@@ -115,7 +115,12 @@
           {
             "Command": [],
             "EntryPoint": [],
-            "Environment": [],
+            "Environment": {
+              "Variables": {
+                "HASURA_GRAPHQL_DATABASE_URL": "{{resolve:ssm-secure:/${env}/tickets/HASURA_GRAPHQL_DATABASE_URL}}",
+                "HASURA_GRAPHQL_ADMIN_SECRET": "{{resolve:ssm-secure:/${env}/tickets/HASURA_GRAPHQL_ADMIN_SECRET}}"
+              }
+            },
             "Essential": true,
             "Image": {
               "Fn::Join": [

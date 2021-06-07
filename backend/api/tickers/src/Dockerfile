@@ -10,11 +10,11 @@ ENV HASURA_GRAPHQL_DEV_MODE=true
 # https://devcenter.heroku.com/articles/heroku-postgres-plans#hobby-tier
 ENV HASURA_GRAPHQL_PG_CONNECTIONS=15
 
+ENV PORT=8080
+
 # Change $DATABASE_URL to your heroku postgres URL if you're not using
 # the primary postgres instance in your app
-CMD graphql-engine \
-    serve \
-    --port 8080
+CMD  graphql-engine serve --port $PORT
 
 EXPOSE 8080
 
