@@ -12,4 +12,4 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - name: Deploy
-      run: ./scripts/amplify-deploy.sh gainy main
+      run: chmod 777 ./scripts/amplify-deploy.sh && ./scripts/amplify-deploy.sh gainy main
