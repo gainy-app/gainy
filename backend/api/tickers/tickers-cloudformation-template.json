@@ -115,15 +115,6 @@
           {
             "Command": [],
             "EntryPoint": [],
-            "Environment": [
-              {
-                "name": "HASURA_GRAPHQL_DATABASE_URL",
-                "value": "{{resolve:ssm-secure:/${env}/tickets/HASURA_GRAPHQL_DATABASE_URL}}"
-              }, {
-                "name":"HASURA_GRAPHQL_ADMIN_SECRET",
-                "value": "{{resolve:ssm-secure:/${env}/tickets/HASURA_GRAPHQL_ADMIN_SECRET}}",
-              }
-            ],
             "Essential": true,
             "Image": {
               "Fn::Join": [
@@ -163,7 +154,15 @@
                 "Protocol": "tcp"
               }
             ],
-            "Secrets": []
+            "Secrets": [
+              {
+                "Name": "HASURA_GRAPHQL_DATABASE_URL",
+                "ValueFrom": "{{resolve:ssm-secure:/${env}/tickets/HASURA_GRAPHQL_DATABASE_URL:1}}"
+              }, {
+                "Name":"HASURA_GRAPHQL_ADMIN_SECRET",
+                "ValueFrom": "{{resolve:ssm-secure:/${env}/tickets/HASURA_GRAPHQL_ADMIN_SECRET:1}}"
+              }
+            ]
           }
         ],
         "Cpu": "512",
