@@ -28,6 +28,7 @@ module "rds" {
   allowed_cidrs = module.networking.vpc.private_subnets
   security_group = module.networking.vpc.default_security_group_id
   vpc_id = module.networking.vpc.vpc_id
+  publicly_accessible = true
 }
 
 module "heroku" {

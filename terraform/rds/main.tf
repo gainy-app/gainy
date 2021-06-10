@@ -18,6 +18,10 @@ resource random_password "password" {
   override_special = "\"/@ "
 }
 
+variable "publicly_accessible" {
+  type = bool
+}
+
 module "db" {
   source = "terraform-aws-modules/rds/aws"
 
@@ -26,6 +30,8 @@ module "db" {
   major_engine_version = "12"
   instance_class = "db.t3.medium"
   allocated_storage = 5
+
+  publicly_accessible = var.publicly_accessible
 
   family = "postgres12"
 
