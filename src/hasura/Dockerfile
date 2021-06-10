@@ -10,22 +10,10 @@ ENV HASURA_GRAPHQL_DEV_MODE=true
 # https://devcenter.heroku.com/articles/heroku-postgres-plans#hobby-tier
 ENV HASURA_GRAPHQL_PG_CONNECTIONS=15
 
+ENV PORT=8080
+
+
 # Change $DATABASE_URL to your heroku postgres URL if you're not using
 # the primary postgres instance in your app
 CMD graphql-engine \
-    serve \
-    --port 8080
-
-EXPOSE 8080
-
-## Comment the command above and use the command below to
-## enable an access-key and an auth-hook
-## Recommended that you set the access-key as a environment variable in heroku
-#CMD graphql-engine \
-#    --database-url $DATABASE_URL \
-#    serve \
-#    --server-port $PORT \
-#    --access-key XXXXX \
-#    --auth-hook https://myapp.com/hasura-webhook
-#
-# Console can be enable/disabled by the env var HASURA_GRAPHQL_ENABLE_CONSOLE
+    serve --port $PORT
