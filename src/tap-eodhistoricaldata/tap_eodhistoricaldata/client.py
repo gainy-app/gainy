@@ -13,8 +13,7 @@ SCHEMAS_DIR = Path(__file__).parent / Path("./schemas")
 class eodhistoricaldataStream(RESTStream):
     """eodhistoricaldata stream class."""
 
-    url_base = "https://eodhistoricaldata.com/api/"
-
+    url_base = "https://eodhistoricaldata.com/api"
 
     def get_next_page_token(
         self, response: requests.Response, previous_token: Optional[Any]

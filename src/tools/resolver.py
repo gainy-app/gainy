@@ -1,5 +1,5 @@
-import os
 import json
+
 
 # Reference converter utility
 
@@ -14,6 +14,7 @@ def get_by_ref(ref, obj):
         walk = walk[p]
 
     return walk.copy()
+
 
 def resolver(json, current=None):
     if current == None:
@@ -32,8 +33,17 @@ def resolver(json, current=None):
     return result
 
 
-with open('./fundamentals.json', 'r') as f:
+import argparse
+
+parser = argparse.ArgumentParser()
+
+parser.add_argument('-f', '--f', help='path to a file to parse', required=True)
+
+args = parser.parse_args()
+
+with open(args.f, 'r') as f:
     j = json.load(f)
     new = resolver(j)
-    del new['definitions']
+    if 'definitions' in new:
+        del new['definitions']
     print(new)

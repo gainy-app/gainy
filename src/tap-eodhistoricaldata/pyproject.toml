@@ -3,7 +3,7 @@ name = "tap-eodhistoricaldata"
 version = "0.0.1"
 description = "`tap-eodhistoricaldata` is a Singer tap for eodhistoricaldata, built with the Meltano SDK for Singer Taps."
 authors = ["Artem Vysotsky"]
-license = "Apache 2.0"
+license = ""
 
 [tool.poetry.dependencies]
 python = "<3.9,>=3.6"
@@ -12,6 +12,8 @@ singer-sdk = "^0.2.0"
 
 [tool.poetry.dev-dependencies]
 pytest = "^6.1.2"
+tox = "^3.23.1"
+pytest-recording = "^0.11.0"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
