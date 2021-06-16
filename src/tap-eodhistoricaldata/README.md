@@ -1,6 +1,6 @@
 # tap-eodhistoricaldata
 
-`tap-eodhistoricaldata` is a Singer tap for eodhistoricaldata.com[https://eodhistoricaldata.com].
+`tap-eodhistoricaldata` is a Singer tap for [eodhistoricaldata.com](https://eodhistoricaldata.com).
 
 Built with the Meltano [SDK](https://gitlab.com/meltano/singer-sdk) for Singer Taps.
 
