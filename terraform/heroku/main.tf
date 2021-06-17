@@ -15,15 +15,29 @@ variable "config" {
   type = map(string)
 }
 
+variable "addons" {
+  type = set(string)
+  default = []
+}
+
+variable "stack" {
+  type = string
+}
+
 variable "env" {}
 
 variable "path" {}
 
+variable "buildpacks" {
+  type = list(string)
+  default = []
+}
 resource "heroku_app" "app" {
-  stack = "container"
+  stack = var.stack
   name   = "${var.name}-${var.env}"
   region = "us"
   sensitive_config_vars = var.config
+  buildpacks = var.buildpacks
 }
 
 # Build code & release to the app
@@ -42,6 +56,12 @@ resource "heroku_formation" "formation" {
   quantity   = 1
   size       = "Hobby"
   depends_on = [heroku_build.build]
+}
+
+resource "heroku_addon" "addons" {
+  for_each = var.addons
+  app = heroku_app.app.name
+  plan = each.value
 }
 
 output "app_url" {
