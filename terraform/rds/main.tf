@@ -28,7 +28,7 @@ module "db" {
   identifier = "${var.name}-${var.env}"
   engine = "postgres"
   major_engine_version = "12"
-  instance_class = "db.t3.medium"
+  instance_class = "db.t3.small"
   allocated_storage = 5
 
   publicly_accessible = var.publicly_accessible
