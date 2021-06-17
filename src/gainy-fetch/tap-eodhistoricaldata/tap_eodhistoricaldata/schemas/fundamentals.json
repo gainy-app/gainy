@@ -1,0 +1,1207 @@
+{
+  "$schema": "http://json-schema.org/draft-06/schema#",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "Code": {
+      "type": "string"
+    },
+    "General": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "Code": {
+          "type": "string"
+        },
+        "Type": {
+          "type": "string"
+        },
+        "Name": {
+          "type": "string"
+        },
+        "Exchange": {
+          "type": "string"
+        },
+        "CurrencyCode": {
+          "type": "string",
+          "enum": [
+            "USD"
+          ],
+          "title": "Currency"
+        },
+        "CurrencyName": {
+          "type": "string"
+        },
+        "CurrencySymbol": {
+          "type": "string"
+        },
+        "CountryName": {
+          "type": "string"
+        },
+        "CountryISO": {
+          "type": "string"
+        },
+        "ISIN": {
+          "type": "string"
+        },
+        "CUSIP": {
+          "type": "string"
+        },
+        "CIK": {
+          "type": "string",
+          "format": "integer"
+        },
+        "EmployerIdNumber": {
+          "type": "string"
+        },
+        "FiscalYearEnd": {
+          "type": "string"
+        },
+        "IPODate": {
+          "type": "string",
+          "format": "date"
+        },
+        "InternationalDomestic": {
+          "type": "string"
+        },
+        "Sector": {
+          "type": "string"
+        },
+        "Industry": {
+          "type": "string"
+        },
+        "GicSector": {
+          "type": "string"
+        },
+        "GicGroup": {
+          "type": "string"
+        },
+        "GicIndustry": {
+          "type": "string"
+        },
+        "GicSubIndustry": {
+          "type": "string"
+        },
+        "HomeCategory": {
+          "type": "string"
+        },
+        "IsDelisted": {
+          "type": "boolean"
+        },
+        "Description": {
+          "type": "string"
+        },
+        "Address": {
+          "type": "string"
+        },
+        "AddressData": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "Street": {
+              "type": "string"
+            },
+            "City": {
+              "type": "string"
+            },
+            "State": {
+              "type": "string"
+            },
+            "Country": {
+              "type": "string"
+            },
+            "ZIP": {
+              "type": "string",
+              "format": "integer"
+            }
+          },
+          "required": [
+            "City",
+            "Country",
+            "State",
+            "Street",
+            "ZIP"
+          ],
+          "title": "AddressData"
+        },
+        "Listings": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "Code": {
+                "type": "string"
+              },
+              "Exchange": {
+                "type": "string"
+              },
+              "Name": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "Code",
+              "Exchange",
+              "Name"
+            ],
+            "title": "Listing"
+          }
+        },
+        "Officers": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "Name": {
+                "type": "string"
+              },
+              "Title": {
+                "type": "string"
+              },
+              "YearBorn": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "Name",
+              "Title",
+              "YearBorn"
+            ],
+            "title": "Officer"
+          }
+        },
+        "Phone": {
+          "type": "string"
+        },
+        "WebURL": {
+          "type": "string",
+          "format": "uri",
+          "qt-uri-protocols": [
+            "http"
+          ]
+        },
+        "LogoURL": {
+          "type": "string"
+        },
+        "FullTimeEmployees": {
+          "type": "integer"
+        },
+        "UpdatedAt": {
+          "type": "string",
+          "format": "date"
+        }
+      },
+      "required": [
+        "Address",
+        "AddressData",
+        "CIK",
+        "CUSIP",
+        "Code",
+        "CountryISO",
+        "CountryName",
+        "CurrencyCode",
+        "CurrencyName",
+        "CurrencySymbol",
+        "Description",
+        "EmployerIdNumber",
+        "Exchange",
+        "FiscalYearEnd",
+        "FullTimeEmployees",
+        "GicGroup",
+        "GicIndustry",
+        "GicSector",
+        "GicSubIndustry",
+        "HomeCategory",
+        "IPODate",
+        "ISIN",
+        "Industry",
+        "InternationalDomestic",
+        "IsDelisted",
+        "Listings",
+        "LogoURL",
+        "Name",
+        "Officers",
+        "Phone",
+        "Sector",
+        "Type",
+        "UpdatedAt",
+        "WebURL"
+      ],
+      "title": "General"
+    },
+    "Highlights": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "MarketCapitalization": {
+          "type": "integer"
+        },
+        "MarketCapitalizationMln": {
+          "type": "number"
+        },
+        "EBITDA": {
+          "type": "integer"
+        },
+        "PERatio": {
+          "type": "number"
+        },
+        "PEGRatio": {
+          "type": "number"
+        },
+        "WallStreetTargetPrice": {
+          "type": "number"
+        },
+        "BookValue": {
+          "type": "number"
+        },
+        "DividendShare": {
+          "type": "number"
+        },
+        "DividendYield": {
+          "type": "number"
+        },
+        "EarningsShare": {
+          "type": "number"
+        },
+        "EPSEstimateCurrentYear": {
+          "type": "number"
+        },
+        "EPSEstimateNextYear": {
+          "type": "number"
+        },
+        "EPSEstimateNextQuarter": {
+          "type": "integer"
+        },
+        "EPSEstimateCurrentQuarter": {
+          "type": "number"
+        },
+        "MostRecentQuarter": {
+          "type": "string",
+          "format": "date"
+        },
+        "ProfitMargin": {
+          "type": "number"
+        },
+        "OperatingMarginTTM": {
+          "type": "number"
+        },
+        "ReturnOnAssetsTTM": {
+          "type": "number"
+        },
+        "ReturnOnEquityTTM": {
+          "type": "number"
+        },
+        "RevenueTTM": {
+          "type": "integer"
+        },
+        "RevenuePerShareTTM": {
+          "type": "number"
+        },
+        "QuarterlyRevenueGrowthYOY": {
+          "type": "number"
+        },
+        "GrossProfitTTM": {
+          "type": "integer"
+        },
+        "DilutedEpsTTM": {
+          "type": "number"
+        },
+        "QuarterlyEarningsGrowthYOY": {
+          "type": "number"
+        }
+      },
+      "required": [
+        "BookValue",
+        "DilutedEpsTTM",
+        "DividendShare",
+        "DividendYield",
+        "EBITDA",
+        "EPSEstimateCurrentQuarter",
+        "EPSEstimateCurrentYear",
+        "EPSEstimateNextQuarter",
+        "EPSEstimateNextYear",
+        "EarningsShare",
+        "GrossProfitTTM",
+        "MarketCapitalization",
+        "MarketCapitalizationMln",
+        "MostRecentQuarter",
+        "OperatingMarginTTM",
+        "PEGRatio",
+        "PERatio",
+        "ProfitMargin",
+        "QuarterlyEarningsGrowthYOY",
+        "QuarterlyRevenueGrowthYOY",
+        "ReturnOnAssetsTTM",
+        "ReturnOnEquityTTM",
+        "RevenuePerShareTTM",
+        "RevenueTTM",
+        "WallStreetTargetPrice"
+      ],
+      "title": "Highlights"
+    },
+    "Valuation": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "TrailingPE": {
+          "type": "number"
+        },
+        "ForwardPE": {
+          "type": "number"
+        },
+        "PriceSalesTTM": {
+          "type": "number"
+        },
+        "PriceBookMRQ": {
+          "type": "number"
+        },
+        "EnterpriseValue": {
+          "type": "integer"
+        },
+        "EnterpriseValueRevenue": {
+          "type": "number"
+        },
+        "EnterpriseValueEbitda": {
+          "type": "number"
+        }
+      },
+      "required": [
+        "EnterpriseValue",
+        "EnterpriseValueEbitda",
+        "EnterpriseValueRevenue",
+        "ForwardPE",
+        "PriceBookMRQ",
+        "PriceSalesTTM",
+        "TrailingPE"
+      ],
+      "title": "Valuation"
+    },
+    "SharesStats": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "SharesOutstanding": {
+          "type": "integer"
+        },
+        "SharesFloat": {
+          "type": "integer"
+        },
+        "PercentInsiders": {
+          "type": "number"
+        },
+        "PercentInstitutions": {
+          "type": "number"
+        },
+        "SharesShort": {
+          "type": "integer"
+        },
+        "SharesShortPriorMonth": {
+          "type": "integer"
+        },
+        "ShortRatio": {
+          "type": "number"
+        },
+        "ShortPercentOutstanding": {
+          "type": "number"
+        },
+        "ShortPercentFloat": {
+          "type": "number"
+        }
+      },
+      "required": [
+        "PercentInsiders",
+        "PercentInstitutions",
+        "SharesFloat",
+        "SharesOutstanding",
+        "SharesShort",
+        "SharesShortPriorMonth",
+        "ShortPercentFloat",
+        "ShortPercentOutstanding",
+        "ShortRatio"
+      ],
+      "title": "SharesStats"
+    },
+    "Technicals": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "number"
+      }
+    },
+    "SplitsDividends": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "ForwardAnnualDividendRate": {
+          "type": "number"
+        },
+        "ForwardAnnualDividendYield": {
+          "type": "number"
+        },
+        "PayoutRatio": {
+          "type": "number"
+        },
+        "DividendDate": {
+          "type": "string",
+          "format": "date"
+        },
+        "ExDividendDate": {
+          "type": "string",
+          "format": "date"
+        },
+        "LastSplitFactor": {
+          "type": "string"
+        },
+        "LastSplitDate": {
+          "type": "string",
+          "format": "date"
+        },
+        "NumberDividendsByYear": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "Year": {
+                "type": "integer"
+              },
+              "Count": {
+                "type": "integer"
+              }
+            },
+            "required": [
+              "Count",
+              "Year"
+            ],
+            "title": "NumberDividendsByYear"
+          }
+        }
+      },
+      "required": [
+        "DividendDate",
+        "ExDividendDate",
+        "ForwardAnnualDividendRate",
+        "ForwardAnnualDividendYield",
+        "LastSplitDate",
+        "LastSplitFactor",
+        "NumberDividendsByYear",
+        "PayoutRatio"
+      ],
+      "title": "SplitsDividends"
+    },
+    "AnalystRatings": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "Rating": {
+          "type": "number"
+        },
+        "TargetPrice": {
+          "type": "number"
+        },
+        "StrongBuy": {
+          "type": "integer"
+        },
+        "Buy": {
+          "type": "integer"
+        },
+        "Hold": {
+          "type": "integer"
+        },
+        "Sell": {
+          "type": "integer"
+        },
+        "StrongSell": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "Buy",
+        "Hold",
+        "Rating",
+        "Sell",
+        "StrongBuy",
+        "StrongSell",
+        "TargetPrice"
+      ],
+      "title": "AnalystRatings"
+    },
+    "Holders": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "Institutions": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "date": {
+                "type": "string",
+                "format": "date"
+              },
+              "totalShares": {
+                "type": "number"
+              },
+              "totalAssets": {
+                "type": "number"
+              },
+              "currentShares": {
+                "type": "integer"
+              },
+              "change": {
+                "type": "integer"
+              },
+              "change_p": {
+                "type": "number"
+              }
+            },
+            "required": [
+              "change",
+              "change_p",
+              "currentShares",
+              "date",
+              "name",
+              "totalAssets",
+              "totalShares"
+            ],
+            "title": "Fund"
+          }
+        },
+        "Funds": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "date": {
+                "type": "string",
+                "format": "date"
+              },
+              "totalShares": {
+                "type": "number"
+              },
+              "totalAssets": {
+                "type": "number"
+              },
+              "currentShares": {
+                "type": "integer"
+              },
+              "change": {
+                "type": "integer"
+              },
+              "change_p": {
+                "type": "number"
+              }
+            },
+            "required": [
+              "change",
+              "change_p",
+              "currentShares",
+              "date",
+              "name",
+              "totalAssets",
+              "totalShares"
+            ],
+            "title": "Fund"
+          }
+        }
+      },
+      "required": [
+        "Funds",
+        "Institutions"
+      ],
+      "title": "Holders"
+    },
+    "InsiderTransactions": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "date": {
+            "type": "string",
+            "format": "date"
+          },
+          "ownerCik": {
+            "type": "string"
+          },
+          "ownerName": {
+            "type": "string",
+            "enum": [
+              "Adams Katherine L.",
+              "KONDO CHRIS",
+              "Maestri Luca",
+              "COOK TIMOTHY D"
+            ],
+            "title": "OwnerName"
+          },
+          "transactionDate": {
+            "type": "string",
+            "format": "date"
+          },
+          "transactionCode": {
+            "type": "string",
+            "enum": [
+              "S"
+            ],
+            "title": "TransactionCode"
+          },
+          "transactionAmount": {
+            "type": "integer"
+          },
+          "transactionPrice": {
+            "type": "number"
+          },
+          "transactionAcquiredDisposed": {
+            "type": "string",
+            "enum": [
+              "D"
+            ],
+            "title": "TransactionAcquiredDisposed"
+          },
+          "postTransactionAmount": {
+            "type": "integer"
+          },
+          "secLink": {
+            "type": "string",
+            "format": "uri",
+            "qt-uri-protocols": [
+              "https"
+            ],
+            "qt-uri-extensions": [
+              ".xml"
+            ]
+          }
+        },
+        "required": [
+          "date",
+          "ownerCik",
+          "ownerName",
+          "postTransactionAmount",
+          "secLink",
+          "transactionAcquiredDisposed",
+          "transactionAmount",
+          "transactionCode",
+          "transactionDate",
+          "transactionPrice"
+        ],
+        "title": "InsiderTransaction"
+      }
+    },
+    "ESGScores": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "Disclaimer": {
+          "type": "string"
+        },
+        "RatingDate": {
+          "type": "string",
+          "format": "date"
+        },
+        "TotalEsg": {
+          "type": "number"
+        },
+        "TotalEsgPercentile": {
+          "type": "number"
+        },
+        "EnvironmentScore": {
+          "type": "number"
+        },
+        "EnvironmentScorePercentile": {
+          "type": "integer"
+        },
+        "SocialScore": {
+          "type": "number"
+        },
+        "SocialScorePercentile": {
+          "type": "integer"
+        },
+        "GovernanceScore": {
+          "type": "number"
+        },
+        "GovernanceScorePercentile": {
+          "type": "integer"
+        },
+        "ControversyLevel": {
+          "type": "integer"
+        },
+        "ActivitiesInvolvement": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "Activity": {
+                "type": "string"
+              },
+              "Involvement": {
+                "type": "string",
+                "enum": [
+                  "No"
+                ],
+                "title": "Involvement"
+              }
+            },
+            "required": [
+              "Activity",
+              "Involvement"
+            ],
+            "title": "ActivitiesInvolvement"
+          }
+        }
+      },
+      "required": [
+        "ActivitiesInvolvement",
+        "ControversyLevel",
+        "Disclaimer",
+        "EnvironmentScore",
+        "EnvironmentScorePercentile",
+        "GovernanceScore",
+        "GovernanceScorePercentile",
+        "RatingDate",
+        "SocialScore",
+        "SocialScorePercentile",
+        "TotalEsg",
+        "TotalEsgPercentile"
+      ],
+      "title": "ESGScores"
+    },
+    "outstandingShares": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "annual": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "date": {
+                "type": "string"
+              },
+              "dateFormatted": {
+                "type": "string",
+                "format": "date"
+              },
+              "sharesMln": {
+                "type": "string"
+              },
+              "shares": {
+                "type": "integer"
+              }
+            },
+            "required": [
+              "date",
+              "dateFormatted",
+              "shares",
+              "sharesMln"
+            ],
+            "title": "AnnualValue"
+          }
+        },
+        "quarterly": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "date": {
+                "type": "string"
+              },
+              "dateFormatted": {
+                "type": "string",
+                "format": "date"
+              },
+              "sharesMln": {
+                "type": "string"
+              },
+              "shares": {
+                "type": "integer"
+              }
+            },
+            "required": [
+              "date",
+              "dateFormatted",
+              "shares",
+              "sharesMln"
+            ],
+            "title": "AnnualValue"
+          }
+        }
+      },
+      "required": [
+        "annual",
+        "quarterly"
+      ],
+      "title": "OutstandingShares"
+    },
+    "Earnings": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "History": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "reportDate": {
+                "type": "string",
+                "format": "date"
+              },
+              "date": {
+                "type": "string",
+                "format": "date"
+              },
+              "beforeAfterMarket": {
+                "anyOf": [
+                  {
+                    "$ref": "#/definitions/BeforeAfterMarket"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "currency": {
+                "type": "string",
+                "enum": [
+                  "USD"
+                ],
+                "title": "Currency"
+              },
+              "epsActual": {
+                "anyOf": [
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "epsEstimate": {
+                "anyOf": [
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "epsDifference": {
+                "anyOf": [
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "surprisePercent": {
+                "anyOf": [
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            "required": [
+              "beforeAfterMarket",
+              "currency",
+              "date",
+              "epsActual",
+              "epsDifference",
+              "epsEstimate",
+              "reportDate",
+              "surprisePercent"
+            ],
+            "title": "History"
+          }
+        },
+        "Trend": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "object",
+            "additionalProperties": {
+              "anyOf": [
+                {
+                  "type": "null"
+                },
+                {
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        },
+        "Annual": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "date": {
+                "type": "string",
+                "format": "date"
+              },
+              "epsActual": {
+                "type": "number"
+              }
+            },
+            "required": [
+              "date",
+              "epsActual"
+            ],
+            "title": "Annual"
+          }
+        }
+      },
+      "required": [
+        "Annual",
+        "History",
+        "Trend"
+      ],
+      "title": "Earnings"
+    },
+    "Financials": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "Balance_Sheet": {
+          "type": "object",
+          "additionalProperties": true,
+          "properties": {
+            "currency_symbol": {
+              "type": "string",
+              "enum": [
+                "USD"
+              ],
+              "title": "Currency"
+            },
+            "quarterly": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "object",
+                "additionalProperties": {
+                  "anyOf": [
+                    {
+                      "type": "null"
+                    },
+                    {
+                      "type": "string"
+                    }
+                  ]
+                }
+              }
+            },
+            "yearly": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "object",
+                "additionalProperties": {
+                  "anyOf": [
+                    {
+                      "type": "null"
+                    },
+                    {
+                      "type": "string"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "required": [
+            "currency_symbol",
+            "quarterly",
+            "yearly"
+          ],
+          "title": "BalanceSheet"
+        },
+        "Cash_Flow": {
+          "type": "object",
+          "additionalProperties": true,
+          "properties": {
+            "currency_symbol": {
+              "type": "string",
+              "enum": [
+                "USD"
+              ],
+              "title": "Currency"
+            },
+            "quarterly": {
+              "type": "object",
+              "patternProperties": {
+                "^[0-9]{4}-[0-9]{2}-[0-9]{2}$": {
+                  "type": "object",
+                  "properties": {
+                    "date": {
+                      "type": "string"
+                    },
+                    "filing_date": {
+                      "type": "string"
+                    },
+                    "currency_symbol": {
+                      "type": "string"
+                    },
+                    "investments": {
+                      "type": "string"
+                    },
+                    "changeToLiabilities": {
+                      "type": "string"
+                    },
+                    "changeToInventory": {
+                      "type": "string"
+                    },
+                    "dividendsPaid": {
+                      "type": "string"
+                    },
+                    "depreciation": {
+                      "type": "string"
+                    },
+                    "totalCashFromOperatingActivities": {
+                      "type": "string"
+                    },
+                    "endPeriodCashFlow": {
+                      "type": "string"
+                    },
+                    "beginPeriodCashFlow": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            },
+            "yearly": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "object",
+                "additionalProperties": {
+                  "anyOf": [
+                    {
+                      "type": "null"
+                    },
+                    {
+                      "type": "string"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "required": [
+            "currency_symbol",
+            "quarterly",
+            "yearly"
+          ],
+          "title": "CashFlow"
+        },
+        "Income_Statement": {
+          "type": "object",
+          "additionalProperties": true,
+          "properties": {
+            "currency_symbol": {
+              "type": "string",
+              "enum": [
+                "USD"
+              ],
+              "title": "Currency"
+            },
+            "quarterly": {
+              "type": "object",
+              "patternProperties": {
+                "^[0-9]{4}-[0-9]{2}-[0-9]{2}$": {
+                  "type": "object",
+                  "properties": {
+                    "date": {
+                      "type": "string"
+                    },
+                    "filing_date": {
+                      "type": "string"
+                    },
+                    "currency_symbol": {
+                      "type": "string"
+                    },
+                    "researchDevelopment": {
+                      "type": "string"
+                    },
+                    "effectOfAccountingCharges": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            },
+            "yearly": {
+              "type": "object",
+              "patternProperties": {
+                "^[0-9]{4}-[0-9]{2}-[0-9]{2}$": {
+                  "type": "object",
+                  "properties": {
+                    "date": {
+                      "type": "string"
+                    },
+                    "filing_date": {
+                      "type": "string"
+                    },
+                    "currency_symbol": {
+                      "type": "string"
+                    },
+                    "researchDevelopment": {
+                      "type": "string"
+                    },
+                    "effectOfAccountingCharges": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "required": [
+            "currency_symbol",
+            "quarterly",
+            "yearly"
+          ],
+          "title": "IncomeStatement"
+        }
+      },
+      "required": [
+        "Balance_Sheet",
+        "Cash_Flow",
+        "Income_Statement"
+      ],
+      "title": "Financials"
+    }
+  },
+  "required": [
+    "AnalystRatings",
+    "ESGScores",
+    "Earnings",
+    "Financials",
+    "General",
+    "Highlights",
+    "Holders",
+    "InsiderTransactions",
+    "SharesStats",
+    "SplitsDividends",
+    "Technicals",
+    "Valuation",
+    "outstandingShares"
+  ]
+}

@@ -1,0 +1,26 @@
+version: 1
+send_anonymous_usage_stats: false
+project_id: 36bd814f-1cb5-402a-8d9c-d3219c38f2b3
+plugins:
+  extractors:
+  - name: tap-eodhistoricaldata
+    namespace: tap_eodhistoricaldata
+    pip_url: /tap-eodhistoricaldata
+    executable: tap-eodhistoricaldata
+    capabilities:
+    - discover
+    - catalog
+    settings:
+    - name: api_token
+    - name: symbols
+  loaders:
+  - name: target-postgres
+    variant: datamill-co
+    pip_url: singer-target-postgres
+schedules:
+- name: eodhistoricaldata-to-postgres
+  extractor: tap-eodhistoricaldata
+  loader: target-postgres
+  transform: skip
+  interval: '@hourly'
+  start_date: 2021-06-17 10:40:58.742133
