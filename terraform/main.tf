@@ -1,5 +1,11 @@
 variable "env" {
   default = "dev"
+  type = string
+}
+
+variable "eodhistoricaldata_api_token" {
+  type        = string
+  sensitive   = true
 }
 
 provider "aws" {}
@@ -60,8 +66,7 @@ module "heroku-gainy-fetch" {
     TARGET_POSTGRES_POSTGRES_PASSWORD = module.rds.db.db_master_password
     TARGET_POSTGRES_POSTGRES_DATABASE = module.rds.db.db_instance_name
     TARGET_POSTGRES_POSTGRES_SCHEMA = "public"
-    TAP_EODHISTORICALDATA_API_TOKEN = "true"
+    TAP_EODHISTORICALDATA_API_TOKEN = var.eodhistoricaldata_api_token
     TAP_EODHISTORICALDATA_SYMBOLS = "AAPL"
   }
-  addons = ["scheduler"]
 }
