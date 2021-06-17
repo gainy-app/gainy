@@ -6,7 +6,6 @@ authors = ["Artem Vysotsky"]
 license = ""
 
 [tool.poetry.dependencies]
-python = "<3.9,>=3.6"
 requests = "^2.25.1"
 singer-sdk = "^0.2.0"
 

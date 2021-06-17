@@ -24,6 +24,7 @@ tap-eodhistoricaldata --about
 ### Source Authentication and Authorization
 
 A valid eodhistoricaldata.com api_token is required in `config.json`
+The token can be found in 1Password shared Vault. Ask @vood for details.
 
 ## Usage
 
