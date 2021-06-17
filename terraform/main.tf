@@ -44,7 +44,7 @@ module "heroku-gainy-managed" {
   source = "./heroku"
   name = "gainy-managed"
   env = "dev"
-  path = "../src/hasura/"
+  path = "./src/hasura/"
   stack = "container"
   config = {
     HASURA_GRAPHQL_DATABASE_URL = "postgres://${module.rds.db.db_instance_username}:${module.rds.db.db_master_password}@${module.rds.db.db_instance_endpoint}/${module.rds.db.db_instance_name}"
@@ -58,7 +58,7 @@ module "heroku-gainy-fetch" {
   stack = "container"
   name = "gainy-fetch"
   env = "dev"
-  path = "../src/gainy-fetch/"
+  path = "./src/gainy-fetch/"
   config = {
     TARGET_POSTGRES_POSTGRES_HOST = module.rds.db.db_instance_endpoint
     TARGET_POSTGRES_POSTGRES_PORT = module.rds.db.db_instance_port
