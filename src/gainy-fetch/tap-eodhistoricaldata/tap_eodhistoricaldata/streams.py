@@ -13,7 +13,7 @@ class Fundamentals(eodhistoricaldataStream):
     name = "fundamentals"
     path = "/fundamentals/{Code}"
     primary_keys = ["Code"]
-    selected_by_default  = True
+    selected_by_default = True
 
     replication_key = None
     schema_filepath = SCHEMAS_DIR / "fundamentals.json"
