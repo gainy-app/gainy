@@ -1,4 +1,4 @@
-FROM meltano/meltano
+FROM meltano/meltano:v1.77.0
 
 WORKDIR /project
 
