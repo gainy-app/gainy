@@ -2,8 +2,8 @@ FROM meltano/meltano:v1.77.0
 
 WORKDIR /project
 
-# Generate requirements and install *all* dependencies.
 COPY meltano /project
+RUN rm /project/.meltano
 COPY docker-entrypoint.sh docker-entrypoint.sh
 COPY tap-eodhistoricaldata /tap-eodhistoricaldata
 RUN meltano install
