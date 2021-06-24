@@ -2,7 +2,7 @@ terraform {
   required_providers {
     heroku = {
       source  = "heroku/heroku"
-      version = "~> 4.0"
+      version = "~> 4.5"
     }
   }
 }
@@ -42,7 +42,7 @@ resource "heroku_app" "app" {
 
 # Build code & release to the app
 resource "heroku_build" "build" {
-  app        = heroku_app.app.name
+  app        = heroku_app.app.id
 
   source {
     path     = var.path
