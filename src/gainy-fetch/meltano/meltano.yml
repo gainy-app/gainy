@@ -13,13 +13,11 @@ plugins:
     settings:
     - name: api_token
     - name: symbols
-  - name: tap-postgres
-    variant: transferwise
-    pip_url: pipelinewise-tap-postgres
+      kind: array
   loaders:
   - name: target-postgres
-    variant: datamill-co
-    pip_url: singer-target-postgres
+    variant: transferwise
+    pip_url: pipelinewise-target-postgres
 schedules:
 - name: eodhistoricaldata-to-postgres
   extractor: tap-eodhistoricaldata

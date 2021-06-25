@@ -60,19 +60,14 @@ module "heroku-gainy-fetch" {
   env = "dev"
   path = "src/gainy-fetch"
   config = {
-    TARGET_POSTGRES_POSTGRES_HOST = module.rds.db.db_instance_endpoint
-    TARGET_POSTGRES_POSTGRES_PORT = module.rds.db.db_instance_port
-    TARGET_POSTGRES_POSTGRES_USERNAME = module.rds.db.db_instance_username
-    TARGET_POSTGRES_POSTGRES_PASSWORD = module.rds.db.db_master_password
-    TARGET_POSTGRES_POSTGRES_DATABASE = module.rds.db.db_instance_name
-    TARGET_POSTGRES_POSTGRES_SCHEMA = "public"
-    TAP_POSTGRES_HOST = module.rds.db.db_instance_endpoint
-    TAP_POSTGRES_PORT = module.rds.db.db_instance_port
-    TAP_POSTGRES_USER= module.rds.db.db_instance_username
-    TAP_POSTGRES_PASSWORD = module.rds.db.db_master_password
-    TAP_POSTGRES_DBNAME = module.rds.db.db_instance_name
+    TARGET_POSTGRES_HOST = module.rds.db.db_instance_endpoint
+    TARGET_POSTGRES_PORT = module.rds.db.db_instance_port
+    TARGET_POSTGRES_USER = module.rds.db.db_instance_username
+    TARGET_POSTGRES_PASSWORD = module.rds.db.db_master_password
+    TARGET_POSTGRES_DBNAME = module.rds.db.db_instance_name
+    TARGET_POSTGRES_SCHEMA = "public"
     TAP_POSTGRES_FILTER_SCHEMAS = "public"
     TAP_EODHISTORICALDATA_API_TOKEN = var.eodhistoricaldata_api_token
-    TAP_EODHISTORICALDATA_SYMBOLS = "AAPL"
+    TAP_EODHISTORICALDATA_SYMBOLS = "[\"AAPL\"]"
   }
 }
