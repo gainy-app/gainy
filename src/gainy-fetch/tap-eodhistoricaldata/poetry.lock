@@ -123,6 +123,35 @@ optional = false
 python-versions = "*"
 
 [[package]]
+name = "functools32"
+version = "3.2.3-2"
+description = "Backport of the functools module from Python 3.2.3 for use on 2.7 and PyPy."
+category = "main"
+optional = false
+python-versions = "*"
+
+[[package]]
+name = "gprof2dot"
+version = "2021.2.21"
+description = "Generate a dot graph from the output of several profilers."
+category = "dev"
+optional = false
+python-versions = "*"
+
+[[package]]
+name = "graphviz"
+version = "0.16"
+description = "Simple Python interface for Graphviz"
+category = "main"
+optional = false
+python-versions = ">=2.7,!=3.0.*,!=3.1.*,!=3.2.*,!=3.3.*,!=3.4.*,!=3.5.*"
+
+[package.extras]
+dev = ["tox (>=3)", "flake8", "pep8-naming", "wheel", "twine"]
+docs = ["sphinx (>=1.8)", "sphinx-rtd-theme"]
+test = ["mock (>=3)", "pytest (>=4)", "pytest-mock (>=2)", "pytest-cov"]
+
+[[package]]
 name = "idna"
 version = "2.10"
 description = "Internationalized Domain Names in Applications (IDNA)"
@@ -179,6 +208,7 @@ python-versions = "*"
 
 [package.dependencies]
 attrs = ">=17.4.0"
+functools32 = {version = "*", markers = "python_version < \"3\""}
 importlib-metadata = {version = "*", markers = "python_version < \"3.8\""}
 pyrsistent = ">=0.14.0"
 six = ">=1.11.0"
@@ -215,6 +245,18 @@ python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*"
 pyparsing = ">=2.0.2"
 
 [[package]]
+name = "pathlib2"
+version = "2.3.6"
+description = "Object-oriented filesystem paths"
+category = "dev"
+optional = false
+python-versions = "*"
+
+[package.dependencies]
+scandir = {version = "*", markers = "python_version < \"3.5\""}
+six = "*"
+
+[[package]]
 name = "pendulum"
 version = "2.1.2"
 description = "Python datetimes made easy"
@@ -225,6 +267,7 @@ python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*"
 [package.dependencies]
 python-dateutil = ">=2.6,<3.0"
 pytzdata = ">=2020.1"
+typing = {version = ">=3.6,<4.0", markers = "python_version < \"3.5\""}
 
 [[package]]
 name = "pipelinewise-singer-python"
@@ -327,6 +370,22 @@ toml = "*"
 testing = ["argcomplete", "hypothesis (>=3.56)", "mock", "nose", "requests", "xmlschema"]
 
 [[package]]
+name = "pytest-profiling"
+version = "1.7.0"
+description = "Profiling plugin for py.test"
+category = "dev"
+optional = false
+python-versions = "*"
+
+[package.dependencies]
+gprof2dot = "*"
+pytest = "*"
+six = "*"
+
+[package.extras]
+tests = ["pytest-virtualenv"]
+
+[[package]]
 name = "pytest-recording"
 version = "0.11.0"
 description = "A pytest plugin that allows you recording of network interactions via VCR.py"
@@ -391,6 +450,14 @@ urllib3 = ">=1.21.1,<1.27"
 [package.extras]
 security = ["pyOpenSSL (>=0.14)", "cryptography (>=1.3.4)"]
 socks = ["PySocks (>=1.5.6,!=1.5.7)", "win-inet-pton"]
+
+[[package]]
+name = "scandir"
+version = "1.10.0"
+description = "scandir, a better directory iterator and faster os.walk()"
+category = "dev"
+optional = false
+python-versions = "*"
 
 [[package]]
 name = "simplejson"
@@ -459,12 +526,23 @@ docs = ["pygments-github-lexers (>=0.0.5)", "sphinx (>=2.0.0)", "sphinxcontrib-a
 testing = ["flaky (>=3.4.0)", "freezegun (>=0.3.11)", "psutil (>=5.6.1)", "pytest (>=4.0.0)", "pytest-cov (>=2.5.1)", "pytest-mock (>=1.10.0)", "pytest-randomly (>=1.0.0)", "pytest-xdist (>=1.22.2)", "pathlib2 (>=2.3.3)"]
 
 [[package]]
+name = "typing"
+version = "3.10.0.0"
+description = "Type Hints for Python"
+category = "main"
+optional = false
+python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, <3.5"
+
+[[package]]
 name = "typing-extensions"
 version = "3.10.0.0"
 description = "Backported and Experimental Type Hints for Python 3.5+"
 category = "main"
 optional = false
 python-versions = "*"
+
+[package.dependencies]
+typing = {version = ">=3.7.4", markers = "python_version < \"3.5\""}
 
 [[package]]
 name = "urllib3"
@@ -507,6 +585,7 @@ distlib = ">=0.3.1,<1"
 filelock = ">=3.0.0,<4"
 importlib-metadata = {version = ">=0.12", markers = "python_version < \"3.8\""}
 importlib-resources = {version = ">=1.0", markers = "python_version < \"3.7\""}
+pathlib2 = {version = ">=2.3.3,<3", markers = "python_version < \"3.4\" and sys_platform != \"win32\""}
 six = ">=1.9.0,<2"
 
 [package.extras]
@@ -548,8 +627,8 @@ testing = ["pytest (>=4.6)", "pytest-checkdocs (>=1.2.3)", "pytest-flake8", "pyt
 
 [metadata]
 lock-version = "1.1"
-python-versions = "<3.9,>=3.6"
-content-hash = "480664d0dc1b1c39e7236dd48a488cfc89508022b560691f3ffd21fc23d0f0eb"
+python-versions = ">=2.7,<2.8 || >=3.6.0"
+content-hash = "51939308712bd875cc97bfffeb0d07e191fe9b0d4b15a314b19f5f2a491baf14"
 
 [metadata.files]
 appdirs = [
@@ -660,6 +739,17 @@ filelock = [
     {file = "filelock-3.0.12-py3-none-any.whl", hash = "sha256:929b7d63ec5b7d6b71b0fa5ac14e030b3f70b75747cef1b10da9b879fef15836"},
     {file = "filelock-3.0.12.tar.gz", hash = "sha256:18d82244ee114f543149c66a6e0c14e9c4f8a1044b5cdaadd0f82159d6a6ff59"},
 ]
+functools32 = [
+    {file = "functools32-3.2.3-2.tar.gz", hash = "sha256:f6253dfbe0538ad2e387bd8fdfd9293c925d63553f5813c4e587745416501e6d"},
+    {file = "functools32-3.2.3-2.zip", hash = "sha256:89d824aa6c358c421a234d7f9ee0bd75933a67c29588ce50aaa3acdf4d403fa0"},
+]
+gprof2dot = [
+    {file = "gprof2dot-2021.2.21.tar.gz", hash = "sha256:1223189383b53dcc8ecfd45787ac48c0ed7b4dbc16ee8b88695d053eea1acabf"},
+]
+graphviz = [
+    {file = "graphviz-0.16-py2.py3-none-any.whl", hash = "sha256:3cad5517c961090dfc679df6402a57de62d97703e2880a1a46147bb0dc1639eb"},
+    {file = "graphviz-0.16.zip", hash = "sha256:d2d25af1c199cad567ce4806f0449cb74eb30cf451fd7597251e1da099ac6e57"},
+]
 idna = [
     {file = "idna-2.10-py2.py3-none-any.whl", hash = "sha256:b97d804b1e9b523befed77c48dacec60e6dcb0b5391d57af6a65a312a90648c0"},
     {file = "idna-2.10.tar.gz", hash = "sha256:b307872f855b18632ce0c21c5e45be78c0ea7ae4c15c828c20788b26921eb3f6"},
@@ -727,6 +817,10 @@ packaging = [
     {file = "packaging-20.9-py2.py3-none-any.whl", hash = "sha256:67714da7f7bc052e064859c05c595155bd1ee9f69f76557e21f051443c20947a"},
     {file = "packaging-20.9.tar.gz", hash = "sha256:5b327ac1320dc863dca72f4514ecc086f31186744b84a230374cc1fd776feae5"},
 ]
+pathlib2 = [
+    {file = "pathlib2-2.3.6-py2.py3-none-any.whl", hash = "sha256:3a130b266b3a36134dcc79c17b3c7ac9634f083825ca6ea9d8f557ee6195c9c8"},
+    {file = "pathlib2-2.3.6.tar.gz", hash = "sha256:7d8bcb5555003cdf4a8d2872c538faa3a0f5d20630cb360e518ca3b981795e5f"},
+]
 pendulum = [
     {file = "pendulum-2.1.2-cp27-cp27m-macosx_10_15_x86_64.whl", hash = "sha256:b6c352f4bd32dff1ea7066bd31ad0f71f8d8100b9ff709fb343f3b86cee43efe"},
     {file = "pendulum-2.1.2-cp27-cp27m-win_amd64.whl", hash = "sha256:318f72f62e8e23cd6660dbafe1e346950281a9aed144b5c596b2ddabc1d19739"},
@@ -781,6 +875,12 @@ pytest = [
     {file = "pytest-6.2.4-py3-none-any.whl", hash = "sha256:91ef2131a9bd6be8f76f1f08eac5c5317221d6ad1e143ae03894b862e8976890"},
     {file = "pytest-6.2.4.tar.gz", hash = "sha256:50bcad0a0b9c5a72c8e4e7c9855a3ad496ca6a881a3641b4260605450772c54b"},
 ]
+pytest-profiling = [
+    {file = "pytest-profiling-1.7.0.tar.gz", hash = "sha256:93938f147662225d2b8bd5af89587b979652426a8a6ffd7e73ec4a23e24b7f29"},
+    {file = "pytest_profiling-1.7.0-py2.7.egg", hash = "sha256:3b255f9db36cb2dd7536a8e7e294c612c0be7f7850a7d30754878e4315d56600"},
+    {file = "pytest_profiling-1.7.0-py2.py3-none-any.whl", hash = "sha256:999cc9ac94f2e528e3f5d43465da277429984a1c237ae9818f8cfd0b06acb019"},
+    {file = "pytest_profiling-1.7.0-py3.6.egg", hash = "sha256:6bce4e2edc04409d2f3158c16750fab8074f62d404cc38eeb075dff7fcbb996c"},
+]
 pytest-recording = [
     {file = "pytest-recording-0.11.0.tar.gz", hash = "sha256:deea1ae6a129c9d8f8669ed7d12539748f00c8f9ef4de4f563055263e47bed08"},
     {file = "pytest_recording-0.11.0-py3-none-any.whl", hash = "sha256:c2cc321f93ceffb2146ead0c51198e4ce86986723265ce6d4a87d3b16071eb85"},
@@ -832,6 +932,19 @@ requests = [
     {file = "requests-2.25.1-py2.py3-none-any.whl", hash = "sha256:c210084e36a42ae6b9219e00e48287def368a26d03a048ddad7bfee44f75871e"},
     {file = "requests-2.25.1.tar.gz", hash = "sha256:27973dd4a904a4f13b263a19c866c13b92a39ed1c964655f025f3f8d3d75b804"},
 ]
+scandir = [
+    {file = "scandir-1.10.0-cp27-cp27m-win32.whl", hash = "sha256:92c85ac42f41ffdc35b6da57ed991575bdbe69db895507af88b9f499b701c188"},
+    {file = "scandir-1.10.0-cp27-cp27m-win_amd64.whl", hash = "sha256:cb925555f43060a1745d0a321cca94bcea927c50114b623d73179189a4e100ac"},
+    {file = "scandir-1.10.0-cp34-cp34m-win32.whl", hash = "sha256:2c712840c2e2ee8dfaf36034080108d30060d759c7b73a01a52251cc8989f11f"},
+    {file = "scandir-1.10.0-cp34-cp34m-win_amd64.whl", hash = "sha256:2586c94e907d99617887daed6c1d102b5ca28f1085f90446554abf1faf73123e"},
+    {file = "scandir-1.10.0-cp35-cp35m-win32.whl", hash = "sha256:2b8e3888b11abb2217a32af0766bc06b65cc4a928d8727828ee68af5a967fa6f"},
+    {file = "scandir-1.10.0-cp35-cp35m-win_amd64.whl", hash = "sha256:8c5922863e44ffc00c5c693190648daa6d15e7c1207ed02d6f46a8dcc2869d32"},
+    {file = "scandir-1.10.0-cp36-cp36m-win32.whl", hash = "sha256:2ae41f43797ca0c11591c0c35f2f5875fa99f8797cb1a1fd440497ec0ae4b022"},
+    {file = "scandir-1.10.0-cp36-cp36m-win_amd64.whl", hash = "sha256:7d2d7a06a252764061a020407b997dd036f7bd6a175a5ba2b345f0a357f0b3f4"},
+    {file = "scandir-1.10.0-cp37-cp37m-win32.whl", hash = "sha256:67f15b6f83e6507fdc6fca22fedf6ef8b334b399ca27c6b568cbfaa82a364173"},
+    {file = "scandir-1.10.0-cp37-cp37m-win_amd64.whl", hash = "sha256:b24086f2375c4a094a6b51e78b4cf7ca16c721dcee2eddd7aa6494b42d6d519d"},
+    {file = "scandir-1.10.0.tar.gz", hash = "sha256:4d4631f6062e658e9007ab3149a9b914f3548cb38bfb021c64f39a025ce578ae"},
+]
 simplejson = [
     {file = "simplejson-3.11.1-cp27-cp27m-win32.whl", hash = "sha256:38c2b563cd03363e7cb2bbba6c20ae4eaafd853a83954c8c8dd345ee391787bf"},
     {file = "simplejson-3.11.1-cp27-cp27m-win_amd64.whl", hash = "sha256:8d73b96a6ee7c81fd49dac7225e3846fd60b54a0b5b93a0aaea04c5a5d2e7bf2"},
@@ -866,6 +979,11 @@ toml = [
 tox = [
     {file = "tox-3.23.1-py2.py3-none-any.whl", hash = "sha256:b0b5818049a1c1997599d42012a637a33f24c62ab8187223fdd318fa8522637b"},
     {file = "tox-3.23.1.tar.gz", hash = "sha256:307a81ddb82bd463971a273f33e9533a24ed22185f27db8ce3386bff27d324e3"},
+]
+typing = [
+    {file = "typing-3.10.0.0-py2-none-any.whl", hash = "sha256:c7219ef20c5fbf413b4567092adfc46fa6203cb8454eda33c3fc1afe1398a308"},
+    {file = "typing-3.10.0.0-py3-none-any.whl", hash = "sha256:12fbdfbe7d6cca1a42e485229afcb0b0c8259258cfb919b8a5e2a5c953742f89"},
+    {file = "typing-3.10.0.0.tar.gz", hash = "sha256:13b4ad211f54ddbf93e5901a9967b1e07720c1d1b78d596ac6a439641aa1b130"},
 ]
 typing-extensions = [
     {file = "typing_extensions-3.10.0.0-py2-none-any.whl", hash = "sha256:0ac0f89795dd19de6b97debb0c6af1c70987fd80a2d62d1958f7e56fcc31b497"},

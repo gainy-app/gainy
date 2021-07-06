@@ -7,7 +7,6 @@ from singer_sdk.testing import get_standard_tap_tests
 from singer_sdk.plugin_base import JSONSchemaValidator
 
 from tap_eodhistoricaldata.tap import Tapeodhistoricaldata
-from requests import Session
 
 SAMPLE_CONFIG = {
     "api_token": "fake_token",
@@ -42,3 +41,9 @@ def test_validate_schema():
             validator = JSONSchemaValidator(sch)
             validator.validate(sample)
 
+
+@pytest.mark.vcr
+def test_selected():
+    tap1 = Tapeodhistoricaldata(config=SAMPLE_CONFIG, parse_env_config=True)
+
+    tap1.sync_all()

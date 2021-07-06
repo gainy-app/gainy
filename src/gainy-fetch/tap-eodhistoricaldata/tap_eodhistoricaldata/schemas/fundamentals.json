@@ -6,6 +6,10 @@
     "Code": {
       "type": "string"
     },
+    "UpdatedAt": {
+      "type": ["string", "null"],
+      "format": "date"
+    },
     "General": {
       "type": "object",
       "additionalProperties": false,
@@ -917,7 +921,10 @@
           "properties": {
             "date": {
               "$id": "#/properties/date",
-              "type": ["string", "null"],
+              "type": [
+                "string",
+                "null"
+              ],
               "title": "The date schema",
               "default": "",
               "examples": [
@@ -926,7 +933,10 @@
             },
             "period": {
               "$id": "#/properties/period",
-              "type": ["string", "null"],
+              "type": [
+                "string",
+                "null"
+              ],
               "title": "The period schema",
               "default": "",
               "examples": [
@@ -935,7 +945,10 @@
             },
             "growth": {
               "$id": "#/properties/growth",
-              "type": ["string", "null"],
+              "type": [
+                "string",
+                "null"
+              ],
               "title": "The growth schema",
               "default": "",
               "examples": [
@@ -944,7 +957,10 @@
             },
             "earningsEstimateAvg": {
               "$id": "#/properties/earningsEstimateAvg",
-              "type": ["string", "null"],
+              "type": [
+                "string",
+                "null"
+              ],
               "title": "The earningsEstimateAvg schema",
               "default": "",
               "examples": [
@@ -953,7 +969,10 @@
             },
             "earningsEstimateLow": {
               "$id": "#/properties/earningsEstimateLow",
-              "type": ["string", "null"],
+              "type": [
+                "string",
+                "null"
+              ],
               "title": "The earningsEstimateLow schema",
               "default": "",
               "examples": [
@@ -962,7 +981,10 @@
             },
             "earningsEstimateHigh": {
               "$id": "#/properties/earningsEstimateHigh",
-              "type": ["string", "null"],
+              "type": [
+                "string",
+                "null"
+              ],
               "title": "The earningsEstimateHigh schema",
               "default": "",
               "examples": [
@@ -971,7 +993,10 @@
             },
             "earningsEstimateYearAgoEps": {
               "$id": "#/properties/earningsEstimateYearAgoEps",
-              "type": ["string", "null"],
+              "type": [
+                "string",
+                "null"
+              ],
               "title": "The earningsEstimateYearAgoEps schema",
               "default": "",
               "examples": [
@@ -980,7 +1005,10 @@
             },
             "earningsEstimateNumberOfAnalysts": {
               "$id": "#/properties/earningsEstimateNumberOfAnalysts",
-              "type": ["string", "null"],
+              "type": [
+                "string",
+                "null"
+              ],
               "title": "The earningsEstimateNumberOfAnalysts schema",
               "default": "",
               "examples": [
@@ -989,7 +1017,10 @@
             },
             "earningsEstimateGrowth": {
               "$id": "#/properties/earningsEstimateGrowth",
-              "type": ["string", "null"],
+              "type": [
+                "string",
+                "null"
+              ],
               "title": "The earningsEstimateGrowth schema",
               "default": "",
               "examples": [
@@ -998,7 +1029,10 @@
             },
             "revenueEstimateAvg": {
               "$id": "#/properties/revenueEstimateAvg",
-              "type": ["string", "null"],
+              "type": [
+                "string",
+                "null"
+              ],
               "title": "The revenueEstimateAvg schema",
               "default": "",
               "examples": [
@@ -1007,7 +1041,10 @@
             },
             "revenueEstimateLow": {
               "$id": "#/properties/revenueEstimateLow",
-              "type": ["string", "null"],
+              "type": [
+                "string",
+                "null"
+              ],
               "title": "The revenueEstimateLow schema",
               "default": "",
               "examples": [
@@ -1016,7 +1053,10 @@
             },
             "revenueEstimateHigh": {
               "$id": "#/properties/revenueEstimateHigh",
-              "type": ["string", "null"],
+              "type": [
+                "string",
+                "null"
+              ],
               "title": "The revenueEstimateHigh schema",
               "default": "",
               "examples": [
@@ -1037,7 +1077,10 @@
             },
             "revenueEstimateNumberOfAnalysts": {
               "$id": "#/properties/revenueEstimateNumberOfAnalysts",
-              "type": ["string", "null"],
+              "type": [
+                "string",
+                "null"
+              ],
               "title": "The revenueEstimateNumberOfAnalysts schema",
               "default": "",
               "examples": [
@@ -1046,7 +1089,10 @@
             },
             "revenueEstimateGrowth": {
               "$id": "#/properties/revenueEstimateGrowth",
-              "type": ["string", "null"],
+              "type": [
+                "string",
+                "null"
+              ],
               "title": "The revenueEstimateGrowth schema",
               "default": "",
               "examples": [
@@ -1055,7 +1101,10 @@
             },
             "epsTrendCurrent": {
               "$id": "#/properties/epsTrendCurrent",
-              "type": ["string", "null"],
+              "type": [
+                "string",
+                "null"
+              ],
               "title": "The epsTrendCurrent schema",
               "default": "",
               "examples": [
@@ -1064,7 +1113,10 @@
             },
             "epsTrend7daysAgo": {
               "$id": "#/properties/epsTrend7daysAgo",
-              "type": ["string", "null"],
+              "type": [
+                "string",
+                "null"
+              ],
               "title": "The epsTrend7daysAgo schema",
               "default": "",
               "examples": [
@@ -1073,7 +1125,10 @@
             },
             "epsTrend30daysAgo": {
               "$id": "#/properties/epsTrend30daysAgo",
-              "type": ["string", "null"],
+              "type": [
+                "string",
+                "null"
+              ],
               "title": "The epsTrend30daysAgo schema",
               "default": "",
               "examples": [
@@ -1082,7 +1137,10 @@
             },
             "epsTrend60daysAgo": {
               "$id": "#/properties/epsTrend60daysAgo",
-              "type": ["string", "null"],
+              "type": [
+                "string",
+                "null"
+              ],
               "title": "The epsTrend60daysAgo schema",
               "default": "",
               "examples": [
@@ -1091,7 +1149,10 @@
             },
             "epsTrend90daysAgo": {
               "$id": "#/properties/epsTrend90daysAgo",
-              "type": ["string", "null"],
+              "type": [
+                "string",
+                "null"
+              ],
               "title": "The epsTrend90daysAgo schema",
               "default": "",
               "examples": [
@@ -1100,7 +1161,10 @@
             },
             "epsRevisionsUpLast7days": {
               "$id": "#/properties/epsRevisionsUpLast7days",
-              "type": ["string", "null"],
+              "type": [
+                "string",
+                "null"
+              ],
               "title": "The epsRevisionsUpLast7days schema",
               "default": "",
               "examples": [
@@ -1109,7 +1173,10 @@
             },
             "epsRevisionsUpLast30days": {
               "$id": "#/properties/epsRevisionsUpLast30days",
-              "type": ["string", "null"],
+              "type": [
+                "string",
+                "null"
+              ],
               "title": "The epsRevisionsUpLast30days schema",
               "default": "",
               "examples": [
@@ -1118,7 +1185,10 @@
             },
             "epsRevisionsDownLast30days": {
               "$id": "#/properties/epsRevisionsDownLast30days",
-              "type": ["string", "null"],
+              "type": [
+                "string",
+                "null"
+              ],
               "title": "The epsRevisionsDownLast30days schema",
               "default": "",
               "examples": [
@@ -1233,7 +1303,10 @@
                   },
                   "totalAssets": {
                     "$id": "#/properties/totalAssets",
-                    "type": ["string", "null"],
+                    "type": [
+                      "string",
+                      "null"
+                    ],
                     "title": "The totalAssets schema",
                     "default": "",
                     "examples": [
@@ -1278,7 +1351,10 @@
                   },
                   "totalLiab": {
                     "$id": "#/properties/totalLiab",
-                    "type": ["string", "null"],
+                    "type": [
+                      "string",
+                      "null"
+                    ],
                     "title": "The totalLiab schema",
                     "default": "",
                     "examples": [
@@ -1611,7 +1687,10 @@
                   },
                   "accumulatedOtherComprehensiveIncome": {
                     "$id": "#/properties/accumulatedOtherComprehensiveIncome",
-                    "type": ["string", "null"],
+                    "type": [
+                      "string",
+                      "null"
+                    ],
                     "title": "The accumulatedOtherComprehensiveIncome schema",
                     "default": "",
                     "examples": [
@@ -1632,7 +1711,10 @@
                   },
                   "commonStockTotalEquity": {
                     "$id": "#/properties/commonStockTotalEquity",
-                    "type": ["string", "null"],
+                    "type": [
+                      "string",
+                      "null"
+                    ],
                     "title": "The commonStockTotalEquity schema",
                     "default": "",
                     "examples": [
@@ -1653,7 +1735,10 @@
                   },
                   "retainedEarningsTotalEquity": {
                     "$id": "#/properties/retainedEarningsTotalEquity",
-                    "type": ["string", "null"],
+                    "type": [
+                      "string",
+                      "null"
+                    ],
                     "title": "The retainedEarningsTotalEquity schema",
                     "default": "",
                     "examples": [
@@ -1686,7 +1771,10 @@
                   },
                   "nonCurrrentAssetsOther": {
                     "$id": "#/properties/nonCurrrentAssetsOther",
-                    "type": ["string", "null"],
+                    "type": [
+                      "string",
+                      "null"
+                    ],
                     "title": "The nonCurrrentAssetsOther schema",
                     "default": "",
                     "examples": [
@@ -1815,7 +1903,10 @@
                   },
                   "liabilitiesAndStockholdersEquity": {
                     "$id": "#/properties/liabilitiesAndStockholdersEquity",
-                    "type": ["string", "null"],
+                    "type": [
+                      "string",
+                      "null"
+                    ],
                     "title": "The liabilitiesAndStockholdersEquity schema",
                     "default": "",
                     "examples": [
@@ -1824,7 +1915,10 @@
                   },
                   "cashAndShortTermInvestments": {
                     "$id": "#/properties/cashAndShortTermInvestments",
-                    "type": ["string", "null"],
+                    "type": [
+                      "string",
+                      "null"
+                    ],
                     "title": "The cashAndShortTermInvestments schema",
                     "default": "",
                     "examples": [
@@ -1833,7 +1927,10 @@
                   },
                   "propertyPlantAndEquipmentGross": {
                     "$id": "#/properties/propertyPlantAndEquipmentGross",
-                    "type": ["string", "null"],
+                    "type": [
+                      "string",
+                      "null"
+                    ],
                     "title": "The propertyPlantAndEquipmentGross schema",
                     "default": "",
                     "examples": [
@@ -1907,7 +2004,10 @@
                   },
                   "filing_date": {
                     "$id": "#/properties/filing_date",
-                    "type": ["string", "null"],
+                    "type": [
+                      "string",
+                      "null"
+                    ],
                     "title": "The filing_date schema",
                     "default": "",
                     "examples": [
@@ -1916,7 +2016,10 @@
                   },
                   "currency_symbol": {
                     "$id": "#/properties/currency_symbol",
-                    "type": ["string", "null"],
+                    "type": [
+                      "string",
+                      "null"
+                    ],
                     "title": "The currency_symbol schema",
                     "default": "",
                     "examples": [
@@ -2102,7 +2205,10 @@
                   },
                   "shortTermDebt": {
                     "$id": "#/properties/shortTermDebt",
-                    "type": ["string", "null"],
+                    "type": [
+                      "string",
+                      "null"
+                    ],
                     "title": "The shortTermDebt schema",
                     "default": "",
                     "examples": [
@@ -2111,7 +2217,10 @@
                   },
                   "shortLongTermDebt": {
                     "$id": "#/properties/shortLongTermDebt",
-                    "type": ["string", "null"],
+                    "type": [
+                      "string",
+                      "null"
+                    ],
                     "title": "The shortLongTermDebt schema",
                     "default": "",
                     "examples": [
@@ -2120,7 +2229,10 @@
                   },
                   "shortLongTermDebtTotal": {
                     "$id": "#/properties/shortLongTermDebtTotal",
-                    "type": ["string", "null"],
+                    "type": [
+                      "string",
+                      "null"
+                    ],
                     "title": "The shortLongTermDebtTotal schema",
                     "default": "",
                     "examples": [
@@ -2129,7 +2241,10 @@
                   },
                   "otherStockholderEquity": {
                     "$id": "#/properties/otherStockholderEquity",
-                    "type": ["string", "null"],
+                    "type": [
+                      "string",
+                      "null"
+                    ],
                     "title": "The otherStockholderEquity schema",
                     "default": "",
                     "examples": [
@@ -2138,7 +2253,10 @@
                   },
                   "propertyPlantEquipment": {
                     "$id": "#/properties/propertyPlantEquipment",
-                    "type": ["string", "null"],
+                    "type": [
+                      "string",
+                      "null"
+                    ],
                     "title": "The propertyPlantEquipment schema",
                     "default": "",
                     "examples": [
@@ -2147,7 +2265,10 @@
                   },
                   "totalCurrentAssets": {
                     "$id": "#/properties/totalCurrentAssets",
-                    "type": ["string", "null"],
+                    "type": [
+                      "string",
+                      "null"
+                    ],
                     "title": "The totalCurrentAssets schema",
                     "default": "",
                     "examples": [
@@ -2156,7 +2277,10 @@
                   },
                   "longTermInvestments": {
                     "$id": "#/properties/longTermInvestments",
-                    "type": ["string", "null"],
+                    "type": [
+                      "string",
+                      "null"
+                    ],
                     "title": "The longTermInvestments schema",
                     "default": "",
                     "examples": [
@@ -2165,7 +2289,10 @@
                   },
                   "netTangibleAssets": {
                     "$id": "#/properties/netTangibleAssets",
-                    "type": ["string", "null"],
+                    "type": [
+                      "string",
+                      "null"
+                    ],
                     "title": "The netTangibleAssets schema",
                     "default": "",
                     "examples": [
@@ -2174,7 +2301,10 @@
                   },
                   "shortTermInvestments": {
                     "$id": "#/properties/shortTermInvestments",
-                    "type": ["string", "null"],
+                    "type": [
+                      "string",
+                      "null"
+                    ],
                     "title": "The shortTermInvestments schema",
                     "default": "",
                     "examples": [
@@ -2183,7 +2313,10 @@
                   },
                   "netReceivables": {
                     "$id": "#/properties/netReceivables",
-                    "type": ["string", "null"],
+                    "type": [
+                      "string",
+                      "null"
+                    ],
                     "title": "The netReceivables schema",
                     "default": "",
                     "examples": [
@@ -2192,7 +2325,10 @@
                   },
                   "longTermDebt": {
                     "$id": "#/properties/longTermDebt",
-                    "type": ["string", "null"],
+                    "type": [
+                      "string",
+                      "null"
+                    ],
                     "title": "The longTermDebt schema",
                     "default": "",
                     "examples": [
@@ -2201,7 +2337,10 @@
                   },
                   "inventory": {
                     "$id": "#/properties/inventory",
-                    "type": ["string", "null"],
+                    "type": [
+                      "string",
+                      "null"
+                    ],
                     "title": "The inventory schema",
                     "default": "",
                     "examples": [
@@ -2210,7 +2349,10 @@
                   },
                   "accountsPayable": {
                     "$id": "#/properties/accountsPayable",
-                    "type": ["string", "null"],
+                    "type": [
+                      "string",
+                      "null"
+                    ],
                     "title": "The accountsPayable schema",
                     "default": "",
                     "examples": [
@@ -2255,7 +2397,10 @@
                   },
                   "accumulatedOtherComprehensiveIncome": {
                     "$id": "#/properties/accumulatedOtherComprehensiveIncome",
-                    "type": ["string", "null"],
+                    "type": [
+                      "string",
+                      "null"
+                    ],
                     "title": "The accumulatedOtherComprehensiveIncome schema",
                     "default": "",
                     "examples": [
@@ -2300,7 +2445,10 @@
                   },
                   "retainedEarningsTotalEquity": {
                     "$id": "#/properties/retainedEarningsTotalEquity",
-                    "type": ["string", "null"],
+                    "type": [
+                      "string",
+                      "null"
+                    ],
                     "title": "The retainedEarningsTotalEquity schema",
                     "default": "",
                     "examples": [
@@ -2333,7 +2481,10 @@
                   },
                   "nonCurrrentAssetsOther": {
                     "$id": "#/properties/nonCurrrentAssetsOther",
-                    "type": ["string", "null"],
+                    "type": [
+                      "string",
+                      "null"
+                    ],
                     "title": "The nonCurrrentAssetsOther schema",
                     "default": "",
                     "examples": [
@@ -2378,7 +2529,10 @@
                   },
                   "longTermDebtTotal": {
                     "$id": "#/properties/longTermDebtTotal",
-                    "type": ["string", "null"],
+                    "type": [
+                      "string",
+                      "null"
+                    ],
                     "title": "The longTermDebtTotal schema",
                     "default": "",
                     "examples": [
@@ -2387,7 +2541,10 @@
                   },
                   "nonCurrentLiabilitiesOther": {
                     "$id": "#/properties/nonCurrentLiabilitiesOther",
-                    "type": ["string", "null"],
+                    "type": [
+                      "string",
+                      "null"
+                    ],
                     "title": "The nonCurrentLiabilitiesOther schema",
                     "default": "",
                     "examples": [
@@ -2396,7 +2553,10 @@
                   },
                   "nonCurrentLiabilitiesTotal": {
                     "$id": "#/properties/nonCurrentLiabilitiesTotal",
-                    "type": ["string", "null"],
+                    "type": [
+                      "string",
+                      "null"
+                    ],
                     "title": "The nonCurrentLiabilitiesTotal schema",
                     "default": "",
                     "examples": [
@@ -2453,7 +2613,10 @@
                   },
                   "liabilitiesAndStockholdersEquity": {
                     "$id": "#/properties/liabilitiesAndStockholdersEquity",
-                    "type": ["string", "null"],
+                    "type": [
+                      "string",
+                      "null"
+                    ],
                     "title": "The liabilitiesAndStockholdersEquity schema",
                     "default": "",
                     "examples": [
@@ -2462,7 +2625,10 @@
                   },
                   "cashAndShortTermInvestments": {
                     "$id": "#/properties/cashAndShortTermInvestments",
-                    "type": ["string", "null"],
+                    "type": [
+                      "string",
+                      "null"
+                    ],
                     "title": "The cashAndShortTermInvestments schema",
                     "default": "",
                     "examples": [
@@ -2471,7 +2637,10 @@
                   },
                   "propertyPlantAndEquipmentGross": {
                     "$id": "#/properties/propertyPlantAndEquipmentGross",
-                    "type": ["string", "null"],
+                    "type": [
+                      "string",
+                      "null"
+                    ],
                     "title": "The propertyPlantAndEquipmentGross schema",
                     "default": "",
                     "examples": [
@@ -2492,7 +2661,10 @@
                   },
                   "netWorkingCapital": {
                     "$id": "#/properties/netWorkingCapital",
-                    "type": ["string", "null"],
+                    "type": [
+                      "string",
+                      "null"
+                    ],
                     "title": "The netWorkingCapital schema",
                     "default": "",
                     "examples": [
@@ -2501,7 +2673,10 @@
                   },
                   "netInvestedCapital": {
                     "$id": "#/properties/netInvestedCapital",
-                    "type": ["string", "null"],
+                    "type": [
+                      "string",
+                      "null"
+                    ],
                     "title": "The netInvestedCapital schema",
                     "default": "",
                     "examples": [
@@ -2510,7 +2685,10 @@
                   },
                   "commonStockSharesOutstanding": {
                     "$id": "#/properties/commonStockSharesOutstanding",
-                    "type": ["string", "null"],
+                    "type": [
+                      "string",
+                      "null"
+                    ],
                     "title": "The commonStockSharesOutstanding schema",
                     "default": "",
                     "examples": [
@@ -2543,37 +2721,70 @@
                   "type": "object",
                   "properties": {
                     "date": {
-                      "type": ["string", "null"]
+                      "type": [
+                        "string",
+                        "null"
+                      ]
                     },
                     "filing_date": {
-                      "type": ["string", "null"]
+                      "type": [
+                        "string",
+                        "null"
+                      ]
                     },
                     "currency_symbol": {
-                      "type": ["string", "null"]
+                      "type": [
+                        "string",
+                        "null"
+                      ]
                     },
                     "investments": {
-                      "type": ["string", "null"]
+                      "type": [
+                        "string",
+                        "null"
+                      ]
                     },
                     "changeToLiabilities": {
-                      "type": ["string", "null"]
+                      "type": [
+                        "string",
+                        "null"
+                      ]
                     },
                     "changeToInventory": {
-                      "type": ["string", "null"]
+                      "type": [
+                        "string",
+                        "null"
+                      ]
                     },
                     "dividendsPaid": {
-                      "type": ["string", "null"]
+                      "type": [
+                        "string",
+                        "null"
+                      ]
                     },
                     "depreciation": {
-                      "type": ["string", "null"]
+                      "type": [
+                        "string",
+                        "null"
+                      ]
                     },
                     "totalCashFromOperatingActivities": {
-                      "type": ["string", "null"]
+                      "type": [
+                        "string",
+                        "null"
+                      ]
                     },
                     "endPeriodCashFlow": {
-                      "type": ["string", "null"]
+                      "type": [
+                        "string",
+                        "null"
+                      ]
                     },
                     "beginPeriodCashFlow": {
-                      "type": ["string", "null"]
+                      "type": [
+                        "string",
+                        "null"
+                      ]
                     }
                   }
                 }
@@ -2618,19 +2829,34 @@
                   "type": "object",
                   "properties": {
                     "date": {
-                      "type": ["string", "null"]
+                      "type": [
+                        "string",
+                        "null"
+                      ]
                     },
                     "filing_date": {
-                      "type": ["string", "null"]
+                      "type": [
+                        "string",
+                        "null"
+                      ]
                     },
                     "currency_symbol": {
-                      "type": ["string", "null"]
+                      "type": [
+                        "string",
+                        "null"
+                      ]
                     },
                     "researchDevelopment": {
-                      "type": ["string", "null"]
+                      "type": [
+                        "string",
+                        "null"
+                      ]
                     },
                     "effectOfAccountingCharges": {
-                      "type": ["string", "null"]
+                      "type": [
+                        "string",
+                        "null"
+                      ]
                     }
                   }
                 }
@@ -2643,19 +2869,34 @@
                   "type": "object",
                   "properties": {
                     "date": {
-                      "type": ["string", "null"]
+                      "type": [
+                        "string",
+                        "null"
+                      ]
                     },
                     "filing_date": {
-                      "type": ["string", "null"]
+                      "type": [
+                        "string",
+                        "null"
+                      ]
                     },
                     "currency_symbol": {
-                      "type": ["string", "null"]
+                      "type": [
+                        "string",
+                        "null"
+                      ]
                     },
                     "researchDevelopment": {
-                      "type": ["string", "null"]
+                      "type": [
+                        "string",
+                        "null"
+                      ]
                     },
                     "effectOfAccountingCharges": {
-                      "type": ["string", "null"]
+                      "type": [
+                        "string",
+                        "null"
+                      ]
                     }
                   }
                 }
