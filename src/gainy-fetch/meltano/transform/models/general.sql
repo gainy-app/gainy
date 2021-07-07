@@ -1,10 +1,5 @@
-{%- set j = read_json_column('general', 'fundamentals') -%}
+{%- set j = expand_json_column('general', 'fundamentals') -%}
 
 select
- {% for k in j.keys() %}
-    general -> '{{k}}' as {{k}}
-    {% if not loop.last %}
-        ,
-    {% endif %}
- {% endfor %}
+ {{ j }}
 from fundamentals

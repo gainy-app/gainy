@@ -9,8 +9,6 @@ order by 1
 
 {% set results = run_query(get_general_query) %}
 
-{{ log(results, info=True) }}
-
 {% if execute %}
 {% set results_list = fromjson(results.columns[0].values()[0]) %}
 {% else %}
