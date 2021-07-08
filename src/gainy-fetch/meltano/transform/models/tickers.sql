@@ -4,7 +4,7 @@
     sort = "updated_at",
     dist = "symbol",
     post_hook=[
-      "{{ index(this, 'symbol', true) }}"
+      index(this, 'symbol', true)
     ]
   )
 }}

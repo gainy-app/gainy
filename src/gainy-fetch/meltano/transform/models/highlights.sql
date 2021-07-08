@@ -3,8 +3,8 @@
     materialized = "table",
     dist = "symbol",
     post_hook=[
-      "{{ index(this, 'symbol', true)}}",
-      "{{ fk_constraint(this, 'symbol', 'tickers', 'symbol') }}"
+      index(this, 'symbol', true),
+      fk(this, 'symbol', 'tickers', 'symbol')
     ]
   )
 }}

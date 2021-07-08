@@ -1,0 +1,23 @@
+version: 2
+
+models:
+  - name: tickers
+    columns:
+      - name: symbol
+        tests:
+          - unique
+          - not_null
+  - name: analyst_ratings
+    columns:
+      - name: symbol
+        tests:
+          - unique
+          - not_null
+  - name: highlights
+    columns:
+      - name: symbol
+        tests:
+          - unique
+          - not_null
+
+
