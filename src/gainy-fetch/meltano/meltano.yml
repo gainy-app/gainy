@@ -18,6 +18,9 @@ plugins:
   - name: target-postgres
     variant: transferwise
     pip_url: pipelinewise-target-postgres
+    config:
+      batch_size_rows: 10
+      parallelism: 5
 schedules:
 - name: eodhistoricaldata-to-postgres
   extractor: tap-eodhistoricaldata
