@@ -35,5 +35,5 @@ schedules:
   extractor: tap-eodhistoricaldata
   loader: target-postgres
   transform: skip
-  interval: '@hourly'
+  interval: '@daily'
   start_date: 2021-06-17 10:40:58.742133
