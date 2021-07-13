@@ -47,3 +47,48 @@ def test_selected():
     tap1 = Tapeodhistoricaldata(config=SAMPLE_CONFIG, parse_env_config=True)
 
     tap1.sync_all()
+
+
+def test_partitions_and_state():
+    state = {"bookmarks": {"fundamentals": {"partitions": [
+        {"context": {"Code": "F"}, "replication_key": "UpdatedAt", "replication_key_value": "2021-07-11"}
+    ]}}}
+
+    config = {"api_token": "fake_token",
+              "symbols": ["AAPL", "F", "IBM"]
+              }
+
+    tap1 = Tapeodhistoricaldata(config=config, parse_env_config=True)
+
+    assert tap1.streams['fundamentals'].partitions == [{'Code': 'AAPL'}, {'Code': 'F'}, {'Code': 'IBM'}]
+
+    tap1 = Tapeodhistoricaldata(config=config, state=state, parse_env_config=True)
+
+    assert tap1.streams['fundamentals'].partitions == [{'Code': 'IBM'}]
+
+    state = {"bookmarks": {"fundamentals": {"partitions": [
+        {"context": {"Code": "IBM"}, "replication_key": "UpdatedAt", "replication_key_value": "2021-07-11"}
+    ]}}}
+
+    tap1 = Tapeodhistoricaldata(config=config, state=state, parse_env_config=True)
+
+    assert tap1.streams['fundamentals'].partitions == []
+
+    state = {"bookmarks": {"fundamentals": {"partitions": [
+        {"context": {"Code": "NON"}, "replication_key": "UpdatedAt", "replication_key_value": "2021-07-11"}
+    ]}}}
+
+    tap1 = Tapeodhistoricaldata(config=config, state=state, parse_env_config=True)
+
+    assert tap1.streams['fundamentals'].partitions == [{'Code': 'AAPL'}, {'Code': 'F'}, {'Code': 'IBM'}]
+
+
+def test_start_symbol():
+    config = {"api_token": "fake_token",
+              "symbols": ["AAPL", "F", "IBM"],
+              "start_symbol": "F"
+              }
+
+    tap1 = Tapeodhistoricaldata(config=config, parse_env_config=True)
+
+    assert tap1.streams['fundamentals'].partitions == [{'Code': 'F'}, {'Code': 'IBM'}]

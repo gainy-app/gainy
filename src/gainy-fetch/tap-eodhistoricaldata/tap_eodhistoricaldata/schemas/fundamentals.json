@@ -127,6 +127,8 @@
         },
         "Listings": {
           "type": "object",
+          "properties": {
+          },
           "additionalProperties": {
             "type": "object",
             "additionalProperties": false,
@@ -151,6 +153,8 @@
         },
         "Officers": {
           "type": "object",
+          "properties": {
+          },
           "additionalProperties": {
             "type": "object",
             "additionalProperties": false,
@@ -426,6 +430,8 @@
     },
     "Technicals": {
       "type": "object",
+      "properties": {
+      },
       "additionalProperties": {
         "type": "number"
       }
@@ -460,6 +466,8 @@
         },
         "NumberDividendsByYear": {
           "type": "object",
+          "properties": {
+          },
           "additionalProperties": {
             "type": "object",
             "additionalProperties": false,
@@ -534,6 +542,8 @@
       "properties": {
         "Institutions": {
           "type": "object",
+          "properties": {
+          },
           "additionalProperties": {
             "type": "object",
             "additionalProperties": false,
@@ -575,6 +585,8 @@
         },
         "Funds": {
           "type": "object",
+          "properties": {
+          },
           "additionalProperties": {
             "type": "object",
             "additionalProperties": false,
@@ -622,6 +634,8 @@
       "title": "Holders"
     },
     "InsiderTransactions": {
+      "properties": {
+      },
       "type": "object",
       "additionalProperties": {
         "type": "object",
@@ -725,6 +739,8 @@
         },
         "ActivitiesInvolvement": {
           "type": "object",
+          "properties": {
+          },
           "additionalProperties": {
             "type": "object",
             "additionalProperties": false,
@@ -767,6 +783,9 @@
       "properties": {
         "annual": {
           "type": "object",
+          "properties": {
+
+          },
           "additionalProperties": {
             "type": "object",
             "additionalProperties": false,

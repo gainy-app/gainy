@@ -19,11 +19,10 @@ class Tapeodhistoricaldata(Tap):
     """eodhistoricaldata tap class."""
     name = "tap-eodhistoricaldata"
 
-    # TODO: Update this section with the actual config values you expect:
     config_jsonschema = th.PropertiesList(
         th.Property("api_token", th.StringType, required=True),
         th.Property("symbols", th.ArrayType(th.StringType), required=True),
-        th.Property("start_date", th.DateTimeType),
+        th.Property("start_symbol", th.StringType),
         th.Property("api_url", th.StringType, default="https://eodhistoricaldata.com/api/"),
     ).to_dict()
 

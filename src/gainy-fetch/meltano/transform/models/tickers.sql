@@ -13,13 +13,14 @@ select (general->>'Code')::text as symbol,
        (general->>'Name')::text as name,
        (general->'Description')::text as description,
        (general->>'Phone')::text as phone,
-       (general->>'LogoUrl')::text as logo_url,
+       (general->>'LogoURL')::text as logo_url,
+       (general->>'WebURL')::text as web_url,
        (general->>'IPODate')::date as ipo_date,
-       (general->>'GicSector')::text as sector,
-       (general->>'GicIndustry')::text as industry,
+       (general->>'Sector')::text as sector,
+       (general->>'Industry')::text as industry,
        (general->>'GicSubIndustry')::text as sub_industry,
        (general->>'UpdatedAt')::timestamp as updated_at
 from fundamentals
 where
     (general->>'IsDelisted')::boolean = false and
-    (general->>'GicSector')::text is not null
+    (general->>'Sector')::text is not null
