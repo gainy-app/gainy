@@ -25,5 +25,3 @@ services:
       # HASURA_GRAPHQL_ADMIN_SECRET: myadminsecretkey
 volumes:
   db_data:
-
-{"mode":"full","isActive":false}
