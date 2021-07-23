@@ -1,8 +1,6 @@
 version: 1
 send_anonymous_usage_stats: false
 project_id: 36bd814f-1cb5-402a-8d9c-d3219c38f2b3
-ui:
-  readonly: true
 plugins:
   extractors:
     - name: tap-eodhistoricaldata
