@@ -69,6 +69,6 @@ module "heroku-gainy-fetch" {
     TAP_POSTGRES_FILTER_SCHEMAS = "public"
     TAP_EODHISTORICALDATA_API_TOKEN = var.eodhistoricaldata_api_token
     TAP_EODHISTORICALDATA_SYMBOLS = "[\"AAPL\"]"
-    MELTANO_DATABASE_URI = "postgres://${module.rds.db.db_instance_username}:${module.rds.db.db_master_password}@${module.rds.db.db_instance_endpoint}/${module.rds.db.db_instance_name}?options=-csearch_path%3Dmeltano"
+    MELTANO_DATABASE_URI = "postgresql://${module.rds.db.db_instance_username}:${module.rds.db.db_master_password}@${module.rds.db.db_instance_endpoint}/${module.rds.db.db_instance_name}?options=-csearch_path%3Dmeltano"
   }
 }
