@@ -2,6 +2,23 @@
 
 Gainy mobile app will use Google Firebase SDK to let users login with their existing 3rd party account (Google, Facebook, etc).
 
+## Local set-up
+1. Create the firebase project (Step 2 below, substeps 1-5);
+2. Obtain the key json file and save it as `firebase.key.json`;
+3. `cp .env{.dist,}` && `cp public/index-local.html{.dist,}` && `cp public/main-local.js{.dist,}`. Modify endpoint variable in `public/main-local.js` and `HASURA_GRAPHQL_JWT_SECRET` env variable in hasura setup;
+4. Authorize firebase:
+```bash
+docker-compose up -d
+docker-compose exec -T node firebase login:ci
+# you'll see the firebase token - copy-paste it to the .env file
+```
+5. Restart containers and run emulators: `docker-compose exec -T node firebase emulators:start --only functions,hosting` 
+6. Access demo at `http://localhost:5000/`.
+
+With this configuration you can authenticate as `user` role in hasura with Google Auth.
+TODO:
+1. set up hasura to accept queries to public collections without Authorization header;
+2. set up hasura to respond with sane code and body when permission is denied.
 
 ## Our (preliminary) security model:
     - all users authenticate to the mobile app with their existing Google account ("Sign-in with Google")
