@@ -38,4 +38,4 @@ Description: upon execution terraform locks global state so that only one infra 
 
 Solution: go to https://app.terraform.io/app/gainy/workspaces/gainy-dev/settings/lock to manually unlock the state.
 
-WARNING: in normal circumstances you should not be doing this. It only occurs when the CI/CD is failing or we made an error in the terraform scripts. Before unlocking make sure that noone actually executing a legit terraform plan by asking in #dev slack channel.
+**WARNING**: in normal circumstances you should not be doing this. It only occurs when the CI/CD is failing or we made an error in the terraform scripts. Before unlocking make sure that noone actually executing a legit terraform plan by asking in #dev slack channel.
