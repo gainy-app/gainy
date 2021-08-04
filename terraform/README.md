@@ -10,7 +10,7 @@ You have to cd into `./terraform` folder before executing terraform commands
 
 # Setup env vars
 1. Grab an api key from eodhistoricaldata.com (find creds in 1password) 
-2. Get AWS credentials [add url here]
+2. [Get AWS credentials](https://docs.aws.amazon.com/singlesignon/latest/userguide/howtogetcredentials.html)
 3. [Install heroku cli](https://devcenter.heroku.com/articles/heroku-cli)
 
 4. Run in terminal to plan and deploy changes via terraform 
