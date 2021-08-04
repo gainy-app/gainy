@@ -3,7 +3,7 @@ variable "env" {
   type    = string
 }
 
-variable "eodhistoricaldata_api_token" {
+variable "EODHISTORICALDATA_API_TOKEN" {
   type      = string
   sensitive = true
 }
@@ -67,7 +67,7 @@ module "heroku-gainy-fetch" {
     TARGET_POSTGRES_DBNAME          = module.rds.db.db_instance_name
     TARGET_POSTGRES_SCHEMA          = "public"
     TAP_POSTGRES_FILTER_SCHEMAS     = "public"
-    TAP_EODHISTORICALDATA_API_TOKEN = var.eodhistoricaldata_api_token
+    TAP_EODHISTORICALDATA_API_TOKEN = var.EODHISTORICALDATA_API_TOKEN
     TAP_EODHISTORICALDATA_SYMBOLS   = "[\"AAPL\"]"
     MELTANO_DATABASE_URI            = "postgresql://${module.rds.db.db_instance_username}:${module.rds.db.db_master_password}@${module.rds.db.db_instance_endpoint}/${module.rds.db.db_instance_name}?options=-csearch_path%3Dmeltano"
     PG_DATABASE                     = module.rds.db.db_instance_name
