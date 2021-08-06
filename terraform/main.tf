@@ -10,6 +10,26 @@ variable "EODHISTORICALDATA_API_TOKEN" {
 
 provider "aws" {}
 
+variable "GOOGLE_PROJECT_ID" {
+  default = "gainyapp"
+}
+variable "GOOGLE_REGION" {
+  default = "us-central1"
+}
+variable "GOOGLE_CREDENTIALS" {
+  type      = string
+  sensitive = true
+}
+variable "GOOGLE_BILLING_ID" {}
+variable "GOOGLE_USER" {}
+variable "GOOGLE_ORGANIZATION_ID" {}
+
+provider "google" {
+  project     = var.GOOGLE_PROJECT_ID
+  region      = var.GOOGLE_REGION
+  credentials = var.GOOGLE_CREDENTIALS
+}
+
 terraform {
   backend "remote" {
     organization = "gainy"
@@ -78,4 +98,14 @@ module "heroku-gainy-fetch" {
     PG_USERNAME                     = module.rds.db.db_instance_username
     DBT_TARGET                      = "postgres"
   }
+}
+
+module "firebase" {
+  source               = "./firebase"
+  function_entry_point = "refreshToken"
+  function_name        = "refresh_token"
+  project              = var.GOOGLE_PROJECT_ID
+  billing_account      = var.GOOGLE_BILLING_ID
+  user                 = var.GOOGLE_USER
+  organization_id      = var.GOOGLE_ORGANIZATION_ID
 }
