@@ -3,12 +3,32 @@ variable "env" {
   type    = string
 }
 
-variable "EODHISTORICALDATA_API_TOKEN" {
+variable "eodhistoricaldata_api_token" {
   type      = string
   sensitive = true
 }
 
 provider "aws" {}
+
+variable "google_project_id" {
+  default = "gainyapp"
+}
+variable "google_region" {
+  default = "us-central1"
+}
+variable "google_credentials" {
+  type      = string
+  sensitive = true
+}
+variable "google_billing_id" {}
+variable "google_user" {}
+variable "google_organization_id" {}
+
+provider "google" {
+  project     = var.google_project_id
+  region      = var.google_region
+  credentials = var.google_credentials
+}
 
 terraform {
   backend "remote" {
@@ -67,7 +87,7 @@ module "heroku-gainy-fetch" {
     TARGET_POSTGRES_DBNAME          = module.rds.db.db_instance_name
     TARGET_POSTGRES_SCHEMA          = "public"
     TAP_POSTGRES_FILTER_SCHEMAS     = "public"
-    TAP_EODHISTORICALDATA_API_TOKEN = var.EODHISTORICALDATA_API_TOKEN
+    TAP_EODHISTORICALDATA_API_TOKEN = var.eodhistoricaldata_api_token
     TAP_EODHISTORICALDATA_SYMBOLS   = "[\"AAPL\"]"
     MELTANO_DATABASE_URI            = "postgresql://${module.rds.db.db_instance_username}:${module.rds.db.db_master_password}@${module.rds.db.db_instance_endpoint}/${module.rds.db.db_instance_name}?options=-csearch_path%3Dmeltano"
     PG_DATABASE                     = module.rds.db.db_instance_name
@@ -78,4 +98,14 @@ module "heroku-gainy-fetch" {
     PG_USERNAME                     = module.rds.db.db_instance_username
     DBT_TARGET                      = "postgres"
   }
+}
+
+module "firebase" {
+  source               = "./firebase"
+  function_entry_point = "refreshToken"
+  function_name        = "refresh_token"
+  project              = var.google_project_id
+  billing_account      = var.google_billing_id
+  user                 = var.google_user
+  organization_id      = var.google_organization_id
 }
