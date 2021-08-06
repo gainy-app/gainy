@@ -1,0 +1,3 @@
+- table:
+    schema: tap_eodhistoricaldata
+    name: fundamentals
