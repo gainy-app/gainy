@@ -3,31 +3,31 @@ variable "env" {
   type    = string
 }
 
-variable "EODHISTORICALDATA_API_TOKEN" {
+variable "eodhistoricaldata_api_token" {
   type      = string
   sensitive = true
 }
 
 provider "aws" {}
 
-variable "GOOGLE_PROJECT_ID" {
+variable "google_project_id" {
   default = "gainyapp"
 }
-variable "GOOGLE_REGION" {
+variable "google_region" {
   default = "us-central1"
 }
-variable "GOOGLE_CREDENTIALS" {
+variable "google_credentials" {
   type      = string
   sensitive = true
 }
-variable "GOOGLE_BILLING_ID" {}
-variable "GOOGLE_USER" {}
-variable "GOOGLE_ORGANIZATION_ID" {}
+variable "google_billing_id" {}
+variable "google_user" {}
+variable "google_organization_id" {}
 
 provider "google" {
-  project     = var.GOOGLE_PROJECT_ID
-  region      = var.GOOGLE_REGION
-  credentials = var.GOOGLE_CREDENTIALS
+  project     = var.google_project_id
+  region      = var.google_region
+  credentials = var.google_credentials
 }
 
 terraform {
@@ -87,7 +87,7 @@ module "heroku-gainy-fetch" {
     TARGET_POSTGRES_DBNAME          = module.rds.db.db_instance_name
     TARGET_POSTGRES_SCHEMA          = "public"
     TAP_POSTGRES_FILTER_SCHEMAS     = "public"
-    TAP_EODHISTORICALDATA_API_TOKEN = var.EODHISTORICALDATA_API_TOKEN
+    TAP_EODHISTORICALDATA_API_TOKEN = var.eodhistoricaldata_api_token
     TAP_EODHISTORICALDATA_SYMBOLS   = "[\"AAPL\"]"
     MELTANO_DATABASE_URI            = "postgresql://${module.rds.db.db_instance_username}:${module.rds.db.db_master_password}@${module.rds.db.db_instance_endpoint}/${module.rds.db.db_instance_name}?options=-csearch_path%3Dmeltano"
     PG_DATABASE                     = module.rds.db.db_instance_name
@@ -104,8 +104,8 @@ module "firebase" {
   source               = "./firebase"
   function_entry_point = "refreshToken"
   function_name        = "refresh_token"
-  project              = var.GOOGLE_PROJECT_ID
-  billing_account      = var.GOOGLE_BILLING_ID
-  user                 = var.GOOGLE_USER
-  organization_id      = var.GOOGLE_ORGANIZATION_ID
+  project              = var.google_project_id
+  billing_account      = var.google_billing_id
+  user                 = var.google_user
+  organization_id      = var.google_organization_id
 }
