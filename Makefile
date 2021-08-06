@@ -19,7 +19,10 @@ update: build update-quick
 
 update-quick: up install
 
-plan:
+tf-fmt:
+	cd terraform && terraform fmt
+
+tf-plan:
 	cd terraform && source .env && terraform plan
 
 %:
