@@ -1,5 +1,5 @@
 /.env
 /*.log
-/fireabase.key.json
+/firebase.key.json
 /public/main.local.js
 /public/index-local.html

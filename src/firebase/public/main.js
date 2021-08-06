@@ -54,7 +54,7 @@ Demo.prototype.onAuthStateChanged = function(user) {
         // const endpoint = 'http://localhost:5001/gainy-dev/us-central1/refreshToken'
 
         // PROD
-        const endpoint = 'https://us-central1-gainy-dev.cloudfunctions.net/refreshToken'
+        const endpoint = 'https://us-central1-gainyapp.cloudfunctions.net/refresh_token'
         return fetch(`${endpoint}?uid=${user.uid}`).then((res) => {
           if (res.status === 200) {
             return user.getIdToken(true)
