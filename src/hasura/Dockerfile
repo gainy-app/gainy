@@ -1,15 +1,10 @@
-FROM hasura/graphql-engine:v1.3.3
+FROM hasura/graphql-engine:v2.0.1
 
-# Enable the console
-ENV HASURA_GRAPHQL_ENABLE_CONSOLE=true
+RUN apt update
+RUN apt install -y curl
+RUN curl -L https://github.com/hasura/graphql-engine/raw/stable/cli/get.sh | bash
 
-# Enable debugging mode. It should be disabled in production.
-ENV HASURA_GRAPHQL_DEV_MODE=true
+COPY hasura /hasura
+WORKDIR /hasura
 
-# Heroku hobby tier PG has few limitations including 20 max connections
-# https://devcenter.heroku.com/articles/heroku-postgres-plans#hobby-tier
-ENV HASURA_GRAPHQL_PG_CONNECTIONS=15
-
-# Change $DATABASE_URL to your heroku postgres URL if you're not using
-# the primary postgres instance in your app
 CMD graphql-engine serve --server-port $PORT

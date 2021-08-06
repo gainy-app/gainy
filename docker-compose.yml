@@ -1,0 +1,35 @@
+version: '3.6'
+services:
+  meltano:
+    env_file:
+      - .env
+    build:
+      context: ./src/gainy-fetch
+      dockerfile: local.Dockerfile
+    ports:
+      - "5000:5000"
+  postgres:
+    image: postgres:12
+    restart: always
+    volumes:
+    - db_data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_PASSWORD: postgrespassword
+    ports:
+      - "5432:5432"
+  hasura:
+    build:
+      context: ./src/hasura
+    ports:
+    - "${HASURA_PORT}:${HASURA_PORT}"
+    volumes:
+      - ./src/hasura/hasura:/hasura
+    depends_on:
+    - "postgres"
+    restart: always
+    env_file:
+      - .env
+    environment:
+      PORT: ${HASURA_PORT}
+volumes:
+  db_data:

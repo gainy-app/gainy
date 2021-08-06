@@ -70,6 +70,10 @@ module "heroku-gainy-managed" {
     HASURA_GRAPHQL_DATABASE_URL   = "postgres://${module.rds.db.db_instance_username}:${module.rds.db.db_master_password}@${module.rds.db.db_instance_endpoint}/${module.rds.db.db_instance_name}"
     HASURA_GRAPHQL_ADMIN_SECRET   = random_password.hasura_secret.result
     HASURA_GRAPHQL_ENABLE_CONSOLE = "true"
+    HASURA_GRAPHQL_DEV_MODE=true
+    ## Heroku hobby tier PG has few limitations including 20 max connections
+    ## https://devcenter.heroku.com/articles/heroku-postgres-plans#hobby-tier
+    HASURA_GRAPHQL_PG_CONNECTIONS=15
   }
 }
 
