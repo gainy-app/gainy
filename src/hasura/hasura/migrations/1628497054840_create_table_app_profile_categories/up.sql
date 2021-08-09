@@ -1,0 +1,1 @@
+CREATE TABLE "app"."profile_categories" ("profile_id" integer NOT NULL, "category_id" integer NOT NULL, PRIMARY KEY ("profile_id","category_id") , FOREIGN KEY ("profile_id") REFERENCES "app"."profiles"("id") ON UPDATE cascade ON DELETE cascade, FOREIGN KEY ("category_id") REFERENCES "app"."categories"("id") ON UPDATE cascade ON DELETE cascade);

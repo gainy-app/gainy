@@ -74,6 +74,7 @@ module "heroku-gainy-managed" {
     ## Heroku hobby tier PG has few limitations including 20 max connections
     ## https://devcenter.heroku.com/articles/heroku-postgres-plans#hobby-tier
     HASURA_GRAPHQL_PG_CONNECTIONS = 15
+    HASURA_GRAPHQL_UNAUTHORIZED_ROLE = "anonymous"
   }
 }
 

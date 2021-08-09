@@ -22,6 +22,8 @@ services:
       context: ./src/hasura
     ports:
     - "${HASURA_PORT}:${HASURA_PORT}"
+    - "9693:9693"
+    - "9695:9695"
     volumes:
       - ./src/hasura/hasura:/hasura
     depends_on:

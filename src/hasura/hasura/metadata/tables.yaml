@@ -1,3 +1,83 @@
 - table:
+    schema: app
+    name: categories
+  array_relationships:
+  - name: profile_categories
+    using:
+      foreign_key_constraint_on:
+        column: category_id
+        table:
+          schema: app
+          name: profile_categories
+  select_permissions:
+  - role: anonymous
+    permission:
+      columns:
+      - id
+      - name
+      filter: {}
+  - role: user
+    permission:
+      columns:
+      - id
+      - name
+      filter: {}
+- table:
+    schema: app
+    name: interests
+  array_relationships:
+  - name: profile_interests
+    using:
+      foreign_key_constraint_on:
+        column: interest_id
+        table:
+          schema: app
+          name: profile_interests
+  select_permissions:
+  - role: anonymous
+    permission:
+      columns:
+      - id
+      - name
+      filter: {}
+- table:
+    schema: app
+    name: profile_categories
+  object_relationships:
+  - name: category
+    using:
+      foreign_key_constraint_on: category_id
+  - name: profile
+    using:
+      foreign_key_constraint_on: profile_id
+- table:
+    schema: app
+    name: profile_interests
+  object_relationships:
+  - name: interest
+    using:
+      foreign_key_constraint_on: interest_id
+  - name: profile
+    using:
+      foreign_key_constraint_on: profile_id
+- table:
+    schema: app
+    name: profiles
+  array_relationships:
+  - name: profile_categories
+    using:
+      foreign_key_constraint_on:
+        column: profile_id
+        table:
+          schema: app
+          name: profile_categories
+  - name: profile_interests
+    using:
+      foreign_key_constraint_on:
+        column: profile_id
+        table:
+          schema: app
+          name: profile_interests
+- table:
     schema: tap_eodhistoricaldata
     name: fundamentals
