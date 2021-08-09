@@ -106,11 +106,9 @@ module "heroku-gainy-fetch" {
 }
 
 module "firebase" {
-  source               = "./firebase"
-  function_entry_point = "refreshToken"
-  function_name        = "refresh_token"
-  project              = var.google_project_id
-  billing_account      = var.google_billing_id
-  user                 = var.google_user
-  organization_id      = var.google_organization_id
+  source                 = "./firebase"
+  google_project_id      = var.google_project_id
+  google_billing_id      = var.google_billing_id
+  google_user            = var.google_user
+  google_organization_id = var.google_organization_id
 }

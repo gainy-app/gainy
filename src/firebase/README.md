@@ -13,7 +13,7 @@ docker-compose exec -T node firebase login:ci
 # you'll see the firebase token - copy-paste it to the .env file
 ```
 5. Restart containers and run emulators: `docker-compose exec -T node firebase emulators:start --only functions,hosting` 
-6. Access demo at `http://localhost:5000/`.
+6. Access demo at `http://localhost:8081/`.
 
 With this configuration you can authenticate as `user` role in hasura with Google Auth.
 TODO:

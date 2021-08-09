@@ -23,6 +23,9 @@ update-quick: up install
 tf-fmt:
 	cd terraform && terraform fmt
 
+tf-init:
+	cd terraform && terraform init
+
 tf-plan:
 	cd terraform && source .env && terraform plan
 

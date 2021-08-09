@@ -7,11 +7,8 @@ services:
     volumes:
       - ./:/var/www:delegated
     ports:
-      - "4000:4000"
-      - "4400:4400"
-      - "4500:4500"
-      - "5000:5000"
-      - "5001:5001"
+      - "8081:5000" # for firebase hosting
+      - "5001:5001" # for firebase functions
       - "9005:9005" # for firebase login
     env_file:
       - .env

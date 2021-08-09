@@ -78,6 +78,58 @@
         table:
           schema: app
           name: profile_interests
+  insert_permissions:
+  - role: user
+    permission:
+      check:
+        user_id:
+          _eq: X-Hasura-User-Id
+      columns:
+      - email
+      - first_name
+      - gender
+      - investment_experience
+      - investment_goals
+      - investment_horizon
+      - last_name
+      - risk_level
+      - user_id
+      backend_only: false
+  select_permissions:
+  - role: user
+    permission:
+      columns:
+      - email
+      - first_name
+      - investment_experience
+      - last_name
+      - id
+      - investment_goals
+      - investment_horizon
+      - risk_level
+      - gender
+      - user_id
+      - created_at
+      filter:
+        user_id:
+          _eq: X-Hasura-User-Id
+  update_permissions:
+  - role: user
+    permission:
+      columns:
+      - first_name
+      - gender
+      - investment_experience
+      - investment_goals
+      - investment_horizon
+      - last_name
+      - risk_level
+      filter:
+        user_id:
+          _eq: X-Hasura-User-Id
+      check:
+        user_id:
+          _eq: X-Hasura-User-Id
 - table:
     schema: tap_eodhistoricaldata
     name: fundamentals
