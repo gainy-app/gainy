@@ -93,7 +93,6 @@
       - investment_horizon
       - last_name
       - risk_level
-      - user_id
       backend_only: false
   select_permissions:
   - role: user
