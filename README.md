@@ -10,7 +10,9 @@ make update-quick # sometimes first run fails - to be investigated
 ```
 
 ### Running
+- check [http://localhost:8081/](http://localhost:8081/) for Firebase Auth demo page 
 - check [http://localhost:8080/](http://localhost:8080/) for Hasura GraphQL console 
+- run `make hasura-console` and check [http://localhost:9695/](http://localhost:9695/) for Hasura development console 
 - check [http://localhost:5000/](http://localhost:5000/) for Meltano ETL console 
 
 ## Key parts of the app

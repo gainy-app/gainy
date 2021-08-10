@@ -22,8 +22,10 @@ services:
       context: ./src/hasura
     ports:
     - "${HASURA_PORT}:${HASURA_PORT}"
+    - "9693:9693"
+    - "9695:9695"
     volumes:
-      - ./src/hasura/hasura:/hasura
+      - ./src/hasura/hasura:/hasura:delegated
     depends_on:
     - "postgres"
     restart: always
@@ -31,5 +33,18 @@ services:
       - .env
     environment:
       PORT: ${HASURA_PORT}
+  firebase:
+    build:
+      context: ./src/firebase
+      dockerfile: hosting.Dockerfile
+    restart: always
+    volumes:
+      - ./src/firebase:/var/www:delegated
+    ports:
+      - "8081:5000" # for auth demo hosting
+    env_file:
+      - .env
+    environment:
+      GOOGLE_APPLICATION_CREDENTIALS: "/var/www/firebase.key.json"
 volumes:
   db_data:
