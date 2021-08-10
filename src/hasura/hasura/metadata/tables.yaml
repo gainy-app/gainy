@@ -24,6 +24,17 @@
       filter: {}
 - table:
     schema: app
+    name: collections
+  select_permissions:
+  - role: user
+    permission:
+      columns:
+      - id
+      - name
+      - image_url
+      filter: {}
+- table:
+    schema: app
     name: interests
   array_relationships:
   - name: profile_interests
