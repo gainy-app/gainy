@@ -27,7 +27,10 @@ tf-init:
 	cd terraform && terraform init
 
 tf-plan:
-	cd terraform && source .env && terraform plan
+	cd terraform && source .env && terraform plan $(PARAMS)
+
+tf-apply:
+	cd terraform && source .env && terraform apply -auto-approve $(PARAMS)
 
 hasura-console:
 	docker-compose exec -T hasura hasura console --address 0.0.0.0
