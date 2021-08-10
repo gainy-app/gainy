@@ -114,5 +114,5 @@ module "firebase" {
 }
 
 module "aws" {
-  source                 = "./aws"
+  source = "./aws"
 }
