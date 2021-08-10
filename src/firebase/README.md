@@ -23,7 +23,7 @@ TODO:
 ## Our (preliminary) security model:
     - all users authenticate to the mobile app with their existing Google account ("Sign-in with Google")
     - all users assume the same restricted (read-only) role in Hasura
-    - anonymous access is not permitted
+    - anonymous access is permitted with the "anonymous" role
     - regular users authenticate with a JWT Bearer token
     - admin access is granted by checking `X-Hasura-Admin-Secret` in the HTTPS headers, which overrides and disables JWT auth
     - transport security (`https://`) is required, we need a valid SSL certificate the the domain hosting Hasura
