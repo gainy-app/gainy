@@ -1,6 +1,6 @@
 variable "eodhistoricaldata_api_token" {}
 output "aws_apigatewayv2_api_endpoint" {
-  value = aws_apigatewayv2_api.lambda.api_endpoint
+  value = "${aws_apigatewayv2_api.lambda.api_endpoint}/${aws_apigatewayv2_stage.lambda.name}"
 }
 
 resource "aws_s3_bucket" "collections" {
