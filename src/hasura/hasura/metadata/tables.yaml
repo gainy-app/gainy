@@ -24,6 +24,17 @@
       filter: {}
 - table:
     schema: app
+    name: collections
+  select_permissions:
+  - role: user
+    permission:
+      columns:
+      - id
+      - name
+      - image_url
+      filter: {}
+- table:
+    schema: app
     name: interests
   array_relationships:
   - name: profile_interests
@@ -85,6 +96,7 @@
         user_id:
           _eq: X-Hasura-User-Id
       columns:
+      - avatar_url
       - email
       - first_name
       - gender
@@ -98,17 +110,18 @@
   - role: user
     permission:
       columns:
+      - avatar_url
+      - created_at
       - email
       - first_name
-      - investment_experience
-      - last_name
+      - gender
       - id
+      - investment_experience
       - investment_goals
       - investment_horizon
+      - last_name
       - risk_level
-      - gender
       - user_id
-      - created_at
       filter:
         user_id:
           _eq: X-Hasura-User-Id
@@ -116,6 +129,7 @@
   - role: user
     permission:
       columns:
+      - avatar_url
       - first_name
       - gender
       - investment_experience
