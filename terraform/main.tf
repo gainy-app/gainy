@@ -112,3 +112,7 @@ module "firebase" {
   google_user            = var.google_user
   google_organization_id = var.google_organization_id
 }
+
+module "aws" {
+  source = "./aws"
+}
