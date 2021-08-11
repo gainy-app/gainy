@@ -114,5 +114,6 @@ module "firebase" {
 }
 
 module "aws" {
-  source = "./aws"
+  source                      = "./aws"
+  eodhistoricaldata_api_token = var.eodhistoricaldata_api_token
 }

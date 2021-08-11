@@ -1,6 +1,11 @@
-actions: []
+actions:
+- name: fetchChartData
+  definition:
+    kind: ""
+    handler: https://sola1vkku5.execute-api.us-east-1.amazonaws.com/serverless_lambda_stage/fetchChartData
 custom_types:
   enums: []
   input_objects: []
-  objects: []
+  objects:
+  - name: ChartDataPoint
   scalars: []
