@@ -75,6 +75,7 @@ module "heroku-gainy-managed" {
     ## https://devcenter.heroku.com/articles/heroku-postgres-plans#hobby-tier
     HASURA_GRAPHQL_PG_CONNECTIONS    = 15
     HASURA_GRAPHQL_UNAUTHORIZED_ROLE = "anonymous"
+    AWS_LAMBDA_API_GATEWAY_ENDPOINT  = module.aws.aws_apigatewayv2_api_endpoint
   }
 }
 
