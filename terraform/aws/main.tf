@@ -1,4 +1,6 @@
+variable "env" {}
 variable "eodhistoricaldata_api_token" {}
+
 output "aws_apigatewayv2_api_endpoint" {
   value = "${aws_apigatewayv2_api.lambda.api_endpoint}/${aws_apigatewayv2_stage.lambda.name}"
 }
@@ -27,7 +29,7 @@ resource "aws_apigatewayv2_api" "lambda" {
 resource "aws_apigatewayv2_stage" "lambda" {
   api_id = aws_apigatewayv2_api.lambda.id
 
-  name        = "serverless_lambda_stage"
+  name        = "serverless_lambda_stage_${var.env}"
   auto_deploy = true
 
   access_log_settings {
@@ -51,6 +53,7 @@ resource "aws_apigatewayv2_stage" "lambda" {
 
 module "lambda-fetchChartData" {
   source = "./lambda"
+  env=var.env
   function_name = "fetchChartData"
   route = "POST /fetchChartData"
   aws_apigatewayv2_api_lambda_id = aws_apigatewayv2_api.lambda.id

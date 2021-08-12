@@ -10,6 +10,10 @@ variable "eodhistoricaldata_api_token" {
 
 provider "aws" {}
 
+output "aws_apigatewayv2_api_endpoint" {
+  value = module.aws.aws_apigatewayv2_api_endpoint
+}
+
 variable "google_project_id" {
   default = "gainyapp"
 }
@@ -117,4 +121,5 @@ module "firebase" {
 module "aws" {
   source                      = "./aws"
   eodhistoricaldata_api_token = var.eodhistoricaldata_api_token
+  env                         = "dev"
 }

@@ -1,3 +1,4 @@
+variable "env" {}
 variable "function_name" {}
 variable "route" {}
 variable "aws_apigatewayv2_api_lambda_id" {}
@@ -52,7 +53,7 @@ resource "aws_iam_role_policy_attachment" "lambda_policy" {
 }
 
 resource "aws_lambda_function" "lambda" {
-  function_name = var.function_name
+  function_name = "${var.function_name}_${var.env}"
 
   s3_bucket = aws_s3_bucket.build.id
   s3_key    = aws_s3_bucket_object.object.id
@@ -77,7 +78,7 @@ resource "aws_apigatewayv2_integration" "lambda" {
   integration_method = "POST"
 }
 
-resource "aws_apigatewayv2_route" "hello_world" {
+resource "aws_apigatewayv2_route" "route" {
   api_id = var.aws_apigatewayv2_api_lambda_id
 
   route_key = var.route
