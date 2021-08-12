@@ -1,3 +1,3 @@
-const {fetchChartData} = require("./functions/fetchChartData");
+const { fetchChartData } = require('./functions/fetchChartData');
 
 exports.fetchChartData = fetchChartData;

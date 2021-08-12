@@ -38,5 +38,11 @@ hasura-console:
 hasura:
 	docker-compose exec -T hasura hasura $(PARAMS)
 
+eslint:
+	npx eslint src/aws/lambda
+
+eslint-fix:
+	npx eslint src/aws/lambda --fix
+
 %:
 	@:
