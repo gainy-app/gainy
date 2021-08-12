@@ -55,6 +55,7 @@ jobs:
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
           TF_VAR_eodhistoricaldata_api_token: ${{ secrets.TF_VAR_EODHISTORICALDATA_API_TOKEN }}
+          TF_VAR_gnews_api_token: ${{ secrets.TF_VAR_GNEWS_API_TOKEN }}
           TF_VAR_google_credentials: ${{ secrets.GOOGLE_CREDENTIALS }}
           TF_VAR_google_user: ${{ secrets.GOOGLE_USER }}
           TF_VAR_google_project_id: ${{ secrets.GOOGLE_PROJECT_ID }}
@@ -99,6 +100,7 @@ jobs:
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
           TF_VAR_eodhistoricaldata_api_token: ${{ secrets.TF_VAR_EODHISTORICALDATA_API_TOKEN }}
+          TF_VAR_gnews_api_token: ${{ secrets.TF_VAR_GNEWS_API_TOKEN }}
           TF_VAR_google_credentials: ${{ secrets.GOOGLE_CREDENTIALS }}
           TF_VAR_google_user: ${{ secrets.GOOGLE_USER }}
           TF_VAR_google_project_id: ${{ secrets.GOOGLE_PROJECT_ID }}

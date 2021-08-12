@@ -5,6 +5,13 @@ type Query {
   ): [ChartDataPoint]
 }
 
+type Query {
+  fetchNewsData (
+    symbol: String!
+    limit: Int
+  ): [NewsDataPoint]
+}
+
 type ChartDataPoint {
   datetime : String
   open : Float
@@ -12,5 +19,15 @@ type ChartDataPoint {
   low : Float
   close : Float
   volume : Float
+}
+
+type NewsDataPoint {
+  datetime : String
+  title : String
+  description : String
+  url : String
+  imageUrl : String
+  sourceName : String
+  sourceUrl : String
 }
 

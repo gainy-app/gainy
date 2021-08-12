@@ -1,36 +1,7 @@
-const axios = require('axios');
-const NodeCache = require('node-cache');
 const moment = require('moment');
 const { successfulResponse, badRequestResponse } = require('../response');
-
-const token = process.env.eodhistoricaldata_api_token;
-
-const cache = new NodeCache({ stdTTL: 100, checkperiod: 120 });
-
-const eodFetch = async (urlParts, queryParams, cacheTTL) => {
-  const params = new URLSearchParams({
-    api_token: token,
-    fmt: 'json',
-    ...queryParams,
-  });
-  const urlPart = urlParts.map((x) => encodeURIComponent(x)).join('/');
-  const url = `https://eodhistoricaldata.com/api/${urlPart}?${params.toString()}`;
-  const cacheKey = `EOD_${url}`;
-
-  if (cacheTTL && cache.has(cacheKey)) {
-    const data = cache.get(cacheKey);
-    if (data) {
-      return data;
-    }
-  }
-
-  const res = await axios.get(url);
-  const { data } = res;
-
-  cache.set(cacheKey, data, cacheTTL);
-
-  return data;
-};
+const {eodFetch} = require("../dataSources");
+const {getInput} = require("../request");
 
 const intradayData = async (symbol) => successfulResponse(
   (await eodFetch(['intraday', symbol], {
@@ -47,14 +18,11 @@ const intradayData = async (symbol) => successfulResponse(
 );
 
 exports.fetchChartData = async (event) => {
-  // TODO some elegant input validation
-  const body = JSON.parse(event.body);
-  if (!body) {
-    return badRequestResponse('empty body');
-  }
-  const { input } = body;
-  if (!input) {
-    return badRequestResponse('input is unset');
+  let input;
+  try {
+    input = getInput(event);
+  }catch (e) {
+    return badRequestResponse(e.message);
   }
 
   const { symbol, period } = input;

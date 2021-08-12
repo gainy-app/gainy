@@ -4,66 +4,26 @@ variable "route" {}
 variable "aws_apigatewayv2_api_lambda_id" {}
 variable "aws_apigatewayv2_api_lambda_name" {}
 variable "aws_apigatewayv2_api_lambda_execution_arn" {}
+variable "aws_s3_bucket" {}
+variable "aws_s3_key" {}
+variable "aws_iam_role_lambda_exec_role" {}
+variable "source_code_hash" {}
 variable "env_vars" {
   default = {}
-}
-
-locals {
-  timestamp = formatdate("YYMMDDhhmmss", timestamp())
-  root_dir = abspath("../src/aws/lambda")
-}
-
-# Compress source code
-data "archive_file" "source" {
-  type        = "zip"
-  source_dir  = local.root_dir
-  output_path = "/tmp/lambda.zip"
-}
-
-resource "aws_s3_bucket" "build" {
-  bucket = "gainy-lambda-builds"
-  acl    = "private"
-}
-
-resource "aws_s3_bucket_object" "object" {
-  bucket = aws_s3_bucket.build.id
-  key   = "source.${data.archive_file.source.output_md5}.zip"
-  source = data.archive_file.source.output_path
-}
-
-resource "aws_iam_role" "lambda_exec" {
-  name = "serverless_lambda"
-
-  assume_role_policy = jsonencode({
-    Version = "2012-10-17"
-    Statement = [{
-      Action = "sts:AssumeRole"
-      Effect = "Allow"
-      Sid    = ""
-      Principal = {
-        Service = "lambda.amazonaws.com"
-      }
-    }]
-  })
-}
-
-resource "aws_iam_role_policy_attachment" "lambda_policy" {
-  role       = "${aws_iam_role.lambda_exec.name}"
-  policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
 }
 
 resource "aws_lambda_function" "lambda" {
   function_name = "${var.function_name}_${var.env}"
 
-  s3_bucket = aws_s3_bucket.build.id
-  s3_key    = aws_s3_bucket_object.object.id
+  s3_bucket = var.aws_s3_bucket
+  s3_key    = var.aws_s3_key
 
   runtime = "nodejs12.x"
   handler       = "index.${var.function_name}"
 
-  source_code_hash = data.archive_file.source.output_base64sha256
+  source_code_hash = var.source_code_hash
 
-  role = aws_iam_role.lambda_exec.arn
+  role = var.aws_iam_role_lambda_exec_role
 
   environment {
     variables = var.env_vars
