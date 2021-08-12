@@ -8,7 +8,7 @@ variable "engine_version" {}
 variable "parameter_group_name" {}
 variable "instance_type" { default = "cache.t3.micro" }
 variable "maintenance_window" { default = "sun:05:00-sun:06:00" }
-variable "attach_vpc_config" { default = false}
+variable "attach_vpc_config" { default = false }
 
 # Create ElastiCache Redis security group
 
@@ -23,10 +23,10 @@ resource "aws_security_group" "redis_sg" {
   }
 
   egress {
-    from_port       = 0
-    to_port         = 0
-    protocol        = "-1"
-    cidr_blocks     = ["0.0.0.0/0"]
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
   }
 }
 
@@ -41,15 +41,15 @@ resource "aws_elasticache_subnet_group" "default" {
 # Create ElastiCache Redis cluster
 
 resource "aws_elasticache_cluster" "redis" {
-  cluster_id           = "${var.cluster_id}"
+  cluster_id           = var.cluster_id
   engine               = "redis"
-  engine_version       = "${var.engine_version}"
-  maintenance_window   = "${var.maintenance_window}"
-  node_type            = "${var.instance_type}"
+  engine_version       = var.engine_version
+  maintenance_window   = var.maintenance_window
+  node_type            = var.instance_type
   num_cache_nodes      = "1"
-  parameter_group_name = "${var.parameter_group_name}"
+  parameter_group_name = var.parameter_group_name
   port                 = "6379"
-  subnet_group_name    = "${aws_elasticache_subnet_group.default.name}"
+  subnet_group_name    = aws_elasticache_subnet_group.default.name
   security_group_ids   = ["${aws_security_group.redis_sg.id}"]
 }
 
@@ -68,8 +68,8 @@ data "aws_iam_policy_document" "assume_role" {
 }
 
 resource "aws_iam_role" "lambda-vpc-role" {
-  name               = "${var.function_name}"
-  assume_role_policy = "${data.aws_iam_policy_document.assume_role.json}"
+  name               = var.function_name
+  assume_role_policy = data.aws_iam_policy_document.assume_role.json
 }
 
 # Attach an additional policy to Lambda function IAM role required for the VPC config
@@ -91,16 +91,16 @@ data "aws_iam_policy_document" "network" {
 }
 
 resource "aws_iam_policy" "network" {
-  count = "${var.attach_vpc_config ? 1 : 0}"
+  count = var.attach_vpc_config ? 1 : 0
 
   name   = "${var.function_name}-network"
-  policy = "${data.aws_iam_policy_document.network.json}"
+  policy = data.aws_iam_policy_document.network.json
 }
 
 resource "aws_iam_policy_attachment" "network" {
-  count = "${var.attach_vpc_config ? 1 : 0}"
+  count = var.attach_vpc_config ? 1 : 0
 
   name       = "${var.function_name}-network"
   roles      = ["${aws_iam_role.lambda-vpc-role.name}"]
-  policy_arn = "${aws_iam_policy.network.arn}"
+  policy_arn = aws_iam_policy.network.arn
 }

@@ -4,7 +4,7 @@ variable "google_project_id" {}
 
 locals {
   timestamp = formatdate("YYMMDDhhmmss", timestamp())
-  root_dir = abspath("../src/firebase/functions/")
+  root_dir  = abspath("../src/firebase/functions/")
 }
 
 # Compress source code

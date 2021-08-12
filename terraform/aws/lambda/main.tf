@@ -19,7 +19,7 @@ resource "aws_lambda_function" "lambda" {
   s3_key    = var.aws_s3_key
 
   runtime = "nodejs12.x"
-  handler       = "index.${var.function_name}"
+  handler = "index.${var.function_name}"
 
   source_code_hash = var.source_code_hash
 

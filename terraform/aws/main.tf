@@ -18,14 +18,14 @@ resource "aws_s3_bucket" "collections" {
 # Compress source code
 locals {
   timestamp = formatdate("YYMMDDhhmmss", timestamp())
-  root_dir = abspath("../src/aws/lambda")
+  root_dir  = abspath("../src/aws/lambda")
 }
 
 data "archive_file" "source" {
   type        = "zip"
   source_dir  = local.root_dir
   output_path = "/tmp/lambda.zip"
-  excludes    = [ "${local.root_dir}/node_modules" ]
+  excludes    = ["${local.root_dir}/node_modules"]
 }
 
 resource "aws_s3_bucket" "build" {
@@ -35,7 +35,7 @@ resource "aws_s3_bucket" "build" {
 
 resource "aws_s3_bucket_object" "object" {
   bucket = aws_s3_bucket.build.id
-  key   = "source.${data.archive_file.source.output_md5}.zip"
+  key    = "source.${data.archive_file.source.output_md5}.zip"
   source = data.archive_file.source.output_path
 }
 
@@ -56,7 +56,7 @@ resource "aws_iam_role" "lambda_exec" {
 }
 
 resource "aws_iam_role_policy_attachment" "lambda_policy" {
-  role       = "${aws_iam_role.lambda_exec.name}"
+  role       = aws_iam_role.lambda_exec.name
   policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
 }
 
@@ -92,40 +92,40 @@ resource "aws_apigatewayv2_stage" "lambda" {
       status                  = "$context.status"
       responseLength          = "$context.responseLength"
       integrationErrorMessage = "$context.integrationErrorMessage"
-    }
+      }
     )
   }
 }
 
 module "lambda-fetchChartData" {
-  source = "./lambda"
-  env=var.env
-  function_name = "fetchChartData"
-  route = "POST /fetchChartData"
-  aws_apigatewayv2_api_lambda_id = aws_apigatewayv2_api.lambda.id
-  aws_apigatewayv2_api_lambda_name = aws_apigatewayv2_api.lambda.name
+  source                                    = "./lambda"
+  env                                       = var.env
+  function_name                             = "fetchChartData"
+  route                                     = "POST /fetchChartData"
+  aws_apigatewayv2_api_lambda_id            = aws_apigatewayv2_api.lambda.id
+  aws_apigatewayv2_api_lambda_name          = aws_apigatewayv2_api.lambda.name
   aws_apigatewayv2_api_lambda_execution_arn = aws_apigatewayv2_api.lambda.execution_arn
-  aws_s3_bucket = aws_s3_bucket.build.id
-  aws_s3_key    = aws_s3_bucket_object.object.id
-  aws_iam_role_lambda_exec_role=aws_iam_role.lambda_exec.arn
-  source_code_hash = data.archive_file.source.output_base64sha256
+  aws_s3_bucket                             = aws_s3_bucket.build.id
+  aws_s3_key                                = aws_s3_bucket_object.object.id
+  aws_iam_role_lambda_exec_role             = aws_iam_role.lambda_exec.arn
+  source_code_hash                          = data.archive_file.source.output_base64sha256
   env_vars = {
     eodhistoricaldata_api_token = var.eodhistoricaldata_api_token
   }
 }
 
 module "lambda-fetchNewsData" {
-  source = "./lambda"
-  env=var.env
-  function_name = "fetchNewsData"
-  route = "POST /fetchNewsData"
-  aws_apigatewayv2_api_lambda_id = aws_apigatewayv2_api.lambda.id
-  aws_apigatewayv2_api_lambda_name = aws_apigatewayv2_api.lambda.name
+  source                                    = "./lambda"
+  env                                       = var.env
+  function_name                             = "fetchNewsData"
+  route                                     = "POST /fetchNewsData"
+  aws_apigatewayv2_api_lambda_id            = aws_apigatewayv2_api.lambda.id
+  aws_apigatewayv2_api_lambda_name          = aws_apigatewayv2_api.lambda.name
   aws_apigatewayv2_api_lambda_execution_arn = aws_apigatewayv2_api.lambda.execution_arn
-  aws_s3_bucket = aws_s3_bucket.build.id
-  aws_s3_key    = aws_s3_bucket_object.object.id
-  aws_iam_role_lambda_exec_role=aws_iam_role.lambda_exec.arn
-  source_code_hash = data.archive_file.source.output_base64sha256
+  aws_s3_bucket                             = aws_s3_bucket.build.id
+  aws_s3_key                                = aws_s3_bucket_object.object.id
+  aws_iam_role_lambda_exec_role             = aws_iam_role.lambda_exec.arn
+  source_code_hash                          = data.archive_file.source.output_base64sha256
   env_vars = {
     gnews_api_token = var.gnews_api_token
   }

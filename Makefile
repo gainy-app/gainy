@@ -21,7 +21,7 @@ update: build update-quick
 update-quick: up install
 
 tf-fmt:
-	cd terraform && terraform fmt
+	cd terraform && terraform fmt -recursive
 
 tf-init:
 	cd terraform && terraform init
