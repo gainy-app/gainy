@@ -10,6 +10,10 @@ variable "eodhistoricaldata_api_token" {
 
 provider "aws" {}
 
+output "aws_apigatewayv2_api_endpoint" {
+  value = module.aws.aws_apigatewayv2_api_endpoint
+}
+
 variable "google_project_id" {
   default = "gainyapp"
 }
@@ -75,6 +79,7 @@ module "heroku-gainy-managed" {
     ## https://devcenter.heroku.com/articles/heroku-postgres-plans#hobby-tier
     HASURA_GRAPHQL_PG_CONNECTIONS    = 15
     HASURA_GRAPHQL_UNAUTHORIZED_ROLE = "anonymous"
+    AWS_LAMBDA_API_GATEWAY_ENDPOINT  = module.aws.aws_apigatewayv2_api_endpoint
   }
 }
 
@@ -114,5 +119,7 @@ module "firebase" {
 }
 
 module "aws" {
-  source = "./aws"
+  source                      = "./aws"
+  eodhistoricaldata_api_token = var.eodhistoricaldata_api_token
+  env                         = "dev"
 }

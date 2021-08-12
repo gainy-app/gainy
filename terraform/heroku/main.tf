@@ -67,5 +67,3 @@ resource "heroku_addon" "addons" {
 output "app_url" {
   value = "https://${heroku_app.app.name}.herokuapp.com"
 }
-
-

@@ -14,6 +14,14 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
 
+      - name: npm install
+        working-directory: src/aws/lambda
+        run: npm install
+
+      - name: ESLint
+        working-directory: src/aws/lambda
+        run: npx eslint .
+
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v1
         with:
