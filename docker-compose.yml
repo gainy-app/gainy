@@ -13,6 +13,7 @@ services:
     restart: always
     volumes:
     - db_data:/var/lib/postgresql/data
+    - ./src/gainy-fetch/seeds:/docker-entrypoint-initdb.d
     environment:
       POSTGRES_PASSWORD: postgrespassword
     ports:
