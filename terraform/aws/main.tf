@@ -14,6 +14,24 @@ resource "aws_s3_bucket" "collections" {
   }
 }
 
+resource "aws_s3_bucket" "categories" {
+  bucket = "gainy-categories"
+  acl    = "private"
+
+  tags = {
+    Name = "Gainy categories"
+  }
+}
+
+resource "aws_s3_bucket" "interests" {
+  bucket = "gainy-interests"
+  acl    = "private"
+
+  tags = {
+    Name = "Gainy interests"
+  }
+}
+
 # gateway
 resource "aws_cloudwatch_log_group" "api_gw" {
   name = "/aws/api_gw/gainy-lambda"
