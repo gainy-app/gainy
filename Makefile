@@ -3,7 +3,9 @@ export PARAMS ?= $(filter-out $@,$(MAKECMDGOALS))
 -include .env
 
 install:
-	docker-compose exec meltano meltano schedule run eodhistoricaldata-to-postgres-0 --transform=run
+    # FIXME: figure out why --transform=run does not run the dbt models locally
+	docker-compose exec meltano meltano schedule run eodhistoricaldata-to-postgres-0 --transform=skip
+	docker-compose exec meltano meltano invoke dbt run
 	docker-compose exec -T hasura hasura migrate apply
 	docker-compose exec -T hasura hasura metadata apply
 
