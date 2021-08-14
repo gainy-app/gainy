@@ -3,9 +3,12 @@ export PARAMS ?= $(filter-out $@,$(MAKECMDGOALS))
 -include .env
 
 install:
-	docker-compose exec meltano meltano schedule run eodhistoricaldata-to-postgres-0 --transform=run
-	docker-compose exec -T hasura hasura migrate apply
-	docker-compose exec -T hasura hasura metadata apply
+	#wait for postgresql to start
+	docker-compose exec meltano bash -c 'while !</dev/tcp/postgres/5432; do sleep 1; done;'
+	sleep 3
+    # FIXME: figure out why --transform=run does not run the dbt models locally
+	docker-compose exec meltano meltano schedule run eodhistoricaldata-to-postgres-0 --transform=skip
+	docker-compose exec meltano meltano invoke dbt run
 
 up:
 	docker-compose up -d
@@ -21,7 +24,7 @@ update: build update-quick
 update-quick: up install
 
 tf-fmt:
-	cd terraform && terraform fmt
+	cd terraform && terraform fmt -recursive
 
 tf-init:
 	cd terraform && terraform init

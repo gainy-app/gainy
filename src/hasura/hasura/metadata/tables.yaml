@@ -24,6 +24,9 @@
       filter: {}
 - table:
     schema: app
+    name: collection_symbols
+- table:
+    schema: app
     name: collections
   select_permissions:
   - role: user
@@ -144,5 +147,113 @@
         user_id:
           _eq: X-Hasura-User-Id
 - table:
-    schema: tap_eodhistoricaldata
+    schema: app
+    name: ticker_financial_periods
+- table:
+    schema: public
+    name: analyst_ratings
+  object_relationships:
+  - name: ticker
+    using:
+      foreign_key_constraint_on: symbol
+- table:
+    schema: public
+    name: earnings_annual
+  object_relationships:
+  - name: ticker
+    using:
+      foreign_key_constraint_on: symbol
+- table:
+    schema: public
+    name: earnings_history
+  object_relationships:
+  - name: ticker
+    using:
+      foreign_key_constraint_on: symbol
+- table:
+    schema: public
+    name: earnings_trend
+  object_relationships:
+  - name: ticker
+    using:
+      foreign_key_constraint_on: symbol
+- table:
+    schema: public
     name: fundamentals
+- table:
+    schema: public
+    name: highlights
+  object_relationships:
+  - name: ticker
+    using:
+      foreign_key_constraint_on: symbol
+- table:
+    schema: public
+    name: technicals
+  object_relationships:
+  - name: ticker
+    using:
+      foreign_key_constraint_on: symbol
+- table:
+    schema: public
+    name: ticker_highlights
+- table:
+    schema: public
+    name: tickers
+  array_relationships:
+  - name: analyst_ratings
+    using:
+      foreign_key_constraint_on:
+        column: symbol
+        table:
+          schema: public
+          name: analyst_ratings
+  - name: earnings_annuals
+    using:
+      foreign_key_constraint_on:
+        column: symbol
+        table:
+          schema: public
+          name: earnings_annual
+  - name: earnings_histories
+    using:
+      foreign_key_constraint_on:
+        column: symbol
+        table:
+          schema: public
+          name: earnings_history
+  - name: earnings_trends
+    using:
+      foreign_key_constraint_on:
+        column: symbol
+        table:
+          schema: public
+          name: earnings_trend
+  - name: highlights
+    using:
+      foreign_key_constraint_on:
+        column: symbol
+        table:
+          schema: public
+          name: highlights
+  - name: technicals
+    using:
+      foreign_key_constraint_on:
+        column: symbol
+        table:
+          schema: public
+          name: technicals
+  - name: valuations
+    using:
+      foreign_key_constraint_on:
+        column: symbol
+        table:
+          schema: public
+          name: valuation
+- table:
+    schema: public
+    name: valuation
+  object_relationships:
+  - name: ticker
+    using:
+      foreign_key_constraint_on: symbol
