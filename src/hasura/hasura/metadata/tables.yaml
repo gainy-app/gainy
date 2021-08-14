@@ -25,9 +25,28 @@
 - table:
     schema: app
     name: collection_symbols
+  object_relationships:
+  - name: collection
+    using:
+      foreign_key_constraint_on: collection_id
 - table:
     schema: app
     name: collections
+  array_relationships:
+  - name: collection_symbols
+    using:
+      foreign_key_constraint_on:
+        column: collection_id
+        table:
+          schema: app
+          name: collection_symbols
+  - name: profile_favorite_collections
+    using:
+      foreign_key_constraint_on:
+        column: collection_id
+        table:
+          schema: app
+          name: profile_favorite_collections
   select_permissions:
   - role: user
     permission:
@@ -66,6 +85,58 @@
       foreign_key_constraint_on: profile_id
 - table:
     schema: app
+    name: profile_favorite_collections
+  object_relationships:
+  - name: collection
+    using:
+      foreign_key_constraint_on: collection_id
+  - name: profile
+    using:
+      foreign_key_constraint_on: profile_id
+  insert_permissions:
+  - role: user
+    permission:
+      check:
+        profile:
+          user_id:
+            _eq: X-Hasura-User-Id
+      columns:
+      - collection_id
+      - profile_id
+      backend_only: false
+  select_permissions:
+  - role: user
+    permission:
+      columns:
+      - collection_id
+      - profile_id
+      filter:
+        profile:
+          user_id:
+            _eq: X-Hasura-User-Id
+      allow_aggregations: true
+  update_permissions:
+  - role: user
+    permission:
+      columns:
+      - collection_id
+      filter:
+        profile:
+          user_id:
+            _eq: X-Hasura-User-Id
+      check:
+        profile:
+          user_id:
+            _eq: X-Hasura-User-Id
+  delete_permissions:
+  - role: user
+    permission:
+      filter:
+        profile:
+          user_id:
+            _eq: X-Hasura-User-Id
+- table:
+    schema: app
     name: profile_interests
   object_relationships:
   - name: interest
@@ -85,6 +156,13 @@
         table:
           schema: app
           name: profile_categories
+  - name: profile_favorite_collections
+    using:
+      foreign_key_constraint_on:
+        column: profile_id
+        table:
+          schema: app
+          name: profile_favorite_collections
   - name: profile_interests
     using:
       foreign_key_constraint_on:
