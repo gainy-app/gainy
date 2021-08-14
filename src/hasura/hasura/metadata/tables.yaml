@@ -51,9 +51,10 @@
   - role: user
     permission:
       columns:
+      - description
       - id
-      - name
       - image_url
+      - name
       filter: {}
 - table:
     schema: app
