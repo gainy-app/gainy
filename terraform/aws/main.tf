@@ -110,7 +110,7 @@ resource "aws_apigatewayv2_stage" "lambda" {
       status                  = "$context.status"
       responseLength          = "$context.responseLength"
       integrationErrorMessage = "$context.integrationErrorMessage"
-    }
+      }
     )
   }
 }
