@@ -75,7 +75,7 @@
       <div class="mdl-cell mdl-cell--8-col mdl-shadow--2dp demo-run-query">
         <h6>Enter query</h6>
         <div class="mdl-textfield mdl-js-textfield">
-          <textarea class="mdl-textfield__input" type="text" rows="8" id="demo-query" >query MyQuery {
+          <textarea class="mdl-textfield__input" type="text" rows="20" id="demo-query" >query MyQuery {
   financial(limit: 10) {
     balance_sheet
     cash_flow
