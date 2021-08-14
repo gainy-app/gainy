@@ -7,6 +7,10 @@ variable "eodhistoricaldata_api_token" {
   type      = string
   sensitive = true
 }
+variable "gnews_api_token" {
+  type      = string
+  sensitive = true
+}
 
 provider "aws" {}
 
@@ -121,5 +125,6 @@ module "firebase" {
 module "aws" {
   source                      = "./aws"
   eodhistoricaldata_api_token = var.eodhistoricaldata_api_token
+  gnews_api_token             = var.gnews_api_token
   env                         = "dev"
 }
