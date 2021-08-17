@@ -19,9 +19,12 @@ build:
 down:
 	docker-compose down
 
+clean:
+	docker-compose down -v
+
 update: build update-quick
 
-update-quick: up install
+update-quick: clean up install
 
 tf-fmt:
 	cd terraform && terraform fmt -recursive
