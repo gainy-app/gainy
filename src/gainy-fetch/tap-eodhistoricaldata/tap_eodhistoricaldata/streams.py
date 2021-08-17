@@ -35,7 +35,7 @@ class Fundamentals(eodhistoricaldataStream):
     ) -> Dict[str, Any]:
         """Return a dictionary of values to be used in URL parameterization."""
         params = super().get_url_params(context, next_page_token)
-        params["filter"] = "General,Earnings,Highlights,AnalystRatings,Technicals,Valuation"
+        params["filter"] = "General,Earnings,Highlights,AnalystRatings,Technicals,Valuation,Financials"
         return params
 
     @property
