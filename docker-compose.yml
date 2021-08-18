@@ -8,6 +8,8 @@ services:
       dockerfile: local.Dockerfile
     ports:
       - "5000:5000"
+    volumes:
+      - ./src/gainy-fetch/meltano/transform:/project/transform:delegated
   postgres:
     image: postgres:12
     restart: always

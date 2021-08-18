@@ -249,6 +249,13 @@
       foreign_key_constraint_on: symbol
 - table:
     schema: public
+    name: cash_flow
+  object_relationships:
+  - name: ticker
+    using:
+      foreign_key_constraint_on: symbol
+- table:
+    schema: public
     name: earnings_annual
   object_relationships:
   - name: ticker
@@ -287,6 +294,13 @@
       foreign_key_constraint_on: symbol
 - table:
     schema: public
+    name: ticker_financials
+  object_relationships:
+  - name: ticker
+    using:
+      foreign_key_constraint_on: symbol
+- table:
+    schema: public
     name: ticker_highlights
 - table:
     schema: public
@@ -299,6 +313,13 @@
         table:
           schema: public
           name: analyst_ratings
+  - name: cash_flows
+    using:
+      foreign_key_constraint_on:
+        column: symbol
+        table:
+          schema: public
+          name: cash_flow
   - name: earnings_annuals
     using:
       foreign_key_constraint_on:
@@ -334,6 +355,13 @@
         table:
           schema: public
           name: technicals
+  - name: ticker_financials
+    using:
+      foreign_key_constraint_on:
+        column: symbol
+        table:
+          schema: public
+          name: ticker_financials
   - name: valuations
     using:
       foreign_key_constraint_on:
