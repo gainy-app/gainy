@@ -14,12 +14,12 @@ select h.symbol,
        pe_ratio,
        market_capitalization,
        highlight,
-       random()                                                                    as price_change_today, /* TODO implement */
-       1000 * random()                                                             as current_price, /* TODO implement */
+       random()::real                                                                      as price_change_today, /* TODO implement */
+       1000 * random()::real                                                               as current_price, /* TODO implement */
        CASE
            WHEN cf1.dividends_paid = 0 THEN NULL
-           ELSE (cf0.dividends_paid - cf1.dividends_paid) / cf1.dividends_paid END as divident_growth,
-       now()                                                                       as created_at
+           ELSE ((cf0.dividends_paid - cf1.dividends_paid) / cf1.dividends_paid)::real END as divident_growth,
+       now()                                                                               as created_at
 from {{ ref('highlights') }} h
          LEFT JOIN {{ ref ('ticker_highlights') }} th
 on h.symbol = th.symbol
