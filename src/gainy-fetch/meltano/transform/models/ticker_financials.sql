@@ -15,7 +15,7 @@ select h.symbol,
        market_capitalization,
        highlight,
        random()::real                                                                      as price_change_today, /* TODO implement */
-       1000 * random()::real                                                               as current_price, /* TODO implement */
+       (1000 * random())::real                                                             as current_price, /* TODO implement */
        CASE
            WHEN cf1.dividends_paid = 0 THEN NULL
            ELSE ((cf0.dividends_paid - cf1.dividends_paid) / cf1.dividends_paid)::real END as divident_growth,
