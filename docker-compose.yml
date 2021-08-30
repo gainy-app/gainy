@@ -5,11 +5,13 @@ services:
       - .env
     build:
       context: ./src/gainy-fetch
-      dockerfile: local.Dockerfile
+      target: local
     ports:
       - "5000:5000"
     volumes:
       - ./src/gainy-fetch/meltano/transform:/project/transform:delegated
+      - ./src/gainy-fetch/meltano/meltano.local.yml:/project/meltano.yml:delegated
+      - ./src/gainy-fetch/tap-eodhistoricaldata:/tap-eodhistoricaldata:delegated
   postgres:
     image: postgres:12
     restart: always

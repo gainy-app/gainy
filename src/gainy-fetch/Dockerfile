@@ -1,4 +1,4 @@
-FROM meltano/meltano:v1.78.0
+FROM meltano/meltano:v1.79.1 AS production
 
 ENV PORT=5000
 
@@ -13,3 +13,7 @@ EXPOSE $PORT
 
 COPY docker-entrypoint.sh /docker-entrypoint.sh
 ENTRYPOINT ["/docker-entrypoint.sh"]
+
+
+FROM production AS local
+COPY meltano/meltano.local.yml /project/meltano.yml

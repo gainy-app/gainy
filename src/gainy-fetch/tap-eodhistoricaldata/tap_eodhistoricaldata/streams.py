@@ -59,7 +59,10 @@ class Fundamentals(eodhistoricaldataStream):
 
     def post_process(self, row: dict, context: Optional[dict] = None) -> dict:
         row['Code'] = context['Code']
-        row['UpdatedAt'] = row['General']['UpdatedAt']
+        if 'UpdatedAt' in row['General']:
+            row['UpdatedAt'] = row['General']['UpdatedAt']
+        else:
+            row['UpdatedAt'] = {}
 
         def replace_na(row):
             for k, v in row.items():
