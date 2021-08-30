@@ -7,8 +7,7 @@ install:
 	docker-compose exec meltano bash -c 'while !</dev/tcp/postgres/5432; do sleep 1; done;'
 	sleep 3
     # FIXME: figure out why --transform=run does not run the dbt models locally
-	docker-compose exec meltano meltano schedule run eodhistoricaldata-to-postgres-0 --transform=skip
-	docker-compose exec meltano meltano invoke dbt run
+	docker-compose exec meltano meltano schedule run eodhistoricaldata-to-postgres
 
 up:
 	docker-compose up -d

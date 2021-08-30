@@ -19,7 +19,7 @@ After this you can visit http://localhost:5000 to see meltano console
 To trigger scheduled ETL pipeline via console open separate terminal window and execute
 
 ```bash
-docker-compose exec meltano meltano schedule run eodhistoricaldata-to-postgres-0 --transform=run
+docker-compose exec meltano meltano schedule run eodhistoricaldata-to-postgres
 ```
 
 To connect to local postgresql database
@@ -35,6 +35,5 @@ cd ../..
 export `heroku config -a gainy-fetch-dev -s`
 export HASURA_PORT=5000
 docker-compose up meltano -d 
-docker-compose exec meltano meltano schedule run eodhistoricaldata-to-postgres-0 # to run stage 0 of load and transform
-docker-compose exec meltano meltano invoke dbt run # to run transformation
+docker-compose exec meltano meltano schedule run eodhistoricaldata-to-postgres # to run stage 0 of load
 ```
