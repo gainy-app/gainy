@@ -27,3 +27,14 @@ To connect to local postgresql database
 ```
 psql -h localhost -U postgres # and enter postgrespassword
 ```
+
+# Running against production (assuming you have access to heroku)
+
+```bash
+cd ../..
+export `heroku config -a gainy-fetch-dev -s`
+export HASURA_PORT=5000
+docker-compose up meltano -d 
+docker-compose exec meltano meltano schedule run eodhistoricaldata-to-postgres-0 # to run stage 0 of load and transform
+docker-compose exec meltano meltano invoke dbt run # to run transformation
+```
