@@ -76,3 +76,5 @@ develop your own taps and targets.
 TODO: describe native way of creating and updating schemas
 
 [https://www.liquid-technologies.com/online-json-to-schema-converter](https://www.liquid-technologies.com/online-json-to-schema-converter)
+
+WARNING: This tool relies on data in provided JSON to generate data types. If the sample json dataset does not cover all use cases it may result in json validation errors for valid json responses. Always manually verify schemas after using this tool.

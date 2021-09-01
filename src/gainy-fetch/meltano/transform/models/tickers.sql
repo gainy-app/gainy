@@ -10,6 +10,7 @@
 }}
 
 select (general->>'Code')::text as symbol,
+       (general->>'Type')::text as type,
        (general->>'Name')::text as name,
        (general->'Description')::text as description,
        (general->>'Phone')::text as phone,

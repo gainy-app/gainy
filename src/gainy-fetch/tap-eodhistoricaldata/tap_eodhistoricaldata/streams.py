@@ -51,12 +51,33 @@ class AbstractEODStream(eodhistoricaldataStream):
 
         return replace_na(row)
 
+    def _write_record_message(self, record: dict) -> None:
+        """Write out a RECORD message."""
+        record = conform_record_data_types(
+            stream_name=self.name,
+            row=record,
+            schema=self.schema,
+            logger=self.logger,
+        )
+        for stream_map in self.stream_maps:
+            mapped_record = stream_map.transform(record)
+            # Emit record if not filtered
+            if mapped_record is not None:
+                record_message = RecordMessage(
+                    stream=stream_map.stream_alias,
+                    record=mapped_record,
+                    version=None,
+                    time_extracted=utc_now(),
+                )
+                singer.write_message(record_message)
+
     def get_records(self, context: Optional[dict]) -> Iterable[Dict[str, Any]]:
         try:
             # Cannot return super().get_records(context) because for some reason error catching does not work.
-            for row in self.request_records(context):
-                row = self.post_process(row, context)
-                yield row
+#             for row in self.request_records(context):
+#                 row = self.post_process(row, context)
+#                 yield row
+            yield from super().get_records(context)
         except Exception as e:
             self.logger.error('Error while requesting %s for symbol %s: %s' % (self.name, context['Code'], str(e)))
             pass
@@ -67,14 +88,12 @@ class Fundamentals(AbstractEODStream):
     primary_keys = ["Code"]
     selected_by_default = True
 
-    STATE_MSG_FREQUENCY = 10
+    STATE_MSG_FREQUENCY = 100
 
     replication_key = 'UpdatedAt'
     schema_filepath = SCHEMAS_DIR / "fundamentals.json"
 
-    def get_url_params(
-            self, context: Optional[dict], next_page_token: Optional[Any]
-    ) -> Dict[str, Any]:
+    def get_url_params(self, context: Optional[dict], next_page_token: Optional[Any]) -> Dict[str, Any]:
         """Return a dictionary of values to be used in URL parameterization."""
         params = super().get_url_params(context, next_page_token)
         params["filter"] = "General,Earnings,Highlights,AnalystRatings,Technicals,Valuation,Financials"
@@ -94,18 +113,24 @@ class HistoricalDividends(AbstractEODStream):
     primary_keys = ["Code", "date"]
     selected_by_default = True
 
-    STATE_MSG_FREQUENCY = 10
+    STATE_MSG_FREQUENCY = 1000
 
     replication_key = 'date'
     schema_filepath = SCHEMAS_DIR / "dividends.json"
 
 class HistoricalPrices(AbstractEODStream):
     name = "historical_prices"
-    path = "/eod/{Code}?fmt=json&period=d&from=%s" % ((datetime.datetime.now() - datetime.timedelta(days=14*30)).strftime('%Y-%m-%d'))
+    path = "/eod/{Code}?fmt=json&period=d"
     primary_keys = ["Code", "date"]
     selected_by_default = True
 
-    STATE_MSG_FREQUENCY = 10
+    STATE_MSG_FREQUENCY = 1000
 
     replication_key = 'date'
     schema_filepath = SCHEMAS_DIR / "eod.json"
+
+    def get_url_params(self, context: Optional[dict], next_page_token: Optional[Any]) -> Dict[str, Any]:
+        params = super().get_url_params(context, next_page_token)
+        # 3 years needed for momentum calculation
+        params["from"] = (datetime.datetime.now() - datetime.timedelta(days=37*30)).strftime('%Y-%m-%d')
+        return params
