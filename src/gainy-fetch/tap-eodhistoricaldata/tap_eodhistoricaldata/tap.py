@@ -6,14 +6,16 @@ from singer_sdk import Tap, Stream
 from singer_sdk import typing as th  # JSON schema typing helpers
 
 from tap_eodhistoricaldata.streams import (
-    eodhistoricaldataStream,
     Fundamentals,
+    HistoricalDividends,
+    HistoricalPrices
 )
 
 STREAM_TYPES = [
-    Fundamentals
+    Fundamentals,
+    HistoricalDividends,
+    HistoricalPrices
 ]
-
 
 class Tapeodhistoricaldata(Tap):
     """eodhistoricaldata tap class."""
@@ -26,6 +28,6 @@ class Tapeodhistoricaldata(Tap):
         th.Property("api_url", th.StringType, default="https://eodhistoricaldata.com/api/"),
     ).to_dict()
 
-    def discover_streams(self) -> List[Stream]:
+    def discover_streams(self):
         """Return a list of discovered streams."""
         return [stream_class(tap=self) for stream_class in STREAM_TYPES]

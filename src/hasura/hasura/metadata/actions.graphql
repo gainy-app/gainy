@@ -6,6 +6,12 @@ type Query {
 }
 
 type Query {
+  fetchLivePrices (
+    symbols: [String]
+  ): [LiveStockPriceData]
+}
+
+type Query {
   fetchNewsData (
     symbol: String!
     limit: Int
@@ -29,5 +35,20 @@ type NewsDataPoint {
   imageUrl : String
   sourceName : String
   sourceUrl : String
+}
+
+type LivePriceData {
+  datetime : String
+  daily_change : Float
+  daily_change_p : Float
+  close : Float
+}
+
+type LiveStockPriceData {
+  symbol : String
+  datetime : String
+  daily_change : Float
+  daily_change_p : Float
+  close : Float
 }
 

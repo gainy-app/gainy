@@ -3,6 +3,10 @@ actions:
   definition:
     kind: ""
     handler: '{{AWS_LAMBDA_API_GATEWAY_ENDPOINT}}/fetchChartData'
+- name: fetchLivePrices
+  definition:
+    kind: ""
+    handler: '{{AWS_LAMBDA_API_GATEWAY_ENDPOINT}}/fetchLivePrices'
 - name: fetchNewsData
   definition:
     kind: ""
@@ -13,4 +17,6 @@ custom_types:
   objects:
   - name: ChartDataPoint
   - name: NewsDataPoint
+  - name: LivePriceData
+  - name: LiveStockPriceData
   scalars: []
