@@ -1,10 +1,10 @@
 const moment = require('moment');
+const NodeCache = require("node-cache");
 const { successfulResponse, badRequestResponse } = require('../response');
 const {eodFetch} = require("../dataSources");
 const {getInput} = require("../request");
-const NodeCache = require("node-cache");
 
-let cacheTTL = 5 * 60;
+const cacheTTL = 5 * 60;
 const cache = new NodeCache({ stdTTL: cacheTTL, checkperiod: 120 });
 
 exports.fetchLivePrices = async (event) => {
@@ -46,7 +46,7 @@ exports.fetchLivePrices = async (event) => {
   }
 
   const fetchedEntries = fetchedData.map((row, index) => {
-    const {change, change_p, close, code, gmtoffset, high, low, open, previousClose, timestamp} = row;
+    const {change, close, timestamp} = row; // Other fields: code, gmtoffset, high, low, open, previousClose
     const datetime = moment(timestamp * 1000).format();
     return [
       fetchedSymbols[index],
@@ -54,7 +54,7 @@ exports.fetchLivePrices = async (event) => {
         symbol: fetchedSymbols[index],
         datetime,
         daily_change : change,
-        daily_change_p : change_p,
+        daily_change_p : row.change_p,
         close
       }
     ];
