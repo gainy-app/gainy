@@ -79,5 +79,5 @@ exports.fetchLivePrices = async (event) => {
     ...Object.fromEntries(fetchedEntries),
   };
 
-  return successfulResponse(symbols.map(symbol => result[symbol]));
+  return successfulResponse(symbols.map((symbol) => result[symbol]));
 };

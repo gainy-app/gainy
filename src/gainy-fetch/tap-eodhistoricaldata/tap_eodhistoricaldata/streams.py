@@ -73,10 +73,6 @@ class AbstractEODStream(eodhistoricaldataStream):
 
     def get_records(self, context: Optional[dict]) -> Iterable[Dict[str, Any]]:
         try:
-            # Cannot return super().get_records(context) because for some reason error catching does not work.
-#             for row in self.request_records(context):
-#                 row = self.post_process(row, context)
-#                 yield row
             yield from super().get_records(context)
         except Exception as e:
             self.logger.error('Error while requesting %s for symbol %s: %s' % (self.name, context['Code'], str(e)))
