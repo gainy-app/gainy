@@ -256,6 +256,9 @@
       foreign_key_constraint_on: symbol
 - table:
     schema: public
+    name: dividends
+- table:
+    schema: public
     name: earnings_annual
   object_relationships:
   - name: ticker
@@ -287,6 +290,9 @@
       foreign_key_constraint_on: symbol
 - table:
     schema: public
+    name: historical_prices
+- table:
+    schema: public
     name: technicals
   object_relationships:
   - name: ticker
@@ -302,6 +308,10 @@
 - table:
     schema: public
     name: ticker_highlights
+  object_relationships:
+  - name: ticker
+    using:
+      foreign_key_constraint_on: symbol
 - table:
     schema: public
     name: tickers
@@ -362,6 +372,13 @@
         table:
           schema: public
           name: ticker_financials
+  - name: ticker_highlights
+    using:
+      foreign_key_constraint_on:
+        column: symbol
+        table:
+          schema: public
+          name: ticker_highlights
   - name: valuations
     using:
       foreign_key_constraint_on:

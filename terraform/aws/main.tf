@@ -148,3 +148,20 @@ module "lambda-fetchNewsData" {
     gnews_api_token = var.gnews_api_token
   }
 }
+
+module "lambda-fetchLivePrices" {
+  source                                    = "./lambda"
+  env                                       = var.env
+  function_name                             = "fetchLivePrices"
+  route                                     = "POST /fetchLivePrices"
+  aws_apigatewayv2_api_lambda_id            = aws_apigatewayv2_api.lambda.id
+  aws_apigatewayv2_api_lambda_name          = aws_apigatewayv2_api.lambda.name
+  aws_apigatewayv2_api_lambda_execution_arn = aws_apigatewayv2_api.lambda.execution_arn
+  aws_s3_bucket                             = aws_s3_bucket.build.id
+  aws_s3_key                                = aws_s3_bucket_object.object.id
+  aws_iam_role_lambda_exec_role             = aws_iam_role.lambda_exec.arn
+  source_code_hash                          = data.archive_file.source.output_base64sha256
+  env_vars = {
+    eodhistoricaldata_api_token = var.eodhistoricaldata_api_token
+  }
+}

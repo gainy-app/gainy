@@ -60,7 +60,19 @@ You can also test the `tap-eodhistoricaldata` CLI interface directly using `poet
 poetry run tap-eodhistoricaldata --help
 ```
 
+### Install updated tap
+
+```bash
+meltano install extractor tap-eodhistoricaldata
+```
+
 ### SDK Dev Guide
 
 See the [dev guide](https://gitlab.com/meltano/singer-sdk/-/blob/main/docs/dev_guide.md) for more instructions on how to use the SDK to 
 develop your own taps and targets.
+
+### Generate new schema
+
+TODO: describe native way of creating and updating schemas
+
+[https://www.liquid-technologies.com/online-json-to-schema-converter](https://www.liquid-technologies.com/online-json-to-schema-converter)
