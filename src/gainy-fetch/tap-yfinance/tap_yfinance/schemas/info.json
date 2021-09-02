@@ -1,0 +1,630 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "type": "object",
+  "properties": {
+    "Code": {
+      "type": "string"
+    },
+    "UpdatedAt": {
+      "type": ["string", "null"],
+      "format": "date"
+    },
+    "zip": {
+      "type": "string"
+    },
+    "sector": {
+      "type": "string"
+    },
+    "fullTimeEmployees": {
+      "type": "integer"
+    },
+    "longBusinessSummary": {
+      "type": "string"
+    },
+    "city": {
+      "type": "string"
+    },
+    "phone": {
+      "type": "string"
+    },
+    "state": {
+      "type": "string"
+    },
+    "country": {
+      "type": "string"
+    },
+    "companyOfficers": {
+      "type": "array",
+      "items": {}
+    },
+    "website": {
+      "type": "string"
+    },
+    "maxAge": {
+      "type": "integer"
+    },
+    "address1": {
+      "type": "string"
+    },
+    "address2": {
+      "type": ["string", "null"]
+    },
+    "fax": {
+      "type": ["string", "null"]
+    },
+    "industry": {
+      "type": "string"
+    },
+    "ebitdaMargins": {
+      "type": "number"
+    },
+    "profitMargins": {
+      "type": "number"
+    },
+    "grossMargins": {
+      "type": "number"
+    },
+    "operatingCashflow": {
+      "type": "integer"
+    },
+    "revenueGrowth": {
+      "type": "number"
+    },
+    "operatingMargins": {
+      "type": "number"
+    },
+    "ebitda": {
+      "type": "integer"
+    },
+    "targetLowPrice": {
+      "type": "integer"
+    },
+    "recommendationKey": {
+      "type": "string"
+    },
+    "grossProfits": {
+      "type": "integer"
+    },
+    "freeCashflow": {
+      "type": "integer"
+    },
+    "targetMedianPrice": {
+      "type": "integer"
+    },
+    "currentPrice": {
+      "type": "number"
+    },
+    "earningsGrowth": {
+      "type": "integer"
+    },
+    "currentRatio": {
+      "type": "number"
+    },
+    "returnOnAssets": {
+      "type": "number"
+    },
+    "numberOfAnalystOpinions": {
+      "type": "integer"
+    },
+    "targetMeanPrice": {
+      "type": "number"
+    },
+    "debtToEquity": {
+      "type": "number"
+    },
+    "returnOnEquity": {
+      "type": "number"
+    },
+    "targetHighPrice": {
+      "type": "integer"
+    },
+    "totalCash": {
+      "type": "integer"
+    },
+    "totalDebt": {
+      "type": "integer"
+    },
+    "totalRevenue": {
+      "type": "integer"
+    },
+    "totalCashPerShare": {
+      "type": "number"
+    },
+    "financialCurrency": {
+      "type": "string"
+    },
+    "revenuePerShare": {
+      "type": "number"
+    },
+    "quickRatio": {
+      "type": "number"
+    },
+    "recommendationMean": {
+      "type": "number"
+    },
+    "exchange": {
+      "type": "string"
+    },
+    "shortName": {
+      "type": "string"
+    },
+    "longName": {
+      "type": "string"
+    },
+    "exchangeTimezoneName": {
+      "type": "string"
+    },
+    "exchangeTimezoneShortName": {
+      "type": "string"
+    },
+    "isEsgPopulated": {
+      "type": "boolean"
+    },
+    "gmtOffSetMilliseconds": {
+      "type": "string"
+    },
+    "quoteType": {
+      "type": "string"
+    },
+    "symbol": {
+      "type": "string"
+    },
+    "messageBoardId": {
+      "type": "string"
+    },
+    "market": {
+      "type": "string"
+    },
+    "annualHoldingsTurnover": {
+      "type": ["number", "null"]
+    },
+    "enterpriseToRevenue": {
+      "type": "number"
+    },
+    "beta3Year": {
+      "type": ["number", "null"]
+    },
+    "enterpriseToEbitda": {
+      "type": "number"
+    },
+    "52WeekChange": {
+      "type": "number"
+    },
+    "morningStarRiskRating": {
+      "type": ["number", "null"]
+    },
+    "forwardEps": {
+      "type": "number"
+    },
+    "revenueQuarterlyGrowth": {
+      "type": ["number", "null"]
+    },
+    "sharesOutstanding": {
+      "type": "integer"
+    },
+    "fundInceptionDate": {
+      "type": ["string", "null"],
+      "format": "date"
+    },
+    "annualReportExpenseRatio": {
+      "type": ["number", "null"]
+    },
+    "totalAssets": {
+      "type": ["number", "null"]
+    },
+    "bookValue": {
+      "type": "number"
+    },
+    "sharesShort": {
+      "type": "integer"
+    },
+    "sharesPercentSharesOut": {
+      "type": "number"
+    },
+    "fundFamily": {
+      "type": ["string", "null"]
+    },
+    "lastFiscalYearEnd": {
+      "type": "integer"
+    },
+    "heldPercentInstitutions": {
+      "type": "number"
+    },
+    "netIncomeToCommon": {
+      "type": "integer"
+    },
+    "trailingEps": {
+      "type": "number"
+    },
+    "lastDividendValue": {
+      "type": ["number", "null"]
+    },
+    "SandP52WeekChange": {
+      "type": "number"
+    },
+    "priceToBook": {
+      "type": "number"
+    },
+    "heldPercentInsiders": {
+      "type": "number"
+    },
+    "nextFiscalYearEnd": {
+      "type": "integer"
+    },
+    "yield": {
+      "type": ["number", "null"]
+    },
+    "mostRecentQuarter": {
+      "type": "integer"
+    },
+    "shortRatio": {
+      "type": "number"
+    },
+    "sharesShortPreviousMonthDate": {
+      "type": "integer"
+    },
+    "floatShares": {
+      "type": "integer"
+    },
+    "beta": {
+      "type": "number"
+    },
+    "enterpriseValue": {
+      "type": "integer"
+    },
+    "priceHint": {
+      "type": "integer"
+    },
+    "threeYearAverageReturn": {
+      "type": ["number", "null"]
+    },
+    "lastSplitDate": {
+      "type": ["number", "null"]
+    },
+    "lastSplitFactor": {
+      "type": ["number", "null"]
+    },
+    "legalType": {
+      "type": ["string", "null"]
+    },
+    "lastDividendDate": {
+      "type": ["string", "null"],
+      "format": "date"
+    },
+    "morningStarOverallRating": {
+      "type": ["number", "null"]
+    },
+    "earningsQuarterlyGrowth": {
+      "type": "number"
+    },
+    "priceToSalesTrailing12Months": {
+      "type": "number"
+    },
+    "dateShortInterest": {
+      "type": "integer"
+    },
+    "pegRatio": {
+      "type": "number"
+    },
+    "ytdReturn": {
+      "type": ["number", "null"]
+    },
+    "forwardPE": {
+      "type": "number"
+    },
+    "lastCapGain": {
+      "type": ["number", "null"]
+    },
+    "shortPercentOfFloat": {
+      "type": "number"
+    },
+    "sharesShortPriorMonth": {
+      "type": "integer"
+    },
+    "impliedSharesOutstanding": {
+      "type": ["number", "null"]
+    },
+    "category": {
+      "type": ["string", "null"]
+    },
+    "fiveYearAverageReturn": {
+      "type": ["number", "null"]
+    },
+    "previousClose": {
+      "type": "number"
+    },
+    "regularMarketOpen": {
+      "type": "number"
+    },
+    "twoHundredDayAverage": {
+      "type": "number"
+    },
+    "trailingAnnualDividendYield": {
+      "type": "number"
+    },
+    "payoutRatio": {
+      "type": "number"
+    },
+    "volume24Hr": {
+      "type": ["number", "null"]
+    },
+    "regularMarketDayHigh": {
+      "type": "number"
+    },
+    "navPrice": {
+      "type": ["number", "null"]
+    },
+    "averageDailyVolume10Day": {
+      "type": "integer"
+    },
+    "regularMarketPreviousClose": {
+      "type": "number"
+    },
+    "fiftyDayAverage": {
+      "type": "number"
+    },
+    "trailingAnnualDividendRate": {
+      "type": "number"
+    },
+    "open": {
+      "type": "number"
+    },
+    "toCurrency": {
+      "type": ["string", "null"]
+    },
+    "averageVolume10days": {
+      "type": "integer"
+    },
+    "expireDate": {
+      "type": ["string", "null"],
+      "format": "date"
+    },
+    "algorithm": {
+      "type": ["string", "null"]
+    },
+    "dividendRate": {
+      "type": "number"
+    },
+    "exDividendDate": {
+      "type": "integer"
+    },
+    "circulatingSupply": {
+      "type": ["number", "null"]
+    },
+    "startDate": {
+      "type": ["string", "null"],
+      "format": "date"
+    },
+    "regularMarketDayLow": {
+      "type": "number"
+    },
+    "currency": {
+      "type": "string"
+    },
+    "trailingPE": {
+      "type": "number"
+    },
+    "regularMarketVolume": {
+      "type": "integer"
+    },
+    "lastMarket": {
+      "type": ["string", "null"]
+    },
+    "maxSupply": {
+      "type": ["number", "null"]
+    },
+    "openInterest": {
+      "type": ["number", "null"]
+    },
+    "marketCap": {
+      "type": "integer"
+    },
+    "volumeAllCurrencies": {
+      "type": ["number", "null"]
+    },
+    "strikePrice": {
+      "type": ["number", "null"]
+    },
+    "averageVolume": {
+      "type": "integer"
+    },
+    "dayLow": {
+      "type": "number"
+    },
+    "ask": {
+      "type": "integer"
+    },
+    "askSize": {
+      "type": "integer"
+    },
+    "volume": {
+      "type": "integer"
+    },
+    "fiftyTwoWeekHigh": {
+      "type": "number"
+    },
+    "fromCurrency": {
+      "type": ["string", "null"]
+    },
+    "fiveYearAvgDividendYield": {
+      "type": "number"
+    },
+    "fiftyTwoWeekLow": {
+      "type": "number"
+    },
+    "bid": {
+      "type": "integer"
+    },
+    "tradeable": {
+      "type": "boolean"
+    },
+    "dividendYield": {
+      "type": "number"
+    },
+    "bidSize": {
+      "type": "integer"
+    },
+    "dayHigh": {
+      "type": "number"
+    },
+    "regularMarketPrice": {
+      "type": "number"
+    },
+    "logo_url": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "zip",
+    "sector",
+    "fullTimeEmployees",
+    "longBusinessSummary",
+    "city",
+    "phone",
+    "state",
+    "country",
+    "companyOfficers",
+    "website",
+    "maxAge",
+    "address1",
+    "industry",
+    "ebitdaMargins",
+    "profitMargins",
+    "grossMargins",
+    "operatingCashflow",
+    "revenueGrowth",
+    "operatingMargins",
+    "ebitda",
+    "targetLowPrice",
+    "recommendationKey",
+    "grossProfits",
+    "freeCashflow",
+    "targetMedianPrice",
+    "currentPrice",
+    "earningsGrowth",
+    "currentRatio",
+    "returnOnAssets",
+    "numberOfAnalystOpinions",
+    "targetMeanPrice",
+    "debtToEquity",
+    "returnOnEquity",
+    "targetHighPrice",
+    "totalCash",
+    "totalDebt",
+    "totalRevenue",
+    "totalCashPerShare",
+    "financialCurrency",
+    "revenuePerShare",
+    "quickRatio",
+    "recommendationMean",
+    "exchange",
+    "shortName",
+    "longName",
+    "exchangeTimezoneName",
+    "exchangeTimezoneShortName",
+    "isEsgPopulated",
+    "gmtOffSetMilliseconds",
+    "quoteType",
+    "symbol",
+    "messageBoardId",
+    "market",
+    "annualHoldingsTurnover",
+    "enterpriseToRevenue",
+    "beta3Year",
+    "enterpriseToEbitda",
+    "52WeekChange",
+    "morningStarRiskRating",
+    "forwardEps",
+    "revenueQuarterlyGrowth",
+    "sharesOutstanding",
+    "fundInceptionDate",
+    "annualReportExpenseRatio",
+    "totalAssets",
+    "bookValue",
+    "sharesShort",
+    "sharesPercentSharesOut",
+    "fundFamily",
+    "lastFiscalYearEnd",
+    "heldPercentInstitutions",
+    "netIncomeToCommon",
+    "trailingEps",
+    "lastDividendValue",
+    "SandP52WeekChange",
+    "priceToBook",
+    "heldPercentInsiders",
+    "nextFiscalYearEnd",
+    "yield",
+    "mostRecentQuarter",
+    "shortRatio",
+    "sharesShortPreviousMonthDate",
+    "floatShares",
+    "beta",
+    "enterpriseValue",
+    "priceHint",
+    "threeYearAverageReturn",
+    "lastSplitDate",
+    "lastSplitFactor",
+    "legalType",
+    "lastDividendDate",
+    "morningStarOverallRating",
+    "earningsQuarterlyGrowth",
+    "priceToSalesTrailing12Months",
+    "dateShortInterest",
+    "pegRatio",
+    "ytdReturn",
+    "forwardPE",
+    "lastCapGain",
+    "shortPercentOfFloat",
+    "sharesShortPriorMonth",
+    "impliedSharesOutstanding",
+    "category",
+    "fiveYearAverageReturn",
+    "previousClose",
+    "regularMarketOpen",
+    "twoHundredDayAverage",
+    "trailingAnnualDividendYield",
+    "payoutRatio",
+    "volume24Hr",
+    "regularMarketDayHigh",
+    "navPrice",
+    "averageDailyVolume10Day",
+    "regularMarketPreviousClose",
+    "fiftyDayAverage",
+    "trailingAnnualDividendRate",
+    "open",
+    "toCurrency",
+    "averageVolume10days",
+    "expireDate",
+    "algorithm",
+    "dividendRate",
+    "exDividendDate",
+    "circulatingSupply",
+    "startDate",
+    "regularMarketDayLow",
+    "currency",
+    "trailingPE",
+    "regularMarketVolume",
+    "lastMarket",
+    "maxSupply",
+    "openInterest",
+    "marketCap",
+    "volumeAllCurrencies",
+    "strikePrice",
+    "averageVolume",
+    "dayLow",
+    "ask",
+    "askSize",
+    "volume",
+    "fiftyTwoWeekHigh",
+    "fromCurrency",
+    "fiveYearAvgDividendYield",
+    "fiftyTwoWeekLow",
+    "bid",
+    "tradeable",
+    "dividendYield",
+    "bidSize",
+    "dayHigh",
+    "regularMarketPrice",
+    "logo_url"
+  ]
+}

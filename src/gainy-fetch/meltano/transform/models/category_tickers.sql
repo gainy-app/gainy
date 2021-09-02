@@ -12,7 +12,7 @@
   )
 }}
 
-/* TODO Defensive, Speculation, Momentum, Value, Growth */
+/* TODO Defensive, Speculation */
 (
     select c.id as category_id,
            t.symbol
@@ -67,4 +67,33 @@ UNION
       AND tf.market_capitalization > 500000000
       AND h.dividend_share >= lsmd.avg_value_per_year
       AND lsme.avg_value_per_year / lsmd.avg_value_per_year > 1.67
+)
+UNION
+(
+    select c.id as category_id,
+           t.symbol
+    from {{ ref('tickers') }} t
+             join app.categories c ON c.name = 'Momentum'
+             join {{ ref('technicals') }} ON technicals.symbol = t.symbol
+    WHERE technicals.combined_momentum_score > 0
+)
+UNION
+(
+    select c.id as category_id,
+           t.symbol
+    from {{ ref('tickers') }} t
+             join app.categories c ON c.name = 'Value'
+             join {{ ref('technicals') }} ON technicals.symbol = t.symbol
+    WHERE technicals.value_score > 0
+      AND technicals.growth_score < 0
+)
+UNION
+(
+    select c.id as category_id,
+           t.symbol
+    from {{ ref('tickers') }} t
+             join app.categories c ON c.name = 'Growth'
+             join {{ ref('technicals') }} ON technicals.symbol = t.symbol
+    WHERE technicals.value_score < 0
+      AND technicals.growth_score > 0
 )
