@@ -15,17 +15,23 @@ plugins:
         - name: start_symbol
         - name: symbols
           kind: array
-    - name: tap-yfinance
-      namespace: tap_yfinance
-      pip_url: /tap-yfinance
-      executable: tap-yfinance
-      capabilities:
-        - discover
-        - catalog
-      settings:
-        - name: start_symbol
-        - name: symbols
-          kind: array
+    - name: tap-csv
+      config:
+        files:
+          - entity: raw_ticker_industries
+            file: data/industry_tickers.csv
+            keys: ["Industry Name", "Code"]
+#    - name: tap-yfinance
+#      namespace: tap_yfinance
+#      pip_url: /tap-yfinance
+#      executable: tap-yfinance
+#      capabilities:
+#        - discover
+#        - catalog
+#      settings:
+#        - name: start_symbol
+#        - name: symbols
+#          kind: array
   loaders:
     - name: target-postgres
       variant: transferwise
@@ -43,6 +49,12 @@ plugins:
     - name: dbt
       pip_url: git+https://gitlab.com/meltano/files-dbt.git@config-version-2
 schedules:
+  - name: csv-to-postgres
+    extractor: tap-csv
+    loader: target-postgres
+    transform: run
+    interval: '@daily'
+    start_date: 2021-09-03
   - name: eodhistoricaldata-to-postgres-0
     extractor: tap-eodhistoricaldata
     loader: target-postgres

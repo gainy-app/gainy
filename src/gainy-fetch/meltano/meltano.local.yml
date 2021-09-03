@@ -15,17 +15,23 @@ plugins:
         - name: start_symbol
         - name: symbols
           kind: array
-    - name: tap-yfinance
-      namespace: tap_yfinance
-      pip_url: /tap-yfinance
-      executable: tap-yfinance
-      capabilities:
-        - discover
-        - catalog
-      settings:
-        - name: start_symbol
-        - name: symbols
-          kind: array
+    - name: tap-csv
+      config:
+        files:
+          - entity: raw_ticker_industries
+            file: data/industry_tickers.csv
+            keys: ["Industry Name", "Code"]
+#    - name: tap-yfinance
+#      namespace: tap_yfinance
+#      pip_url: /tap-yfinance
+#      executable: tap-yfinance
+#      capabilities:
+#        - discover
+#        - catalog
+#      settings:
+#        - name: start_symbol
+#        - name: symbols
+#          kind: array
   loaders:
     - name: target-postgres
       variant: transferwise
@@ -49,9 +55,15 @@ schedules:
     transform: run
     interval: '@hourly'
     start_date: 2021-06-17 10:40:58.742133
-  - name: yfinance-to-postgres
-    extractor: tap-yfinance
+#  - name: yfinance-to-postgres
+#    extractor: tap-yfinance
+#    loader: target-postgres
+#    transform: run
+#    interval: '@hourly'
+#    start_date: 2021-06-17 10:40:58.742133
+  - name: csv-to-postgres
+    extractor: tap-csv
     loader: target-postgres
     transform: run
-    interval: '@hourly'
-    start_date: 2021-06-17 10:40:58.742133
+    interval: '@daily'
+    start_date: 2021-09-03

@@ -24,7 +24,7 @@ with latest_yearly_earning_trend as
          ),
      hist_eps_growth as (
          SELECT eh0.symbol,
-                cbrt(eh0.eps_actual / eh1.eps_actual) - 1 as value
+                CASE WHEN ABS(eh1.eps_actual) > 0 THEN cbrt(eh0.eps_actual / eh1.eps_actual) - 1 END as value
          from {{ ref('earnings_history') }} eh0
                   LEFT JOIN {{ ref('earnings_history') }} eh0_next
                             ON eh0_next.symbol = eh0.symbol AND
@@ -43,11 +43,8 @@ with latest_yearly_earning_trend as
      ),
      hist_sales_growth as (
          SELECT fisq0.symbol,
-                fisq0.date::timestamp as date,
-                CASE
-                    WHEN fisq0.total_revenue > 0 AND fisq1.total_revenue > 0
-                        THEN POW(fisq0.total_revenue / fisq1.total_revenue, 1 / 3.0) - 1
-                    ELSE NULL END     as value
+                fisq0.date::timestamp                                                                               as date,
+                CASE WHEN ABS(fisq1.total_revenue) > 0 THEN cbrt(fisq0.total_revenue / fisq1.total_revenue) - 1 END as value
          from {{ ref('financials_income_statement_quarterly') }} fisq0
                   LEFT JOIN {{ ref('financials_income_statement_quarterly') }} fisq0_next
                             ON fisq0_next.symbol = fisq0.symbol AND
@@ -90,8 +87,13 @@ with latest_yearly_earning_trend as
                                                 et.period = et_next.period
                                    join {{ ref('earnings_trend') }} et_next_year
                                         ON et_next_year.symbol = et.symbol AND et_next_year.period = '+1y'
+                                   left join {{ ref('earnings_trend') }} et_next_year_next
+                                             ON et_next_year_next.symbol = et.symbol AND
+                                                et_next_year_next.period = '+1y' AND
+                                                et_next_year_next.date::timestamp > et_next_year.date::timestamp
                                    JOIN eps_actual ON eps_actual.symbol = et.symbol
                           WHERE et_next.symbol IS NULL
+                            AND et_next_year_next.symbol IS NULL
                             AND et.period = '0y'
                       ),
                   cur_month as (SELECT date_part('month', NOW()) as value),
@@ -122,15 +124,17 @@ with latest_yearly_earning_trend as
                     t.gic_sector,
                  /* growth */
                     egrsf.value                                                             as st_fwd_eps,
-                    (h.diluted_eps_ttm / h.book_value) *
-                    (1 - (f.splitsdividends ->> 'PayoutRatio')::float)                      as cur_internal_growth_rate,
+                    CASE
+                        WHEN ABS(h.book_value) > 0
+                            THEN (h.diluted_eps_ttm / h.book_value) *
+                                 (1 - (f.splitsdividends ->> 'PayoutRatio')::float)
+                        END                                                                 as cur_internal_growth_rate,
                     heg.value                                                               as hist_eps_growth,
                     hsg.value                                                               as hist_sales_growth,
                  /* value */
                     h.book_value / hp.close                                                 as bvp,
                     CASE WHEN abs(v.forward_pe::float) > 0 THEN 1 / v.forward_pe::float END as fwd_ep,
                     (f.splitsdividends ->> 'ForwardAnnualDividendYield')::float             as dividend_yield
-
              from fundamentals f
                       JOIN {{ ref('tickers') }} t
                            ON t.symbol = f.code
