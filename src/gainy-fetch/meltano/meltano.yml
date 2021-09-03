@@ -54,7 +54,7 @@ schedules:
     loader: target-postgres
     transform: run
     interval: '@daily'
-    start_date: 2021-09-03
+    start_date: 2021-09-03 13:52:48.598227
   - name: eodhistoricaldata-to-postgres-0
     extractor: tap-eodhistoricaldata
     loader: target-postgres
