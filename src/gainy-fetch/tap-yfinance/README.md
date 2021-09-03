@@ -1,3 +1,5 @@
+# !WARNING! this tap is work in progress and lack tests.
+
 # tap-yfinance
 
 `tap-yfinance` is a Singer tap for [yfinance](https://pypi.org/project/yfinance/).
