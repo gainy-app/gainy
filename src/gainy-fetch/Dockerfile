@@ -7,7 +7,6 @@ WORKDIR /project
 COPY meltano /project
 RUN rm -rf /project/.meltano
 COPY tap-eodhistoricaldata /tap-eodhistoricaldata
-COPY tap-yfinance /tap-yfinance
 RUN meltano install
 
 EXPOSE $PORT

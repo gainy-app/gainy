@@ -13,7 +13,6 @@ services:
       - ./src/gainy-fetch/meltano/data:/project/data:delegated
       - ./src/gainy-fetch/meltano/meltano.local.yml:/project/meltano.yml:delegated
       - ./src/gainy-fetch/tap-eodhistoricaldata:/tap-eodhistoricaldata:delegated
-      - ./src/gainy-fetch/tap-yfinance:/tap-yfinance:delegated
   postgres:
     image: postgres:12
     restart: always
