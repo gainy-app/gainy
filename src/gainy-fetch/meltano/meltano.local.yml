@@ -30,7 +30,7 @@ plugins:
         parallelism: 5
   transformers:
     - name: dbt
-      pip_url: dbt==0.19.1
+      pip_url: dbt==0.20.1
       config:
         target: postgres
         models: '*'

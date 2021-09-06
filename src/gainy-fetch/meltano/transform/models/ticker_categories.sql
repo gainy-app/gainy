@@ -3,9 +3,12 @@
     materialized = "table",
     sort = "created_at",
     dist = ['category_id', 'symbol'],
+    indexes=[
+      { 'columns': ['category_id', 'symbol'], 'unique': true },
+    ],
     post_hook=[
       fk(this, 'symbol', 'tickers', 'symbol'),
-      'ALTER TABLE ticker_categories add constraint ticker_categories_category_fk foreign key (category_id) references app.categories (id)'
+      fk(this, 'category_id', 'categories', 'id')
     ]
   )
 }}
@@ -22,14 +25,15 @@
     select c.id as category_id,
            t.symbol
     from tickers t
-             join app.categories c ON c.name = 'Defensive'
+             join {{ ref('categories') }} c ON c.name = 'Defensive'
              JOIN technicals t2 on t.symbol = t2.symbol
              JOIN downside_deviation_stats on downside_deviation_stats.gic_sector = t.gic_sector
     WHERE t2.beta < 1
       AND t2.downside_deviation < downside_deviation_stats.median
       AND t.gic_sector IN ('Consumer Staples', 'Utilities', 'Health Care', 'Communication Services')
 )
-UNION(
+UNION
+(
     WITH max_eps AS
              (
                  select t.symbol,
@@ -49,7 +53,7 @@ UNION(
     select c.id as category_id,
            t.symbol
     from tickers t
-             join app.categories c ON c.name = 'Speculation'
+             join {{ ref('categories') }} c ON c.name = 'Speculation'
              JOIN technicals t2 on t.symbol = t2.symbol
              JOIN fundamentals f ON f.code = t.symbol
              JOIN max_eps on max_eps.symbol = t.symbol
@@ -64,7 +68,7 @@ UNION
     select c.id as category_id,
            t.symbol
     from {{ ref('tickers') }} t
-             join app.categories c ON c.name = 'ETF'
+             join {{ ref('categories') }} c ON c.name = 'ETF'
     WHERE t.type = 'ETF'
 )
 UNION
@@ -72,7 +76,7 @@ UNION
     select c.id as category_id,
            t.symbol
     from {{ ref('tickers') }} t
-             join app.categories c ON c.name = 'Penny'
+             join {{ ref('categories') }} c ON c.name = 'Penny'
              LEFT JOIN historical_prices hp on t.symbol = hp.code
              LEFT JOIN historical_prices hp_next on t.symbol = hp_next.code AND hp_next.date::timestamp > hp.date::timestamp
     WHERE hp_next.code is null
@@ -104,7 +108,7 @@ UNION
     select c.id     as category_id,
            t.symbol as ticker_symbol
     from tickers t
-             join app.categories c ON c.name = 'Dividend'
+             join {{ ref('categories') }} c ON c.name = 'Dividend'
              join last_five_years_dividends lfyd ON lfyd.code = t.symbol
              join last_sixty_months_dividends lsmd ON lsmd.code = t.symbol
              join last_sixty_months_earnings lsme ON lsme.symbol = t.symbol
@@ -120,7 +124,7 @@ UNION
     select c.id as category_id,
            t.symbol
     from {{ ref('tickers') }} t
-             join app.categories c ON c.name = 'Momentum'
+             join {{ ref('categories') }} c ON c.name = 'Momentum'
              join {{ ref('technicals') }} ON technicals.symbol = t.symbol
     WHERE technicals.combined_momentum_score > 0
 )
@@ -129,7 +133,7 @@ UNION
     select c.id as category_id,
            t.symbol
     from {{ ref('tickers') }} t
-             join app.categories c ON c.name = 'Value'
+             join {{ ref('categories') }} c ON c.name = 'Value'
              join {{ ref('technicals') }} ON technicals.symbol = t.symbol
     WHERE technicals.value_score > 0
       AND technicals.growth_score < 0
@@ -139,7 +143,7 @@ UNION
     select c.id as category_id,
            t.symbol
     from {{ ref('tickers') }} t
-             join app.categories c ON c.name = 'Growth'
+             join {{ ref('categories') }} c ON c.name = 'Growth'
              join {{ ref('technicals') }} ON technicals.symbol = t.symbol
     WHERE technicals.value_score < 0
       AND technicals.growth_score > 0
