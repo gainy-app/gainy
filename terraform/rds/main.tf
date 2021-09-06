@@ -25,11 +25,12 @@ variable "publicly_accessible" {
 module "db" {
   source = "terraform-aws-modules/rds/aws"
 
-  identifier           = "${var.name}-${var.env}"
-  engine               = "postgres"
-  major_engine_version = "12"
-  instance_class       = "db.t3.small"
-  allocated_storage    = 5
+  identifier            = "${var.name}-${var.env}"
+  engine                = "postgres"
+  major_engine_version  = "12"
+  instance_class        = "db.t3.small"
+  allocated_storage     = 20
+  max_allocated_storage = 100
 
   publicly_accessible = var.publicly_accessible
 

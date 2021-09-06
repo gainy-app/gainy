@@ -39,7 +39,7 @@ with settings as
                     hps_close.date,
                     hps.open,
                     hps_close.close,
-                    (hps_close.close - hps.open) / hps.open as return
+                    CASE WHEN hps.open > 0 THEN (hps_close.close - hps.open) / hps.open END as return
              FROM historical_prices_summary hps
                       JOIN historical_prices_max_idx hpmi
                            ON hpmi.code = hps.code AND hpmi.year = hps.year AND hpmi.month = hps.month
@@ -55,6 +55,7 @@ with settings as
                     SQRT(SUM(POW(return, 2)) / COUNT(return)) as value
              FROM returns
              GROUP BY code
+             having COUNT(return) > 0
          )
 select f.code                                          as symbol,
        tmm.combined_momentum_score,
