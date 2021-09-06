@@ -92,7 +92,7 @@ class Fundamentals(AbstractEODStream):
     def get_url_params(self, context: Optional[dict], next_page_token: Optional[Any]) -> Dict[str, Any]:
         """Return a dictionary of values to be used in URL parameterization."""
         params = super().get_url_params(context, next_page_token)
-        params["filter"] = "General,Earnings,Highlights,AnalystRatings,Technicals,Valuation,Financials,SplitsDividends"
+        params["filter"] = "General,Earnings,Highlights,AnalystRatings,Technicals,Valuation,Financials,SplitsDividends,SharesStats"
         return params
 
     def post_process(self, row: dict, context: Optional[dict] = None) -> dict:
@@ -127,6 +127,23 @@ class HistoricalPrices(AbstractEODStream):
 
     def get_url_params(self, context: Optional[dict], next_page_token: Optional[Any]) -> Dict[str, Any]:
         params = super().get_url_params(context, next_page_token)
-        # 3 years needed for momentum calculation
-        params["from"] = (datetime.datetime.now() - datetime.timedelta(days=37*30)).strftime('%Y-%m-%d')
+        # 10 years needed for downside deviation
+        params["from"] = (datetime.datetime.now() - datetime.timedelta(days=10 * 12 * 30)).strftime('%Y-%m-%d')
         return params
+
+class Options(AbstractEODStream):
+    name = "options"
+    path = "/options/{Code}?fmt=json"
+    primary_keys = ["Code", "expirationDate"]
+    selected_by_default = True
+
+    STATE_MSG_FREQUENCY = 1000
+
+    replication_key = 'expirationDate'
+    schema_filepath = SCHEMAS_DIR / "options.json"
+
+    def get_records(self, context: Optional[dict]) -> Iterable[Dict[str, Any]]:
+        for i in super().get_records(context):
+            for j in i['data']:
+                del j['options']
+                yield j

@@ -10,11 +10,60 @@
   )
 }}
 
-/* TODO Defensive, Speculation */
 (
+    WITH downside_deviation_stats AS
+             (
+                 SELECT tickers.gic_sector,
+                        percentile_cont(0.5) WITHIN GROUP (ORDER BY downside_deviation) as median
+                 FROM technicals
+                          JOIN tickers ON tickers.symbol = technicals.symbol
+                 GROUP BY tickers.gic_sector
+             )
     select c.id as category_id,
            t.symbol
     from tickers t
+             join app.categories c ON c.name = 'Defensive'
+             JOIN technicals t2 on t.symbol = t2.symbol
+             JOIN downside_deviation_stats on downside_deviation_stats.gic_sector = t.gic_sector
+    WHERE t2.beta < 1
+      AND t2.downside_deviation < downside_deviation_stats.median
+      AND t.gic_sector IN ('Consumer Staples', 'Utilities', 'Health Care', 'Communication Services')
+)
+UNION(
+    WITH max_eps AS
+             (
+                 select t.symbol,
+                        MAX(eh.eps_actual) as value
+                 from tickers t
+                          JOIN earnings_history eh on t.symbol = eh.symbol
+                 GROUP BY t.symbol
+             ),
+         options_stats as
+             (
+                 SELECT code,
+                        SUM(callvolume) * 100 as call_option_shares_deliverable_outstanding
+                 FROM options
+                 WHERE expirationdate::timestamp > NOW()
+                 GROUP BY code
+             )
+    select c.id as category_id,
+           t.symbol
+    from tickers t
+             join app.categories c ON c.name = 'Speculation'
+             JOIN technicals t2 on t.symbol = t2.symbol
+             JOIN fundamentals f ON f.code = t.symbol
+             JOIN max_eps on max_eps.symbol = t.symbol
+             JOIN options_stats on options_stats.code = t.symbol
+    WHERE t2.beta > 3
+       OR max_eps.value < 0
+       OR max_eps.value IS NULL
+       OR call_option_shares_deliverable_outstanding > (sharesstats ->> 'SharesOutstanding')::bigint
+)
+UNION
+(
+    select c.id as category_id,
+           t.symbol
+    from {{ ref('tickers') }} t
              join app.categories c ON c.name = 'ETF'
     WHERE t.type = 'ETF'
 )
