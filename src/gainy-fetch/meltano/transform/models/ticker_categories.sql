@@ -3,11 +3,9 @@
     materialized = "table",
     sort = "created_at",
     dist = ['category_id', 'symbol'],
-    indexes = [
-      {'columns': ['category_id', 'symbol'], 'unique': True}
-    ],
     post_hook=[
-      fk(this, 'symbol', 'tickers', 'symbol')
+      fk(this, 'symbol', 'tickers', 'symbol'),
+      'ALTER TABLE ticker_categories add constraint ticker_categories_category_fk foreign key (category_id) references app.categories (id)'
     ]
   )
 }}

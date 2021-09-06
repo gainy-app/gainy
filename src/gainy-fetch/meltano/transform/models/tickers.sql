@@ -4,12 +4,10 @@
     sort = "updated_at",
     dist = "symbol",
     post_hook=[
-      index(this, 'symbol', true)
+      index(this, 'symbol', true),
     ]
   )
 }}
-
-/* 'ALTER TABLE IF EXISTS app.collection_symbols add constraint collection_symbols_tickers_symbol_fk foreign key (symbol) references tickers (symbol)' */
 
 select (general->>'Code')::text           as symbol,
        (general->>'Type')::text           as type,
