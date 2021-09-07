@@ -24,12 +24,14 @@ with settings (local_risk_free_rate) as (values (0.001)),
          ),
      stddev_3_years as
          (
-             SELECT wp.code, stddev_pop(wp.close / wp_prev.close - 1) * pow(52, 0.5) as value
+             SELECT wp.code,
+                    stddev_pop(wp.close / CASE WHEN wp_prev.close > 0 THEN wp_prev.close END - 1) * pow(52, 0.5) as value
              from weekly_prices wp
                       JOIN weekly_prices wp_prev
                            ON wp.code = wp_prev.code AND wp_prev.date = wp.date - interval '1 week'
              group by wp.code
-         ),
+             having bool_and(wp_prev.close > 0)
+      ),
      momentum as
          (
              SELECT f.code,
@@ -68,8 +70,8 @@ with settings (local_risk_free_rate) as (values (0.001)),
          (
              SELECT m.code,
                     m.gic_sector,
-                    m.MOM2 / s3y.value  as Risk_Adj_MOM2,
-                    m.MOM12 / s3y.value as Risk_Adj_MOM12
+                    CASE WHEN ABS(s3y.value) > 0 THEN m.MOM2 / s3y.value END  as Risk_Adj_MOM2,
+                    CASE WHEN ABS(s3y.value) > 0 THEN m.MOM12 / s3y.value END as Risk_Adj_MOM12
              from momentum m
                       JOIN stddev_3_years s3y ON s3y.code = m.code
          ),

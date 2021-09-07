@@ -8,13 +8,15 @@ from singer_sdk import typing as th  # JSON schema typing helpers
 from tap_eodhistoricaldata.streams import (
     Fundamentals,
     HistoricalDividends,
-    HistoricalPrices
+    HistoricalPrices,
+    Options
 )
 
 STREAM_TYPES = [
     Fundamentals,
     HistoricalDividends,
-    HistoricalPrices
+    HistoricalPrices,
+    Options
 ]
 
 class Tapeodhistoricaldata(Tap):
