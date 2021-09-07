@@ -28,6 +28,6 @@ class Tapeodhistoricaldata(Tap):
         th.Property("api_url", th.StringType, default="https://eodhistoricaldata.com/api/"),
     ).to_dict()
 
-    def discover_streams(self):
+    def discover_streams(self) -> List[Stream]:
         """Return a list of discovered streams."""
         return [stream_class(tap=self) for stream_class in STREAM_TYPES]

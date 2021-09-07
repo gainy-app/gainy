@@ -22,6 +22,10 @@ jobs:
         working-directory: src/aws/lambda
         run: npx eslint .
 
+      - name: Prettier
+        working-directory: src/aws/lambda
+        run: npx prettier --check "./**/*.js"
+
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v1
         with:

@@ -15,12 +15,18 @@ plugins:
         - name: start_symbol
         - name: symbols
           kind: array
+    - name: tap-csv
+      config:
+        files:
+          - entity: raw_ticker_industries
+            file: data/industry_tickers.csv
+            keys: ["Industry Name", "Code"]
   loaders:
     - name: target-postgres
       variant: transferwise
       pip_url: pipelinewise-target-postgres
       config:
-        batch_size_rows: 10
+        batch_size_rows: 100
         parallelism: 5
   transformers:
     - name: dbt
@@ -38,3 +44,9 @@ schedules:
     transform: run
     interval: '@hourly'
     start_date: 2021-06-17 10:40:58.742133
+  - name: csv-to-postgres
+    extractor: tap-csv
+    loader: target-postgres
+    transform: run
+    interval: '@daily'
+    start_date: 2021-09-03
