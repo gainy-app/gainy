@@ -21,6 +21,9 @@ plugins:
           - entity: raw_ticker_industries
             file: data/industry_tickers.csv
             keys: ["Industry Name", "Code"]
+          - entity: collections
+            file: data/collections.csv
+            keys: ["id"]
   loaders:
     - name: target-postgres
       variant: transferwise

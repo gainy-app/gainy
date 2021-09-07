@@ -1,0 +1,584 @@
+Collection Name,QA,sql_request,sql_skip
+1 dollar stocks,1,"select * from ct
+where
+ct.price <=1.5 AND
+ct.chrt <=1
+order by abs(ct.price-1) asc",
+10 Best stocks,1,,x
+10 dollar stock,1,"select * from ct
+where
+ct.price >7 and ct.price <=13 AND
+ct.chrt <=0.2
+order by abs(ct.price-10) asc",
+10 dollars stocks,1,,x
+100 dollars index fund and ETFs,2,"select * from ct
+where
+ct.price between 90 and 110 AND
+ct.chrt <=0.2 AND
+ct.ttype ='ETF'
+order by abs(ct.price-100) asc",x
+100 dollars stocks,1,"select * from ct
+where
+ct.price between 90 and 110 AND
+ct.chrt <=0.2
+order by abs(ct.price-100) asc",
+2 dollars stocks,1,"select * from ct
+where
+ct.price >1.5 and ct.price <=3 AND
+ct.chrt <=1
+order by abs(ct.price-2) asc",
+20 dollars stocks,1,"select * from ct
+where
+ct.price between 17 and 23 AND
+ct.chrt <=0.2
+order by abs(ct.price-20) asc",
+3D printing ETFs,2,"select * from ct
+where
+ct.ttype ='ETF' AND
+lower(ct.g_industry) like '%3d%print%'",
+3D printing stocks,1,"select * from ct
+where
+lower(ct.g_industry) like '%3d%print%'",
+3d system stock,1,,x
+5 dollars stock,1,"select * from ct
+where
+ct.price >3 and ct.price <=7 AND
+ct.chrt <=0.5
+order by abs(ct.price-5) asc",
+5$ Biotech Stocks ,2,"select * from ct
+where
+ct.price >3 and ct.price <=7 AND
+ct.chrt <=0.5 AND
+lower(ct.g_industry) like '%biotech%'
+order by abs(ct.price-5) asc",
+50 dollars stocks,1,"select * from ct
+where
+ct.price between 45 and 55 AND
+ct.chrt <=0.2
+order by abs(ct.price-50) asc",
+5G stocks,1,"select * from ct
+where
+lower(ct.g_industry) like '%5g%com%unicat%'",
+AAA raiting stocks,1,,x
+Agriculture stocks,1,"select * from ct
+where
+lower(ct.g_industry) like '%agricul%tech%'",
+AI companies stocks,1,"select * from ct
+where
+lower(ct.g_industry) like '%analyt%ai%'",
+Airline ETFs,1,,x
+Airline Stocks,1,"select * from ct
+where
+lower(ct.g_industry) like '%airlines%'",
+Alcohol Stocks,1,"select * from ct
+where
+lower(ct.g_industry) like '%wine%liquor%'",
+"AR, VR, XR Stocks",1,"select * from ct
+where
+lower(ct.g_industry) like '%ar_vr%'",
+Automotive stocks,1,"select * from ct
+where
+lower(ct.g_industry) like '%electr%vehic%' OR
+lower(ct.g_industry) like '%auto%deal%' OR
+lower(ct.g_industry) like '%auto%manufact%' OR
+lower(ct.g_industry) like '%auto%marketpl%' OR
+lower(ct.g_industry) like '%auto%part%servic%'",
+Banking ETFs ,2,"select * from ct
+where
+ct.ttype ='ETF' AND
+lower(ct.g_industry) like '%bank%'",
+Best bonds to buy,2,,x
+Best European Stocks,1,,x
+Best index funds,1,,x
+Best mid cap stocks,1,,x
+Best of ETFs,1,,x
+Best small cap ETFs,1,,x
+Best small cap stocks,1,,x
+Best stocks this week,1,,x
+Best stocks today ,1,,x
+Best today and now,1,,x
+Best value stock,1,,x
+Biggest oil stocks,1,,x
+Biotech ETFs,2,"select * from ct
+where
+ct.ttype ='ETF' AND
+lower(ct.g_industry) like '%biotech%'",
+Biotech Stocks,1,"select * from ct
+where
+lower(ct.g_industry) like '%biotech%'",
+Blue chip stocks,1,,x
+Cannabis ETFs,2,"select * from ct
+where
+ct.ttype ='ETF' AND
+lower(ct.g_industry) like '%cannabis%'",
+Cannabis Penny stocks,3,"select * from ct
+where
+ct.investcat ='Penny' AND
+ct.price <=5 AND
+lower(ct.g_industry) like '%cannabis%'
+order by ct.price asc",
+Cannabis penny stocks,1,,x
+Cannabis stocks,1,"select * from ct
+where
+lower(ct.g_industry) like '%cannabis%'",
+Cars stocks,1,"select * from ct
+where
+lower(ct.g_industry) like '%electr%vehic%' OR
+lower(ct.g_industry) like '%auto%deal%' OR
+lower(ct.g_industry) like '%auto%manufact%' OR
+lower(ct.g_industry) like '%auto%marketpl%'",
+Casino stocks,1,"select * from ct
+where
+lower(ct.g_industry) like '%casin%resort%'",
+Chinese stocks,1,,x
+Cloud computing stocks,1,"select * from ct
+where
+lower(ct.g_industry) like '%enterpric%cloud%' OR
+lower(ct.g_industry) like '%tech%conglomer%'",
+Coffee stocks,1,"select * from ct
+where
+lower(ct.g_industry) like '%cof%e%tea%'",
+Commodities stocks,1,"select * from ct
+where
+lower(ct.g_industry) like '%agricult%tech%' OR
+lower(ct.g_industry) like '%bas%chemi%' OR
+lower(ct.g_industry) like '%coal%' OR
+lower(ct.g_industry) like '%energ%explor%' OR
+lower(ct.g_industry) like '%industr%metal%' OR
+lower(ct.g_industry) like '%liqui%natur%gas%' OR
+lower(ct.g_industry) like '%mlp%' OR
+lower(ct.g_industry) like '%oil%gas%produc%'",
+Commodity stocks,1,,x
+Concrete stocks,1,"select * from ct
+where
+ticker_code IN ('SMID','USCR')",
+Construction stocks,1,"select * from ct
+where
+lower(ct.g_industry) like '%home%construct%maint%' OR
+lower(ct.g_industry) like '%construct%infrastruct%' OR
+lower(ct.g_industry) like '%build%mater%' OR
+lower(ct.g_industry) like '%build%produc%'",
+Consumer staples ETFs,2,"select * from ct
+where
+ct.ttype ='ETF' AND
+lower(ct.gics_sector) like '%consum%stapl%'",
+Consumer staples stocks,1,"select * from ct
+where
+lower(ct.gics_sector) like '%consum%stapl%'",
+Copper ETFs,2,"select * from ct
+where
+ct.ttype ='ETF' AND
+lower(ct.g_industry) like '%industr%metal%'",
+Copper stocks,1,"select * from ct
+where
+lower(ct.g_industry) like '%industr%metal%'",
+Crashed stocks,1,,x
+Cruise line ETFs,2,"select * from ct
+where
+ct.ttype ='ETF' AND
+(lower(ct.g_industry) like '%onlin%travel%compan%' OR
+lower(ct.g_industry) like '%maritime%transport&')",
+Cruise line stocks,1,"select * from ct
+where
+lower(ct.g_industry) like '%onlin%travel%compan%' OR
+lower(ct.g_industry) like '%maritime%transport&'",
+Cryptocurrency to invest today,1,,x
+Daily trading stocks,1,,x
+Data stocks,1,"select * from ct
+where
+lower(ct.g_industry) like '%analyt%ai%' OR
+lower(ct.g_industry) like '%data%center%' and lower(ct.g_industry) not like '%reit%' OR
+lower(ct.g_industry) like '%data%stor%manag%'",
+Defense stocks,1,"select * from ct
+where
+lower(ct.g_industry) like '%aerospac%defen%'",
+Defensive consumer stocks,1,,x
+Development companies stocks,1,"select * from ct
+where
+ct.investcat ='Defensive'",
+Discretionary consumer stocks,1,"select * from ct
+where
+lower(ct.gics_sector) like '%consum%discretionar%'",
+Dividend ETF,1,,x
+Dividend Gold stocks,2,"select * from ct
+where
+lower(ct.g_industry) like '%gold%silver%' AND
+lower(ct.investcat) ='dividend'",
+Dividend growth stocks,1,,x
+Dividend Index fund,1,,x
+Dividend Mutual funds,1,,x
+Dividend stocks,1,,x
+Dow Jones chemical stocks,1,,x
+Dow Jones Companies,1,,x
+Drone stock companies,1,"select * from ct
+where
+lower(ct.g_industry) like '%drone%'",
+E-commerce and Retail stocks,1,"select * from ct
+where
+lower(ct.g_industry) like '%e-commerc%platform%' OR
+lower(ct.g_industry) like '%e-commerc%operat%' OR
+lower(ct.g_industry) like '%apparel%manufact%retail%' OR
+lower(ct.g_industry) like '%discount%retail%' OR
+lower(ct.g_industry) like '%home%furnit%retail%' OR
+lower(ct.g_industry) like '%luxur%retail%'",
+Education stocks,1,"select * from ct
+where
+lower(ct.g_industry) like '%educat%servic%' OR
+lower(ct.g_industry) like '%educat%tech%'",
+Electric vehicles stocks,1,"select * from ct
+where
+lower(ct.g_industry) like '%electr%vehicl%'",
+Energy company ETFs,2,"select * from ct
+where
+ct.ttype ='ETF' AND
+(lower(ct.g_industry) like '%clean%energ%' OR
+lower(ct.g_industry) like '%energ%explor%' OR
+lower(ct.g_industry) like '%renew%energ%' OR
+lower(ct.g_industry) like '%solar%energ%' OR
+lower(ct.g_industry) like '%oil%gas%produc%' OR
+lower(ct.g_industry) like '%liqui%natur%gas%' OR
+lower(ct.g_industry) like '%electr%generat%' OR
+lower(ct.g_industry) like '%power%gener%distrib%' OR
+lower(ct.g_industry) like '%oil%gas%servic%' OR
+lower(ct.g_industry) like '%electron%power%management%')",
+Energy company stocks,1,"select * from ct
+where
+lower(ct.g_industry) like '%clean%energ%' OR
+lower(ct.g_industry) like '%energ%explor%' OR
+lower(ct.g_industry) like '%renew%energ%' OR
+lower(ct.g_industry) like '%solar%energ%' OR
+lower(ct.g_industry) like '%oil%gas%produc%' OR
+lower(ct.g_industry) like '%liqui%natur%gas%' OR
+lower(ct.g_industry) like '%electr%generat%' OR
+lower(ct.g_industry) like '%power%gener%distrib%' OR
+lower(ct.g_industry) like '%oil%gas%servic%' OR
+lower(ct.g_industry) like '%electron%power%management%'",
+Energy Penny stocks,3,"select * from ct
+where
+ct.investcat ='Penny' AND
+ct.price <=5 AND
+(lower(ct.g_industry) like '%clean%energ%' OR
+lower(ct.g_industry) like '%energ%explor%' OR
+lower(ct.g_industry) like '%renew%energ%' OR
+lower(ct.g_industry) like '%solar%energ%' OR
+lower(ct.g_industry) like '%oil%gas%produc%' OR
+lower(ct.g_industry) like '%liqui%natur%gas%' OR
+lower(ct.g_industry) like '%electr%generat%' OR
+lower(ct.g_industry) like '%power%gener%distrib%' OR
+lower(ct.g_industry) like '%oil%gas%servic%' OR
+lower(ct.g_industry) like '%electron%power%management%')
+order by ct.price asc",
+Entertainment stocks,1,"select * from ct
+where
+lower(ct.g_industry) like '%tv%radio%' OR
+lower(ct.g_industry) like '%streaming%' OR
+lower(ct.g_industry) like '%gaming%esport%'",
+Esport stocks,1,"select * from ct
+where
+ct.ticker_code IN ('HAS', 'GMBL', 'SLGG', 'INSE', 'AESE', 'EA', 'ATVI', 'TTWO', 'DKNG')",
+European stocks,1,,x
+EV batteries stocks,1,"select * from ct
+where
+lower(ct.g_industry) like '%batter%tech%'",
+FAANG (big tech) stocks,2,"select * from ct
+where
+lower(ct.g_industry) like '%tech%conglomerat%' OR
+ct.ticker_code IN ('FB', 'AMZN', 'AAPL', 'NFLX', 'GOOG', 'GOOGL')",
+Farming stocks,1,"select * from ct
+where
+lower(ct.g_industry) like '%agricultur%tech%'",
+Fast food stocks,1,"select * from ct
+where
+lower(ct.g_industry) like '%casual%din%n%'",
+Finance stocks,1,"select * from ct
+where
+lower(ct.gics_sector) like '%financ%'",
+Fintech stocks,1,"select * from ct
+where
+lower(ct.g_industry) like '%financ%exchang%data%' OR
+lower(ct.g_industry) like '%fintech%'",
+Flowers food stocks,0,,x
+Food Delivery stocks,1,"select * from ct
+where
+lower(ct.g_industry) like '%food%deliver%'",
+Food stocks,1,"select * from ct
+where
+lower(ct.g_industry) like '%bread%condiment%' OR
+lower(ct.g_industry) like '%casual%din%n%' OR
+lower(ct.g_industry) like '%dairy%' OR
+lower(ct.g_industry) like '%fruit%vegetabl%' OR
+lower(ct.g_industry) like '%meat%poultry%' OR
+lower(ct.g_industry) like '%snack%cand%' OR
+lower(ct.g_industry) like '%soft%sport%drink%'",
+Fuel stocks,1,"select * from ct
+where
+lower(ct.g_industry) like '%oil%gas%produc%' OR
+lower(ct.g_industry) like '%liqui%natur%gas%'",
+Furniture and decor stocks,1,"select * from ct
+where
+lower(ct.g_industry) like '%home%furnitur%retail%'",
+Gambling stocks,1,"select * from ct
+where
+lower(ct.g_industry) like '%casin%resort%'",
+Gaming companies stocks,1,"select * from ct
+where
+lower(ct.g_industry) like '%gam%esport%'",
+Gold companies stocks,1,"select * from ct
+where
+lower(ct.g_industry) like '%gold%silver%'",
+Gold Index funds,1,,x
+Golf stocks,0,,x
+Graphene stocks,0,,x
+Green companies stocks,1,,x
+Green energy stocks,1,"select * from ct
+where
+lower(ct.g_industry) like '%clean%energ%' OR
+lower(ct.g_industry) like '%energ%explor%' OR
+lower(ct.g_industry) like '%renew%energ%' OR
+lower(ct.g_industry) like '%solar%energ%'",
+Gril stocks,0,,x
+Growth ETFs,1,,x
+Growth large cap ETFs,1,,x
+Growth larget cap stocks,2,,x
+Growth stocks,1,,x
+Gun stocks,1,"select * from ct
+where
+lower(ct.g_industry) like '%secur%protect%'",
+Health insurance stocks,1,"select * from ct
+where
+lower(ct.g_industry) like '%health%insuranc%'",
+Healthcare ETFs,2,"select * from ct
+where
+ct.ttype ='ETF' AND
+lower(ct.gics_sector) like '%health%car%'",
+Healthcare Stocks,1,"select * from ct
+where
+lower(ct.gics_sector) like '%health%car%'",
+Heavy Equipment Stocks,1,"select * from ct
+where
+lower(ct.g_industry) like '%construct%machine%' OR
+lower(ct.g_industry) like '%heavy%machine%part%'",
+High PE stocks,1,,x
+High risk high reward stocks,1,,x
+High volatility stocks,1,,x
+Highest risk stocks,1,,x
+Hotel stocks,1,"select * from ct
+where
+(lower(ct.g_industry) like '%hotel%' and
+lower(ct.g_industry) not like '%reit%') OR
+lower(ct.g_industry) like '%casin%resort%'",
+Information security stocks,1,"select * from ct
+where
+lower(ct.g_industry) like '%cyber%secur%' OR
+lower(ct.g_industry) like '%ident%authenticat%'",
+Infrastructure stocks,1,"select * from ct
+where
+lower(ct.g_industry) like '%construct%infrastruct%' OR
+lower(ct.g_industry) like '%telecom%infrastruct%'",
+Insurance stocks,1,"select * from ct
+where
+lower(ct.g_industry) like '%health%insuranc%' OR
+lower(ct.g_industry) like '%insuranc%broker%' OR
+lower(ct.g_industry) like '%insuranc%marketplac%tech%' OR
+lower(ct.g_industry) like '%mortgag%insuranc%' OR
+lower(ct.g_industry) like '%multiline%insuranc%' OR
+lower(ct.g_industry) like '%property%casualt%insuranc%' OR
+lower(ct.g_industry) like '%life%insuranc%'",
+International stocks,1,,x
+Internet of things stocks ,1,"select * from ct
+where
+lower(ct.g_industry) like 'iot%'",
+Large cap index funds,1,,x
+Large cap stocks,1,,x
+Latam Airlines Stocks,1,"select * from ct
+where
+lower(ct.g_industry) like '%airline%' AND
+<geo>",x
+Latam stocks,1,,x
+Lithium stocks,1,"select * from ct
+where
+ct.ticker_code IN ('ULBI', 'FLUX', 'TANH', 'PLL', 'SEDG')",
+Long term stocks ,1,,x
+Meat stocks,1,"select * from ct
+where
+lower(ct.g_industry) like '%meat%poultry%'",
+Medical supplies company stocks,1,"select * from ct
+where
+lower(ct.g_industry) like '%health%care%service%equipment%'",
+Mining companies stocks,1,"select * from ct
+where
+lower(ct.g_industry) like '%gold%silver%' OR
+lower(ct.g_industry) like '%industr%metal%'",
+MLP to invest,1,"select * from ct
+where
+lower(ct.g_industry) like '%mlp%'",
+Monopolies stocks,0,,x
+Municipal bonds ,1,,x
+Nanotechnology stocks,1,"select * from ct
+where
+lower(ct.g_industry) like '%nanotech%'",
+Natural gas stocks,1,"select * from ct
+where
+lower(ct.g_industry) like '%oil%gas%produc%' OR
+lower(ct.g_industry) like '%liqui%natur%gas%'",
+Nuclear energy stocks,1,"select * from ct
+where
+ct.ticker_code IN ('LBTR','AEP','EXC','XEL','PESI','HOLI','GVP')",
+Oil ETF,2,"select * from ct
+where
+ct.ttype ='ETF' AND
+(lower(ct.g_industry) like '%oil%gas%produc%' OR
+lower(ct.g_industry) like '%oil%gas%servic%')",
+Oil short ETF,1,,x
+Oil stocks,1,"select * from ct
+where
+lower(ct.g_industry) like '%oil%gas%produc%' OR
+lower(ct.g_industry) like '%oil%gas%servic%'",
+Penny stocks,2,"select * from ct
+where
+ct.investcat ='Penny' AND
+ct.price <=1.5 AND
+ct.chrt <=0.2
+order by ct.price asc",
+Pharmaceutical stocks,1,"select * from ct
+where
+lower(ct.g_industry) like '%pharm%'",
+Pink sheets stocks,1,,x
+Precious metals stocks,1,"select * from ct
+where
+lower(ct.g_industry) like '%gold%silver%'",
+Preferred stock funds,1,,x
+Prisons stocks,1,,x
+Real estate stocks,1,"select * from ct
+where
+lower(ct.gics_sector) like '%real%estat%'",
+Recent IPOs,1,,x
+Recession stocks,1,,x
+Restaurant stocks,1,"select * from ct
+where
+lower(ct.g_industry) like '%gold%silver%'",
+Robotics company stocks,1,"select * from ct
+where
+lower(ct.g_industry) like '%analytic%ai%' OR
+lower(ct.g_industry) like '%comput%visi%sens%' OR
+lower(ct.g_industry) like 'iot%' OR
+lower(ct.g_industry) like '%precis%manufact%' OR
+lower(ct.g_industry) like '%health%car%services%equipment%robot%'",
+Russell 2000 stocks,1,,x
+Schwab index funds,1,,x
+Schwab mutual funds,1,,x
+Self driving car stocks,2,"select * from ct
+where
+ct.ticker_code IN ('LAZR', 'F', 'APTV', 'TSLA', 'GOOGL', 'XPEV', 'AMBA', 'QCOM', 'NVDA')",
+Semiconductors stocks,1,"select * from ct
+where
+lower(ct.g_industry) like '%semiconduct%equip%' OR
+lower(ct.g_industry) like '%semiconduct%manufact%' OR
+lower(ct.g_industry) like '%semiconduct%material%'",
+Shipping stocks,1,"select * from ct
+where
+lower(ct.g_industry) like '%maritim%transport%' OR
+lower(ct.g_industry) like '%truck%' OR
+lower(ct.g_industry) like '%air%carg%transport%' OR
+lower(ct.g_industry) like '%rail%freight%'",
+Ships stocks,1,"select * from ct
+where
+lower(ct.g_industry) like '%maritim%transport%'",
+Shorted stocks,1,,x
+Silver companies stocks,1,"select * from ct
+where
+lower(ct.g_industry) like '%gold%silver%'",
+Silver ETFs,2,"select * from ct
+where
+ct.ttype ='ETF' AND
+lower(ct.g_industry) like '%gold%silver%'",
+Small Cap companies stocks,1,,x
+Space stocks,1,"select * from ct
+where
+lower(ct.g_industry) like '%aerospac%defen%'",
+Steel stocks,1,"select * from ct
+where
+ct.ticker_code IN ('ZEUS', 'SCHN', 'STLD', 'USAP', 'ZKIN')",
+Stocks in sports,1,"select * from ct
+where
+lower(ct.g_industry) like '%prosport%manag%'",
+Stocks rated buy,1,,x
+Stocks to buy now,1,,x
+Stocks to buy this week,1,,x
+Stocks to watch next week,1,,x
+Stocks to watch this week,1,,x
+Technology stocks,1,"select * from ct
+where
+lower(ct.gics_sector) like '%technolog%'",
+Telecom stocks,1,"select * from ct
+where
+lower(ct.g_industry) like '%5g%com%unicat%' OR
+lower(ct.g_industry) like '%internet%cellular%provid%' OR
+lower(ct.g_industry) like '%telecom%infrastruct%'",
+Toilet paper companies stocks,1,"select * from ct
+where
+ct.ticker_code IN ('WMT', 'PG', 'KMB', 'ITP', 'CLW', 'COST', 'KR')",
+Transportation stocks,1,"select * from ct
+where
+lower(ct.g_industry) like '%maritim%transport%' OR
+lower(ct.g_industry) like '%airline%' OR
+lower(ct.g_industry) like '%air%carg%transport%' OR
+lower(ct.g_industry) like '%rail%freight%'",
+Travel stocks,1,"select * from ct
+where
+lower(ct.g_industry) like '%online%travel%compan%' OR
+lower(ct.g_industry) like '%airline%' OR
+lower(ct.g_industry) like '%casin%resort%' OR
+lower(ct.g_industry) like '%hotel%'",
+Triple leveraged ETFs ,1,,x
+Trucking stocks,1,"select * from ct
+where
+lower(ct.g_industry) like '%truck%'",
+US Food stocks,1,"select * from ct
+where
+(lower(ct.g_industry) like '%bread%condiment%' OR
+lower(ct.g_industry) like '%casual%din%' OR
+lower(ct.g_industry) like '%dairy%' OR
+lower(ct.g_industry) like '%fruit%vegetabl%' OR
+lower(ct.g_industry) like '%meat%poultr%' OR
+lower(ct.g_industry) like '%snack%cand%' OR
+lower(ct.g_industry) like '%soft%sport%drink%') AND
+<geo>",x
+USA Technology stocks,1,"select * from ct
+where
+lower(ct.gics_sector) like '%technolog%' AND
+<geo>",x
+Utilities ETFs,2,"select * from ct
+where
+ct.ttype ='ETF' AND
+lower(ct.gics_sector) like '%utilities%'",
+Utilities stocks,1,"select * from ct
+where
+lower(ct.gics_sector) like '%utilities%'",
+Utility stocks,1,,x
+Vanguard Biotech ETFs,1,,x
+Vanguard Bond ETFs,2,,x
+Vanguard bond index funds,2,,x
+Vanguard Dividend ETF,1,,x
+Vanguard Energy ETFs,1,,x
+Vanguard ETFs,1,,x
+Vanguard mid cap ETFs,1,,x
+Vanguard NASDAQ ETFs,1,,x
+Vanguard oil etf,1,,x
+Vulcan materials stocks,1,"select * from ct
+where
+ct.ticker_code ='VMC'",x
+Waste management stocks,1,"select * from ct
+where
+lower(ct.g_industry) like '%wast%manag%'",
+Water companies stocks,1,"select * from ct
+where
+lower(ct.g_industry) like '%water%manag%'",
+Wine stocks,1,"select * from ct
+where
+lower(ct.g_industry) like '%wine%liquor%'",
+Heavily Shorted,1,,x
+Underdogs,1,,x
+Hot Stocks,1,,x
+Earnings Surprise,1,,x
+ESG,1,,x
