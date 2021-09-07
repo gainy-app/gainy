@@ -93,6 +93,7 @@ module "heroku-gainy-fetch" {
   name   = "gainy-fetch"
   env    = "dev"
   path   = "src/gainy-fetch"
+  size   = "Standard-1X"
   config = {
     TARGET_POSTGRES_HOST            = module.rds.db.db_instance_address
     TARGET_POSTGRES_PORT            = module.rds.db.db_instance_port

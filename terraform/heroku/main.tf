@@ -32,6 +32,11 @@ variable "buildpacks" {
   type    = list(string)
   default = []
 }
+
+variable "size" {
+  default = "Free"
+}
+
 resource "heroku_app" "app" {
   stack                 = var.stack
   name                  = "${var.name}-${var.env}"
@@ -54,7 +59,7 @@ resource "heroku_formation" "formation" {
   app        = heroku_app.app.name
   type       = "web"
   quantity   = 1
-  size       = "Standard-1X"
+  size       = var.size
   depends_on = [heroku_build.build]
 }
 
