@@ -24,4 +24,4 @@ clean-targets:
 models:
 
 on-run-start:
-  - "create or replace function CAGR(date, numeric, date, numeric) RETURNS numeric AS $$ select power($4/$2, 365.0/($3 - $1)) - 1.0; $$ language sql;"
+  - "create or replace function CAGR(date, numeric, date, numeric) RETURNS numeric AS $$ select case when $2 !=0 then power($4/$2, 365.0/($3 - $1)) - 1.0 end; $$ language sql;"
