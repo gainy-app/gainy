@@ -161,6 +161,7 @@ module "lambda-fetchLivePrices" {
   aws_s3_key                                = aws_s3_bucket_object.object.id
   aws_iam_role_lambda_exec_role             = aws_iam_role.lambda_exec.arn
   source_code_hash                          = data.archive_file.source.output_base64sha256
+  timeout                                   = 10
   env_vars = {
     eodhistoricaldata_api_token = var.eodhistoricaldata_api_token
   }

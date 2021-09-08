@@ -43,11 +43,13 @@ hasura-console:
 hasura:
 	docker-compose exec -T hasura hasura $(PARAMS)
 
-eslint:
+style-check:
 	npx eslint src/aws/lambda
+	npx prettier --check "src/aws/lambda/**/*.js"
 
-eslint-fix:
+style-fix:
 	npx eslint src/aws/lambda --fix
+	npx prettier --write "src/aws/lambda/**/*.js"
 
 %:
 	@:

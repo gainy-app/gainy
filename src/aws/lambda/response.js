@@ -1,7 +1,7 @@
 const response = (statusCode) => ({
   isBase64Encoded: false,
   statusCode,
-  headers: { },
+  headers: {},
 });
 const errorResponse = (statusCode, error) => ({
   ...response(400),

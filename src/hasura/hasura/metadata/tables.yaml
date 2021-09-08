@@ -1,75 +1,5 @@
 - table:
     schema: app
-    name: categories
-  array_relationships:
-  - name: profile_categories
-    using:
-      foreign_key_constraint_on:
-        column: category_id
-        table:
-          schema: app
-          name: profile_categories
-  select_permissions:
-  - role: anonymous
-    permission:
-      columns:
-      - id
-      - name
-      filter: {}
-  - role: user
-    permission:
-      columns:
-      - id
-      - name
-      filter: {}
-- table:
-    schema: app
-    name: collection_symbols
-  object_relationships:
-  - name: collection
-    using:
-      foreign_key_constraint_on: collection_id
-  - name: ticker
-    using:
-      foreign_key_constraint_on: symbol
-  select_permissions:
-  - role: user
-    permission:
-      columns:
-      - id
-      - collection_id
-      - symbol
-      filter: {}
-      allow_aggregations: true
-- table:
-    schema: app
-    name: collections
-  array_relationships:
-  - name: collection_symbols
-    using:
-      foreign_key_constraint_on:
-        column: collection_id
-        table:
-          schema: app
-          name: collection_symbols
-  - name: profile_favorite_collections
-    using:
-      foreign_key_constraint_on:
-        column: collection_id
-        table:
-          schema: app
-          name: profile_favorite_collections
-  select_permissions:
-  - role: user
-    permission:
-      columns:
-      - description
-      - id
-      - image_url
-      - name
-      filter: {}
-- table:
-    schema: app
     name: interests
   array_relationships:
   - name: profile_interests
@@ -90,9 +20,6 @@
     schema: app
     name: profile_categories
   object_relationships:
-  - name: category
-    using:
-      foreign_key_constraint_on: category_id
   - name: profile
     using:
       foreign_key_constraint_on: profile_id
@@ -100,9 +27,6 @@
     schema: app
     name: profile_favorite_collections
   object_relationships:
-  - name: collection
-    using:
-      foreign_key_constraint_on: collection_id
   - name: profile
     using:
       foreign_key_constraint_on: profile_id
@@ -256,6 +180,38 @@
       foreign_key_constraint_on: symbol
 - table:
     schema: public
+    name: categories
+  array_relationships:
+  - name: ticker_categories
+    using:
+      foreign_key_constraint_on:
+        column: category_id
+        table:
+          schema: public
+          name: ticker_categories
+- table:
+    schema: public
+    name: collections
+  array_relationships:
+  - name: ticker_collections
+    using:
+      foreign_key_constraint_on:
+        column: collection_id
+        table:
+          schema: public
+          name: ticker_collections
+  select_permissions:
+  - role: user
+    permission:
+      columns:
+      - id
+      - name
+      - image_url
+      - description
+      filter: {}
+      allow_aggregations: true
+- table:
+    schema: public
     name: dividends
 - table:
     schema: public
@@ -295,6 +251,26 @@
     schema: public
     name: technicals
   object_relationships:
+  - name: ticker
+    using:
+      foreign_key_constraint_on: symbol
+- table:
+    schema: public
+    name: ticker_categories
+  object_relationships:
+  - name: category
+    using:
+      foreign_key_constraint_on: category_id
+  - name: ticker
+    using:
+      foreign_key_constraint_on: symbol
+- table:
+    schema: public
+    name: ticker_collections
+  object_relationships:
+  - name: collection
+    using:
+      foreign_key_constraint_on: collection_id
   - name: ticker
     using:
       foreign_key_constraint_on: symbol
@@ -365,6 +341,20 @@
         table:
           schema: public
           name: technicals
+  - name: ticker_categories
+    using:
+      foreign_key_constraint_on:
+        column: symbol
+        table:
+          schema: public
+          name: ticker_categories
+  - name: ticker_collections
+    using:
+      foreign_key_constraint_on:
+        column: symbol
+        table:
+          schema: public
+          name: ticker_collections
   - name: ticker_financials
     using:
       foreign_key_constraint_on:

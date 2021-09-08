@@ -11,7 +11,9 @@ variable "source_code_hash" {}
 variable "env_vars" {
   default = {}
 }
-
+variable "timeout" {
+  default = 3
+}
 resource "aws_lambda_function" "lambda" {
   function_name = "${var.function_name}_${var.env}"
 
@@ -20,6 +22,7 @@ resource "aws_lambda_function" "lambda" {
 
   runtime = "nodejs12.x"
   handler = "index.${var.function_name}"
+  timeout = var.timeout
 
   source_code_hash = var.source_code_hash
 
