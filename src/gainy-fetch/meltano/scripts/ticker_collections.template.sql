@@ -22,18 +22,27 @@ with price AS
      ct as
          (
              select t.symbol                                                     as ticker_code,
+                    t.country_name,
+                    t.ipo_date,
                     latest_price.close                                           as price,
                     (latest_price.close - latest_price.open) / latest_price.open as chrt,
                     t.type                                                       as ttype,
                     gi.name                                                      as g_industry,
                     t.gic_sector                                                 as gics_sector,
-                    lower(c.name)                                                as investcat
+                    lower(c.name)                                                as investcat,
+                    CASE
+                        WHEN countries.region = 'Europe' THEN 'europe'
+                        WHEN countries."sub-region" LIKE '%Latin America%' THEN 'latam'
+                        END                                                      as country_group
              from {{ ref('tickers') }} t
                       JOIN price latest_price ON latest_price.code = t.symbol AND latest_price.inv_row_number = 1
                       JOIN {{ ref('ticker_industries') }} ti on t.symbol = ti.symbol
                       JOIN {{ ref('gainy_industries') }} gi on ti.industry_id = gi.id
                       JOIN {{ ref('ticker_categories') }} tc on t.symbol = tc.symbol
                       JOIN {{ ref('categories') }} c on tc.category_id = c.id
+                      JOIN raw_countries countries
+                           on countries.name = t.country_name OR countries."alpha-2" = t.country_name OR
+                              countries."alpha-3" = t.country_name
          ),
      tmp_ticker_collections as
          (
