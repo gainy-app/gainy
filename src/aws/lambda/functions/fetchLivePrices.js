@@ -34,38 +34,48 @@ exports.fetchLivePrices = async (event) => {
   );
   fetchedSymbols.sort();
 
-  let fetchedData;
-  switch (fetchedSymbols.length) {
-    case 0:
-      fetchedData = [];
-      break;
-    case 1:
-      fetchedData = [
-        await eodFetch(["real-time", fetchedSymbols[0]], {}, cacheTTL),
-      ];
-      break;
-    default:
-      fetchedData = await eodFetch(
-        ["real-time", fetchedSymbols[0]],
-        {
-          s: fetchedSymbols.slice(1).join(","),
-        },
-        cacheTTL
-      );
-      break;
+  const chunks = [];
+  const chunkSize = 25; // after some tests i discovered this is the best chunk size, trust me!
+  for (let i = 0; i < fetchedSymbols.length; i += chunkSize) {
+    chunks.push(fetchedSymbols.slice(i, i + chunkSize));
   }
+
+  const fetchedDataChunks = await Promise.all(
+    chunks.map(async (chunk) => {
+      switch (chunk.length) {
+        case 0:
+          return [];
+        case 1:
+          return [await eodFetch(["real-time", chunk[0]], {}, cacheTTL)];
+        default:
+          return eodFetch(
+            ["real-time", chunk[0]],
+            {
+              s: chunk.slice(1).join(","),
+            },
+            cacheTTL
+          );
+      }
+    })
+  );
+
+  const fetchedData = fetchedDataChunks.reduce((accumulator, current) =>
+    accumulator.concat(current)
+  );
+
+  const isNA = (x) => x === "NA";
 
   const fetchedEntries = fetchedData.map((row, index) => {
     const { change, close, timestamp } = row; // Other fields: code, gmtoffset, high, low, open, previousClose
-    const datetime = moment(timestamp * 1000).format();
+    const datetime = isNA(timestamp) ? null : moment(timestamp * 1000).format();
     return [
       fetchedSymbols[index],
       {
         symbol: fetchedSymbols[index],
         datetime,
-        daily_change: change,
-        daily_change_p: row.change_p,
-        close,
+        daily_change: isNA(change) ? null : change,
+        daily_change_p: isNA(row.change_p) ? null : row.change_p,
+        close: isNA(close) ? null : close,
       },
     ];
   });
