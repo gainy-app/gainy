@@ -22,18 +22,27 @@ with price AS
      ct as
          (
              select t.symbol                                                     as ticker_code,
+                    t.country_name,
+                    t.ipo_date,
                     latest_price.close                                           as price,
                     (latest_price.close - latest_price.open) / latest_price.open as chrt,
                     t.type                                                       as ttype,
                     gi.name                                                      as g_industry,
                     t.gic_sector                                                 as gics_sector,
-                    lower(c.name)                                                as investcat
-             from {{ ref('tickers') }} t
+                    lower(c.name)                                                as investcat,
+                    CASE
+                        WHEN countries.region = 'Europe' THEN 'europe'
+                        WHEN countries."sub-region" LIKE '%Latin America%' THEN 'latam'
+                        END                                                      as country_group
+             from tickers t
                       JOIN price latest_price ON latest_price.code = t.symbol AND latest_price.inv_row_number = 1
-                      JOIN {{ ref('ticker_industries') }} ti on t.symbol = ti.symbol
-                      JOIN {{ ref('gainy_industries') }} gi on ti.industry_id = gi.id
-                      JOIN {{ ref('ticker_categories') }} tc on t.symbol = tc.symbol
-                      JOIN {{ ref('categories') }} c on tc.category_id = c.id
+                      JOIN ticker_industries ti on t.symbol = ti.symbol
+                      JOIN gainy_industries gi on ti.industry_id = gi.id
+                      JOIN ticker_categories tc on t.symbol = tc.symbol
+                      JOIN categories c on tc.category_id = c.id
+                      JOIN raw_countries countries
+                           on countries.name = t.country_name OR countries."alpha-2" = t.country_name OR
+                              countries."alpha-3" = t.country_name
          ),
      tmp_ticker_collections as
          (
@@ -53,7 +62,7 @@ select collections.id as collection_id, ct.ticker_code as symbol from ct join co
 UNION
 select collections.id as collection_id, ct.ticker_code as symbol from ct join collections on collections.name = '5 dollars stock' where ct.price >3 and ct.price <=7 and ct.chrt <=0.5
 UNION
-select collections.id as collection_id, ct.ticker_code as symbol from ct join collections on collections.name = '5$ Biotech Stocks ' where ct.price >3 and ct.price <=7 and ct.chrt <=0.5 and lower(ct.g_industry) like '%biotech%'
+select collections.id as collection_id, ct.ticker_code as symbol from ct join collections on collections.name = '5$ Biotech Stocks' where ct.price >3 and ct.price <=7 and ct.chrt <=0.5 and lower(ct.g_industry) like '%biotech%'
 UNION
 select collections.id as collection_id, ct.ticker_code as symbol from ct join collections on collections.name = '50 dollars stocks' where ct.price between 45 and 55 and ct.chrt <=0.2
 UNION
@@ -71,7 +80,7 @@ select collections.id as collection_id, ct.ticker_code as symbol from ct join co
 UNION
 select collections.id as collection_id, ct.ticker_code as symbol from ct join collections on collections.name = 'Automotive stocks' where lower(ct.g_industry) like '%electr%vehic%' or lower(ct.g_industry) like '%auto%deal%' or lower(ct.g_industry) like '%auto%manufact%' or lower(ct.g_industry) like '%auto%marketpl%' or lower(ct.g_industry) like '%auto%part%servic%'
 UNION
-select collections.id as collection_id, ct.ticker_code as symbol from ct join collections on collections.name = 'Banking ETFs ' where ct.ttype ='etf' and lower(ct.g_industry) like '%bank%'
+select collections.id as collection_id, ct.ticker_code as symbol from ct join collections on collections.name = 'Banking ETFs' where ct.ttype ='etf' and lower(ct.g_industry) like '%bank%'
 UNION
 select collections.id as collection_id, ct.ticker_code as symbol from ct join collections on collections.name = 'Biotech ETFs' where ct.ttype ='etf' and lower(ct.g_industry) like '%biotech%'
 UNION
@@ -86,6 +95,8 @@ UNION
 select collections.id as collection_id, ct.ticker_code as symbol from ct join collections on collections.name = 'Cars stocks' where lower(ct.g_industry) like '%electr%vehic%' or lower(ct.g_industry) like '%auto%deal%' or lower(ct.g_industry) like '%auto%manufact%' or lower(ct.g_industry) like '%auto%marketpl%'
 UNION
 select collections.id as collection_id, ct.ticker_code as symbol from ct join collections on collections.name = 'Casino stocks' where lower(ct.g_industry) like '%casin%resort%'
+UNION
+select collections.id as collection_id, ct.ticker_code as symbol from ct join collections on collections.name = 'Chinese stocks' where ct.country_name ='china'
 UNION
 select collections.id as collection_id, ct.ticker_code as symbol from ct join collections on collections.name = 'Cloud computing stocks' where lower(ct.g_industry) like '%enterpric%cloud%' or lower(ct.g_industry) like '%tech%conglomer%'
 UNION
@@ -137,6 +148,8 @@ select collections.id as collection_id, ct.ticker_code as symbol from ct join co
 UNION
 select collections.id as collection_id, ct.ticker_code as symbol from ct join collections on collections.name = 'Esport stocks' where ct.ticker_code in ('has', 'gmbl', 'slgg', 'inse', 'aese', 'ea', 'atvi', 'ttwo', 'dkng')
 UNION
+select collections.id as collection_id, ct.ticker_code as symbol from ct join collections on collections.name = 'European stocks' where ct.country_group ='europe'
+UNION
 select collections.id as collection_id, ct.ticker_code as symbol from ct join collections on collections.name = 'EV batteries stocks' where lower(ct.g_industry) like '%batter%tech%'
 UNION
 select collections.id as collection_id, ct.ticker_code as symbol from ct join collections on collections.name = 'FAANG (big tech) stocks' where lower(ct.g_industry) like '%tech%conglomerat%' or ct.ticker_code in ('fb', 'amzn', 'aapl', 'nflx', 'goog', 'googl')
@@ -183,7 +196,13 @@ select collections.id as collection_id, ct.ticker_code as symbol from ct join co
 UNION
 select collections.id as collection_id, ct.ticker_code as symbol from ct join collections on collections.name = 'Insurance stocks' where lower(ct.g_industry) like '%health%insuranc%' or lower(ct.g_industry) like '%insuranc%broker%' or lower(ct.g_industry) like '%insuranc%marketplac%tech%' or lower(ct.g_industry) like '%mortgag%insuranc%' or lower(ct.g_industry) like '%multiline%insuranc%' or lower(ct.g_industry) like '%property%casualt%insuranc%' or lower(ct.g_industry) like '%life%insuranc%'
 UNION
-select collections.id as collection_id, ct.ticker_code as symbol from ct join collections on collections.name = 'Internet of things stocks ' where lower(ct.g_industry) like 'iot%'
+select collections.id as collection_id, ct.ticker_code as symbol from ct join collections on collections.name = 'International stocks' where ct.country_name <>'united states'
+UNION
+select collections.id as collection_id, ct.ticker_code as symbol from ct join collections on collections.name = 'Internet of things stocks' where lower(ct.g_industry) like 'iot%'
+UNION
+select collections.id as collection_id, ct.ticker_code as symbol from ct join collections on collections.name = 'Latam Airlines Stocks' where lower(ct.g_industry) like '%airline%' and ct.country_group ='latam'
+UNION
+select collections.id as collection_id, ct.ticker_code as symbol from ct join collections on collections.name = 'Latam stocks' where ct.country_group ='latam'
 UNION
 select collections.id as collection_id, ct.ticker_code as symbol from ct join collections on collections.name = 'Lithium stocks' where ct.ticker_code in ('ulbi', 'flux', 'tanh', 'pll', 'sedg')
 UNION
@@ -212,6 +231,8 @@ UNION
 select collections.id as collection_id, ct.ticker_code as symbol from ct join collections on collections.name = 'Precious metals stocks' where lower(ct.g_industry) like '%gold%silver%'
 UNION
 select collections.id as collection_id, ct.ticker_code as symbol from ct join collections on collections.name = 'Real estate stocks' where lower(ct.gics_sector) like '%real%estat%'
+UNION
+select collections.id as collection_id, ct.ticker_code as symbol from ct join collections on collections.name = 'Recent IPOs' where ct.ipo_date > (current_date - interval '6 month')
 UNION
 select collections.id as collection_id, ct.ticker_code as symbol from ct join collections on collections.name = 'Restaurant stocks' where lower(ct.g_industry) like '%gold%silver%'
 UNION
@@ -246,6 +267,10 @@ UNION
 select collections.id as collection_id, ct.ticker_code as symbol from ct join collections on collections.name = 'Travel stocks' where lower(ct.g_industry) like '%online%travel%compan%' or lower(ct.g_industry) like '%airline%' or lower(ct.g_industry) like '%casin%resort%' or lower(ct.g_industry) like '%hotel%'
 UNION
 select collections.id as collection_id, ct.ticker_code as symbol from ct join collections on collections.name = 'Trucking stocks' where lower(ct.g_industry) like '%truck%'
+UNION
+select collections.id as collection_id, ct.ticker_code as symbol from ct join collections on collections.name = 'US Food stocks' where (lower(ct.g_industry) like '%bread%condiment%' or lower(ct.g_industry) like '%casual%din%' or lower(ct.g_industry) like '%dairy%' or lower(ct.g_industry) like '%fruit%vegetabl%' or lower(ct.g_industry) like '%meat%poultr%' or lower(ct.g_industry) like '%snack%cand%' or lower(ct.g_industry) like '%soft%sport%drink%') and ct.country_name ='united states'
+UNION
+select collections.id as collection_id, ct.ticker_code as symbol from ct join collections on collections.name = 'USA Technology stocks' where lower(ct.gics_sector) like '%technolog%' and ct.country_name ='united states'
 UNION
 select collections.id as collection_id, ct.ticker_code as symbol from ct join collections on collections.name = 'Utilities ETFs' where ct.ttype ='etf' and lower(ct.gics_sector) like '%utilities%'
 UNION
