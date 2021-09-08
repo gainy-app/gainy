@@ -10,7 +10,6 @@
   )
 }}
 
-/* TODO remove price_change_today and current_price */
 select h.symbol,
        pe_ratio,
        market_capitalization,

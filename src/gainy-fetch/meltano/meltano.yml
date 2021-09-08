@@ -18,6 +18,9 @@ plugins:
     - name: tap-csv
       config:
         files:
+          - entity: gainy_industries
+            file: data/gainy_industries.csv
+            keys: ["id"]
           - entity: raw_ticker_industries
             file: data/industry_tickers.csv
             keys: ["Industry Name", "Code"]

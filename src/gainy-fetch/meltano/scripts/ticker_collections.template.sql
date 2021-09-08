@@ -10,6 +10,9 @@
     ]
   )
 }}
+
+/* THE MODEL FILE IS AUTO GENERATED DURING BUILD, YOU SHOULD NOT EDIT THE MODEL, EDIT THE TEMPLATE INSTEAD  */
+
 with price AS
          (
              select hp.*,
@@ -22,21 +25,21 @@ with price AS
                     latest_price.close                                           as price,
                     (latest_price.close - latest_price.open) / latest_price.open as chrt,
                     t.type                                                       as ttype,
-                    ti.industry_name                                             as g_industry,
+                    gi.name                                                      as g_industry,
                     t.gic_sector                                                 as gics_sector,
                     lower(c.name)                                                as investcat
-             from tickers t
+             from {{ ref('tickers') }} t
                       JOIN price latest_price ON latest_price.code = t.symbol AND latest_price.inv_row_number = 1
-                      JOIN ticker_industries ti on t.symbol = ti.symbol
-                      JOIN ticker_categories tc on t.symbol = tc.symbol
-                      JOIN categories c on tc.category_id = c.id
+                      JOIN {{ ref('ticker_industries') }} ti on t.symbol = ti.symbol
+                      JOIN {{ ref('gainy_industries') }} gi on ti.industry_id = gi.id
+                      JOIN {{ ref('ticker_categories') }} tc on t.symbol = tc.symbol
+                      JOIN {{ ref('categories') }} c on tc.category_id = c.id
          ),
-     ticker_collections as
+     tmp_ticker_collections as
          (
 -- __SELECT__ --
          )
 SELECT t2.symbol, collection_id
-from ticker_collections
-         join {{ ref ('tickers') }} t2
-on ticker_collections.symbol = t2.symbol
-    join collections c2 on ticker_collections.collection_id = c2.id
+from tmp_ticker_collections
+    join {{ ref ('tickers') }} t2 on tmp_ticker_collections.symbol = t2.symbol
+    join {{ ref ('collections') }} c2 on tmp_ticker_collections.collection_id = c2.id

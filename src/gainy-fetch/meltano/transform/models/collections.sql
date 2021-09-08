@@ -8,5 +8,5 @@
   )
 }}
 
-SELECT id::int, name
-FROM raw_gainy_industries
+SELECT id::int, name, qa, description, enabled, image_url, sql_request
+FROM raw_collections

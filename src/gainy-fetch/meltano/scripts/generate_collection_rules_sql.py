@@ -2,11 +2,11 @@ import csv
 import re
 
 queries = []
-with open('../data/collection_rules.csv', newline='') as csvfile:
+with open('../data/collections.csv', newline='') as csvfile:
     reader = csv.DictReader(csvfile, delimiter=',', quotechar='"')
     for row in reader:
-        name, sql, skip = row['Collection Name'], row['sql_request'], row['sql_skip']
-        if(not sql or skip):
+        name, sql, enabled = row['name'], row['sql_request'], row['enabled']
+        if(not sql or not int(enabled)):
             continue
         sql = " ".join(filter(lambda x: not re.match(r'^(select|where|order)', x), sql.lower().split("\n")))
         queries.append("select collections.id as collection_id, ct.ticker_code as symbol from ct join collections on collections.name = '%s' where %s" % (name, sql))
