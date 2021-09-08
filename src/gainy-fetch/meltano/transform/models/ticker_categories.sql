@@ -4,7 +4,6 @@
     sort = "created_at",
     dist = ['category_id', 'symbol'],
     indexes=[
-      { 'columns': ['category_id', 'symbol'], 'unique': true },
     ],
     post_hook=[
       fk(this, 'symbol', 'tickers', 'symbol'),
@@ -12,6 +11,8 @@
     ]
   )
 }}
+
+/*       { 'columns': ['category_id', 'symbol'], 'unique': true }, # TODO specify name not starting with a digit (else hasura will fail) */
 
 (
     WITH downside_deviation_stats AS

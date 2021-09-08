@@ -18,9 +18,15 @@ plugins:
     - name: tap-csv
       config:
         files:
+          - entity: raw_gainy_industries
+            file: data/gainy_industries.csv
+            keys: ["id"]
           - entity: raw_ticker_industries
             file: data/industry_tickers.csv
-            keys: ["Industry Name", "Code"]
+            keys: ["Code"]
+          - entity: raw_collections
+            file: data/collections.csv
+            keys: ["id"]
   loaders:
     - name: target-postgres
       variant: transferwise

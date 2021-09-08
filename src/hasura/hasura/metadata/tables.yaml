@@ -181,9 +181,35 @@
 - table:
     schema: public
     name: categories
+  array_relationships:
+  - name: ticker_categories
+    using:
+      foreign_key_constraint_on:
+        column: category_id
+        table:
+          schema: public
+          name: ticker_categories
 - table:
     schema: public
     name: collections
+  array_relationships:
+  - name: ticker_collections
+    using:
+      foreign_key_constraint_on:
+        column: collection_id
+        table:
+          schema: public
+          name: ticker_collections
+  select_permissions:
+  - role: user
+    permission:
+      columns:
+      - id
+      - name
+      - image_url
+      - description
+      filter: {}
+      allow_aggregations: true
 - table:
     schema: public
     name: dividends
@@ -231,9 +257,23 @@
 - table:
     schema: public
     name: ticker_categories
+  object_relationships:
+  - name: category
+    using:
+      foreign_key_constraint_on: category_id
+  - name: ticker
+    using:
+      foreign_key_constraint_on: symbol
 - table:
     schema: public
     name: ticker_collections
+  object_relationships:
+  - name: collection
+    using:
+      foreign_key_constraint_on: collection_id
+  - name: ticker
+    using:
+      foreign_key_constraint_on: symbol
 - table:
     schema: public
     name: ticker_financials
@@ -301,6 +341,20 @@
         table:
           schema: public
           name: technicals
+  - name: ticker_categories
+    using:
+      foreign_key_constraint_on:
+        column: symbol
+        table:
+          schema: public
+          name: ticker_categories
+  - name: ticker_collections
+    using:
+      foreign_key_constraint_on:
+        column: symbol
+        table:
+          schema: public
+          name: ticker_collections
   - name: ticker_financials
     using:
       foreign_key_constraint_on:

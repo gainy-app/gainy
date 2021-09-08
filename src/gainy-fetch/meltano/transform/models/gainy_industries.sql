@@ -2,12 +2,11 @@
   config(
     materialized = "table",
     sort = "created_at",
-    dist = "symbol",
     post_hook=[
-      index(this, 'name', true),
+      index(this, 'id', true),
     ]
   )
 }}
 
-SELECT DISTINCT "industry name" as name
-FROM raw_ticker_industries
+SELECT id::int, name
+FROM raw_gainy_industries

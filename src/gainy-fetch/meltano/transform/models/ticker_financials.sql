@@ -10,19 +10,16 @@
   )
 }}
 
-/* TODO remove price_change_today and current_price */
 select h.symbol,
        pe_ratio,
        market_capitalization,
        highlight,
        h.revenue_ttm,
-       random()::real            as price_change_today,
-       (1000 * random())::real   as current_price,
        CASE
            WHEN d0.value = 0 THEN NULL
            WHEN d1.value IS NOT NULL THEN pow(d0.value / d1.value, 1.0 / 5)::real - 1
            WHEN d2.value IS NOT NULL THEN (d0.value / d2.value)::real - 1
-           END                   as divident_growth,
+           END                   as dividend_growth,
        hp1.close                 as quarter_ago_close,
        hp0.close / hp1.close - 1 as quarter_price_performance,
        now()                     as created_at
