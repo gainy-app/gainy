@@ -82,9 +82,118 @@
   - name: profile
     using:
       foreign_key_constraint_on: profile_id
+  insert_permissions:
+  - role: user
+    permission:
+      check:
+        profile:
+          user_id:
+            _eq: X-Hasura-User-Id
+      columns:
+      - interest_id
+      - profile_id
+      backend_only: false
+  select_permissions:
+  - role: user
+    permission:
+      columns:
+      - interest_id
+      - profile_id
+      filter:
+        profile:
+          user_id:
+            _eq: X-Hasura-User-Id
+  update_permissions:
+  - role: user
+    permission:
+      columns:
+      - interest_id
+      - profile_id
+      filter:
+        profile:
+          user_id:
+            _eq: X-Hasura-User-Id
+      check: null
+  delete_permissions:
+  - role: user
+    permission:
+      filter:
+        profile:
+          user_id:
+            _eq: X-Hasura-User-Id
+- table:
+    schema: app
+    name: profile_scoring_settings
+  object_relationships:
+  - name: profile
+    using:
+      foreign_key_constraint_on: profile_id
+  insert_permissions:
+  - role: user
+    permission:
+      check:
+        profile:
+          user_id:
+            _eq: X-Hasura-User-Id
+      columns:
+      - average_market_return
+      - damage_of_failure
+      - if_market_drops_20_i_will_buy
+      - if_market_drops_40_i_will_buy
+      - investment_horizon
+      - risk_level
+      - stock_market_risk_level
+      - trading_experience
+      - unexpected_purchases_source
+      backend_only: false
+  select_permissions:
+  - role: user
+    permission:
+      columns:
+      - stock_market_risk_level
+      - trading_experience
+      - unexpected_purchases_source
+      - average_market_return
+      - profile_id
+      - damage_of_failure
+      - if_market_drops_20_i_will_buy
+      - if_market_drops_40_i_will_buy
+      - investment_horizon
+      - risk_level
+      - created_at
+      filter:
+        profile:
+          user_id:
+            _eq: X-Hasura-User-Id
+  update_permissions:
+  - role: user
+    permission:
+      columns:
+      - average_market_return
+      - damage_of_failure
+      - if_market_drops_20_i_will_buy
+      - if_market_drops_40_i_will_buy
+      - investment_horizon
+      - risk_level
+      - stock_market_risk_level
+      - trading_experience
+      - unexpected_purchases_source
+      filter:
+        profile:
+          user_id:
+            _eq: X-Hasura-User-Id
+      check: null
 - table:
     schema: app
     name: profiles
+  object_relationships:
+  - name: profile_scoring_setting
+    using:
+      foreign_key_constraint_on:
+        column: profile_id
+        table:
+          schema: app
+          name: profile_scoring_settings
   array_relationships:
   - name: profile_categories
     using:
@@ -118,11 +227,8 @@
       - email
       - first_name
       - gender
-      - investment_experience
-      - investment_goals
-      - investment_horizon
       - last_name
-      - risk_level
+      - user_id
       backend_only: false
   select_permissions:
   - role: user
@@ -134,11 +240,7 @@
       - first_name
       - gender
       - id
-      - investment_experience
-      - investment_goals
-      - investment_horizon
       - last_name
-      - risk_level
       - user_id
       filter:
         user_id:
@@ -150,11 +252,7 @@
       - avatar_url
       - first_name
       - gender
-      - investment_experience
-      - investment_goals
-      - investment_horizon
       - last_name
-      - risk_level
       filter:
         user_id:
           _eq: X-Hasura-User-Id
