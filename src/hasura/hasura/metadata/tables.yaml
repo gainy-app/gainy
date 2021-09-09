@@ -334,7 +334,63 @@
       foreign_key_constraint_on: symbol
 - table:
     schema: public
+    name: financials_income_statement_quarterly
+  object_relationships:
+  - name: ticker
+    using:
+      foreign_key_constraint_on: symbol
+- table:
+    schema: public
     name: fundamentals
+- table:
+    schema: public
+    name: gainy_industries
+  array_relationships:
+  - name: industry_stats_dailies
+    using:
+      foreign_key_constraint_on:
+        column: industry_id
+        table:
+          schema: public
+          name: industry_stats_daily
+  - name: industry_stats_quarterlies
+    using:
+      foreign_key_constraint_on:
+        column: industry_id
+        table:
+          schema: public
+          name: industry_stats_quarterly
+  - name: ticker_industries
+    using:
+      foreign_key_constraint_on:
+        column: industry_id
+        table:
+          schema: public
+          name: ticker_industries
+  - name: ticker_industry_median_1m
+    using:
+      manual_configuration:
+        remote_table:
+          schema: public
+          name: industry_median_1m
+        insertion_order: null
+        column_mapping:
+          id: industry_id
+  - name: ticker_industry_median_1w
+    using:
+      manual_configuration:
+        remote_table:
+          schema: public
+          name: industry_median_1w
+        insertion_order: null
+        column_mapping:
+          id: industry_id
+- table:
+    schema: public
+    name: growth_rate_1m
+- table:
+    schema: public
+    name: growth_rate_1w
 - table:
     schema: public
     name: highlights
@@ -344,7 +400,40 @@
       foreign_key_constraint_on: symbol
 - table:
     schema: public
+    name: historical_growth_rate
+  object_relationships:
+  - name: ticker
+    using:
+      foreign_key_constraint_on: symbol
+- table:
+    schema: public
     name: historical_prices
+- table:
+    schema: public
+    name: historical_prices_1m
+- table:
+    schema: public
+    name: historical_prices_1w
+- table:
+    schema: public
+    name: industry_median_1m
+- table:
+    schema: public
+    name: industry_median_1w
+- table:
+    schema: public
+    name: industry_stats_daily
+  object_relationships:
+  - name: gainy_industry
+    using:
+      foreign_key_constraint_on: industry_id
+- table:
+    schema: public
+    name: industry_stats_quarterly
+  object_relationships:
+  - name: gainy_industry
+    using:
+      foreign_key_constraint_on: industry_id
 - table:
     schema: public
     name: technicals
@@ -388,6 +477,16 @@
       foreign_key_constraint_on: symbol
 - table:
     schema: public
+    name: ticker_industries
+  object_relationships:
+  - name: gainy_industry
+    using:
+      foreign_key_constraint_on: industry_id
+  - name: ticker
+    using:
+      foreign_key_constraint_on: symbol
+- table:
+    schema: public
     name: tickers
   array_relationships:
   - name: analyst_ratings
@@ -425,6 +524,13 @@
         table:
           schema: public
           name: earnings_trend
+  - name: financials_income_statement_quarterlies
+    using:
+      foreign_key_constraint_on:
+        column: symbol
+        table:
+          schema: public
+          name: financials_income_statement_quarterly
   - name: highlights
     using:
       foreign_key_constraint_on:
@@ -432,6 +538,22 @@
         table:
           schema: public
           name: highlights
+  - name: historical_growth_rates
+    using:
+      foreign_key_constraint_on:
+        column: symbol
+        table:
+          schema: public
+          name: historical_growth_rate
+  - name: historical_prices
+    using:
+      manual_configuration:
+        remote_table:
+          schema: public
+          name: historical_prices
+        insertion_order: null
+        column_mapping:
+          symbol: code
   - name: technicals
     using:
       foreign_key_constraint_on:
@@ -460,6 +582,24 @@
         table:
           schema: public
           name: ticker_financials
+  - name: ticker_growth_rate_1m
+    using:
+      manual_configuration:
+        remote_table:
+          schema: public
+          name: growth_rate_1m
+        insertion_order: null
+        column_mapping:
+          symbol: symbol
+  - name: ticker_growth_rate_1w
+    using:
+      manual_configuration:
+        remote_table:
+          schema: public
+          name: growth_rate_1w
+        insertion_order: null
+        column_mapping:
+          symbol: symbol
   - name: ticker_highlights
     using:
       foreign_key_constraint_on:
@@ -467,6 +607,31 @@
         table:
           schema: public
           name: ticker_highlights
+  - name: ticker_historical_prices_1m
+    using:
+      manual_configuration:
+        remote_table:
+          schema: public
+          name: historical_prices_1m
+        insertion_order: null
+        column_mapping:
+          symbol: symbol
+  - name: ticker_historical_prices_1w
+    using:
+      manual_configuration:
+        remote_table:
+          schema: public
+          name: historical_prices_1w
+        insertion_order: null
+        column_mapping:
+          symbol: symbol
+  - name: ticker_industries
+    using:
+      foreign_key_constraint_on:
+        column: symbol
+        table:
+          schema: public
+          name: ticker_industries
   - name: valuations
     using:
       foreign_key_constraint_on:
