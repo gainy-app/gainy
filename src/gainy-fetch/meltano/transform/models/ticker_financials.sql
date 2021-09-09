@@ -91,12 +91,12 @@ select  h.symbol,
         now()                      as created_at,
         h.profit_margin            as net_profit_margin,
         v.enterprise_value_revenue as enterprise_value_to_sales,
-        sma_30days,
-        sma_50days,
-        sma_200days,
-        market_cap_cagr_1years,
-        market_cap_cagr_3years,
-        market_cap_cagr_5years
+        sma_30days::real,
+        sma_50days::real,
+        sma_200days::real,
+        market_cap_cagr_1years::real,
+        market_cap_cagr_3years::real,
+        market_cap_cagr_5years::real
 from {{ ref('highlights') }} h
     left join sma_tmp on h.symbol = sma_tmp.code
     left join cagr_tmp on h.symbol = cagr_tmp.code
