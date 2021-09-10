@@ -127,8 +127,6 @@ class HistoricalPrices(AbstractEODStream):
 
     def get_url_params(self, context: Optional[dict], next_page_token: Optional[Any]) -> Dict[str, Any]:
         params = super().get_url_params(context, next_page_token)
-        # 10 years needed for downside deviation
-        params["from"] = (datetime.datetime.now() - datetime.timedelta(days=10 * 12 * 30)).strftime('%Y-%m-%d')
         return params
 
 class Options(AbstractEODStream):
