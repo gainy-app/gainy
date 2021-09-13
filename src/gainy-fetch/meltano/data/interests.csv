@@ -1,0 +1,164 @@
+name,id,sql_request,enabled,icon_url
+Cars Manufacturers,1,"where
+lower(ct.g_industry) like '%electr%vehic%' OR
+lower(ct.g_industry) like '%auto%deal%' OR
+lower(ct.g_industry) like '%auto%manufact%' OR
+lower(ct.g_industry) like '%auto%marketpl%' OR
+lower(ct.g_industry) like '%auto%part%service%'",1,https://gainy-interests-dev.s3.amazonaws.com/placeholder.png
+Cable & Satellite,2,"where
+lower(ct.g_industry) like '%satel%comm%' OR
+lower(ct.g_industry) like '%tv%radio%' OR
+lower(ct.g_industry) like '%5g%comm%'",1,https://gainy-interests-dev.s3.amazonaws.com/placeholder.png
+Gaming,3,"where
+lower(ct.g_industry) like '%gam%esport%' OR
+lower(ct.g_industry) like '%casin%resort%'",1,https://gainy-interests-dev.s3.amazonaws.com/placeholder.png
+Cannabis,4,"where
+lower(ct.g_industry) like '%cannabis%'",1,https://gainy-interests-dev.s3.amazonaws.com/placeholder.png
+Consumer Electronics,5,"where
+lower(ct.g_industry) like '%electron%displ%' OR
+lower(ct.g_industry) like '%electron%manufact%' OR
+lower(ct.g_industry) like '%drones%' OR
+lower(ct.g_industry) like 'iot%' OR
+lower(ct.g_industry) like '%tech%conglomerat%'",1,https://gainy-interests-dev.s3.amazonaws.com/placeholder.png
+Hotels & Cruise Lines,6,"where
+lower(ct.g_industry) like '%hotel%' and lower(ct.g_industry) not like '%reit%' OR
+lower(ct.g_industry) like '%onlin%travel%compan%' OR
+lower(ct.g_industry) like '%maritime%transport%'",1,https://gainy-interests-dev.s3.amazonaws.com/placeholder.png
+Peloton,7,"where
+lower(ct.g_industry) like '%outdoor%life%style%' OR
+lower(ct.g_industry) like '%sport%drink%'",1,https://gainy-interests-dev.s3.amazonaws.com/placeholder.png
+Crypto,8,"where
+lower(ct.g_industry) like '%cryptocurrenc%'",1,https://gainy-interests-dev.s3.amazonaws.com/placeholder.png
+Green Energy,9,"where
+lower(ct.g_industry) like '%clean%energ%' OR
+lower(ct.g_industry) like '%energ%explor%' OR
+lower(ct.g_industry) like '%renew%energ%' OR
+lower(ct.g_industry) like '%solar%energ%'",1,https://gainy-interests-dev.s3.amazonaws.com/placeholder.png
+Health Insurance,10,"where
+lower(ct.g_industry) like '%health%insur%' OR
+lower(ct.g_industry) like '%life%insur%' OR
+lower(ct.g_industry) like '%multilin%insur%' OR
+lower(ct.g_industry) like '%insur%broker%'",1,https://gainy-interests-dev.s3.amazonaws.com/placeholder.png
+Publishing,11,"where
+lower(ct.g_industry) like '%digit%content%publish%' OR
+lower(ct.g_industry) like '%publishers%' OR
+lower(ct.g_industry) like '%digit%market%advert%' OR
+lower(ct.g_industry) like '%digit%media%web%'",1,https://gainy-interests-dev.s3.amazonaws.com/placeholder.png
+Technology Hardware,12,"where
+lower(ct.g_industry) like '%5g%comm%' OR
+lower(ct.g_industry) like '%comput%vision%sens%' OR
+lower(ct.g_industry) like '%data%stor%manag%' OR
+lower(ct.g_industry) like '%electron%compon%' OR
+lower(ct.g_industry) like '%electron%displ%' OR
+lower(ct.g_industry) like '%electron%manufact%' OR
+lower(ct.g_industry) like '%memor%stor%' OR
+lower(ct.g_industry) like '%network%equip%' OR
+lower(ct.g_industry) like '%power%generat%distrib%' OR
+lower(ct.g_industry) like '%video%tech%'",1,https://gainy-interests-dev.s3.amazonaws.com/placeholder.png
+Trucking,13,"where
+lower(ct.g_industry) like '%truck%' OR
+lower(ct.g_industry) like '%auto%part%serv%'",1,https://gainy-interests-dev.s3.amazonaws.com/placeholder.png
+Salesforce,14,"where
+lower(ct.g_industry) like '%crm%customer%succ%' OR
+lower(ct.g_industry) like '%distrib%work%tool%' OR
+lower(ct.g_industry) like '%enterpris%tech%'",1,https://gainy-interests-dev.s3.amazonaws.com/placeholder.png
+AI,15,"where
+lower(ct.g_industry) like '%analyt%ai%' OR
+lower(ct.g_industry) like '%comput%vis%sens%' OR
+lower(ct.g_industry) like 'iot%' OR
+lower(ct.g_industry) like '%precis%manufact%' OR
+lower(ct.g_industry) like '%health%car%serv%equip%robot%' OR
+lower(ct.g_industry) like '%tech%conglomerat%'",1,https://gainy-interests-dev.s3.amazonaws.com/placeholder.png
+Airlines,16,"where
+lower(ct.g_industry) like '%airline%' OR
+lower(ct.g_industry) like '%air%carg%transport%' OR
+lower(ct.g_industry) like '%aircraft%leas%' OR
+lower(ct.g_industry) like '%onlin%travel%comp%'",1,https://gainy-interests-dev.s3.amazonaws.com/placeholder.png
+Entertainment,17,"where
+lower(ct.g_industry) like '%tv%radio%' OR
+lower(ct.g_industry) like '%streaming%' OR
+lower(ct.g_industry) like '%gaming%esport%' OR
+lower(ct.g_industry) like '%digit%market%advert%'",1,https://gainy-interests-dev.s3.amazonaws.com/placeholder.png
+Biotechnology,18,"where
+lower(ct.g_industry) like '%biotech%' OR
+lower(ct.g_industry) like '%pharm%cancer%diseas%' OR
+lower(ct.g_industry) like '%health%car%serv%equip%lab%' OR
+lower(ct.g_industry) like '%pharm%covid%' OR
+lower(ct.g_industry) like '%pharm%dermat%'",1,https://gainy-interests-dev.s3.amazonaws.com/placeholder.png
+Banks,19,"where
+lower(ct.g_industry) like 'bank%' OR
+lower(ct.g_industry) like '%invest%bank%adv%' OR
+lower(ct.g_industry) like '%invest%manag%' OR
+lower(ct.g_industry) like '%trad%privat%invest%fund%'",1,https://gainy-interests-dev.s3.amazonaws.com/placeholder.png
+Lululemon,20,"where
+lower(ct.g_industry) like '%luxur%retail%' OR
+lower(ct.g_industry) like '%apparel%manufact%retail%' OR
+lower(ct.g_industry) like '%outdoor%life%styl%prod%'",1,https://gainy-interests-dev.s3.amazonaws.com/placeholder.png
+Ecommerce,21,"where
+lower(ct.g_industry) like '%e-commerc%operat%' OR
+lower(ct.g_industry) like '%e-commerc%platform%' OR
+lower(ct.g_industry) like '%tech%conglomerat%'",1,https://gainy-interests-dev.s3.amazonaws.com/placeholder.png
+Coursera,22,"where
+lower(ct.g_industry) like '%educat%serv%' OR
+lower(ct.g_industry) like '%educat%tech%'",1,https://gainy-interests-dev.s3.amazonaws.com/placeholder.png
+PayPal,23,"where
+lower(ct.g_industry) like '%payment%system%' OR
+lower(ct.g_industry) like '%fintech%operat%'",1,https://gainy-interests-dev.s3.amazonaws.com/placeholder.png
+Casino,24,"where
+lower(ct.g_industry) like '%casin%resort%'",1,https://gainy-interests-dev.s3.amazonaws.com/placeholder.png
+Gold & Silver,25,"where
+lower(ct.g_industry) like '%gold%silver%' OR
+lower(ct.g_industry) like '%prec%metal%trad%'",1,https://gainy-interests-dev.s3.amazonaws.com/placeholder.png
+Homebuilding,26,"where
+lower(ct.g_industry) like '%home%construct%maint%' OR
+lower(ct.g_industry) like '%build%mater%' OR
+lower(ct.g_industry) like '%build%prod%' OR
+lower(ct.g_industry) like '%home%furnit%retail%'",1,https://gainy-interests-dev.s3.amazonaws.com/placeholder.png
+Oil & Gas,27,"where
+lower(ct.g_industry) like '%oil%gas%produc%' OR
+lower(ct.g_industry) like '%liqui%natur%gas%' OR
+lower(ct.g_industry) like '%oil%gas%servic%'",1,https://gainy-interests-dev.s3.amazonaws.com/placeholder.png
+Internet Infrastructure,28,"where
+lower(ct.g_industry) like '%cybersecur%' OR
+lower(ct.g_industry) like '%data%cent%' OR
+lower(ct.g_industry) like '%domain%reg%' OR
+lower(ct.g_industry) like '%enterpris%cloud%' OR
+lower(ct.g_industry) like '%network%equip%' OR
+lower(ct.g_industry) like '%tech%conglomerat%'",1,https://gainy-interests-dev.s3.amazonaws.com/placeholder.png
+Real Estate,29,"where
+lower(ct.g_industry) like '%real%estat%tech%' OR
+lower(ct.g_industry) like '%real%estat%prop%manag%' OR
+lower(ct.g_industry) like '%real%estat%invest%develop%' OR
+lower(ct.g_industry) like '%commerc%real%estat%broker%serv%' OR
+lower(ct.g_industry) like '% reit'",1,https://gainy-interests-dev.s3.amazonaws.com/placeholder.png
+Restaurants,30,"where
+lower(ct.g_industry) like '%casual%din%' OR
+lower(ct.g_industry) like '%food%deliver%'",1,https://gainy-interests-dev.s3.amazonaws.com/placeholder.png
+Semiconductors,31,"where
+lower(ct.g_industry) like '%semiconduct%equip%' OR
+lower(ct.g_industry) like '%semiconduct%manufact%' OR
+lower(ct.g_industry) like '%semiconduct%mater%' OR
+lower(ct.g_industry) like '%memory%storage%'",1,https://gainy-interests-dev.s3.amazonaws.com/placeholder.png
+SPACs,32,"where
+lower(ct.g_industry) like '%shell%compan%spac%'",1,https://gainy-interests-dev.s3.amazonaws.com/placeholder.png
+Social media,33,"where
+lower(ct.g_industry) like '%social%media%'",1,https://gainy-interests-dev.s3.amazonaws.com/placeholder.png
+Utilities,34,"where
+lower(ct.g_industry) like '%electricity%generat%' OR
+lower(ct.g_industry) like '%waste%manag%' OR
+lower(ct.g_industry) like '%water%manag%'",1,https://gainy-interests-dev.s3.amazonaws.com/placeholder.png
+Tesla,35,"where
+lower(ct.g_industry) like '%electric%vehicle%'",1,https://gainy-interests-dev.s3.amazonaws.com/placeholder.png
+Gig Economy,36,"where
+lower(ct.g_industry) like '%payment%system%' OR
+lower(ct.g_industry) like '%shar%econom%' OR
+lower(ct.g_industry) like '%e-commerc%platform%'",1,https://gainy-interests-dev.s3.amazonaws.com/placeholder.png
+Sharing economy,37,"where
+lower(ct.g_industry) like '%shar%econom%'",1,https://gainy-interests-dev.s3.amazonaws.com/placeholder.png
+Beverages,38,"where
+lower(ct.g_industry) like '%cof%e%tea%' OR
+lower(ct.g_industry) like '%wine%liquor%' OR
+lower(ct.g_industry) like '%soft%sport%drink%'
+",1,https://gainy-interests-dev.s3.amazonaws.com/placeholder.png
+Netflix,39,"where
+lower(ct.g_industry) like 'streaming%'",1,https://gainy-interests-dev.s3.amazonaws.com/placeholder.png

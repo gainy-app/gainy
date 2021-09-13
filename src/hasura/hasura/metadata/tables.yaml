@@ -1,23 +1,5 @@
 - table:
     schema: app
-    name: interests
-  array_relationships:
-  - name: profile_interests
-    using:
-      foreign_key_constraint_on:
-        column: interest_id
-        table:
-          schema: app
-          name: profile_interests
-  select_permissions:
-  - role: anonymous
-    permission:
-      columns:
-      - id
-      - name
-      filter: {}
-- table:
-    schema: app
     name: profile_categories
   object_relationships:
   - name: profile
@@ -76,9 +58,6 @@
     schema: app
     name: profile_interests
   object_relationships:
-  - name: interest
-    using:
-      foreign_key_constraint_on: interest_id
   - name: profile
     using:
       foreign_key_constraint_on: profile_id
@@ -436,6 +415,17 @@
       foreign_key_constraint_on: industry_id
 - table:
     schema: public
+    name: interests
+  array_relationships:
+  - name: ticker_interests
+    using:
+      foreign_key_constraint_on:
+        column: interest_id
+        table:
+          schema: public
+          name: ticker_interests
+- table:
+    schema: public
     name: technicals
   object_relationships:
   - name: ticker
@@ -482,6 +472,16 @@
   - name: gainy_industry
     using:
       foreign_key_constraint_on: industry_id
+  - name: ticker
+    using:
+      foreign_key_constraint_on: symbol
+- table:
+    schema: public
+    name: ticker_interests
+  object_relationships:
+  - name: interest
+    using:
+      foreign_key_constraint_on: interest_id
   - name: ticker
     using:
       foreign_key_constraint_on: symbol
@@ -632,6 +632,13 @@
         table:
           schema: public
           name: ticker_industries
+  - name: ticker_interests
+    using:
+      foreign_key_constraint_on:
+        column: symbol
+        table:
+          schema: public
+          name: ticker_interests
   - name: valuations
     using:
       foreign_key_constraint_on:

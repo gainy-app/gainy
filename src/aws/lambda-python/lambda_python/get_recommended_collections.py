@@ -92,7 +92,6 @@ def handle(event, context):
         loss_tolerance = round(
             (stock_market_risk_level_points + trading_experience_points) / 2)
 
-        #TODO check if we need to adjust the final loss_tolerance score, not just trading_experience_points
         for i in [
                 'if_market_drops_20_i_will_buy',
                 'if_market_drops_40_i_will_buy'
@@ -105,7 +104,6 @@ def handle(event, context):
                     loss_tolerance += 1
 
         final_score = max(risk_needed, risk_taking_ability, loss_tolerance)
-        # TODO add missing rows
         for i in decision_matrix:
             if i['Risk Need'] == risk_needed and i[
                     'Risk Taking Ability'] == risk_taking_ability and i[

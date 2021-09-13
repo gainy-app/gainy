@@ -27,6 +27,9 @@ plugins:
           - entity: raw_collections
             file: data/collections.csv
             keys: ["id"]
+          - entity: raw_interests
+            file: data/interests.csv
+            keys: ["id"]
           - entity: raw_countries
             file: data/countries.csv # https://github.com/lukes/ISO-3166-Countries-with-Regional-Codes/blob/master/all/all.json
             keys: ["name", "alpha-2", "alpha-3"]
