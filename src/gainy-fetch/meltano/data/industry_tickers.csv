@@ -1,0 +1,3154 @@
+Industry Name,Code
+3d printing,VJET
+3d printing,SGLB
+3d printing,XONE
+aerospace & defense,AVAV
+aerospace & defense,ISSC
+aerospace & defense,RADA
+aerospace & defense,TATT
+aerospace & defense,VSEC
+aerospace & defense,ESLT
+aerospace & defense,WWD
+aerospace & defense,ATRO
+aerospace & defense,ULBI
+aerospace & defense,MRCY
+agriculture & agtech,CDZI
+agriculture & agtech,RAVN
+agriculture & agtech,AGFS
+agriculture & agtech,ARTW
+agriculture & agtech,AGFY
+agriculture & agtech,BIOX
+agriculture & agtech,RKDA
+agriculture & agtech,SEED
+agriculture & agtech,ZIVO
+agriculture & agtech,CYAN
+air cargo transport,AIRT
+air cargo transport,AIRTP
+air cargo transport,AIRTW
+air cargo transport,ATSG
+aircraft leasing,WLFC
+airlines,ALGT
+airlines,AAL
+airlines,AAWW
+airlines,OMAB
+airlines,HA
+airlines,JBLU
+airlines,MESA
+airlines,RYAAY
+airlines,SKYW
+airlines,UAL
+auto manufacturers,PCAR
+auto parts & services,AIMC
+auto parts & services,CVGI
+auto parts & services,CPRT
+auto parts & services,RUSHA
+auto parts & services,SHYF
+auto parts & services,REKR
+auto parts & services,BLBD
+auto parts & services,NNBR
+auto parts & services,WPRT
+basic chemicals,HWKN
+basic chemicals,GURE
+battery tech,FLUX
+battery tech,PLUG
+battery tech,WATT
+building products,AAON
+building products,ROCK
+cannabis,KERNW
+cannabis,KERN
+clean energy,GEVO
+clean energy,GPRE
+clean energy,GPP
+clean energy,LTBR
+clean energy,AMTX
+clean energy,TANH
+clean energy,REGI
+clean energy,ANDE
+clean energy,CHSCL
+clean energy,CHSCO
+clean energy,CHSCP
+specialty chemicals,OBCI
+cleaning & decontamination,AUVI
+cleaning & decontamination,TOMZ
+cleaning & decontamination,CECE
+cleaning & decontamination,FTEK
+coal,METC
+coal,ADES
+coal,ARLP
+coal,AREC
+construction & infrastructure,ROAD
+construction & infrastructure,FAST
+construction & infrastructure,GLDD
+construction & infrastructure,GIFI
+construction & infrastructure,IESC
+construction & infrastructure,IEA
+construction & infrastructure,LMB
+construction & infrastructure,FSTR
+construction & infrastructure,FRTA
+construction & infrastructure,NWPX
+construction & infrastructure,PPIH
+construction & infrastructure,STRL
+construction machinery,MNTX
+construction machinery,TITN
+construction machinery,GENC
+construction machinery,ASTE
+building materials,MERC
+building materials,OSN
+building materials,RETO
+building materials,BECN
+building materials,BBCP
+building materials,SMID
+building materials,USCR
+building materials,USLM
+consulting services,TRNS
+consulting services,EXPO
+consulting services,TTEK
+consulting services,FORR
+consulting services,HSII
+consulting services,HURN
+consulting services,ICFI
+consulting services,NVEE
+container and packaging,LOOP
+container and packaging,PTVE
+container and packaging,SLGN
+container and packaging,TRS
+drones,EH
+electricity generation,AEP
+electricity generation,EXC
+electricity generation,LNT
+electricity generation,FCEL
+electricity generation,HNRG
+electricity generation,IPLDP
+electricity generation,MGEE
+electricity generation,NWE
+electricity generation,OTTR
+electricity generation,SPKE
+electricity generation,XEL
+electronic components,HIHO
+electronic components,AMOT
+energy exploration,BKEPP
+energy exploration,BKEP
+energy exploration,CLMT
+energy exploration,DMLP
+energy exploration,FLMN
+energy exploration,PFIE
+energy exploration,VNOM
+furnishing & fixtures,JCTCF
+home construction & maintenance,AMWD
+building materials,CSTE
+building materials,HBP
+furnishing & fixtures,TILE
+furnishing & fixtures,PATK
+building materials,APOG
+building materials,TGLS
+furnishing & fixtures,OFLX
+furnishing & fixtures,UFPI
+furnishing & fixtures,WIRE
+gold & silver,PAAS
+gold & silver,RGLD
+gold & silver,SSRM
+gold & silver,USAU
+heavy machinery & parts,BOOM
+heavy machinery & parts,LAWS
+heavy machinery & parts,HEES
+heavy machinery & parts,BWEN
+heavy machinery & parts,CMCO
+heavy machinery & parts,FELE
+heavy machinery & parts,HLIO
+heavy machinery & parts,TAYD
+heavy machinery & parts,TPIC
+heavy machinery & parts,GTEC
+heavy machinery & parts,HURC
+heavy machinery & parts,ROLL
+heavy machinery & parts,EML
+household products,MIDD
+industrial conglomerates,HON
+industrial metals,PLL
+industrial metals,AQMS
+industrial metals,CENX
+industrial metals,GSM
+industrial metals,HAYN
+industrial metals,KALU
+industrial metals,LECO
+industrial metals,ZEUS
+industrial metals,SCHN
+industrial metals,STLD
+industrial metals,USAP
+industrial metals,ZKIN
+industrial metals,CHNR
+industrial metals,GLG
+lighting systems,EFOI
+lighting systems,LYTS
+lighting systems,OESX
+liquified natural gas,CLNE
+liquified natural gas,CCLP
+liquified natural gas,GLNG
+liquified natural gas,GMLPP
+liquified natural gas,MEOH
+liquified natural gas,NFE
+liquified natural gas,NEXT
+liquified natural gas,RGCO
+liquified natural gas,SLNG
+liquified natural gas,TELL
+maritime transportation,CPLP
+maritime transportation,CTRM
+maritime transportation,EGLE
+maritime transportation,EDRY
+maritime transportation,ESEA
+maritime transportation,GLBS
+maritime transportation,GOGL
+maritime transportation,PANL
+maritime transportation,SHIP
+maritime transportation,SBLK
+maritime transportation,OMEX
+maritime transportation,GRIN
+maritime transportation,PATI
+maritime transportation,PXS
+maritime transportation,GASS
+maritime transportation,TOPS
+maritime transportation,SINO
+mlps,ALTM
+mlps,MMLP
+mlps,OMP
+mlps,PAA
+mlps,PAGP
+modular office & storage,DRTT
+modular office & storage,KBAL
+modular office & storage,UHAL
+modular office & storage,GFN
+modular office & storage,MLHR
+modular office & storage,MGRC
+modular office & storage,SGBX
+modular office & storage,VIRC
+modular office & storage,WSC
+nutrition & health,ALTO
+nutrition & health,BCPC
+oil & gas services,CHX
+oil & gas services,KLXE
+oil & gas services,TUSK
+oil & gas services,NESR
+oil & gas services,PTEN
+oil & gas services,RCON
+oil & gas services,SND
+oil & gas services,DWSN
+oil & gas services,GEOS
+oil & gas services,ERII
+oil & gas services,PRIM
+oil & gas services,ENG
+oil & gas services,WLDN
+oil & gas services,BROG
+oil & gas services,NCSM
+oil & gas producer,AXAS
+oil & gas producer,APA
+oil & gas producer,BRY
+oil & gas producer,CDEV
+oil & gas producer,CHK
+oil & gas producer,FANG
+oil & gas producer,EPSN
+oil & gas producer,MARPS
+oil & gas producer,OAS
+oil & gas producer,PDCE
+oil & gas producer,PVAC
+oil & gas producer,PNRG
+oil & gas producer,RTLR
+oil & gas producer,TGA
+oil & gas producer,USEG
+parking,SP
+power generation & distribution,POWL
+power generation & distribution,TWIN
+power generation & distribution,VICR
+power generation & distribution,MTRX
+power generation & distribution,MYRG
+print marketing,CMPR
+print marketing,FFHL
+print marketing,IKNX
+print marketing,KRNT
+print marketing,MATW
+rail freight,RAIL
+sharing economy,LYFT
+security & protection,AXON
+security & protection,RDVT
+security & protection,VRSK
+security & protection,VTSI
+security & protection,CTAS
+security & protection,ASTC
+security & protection,KTOS
+security & protection,MIND
+security & protection,MINDP
+power generation & distribution,AMSC
+renewable energy,AY
+renewable energy,BLDP
+renewable energy,BEEM
+renewable energy,IPWR
+power generation & distribution,PPSI
+power generation & distribution,POLA
+solar energy,RUN
+solar energy,SUNW
+solar energy,VVPR
+specialty chemicals,CSWI
+specialty chemicals,IOSP
+specialty chemicals,SYNL
+specialty chemicals,NDSN
+specialty chemicals,NTIC
+specialty chemicals,HDSN
+staffing services,CCRC
+staffing services,KFRC
+staffing services,RCMT
+staffing services,WHLM
+staffing services,JOBS
+staffing services,BBSI
+staffing services,HHR
+staffing services,HQI
+staffing services,HSON
+staffing services,KELYA
+staffing services,KELYB
+staffing services,PIXY
+staffing services,STAF
+supply chain services,EXPD
+supply chain services,DXPE
+supply chain services,PKOH
+telecomm infrastructure,APWC
+telecomm infrastructure,PLPC
+real estate technology,CSGP
+consulting services,CRAI
+investment management firm,IEP
+retail brokerage,MICT
+real estate technology,CIH
+traded private investment funds,ACTG
+investment banking & advisory,ATIF
+debt collections,PFMT
+consulting services,RGP
+pharmaceuticals & dystrophy disease,DYN
+pharmaceuticals & cancer disease,IPSC
+pharmaceuticals,AMRS
+healthcare services & people care,DLHC
+pharmaceuticals,MBII
+healthcare services & equipment,UFPT
+healthcare services & equipment,BIMI
+healthcare services & hospitals,HCSG
+pharmaceuticals,JAN
+staffing services,UPWK
+trucking,ARCB
+trucking,CHRW
+trucking,CVLG
+trucking,CSX
+trucking,DSKE
+trucking,ECHO
+trucking,FWRD
+trucking,HTLD
+trucking,HUBG
+trucking,JBHT
+trucking,LSTR
+trucking,MRTN
+trucking,ODFL
+trucking,PTSI
+trucking,SAIA
+trucking,ULH
+trucking,USAK
+trucking,WERN
+trucking,YELL
+vehicle rental,CAR
+waste management,BHTG
+waste management,CWST
+waste management,CREG
+waste management,HCCI
+waste management,PESI
+waste management,QRHC
+waste management,SRCL
+waste management,ECOL
+waste management,ECOLW
+waste management,VTNR
+water management,CLWT
+water management,LIQT
+water management,NEWA
+water management,AEGN
+water management,ARTNA
+water management,CWCO
+water management,GWRS
+water management,MSEX
+water management,PCYO
+water management,YORW
+water management,VWTR
+bread & condiments,KHC
+bread & condiments,LANC
+coffee & tea,NUZE
+coffee & tea,FARM
+coffee & tea,JVA
+coffee & tea,YGYIP
+coffee & tea,HAIN
+coffee & tea,MYT
+dairy,CHEF
+dairy,LWAY
+fruits & vegetables,VFF
+fruits & vegetables,WILC
+fruits & vegetables,LNDC
+fruits & vegetables,SANW
+fruits & vegetables,ALCO
+fruits & vegetables,CVGW
+fruits & vegetables,LMNR
+fruits & vegetables,FAMI
+fruits & vegetables,SENEA
+fruits & vegetables,SENEB
+health supplements,SXTC
+health supplements,TYHT
+health supplements,NBEV
+health supplements,NHTC
+health supplements,LFVN
+health supplements,NATR
+health supplements,MTEX
+health supplements,HAPP
+meat & poultry,BRID
+meat & poultry,BYND
+meat & poultry,HFFG
+meat & poultry,JBSS
+meat & poultry,PPC
+meat & poultry,SAFM
+meat & poultry,PME
+meat & poultry,PLIN
+meat & poultry,CALM
+medical/cosmetic ingredients,RIBT
+medical/cosmetic ingredients,IPAR
+medical/cosmetic ingredients,NAII
+medical/cosmetic ingredients,NEPT
+medical/cosmetic ingredients,UG
+pets,CENT
+pets,CENTA
+pets,FRPT
+pets,PETZ
+pharmacies,CJJD
+pharmacies,WBA
+pharmacies,YI
+snacks & candy,RMCF
+snacks & candy,SMPL
+snacks & candy,STKL
+snacks & candy,JJSF
+snacks & candy,MDLZ
+snacks & candy,TWNK
+snacks & candy,TWNKW
+soft/sports drink,CELH
+soft/sports drink,MNST
+soft/sports drink,FIZZ
+soft/sports drink,KDP
+soft/sports drink,PEP
+soft/sports drink,COKE
+soft/sports drink,REED
+soft/sports drink,WTER
+supermarkets,GO
+supermarkets,CASY
+supermarkets,IMKTA
+supermarkets,SPTN
+supermarkets,VLGEA
+supermarkets,COST
+supermarkets,IFMK
+supermarkets,SFM
+supermarkets,PSMT
+wine & liquor,EAST
+wine & liquor,WVVI
+wine & liquor,WVVIP
+wine & liquor,MGPI
+3d printing,SSYS
+3d printing,MTLS
+5g communication,ERIC
+5g communication,AEY
+5g communication,RBBN
+5g communication,FKWL
+5g communication,IDCC
+5g communication,INSG
+5g communication,DZSI
+advanced materials,CPSH
+advanced materials,SGOC
+advanced materials,RBCN
+advanced materials,IVAC
+agriculture & agtech,GRWG
+agriculture & agtech,WFCF
+analytics and ai,NCNO
+analytics and ai,NUAN
+analytics and ai,TLND
+analytics and ai,VRNS
+analytics and ai,NVDA
+analytics and ai,LKCO
+analytics and ai,SUMO
+analytics and ai,DOMO
+analytics and ai,SPLK
+analytics and ai,CRNC
+analytics and ai,DDOG
+analytics and ai,MARK
+analytics and ai,VERI
+analytics and ai,INPX
+analytics and ai,INOD
+analytics and ai,DUOT
+analytics and ai,MSTR
+analytics and ai,ALTR
+apparel manufacturing & retail,FIVE
+apparel manufacturing & retail,FOSL
+apparel manufacturing & retail,HIBB
+apparel manufacturing & retail,PLCE
+apparel manufacturing & retail,ICON
+apparel manufacturing & retail,ROST
+apparel manufacturing & retail,SCVL
+apparel manufacturing & retail,LE
+apparel manufacturing & retail,RCKY
+apparel manufacturing & retail,SHOO
+apparel manufacturing & retail,NAKD
+apparel manufacturing & retail,URBN
+apparel manufacturing & retail,WEYS
+apparel manufacturing & retail,POSH
+apparel manufacturing & retail,SQBG
+apparel manufacturing & retail,SGC
+apparel manufacturing & retail,KBSF
+apparel manufacturing & retail,WINA
+apparel manufacturing & retail,CROX
+apparel manufacturing & retail,CTRN
+apparel manufacturing & retail,DLTH
+apparel manufacturing & retail,EVK
+ar/vr,VUZI
+ar/vr,BHAT
+auto dealer,CRMT
+auto dealer,KXIN
+auto dealer,LAZY
+auto dealer,LMPX
+auto marketplace,TRUE
+auto marketplace,VRM
+auto marketplace,CARG
+auto marketplace,PRTS
+auto marketplace,AUTO
+auto marketplace,UXIN
+auto marketplace,RMBL
+auto parts & services,CDK
+auto parts & services,PFIN
+auto parts & services,GT
+auto parts & services,VC
+auto parts & services,MPAA
+auto parts & services,XPEL
+auto parts & services,CAAS
+auto parts & services,THRM
+auto parts & services,ORLY
+auto parts & services,DORM
+auto parts & services,FOXF
+auto parts & services,VOXX
+auto parts & services,FRSX
+auto parts & services,GTX
+auto parts & services,ITRN
+auto parts & services,LKQ
+auto parts & services,MNRO
+auto parts & services,STRT
+business intelligence,RSSS
+business intelligence,ZI
+cannabis,GNLN
+casino and resorts,MLCO
+casino and resorts,CNTY
+casino and resorts,CPHC
+casino and resorts,CZR
+casino and resorts,FLL
+casino and resorts,GDEN
+casino and resorts,MCRI
+casino and resorts,RRR
+casino and resorts,WYNN
+casino and resorts,PENN
+casino and resorts,OSW
+casual dining,RAVE
+casual dining,RRGB
+casual dining,RUTH
+casual dining,TA
+casual dining,FRGI
+casual dining,NATH
+casual dining,ARKR
+casual dining,BLMN
+casual dining,GTIM
+casual dining,BJRI
+casual dining,PZZA
+casual dining,CAKE
+casual dining,CHUY
+casual dining,STKS
+casual dining,NDLS
+casual dining,KRUS
+casual dining,JACK
+casual dining,PBPB
+casual dining,TXRH
+casual dining,LOCO
+casual dining,RICK
+casual dining,CBRL
+casual dining,TACO
+casual dining,WING
+casual dining,BBQ
+casual dining,TAST
+casual dining,DENN
+casual dining,FAT
+casual dining,WEN
+cloud-based communications,AUDC
+cloud-based communications,BAND
+cloud-based communications,DOX
+cloud-based communications,RDCM
+cloud-based communications,VG
+cloud-based communications,CRNT
+cloud-based communications,CXDO
+coffee & tea,LK
+coffee & tea,DTEA
+coffee & tea,SBUX
+computer vision and sensor,ITI
+computer vision and sensor,GNTX
+computer vision and sensor,CGNX
+computer vision and sensor,CYBE
+computer vision and sensor,MVIS
+computer vision and sensor,ISNS
+computer vision and sensor,LINK
+computer vision and sensor,NEON
+contract management,NTWK
+contract management,DOCU
+crm/customer success,LPSN
+crm/customer success,SNCR
+crm/customer success,EGAN
+crm/customer success,ALJJ
+crm/customer success,FIVN
+crm/customer success,IBEX
+crm/customer success,SYKE
+crm/customer success,TTEC
+crm/customer success,JG
+crm/customer success,TTGT
+crm/customer success,SRAX
+crm/customer success,NICE
+crm/customer success,PEGA
+crm/customer success,CNXC
+crm/customer success,VRNT
+crm/customer success,VERB
+crm/customer success,SREV
+crm/customer success,EVOL
+crm/customer success,SYNC
+crm/customer success,MNDO
+cryptocurrency,BTBT
+cryptocurrency,MFH
+cryptocurrency,RIOT
+cryptocurrency,CAN
+cryptocurrency,NCTY
+cryptocurrency,MARA
+cybersecurity,CSPI
+cybersecurity,CTXS
+cybersecurity,TENB
+cybersecurity,TLS
+cybersecurity,MIME
+cybersecurity,ZIXI
+cybersecurity,NTCT
+cybersecurity,PFPT
+cybersecurity,RPD
+cybersecurity,CYBR
+cybersecurity,FEYE
+cybersecurity,FFIV
+cybersecurity,FTNT
+cybersecurity,JCOM
+cybersecurity,JAMF
+cybersecurity,SCWX
+cybersecurity,SFET
+cybersecurity,INTZ
+cybersecurity,QLYS
+cybersecurity,WKEY
+cybersecurity,ZS
+cybersecurity,CHKP
+cybersecurity,MANT
+cybersecurity,CYRN
+cybersecurity,CRWD
+cybersecurity,RDWR
+cybersecurity,MCFE
+data center,GDS
+data center,VNET
+data center,SIFY
+data storage and management,CVLT
+data storage and management,MDB
+data storage and management,QMCO
+digital content publisher,DLPN
+digital content publisher,GAIA
+digital content publisher,IAC
+digital content publisher,QTT
+digital content publisher,GNUS
+digital content publisher,KRKR
+digital marketing & advertising,SHSP
+digital marketing & advertising,ATY
+digital marketing & advertising,CDLX
+digital marketing & advertising,IZEA
+digital marketing & advertising,NCMI
+digital marketing & advertising,ICLK
+digital marketing & advertising,SCOR
+digital marketing & advertising,QNST
+digital marketing & advertising,CRTO
+digital marketing & advertising,TAOP
+digital marketing & advertising,THRY
+digital marketing & advertising,POPM
+digital marketing & advertising,MRIN
+digital marketing & advertising,ISIG
+digital marketing & advertising,MCHX
+digital marketing & advertising,FLNT
+digital marketing & advertising,MGNI
+digital marketing & advertising,CNET
+digital marketing & advertising,PERI
+digital marketing & advertising,ANTE
+digital marketing & advertising,PUBM
+digital marketing & advertising,TTD
+digital marketing & advertising,APPS
+digital marketing & advertising,CREX
+digital marketing & advertising,BOMN
+digital marketing & advertising,MDCA
+digital media/web,BLIN
+digital media/web,WIX
+digital media/web,OPRA
+digital media/web,AEYE
+digital media/web,ADBE
+discount retail,FRG
+discount retail,DLTR
+distributed work tools,FROG
+distributed work tools,DBX
+distributed work tools,ZM
+distributed work tools,TEAM
+distributed work tools,CLRO
+domain registry,TCX
+domain registry,VRSN
+e-commerce operations,PFSW
+e-commerce operations,KSPN
+e-commerce operations,MYSZ
+e-commerce operations,BZUN
+e-commerce operations,DADA
+e-commerce operations,BIGC
+e-commerce platforms,LQDT
+e-commerce platforms,MELI
+e-commerce platforms,OZON
+e-commerce platforms,WISH
+e-commerce platforms,GRPN
+e-commerce platforms,REAL
+e-commerce platforms,SFIX
+e-commerce platforms,EBAY
+e-commerce platforms,JD
+e-commerce platforms,PDD
+e-commerce platforms,YJ
+e-commerce platforms,OSTK
+e-commerce platforms,ETSY
+education services,HLG
+education services,LINC
+education services,TEDU
+education services,AACG
+education services,LAUR
+education services,PRDO
+education services,HMHC
+education services,WAFU
+education services,AFYA
+education services,APEI
+education services,TWOU
+education services,LOPE
+education services,REDU
+education services,STRA
+education services,EEIQ
+education technology,ZVO
+education technology,BOXL
+education technology,YQ
+education technology,ASPU
+education technology,ARCE
+electric vehicles,NIU
+electric vehicles,FUV
+electric vehicles,IDEX
+electric vehicles,KNDI
+electric vehicles,TSLA
+electric vehicles,VMAR
+electric vehicles,WKHS
+electric vehicles,LI
+electric vehicles,BLNK
+electric vehicles,SOLO
+electronic components,MXIM
+electronic components,AVT
+electronic components,HOLI
+electronic components,CRUS
+electronic components,SITM
+electronic components,TAIT
+electronic display,OLED
+electronic display,IMTE
+electronic display,DAKT
+electronic display,KOPN
+electronic display,SYNA
+electronics manufacturing,SNPS
+electronics manufacturing,KE
+electronics manufacturing,KTCC
+electronics manufacturing,LOGI
+electronics manufacturing,PLXS
+electronics manufacturing,SONO
+electronics manufacturing,SYPR
+electronics manufacturing,NNDM
+electronics manufacturing,NSYS
+electronics manufacturing,PDFS
+electronics manufacturing,SANM
+electronics manufacturing,KOSS
+electronics manufacturing,TTMI
+electronics manufacturing,TACT
+electronics manufacturing,SGMA
+electronics manufacturing,BNSO
+electronics manufacturing,ITRI
+electronics manufacturing,ELTK
+electronics manufacturing,AAPL
+electronics manufacturing,CDNS
+electronics manufacturing,IEC
+electronics manufacturing,FLEX
+electronics manufacturing,OSIS
+electronics manufacturing,ALOT
+electronics power management,POWI
+electronics power management,RELL
+electronics power management,AEIS
+electronics power management,AOSL
+electronics power management,LFUS
+electronics power management,OIIM
+enterprise cloud,NTNX
+enterprise cloud,KC
+enterprise cloud,NTAP
+enterprise cloud,AKAM
+enterprise cloud,ANY
+enterprise technology,INTU
+enterprise technology,MTSL
+enterprise technology,QADA
+enterprise technology,ASUR
+enterprise technology,OTEX
+enterprise technology,PAYX
+enterprise technology,QADB
+enterprise technology,BLKB
+enterprise technology,GTYH
+enterprise technology,PRGS
+enterprise technology,BL
+enterprise technology,PCTY
+enterprise technology,CNDT
+enterprise technology,BNFT
+enterprise technology,SSNC
+enterprise technology,XELA
+enterprise technology,UPLD
+enterprise technology,SSNT
+enterprise technology,AGYS
+enterprise technology,WDAY
+enterprise technology,CSOD
+enterprise technology,MNTV
+enterprise technology,CTSH
+enterprise technology,EPAY
+enterprise technology,ADP
+enterprise technology,GVP
+enterprise technology,EXLS
+fiber optics and laser,EMKR
+fiber optics and laser,FARO
+fiber optics and laser,IIVI
+fiber optics and laser,IPGP
+fiber optics and laser,LASR
+fiber optics and laser,LITE
+fiber optics and laser,LPTH
+fiber optics and laser,LUNA
+fiber optics and laser,OCC
+fiber optics and laser,NOVT
+fiber optics and laser,COHR
+fiber optics and laser,RFIL
+food delivery,GRUB
+food delivery,WTRH
+furnishing & fixtures,DXYN
+gaming & esports,GRVY
+gaming & esports,HAS
+gaming & esports,GMBL
+gaming & esports,HEAR
+gaming & esports,SLGG
+gaming & esports,INSE
+gaming & esports,AESE
+gaming & esports,NGMS
+gaming & esports,GIGM
+gaming & esports,YVR
+gaming & esports,PLAY
+gaming & esports,SCPL
+gaming & esports,EA
+gaming & esports,FNKO
+gaming & esports,SGMS
+gaming & esports,CHDN
+gaming & esports,ATVI
+gaming & esports,ZNGA
+gaming & esports,TTWO
+gaming & esports,CRSR
+gaming & esports,DKNG
+health supplements,WW
+health supplements,MOHO
+home and furniture retail,LOVE
+home and furniture retail,SNBR
+home and furniture retail,NVFY
+home and furniture retail,BSET
+home and furniture retail,FLXS
+home and furniture retail,HOFT
+home and furniture retail,CONN
+home construction & maintenance,TTSH
+home construction & maintenance,LIVE
+home construction & maintenance,ANGI
+home construction & maintenance,CVCO
+home construction & maintenance,FTDR
+home construction & maintenance,GRBK
+home construction & maintenance,HOVNP
+home construction & maintenance,LEGH
+home construction & maintenance,LGIH
+home construction & maintenance,POOL
+home construction & maintenance,TBLT
+hotels,HTHT
+hotels,MAR
+hotels,PLYA
+household products,BBBY
+household products,FLWS
+household products,KIRK
+household products,LCUT
+household products,ULTA
+lease-to-own retailer,RCII
+household products,PRPL
+household products,JAKK
+household products,NWL
+household products,OLLI
+household products,MAT
+household products,TSCO
+household products,BWMX
+household products,HELE
+household products,SIC
+household products,CRWS
+household products,CTIB
+household products,SUMR
+identity & authentication,SPCB
+identity & authentication,NXTD
+identity & authentication,IDN
+identity & authentication,OKTA
+identity & authentication,OSPN
+identity & authentication,VRME
+identity & authentication,MITK
+identity & authentication,BKYI
+identity & authentication,AWRE
+insurance marketplace & technology,EVER
+insurance marketplace & technology,EBIX
+insurance marketplace & technology,SPNS
+insurance marketplace & technology,DCT
+internet and cellular provider,VZ
+internet and cellular provider,ALSK
+internet and cellular provider,ATNI
+internet and cellular provider,CCOI
+internet and cellular provider,CHTR
+internet and cellular provider,CNSL
+internet and cellular provider,LBRDA
+internet and cellular provider,LBRDK
+internet and cellular provider,LBTYA
+internet and cellular provider,LBTYB
+internet and cellular provider,LBTYK
+internet and cellular provider,LILA
+internet and cellular provider,ATEX
+internet and cellular provider,LILAK
+internet and cellular provider,TIGO
+internet and cellular provider,VEON
+internet and cellular provider,OTEL
+internet and cellular provider,VOD
+internet and cellular provider,PTNR
+internet and cellular provider,SHEN
+internet and cellular provider,UTSI
+internet and cellular provider,TMUS
+internet and cellular provider,CMCSA
+iot,SMSI
+iot,TRMB
+iot,PWFL
+iot,IRBT
+iot,IMMR
+iot,BRQS
+iot,CAMP
+iot,PCTI
+iot,CETX
+iot,CETXP
+iot,DGII
+iot,BSQR
+iot,CEVA
+iot,ZBRA
+iot,UEIC
+iot,LTRX
+iot,PTC
+iot,VIOT
+iot,AZPN
+iot,SWIR
+iot,OSS
+iot,PI
+iot,ORBC
+it services,APPN
+it services,AVCT
+it services,TSRI
+it services,NSIT
+it services,SPRT
+it services,FORTY
+it services,MGIC
+it services,WSTG
+it services,CNXN
+it services,CDW
+it services,PLUS
+it services,RMNI
+lighting systems,LEDS
+lighting systems,REFR
+lighting systems,CREE
+luxury retail,VRA
+luxury retail,CTHR
+luxury retail,XELB
+luxury retail,LULU
+luxury retail,SECO
+luxury retail,GIII
+memory and storage,SGH
+memory and storage,SMCI
+memory and storage,STX
+memory and storage,MU
+memory and storage,WDC
+memory and storage,GSIT
+memory and storage,SIMO
+mobile data capture,SCKT
+mobile data capture,DMRC
+mobile data capture,SCSC
+modular office & storage,ODP
+nanotechnology,NVEC
+network equipment,INFN
+network equipment,SONM
+network equipment,TCCO
+network equipment,AVNW
+network equipment,AIRG
+network equipment,CASA
+network equipment,EXFO
+network equipment,VIAV
+network equipment,CMBM
+network equipment,TESS
+network equipment,EXTR
+network equipment,NTGR
+network equipment,AAOI
+network equipment,CLFD
+network equipment,COMM
+network equipment,QCOM
+network equipment,JCS
+network equipment,ADTN
+network equipment,CSCO
+network equipment,ALLT
+network equipment,SILC
+oil & gas services,TH
+oil & gas services,CLIR
+online travel company,BKNG
+online travel company,MMYT
+online travel company,EXPE
+online travel company,TOUR
+online travel company,LTRPA
+online travel company,LTRPB
+online travel company,MKGI
+online travel company,PCOM
+online travel company,SABR
+online travel company,TRVG
+online travel company,TCOM
+online travel company,TRIP
+online travel company,TZOO
+online travel company,YTRA
+outdoor & lifestyle products,ZUMZ
+outdoor & lifestyle products,GPRO
+outdoor & lifestyle products,COLM
+outdoor & lifestyle products,JRSH
+outdoor & lifestyle products,AOUT
+outdoor & lifestyle products,ESCA
+outdoor & lifestyle products,GRMN
+outdoor & lifestyle products,LIND
+outdoor & lifestyle products,SPWH
+outdoor & lifestyle products,ONEW
+outdoor & lifestyle products,TLF
+outdoor & lifestyle products,PTON
+outdoor & lifestyle products,CLAR
+outdoor & lifestyle products,ASO
+outdoor & lifestyle products,BGFV
+outdoor & lifestyle products,JOUT
+outdoor & lifestyle products,XSPA
+payment systems,USIO
+payment systems,CSGS
+payment systems,EVOP
+payment systems,ACIW
+payment systems,IIIV
+payment systems,NETE
+payment systems,PRTH
+payment systems,PYPL
+payment systems,CASS
+payment systems,CUEN
+payment systems,STNE
+payment systems,EEFT
+payment systems,FISV
+payment systems,IMXI
+payment systems,JKHY
+payment systems,MGI
+payment systems,PAYS
+payment systems,QIWI
+payment systems,RPAY
+payment systems,UEPS
+pets,DOGZ
+pets,PETS
+pets,WOOF
+plastics,CXDC
+plastics,DSWL
+power generation & distribution,CLSK
+precision manufacturing,NATI
+precision manufacturing,CODA
+precision manufacturing,ELSE
+precision manufacturing,SMIT
+precision manufacturing,ANSS
+precision manufacturing,MKSI
+precision manufacturing,ADSK
+prosports management,FWONA
+prosports management,FWONK
+prosports management,BATRA
+prosports management,BATRK
+publishers,CSSE
+publishers,CSSEP
+publishers,DJCO
+publishers,PLBY
+publishers,EDUC
+publishers,LEE
+publishers,NWS
+publishers,NWSA
+publishers,SALM
+publishers,SCHL
+publishers,TPCO
+recreational vehicle,DOOO
+recreational vehicle,MBUU
+recreational vehicle,MCFT
+retail supply chain,CORE
+retail supply chain,STMP
+retail supply chain,SGRP
+satellite communication,CMTL
+satellite communication,SATS
+satellite communication,GILT
+satellite communication,IRDM
+satellite communication,GOGO
+satellite communication,VSAT
+satellite communication,FEIM
+satellite communication,KVHI
+satellite communication,LORL
+security & protection,ALRM
+security & protection,NLOK
+security & protection,POWW
+security & protection,SSTI
+security & protection,VRRM
+security & protection,WRAP
+security & protection,GNSS
+security & protection,EVBG
+security & protection,DTSS
+security & protection,INVE
+security & protection,LAKE
+security & protection,NSSC
+security & protection,SWBI
+security & protection,DGLY
+security & protection,MAGS
+security & protection,FORD
+semiconductor equipments,ACMR
+semiconductor equipments,ICHR
+semiconductor equipments,ASYS
+semiconductor equipments,KLAC
+semiconductor equipments,LRCX
+semiconductor equipments,MKTY
+semiconductor equipments,AEHR
+semiconductor equipments,UCTT
+semiconductor equipments,VECO
+semiconductor equipments,ASML
+semiconductor equipments,TER
+semiconductor equipments,FORM
+semiconductor equipments,IMOS
+semiconductor equipments,BRKS
+semiconductor equipments,AMAT
+semiconductor equipments,COHU
+semiconductor equipments,KLIC
+semiconductor equipments,ACLS
+semiconductor equipments,CAMT
+semiconductor equipments,DAIO
+semiconductor equipments,CVV
+semiconductor equipments,NVMI
+semiconductor manufacturing,AVGO
+semiconductor manufacturing,XLNX
+semiconductor manufacturing,PXLW
+semiconductor manufacturing,TXN
+semiconductor manufacturing,MRVL
+semiconductor manufacturing,TSEM
+semiconductor manufacturing,AMKR
+semiconductor manufacturing,AKTS
+semiconductor manufacturing,BELFB
+semiconductor manufacturing,AMD
+semiconductor manufacturing,DIOD
+semiconductor manufacturing,RMBS
+semiconductor manufacturing,AMBA
+semiconductor manufacturing,MPWR
+semiconductor manufacturing,ADI
+semiconductor manufacturing,DSPG
+semiconductor manufacturing,MRAM
+semiconductor manufacturing,INTC
+semiconductor manufacturing,LSCC
+semiconductor manufacturing,NXPI
+semiconductor manufacturing,ON
+semiconductor manufacturing,QUIK
+semiconductor manufacturing,MCHP
+semiconductor manufacturing,WISA
+semiconductor manufacturing,XPER
+semiconductor manufacturing,ALGM
+semiconductor manufacturing,QRVO
+semiconductor manufacturing,RESN
+semiconductor manufacturing,HIMX
+semiconductor manufacturing,SMTC
+semiconductor manufacturing,SWKS
+semiconductor manufacturing,MOSY
+semiconductor manufacturing,MTSI
+semiconductor manufacturing,SLAB
+semiconductor materials,AXTI
+semiconductor materials,ENTG
+semiconductor materials,ATOM
+semiconductor materials,PLAB
+semiconductor materials,CCMP
+sharing economy,ABNB
+sharing economy,HYRE
+social media,YY
+social media,MOMO
+social media,FB
+social media,WB
+social media,MOXC
+social media,MTCH
+social media,SPT
+solar energy,SEDG
+solar energy,MAXN
+solar energy,SPI
+solar energy,SPWR
+solar energy,ENPH
+solar energy,FSLR
+solar energy,CSIQ
+streaming,DOYU
+streaming,IQ
+streaming,LIVX
+streaming,NFLX
+streaming,ROKU
+streaming,BILI
+streaming,LLNW
+supply chain technology,STCN
+supply chain technology,MANH
+supply chain technology,SPSC
+supply chain technology,PBTS
+supply chain technology,DSGX
+supply chain technology,BOSC
+supply chain technology,AMSWA
+supply chain technology,COUP
+supply chain technology,PCYG
+technology conglomerate,BIDU
+technology conglomerate,MSFT
+technology conglomerate,AMZN
+technology conglomerate,YNDX
+technology conglomerate,SOHU
+technology conglomerate,NTES
+technology conglomerate,GOOG
+technology conglomerate,GOOGL
+technology consulting,PRFT
+technology consulting,ALYA
+technology consulting,CTG
+technology consulting,CLPS
+technology consulting,GDYN
+technology consulting,HCKT
+technology consulting,III
+trading system,MTC
+consumer lending,AFRM
+consumer lending,JFU
+consumer lending,GSKY
+pharmaceuticals & drugs discovery,ENLV
+healthcare services & equipment,EYE
+healthcare services & equipment,MOVE
+healthcare services & information technology,SPOK
+healthcare services & equipment & laboratory,APDN
+healthcare services & information technology,SY
+real estate technology,ZG
+real estate property management,APPF
+real estate property management,CHCI
+real estate technology,DUO
+real estate investment & development,RDI
+real estate investment & development,RDIB
+real estate technology,Z
+tv and radio,CIDM
+tv and radio,BBGI
+tv and radio,SGA
+tv and radio,UONE
+tv and radio,UONEK
+tv and radio,DISH
+tv and radio,FOX
+tv and radio,FOXA
+tv and radio,NXST
+tv and radio,DISCA
+tv and radio,DISCB
+tv and radio,HMTV
+tv and radio,DISCK
+tv and radio,SBGI
+tv and radio,SSP
+tv and radio,VIAC
+tv and radio,VIACA
+tv and radio,CMLS
+tv and radio,AMCX
+tv and radio,LSXMA
+tv and radio,LSXMB
+tv and radio,LSXMK
+tv and radio,SIRI
+tv shopping network,QRTEA
+tv shopping network,IMBI
+tv shopping network,QRTEB
+video technology,API
+video technology,VISL
+video technology,QUMU
+video technology,XNET
+video technology,RNWK
+video technology,AVID
+video technology,SEAC
+video technology,BCOV
+video technology,HLIT
+water management,NEPH
+agriculture & agtech,CRESY
+asset-based finance company,GEG
+asset-based finance company,MFIN
+asset-based finance company,HGBL
+asset-based finance company,GWGH
+auto financing,AIHS
+auto financing,NICK
+auto financing,CACC
+auto financing,CPSS
+banks,BCOW
+banks,CARV
+banks,CFFN
+banks,CLBK
+banks,EBSB
+banks,ESBK
+banks,FFIC
+banks,GFED
+banks,HBCP
+banks,HFBL
+banks,KFFB
+banks,LARK
+banks,PDLB
+banks,SMBC
+banks,TSBK
+banks,BFST
+banks,BMRC
+banks,BRKL
+banks,OSBC
+banks,CASH
+banks,CCB
+banks,MNSB
+banks,CVBF
+banks,EQBK
+banks,FGBI
+banks,FLIC
+banks,FMAO
+banks,FNCB
+banks,FRBA
+banks,FUNC
+banks,HBMD
+banks,HTBK
+banks,HTLF
+banks,ISTR
+banks,LMST
+banks,NBN
+banks,NRIM
+banks,NWFL
+banks,RBCAA
+banks,RRBI
+banks,SBNY
+banks,SIVB
+banks,SSBI
+banks,BANF
+banks,CFB
+banks,CVLY
+banks,CZWI
+banks,FBNC
+banks,FCNCA
+banks,FMBH
+banks,LKFN
+banks,PBFS
+banks,PEBK
+banks,PROV
+banks,RNST
+banks,UBSI
+banks,UCBI
+banks,AMAL
+banks,BANR
+banks,BSBK
+banks,BSVN
+banks,SVBI
+banks,CFBK
+banks,NBTB
+banks,EMCF
+banks,FCAP
+banks,FFBW
+banks,FFNW
+banks,FRBK
+banks,FSBW
+banks,FSEA
+banks,FSFG
+banks,FXNC
+banks,GBCI
+banks,HMNF
+banks,IBTX
+banks,ISBC
+banks,KRNY
+banks,LSBK
+banks,MBWM
+banks,MCBC
+banks,MFNC
+banks,MSVB
+banks,NFBK
+banks,NWBI
+banks,OCFC
+banks,ORRF
+banks,PBHC
+banks,PBIP
+banks,PFC
+banks,RVSB
+banks,SFBC
+banks,WVFC
+banks,WSFS
+banks,ATLO
+banks,BOCH
+banks,BKSC
+banks,CALB
+banks,CARE
+banks,MPB
+banks,GSBC
+banks,HOMB
+banks,HTBI
+banks,HWBK
+banks,LOB
+banks,OFED
+banks,PPBI
+banks,SFST
+banks,SLCT
+banks,UBFO
+banks,WABC
+banks,WNEB
+banks,PKBK
+banks,BWB
+banks,CBMB
+banks,CBTX
+banks,CWBC
+banks,DCOM
+banks,EBMT
+banks,ESQ
+banks,FDBC
+banks,FIBK
+banks,FNLC
+banks,FNWB
+banks,GCBC
+banks,HFWA
+banks,IROQ
+banks,LEVL
+banks,RBKB
+banks,RBNC
+banks,SBCF
+banks,SBSI
+banks,SMBK
+banks,SPFI
+banks,STXB
+banks,TBK
+banks,TCBK
+banks,WTBA
+banks,OVBC
+banks,CCNE
+banks,CLDB
+banks,FFBC
+banks,FMNB
+banks,FRAF
+banks,GABC
+banks,HBNC
+banks,LCNB
+banks,PEBO
+banks,UBOH
+banks,SBFG
+banks,TFSL
+banks,TOWN
+banks,UBCP
+banks,COFS
+banks,BOKF
+banks,CBSH
+banks,EWBC
+banks,HBT
+banks,INBK
+banks,PBCT
+banks,PGC
+banks,TCBI
+banks,UMBF
+banks,UMPQ
+banks,UVSP
+banks,WAFD
+banks,WTFC
+banks,ZION
+banks,ABTX
+banks,OPHC
+banks,GLBZ
+banks,AUBN
+banks,MLVF
+banks,PNBK
+banks,BFC
+banks,BFIN
+banks,AMRB
+banks,AFBI
+banks,CBAN
+banks,CCBG
+banks,CNOB
+banks,CSTR
+banks,ESSA
+banks,FBMS
+banks,FCCO
+banks,FUSB
+banks,PFBI
+banks,ABCB
+banks,ACNB
+banks,ACBI
+banks,HWC
+banks,ICBK
+banks,MCBS
+banks,NCBS
+banks,PLBC
+banks,PNFP
+banks,SAL
+banks,SFBS
+banks,SHBI
+banks,SSB
+banks,TCFC
+banks,WMPN
+banks,BCML
+banks,BSRR
+banks,BYFC
+banks,FCBP
+banks,HAFC
+banks,HOPE
+banks,OPBK
+banks,OVLY
+banks,PACW
+banks,PCB
+banks,PFBC
+banks,PMBC
+banks,RBB
+banks,SBT
+banks,FFIN
+banks,PFIS
+banks,IBOC
+banks,OZK
+banks,RIVE
+banks,VLY
+banks,WASH
+banks,MRLN
+banks,FITB
+banks,FITBP
+banks,MBCN
+banks,AROW
+banks,EFSC
+banks,FBIZ
+banks,FFWM
+banks,FRME
+banks,MYFW
+banks,ONB
+banks,SRCE
+banks,SYBT
+banks,TRMK
+banks,COLB
+banks,ALRS
+banks,AMNB
+banks,CBFV
+banks,BPOP
+banks,CHCO
+banks,CHMG
+banks,CIVB
+banks,CTBI
+banks,CVCY
+banks,FHB
+banks,FISI
+banks,MSBI
+banks,MVBF
+banks,QCRH
+banks,SASR
+banks,SMMF
+banks,STBA
+banks,THFF
+banks,WSBC
+banks,WSBF
+banks,BMTC
+banks,CFFI
+banks,CZNC
+banks,ESXB
+banks,FCBC
+banks,FVCB
+banks,OPOF
+banks,RMBI
+banks,TRST
+banks,VABK
+banks,PWOD
+banks,ASRV
+banks,BCBP
+banks,AUB
+banks,BOTJ
+banks,BWFG
+banks,CATY
+banks,CIZN
+banks,UNB
+banks,EBC
+banks,EGBN
+banks,FCCY
+banks,FRST
+banks,FULT
+banks,MRBK
+banks,HMST
+banks,IBCP
+banks,LBAI
+banks,MBIN
+banks,MGYR
+banks,PFHD
+banks,TBBK
+banks,UNTY
+banks,VBFC
+banks,CNBKA
+banks,EBTC
+banks,HIFS
+banks,HONE
+banks,HVBC
+banks,INDB
+banks,PCSB
+banks,PVBC
+banks,RNDB
+banks,TBNK
+banks,HBAN
+banks,HBANN
+banks,HBANO
+banks,AMTB
+banks,BPRN
+banks,GNTY
+banks,AMTBB
+banks,BUSE
+banks,CBNK
+banks,MOFG
+banks,FMBI
+banks,LBC
+banks,NKSH
+banks,OBNK
+banks,SFNC
+banks,TSC
+banks,VBTX
+closed-end mutual fund,BANX
+closed-end mutual fund,OXLC
+commercial real estate brokerage & services,CIGI
+commercial real estate brokerage & services,NMRK
+commercial real estate brokerage & services,MDJH
+consumer lending,JFIN
+consumer lending,LX
+consumer lending,WRLD
+consumer lending,OPRT
+consumer lending,TREE
+consumer lending,ATLC
+consumer lending,UPST
+crowdfunding & incubator,LYL
+cryptocurrency,MOGO
+data center reit,CONE
+data center reit,EQIX
+debt collections,PRAA
+debt collections,ECPG
+debt collections,LMFA
+diversified reit,BPYU
+diversified reit,GOOD
+diversified reit,GOODN
+diversified reit,MDRR
+e-commerce platforms,HX
+financial exchanges & data,CME
+financial exchanges & data,NDAQ
+fintech analytics & operations,PT
+fintech analytics & operations,QFIN
+health care reit,SBRA
+health care reit,CTRE
+health care reit,DHC
+health insurance,TRUP
+healthcare finance,SWKH
+hotel reit,SOHON
+hotel reit,SOHOO
+hotel reit,HST
+hotel reit,SOHO
+hotel reit,SOHOB
+hotels,INTG
+industrial reit,INDT
+industrial reit,SELF
+industrial reit,ILPT
+infrastructure investment fund,ATAX
+infrastructure investment fund,LMRK
+infrastructure investment fund,LMRKN
+infrastructure investment fund,LMRKO
+infrastructure investment fund,LMRKP
+infrastructure reit,SBAC
+infrastructure reit,UNIT
+insurance brokers,ERIE
+insurance brokers,EHTH
+insurance brokers,FANH
+insurance brokers,GSHD
+insurance brokers,BRP
+investment banking & advisory,RILY
+investment banking & advisory,COWN
+investment banking & advisory,DHIL
+investment banking & advisory,GRNQ
+investment management firm,GROW
+investment management firm,HNNA
+investment management firm,SAMG
+investment management firm,SEIC
+investment management firm,TROW
+investment management firm,TURN
+investment management firm,VCTR
+investment management firm,VRTS
+investment management firm,WETF
+investment research & data,VALU
+investment research & data,MORN
+land & farm reit,LAND
+land & farm reit,PCH
+lease-to-own retailer,FPAY
+life insurance,BHF
+life insurance,BHFAP
+life insurance,SNFCA
+life insurance,NWLI
+life insurance,VERY
+mortgage insurance company,NMIH
+mortgage reit,AGNC
+mortgage reit,LOAN
+mortgage reit,NYMT
+mortgage reit,NYMTO
+mortgage reit,NYMTP
+mortgage reit,TRMT
+multiline insurance,AAME
+multiline insurance,ANAT
+multiline insurance,TIPT
+multiline insurance,NSEC
+office reit,GLPI
+office reit,CMCT
+office reit,CMCTP
+office reit,OPI
+pawn shops,EZPW
+pawn shops,FCFS
+precious metal trading,AMRK
+print marketing,LAMR
+property & casualty insurance,DGICA
+property & casualty insurance,DGICB
+property & casualty insurance,KINS
+property & casualty insurance,NODK
+property & casualty insurance,SAFT
+property & casualty insurance,UIHC
+property & casualty insurance,CINF
+property & casualty insurance,CNFR
+property & casualty insurance,FNHC
+property & casualty insurance,HALL
+property & casualty insurance,KNSL
+property & casualty insurance,SIGI
+property & casualty insurance,STFC
+property & casualty insurance,UNAM
+property & casualty insurance,AMSF
+property & casualty insurance,GBLI
+property & casualty insurance,ACGL
+property & casualty insurance,ACGLO
+property & casualty insurance,ACGLP
+property & casualty insurance,ICCH
+property & casualty insurance,PLMR
+property & casualty insurance,PPHI
+property & casualty insurance,UFCS
+property & casualty insurance,WTRE
+property & casualty insurance,ITIC
+real estate investment & development,FRPH
+real estate investment & development,OBAS
+real estate investment & development,BPY
+real estate investment & development,BPYPO
+real estate investment & development,BPYPP
+real estate investment & development,HGSH
+real estate investment & development,GYRO
+real estate investment & development,IRCP
+real estate property management,FSV
+real estate property management,RMR
+real estate technology,QK
+real estate technology,ASPS
+real estate technology,EXPI
+real estate technology,FTHM
+real estate technology,RDFN
+real estate technology,OPEN
+reinsurance,OXBR
+reinsurance,ESGR
+reinsurance,ESGRO
+reinsurance,FGF
+reinsurance,JRVR
+reinsurance,MHLD
+reinsurance,GLRE
+residential mortgage financing,COOP
+retail brokerage,FRHC
+retail brokerage,FUTU
+retail brokerage,IBKR
+retail brokerage,JRJC
+retail brokerage,SIEB
+retail brokerage,TIGR
+retail reit,MAYS
+retail reit,STRS
+retail reit,AFIN
+retail reit,AFINP
+retail reit,REG
+retail reit,ROIC
+retail reit,WHLR
+retail reit,WHLRD
+retail reit,WHLRP
+retail reit,SVC
+retirement asset management,WLTW
+retirement asset management,PFG
+security brokerage & capital markets,LPLA
+security brokerage & capital markets,XP
+security brokerage & capital markets,BGCP
+security brokerage & capital markets,GGAL
+banks,CAC
+banks,CATC
+student loan,NAVI
+student loan,SLM
+traded growth/venture funds,CSWC
+traded growth/venture funds,HLNE
+traded growth/venture funds,MRCC
+traded growth/venture funds,HRZN
+traded growth/venture funds,NEWT
+traded growth/venture funds,SSSS
+traded private investment funds,MMAC
+traded private investment funds,GLAD
+traded private investment funds,ARCC
+traded private investment funds,BKCC
+traded private investment funds,AINV
+traded private investment funds,CG
+traded private investment funds,CGBD
+traded private investment funds,CPTA
+traded private investment funds,FDUS
+traded private investment funds,GAIN
+traded private investment funds,GBDC
+traded private investment funds,GECC
+traded private investment funds,PFX
+traded private investment funds,ICMB
+traded private investment funds,NMFC
+traded private investment funds,OCSL
+traded private investment funds,OFS
+traded private investment funds,OXSQ
+traded private investment funds,OXSQL
+traded private investment funds,PFLT
+traded private investment funds,PNNT
+traded private investment funds,PSEC
+traded private investment funds,RAND
+traded private investment funds,SLRC
+traded private investment funds,SUNS
+traded private investment funds,TCPC
+trading system,AGMH
+trading system,MKTX
+trading system,TW
+trading system,VIRT
+wealth management,NTRS
+wealth management,PHCF
+wealth management,BCOR
+wealth management,PUYI
+wealth management,FOCS
+biotech,ABEO
+biotech,ADMA
+biotech,HARP
+biotech,AKBA
+pharmaceuticals & liver disease,AKRO
+pharmaceuticals & autoimmune disease,AKTX
+healthcare services & equipment & diagnostics,NTUS
+biotech,ALBO
+biotech,ALEC
+healthcare services & equipment,ALGN
+biotech,ALGS
+healthcare services & people care,ALHC
+pharmaceuticals & eye disease,ALIM
+healthcare services & equipment & diagnostics,AEMD
+biotech,ALKS
+pharmaceuticals,AERI
+biotech,ALLK
+healthcare services & equipment & diagnostics,GH
+biotech,AEZS
+biotech,ALLO
+pharmaceuticals,GILD
+pharmaceuticals & covid,ADPT
+healthcare services & equipment & implants,NVIV
+biotech,GLMD
+biotech,GLPG
+biotech,GLSI
+biotech,ALNA
+biotech,ALNY
+biotech,AFMD
+biotech,ALPN
+biotech,ALRN
+healthcare services & equipment & diagnostics,PMD
+biotech,AGEN
+biotech,AGIO
+biotech,AGLE
+biotech,ALT
+pharmaceuticals & women's health,AGRX
+biotech,ALVR
+biotech,ALXN
+healthcare services & equipment,APEN
+pharmaceuticals & cannabis,APHA
+biotech,APLS
+pharmaceuticals,APLT
+biotech,APOP
+pharmaceuticals & leukemia disease,APRE
+biotech,ALDX
+biotech,APTO
+biotech,APTX
+biotech,APVO
+healthcare services & equipment & dermatology,APYX
+healthcare services & equipment & monitoring,AQB
+pharmaceuticals & cannabis,OGI
+pharmaceuticals,AQST
+biotech,ARAV
+healthcare services & equipment & robotics,ARAY
+biotech,ARCT
+biotech,ARDX
+biotech,ARGX
+biotech,ARNA
+healthcare services & people care,AMEH
+pharmaceuticals & eye disease,ARPO
+pharmaceuticals & cannabis,ARTL
+pharmaceuticals & cannabis,ARTLW
+pharmaceuticals & lung cancer disease,ARVN
+biotech,CATB
+healthcare services & equipment & implants,ATEC
+biotech,ANAB
+biotech,ASLN
+pharmaceuticals & liver disease,ASMB
+biotech,ASND
+pharmaceuticals,ASRT
+pharmaceuticals & neurological disease,ATHE
+biotech,ATHX
+pharmaceuticals & cancer disease,ATNX
+biotech,ATRA
+biotech,APM
+biotech,ARWR
+healthcare services & equipment & cardiovascular,ATRC
+healthcare services & equipment & cardiovascular,ATRI
+healthcare services & equipment & man's health,ATRS
+pharmaceuticals & dermatology,BBI
+pharmaceuticals,ATXI
+pharmaceuticals & autoimmune disease,BBIO
+biotech,AUPH
+biotech,AUTL
+biotech,ARDS
+healthcare services & equipment & covid,AVCO
+pharmaceuticals,AVDL
+biotech,AVEO
+healthcare services & equipment & cardiovascular,AVGR
+pharmaceuticals & covid,AVIR
+biotech,AVRO
+biotech,AVXL
+healthcare services & equipment & women's health,AWH
+healthcare services & equipment & diagnostics,AXDX
+healthcare services & equipment & implants,AXGN
+pharmaceuticals & neurological disease,AXSM
+pharmaceuticals & man's health,AYTU
+pharmaceuticals,AZN
+biotech,BCDA
+pharmaceuticals & transplantology,BCEL
+biotech,BCLI
+healthcare services & equipment & laboratory,BLFS
+biotech,BCRX
+healthcare services & equipment,BLI
+pharmaceuticals,BCYC
+pharmaceuticals,BDSI
+healthcare services & equipment & covid,ATOS
+biotech,BFRA
+biotech,BGNE
+healthcare services & equipment & covid,BLPH
+biotech,BLRX
+pharmaceuticals & animal health,AXLA
+healthcare services & equipment & implants,AXNX
+pharmaceuticals & autoimmune disease,BIIB
+pharmaceuticals & cancer disease,BIOC
+biotech,ONCY
+healthcare services & equipment,BIOL
+pharmaceuticals & autoimmune disease,BLU
+biotech,AZRX
+healthcare services & equipment & cardiovascular,BCDAW
+biotech,BLCM
+pharmaceuticals & cancer disease,ONTX
+biotech,BLUE
+healthcare services & equipment & covid,BMRA
+biotech,BMRN
+healthcare services & equipment & laboratory,BNGO
+pharmaceuticals & cancer disease,BNTX
+biotech,BPMC
+pharmaceuticals & leukemia disease,BPTH
+healthcare services & equipment & laboratory,BRKR
+healthcare services & equipment & diagnostics,BSGM
+biotech,BTAI
+biotech,GLYC
+pharmaceuticals & cancer disease,GMAB
+healthcare services & equipment & cardiovascular,MMSI
+biotech,GMDA
+biotech,CALA
+biotech,GNCA
+pharmaceuticals,GNFT
+biotech,GNPX
+biotech,BNTC
+biotech,AGTC
+healthcare services & people care,AHCO
+healthcare services & equipment,AHPI
+healthcare services & equipment & women's health,AIH
+healthcare services & people care,AMED
+pharmaceuticals & autoimmune disease,AMGN
+pharmaceuticals & women's health,AMPH
+biotech,AMRN
+biotech,AMTI
+biotech,ADXS
+pharmaceuticals & rare disease,NMTR
+healthcare services & equipment & cardiovascular,ANGO
+healthcare services & equipment & implants,ANIK
+pharmaceuticals & women's health,ANIP
+pharmaceuticals & cancer disease,ANIX
+pharmaceuticals,BVXV
+healthcare services & equipment,BWAY
+biotech,BYSI
+pharmaceuticals,CABA
+biotech,CAPR
+biotech,CARA
+biotech,MNKD
+biotech,CASI
+pharmaceuticals & liver disease,CBAY
+biotech,CBIO
+biotech,CBLI
+pharmaceuticals & drugs discovery,CCCC
+healthcare services & hospitals,CCRN
+biotech,CCXI
+biotech,CDAK
+biotech,CDMO
+pharmaceuticals & transplantology,CDNA
+biotech,CDTX
+healthcare services & equipment,CDXC
+healthcare services & equipment & diagnostics,CDXS
+healthcare services & equipment & diagnostics,CELC
+healthcare services & equipment & covid,CEMI
+pharmaceuticals & rare disease,CERC
+healthcare services & information technology,CERN
+healthcare services & equipment & laboratory,CERS
+healthcare services & equipment & implants,CFMS
+biotech,CFRX
+pharmaceuticals & cannabis,CGC
+pharmaceuticals & transplantology,CGEN
+healthcare services & equipment & diagnostics,CHEK
+pharmaceuticals & rare disease,CHMA
+healthcare services & information technology,CHNG
+healthcare services & information technology,CHNGU
+biotech,CHRS
+biotech,PBLA
+biotech,CKPT
+biotech,CLBS
+biotech,CLDX
+healthcare services & equipment & implants,CLGN
+biotech,CLLS
+healthcare services & equipment & robotics,CLPT
+biotech,CLRB
+pharmaceuticals & eye disease,CLSD
+biotech,CLSN
+biotech,CLVS
+pharmaceuticals,CLXT
+pharmaceuticals,CMPS
+biotech,CMRX
+biotech,CNCE
+biotech,NCNA
+pharmaceuticals & cancer disease,CNSP
+pharmaceuticals & rare disease,CNTG
+biotech,RGLS
+pharmaceuticals & respiratory disease,COCP
+healthcare services & information technology,NRC
+pharmaceuticals,CORT
+pharmaceuticals,CPIX
+biotech,CPRX
+healthcare services & information technology,CPSI
+biotech,CRBP
+biotech,CRDF
+biotech,CRIS
+pharmaceuticals & cardiovascular disease,CRMD
+biotech,CRNX
+pharmaceuticals & cannabis,CRON
+biotech,CRSP
+pharmaceuticals & neurological disease,CRTX
+healthcare services & information technology,CRVL
+biotech,CRVS
+pharmaceuticals & cancer disease,CSBR
+healthcare services & equipment & cardiovascular,CSII
+pharmaceuticals & dermatology,CSTL
+biotech,CTIC
+biotech,CTMX
+healthcare services & equipment,CTSO
+pharmaceuticals & cancer disease,CTXR
+pharmaceuticals,CTXRW
+biotech,CUE
+healthcare services & equipment & women's health,CUTR
+healthcare services & equipment & animal health,CVET
+biotech,CWBR
+biotech,CYAD
+biotech,CYCC
+pharmaceuticals & leukemia disease,CYCCP
+pharmaceuticals & neurological disease,CYCN
+healthcare services & information technology,CYRX
+biotech,CYTK
+healthcare services & equipment & women's health,DARE
+biotech,DBVT
+biotech,DCPH
+biotech,DFFN
+pharmaceuticals,SIGA
+healthcare services & equipment & laboratory,SINT
+biotech,DMAC
+healthcare services & equipment & diagnostics,DMTK
+biotech,DNLI
+healthcare services & information technology,DRIO
+biotech,DRNA
+healthcare services & equipment & laboratory,DRRX
+pharmaceuticals & leukemia disease,DTIL
+biotech,GOSS
+biotech,DVAX
+healthcare services & equipment & monitoring,DXCM
+pharmaceuticals & covid,DYAI
+healthcare services & equipment,DYNT
+pharmaceuticals,EARS
+pharmaceuticals & women's health,SCYX
+healthcare services & equipment & laboratory,PDEX
+healthcare services & equipment,ECOR
+healthcare services & equipment & robotics,EDAP
+biotech,EDIT
+pharmaceuticals & autoimmune disease,EDSA
+healthcare services & information technology,MTBC
+healthcare services & information technology,MTBCP
+pharmaceuticals & leukemia disease,EGRX
+biotech,EIGR
+healthcare services & equipment & robotics,EKSO
+pharmaceuticals,ELOX
+healthcare services & people care,MODV
+biotech,SNGX
+pharmaceuticals & man's health,ENDP
+biotech,ENOB
+healthcare services & people care,ENSG
+biotech,ENTA
+biotech,ENTX
+pharmaceuticals & women's health,EOLS
+biotech,EPIX
+biotech,MTEM
+biotech,EPZM
+biotech,EQ
+pharmaceuticals & cancer disease,ERYP
+biotech,ESPR
+healthcare services & equipment & implants,ESTA
+pharmaceuticals & liver disease,ETNB
+pharmaceuticals,ETON
+biotech,ETTX
+pharmaceuticals & women's health,EVFM
+biotech,EVGN
+biotech,EVLO
+pharmaceuticals & gastroenterological disease,EVOK
+pharmaceuticals & cancer disease,EXAS
+biotech,EXEL
+pharmaceuticals & eye disease,EYEG
+pharmaceuticals & neurological disease,EYEN
+healthcare services & equipment & implants,EYES
+pharmaceuticals & eye disease,EYPT
+biotech,FATE
+biotech,FBIO
+pharmaceuticals & dermatology,FBIOP
+biotech,MOR
+pharmaceuticals & drugs discovery,MORF
+biotech,FENC
+biotech,FGEN
+biotech,FIXX
+healthcare services & equipment & laboratory,FLDM
+healthcare services & equipment & covid,FLGT
+pharmaceuticals & rare disease,FLXN
+biotech,FOLD
+healthcare services & equipment & diagnostics,FONR
+pharmaceuticals & rare disease,FREQ
+healthcare services & equipment,MOTS
+pharmaceuticals & drugs discovery,FULC
+healthcare services & people care,FVE
+biotech,FWP
+biotech,GOVX
+biotech,GALT
+biotech,GBT
+healthcare services & information technology,GDRX
+healthcare services & equipment & diagnostics,GENE
+biotech,GERN
+healthcare services & equipment & monitoring,GRFS
+biotech,GRTS
+pharmaceuticals & cancer disease,GRTX
+biotech,ABIO
+healthcare services & equipment & cardiovascular,ABMD
+biotech,GTBP
+biotech,ABUS
+biotech,GTHX
+biotech,HALO
+pharmaceuticals & cannabis,ACB
+pharmaceuticals & cancer disease,ACET
+healthcare services & hospitals,ACHC
+biotech,ACHV
+pharmaceuticals & cancer disease,PHIOW
+biotech,ACIU
+biotech,ACOR
+pharmaceuticals & drugs discovery,ACRS
+pharmaceuticals,ACRX
+pharmaceuticals,ACST
+biotech,ADAP
+pharmaceuticals,ADIL
+healthcare services & information technology,STRM
+pharmaceuticals & respiratory disease,ADMP
+pharmaceuticals & neurological disease,ADMS
+healthcare services & people care,ADUS
+biotech,ADVM
+biotech,ACAD
+healthcare services & information technology,ACCD
+pharmaceuticals & rare disease,ACER
+healthcare services & equipment & laboratory,HBIO
+healthcare services & information technology,HCAT
+pharmaceuticals & cancer disease,HCM
+pharmaceuticals,HEPA
+biotech,HGEN
+healthcare services & equipment & cardiovascular,HJLI
+healthcare services & equipment & women's health,HOLX
+pharmaceuticals & drugs discovery,HOOK
+pharmaceuticals & autoimmune disease,HOTH
+healthcare services & information technology,HQY
+pharmaceuticals,HROW
+biotech,HRTX
+healthcare services & equipment,HSDT
+healthcare services & equipment,HSIC
+healthcare services & equipment & animal health,HSKA
+healthcare services & information technology,HSTM
+biotech,HTBX
+healthcare services & equipment & laboratory,HTGM
+pharmaceuticals,MREO
+pharmaceuticals & liver disease,HZNP
+healthcare services & equipment & implants,IART
+biotech,IBRX
+healthcare services & equipment & diagnostics,ICAD
+biotech,ICCC
+pharmaceuticals & drugs discovery,ICLR
+biotech,ICPT
+healthcare services & equipment & cardiovascular,ICUI
+biotech,IDRA
+healthcare services & equipment & animal health,IDXX
+pharmaceuticals & cancer disease,IDYA
+biotech,IFRX
+pharmaceuticals & transplantology,IGMS
+biotech,MRKR
+biotech,IMRN
+healthcare services & equipment,IIN
+healthcare services & equipment & laboratory,ILMN
+biotech,IMAB
+healthcare services & hospitals,IMAC
+biotech,IMGN
+biotech,IMMP
+biotech,IMNM
+pharmaceuticals & autoimmune disease,IMUX
+biotech,IMV
+biotech,IMVT
+biotech,INCY
+biotech,INFI
+healthcare services & equipment,INGN
+biotech,INMB
+healthcare services & equipment,INMD
+biotech,INO
+healthcare services & information technology,INOV
+biotech,INSM
+pharmaceuticals & cardiovascular disease,INVA
+healthcare services & equipment & women's health,INVO
+biotech,IONS
+biotech,IOVA
+pharmaceuticals & cancer disease,IPHA
+healthcare services & equipment,IRIX
+healthcare services & equipment & diagnostics,IRMD
+healthcare services & equipment & monitoring,IRTC
+pharmaceuticals & gastroenterological disease,IRWD
+biotech,MRTX
+pharmaceuticals & eye disease,ISEE
+healthcare services & equipment,ISRG
+pharmaceuticals & neurological disease,ITCI
+healthcare services & equipment & monitoring,ITMR
+pharmaceuticals,ITRM
+pharmaceuticals & gastroenterological disease,JAGX
+pharmaceuticals & sleep disorder,JAZZ
+biotech,MRUS
+biotech,JNCE
+healthcare services & hospitals,JYNT
+pharmaceuticals,KALA
+biotech,KALV
+biotech,KDMN
+healthcare services & equipment,KEQU
+healthcare services & equipment & implants,KIDS
+pharmaceuticals & animal health,KIN
+pharmaceuticals & drugs discovery,KLDO
+pharmaceuticals & liver disease,KMDA
+biotech,KNSA
+biotech,KOD
+biotech,KPTI
+healthcare services & equipment,KRMD
+pharmaceuticals & leukemia disease,KRON
+pharmaceuticals & neurological disease,KRTX
+biotech,KRYS
+biotech,KURA
+biotech,KZIA
+biotech,KZR
+pharmaceuticals & rare disease,SLNO
+healthcare services & equipment & cardiovascular,LMAT
+biotech,LGND
+healthcare services & people care,LHCG
+biotech,LIFE
+healthcare services & equipment,NAOV
+healthcare services & equipment & implants,LIVN
+biotech,LIXT
+biotech,LJPC
+pharmaceuticals & drugs discovery,LMNL
+healthcare services & equipment & diagnostics,LNTH
+biotech,LOGC
+pharmaceuticals & man's health,LPCN
+biotech,LPTX
+pharmaceuticals & cardiovascular disease,LQDA
+biotech,LTRN
+healthcare services & equipment,LUNG
+biotech,LXRX
+biotech,MACK
+healthcare services & equipment & monitoring,MASI
+biotech,MBIO
+healthcare services & equipment & robotics,MBOT
+biotech,MBRX
+biotech,MCRB
+biotech,NYMX
+biotech,MDGL
+healthcare services & equipment,MDGS
+healthcare services & information technology,MDRX
+pharmaceuticals,MDWD
+healthcare services & equipment & implants,MDXG
+healthcare services & equipment,MEDP
+biotech,MEIP
+healthcare services & equipment,MGLN
+biotech,MGNX
+healthcare services & equipment & laboratory,MLAB
+biotech,MGTA
+biotech,MGTX
+healthcare services & equipment & covid,PRPO
+pharmaceuticals,MIRM
+pharmaceuticals & autoimmune disease,MIST
+biotech,MITO
+biotech,MNOV
+pharmaceuticals & cancer disease,MNPR
+biotech,MRNA
+pharmaceuticals & neurological disease,MRNS
+biotech,MRSN
+healthcare services & equipment,MSON
+biotech,MTP
+healthcare services & equipment & diagnostics,MYGN
+healthcare services & equipment & cardiovascular,NARI
+biotech,NBIX
+pharmaceuticals & pneumonia disease,NBRV
+pharmaceuticals & rare disease,NBSE
+healthcare services & equipment & diagnostics,NDRA
+healthcare services & equipment,NDRAW
+healthcare services & equipment & diagnostics,NEO
+healthcare services & equipment & animal health,NEOG
+biotech,NERV
+pharmaceuticals & liver disease,NGM
+healthcare services & information technology,NH
+biotech,NK
+pharmaceuticals & drugs discovery,NKTR
+pharmaceuticals & lung cancer disease,NLTX
+healthcare services & equipment & monitoring,NMRD
+healthcare services & equipment,NMTC
+healthcare services & equipment & diagnostics,NNOX
+pharmaceuticals & drugs discovery,NOTV
+pharmaceuticals & dermatology,NOVN
+pharmaceuticals & covid,NRBO
+healthcare services & equipment & cardiovascular,NSPR
+healthcare services & equipment & laboratory,NSTG
+biotech,NTEC
+biotech,NTLA
+pharmaceuticals & women's health,NTRA
+healthcare services & equipment & monitoring,NURO
+healthcare services & equipment & implants,NUVA
+biotech,NVAX
+healthcare services & equipment & cardiovascular,NVCN
+healthcare services & equipment,NVCR
+healthcare services & people care,NVOS
+healthcare services & information technology,NXGN
+pharmaceuticals & cancer disease,NXTC
+pharmaceuticals & drugs discovery,OBSV
+healthcare services & equipment & covid,OCDX
+pharmaceuticals & eye disease,OCGN
+pharmaceuticals & eye disease,OCUL
+biotech,OCX
+pharmaceuticals & cancer disease,ODT
+healthcare services & equipment & implants,OFIX
+biotech,SMMT
+healthcare services & equipment & robotics,OMCL
+pharmaceuticals,OMER
+biotech,ONCS
+pharmaceuticals & leukemia disease,ONCT
+healthcare services & information technology,ONEM
+healthcare services & equipment & implants,ONVO
+healthcare services & equipment & diagnostics,OPGN
+pharmaceuticals,OPK
+pharmaceuticals,OPNT
+healthcare services & information technology,OPRX
+pharmaceuticals & cardiovascular disease,OPTN
+healthcare services & equipment & implants,ORGO
+biotech,ORGS
+pharmaceuticals,ORMP
+biotech,ORTX
+pharmaceuticals & neurological disease,OSMT
+healthcare services & equipment & covid,OSUR
+pharmaceuticals & neurological disease,OTIC
+biotech,OTLK
+healthcare services & information technology,OTRK
+biotech,OVID
+pharmaceuticals,OYST
+healthcare services & equipment & laboratory,PACB
+pharmaceuticals & animal health,PAHC
+healthcare services & equipment,PAVM
+healthcare services & equipment,PAVMW
+biotech,PBYI
+pharmaceuticals & liver disease,PCRX
+healthcare services & equipment & animal health,PDCO
+pharmaceuticals & cancer disease,PDSB
+healthcare services & equipment,PETQ
+healthcare services & equipment & women's health,PGNY
+biotech,PHAS
+pharmaceuticals & gastroenterological disease,PHAT
+biotech,PHIO
+healthcare services & equipment,PINC
+biotech,PIRS
+healthcare services & equipment & dermatology,PLSE
+pharmaceuticals,PLXP
+healthcare services & people care,PNTG
+healthcare services & equipment,POAI
+healthcare services & equipment & implants,PODD
+healthcare services & equipment,PPD
+healthcare services & equipment,PROF
+healthcare services & equipment & women's health,PROG
+pharmaceuticals & man's health,PRPH
+biotech,PRQR
+biotech,PRTA
+pharmaceuticals & pneumonia disease,PRTK
+pharmaceuticals & autoimmune disease,PRVB
+healthcare services & equipment & laboratory,PSNL
+biotech,PSTI
+pharmaceuticals & cancer disease,PSTV
+biotech,PTCT
+biotech,PTIX
+biotech,PTE
+biotech,PTGX
+pharmaceuticals & cancer disease,PULM
+healthcare services & equipment & women's health,QDEL
+healthcare services & equipment & covid,QTNT
+healthcare services & equipment & laboratory,QTRX
+biotech,QURE
+pharmaceuticals & drugs discovery,RAPT
+biotech,RARE
+pharmaceuticals & dermatology,RCEL
+pharmaceuticals & rare disease,RCKT
+healthcare services & equipment,RCM
+pharmaceuticals & gastroenterological disease,RDHL
+healthcare services & equipment & diagnostics,RDNT
+pharmaceuticals & autoimmune disease,RDUS
+biotech,REGN
+pharmaceuticals,REPH
+biotech,REPL
+pharmaceuticals & drugs discovery,RETA
+healthcare services & equipment,RGEN
+biotech,RGNX
+biotech,RIGL
+pharmaceuticals & neurological disease,RLMD
+pharmaceuticals & kidney disease,RMTI
+biotech,RNA
+healthcare services & equipment & diagnostics,RNLX
+pharmaceuticals,RPRX
+biotech,RUBY
+pharmaceuticals,RVNC
+healthcare services & equipment & robotics,RWLK
+biotech,RYTM
+biotech,RZLT
+biotech,SAGE
+pharmaceuticals & neurological disease,SAVA
+pharmaceuticals,SBBP
+pharmaceuticals,SCPH
+healthcare services & equipment,SDC
+healthcare services & information technology,SDGR
+pharmaceuticals & neurological disease,SEEL
+healthcare services & equipment & laboratory,SEER
+biotech,SELB
+biotech,SESN
+healthcare services & hospitals,SGRY
+biotech,SGEN
+biotech,SGMO
+healthcare services & equipment & implants,SIBN
+healthcare services & equipment & implants,SIEN
+healthcare services & equipment & cardiovascular,SILK
+pharmaceuticals & dystrophy disease,SLDB
+pharmaceuticals & autoimmune disease,SLGL
+healthcare services & information technology,SLP
+pharmaceuticals & cancer disease,SLRX
+pharmaceuticals & cancer disease,SLS
+healthcare services & hospitals,SMED
+pharmaceuticals & cannabis,SNDL
+biotech,SNDX
+pharmaceuticals & animal health,SNES
+pharmaceuticals & dermatology,SNOA
+pharmaceuticals,SNY
+healthcare services & equipment & dermatology,SOLY
+healthcare services & equipment & implants,SPNE
+biotech,SPPI
+biotech,SPRO
+healthcare services & equipment & cardiovascular,SRDX
+biotech,SRNE
+biotech,SRPT
+biotech,SRRA
+biotech,SRRK
+healthcare services & equipment & robotics,SRTS
+healthcare services & equipment & dermatology,SSKN
+healthcare services & equipment & implants,STAA
+healthcare services & equipment,STIM
+pharmaceuticals & rare disease,STOK
+biotech,STRO
+pharmaceuticals,STSA
+pharmaceuticals & cancer disease,STTK
+pharmaceuticals & neurological disease,SUPN
+biotech,SURF
+biotech,SVA
+biotech,SVRA
+healthcare services & equipment & cardiovascular,SWAV
+pharmaceuticals & autoimmune disease,SWTX
+biotech,SYBX
+healthcare services & equipment & laboratory,SYNH
+biotech,SYRS
+biotech,TBIO
+pharmaceuticals,TBPH
+pharmaceuticals & kidney disease,TCDA
+healthcare services & equipment & cardiovascular,TCMD
+biotech,TCON
+biotech,TCRR
+healthcare services & equipment & diagnostics,TECH
+healthcare services & equipment & robotics,TELA
+biotech,TENX
+pharmaceuticals & cardiovascular disease,TFFP
+biotech,TGTX
+healthcare services & equipment & robotics,THMO
+pharmaceuticals & drugs discovery,THTX
+healthcare services & hospitals,TIG
+biotech,TLC
+pharmaceuticals & women's health,TLGT
+pharmaceuticals & cannabis,TLRY
+biotech,TLSA
+healthcare services & equipment & robotics,TMDI
+healthcare services & equipment & monitoring,TMDX
+healthcare services & equipment & implants,TNDM
+biotech,TNXP
+biotech,TPTX
+healthcare services & information technology,TRHC
+healthcare services & equipment & covid,TRIB
+biotech,TRIL
+pharmaceuticals & neurological disease,TRVI
+biotech,TRVN
+pharmaceuticals & liver disease,TTNP
+healthcare services & equipment,TTOO
+healthcare services & people care,TVTY
+pharmaceuticals & transplantology,TWST
+healthcare services & equipment & laboratory,TXG
+pharmaceuticals & women's health,TXMD
+biotech,TYME
+biotech,UBX
+biotech,URGN
+biotech,UTHR
+healthcare services & equipment,UTMD
+biotech,VBIV
+biotech,VBLT
+biotech,VCEL
+biotech,VCNX
+biotech,VCYT
+pharmaceuticals,VIR
+healthcare services & equipment & women's health,VIVE
+healthcare services & equipment & diagnostics,VIVO
+biotech,VKTX
+healthcare services & equipment,VMD
+biotech,VNDA
+healthcare services & equipment & diagnostics,VRAY
+pharmaceuticals & dermatology,VRCA
+healthcare services & equipment,VREX
+pharmaceuticals & respiratory disease,VRNA
+pharmaceuticals,VTRS
+biotech,VRTX
+biotech,VSTM
+biotech,VTGN
+biotech,VTVT
+pharmaceuticals & respiratory disease,VXRT
+biotech,VYGR
+biotech,WINT
+healthcare services & information technology,WORX
+pharmaceuticals & neurological disease,WVE
+healthcare services & equipment & covid,XAIR
+biotech,XBIO
+pharmaceuticals & drugs discovery,XBIOW
+biotech,XBIT
+pharmaceuticals & cancer disease,XCUR
+biotech,XENE
+pharmaceuticals & cardiovascular disease,XENT
+pharmaceuticals,XERS
+pharmaceuticals & autoimmune disease,XFOR
+healthcare services & equipment & diagnostics,XGN
+biotech,XLRN
+biotech,XNCR
+biotech,XOMA
+healthcare services & equipment,XRAY
+biotech,XTLB
+biotech,YMAB
+pharmaceuticals & animal health,YTEN
+biotech,ZEAL
+pharmaceuticals & rare disease,ZGNX
+biotech,ZIOP
+biotech,ZLAB
+biotech,ZNTL
+healthcare services & equipment,ZSAN
+pharmaceuticals & cannabis,ZYNE
+healthcare services & equipment,ZYXI
+healthcare services & equipment & covid,CODX
+biotech,COGT
+pharmaceuticals,COLL
+shell company & spac,KINZU
+shell company & spac,WHF
+shell company & spac,DNAD
+shell company & spac,GWAC
+shell company & spac,MLAC
+shell company & spac,ABGI
+shell company & spac,GGGVU
+shell company & spac,GGMC
+shell company & spac,GGMCU
+shell company & spac,GGPI
+shell company & spac,GGPIU
+shell company & spac,MLACU
+shell company & spac,AEAC
+shell company & spac,AKIC
+shell company & spac,ANZU
+shell company & spac,ANZUU
+shell company & spac,ALAC
+shell company & spac,ALACU
+shell company & spac,GHAC
+shell company & spac,GHACU
+shell company & spac,GHVI
+shell company & spac,GHVIU
+shell company & spac,AFAQ
+shell company & spac,AFAQU
+shell company & spac,GIGGU
+shell company & spac,GIIX
+shell company & spac,GIIXU
+shell company & spac,GIWWU
+shell company & spac,GLAQ
+shell company & spac,GLBLU
+shell company & spac,GLHA
+shell company & spac,GLHAU
+shell company & spac,GLSPT
+shell company & spac,GXII
+shell company & spac,GXIIU
+shell company & spac,AGBA
+shell company & spac,AGC
+shell company & spac,AGBAU
+shell company & spac,AGGRU
+shell company & spac,AGGR
+shell company & spac,ALTU
+shell company & spac,AMAO
+shell company & spac,AMAOU
+shell company & spac,APXTU
+shell company & spac,ARRW
+shell company & spac,ARRWU
+shell company & spac,ASAX
+shell company & spac,ASAXU
+shell company & spac,ASPC
+shell company & spac,ASPCU
+shell company & spac,ATSPT
+shell company & spac,ATSPU
+shell company & spac,ATVC
+shell company & spac,ATVCU
+shell company & spac,AURC
+shell company & spac,AURCU
+shell company & spac,ARBG
+shell company & spac,ARYD
+shell company & spac,BCAC
+shell company & spac,BCTG
+shell company & spac,MTAC
+shell company & spac,BENE
+shell company & spac,BENEU
+shell company & spac,MTACU
+shell company & spac,BHSE
+shell company & spac,BHSEU
+shell company & spac,BLSA
+shell company & spac,BLTS
+shell company & spac,BLTSU
+shell company & spac,BLUW
+shell company & spac,BLUWU
+shell company & spac,BTNB
+shell company & spac,BOWX
+shell company & spac,BREZ
+shell company & spac,BTWN
+shell company & spac,BRLIU
+shell company & spac,BTWNU
+shell company & spac,BSGAU
+shell company & spac,BSKY
+shell company & spac,BSKYU
+shell company & spac,BTAQ
+shell company & spac,CFIV
+shell company & spac,CFIVU
+shell company & spac,GMBT
+shell company & spac,GMII
+shell company & spac,GMIIU
+shell company & spac,GNAC
+shell company & spac,AHAC
+shell company & spac,AHACU
+shell company & spac,GOBI
+shell company & spac,AMHC
+shell company & spac,AMHCU
+shell company & spac,HAAC
+shell company & spac,ANDA
+shell company & spac,NBST
+shell company & spac,BWAC
+shell company & spac,BYTS
+shell company & spac,BYTSU
+shell company & spac,CAHC
+shell company & spac,CAHCU
+shell company & spac,NBSTU
+shell company & spac,CENH
+shell company & spac,CENHU
+shell company & spac,CFAC
+shell company & spac,CFACU
+shell company & spac,CFFE
+shell company & spac,CFFEU
+shell company & spac,CFFVU
+shell company & spac,CFV
+shell company & spac,CFVI
+shell company & spac,CFVIU
+shell company & spac,CHPM
+shell company & spac,CHPMU
+shell company & spac,SBEAU
+shell company & spac,CLRM
+shell company & spac,CMII
+shell company & spac,CMIIU
+shell company & spac,CMLF
+shell company & spac,CMLT
+shell company & spac,CMLTU
+shell company & spac,CONX
+shell company & spac,COVA
+shell company & spac,COVAU
+shell company & spac,CPARU
+shell company & spac,CRZN
+shell company & spac,CRZNU
+shell company & spac,CTAQ
+shell company & spac,DBDR
+shell company & spac,DCRC
+shell company & spac,DCRCU
+shell company & spac,DCRNU
+shell company & spac,DFPH
+shell company & spac,DFPHU
+shell company & spac,DGNS
+shell company & spac,DGNU
+shell company & spac,DHBC
+shell company & spac,DHBCU
+shell company & spac,DHCA
+shell company & spac,DHCAU
+shell company & spac,DHHC
+shell company & spac,DILAU
+shell company & spac,DISA
+shell company & spac,DISAU
+shell company & spac,DKDCA
+shell company & spac,DKDCU
+shell company & spac,DLCA
+shell company & spac,DLCAU
+shell company & spac,DNAA
+shell company & spac,DNAB
+shell company & spac,DNAC
+shell company & spac,DRAYU
+shell company & spac,DSAC
+shell company & spac,DTOC
+shell company & spac,DTOCU
+shell company & spac,DUNE
+shell company & spac,DUNEU
+shell company & spac,DYNS
+shell company & spac,EACPU
+shell company & spac,EBAC
+shell company & spac,EBACU
+shell company & spac,NVSAU
+shell company & spac,EJFA
+shell company & spac,EJFAU
+shell company & spac,ELMSW
+shell company & spac,ENFA
+shell company & spac,ENFAU
+shell company & spac,ENNV
+shell company & spac,ENNVU
+shell company & spac,ENVIU
+shell company & spac,EPHY
+shell company & spac,ERESU
+shell company & spac,ESSC
+shell company & spac,ESSCU
+shell company & spac,ETAC
+shell company & spac,ETACU
+shell company & spac,EUCR
+shell company & spac,EUSG
+shell company & spac,EVOJ
+shell company & spac,EVOJU
+shell company & spac,FCAC
+shell company & spac,FCACU
+shell company & spac,FICVU
+shell company & spac,FINM
+shell company & spac,FINMU
+shell company & spac,MOTN
+shell company & spac,FLAC
+shell company & spac,FMIV
+shell company & spac,FMIVU
+shell company & spac,FORE
+shell company & spac,FOREU
+shell company & spac,FOXW
+shell company & spac,FOXWU
+shell company & spac,FREE
+shell company & spac,FRON
+shell company & spac,FRONU
+shell company & spac,FRSG
+shell company & spac,FRSGU
+shell company & spac,FRWAU
+shell company & spac,FSRXU
+shell company & spac,FSSI
+shell company & spac,FSSIU
+shell company & spac,FTAA
+shell company & spac,FTAAU
+shell company & spac,FTCV
+shell company & spac,FTCVU
+shell company & spac,FTPA
+shell company & spac,FTVIU
+shell company & spac,FVAM
+shell company & spac,FWAA
+shell company & spac,FWAC
+shell company & spac,GACQU
+shell company & spac,GAMC
+shell company & spac,GAMCU
+shell company & spac,GBRG
+shell company & spac,GBRGU
+shell company & spac,GCAC
+shell company & spac,GCACU
+shell company & spac,GPCOU
+shell company & spac,HAACU
+shell company & spac,GRCY
+shell company & spac,GRCYU
+shell company & spac,GRNV
+shell company & spac,GRNVU
+shell company & spac,GRSV
+shell company & spac,GSAQ
+shell company & spac,GSAQU
+shell company & spac,GSEV
+shell company & spac,GSEVU
+shell company & spac,GTPA
+shell company & spac,GTPB
+shell company & spac,ACEV
+shell company & spac,ACEVU
+shell company & spac,ACKIT
+shell company & spac,ACKIU
+shell company & spac,ACQR
+shell company & spac,ACQRU
+shell company & spac,ACTD
+shell company & spac,ACTDU
+shell company & spac,ADER
+shell company & spac,ADERU
+shell company & spac,ADOC
+shell company & spac,MRAC
+shell company & spac,ACAH
+shell company & spac,ACAHU
+shell company & spac,HCAQ
+shell company & spac,HCAR
+shell company & spac,HCARU
+shell company & spac,HCCCU
+shell company & spac,HCIC
+shell company & spac,HCICU
+shell company & spac,HCII
+shell company & spac,HCIIU
+shell company & spac,HCNEU
+shell company & spac,HEC
+shell company & spac,HERA
+shell company & spac,HERAU
+shell company & spac,HIII
+shell company & spac,HIIIU
+shell company & spac,HLAH
+shell company & spac,HLAHU
+shell company & spac,HLXA
+shell company & spac,HMCO
+shell company & spac,HSAQ
+shell company & spac,HYAC
+shell company & spac,HYACU
+shell company & spac,IGAC
+shell company & spac,IGNY
+shell company & spac,IGNYU
+shell company & spac,IIII
+shell company & spac,IIIIU
+shell company & spac,INKA
+shell company & spac,IPVI
+shell company & spac,IPVIU
+shell company & spac,ISAA
+shell company & spac,ITAC
+shell company & spac,ITACU
+shell company & spac,ITHX
+shell company & spac,ITHXU
+shell company & spac,ITQ
+shell company & spac,ITQRU
+shell company & spac,JCIC
+shell company & spac,JOFF
+shell company & spac,JOFFU
+shell company & spac,JUGGU
+shell company & spac,JYAC
+shell company & spac,KAII
+shell company & spac,KAIIU
+shell company & spac,KAIR
+shell company & spac,KAIRU
+shell company & spac,KIII
+shell company & spac,KIIIU
+shell company & spac,KINZ
+shell company & spac,KLAQ
+shell company & spac,KLAQU
+shell company & spac,KRNL
+shell company & spac,KRNLU
+shell company & spac,KSI
+shell company & spac,KSICU
+shell company & spac,KSMT
+shell company & spac,KURI
+shell company & spac,KURIU
+shell company & spac,KVSA
+shell company & spac,LAAAU
+shell company & spac,LATN
+shell company & spac,LATNU
+shell company & spac,LCA
+shell company & spac,LCAA
+shell company & spac,LCAAU
+shell company & spac,LCAHU
+shell company & spac,LCAP
+shell company & spac,LCY
+shell company & spac,LDHA
+shell company & spac,LDHAU
+shell company & spac,LEGA
+shell company & spac,LEGAU
+shell company & spac,LEGO
+shell company & spac,LEGOU
+shell company & spac,LFTR
+shell company & spac,LFTRU
+shell company & spac,LGAC
+shell company & spac,LGACU
+shell company & spac,LHAA
+shell company & spac,LITTU
+shell company & spac,LIVK
+shell company & spac,LIVKU
+shell company & spac,LJAQ
+shell company & spac,LJAQU
+shell company & spac,MSAC
+shell company & spac,LMACA
+shell company & spac,LMACU
+shell company & spac,LMAO
+shell company & spac,LPRO
+shell company & spac,LSAQ
+shell company & spac,LUXA
+shell company & spac,LVRA
+shell company & spac,LWAC
+shell company & spac,LWACU
+shell company & spac,MAAC
+shell company & spac,MAACU
+shell company & spac,MACA
+shell company & spac,MACAU
+shell company & spac,MACU
+shell company & spac,MACUU
+shell company & spac,MAQC
+shell company & spac,MAQCU
+shell company & spac,MBTC
+shell company & spac,MBTCU
+shell company & spac,MCAD
+shell company & spac,MCADU
+shell company & spac,MCAEU
+shell company & spac,MCAFU
+shell company & spac,MCMJ
+shell company & spac,PRSR
+shell company & spac,MITAU
+shell company & spac,MON
+shell company & spac,MSDA
+shell company & spac,MSDAU
+shell company & spac,MUDS
+shell company & spac,MUDSU
+shell company & spac,NAAC
+shell company & spac,NAACU
+shell company & spac,NDAC
+shell company & spac,NDACU
+shell company & spac,NEBC
+shell company & spac,NGCA
+shell company & spac,NGCAU
+shell company & spac,NLITU
+shell company & spac,NMMC
+shell company & spac,NMMCU
+shell company & spac,NOAC
+shell company & spac,NOACU
+shell company & spac,NPA
+shell company & spac,NRAC
+shell company & spac,NVSA
+shell company & spac,PSAG
+shell company & spac,OCAX
+shell company & spac,OCAXU
+shell company & spac,PSAGU
+shell company & spac,OEPW
+shell company & spac,OHPA
+shell company & spac,OHPAU
+shell company & spac,OMEG
+shell company & spac,ORIAU
+shell company & spac,OSTR
+shell company & spac,OSTRU
+shell company & spac,OTECU
+shell company & spac,OTRA
+shell company & spac,PACX
+shell company & spac,PAIC
+shell company & spac,PAICU
+shell company & spac,PANA
+shell company & spac,PAQC
+shell company & spac,PFDR
+shell company & spac,PFDRU
+shell company & spac,PGRWU
+shell company & spac,PHIC
+shell company & spac,PHICU
+shell company & spac,PLMI
+shell company & spac,PLMIU
+shell company & spac,PMGM
+shell company & spac,PMGMU
+shell company & spac,POW
+shell company & spac,POWRU
+shell company & spac,PPGH
+shell company & spac,PSAC
+shell company & spac,PSACU
+shell company & spac,PTIC
+shell company & spac,PTICU
+shell company & spac,PTOC
+shell company & spac,PTOCU
+shell company & spac,PUCK
+shell company & spac,PUCKU
+shell company & spac,QELL
+shell company & spac,RAAC
+shell company & spac,RACB
+shell company & spac,RAMMU
+shell company & spac,RCHG
+shell company & spac,RCLF
+shell company & spac,RCLFU
+shell company & spac,SPKAU
+shell company & spac,REVH
+shell company & spac,REVHU
+shell company & spac,RMGB
+shell company & spac,RMGBU
+shell company & spac,RMGC
+shell company & spac,RMGCU
+shell company & spac,ROCC
+shell company & spac,ROCCU
+shell company & spac,ROCR
+shell company & spac,ROCRU
+shell company & spac,RTPY
+shell company & spac,RTPYU
+shell company & spac,RXRA
+shell company & spac,RXRAU
+shell company & spac,SAII
+shell company & spac,SBEA
+shell company & spac,SCAQ
+shell company & spac,SCAQU
+shell company & spac,SCLE
+shell company & spac,SCLEU
+shell company & spac,SCOA
+shell company & spac,SCOB
+shell company & spac,SCOBU
+shell company & spac,SDAC
+shell company & spac,SDACU
+shell company & spac,SGAM
+shell company & spac,SGAMU
+shell company & spac,SHAC
+shell company & spac,SHACU
+shell company & spac,SHQAU
+shell company & spac,SKYAU
+shell company & spac,SLCR
+shell company & spac,SLAMU
+shell company & spac,SLCRU
+shell company & spac,SMIHU
+shell company & spac,SNRH
+shell company & spac,SNRHU
+shell company & spac,SOFI
+shell company & spac,SPKB
+shell company & spac,SPKBU
+shell company & spac,SPTKU
+shell company & spac,SRAC
+shell company & spac,SRACU
+shell company & spac,SRNG
+shell company & spac,SRNGU
+shell company & spac,SRSA
+shell company & spac,SSAA
+shell company & spac,SSPK
+shell company & spac,STWO
+shell company & spac,SV
+shell company & spac,SVAC
+shell company & spac,SVACU
+shell company & spac,SVFA
+shell company & spac,SVFB
+shell company & spac,SVFC
+shell company & spac,SVOK
+shell company & spac,SVOKU
+shell company & spac,TBCP
+shell company & spac,TBCPU
+shell company & spac,TBLAW
+shell company & spac,TBSA
+shell company & spac,TBSAU
+shell company & spac,TCAC
+shell company & spac,TCACU
+shell company & spac,TCVA
+shell company & spac,TDAC
+shell company & spac,TDACU
+shell company & spac,TEKK
+shell company & spac,TETC
+shell company & spac,TETCU
+shell company & spac,THCA
+shell company & spac,THCAU
+shell company & spac,THCB
+shell company & spac,THCBU
+shell company & spac,THCPU
+shell company & spac,THMA
+shell company & spac,THMAU
+shell company & spac,TIOA
+shell company & spac,TIOAU
+shell company & spac,TMKR
+shell company & spac,TMPM
+shell company & spac,TMTS
+shell company & spac,TRONU
+shell company & spac,TSIB
+shell company & spac,TSIBU
+shell company & spac,TUGCU
+shell company & spac,TVAC
+shell company & spac,TVACU
+shell company & spac,TWCT
+shell company & spac,TZPS
+shell company & spac,TZPSU
+shell company & spac,VACQ
+shell company & spac,VAQC
+shell company & spac,VCKA
+shell company & spac,VCKAU
+shell company & spac,VCVC
+shell company & spac,VELO
+shell company & spac,VELOU
+shell company & spac,VENA
+shell company & spac,VENAU
+shell company & spac,VIH
+shell company & spac,VLATU
+shell company & spac,VMAC
+shell company & spac,VMACU
+shell company & spac,VOSO
+shell company & spac,VOSOU
+shell company & spac,VPCB
+shell company & spac,VPCBU
+shell company & spac,VTAQ
+shell company & spac,VTAQU
+shell company & spac,VTIQ
+shell company & spac,VTIQU
+shell company & spac,WALD
+shell company & spac,WALDU
+shell company & spac,XPDI
+shell company & spac,XPDIU
+shell company & spac,YSAC
+shell company & spac,ZGYH
+shell company & spac,ZGYHU
+shell company & spac,ZNTE
+shell company & spac,ZNTEU
+shell company & spac,ZTAQU
+shell company & spac,ZWRK
+shell company & spac,ZWRKU
+shell company & spac,COLI
+shell company & spac,COLIU
+shell company & spac,AHACW
+shell company & spac,DFPHW
+shell company & spac,DSACW
+shell company & spac,ERESW
+shell company & spac,FRWAW
+shell company & spac,MAACW
+shell company & spac,MACUW
+shell company & spac,MCAER
+shell company & spac,PAYOW
+shell company & spac,TDACW
+shell company & spac,UPTDU
+shell company & spac,VACQW
+shell company & spac,YSACW
