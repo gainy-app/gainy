@@ -26,9 +26,9 @@ jobs:
         working-directory: src/aws/lambda-nodejs
         run: npx prettier --check "./**/*.js"
 
-      - name: poetry install
+      - name: YAPF install
         working-directory: src/aws/lambda-python
-        run: pip3 install poetry && poetry install
+        run: pip3 install yapf toml
 
       - name: YAPF
         working-directory: src/aws/lambda-python/
