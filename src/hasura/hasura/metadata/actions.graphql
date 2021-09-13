@@ -1,54 +1,66 @@
 type Query {
-  fetchChartData (
+  fetchChartData(
     symbol: String!
     period: String!
   ): [ChartDataPoint]
 }
 
 type Query {
-  fetchLivePrices (
+  fetchLivePrices(
     symbols: [String]
   ): [LiveStockPriceData]
 }
 
 type Query {
-  fetchNewsData (
+  fetchNewsData(
     symbol: String!
     limit: Int
   ): [NewsDataPoint]
 }
 
+type Query {
+  getRecommendedCollections: RecommendedCollections
+}
+
 type ChartDataPoint {
-  datetime : String
-  open : Float
-  high : Float
-  low : Float
-  close : Float
-  volume : Float
+  datetime: String
+  open: Float
+  high: Float
+  low: Float
+  close: Float
+  volume: Float
 }
 
 type NewsDataPoint {
-  datetime : String
-  title : String
-  description : String
-  url : String
-  imageUrl : String
-  sourceName : String
-  sourceUrl : String
+  datetime: String
+  title: String
+  description: String
+  url: String
+  imageUrl: String
+  sourceName: String
+  sourceUrl: String
 }
 
 type LivePriceData {
-  datetime : String
-  daily_change : Float
-  daily_change_p : Float
-  close : Float
+  datetime: String
+  daily_change: Float
+  daily_change_p: Float
+  close: Float
 }
 
 type LiveStockPriceData {
-  symbol : String
-  datetime : String
-  daily_change : Float
-  daily_change_p : Float
-  close : Float
+  symbol: String
+  datetime: String
+  daily_change: Float
+  daily_change_p: Float
+  close: Float
+}
+
+type RecommendedCollection {
+  id: Int!
+}
+
+type RecommendedCollections {
+  categories: [Int]
 }
 

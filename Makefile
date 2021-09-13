@@ -44,12 +44,14 @@ hasura:
 	docker-compose exec -T hasura hasura $(PARAMS)
 
 style-check:
-	npx eslint src/aws/lambda
-	npx prettier --check "src/aws/lambda/**/*.js"
+	npx eslint src/aws/lambda-nodejs
+	npx prettier --check "src/aws/lambda-nodejs/**/*.js"
+	yapf --diff -r src/aws/lambda-python/
 
 style-fix:
-	npx eslint src/aws/lambda --fix
-	npx prettier --write "src/aws/lambda/**/*.js"
+	npx eslint src/aws/lambda-nodejs --fix
+	npx prettier --write "src/aws/lambda-nodejs/**/*.js"
+	yapf -i -r src/aws/lambda-python/
 
 %:
 	@:

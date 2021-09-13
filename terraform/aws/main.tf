@@ -1,6 +1,11 @@
 variable "env" {}
 variable "eodhistoricaldata_api_token" {}
 variable "gnews_api_token" {}
+variable "pg_host" {}
+variable "pg_port" {}
+variable "pg_dbname" {}
+variable "pg_username" {}
+variable "pg_password" {}
 
 output "aws_apigatewayv2_api_endpoint" {
   value = "${aws_apigatewayv2_api.lambda.api_endpoint}/${aws_apigatewayv2_stage.lambda.name}"
@@ -35,15 +40,15 @@ resource "aws_s3_bucket" "interests" {
 
 # Compress source code
 locals {
-  timestamp = formatdate("YYMMDDhhmmss", timestamp())
-  root_dir  = abspath("../src/aws/lambda")
+  timestamp       = formatdate("YYMMDDhhmmss", timestamp())
+  nodejs_root_dir = abspath("../src/aws/lambda-nodejs")
+  python_root_dir = abspath("../src/aws/lambda-python")
 }
-
-data "archive_file" "source" {
+data "archive_file" "nodejs_source" {
   type        = "zip"
-  source_dir  = local.root_dir
-  output_path = "/tmp/lambda.zip"
-  excludes    = ["${local.root_dir}/node_modules"]
+  source_dir  = local.nodejs_root_dir
+  output_path = "/tmp/lambda-nodejs.zip"
+  excludes    = ["${local.nodejs_root_dir}/node_modules"]
 }
 
 resource "aws_s3_bucket" "build" {
@@ -51,10 +56,10 @@ resource "aws_s3_bucket" "build" {
   acl    = "private"
 }
 
-resource "aws_s3_bucket_object" "object" {
+resource "aws_s3_bucket_object" "nodejs" {
   bucket = aws_s3_bucket.build.id
-  key    = "source.${data.archive_file.source.output_md5}.zip"
-  source = data.archive_file.source.output_path
+  key    = "source.${data.archive_file.nodejs_source.output_md5}.zip"
+  source = data.archive_file.nodejs_source.output_path
 }
 
 resource "aws_iam_role" "lambda_exec" {
@@ -115,54 +120,97 @@ resource "aws_apigatewayv2_stage" "lambda" {
   }
 }
 
+#################################### Node.js lambdas ####################################
+
 module "lambda-fetchChartData" {
-  source                                    = "./lambda"
+  source                                    = "./lambda/type-zip"
   env                                       = var.env
   function_name                             = "fetchChartData"
   route                                     = "POST /fetchChartData"
   aws_apigatewayv2_api_lambda_id            = aws_apigatewayv2_api.lambda.id
-  aws_apigatewayv2_api_lambda_name          = aws_apigatewayv2_api.lambda.name
   aws_apigatewayv2_api_lambda_execution_arn = aws_apigatewayv2_api.lambda.execution_arn
   aws_s3_bucket                             = aws_s3_bucket.build.id
-  aws_s3_key                                = aws_s3_bucket_object.object.id
+  aws_s3_key                                = aws_s3_bucket_object.nodejs.id
   aws_iam_role_lambda_exec_role             = aws_iam_role.lambda_exec.arn
-  source_code_hash                          = data.archive_file.source.output_base64sha256
+  source_code_hash                          = data.archive_file.nodejs_source.output_base64sha256
   env_vars = {
     eodhistoricaldata_api_token = var.eodhistoricaldata_api_token
   }
+  runtime = "nodejs12.x"
+  handler = "index.fetchChartData"
 }
 
 module "lambda-fetchNewsData" {
-  source                                    = "./lambda"
+  source                                    = "./lambda/type-zip"
   env                                       = var.env
   function_name                             = "fetchNewsData"
   route                                     = "POST /fetchNewsData"
   aws_apigatewayv2_api_lambda_id            = aws_apigatewayv2_api.lambda.id
-  aws_apigatewayv2_api_lambda_name          = aws_apigatewayv2_api.lambda.name
   aws_apigatewayv2_api_lambda_execution_arn = aws_apigatewayv2_api.lambda.execution_arn
   aws_s3_bucket                             = aws_s3_bucket.build.id
-  aws_s3_key                                = aws_s3_bucket_object.object.id
+  aws_s3_key                                = aws_s3_bucket_object.nodejs.id
   aws_iam_role_lambda_exec_role             = aws_iam_role.lambda_exec.arn
-  source_code_hash                          = data.archive_file.source.output_base64sha256
+  source_code_hash                          = data.archive_file.nodejs_source.output_base64sha256
   env_vars = {
     gnews_api_token = var.gnews_api_token
   }
+  runtime = "nodejs12.x"
+  handler = "index.fetchNewsData"
 }
 
 module "lambda-fetchLivePrices" {
-  source                                    = "./lambda"
+  source                                    = "./lambda/type-zip"
   env                                       = var.env
   function_name                             = "fetchLivePrices"
   route                                     = "POST /fetchLivePrices"
   aws_apigatewayv2_api_lambda_id            = aws_apigatewayv2_api.lambda.id
-  aws_apigatewayv2_api_lambda_name          = aws_apigatewayv2_api.lambda.name
   aws_apigatewayv2_api_lambda_execution_arn = aws_apigatewayv2_api.lambda.execution_arn
   aws_s3_bucket                             = aws_s3_bucket.build.id
-  aws_s3_key                                = aws_s3_bucket_object.object.id
+  aws_s3_key                                = aws_s3_bucket_object.nodejs.id
   aws_iam_role_lambda_exec_role             = aws_iam_role.lambda_exec.arn
-  source_code_hash                          = data.archive_file.source.output_base64sha256
+  source_code_hash                          = data.archive_file.nodejs_source.output_base64sha256
   timeout                                   = 10
   env_vars = {
     eodhistoricaldata_api_token = var.eodhistoricaldata_api_token
+  }
+  runtime = "nodejs12.x"
+  handler = "index.fetchLivePrices"
+}
+
+#################################### Python lambdas ####################################
+
+data "archive_file" "python_source" {
+  type        = "zip"
+  source_dir  = local.python_root_dir
+  output_path = "/tmp/lambda-python.zip"
+}
+module "docker_image" {
+  source = "terraform-aws-modules/lambda/aws//modules/docker-build"
+
+  create_ecr_repo = true
+  ecr_repo        = "gainy-${var.env}"
+  image_tag       = data.archive_file.python_source.output_md5
+  source_path     = local.python_root_dir
+}
+
+module "lambda-getRecommendedCollections" {
+  source                                    = "./lambda/type-image"
+  env                                       = var.env
+  function_name                             = "getRecommendedCollections"
+  source_code_hash                          = data.archive_file.python_source.output_md5
+  handler                                   = "get_recommended_collections.handle"
+  timeout                                   = 10
+  route                                     = "POST /getRecommendedCollections"
+  aws_apigatewayv2_api_lambda_id            = aws_apigatewayv2_api.lambda.id
+  aws_apigatewayv2_api_lambda_execution_arn = aws_apigatewayv2_api.lambda.execution_arn
+  aws_iam_role_lambda_exec_role             = aws_iam_role.lambda_exec.arn
+  image_uri                                 = module.docker_image.image_uri
+
+  env_vars = {
+    pg_host     = var.pg_host
+    pg_port     = var.pg_port
+    pg_dbname   = var.pg_dbname
+    pg_username = var.pg_username
+    pg_password = var.pg_password
   }
 }

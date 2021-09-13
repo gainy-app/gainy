@@ -8,7 +8,11 @@ with open('../data/collections.csv', newline='') as csvfile:
         name, sql, enabled = row['name'], row['sql_request'], row['enabled']
         if(not sql or not int(enabled)):
             continue
-        sql = " ".join(filter(lambda x: not re.match(r'^(select|where|order)', x), sql.lower().split("\n")))
+
+        lines = sql.lower().split("\n")
+        lines = filter(lambda x: not re.match(r'^(select|order)', x), lines)
+        lines = map(lambda x: x.replace('where', '').strip(), lines)
+        sql = " ".join(lines)
         queries.append("select collections.id as collection_id, ct.ticker_code as symbol from ct join collections on collections.name = '%s' where %s" % (name, sql))
 
 final_sql = "\nUNION\n".join(queries)
