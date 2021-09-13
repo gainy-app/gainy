@@ -189,7 +189,7 @@ module "docker_image" {
 
   create_ecr_repo = true
   ecr_repo        = "gainy-${var.env}"
-  image_tag       = "${data.archive_file.python_source.output_md5}"
+  image_tag       = data.archive_file.python_source.output_md5
   source_path     = local.python_root_dir
 }
 
