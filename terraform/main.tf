@@ -128,4 +128,9 @@ module "aws" {
   eodhistoricaldata_api_token = var.eodhistoricaldata_api_token
   gnews_api_token             = var.gnews_api_token
   env                         = "dev"
+  pg_host                     = module.rds.db.db_instance_address
+  pg_port                     = module.rds.db.db_instance_port
+  pg_dbname                   = module.rds.db.db_instance_name
+  pg_username                 = module.rds.db.db_instance_username
+  pg_password                 = module.rds.db.db_instance_password
 }
