@@ -28,7 +28,7 @@ with price_stats as
                     percentile_cont(0.5) WITHIN GROUP (ORDER BY growth_rate_1m) as median_growth_rate_1m,
                     percentile_cont(0.5) WITHIN GROUP (ORDER BY growth_rate_3m) as median_growth_rate_3m,
                     percentile_cont(0.5) WITHIN GROUP (ORDER BY growth_rate_1y) as median_growth_rate_1y
-             from historical_growth_rate hgr
+             from {{ ref('historical_growth_rate') }} hgr
                       join {{ ref('tickers') }} on hgr.symbol = tickers.symbol
                       join {{ ref('ticker_industries') }} ti on tickers.symbol = ti.symbol
              group by ti.industry_id, hgr.date

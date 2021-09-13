@@ -15,16 +15,24 @@ jobs:
         uses: actions/checkout@v2
 
       - name: npm install
-        working-directory: src/aws/lambda
+        working-directory: src/aws/lambda-nodejs
         run: npm install
 
       - name: ESLint
-        working-directory: src/aws/lambda
+        working-directory: src/aws/lambda-nodejs
         run: npx eslint .
 
       - name: Prettier
-        working-directory: src/aws/lambda
+        working-directory: src/aws/lambda-nodejs
         run: npx prettier --check "./**/*.js"
+
+      - name: YAPF install
+        working-directory: src/aws/lambda-python
+        run: pip3 install yapf toml
+
+      - name: YAPF
+        working-directory: src/aws/lambda-python/
+        run: yapf --diff -r . > /dev/null
 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v1

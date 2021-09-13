@@ -25,7 +25,7 @@ make update-quick # sometimes first run fails - to be investigated
    2. Loader
    We use standard [target-postgres](https://github.com/transferwise/pipelinewise-target-postgres) to load data into our PostgreSQL instance as is. Basically it ends up in database as one giant json blob
 
-   3. Transfrormer (not configured to be automatially run
+   3. Transformer (not configured to be automatially run
    At the end we use [dbt](https://www.getdbt.com/) transformer to normalize loaded data into [models](https://github.com/gainy-app/gainy-etl/tree/main/src/gainy-fetch/meltano/transform/models).
 
 2. ### Gainy API

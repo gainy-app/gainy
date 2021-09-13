@@ -58,4 +58,4 @@ schedules:
     loader: target-postgres
     transform: run
     interval: '@daily'
-    start_date: 2021-09-03
+    start_date: 2021-09-03 10:40:58.742133
