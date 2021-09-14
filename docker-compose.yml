@@ -8,6 +8,7 @@ services:
       target: local
     ports:
       - "5000:5000"
+      - "5001:5001"
     volumes:
       - ./src/gainy-fetch/meltano/transform:/project/transform:delegated
       - ./src/gainy-fetch/meltano/data:/project/data:delegated

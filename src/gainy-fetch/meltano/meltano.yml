@@ -43,9 +43,12 @@ plugins:
       config:
         target: postgres
         models: '*'
-  files:
-    - name: dbt
-      pip_url: git+https://gitlab.com/meltano/files-dbt.git@config-version-2
+  orchestrators:
+    - name: airflow
+      pip_url: psycopg2-binary==2.9.1 apache-airflow==2.1.2 --constraint https://raw.githubusercontent.com/apache/airflow/constraints-2.1.2/constraints-${MELTANO__PYTHON_VERSION}.txt
+      config:
+        core:
+          sql_alchemy_conn: $AIRFLOW_DATABASE_URI
 schedules:
   - name: csv-to-postgres
     extractor: tap-csv

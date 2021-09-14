@@ -1,1 +1,2 @@
-create schema meltano
+create schema meltano;
+create schema airflow;
