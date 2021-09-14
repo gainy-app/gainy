@@ -463,6 +463,13 @@
       foreign_key_constraint_on: symbol
 - table:
     schema: public
+    name: ticker_events
+  object_relationships:
+  - name: ticker
+    using:
+      foreign_key_constraint_on: symbol
+- table:
+    schema: public
     name: ticker_financials
   object_relationships:
   - name: ticker
@@ -575,6 +582,13 @@
         table:
           schema: public
           name: ticker_collections
+  - name: ticker_events
+    using:
+      foreign_key_constraint_on:
+        column: symbol
+        table:
+          schema: public
+          name: ticker_events
   - name: ticker_financials
     using:
       foreign_key_constraint_on:
