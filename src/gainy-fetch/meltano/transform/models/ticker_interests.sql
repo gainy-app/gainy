@@ -46,83 +46,83 @@ with price AS
          ),
      tmp_ticker_interests as
          (
-select interests.id as interest_id, ct.ticker_code as symbol from ct join interests on interests.name = 'Cars Manufacturers' where  lower(ct.g_industry) like '%electr%vehic%' or lower(ct.g_industry) like '%auto%deal%' or lower(ct.g_industry) like '%auto%manufact%' or lower(ct.g_industry) like '%auto%marketpl%' or lower(ct.g_industry) like '%auto%part%service%'
+select interests.id as interest_id, ct.ticker_code as symbol from ct join interests on interests.name = 'Cars Manufacturers' where ct.g_industry ilike '%electr%vehic%' or ct.g_industry ilike '%auto%deal%' or ct.g_industry ilike '%auto%manufact%' or ct.g_industry ilike '%auto%marketpl%' or ct.g_industry ilike '%auto%part%service%'
 UNION
-select interests.id as interest_id, ct.ticker_code as symbol from ct join interests on interests.name = 'Cable & Satellite' where  lower(ct.g_industry) like '%satel%comm%' or lower(ct.g_industry) like '%tv%radio%' or lower(ct.g_industry) like '%5g%comm%'
+select interests.id as interest_id, ct.ticker_code as symbol from ct join interests on interests.name = 'Cable & Satellite' where ct.g_industry ilike '%satel%comm%' or ct.g_industry ilike '%tv%radio%' or ct.g_industry ilike '%5g%comm%'
 UNION
-select interests.id as interest_id, ct.ticker_code as symbol from ct join interests on interests.name = 'Gaming' where  lower(ct.g_industry) like '%gam%esport%' or lower(ct.g_industry) like '%casin%resort%'
+select interests.id as interest_id, ct.ticker_code as symbol from ct join interests on interests.name = 'Gaming' where ct.g_industry ilike '%gam%esport%' or ct.g_industry ilike '%casin%resort%'
 UNION
-select interests.id as interest_id, ct.ticker_code as symbol from ct join interests on interests.name = 'Cannabis' where  lower(ct.g_industry) like '%cannabis%'
+select interests.id as interest_id, ct.ticker_code as symbol from ct join interests on interests.name = 'Cannabis' where ct.g_industry ilike '%cannabis%'
 UNION
-select interests.id as interest_id, ct.ticker_code as symbol from ct join interests on interests.name = 'Consumer Electronics' where  lower(ct.g_industry) like '%electron%displ%' or lower(ct.g_industry) like '%electron%manufact%' or lower(ct.g_industry) like '%drones%' or lower(ct.g_industry) like 'iot%' or lower(ct.g_industry) like '%tech%conglomerat%'
+select interests.id as interest_id, ct.ticker_code as symbol from ct join interests on interests.name = 'Consumer Electronics' where ct.g_industry ilike '%electron%displ%' or ct.g_industry ilike '%electron%manufact%' or ct.g_industry ilike '%drones%' or ct.g_industry ilike 'iot%' or ct.g_industry ilike '%tech%conglomerat%'
 UNION
-select interests.id as interest_id, ct.ticker_code as symbol from ct join interests on interests.name = 'Hotels & Cruise Lines' where  lower(ct.g_industry) like '%hotel%' and lower(ct.g_industry) not like '%reit%' or lower(ct.g_industry) like '%onlin%travel%compan%' or lower(ct.g_industry) like '%maritime%transport%'
+select interests.id as interest_id, ct.ticker_code as symbol from ct join interests on interests.name = 'Hotels & Cruise Lines' where ct.g_industry ilike '%hotel%' and ct.g_industry not ilike '%reit%' or ct.g_industry ilike '%onlin%travel%compan%' or ct.g_industry ilike '%maritime%transport%'
 UNION
-select interests.id as interest_id, ct.ticker_code as symbol from ct join interests on interests.name = 'Peloton' where  lower(ct.g_industry) like '%outdoor%life%style%' or lower(ct.g_industry) like '%sport%drink%'
+select interests.id as interest_id, ct.ticker_code as symbol from ct join interests on interests.name = 'Peloton' where ct.g_industry ilike '%outdoor%life%style%' or ct.g_industry ilike '%sport%drink%'
 UNION
-select interests.id as interest_id, ct.ticker_code as symbol from ct join interests on interests.name = 'Crypto' where  lower(ct.g_industry) like '%cryptocurrenc%'
+select interests.id as interest_id, ct.ticker_code as symbol from ct join interests on interests.name = 'Crypto' where ct.g_industry ilike '%cryptocurrenc%'
 UNION
-select interests.id as interest_id, ct.ticker_code as symbol from ct join interests on interests.name = 'Green Energy' where  lower(ct.g_industry) like '%clean%energ%' or lower(ct.g_industry) like '%energ%explor%' or lower(ct.g_industry) like '%renew%energ%' or lower(ct.g_industry) like '%solar%energ%'
+select interests.id as interest_id, ct.ticker_code as symbol from ct join interests on interests.name = 'Green Energy' where ct.g_industry ilike '%clean%energ%' or ct.g_industry ilike '%energ%explor%' or ct.g_industry ilike '%renew%energ%' or ct.g_industry ilike '%solar%energ%'
 UNION
-select interests.id as interest_id, ct.ticker_code as symbol from ct join interests on interests.name = 'Health Insurance' where  lower(ct.g_industry) like '%health%insur%' or lower(ct.g_industry) like '%life%insur%' or lower(ct.g_industry) like '%multilin%insur%' or lower(ct.g_industry) like '%insur%broker%'
+select interests.id as interest_id, ct.ticker_code as symbol from ct join interests on interests.name = 'Health Insurance' where ct.g_industry ilike '%health%insur%' or ct.g_industry ilike '%life%insur%' or ct.g_industry ilike '%multilin%insur%' or ct.g_industry ilike '%insur%broker%'
 UNION
-select interests.id as interest_id, ct.ticker_code as symbol from ct join interests on interests.name = 'Publishing' where  lower(ct.g_industry) like '%digit%content%publish%' or lower(ct.g_industry) like '%publishers%' or lower(ct.g_industry) like '%digit%market%advert%' or lower(ct.g_industry) like '%digit%media%web%'
+select interests.id as interest_id, ct.ticker_code as symbol from ct join interests on interests.name = 'Publishing' where ct.g_industry ilike '%digit%content%publish%' or ct.g_industry ilike '%publishers%' or ct.g_industry ilike '%digit%market%advert%' or ct.g_industry ilike '%digit%media%web%'
 UNION
-select interests.id as interest_id, ct.ticker_code as symbol from ct join interests on interests.name = 'Technology Hardware' where  lower(ct.g_industry) like '%5g%comm%' or lower(ct.g_industry) like '%comput%vision%sens%' or lower(ct.g_industry) like '%data%stor%manag%' or lower(ct.g_industry) like '%electron%compon%' or lower(ct.g_industry) like '%electron%displ%' or lower(ct.g_industry) like '%electron%manufact%' or lower(ct.g_industry) like '%memor%stor%' or lower(ct.g_industry) like '%network%equip%' or lower(ct.g_industry) like '%power%generat%distrib%' or lower(ct.g_industry) like '%video%tech%'
+select interests.id as interest_id, ct.ticker_code as symbol from ct join interests on interests.name = 'Technology Hardware' where ct.g_industry ilike '%5g%comm%' or ct.g_industry ilike '%comput%vision%sens%' or ct.g_industry ilike '%data%stor%manag%' or ct.g_industry ilike '%electron%compon%' or ct.g_industry ilike '%electron%displ%' or ct.g_industry ilike '%electron%manufact%' or ct.g_industry ilike '%memor%stor%' or ct.g_industry ilike '%network%equip%' or ct.g_industry ilike '%power%generat%distrib%' or ct.g_industry ilike '%video%tech%'
 UNION
-select interests.id as interest_id, ct.ticker_code as symbol from ct join interests on interests.name = 'Trucking' where  lower(ct.g_industry) like '%truck%' or lower(ct.g_industry) like '%auto%part%serv%'
+select interests.id as interest_id, ct.ticker_code as symbol from ct join interests on interests.name = 'Trucking' where ct.g_industry ilike '%truck%' or ct.g_industry ilike '%auto%part%serv%'
 UNION
-select interests.id as interest_id, ct.ticker_code as symbol from ct join interests on interests.name = 'Salesforce' where  lower(ct.g_industry) like '%crm%customer%succ%' or lower(ct.g_industry) like '%distrib%work%tool%' or lower(ct.g_industry) like '%enterpris%tech%'
+select interests.id as interest_id, ct.ticker_code as symbol from ct join interests on interests.name = 'Salesforce' where ct.g_industry ilike '%crm%customer%succ%' or ct.g_industry ilike '%distrib%work%tool%' or ct.g_industry ilike '%enterpris%tech%'
 UNION
-select interests.id as interest_id, ct.ticker_code as symbol from ct join interests on interests.name = 'AI' where  lower(ct.g_industry) like '%analyt%ai%' or lower(ct.g_industry) like '%comput%vis%sens%' or lower(ct.g_industry) like 'iot%' or lower(ct.g_industry) like '%precis%manufact%' or lower(ct.g_industry) like '%health%car%serv%equip%robot%' or lower(ct.g_industry) like '%tech%conglomerat%'
+select interests.id as interest_id, ct.ticker_code as symbol from ct join interests on interests.name = 'AI' where ct.g_industry ilike '%analyt%ai%' or ct.g_industry ilike '%comput%vis%sens%' or ct.g_industry ilike 'iot%' or ct.g_industry ilike '%precis%manufact%' or ct.g_industry ilike '%health%car%serv%equip%robot%' or ct.g_industry ilike '%tech%conglomerat%'
 UNION
-select interests.id as interest_id, ct.ticker_code as symbol from ct join interests on interests.name = 'Airlines' where  lower(ct.g_industry) like '%airline%' or lower(ct.g_industry) like '%air%carg%transport%' or lower(ct.g_industry) like '%aircraft%leas%' or lower(ct.g_industry) like '%onlin%travel%comp%'
+select interests.id as interest_id, ct.ticker_code as symbol from ct join interests on interests.name = 'Airlines' where ct.g_industry ilike '%airline%' or ct.g_industry ilike '%air%carg%transport%' or ct.g_industry ilike '%aircraft%leas%' or ct.g_industry ilike '%onlin%travel%comp%'
 UNION
-select interests.id as interest_id, ct.ticker_code as symbol from ct join interests on interests.name = 'Entertainment' where  lower(ct.g_industry) like '%tv%radio%' or lower(ct.g_industry) like '%streaming%' or lower(ct.g_industry) like '%gaming%esport%' or lower(ct.g_industry) like '%digit%market%advert%'
+select interests.id as interest_id, ct.ticker_code as symbol from ct join interests on interests.name = 'Entertainment' where ct.g_industry ilike '%tv%radio%' or ct.g_industry ilike '%streaming%' or ct.g_industry ilike '%gaming%esport%' or ct.g_industry ilike '%digit%market%advert%'
 UNION
-select interests.id as interest_id, ct.ticker_code as symbol from ct join interests on interests.name = 'Biotechnology' where  lower(ct.g_industry) like '%biotech%' or lower(ct.g_industry) like '%pharm%cancer%diseas%' or lower(ct.g_industry) like '%health%car%serv%equip%lab%' or lower(ct.g_industry) like '%pharm%covid%' or lower(ct.g_industry) like '%pharm%dermat%'
+select interests.id as interest_id, ct.ticker_code as symbol from ct join interests on interests.name = 'Biotechnology' where ct.g_industry ilike '%biotech%' or ct.g_industry ilike '%pharm%cancer%diseas%' or ct.g_industry ilike '%health%car%serv%equip%lab%' or ct.g_industry ilike '%pharm%covid%' or ct.g_industry ilike '%pharm%dermat%'
 UNION
-select interests.id as interest_id, ct.ticker_code as symbol from ct join interests on interests.name = 'Banks' where  lower(ct.g_industry) like 'bank%' or lower(ct.g_industry) like '%invest%bank%adv%' or lower(ct.g_industry) like '%invest%manag%' or lower(ct.g_industry) like '%trad%privat%invest%fund%'
+select interests.id as interest_id, ct.ticker_code as symbol from ct join interests on interests.name = 'Banks' where ct.g_industry ilike 'bank%' or ct.g_industry ilike '%invest%bank%adv%' or ct.g_industry ilike '%invest%manag%' or ct.g_industry ilike '%trad%privat%invest%fund%'
 UNION
-select interests.id as interest_id, ct.ticker_code as symbol from ct join interests on interests.name = 'Lululemon' where  lower(ct.g_industry) like '%luxur%retail%' or lower(ct.g_industry) like '%apparel%manufact%retail%' or lower(ct.g_industry) like '%outdoor%life%styl%prod%'
+select interests.id as interest_id, ct.ticker_code as symbol from ct join interests on interests.name = 'Lululemon' where ct.g_industry ilike '%luxur%retail%' or ct.g_industry ilike '%apparel%manufact%retail%' or ct.g_industry ilike '%outdoor%life%styl%prod%'
 UNION
-select interests.id as interest_id, ct.ticker_code as symbol from ct join interests on interests.name = 'Ecommerce' where  lower(ct.g_industry) like '%e-commerc%operat%' or lower(ct.g_industry) like '%e-commerc%platform%' or lower(ct.g_industry) like '%tech%conglomerat%'
+select interests.id as interest_id, ct.ticker_code as symbol from ct join interests on interests.name = 'Ecommerce' where ct.g_industry ilike '%e-commerc%operat%' or ct.g_industry ilike '%e-commerc%platform%' or ct.g_industry ilike '%tech%conglomerat%'
 UNION
-select interests.id as interest_id, ct.ticker_code as symbol from ct join interests on interests.name = 'Coursera' where  lower(ct.g_industry) like '%educat%serv%' or lower(ct.g_industry) like '%educat%tech%'
+select interests.id as interest_id, ct.ticker_code as symbol from ct join interests on interests.name = 'Coursera' where ct.g_industry ilike '%educat%serv%' or ct.g_industry ilike '%educat%tech%'
 UNION
-select interests.id as interest_id, ct.ticker_code as symbol from ct join interests on interests.name = 'PayPal' where  lower(ct.g_industry) like '%payment%system%' or lower(ct.g_industry) like '%fintech%operat%'
+select interests.id as interest_id, ct.ticker_code as symbol from ct join interests on interests.name = 'PayPal' where ct.g_industry ilike '%payment%system%' or ct.g_industry ilike '%fintech%operat%'
 UNION
-select interests.id as interest_id, ct.ticker_code as symbol from ct join interests on interests.name = 'Casino' where  lower(ct.g_industry) like '%casin%resort%'
+select interests.id as interest_id, ct.ticker_code as symbol from ct join interests on interests.name = 'Casino' where ct.g_industry ilike '%casin%resort%'
 UNION
-select interests.id as interest_id, ct.ticker_code as symbol from ct join interests on interests.name = 'Gold & Silver' where  lower(ct.g_industry) like '%gold%silver%' or lower(ct.g_industry) like '%prec%metal%trad%'
+select interests.id as interest_id, ct.ticker_code as symbol from ct join interests on interests.name = 'Gold & Silver' where ct.g_industry ilike '%gold%silver%' or ct.g_industry ilike '%prec%metal%trad%'
 UNION
-select interests.id as interest_id, ct.ticker_code as symbol from ct join interests on interests.name = 'Homebuilding' where  lower(ct.g_industry) like '%home%construct%maint%' or lower(ct.g_industry) like '%build%mater%' or lower(ct.g_industry) like '%build%prod%' or lower(ct.g_industry) like '%home%furnit%retail%'
+select interests.id as interest_id, ct.ticker_code as symbol from ct join interests on interests.name = 'Homebuilding' where ct.g_industry ilike '%home%construct%maint%' or ct.g_industry ilike '%build%mater%' or ct.g_industry ilike '%build%prod%' or ct.g_industry ilike '%home%furnit%retail%'
 UNION
-select interests.id as interest_id, ct.ticker_code as symbol from ct join interests on interests.name = 'Oil & Gas' where  lower(ct.g_industry) like '%oil%gas%produc%' or lower(ct.g_industry) like '%liqui%natur%gas%' or lower(ct.g_industry) like '%oil%gas%servic%'
+select interests.id as interest_id, ct.ticker_code as symbol from ct join interests on interests.name = 'Oil & Gas' where ct.g_industry ilike '%oil%gas%produc%' or ct.g_industry ilike '%liqui%natur%gas%' or ct.g_industry ilike '%oil%gas%servic%'
 UNION
-select interests.id as interest_id, ct.ticker_code as symbol from ct join interests on interests.name = 'Internet Infrastructure' where  lower(ct.g_industry) like '%cybersecur%' or lower(ct.g_industry) like '%data%cent%' or lower(ct.g_industry) like '%domain%reg%' or lower(ct.g_industry) like '%enterpris%cloud%' or lower(ct.g_industry) like '%network%equip%' or lower(ct.g_industry) like '%tech%conglomerat%'
+select interests.id as interest_id, ct.ticker_code as symbol from ct join interests on interests.name = 'Internet Infrastructure' where ct.g_industry ilike '%cybersecur%' or ct.g_industry ilike '%data%cent%' or ct.g_industry ilike '%domain%reg%' or ct.g_industry ilike '%enterpris%cloud%' or ct.g_industry ilike '%network%equip%' or ct.g_industry ilike '%tech%conglomerat%'
 UNION
-select interests.id as interest_id, ct.ticker_code as symbol from ct join interests on interests.name = 'Real Estate' where  lower(ct.g_industry) like '%real%estat%tech%' or lower(ct.g_industry) like '%real%estat%prop%manag%' or lower(ct.g_industry) like '%real%estat%invest%develop%' or lower(ct.g_industry) like '%commerc%real%estat%broker%serv%' or lower(ct.g_industry) like '% reit'
+select interests.id as interest_id, ct.ticker_code as symbol from ct join interests on interests.name = 'Real Estate' where ct.g_industry ilike '%real%estat%tech%' or ct.g_industry ilike '%real%estat%prop%manag%' or ct.g_industry ilike '%real%estat%invest%develop%' or ct.g_industry ilike '%commerc%real%estat%broker%serv%' or ct.g_industry ilike '% reit'
 UNION
-select interests.id as interest_id, ct.ticker_code as symbol from ct join interests on interests.name = 'Restaurants' where  lower(ct.g_industry) like '%casual%din%' or lower(ct.g_industry) like '%food%deliver%'
+select interests.id as interest_id, ct.ticker_code as symbol from ct join interests on interests.name = 'Restaurants' where ct.g_industry ilike '%casual%din%' or ct.g_industry ilike '%food%deliver%'
 UNION
-select interests.id as interest_id, ct.ticker_code as symbol from ct join interests on interests.name = 'Semiconductors' where  lower(ct.g_industry) like '%semiconduct%equip%' or lower(ct.g_industry) like '%semiconduct%manufact%' or lower(ct.g_industry) like '%semiconduct%mater%' or lower(ct.g_industry) like '%memory%storage%'
+select interests.id as interest_id, ct.ticker_code as symbol from ct join interests on interests.name = 'Semiconductors' where ct.g_industry ilike '%semiconduct%equip%' or ct.g_industry ilike '%semiconduct%manufact%' or ct.g_industry ilike '%semiconduct%mater%' or ct.g_industry ilike '%memory%storage%'
 UNION
-select interests.id as interest_id, ct.ticker_code as symbol from ct join interests on interests.name = 'SPACs' where  lower(ct.g_industry) like '%shell%compan%spac%'
+select interests.id as interest_id, ct.ticker_code as symbol from ct join interests on interests.name = 'SPACs' where ct.g_industry ilike '%shell%compan%spac%'
 UNION
-select interests.id as interest_id, ct.ticker_code as symbol from ct join interests on interests.name = 'Social media' where  lower(ct.g_industry) like '%social%media%'
+select interests.id as interest_id, ct.ticker_code as symbol from ct join interests on interests.name = 'Social media' where ct.g_industry ilike '%social%media%'
 UNION
-select interests.id as interest_id, ct.ticker_code as symbol from ct join interests on interests.name = 'Utilities' where  lower(ct.g_industry) like '%electricity%generat%' or lower(ct.g_industry) like '%waste%manag%' or lower(ct.g_industry) like '%water%manag%'
+select interests.id as interest_id, ct.ticker_code as symbol from ct join interests on interests.name = 'Utilities' where ct.g_industry ilike '%electricity%generat%' or ct.g_industry ilike '%waste%manag%' or ct.g_industry ilike '%water%manag%'
 UNION
-select interests.id as interest_id, ct.ticker_code as symbol from ct join interests on interests.name = 'Tesla' where  lower(ct.g_industry) like '%electric%vehicle%'
+select interests.id as interest_id, ct.ticker_code as symbol from ct join interests on interests.name = 'Tesla' where ct.g_industry ilike '%electric%vehicle%'
 UNION
-select interests.id as interest_id, ct.ticker_code as symbol from ct join interests on interests.name = 'Gig Economy' where  lower(ct.g_industry) like '%payment%system%' or lower(ct.g_industry) like '%shar%econom%' or lower(ct.g_industry) like '%e-commerc%platform%'
+select interests.id as interest_id, ct.ticker_code as symbol from ct join interests on interests.name = 'Gig Economy' where ct.g_industry ilike '%payment%system%' or ct.g_industry ilike '%shar%econom%' or ct.g_industry ilike '%e-commerc%platform%'
 UNION
-select interests.id as interest_id, ct.ticker_code as symbol from ct join interests on interests.name = 'Sharing economy' where  lower(ct.g_industry) like '%shar%econom%'
+select interests.id as interest_id, ct.ticker_code as symbol from ct join interests on interests.name = 'Sharing economy' where ct.g_industry ilike '%shar%econom%'
 UNION
-select interests.id as interest_id, ct.ticker_code as symbol from ct join interests on interests.name = 'Beverages' where  lower(ct.g_industry) like '%cof%e%tea%' or lower(ct.g_industry) like '%wine%liquor%' or lower(ct.g_industry) like '%soft%sport%drink%' 
+select interests.id as interest_id, ct.ticker_code as symbol from ct join interests on interests.name = 'Beverages' where ct.g_industry ilike '%cof%e%tea%' or ct.g_industry ilike '%wine%liquor%' or ct.g_industry ilike '%soft%sport%drink%'
 UNION
-select interests.id as interest_id, ct.ticker_code as symbol from ct join interests on interests.name = 'Netflix' where  lower(ct.g_industry) like 'streaming%'
+select interests.id as interest_id, ct.ticker_code as symbol from ct join interests on interests.name = 'Netflix' where ct.g_industry ilike 'streaming%'
          )
 SELECT t2.symbol, interest_id
 from tmp_ticker_interests
