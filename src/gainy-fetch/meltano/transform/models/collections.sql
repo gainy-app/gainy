@@ -8,5 +8,5 @@
   )
 }}
 
-SELECT id::int, name, qa, description, enabled, image_url, sql_request
+SELECT id::int, name, qa, description, enabled, image_url
 FROM raw_collections
