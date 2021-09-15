@@ -28,7 +28,7 @@ exports.fetchNewsData = async (event) => {
       ["search"],
       {
         q: symbol,
-        lang: 'en',
+        lang: "en",
         max: limit || defaultLimit,
       },
       cacheTTL
