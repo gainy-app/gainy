@@ -47,7 +47,7 @@ with upcoming_reports as
     )
 union
 (
-    /* Upcoming earnings. Bit expectations 3/4 times.  */
+    /* Upcoming earnings. Bit expectations x/4 times.  */
     select distinct_reports.symbol,
            distinct_reports.symbol || ' reports earnings on ' || max(upcoming_report) ||
            '. Beaten analysts expectations ' ||
@@ -61,7 +61,6 @@ union
       and upcoming_report <= now() + interval '2 weeks'
       and upcoming_report > now()
     group by distinct_reports.symbol
-    having count(1) >= 3
 )
 
 
