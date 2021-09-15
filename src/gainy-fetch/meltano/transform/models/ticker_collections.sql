@@ -196,7 +196,7 @@ select collections.id as collection_id, ct.ticker_code as symbol from ct join co
 UNION
 select collections.id as collection_id, ct.ticker_code as symbol from ct join collections on collections.name = 'Insurance stocks' where ct.g_industry ilike '%health%insuranc%' or ct.g_industry ilike '%insuranc%broker%' or ct.g_industry ilike '%insuranc%marketplac%tech%' or ct.g_industry ilike '%mortgag%insuranc%' or ct.g_industry ilike '%multiline%insuranc%' or ct.g_industry ilike '%property%casualt%insuranc%' or ct.g_industry ilike '%life%insuranc%'
 UNION
-select collections.id as collection_id, ct.ticker_code as symbol from ct join collections on collections.name = 'International stocks' where ct.country_name not ilike '%united%states%'
+select collections.id as collection_id, ct.ticker_code as symbol from ct join collections on collections.name = 'International stocks' where ct.country_name not ilike '%united%states%' and ct.country_name not ilike '%usa%'
 UNION
 select collections.id as collection_id, ct.ticker_code as symbol from ct join collections on collections.name = 'Internet of things stocks' where ct.g_industry ilike 'iot%'
 UNION
@@ -266,9 +266,9 @@ select collections.id as collection_id, ct.ticker_code as symbol from ct join co
 UNION
 select collections.id as collection_id, ct.ticker_code as symbol from ct join collections on collections.name = 'Trucking stocks' where ct.g_industry ilike '%truck%'
 UNION
-select collections.id as collection_id, ct.ticker_code as symbol from ct join collections on collections.name = 'US Food stocks' where (ct.g_industry ilike '%bread%condiment%' or ct.g_industry ilike '%casual%din%' or ct.g_industry ilike '%dairy%' or ct.g_industry ilike '%fruit%vegetabl%' or ct.g_industry ilike '%meat%poultr%' or ct.g_industry ilike '%snack%cand%' or ct.g_industry ilike '%soft%sport%drink%') and ct.country_name ilike '%united states%'
+select collections.id as collection_id, ct.ticker_code as symbol from ct join collections on collections.name = 'US Food stocks' where (ct.g_industry ilike '%bread%condiment%' or ct.g_industry ilike '%casual%din%' or ct.g_industry ilike '%dairy%' or ct.g_industry ilike '%fruit%vegetabl%' or ct.g_industry ilike '%meat%poultr%' or ct.g_industry ilike '%snack%cand%' or ct.g_industry ilike '%soft%sport%drink%') and (ct.country_name ilike '%united states%' or ct.country_name ilike '%usa%')
 UNION
-select collections.id as collection_id, ct.ticker_code as symbol from ct join collections on collections.name = 'USA Technology stocks' where lower(ct.gics_sector) ilike '%technolog%' and ct.country_name ilike '%united states%'
+select collections.id as collection_id, ct.ticker_code as symbol from ct join collections on collections.name = 'USA Technology stocks' where lower(ct.gics_sector) ilike '%technolog%' and (ct.country_name ilike '%united states%' or ct.country_name ilike '%usa%')
 UNION
 select collections.id as collection_id, ct.ticker_code as symbol from ct join collections on collections.name = 'Utilities ETFs' where ct.ttype ='etf' and lower(ct.gics_sector) ilike '%utilities%'
 UNION
