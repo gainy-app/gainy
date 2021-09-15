@@ -14,14 +14,14 @@ with upcoming_reports as
          (
              select symbol,
                     min(report_date) as upcoming_report
-             from earnings_history
+             from {{ ref('earnings_history') }}
              where eps_actual is null
              group by symbol
          ),
      recent_reports as
          (
              select symbol, max(report_date) as recent_report
-             from earnings_history
+             from {{ ref('earnings_history') }}
              where eps_difference is not null
              group by symbol),
      distinct_reports as
@@ -31,7 +31,7 @@ with upcoming_reports as
                     eps_difference,
                     max(date)                                                         as date,
                     ROW_NUMBER() over (partition by symbol order by report_date desc) as r
-             from earnings_history
+             from {{ ref('earnings_history') }}
              where eps_difference is not null
                and report_date < now()
              group by report_date, symbol, eps_difference
@@ -42,7 +42,7 @@ with upcoming_reports as
         select symbol,
                symbol || ' went public on ' || ipo_date as highlight,
                now()                                    as created_at
-        from tickers
+        from {{ ref('tickers') }}
         where ipo_date > now() - interval '3 months'
     )
 union
