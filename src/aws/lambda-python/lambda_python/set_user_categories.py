@@ -7,6 +7,7 @@ sys.path.append(script_directory)
 import json
 import csv
 import psycopg2
+from psycopg2.extras import execute_values
 from common import hasura_response
 
 host = os.environ['pg_host']
@@ -16,9 +17,8 @@ username = os.environ['pg_username']
 password = os.environ['pg_password']
 
 with open(
-        os.path.join(
-            script_directory,
-            'data/recommended_collections_decision_matrix.csv')) as csv_file:
+        os.path.join(script_directory,
+                     'data/user_categories_decision_matrix.csv')) as csv_file:
     reader = csv.DictReader(csv_file, delimiter='\t')
     decision_matrix = list(reader)
 
@@ -27,7 +27,7 @@ def handle(event, context):
     print(json.dumps(event))
     try:
         body = json.loads(event['body'])
-        hasura_user_id = body['session_variables']['x-hasura-user-id']
+        hasura_user_id = body['event']['session_variables']['x-hasura-user-id']
     except:
         return hasura_response.unauthorized()
 
@@ -49,6 +49,7 @@ def handle(event, context):
             return hasura_response.bad_request('No onboarding data available')
 
         data = dict(zip(columns, row))
+        profile_id = data['profile_id']
 
         risk_needed = [1, 2, 2, 3][round(data['risk_level'] * 4)]
         if data['average_market_return'] == 6 and risk_needed > 1:
@@ -112,7 +113,7 @@ def handle(event, context):
 
         with conn.cursor() as cursor:
             cursor.execute(
-                "select id from public.categories",  # where risk_score = %(risk_score)s",
+                "select id from public.categories where risk_score = %(risk_score)s",
                 {'risk_score': final_score})
 
             rows = cursor.fetchall()
@@ -128,4 +129,10 @@ def handle(event, context):
             'categories': categories,
         })
 
-        return hasura_response.success({'categories': categories})
+        with conn.cursor() as cursor:
+            execute_values(
+                cursor,
+                "INSERT INTO app.profile_categories (profile_id, category_id) VALUES %s",
+                [(profile_id, category_id) for category_id in categories])
+
+        return hasura_response.success(None)

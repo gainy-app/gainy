@@ -193,14 +193,14 @@ module "docker_image" {
   source_path     = local.python_root_dir
 }
 
-module "lambda-getRecommendedCollections" {
+module "lambda-setUserCategories" {
   source                                    = "./lambda/type-image"
   env                                       = var.env
-  function_name                             = "getRecommendedCollections"
+  function_name                             = "setUserCategories"
   source_code_hash                          = data.archive_file.python_source.output_md5
-  handler                                   = "get_recommended_collections.handle"
+  handler                                   = "set_user_categories.handle"
   timeout                                   = 10
-  route                                     = "POST /getRecommendedCollections"
+  route                                     = "POST /setUserCategories"
   aws_apigatewayv2_api_lambda_id            = aws_apigatewayv2_api.lambda.id
   aws_apigatewayv2_api_lambda_execution_arn = aws_apigatewayv2_api.lambda.execution_arn
   aws_iam_role_lambda_exec_role             = aws_iam_role.lambda_exec.arn
