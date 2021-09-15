@@ -1,3 +1,31 @@
+### Intra-day prices
+```graphql
+query {
+  fetchChartData(period: "1D", symbol: "AAPL") {
+    close
+    datetime
+    high
+    low
+    open
+    volume
+  }
+}
+```
+
+### Realtime prices
+
+```graphql
+query {
+  fetchLivePrices(symbols: ["AAPL", "GOOG"]) {
+    close
+    daily_change
+    daily_change_p
+    datetime
+    symbol
+  }
+}
+```
+
 ### Daily prices and growth rate with industry median
 
 ```graphql
