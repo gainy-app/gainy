@@ -45,20 +45,24 @@ plugins:
         models: '*'
   orchestrators:
     - name: airflow
-      pip_url: apache-airflow==2.1.2 --constraint https://raw.githubusercontent.com/apache/airflow/constraints-2.1.2/constraints-${MELTANO__PYTHON_VERSION}.txt
+      pip_url: psycopg2-binary==2.9.1 apache-airflow==2.1.2 --constraint https://raw.githubusercontent.com/apache/airflow/constraints-2.1.2/constraints-${MELTANO__PYTHON_VERSION}.txt
       config:
         core:
           sql_alchemy_conn: $AIRFLOW_DATABASE_URI
+          executor: LocalExecutor
 schedules:
-  - name: eodhistoricaldata-to-postgres
-    extractor: tap-eodhistoricaldata
-    loader: target-postgres
-    transform: run
-    interval: '@hourly'
-    start_date: 2021-06-17 10:40:58.742133
   - name: csv-to-postgres
     extractor: tap-csv
     loader: target-postgres
     transform: run
     interval: '@daily'
-    start_date: 2021-09-03 10:40:58.742133
+    start_date: 2021-09-03 13:52:48.598227
+
+  - name: eodhistoricaldata-to-postgres-0
+    extractor: tap-eodhistoricaldata
+    loader: target-postgres
+    transform: run
+    interval: '@daily'
+    start_date: 2021-06-17 10:40:58.742133
+#    env:
+#      TAP_EODHISTORICALDATA_SYMBOLS: '["GOOG","FB","PLUG","MSFT","HTHT","BA","VALE", "PSTG","ABBV","F","BMY","GM","LUV","AAPL", "ABNB","ATVI","COIN","JNJ","PFE","RIOT","TSLA"]'

@@ -15,6 +15,8 @@ from pathlib import Path
 
 logger = logging.getLogger(__name__)
 
+project_root = os.getenv("MELTANO_PROJECT_ROOT", os.getcwd())
+concurrency = int(os.getenv("EODHISTORICALDATA_JOBS_COUNT", 1))
 
 DEFAULT_ARGS = {
     "owner": "gainy",
@@ -24,13 +26,11 @@ DEFAULT_ARGS = {
     "catchup": False,
     "retries": 1,
     "retry_delay": timedelta(minutes=5),
-    "concurrency": 1,
+    "concurrency": concurrency,
     "start_date": datetime(2021, 9, 1)
 }
 
 # Meltano
-project_root = os.getenv("MELTANO_PROJECT_ROOT", os.getcwd())
-
 meltano_bin = ".meltano/run/bin"
 
 if not Path(project_root).joinpath(meltano_bin).exists():
@@ -79,12 +79,14 @@ for schedule in schedules:
         task_id=f"{schedule['name']}",
         bash_command=f"cd {project_root}; {meltano_bin} schedule run {schedule['name']} --transform=skip",
         dag=dag,
+        task_concurrency=concurrency,
+        pool_slots=concurrency
     )
     loaders.append(loader)
 
 dbt = BashOperator(
     task_id="dbt-transform",
-    bash_command=f"cd {project_root}; {meltano_bin} schedule run {schedules[0]['name']} --transform=only",
+    bash_command=f"cd {project_root}; {meltano_bin} invoke dbt run",
     dag=dag,
 )
 

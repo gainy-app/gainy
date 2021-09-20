@@ -6,6 +6,8 @@ install:
 	#wait for postgresql to start
 	docker-compose exec meltano bash -c 'while !</dev/tcp/postgres/5432; do sleep 1; done;'
 	sleep 3
+	docker-compose exec meltano meltano schedule run csv-to-postgres --transform skip
+	docker-compose exec meltano meltano schedule run eodhistoricaldata-to-postgres
 
 up:
 	docker-compose up -d
@@ -50,6 +52,9 @@ style-fix:
 	npx eslint src/aws/lambda-nodejs --fix
 	npx prettier --write "src/aws/lambda-nodejs/**/*.js"
 	yapf -i -r src/aws/lambda-python/
+
+extract-passwords:
+	cd terraform && terraform state pull | python ../extract_passwords.py
 
 %:
 	@:

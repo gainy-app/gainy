@@ -12,14 +12,20 @@ services:
     volumes:
       - ./src/gainy-fetch/meltano/transform:/project/transform:delegated
       - ./src/gainy-fetch/meltano/data:/project/data:delegated
-      - ./src/gainy-fetch/meltano/meltano.local.yml:/project/meltano.yml:delegated
+      - ./src/gainy-fetch/meltano/orchestrate:/project/orchestrate:delegated
+      - ./src/gainy-fetch/meltano/scripts:/project/scripts:delegated
+      - ./src/gainy-fetch/meltano/meltano.template.yml:/project/meltano.template.yml:delegated
       - ./src/gainy-fetch/tap-eodhistoricaldata:/tap-eodhistoricaldata:delegated
+      - ./src/gainy-fetch/supervisor.conf:/etc/supervisor/conf.d/supervisor.conf
+    environment:
+      EODHISTORICALDATA_JOBS_COUNT: 1
+    depends_on:
+      - postgres
   postgres:
     image: postgres:12
     restart: always
     volumes:
     - db_data:/var/lib/postgresql/data
-    - ./src/gainy-fetch/seeds:/docker-entrypoint-initdb.d
     environment:
       POSTGRES_PASSWORD: postgrespassword
     ports:
@@ -39,7 +45,7 @@ services:
     env_file:
       - .env
     environment:
-      PORT: ${HASURA_PORT}
+      HASURA_PORT: ${HASURA_PORT}
   firebase:
     build:
       context: ./src/firebase

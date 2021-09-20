@@ -56,231 +56,229 @@ select collections.id as collection_id, ct.ticker_code as symbol from ct join co
 UNION
 select collections.id as collection_id, ct.ticker_code as symbol from ct join collections on collections.name = '20 dollars stocks' where ct.price between 17 and 23 and ct.chrt <=0.2
 UNION
-select collections.id as collection_id, ct.ticker_code as symbol from ct join collections on collections.name = '3D printing ETFs' where ct.ttype ='etf' and lower(ct.g_industry) like '%3d%print%'
+select collections.id as collection_id, ct.ticker_code as symbol from ct join collections on collections.name = '3D printing ETFs' where ct.ttype ='etf' and ct.g_industry ilike '%3d%print%'
 UNION
-select collections.id as collection_id, ct.ticker_code as symbol from ct join collections on collections.name = '3D printing stocks' where lower(ct.g_industry) like '%3d%print%'
+select collections.id as collection_id, ct.ticker_code as symbol from ct join collections on collections.name = '3D printing stocks' where ct.g_industry ilike '%3d%print%'
 UNION
 select collections.id as collection_id, ct.ticker_code as symbol from ct join collections on collections.name = '5 dollars stock' where ct.price >3 and ct.price <=7 and ct.chrt <=0.5
 UNION
-select collections.id as collection_id, ct.ticker_code as symbol from ct join collections on collections.name = '5$ Biotech Stocks' where ct.price >3 and ct.price <=7 and ct.chrt <=0.5 and lower(ct.g_industry) like '%biotech%'
+select collections.id as collection_id, ct.ticker_code as symbol from ct join collections on collections.name = '5$ Biotech Stocks' where ct.price >3 and ct.price <=7 and ct.chrt <=0.5 and ct.g_industry ilike '%biotech%'
 UNION
 select collections.id as collection_id, ct.ticker_code as symbol from ct join collections on collections.name = '50 dollars stocks' where ct.price between 45 and 55 and ct.chrt <=0.2
 UNION
-select collections.id as collection_id, ct.ticker_code as symbol from ct join collections on collections.name = '5G stocks' where lower(ct.g_industry) like '%5g%com%unicat%'
+select collections.id as collection_id, ct.ticker_code as symbol from ct join collections on collections.name = '5G stocks' where ct.g_industry ilike '%5g%com%unicat%'
 UNION
-select collections.id as collection_id, ct.ticker_code as symbol from ct join collections on collections.name = 'Agriculture stocks' where lower(ct.g_industry) like '%agricul%tech%'
+select collections.id as collection_id, ct.ticker_code as symbol from ct join collections on collections.name = 'Agriculture stocks' where ct.g_industry ilike '%agricul%tech%'
 UNION
-select collections.id as collection_id, ct.ticker_code as symbol from ct join collections on collections.name = 'AI companies stocks' where lower(ct.g_industry) like '%analyt%ai%'
+select collections.id as collection_id, ct.ticker_code as symbol from ct join collections on collections.name = 'AI companies stocks' where ct.g_industry ilike '%analyt%ai%'
 UNION
-select collections.id as collection_id, ct.ticker_code as symbol from ct join collections on collections.name = 'Airline Stocks' where lower(ct.g_industry) like '%airlines%'
+select collections.id as collection_id, ct.ticker_code as symbol from ct join collections on collections.name = 'Airline Stocks' where ct.g_industry ilike '%airlines%'
 UNION
-select collections.id as collection_id, ct.ticker_code as symbol from ct join collections on collections.name = 'Alcohol Stocks' where lower(ct.g_industry) like '%wine%liquor%'
+select collections.id as collection_id, ct.ticker_code as symbol from ct join collections on collections.name = 'Alcohol Stocks' where ct.g_industry ilike '%wine%liquor%'
 UNION
-select collections.id as collection_id, ct.ticker_code as symbol from ct join collections on collections.name = 'AR, VR, XR Stocks' where lower(ct.g_industry) like '%ar_vr%'
+select collections.id as collection_id, ct.ticker_code as symbol from ct join collections on collections.name = 'AR, VR, XR Stocks' where ct.g_industry ilike '%ar_vr%'
 UNION
-select collections.id as collection_id, ct.ticker_code as symbol from ct join collections on collections.name = 'Automotive stocks' where lower(ct.g_industry) like '%electr%vehic%' or lower(ct.g_industry) like '%auto%deal%' or lower(ct.g_industry) like '%auto%manufact%' or lower(ct.g_industry) like '%auto%marketpl%' or lower(ct.g_industry) like '%auto%part%servic%'
+select collections.id as collection_id, ct.ticker_code as symbol from ct join collections on collections.name = 'Automotive stocks' where ct.g_industry ilike '%electr%vehic%' or ct.g_industry ilike '%auto%deal%' or ct.g_industry ilike '%auto%manufact%' or ct.g_industry ilike '%auto%marketpl%' or ct.g_industry ilike '%auto%part%servic%'
 UNION
-select collections.id as collection_id, ct.ticker_code as symbol from ct join collections on collections.name = 'Banking ETFs' where ct.ttype ='etf' and lower(ct.g_industry) like '%bank%'
+select collections.id as collection_id, ct.ticker_code as symbol from ct join collections on collections.name = 'Banking ETFs' where ct.ttype ='etf' and ct.g_industry ilike '%bank%'
 UNION
-select collections.id as collection_id, ct.ticker_code as symbol from ct join collections on collections.name = 'Biotech ETFs' where ct.ttype ='etf' and lower(ct.g_industry) like '%biotech%'
+select collections.id as collection_id, ct.ticker_code as symbol from ct join collections on collections.name = 'Biotech ETFs' where ct.ttype ='etf' and ct.g_industry ilike '%biotech%'
 UNION
-select collections.id as collection_id, ct.ticker_code as symbol from ct join collections on collections.name = 'Biotech Stocks' where lower(ct.g_industry) like '%biotech%'
+select collections.id as collection_id, ct.ticker_code as symbol from ct join collections on collections.name = 'Biotech Stocks' where ct.g_industry ilike '%biotech%'
 UNION
-select collections.id as collection_id, ct.ticker_code as symbol from ct join collections on collections.name = 'Cannabis ETFs' where ct.ttype ='etf' and lower(ct.g_industry) like '%cannabis%'
+select collections.id as collection_id, ct.ticker_code as symbol from ct join collections on collections.name = 'Cannabis ETFs' where ct.ttype ='etf' and ct.g_industry ilike '%cannabis%'
 UNION
-select collections.id as collection_id, ct.ticker_code as symbol from ct join collections on collections.name = 'Cannabis Penny stocks' where ct.investcat ='penny' and ct.price <=5 and lower(ct.g_industry) like '%cannabis%'
+select collections.id as collection_id, ct.ticker_code as symbol from ct join collections on collections.name = 'Cannabis Penny stocks' where ct.investcat ='penny' and ct.price <=5 and ct.g_industry ilike '%cannabis%'
 UNION
-select collections.id as collection_id, ct.ticker_code as symbol from ct join collections on collections.name = 'Cannabis stocks' where lower(ct.g_industry) like '%cannabis%'
+select collections.id as collection_id, ct.ticker_code as symbol from ct join collections on collections.name = 'Cannabis stocks' where ct.g_industry ilike '%cannabis%'
 UNION
-select collections.id as collection_id, ct.ticker_code as symbol from ct join collections on collections.name = 'Cars stocks' where lower(ct.g_industry) like '%electr%vehic%' or lower(ct.g_industry) like '%auto%deal%' or lower(ct.g_industry) like '%auto%manufact%' or lower(ct.g_industry) like '%auto%marketpl%'
+select collections.id as collection_id, ct.ticker_code as symbol from ct join collections on collections.name = 'Cars stocks' where ct.g_industry ilike '%electr%vehic%' or ct.g_industry ilike '%auto%deal%' or ct.g_industry ilike '%auto%manufact%' or ct.g_industry ilike '%auto%marketpl%'
 UNION
-select collections.id as collection_id, ct.ticker_code as symbol from ct join collections on collections.name = 'Casino stocks' where lower(ct.g_industry) like '%casin%resort%'
+select collections.id as collection_id, ct.ticker_code as symbol from ct join collections on collections.name = 'Casino stocks' where ct.g_industry ilike '%casin%resort%'
 UNION
-select collections.id as collection_id, ct.ticker_code as symbol from ct join collections on collections.name = 'Chinese stocks' where ct.country_name ='china'
+select collections.id as collection_id, ct.ticker_code as symbol from ct join collections on collections.name = 'Chinese stocks' where ct.country_name ilike '%china%'
 UNION
-select collections.id as collection_id, ct.ticker_code as symbol from ct join collections on collections.name = 'Cloud computing stocks' where lower(ct.g_industry) like '%enterpric%cloud%' or lower(ct.g_industry) like '%tech%conglomer%'
+select collections.id as collection_id, ct.ticker_code as symbol from ct join collections on collections.name = 'Cloud computing stocks' where ct.g_industry ilike '%enterpric%cloud%' or ct.g_industry ilike '%tech%conglomer%'
 UNION
-select collections.id as collection_id, ct.ticker_code as symbol from ct join collections on collections.name = 'Coffee stocks' where lower(ct.g_industry) like '%cof%e%tea%'
+select collections.id as collection_id, ct.ticker_code as symbol from ct join collections on collections.name = 'Coffee stocks' where ct.g_industry ilike '%cof%e%tea%'
 UNION
-select collections.id as collection_id, ct.ticker_code as symbol from ct join collections on collections.name = 'Commodities stocks' where lower(ct.g_industry) like '%agricult%tech%' or lower(ct.g_industry) like '%bas%chemi%' or lower(ct.g_industry) like '%coal%' or lower(ct.g_industry) like '%energ%explor%' or lower(ct.g_industry) like '%industr%metal%' or lower(ct.g_industry) like '%liqui%natur%gas%' or lower(ct.g_industry) like '%mlp%' or lower(ct.g_industry) like '%oil%gas%produc%'
+select collections.id as collection_id, ct.ticker_code as symbol from ct join collections on collections.name = 'Commodities stocks' where ct.g_industry ilike '%agricult%tech%' or ct.g_industry ilike '%bas%chemi%' or ct.g_industry ilike '%coal%' or ct.g_industry ilike '%energ%explor%' or ct.g_industry ilike '%industr%metal%' or ct.g_industry ilike '%liqui%natur%gas%' or ct.g_industry ilike '%mlp%' or ct.g_industry ilike '%oil%gas%produc%'
 UNION
 select collections.id as collection_id, ct.ticker_code as symbol from ct join collections on collections.name = 'Concrete stocks' where ticker_code in ('smid','uscr')
 UNION
-select collections.id as collection_id, ct.ticker_code as symbol from ct join collections on collections.name = 'Construction stocks' where lower(ct.g_industry) like '%home%construct%maint%' or lower(ct.g_industry) like '%construct%infrastruct%' or lower(ct.g_industry) like '%build%mater%' or lower(ct.g_industry) like '%build%produc%'
+select collections.id as collection_id, ct.ticker_code as symbol from ct join collections on collections.name = 'Construction stocks' where ct.g_industry ilike '%home%construct%maint%' or ct.g_industry ilike '%construct%infrastruct%' or ct.g_industry ilike '%build%mater%' or ct.g_industry ilike '%build%produc%'
 UNION
-select collections.id as collection_id, ct.ticker_code as symbol from ct join collections on collections.name = 'Consumer staples ETFs' where ct.ttype ='etf' and lower(ct.gics_sector) like '%consum%stapl%'
+select collections.id as collection_id, ct.ticker_code as symbol from ct join collections on collections.name = 'Consumer staples ETFs' where ct.ttype ='etf' and lower(ct.gics_sector) ilike '%consum%stapl%'
 UNION
-select collections.id as collection_id, ct.ticker_code as symbol from ct join collections on collections.name = 'Consumer staples stocks' where lower(ct.gics_sector) like '%consum%stapl%'
+select collections.id as collection_id, ct.ticker_code as symbol from ct join collections on collections.name = 'Consumer staples stocks' where lower(ct.gics_sector) ilike '%consum%stapl%'
 UNION
-select collections.id as collection_id, ct.ticker_code as symbol from ct join collections on collections.name = 'Copper ETFs' where ct.ttype ='etf' and lower(ct.g_industry) like '%industr%metal%'
+select collections.id as collection_id, ct.ticker_code as symbol from ct join collections on collections.name = 'Copper ETFs' where ct.ttype ='etf' and ct.g_industry ilike '%industr%metal%'
 UNION
-select collections.id as collection_id, ct.ticker_code as symbol from ct join collections on collections.name = 'Copper stocks' where lower(ct.g_industry) like '%industr%metal%'
+select collections.id as collection_id, ct.ticker_code as symbol from ct join collections on collections.name = 'Copper stocks' where ct.g_industry ilike '%industr%metal%'
 UNION
-select collections.id as collection_id, ct.ticker_code as symbol from ct join collections on collections.name = 'Cruise line ETFs' where ct.ttype ='etf' and (lower(ct.g_industry) like '%onlin%travel%compan%' or lower(ct.g_industry) like '%maritime%transport&')
+select collections.id as collection_id, ct.ticker_code as symbol from ct join collections on collections.name = 'Cruise line ETFs' where ct.ttype ='etf' and (ct.g_industry ilike '%onlin%travel%compan%' or ct.g_industry ilike '%maritime%transport%')
 UNION
-select collections.id as collection_id, ct.ticker_code as symbol from ct join collections on collections.name = 'Cruise line stocks' where lower(ct.g_industry) like '%onlin%travel%compan%' or lower(ct.g_industry) like '%maritime%transport&'
+select collections.id as collection_id, ct.ticker_code as symbol from ct join collections on collections.name = 'Cruise line stocks' where ct.g_industry ilike '%onlin%travel%compan%' or ct.g_industry ilike '%maritime%transport%'
 UNION
-select collections.id as collection_id, ct.ticker_code as symbol from ct join collections on collections.name = 'Data stocks' where lower(ct.g_industry) like '%analyt%ai%' or lower(ct.g_industry) like '%data%center%' and lower(ct.g_industry) not like '%reit%' or lower(ct.g_industry) like '%data%stor%manag%'
+select collections.id as collection_id, ct.ticker_code as symbol from ct join collections on collections.name = 'Data stocks' where ct.g_industry ilike '%analyt%ai%' or ct.g_industry ilike '%data%center%' and ct.g_industry not ilike '%reit%' or ct.g_industry ilike '%data%stor%manag%'
 UNION
-select collections.id as collection_id, ct.ticker_code as symbol from ct join collections on collections.name = 'Defense stocks' where lower(ct.g_industry) like '%aerospac%defen%'
+select collections.id as collection_id, ct.ticker_code as symbol from ct join collections on collections.name = 'Defense stocks' where ct.g_industry ilike '%aerospac%defen%'
 UNION
 select collections.id as collection_id, ct.ticker_code as symbol from ct join collections on collections.name = 'Development companies stocks' where ct.investcat ='defensive'
 UNION
-select collections.id as collection_id, ct.ticker_code as symbol from ct join collections on collections.name = 'Discretionary consumer stocks' where lower(ct.gics_sector) like '%consum%discretionar%'
+select collections.id as collection_id, ct.ticker_code as symbol from ct join collections on collections.name = 'Discretionary consumer stocks' where lower(ct.gics_sector) ilike '%consum%discretionar%'
 UNION
-select collections.id as collection_id, ct.ticker_code as symbol from ct join collections on collections.name = 'Dividend Gold stocks' where lower(ct.g_industry) like '%gold%silver%' and lower(ct.investcat) ='dividend'
+select collections.id as collection_id, ct.ticker_code as symbol from ct join collections on collections.name = 'Dividend Gold stocks' where ct.g_industry ilike '%gold%silver%' and lower(ct.investcat) ='dividend'
 UNION
-select collections.id as collection_id, ct.ticker_code as symbol from ct join collections on collections.name = 'Drone stock companies' where lower(ct.g_industry) like '%drone%'
+select collections.id as collection_id, ct.ticker_code as symbol from ct join collections on collections.name = 'Drone stock companies' where ct.g_industry ilike '%drone%'
 UNION
-select collections.id as collection_id, ct.ticker_code as symbol from ct join collections on collections.name = 'E-commerce and Retail stocks' where lower(ct.g_industry) like '%e-commerc%platform%' or lower(ct.g_industry) like '%e-commerc%operat%' or lower(ct.g_industry) like '%apparel%manufact%retail%' or lower(ct.g_industry) like '%discount%retail%' or lower(ct.g_industry) like '%home%furnit%retail%' or lower(ct.g_industry) like '%luxur%retail%'
+select collections.id as collection_id, ct.ticker_code as symbol from ct join collections on collections.name = 'E-commerce and Retail stocks' where ct.g_industry ilike '%e-commerc%platform%' or ct.g_industry ilike '%e-commerc%operat%' or ct.g_industry ilike '%apparel%manufact%retail%' or ct.g_industry ilike '%discount%retail%' or ct.g_industry ilike '%home%furnit%retail%' or ct.g_industry ilike '%luxur%retail%'
 UNION
-select collections.id as collection_id, ct.ticker_code as symbol from ct join collections on collections.name = 'Education stocks' where lower(ct.g_industry) like '%educat%servic%' or lower(ct.g_industry) like '%educat%tech%'
+select collections.id as collection_id, ct.ticker_code as symbol from ct join collections on collections.name = 'Education stocks' where ct.g_industry ilike '%educat%servic%' or ct.g_industry ilike '%educat%tech%'
 UNION
-select collections.id as collection_id, ct.ticker_code as symbol from ct join collections on collections.name = 'Electric vehicles stocks' where lower(ct.g_industry) like '%electr%vehicl%'
+select collections.id as collection_id, ct.ticker_code as symbol from ct join collections on collections.name = 'Electric vehicles stocks' where ct.g_industry ilike '%electr%vehicl%'
 UNION
-select collections.id as collection_id, ct.ticker_code as symbol from ct join collections on collections.name = 'Energy company ETFs' where ct.ttype ='etf' and (lower(ct.g_industry) like '%clean%energ%' or lower(ct.g_industry) like '%energ%explor%' or lower(ct.g_industry) like '%renew%energ%' or lower(ct.g_industry) like '%solar%energ%' or lower(ct.g_industry) like '%oil%gas%produc%' or lower(ct.g_industry) like '%liqui%natur%gas%' or lower(ct.g_industry) like '%electr%generat%' or lower(ct.g_industry) like '%power%gener%distrib%' or lower(ct.g_industry) like '%oil%gas%servic%' or lower(ct.g_industry) like '%electron%power%management%')
+select collections.id as collection_id, ct.ticker_code as symbol from ct join collections on collections.name = 'Energy company ETFs' where ct.ttype ='etf' and (ct.g_industry ilike '%clean%energ%' or ct.g_industry ilike '%energ%explor%' or ct.g_industry ilike '%renew%energ%' or ct.g_industry ilike '%solar%energ%' or ct.g_industry ilike '%oil%gas%produc%' or ct.g_industry ilike '%liqui%natur%gas%' or ct.g_industry ilike '%electr%generat%' or ct.g_industry ilike '%power%gener%distrib%' or ct.g_industry ilike '%oil%gas%servic%' or ct.g_industry ilike '%electron%power%management%')
 UNION
-select collections.id as collection_id, ct.ticker_code as symbol from ct join collections on collections.name = 'Energy company stocks' where lower(ct.g_industry) like '%clean%energ%' or lower(ct.g_industry) like '%energ%explor%' or lower(ct.g_industry) like '%renew%energ%' or lower(ct.g_industry) like '%solar%energ%' or lower(ct.g_industry) like '%oil%gas%produc%' or lower(ct.g_industry) like '%liqui%natur%gas%' or lower(ct.g_industry) like '%electr%generat%' or lower(ct.g_industry) like '%power%gener%distrib%' or lower(ct.g_industry) like '%oil%gas%servic%' or lower(ct.g_industry) like '%electron%power%management%'
+select collections.id as collection_id, ct.ticker_code as symbol from ct join collections on collections.name = 'Energy company stocks' where ct.g_industry ilike '%clean%energ%' or ct.g_industry ilike '%energ%explor%' or ct.g_industry ilike '%renew%energ%' or ct.g_industry ilike '%solar%energ%' or ct.g_industry ilike '%oil%gas%produc%' or ct.g_industry ilike '%liqui%natur%gas%' or ct.g_industry ilike '%electr%generat%' or ct.g_industry ilike '%power%gener%distrib%' or ct.g_industry ilike '%oil%gas%servic%' or ct.g_industry ilike '%electron%power%management%'
 UNION
-select collections.id as collection_id, ct.ticker_code as symbol from ct join collections on collections.name = 'Energy Penny stocks' where ct.investcat ='penny' and ct.price <=5 and (lower(ct.g_industry) like '%clean%energ%' or lower(ct.g_industry) like '%energ%explor%' or lower(ct.g_industry) like '%renew%energ%' or lower(ct.g_industry) like '%solar%energ%' or lower(ct.g_industry) like '%oil%gas%produc%' or lower(ct.g_industry) like '%liqui%natur%gas%' or lower(ct.g_industry) like '%electr%generat%' or lower(ct.g_industry) like '%power%gener%distrib%' or lower(ct.g_industry) like '%oil%gas%servic%' or lower(ct.g_industry) like '%electron%power%management%')
+select collections.id as collection_id, ct.ticker_code as symbol from ct join collections on collections.name = 'Energy Penny stocks' where ct.investcat ='penny' and ct.price <=5 and (ct.g_industry ilike '%clean%energ%' or ct.g_industry ilike '%energ%explor%' or ct.g_industry ilike '%renew%energ%' or ct.g_industry ilike '%solar%energ%' or ct.g_industry ilike '%oil%gas%produc%' or ct.g_industry ilike '%liqui%natur%gas%' or ct.g_industry ilike '%electr%generat%' or ct.g_industry ilike '%power%gener%distrib%' or ct.g_industry ilike '%oil%gas%servic%' or ct.g_industry ilike '%electron%power%management%')
 UNION
-select collections.id as collection_id, ct.ticker_code as symbol from ct join collections on collections.name = 'Entertainment stocks' where lower(ct.g_industry) like '%tv%radio%' or lower(ct.g_industry) like '%streaming%' or lower(ct.g_industry) like '%gaming%esport%'
+select collections.id as collection_id, ct.ticker_code as symbol from ct join collections on collections.name = 'Entertainment stocks' where ct.g_industry ilike '%tv%radio%' or ct.g_industry ilike '%streaming%' or ct.g_industry ilike '%gaming%esport%'
 UNION
 select collections.id as collection_id, ct.ticker_code as symbol from ct join collections on collections.name = 'Esport stocks' where ct.ticker_code in ('has', 'gmbl', 'slgg', 'inse', 'aese', 'ea', 'atvi', 'ttwo', 'dkng')
 UNION
-select collections.id as collection_id, ct.ticker_code as symbol from ct join collections on collections.name = 'European stocks' where ct.country_group ='europe'
+select collections.id as collection_id, ct.ticker_code as symbol from ct join collections on collections.name = 'European stocks' where ct.country_group ilike '%europe%'
 UNION
-select collections.id as collection_id, ct.ticker_code as symbol from ct join collections on collections.name = 'EV batteries stocks' where lower(ct.g_industry) like '%batter%tech%'
+select collections.id as collection_id, ct.ticker_code as symbol from ct join collections on collections.name = 'EV batteries stocks' where ct.g_industry ilike '%batter%tech%'
 UNION
-select collections.id as collection_id, ct.ticker_code as symbol from ct join collections on collections.name = 'FAANG (big tech) stocks' where lower(ct.g_industry) like '%tech%conglomerat%' or ct.ticker_code in ('fb', 'amzn', 'aapl', 'nflx', 'goog', 'googl')
+select collections.id as collection_id, ct.ticker_code as symbol from ct join collections on collections.name = 'FAANG (big tech) stocks' where ct.g_industry ilike '%tech%conglomerat%' or ct.ticker_code in ('fb', 'amzn', 'aapl', 'nflx', 'goog', 'googl')
 UNION
-select collections.id as collection_id, ct.ticker_code as symbol from ct join collections on collections.name = 'Farming stocks' where lower(ct.g_industry) like '%agricultur%tech%'
+select collections.id as collection_id, ct.ticker_code as symbol from ct join collections on collections.name = 'Farming stocks' where ct.g_industry ilike '%agricultur%tech%'
 UNION
-select collections.id as collection_id, ct.ticker_code as symbol from ct join collections on collections.name = 'Fast food stocks' where lower(ct.g_industry) like '%casual%din%n%'
+select collections.id as collection_id, ct.ticker_code as symbol from ct join collections on collections.name = 'Fast food stocks' where ct.g_industry ilike '%casual%din%n%'
 UNION
-select collections.id as collection_id, ct.ticker_code as symbol from ct join collections on collections.name = 'Finance stocks' where lower(ct.gics_sector) like '%financ%'
+select collections.id as collection_id, ct.ticker_code as symbol from ct join collections on collections.name = 'Finance stocks' where lower(ct.gics_sector) ilike '%financ%'
 UNION
-select collections.id as collection_id, ct.ticker_code as symbol from ct join collections on collections.name = 'Fintech stocks' where lower(ct.g_industry) like '%financ%exchang%data%' or lower(ct.g_industry) like '%fintech%'
+select collections.id as collection_id, ct.ticker_code as symbol from ct join collections on collections.name = 'Fintech stocks' where ct.g_industry ilike '%financ%exchang%data%' or ct.g_industry ilike '%fintech%'
 UNION
-select collections.id as collection_id, ct.ticker_code as symbol from ct join collections on collections.name = 'Food Delivery stocks' where lower(ct.g_industry) like '%food%deliver%'
+select collections.id as collection_id, ct.ticker_code as symbol from ct join collections on collections.name = 'Food Delivery stocks' where ct.g_industry ilike '%food%deliver%'
 UNION
-select collections.id as collection_id, ct.ticker_code as symbol from ct join collections on collections.name = 'Food stocks' where lower(ct.g_industry) like '%bread%condiment%' or lower(ct.g_industry) like '%casual%din%n%' or lower(ct.g_industry) like '%dairy%' or lower(ct.g_industry) like '%fruit%vegetabl%' or lower(ct.g_industry) like '%meat%poultry%' or lower(ct.g_industry) like '%snack%cand%' or lower(ct.g_industry) like '%soft%sport%drink%'
+select collections.id as collection_id, ct.ticker_code as symbol from ct join collections on collections.name = 'Food stocks' where ct.g_industry ilike '%bread%condiment%' or ct.g_industry ilike '%casual%din%n%' or ct.g_industry ilike '%dairy%' or ct.g_industry ilike '%fruit%vegetabl%' or ct.g_industry ilike '%meat%poultry%' or ct.g_industry ilike '%snack%cand%' or ct.g_industry ilike '%soft%sport%drink%'
 UNION
-select collections.id as collection_id, ct.ticker_code as symbol from ct join collections on collections.name = 'Fuel stocks' where lower(ct.g_industry) like '%oil%gas%produc%' or lower(ct.g_industry) like '%liqui%natur%gas%'
+select collections.id as collection_id, ct.ticker_code as symbol from ct join collections on collections.name = 'Fuel stocks' where ct.g_industry ilike '%oil%gas%produc%' or ct.g_industry ilike '%liqui%natur%gas%'
 UNION
-select collections.id as collection_id, ct.ticker_code as symbol from ct join collections on collections.name = 'Furniture and decor stocks' where lower(ct.g_industry) like '%home%furnitur%retail%'
+select collections.id as collection_id, ct.ticker_code as symbol from ct join collections on collections.name = 'Furniture and decor stocks' where ct.g_industry ilike '%home%furnitur%retail%'
 UNION
-select collections.id as collection_id, ct.ticker_code as symbol from ct join collections on collections.name = 'Gambling stocks' where lower(ct.g_industry) like '%casin%resort%'
+select collections.id as collection_id, ct.ticker_code as symbol from ct join collections on collections.name = 'Gambling stocks' where ct.g_industry ilike '%casin%resort%'
 UNION
-select collections.id as collection_id, ct.ticker_code as symbol from ct join collections on collections.name = 'Gaming companies stocks' where lower(ct.g_industry) like '%gam%esport%'
+select collections.id as collection_id, ct.ticker_code as symbol from ct join collections on collections.name = 'Gaming companies stocks' where ct.g_industry ilike '%gam%esport%'
 UNION
-select collections.id as collection_id, ct.ticker_code as symbol from ct join collections on collections.name = 'Gold companies stocks' where lower(ct.g_industry) like '%gold%silver%'
+select collections.id as collection_id, ct.ticker_code as symbol from ct join collections on collections.name = 'Gold companies stocks' where ct.g_industry ilike '%gold%silver%'
 UNION
-select collections.id as collection_id, ct.ticker_code as symbol from ct join collections on collections.name = 'Green energy stocks' where lower(ct.g_industry) like '%clean%energ%' or lower(ct.g_industry) like '%energ%explor%' or lower(ct.g_industry) like '%renew%energ%' or lower(ct.g_industry) like '%solar%energ%'
+select collections.id as collection_id, ct.ticker_code as symbol from ct join collections on collections.name = 'Green energy stocks' where ct.g_industry ilike '%clean%energ%' or ct.g_industry ilike '%energ%explor%' or ct.g_industry ilike '%renew%energ%' or ct.g_industry ilike '%solar%energ%'
 UNION
-select collections.id as collection_id, ct.ticker_code as symbol from ct join collections on collections.name = 'Gun stocks' where lower(ct.g_industry) like '%secur%protect%'
+select collections.id as collection_id, ct.ticker_code as symbol from ct join collections on collections.name = 'Gun stocks' where ct.g_industry ilike '%secur%protect%'
 UNION
-select collections.id as collection_id, ct.ticker_code as symbol from ct join collections on collections.name = 'Health insurance stocks' where lower(ct.g_industry) like '%health%insuranc%'
+select collections.id as collection_id, ct.ticker_code as symbol from ct join collections on collections.name = 'Health insurance stocks' where ct.g_industry ilike '%health%insuranc%'
 UNION
-select collections.id as collection_id, ct.ticker_code as symbol from ct join collections on collections.name = 'Healthcare ETFs' where ct.ttype ='etf' and lower(ct.gics_sector) like '%health%car%'
+select collections.id as collection_id, ct.ticker_code as symbol from ct join collections on collections.name = 'Healthcare ETFs' where ct.ttype ='etf' and lower(ct.gics_sector) ilike '%health%car%'
 UNION
-select collections.id as collection_id, ct.ticker_code as symbol from ct join collections on collections.name = 'Healthcare Stocks' where lower(ct.gics_sector) like '%health%car%'
+select collections.id as collection_id, ct.ticker_code as symbol from ct join collections on collections.name = 'Healthcare Stocks' where lower(ct.gics_sector) ilike '%health%car%'
 UNION
-select collections.id as collection_id, ct.ticker_code as symbol from ct join collections on collections.name = 'Heavy Equipment Stocks' where lower(ct.g_industry) like '%construct%machine%' or lower(ct.g_industry) like '%heavy%machine%part%'
+select collections.id as collection_id, ct.ticker_code as symbol from ct join collections on collections.name = 'Heavy Equipment Stocks' where ct.g_industry ilike '%construct%machine%' or ct.g_industry ilike '%heavy%machine%part%'
 UNION
-select collections.id as collection_id, ct.ticker_code as symbol from ct join collections on collections.name = 'Hotel stocks' where (lower(ct.g_industry) like '%hotel%' and lower(ct.g_industry) not like '%reit%') or lower(ct.g_industry) like '%casin%resort%'
+select collections.id as collection_id, ct.ticker_code as symbol from ct join collections on collections.name = 'Hotel stocks' where (ct.g_industry ilike '%hotel%' and ct.g_industry not ilike '%reit%') or ct.g_industry ilike '%casin%resort%'
 UNION
-select collections.id as collection_id, ct.ticker_code as symbol from ct join collections on collections.name = 'Information security stocks' where lower(ct.g_industry) like '%cyber%secur%' or lower(ct.g_industry) like '%ident%authenticat%'
+select collections.id as collection_id, ct.ticker_code as symbol from ct join collections on collections.name = 'Information security stocks' where ct.g_industry ilike '%cyber%secur%' or ct.g_industry ilike '%ident%authenticat%'
 UNION
-select collections.id as collection_id, ct.ticker_code as symbol from ct join collections on collections.name = 'Infrastructure stocks' where lower(ct.g_industry) like '%construct%infrastruct%' or lower(ct.g_industry) like '%telecom%infrastruct%'
+select collections.id as collection_id, ct.ticker_code as symbol from ct join collections on collections.name = 'Infrastructure stocks' where ct.g_industry ilike '%construct%infrastruct%' or ct.g_industry ilike '%telecom%infrastruct%'
 UNION
-select collections.id as collection_id, ct.ticker_code as symbol from ct join collections on collections.name = 'Insurance stocks' where lower(ct.g_industry) like '%health%insuranc%' or lower(ct.g_industry) like '%insuranc%broker%' or lower(ct.g_industry) like '%insuranc%marketplac%tech%' or lower(ct.g_industry) like '%mortgag%insuranc%' or lower(ct.g_industry) like '%multiline%insuranc%' or lower(ct.g_industry) like '%property%casualt%insuranc%' or lower(ct.g_industry) like '%life%insuranc%'
+select collections.id as collection_id, ct.ticker_code as symbol from ct join collections on collections.name = 'Insurance stocks' where ct.g_industry ilike '%health%insuranc%' or ct.g_industry ilike '%insuranc%broker%' or ct.g_industry ilike '%insuranc%marketplac%tech%' or ct.g_industry ilike '%mortgag%insuranc%' or ct.g_industry ilike '%multiline%insuranc%' or ct.g_industry ilike '%property%casualt%insuranc%' or ct.g_industry ilike '%life%insuranc%'
 UNION
-select collections.id as collection_id, ct.ticker_code as symbol from ct join collections on collections.name = 'International stocks' where ct.country_name <>'united states'
+select collections.id as collection_id, ct.ticker_code as symbol from ct join collections on collections.name = 'International stocks' where ct.country_name not ilike '%united%states%'
 UNION
-select collections.id as collection_id, ct.ticker_code as symbol from ct join collections on collections.name = 'Internet of things stocks' where lower(ct.g_industry) like 'iot%'
+select collections.id as collection_id, ct.ticker_code as symbol from ct join collections on collections.name = 'Internet of things stocks' where ct.g_industry ilike 'iot%'
 UNION
-select collections.id as collection_id, ct.ticker_code as symbol from ct join collections on collections.name = 'Latam Airlines Stocks' where lower(ct.g_industry) like '%airline%' and ct.country_group ='latam'
+select collections.id as collection_id, ct.ticker_code as symbol from ct join collections on collections.name = 'Latam Airlines Stocks' where ct.g_industry ilike '%airline%' and ct.country_group ilike '%latam%'
 UNION
-select collections.id as collection_id, ct.ticker_code as symbol from ct join collections on collections.name = 'Latam stocks' where ct.country_group ='latam'
+select collections.id as collection_id, ct.ticker_code as symbol from ct join collections on collections.name = 'Latam stocks' where ct.country_group ilike '%latam%'
 UNION
 select collections.id as collection_id, ct.ticker_code as symbol from ct join collections on collections.name = 'Lithium stocks' where ct.ticker_code in ('ulbi', 'flux', 'tanh', 'pll', 'sedg')
 UNION
-select collections.id as collection_id, ct.ticker_code as symbol from ct join collections on collections.name = 'Meat stocks' where lower(ct.g_industry) like '%meat%poultry%'
+select collections.id as collection_id, ct.ticker_code as symbol from ct join collections on collections.name = 'Meat stocks' where ct.g_industry ilike '%meat%poultry%'
 UNION
-select collections.id as collection_id, ct.ticker_code as symbol from ct join collections on collections.name = 'Medical supplies company stocks' where lower(ct.g_industry) like '%health%care%service%equipment%'
+select collections.id as collection_id, ct.ticker_code as symbol from ct join collections on collections.name = 'Medical supplies company stocks' where ct.g_industry ilike '%health%care%service%equipment%'
 UNION
-select collections.id as collection_id, ct.ticker_code as symbol from ct join collections on collections.name = 'Mining companies stocks' where lower(ct.g_industry) like '%gold%silver%' or lower(ct.g_industry) like '%industr%metal%'
+select collections.id as collection_id, ct.ticker_code as symbol from ct join collections on collections.name = 'Mining companies stocks' where ct.g_industry ilike '%gold%silver%' or ct.g_industry ilike '%industr%metal%'
 UNION
-select collections.id as collection_id, ct.ticker_code as symbol from ct join collections on collections.name = 'MLP to invest' where lower(ct.g_industry) like '%mlp%'
+select collections.id as collection_id, ct.ticker_code as symbol from ct join collections on collections.name = 'MLP to invest' where ct.g_industry ilike '%mlp%'
 UNION
-select collections.id as collection_id, ct.ticker_code as symbol from ct join collections on collections.name = 'Nanotechnology stocks' where lower(ct.g_industry) like '%nanotech%'
+select collections.id as collection_id, ct.ticker_code as symbol from ct join collections on collections.name = 'Nanotechnology stocks' where ct.g_industry ilike '%nanotech%'
 UNION
-select collections.id as collection_id, ct.ticker_code as symbol from ct join collections on collections.name = 'Natural gas stocks' where lower(ct.g_industry) like '%oil%gas%produc%' or lower(ct.g_industry) like '%liqui%natur%gas%'
+select collections.id as collection_id, ct.ticker_code as symbol from ct join collections on collections.name = 'Natural gas stocks' where ct.g_industry ilike '%oil%gas%produc%' or ct.g_industry ilike '%liqui%natur%gas%'
 UNION
 select collections.id as collection_id, ct.ticker_code as symbol from ct join collections on collections.name = 'Nuclear energy stocks' where ct.ticker_code in ('lbtr','aep','exc','xel','pesi','holi','gvp')
 UNION
-select collections.id as collection_id, ct.ticker_code as symbol from ct join collections on collections.name = 'Oil ETF' where ct.ttype ='etf' and (lower(ct.g_industry) like '%oil%gas%produc%' or lower(ct.g_industry) like '%oil%gas%servic%')
+select collections.id as collection_id, ct.ticker_code as symbol from ct join collections on collections.name = 'Oil ETF' where ct.ttype ='etf' and (ct.g_industry ilike '%oil%gas%produc%' or ct.g_industry ilike '%oil%gas%servic%')
 UNION
-select collections.id as collection_id, ct.ticker_code as symbol from ct join collections on collections.name = 'Oil stocks' where lower(ct.g_industry) like '%oil%gas%produc%' or lower(ct.g_industry) like '%oil%gas%servic%'
+select collections.id as collection_id, ct.ticker_code as symbol from ct join collections on collections.name = 'Oil stocks' where ct.g_industry ilike '%oil%gas%produc%' or ct.g_industry ilike '%oil%gas%servic%'
 UNION
 select collections.id as collection_id, ct.ticker_code as symbol from ct join collections on collections.name = 'Penny stocks' where ct.investcat ='penny' and ct.price <=1.5 and ct.chrt <=0.2
 UNION
-select collections.id as collection_id, ct.ticker_code as symbol from ct join collections on collections.name = 'Pharmaceutical stocks' where lower(ct.g_industry) like '%pharm%'
+select collections.id as collection_id, ct.ticker_code as symbol from ct join collections on collections.name = 'Pharmaceutical stocks' where ct.g_industry ilike '%pharm%'
 UNION
-select collections.id as collection_id, ct.ticker_code as symbol from ct join collections on collections.name = 'Precious metals stocks' where lower(ct.g_industry) like '%gold%silver%'
+select collections.id as collection_id, ct.ticker_code as symbol from ct join collections on collections.name = 'Precious metals stocks' where ct.g_industry ilike '%gold%silver%'
 UNION
-select collections.id as collection_id, ct.ticker_code as symbol from ct join collections on collections.name = 'Real estate stocks' where lower(ct.gics_sector) like '%real%estat%'
+select collections.id as collection_id, ct.ticker_code as symbol from ct join collections on collections.name = 'Real estate stocks' where lower(ct.gics_sector) ilike '%real%estat%'
 UNION
 select collections.id as collection_id, ct.ticker_code as symbol from ct join collections on collections.name = 'Recent IPOs' where ct.ipo_date > (current_date - interval '6 month')
 UNION
-select collections.id as collection_id, ct.ticker_code as symbol from ct join collections on collections.name = 'Restaurant stocks' where lower(ct.g_industry) like '%gold%silver%'
-UNION
-select collections.id as collection_id, ct.ticker_code as symbol from ct join collections on collections.name = 'Robotics company stocks' where lower(ct.g_industry) like '%analytic%ai%' or lower(ct.g_industry) like '%comput%visi%sens%' or lower(ct.g_industry) like 'iot%' or lower(ct.g_industry) like '%precis%manufact%' or lower(ct.g_industry) like '%health%car%services%equipment%robot%'
+select collections.id as collection_id, ct.ticker_code as symbol from ct join collections on collections.name = 'Robotics company stocks' where ct.g_industry ilike '%analytic%ai%' or ct.g_industry ilike '%comput%visi%sens%' or ct.g_industry ilike 'iot%' or ct.g_industry ilike '%precis%manufact%' or ct.g_industry ilike '%health%car%services%equipment%robot%'
 UNION
 select collections.id as collection_id, ct.ticker_code as symbol from ct join collections on collections.name = 'Self driving car stocks' where ct.ticker_code in ('lazr', 'f', 'aptv', 'tsla', 'googl', 'xpev', 'amba', 'qcom', 'nvda')
 UNION
-select collections.id as collection_id, ct.ticker_code as symbol from ct join collections on collections.name = 'Semiconductors stocks' where lower(ct.g_industry) like '%semiconduct%equip%' or lower(ct.g_industry) like '%semiconduct%manufact%' or lower(ct.g_industry) like '%semiconduct%material%'
+select collections.id as collection_id, ct.ticker_code as symbol from ct join collections on collections.name = 'Semiconductors stocks' where ct.g_industry ilike '%semiconduct%equip%' or ct.g_industry ilike '%semiconduct%manufact%' or ct.g_industry ilike '%semiconduct%material%'
 UNION
-select collections.id as collection_id, ct.ticker_code as symbol from ct join collections on collections.name = 'Shipping stocks' where lower(ct.g_industry) like '%maritim%transport%' or lower(ct.g_industry) like '%truck%' or lower(ct.g_industry) like '%air%carg%transport%' or lower(ct.g_industry) like '%rail%freight%'
+select collections.id as collection_id, ct.ticker_code as symbol from ct join collections on collections.name = 'Shipping stocks' where ct.g_industry ilike '%maritim%transport%' or ct.g_industry ilike '%truck%' or ct.g_industry ilike '%air%carg%transport%' or ct.g_industry ilike '%rail%freight%'
 UNION
-select collections.id as collection_id, ct.ticker_code as symbol from ct join collections on collections.name = 'Ships stocks' where lower(ct.g_industry) like '%maritim%transport%'
+select collections.id as collection_id, ct.ticker_code as symbol from ct join collections on collections.name = 'Ships stocks' where ct.g_industry ilike '%maritim%transport%'
 UNION
-select collections.id as collection_id, ct.ticker_code as symbol from ct join collections on collections.name = 'Silver companies stocks' where lower(ct.g_industry) like '%gold%silver%'
+select collections.id as collection_id, ct.ticker_code as symbol from ct join collections on collections.name = 'Silver companies stocks' where ct.g_industry ilike '%gold%silver%'
 UNION
-select collections.id as collection_id, ct.ticker_code as symbol from ct join collections on collections.name = 'Silver ETFs' where ct.ttype ='etf' and lower(ct.g_industry) like '%gold%silver%'
+select collections.id as collection_id, ct.ticker_code as symbol from ct join collections on collections.name = 'Silver ETFs' where ct.ttype ='etf' and ct.g_industry ilike '%gold%silver%'
 UNION
-select collections.id as collection_id, ct.ticker_code as symbol from ct join collections on collections.name = 'Space stocks' where lower(ct.g_industry) like '%aerospac%defen%'
+select collections.id as collection_id, ct.ticker_code as symbol from ct join collections on collections.name = 'Space stocks' where ct.g_industry ilike '%aerospac%defen%'
 UNION
 select collections.id as collection_id, ct.ticker_code as symbol from ct join collections on collections.name = 'Steel stocks' where ct.ticker_code in ('zeus', 'schn', 'stld', 'usap', 'zkin')
 UNION
-select collections.id as collection_id, ct.ticker_code as symbol from ct join collections on collections.name = 'Stocks in sports' where lower(ct.g_industry) like '%prosport%manag%'
+select collections.id as collection_id, ct.ticker_code as symbol from ct join collections on collections.name = 'Stocks in sports' where ct.g_industry ilike '%prosport%manag%'
 UNION
-select collections.id as collection_id, ct.ticker_code as symbol from ct join collections on collections.name = 'Technology stocks' where lower(ct.gics_sector) like '%technolog%'
+select collections.id as collection_id, ct.ticker_code as symbol from ct join collections on collections.name = 'Technology stocks' where lower(ct.gics_sector) ilike '%technolog%'
 UNION
-select collections.id as collection_id, ct.ticker_code as symbol from ct join collections on collections.name = 'Telecom stocks' where lower(ct.g_industry) like '%5g%com%unicat%' or lower(ct.g_industry) like '%internet%cellular%provid%' or lower(ct.g_industry) like '%telecom%infrastruct%'
+select collections.id as collection_id, ct.ticker_code as symbol from ct join collections on collections.name = 'Telecom stocks' where ct.g_industry ilike '%5g%com%unicat%' or ct.g_industry ilike '%internet%cellular%provid%' or ct.g_industry ilike '%telecom%infrastruct%'
 UNION
 select collections.id as collection_id, ct.ticker_code as symbol from ct join collections on collections.name = 'Toilet paper companies stocks' where ct.ticker_code in ('wmt', 'pg', 'kmb', 'itp', 'clw', 'cost', 'kr')
 UNION
-select collections.id as collection_id, ct.ticker_code as symbol from ct join collections on collections.name = 'Transportation stocks' where lower(ct.g_industry) like '%maritim%transport%' or lower(ct.g_industry) like '%airline%' or lower(ct.g_industry) like '%air%carg%transport%' or lower(ct.g_industry) like '%rail%freight%'
+select collections.id as collection_id, ct.ticker_code as symbol from ct join collections on collections.name = 'Transportation stocks' where ct.g_industry ilike '%maritim%transport%' or ct.g_industry ilike '%airline%' or ct.g_industry ilike '%air%carg%transport%' or ct.g_industry ilike '%rail%freight%'
 UNION
-select collections.id as collection_id, ct.ticker_code as symbol from ct join collections on collections.name = 'Travel stocks' where lower(ct.g_industry) like '%online%travel%compan%' or lower(ct.g_industry) like '%airline%' or lower(ct.g_industry) like '%casin%resort%' or lower(ct.g_industry) like '%hotel%'
+select collections.id as collection_id, ct.ticker_code as symbol from ct join collections on collections.name = 'Travel stocks' where ct.g_industry ilike '%online%travel%compan%' or ct.g_industry ilike '%airline%' or ct.g_industry ilike '%casin%resort%' or ct.g_industry ilike '%hotel%'
 UNION
-select collections.id as collection_id, ct.ticker_code as symbol from ct join collections on collections.name = 'Trucking stocks' where lower(ct.g_industry) like '%truck%'
+select collections.id as collection_id, ct.ticker_code as symbol from ct join collections on collections.name = 'Trucking stocks' where ct.g_industry ilike '%truck%'
 UNION
-select collections.id as collection_id, ct.ticker_code as symbol from ct join collections on collections.name = 'US Food stocks' where (lower(ct.g_industry) like '%bread%condiment%' or lower(ct.g_industry) like '%casual%din%' or lower(ct.g_industry) like '%dairy%' or lower(ct.g_industry) like '%fruit%vegetabl%' or lower(ct.g_industry) like '%meat%poultr%' or lower(ct.g_industry) like '%snack%cand%' or lower(ct.g_industry) like '%soft%sport%drink%') and ct.country_name ='united states'
+select collections.id as collection_id, ct.ticker_code as symbol from ct join collections on collections.name = 'US Food stocks' where (ct.g_industry ilike '%bread%condiment%' or ct.g_industry ilike '%casual%din%' or ct.g_industry ilike '%dairy%' or ct.g_industry ilike '%fruit%vegetabl%' or ct.g_industry ilike '%meat%poultr%' or ct.g_industry ilike '%snack%cand%' or ct.g_industry ilike '%soft%sport%drink%') and ct.country_name ilike '%united states%'
 UNION
-select collections.id as collection_id, ct.ticker_code as symbol from ct join collections on collections.name = 'USA Technology stocks' where lower(ct.gics_sector) like '%technolog%' and ct.country_name ='united states'
+select collections.id as collection_id, ct.ticker_code as symbol from ct join collections on collections.name = 'USA Technology stocks' where lower(ct.gics_sector) ilike '%technolog%' and ct.country_name ilike '%united states%'
 UNION
-select collections.id as collection_id, ct.ticker_code as symbol from ct join collections on collections.name = 'Utilities ETFs' where ct.ttype ='etf' and lower(ct.gics_sector) like '%utilities%'
+select collections.id as collection_id, ct.ticker_code as symbol from ct join collections on collections.name = 'Utilities ETFs' where ct.ttype ='etf' and lower(ct.gics_sector) ilike '%utilities%'
 UNION
-select collections.id as collection_id, ct.ticker_code as symbol from ct join collections on collections.name = 'Utilities stocks' where lower(ct.gics_sector) like '%utilities%'
+select collections.id as collection_id, ct.ticker_code as symbol from ct join collections on collections.name = 'Utilities stocks' where lower(ct.gics_sector) ilike '%utilities%'
 UNION
-select collections.id as collection_id, ct.ticker_code as symbol from ct join collections on collections.name = 'Waste management stocks' where lower(ct.g_industry) like '%wast%manag%'
+select collections.id as collection_id, ct.ticker_code as symbol from ct join collections on collections.name = 'Waste management stocks' where ct.g_industry ilike '%wast%manag%'
 UNION
-select collections.id as collection_id, ct.ticker_code as symbol from ct join collections on collections.name = 'Water companies stocks' where lower(ct.g_industry) like '%water%manag%'
+select collections.id as collection_id, ct.ticker_code as symbol from ct join collections on collections.name = 'Water companies stocks' where ct.g_industry ilike '%water%manag%'
 UNION
-select collections.id as collection_id, ct.ticker_code as symbol from ct join collections on collections.name = 'Wine stocks' where lower(ct.g_industry) like '%wine%liquor%'
+select collections.id as collection_id, ct.ticker_code as symbol from ct join collections on collections.name = 'Wine stocks' where ct.g_industry ilike '%wine%liquor%'
          )
 SELECT t2.symbol, collection_id
 from tmp_ticker_collections
