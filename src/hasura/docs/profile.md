@@ -82,3 +82,13 @@ mutation {
     }
 }
 ```
+
+### Delete user
+
+```graphql
+mutation {
+  delete_app_profiles_by_pk(id: 1) {
+    id
+  }
+}
+```

@@ -8,6 +8,6 @@ if ! meltano invoke airflow users list | grep admin > /dev/null; then
   meltano invoke airflow users create --username admin --password $AIRFLOW_PASSWORD --firstname admin --lastname admin --role Admin --email support@gainy.app
 fi
 
-( cd scripts && python3 generate_collection_rules_sql.py )
+( cd scripts && python3 generate_rules_sql.py )
 
 supervisord -n -c /etc/supervisor/supervisord.conf

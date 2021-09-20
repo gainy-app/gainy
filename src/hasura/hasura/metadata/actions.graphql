@@ -18,10 +18,6 @@ type Query {
   ): [NewsDataPoint]
 }
 
-type Query {
-  getRecommendedCollections: RecommendedCollections
-}
-
 type ChartDataPoint {
   datetime: String
   open: Float

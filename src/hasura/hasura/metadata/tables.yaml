@@ -1,23 +1,5 @@
 - table:
     schema: app
-    name: interests
-  array_relationships:
-  - name: profile_interests
-    using:
-      foreign_key_constraint_on:
-        column: interest_id
-        table:
-          schema: app
-          name: profile_interests
-  select_permissions:
-  - role: anonymous
-    permission:
-      columns:
-      - id
-      - name
-      filter: {}
-- table:
-    schema: app
     name: profile_categories
   object_relationships:
   - name: profile
@@ -76,9 +58,6 @@
     schema: app
     name: profile_interests
   object_relationships:
-  - name: interest
-    using:
-      foreign_key_constraint_on: interest_id
   - name: profile
     using:
       foreign_key_constraint_on: profile_id
@@ -183,6 +162,17 @@
           user_id:
             _eq: X-Hasura-User-Id
       check: null
+  event_triggers:
+  - name: setUserCategories
+    definition:
+      enable_manual: false
+      insert:
+        columns: '*'
+    retry_conf:
+      num_retries: 0
+      interval_sec: 10
+      timeout_sec: 60
+    webhook: '{{AWS_LAMBDA_API_GATEWAY_ENDPOINT}}/setUserCategories'
 - table:
     schema: app
     name: profiles
@@ -436,6 +426,17 @@
       foreign_key_constraint_on: industry_id
 - table:
     schema: public
+    name: interests
+  array_relationships:
+  - name: ticker_interests
+    using:
+      foreign_key_constraint_on:
+        column: interest_id
+        table:
+          schema: public
+          name: ticker_interests
+- table:
+    schema: public
     name: technicals
   object_relationships:
   - name: ticker
@@ -463,6 +464,13 @@
       foreign_key_constraint_on: symbol
 - table:
     schema: public
+    name: ticker_events
+  object_relationships:
+  - name: ticker
+    using:
+      foreign_key_constraint_on: symbol
+- table:
+    schema: public
     name: ticker_financials
   object_relationships:
   - name: ticker
@@ -482,6 +490,16 @@
   - name: gainy_industry
     using:
       foreign_key_constraint_on: industry_id
+  - name: ticker
+    using:
+      foreign_key_constraint_on: symbol
+- table:
+    schema: public
+    name: ticker_interests
+  object_relationships:
+  - name: interest
+    using:
+      foreign_key_constraint_on: interest_id
   - name: ticker
     using:
       foreign_key_constraint_on: symbol
@@ -575,6 +593,13 @@
         table:
           schema: public
           name: ticker_collections
+  - name: ticker_events
+    using:
+      foreign_key_constraint_on:
+        column: symbol
+        table:
+          schema: public
+          name: ticker_events
   - name: ticker_financials
     using:
       foreign_key_constraint_on:
@@ -632,6 +657,13 @@
         table:
           schema: public
           name: ticker_industries
+  - name: ticker_interests
+    using:
+      foreign_key_constraint_on:
+        column: symbol
+        table:
+          schema: public
+          name: ticker_interests
   - name: valuations
     using:
       foreign_key_constraint_on:
