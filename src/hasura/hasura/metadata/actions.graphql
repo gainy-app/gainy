@@ -18,6 +18,12 @@ type Query {
   ): [NewsDataPoint]
 }
 
+type Query {
+  recommendProfileCollections(
+    profile_id: Int
+  ): [RecommendedCollection]
+}
+
 type ChartDataPoint {
   datetime: String
   open: Float
@@ -53,10 +59,6 @@ type LiveStockPriceData {
 }
 
 type RecommendedCollection {
-  id: Int!
-}
-
-type RecommendedCollections {
-  categories: [Int]
+  id: Int
 }
 

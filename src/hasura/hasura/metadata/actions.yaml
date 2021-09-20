@@ -11,6 +11,12 @@ actions:
   definition:
     kind: ""
     handler: '{{AWS_LAMBDA_API_GATEWAY_ENDPOINT}}/fetchNewsData'
+- name: recommendProfileCollections
+  definition:
+    kind: ""
+    handler: 'http://host.docker.internal:9000/2015-03-31/functions/function/invocations'
+  permissions:
+    - role: user
 custom_types:
   enums: []
   input_objects: []
@@ -20,5 +26,12 @@ custom_types:
   - name: LivePriceData
   - name: LiveStockPriceData
   - name: RecommendedCollection
-  - name: RecommendedCollections
+    relationships:
+    - remote_table:
+        schema: public
+        name: collections
+      name: collection
+      type: object
+      field_mapping:
+        id: id
   scalars: []

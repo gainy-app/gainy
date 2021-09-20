@@ -1,21 +1,11 @@
-{{
-  config(
-    materialized = "table",
-    post_hook=[
-      index(this, 'collection_id', true),
-      fk(this, 'collection_id', 'collections', 'id')
-    ]
-  )
-}}
-
 with collection_industries as (
     select
         tc.collection_id,
         ti.industry_id
     from
-        {{ ref('ticker_collections') }} tc
+        ticker_collections tc
     join
-        {{ ref('ticker_industries') }} ti
+        ticker_industries ti
     on
         tc.symbol = ti.symbol
 ),
@@ -49,4 +39,4 @@ join
 on
     cis.collection_id = cn.collection_id
 group by
-    cis.collection_id
+    cis.collection_id;
