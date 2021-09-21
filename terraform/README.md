@@ -29,7 +29,15 @@ terraform plan
 terraform apply
 ```
 
-### Production
+### New environments
+
+Key features:
+- all services are isolated in a VPC (except lambdas - they are still in public, I’ll address it in future). An EC2 instance is created as proxy to enable interacting with the DB via ssh tunnel
+- all services are designed to be deployed and destroyed separately of each other (this is not checked yet) - except for the firebase auth, currently all future environments are meant to share all google services
+- meltano and hasura are running in ECS cluster. Each deployment a new service is started, then the old one is destroyed (reducing downtime)
+- terraform is set to not use foreign key relationships - all relationship were converted to manual type (otherwise hasura fails during dbt run). However other hasura failures are still subject to investigation
+
+Production deployment:
 ```
 terraform init -backend-config=backend-production.hcl -reconfigure
 ./import-shared-resources.sh
