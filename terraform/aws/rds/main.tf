@@ -10,12 +10,13 @@ resource "random_password" "rds" {
 }
 
 resource "aws_db_instance" "db_instance" {
-  identifier            = "${var.name}-${var.env}"
-  engine                = "postgres"
-  engine_version        = "12"
-  instance_class        = "db.t3.medium"
-  allocated_storage     = 50
-  max_allocated_storage = 100
+  identifier              = "${var.name}-${var.env}"
+  engine                  = "postgres"
+  engine_version          = "12"
+  instance_class          = "db.t3.medium"
+  allocated_storage       = 50
+  max_allocated_storage   = 100
+  backup_retention_period = var.env == "production" ? 7 : 0
 
   publicly_accessible = false
 
@@ -27,7 +28,7 @@ resource "aws_db_instance" "db_instance" {
 
   db_subnet_group_name   = var.db_subnet_group_name
   vpc_security_group_ids = [var.vpc_default_sg_id]
-  skip_final_snapshot    = true // <- not recommended for production
+  skip_final_snapshot    = var.env == "production" ? false : true
 
   storage_encrypted = true
   apply_immediately = true
