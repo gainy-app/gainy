@@ -37,7 +37,6 @@ jobs:
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v1
         with:
-          # terraform_version: 0.13.0:
           cli_config_credentials_token: ${{ secrets.TF_API_TOKEN }}
 
       - name: Terraform Format
@@ -47,7 +46,12 @@ jobs:
 
       - name: Terraform Init
         id: init
-        run: terraform init
+        run: terraform init -backend-config=backend-production.hcl -reconfigure
+        working-directory: terraform
+
+      - name: Terraform Init
+        id: import-shared-resources
+        run: ./import-shared-resources.sh
         working-directory: terraform
 
       - name: Terraform Validate

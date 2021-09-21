@@ -24,7 +24,7 @@ resource "aws_alb_target_group" "default" {
   }
   health_check {
     interval = 60
-    matcher = "200,302"
+    matcher  = "200,302"
   }
 }
 /*

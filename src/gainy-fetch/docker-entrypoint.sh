@@ -10,4 +10,6 @@ fi
 
 ( cd scripts && python3 generate_rules_sql.py )
 
+meltano schedule run csv-to-postgres --transform skip
+
 supervisord -n -c /etc/supervisor/supervisord.conf

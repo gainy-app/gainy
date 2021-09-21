@@ -37,24 +37,24 @@ resource "aws_ecs_task_definition" "meltano" {
   tags                     = {}
 
   container_definitions = templatefile(
-  "${path.cwd}/../src/gainy-fetch/aws-ecs-task-definition.json",
-  {
-    eodhistoricaldata_api_token = var.eodhistoricaldata_api_token
-    pg_host                     = var.pg_host
-    pg_password                 = var.pg_password
-    pg_port                     = var.pg_port
-    pg_username                 = var.pg_username
-    pg_dbname                   = var.pg_dbname
-    pg_schema                   = "public"
-    pg_meltano_schema           = "meltano"
-    pg_airflow_schema           = "airflow"
-    airflow_password            = random_password.airflow.result
-    image                       = docker_registry_image.meltano.name
-    aws_log_group_name          = var.aws_log_group_name
-    aws_log_region              = var.aws_log_region
-    meltano_port                = 5000
-    airflow_port                = 5001
-  }
+    "${path.cwd}/../src/gainy-fetch/aws-ecs-task-definition.json",
+    {
+      eodhistoricaldata_api_token = var.eodhistoricaldata_api_token
+      pg_host                     = var.pg_host
+      pg_password                 = var.pg_password
+      pg_port                     = var.pg_port
+      pg_username                 = var.pg_username
+      pg_dbname                   = var.pg_dbname
+      pg_schema                   = "public"
+      pg_meltano_schema           = "meltano"
+      pg_airflow_schema           = "airflow"
+      airflow_password            = random_password.airflow.result
+      image                       = docker_registry_image.meltano.name
+      aws_log_group_name          = var.aws_log_group_name
+      aws_log_region              = var.aws_log_region
+      meltano_port                = 5000
+      airflow_port                = 5001
+    }
   )
 }
 module "service-meltano" {

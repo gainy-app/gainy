@@ -35,23 +35,23 @@ resource "aws_ecs_task_definition" "hasura" {
   tags                     = {}
 
   container_definitions = templatefile(
-  "${path.cwd}/../src/hasura/aws-ecs-task-definition.json",
-  {
-    pg_host                         = var.pg_host
-    pg_password                     = var.pg_password
-    pg_port                         = var.pg_port
-    pg_username                     = var.pg_username
-    pg_dbname                       = var.pg_dbname
-    hasura_port                     = 8080
-    hasura_enable_console           = var.hasura_enable_console
-    hasura_enable_dev_mode          = var.hasura_enable_dev_mode
-    hasura_admin_secret             = random_password.hasura.result
-    hasura_jwt_secret               = var.hasura_jwt_secret
-    aws_lambda_api_gateway_endpoint = var.aws_lambda_api_gateway_endpoint
-    aws_log_group_name              = var.aws_log_group_name
-    aws_log_region                  = var.aws_log_region
-    image                           = docker_registry_image.hasura.name
-  }
+    "${path.cwd}/../src/hasura/aws-ecs-task-definition.json",
+    {
+      pg_host                         = var.pg_host
+      pg_password                     = var.pg_password
+      pg_port                         = var.pg_port
+      pg_username                     = var.pg_username
+      pg_dbname                       = var.pg_dbname
+      hasura_port                     = 8080
+      hasura_enable_console           = var.hasura_enable_console
+      hasura_enable_dev_mode          = var.hasura_enable_dev_mode
+      hasura_admin_secret             = random_password.hasura.result
+      hasura_jwt_secret               = var.hasura_jwt_secret
+      aws_lambda_api_gateway_endpoint = var.aws_lambda_api_gateway_endpoint
+      aws_log_group_name              = var.aws_log_group_name
+      aws_log_region                  = var.aws_log_region
+      image                           = docker_registry_image.hasura.name
+    }
   )
 }
 module "service-hasura" {

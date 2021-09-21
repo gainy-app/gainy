@@ -52,7 +52,7 @@
     "command": [],
     "user": null,
     "dockerLabels": null,
-    "cpu": 4096,
+    "cpu": 3072,
     "privileged": null,
     "memoryReservation": null,
     "logConfiguration": {

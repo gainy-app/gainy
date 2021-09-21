@@ -20,7 +20,6 @@ export TF_VAR_eodhistoricaldata_api_token=`{token here from #1}`
 export AWS_DEFAULT_REGION=us-east-1
 export AWS_ACCESS_KEY_ID=${key here from #2}
 export AWS_SECRET_ACCESS_KEY=${secret key here from #2}
-heroku login # will prompt for heroku login web flow 
 terraform login # to login into terraform cloud
 
 # run the following to see the changes in terraform
@@ -30,14 +29,10 @@ terraform plan
 terraform apply
 ```
 
-### New environment
+### Production
 ```
 terraform init -backend-config=backend-production.hcl -reconfigure
-terraform import module.firebase.google_project.project gainyapp
-terraform import module.firebase.module.functions-refreshToken.google_storage_bucket.bucket gainyapp-refresh_token
-terraform import module.firebase.module.functions-processSignUp.google_storage_bucket.bucket gainyapp-process_signup
-terraform import module.firebase.module.functions-processSignUp.google_cloudfunctions_function.function process_signup
-terraform import module.firebase.module.functions-refreshToken.google_cloudfunctions_function.function refresh_token
+./import-shared-resources.sh
 terraform apply
 ```
 

@@ -32,8 +32,8 @@ module "lambda" {
   pg_port                     = module.rds.db_instance.port
   pg_username                 = module.rds.db_instance.username
   container_repository        = aws_ecr_repository.default.name
-  vpc_security_group_ids = [module.ecs.vpc_default_sg_id]
-  vpc_subnet_ids = module.ecs.private_subnet_ids
+  vpc_security_group_ids      = [module.ecs.vpc_default_sg_id]
+  vpc_subnet_ids              = module.ecs.private_subnet_ids
 }
 
 module "ecs" {
