@@ -386,6 +386,16 @@
 - table:
     schema: public
     name: ticker_collections
+  object_relationships:
+  - name: ticker
+    using:
+      manual_configuration:
+        remote_table:
+          schema: public
+          name: tickers
+        insertion_order: null
+        column_mapping:
+          symbol: symbol
 - table:
     schema: public
     name: ticker_events

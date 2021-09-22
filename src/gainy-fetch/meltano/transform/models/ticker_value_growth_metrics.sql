@@ -21,9 +21,9 @@ with tickers as (select * from {{ ref('tickers') }}),
          (
              select distinct on (hp.code) hp.close as quartal_end_price, hsg.*
              from historical_sales_growth hsg
-                      JOIN historical_prices hp ON hp.code = hsg.symbol AND hp.date <= hsg.updated_at AND
-                                                   hp.date >= hsg.updated_at - interval '1 week'
-             order by hp.code, hp.date DESC
+                      JOIN historical_prices hp ON hp.code = hsg.symbol AND hp.date::date <= hsg.updated_at AND
+                                                   hp.date::date >= hsg.updated_at - interval '1 week'
+             order by hp.code, hp.date::date DESC
          ),
      latest_yearly_earning_trend as
          (
