@@ -9,7 +9,7 @@
   )
 }}
 
-select fisq.date,
+select fisq.date::timestamp,
        ti.industry_id,
        percentile_cont(0.5) WITHIN GROUP (ORDER BY net_income)    as median_net_income,
        percentile_cont(0.5) WITHIN GROUP (ORDER BY total_revenue) as median_revenue

@@ -1,19 +1,28 @@
 {{
   config(
-    materialized = "table",
-    dist = "symbol",
+    materialized = "incremental",
+    unique_key = "symbol",
+    incremental_strategy='insert_overwrite',
     post_hook=[
       index(this, 'symbol', false),
-      fk(this, 'symbol', 'tickers', 'symbol')
     ]
   )
 }}
 
-with expanded as (
+with
+--      max_updated_at as
+--     (select max(updated_at) as date from {{ this }}),
+     expanded as
+    (
     select code as symbol,
-           (json_each((financials -> 'Income_Statement' ->> 'quarterly')::json)).*
+           (json_each((financials -> 'Income_Statement' ->> 'quarterly')::json)).*,
+           updatedat::date as updated_at
     from fundamentals f
              inner join {{ ref('tickers') }} as t on f.code = t.symbol
+-- {% if is_incremental() %}
+--     join max_updated_at on true
+--     where updated_at::date >= max_updated_at.date
+-- {% endif %}
 )
 select symbol,
        key::date                                              as date,
@@ -49,5 +58,6 @@ select symbol,
        (value ->> 'sellingAndMarketingExpenses')::float       as selling_and_marketing_expenses,
        (value ->> 'sellingGeneralAdministrative')::float      as selling_general_administrative,
        (value ->> 'netIncomeApplicableToCommonShares')::float as net_income_applicable_to_common_shares,
-       (value ->> 'preferredStockAndOtherAdjustments')::float as preferred_stock_and_other_adjustments
+       (value ->> 'preferredStockAndOtherAdjustments')::float as preferred_stock_and_other_adjustments,
+       updated_at                                             as updated_at
 from expanded
