@@ -6,7 +6,6 @@
     ],
     post_hook=[
       fk(this, 'collection_id', 'collections', 'id'),
-      fk(this, 'symbol', 'tickers', 'symbol'),
     ]
   )
 }}

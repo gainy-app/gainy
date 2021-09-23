@@ -4,7 +4,6 @@
     dist = "symbol",
     post_hook=[
       index(this, 'symbol', false),
-      fk(this, 'symbol', 'tickers', 'symbol')
     ]
   )
 }}

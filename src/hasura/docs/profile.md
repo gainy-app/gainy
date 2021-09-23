@@ -7,7 +7,8 @@ mutation {
     email: "test3@example.com", 
     first_name: "fn", 
     gender: 0, 
-    last_name: "ln", 
+    last_name: "ln",
+    legal_address: "legal_address",
     user_id: "AO0OQyz0jyL5lNUpvKbpVdAPvlI3",
     profile_interests: {
       data: [
