@@ -19,7 +19,7 @@ data "aws_ami" "ecs_ami" {
  * Create ECS cluster
  */
 resource "aws_kms_key" "this" {
-  description             = "example"
+  description             = "gainy-kms-key-${var.env}"
   deletion_window_in_days = 7
   tags                    = {}
 }

@@ -1,14 +1,9 @@
 FROM meltano/meltano:v1.80.1-python3.8 AS local
 
-RUN apt update && apt install -y postgresql-client supervisor
+RUN apt update && apt install -y postgresql-client
 RUN pip install pyyaml
 
-ENV MELTANO_UI_PORT=5000
-ENV AIRFLOW_UI_PORT=5001
-
 WORKDIR /project
-
-COPY supervisor.conf /etc/supervisor/conf.d
 
 COPY meltano /project
 RUN rm -rf /project/.meltano
@@ -21,12 +16,8 @@ COPY tap-eodhistoricaldata /tap-eodhistoricaldata
 RUN cd /tap-eodhistoricaldata && pip install . # for some reason install below fails on heroku and hangs locally without this line
 RUN meltano install
 
-EXPOSE $MELTANO_UI_PORT
-EXPOSE $AIRFLOW_UI_PORT
-
-COPY docker-entrypoint.sh /docker-entrypoint.sh
-RUN chmod +x /docker-entrypoint.sh
-ENTRYPOINT ["/docker-entrypoint.sh"]
+COPY init.sh wait.sh /
+RUN chmod +x /init.sh /wait.sh
 
 FROM local AS production
 ENV ENV=production

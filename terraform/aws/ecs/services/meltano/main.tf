@@ -35,9 +35,12 @@ resource "aws_ecs_task_definition" "meltano" {
   network_mode             = "bridge"
   requires_compatibilities = []
   tags                     = {}
+  volume {
+    name = "meltano-data"
+  }
 
   container_definitions = templatefile(
-    "${path.cwd}/../src/gainy-fetch/aws-ecs-task-definition.json",
+    "${path.module}/container-definitions.json",
     {
       eodhistoricaldata_api_token = var.eodhistoricaldata_api_token
       pg_host                     = var.pg_host
@@ -52,14 +55,14 @@ resource "aws_ecs_task_definition" "meltano" {
       image                       = docker_registry_image.meltano.name
       aws_log_group_name          = var.aws_log_group_name
       aws_log_region              = var.aws_log_region
-      meltano_port                = 5000
       airflow_port                = 5001
     }
   )
 }
 module "service-meltano" {
   source                           = "../"
-  name                             = "meltano"
+  name                             = "meltano-airflow"
+  container_name                   = "meltano-airflow-ui"
   env                              = var.env
   domain                           = var.domain
   vpc_id                           = var.vpc_id

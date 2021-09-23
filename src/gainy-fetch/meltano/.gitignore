@@ -2,3 +2,4 @@
 /.meltano
 .env
 /meltano.yml
+/symbols.local.json

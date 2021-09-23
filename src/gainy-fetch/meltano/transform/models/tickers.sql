@@ -8,7 +8,6 @@
   )
 }}
 
-with max_updated_at as (select max(updated_at) as date from {{ this }})
 select (general ->> 'Code')::character varying           as symbol,
        (general ->> 'Type')::character varying           as type,
        (general ->> 'Name')::character varying           as name,
@@ -36,13 +35,4 @@ select (general ->> 'Code')::character varying           as symbol,
            )                                             as country_name,
        (general ->> 'UpdatedAt')::timestamp              as updated_at
 from fundamentals
-{% if is_incremental() %}
-    join max_updated_at on true
-{% endif %}
-
 where (general ->> 'IsDelisted')::boolean = false
-  and (general ->> 'Sector') is not null
-
-{% if is_incremental() %}
-  and (general ->> 'UpdatedAt')::timestamp >= max_updated_at.date
-{% endif %}

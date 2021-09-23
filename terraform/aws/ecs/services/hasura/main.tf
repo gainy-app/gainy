@@ -57,6 +57,7 @@ resource "aws_ecs_task_definition" "hasura" {
 module "service-hasura" {
   source                           = "../"
   name                             = "hasura"
+  container_name                   = "hasura"
   env                              = var.env
   domain                           = var.domain
   vpc_id                           = var.vpc_id

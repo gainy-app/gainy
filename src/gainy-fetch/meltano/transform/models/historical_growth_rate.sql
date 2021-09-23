@@ -10,8 +10,10 @@
   )
 }}
 
+{% if is_incremental() %}
 with
      max_updated_at as (select max(date) as max_date from {{ this }})
+{% endif %}
 SELECT code as symbol,
        date ::date, CASE
     WHEN first_value(date ::date) OVER (partition by code ORDER BY date ::date ROWS 1 PRECEDING) <=

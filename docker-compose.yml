@@ -1,26 +1,44 @@
 version: '3.6'
 services:
-  meltano:
+  meltano-airflow-ui:
+    restart: always
     env_file:
       - .env
     build:
       context: ./src/gainy-fetch
       target: local
     ports:
-      - "5000:5000"
       - "5001:5001"
     volumes:
       - ./src/gainy-fetch/meltano/scripts:/project/scripts:delegated
+      - ./src/gainy-fetch/meltano/orchestrate:/project/orchestrate:delegated
+      - ./src/gainy-fetch/meltano/meltano.template.yml:/project/meltano.template.yml:delegated
+      - meltano_data:/project/.meltano/run/airflow
+    environment:
+      EODHISTORICALDATA_JOBS_COUNT: 1
+      AIRFLOW_PASSWORD: admin
+    depends_on:
+      - postgres
+    entrypoint: "/init.sh"
+    command: "invoke airflow webserver -p 5001"
+  meltano-airflow-scheduler:
+    restart: always
+    env_file:
+      - .env
+    build:
+      context: ./src/gainy-fetch
+      target: local
+    volumes:
       - ./src/gainy-fetch/meltano/transform:/project/transform:delegated
       - ./src/gainy-fetch/meltano/data:/project/data:delegated
       - ./src/gainy-fetch/meltano/orchestrate:/project/orchestrate:delegated
-      - ./src/gainy-fetch/meltano/meltano.template.yml:/project/meltano.template.yml:delegated
       - ./src/gainy-fetch/tap-eodhistoricaldata:/tap-eodhistoricaldata:delegated
-      - ./src/gainy-fetch/supervisor.conf:/etc/supervisor/conf.d/supervisor.conf
-    environment:
-      EODHISTORICALDATA_JOBS_COUNT: 1
+      - meltano_data:/project/.meltano/run/airflow
     depends_on:
+      - meltano-airflow-ui
       - postgres
+    entrypoint: "/wait.sh"
+    command: "invoke airflow scheduler"
   postgres:
     image: postgres:12
     restart: always
@@ -61,3 +79,4 @@ services:
       GOOGLE_APPLICATION_CREDENTIALS: "/var/www/firebase.key.json"
 volumes:
   db_data:
+  meltano_data:
