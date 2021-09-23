@@ -11,10 +11,22 @@ actions:
   definition:
     kind: ""
     handler: '{{AWS_LAMBDA_API_GATEWAY_ENDPOINT}}/fetchNewsData'
-- name: recommendProfileCollections
+- name: get_recommended_collections
   definition:
     kind: ""
-    handler: 'http://host.docker.internal:9000/2015-03-31/functions/function/invocations'
+    handler: '{{AWS_LAMBDA_API_GATEWAY_ENDPOINT}}/hasuraAction'
+  permissions:
+    - role: user
+- name: get_match_score_by_ticker
+  definition:
+    kind: ""
+    handler: '{{AWS_LAMBDA_API_GATEWAY_ENDPOINT}}/hasuraAction'
+  permissions:
+    - role: user
+- name: get_match_scores_by_collections
+  definition:
+    kind: ""
+    handler: '{{AWS_LAMBDA_API_GATEWAY_ENDPOINT}}/hasuraAction'
   permissions:
     - role: user
 custom_types:
@@ -34,4 +46,21 @@ custom_types:
       type: object
       field_mapping:
         id: id
+  - name: MatchScore
+    relationships:
+      - remote_table:
+          schema: public
+          name: tickers
+        name: ticker
+        type: object
+        field_mapping:
+          symbol: symbol
+      - remote_table:
+          schema: public
+          name: collections
+        name: collection
+        type: object
+        field_mapping:
+          collection_id: id
+
   scalars: []

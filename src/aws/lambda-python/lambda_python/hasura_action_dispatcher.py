@@ -5,7 +5,8 @@ import psycopg2
 
 from common.hasura_exception import HasuraActionException
 from common.hasura_response import base_response
-from recommendation import recommendations
+from recommendation.match_score import get_match_score_by_ticker, get_match_scores_by_collections
+from recommendation.recommended_collections import get_recommended_collections
 
 API_GATEWAY_PROXY_INTEGRATION = os.environ.get("AWS_LAMBDA_API_GATEWAY_PROXY_INTEGRATION", "True") == "True"
 
@@ -18,7 +19,9 @@ class Action:
 
 
 action_registry = {
-    "recommendProfileCollections": Action(recommendations.recommend_profile_collections, "profile_id")
+    "get_recommended_collections": Action(get_recommended_collections, "profile_id"),
+    "get_match_score_by_ticker": Action(get_match_score_by_ticker, "profile_id"),
+    "get_match_scores_by_collections": Action(get_match_scores_by_collections, "profile_id")
 }
 
 
