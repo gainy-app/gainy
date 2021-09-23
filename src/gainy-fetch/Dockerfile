@@ -10,6 +10,7 @@ RUN rm -rf /project/.meltano
 
 ENV ENV=local
 ENV EODHISTORICALDATA_JOBS_COUNT=1
+RUN cp -n symbols.local.json.dist symbols.local.json
 RUN python scripts/generate_meltano_config.py $ENV
 
 COPY tap-eodhistoricaldata /tap-eodhistoricaldata
