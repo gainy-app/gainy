@@ -26,10 +26,9 @@ with price AS
                     t.ipo_date,
                     latest_price.close                                           as price,
                     CASE
-                        WHEN latest_price.close = 0 OR latest_price.open = 0 THEN NULL --in case of open=0 bug from eod
-                        WHEN latest_price.close = NULL OR latest_price.open = NULL THEN NULL --in case of left join didn't find records
-                        ELSE (latest_price.close - latest_price.open) / (1e-15 + latest_price.open) --+1e-15 in case of glitch near-zero values (if any)
-                        END                                                      as chrt,
+                       WHEN latest_price.close > 0 AND latest_price.open > 0
+                       THEN (latest_price.close - latest_price.open) / latest_price.open --else NULL
+                       END                                                       as chrt,
                     t.type                                                       as ttype,
                     gi.name                                                      as g_industry,
                     t.gic_sector                                                 as gics_sector,
