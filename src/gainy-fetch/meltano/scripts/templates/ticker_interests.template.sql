@@ -17,6 +17,7 @@ with price AS
              select hp.*,
                     ROW_NUMBER() OVER (PARTITION BY hp.code ORDER BY hp.date::timestamp DESC) as inv_row_number
              from historical_prices hp
+             where close is not null AND open is not null --we get latest by date not-null prices (with inv_row_number=1) (if any)
          ),
      ct as
          (
@@ -24,7 +25,10 @@ with price AS
                     t.country_name,
                     t.ipo_date,
                     latest_price.close                                           as price,
-                    (latest_price.close - latest_price.open) / latest_price.open as chrt,
+                    CASE
+                       WHEN latest_price.close > 0 AND latest_price.open > 0
+                       THEN (latest_price.close - latest_price.open) / latest_price.open --else NULL
+                       END                                                       as chrt,
                     t.type                                                       as ttype,
                     gi.name                                                      as g_industry,
                     t.gic_sector                                                 as gics_sector,
