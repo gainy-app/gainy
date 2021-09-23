@@ -254,40 +254,20 @@
     name: ticker_financial_periods
 - table:
     schema: public
-    name: analyst_ratings
-  object_relationships:
-  - name: ticker
-    using:
-      foreign_key_constraint_on: symbol
-- table:
-    schema: public
-    name: cash_flow
-  object_relationships:
-  - name: ticker
-    using:
-      foreign_key_constraint_on: symbol
-- table:
-    schema: public
     name: categories
-  array_relationships:
-  - name: ticker_categories
-    using:
-      foreign_key_constraint_on:
-        column: category_id
-        table:
-          schema: public
-          name: ticker_categories
 - table:
     schema: public
     name: collections
   array_relationships:
   - name: ticker_collections
     using:
-      foreign_key_constraint_on:
-        column: collection_id
-        table:
+      manual_configuration:
+        remote_table:
           schema: public
           name: ticker_collections
+        insertion_order: null
+        column_mapping:
+          id: collection_id
   select_permissions:
   - role: user
     permission:
@@ -300,63 +280,35 @@
       allow_aggregations: true
 - table:
     schema: public
-    name: dividends
-- table:
-    schema: public
-    name: earnings_annual
-  object_relationships:
-  - name: ticker
-    using:
-      foreign_key_constraint_on: symbol
-- table:
-    schema: public
-    name: earnings_history
-  object_relationships:
-  - name: ticker
-    using:
-      foreign_key_constraint_on: symbol
-- table:
-    schema: public
-    name: earnings_trend
-  object_relationships:
-  - name: ticker
-    using:
-      foreign_key_constraint_on: symbol
-- table:
-    schema: public
-    name: financials_income_statement_quarterly
-  object_relationships:
-  - name: ticker
-    using:
-      foreign_key_constraint_on: symbol
-- table:
-    schema: public
-    name: fundamentals
-- table:
-    schema: public
     name: gainy_industries
   array_relationships:
   - name: industry_stats_dailies
     using:
-      foreign_key_constraint_on:
-        column: industry_id
-        table:
+      manual_configuration:
+        remote_table:
           schema: public
           name: industry_stats_daily
+        insertion_order: null
+        column_mapping:
+          id: industry_id
   - name: industry_stats_quarterlies
     using:
-      foreign_key_constraint_on:
-        column: industry_id
-        table:
+      manual_configuration:
+        remote_table:
           schema: public
           name: industry_stats_quarterly
+        insertion_order: null
+        column_mapping:
+          id: industry_id
   - name: ticker_industries
     using:
-      foreign_key_constraint_on:
-        column: industry_id
-        table:
+      manual_configuration:
+        remote_table:
           schema: public
           name: ticker_industries
+        insertion_order: null
+        column_mapping:
+          id: industry_id
   - name: ticker_industry_median_1m
     using:
       manual_configuration:
@@ -383,18 +335,7 @@
     name: growth_rate_1w
 - table:
     schema: public
-    name: highlights
-  object_relationships:
-  - name: ticker
-    using:
-      foreign_key_constraint_on: symbol
-- table:
-    schema: public
     name: historical_growth_rate
-  object_relationships:
-  - name: ticker
-    using:
-      foreign_key_constraint_on: symbol
 - table:
     schema: public
     name: historical_prices
@@ -413,156 +354,124 @@
 - table:
     schema: public
     name: industry_stats_daily
-  object_relationships:
-  - name: gainy_industry
-    using:
-      foreign_key_constraint_on: industry_id
 - table:
     schema: public
     name: industry_stats_quarterly
-  object_relationships:
-  - name: gainy_industry
-    using:
-      foreign_key_constraint_on: industry_id
 - table:
     schema: public
     name: interests
   array_relationships:
   - name: ticker_interests
     using:
-      foreign_key_constraint_on:
-        column: interest_id
-        table:
+      manual_configuration:
+        remote_table:
           schema: public
           name: ticker_interests
-- table:
-    schema: public
-    name: technicals
-  object_relationships:
-  - name: ticker
-    using:
-      foreign_key_constraint_on: symbol
+        insertion_order: null
+        column_mapping:
+          id: interest_id
 - table:
     schema: public
     name: ticker_categories
   object_relationships:
-  - name: category
+  - name: categories
     using:
-      foreign_key_constraint_on: category_id
-  - name: ticker
-    using:
-      foreign_key_constraint_on: symbol
+      manual_configuration:
+        remote_table:
+          schema: public
+          name: categories
+        insertion_order: null
+        column_mapping:
+          category_id: id
 - table:
     schema: public
     name: ticker_collections
   object_relationships:
-  - name: collection
-    using:
-      foreign_key_constraint_on: collection_id
   - name: ticker
     using:
-      foreign_key_constraint_on: symbol
+      manual_configuration:
+        remote_table:
+          schema: public
+          name: tickers
+        insertion_order: null
+        column_mapping:
+          symbol: symbol
 - table:
     schema: public
     name: ticker_events
-  object_relationships:
-  - name: ticker
-    using:
-      foreign_key_constraint_on: symbol
 - table:
     schema: public
     name: ticker_financials
-  object_relationships:
-  - name: ticker
-    using:
-      foreign_key_constraint_on: symbol
 - table:
     schema: public
     name: ticker_highlights
   object_relationships:
   - name: ticker
     using:
-      foreign_key_constraint_on: symbol
+      manual_configuration:
+        remote_table:
+          schema: public
+          name: tickers
+        insertion_order: null
+        column_mapping:
+          symbol: symbol
 - table:
     schema: public
     name: ticker_industries
   object_relationships:
   - name: gainy_industry
     using:
-      foreign_key_constraint_on: industry_id
+      manual_configuration:
+        remote_table:
+          schema: public
+          name: gainy_industries
+        insertion_order: null
+        column_mapping:
+          industry_id: id
   - name: ticker
     using:
-      foreign_key_constraint_on: symbol
+      manual_configuration:
+        remote_table:
+          schema: public
+          name: tickers
+        insertion_order: null
+        column_mapping:
+          symbol: symbol
 - table:
     schema: public
     name: ticker_interests
   object_relationships:
   - name: interest
     using:
-      foreign_key_constraint_on: interest_id
+      manual_configuration:
+        remote_table:
+          schema: public
+          name: interests
+        insertion_order: null
+        column_mapping:
+          interest_id: id
   - name: ticker
     using:
-      foreign_key_constraint_on: symbol
+      manual_configuration:
+        remote_table:
+          schema: public
+          name: tickers
+        insertion_order: null
+        column_mapping:
+          symbol: symbol
 - table:
     schema: public
     name: tickers
   array_relationships:
-  - name: analyst_ratings
-    using:
-      foreign_key_constraint_on:
-        column: symbol
-        table:
-          schema: public
-          name: analyst_ratings
-  - name: cash_flows
-    using:
-      foreign_key_constraint_on:
-        column: symbol
-        table:
-          schema: public
-          name: cash_flow
-  - name: earnings_annuals
-    using:
-      foreign_key_constraint_on:
-        column: symbol
-        table:
-          schema: public
-          name: earnings_annual
-  - name: earnings_histories
-    using:
-      foreign_key_constraint_on:
-        column: symbol
-        table:
-          schema: public
-          name: earnings_history
-  - name: earnings_trends
-    using:
-      foreign_key_constraint_on:
-        column: symbol
-        table:
-          schema: public
-          name: earnings_trend
-  - name: financials_income_statement_quarterlies
-    using:
-      foreign_key_constraint_on:
-        column: symbol
-        table:
-          schema: public
-          name: financials_income_statement_quarterly
-  - name: highlights
-    using:
-      foreign_key_constraint_on:
-        column: symbol
-        table:
-          schema: public
-          name: highlights
   - name: historical_growth_rates
     using:
-      foreign_key_constraint_on:
-        column: symbol
-        table:
+      manual_configuration:
+        remote_table:
           schema: public
           name: historical_growth_rate
+        insertion_order: null
+        column_mapping:
+          symbol: symbol
   - name: historical_prices
     using:
       manual_configuration:
@@ -572,41 +481,42 @@
         insertion_order: null
         column_mapping:
           symbol: code
-  - name: technicals
-    using:
-      foreign_key_constraint_on:
-        column: symbol
-        table:
-          schema: public
-          name: technicals
   - name: ticker_categories
     using:
-      foreign_key_constraint_on:
-        column: symbol
-        table:
+      manual_configuration:
+        remote_table:
           schema: public
           name: ticker_categories
+        insertion_order: null
+        column_mapping:
+          symbol: symbol
   - name: ticker_collections
     using:
-      foreign_key_constraint_on:
-        column: symbol
-        table:
+      manual_configuration:
+        remote_table:
           schema: public
           name: ticker_collections
+        insertion_order: null
+        column_mapping:
+          symbol: symbol
   - name: ticker_events
     using:
-      foreign_key_constraint_on:
-        column: symbol
-        table:
+      manual_configuration:
+        remote_table:
           schema: public
           name: ticker_events
+        insertion_order: null
+        column_mapping:
+          symbol: symbol
   - name: ticker_financials
     using:
-      foreign_key_constraint_on:
-        column: symbol
-        table:
+      manual_configuration:
+        remote_table:
           schema: public
           name: ticker_financials
+        insertion_order: null
+        column_mapping:
+          symbol: symbol
   - name: ticker_growth_rate_1m
     using:
       manual_configuration:
@@ -627,11 +537,13 @@
           symbol: symbol
   - name: ticker_highlights
     using:
-      foreign_key_constraint_on:
-        column: symbol
-        table:
+      manual_configuration:
+        remote_table:
           schema: public
           name: ticker_highlights
+        insertion_order: null
+        column_mapping:
+          symbol: symbol
   - name: ticker_historical_prices_1m
     using:
       manual_configuration:
@@ -652,29 +564,19 @@
           symbol: symbol
   - name: ticker_industries
     using:
-      foreign_key_constraint_on:
-        column: symbol
-        table:
+      manual_configuration:
+        remote_table:
           schema: public
           name: ticker_industries
+        insertion_order: null
+        column_mapping:
+          symbol: symbol
   - name: ticker_interests
     using:
-      foreign_key_constraint_on:
-        column: symbol
-        table:
+      manual_configuration:
+        remote_table:
           schema: public
           name: ticker_interests
-  - name: valuations
-    using:
-      foreign_key_constraint_on:
-        column: symbol
-        table:
-          schema: public
-          name: valuation
-- table:
-    schema: public
-    name: valuation
-  object_relationships:
-  - name: ticker
-    using:
-      foreign_key_constraint_on: symbol
+        insertion_order: null
+        column_mapping:
+          symbol: symbol

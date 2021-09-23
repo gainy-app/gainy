@@ -9,7 +9,7 @@ select DISTINCT ON (
     date_part('year', date::date),
     date_part('week', date::date)
     ) code                                                                                                            as symbol,
-      date::date,
+      date::timestamp,
       open,
       first_value(close)
       OVER (partition by code, date_part('year', date::date), date_part('week', date::date) ORDER BY date::date desc) as close,

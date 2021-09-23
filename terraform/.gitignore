@@ -3,3 +3,4 @@ terraform.tfstate.backup
 .terraform
 builds
 /.env
+/.terraform.lock.hcl

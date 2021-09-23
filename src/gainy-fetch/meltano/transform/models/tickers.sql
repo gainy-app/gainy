@@ -1,8 +1,7 @@
 {{
   config(
     materialized = "table",
-    sort = "updated_at",
-    dist = "symbol",
+    unique_key = "symbol",
     post_hook=[
       index(this, 'symbol', true),
     ]
@@ -37,4 +36,3 @@ select (general ->> 'Code')::character varying           as symbol,
        (general ->> 'UpdatedAt')::timestamp              as updated_at
 from fundamentals
 where (general ->> 'IsDelisted')::boolean = false
-  and (general ->> 'Sector') is not null

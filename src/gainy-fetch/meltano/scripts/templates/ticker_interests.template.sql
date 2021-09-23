@@ -6,7 +6,6 @@
     ],
     post_hook=[
       fk(this, 'interest_id', 'interests', 'id'),
-      fk(this, 'symbol', 'tickers', 'symbol'),
     ]
   )
 }}
@@ -35,12 +34,12 @@ with price AS
                         WHEN countries."sub-region" LIKE '%Latin America%' THEN 'latam'
                         END                                                      as country_group
              from {{ ref('tickers') }} t
-                      JOIN price latest_price ON latest_price.code = t.symbol AND latest_price.inv_row_number = 1
-                      JOIN {{ ref('ticker_industries') }} ti on t.symbol = ti.symbol
-                      JOIN {{ ref('gainy_industries') }} gi on ti.industry_id = gi.id
-                      JOIN {{ ref('ticker_categories') }} tc on t.symbol = tc.symbol
-                      JOIN {{ ref('categories') }} c on tc.category_id = c.id
-                      JOIN raw_countries countries
+                      LEFT JOIN price latest_price ON latest_price.code = t.symbol AND latest_price.inv_row_number = 1
+                      LEFT JOIN {{ ref('ticker_industries') }} ti on t.symbol = ti.symbol
+                      LEFT JOIN {{ ref('gainy_industries') }} gi on ti.industry_id = gi.id
+                      LEFT JOIN {{ ref('ticker_categories') }} tc on t.symbol = tc.symbol --here we have N:N relationship, so for interests we must use distinct in the end (we will get duplicates otherwise)
+                      LEFT JOIN {{ ref('categories') }} c on tc.category_id = c.id
+                      LEFT JOIN raw_countries countries
                            on countries.name = t.country_name OR countries."alpha-2" = t.country_name OR
                               countries."alpha-3" = t.country_name
          ),
@@ -48,7 +47,7 @@ with price AS
          (
 -- __SELECT__ --
          )
-SELECT t2.symbol, interest_id
+SELECT distinct t2.symbol, interest_id
 from tmp_ticker_interests
     join {{ ref ('tickers') }} t2 on tmp_ticker_interests.symbol = t2.symbol
     join {{ ref ('interests') }} c2 on tmp_ticker_interests.interest_id = c2.id

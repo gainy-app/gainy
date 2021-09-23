@@ -10,4 +10,4 @@ WORKDIR /hasura
 ENV HASURA_GRAPHQL_MIGRATIONS_DIR=/hasura/migrations
 ENV HASURA_GRAPHQL_METADATA_DIR=/hasura/metadata
 
-CMD graphql-engine serve --server-port $PORT
+CMD graphql-engine serve --server-port $HASURA_PORT
