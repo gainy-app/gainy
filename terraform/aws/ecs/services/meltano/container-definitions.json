@@ -64,7 +64,7 @@
     "portMappings": [],
     "hostname": null,
     "essential": true,
-    "entryPoint": ["/wait.sh"],
+    "entryPoint": ["/init.sh"],
     "mountPoints": [
       {
         "containerPath" : "/project/.meltano/run/airflow",
