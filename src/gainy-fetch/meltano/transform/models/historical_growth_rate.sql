@@ -1,14 +1,19 @@
 {{
   config(
-    materialized = "table",
+    materialized = "incremental",
+    unique_key = "symbol",
+    incremental_strategy='insert_overwrite',
     post_hook=[
       index(this, 'symbol'),
       index(this, 'date'),
-      fk(this, 'symbol', 'tickers', 'symbol'),
     ]
   )
 }}
 
+{% if is_incremental() %}
+with
+     max_updated_at as (select max(date) as max_date from {{ this }})
+{% endif %}
 SELECT code as symbol,
        date ::date, CASE
     WHEN first_value(date ::date) OVER (partition by code ORDER BY date ::date ROWS 1 PRECEDING) <=
@@ -59,3 +64,7 @@ SELECT code as symbol,
            END as growth_rate_1y
 from historical_prices
 join {{ ref('tickers') }} ON tickers.symbol = historical_prices.code
+{% if is_incremental() %}
+    join max_updated_at on true
+    where date::date >= max_updated_at.max_date
+{% endif %}

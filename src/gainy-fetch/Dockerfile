@@ -1,20 +1,24 @@
-FROM meltano/meltano:v1.79.1 AS production
+FROM meltano/meltano:v1.80.1-python3.8 AS local
 
-ENV PORT=5000
+RUN apt update && apt install -y postgresql-client
+RUN pip install pyyaml
 
 WORKDIR /project
 
 COPY meltano /project
 RUN rm -rf /project/.meltano
+
+ENV ENV=local
+ENV EODHISTORICALDATA_JOBS_COUNT=1
+RUN python scripts/generate_meltano_config.py $ENV
+
 COPY tap-eodhistoricaldata /tap-eodhistoricaldata
 RUN cd /tap-eodhistoricaldata && pip install . # for some reason install below fails on heroku and hangs locally without this line
 RUN meltano install
 
-EXPOSE $PORT
+COPY init.sh wait.sh /
+RUN chmod +x /init.sh /wait.sh
 
-COPY docker-entrypoint.sh /docker-entrypoint.sh
-ENTRYPOINT ["/docker-entrypoint.sh"]
-
-
-FROM production AS local
-COPY meltano/meltano.local.yml /project/meltano.yml
+FROM local AS production
+ENV ENV=production
+RUN python scripts/generate_meltano_config.py $ENV

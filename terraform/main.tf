@@ -1,36 +1,24 @@
-variable "env" {
-  default = "dev"
-  type    = string
+# terraform init -backend-config=backend.hcl -reconfigure
+terraform {
+  backend "remote" {
+  }
 }
 
-variable "eodhistoricaldata_api_token" {
-  type      = string
-  sensitive = true
-}
-variable "gnews_api_token" {
-  type      = string
-  sensitive = true
+#################################### Providers ####################################
+
+terraform {
+  required_providers {
+    cloudflare = {
+      source  = "cloudflare/cloudflare"
+      version = "~> 2.0"
+    }
+  }
 }
 
-provider "aws" {}
-
-output "aws_apigatewayv2_api_endpoint" {
-  value = module.aws.aws_apigatewayv2_api_endpoint
+provider "cloudflare" {
+  email   = var.cloudflare_email
+  api_key = var.cloudflare_api_key
 }
-
-variable "google_project_id" {
-  default = "gainyapp"
-}
-variable "google_region" {
-  default = "us-central1"
-}
-variable "google_credentials" {
-  type      = string
-  sensitive = true
-}
-variable "google_billing_id" {}
-variable "google_user" {}
-variable "google_organization_id" {}
 
 provider "google" {
   project     = var.google_project_id
@@ -38,82 +26,12 @@ provider "google" {
   credentials = var.google_credentials
 }
 
-terraform {
-  backend "remote" {
-    organization = "gainy"
-
-    workspaces {
-      name = "gainy-dev"
-    }
-  }
+provider "aws" {
+  region     = var.aws_region
+  access_key = var.aws_access_key
+  secret_key = var.aws_secret_key
 }
 
-module "networking" {
-  source = "./networking"
-  env    = var.env
-}
-
-resource "random_password" "hasura_secret" {
-  length = 16
-}
-
-module "rds" {
-  env                 = var.env
-  name                = "gainy"
-  source              = "./rds"
-  subnets             = module.networking.vpc.database_subnets
-  allowed_cidrs       = module.networking.vpc.private_subnets
-  security_group      = module.networking.vpc.default_security_group_id
-  vpc_id              = module.networking.vpc.vpc_id
-  publicly_accessible = true
-}
-
-module "heroku-gainy-managed" {
-  source = "./heroku"
-  name   = "gainy-managed"
-  env    = "dev"
-  path   = "src/hasura"
-  stack  = "container"
-  config = {
-    HASURA_GRAPHQL_DATABASE_URL   = "postgres://${module.rds.db.db_instance_username}:${module.rds.db.db_master_password}@${module.rds.db.db_instance_endpoint}/${module.rds.db.db_instance_name}"
-    HASURA_GRAPHQL_ADMIN_SECRET   = random_password.hasura_secret.result
-    HASURA_GRAPHQL_ENABLE_CONSOLE = "true"
-    HASURA_GRAPHQL_DEV_MODE       = true
-    ## Heroku hobby tier PG has few limitations including 20 max connections
-    ## https://devcenter.heroku.com/articles/heroku-postgres-plans#hobby-tier
-    HASURA_GRAPHQL_PG_CONNECTIONS    = 15
-    HASURA_GRAPHQL_UNAUTHORIZED_ROLE = "anonymous"
-    AWS_LAMBDA_API_GATEWAY_ENDPOINT  = module.aws.aws_apigatewayv2_api_endpoint
-  }
-}
-
-module "heroku-gainy-fetch" {
-  source = "./heroku"
-  stack  = "container"
-  name   = "gainy-fetch"
-  env    = "dev"
-  path   = "src/gainy-fetch"
-  size   = "Standard-1X"
-  config = {
-    TARGET_POSTGRES_HOST            = module.rds.db.db_instance_address
-    TARGET_POSTGRES_PORT            = module.rds.db.db_instance_port
-    TARGET_POSTGRES_USER            = module.rds.db.db_instance_username
-    TARGET_POSTGRES_PASSWORD        = module.rds.db.db_master_password
-    TARGET_POSTGRES_DBNAME          = module.rds.db.db_instance_name
-    TARGET_POSTGRES_SCHEMA          = "public"
-    TAP_POSTGRES_FILTER_SCHEMAS     = "public"
-    TAP_EODHISTORICALDATA_API_TOKEN = var.eodhistoricaldata_api_token
-    TAP_EODHISTORICALDATA_SYMBOLS   = "[\"AAPL\"]"
-    MELTANO_DATABASE_URI            = "postgresql://${module.rds.db.db_instance_username}:${module.rds.db.db_master_password}@${module.rds.db.db_instance_endpoint}/${module.rds.db.db_instance_name}?options=-csearch_path%3Dmeltano"
-    PG_DATABASE                     = module.rds.db.db_instance_name
-    PG_ADDRESS                      = module.rds.db.db_instance_address
-    PG_PASSWORD                     = module.rds.db.db_master_password
-    PG_PORT                         = module.rds.db.db_instance_port
-    DBT_TARGET_SCHEMA               = "public"
-    PG_USERNAME                     = module.rds.db.db_instance_username
-    DBT_TARGET                      = "postgres"
-  }
-}
 
 module "firebase" {
   source                 = "./firebase"
@@ -127,10 +45,27 @@ module "aws" {
   source                      = "./aws"
   eodhistoricaldata_api_token = var.eodhistoricaldata_api_token
   gnews_api_token             = var.gnews_api_token
-  env                         = "dev"
-  pg_host                     = module.rds.db.db_instance_address
-  pg_port                     = module.rds.db.db_instance_port
-  pg_dbname                   = module.rds.db.db_instance_name
-  pg_username                 = module.rds.db.db_instance_username
-  pg_password                 = module.rds.db.db_instance_password
+  env                         = var.env
+  cloudflare_zone_id          = var.cloudflare_zone_id
+  hasura_jwt_secret           = var.hasura_jwt_secret
+}
+
+#################################### Variables ####################################
+
+output "aws_apigatewayv2_api_endpoint" {
+  value = module.aws.aws_apigatewayv2_api_endpoint
+}
+output "aws_rds_db_instance" {
+  value = {
+    pg_host     = module.aws.aws_rds.db_instance.address
+    pg_port     = module.aws.aws_rds.db_instance.port
+    pg_username = module.aws.aws_rds.db_instance.username
+    pg_dbname   = module.aws.aws_rds.db_instance.name
+  }
+}
+output "vpc_bridge_instance_domain" {
+  value = module.aws.bridge_instance.public_dns
+}
+output "meltano_url" {
+  value = module.aws.meltano_url
 }

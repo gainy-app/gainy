@@ -4,12 +4,14 @@
     dist = "symbol",
     post_hook=[
       index(this, 'symbol', true),
-      fk(this, 'symbol', 'tickers', 'symbol'),
     ]
   )
 }}
 
-with settings as
+with tickers as (select * from {{ ref('tickers') }}),
+     ticker_momentum_metrics as (select * from {{ ref('ticker_momentum_metrics') }}),
+     ticker_value_growth_metrics as (select * from {{ ref('ticker_value_growth_metrics') }}),
+     settings as
          (
              select 12 as month_period_divider
          ),
@@ -27,27 +29,27 @@ with settings as
              from historical_prices hp
                       join settings ON true
          ),
-     historical_prices_max_idx AS
+     period_open AS
          (
-             select code, year, month, MAX(idx) as max_idx
-             from historical_prices_summary hps
-             group by code, year, month
+             select distinct on (code, year, month) *
+             from historical_prices_summary
+             order by code, year, month, date
+         ),
+     period_close AS
+         (
+             select distinct on (code, year, month) *
+             from historical_prices_summary
+             order by code desc, year desc, month desc, date desc
          ),
      returns AS
          (
-             SELECT hps.code,
-                    hps_close.date,
-                    hps.open,
-                    hps_close.close,
-                    CASE WHEN hps.open > 0 THEN (hps_close.close - hps.open) / hps.open END as return
-             FROM historical_prices_summary hps
-                      JOIN historical_prices_max_idx hpmi
-                           ON hpmi.code = hps.code AND hpmi.year = hps.year AND hpmi.month = hps.month
-                      JOIN historical_prices_summary hps_close
-                           ON hpmi.code = hps_close.code AND hpmi.year = hps_close.year AND
-                              hpmi.month = hps_close.month AND
-                              hps_close.idx = hpmi.max_idx
-             WHERE hps.idx = 1
+             SELECT po.code,
+                    pc.date,
+                    po.open,
+                    pc.close,
+                    CASE WHEN po.open > 0 THEN (pc.close - po.open) / po.open END as return
+             FROM period_open po
+                      JOIN period_close pc ON pc.code = po.code AND pc.year = po.year AND pc.month = po.month
          ),
      downside_deviation AS
          (
@@ -72,7 +74,7 @@ select f.code                                          as symbol,
        (technicals ->> 'ShortPercent')::float          as short_percent,
        (technicals ->> 'SharesShortPriorMonth')::float as shares_short_prior_month
 from fundamentals f
-         JOIN {{ ref('tickers') }} t ON t.symbol = f.code
-         JOIN {{ ref('ticker_momentum_metrics') }} tmm ON tmm.symbol = f.code
-         JOIN {{ ref('ticker_value_growth_metrics') }} tvgm ON tvgm.symbol = f.code
+         JOIN tickers t ON t.symbol = f.code
+         JOIN ticker_momentum_metrics tmm ON tmm.symbol = f.code
+         JOIN ticker_value_growth_metrics tvgm ON tvgm.symbol = f.code
          LEFT JOIN downside_deviation ON downside_deviation.code = f.code
