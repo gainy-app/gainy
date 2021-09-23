@@ -58,19 +58,13 @@
   {
     "memory": 3072,
     "extraHosts": null,
-    "dependsOn": [
-      {
-        "containerName": "meltano-airflow-ui",
-        "condition": "HEALTHY"
-      }
-    ],
     "dnsServers": null,
     "disableNetworking": null,
     "dnsSearchDomains": null,
     "portMappings": [],
     "hostname": null,
     "essential": true,
-    "entryPoint": ["/init.sh"],
+    "entryPoint": ["/wait.sh"],
     "mountPoints": [
       {
         "containerPath" : "/project/.meltano/run/airflow",
