@@ -9,7 +9,7 @@
   )
 }}
 
-with earning_history as (select * from {{ ref('earnings_history') }}),
+with earnings_history as (select * from {{ ref('earnings_history') }}),
      tickers as (select * from {{ ref('tickers') }}),
      upcoming_reports as
          (
