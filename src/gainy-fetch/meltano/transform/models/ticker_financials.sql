@@ -26,9 +26,9 @@ with prices_tmp as (
 		select
 			code,
 			"date"::date,
-			adjusted_close::real as price,
+			adjusted_close::numeric as price,
 			first_value("date"::date) over (partition by code order by "date" desc) as cur_date,
-			first_value(adjusted_close::real) over (partition by code order by "date" desc) as cur_price
+			first_value(adjusted_close::numeric) over (partition by code order by "date" desc) as cur_price
 		from
 			public.historical_prices
 	) hp
@@ -62,9 +62,9 @@ dividends_tmp as (
 		select
 			code,
 			"date"::date,
-			value::real as value,
+			value::numeric as value,
 			first_value("date"::date) over (partition by code order by "date" desc) as latest_date,
-			first_value(value::real) over (partition by code order by "date" desc) as latest_value
+			first_value("value"::numeric) over (partition by code order by "date" desc) as latest_value
 		from
 			public.dividends
 	) d
@@ -89,17 +89,21 @@ select  h.symbol,
         highlight,
         h.revenue_ttm,
         CASE
-            WHEN da.latest_value = 0 THEN NULL
+            WHEN da.latest_value = 0.0 THEN NULL
             WHEN da.value_5y_ago IS NOT NULL THEN pow(da.latest_value / da.value_5y_ago, 1.0 / 5)::real - 1
             WHEN da.value_1y_ago IS NOT NULL THEN (da.latest_value / da.value_1y_ago)::real - 1
-END                                  as dividend_growth,
-        pa.price_3m_ago                      as quarter_ago_close,
-        pa.cur_price / pa.price_3m_ago - 1   as quarter_price_performance,
+        END                                  as dividend_growth,
+        pa.price_3m_ago::real                as quarter_ago_close,
+        case
+            when price_1m_ago != 0 then (cur_price / price_3m_ago - 1)::real
+        end                                  as quarter_price_performance,
         now()                                as created_at,
         h.profit_margin::real                as net_profit_margin,
         v.enterprise_value_revenue::real     as enterprise_value_to_sales,
         h.quarterly_revenue_growth_yoy::real as quarterly_revenue_growth_yoy,
-        pa.cur_price / pa.price_1m_ago - 1   as month_price_performance
+        case
+            when price_1m_ago != 0 then (cur_price / price_1m_ago - 1)::real
+        end                                  as month_price_performance
 from {{ ref('highlights') }} h
     left join {{ ref('valuation') }} v on h.symbol = v.symbol
     left join {{ ref ('ticker_highlights') }} th on h.symbol = th.symbol
