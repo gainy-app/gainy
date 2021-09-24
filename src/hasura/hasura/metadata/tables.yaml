@@ -607,23 +607,19 @@
   - role: user
     permission:
       columns:
-      - symbol
-      - pe_ratio
-      - market_capitalization
-      - highlight
-      - revenue_ttm
+      - created_at
       - dividend_growth
+      - enterprise_value_to_sales
+      - highlight
+      - market_capitalization
+      - month_price_performance
+      - net_profit_margin
+      - pe_ratio
       - quarter_ago_close
       - quarter_price_performance
-      - created_at
-      - net_profit_margin
-      - enterprise_value_to_sales
-      - sma_30days
-      - sma_50days
-      - sma_200days
-      - market_cap_cagr_1years
-      - market_cap_cagr_3years
-      - market_cap_cagr_5years
+      - quarterly_revenue_growth_yoy
+      - revenue_ttm
+      - symbol
       filter: {}
 - table:
     schema: public
