@@ -1,11 +1,9 @@
 {{
   config(
     materialized = "table",
-    dist = "symbol",
-    indexes=[
-    ],
     post_hook=[
       fk(this, 'interest_id', 'interests', 'id'),
+      fk(this, 'symbol', 'tickers', 'symbol')
     ]
   )
 }}

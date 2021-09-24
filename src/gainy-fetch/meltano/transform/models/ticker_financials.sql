@@ -1,8 +1,6 @@
 {{
   config(
     materialized = "table",
-    sort = "created_at",
-    dist = "symbol",
     post_hook=[
       index(this, 'symbol', true),
     ]
@@ -74,8 +72,13 @@ sma_tmp as (
 		prices_tmp
 	group by
 		code
-)
-select  h.symbol,
+),
+     latest_highlight as (
+         select distinct on (symbol) *
+         from {{ ref ('ticker_highlights') }}
+         order by symbol
+     )
+select  DISTINCT h.symbol,
         pe_ratio,
         market_capitalization,
         highlight,
@@ -101,7 +104,7 @@ from {{ ref('highlights') }} h
     left join cagr_tmp on h.symbol = cagr_tmp.code
     left join {{ ref('valuation') }} v on h.symbol = v.symbol
 
-    LEFT JOIN {{ ref ('ticker_highlights') }} th on h.symbol = th.symbol
+    LEFT JOIN latest_highlight th on h.symbol = th.symbol
 
     LEFT JOIN dividends d0 on h.symbol = d0.code
     LEFT JOIN dividends d0_next on h.symbol = d0_next.code AND d0_next.date:: timestamp > d0.date:: timestamp
