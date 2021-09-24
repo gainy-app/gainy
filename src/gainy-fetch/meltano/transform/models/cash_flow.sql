@@ -46,3 +46,4 @@ select symbol,
        (value ->> 'otherCashflowsFromInvestingActivities')::float as other_cashflows_from_investing_activities,
        (value ->> 'totalCashflowsFromInvestingActivities')::float as total_cashflows_from_investing_activities
 from expanded_quaterly_cash_flow
+where key != '0000-00-00'

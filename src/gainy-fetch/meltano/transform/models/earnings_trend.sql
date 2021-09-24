@@ -40,4 +40,4 @@
            (value ->> 'revenueEstimateNumberOfAnalysts')::float  as revenue_estimate_number_of_analysts,
            (value ->> 'earningsEstimateNumberOfAnalysts')::float as earnings_estimate_number_of_analysts
     from expanded_trends
-
+    where key != '0000-00-00'
