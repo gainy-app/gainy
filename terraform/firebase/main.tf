@@ -8,18 +8,27 @@ resource "google_project" "project" {
   project_id      = var.google_project_id
   billing_account = var.google_billing_id
   org_id          = var.google_organization_id
+  lifecycle {
+    prevent_destroy = true
+  }
 }
 resource "google_project_iam_member" "owner" {
   role   = "roles/owner"
   member = "user:${var.google_user}"
 
   depends_on = [google_project.project]
+  lifecycle {
+    prevent_destroy = true
+  }
 }
 
 # Enable Compute API
 resource "google_project_service" "compute" {
   service    = "compute.googleapis.com"
   depends_on = [google_project.project]
+  lifecycle {
+    prevent_destroy = true
+  }
 }
 
 # Enable Cloud Functions API
@@ -30,6 +39,9 @@ resource "google_project_service" "cf" {
   disable_dependent_services = true
   disable_on_destroy         = false
   depends_on                 = [google_project.project]
+  lifecycle {
+    prevent_destroy = true
+  }
 }
 
 # Enable Cloud Build API
@@ -40,6 +52,9 @@ resource "google_project_service" "cb" {
   disable_dependent_services = true
   disable_on_destroy         = false
   depends_on                 = [google_project.project]
+  lifecycle {
+    prevent_destroy = true
+  }
 }
 
 module "functions-processSignUp" {
