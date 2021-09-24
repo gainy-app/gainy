@@ -1,13 +1,9 @@
 {{
   config(
     materialized = "table",
-    sort = "created_at",
-    dist = ['category_id', 'symbol'],
-    indexes=[
-    ],
     post_hook=[
-      fk(this, 'symbol', 'tickers', 'symbol'),
-      fk(this, 'category_id', 'categories', 'id')
+      fk(this, 'category_id', 'categories', 'id'),
+      fk(this, 'symbol', 'tickers', 'symbol')
     ]
   )
 }}

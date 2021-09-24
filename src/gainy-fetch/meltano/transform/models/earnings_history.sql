@@ -4,7 +4,6 @@
     dist = "symbol",
     post_hook=[
       index(this, 'symbol', false),
-      fk(this, 'symbol', 'tickers', 'symbol')
     ]
   )
 }}
@@ -26,3 +25,4 @@
            (value ->> 'surprisePercent')::float  as surprise_percent,
            (value ->> 'beforeAfterMarket')::text as before_after_market
     from expanded
+    where key != '0000-00-00'

@@ -1,7 +1,6 @@
 {{
   config(
     materialized = "table",
-    dist = "symbol",
     post_hook=[
       index(this, 'symbol', true),
       fk(this, 'symbol', 'tickers', 'symbol')
@@ -11,56 +10,32 @@
 
 /* EGRSF https://www.msci.com/eqb/methodology/meth_docs/MSCI_Feb13_Fundamental_Data.pdf */
 
-with latest_yearly_earning_trend as
+with tickers as (select * from {{ ref('tickers') }}),
+     earnings_trend as (select * from {{ ref('earnings_trend') }}),
+     earnings_annual as (select * from {{ ref('earnings_annual') }}),
+     highlights as (select * from {{ ref('highlights') }}),
+     historical_eps_growth as (select * from {{ ref('historical_eps_growth') }}),
+     historical_sales_growth as (select * from {{ ref('historical_sales_growth') }}),
+     valuation as (select * from {{ ref('valuation') }}),
+     hsg_extended as
+         (
+             select distinct on (hp.code) hp.close as quartal_end_price, hsg.*
+             from historical_sales_growth hsg
+                      JOIN historical_prices hp ON hp.code = hsg.symbol AND hp.date::date <= hsg.updated_at AND
+                                                   hp.date::date >= hsg.updated_at - interval '1 week'
+             order by hp.code, hp.date::date DESC
+         ),
+     latest_yearly_earning_trend as
          (
              SELECT et.symbol,
                     et.growth
-             from {{ ref('earnings_trend') }} et
-                      LEFT JOIN {{ ref('earnings_trend') }} AS et_next
+             from earnings_trend et
+                      LEFT JOIN earnings_trend AS et_next
                                 ON et_next.symbol = et.symbol AND et_next.period = '0y' AND
                                    et_next.date::timestamp > et.date::timestamp
              WHERE et.period = '0y'
                AND et_next.symbol IS NULL
          ),
-     hist_eps_growth as (
-         SELECT eh0.symbol,
-                CASE WHEN ABS(eh1.eps_actual) > 0 THEN cbrt(eh0.eps_actual / eh1.eps_actual) - 1 END as value
-         from {{ ref('earnings_history') }} eh0
-                  LEFT JOIN {{ ref('earnings_history') }} eh0_next
-                            ON eh0_next.symbol = eh0.symbol AND
-                               eh0_next.date::timestamp > eh0.date::timestamp AND
-                               eh0_next.date::timestamp < NOW()
-                  JOIN {{ ref('earnings_history') }} eh1
-                       ON eh1.symbol = eh0.symbol AND
-                          eh1.date::timestamp < NOW() - interval '3 years'
-                  LEFT JOIN {{ ref('earnings_history') }} eh1_next ON eh1_next.symbol = eh0.symbol AND
-                                                         eh1_next.date::timestamp <
-                                                         NOW() - interval '3 years' AND
-                                                         eh1_next.date::timestamp > eh1.date::timestamp
-         WHERE eh0.date::timestamp < NOW()
-           AND eh0_next.symbol IS NULL
-           AND eh1_next.symbol IS NULL
-     ),
-     hist_sales_growth as (
-         SELECT fisq0.symbol,
-                fisq0.date::timestamp                                                                               as date,
-                CASE WHEN ABS(fisq1.total_revenue) > 0 THEN cbrt(fisq0.total_revenue / fisq1.total_revenue) - 1 END as value
-         from {{ ref('financials_income_statement_quarterly') }} fisq0
-                  LEFT JOIN {{ ref('financials_income_statement_quarterly') }} fisq0_next
-                            ON fisq0_next.symbol = fisq0.symbol AND
-                               fisq0_next.date::timestamp > fisq0.date::timestamp AND
-                               fisq0_next.date::timestamp < NOW()
-                  JOIN {{ ref('financials_income_statement_quarterly') }} fisq1
-                       ON fisq1.symbol = fisq0.symbol AND
-                          fisq1.date::timestamp < NOW() - interval '3 years'
-                  LEFT JOIN {{ ref('financials_income_statement_quarterly') }} fisq1_next
-                            ON fisq1_next.symbol = fisq0.symbol AND
-                               fisq1_next.date::timestamp < NOW() - interval '3 years' AND
-                               fisq1_next.date::timestamp > fisq1.date::timestamp
-         WHERE fisq0.date::timestamp < NOW()
-           AND fisq0_next.symbol IS NULL
-           AND fisq1_next.symbol IS NULL
-     ),
      egrsf as
          (
              with eps_actual as
@@ -79,15 +54,15 @@ with latest_yearly_earning_trend as
                                  eps_actual.value                   as eps0,
                                  et.earnings_estimate_avg           as eps1,
                                  et_next_year.earnings_estimate_avg as eps2
-                          FROM {{ ref('earnings_trend') }} et
-                                   left join {{ ref('earnings_trend') }} et_next
+                          FROM earnings_trend et
+                                   left join earnings_trend et_next
                                              ON et_next.symbol = et.symbol AND
                                                 et_next.date::timestamp >
                                                 et.date::timestamp AND
                                                 et.period = et_next.period
-                                   join {{ ref('earnings_trend') }} et_next_year
+                                   join earnings_trend et_next_year
                                         ON et_next_year.symbol = et.symbol AND et_next_year.period = '+1y'
-                                   left join {{ ref('earnings_trend') }} et_next_year_next
+                                   left join earnings_trend et_next_year_next
                                              ON et_next_year_next.symbol = et.symbol AND
                                                 et_next_year_next.period = '+1y' AND
                                                 et_next_year_next.date::timestamp > et_next_year.date::timestamp
@@ -123,32 +98,29 @@ with latest_yearly_earning_trend as
              select f.code,
                     t.gic_sector,
                  /* growth */
-                    egrsf.value                                                             as st_fwd_eps,
+                    egrsf.value                                                                       as st_fwd_eps,
                     CASE
                         WHEN ABS(h.book_value) > 0
                             THEN (h.diluted_eps_ttm / h.book_value) *
                                  (1 - (f.splitsdividends ->> 'PayoutRatio')::float)
-                        END                                                                 as cur_internal_growth_rate,
-                    heg.value                                                               as hist_eps_growth,
-                    hsg.value                                                               as hist_sales_growth,
+                        END                                                                           as cur_internal_growth_rate,
+                    heg.value                                                                         as hist_eps_growth,
+                    hsg.value                                                                         as hist_sales_growth,
                  /* value */
-                    h.book_value / hp.close                                                 as bvp,
-                    CASE WHEN abs(v.forward_pe::float) > 0 THEN 1 / v.forward_pe::float END as fwd_ep,
-                    (f.splitsdividends ->> 'ForwardAnnualDividendYield')::float             as dividend_yield
+                    CASE WHEN hsg.quartal_end_price > 0 THEN h.book_value / hsg.quartal_end_price END as bvp,
+                    CASE
+                        WHEN abs(v.forward_pe::float) > 0
+                            THEN 1 / v.forward_pe::float END                                          as fwd_ep,
+                    (f.splitsdividends ->> 'ForwardAnnualDividendYield')::float                       as dividend_yield
              from fundamentals f
-                      JOIN {{ ref('tickers') }} t
+                      JOIN tickers t
                            ON t.symbol = f.code
-                      JOIN {{ ref('highlights') }} h ON h.symbol = f.code
+                      JOIN highlights h ON h.symbol = f.code
                       JOIN egrsf ON egrsf.symbol = f.code
                       JOIN latest_yearly_earning_trend lyet ON lyet.symbol = f.code
-                      JOIN hist_eps_growth heg ON heg.symbol = f.code
-                      JOIN hist_sales_growth hsg ON hsg.symbol = f.code
-                      JOIN historical_prices hp ON hp.code = f.code AND hp.date::timestamp <= hsg.date
-                      LEFT JOIN historical_prices hp_next
-                                ON hp_next.code = f.code AND hp_next.date::timestamp <= hsg.date AND
-                                   hp_next.date::timestamp > hp.date::timestamp
-                      JOIN {{ ref('valuation') }} v ON v.symbol = f.code
-             WHERE hp_next.date IS NULL
+                      JOIN historical_eps_growth heg ON heg.symbol = f.code
+                      JOIN hsg_extended hsg ON hsg.symbol = f.code
+                      JOIN valuation v ON v.symbol = f.code
          ),
      vg_metrics_stats as
          (
@@ -205,25 +177,25 @@ with latest_yearly_earning_trend as
                  /*GREATEST(-3, LEAST(3, z_score_lt_fwd_eps))               as windsored_z_score_lt_fwd_eps,*/
                     CASE
                         WHEN z_score_st_fwd_eps IS NOT NULL
-                            THEN GREATEST(-3, LEAST(3, z_score_st_fwd_eps)) END                          as windsored_z_score_st_fwd_eps,
+                            THEN GREATEST(-3, LEAST(3, z_score_st_fwd_eps)) END               as windsored_z_score_st_fwd_eps,
                     CASE
                         WHEN z_score_cur_internal_growth_rate IS NOT NULL
-                            THEN GREATEST(-3, LEAST(3, z_score_cur_internal_growth_rate)) END            as windsored_z_score_cur_internal_growth_rate,
+                            THEN GREATEST(-3, LEAST(3, z_score_cur_internal_growth_rate)) END as windsored_z_score_cur_internal_growth_rate,
                     CASE
                         WHEN z_score_hist_eps_growth IS NOT NULL
-                            THEN GREATEST(-3, LEAST(3, z_score_hist_eps_growth)) END                     as windsored_z_score_hist_eps_growth,
+                            THEN GREATEST(-3, LEAST(3, z_score_hist_eps_growth)) END          as windsored_z_score_hist_eps_growth,
                     CASE
                         WHEN z_score_hist_sales_growth IS NOT NULL
-                            THEN GREATEST(-3, LEAST(3, z_score_hist_sales_growth)) END                   as windsored_z_score_hist_sales_growth,
+                            THEN GREATEST(-3, LEAST(3, z_score_hist_sales_growth)) END        as windsored_z_score_hist_sales_growth,
                     CASE
                         WHEN z_score_bvp IS NOT NULL
-                            THEN GREATEST(-3, LEAST(3, z_score_bvp)) END                                 as windsored_z_score_bvp,
+                            THEN GREATEST(-3, LEAST(3, z_score_bvp)) END                      as windsored_z_score_bvp,
                     CASE
                         WHEN z_score_fwd_ep IS NOT NULL
-                            THEN GREATEST(-3, LEAST(3, z_score_fwd_ep)) END                              as windsored_z_score_fwd_ep,
+                            THEN GREATEST(-3, LEAST(3, z_score_fwd_ep)) END                   as windsored_z_score_fwd_ep,
                     CASE
                         WHEN z_score_dividend_yield IS NOT NULL
-                            THEN GREATEST(-3, LEAST(3, z_score_dividend_yield)) END                      as windsored_z_score_dividend_yield
+                            THEN GREATEST(-3, LEAST(3, z_score_dividend_yield)) END           as windsored_z_score_dividend_yield
              from z_score zs
          )
 SELECT t.symbol,
@@ -265,7 +237,6 @@ SELECT t.symbol,
        z_score_bvp,
        z_score_fwd_ep,
        z_score_dividend_yield,
-
        windsored_z_score_st_fwd_eps,
        windsored_z_score_cur_internal_growth_rate,
        windsored_z_score_hist_eps_growth,
@@ -281,7 +252,7 @@ SELECT t.symbol,
        (windsored_z_score_bvp +
         windsored_z_score_fwd_ep +
         windsored_z_score_dividend_yield) / 3    as value_score
-from {{ ref('tickers') }} t
+from tickers t
          JOIN egrsf ON egrsf.symbol = t.symbol
          JOIN vg_metrics ON vg_metrics.code = t.symbol
          JOIN vg_metrics_stats ON vg_metrics_stats.gic_sector = t.gic_sector

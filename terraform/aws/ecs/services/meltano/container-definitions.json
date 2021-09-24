@@ -1,0 +1,117 @@
+[
+  {
+    "memory": 1024,
+    "extraHosts": null,
+    "dnsServers": null,
+    "disableNetworking": null,
+    "dnsSearchDomains": null,
+    "portMappings": [
+      {
+        "hostPort": 0,
+        "containerPort": ${airflow_port},
+        "protocol": "tcp"
+      }
+    ],
+    "hostname": null,
+    "essential": true,
+    "entryPoint": ["/init.sh"],
+    "mountPoints": [
+      {
+        "containerPath" : "/project/.meltano/run/airflow",
+        "sourceVolume" : "meltano-data"
+      }
+    ],
+    "name": "meltano-airflow-ui",
+    "ulimits": null,
+    "dockerSecurityOptions": null,
+    "environment": [
+      { "name": "PG_DATABASE",                     "value": "${pg_dbname}" },
+      { "name": "PG_ADDRESS",                      "value": "${pg_host}" },
+      { "name": "PG_PASSWORD",                     "value": "${pg_password}" },
+      { "name": "PG_PORT",                         "value": "${pg_port}" },
+      { "name": "PG_USERNAME",                     "value": "${pg_username}" },
+      { "name": "MELTANO_DATABASE_URI",            "value": "postgresql://${pg_username}:${pg_password}@${pg_host}:${pg_port}/${pg_dbname}?options=-csearch_path=${pg_meltano_schema}" },
+      { "name": "AIRFLOW_PASSWORD",                "value": "${airflow_password}" },
+      { "name": "AIRFLOW_UI_PORT",                 "value": "${airflow_port}" },
+      { "name": "AIRFLOW_DATABASE_URI",            "value": "postgresql://${pg_username}:${pg_password}@${pg_host}:${pg_port}/${pg_dbname}?options=-csearch_path=${pg_airflow_schema}" },
+      { "name": "EODHISTORICALDATA_JOBS_COUNT",    "value": "4" }
+    ],
+    "links": [],
+    "workingDirectory": null,
+    "readonlyRootFilesystem": null,
+    "image": "${image}",
+    "command": ["invoke", "airflow", "webserver", "-p", "${airflow_port}"],
+    "user": null,
+    "dockerLabels": null,
+    "cpu": null,
+    "privileged": null,
+    "memoryReservation": null,
+    "logConfiguration": {
+      "logDriver": "awslogs",
+      "options": {
+        "awslogs-group": "${aws_log_group_name}",
+        "awslogs-region": "${aws_log_region}",
+        "awslogs-stream-prefix": "meltano"
+      }
+    }
+  },
+  {
+    "memory": 3072,
+    "extraHosts": null,
+    "dnsServers": null,
+    "disableNetworking": null,
+    "dnsSearchDomains": null,
+    "portMappings": [],
+    "hostname": null,
+    "essential": true,
+    "entryPoint": ["/init.sh"],
+    "mountPoints": [
+      {
+        "containerPath" : "/project/.meltano/run/airflow",
+        "sourceVolume" : "meltano-data"
+      }
+    ],
+    "name": "meltano-airflow-scheduler",
+    "ulimits": null,
+    "dockerSecurityOptions": null,
+    "environment": [
+      { "name": "PG_DATABASE",                     "value": "${pg_dbname}" },
+      { "name": "PG_ADDRESS",                      "value": "${pg_host}" },
+      { "name": "PG_PASSWORD",                     "value": "${pg_password}" },
+      { "name": "PG_PORT",                         "value": "${pg_port}" },
+      { "name": "PG_USERNAME",                     "value": "${pg_username}" },
+      { "name": "MELTANO_DATABASE_URI",            "value": "postgresql://${pg_username}:${pg_password}@${pg_host}:${pg_port}/${pg_dbname}?options=-csearch_path=${pg_meltano_schema}" },
+      { "name": "AIRFLOW_PASSWORD",                "value": "${airflow_password}" },
+      { "name": "AIRFLOW_UI_PORT",                 "value": "${airflow_port}" },
+      { "name": "AIRFLOW_DATABASE_URI",            "value": "postgresql://${pg_username}:${pg_password}@${pg_host}:${pg_port}/${pg_dbname}?options=-csearch_path=${pg_airflow_schema}" },
+      { "name": "EODHISTORICALDATA_JOBS_COUNT",    "value": "4" },
+      { "name": "TAP_EODHISTORICALDATA_API_TOKEN", "value": "${eodhistoricaldata_api_token}" },
+      { "name": "TARGET_POSTGRES_HOST",            "value": "${pg_host}" },
+      { "name": "TARGET_POSTGRES_PORT",            "value": "${pg_port}" },
+      { "name": "TARGET_POSTGRES_USER",            "value": "${pg_username}" },
+      { "name": "TARGET_POSTGRES_PASSWORD",        "value": "${pg_password}" },
+      { "name": "TARGET_POSTGRES_DBNAME",          "value": "${pg_dbname}" },
+      { "name": "TARGET_POSTGRES_SCHEMA",          "value": "${pg_schema}" },
+      { "name": "DBT_TARGET_SCHEMA",               "value": "${pg_schema}" },
+      { "name": "DBT_TARGET",                      "value": "postgres" }
+    ],
+    "links": [],
+    "workingDirectory": null,
+    "readonlyRootFilesystem": null,
+    "image": "${image}",
+    "command": ["invoke", "airflow", "scheduler"],
+    "user": null,
+    "dockerLabels": null,
+    "cpu": 3072,
+    "privileged": null,
+    "memoryReservation": null,
+    "logConfiguration": {
+      "logDriver": "awslogs",
+      "options": {
+        "awslogs-group": "${aws_log_group_name}",
+        "awslogs-region": "${aws_log_region}",
+        "awslogs-stream-prefix": "meltano"
+      }
+    }
+  }
+]

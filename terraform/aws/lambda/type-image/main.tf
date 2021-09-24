@@ -1,6 +1,5 @@
 variable "env" {}
 variable "function_name" {}
-variable "source_code_hash" {}
 variable "handler" {}
 variable "env_vars" {
   default = {}
@@ -13,6 +12,13 @@ variable "aws_apigatewayv2_api_lambda_id" {}
 variable "aws_apigatewayv2_api_lambda_execution_arn" {}
 variable "aws_iam_role_lambda_exec_role" {}
 variable "image_uri" {}
+variable "vpc_security_group_ids" {}
+variable "vpc_subnet_ids" {}
+
+resource "aws_iam_role_policy_attachment" "iam_role_policy_attachment_lambda_vpc_access_execution" {
+  role       = var.aws_iam_role_lambda_exec_role.name
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole"
+}
 
 resource "aws_lambda_function" "lambda" {
   function_name = "${var.function_name}_${var.env}"
@@ -26,9 +32,12 @@ resource "aws_lambda_function" "lambda" {
 
   timeout = var.timeout
 
-  source_code_hash = var.source_code_hash
+  role = var.aws_iam_role_lambda_exec_role.arn
 
-  role = var.aws_iam_role_lambda_exec_role
+  vpc_config {
+    security_group_ids = var.vpc_security_group_ids
+    subnet_ids         = var.vpc_subnet_ids
+  }
 
   environment {
     variables = var.env_vars

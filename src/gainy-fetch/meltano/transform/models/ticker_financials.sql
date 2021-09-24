@@ -1,11 +1,8 @@
 {{
   config(
     materialized = "table",
-    sort = "created_at",
-    dist = "symbol",
     post_hook=[
       index(this, 'symbol', true),
-      fk(this, 'symbol', 'tickers', 'symbol')
     ]
   )
 }}
@@ -82,8 +79,13 @@ dividends_ago as (
 		order by code, year_flag, "date" desc
 		) p
 	group by code
-)
-select  h.symbol,
+),
+    latest_highlight as (
+    select distinct on (symbol) *
+    from {{ ref ('ticker_highlights') }}
+    order by symbol
+    )
+select  DISTINCT ON (h.symbol) h.symbol,
         pe_ratio,
         market_capitalization,
         highlight,
@@ -106,7 +108,7 @@ select  h.symbol,
         end                                  as month_price_performance
 from {{ ref('highlights') }} h
     left join {{ ref('valuation') }} v on h.symbol = v.symbol
-    left join {{ ref ('ticker_highlights') }} th on h.symbol = th.symbol
+    left join latest_highlight th on h.symbol = th.symbol
     left join prices_ago pa on h.symbol = pa.code
     left join dividends_ago da on h.symbol = da.code
-
+order by h.symbol

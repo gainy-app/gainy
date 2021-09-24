@@ -4,7 +4,6 @@
     dist = "symbol",
     post_hook=[
       index(this, 'symbol', false),
-      fk(this, 'symbol', 'tickers', 'symbol')
     ]
   )
 }}
@@ -19,3 +18,4 @@
            key::date                       as date,
            (value ->> 'epsActual')::float4 as eps_actual
     from expanded
+    where key != '0000-00-00'
