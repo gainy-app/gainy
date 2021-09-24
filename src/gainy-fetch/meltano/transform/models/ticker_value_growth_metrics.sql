@@ -1,9 +1,9 @@
 {{
   config(
     materialized = "table",
-    dist = "symbol",
     post_hook=[
       index(this, 'symbol', true),
+      fk(this, 'symbol', 'tickers', 'symbol')
     ]
   )
 }}
