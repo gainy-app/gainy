@@ -35,7 +35,7 @@ resource "aws_ecs_task_definition" "hasura" {
   tags                     = {}
 
   container_definitions = templatefile(
-    "${path.cwd}/../src/hasura/aws-ecs-task-definition.json",
+    "${path.module}/container-definitions.json",
     {
       pg_host                         = var.pg_host
       pg_password                     = var.pg_password
