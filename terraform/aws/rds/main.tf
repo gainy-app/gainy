@@ -15,7 +15,7 @@ resource "aws_db_instance" "db_instance" {
   engine_version          = "12"
   instance_class          = "db.m6g.large"
   allocated_storage       = 100
-  max_allocated_storage   = 150
+  max_allocated_storage   = 200
   backup_retention_period = var.env == "production" ? 7 : 0
 
   publicly_accessible = false
