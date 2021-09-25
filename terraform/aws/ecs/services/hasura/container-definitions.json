@@ -1,7 +1,7 @@
 [
   {
     "volumesFrom": [],
-    "memory": 512,
+    "memory": 1024,
     "extraHosts": null,
     "dnsServers": null,
     "disableNetworking": null,
