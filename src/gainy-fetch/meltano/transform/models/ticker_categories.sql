@@ -1,6 +1,9 @@
 {{
   config(
     materialized = "table",
+    indexes = [
+      { 'columns': ['category_id', 'symbol'], 'unique': true },
+    ],
     post_hook=[
       fk(this, 'category_id', 'categories', 'id'),
       fk(this, 'symbol', 'tickers', 'symbol')
