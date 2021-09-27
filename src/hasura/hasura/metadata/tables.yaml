@@ -207,7 +207,7 @@
       num_retries: 0
       interval_sec: 10
       timeout_sec: 60
-    webhook: '{{AWS_LAMBDA_API_GATEWAY_ENDPOINT}}/setUserCategories'
+    webhook: '{{AWS_LAMBDA_API_GATEWAY_ENDPOINT}}/hasuraTrigger'
 - table:
     schema: app
     name: profiles

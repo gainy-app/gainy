@@ -186,7 +186,7 @@ module "hasuraTrigger" {
   source                                    = "./type-image"
   env                                       = var.env
   function_name                             = "hasuraTrigger"
-  handler                                   = "hasura_trigger_handler.handle"
+  handler                                   = "hasura_handler.handle_trigger"
   route                                     = "POST /hasuraTrigger"
   aws_apigatewayv2_api_lambda_id            = aws_apigatewayv2_api.lambda.id
   aws_apigatewayv2_api_lambda_execution_arn = aws_apigatewayv2_api.lambda.execution_arn
@@ -208,7 +208,7 @@ module "hasuraAction" {
   source                                    = "./type-image"
   env                                       = var.env
   function_name                             = "hasuraAction"
-  handler                                   = "hasura_action_handler.handle"
+  handler                                   = "hasura_handler.handle_action"
   route                                     = "POST /hasuraAction"
   aws_apigatewayv2_api_lambda_id            = aws_apigatewayv2_api.lambda.id
   aws_apigatewayv2_api_lambda_execution_arn = aws_apigatewayv2_api.lambda.execution_arn
