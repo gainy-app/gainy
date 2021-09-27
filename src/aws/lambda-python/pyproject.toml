@@ -12,7 +12,6 @@ psycopg2-binary = "^2.9.1"
 yapf = "^0.31.0"
 toml = "^0.10.2"
 pytest = "^6.2.5"
-SQLAlchemy = "^1.4.23"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]

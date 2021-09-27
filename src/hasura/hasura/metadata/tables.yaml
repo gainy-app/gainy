@@ -163,7 +163,7 @@
             _eq: X-Hasura-User-Id
       check: null
   event_triggers:
-  - name: setUserCategories
+  - name: set_user_categories
     definition:
       enable_manual: false
       insert:

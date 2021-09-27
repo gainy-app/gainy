@@ -1,5 +1,4 @@
 from math import sqrt
-from typing import List
 
 
 class DimVector:
@@ -32,28 +31,5 @@ class DimVector:
 
         return DimVector.dot_product(self, other) / self_norm / other_norm
 
-
-def sort_vectors_by(vectors, similarity, asc=True):
-    vectors.sort(key=similarity, reverse=not asc)
-    return vectors
-
-
-# TODO: find a better place
-class NamedDimVector(DimVector):
-
-    def __init__(self, name, coordinates):
-        super().__init__(coordinates)
-        self.name = name
-
-
-def query_vectors(db_conn, query) -> List[NamedDimVector]:
-    cursor = db_conn.cursor()
-    cursor.execute(query)
-
-    vectors = []
-    for row in cursor.fetchall():
-        vectors.append(NamedDimVector(row[0], row[1]))
-
-    return vectors
 
 
