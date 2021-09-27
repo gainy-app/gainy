@@ -1,11 +1,9 @@
 {{
   config(
     materialized = "table",
-    indexes = [
-      { 'columns': ['symbol'], 'unique': true },
-    ],
     post_hook=[
-      fk(this, 'symbol', 'tickers', 'symbol')
+      fk(this, 'symbol', 'tickers', 'symbol'),
+      'create unique index if not exists {{ get_index_name(this, "symbol") }} (symbol)',
     ]
   )
 }}
