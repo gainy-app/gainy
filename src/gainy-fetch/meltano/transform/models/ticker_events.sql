@@ -2,7 +2,8 @@
   config(
     materialized = "table",
     post_hook=[
-      index(this, 'symbol', true),
+      fk(this, 'symbol', 'tickers', 'symbol'),
+      'create unique index if not exists {{ get_index_name(this, "symbol") }} (symbol)',
     ]
   )
 }}

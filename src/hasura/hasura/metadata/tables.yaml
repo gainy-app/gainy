@@ -5,6 +5,43 @@
   - name: profile
     using:
       foreign_key_constraint_on: profile_id
+  insert_permissions:
+  - role: user
+    permission:
+      check:
+        profile:
+          user_id:
+            _eq: X-Hasura-User-Id
+      columns:
+      - category_id
+      backend_only: false
+  select_permissions:
+  - role: user
+    permission:
+      columns:
+      - category_id
+      - profile_id
+      filter:
+        profile:
+          user_id:
+            _eq: X-Hasura-User-Id
+  update_permissions:
+  - role: user
+    permission:
+      columns:
+      - category_id
+      filter:
+        profile:
+          user_id:
+            _eq: X-Hasura-User-Id
+      check: null
+  delete_permissions:
+  - role: user
+    permission:
+      filter:
+        profile:
+          user_id:
+            _eq: X-Hasura-User-Id
 - table:
     schema: app
     name: profile_favorite_collections
@@ -70,7 +107,6 @@
             _eq: X-Hasura-User-Id
       columns:
       - interest_id
-      - profile_id
       backend_only: false
   select_permissions:
   - role: user
@@ -87,7 +123,6 @@
     permission:
       columns:
       - interest_id
-      - profile_id
       filter:
         profile:
           user_id:
@@ -218,6 +253,7 @@
       - first_name
       - gender
       - last_name
+      - legal_address
       - user_id
       backend_only: false
   select_permissions:
@@ -252,9 +288,24 @@
 - table:
     schema: app
     name: ticker_financial_periods
+  select_permissions:
+  - role: user
+    permission:
+      columns:
+      - id
+      - period
+      filter: {}
 - table:
     schema: public
     name: categories
+  select_permissions:
+  - role: user
+    permission:
+      columns:
+      - icon_url
+      - id
+      - name
+      filter: {}
 - table:
     schema: public
     name: collections
@@ -327,36 +378,144 @@
         insertion_order: null
         column_mapping:
           id: industry_id
+  select_permissions:
+  - role: user
+    permission:
+      columns:
+      - id
+      - name
+      filter: {}
 - table:
     schema: public
     name: growth_rate_1m
+  select_permissions:
+  - role: user
+    permission:
+      columns:
+      - symbol
+      - date
+      - growth_rate
+      filter: {}
 - table:
     schema: public
     name: growth_rate_1w
+  select_permissions:
+  - role: user
+    permission:
+      columns:
+      - symbol
+      - date
+      - growth_rate
+      filter: {}
 - table:
     schema: public
     name: historical_growth_rate
+  select_permissions:
+  - role: user
+    permission:
+      columns:
+      - symbol
+      - date
+      - growth_rate_1d
+      - growth_rate_1w
+      - growth_rate_1m
+      - growth_rate_3m
+      - growth_rate_1y
+      filter: {}
 - table:
     schema: public
     name: historical_prices
+  select_permissions:
+  - role: user
+    permission:
+      columns:
+      - code
+      - adjusted_close
+      - close
+      - date
+      - high
+      - low
+      - open
+      - volume
+      filter: {}
 - table:
     schema: public
     name: historical_prices_1m
+  select_permissions:
+  - role: user
+    permission:
+      columns:
+      - symbol
+      - date
+      - open
+      - close
+      - adjusted_close
+      filter: {}
 - table:
     schema: public
     name: historical_prices_1w
+  select_permissions:
+  - role: user
+    permission:
+      columns:
+      - symbol
+      - date
+      - open
+      - close
+      - adjusted_close
+      filter: {}
 - table:
     schema: public
     name: industry_median_1m
+  select_permissions:
+  - role: user
+    permission:
+      columns:
+      - industry_id
+      - date
+      - median_growth_rate
+      - median_price
+      filter: {}
 - table:
     schema: public
     name: industry_median_1w
+  select_permissions:
+  - role: user
+    permission:
+      columns:
+      - industry_id
+      - date
+      - median_growth_rate
+      - median_price
+      filter: {}
 - table:
     schema: public
     name: industry_stats_daily
+  select_permissions:
+  - role: user
+    permission:
+      columns:
+      - date
+      - industry_id
+      - median_price
+      - median_growth_rate_1d
+      - median_growth_rate_1w
+      - median_growth_rate_1m
+      - median_growth_rate_3m
+      - median_growth_rate_1y
+      filter: {}
 - table:
     schema: public
     name: industry_stats_quarterly
+  select_permissions:
+  - role: user
+    permission:
+      columns:
+      - date
+      - industry_id
+      - median_net_income
+      - median_revenue
+      filter: {}
 - table:
     schema: public
     name: interests
@@ -370,6 +529,23 @@
         insertion_order: null
         column_mapping:
           id: interest_id
+  select_permissions:
+  - role: anonymous
+    permission:
+      columns:
+      - enabled
+      - icon_url
+      - id
+      - name
+      filter: {}
+  - role: user
+    permission:
+      columns:
+      - id
+      - name
+      - icon_url
+      - enabled
+      filter: {}
 - table:
     schema: public
     name: ticker_categories
@@ -383,6 +559,13 @@
         insertion_order: null
         column_mapping:
           category_id: id
+  select_permissions:
+  - role: user
+    permission:
+      columns:
+      - category_id
+      - symbol
+      filter: {}
 - table:
     schema: public
     name: ticker_collections
@@ -396,12 +579,48 @@
         insertion_order: null
         column_mapping:
           symbol: symbol
+  select_permissions:
+  - role: user
+    permission:
+      columns:
+      - symbol
+      - collection_id
+      filter: {}
+      allow_aggregations: true
 - table:
     schema: public
     name: ticker_events
+  select_permissions:
+  - role: user
+    permission:
+      columns:
+      - symbol
+      - date
+      - type
+      - description
+      - created_at
+      filter: {}
 - table:
     schema: public
     name: ticker_financials
+  select_permissions:
+  - role: user
+    permission:
+      columns:
+      - created_at
+      - dividend_growth
+      - enterprise_value_to_sales
+      - highlight
+      - market_capitalization
+      - month_price_performance
+      - net_profit_margin
+      - pe_ratio
+      - quarter_ago_close
+      - quarter_price_performance
+      - quarterly_revenue_growth_yoy
+      - revenue_ttm
+      - symbol
+      filter: {}
 - table:
     schema: public
     name: ticker_highlights
@@ -415,6 +634,14 @@
         insertion_order: null
         column_mapping:
           symbol: symbol
+  select_permissions:
+  - role: user
+    permission:
+      columns:
+      - symbol
+      - highlight
+      - created_at
+      filter: {}
 - table:
     schema: public
     name: ticker_industries
@@ -437,6 +664,13 @@
         insertion_order: null
         column_mapping:
           symbol: symbol
+  select_permissions:
+  - role: user
+    permission:
+      columns:
+      - symbol
+      - industry_id
+      filter: {}
 - table:
     schema: public
     name: ticker_interests
@@ -459,6 +693,13 @@
         insertion_order: null
         column_mapping:
           symbol: symbol
+  select_permissions:
+  - role: user
+    permission:
+      columns:
+      - symbol
+      - interest_id
+      filter: {}
 - table:
     schema: public
     name: tickers
@@ -580,3 +821,24 @@
         insertion_order: null
         column_mapping:
           symbol: symbol
+  select_permissions:
+  - role: user
+    permission:
+      columns:
+      - symbol
+      - type
+      - name
+      - description
+      - phone
+      - logo_url
+      - web_url
+      - ipo_date
+      - sector
+      - industry
+      - gic_sector
+      - gic_group
+      - gic_industry
+      - gic_sub_industry
+      - country_name
+      - updated_at
+      filter: {}
