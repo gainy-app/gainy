@@ -203,6 +203,8 @@
       enable_manual: false
       insert:
         columns: '*'
+      update:
+        columns: '*'
     retry_conf:
       num_retries: 0
       interval_sec: 10

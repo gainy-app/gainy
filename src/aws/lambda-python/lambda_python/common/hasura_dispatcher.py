@@ -23,12 +23,14 @@ class HasuraDispatcher(ABC):
         self.is_gateway_proxy = is_gateway_proxy
 
     def handle(self, event, context):
-        print(event)
-
+        print(f"event: {event}")
         request = self.extract_request(event)
+
         with psycopg2.connect(self.db_conn_string) as db_conn:
             try:
                 response = self.apply(db_conn, request)
+                print(f"response: {response}")
+
                 return self.format_response(200, response)
             except HasuraActionException as he:
                 traceback.print_exc()
@@ -91,8 +93,9 @@ class HasuraActionDispatcher(HasuraDispatcher):
         action = self.choose_function_by_name(request["action"]["name"])
         print(f"Start action: {action.name}")
 
-        input_params = request["input_params"]
+        input_params = request["input"]
         profile_id = action.get_profile_id(input_params)
+
         self.check_authorization(db_conn, profile_id, request["session_variables"])
 
         return action.apply(db_conn, input_params)

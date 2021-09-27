@@ -33,7 +33,7 @@ action_dispatcher = HasuraActionDispatcher(
 
 
 def handle_action(event, context):
-    action_dispatcher.handle(event, context)
+    return action_dispatcher.handle(event, context)
 
 
 TRIGGERS = [
@@ -48,5 +48,5 @@ trigger_dispatcher = HasuraTriggerDispatcher(
 
 
 def handle_trigger(event, context):
-    trigger_dispatcher.handle(event, context)
+    return trigger_dispatcher.handle(event, context)
 

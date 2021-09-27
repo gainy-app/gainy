@@ -3,14 +3,20 @@ actions:
   definition:
     kind: ""
     handler: '{{AWS_LAMBDA_API_GATEWAY_ENDPOINT}}/fetchChartData'
+  permissions:
+    - role: user
 - name: fetchLivePrices
   definition:
     kind: ""
     handler: '{{AWS_LAMBDA_API_GATEWAY_ENDPOINT}}/fetchLivePrices'
+  permissions:
+    - role: user
 - name: fetchNewsData
   definition:
     kind: ""
     handler: '{{AWS_LAMBDA_API_GATEWAY_ENDPOINT}}/fetchNewsData'
+  permissions:
+    - role: user
 - name: get_recommended_collections
   definition:
     kind: ""

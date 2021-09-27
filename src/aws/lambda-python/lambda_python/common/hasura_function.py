@@ -18,6 +18,8 @@ class HasuraAction(ABC):
         if not profile_id:
             raise HasuraActionException(400, f"{self.name}: Profile id is not provided")
 
+        return profile_id
+
     @abstractmethod
     def apply(self, db_conn, input_params):
         pass
