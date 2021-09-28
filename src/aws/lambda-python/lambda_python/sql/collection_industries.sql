@@ -17,4 +17,5 @@ collection_industry_vectors as (
 select c.id, civ.collection_industry_vector
 from public.collections c
 left join collection_industry_vectors civ
-on c.id = civ.collection_id;
+on c.id = civ.collection_id
+where c.enabled = '1';
