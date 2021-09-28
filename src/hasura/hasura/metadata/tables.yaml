@@ -332,6 +332,7 @@
       - name
       - image_url
       - description
+      - enabled
       filter: {}
       allow_aggregations: true
 - table:
