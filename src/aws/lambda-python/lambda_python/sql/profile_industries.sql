@@ -20,4 +20,4 @@ select p.id, piv.profile_industry_vector
 from app.profiles p
          left join profile_industry_vectors piv
                    on p.id = piv.profile_id
-where p.id = '{0}';
+where p.id = %(profile_id)s;

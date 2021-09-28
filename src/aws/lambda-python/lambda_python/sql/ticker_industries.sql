@@ -7,4 +7,4 @@ select t.symbol, tiv.ticker_industry_vector
 from public.tickers t
          left join ticker_industry_vectors tiv
                    on t.symbol = tiv.symbol
-where t.symbol = '{0}';
+where t.symbol = %(symbol)s;

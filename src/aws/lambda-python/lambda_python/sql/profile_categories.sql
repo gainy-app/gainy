@@ -7,4 +7,4 @@ select p.id, pcv.profile_category_vector
 from app.profiles p
          left join profile_category_vectors pcv
                    on p.id = pcv.profile_id
-where p.id = '{0}';
+where p.id = %(profile_id)s;

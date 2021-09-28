@@ -9,4 +9,4 @@ from public.tickers t
                    on t.symbol = tiv.symbol
          left join public.ticker_collections as tc
                    on t.symbol = tc.symbol
-where tc.collection_id in ({0});
+where tc.collection_id in %(collection_ids)s;

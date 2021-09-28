@@ -48,7 +48,7 @@ def read_categories_risks(db_conn):
 
 
 def get_profile_vector(db_conn, profile_vector_query, profile_id):
-    vectors = query_vectors(db_conn, profile_vector_query.format(profile_id))
+    vectors = query_vectors(db_conn, profile_vector_query, {"profile_id": profile_id})
     if not vectors:
         raise HasuraActionException(400, f"Profile {profile_id} not found")
 
@@ -56,16 +56,16 @@ def get_profile_vector(db_conn, profile_vector_query, profile_id):
 
 
 def get_ticker_vector(db_conn, ticker_vector_query, ticker):
-    vectors = query_vectors(db_conn, ticker_vector_query.format(ticker))
+    vectors = query_vectors(db_conn, ticker_vector_query, {"symbol": ticker})
     if not vectors:
         raise HasuraActionException(400, f"Symbol {ticker} not found")
 
     return vectors[0]
 
 
-def query_vectors(db_conn, query) -> List[NamedDimVector]:
+def query_vectors(db_conn, query, variables=None) -> List[NamedDimVector]:
     cursor = db_conn.cursor()
-    cursor.execute(query)
+    cursor.execute(query, variables)
 
     vectors = []
     for row in cursor.fetchall():
@@ -214,10 +214,8 @@ class GetMatchScoreByCollections(HasuraAction):
 
     @staticmethod
     def __get_ticker_vectors_by_collections(db_conn, ticker_vectors_query, collection_ids):
-        compiled_query = ticker_vectors_query.format(", ".join([str(col_id) for col_id in collection_ids]))
-
         cursor = db_conn.cursor()
-        cursor.execute(compiled_query)
+        cursor.execute(ticker_vectors_query, {"collection_ids": tuple(collection_ids)})
 
         vectors = []
         for row in cursor.fetchall():
