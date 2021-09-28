@@ -67,7 +67,7 @@ class HasuraDispatcher(ABC):
                 return
 
             cursor = db_conn.cursor()
-            cursor.execute(f"SELECT user_id FROM app.profiles WHERE id = {profile_id}")
+            cursor.execute(f"SELECT user_id FROM app.profiles WHERE id = %s", profile_id)
 
             user_id = cursor.fetchone()[0]
             hasura_user_id = session_variables["x-hasura-user-id"]
