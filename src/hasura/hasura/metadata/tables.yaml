@@ -198,16 +198,18 @@
             _eq: X-Hasura-User-Id
       check: null
   event_triggers:
-  - name: setUserCategories
+  - name: set_user_categories
     definition:
       enable_manual: false
       insert:
+        columns: '*'
+      update:
         columns: '*'
     retry_conf:
       num_retries: 0
       interval_sec: 10
       timeout_sec: 60
-    webhook: '{{AWS_LAMBDA_API_GATEWAY_ENDPOINT}}/setUserCategories'
+    webhook: '{{AWS_LAMBDA_API_GATEWAY_ENDPOINT}}/hasuraTrigger'
 - table:
     schema: app
     name: profiles
@@ -267,6 +269,7 @@
       - gender
       - id
       - last_name
+      - legal_address
       - user_id
       filter:
         user_id:
@@ -276,9 +279,11 @@
     permission:
       columns:
       - avatar_url
+      - email
       - first_name
       - gender
       - last_name
+      - legal_address
       filter:
         user_id:
           _eq: X-Hasura-User-Id
@@ -327,6 +332,7 @@
       - name
       - image_url
       - description
+      - enabled
       filter: {}
       allow_aggregations: true
 - table:

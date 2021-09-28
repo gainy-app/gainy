@@ -18,6 +18,26 @@ type Query {
   ): [NewsDataPoint]
 }
 
+type Query {
+  get_recommended_collections(
+    profile_id: Int
+  ): [RecommendedCollection]
+}
+
+type Query {
+  get_match_score_by_ticker(
+    profile_id: Int
+    symbol: String
+  ): MatchScore
+}
+
+type Query {
+  get_match_scores_by_collections(
+    profile_id: Int!
+    collection_ids: [Int!]
+  ): [MatchScore]
+}
+
 type ChartDataPoint {
   datetime: String
   open: Float
@@ -56,7 +76,12 @@ type RecommendedCollection {
   id: Int!
 }
 
-type RecommendedCollections {
-  categories: [Int]
+type MatchScore {
+  symbol: String!
+  collection_id: String
+  match_score: Int!
+  is_match: Boolean!
+  explanation: [String!]
 }
+
 

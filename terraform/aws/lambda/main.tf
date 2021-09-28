@@ -182,12 +182,34 @@ resource "docker_registry_image" "lambda_python" {
   }
 }
 
-module "setUserCategories" {
+module "hasuraTrigger" {
   source                                    = "./type-image"
   env                                       = var.env
-  function_name                             = "setUserCategories"
-  handler                                   = "set_user_categories.handle"
-  route                                     = "POST /setUserCategories"
+  function_name                             = "hasuraTrigger"
+  handler                                   = "hasura_handler.handle_trigger"
+  route                                     = "POST /hasuraTrigger"
+  aws_apigatewayv2_api_lambda_id            = aws_apigatewayv2_api.lambda.id
+  aws_apigatewayv2_api_lambda_execution_arn = aws_apigatewayv2_api.lambda.execution_arn
+  aws_iam_role_lambda_exec_role             = aws_iam_role.lambda_exec
+  image_uri                                 = docker_registry_image.lambda_python.name
+
+  env_vars = {
+    pg_host     = var.pg_host
+    pg_port     = var.pg_port
+    pg_dbname   = var.pg_dbname
+    pg_username = var.pg_username
+    pg_password = var.pg_password
+  }
+  vpc_security_group_ids = var.vpc_security_group_ids
+  vpc_subnet_ids         = var.vpc_subnet_ids
+}
+
+module "hasuraAction" {
+  source                                    = "./type-image"
+  env                                       = var.env
+  function_name                             = "hasuraAction"
+  handler                                   = "hasura_handler.handle_action"
+  route                                     = "POST /hasuraAction"
   aws_apigatewayv2_api_lambda_id            = aws_apigatewayv2_api.lambda.id
   aws_apigatewayv2_api_lambda_execution_arn = aws_apigatewayv2_api.lambda.execution_arn
   aws_iam_role_lambda_exec_role             = aws_iam_role.lambda_exec
