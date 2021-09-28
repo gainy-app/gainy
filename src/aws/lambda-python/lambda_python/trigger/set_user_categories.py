@@ -25,7 +25,7 @@ class SetUserCategories(HasuraTrigger):
         return data["new"]['profile_id']
 
     def apply(self, db_conn, op, data):
-        payload = self.__extract_payload(data)
+        payload = self._extract_payload(data)
 
         risk_needed = [1, 2, 2, 3][round(payload['risk_level'] * 4)]
         if payload['average_market_return'] == 6 and risk_needed > 1:
@@ -113,7 +113,7 @@ class SetUserCategories(HasuraTrigger):
                 [(profile_id, category_id) for category_id in categories])
 
     @staticmethod
-    def __extract_payload(data):
+    def _extract_payload(data):
         # Update old values with new values to properly handle updates
         if data["old"]:
             payload = data["old"]

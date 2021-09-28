@@ -124,8 +124,8 @@ class MatchScoreExplainer:
     def __init__(self, config):
         self.config = config
 
-    def __apply_explanation_config(self, similarity,
-                                   component) -> List[MatchScoreExplanation]:
+    def _apply_explanation_config(self, similarity,
+                                  component) -> List[MatchScoreExplanation]:
         explanations = []
         for lower_bound, upper_bound, fits, description in self.config[
                 component]:
@@ -139,11 +139,11 @@ class MatchScoreExplainer:
                 industry_similarity) -> List[MatchScoreExplanation]:
         explanations = []
 
-        explanations += self.__apply_explanation_config(
+        explanations += self._apply_explanation_config(
             risk_similarity, MatchScoreComponent.RISK)
-        explanations += self.__apply_explanation_config(
+        explanations += self._apply_explanation_config(
             category_similarity, MatchScoreComponent.CATEGORY)
-        explanations += self.__apply_explanation_config(
+        explanations += self._apply_explanation_config(
             industry_similarity, MatchScoreComponent.INDUSTRY)
 
         return explanations
