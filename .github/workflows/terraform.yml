@@ -31,8 +31,8 @@ jobs:
         run: pip3 install yapf toml
 
       - name: YAPF
-        working-directory: src/aws/lambda-python/lambda-python/
-        run: yapf --diff -r . > /dev/null
+        working-directory: src/aws/lambda-python/
+        run: yapf --diff -r .
 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v1
