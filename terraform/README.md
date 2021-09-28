@@ -40,6 +40,11 @@ Key features:
 Production deployment:
 ```
 terraform init -backend-config=backend-production.hcl -reconfigure
+# Now head to terraform and change execution mode from remote to local. TODO: place for improvement
+terraform apply 
+# At this point you will deploy something, but fail with google resources, so you need to import them.
+# Unfortunately currently it's impossible to import first due to docker provider's configuration requires
+# values that will be known after apply. TODO: place for improvement (or separate test firebase from production firebase)
 ./import-shared-resources.sh
 terraform apply
 ```
