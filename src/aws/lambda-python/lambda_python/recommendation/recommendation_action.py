@@ -188,13 +188,13 @@ class GetMatchScoreByCollections(HasuraAction):
 
         collection_ids = input_params["collection_ids"]
         ticker_industry_vectors = \
-            self.__get_ticker_vectors_by_collections(db_conn, ticker_categories_by_collections_query, collection_ids)
+            self._get_ticker_vectors_by_collections(db_conn, ticker_categories_by_collections_query, collection_ids)
         ticker_category_vectors = \
-            self.__get_ticker_vectors_by_collections(db_conn, ticker_industries_by_collections_query, collection_ids)
+            self._get_ticker_vectors_by_collections(db_conn, ticker_industries_by_collections_query, collection_ids)
 
-        ticker_category_vectors_dict = self.__index_ticker_collection_vectors(
+        ticker_category_vectors_dict = self._index_ticker_collection_vectors(
             ticker_industry_vectors)
-        ticker_industry_vectors_dict = self.__index_ticker_collection_vectors(
+        ticker_industry_vectors_dict = self._index_ticker_collection_vectors(
             ticker_category_vectors)
 
         result = []
@@ -232,7 +232,7 @@ class GetMatchScoreByCollections(HasuraAction):
         return result
 
     @staticmethod
-    def __index_ticker_collection_vectors(
+    def _index_ticker_collection_vectors(
         ticker_collection_vectors: List[TickerCollectionDimVector]
     ) -> Dict[Tuple[str, int], TickerCollectionDimVector]:
         result = {}
@@ -242,8 +242,8 @@ class GetMatchScoreByCollections(HasuraAction):
         return result
 
     @staticmethod
-    def __get_ticker_vectors_by_collections(db_conn, ticker_vectors_query,
-                                            collection_ids):
+    def _get_ticker_vectors_by_collections(db_conn, ticker_vectors_query,
+                                           collection_ids):
         cursor = db_conn.cursor()
         cursor.execute(ticker_vectors_query,
                        {"collection_ids": tuple(collection_ids)})
@@ -255,7 +255,7 @@ class GetMatchScoreByCollections(HasuraAction):
         return vectors
 
     @staticmethod
-    def __query_ticker_collection_vectors(
+    def _query_ticker_collection_vectors(
             db_conn, query) -> List[TickerCollectionDimVector]:
         result = []
 
