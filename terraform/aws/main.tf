@@ -76,9 +76,9 @@ module "meltano" {
   pg_dbname                   = module.rds.db_instance.name
 
   eodhistoricaldata_jobs_count = local.meltano_eodhistoricaldata_jobs_count
-  scheduler_cpu_credits = local.meltano_scheduler_cpu_credits
-  scheduler_memory_credits = local.meltano_scheduler_memory_credits
-  ui_memory_credits = local.meltano_ui_memory_credits
+  scheduler_cpu_credits        = local.meltano_scheduler_cpu_credits
+  scheduler_memory_credits     = local.meltano_scheduler_memory_credits
+  ui_memory_credits            = local.meltano_ui_memory_credits
 }
 
 module "hasura" {
@@ -108,8 +108,8 @@ module "hasura" {
   hasura_enable_dev_mode          = "true"
   hasura_jwt_secret               = var.hasura_jwt_secret
 
-  cpu_credits                     = local.hasura_cpu_credits
-  memory_credits                  = local.hasura_memory_credits
+  cpu_credits    = local.hasura_cpu_credits
+  memory_credits = local.hasura_memory_credits
 }
 
 output "bridge_instance" {

@@ -7,19 +7,15 @@ on:
   pull_request:
 
 jobs:
-  checkout:
-    name: "Checkout"
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v2
-
   style-check:
     name: "Style Check"
     runs-on: ubuntu-latest
     needs:
       - checkout
     steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
       - name: npm install
         working-directory: src/aws/lambda-nodejs
         run: npm install
@@ -46,6 +42,9 @@ jobs:
     needs:
       - checkout
     steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v1
         with:
