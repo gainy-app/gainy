@@ -48,7 +48,7 @@ style-check:
 style-fix:
 	npx eslint src/aws/lambda-nodejs --fix
 	npx prettier --write "src/aws/lambda-nodejs/**/*.js"
-	yapf -i -r src/aws/lambda-python/lambda-python/*
+	yapf -i -r src/aws/lambda-python/
 
 extract-passwords:
 	cd terraform && terraform state pull | python ../extract_passwords.py
