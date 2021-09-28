@@ -1,18 +1,48 @@
 name: Deploy to test
 
 on:
-  workflow_dispatch:
-    inputs:
-      env:
-        description: 'Environment'
-        default: 'test'
-        required: true
+  issue_comment:
+    types: [created, edited]
 
-# A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
+#  build:
+#    name: Build
+#    runs-on: macos-latest
+#    steps:
+#      - name: Fetch issue info
+#        uses: octokit/request-action@v2.x
+#        id: get_issue_info
+#        with:
+#          route: GET ${{ github.event.issue.url }}
+#        env:
+#          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+#      - name: Parse issue info
+#        id: parse_issue_info
+#        uses: gr2m/get-json-paths-action@v1.x
+#        with:
+#          json: ${{ steps.get_issue_info.outputs.data }}
+#          pull_request_url: "pull_request.url"
+#      - name: Fetch PR info
+#        uses: octokit/request-action@v2.x
+#        id: get_pr_ref
+#        with:
+#          route: GET ${{ steps.parse_issue_info.outputs.pull_request_url }}
+#        env:
+#          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+#      - name: Parse PR info
+#        id: parse_pr_info
+#        uses: gr2m/get-json-paths-action@v1.x
+#        with:
+#          json: ${{ steps.get_pr_ref.outputs.data }}
+#          ref: "head.ref"
+#      - uses: actions/checkout@v1
+#        with:
+#          ref: ${{ steps.parse_pr_info.outputs.ref }}
+
   deploy:
     name: "Terraform Test env"
     runs-on: ubuntu-latest
+    if: github.event.comment.body == 'deploy to test'
     steps:
       - name: Checkout
         uses: actions/checkout@v2
