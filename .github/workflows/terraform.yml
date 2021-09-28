@@ -27,12 +27,12 @@ jobs:
         run: npx prettier --check "./**/*.js"
 
       - name: YAPF install
-        working-directory: src/aws/lambda-python/
+        working-directory: src/aws/lambda-python
         run: pip3 install yapf toml
 
       - name: YAPF
         working-directory: src/aws/lambda-python/
-        run: yapf --diff -r .
+        run: yapf --diff -r . > /dev/null
 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v1
