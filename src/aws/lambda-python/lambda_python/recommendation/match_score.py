@@ -8,8 +8,8 @@ from recommendation.dim_vector import DimVector
 # IS MATCH
 
 def is_match(profile_category_vector: DimVector, ticker_category_vector: DimVector) -> bool:
-    profile_categories = profile_category_vector.coordinates.keys()
-    ticker_categories = ticker_category_vector.coordinates.keys()
+    profile_categories = profile_category_vector.dims
+    ticker_categories = ticker_category_vector.dims
 
     return len(set(profile_categories).intersection(ticker_categories)) > 0
 
@@ -21,19 +21,22 @@ def get_industry_similarity(
         ticker_industries: DimVector
 ) -> float:
     return DimVector.dot_product(
-        normalize_profile_industries_vector(profile_industries),
+        normalized_profile_industries_vector(profile_industries),
         ticker_industries
     )
 
 
-def normalize_profile_industries_vector(vector: DimVector) -> DimVector:
-    max_value = max(vector.coordinates.values())
-    min_value = min(vector.coordinates.values())
+def normalized_profile_industries_vector(vector: DimVector) -> DimVector:
+    if len(vector.dims) == 0:
+        return vector
+
+    max_value = max(vector.values)
+    min_value = min(vector.values)
 
     new_coordinates = {}
     denominator = 1.0 + sqrt(max_value) - sqrt(min_value)
-    for dimension in vector.coordinates.keys():
-        new_coordinates[dimension] = (1.0 + sqrt(vector.coordinates[dimension]) - sqrt(min_value)) / denominator
+    for (dim, value) in zip(vector.dims, vector.values):
+        new_coordinates[dim] = (1.0 + sqrt(value) - sqrt(min_value)) / denominator
 
     return DimVector(new_coordinates)
 
@@ -50,7 +53,7 @@ RISK_TO_SCORE_MAPPING = {
 def get_categories_risk_score(categories: DimVector, risk_mapping: Dict[str, int]):
     risk_sum = None
     categories_num = None
-    for category in categories.coordinates.keys():
+    for category in categories.dims:
         risk = risk_mapping.get(category, None)
         if risk is not None:
             if risk_sum is None:

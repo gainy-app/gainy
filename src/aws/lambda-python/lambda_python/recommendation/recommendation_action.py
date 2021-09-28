@@ -158,6 +158,8 @@ class GetMatchScoreByCollections(HasuraAction):
         profile_category_vector = get_profile_vector(db_conn, profile_category_vector_query, profile_id)
         profile_industry_vector = get_profile_vector(db_conn, profile_industry_vector_query, profile_id)
 
+        risks = read_categories_risks(db_conn)
+
         collection_ids = input_params["collection_ids"]
         ticker_industry_vectors = \
             self.__get_ticker_vectors_by_collections(db_conn, ticker_categories_by_collections_query, collection_ids)
@@ -166,8 +168,6 @@ class GetMatchScoreByCollections(HasuraAction):
 
         ticker_category_vectors_dict = self.__index_ticker_collection_vectors(ticker_industry_vectors)
         ticker_industry_vectors_dict = self.__index_ticker_collection_vectors(ticker_category_vectors)
-
-        risks = read_categories_risks(db_conn)
 
         result = []
         all_ticker_collection_pairs = \
