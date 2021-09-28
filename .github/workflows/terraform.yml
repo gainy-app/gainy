@@ -32,7 +32,7 @@ jobs:
 
       - name: YAPF
         working-directory: src/aws/lambda-python/
-        run: yapf --diff -r . > /dev/null
+        run: yapf --diff -r -vv .
 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v1
