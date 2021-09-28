@@ -269,6 +269,7 @@
       - gender
       - id
       - last_name
+      - legal_address
       - user_id
       filter:
         user_id:
@@ -278,9 +279,11 @@
     permission:
       columns:
       - avatar_url
+      - email
       - first_name
       - gender
       - last_name
+      - legal_address
       filter:
         user_id:
           _eq: X-Hasura-User-Id
