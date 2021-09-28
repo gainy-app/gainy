@@ -5,8 +5,8 @@ with ticker_category_vectors as (
 )
 select t.symbol, tc.collection_id, tcv.ticker_category_vector
 from public.tickers t
-left join ticker_category_vectors tcv
-on t.symbol = tcv.symbol
-left join public.ticker_collections as tc
-on t.symbol = tc.symbol
+         left join ticker_category_vectors tcv
+                   on t.symbol = tcv.symbol
+         left join public.ticker_collections as tc
+                   on t.symbol = tc.symbol
 where tc.collection_id in ({0});

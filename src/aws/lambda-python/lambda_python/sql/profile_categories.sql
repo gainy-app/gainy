@@ -5,6 +5,6 @@ with profile_category_vectors as (
 )
 select p.id, pcv.profile_category_vector
 from app.profiles p
-left join profile_category_vectors pcv
-on p.id = pcv.profile_id
+         left join profile_category_vectors pcv
+                   on p.id = pcv.profile_id
 where p.id = '{0}';
