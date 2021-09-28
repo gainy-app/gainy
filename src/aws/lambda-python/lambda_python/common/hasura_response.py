@@ -14,4 +14,3 @@ def error_response(status_code, message, payload={}):
     payload = payload.copy()
     payload['message'] = message
     return base_response(status_code, payload)
-

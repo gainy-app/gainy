@@ -4,7 +4,6 @@ from numpy.linalg import norm
 
 
 class DimVector:
-
     """
     DimVector is a wrapper of `numpy` array, which stores names of dimensions together with values.
     This implementation is useful to deal with "bag-of-words" model - that is how we typically deal
@@ -20,7 +19,6 @@ class DimVector:
     - https://github.com/wagdav/dimarray (and https://github.com/perrette/dimarray) - custom implementations of
     similar data structure with wider functionality. Unfortunately, booth are outdated.
     """
-
     def __init__(self, coordinates):
         if coordinates:
             dim_list = []
@@ -68,6 +66,3 @@ class DimVector:
             return 0.0
 
         return DimVector.dot_product(self, other) / self_norm / other_norm
-
-
-

@@ -16,8 +16,8 @@ PASSWORD = os.environ['pg_password']
 DB_CONN_STRING = f"postgresql://{USERNAME}:{PASSWORD}@{HOST}:{PORT}/{DB_NAME}"
 
 # API GATEWAY PROXY INTEGRATION
-API_GATEWAY_PROXY_INTEGRATION = os.environ.get("AWS_LAMBDA_API_GATEWAY_PROXY_INTEGRATION", "True") == "True"
-
+API_GATEWAY_PROXY_INTEGRATION = os.environ.get(
+    "AWS_LAMBDA_API_GATEWAY_PROXY_INTEGRATION", "True") == "True"
 
 ACTIONS = [
     GetRecommendedCollections(),
@@ -25,28 +25,19 @@ ACTIONS = [
     GetMatchScoreByCollections()
 ]
 
-action_dispatcher = HasuraActionDispatcher(
-    DB_CONN_STRING,
-    ACTIONS,
-    API_GATEWAY_PROXY_INTEGRATION
-)
+action_dispatcher = HasuraActionDispatcher(DB_CONN_STRING, ACTIONS,
+                                           API_GATEWAY_PROXY_INTEGRATION)
 
 
 def handle_action(event, context):
     return action_dispatcher.handle(event, context)
 
 
-TRIGGERS = [
-    SetUserCategories()
-]
+TRIGGERS = [SetUserCategories()]
 
-trigger_dispatcher = HasuraTriggerDispatcher(
-    DB_CONN_STRING,
-    TRIGGERS,
-    API_GATEWAY_PROXY_INTEGRATION
-)
+trigger_dispatcher = HasuraTriggerDispatcher(DB_CONN_STRING, TRIGGERS,
+                                             API_GATEWAY_PROXY_INTEGRATION)
 
 
 def handle_trigger(event, context):
     return trigger_dispatcher.handle(event, context)
-

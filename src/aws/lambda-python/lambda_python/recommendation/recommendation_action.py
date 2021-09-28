@@ -8,34 +8,45 @@ from recommendation.match_score import profile_ticker_similarity, is_match
 
 script_dir = os.path.dirname(__file__)
 
-with open(os.path.join(script_dir, "../sql/collection_industries.sql")) as collection_industry_vector_query_file:
-    collection_industry_vector_query = collection_industry_vector_query_file.read()
+with open(os.path.join(script_dir, "../sql/collection_industries.sql")
+          ) as collection_industry_vector_query_file:
+    collection_industry_vector_query = collection_industry_vector_query_file.read(
+    )
 
-with open(os.path.join(script_dir, "../sql/ticker_categories.sql")) as ticker_category_vector_query_file:
+with open(os.path.join(
+        script_dir,
+        "../sql/ticker_categories.sql")) as ticker_category_vector_query_file:
     ticker_category_vector_query = ticker_category_vector_query_file.read()
 
-with open(os.path.join(script_dir, "../sql/ticker_industries.sql")) as ticker_industry_vector_query_file:
+with open(os.path.join(
+        script_dir,
+        "../sql/ticker_industries.sql")) as ticker_industry_vector_query_file:
     ticker_industry_vector_query = ticker_industry_vector_query_file.read()
 
-with open(os.path.join(script_dir, "../sql/profile_categories.sql")) as profile_category_vector_query_file:
+with open(os.path.join(script_dir, "../sql/profile_categories.sql")
+          ) as profile_category_vector_query_file:
     profile_category_vector_query = profile_category_vector_query_file.read()
 
-with open(os.path.join(script_dir, "../sql/profile_industries.sql")) as profile_industry_vector_query_file:
+with open(os.path.join(script_dir, "../sql/profile_industries.sql")
+          ) as profile_industry_vector_query_file:
     profile_industry_vector_query = profile_industry_vector_query_file.read()
 
-with open(os.path.join(script_dir,
-                       "../sql/ticker_categories_by_collections.sql")) as ticker_categories_by_collections_query_file:
-    ticker_categories_by_collections_query = ticker_categories_by_collections_query_file.read()
+with open(
+        os.path.join(script_dir, "../sql/ticker_categories_by_collections.sql")
+) as ticker_categories_by_collections_query_file:
+    ticker_categories_by_collections_query = ticker_categories_by_collections_query_file.read(
+    )
 
-with open(os.path.join(script_dir,
-                       "../sql/ticker_industries_by_collections.sql")) as ticker_industries_by_collections_query_file:
-    ticker_industries_by_collections_query = ticker_industries_by_collections_query_file.read()
-
+with open(
+        os.path.join(script_dir, "../sql/ticker_industries_by_collections.sql")
+) as ticker_industries_by_collections_query_file:
+    ticker_industries_by_collections_query = ticker_industries_by_collections_query_file.read(
+    )
 
 #     COMMON UTILS    #
 
-class NamedDimVector(DimVector):
 
+class NamedDimVector(DimVector):
     def __init__(self, name, coordinates):
         super().__init__(coordinates)
         self.name = name
@@ -43,12 +54,15 @@ class NamedDimVector(DimVector):
 
 def read_categories_risks(db_conn):
     cursor = db_conn.cursor()
-    cursor.execute("SELECT id::varchar, risk_score from public.categories WHERE risk_score IS NOT NULL;")
+    cursor.execute(
+        "SELECT id::varchar, risk_score from public.categories WHERE risk_score IS NOT NULL;"
+    )
     return dict(cursor.fetchall())
 
 
 def get_profile_vector(db_conn, profile_vector_query, profile_id):
-    vectors = query_vectors(db_conn, profile_vector_query, {"profile_id": profile_id})
+    vectors = query_vectors(db_conn, profile_vector_query,
+                            {"profile_id": profile_id})
     if not vectors:
         raise HasuraActionException(400, f"Profile {profile_id} not found")
 
@@ -76,27 +90,33 @@ def query_vectors(db_conn, query, variables=None) -> List[NamedDimVector]:
 
 #     RECOMMEND COLLECTIONS    #
 
-class GetRecommendedCollections(HasuraAction):
 
+class GetRecommendedCollections(HasuraAction):
     def __init__(self):
         super().__init__("get_recommended_collections", "profile_id")
 
     def apply(self, db_conn, input_params):
         profile_id = input_params["profile_id"]
 
-        sorted_collections = GetRecommendedCollections.query_and_sort_collections(db_conn, profile_id)
-        sorted_collection_ids = list(map(lambda c_id: {"id": c_id.name}, sorted_collections))
+        sorted_collections = GetRecommendedCollections.query_and_sort_collections(
+            db_conn, profile_id)
+        sorted_collection_ids = list(
+            map(lambda c_id: {"id": c_id.name}, sorted_collections))
 
         return sorted_collection_ids
 
     @staticmethod
     def query_and_sort_collections(db_conn, profile_id):
-        collection_vectors = query_vectors(db_conn, collection_industry_vector_query)
-        profile_vector = get_profile_vector(db_conn, profile_industry_vector_query, profile_id)
+        collection_vectors = query_vectors(db_conn,
+                                           collection_industry_vector_query)
+        profile_vector = get_profile_vector(db_conn,
+                                            profile_industry_vector_query,
+                                            profile_id)
 
         # TODO: filter out saved collections
 
-        return GetRecommendedCollections.sort_vectors_by(collection_vectors, profile_vector.cosine_similarity, False)
+        return GetRecommendedCollections.sort_vectors_by(
+            collection_vectors, profile_vector.cosine_similarity, False)
 
     @staticmethod
     def sort_vectors_by(vectors, similarity, asc=True):
@@ -106,42 +126,47 @@ class GetRecommendedCollections(HasuraAction):
 
 #     MATCH SCORE BY TICKER  #
 
-class GetMatchScoreByTicker(HasuraAction):
 
+class GetMatchScoreByTicker(HasuraAction):
     def __init__(self):
         super().__init__("get_match_score_by_ticker", "profile_id")
 
     def apply(self, db_conn, input_params):
         profile_id = input_params["profile_id"]
-        profile_category_vector = get_profile_vector(db_conn, profile_category_vector_query, profile_id)
-        profile_industry_vector = get_profile_vector(db_conn, profile_industry_vector_query, profile_id)
+        profile_category_vector = get_profile_vector(
+            db_conn, profile_category_vector_query, profile_id)
+        profile_industry_vector = get_profile_vector(
+            db_conn, profile_industry_vector_query, profile_id)
 
         ticker = input_params["symbol"]
-        ticker_category_vector = get_ticker_vector(db_conn, ticker_category_vector_query, ticker)
-        ticker_industry_vector = get_ticker_vector(db_conn, ticker_industry_vector_query, ticker)
+        ticker_category_vector = get_ticker_vector(
+            db_conn, ticker_category_vector_query, ticker)
+        ticker_industry_vector = get_ticker_vector(
+            db_conn, ticker_industry_vector_query, ticker)
 
         risks = read_categories_risks(db_conn)
 
-        match_score = profile_ticker_similarity(
-            profile_category_vector,
-            ticker_category_vector,
-            risks,
-            profile_industry_vector,
-            ticker_industry_vector
-        )
+        match_score = profile_ticker_similarity(profile_category_vector,
+                                                ticker_category_vector, risks,
+                                                profile_industry_vector,
+                                                ticker_industry_vector)
 
         return {
-            "symbol": ticker,
-            "is_match": is_match(profile_category_vector, ticker_category_vector),
-            "match_score": match_score.match_score(),
-            "explanation": [expl.description for expl in match_score.explain(fits_only=True)]
+            "symbol":
+            ticker,
+            "is_match":
+            is_match(profile_category_vector, ticker_category_vector),
+            "match_score":
+            match_score.match_score(),
+            "explanation":
+            [expl.description for expl in match_score.explain(fits_only=True)]
         }
 
 
 #     MATCH SCORE BY COLLECTIONS  #
 
-class TickerCollectionDimVector(DimVector):
 
+class TickerCollectionDimVector(DimVector):
     def __init__(self, symbol, collection_id, coordinates):
         super().__init__(coordinates)
         self.symbol = symbol
@@ -149,14 +174,15 @@ class TickerCollectionDimVector(DimVector):
 
 
 class GetMatchScoreByCollections(HasuraAction):
-
     def __init__(self):
         super().__init__("get_match_scores_by_collections", "profile_id")
 
     def apply(self, db_conn, input_params):
         profile_id = input_params["profile_id"]
-        profile_category_vector = get_profile_vector(db_conn, profile_category_vector_query, profile_id)
-        profile_industry_vector = get_profile_vector(db_conn, profile_industry_vector_query, profile_id)
+        profile_category_vector = get_profile_vector(
+            db_conn, profile_category_vector_query, profile_id)
+        profile_industry_vector = get_profile_vector(
+            db_conn, profile_industry_vector_query, profile_id)
 
         risks = read_categories_risks(db_conn)
 
@@ -166,8 +192,10 @@ class GetMatchScoreByCollections(HasuraAction):
         ticker_category_vectors = \
             self.__get_ticker_vectors_by_collections(db_conn, ticker_industries_by_collections_query, collection_ids)
 
-        ticker_category_vectors_dict = self.__index_ticker_collection_vectors(ticker_industry_vectors)
-        ticker_industry_vectors_dict = self.__index_ticker_collection_vectors(ticker_category_vectors)
+        ticker_category_vectors_dict = self.__index_ticker_collection_vectors(
+            ticker_industry_vectors)
+        ticker_industry_vectors_dict = self.__index_ticker_collection_vectors(
+            ticker_category_vectors)
 
         result = []
         all_ticker_collection_pairs = \
@@ -175,36 +203,37 @@ class GetMatchScoreByCollections(HasuraAction):
         for (symbol, collection_id) in all_ticker_collection_pairs:
             ticker_category_vector = ticker_category_vectors_dict.get(
                 (symbol, collection_id),
-                TickerCollectionDimVector(symbol, collection_id, {})
-            )
+                TickerCollectionDimVector(symbol, collection_id, {}))
             ticker_industry_vector = ticker_industry_vectors_dict.get(
                 (symbol, collection_id),
-                TickerCollectionDimVector(symbol, collection_id, {})
-            )
+                TickerCollectionDimVector(symbol, collection_id, {}))
 
-            match_score = profile_ticker_similarity(
-                profile_category_vector,
-                ticker_category_vector,
-                risks,
-                profile_industry_vector,
-                ticker_industry_vector
-            )
+            match_score = profile_ticker_similarity(profile_category_vector,
+                                                    ticker_category_vector,
+                                                    risks,
+                                                    profile_industry_vector,
+                                                    ticker_industry_vector)
 
-            result.append(
-                {
-                    "symbol": symbol,
-                    "collection_id": collection_id,
-                    "is_match": is_match(profile_category_vector, ticker_category_vector),
-                    "match_score": match_score.match_score(),
-                    "explanation": [expl.description for expl in match_score.explain(fits_only=True)]
-                }
-            )
+            result.append({
+                "symbol":
+                symbol,
+                "collection_id":
+                collection_id,
+                "is_match":
+                is_match(profile_category_vector, ticker_category_vector),
+                "match_score":
+                match_score.match_score(),
+                "explanation": [
+                    expl.description
+                    for expl in match_score.explain(fits_only=True)
+                ]
+            })
 
         return result
 
     @staticmethod
     def __index_ticker_collection_vectors(
-            ticker_collection_vectors: List[TickerCollectionDimVector]
+        ticker_collection_vectors: List[TickerCollectionDimVector]
     ) -> Dict[Tuple[str, int], TickerCollectionDimVector]:
         result = {}
         for vector in ticker_collection_vectors:
@@ -213,9 +242,11 @@ class GetMatchScoreByCollections(HasuraAction):
         return result
 
     @staticmethod
-    def __get_ticker_vectors_by_collections(db_conn, ticker_vectors_query, collection_ids):
+    def __get_ticker_vectors_by_collections(db_conn, ticker_vectors_query,
+                                            collection_ids):
         cursor = db_conn.cursor()
-        cursor.execute(ticker_vectors_query, {"collection_ids": tuple(collection_ids)})
+        cursor.execute(ticker_vectors_query,
+                       {"collection_ids": tuple(collection_ids)})
 
         vectors = []
         for row in cursor.fetchall():
@@ -224,7 +255,8 @@ class GetMatchScoreByCollections(HasuraAction):
         return vectors
 
     @staticmethod
-    def __query_ticker_collection_vectors(db_conn, query) -> List[TickerCollectionDimVector]:
+    def __query_ticker_collection_vectors(
+            db_conn, query) -> List[TickerCollectionDimVector]:
         result = []
 
         cursor = db_conn.cursor()

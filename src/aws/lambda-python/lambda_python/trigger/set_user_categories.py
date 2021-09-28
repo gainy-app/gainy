@@ -10,14 +10,14 @@ script_directory = os.path.dirname(os.path.realpath(__file__))
 sys.path.append(script_directory)
 
 with open(
-        os.path.join(script_directory,
-                     '../data/user_categories_decision_matrix.csv')) as csv_file:
+        os.path.join(
+            script_directory,
+            '../data/user_categories_decision_matrix.csv')) as csv_file:
     reader = csv.DictReader(csv_file, delimiter='\t')
     decision_matrix = list(reader)
 
 
 class SetUserCategories(HasuraTrigger):
-
     def __init__(self):
         super().__init__("set_user_categories")
 
@@ -33,8 +33,8 @@ class SetUserCategories(HasuraTrigger):
         if payload['average_market_return'] == 50 and risk_needed < 3:
             risk_needed = 2
 
-        investment_horizon_points = [1, 1, 2,
-                                     3][round(payload['investment_horizon'] * 4)]
+        investment_horizon_points = [1, 1, 2, 3][round(
+            payload['investment_horizon'] * 4)]
         unexpected_purchases_source_points = {
             'checking_savings': 3,
             'stock_investments': 2,
@@ -70,8 +70,8 @@ class SetUserCategories(HasuraTrigger):
             (stock_market_risk_level_points + trading_experience_points) / 2)
 
         for i in [
-            'if_market_drops_20_i_will_buy',
-            'if_market_drops_40_i_will_buy'
+                'if_market_drops_20_i_will_buy',
+                'if_market_drops_40_i_will_buy'
         ]:
             if payload[i] is not None:
                 buy_rate = payload[i] * 3
@@ -82,8 +82,9 @@ class SetUserCategories(HasuraTrigger):
 
         final_score = max(risk_needed, risk_taking_ability, loss_tolerance)
         for i in decision_matrix:
-            if i['Risk Need'] == risk_needed and i['Risk Taking Ability'] == risk_taking_ability and i[
-                'Loss Tolerance'] == loss_tolerance:
+            if i['Risk Need'] == risk_needed and i[
+                    'Risk Taking Ability'] == risk_taking_ability and i[
+                        'Loss Tolerance'] == loss_tolerance:
                 final_score = i['Hard code matrix']
 
         with db_conn.cursor() as cursor:
@@ -120,4 +121,3 @@ class SetUserCategories(HasuraTrigger):
             payload = {}
         payload.update(data["new"])
         return payload
-
