@@ -71,8 +71,8 @@ class SetUserCategories(HasuraTrigger):
             (stock_market_risk_level_points + trading_experience_points) / 2)
 
         for i in [
-            'if_market_drops_20_i_will_buy',
-            'if_market_drops_40_i_will_buy'
+                'if_market_drops_20_i_will_buy',
+                'if_market_drops_40_i_will_buy'
         ]:
             if payload[i] is not None:
                 buy_rate = payload[i] * 3
@@ -84,8 +84,8 @@ class SetUserCategories(HasuraTrigger):
         final_score = max(risk_needed, risk_taking_ability, loss_tolerance)
         for i in decision_matrix:
             if i['Risk Need'] == risk_needed and i[
-                'Risk Taking Ability'] == risk_taking_ability and i[
-                'Loss Tolerance'] == loss_tolerance:
+                    'Risk Taking Ability'] == risk_taking_ability and i[
+                        'Loss Tolerance'] == loss_tolerance:
                 final_score = i['Hard code matrix']
 
         with db_conn.cursor() as cursor:
