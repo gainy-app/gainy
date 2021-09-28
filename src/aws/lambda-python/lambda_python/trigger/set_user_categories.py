@@ -123,7 +123,7 @@ class SetUserCategories(HasuraTrigger):
         """
         if value >= 1.0:
             # covers case where `value` = 1.0
-            return list_size
+            return list_size - 1
 
         return trunc(value * list_size)
 
