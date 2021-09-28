@@ -1,7 +1,6 @@
 import csv
 import os
 import sys
-from math import trunc
 
 from psycopg2.extras import execute_values
 
@@ -28,14 +27,14 @@ class SetUserCategories(HasuraTrigger):
     def apply(self, db_conn, op, data):
         payload = self._extract_payload(data)
 
-        risk_needed = [1, 2, 2, 3][self._list_index(payload['risk_level'], 4)]
+        risk_needed = [1, 2, 2, 3][round(payload['risk_level'] * 4)]
         if payload['average_market_return'] == 6 and risk_needed > 1:
             risk_needed = 3
         if payload['average_market_return'] == 50 and risk_needed < 3:
             risk_needed = 2
 
-        investment_horizon_points = [1, 1, 2, 3][self._list_index(
-            payload['investment_horizon'], 4)]
+        investment_horizon_points = [1, 1, 2, 3][round(
+            payload['investment_horizon'] * 4)]
         unexpected_purchases_source_points = {
             'checking_savings': 3,
             'stock_investments': 2,
@@ -43,7 +42,7 @@ class SetUserCategories(HasuraTrigger):
             'other_loans': 1
         }[payload['unexpected_purchases_source']]
         damage_of_failure_points = [1, 2, 2,
-                                    3][self._list_index(payload['damage_of_failure'], 4)]
+                                    3][round(payload['damage_of_failure'] * 4)]
         risk_taking_ability = round(
             (investment_horizon_points + unexpected_purchases_source_points +
              damage_of_failure_points) / 3)
@@ -71,8 +70,8 @@ class SetUserCategories(HasuraTrigger):
             (stock_market_risk_level_points + trading_experience_points) / 2)
 
         for i in [
-            'if_market_drops_20_i_will_buy',
-            'if_market_drops_40_i_will_buy'
+                'if_market_drops_20_i_will_buy',
+                'if_market_drops_40_i_will_buy'
         ]:
             if payload[i] is not None:
                 buy_rate = payload[i] * 3
@@ -84,8 +83,8 @@ class SetUserCategories(HasuraTrigger):
         final_score = max(risk_needed, risk_taking_ability, loss_tolerance)
         for i in decision_matrix:
             if i['Risk Need'] == risk_needed and i[
-                'Risk Taking Ability'] == risk_taking_ability and i[
-                'Loss Tolerance'] == loss_tolerance:
+                    'Risk Taking Ability'] == risk_taking_ability and i[
+                        'Loss Tolerance'] == loss_tolerance:
                 final_score = i['Hard code matrix']
 
         with db_conn.cursor() as cursor:
@@ -112,20 +111,6 @@ class SetUserCategories(HasuraTrigger):
                 cursor,
                 "INSERT INTO app.profile_categories (profile_id, category_id) VALUES %s",
                 [(profile_id, category_id) for category_id in categories])
-
-    @staticmethod
-    def _list_index(value, list_size):
-        """
-        Select the list index between 0 and `list_size` - 1 based on ``value`` parameter
-        :param value: real number between 0 and 1
-        :param list_size: the size of the list
-        :return: the index between 0 and `list_size` - 1
-        """
-        if value >= 1.0:
-            # covers case where `value` = 1.0
-            return list_size
-
-        return trunc(value * list_size)
 
     @staticmethod
     def _extract_payload(data):
