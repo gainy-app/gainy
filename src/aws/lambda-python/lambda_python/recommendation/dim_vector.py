@@ -5,6 +5,22 @@ from numpy.linalg import norm
 
 class DimVector:
 
+    """
+    DimVector is a wrapper of `numpy` array, which stores names of dimensions together with values.
+    This implementation is useful to deal with "bag-of-words" model - that is how we typically deal
+    with categories and industries.
+
+    All mathematical operations (e.g. norm, cosine similarity) are performed against the underlying
+     `numpy` vector.
+
+    Alternatives considered:
+    - https://xarray.pydata.org/ - can be useful in the future, but now is an overkill (as it requires pandas)
+    - https://numpy.org/doc/stable/user/basics.rec.html - numpy structured arrays are differenet and can't be
+    a direct replacement to this class
+    - https://github.com/wagdav/dimarray (and https://github.com/perrette/dimarray) - custom implementations of
+    similar data structure with wider functionality. Unfortunately, booth are outdated.
+    """
+
     def __init__(self, coordinates):
         if coordinates:
             dim_list = []
