@@ -42,8 +42,8 @@ class SetUserCategories(HasuraTrigger):
             'credit_card': 1,
             'other_loans': 1
         }[payload['unexpected_purchases_source']]
-        damage_of_failure_points = [1, 2, 2, 3][self._list_index(
-            payload['damage_of_failure'], 4)]
+        damage_of_failure_points = [1, 2, 2,
+                                    3][self._list_index(payload['damage_of_failure'], 4)]
         risk_taking_ability = round(
             (investment_horizon_points + unexpected_purchases_source_points +
              damage_of_failure_points) / 3)
@@ -71,8 +71,8 @@ class SetUserCategories(HasuraTrigger):
             (stock_market_risk_level_points + trading_experience_points) / 2)
 
         for i in [
-                'if_market_drops_20_i_will_buy',
-                'if_market_drops_40_i_will_buy'
+            'if_market_drops_20_i_will_buy',
+            'if_market_drops_40_i_will_buy'
         ]:
             if payload[i] is not None:
                 buy_rate = payload[i] * 3
@@ -84,8 +84,8 @@ class SetUserCategories(HasuraTrigger):
         final_score = max(risk_needed, risk_taking_ability, loss_tolerance)
         for i in decision_matrix:
             if i['Risk Need'] == risk_needed and i[
-                    'Risk Taking Ability'] == risk_taking_ability and i[
-                        'Loss Tolerance'] == loss_tolerance:
+                'Risk Taking Ability'] == risk_taking_ability and i[
+                'Loss Tolerance'] == loss_tolerance:
                 final_score = i['Hard code matrix']
 
         with db_conn.cursor() as cursor:
