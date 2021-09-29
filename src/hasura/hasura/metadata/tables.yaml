@@ -14,6 +14,7 @@
             _eq: X-Hasura-User-Id
       columns:
       - category_id
+      - profile_id
       backend_only: false
   select_permissions:
   - role: user
@@ -107,6 +108,7 @@
             _eq: X-Hasura-User-Id
       columns:
       - interest_id
+      - profile_id
       backend_only: false
   select_permissions:
   - role: user
