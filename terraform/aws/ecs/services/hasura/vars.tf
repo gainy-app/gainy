@@ -21,3 +21,5 @@ variable "hasura_enable_console" {}
 variable "hasura_enable_dev_mode" {}
 variable "hasura_jwt_secret" {}
 variable "aws_lambda_api_gateway_endpoint" {}
+variable "memory_credits" {}
+variable "cpu_credits" {}

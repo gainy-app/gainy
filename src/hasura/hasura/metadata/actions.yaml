@@ -4,37 +4,37 @@ actions:
     kind: ""
     handler: '{{AWS_LAMBDA_API_GATEWAY_ENDPOINT}}/fetchChartData'
   permissions:
-    - role: user
+  - role: user
 - name: fetchLivePrices
   definition:
     kind: ""
     handler: '{{AWS_LAMBDA_API_GATEWAY_ENDPOINT}}/fetchLivePrices'
   permissions:
-    - role: user
+  - role: user
 - name: fetchNewsData
   definition:
     kind: ""
     handler: '{{AWS_LAMBDA_API_GATEWAY_ENDPOINT}}/fetchNewsData'
   permissions:
-    - role: user
-- name: get_recommended_collections
-  definition:
-    kind: ""
-    handler: '{{AWS_LAMBDA_API_GATEWAY_ENDPOINT}}/hasuraAction'
-  permissions:
-    - role: user
+  - role: user
 - name: get_match_score_by_ticker
   definition:
     kind: ""
-    handler: '{{AWS_LAMBDA_API_GATEWAY_ENDPOINT}}/hasuraAction'
+    handler: '{{AWS_LAMBDA_API_GATEWAY_ENDPOINT}}/fetchNewsData'
   permissions:
-    - role: user
-- name: get_match_scores_by_collections
+  - role: user
+- name: get_match_scores_by_collection
   definition:
     kind: ""
     handler: '{{AWS_LAMBDA_API_GATEWAY_ENDPOINT}}/hasuraAction'
   permissions:
-    - role: user
+  - role: user
+- name: get_recommended_collections
+  definition:
+    kind: ""
+    handler: '{{AWS_LAMBDA_API_GATEWAY_ENDPOINT}}/fetchNewsData'
+  permissions:
+  - role: user
 custom_types:
   enums: []
   input_objects: []
@@ -54,19 +54,11 @@ custom_types:
         id: id
   - name: MatchScore
     relationships:
-      - remote_table:
-          schema: public
-          name: tickers
-        name: ticker
-        type: object
-        field_mapping:
-          symbol: symbol
-      - remote_table:
-          schema: public
-          name: collections
-        name: collection
-        type: object
-        field_mapping:
-          collection_id: id
-
+    - remote_table:
+        schema: public
+        name: tickers
+      name: ticker
+      type: object
+      field_mapping:
+        symbol: symbol
   scalars: []

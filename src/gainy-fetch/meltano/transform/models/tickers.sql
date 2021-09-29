@@ -35,4 +35,4 @@ select (general ->> 'Code')::character varying           as symbol,
            )                                             as country_name,
        (general ->> 'UpdatedAt')::timestamp              as updated_at
 from fundamentals
-where (general ->> 'IsDelisted')::boolean = false
+where ((general ->> 'IsDelisted') is null or (general ->> 'IsDelisted')::bool = false)

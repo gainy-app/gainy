@@ -64,8 +64,11 @@ output "aws_rds_db_instance" {
   }
 }
 output "vpc_bridge_instance_domain" {
-  value = module.aws.bridge_instance.public_dns
+  value = module.aws.bridge_instance.public_ip
 }
 output "meltano_url" {
   value = module.aws.meltano_url
+}
+output "hasura_url" {
+  value = module.aws.hasura_url
 }

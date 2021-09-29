@@ -94,6 +94,6 @@ resource "cloudflare_record" "service" {
   zone_id = var.cloudflare_zone_id
 }
 
-output "aws_alb_url" {
-  value = aws_alb.alb.dns_name
+output "url" {
+  value = cloudflare_record.service.hostname
 }

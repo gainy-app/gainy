@@ -1,7 +1,7 @@
 [
   {
     "volumesFrom": [],
-    "memory": 1024,
+    "memory": ${memory_credits},
     "extraHosts": null,
     "dnsServers": null,
     "disableNetworking": null,
@@ -39,7 +39,7 @@
     "command": [],
     "user": null,
     "dockerLabels": null,
-    "cpu": 512,
+    "cpu": ${cpu_credits},
     "privileged": null,
     "memoryReservation": null,
     "logConfiguration": {

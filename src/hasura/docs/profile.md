@@ -84,6 +84,37 @@ mutation {
 }
 ```
 
+### Update favorite collections
+
+```graphql
+mutation {
+    insert_app_profile_favorite_collections(
+        objects: [
+            {profile_id: 11, collection_id: 3},
+            {profile_id: 11, collection_id: 4},
+        ],
+        on_conflict: {
+            constraint: profile_favorite_collections_pkey,
+            update_columns: []
+        }
+    ) {
+        returning {
+            collection_id
+        }
+    }
+    delete_app_profile_favorite_collections(
+        where: {
+            collection_id: {_in: [1,2]},
+            profile_id: {_eq: 11}
+        }
+    ) {
+        returning {
+            collection_id
+        }
+    }
+}
+```
+
 ### Delete user
 
 ```graphql

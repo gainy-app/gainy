@@ -59,9 +59,11 @@ exports.fetchLivePrices = async (event) => {
     })
   );
 
-  const fetchedData = fetchedDataChunks.reduce((accumulator, current) =>
-    accumulator.concat(current)
-  );
+  const fetchedData = fetchedDataChunks.length
+    ? fetchedDataChunks.reduce((accumulator, current) =>
+        accumulator.concat(current)
+      )
+    : [];
 
   const isNA = (x) => x === "NA";
 
