@@ -4,7 +4,6 @@ from typing import Dict, List
 
 from recommendation.dim_vector import DimVector
 
-
 # IS MATCH
 
 
@@ -106,35 +105,22 @@ class SimilarityLevel(Enum):
 
 
 EXPLANATION_CONFIG = {
-    MatchScoreComponent.RISK:
-        [
-            (None, 0.3, SimilarityLevel.LOW),
-            (0.3, 0.7, SimilarityLevel.MID),
-            (0.7, None, SimilarityLevel.HIGH)
-        ],
-    MatchScoreComponent.CATEGORY:
-        [
-            (None, 0.3, SimilarityLevel.LOW),
-            (0.3, 0.7, SimilarityLevel.MID),
-            (0.7, None, SimilarityLevel.HIGH)
-        ],
-    MatchScoreComponent.INTEREST:
-        [
-            (None, 0.3, SimilarityLevel.LOW),
-            (0.3, 0.7, SimilarityLevel.MID),
-            (0.7, None, SimilarityLevel.HIGH)
-        ]
+    MatchScoreComponent.RISK: [(None, 0.3, SimilarityLevel.LOW),
+                               (0.3, 0.7, SimilarityLevel.MID),
+                               (0.7, None, SimilarityLevel.HIGH)],
+    MatchScoreComponent.CATEGORY: [(None, 0.3, SimilarityLevel.LOW),
+                                   (0.3, 0.7, SimilarityLevel.MID),
+                                   (0.7, None, SimilarityLevel.HIGH)],
+    MatchScoreComponent.INTEREST: [(None, 0.3, SimilarityLevel.LOW),
+                                   (0.3, 0.7, SimilarityLevel.MID),
+                                   (0.7, None, SimilarityLevel.HIGH)]
 }
 
 
 class MatchScoreExplanation:
-
-    def __init__(
-            self,
-            risk_level: SimilarityLevel,
-            category_level: SimilarityLevel,
-            interest_level: SimilarityLevel
-    ):
+    def __init__(self, risk_level: SimilarityLevel,
+                 category_level: SimilarityLevel,
+                 interest_level: SimilarityLevel):
         self.risk_level = risk_level
         self.category_level = category_level
         self.interest_level = interest_level
@@ -147,8 +133,10 @@ class MatchScoreExplainer:
     def _apply_explanation_config(self, similarity,
                                   component) -> SimilarityLevel:
 
-        for lower_bound, upper_bound, similarity_level in self.config[component]:
-            if (not lower_bound or lower_bound <= similarity) and (not upper_bound or upper_bound > similarity):
+        for lower_bound, upper_bound, similarity_level in self.config[
+                component]:
+            if (not lower_bound or lower_bound <= similarity) and (
+                    not upper_bound or upper_bound > similarity):
                 return similarity_level
 
         return SimilarityLevel.LOW
@@ -156,18 +144,18 @@ class MatchScoreExplainer:
     def explanation(self, risk_similarity, category_similarity,
                     interest_similarity) -> MatchScoreExplanation:
 
-        risk_level = self._apply_explanation_config(
-            risk_similarity, MatchScoreComponent.RISK)
+        risk_level = self._apply_explanation_config(risk_similarity,
+                                                    MatchScoreComponent.RISK)
         category_level = self._apply_explanation_config(
             category_similarity, MatchScoreComponent.CATEGORY)
         interest_level = self._apply_explanation_config(
             interest_similarity, MatchScoreComponent.INTEREST)
 
-        return MatchScoreExplanation(risk_level, category_level, interest_level)
+        return MatchScoreExplanation(risk_level, category_level,
+                                     interest_level)
 
 
 class MatchScore:
-
     def __init__(self, similarity: float, risk_similarity: float,
                  category_similarity: float, interest_similarity: float):
         self.similarity = similarity
@@ -182,16 +170,17 @@ class MatchScore:
         return round(self.similarity * 100)
 
     def explain(self) -> MatchScoreExplanation:
-        return self.similarity_explainer.explanation(self.risk_similarity, self.category_similarity,
+        return self.similarity_explainer.explanation(self.risk_similarity,
+                                                     self.category_similarity,
                                                      self.interest_similarity)
 
 
 def profile_ticker_similarity(
-        profile_categories: DimVector,
-        ticker_categories: DimVector,
-        risk_mapping: Dict[str, int],
-        profile_industries: DimVector,
-        ticker_industries: DimVector,
+    profile_categories: DimVector,
+    ticker_categories: DimVector,
+    risk_mapping: Dict[str, int],
+    profile_industries: DimVector,
+    ticker_industries: DimVector,
 ) -> MatchScore:
     risk_weight = 1 / 3
     category_weight = 1 / 3
