@@ -1,0 +1,1 @@
+DROP TABLE app.ticker_match_score_explanations;

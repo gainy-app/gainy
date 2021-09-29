@@ -113,8 +113,6 @@ class GetRecommendedCollections(HasuraAction):
                                             profile_industry_vector_query,
                                             profile_id)
 
-        # TODO: filter out saved collections
-
         return GetRecommendedCollections.sort_vectors_by(
             collection_vectors, profile_vector.cosine_similarity, False)
 
@@ -158,8 +156,7 @@ class GetMatchScoreByTicker(HasuraAction):
             is_match(profile_category_vector, ticker_category_vector),
             "match_score":
             match_score.match_score(),
-            "explanation":
-            [expl.description for expl in match_score.explain(fits_only=True)]
+            "explanation_code": match_score.explanation_code()
         }
 
 
@@ -217,16 +214,11 @@ class GetMatchScoreByCollections(HasuraAction):
             result.append({
                 "symbol":
                 symbol,
-                "collection_id":
-                collection_id,
                 "is_match":
                 is_match(profile_category_vector, ticker_category_vector),
                 "match_score":
                 match_score.match_score(),
-                "explanation": [
-                    expl.description
-                    for expl in match_score.explain(fits_only=True)
-                ]
+                "explanation_code": match_score.explanation_code()
             })
 
         return result

@@ -4,6 +4,7 @@ from typing import Dict, List
 
 from recommendation.dim_vector import DimVector
 
+
 # IS MATCH
 
 
@@ -18,7 +19,7 @@ def is_match(profile_category_vector: DimVector,
 # INDUSTRY SIMILARITY SCORE
 
 
-def get_industry_similarity(profile_industries: DimVector,
+def get_interest_similarity(profile_industries: DimVector,
                             ticker_industries: DimVector) -> float:
     return DimVector.dot_product(
         normalized_profile_industries_vector(profile_industries),
@@ -95,104 +96,111 @@ def get_category_similarity(profile_categories: DimVector,
 class MatchScoreComponent(Enum):
     RISK = "risk"
     CATEGORY = "category"
-    INDUSTRY = "industry"
+    INTEREST = "interest"
 
 
-class MatchScoreExplanation:
-    def __init__(self, component: MatchScoreComponent, fits: bool,
-                 description: str):
-        self.component = component
-        self.fits = fits
-        self.description = description
+class SimilarityLevel(Enum):
+    LOW = 0
+    MID = 1
+    HIGH = 2
 
 
 EXPLANATION_CONFIG = {
     MatchScoreComponent.RISK:
-    [(0.0, 0.3, False, "Doesn't fit your risk profile"),
-     (0.7, 1.0, True, "Fits your risk profile")],
+        [
+            (None, 0.3, SimilarityLevel.LOW),
+            (0.3, 0.7, SimilarityLevel.MID),
+            (0.7, None, SimilarityLevel.HIGH)
+        ],
     MatchScoreComponent.CATEGORY:
-    [(0.0, 0.3, False, "Doesn't fit your preferred categories"),
-     (0.7, 1.0, True, "Fits your preferred categories")],
-    MatchScoreComponent.INDUSTRY:
-    [(0.0, 0.3, False, "Doesn't fit your interests"),
-     (0.7, 1.0, True, "Fits your interests")]
+        [
+            (None, 0.3, SimilarityLevel.LOW),
+            (0.3, 0.7, SimilarityLevel.MID),
+            (0.7, None, SimilarityLevel.HIGH)
+        ],
+    MatchScoreComponent.INTEREST:
+        [
+            (None, 0.3, SimilarityLevel.LOW),
+            (0.3, 0.7, SimilarityLevel.MID),
+            (0.7, None, SimilarityLevel.HIGH)
+        ]
 }
 
 
-# TODO: change explanation approach
 class MatchScoreExplainer:
     def __init__(self, config):
         self.config = config
 
     def _apply_explanation_config(self, similarity,
-                                  component) -> List[MatchScoreExplanation]:
-        explanations = []
-        for lower_bound, upper_bound, fits, description in self.config[
-                component]:
-            if lower_bound <= similarity <= upper_bound:
-                explanations.append(
-                    MatchScoreExplanation(component, fits, description))
+                                  component) -> SimilarityLevel:
 
-        return explanations
+        for lower_bound, upper_bound, similarity_level in self.config[component]:
+            if (not lower_bound or lower_bound <= similarity) and (not upper_bound or upper_bound > similarity):
+                return similarity_level
 
-    def explain(self, risk_similarity, category_similarity,
-                industry_similarity) -> List[MatchScoreExplanation]:
-        explanations = []
+        return SimilarityLevel.LOW
 
-        explanations += self._apply_explanation_config(
+    def explanation_code(self, risk_similarity, category_similarity,
+                         interest_similarity) -> str:
+
+        risk_level = self._apply_explanation_config(
             risk_similarity, MatchScoreComponent.RISK)
-        explanations += self._apply_explanation_config(
+        category_level = self._apply_explanation_config(
             category_similarity, MatchScoreComponent.CATEGORY)
-        explanations += self._apply_explanation_config(
-            industry_similarity, MatchScoreComponent.INDUSTRY)
+        interest_level = self._apply_explanation_config(
+            interest_similarity, MatchScoreComponent.INTEREST)
 
-        return explanations
+        return f"{risk_level.value}{category_level.value}{interest_level.value}"
 
 
 class MatchScore:
+
     def __init__(self, similarity: float, risk_similarity: float,
-                 category_similarity: float, industry_similarity: float):
+                 category_similarity: float, interest_similarity: float):
         self.similarity = similarity
 
         self.risk_similarity = risk_similarity
         self.category_similarity = category_similarity
-        self.industry_similarity = industry_similarity
+        self.interest_similarity = interest_similarity
 
         self.similarity_explainer = MatchScoreExplainer(EXPLANATION_CONFIG)
 
-    def explain(self, fits_only: bool = False) -> List[MatchScoreExplanation]:
-        explanations = self.similarity_explainer.explain(
-            self.risk_similarity, self.category_similarity,
-            self.industry_similarity)
+    def explanation_code(self) -> str:
+        """
+        Generates a synthetic row id to reference a separate table with match score explanation.
+        This is a logic way to normalize match score data and return match score as a valid object
+        via GraphQL.
 
-        if fits_only:
-            return list(filter(lambda expl: expl.fits, explanations))
-        else:
-            return explanations
+        :return: row id in table `app.ticker_match_score_explanations`
+        """
+
+        return self.similarity_explainer.explanation_code(
+            self.risk_similarity, self.category_similarity,
+            self.interest_similarity)
 
     def match_score(self):
         return round(self.similarity * 100)
 
 
 def profile_ticker_similarity(
-    profile_categories: DimVector,
-    ticker_categories: DimVector,
-    risk_mapping: Dict[str, int],
-    profile_industries: DimVector,
-    ticker_industries: DimVector,
+        profile_categories: DimVector,
+        ticker_categories: DimVector,
+        risk_mapping: Dict[str, int],
+        profile_industries: DimVector,
+        ticker_industries: DimVector,
 ) -> MatchScore:
     risk_weight = 1 / 3
     category_weight = 1 / 3
-    industry_weight = 1 / 3
+    interest_weight = 1 / 3
 
     risk_similarity = get_risk_similarity(profile_categories,
                                           ticker_categories, risk_mapping)
     category_similarity = get_category_similarity(profile_categories,
                                                   ticker_categories)
-    industry_similarity = get_industry_similarity(profile_industries,
+    interest_similarity = get_interest_similarity(profile_industries,
                                                   ticker_industries)
 
-    similarity = risk_weight * risk_similarity + category_weight * category_similarity + industry_weight * industry_similarity
+    similarity = risk_weight * risk_similarity + category_weight * category_similarity + interest_weight * interest_similarity
 
     return MatchScore(similarity, risk_similarity, category_similarity,
-                      industry_similarity)
+                      interest_similarity)

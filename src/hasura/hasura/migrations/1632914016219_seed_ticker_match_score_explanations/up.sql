@@ -1,0 +1,31 @@
+insert into app.ticker_match_score_explanations("id", "code", "risk_level", "category_level", "interest_level")
+values
+       (DEFAULT, '000', 0, 0, 0),
+       (DEFAULT, '001', 0, 0, 1),
+       (DEFAULT, '002', 0, 0, 2),
+       (DEFAULT, '010', 0, 1, 0),
+       (DEFAULT, '011', 0, 1, 1),
+       (DEFAULT, '012', 0, 1, 2),
+       (DEFAULT, '020', 0, 2, 0),
+       (DEFAULT, '021', 0, 2, 1),
+       (DEFAULT, '022', 0, 2, 2),
+       (DEFAULT, '100', 1, 0, 0),
+       (DEFAULT, '101', 1, 0, 1),
+       (DEFAULT, '102', 1, 0, 2),
+       (DEFAULT, '110', 1, 1, 0),
+       (DEFAULT, '111', 1, 1, 1),
+       (DEFAULT, '112', 1, 1, 2),
+       (DEFAULT, '120', 1, 2, 0),
+       (DEFAULT, '121', 1, 2, 1),
+       (DEFAULT, '122', 1, 2, 2),
+       (DEFAULT, '200', 2, 0, 0),
+       (DEFAULT, '201', 2, 0, 1),
+       (DEFAULT, '202', 2, 0, 2),
+       (DEFAULT, '210', 2, 1, 0),
+       (DEFAULT, '211', 2, 1, 1),
+       (DEFAULT, '212', 2, 1, 2),
+       (DEFAULT, '220', 2, 2, 0),
+       (DEFAULT, '221', 2, 2, 1),
+       (DEFAULT, '222', 2, 2, 2);
+
+
