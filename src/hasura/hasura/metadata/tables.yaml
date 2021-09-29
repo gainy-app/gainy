@@ -301,18 +301,6 @@
       - period
       filter: {}
 - table:
-    schema: app
-    name: ticker_match_score_explanations
-  select_permissions:
-  - role: user
-    permission:
-      columns:
-      - code
-      - risk_level
-      - category_level
-      - interest_level
-      filter: {}
-- table:
     schema: public
     name: categories
   select_permissions:

@@ -2,7 +2,7 @@ import os
 
 from common.hasura_dispatcher import HasuraActionDispatcher, HasuraTriggerDispatcher
 from recommendation.recommendation_action import GetMatchScoreByTicker, GetRecommendedCollections, \
-    GetMatchScoreByCollections
+    GetMatchScoreByCollection
 
 # DB CONNECTION
 from trigger.set_user_categories import SetUserCategories
@@ -22,7 +22,7 @@ API_GATEWAY_PROXY_INTEGRATION = os.environ.get(
 ACTIONS = [
     GetRecommendedCollections(),
     GetMatchScoreByTicker(),
-    GetMatchScoreByCollections()
+    GetMatchScoreByCollection()
 ]
 
 action_dispatcher = HasuraActionDispatcher(DB_CONN_STRING, ACTIONS,

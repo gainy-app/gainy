@@ -26,9 +26,9 @@ type Query {
 }
 
 type Query {
-  get_match_scores_by_collections(
+  get_match_scores_by_collection(
     profile_id: Int!
-    collection_ids: [Int!]
+    collection_id: Int!
   ): [MatchScore]
 }
 
@@ -80,6 +80,8 @@ type MatchScore {
   symbol: String!
   match_score: Int!
   is_match: Boolean!
-  explanation_code: String!
+  risk_level_explanation: Int!
+  category_level_explanation: Int!
+  interest_level_explanation: Int!
 }
 

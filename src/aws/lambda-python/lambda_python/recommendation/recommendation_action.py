@@ -32,15 +32,15 @@ with open(os.path.join(script_dir, "../sql/profile_industries.sql")
     profile_industry_vector_query = profile_industry_vector_query_file.read()
 
 with open(
-        os.path.join(script_dir, "../sql/ticker_categories_by_collections.sql")
-) as ticker_categories_by_collections_query_file:
-    ticker_categories_by_collections_query = ticker_categories_by_collections_query_file.read(
+        os.path.join(script_dir, "../sql/ticker_categories_by_collection.sql")
+) as ticker_categories_by_collection_query_file:
+    ticker_categories_by_collection_query = ticker_categories_by_collection_query_file.read(
     )
 
 with open(
-        os.path.join(script_dir, "../sql/ticker_industries_by_collections.sql")
-) as ticker_industries_by_collections_query_file:
-    ticker_industries_by_collections_query = ticker_industries_by_collections_query_file.read(
+        os.path.join(script_dir, "../sql/ticker_industries_by_collection.sql")
+) as ticker_industries_by_collection_query_file:
+    ticker_industries_by_collection_query = ticker_industries_by_collection_query_file.read(
     )
 
 #     COMMON UTILS    #
@@ -148,7 +148,7 @@ class GetMatchScoreByTicker(HasuraAction):
                                                 ticker_category_vector, risks,
                                                 profile_industry_vector,
                                                 ticker_industry_vector)
-
+        explanation = match_score.explain()
         return {
             "symbol":
             ticker,
@@ -156,23 +156,17 @@ class GetMatchScoreByTicker(HasuraAction):
             is_match(profile_category_vector, ticker_category_vector),
             "match_score":
             match_score.match_score(),
-            "explanation_code": match_score.explanation_code()
+            "risk_level_explanation": explanation.risk_level.value,
+            "category_level_explanation": explanation.category_level.value,
+            "interest_level_explanation": explanation.interest_level.value
         }
 
 
 #     MATCH SCORE BY COLLECTIONS  #
 
-
-class TickerCollectionDimVector(DimVector):
-    def __init__(self, symbol, collection_id, coordinates):
-        super().__init__(coordinates)
-        self.symbol = symbol
-        self.collection_id = collection_id
-
-
-class GetMatchScoreByCollections(HasuraAction):
+class GetMatchScoreByCollection(HasuraAction):
     def __init__(self):
-        super().__init__("get_match_scores_by_collections", "profile_id")
+        super().__init__("get_match_scores_by_collection", "profile_id")
 
     def apply(self, db_conn, input_params):
         profile_id = input_params["profile_id"]
@@ -183,11 +177,11 @@ class GetMatchScoreByCollections(HasuraAction):
 
         risks = read_categories_risks(db_conn)
 
-        collection_ids = input_params["collection_ids"]
+        collection_id = input_params["collection_id"]
         ticker_industry_vectors = \
-            self._get_ticker_vectors_by_collections(db_conn, ticker_categories_by_collections_query, collection_ids)
+            self._get_ticker_vectors_by_collection(db_conn, ticker_categories_by_collection_query, collection_id)
         ticker_category_vectors = \
-            self._get_ticker_vectors_by_collections(db_conn, ticker_industries_by_collections_query, collection_ids)
+            self._get_ticker_vectors_by_collection(db_conn, ticker_industries_by_collection_query, collection_id)
 
         ticker_category_vectors_dict = self._index_ticker_collection_vectors(
             ticker_industry_vectors)
@@ -197,13 +191,13 @@ class GetMatchScoreByCollections(HasuraAction):
         result = []
         all_ticker_collection_pairs = \
             set(ticker_category_vectors_dict.keys()).union(ticker_industry_vectors_dict.keys())
-        for (symbol, collection_id) in all_ticker_collection_pairs:
+        for symbol in all_ticker_collection_pairs:
             ticker_category_vector = ticker_category_vectors_dict.get(
-                (symbol, collection_id),
-                TickerCollectionDimVector(symbol, collection_id, {}))
+                symbol,
+                NamedDimVector(symbol, {}))
             ticker_industry_vector = ticker_industry_vectors_dict.get(
-                (symbol, collection_id),
-                TickerCollectionDimVector(symbol, collection_id, {}))
+                symbol,
+                NamedDimVector(symbol, {}))
 
             match_score = profile_ticker_similarity(profile_category_vector,
                                                     ticker_category_vector,
@@ -211,6 +205,7 @@ class GetMatchScoreByCollections(HasuraAction):
                                                     profile_industry_vector,
                                                     ticker_industry_vector)
 
+            explanation = match_score.explain()
             result.append({
                 "symbol":
                 symbol,
@@ -218,42 +213,44 @@ class GetMatchScoreByCollections(HasuraAction):
                 is_match(profile_category_vector, ticker_category_vector),
                 "match_score":
                 match_score.match_score(),
-                "explanation_code": match_score.explanation_code()
+                "risk_level_explanation": explanation.risk_level.value,
+                "category_level_explanation": explanation.category_level.value,
+                "interest_level_explanation": explanation.interest_level.value
             })
 
         return result
 
     @staticmethod
     def _index_ticker_collection_vectors(
-        ticker_collection_vectors: List[TickerCollectionDimVector]
-    ) -> Dict[Tuple[str, int], TickerCollectionDimVector]:
+        ticker_collection_vectors: List[NamedDimVector]
+    ) -> Dict[Tuple[str, int], NamedDimVector]:
         result = {}
         for vector in ticker_collection_vectors:
-            result[(vector.symbol, vector.collection_id)] = vector
+            result[vector.name] = vector
 
         return result
 
     @staticmethod
-    def _get_ticker_vectors_by_collections(db_conn, ticker_vectors_query,
-                                           collection_ids):
+    def _get_ticker_vectors_by_collection(db_conn, ticker_vectors_query,
+                                          collection_id):
         cursor = db_conn.cursor()
         cursor.execute(ticker_vectors_query,
-                       {"collection_ids": tuple(collection_ids)})
+                       {"collection_id": collection_id})
 
         vectors = []
         for row in cursor.fetchall():
-            vectors.append(TickerCollectionDimVector(row[0], row[1], row[2]))
+            vectors.append(NamedDimVector(row[0], row[1]))
 
         return vectors
 
     @staticmethod
     def _query_ticker_collection_vectors(
-            db_conn, query) -> List[TickerCollectionDimVector]:
+            db_conn, query) -> List[NamedDimVector]:
         result = []
 
         cursor = db_conn.cursor()
         cursor.execute(query)
         for row in cursor.fetchall():
-            result.append(TickerCollectionDimVector(row[0], row[1], row[2]))
+            result.append(NamedDimVector(row[0], row[1]))
 
         return result

@@ -23,7 +23,7 @@ actions:
     handler: '{{AWS_LAMBDA_API_GATEWAY_ENDPOINT}}/fetchNewsData'
   permissions:
   - role: user
-- name: get_match_scores_by_collections
+- name: get_match_scores_by_collection
   definition:
     kind: ""
     handler: '{{AWS_LAMBDA_API_GATEWAY_ENDPOINT}}/hasuraAction'
@@ -61,11 +61,4 @@ custom_types:
       type: object
       field_mapping:
         symbol: symbol
-    - remote_table:
-        schema: app
-        name: ticker_match_score_explanations
-      name: explanation
-      type: object
-      field_mapping:
-        explanation_code: code
   scalars: []

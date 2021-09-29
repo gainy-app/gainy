@@ -127,6 +127,19 @@ EXPLANATION_CONFIG = {
 }
 
 
+class MatchScoreExplanation:
+
+    def __init__(
+            self,
+            risk_level: SimilarityLevel,
+            category_level: SimilarityLevel,
+            interest_level: SimilarityLevel
+    ):
+        self.risk_level = risk_level
+        self.category_level = category_level
+        self.interest_level = interest_level
+
+
 class MatchScoreExplainer:
     def __init__(self, config):
         self.config = config
@@ -140,8 +153,8 @@ class MatchScoreExplainer:
 
         return SimilarityLevel.LOW
 
-    def explanation_code(self, risk_similarity, category_similarity,
-                         interest_similarity) -> str:
+    def explanation(self, risk_similarity, category_similarity,
+                    interest_similarity) -> MatchScoreExplanation:
 
         risk_level = self._apply_explanation_config(
             risk_similarity, MatchScoreComponent.RISK)
@@ -150,7 +163,7 @@ class MatchScoreExplainer:
         interest_level = self._apply_explanation_config(
             interest_similarity, MatchScoreComponent.INTEREST)
 
-        return f"{risk_level.value}{category_level.value}{interest_level.value}"
+        return MatchScoreExplanation(risk_level, category_level, interest_level)
 
 
 class MatchScore:
@@ -165,21 +178,12 @@ class MatchScore:
 
         self.similarity_explainer = MatchScoreExplainer(EXPLANATION_CONFIG)
 
-    def explanation_code(self) -> str:
-        """
-        Generates a synthetic row id to reference a separate table with match score explanation.
-        This is a logic way to normalize match score data and return match score as a valid object
-        via GraphQL.
-
-        :return: row id in table `app.ticker_match_score_explanations`
-        """
-
-        return self.similarity_explainer.explanation_code(
-            self.risk_similarity, self.category_similarity,
-            self.interest_similarity)
-
     def match_score(self):
         return round(self.similarity * 100)
+
+    def explain(self) -> MatchScoreExplanation:
+        return self.similarity_explainer.explanation(self.risk_similarity, self.category_similarity,
+                                                     self.interest_similarity)
 
 
 def profile_ticker_similarity(

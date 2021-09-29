@@ -1,1 +1,0 @@
-CREATE TABLE app.ticker_match_score_explanations("id" serial NOT NULL, "code" varchar NOT NULL, "risk_level" integer NOT NULL, "category_level" integer NOT NULL, "interest_level" integer NOT NULL, PRIMARY KEY ("code") );

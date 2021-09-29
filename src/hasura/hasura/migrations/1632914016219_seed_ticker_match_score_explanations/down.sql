@@ -1,1 +1,0 @@
-DELETE FROM app.ticker_match_score_explanations WHERE "id" <= 27;
