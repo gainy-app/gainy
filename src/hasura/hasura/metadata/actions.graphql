@@ -80,8 +80,8 @@ type MatchScore {
   symbol: String!
   match_score: Int!
   is_match: Boolean!
-  risk_level_explanation: Int!
-  category_level_explanation: Int!
-  interest_level_explanation: Int!
+  fits_risk: Int!
+  fits_categories: Int!
+  fits_interests: Int!
 }
 

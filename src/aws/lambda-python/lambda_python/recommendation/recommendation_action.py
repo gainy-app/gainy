@@ -156,9 +156,9 @@ class GetMatchScoreByTicker(HasuraAction):
             is_match(profile_category_vector, ticker_category_vector),
             "match_score":
             match_score.match_score(),
-            "risk_level_explanation": explanation.risk_level.value,
-            "category_level_explanation": explanation.category_level.value,
-            "interest_level_explanation": explanation.interest_level.value
+            "fits_risk": explanation.risk_level.value,
+            "fits_categories": explanation.category_level.value,
+            "fits_interests": explanation.interest_level.value
         }
 
 
@@ -213,9 +213,9 @@ class GetMatchScoreByCollection(HasuraAction):
                 is_match(profile_category_vector, ticker_category_vector),
                 "match_score":
                 match_score.match_score(),
-                "risk_level_explanation": explanation.risk_level.value,
-                "category_level_explanation": explanation.category_level.value,
-                "interest_level_explanation": explanation.interest_level.value
+                "fits_risk": explanation.risk_level.value,
+                "fits_categories": explanation.category_level.value,
+                "fits_interests": explanation.interest_level.value
             })
 
         return result

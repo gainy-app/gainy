@@ -6,9 +6,9 @@ query {
         symbol
         is_match
         match_score
-        risk_level_explanation
-        category_level_explanation
-        interest_level_explanation
+        fits_risk
+        fits_categories
+        fits_interests
         ticker {
             name
         }
@@ -24,9 +24,9 @@ query {
         is_match
         match_score
         symbol
-        risk_level_explanation
-        category_level_explanation
-        interest_level_explanation
+        fits_risk
+        fits_categories
+        fits_interests
         ticker {
             name
         }
