@@ -1,0 +1,66 @@
+version: '3.6'
+services:
+  test-meltano:
+    restart: always
+    env_file:
+      - .env
+    build:
+      context: ./src/gainy-fetch
+      target: local
+    image: meltano-airflow:local
+    volumes:
+      - ./src/gainy-fetch/meltano/meltano.template.yml:/project/meltano.template.yml:delegated
+      - ./src/gainy-fetch/meltano/scripts:/project/scripts:delegated
+      - ./src/gainy-fetch/meltano/transform:/project/transform:delegated
+      - ./src/gainy-fetch/meltano/data:/project/data:delegated
+      - ./src/gainy-fetch/meltano/orchestrate:/project/orchestrate:delegated
+      - ./src/gainy-fetch/meltano/seed:/project/seed:delegated
+      - ./src/gainy-fetch/tap-eodhistoricaldata:/tap-eodhistoricaldata:delegated
+      - test_meltano_data:/project/.meltano/run/airflow
+    environment:
+      EODHISTORICALDATA_JOBS_COUNT: 1
+      AIRFLOW_PASSWORD: admin
+      PG_ADDRESS: test-postgres
+      TARGET_POSTGRES_HOST: test-postgres
+      MELTANO_DATABASE_URI: "postgresql://postgres:postgrespassword@test-postgres:5432/postgres?options=-csearch_path%3Dmeltano"
+      NO_AIRFLOW: "true"
+    depends_on:
+      - test-postgres
+    entrypoint: "/init.sh"
+    command: "ui"
+  test-postgres:
+    image: postgres:12
+    restart: always
+    environment:
+      POSTGRES_PASSWORD: postgrespassword
+#  test-hasura:
+#    build:
+#      context: ./src/hasura
+#    ports:
+#    - "${HASURA_PORT}:${HASURA_PORT}"
+#    - "9693:9693"
+#    - "9695:9695"
+#    volumes:
+#      - ./src/hasura/hasura:/hasura:delegated
+#    depends_on:
+#    - "postgres"
+#    restart: always
+#    env_file:
+#      - .env
+#    environment:
+#      HASURA_PORT: ${HASURA_PORT}
+#  firebase:
+#    build:
+#      context: ./src/firebase
+#      dockerfile: hosting.Dockerfile
+#    restart: always
+#    volumes:
+#      - ./src/firebase:/var/www:delegated
+#    ports:
+#      - "8081:5000" # for auth demo hosting
+#    env_file:
+#      - .env
+#    environment:
+#      GOOGLE_APPLICATION_CREDENTIALS: "/var/www/firebase.key.json"
+volumes:
+  test_meltano_data:

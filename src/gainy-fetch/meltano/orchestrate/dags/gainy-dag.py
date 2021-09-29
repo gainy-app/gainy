@@ -68,7 +68,7 @@ dag = DAG(
     default_args=DEFAULT_ARGS,
     schedule_interval="@daily",
     max_active_runs=1,
-    is_paused_upon_creation=False
+    is_paused_upon_creation=True
 )
 
 # operators

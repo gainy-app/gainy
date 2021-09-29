@@ -53,5 +53,12 @@ style-fix:
 extract-passwords:
 	cd terraform && terraform state pull | python ../extract_passwords.py
 
+test:
+	docker-compose -p gainy_test -f docker-compose.test.yml run --rm test-meltano invoke dbt test
+	make test-clean
+
+test-clean:
+	docker-compose -p gainy_test -f docker-compose.test.yml down --rmi local -v
+	docker-compose -p gainy_test -f docker-compose.test.yml rm -sv
 %:
 	@:
