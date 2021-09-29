@@ -17,8 +17,8 @@ resource "aws_db_instance" "db_instance" {
   allocated_storage       = var.env == "production" ? 100 : 20
   max_allocated_storage   = var.env == "production" ? 200 : 21
   backup_retention_period = var.env == "production" ? 7 : 0
-#  TODO use this resource only for production and specify iops
-#  storage_type            = var.env == "production" ? "io1" : "gp2"
+  #  TODO use this resource only for production and specify iops
+  #  storage_type            = var.env == "production" ? "io1" : "gp2"
 
   publicly_accessible = false
 
