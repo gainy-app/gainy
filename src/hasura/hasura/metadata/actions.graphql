@@ -19,12 +19,6 @@ type Query {
 }
 
 type Query {
-  get_recommended_collections(
-    profile_id: Int
-  ): [RecommendedCollection]
-}
-
-type Query {
   get_match_score_by_ticker(
     profile_id: Int
     symbol: String
@@ -32,10 +26,16 @@ type Query {
 }
 
 type Query {
-  get_match_scores_by_collections(
+  get_match_scores_by_collection(
     profile_id: Int!
-    collection_ids: [Int!]
+    collection_id: Int!
   ): [MatchScore]
+}
+
+type Query {
+  get_recommended_collections(
+    profile_id: Int
+  ): [RecommendedCollection]
 }
 
 type ChartDataPoint {
@@ -78,10 +78,10 @@ type RecommendedCollection {
 
 type MatchScore {
   symbol: String!
-  collection_id: String
   match_score: Int!
   is_match: Boolean!
-  explanation: [String!]
+  fits_risk: Int!
+  fits_categories: Int!
+  fits_interests: Int!
 }
-
 

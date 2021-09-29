@@ -3,28 +3,30 @@
 ```graphql
 query {
     get_match_score_by_ticker(profile_id: 1, symbol: "GOOGL") {
+        symbol
         is_match
         match_score
-        symbol
-        explanation
+        fits_risk
+        fits_categories
+        fits_interests
         ticker {
             name
         }
     }
-
 }
 ```
 
-### Get match scores by collections
+### Get match scores by collection id
 
 ```graphql
 query {
-    get_match_scores_by_collections(profile_id: 1, collection_ids: [45, 83]) {
+    get_match_scores_by_collection(profile_id: 1, collection_id: 45) {
         is_match
         match_score
         symbol
-        collection_id
-        explanation
+        fits_risk
+        fits_categories
+        fits_interests
         ticker {
             name
         }
