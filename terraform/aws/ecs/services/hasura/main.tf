@@ -51,6 +51,8 @@ resource "aws_ecs_task_definition" "hasura" {
       aws_log_group_name              = var.aws_log_group_name
       aws_log_region                  = var.aws_log_region
       image                           = docker_registry_image.hasura.name
+      memory_credits                  = var.memory_credits
+      cpu_credits                     = var.cpu_credits
     }
   )
 }
@@ -75,5 +77,5 @@ module "service-hasura" {
 }
 
 output "service_url" {
-  value = module.service-hasura.aws_alb_url
+  value = module.service-hasura.url
 }

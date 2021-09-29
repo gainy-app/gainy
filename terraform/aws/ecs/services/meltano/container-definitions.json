@@ -1,6 +1,7 @@
 [
   {
-    "memory": 1024,
+    "name": "meltano-airflow-ui",
+    "memory": ${ui_memory_credits},
     "extraHosts": null,
     "dnsServers": null,
     "disableNetworking": null,
@@ -21,10 +22,10 @@
         "sourceVolume" : "meltano-data"
       }
     ],
-    "name": "meltano-airflow-ui",
     "ulimits": null,
     "dockerSecurityOptions": null,
     "environment": [
+      { "name": "ENV",                             "value": "${env}" },
       { "name": "PG_DATABASE",                     "value": "${pg_dbname}" },
       { "name": "PG_ADDRESS",                      "value": "${pg_host}" },
       { "name": "PG_PASSWORD",                     "value": "${pg_password}" },
@@ -56,7 +57,8 @@
     }
   },
   {
-    "memory": 3072,
+    "name": "meltano-airflow-scheduler",
+    "memory": ${scheduler_memory_credits},
     "extraHosts": null,
     "dnsServers": null,
     "disableNetworking": null,
@@ -64,17 +66,17 @@
     "portMappings": [],
     "hostname": null,
     "essential": true,
-    "entryPoint": ["/init.sh"],
+    "entryPoint": ["/wait.sh"],
     "mountPoints": [
       {
         "containerPath" : "/project/.meltano/run/airflow",
         "sourceVolume" : "meltano-data"
       }
     ],
-    "name": "meltano-airflow-scheduler",
     "ulimits": null,
     "dockerSecurityOptions": null,
     "environment": [
+      { "name": "ENV",                             "value": "${env}" },
       { "name": "PG_DATABASE",                     "value": "${pg_dbname}" },
       { "name": "PG_ADDRESS",                      "value": "${pg_host}" },
       { "name": "PG_PASSWORD",                     "value": "${pg_password}" },
@@ -84,7 +86,7 @@
       { "name": "AIRFLOW_PASSWORD",                "value": "${airflow_password}" },
       { "name": "AIRFLOW_UI_PORT",                 "value": "${airflow_port}" },
       { "name": "AIRFLOW_DATABASE_URI",            "value": "postgresql://${pg_username}:${pg_password}@${pg_host}:${pg_port}/${pg_dbname}?options=-csearch_path=${pg_airflow_schema}" },
-      { "name": "EODHISTORICALDATA_JOBS_COUNT",    "value": "4" },
+      { "name": "EODHISTORICALDATA_JOBS_COUNT",    "value": "${eodhistoricaldata_jobs_count}" },
       { "name": "TAP_EODHISTORICALDATA_API_TOKEN", "value": "${eodhistoricaldata_api_token}" },
       { "name": "TARGET_POSTGRES_HOST",            "value": "${pg_host}" },
       { "name": "TARGET_POSTGRES_PORT",            "value": "${pg_port}" },
@@ -102,7 +104,7 @@
     "command": ["invoke", "airflow", "scheduler"],
     "user": null,
     "dockerLabels": null,
-    "cpu": 3072,
+    "cpu": ${scheduler_cpu_credits},
     "privileged": null,
     "memoryReservation": null,
     "logConfiguration": {

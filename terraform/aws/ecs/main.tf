@@ -324,7 +324,7 @@ resource "aws_launch_configuration" "as_conf" {
  * Create Auto Scaling Group
  */
 resource "aws_autoscaling_group" "asg" {
-  name = "asg-ecs-enviroment"
+  name = "asg-gainy-${var.env}"
   //  availability_zones        = var.aws_zones
   vpc_zone_identifier       = aws_subnet.private_subnet.*.id
   min_size                  = "1"
