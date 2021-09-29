@@ -41,6 +41,9 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
 
+      - name: Set up
+        run: cp .env.dist .env
+
       - name: Run tests
         id: test
         continue-on-error: true
