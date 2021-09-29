@@ -18,3 +18,7 @@ variable "ecs_cluster_name" {}
 variable "ecs_service_role_arn" {}
 variable "cloudflare_zone_id" {}
 variable "domain" {}
+variable "eodhistoricaldata_jobs_count" {}
+variable "ui_memory_credits" {}
+variable "scheduler_memory_credits" {}
+variable "scheduler_cpu_credits" {}

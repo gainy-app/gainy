@@ -6,17 +6,18 @@ variable "vpc_default_sg_id" {}
 resource "random_password" "rds" {
   length           = 16
   special          = true
-  override_special = "!#$%&*()-_=+[]{}<>:?"
+  override_special = "!#$&*()-_=+[]{}<>:?"
 }
 
 resource "aws_db_instance" "db_instance" {
   identifier              = "${var.name}-${var.env}"
   engine                  = "postgres"
   engine_version          = "12"
-  instance_class          = "db.m6g.large"
-  allocated_storage       = 100
-  max_allocated_storage   = 200
+  instance_class          = var.env == "production" ? "db.m6g.large" : "db.t3.micro"
+  allocated_storage       = var.env == "production" ? 100 : 20
+  max_allocated_storage   = var.env == "production" ? 200 : 21
   backup_retention_period = var.env == "production" ? 7 : 0
+  storage_type            = var.env == "production" ? "io1" : "gp2"
 
   publicly_accessible = false
 

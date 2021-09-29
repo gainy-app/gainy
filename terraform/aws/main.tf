@@ -1,11 +1,4 @@
-variable "env" {}
-variable "eodhistoricaldata_api_token" {}
-variable "gnews_api_token" {}
-variable "domain" {
-  default = "gainy-infra.net"
-}
-variable "cloudflare_zone_id" {}
-variable "hasura_jwt_secret" {}
+
 
 module "s3" {
   source = "./s3"
@@ -39,7 +32,7 @@ module "lambda" {
 module "ecs" {
   source        = "./ecs"
   env           = var.env
-  instance_type = "c5.2xlarge"
+  instance_type = local.ecs_instance_type
 }
 
 module "rds" {
@@ -81,6 +74,11 @@ module "meltano" {
   pg_port                     = module.rds.db_instance.port
   pg_username                 = module.rds.db_instance.username
   pg_dbname                   = module.rds.db_instance.name
+
+  eodhistoricaldata_jobs_count = local.meltano_eodhistoricaldata_jobs_count
+  scheduler_cpu_credits        = local.meltano_scheduler_cpu_credits
+  scheduler_memory_credits     = local.meltano_scheduler_memory_credits
+  ui_memory_credits            = local.meltano_ui_memory_credits
 }
 
 module "hasura" {
@@ -109,6 +107,9 @@ module "hasura" {
   hasura_enable_console           = "true"
   hasura_enable_dev_mode          = "true"
   hasura_jwt_secret               = var.hasura_jwt_secret
+
+  cpu_credits    = local.hasura_cpu_credits
+  memory_credits = local.hasura_memory_credits
 }
 
 output "bridge_instance" {
@@ -117,6 +118,10 @@ output "bridge_instance" {
 
 output "meltano_url" {
   value = module.meltano.service_url
+}
+
+output "hasura_url" {
+  value = module.hasura.service_url
 }
 
 output "aws_apigatewayv2_api_endpoint" {
