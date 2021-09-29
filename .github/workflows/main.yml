@@ -50,18 +50,11 @@ jobs:
         run: make test 2>&1
 
       - uses: actions/github-script@0.9.0
-        if: github.event_name == 'pull_request'
-        env:
-          TEST_OUTPUT: "terraform\n${{ steps.test.outputs.stdout }}"
+        if: github.event_name == 'pull_request' and steps.test.outcome == 'success'
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
-            const output = `#### Test 🖌\`${{ steps.test.outcome }}\`
-            <details><summary>Show Output</summary>
-            \`\`\`\n
-            ${process.env.TEST_OUTPUT}
-            \`\`\`
-            </details>
+            const output = `#### Tests: ✅ \`${{ steps.test.outcome }}\`
             *Pusher: @${{ github.actor }}, Action: \`${{ github.event_name }}\`*`;
             github.issues.createComment({
               issue_number: context.issue.number,
