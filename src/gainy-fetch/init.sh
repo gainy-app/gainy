@@ -8,7 +8,7 @@ find seed -iname '*.sql' | while read -r i; do
   PGPASSWORD=$PG_PASSWORD psql -h $PG_ADDRESS -p $PG_PORT -U $PG_USERNAME $PG_DATABASE -P pager -f "$i"
 done
 echo "Seeding done"
-meltano invoke dbt test -x &> /dev/null || (echo 'Running cst-to-postgres' && meltano schedule run csv-to-postgres)
+meltano invoke dbt test -x || (echo 'Running cst-to-postgres' && meltano schedule run csv-to-postgres)
 
 if "$NO_AIRFLOW" == ""; then
   if ! meltano invoke airflow users list | grep admin > /dev/null; then
