@@ -39,6 +39,7 @@ resource "aws_ecs_task_definition" "hasura" {
     {
       pg_host                         = var.pg_host
       pg_password                     = var.pg_password
+      pg_password_encoded             = urlencode(var.pg_password)
       pg_port                         = var.pg_port
       pg_username                     = var.pg_username
       pg_dbname                       = var.pg_dbname

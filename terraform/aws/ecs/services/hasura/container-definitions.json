@@ -23,9 +23,9 @@
     "environment": [
       { "name": "HASURA_GRAPHQL_UNAUTHORIZED_ROLE",     "value": "anonymous" },
       { "name": "HASURA_PORT",                          "value": "${hasura_port}" },
-      { "name": "HASURA_GRAPHQL_METADATA_DATABASE_URL", "value": "postgres://${pg_username}:${pg_password}@${pg_host}:${pg_port}/${pg_dbname}" },
+      { "name": "HASURA_GRAPHQL_METADATA_DATABASE_URL", "value": "postgres://${pg_username}:${pg_password_encoded}@${pg_host}:${pg_port}/${pg_dbname}" },
       { "name": "HASURA_GRAPHQL_ENABLED_LOG_TYPES",     "value": "startup, http-log, webhook-log, websocket-log, query-log" },
-      { "name": "HASURA_GRAPHQL_DATABASE_URL",          "value": "postgres://${pg_username}:${pg_password}@${pg_host}:${pg_port}/${pg_dbname}" },
+      { "name": "HASURA_GRAPHQL_DATABASE_URL",          "value": "postgres://${pg_username}:${pg_password_encoded}@${pg_host}:${pg_port}/${pg_dbname}" },
       { "name": "HASURA_GRAPHQL_ENABLE_CONSOLE",        "value": "${hasura_enable_console}" },
       { "name": "HASURA_GRAPHQL_DEV_MODE",              "value": "${hasura_enable_dev_mode}" },
       { "name": "HASURA_GRAPHQL_ADMIN_SECRET",          "value": "${hasura_admin_secret}" },
