@@ -1,4 +1,4 @@
-FROM hasura/graphql-engine:v2.0.1.cli-migrations-v2
+FROM hasura/graphql-engine:v2.0.9.cli-migrations-v2
 
 RUN apt update
 RUN apt install -y curl

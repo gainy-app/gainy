@@ -8,12 +8,12 @@ find seed -iname '*.sql' | while read -r i; do
   PGPASSWORD=$PG_PASSWORD psql -h $PG_ADDRESS -p $PG_PORT -U $PG_USERNAME $PG_DATABASE -P pager -f "$i"
 done
 echo "Seeding done"
-meltano invoke dbt test -x || (echo 'Running cst-to-postgres' && meltano schedule run csv-to-postgres)
+PGPASSWORD=$PG_PASSWORD psql -h $PG_ADDRESS -p $PG_PORT -U $PG_USERNAME $PG_DATABASE -P pager -c "select count(*) from tickers" &> /dev/null || (echo 'Running cst-to-postgres' && meltano schedule run csv-to-postgres)
 
-if "$NO_AIRFLOW" == ""; then
+if [ -z "$NO_AIRFLOW" ]; then
   if ! meltano invoke airflow users list | grep admin > /dev/null; then
     echo "Creating admin user"
-    meltano invoke airflow users create --username admin --password $AIRFLOW_PASSWORD --firstname admin --lastname admin --role Admin --email support@gainy.app
+    meltano invoke airflow users create --username admin --password "$AIRFLOW_PASSWORD" --firstname admin --lastname admin --role Admin --email support@gainy.app
   else
     echo "Admin user exists"
   fi
