@@ -20,7 +20,7 @@ actions:
 - name: get_match_score_by_ticker
   definition:
     kind: ""
-    handler: '{{AWS_LAMBDA_API_GATEWAY_ENDPOINT}}/fetchNewsData'
+    handler: '{{AWS_LAMBDA_API_GATEWAY_ENDPOINT}}/hasuraAction'
   permissions:
   - role: user
 - name: get_match_scores_by_collection
@@ -32,7 +32,7 @@ actions:
 - name: get_recommended_collections
   definition:
     kind: ""
-    handler: '{{AWS_LAMBDA_API_GATEWAY_ENDPOINT}}/fetchNewsData'
+    handler: '{{AWS_LAMBDA_API_GATEWAY_ENDPOINT}}/hasuraAction'
   permissions:
   - role: user
 custom_types:
