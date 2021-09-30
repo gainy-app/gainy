@@ -4,8 +4,8 @@ variable "db_subnet_group_name" {}
 variable "vpc_default_sg_id" {}
 
 resource "random_password" "rds" {
-  length           = 16
-  special          = false
+  length  = 16
+  special = false
 }
 
 resource "aws_db_instance" "db_instance" {
