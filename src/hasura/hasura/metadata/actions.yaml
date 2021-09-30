@@ -1,64 +1,64 @@
-actions:
-- name: fetchChartData
-  definition:
-    kind: ""
-    handler: '{{AWS_LAMBDA_API_GATEWAY_ENDPOINT}}/fetchChartData'
-  permissions:
-  - role: user
-- name: fetchLivePrices
-  definition:
-    kind: ""
-    handler: '{{AWS_LAMBDA_API_GATEWAY_ENDPOINT}}/fetchLivePrices'
-  permissions:
-  - role: user
-- name: fetchNewsData
-  definition:
-    kind: ""
-    handler: '{{AWS_LAMBDA_API_GATEWAY_ENDPOINT}}/fetchNewsData'
-  permissions:
-  - role: user
-- name: get_match_score_by_ticker
-  definition:
-    kind: ""
-    handler: '{{AWS_LAMBDA_API_GATEWAY_ENDPOINT}}/hasuraAction'
-  permissions:
-  - role: user
-- name: get_match_scores_by_collection
-  definition:
-    kind: ""
-    handler: '{{AWS_LAMBDA_API_GATEWAY_ENDPOINT}}/hasuraAction'
-  permissions:
-  - role: user
-- name: get_recommended_collections
-  definition:
-    kind: ""
-    handler: '{{AWS_LAMBDA_API_GATEWAY_ENDPOINT}}/hasuraAction'
-  permissions:
-  - role: user
+actions: []
+#- name: fetchChartData
+#  definition:
+#    kind: ""
+#    handler: '{{AWS_LAMBDA_API_GATEWAY_ENDPOINT}}/fetchChartData'
+#  permissions:
+#  - role: user
+#- name: fetchLivePrices
+#  definition:
+#    kind: ""
+#    handler: '{{AWS_LAMBDA_API_GATEWAY_ENDPOINT}}/fetchLivePrices'
+#  permissions:
+#  - role: user
+#- name: fetchNewsData
+#  definition:
+#    kind: ""
+#    handler: '{{AWS_LAMBDA_API_GATEWAY_ENDPOINT}}/fetchNewsData'
+#  permissions:
+#  - role: user
+#- name: get_match_score_by_ticker
+#  definition:
+#    kind: ""
+#    handler: '{{AWS_LAMBDA_API_GATEWAY_ENDPOINT}}/hasuraAction'
+#  permissions:
+#  - role: user
+#- name: get_match_scores_by_collection
+#  definition:
+#    kind: ""
+#    handler: '{{AWS_LAMBDA_API_GATEWAY_ENDPOINT}}/hasuraAction'
+#  permissions:
+#  - role: user
+#- name: get_recommended_collections
+#  definition:
+#    kind: ""
+#    handler: '{{AWS_LAMBDA_API_GATEWAY_ENDPOINT}}/hasuraAction'
+#  permissions:
+#  - role: user
 custom_types:
   enums: []
   input_objects: []
-  objects:
-  - name: ChartDataPoint
-  - name: NewsDataPoint
-  - name: LivePriceData
-  - name: LiveStockPriceData
-  - name: RecommendedCollection
-    relationships:
-    - remote_table:
-        schema: public
-        name: collections
-      name: collection
-      type: object
-      field_mapping:
-        id: id
-  - name: MatchScore
-    relationships:
-    - remote_table:
-        schema: public
-        name: tickers
-      name: ticker
-      type: object
-      field_mapping:
-        symbol: symbol
+  objects: []
+#  - name: ChartDataPoint
+#  - name: NewsDataPoint
+#  - name: LivePriceData
+#  - name: LiveStockPriceData
+#  - name: RecommendedCollection
+#    relationships:
+#    - remote_table:
+#        schema: public
+#        name: collections
+#      name: collection
+#      type: object
+#      field_mapping:
+#        id: id
+#  - name: MatchScore
+#    relationships:
+#    - remote_table:
+#        schema: public
+#        name: tickers
+#      name: ticker
+#      type: object
+#      field_mapping:
+#        symbol: symbol
   scalars: []

@@ -10,13 +10,15 @@ done
 echo "Seeding done"
 meltano invoke dbt test -x &> /dev/null || (echo 'Running cst-to-postgres' && meltano schedule run csv-to-postgres)
 
-if [ -z "$NO_AIRFLOW" ]; then
+if "$NO_AIRFLOW" == ""; then
   if ! meltano invoke airflow users list | grep admin > /dev/null; then
     echo "Creating admin user"
     meltano invoke airflow users create --username admin --password $AIRFLOW_PASSWORD --firstname admin --lastname admin --role Admin --email support@gainy.app
   else
     echo "Admin user exists"
   fi
+else
+  echo "Skip creating admin"
 fi
 
 ( cd scripts && python3 generate_rules_sql.py )

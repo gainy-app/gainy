@@ -16,8 +16,6 @@ SET xmloption = content;
 SET client_min_messages = warning;
 SET row_security = off;
 
-ALTER TABLE IF EXISTS ONLY public.fundamentals DROP CONSTRAINT IF EXISTS fundamentals_pkey;
-DROP TABLE IF EXISTS public.fundamentals;
 SET default_tablespace = '';
 
 SET default_table_access_method = heap;
