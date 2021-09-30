@@ -27,7 +27,7 @@ with prices_tmp as (
 			first_value("date"::date) over (partition by code order by "date" desc) as cur_date,
 			first_value(adjusted_close::numeric) over (partition by code order by "date" desc) as cur_price
 		from
-			public.historical_prices
+            {{ ref('historical_prices') }}
 	) hp
 ),
 prices_ago as (

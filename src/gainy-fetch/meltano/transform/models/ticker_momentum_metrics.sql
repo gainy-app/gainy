@@ -13,9 +13,9 @@ with tickers as (select * from {{ ref('tickers') }}),
      weekly_prices as
          (
              SELECT hp.code, hp.date::timestamp as date, hp.close
-             from historical_prices hp
+             from {{ ref('historical_prices') }} hp
                       JOIN tickers t ON t.symbol = hp.code
-                 left join historical_prices hp1 ON hp1.code = hp.code AND
+                 left join {{ ref('historical_prices') }} hp1 ON hp1.code = hp.code AND
                  To_char(hp1.date::timestamp, 'IYYY-IW') =
                  To_char(hp.date::timestamp, 'IYYY-IW') AND
                  hp1.date::timestamp > hp.date::timestamp
@@ -40,9 +40,9 @@ with tickers as (select * from {{ ref('tickers') }}),
                     case when hp2.close > 0 THEN hp0.close / hp2.close - 1 - settings.local_risk_free_rate END AS MOM12
              from fundamentals f
                       join settings ON true
-                      join historical_prices hp0 on hp0.code = f.code AND hp0.date::timestamp < NOW() - interval '1 month' AND hp0.date::timestamp > NOW() - interval '1 month' - interval '1 week'
-                      join historical_prices hp1 on hp1.code = f.code AND hp1.date::timestamp < NOW() - interval '2 month' AND hp1.date::timestamp > NOW() - interval '2 month' - interval '1 week'
-                      join historical_prices hp2 on hp2.code = f.code AND hp2.date::timestamp < NOW() - interval '13 month' AND hp2.date::timestamp > NOW() - interval '13 month' - interval '1 week'
+                      join {{ ref('historical_prices') }} hp0 on hp0.code = f.code AND hp0.date::timestamp < NOW() - interval '1 month' AND hp0.date::timestamp > NOW() - interval '1 month' - interval '1 week'
+                      join {{ ref('historical_prices') }} hp1 on hp1.code = f.code AND hp1.date::timestamp < NOW() - interval '2 month' AND hp1.date::timestamp > NOW() - interval '2 month' - interval '1 week'
+                      join {{ ref('historical_prices') }} hp2 on hp2.code = f.code AND hp2.date::timestamp < NOW() - interval '13 month' AND hp2.date::timestamp > NOW() - interval '13 month' - interval '1 week'
                       inner join tickers as t on f.code = t.symbol
              order by f.code, hp0.date DESC, hp1.date DESC, hp2.date DESC
          ),
