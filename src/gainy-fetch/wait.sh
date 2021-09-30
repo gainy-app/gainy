@@ -1,6 +1,6 @@
 #!/bin/sh
 
-#bash -c "while ! curl -sD - meltano-airflow-ui:5001 | grep '302 FOUND' > /dev/null; do sleep 1; done;"
-sleep 10
+while ! PGPASSWORD=$PG_PASSWORD pg_isready -h $PG_ADDRESS -p $PG_PORT -U $PG_USERNAME; do sleep 1; done
+while ! PGPASSWORD=$PG_PASSWORD psql -h $PG_ADDRESS -p $PG_PORT -U $PG_USERNAME $PG_DATABASE -c "select * from meltano.alembic_version"; do sleep 1; done
 
 meltano "$@"

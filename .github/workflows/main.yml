@@ -34,6 +34,39 @@ jobs:
         working-directory: src/aws/lambda-python/
         run: yapf --diff -r . > /dev/null
 
+  test:
+    name: "Run tests"
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Set up
+        run: cp .env.dist .env
+
+      - name: Run tests
+        id: test
+        continue-on-error: true
+        run: make test 2>&1
+
+      - uses: actions/github-script@0.9.0
+        if: github.event_name == 'pull_request' && steps.test.outcome == 'success'
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const output = `#### Tests: ✅ \`${{ steps.test.outcome }}\`
+            *Pusher: @${{ github.actor }}, Action: \`${{ github.event_name }}\`*`;
+            github.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: output
+            })
+
+      - name: Tests Status
+        if: steps.test.outcome == 'failure'
+        run: make test-clean && exit 1
+
   terraform:
     name: "Terraform"
     runs-on: ubuntu-latest

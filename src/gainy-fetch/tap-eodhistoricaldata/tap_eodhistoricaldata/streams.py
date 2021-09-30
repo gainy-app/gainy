@@ -115,7 +115,7 @@ class HistoricalDividends(AbstractEODStream):
     schema_filepath = SCHEMAS_DIR / "dividends.json"
 
 class HistoricalPrices(AbstractEODStream):
-    name = "historical_prices"
+    name = "raw_historical_prices"
     path = "/eod/{Code}?fmt=json&period=d"
     primary_keys = ["Code", "date"]
     selected_by_default = True

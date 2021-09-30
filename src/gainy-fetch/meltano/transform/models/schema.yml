@@ -1,23 +1,594 @@
 version: 2
 
 models:
+  - name: categories
+    columns:
+      - name: id
+        tests:
+          - unique
+          - not_null
+          - type:
+              type: 'integer'
+      - name: name
+        tests:
+          - not_null
+          - type:
+              type: 'text'
+      - name: icon_url
+        tests:
+          - exists
+          - type:
+              type: 'text'
+
+  - name: historical_growth_rate
+    columns:
+      - name: symbol
+        tests:
+          - not_null
+          - type:
+              type: 'character varying'
+      - name: date
+        tests:
+          - not_null
+          - type:
+              type: 'date'
+      - name: growth_rate_1d
+        tests:
+          - exists
+          - type:
+              type: 'double precision'
+      - name: growth_rate_1w
+        tests:
+          - exists
+          - type:
+              type: 'double precision'
+      - name: growth_rate_1m
+        tests:
+          - exists
+          - type:
+              type: 'double precision'
+      - name: growth_rate_3m
+        tests:
+          - exists
+          - type:
+              type: 'double precision'
+      - name: growth_rate_1y
+        tests:
+          - exists
+          - type:
+              type: 'double precision'
+
+  - name: historical_prices
+    columns:
+      - name: code
+        tests:
+          - not_null
+          - type:
+              type: 'character varying'
+      - name: adjusted_close
+        tests:
+          - exists
+          - type:
+              type: 'double precision'
+      - name: close
+        tests:
+          - exists
+          - type:
+              type: 'double precision'
+      - name: date
+        tests:
+          - not_null
+          - type:
+              type: 'date'
+      - name: high
+        tests:
+          - exists
+          - type:
+              type: 'double precision'
+      - name: low
+        tests:
+          - exists
+          - type:
+              type: 'double precision'
+      - name: open
+        tests:
+          - exists
+          - type:
+              type: 'double precision'
+      - name: volume
+        tests:
+          - exists
+          - type:
+              type: 'numeric'
+
+  - name: industry_stats_daily
+    columns:
+      - name: date
+        tests:
+          - not_null
+          - type:
+              type: 'timestamp without time zone'
+      - name: industry_id
+        tests:
+          - not_null
+          - type:
+              type: 'integer'
+      - name: median_price
+        tests:
+          - exists
+          - type:
+              type: 'double precision'
+      - name: median_growth_rate_1d
+        tests:
+          - exists
+          - type:
+              type: 'double precision'
+      - name: median_growth_rate_1w
+        tests:
+          - exists
+          - type:
+              type: 'double precision'
+      - name: median_growth_rate_1m
+        tests:
+          - exists
+          - type:
+              type: 'double precision'
+      - name: median_growth_rate_3m
+        tests:
+          - exists
+          - type:
+              type: 'double precision'
+      - name: median_growth_rate_1y
+        tests:
+          - exists
+          - type:
+              type: 'double precision'
+
+  - name: industry_stats_quarterly
+    columns:
+      - name: date
+        tests:
+          - not_null
+          - type:
+              type: 'timestamp without time zone'
+      - name: industry_id
+        tests:
+          - not_null
+          - type:
+              type: 'integer'
+      - name: median_net_income
+        tests:
+          - exists
+          - type:
+              type: 'double precision'
+      - name: median_revenue
+        tests:
+          - exists
+          - type:
+              type: 'double precision'
+
+  - name: interests
+    columns:
+      - name: id
+        tests:
+          - unique
+          - exists
+          - type:
+              type: 'integer'
+      - name: enabled
+        tests:
+          - exists
+          - type:
+              type: 'character varying'
+      - name: icon_url
+        tests:
+          - exists
+          - type:
+              type: 'character varying'
+      - name: name
+        tests:
+          - exists
+          - type:
+              type: 'character varying'
+
+  - name: ticker_categories
+    columns:
+      - name: category_id
+        tests:
+          - exists
+          - not_null
+          - type:
+              type: 'integer'
+      - name: symbol
+        tests:
+          - exists
+          - not_null
+          - type:
+              type: 'character varying'
+
+  - name: ticker_collections
+    columns:
+      - name: symbol
+        tests:
+          - exists
+          - not_null
+          - type:
+              type: 'character varying'
+      - name: collection_id
+        tests:
+          - exists
+          - not_null
+          - type:
+              type: 'integer'
+
+  - name: ticker_events
+    columns:
+      - name: symbol
+        tests:
+          - exists
+          - not_null
+          - type:
+              type: 'character varying'
+      - name: date
+        tests:
+          - exists
+          - not_null
+          - type:
+              type: 'date'
+      - name: type
+        tests:
+          - exists
+          - type:
+              type: 'text'
+      - name: description
+        tests:
+          - exists
+          - type:
+              type: 'text'
+      - name: created_at
+        tests:
+          - exists
+          - type:
+              type: 'timestamp with time zone'
+
+  - name: ticker_financials
+    columns:
+      - name: symbol
+        tests:
+          - unique
+          - not_null
+          - exists
+          - type:
+              type: 'character varying'
+      - name: pe_ratio
+        tests:
+          - exists
+          - type:
+              type: 'real'
+      - name: market_capitalization
+        tests:
+          - exists
+          - type:
+              type: 'real'
+      - name: highlight
+        tests:
+          - exists
+          - type:
+              type: 'text'
+      - name: revenue_ttm
+        tests:
+          - exists
+          - type:
+              type: 'real'
+      - name: dividend_growth
+        tests:
+          - exists
+          - type:
+              type: 'double precision'
+      - name: quarter_ago_close
+        tests:
+          - exists
+          - type:
+              type: 'real'
+      - name: quarter_price_performance
+        tests:
+          - exists
+          - type:
+              type: 'real'
+      - name: created_at
+        tests:
+          - exists
+          - type:
+              type: 'timestamp with time zone'
+      - name: net_profit_margin
+        tests:
+          - exists
+          - type:
+              type: 'real'
+      - name: enterprise_value_to_sales
+        tests:
+          - exists
+          - type:
+              type: 'real'
+      - name: quarterly_revenue_growth_yoy
+        tests:
+          - exists
+          - type:
+              type: 'real'
+      - name: month_price_performance
+        tests:
+          - exists
+          - type:
+              type: 'real'
+
+  - name: ticker_highlights
+    columns:
+      - name: symbol
+        tests:
+          - not_null
+          - exists
+          - type:
+              type: 'character varying'
+      - name: highlight
+        tests:
+          - exists
+          - type:
+              type: 'text'
+      - name: created_at
+        tests:
+          - exists
+          - type:
+              type: 'timestamp with time zone'
+
+  - name: ticker_industries
+    columns:
+      - name: symbol
+        tests:
+          - not_null
+          - exists
+          - type:
+              type: 'character varying'
+      - name: industry_id
+        tests:
+          - not_null
+          - exists
+          - type:
+              type: 'integer'
+
+  - name: ticker_interests
+    columns:
+      - name: symbol
+        tests:
+          - not_null
+          - exists
+          - type:
+              type: 'character varying'
+      - name: interest_id
+        tests:
+          - not_null
+          - exists
+          - type:
+              type: 'integer'
+
   - name: tickers
     columns:
       - name: symbol
         tests:
-          - unique
           - not_null
-  - name: analyst_ratings
+          - unique
+          - exists
+          - type:
+              type: 'character varying'
+      - name: type
+        tests:
+          - exists
+          - type:
+              type: 'character varying'
+      - name: name
+        tests:
+          - exists
+          - type:
+              type: 'character varying'
+      - name: description
+        tests:
+          - exists
+          - type:
+              type: 'character varying'
+      - name: phone
+        tests:
+          - exists
+          - type:
+              type: 'character varying'
+      - name: logo_url
+        tests:
+          - exists
+          - type:
+              type: 'character varying'
+      - name: web_url
+        tests:
+          - exists
+          - type:
+              type: 'character varying'
+      - name: ipo_date
+        tests:
+          - exists
+          - type:
+              type: 'date'
+      - name: sector
+        tests:
+          - exists
+          - type:
+              type: 'character varying'
+      - name: industry
+        tests:
+          - exists
+          - type:
+              type: 'character varying'
+      - name: gic_sector
+        tests:
+          - exists
+          - type:
+              type: 'character varying'
+      - name: gic_group
+        tests:
+          - exists
+          - type:
+              type: 'character varying'
+      - name: gic_industry
+        tests:
+          - exists
+          - type:
+              type: 'character varying'
+      - name: gic_sub_industry
+        tests:
+          - exists
+          - type:
+              type: 'character varying'
+      - name: country_name
+        tests:
+          - exists
+          - type:
+              type: 'text'
+      - name: updated_at
+        tests:
+          - exists
+          - type:
+              type: 'timestamp without time zone'
+
+  - name: growth_rate_1m
     columns:
       - name: symbol
         tests:
-          - unique
-          - not_null
-  - name: highlights
+          - exists
+          - type:
+              type: 'character varying'
+      - name: date
+        tests:
+          - exists
+          - type:
+              type: 'timestamp without time zone'
+      - name: growth_rate
+        tests:
+          - exists
+          - type:
+              type: 'double precision'
+
+  - name: growth_rate_1w
     columns:
       - name: symbol
         tests:
-          - unique
-          - not_null
+          - exists
+          - type:
+              type: 'character varying'
+      - name: date
+        tests:
+          - exists
+          - type:
+              type: 'timestamp without time zone'
+      - name: growth_rate
+        tests:
+          - exists
+          - type:
+              type: 'double precision'
 
+  - name: historical_prices_1m
+    columns:
+      - name: symbol
+        tests:
+          - exists
+          - type:
+              type: 'character varying'
+      - name: date
+        tests:
+          - exists
+          - type:
+              type: 'date'
+      - name: open
+        tests:
+          - exists
+          - type:
+              type: 'double precision'
+      - name: close
+        tests:
+          - exists
+          - type:
+              type: 'double precision'
+      - name: adjusted_close
+        tests:
+          - exists
+          - type:
+              type: 'double precision'
 
+  - name: historical_prices_1w
+    columns:
+      - name: symbol
+        tests:
+          - exists
+          - type:
+              type: 'character varying'
+      - name: date
+        tests:
+          - exists
+          - type:
+              type: 'date'
+      - name: open
+        tests:
+          - exists
+          - type:
+              type: 'double precision'
+      - name: close
+        tests:
+          - exists
+          - type:
+              type: 'double precision'
+      - name: adjusted_close
+        tests:
+          - exists
+          - type:
+              type: 'double precision'
+
+  - name: industry_median_1m
+    columns:
+      - name: industry_id
+        tests:
+          - exists
+          - type:
+              type: 'integer'
+      - name: date
+        tests:
+          - exists
+          - type:
+              type: 'timestamp without time zone'
+      - name: median_growth_rate
+        tests:
+          - exists
+          - type:
+              type: 'double precision'
+      - name: median_price
+        tests:
+          - exists
+          - type:
+              type: 'double precision'
+
+  - name: industry_median_1w
+    columns:
+      - name: industry_id
+        tests:
+          - exists
+          - type:
+              type: 'integer'
+      - name: date
+        tests:
+          - exists
+          - type:
+              type: 'timestamp without time zone'
+      - name: median_growth_rate
+        tests:
+          - exists
+          - type:
+              type: 'double precision'
+      - name: median_price
+        tests:
+          - exists
+          - type:
+              type: 'double precision'
