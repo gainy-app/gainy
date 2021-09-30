@@ -14,7 +14,7 @@ with price_stats as
              select hp.date::timestamp                                     as date,
                     ti.industry_id,
                     percentile_cont(0.5) WITHIN GROUP (ORDER BY adjusted_close) as median_price
-             from historical_prices hp
+             from {{ ref('historical_prices') }} hp
                       join {{ ref('tickers') }} on hp.code = tickers.symbol
                       join {{ ref('ticker_industries') }} ti on tickers.symbol = ti.symbol
              group by ti.industry_id, hp.date
