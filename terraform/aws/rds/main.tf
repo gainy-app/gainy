@@ -5,8 +5,7 @@ variable "vpc_default_sg_id" {}
 
 resource "random_password" "rds" {
   length           = 16
-  special          = true
-  override_special = "!#$&*()-_=+[]{}<>:?"
+  special          = false
 }
 
 resource "aws_db_instance" "db_instance" {
