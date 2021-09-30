@@ -8,12 +8,13 @@
   )
 }}
 
-SELECT code,
-       adjusted_close,
-       close,
-       date::date,
-       high,
-       low,
-       open,
-       volume
-from raw_historical_prices
+SELECT rhp.code,
+       rhp.adjusted_close,
+       rhp.close,
+       rhp.date::date,
+       rhp.high,
+       rhp.low,
+       rhp.open,
+       rhp.volume
+from raw_historical_prices rhp
+join {{ ref('tickers') }} ON tickers.symbol = rhp.code
