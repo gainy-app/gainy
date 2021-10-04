@@ -16,7 +16,6 @@ services:
       - ./src/gainy-fetch/meltano/data:/project/data:delegated
       - ./src/gainy-fetch/meltano/orchestrate:/project/orchestrate:delegated
       - ./src/gainy-fetch/meltano/seed:/project/seed:delegated
-      - ./src/gainy-fetch/tap-eodhistoricaldata:/tap-eodhistoricaldata:delegated
     environment:
       EODHISTORICALDATA_JOBS_COUNT: 1
       AIRFLOW_PASSWORD: admin

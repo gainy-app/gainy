@@ -12,5 +12,3 @@ COPY meltano/meltano.template.yml meltano/symbols* /project/
 
 ENV ENV=local
 ENV EODHISTORICALDATA_JOBS_COUNT=1
-
-RUN ( cd scripts && python3 generate_rules_sql.py )
