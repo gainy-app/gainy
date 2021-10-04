@@ -22,3 +22,5 @@ variable "eodhistoricaldata_jobs_count" {}
 variable "ui_memory_credits" {}
 variable "scheduler_memory_credits" {}
 variable "scheduler_cpu_credits" {}
+variable "base_image_prefix" {}
+variable "base_image_version" {}

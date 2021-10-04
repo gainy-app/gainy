@@ -48,6 +48,8 @@ module "aws" {
   env                         = var.env
   cloudflare_zone_id          = var.cloudflare_zone_id
   hasura_jwt_secret           = var.hasura_jwt_secret
+  base_image_prefix           = var.base_image_prefix
+  base_image_version          = var.base_image_version
 }
 
 #################################### Variables ####################################

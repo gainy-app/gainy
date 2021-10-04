@@ -79,6 +79,9 @@ module "meltano" {
   scheduler_cpu_credits        = local.meltano_scheduler_cpu_credits
   scheduler_memory_credits     = local.meltano_scheduler_memory_credits
   ui_memory_credits            = local.meltano_ui_memory_credits
+
+  base_image_prefix            = var.base_image_prefix
+  base_image_version           = var.base_image_version
 }
 
 module "hasura" {
