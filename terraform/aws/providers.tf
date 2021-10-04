@@ -21,9 +21,4 @@ provider "docker" {
     username = data.aws_ecr_authorization_token.token.user_name
     password = data.aws_ecr_authorization_token.token.password
   }
-  registry_auth {
-    address  = var.base_image_registry_address
-    username = data.aws_ecr_authorization_token.token.user_name
-    password = data.aws_ecr_authorization_token.token.password
-  }
 }
