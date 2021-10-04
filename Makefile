@@ -10,9 +10,6 @@ up:
 upd:
 	docker-compose up -d
 
-config:
-	docker-compose config
-
 build:
 	docker-compose build
 

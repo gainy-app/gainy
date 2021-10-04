@@ -8,7 +8,7 @@ on:
 
 jobs:
   authorize:
-    name: "Style Check"
+    name: "Authorize"
     runs-on: ubuntu-latest
     steps:
       - name: Docker Registry

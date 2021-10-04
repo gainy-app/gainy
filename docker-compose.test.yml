@@ -6,7 +6,9 @@ services:
       - .env
     build:
       context: ./src/gainy-fetch
-    image: meltano-airflow:local
+      args:
+        BASE_IMAGE_PREFIX: ${BASE_IMAGE_PREFIX}
+        BASE_IMAGE_VERSION: ${BASE_IMAGE_VERSION}
     volumes:
       - ./src/gainy-fetch/meltano/meltano.template.yml:/project/meltano.template.yml:delegated
       - ./src/gainy-fetch/meltano/scripts:/project/scripts:delegated
@@ -15,7 +17,6 @@ services:
       - ./src/gainy-fetch/meltano/orchestrate:/project/orchestrate:delegated
       - ./src/gainy-fetch/meltano/seed:/project/seed:delegated
       - ./src/gainy-fetch/tap-eodhistoricaldata:/tap-eodhistoricaldata:delegated
-      - test_meltano_data:/project/.meltano/run/airflow
     environment:
       EODHISTORICALDATA_JOBS_COUNT: 1
       AIRFLOW_PASSWORD: admin
@@ -26,7 +27,7 @@ services:
     depends_on:
       - test-postgres
     entrypoint: "/init.sh"
-    command: "ui"
+
   test-postgres:
     image: postgres:12
     restart: always
@@ -61,5 +62,3 @@ services:
 #      - .env
 #    environment:
 #      GOOGLE_APPLICATION_CREDENTIALS: "/var/www/firebase.key.json"
-volumes:
-  test_meltano_data:
