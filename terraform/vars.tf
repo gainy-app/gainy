@@ -52,8 +52,8 @@ variable "cloudflare_zone_id" {
 }
 
 variable "base_image_prefix" {
-  type      = string
+  type = string
 }
 variable "base_image_version" {
-  type      = string
+  type = string
 }

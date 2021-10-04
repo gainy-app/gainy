@@ -20,7 +20,7 @@ resource "docker_registry_image" "meltano" {
     context    = local.meltano_root_dir
     dockerfile = "Dockerfile"
     build_args = {
-      BASE_IMAGE_PREFIX = var.base_image_prefix
+      BASE_IMAGE_PREFIX  = var.base_image_prefix
       BASE_IMAGE_VERSION = var.base_image_version
     }
   }
