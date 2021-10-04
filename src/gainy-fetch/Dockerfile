@@ -1,7 +1,7 @@
 ARG BASE_IMAGE_VERSION
-ARG BASE_IMAGE_PREFIX
+ARG BASE_IMAGE_REGISTRY_ADDRESS
 
-FROM ${BASE_IMAGE_PREFIX}-meltano:${BASE_IMAGE_VERSION}
+FROM ${BASE_IMAGE_REGISTRY_ADDRESS}/gainy-meltano:${BASE_IMAGE_VERSION}
 
 COPY meltano/data /project/data
 COPY meltano/orchestrate /project/orchestrate

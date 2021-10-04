@@ -7,7 +7,7 @@ variable "domain" {
 variable "cloudflare_zone_id" {}
 variable "hasura_jwt_secret" {}
 
-variable "base_image_prefix" {}
+variable "base_image_registry_address" {}
 variable "base_image_version" {}
 
 

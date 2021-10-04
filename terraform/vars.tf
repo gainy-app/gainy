@@ -51,7 +51,7 @@ variable "cloudflare_zone_id" {
   sensitive = true
 }
 
-variable "base_image_prefix" {
+variable "base_image_registry_address" {
   type = string
 }
 variable "base_image_version" {

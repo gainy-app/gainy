@@ -7,7 +7,7 @@ services:
     build:
       context: ./src/gainy-fetch
       args:
-        BASE_IMAGE_PREFIX: ${BASE_IMAGE_PREFIX}
+        BASE_IMAGE_REGISTRY_ADDRESS: ${BASE_IMAGE_REGISTRY_ADDRESS}
         BASE_IMAGE_VERSION: ${BASE_IMAGE_VERSION}
     image: meltano-airflow:local
     volumes:
@@ -56,7 +56,7 @@ services:
     build:
       context: ./src/hasura
       args:
-        BASE_IMAGE_PREFIX: ${BASE_IMAGE_PREFIX}
+        BASE_IMAGE_REGISTRY_ADDRESS: ${BASE_IMAGE_REGISTRY_ADDRESS}
         BASE_IMAGE_VERSION: ${BASE_IMAGE_VERSION}
     ports:
     - "${HASURA_PORT}:${HASURA_PORT}"
@@ -73,7 +73,7 @@ services:
       HASURA_PORT: ${HASURA_PORT}
 
   firebase:
-    image: ${BASE_IMAGE_PREFIX}-firebase:${BASE_IMAGE_VERSION}
+    image: ${BASE_IMAGE_REGISTRY_ADDRESS}/gainy-firebase:${BASE_IMAGE_VERSION}
     restart: always
     volumes:
       - ./src/firebase:/var/www:delegated
