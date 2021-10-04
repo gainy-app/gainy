@@ -62,7 +62,7 @@ SELECT code as symbol,
                THEN adjusted_close / first_value(adjusted_close)
                                      OVER (partition by code ORDER BY date::date RANGE INTERVAL '1 year' PRECEDING)
            END as growth_rate_1y
-from historical_prices
+from {{ ref('historical_prices') }}
 join {{ ref('tickers') }} ON tickers.symbol = historical_prices.code
 {% if is_incremental() %}
     join max_updated_at on true
