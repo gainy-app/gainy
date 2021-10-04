@@ -14,6 +14,12 @@ jobs:
     name: "Terraform Test env"
     runs-on: ubuntu-latest
     steps:
+      - name: Authorize in Docker Registry
+        run: aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 217303665077.dkr.ecr.us-east-1.amazonaws.com
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+
       - name: Checkout
         uses: actions/checkout@v2
 

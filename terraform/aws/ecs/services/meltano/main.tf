@@ -19,7 +19,6 @@ resource "docker_registry_image" "meltano" {
   build {
     context    = local.meltano_root_dir
     dockerfile = "Dockerfile"
-    target     = var.env == "production" ? "production" : "local"
   }
 }
 /*

@@ -6,7 +6,6 @@ services:
       - .env
     build:
       context: ./src/gainy-fetch
-      target: local
     image: meltano-airflow:local
     volumes:
       - ./src/gainy-fetch/meltano/meltano.template.yml:/project/meltano.template.yml:delegated

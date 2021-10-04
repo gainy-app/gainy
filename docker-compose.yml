@@ -6,7 +6,9 @@ services:
       - .env
     build:
       context: ./src/gainy-fetch
-      target: local
+      args:
+        BASE_IMAGE_PREFIX: ${BASE_IMAGE_PREFIX}
+        BASE_IMAGE_VERSION: ${BASE_IMAGE_VERSION}
     image: meltano-airflow:local
     volumes:
       - ./src/gainy-fetch/meltano/scripts:/project/scripts:delegated
@@ -24,6 +26,7 @@ services:
       - postgres
     entrypoint: "/init.sh"
     command: "invoke airflow scheduler"
+
   meltano-airflow-ui:
     restart: always
     env_file:
@@ -39,6 +42,7 @@ services:
       - meltano-airflow-scheduler
     entrypoint: "/wait.sh"
     command: "invoke airflow webserver -p 5001"
+
   postgres:
     image: postgres:12
     restart: always
@@ -48,9 +52,13 @@ services:
       POSTGRES_PASSWORD: postgrespassword
     ports:
       - "5432:5432"
+
   hasura:
     build:
       context: ./src/hasura
+      args:
+        BASE_IMAGE_PREFIX: ${BASE_IMAGE_PREFIX}
+        BASE_IMAGE_VERSION: ${BASE_IMAGE_VERSION}
     ports:
     - "${HASURA_PORT}:${HASURA_PORT}"
     - "9693:9693"
@@ -64,10 +72,9 @@ services:
       - .env
     environment:
       HASURA_PORT: ${HASURA_PORT}
+
   firebase:
-    build:
-      context: ./src/firebase
-      dockerfile: hosting.Dockerfile
+    image: ${BASE_IMAGE_PREFIX}-firebase:${BASE_IMAGE_VERSION}
     restart: always
     volumes:
       - ./src/firebase:/var/www:delegated
@@ -77,6 +84,7 @@ services:
       - .env
     environment:
       GOOGLE_APPLICATION_CREDENTIALS: "/var/www/firebase.key.json"
+
 volumes:
   db_data:
   meltano_data:

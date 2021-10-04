@@ -1,5 +1,6 @@
 export PARAMS ?= $(filter-out $@,$(MAKECMDGOALS))
 
+-include .env.make
 -include .env
 
 up:
@@ -8,6 +9,9 @@ up:
 
 upd:
 	docker-compose up -d
+
+config:
+	docker-compose config
 
 build:
 	docker-compose build
