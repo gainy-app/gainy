@@ -165,7 +165,7 @@ jobs:
 
       - name: Docker Pull
         if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-        run: docker-compose pull
+        run: source .env.make && docker-compose pull
 
       - name: Terraform Apply
         if: github.ref == 'refs/heads/main' && github.event_name == 'push'
