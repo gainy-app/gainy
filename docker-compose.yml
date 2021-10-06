@@ -9,7 +9,6 @@ services:
       args:
         BASE_IMAGE_REGISTRY_ADDRESS: ${BASE_IMAGE_REGISTRY_ADDRESS}
         BASE_IMAGE_VERSION: ${BASE_IMAGE_VERSION}
-    image: meltano-airflow:local
     volumes:
       - ./src/gainy-fetch/meltano/scripts:/project/scripts:delegated
       - ./src/gainy-fetch/meltano/meltano.template.yml:/project/meltano.template.yml:delegated
@@ -30,7 +29,11 @@ services:
     restart: always
     env_file:
       - .env
-    image: meltano-airflow:local
+    build:
+      context: ./src/gainy-fetch
+      args:
+        BASE_IMAGE_REGISTRY_ADDRESS: ${BASE_IMAGE_REGISTRY_ADDRESS}
+        BASE_IMAGE_VERSION: ${BASE_IMAGE_VERSION}
     ports:
       - "5001:5001"
     volumes:
