@@ -163,10 +163,6 @@ jobs:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
 
-      - name: Docker Pull
-        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-        run: cp .env.dist .env && source .env.make && docker-compose pull
-
       - name: Terraform Apply
         if: github.ref == 'refs/heads/main' && github.event_name == 'push'
         run: terraform apply -auto-approve
@@ -187,5 +183,3 @@ jobs:
           TF_VAR_cloudflare_email: ${{ secrets.CLOUDFLARE_EMAIL }}
           TF_VAR_cloudflare_api_key: ${{ secrets.CLOUDFLARE_API_KEY }}
           TF_VAR_cloudflare_zone_id: ${{ secrets.CLOUDFLARE_ZONE_ID }}
-          TF_VAR_base_image_registry_address: ${{ secrets.CLOUDFLARE_ZONE_ID }}
-          TF_VAR_base_image_version: ${{ secrets.CLOUDFLARE_ZONE_ID }}
