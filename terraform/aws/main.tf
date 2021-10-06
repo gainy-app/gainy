@@ -44,11 +44,12 @@ module "rds" {
 }
 
 module "vpc_bridge" {
-  source            = "./ec2/vpc_bridge"
-  env               = var.env
-  vpc_default_sg_id = module.ecs.vpc_default_sg_id
-  public_subnet_id  = module.ecs.public_subnet_ids.0
-  vpc_id            = module.ecs.vpc_id
+  source             = "./ec2/vpc_bridge"
+  env                = var.env
+  vpc_default_sg_id  = module.ecs.vpc_default_sg_id
+  public_subnet_id   = module.ecs.public_subnet_ids.0
+  vpc_id             = module.ecs.vpc_id
+  cloudflare_zone_id = var.cloudflare_zone_id
 }
 
 module "meltano" {
@@ -118,8 +119,8 @@ module "hasura" {
   base_image_version          = var.base_image_version
 }
 
-output "bridge_instance" {
-  value = module.vpc_bridge.instance
+output "bridge_instance_url" {
+  value = module.vpc_bridge.bridge_instance_url
 }
 
 output "meltano_url" {
