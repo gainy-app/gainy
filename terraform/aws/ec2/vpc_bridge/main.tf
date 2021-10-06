@@ -78,7 +78,7 @@ resource "cloudflare_record" "service" {
   name    = "gainy-bridge-${var.env}"
   value   = aws_instance.bridge.public_dns
   type    = "CNAME"
-  proxied = true
+  proxied = false
   zone_id = var.cloudflare_zone_id
 }
 
