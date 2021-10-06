@@ -4,6 +4,7 @@ variable "env" {}
 variable "vpc_id" {}
 variable "vpc_default_sg_id" {}
 variable "public_subnet_id" {}
+variable "cloudflare_zone_id" {}
 
 data "aws_ami" "ubuntu" {
   most_recent = true
@@ -70,6 +71,17 @@ resource "aws_instance" "bridge" {
   }
 }
 
-output "instance" {
-  value = aws_instance.bridge
+/*
+ * Create Cloudflare DNS record
+ */
+resource "cloudflare_record" "service" {
+  name    = "gainy-bridge-${var.env}"
+  value   = aws_instance.bridge.public_ip
+  type    = "A"
+  proxied = false
+  zone_id = var.cloudflare_zone_id
+}
+
+output "bridge_instance_url" {
+  value = cloudflare_record.service.hostname
 }
