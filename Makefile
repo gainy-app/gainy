@@ -1,5 +1,6 @@
 export PARAMS ?= $(filter-out $@,$(MAKECMDGOALS))
 
+-include .env.make
 -include .env
 
 up:

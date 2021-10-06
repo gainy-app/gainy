@@ -14,12 +14,22 @@ data "archive_file" "meltano_source" {
   output_path = "/tmp/meltano-source.zip"
   excludes    = ["meltano/.meltano"]
 }
+data "aws_ecr_authorization_token" "token" {}
 resource "docker_registry_image" "meltano" {
   name = local.meltano_ecr_image_name
   build {
     context    = local.meltano_root_dir
     dockerfile = "Dockerfile"
-    target     = var.env == "production" ? "production" : "local"
+    build_args = {
+      BASE_IMAGE_REGISTRY_ADDRESS = var.base_image_registry_address
+      BASE_IMAGE_VERSION          = var.base_image_version
+    }
+
+    auth_config {
+      host_name = var.ecr_address
+      user_name = data.aws_ecr_authorization_token.token.user_name
+      password  = data.aws_ecr_authorization_token.token.password
+    }
   }
 }
 /*

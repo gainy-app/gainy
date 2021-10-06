@@ -79,6 +79,9 @@ module "meltano" {
   scheduler_cpu_credits        = local.meltano_scheduler_cpu_credits
   scheduler_memory_credits     = local.meltano_scheduler_memory_credits
   ui_memory_credits            = local.meltano_ui_memory_credits
+
+  base_image_registry_address = var.base_image_registry_address
+  base_image_version          = var.base_image_version
 }
 
 module "hasura" {
@@ -110,6 +113,9 @@ module "hasura" {
 
   cpu_credits    = local.hasura_cpu_credits
   memory_credits = local.hasura_memory_credits
+
+  base_image_registry_address = var.base_image_registry_address
+  base_image_version          = var.base_image_version
 }
 
 output "bridge_instance" {

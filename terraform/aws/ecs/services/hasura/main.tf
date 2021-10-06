@@ -13,11 +13,22 @@ data "archive_file" "hasura_source" {
   source_dir  = local.hasura_root_dir
   output_path = "/tmp/hasura-source.zip"
 }
+data "aws_ecr_authorization_token" "token" {}
 resource "docker_registry_image" "hasura" {
   name = local.hasura_ecr_image_name
   build {
     context    = local.hasura_root_dir
     dockerfile = "Dockerfile"
+    build_args = {
+      BASE_IMAGE_REGISTRY_ADDRESS = var.base_image_registry_address
+      BASE_IMAGE_VERSION          = var.base_image_version
+    }
+
+    auth_config {
+      host_name = var.ecr_address
+      user_name = data.aws_ecr_authorization_token.token.user_name
+      password  = data.aws_ecr_authorization_token.token.password
+    }
   }
 }
 /*

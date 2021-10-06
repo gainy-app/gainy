@@ -50,3 +50,10 @@ variable "cloudflare_zone_id" {
   type      = string
   sensitive = true
 }
+
+variable "base_image_registry_address" {
+  type = string
+}
+variable "base_image_version" {
+  type = string
+}
