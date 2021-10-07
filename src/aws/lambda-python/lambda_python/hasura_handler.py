@@ -6,6 +6,9 @@ from recommendation.recommendation_action import GetMatchScoreByTicker, GetRecom
 
 # DB CONNECTION
 from trigger.set_user_categories import SetUserCategories
+from trigger.on_user_created import OnUserCreated
+
+ENV = os.environ['ENV']
 
 HOST = os.environ['pg_host']
 PORT = os.environ['pg_port']
@@ -15,7 +18,6 @@ PASSWORD = os.environ['pg_password']
 
 DB_CONN_STRING = f"postgresql://{USERNAME}:{PASSWORD}@{HOST}:{PORT}/{DB_NAME}"
 
-# API GATEWAY PROXY INTEGRATION
 API_GATEWAY_PROXY_INTEGRATION = os.environ.get(
     "AWS_LAMBDA_API_GATEWAY_PROXY_INTEGRATION", "True") == "True"
 
@@ -33,7 +35,10 @@ def handle_action(event, context):
     return action_dispatcher.handle(event, context)
 
 
-TRIGGERS = [SetUserCategories()]
+TRIGGERS = [
+    SetUserCategories(),
+    OnUserCreated(ENV),
+]
 
 trigger_dispatcher = HasuraTriggerDispatcher(DB_CONN_STRING, TRIGGERS,
                                              API_GATEWAY_PROXY_INTEGRATION)

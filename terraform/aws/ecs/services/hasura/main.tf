@@ -90,3 +90,6 @@ module "service-hasura" {
 output "service_url" {
   value = module.service-hasura.url
 }
+output "service_name" {
+  value = module.service-hasura.aws_ecs_service.name
+}
