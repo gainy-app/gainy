@@ -305,7 +305,7 @@
       num_retries: 0
       interval_sec: 10
       timeout_sec: 60
-    webhook: http://prl-dev:9010/2015-03-31/functions/function/invocations
+    webhook: '{{AWS_LAMBDA_API_GATEWAY_ENDPOINT}}/hasuraTrigger'
 - table:
     schema: app
     name: ticker_financial_periods
