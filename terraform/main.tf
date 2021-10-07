@@ -60,8 +60,8 @@ module "aws" {
   hasura_jwt_secret           = var.hasura_jwt_secret
   base_image_registry_address = var.base_image_registry_address
   base_image_version          = var.base_image_version
-  datadog_api_key = var.datadog_api_key
-  datadog_app_key = var.datadog_app_key
+  datadog_api_key             = var.datadog_api_key
+  datadog_app_key             = var.datadog_app_key
 }
 
 module "datadog" {

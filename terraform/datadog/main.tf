@@ -167,7 +167,7 @@ resource "datadog_monitor" "healthy_hosts" {
   query = "avg(last_1h):min:aws.applicationelb.healthy_host_count{name:*-production} by {name} < 1"
 
   monitor_thresholds {
-    critical          = 1
+    critical = 1
   }
 
   require_full_window = false

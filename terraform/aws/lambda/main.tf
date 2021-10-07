@@ -196,14 +196,14 @@ module "hasuraTrigger" {
   image_uri                                 = docker_registry_image.lambda_python.name
 
   env_vars = {
-    pg_host     = var.pg_host
-    pg_port     = var.pg_port
-    pg_dbname   = var.pg_dbname
-    pg_username = var.pg_username
-    pg_password = var.pg_password
-    DATADOG_API_KEY=var.datadog_api_key
-    DATADOG_APP_KEY=var.datadog_app_key
-    ENV=var.env
+    pg_host         = var.pg_host
+    pg_port         = var.pg_port
+    pg_dbname       = var.pg_dbname
+    pg_username     = var.pg_username
+    pg_password     = var.pg_password
+    DATADOG_API_KEY = var.datadog_api_key
+    DATADOG_APP_KEY = var.datadog_app_key
+    ENV             = var.env
   }
   vpc_security_group_ids = var.vpc_security_group_ids
   vpc_subnet_ids         = var.vpc_subnet_ids
@@ -221,14 +221,14 @@ module "hasuraAction" {
   image_uri                                 = docker_registry_image.lambda_python.name
 
   env_vars = {
-    pg_host     = var.pg_host
-    pg_port     = var.pg_port
-    pg_dbname   = var.pg_dbname
-    pg_username = var.pg_username
-    pg_password = var.pg_password
-    DATADOG_API_KEY=var.datadog_api_key
-    DATADOG_APP_KEY=var.datadog_app_key
-    ENV=var.env
+    pg_host         = var.pg_host
+    pg_port         = var.pg_port
+    pg_dbname       = var.pg_dbname
+    pg_username     = var.pg_username
+    pg_password     = var.pg_password
+    DATADOG_API_KEY = var.datadog_api_key
+    DATADOG_APP_KEY = var.datadog_app_key
+    ENV             = var.env
   }
   vpc_security_group_ids = var.vpc_security_group_ids
   vpc_subnet_ids         = var.vpc_subnet_ids
