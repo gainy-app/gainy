@@ -49,6 +49,7 @@ custom_types:
         schema: public
         name: collections
       name: collection
+      source: default
       type: object
       field_mapping:
         id: id
@@ -58,6 +59,7 @@ custom_types:
         schema: public
         name: tickers
       name: ticker
+      source: default
       type: object
       field_mapping:
         symbol: symbol

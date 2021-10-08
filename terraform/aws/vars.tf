@@ -10,6 +10,9 @@ variable "hasura_jwt_secret" {}
 variable "base_image_registry_address" {}
 variable "base_image_version" {}
 
+variable "datadog_api_key" {}
+variable "datadog_app_key" {}
+
 
 locals {
   ecs_instance_type                    = var.env == "production" ? "c5.2xlarge" : "t3.medium"

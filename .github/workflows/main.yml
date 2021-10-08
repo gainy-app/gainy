@@ -128,6 +128,9 @@ jobs:
           TF_VAR_cloudflare_email: ${{ secrets.CLOUDFLARE_EMAIL }}
           TF_VAR_cloudflare_api_key: ${{ secrets.CLOUDFLARE_API_KEY }}
           TF_VAR_cloudflare_zone_id: ${{ secrets.CLOUDFLARE_ZONE_ID }}
+          TF_VAR_datadog_api_key: ${{ secrets.DATADOG_API_KEY }}
+          TF_VAR_datadog_api_url: ${{ secrets.DATADOG_API_URL }}
+          TF_VAR_datadog_app_key: ${{ secrets.DATADOG_APP_KEY }}
 
       - uses: actions/github-script@0.9.0
         if: github.event_name == 'pull_request'
@@ -183,3 +186,6 @@ jobs:
           TF_VAR_cloudflare_email: ${{ secrets.CLOUDFLARE_EMAIL }}
           TF_VAR_cloudflare_api_key: ${{ secrets.CLOUDFLARE_API_KEY }}
           TF_VAR_cloudflare_zone_id: ${{ secrets.CLOUDFLARE_ZONE_ID }}
+          TF_VAR_datadog_api_key: ${{ secrets.DATADOG_API_KEY }}
+          TF_VAR_datadog_api_url: ${{ secrets.DATADOG_API_URL }}
+          TF_VAR_datadog_app_key: ${{ secrets.DATADOG_APP_KEY }}

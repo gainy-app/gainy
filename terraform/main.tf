@@ -12,6 +12,9 @@ terraform {
       source  = "cloudflare/cloudflare"
       version = "~> 2.0"
     }
+    datadog = {
+      source = "DataDog/datadog"
+    }
   }
 }
 
@@ -32,6 +35,13 @@ provider "aws" {
   secret_key = var.aws_secret_key
 }
 
+provider "datadog" {
+  api_key = var.datadog_api_key
+  api_url = var.datadog_api_url
+  app_key = var.datadog_app_key
+}
+
+#################################### Modules ####################################
 
 module "firebase" {
   source                 = "./firebase"
@@ -50,9 +60,21 @@ module "aws" {
   hasura_jwt_secret           = var.hasura_jwt_secret
   base_image_registry_address = var.base_image_registry_address
   base_image_version          = var.base_image_version
+  datadog_api_key             = var.datadog_api_key
+  datadog_app_key             = var.datadog_app_key
 }
 
-#################################### Variables ####################################
+module "datadog" {
+  count               = var.env == "production" ? 1 : 0
+  source              = "./datadog"
+  datadog_api_key     = var.datadog_api_key
+  datadog_api_url     = var.datadog_api_url
+  datadog_app_key     = var.datadog_app_key
+  env                 = var.env
+  hasura_service_name = "hasura-production" # TODO module.aws.hasura_service_name
+}
+
+#################################### Outputs ####################################
 
 output "aws_apigatewayv2_api_endpoint" {
   value = module.aws.aws_apigatewayv2_api_endpoint
