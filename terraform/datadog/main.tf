@@ -18,7 +18,7 @@ resource "datadog_monitor" "billing_spend" {
   message = "Billing Spend Monitor triggered. Notify: @slack-${var.slack_channel_name} <!channel>"
   #  escalation_message = "Escalation message @pagerduty"
 
-  query = "avg(last_7d):anomalies(sum:aws.billing.forecasted_spend{*}, 'basic', 2, direction='above', alert_window='last_12h', interval=300, count_default_zero='true') > 0.1"
+  query = "avg(last_1d):anomalies(sum:aws.billing.forecasted_spend{*}, 'basic', 2, direction='above', alert_window='last_12h', interval=300, count_default_zero='true') > 0.1"
 
   monitor_threshold_windows {
     recovery_window = "last_12h"
@@ -32,7 +32,7 @@ resource "datadog_monitor" "billing_spend" {
 
   require_full_window = false
   notify_no_data      = false
-  renotify_interval   = 15
+  renotify_interval   = 240
 
   tags = ["billing"]
 }
@@ -185,7 +185,7 @@ resource "datadog_monitor" "lambda_invocations" {
   message = "Lambda Invocations Monitor triggered. Notify: @slack-${var.slack_channel_name} <!channel>"
   #  escalation_message = "Escalation message @pagerduty"
 
-  query = "avg(last_1d):anomalies(sum:aws.lambda.invocations{resource:*_production} by {functionname}.as_count(), 'basic', 2, direction='both', alert_window='last_6h', interval=300, count_default_zero='true') > 1"
+  query = "avg(last_1d):anomalies(sum:aws.lambda.invocations{resource:*_production} by {functionname}.as_count(), 'basic', 2, direction='above', alert_window='last_6h', interval=300, count_default_zero='true') > 1"
 
   monitor_threshold_windows {
     recovery_window = "last_6h"
@@ -211,7 +211,7 @@ resource "datadog_monitor" "lambda_duration" {
   message = "Lambda Duration Monitor triggered. Notify: @slack-${var.slack_channel_name} <!channel>"
   #  escalation_message = "Escalation message @pagerduty"
 
-  query = "avg(last_7d):anomalies(sum:aws.lambda.duration{resource:*_production} by {functionname}.as_count(), 'basic', 2, direction='both', alert_window='last_6h', interval=300, count_default_zero='true') > 1"
+  query = "avg(last_7d):anomalies(sum:aws.lambda.duration{resource:*_production} by {functionname}.as_count(), 'basic', 2, direction='above', alert_window='last_6h', interval=300, count_default_zero='true') > 1"
 
   monitor_threshold_windows {
     recovery_window = "last_6h"
@@ -265,7 +265,7 @@ resource "datadog_monitor" "api_gateway_request_count" {
   message = "API Gateway Request Count Monitor triggered. Notify: @slack-${var.slack_channel_name} <!channel>"
   #  escalation_message = "Escalation message @pagerduty"
 
-  query = "avg(last_1d):anomalies(sum:aws.apigateway.count{stage:*_production}.as_count(), 'basic', 2, direction='both', alert_window='last_6h', interval=300, count_default_zero='true') > 1"
+  query = "avg(last_1d):anomalies(sum:aws.apigateway.count{stage:*_production}.as_count(), 'basic', 2, direction='above', alert_window='last_6h', interval=300, count_default_zero='true') > 1"
 
   monitor_threshold_windows {
     recovery_window = "last_6h"
@@ -317,7 +317,7 @@ resource "datadog_monitor" "api_gateway_errors" {
   message = "API Gateway Errors Monitor triggered. Notify: @slack-${var.slack_channel_name} <!channel>"
   #  escalation_message = "Escalation message @pagerduty"
 
-  query = "avg(last_1d):anomalies(sum:aws.apigateway.5xx{stage:*_production}.as_count(), 'basic', 2, direction='both', alert_window='last_6h', interval=300, count_default_zero='true') > 1"
+  query = "avg(last_1d):anomalies(sum:aws.apigateway.5xx{stage:*_production}.as_count(), 'basic', 2, direction='above', alert_window='last_6h', interval=300, count_default_zero='true') > 1"
 
   monitor_threshold_windows {
     recovery_window = "last_6h"
