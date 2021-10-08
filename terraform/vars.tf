@@ -1,7 +1,8 @@
+#################################### Application ####################################
+
 variable "env" {
   type = string
 }
-
 variable "eodhistoricaldata_api_token" {
   type      = string
   sensitive = true
@@ -10,6 +11,14 @@ variable "gnews_api_token" {
   type      = string
   sensitive = true
 }
+variable "base_image_registry_address" {
+  type = string
+}
+variable "base_image_version" {
+  type = string
+}
+
+#################################### AWS ####################################
 
 variable "aws_region" {
   type    = string
@@ -21,6 +30,8 @@ variable "aws_access_key" {
 variable "aws_secret_key" {
   sensitive = true
 }
+
+#################################### Google Cloud & Firebase ####################################
 
 variable "google_project_id" {
   default = "gainyapp"
@@ -38,6 +49,8 @@ variable "google_organization_id" {}
 
 variable "hasura_jwt_secret" {}
 
+#################################### Cloudflare ####################################
+
 variable "cloudflare_email" {
   type = string
 }
@@ -51,9 +64,16 @@ variable "cloudflare_zone_id" {
   sensitive = true
 }
 
-variable "base_image_registry_address" {
-  type = string
+#################################### Datadog ####################################
+
+variable "datadog_api_key" {
+  type      = string
+  sensitive = true
 }
-variable "base_image_version" {
+variable "datadog_app_key" {
+  type      = string
+  sensitive = true
+}
+variable "datadog_api_url" {
   type = string
 }

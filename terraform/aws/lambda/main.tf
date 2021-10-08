@@ -9,6 +9,8 @@ variable "pg_password" {}
 variable "container_repository" {}
 variable "vpc_security_group_ids" {}
 variable "vpc_subnet_ids" {}
+variable "datadog_api_key" {}
+variable "datadog_app_key" {}
 
 output "aws_apigatewayv2_api_endpoint" {
   value = "${aws_apigatewayv2_api.lambda.api_endpoint}/${aws_apigatewayv2_stage.lambda.name}"
@@ -194,11 +196,14 @@ module "hasuraTrigger" {
   image_uri                                 = docker_registry_image.lambda_python.name
 
   env_vars = {
-    pg_host     = var.pg_host
-    pg_port     = var.pg_port
-    pg_dbname   = var.pg_dbname
-    pg_username = var.pg_username
-    pg_password = var.pg_password
+    pg_host         = var.pg_host
+    pg_port         = var.pg_port
+    pg_dbname       = var.pg_dbname
+    pg_username     = var.pg_username
+    pg_password     = var.pg_password
+    DATADOG_API_KEY = var.datadog_api_key
+    DATADOG_APP_KEY = var.datadog_app_key
+    ENV             = var.env
   }
   vpc_security_group_ids = var.vpc_security_group_ids
   vpc_subnet_ids         = var.vpc_subnet_ids
@@ -216,11 +221,14 @@ module "hasuraAction" {
   image_uri                                 = docker_registry_image.lambda_python.name
 
   env_vars = {
-    pg_host     = var.pg_host
-    pg_port     = var.pg_port
-    pg_dbname   = var.pg_dbname
-    pg_username = var.pg_username
-    pg_password = var.pg_password
+    pg_host         = var.pg_host
+    pg_port         = var.pg_port
+    pg_dbname       = var.pg_dbname
+    pg_username     = var.pg_username
+    pg_password     = var.pg_password
+    DATADOG_API_KEY = var.datadog_api_key
+    DATADOG_APP_KEY = var.datadog_app_key
+    ENV             = var.env
   }
   vpc_security_group_ids = var.vpc_security_group_ids
   vpc_subnet_ids         = var.vpc_subnet_ids

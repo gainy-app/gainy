@@ -27,6 +27,8 @@ module "lambda" {
   container_repository        = aws_ecr_repository.default.name
   vpc_security_group_ids      = [module.ecs.vpc_default_sg_id]
   vpc_subnet_ids              = module.ecs.private_subnet_ids
+  datadog_api_key             = var.datadog_api_key
+  datadog_app_key             = var.datadog_app_key
 }
 
 module "ecs" {
@@ -130,10 +132,16 @@ output "meltano_url" {
 output "hasura_url" {
   value = module.hasura.service_url
 }
+output "hasura_service_name" {
+  value = module.hasura.service_name
+}
 
 output "aws_apigatewayv2_api_endpoint" {
   value = module.lambda.aws_apigatewayv2_api_endpoint
 }
 output "aws_rds" {
   value = module.rds
+}
+output "aws_ecs" {
+  value = module.ecs
 }

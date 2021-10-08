@@ -87,6 +87,28 @@ services:
     environment:
       GOOGLE_APPLICATION_CREDENTIALS: "/var/www/firebase.key.json"
 
+  lambda-python-trigger:
+    build:
+      context: ./src/aws/lambda-python
+    restart: always
+    volumes:
+      - ./src/aws/lambda-python/lambda_python:/var/task
+      - ./src/aws/lambda-python/poetry.lock:/var/task/poetry.lock
+      - ./src/aws/lambda-python/pyproject.toml:/var/task/pyproject.toml
+    ports:
+      - "9010:8080"
+    env_file:
+      - .env
+    environment:
+      pg_host: "${PG_ADDRESS}"
+      pg_port: "${PG_PORT}"
+      pg_dbname: "${PG_DATABASE}"
+      pg_username: "${PG_USERNAME}"
+      pg_password: "${PG_PASSWORD}"
+      AWS_LAMBDA_API_GATEWAY_PROXY_INTEGRATION: "false"
+      ENV: "local"
+    command: [ "hasura_handler.handle_trigger" ]
+
 volumes:
   db_data:
   meltano_data:
