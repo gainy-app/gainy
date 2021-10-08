@@ -87,8 +87,8 @@ output "aws_rds_db_instance" {
     pg_dbname   = module.aws.aws_rds.db_instance.name
   }
 }
-output "vpc_bridge_instance_domain" {
-  value = module.aws.bridge_instance.public_ip
+output "vpc_bridge_instance_url" {
+  value = module.aws.bridge_instance_url
 }
 output "meltano_url" {
   value = module.aws.meltano_url
