@@ -616,11 +616,12 @@
   - role: user
     permission:
       columns:
-      - symbol
-      - date
-      - type
-      - description
       - created_at
+      - date
+      - description
+      - symbol
+      - timestamp
+      - type
       filter: {}
 - table:
     schema: public
