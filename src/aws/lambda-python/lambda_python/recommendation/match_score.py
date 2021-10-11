@@ -1,6 +1,6 @@
 from enum import Enum
 from math import sqrt
-from typing import Dict, List
+from typing import Dict
 
 from recommendation.dim_vector import DimVector
 
@@ -77,8 +77,7 @@ def get_risk_similarity(profile_categories: DimVector,
     if profile_risk_score is None or ticker_risk_score is None:
         return 0.0
 
-    return 1.0 - sqrt((profile_risk_score - ticker_risk_score) *
-                      (profile_risk_score - ticker_risk_score))
+    return 1.0 - abs(profile_risk_score - ticker_risk_score)
 
 
 # CATEGORY SIMILARITY SCORE
