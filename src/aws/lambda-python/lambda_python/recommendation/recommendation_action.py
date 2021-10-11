@@ -44,10 +44,14 @@ with open(
     ticker_industries_by_collection_query = ticker_industries_by_collection_query_file.read(
     )
 
-with open(os.path.join(script_dir, "../sql/industry_frequencies.sql")) as industry_frequencies_query_file:
+with open(os.path.join(
+        script_dir,
+        "../sql/industry_frequencies.sql")) as industry_frequencies_query_file:
     industry_frequencies_query = industry_frequencies_query_file.read()
 
-with open(os.path.join(script_dir, "../sql/collection_corpus_size.sql")) as corpus_size_query_file:
+with open(os.path.join(
+        script_dir,
+        "../sql/collection_corpus_size.sql")) as corpus_size_query_file:
     corpus_size_query = corpus_size_query_file.read()
 
 #     COMMON UTILS    #
@@ -109,10 +113,15 @@ class GetRecommendedCollections(HasuraAction):
         document_frequencies = self._read_document_frequencies(db_conn)
         corpus_size = self._read_corpus_size(db_conn)
 
-        collection_vs = query_vectors(db_conn, collection_industry_vector_query)
-        profile_v = get_profile_vector(db_conn, profile_industry_vector_query, profile_id)
+        collection_vs = query_vectors(db_conn,
+                                      collection_industry_vector_query)
+        profile_v = get_profile_vector(db_conn, profile_industry_vector_query,
+                                       profile_id)
 
-        ranked_collections = self.ranking.rank(profile_v, collection_vs, df=document_frequencies, size=corpus_size)
+        ranked_collections = self.ranking.rank(profile_v,
+                                               collection_vs,
+                                               df=document_frequencies,
+                                               size=corpus_size)
         return list(map(lambda c_v: {"id": c_v.item.name}, ranked_collections))
 
     @staticmethod
@@ -213,24 +222,24 @@ class GetMatchScoreByCollection(HasuraAction):
             explanation = match_score.explain()
             result.append({
                 "symbol":
-                    symbol,
+                symbol,
                 "is_match":
-                    is_match(profile_category_vector, ticker_category_vector),
+                is_match(profile_category_vector, ticker_category_vector),
                 "match_score":
-                    match_score.match_score(),
+                match_score.match_score(),
                 "fits_risk":
-                    explanation.risk_level.value,
+                explanation.risk_level.value,
                 "fits_categories":
-                    explanation.category_level.value,
+                explanation.category_level.value,
                 "fits_interests":
-                    explanation.interest_level.value
+                explanation.interest_level.value
             })
 
         return result
 
     @staticmethod
     def _index_ticker_collection_vectors(
-            ticker_collection_vectors: List[NamedDimVector]
+        ticker_collection_vectors: List[NamedDimVector]
     ) -> Dict[Tuple[str, int], NamedDimVector]:
         result = {}
         for vector in ticker_collection_vectors:

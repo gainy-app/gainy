@@ -46,7 +46,8 @@ def normalized_profile_industries_vector(vector: DimVector) -> DimVector:
 RISK_TO_SCORE_MAPPING = {1: 0.0, 2: 0.5, 3: 1.0}
 
 
-def get_categories_risk_score(categories: DimVector, risk_mapping: Dict[str, int]):
+def get_categories_risk_score(categories: DimVector, risk_mapping: Dict[str,
+                                                                        int]):
     risk_sum = None
     categories_num = None
     for category in categories.dims:
