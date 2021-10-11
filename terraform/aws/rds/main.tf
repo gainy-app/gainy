@@ -16,8 +16,8 @@ resource "aws_db_instance" "db_instance" {
   allocated_storage       = var.env == "production" ? 100 : 20
   max_allocated_storage   = var.env == "production" ? 200 : 21
   backup_retention_period = var.env == "production" ? 7 : 0
-  #  TODO use this resource only for production and specify iops
-  #  storage_type            = var.env == "production" ? "io1" : "gp2"
+  storage_type            = var.env == "production" ? "io1" : "gp2"
+  iops                    = var.env == "production" ? 1000 : null
 
   publicly_accessible = false
 
@@ -29,7 +29,7 @@ resource "aws_db_instance" "db_instance" {
 
   db_subnet_group_name   = var.db_subnet_group_name
   vpc_security_group_ids = [var.vpc_default_sg_id]
-  skip_final_snapshot    = true # TODO var.env == "production" ? false : true
+  skip_final_snapshot    = true # TODO revert to var.env == "production" ? false : true
 
   storage_encrypted = true
   apply_immediately = true

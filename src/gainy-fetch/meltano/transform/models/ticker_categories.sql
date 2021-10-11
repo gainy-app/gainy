@@ -75,8 +75,8 @@ UNION
            t.symbol
     from {{ ref('tickers') }} t
              join {{ ref('categories') }} c ON c.name = 'Penny'
-             LEFT JOIN historical_prices hp on t.symbol = hp.code
-             LEFT JOIN historical_prices hp_next on t.symbol = hp_next.code AND hp_next.date::timestamp > hp.date::timestamp
+             LEFT JOIN {{ ref('historical_prices') }} hp on t.symbol = hp.code
+             LEFT JOIN {{ ref('historical_prices') }} hp_next on t.symbol = hp_next.code AND hp_next.date::timestamp > hp.date::timestamp
     WHERE hp_next.code is null
       AND hp.close < 1
 )

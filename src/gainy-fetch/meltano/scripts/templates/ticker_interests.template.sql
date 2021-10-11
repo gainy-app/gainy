@@ -14,7 +14,7 @@ with price AS
          (
              select hp.*,
                     ROW_NUMBER() OVER (PARTITION BY hp.code ORDER BY hp.date::timestamp DESC) as inv_row_number
-             from historical_prices hp
+             from {{ ref('historical_prices') }} hp
              where close is not null AND open is not null --we get latest by date not-null prices (with inv_row_number=1) (if any)
          ),
      ct as

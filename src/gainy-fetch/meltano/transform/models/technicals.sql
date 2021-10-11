@@ -26,7 +26,7 @@ with tickers as (select * from {{ ref('tickers') }}),
                     ROW_NUMBER() OVER (PARTITION BY hp.code, date_part('year', hp.date::timestamp), div(
                                 date_part('month', hp.date::timestamp)::integer - 1, settings.month_period_divider)
                         ORDER BY hp.date)                                                                   AS idx
-             from historical_prices hp
+             from {{ ref('historical_prices') }} hp
                       join settings ON true
          ),
      period_open AS

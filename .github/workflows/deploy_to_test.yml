@@ -14,8 +14,20 @@ jobs:
     name: "Terraform Test env"
     runs-on: ubuntu-latest
     steps:
+      - name: Docker Registry Auth
+        run: aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 217303665077.dkr.ecr.us-east-1.amazonaws.com
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+
       - name: Checkout
         uses: actions/checkout@v2
+
+      - name: Set Docker Build Environment Variables
+        run: |
+          source .env.make
+          echo "TF_VAR_base_image_registry_address=$BASE_IMAGE_REGISTRY_ADDRESS" >> $GITHUB_ENV
+          echo "TF_VAR_base_image_version=$BASE_IMAGE_VERSION" >> $GITHUB_ENV
 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v1
@@ -57,6 +69,9 @@ jobs:
           TF_VAR_cloudflare_email: ${{ secrets.CLOUDFLARE_EMAIL }}
           TF_VAR_cloudflare_api_key: ${{ secrets.CLOUDFLARE_API_KEY }}
           TF_VAR_cloudflare_zone_id: ${{ secrets.CLOUDFLARE_ZONE_ID }}
+          TF_VAR_datadog_api_key: ${{ secrets.DATADOG_API_KEY }}
+          TF_VAR_datadog_api_url: ${{ secrets.DATADOG_API_URL }}
+          TF_VAR_datadog_app_key: ${{ secrets.DATADOG_APP_KEY }}
 
       - uses: actions/github-script@0.9.0
         if: github.event_name == 'pull_request'

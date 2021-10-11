@@ -27,6 +27,8 @@ module "lambda" {
   container_repository        = aws_ecr_repository.default.name
   vpc_security_group_ids      = [module.ecs.vpc_default_sg_id]
   vpc_subnet_ids              = module.ecs.private_subnet_ids
+  datadog_api_key             = var.datadog_api_key
+  datadog_app_key             = var.datadog_app_key
 }
 
 module "ecs" {
@@ -44,11 +46,12 @@ module "rds" {
 }
 
 module "vpc_bridge" {
-  source            = "./ec2/vpc_bridge"
-  env               = var.env
-  vpc_default_sg_id = module.ecs.vpc_default_sg_id
-  public_subnet_id  = module.ecs.public_subnet_ids.0
-  vpc_id            = module.ecs.vpc_id
+  source             = "./ec2/vpc_bridge"
+  env                = var.env
+  vpc_default_sg_id  = module.ecs.vpc_default_sg_id
+  public_subnet_id   = module.ecs.public_subnet_ids.0
+  vpc_id             = module.ecs.vpc_id
+  cloudflare_zone_id = var.cloudflare_zone_id
 }
 
 module "meltano" {
@@ -79,6 +82,9 @@ module "meltano" {
   scheduler_cpu_credits        = local.meltano_scheduler_cpu_credits
   scheduler_memory_credits     = local.meltano_scheduler_memory_credits
   ui_memory_credits            = local.meltano_ui_memory_credits
+
+  base_image_registry_address = var.base_image_registry_address
+  base_image_version          = var.base_image_version
 }
 
 module "hasura" {
@@ -110,10 +116,13 @@ module "hasura" {
 
   cpu_credits    = local.hasura_cpu_credits
   memory_credits = local.hasura_memory_credits
+
+  base_image_registry_address = var.base_image_registry_address
+  base_image_version          = var.base_image_version
 }
 
-output "bridge_instance" {
-  value = module.vpc_bridge.instance
+output "bridge_instance_url" {
+  value = module.vpc_bridge.bridge_instance_url
 }
 
 output "meltano_url" {
@@ -123,10 +132,16 @@ output "meltano_url" {
 output "hasura_url" {
   value = module.hasura.service_url
 }
+output "hasura_service_name" {
+  value = module.hasura.service_name
+}
 
 output "aws_apigatewayv2_api_endpoint" {
   value = module.lambda.aws_apigatewayv2_api_endpoint
 }
 output "aws_rds" {
   value = module.rds
+}
+output "aws_ecs" {
+  value = module.ecs
 }

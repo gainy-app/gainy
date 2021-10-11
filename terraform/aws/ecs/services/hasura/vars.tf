@@ -23,3 +23,5 @@ variable "hasura_jwt_secret" {}
 variable "aws_lambda_api_gateway_endpoint" {}
 variable "memory_credits" {}
 variable "cpu_credits" {}
+variable "base_image_registry_address" {}
+variable "base_image_version" {}

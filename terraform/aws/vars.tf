@@ -7,6 +7,13 @@ variable "domain" {
 variable "cloudflare_zone_id" {}
 variable "hasura_jwt_secret" {}
 
+variable "base_image_registry_address" {}
+variable "base_image_version" {}
+
+variable "datadog_api_key" {}
+variable "datadog_app_key" {}
+
+
 locals {
   ecs_instance_type                    = var.env == "production" ? "c5.2xlarge" : "t3.medium"
   meltano_eodhistoricaldata_jobs_count = var.env == "production" ? 4 : 1

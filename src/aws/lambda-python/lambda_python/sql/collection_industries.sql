@@ -18,8 +18,4 @@ select c.id, civ.collection_industry_vector
 from public.collections c
          left join collection_industry_vectors civ
                    on c.id = civ.collection_id
-where c.enabled = '1'
-  and c.id not in (
-    select collection_id
-    from app.profile_favorite_collections
-);
+where c.enabled = '1';

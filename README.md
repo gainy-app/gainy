@@ -3,6 +3,11 @@
 This repo contains all backend services for Gainy application and infrastructure.
 
 ## Local environment
+#### Registry auth:
+```bash
+aws configure
+aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 217303665077.dkr.ecr.us-east-1.amazonaws.com
+```
 ### Setting up
 ```bash
 cp .env.dist .env # ask for the right env config from the team
