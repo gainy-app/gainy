@@ -235,6 +235,12 @@ models:
           - not_null
           - type:
               type: 'date'
+      - name: timestamp
+        tests:
+          - exists
+          - not_null
+          - type:
+              type: 'timestamp with time zone'
       - name: type
         tests:
           - exists
