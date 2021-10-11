@@ -18,6 +18,7 @@ with upcoming_reports as
          )
 select upcoming_reports.symbol,
        date,
+       date::timestamptz                                                 as timestamp,
        'earnings_report'                                                 as type,
        upcoming_reports.symbol || ' reports earnings on ' || date || '.' as description,
        now()                                                             as created_at
