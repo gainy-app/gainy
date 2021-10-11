@@ -3,6 +3,7 @@ from typing import Dict, Tuple, List
 
 from common.hasura_exception import HasuraActionException
 from common.hasura_function import HasuraAction
+from recommendation.collection_ranking import TFIDFWithNorm1_5CollectionRanking
 from recommendation.dim_vector import DimVector
 from recommendation.match_score import profile_ticker_similarity, is_match
 
@@ -42,6 +43,12 @@ with open(
 ) as ticker_industries_by_collection_query_file:
     ticker_industries_by_collection_query = ticker_industries_by_collection_query_file.read(
     )
+
+with open(os.path.join(script_dir, "../sql/industry_frequencies.sql")) as industry_frequencies_query_file:
+    industry_frequencies_query = industry_frequencies_query_file.read()
+
+with open(os.path.join(script_dir, "../sql/collection_corpus_size.sql")) as corpus_size_query_file:
+    corpus_size_query = corpus_size_query_file.read()
 
 #     COMMON UTILS    #
 
@@ -94,32 +101,33 @@ def query_vectors(db_conn, query, variables=None) -> List[NamedDimVector]:
 class GetRecommendedCollections(HasuraAction):
     def __init__(self):
         super().__init__("get_recommended_collections", "profile_id")
+        self.ranking = TFIDFWithNorm1_5CollectionRanking()
 
     def apply(self, db_conn, input_params):
         profile_id = input_params["profile_id"]
 
-        sorted_collections = GetRecommendedCollections.query_and_sort_collections(
-            db_conn, profile_id)
-        sorted_collection_ids = list(
-            map(lambda c_id: {"id": c_id.name}, sorted_collections))
+        document_frequencies = self._read_document_frequencies(db_conn)
+        corpus_size = self._read_corpus_size(db_conn)
 
-        return sorted_collection_ids
+        collection_vs = query_vectors(db_conn, collection_industry_vector_query)
+        profile_v = get_profile_vector(db_conn, profile_industry_vector_query, profile_id)
 
-    @staticmethod
-    def query_and_sort_collections(db_conn, profile_id):
-        collection_vectors = query_vectors(db_conn,
-                                           collection_industry_vector_query)
-        profile_vector = get_profile_vector(db_conn,
-                                            profile_industry_vector_query,
-                                            profile_id)
-
-        return GetRecommendedCollections.sort_vectors_by(
-            collection_vectors, profile_vector.cosine_similarity, False)
+        ranked_collections = self.ranking.rank(profile_v, collection_vs, df=document_frequencies, size=corpus_size)
+        return list(map(lambda c_v: {"id": c_v.item.name}, ranked_collections))
 
     @staticmethod
-    def sort_vectors_by(vectors, similarity, asc=True):
-        vectors.sort(key=similarity, reverse=not asc)
-        return vectors
+    def _read_corpus_size(db_conn):
+        cursor = db_conn.cursor()
+        cursor.execute(corpus_size_query)
+        corpus_size = cursor.fetchone()[0]
+        return corpus_size
+
+    @staticmethod
+    def _read_document_frequencies(db_conn):
+        cursor = db_conn.cursor()
+        cursor.execute(industry_frequencies_query)
+        document_frequencies = dict(cursor.fetchall())
+        return document_frequencies
 
 
 #     MATCH SCORE BY TICKER  #
@@ -205,24 +213,24 @@ class GetMatchScoreByCollection(HasuraAction):
             explanation = match_score.explain()
             result.append({
                 "symbol":
-                symbol,
+                    symbol,
                 "is_match":
-                is_match(profile_category_vector, ticker_category_vector),
+                    is_match(profile_category_vector, ticker_category_vector),
                 "match_score":
-                match_score.match_score(),
+                    match_score.match_score(),
                 "fits_risk":
-                explanation.risk_level.value,
+                    explanation.risk_level.value,
                 "fits_categories":
-                explanation.category_level.value,
+                    explanation.category_level.value,
                 "fits_interests":
-                explanation.interest_level.value
+                    explanation.interest_level.value
             })
 
         return result
 
     @staticmethod
     def _index_ticker_collection_vectors(
-        ticker_collection_vectors: List[NamedDimVector]
+            ticker_collection_vectors: List[NamedDimVector]
     ) -> Dict[Tuple[str, int], NamedDimVector]:
         result = {}
         for vector in ticker_collection_vectors:

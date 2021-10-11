@@ -43,8 +43,8 @@ class DimVector:
         return DimVector(coordinates)
 
     @staticmethod
-    def norm(vector):
-        return norm(vector.values)
+    def norm(vector, order=2):
+        return norm(vector.values, ord=order)
 
     @staticmethod
     def dot_product(first, second, reshape=True):
@@ -58,9 +58,9 @@ class DimVector:
         else:
             return dot(first.values, second.values)
 
-    def cosine_similarity(self, other):
-        self_norm = DimVector.norm(self)
-        other_norm = DimVector.norm(other)
+    def cosine_similarity(self, other, norm_order=2):
+        self_norm = DimVector.norm(self, order=norm_order)
+        other_norm = DimVector.norm(other, order=norm_order)
 
         if self_norm == 0.0 or other_norm == 0.0:
             return 0.0
