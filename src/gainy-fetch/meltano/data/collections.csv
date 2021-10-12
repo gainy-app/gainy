@@ -11,14 +11,14 @@ name,QA,id,image_url,description,enabled,sql_request
 3d system stock,1,10,https://gainy-collections-production.s3.amazonaws.com/3d%20system%20stocks.png,,0,
 5 dollars stock,1,11,https://gainy-collections-production.s3.amazonaws.com/5%20dollars%20stocks.png,,1,where ct.price >3 and ct.price <=7 AND ct.chrt <=0.5
 5$ Biotech Stocks,2,12,https://gainy-collections-production.s3.amazonaws.com/5%20dollars%20biotech%20stocks.png,,1,where ct.price >3 and ct.price <=7 AND ct.chrt <=0.5 AND ct.g_industry ilike '%biotech%'
-50 dollars stocks,1,13,,,1,where ct.price between 45 and 55 AND ct.chrt <=0.2
+50 dollars stocks,1,13,https://gainy-collections-production.s3.amazonaws.com/abstract+1.png,,1,where ct.price between 45 and 55 AND ct.chrt <=0.2
 5G stocks,1,14,https://gainy-collections-production.s3.amazonaws.com/5g%20stocks.png,,1,where ct.g_industry ilike '%5g%com%unicat%'
 AAA raiting stocks,1,15,https://gainy-collections-production.s3.amazonaws.com/aaa%20raiting%20stocks.png,Stocks rated AAA,0,
 Agriculture stocks,1,16,https://gainy-collections-production.s3.amazonaws.com/agriculture%20stocks.png,,1,where ct.g_industry ilike '%agricul%tech%'
 AI companies stocks,1,17,https://gainy-collections-production.s3.amazonaws.com/ai%20companies%20stocks.png,Technology companies that utilize artificial intelligence,1,where ct.g_industry ilike '%analyt%ai%'
 Airline ETFs,1,18,https://gainy-collections-production.s3.amazonaws.com/airline%20etfs.png,,0,
 Airline Stocks,1,19,https://gainy-collections-production.s3.amazonaws.com/airline%20stocks.png,,1,where ct.g_industry ilike '%airlines%'
-Alcohol Stocks,1,20,,,1,where ct.g_industry ilike '%wine%liquor%'
+Alcohol Stocks,1,20,https://gainy-collections-production.s3.amazonaws.com/abstract+2.png,,1,where ct.g_industry ilike '%wine%liquor%'
 "AR, VR, XR Stocks",1,21,https://gainy-collections-production.s3.amazonaws.com/ar%20vr%20xr%20stocks.png,,1,where ct.g_industry ilike '%ar_vr%'
 Automotive stocks,1,22,https://gainy-collections-production.s3.amazonaws.com/automotive%20stocks.png,,1,where ct.g_industry ilike '%electr%vehic%' OR ct.g_industry ilike '%auto%deal%' OR ct.g_industry ilike '%auto%manufact%' OR ct.g_industry ilike '%auto%marketpl%' OR ct.g_industry ilike '%auto%part%servic%'
 Banking ETFs,2,23,https://gainy-collections-production.s3.amazonaws.com/banking%20etfs.png,ETFs on banking companies in the US,1,where ct.ttype ='ETF' AND ct.g_industry ilike '%bank%'
@@ -54,7 +54,7 @@ Copper ETFs,2,52,https://gainy-collections-production.s3.amazonaws.com/copper%20
 Copper stocks,1,53,https://gainy-collections-production.s3.amazonaws.com/copper%20stocks.png,,1,where ct.g_industry ilike '%industr%metal%'
 Crashed stocks,1,54,https://gainy-collections-production.s3.amazonaws.com/crashed%20stocks.png,,0,
 Cruise line ETFs,2,55,https://gainy-collections-production.s3.amazonaws.com/cruise%20line%20etfs.png,,1,where ct.ttype ='ETF' AND (ct.g_industry ilike '%onlin%travel%compan%' OR ct.g_industry ilike '%maritime%transport%')
-Cruise line stocks,1,56,,,1,where ct.g_industry ilike '%onlin%travel%compan%' OR ct.g_industry ilike '%maritime%transport%'
+Cruise line stocks,1,56,https://gainy-collections-production.s3.amazonaws.com/abstract+3.png,,1,where ct.g_industry ilike '%onlin%travel%compan%' OR ct.g_industry ilike '%maritime%transport%'
 Cryptocurrency to invest today,1,57,https://gainy-collections-production.s3.amazonaws.com/cryptocurrency%20to%20invest%20today.png,,0,
 Daily trading stocks,1,58,https://gainy-collections-production.s3.amazonaws.com/daily%20trading%20stocks.png,,0,
 Data stocks,1,59,https://gainy-collections-production.s3.amazonaws.com/data%20stocks.png,,1,where ct.g_industry ilike '%analyt%ai%' OR ct.g_industry ilike '%data%center%' and ct.g_industry not ilike '%reit%' OR ct.g_industry ilike '%data%stor%manag%'
@@ -85,7 +85,7 @@ FAANG (big tech) stocks,2,83,https://gainy-collections-production.s3.amazonaws.c
 Farming stocks,1,84,https://gainy-collections-production.s3.amazonaws.com/farming%20stocks.png,,1,where ct.g_industry ilike '%agricultur%tech%'
 Fast food stocks,1,85,https://gainy-collections-production.s3.amazonaws.com/fast%20food%20stocks.png,,1,where ct.g_industry ilike '%casual%din%n%'
 Finance stocks,1,86,https://gainy-collections-production.s3.amazonaws.com/finance%20stocks.png,,1,where lower(ct.gics_sector) ilike '%financ%'
-Fintech stocks,1,87,,,1,where ct.g_industry ilike '%financ%exchang%data%' OR ct.g_industry ilike '%fintech%'
+Fintech stocks,1,87,https://gainy-collections-production.s3.amazonaws.com/abstract+4.png,,1,where ct.g_industry ilike '%financ%exchang%data%' OR ct.g_industry ilike '%fintech%'
 Flowers food stocks,0,88,https://gainy-collections-production.s3.amazonaws.com/flowers%20food%20stocks.png,,0,
 Food Delivery stocks,1,89,https://gainy-collections-production.s3.amazonaws.com/food%20delivery%20stocks.png,,1,where ct.g_industry ilike '%food%deliver%'
 Food stocks,1,90,https://gainy-collections-production.s3.amazonaws.com/food%20stocks.png,,1,where ct.g_industry ilike '%bread%condiment%' OR ct.g_industry ilike '%casual%din%n%' OR ct.g_industry ilike '%dairy%' OR ct.g_industry ilike '%fruit%vegetabl%' OR ct.g_industry ilike '%meat%poultry%' OR ct.g_industry ilike '%snack%cand%' OR ct.g_industry ilike '%soft%sport%drink%'
@@ -122,7 +122,7 @@ Internet of things stocks,1,120,https://gainy-collections-production.s3.amazonaw
 Large cap index funds,1,121,https://gainy-collections-production.s3.amazonaws.com/large%20cap%20index%20funds.png,,0,
 Large cap stocks,1,122,https://gainy-collections-production.s3.amazonaws.com/large%20cap%20stocks.png,,0,
 Latam Airlines Stocks,1,123,https://gainy-collections-production.s3.amazonaws.com/latam%20airlines%20stocks.png,,1,where ct.g_industry ilike '%airline%' AND ct.country_group ilike '%latam%'
-Latam stocks,1,124,,,1,where ct.country_group ilike '%latam%'
+Latam stocks,1,124,https://gainy-collections-production.s3.amazonaws.com/abstract+5.png,,1,where ct.country_group ilike '%latam%'
 Lithium stocks,1,125,https://gainy-collections-production.s3.amazonaws.com/lithium%20stocks.png,,1,"where ct.ticker_code IN ('ULBI', 'FLUX', 'TANH', 'PLL', 'SEDG')"
 Long term stocks,1,126,https://gainy-collections-production.s3.amazonaws.com/long%20term%20stocks.png,Stocks to gain long-term benefit,0,
 Meat stocks,1,127,https://gainy-collections-production.s3.amazonaws.com/meat%20stocks.png,,1,where ct.g_industry ilike '%meat%poultry%'

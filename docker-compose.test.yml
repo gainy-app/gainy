@@ -10,12 +10,13 @@ services:
         BASE_IMAGE_REGISTRY_ADDRESS: ${BASE_IMAGE_REGISTRY_ADDRESS}
         BASE_IMAGE_VERSION: ${BASE_IMAGE_VERSION}
     volumes:
-      - ./src/gainy-fetch/meltano/meltano.template.yml:/project/meltano.template.yml:delegated
-      - ./src/gainy-fetch/meltano/scripts:/project/scripts:delegated
-      - ./src/gainy-fetch/meltano/transform:/project/transform:delegated
-      - ./src/gainy-fetch/meltano/data:/project/data:delegated
-      - ./src/gainy-fetch/meltano/orchestrate:/project/orchestrate:delegated
-      - ./src/gainy-fetch/meltano/seed:/project/seed:delegated
+      - ./src/gainy-fetch/meltano/meltano.template.yml:/project/meltano.template.yml
+      - ./src/gainy-fetch/meltano/scripts:/project/scripts
+      - ./src/gainy-fetch/meltano/transform:/project/transform
+      - ./src/gainy-fetch/meltano/data:/project/data
+      - ./src/gainy-fetch/meltano/orchestrate:/project/orchestrate
+      - ./src/gainy-fetch/meltano/seed:/project/seed
+      - ./tests:/project/tests
     environment:
       EODHISTORICALDATA_JOBS_COUNT: 1
       AIRFLOW_PASSWORD: admin
@@ -23,6 +24,7 @@ services:
       TARGET_POSTGRES_HOST: test-postgres
       MELTANO_DATABASE_URI: "postgresql://postgres:postgrespassword@test-postgres:5432/postgres?options=-csearch_path%3Dmeltano"
       NO_AIRFLOW: "true"
+      ENV: test
     depends_on:
       - test-postgres
     entrypoint: "/init.sh"
