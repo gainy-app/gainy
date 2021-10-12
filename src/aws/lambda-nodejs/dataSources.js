@@ -43,5 +43,21 @@ exports.gnewsFetch = async (urlParts, queryParams, cacheTTL) => {
   const urlPart = urlParts.map((x) => encodeURIComponent(x)).join("/");
   const url = `https://gnews.io/api/v4/${urlPart}?${params.toString()}`;
 
-  return cached(url, cacheTTL);
+  const fetch = async (attemptsLeft) => {
+    try {
+      return await cached(url, cacheTTL);
+    } catch (error) {
+      if (error.response.status === 429) {
+        return new Promise((resolve) => {
+          setTimeout(() => {
+            resolve(fetch(attemptsLeft - 1));
+          }, 1000);
+        });
+      }
+
+      throw error;
+    }
+  };
+
+  return fetch(3);
 };

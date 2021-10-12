@@ -15,9 +15,8 @@ exports.fetchNewsData = async (event) => {
     return badRequestResponse(e.message);
   }
 
-  let { symbol, limit } = input;
-
-  symbol = symbol.trim()
+  const { limit } = input;
+  const symbol = input.symbol.trim();
   if (!symbol) {
     return successfulResponse([]);
   }
