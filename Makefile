@@ -38,9 +38,6 @@ tf-apply:
 hasura-console:
 	docker-compose exec -T hasura hasura console --address 0.0.0.0
 
-hasura:
-	docker-compose exec -T hasura hasura $(PARAMS)
-
 style-check:
 	npx eslint src/aws/lambda-nodejs
 	npx prettier --check "src/aws/lambda-nodejs/**/*.js"
@@ -55,7 +52,8 @@ extract-passwords:
 	cd terraform && terraform state pull | python ../extract_passwords.py
 
 test:
-	docker-compose -p gainy_test -f docker-compose.test.yml run --rm test-meltano invoke dbt test
+	docker-compose -p gainy_test -f docker-compose.test.yml run --entrypoint python3 test-meltano tests/image_urls.py
+	docker-compose -p gainy_test -f docker-compose.test.yml run test-meltano invoke dbt test
 	make test-clean
 
 test-clean:
