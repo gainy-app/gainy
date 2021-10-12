@@ -20,6 +20,7 @@ for model_name in models:
             lines = filter(lambda x: not re.match(r'^(select|order)', x), lines)
             lines = map(lambda x: x.replace('where', '').strip(), lines)
             sql = " ".join(lines)
+            name = name.replace("'", "''")
 
             queries.append(
                 "select %s.id as %s_id, ct.ticker_code as symbol from ct join %s on %s.name = '%s' where %s" %
