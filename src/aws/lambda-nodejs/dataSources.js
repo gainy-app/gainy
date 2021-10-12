@@ -47,7 +47,7 @@ exports.gnewsFetch = async (urlParts, queryParams, cacheTTL) => {
     try {
       return await cached(url, cacheTTL);
     } catch (error) {
-      if (error.response.status === 429) {
+      if (error.response.status === 429 && attemptsLeft > 0) {
         return new Promise((resolve) => {
           setTimeout(() => {
             resolve(fetch(attemptsLeft - 1));
