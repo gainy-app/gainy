@@ -24,6 +24,7 @@ services:
       TARGET_POSTGRES_HOST: test-postgres
       MELTANO_DATABASE_URI: "postgresql://postgres:postgrespassword@test-postgres:5432/postgres?options=-csearch_path%3Dmeltano"
       NO_AIRFLOW: "true"
+      ENV: test
     depends_on:
       - test-postgres
     entrypoint: "/init.sh"
