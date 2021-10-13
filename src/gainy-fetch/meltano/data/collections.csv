@@ -225,8 +225,8 @@ Healthcare services,0,222,,,1,where ct.g_industry ilike 'Healthcare services & E
 Investment funds,0,223,,,1,where ct.g_industry ilike 'Asset-Based Finance Company' OR ct.g_industry ilike 'closed-end mutual fund' OR ct.g_industry ilike 'Crowdfunding & Incubator' OR ct.g_industry ilike 'Infrastructure Investment Fund' OR ct.g_industry ilike 'Retirement Asset Management' OR ct.g_industry ilike 'Traded Growth/Venture Funds' OR ct.g_industry ilike 'Traded Private Investment Funds' OR ct.g_industry ilike 'Wealth Management'
 Logistics,0,224,,,1,where ct.g_industry ilike 'Air Cargo Transport' OR ct.g_industry ilike 'Container and Packaging' OR ct.g_industry ilike 'Maritime Transportation' OR ct.g_industry ilike 'Rail Freight' OR ct.g_industry ilike 'Retail Supply Chain' OR ct.g_industry ilike 'Supply Chain Services' OR ct.g_industry ilike 'Supply Chain Technology'
 Machinery,0,225,,,1,where ct.g_industry ilike 'Construction Machinery' OR ct.g_industry ilike 'Heavy Machinery & Parts'
-Man's health,0,226,,,1,where ct.g_industry ilike 'Healthcare services & Equipment & Man's health' OR ct.g_industry ilike 'Pharmaceuticals & Man's health'
+Man's health,0,226,,,1,where ct.g_industry ilike 'Healthcare services & Equipment & Man''s health' OR ct.g_industry ilike 'Pharmaceuticals & Man''s health'
 Resource mining,0,227,,,1,where ct.g_industry ilike 'Basic Chemicals' OR ct.g_industry ilike 'Coal' OR ct.g_industry ilike 'Industrial Metals' OR ct.g_industry ilike 'Specialty Chemicals'
 Security & Protection,0,228,,,1,where ct.g_industry ilike 'Mobile Data Capture' OR ct.g_industry ilike 'Security & Protection'
-Women's health,0,229,,,1,where ct.g_industry ilike 'Healthcare services & Equipment & Women's health' OR ct.g_industry ilike 'Pharmaceuticals & Women's health'
-EV charging companies,0,230,,,1,"where ticker_code IN ('BLNK', 'EVGO', 'TSLA', 'CHPT', 'RDS.A', 'RDS.B', 'BP', 'TPGY')"
+Women's health,0,229,,,1,where ct.g_industry ilike 'Healthcare services & Equipment & Women''s health' OR ct.g_industry ilike 'Pharmaceuticals & Women''s health'
+EV charging companies,0,230,,,1,"where ticker_code IN ('BLNK','EVGO','TSLA','CHPT','RDS.A','RDS.B','BP','TPGY')"
