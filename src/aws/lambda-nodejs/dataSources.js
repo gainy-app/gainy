@@ -42,6 +42,29 @@ exports.gnewsFetch = async (urlParts, queryParams, cacheTTL) => {
   });
   const urlPart = urlParts.map((x) => encodeURIComponent(x)).join("/");
   const url = `https://gnews.io/api/v4/${urlPart}?${params.toString()}`;
+  const maxAttempts = 3;
 
-  return cached(url, cacheTTL);
+  const fetch = async (attemptsLeft) => {
+    try {
+      const result = await cached(url, cacheTTL);
+
+      if (attemptsLeft < maxAttempts) {
+        console.log(`News fetched on the ${maxAttempts - attemptsLeft} try.`);
+      }
+
+      return result;
+    } catch (error) {
+      if (error.response.status === 429 && attemptsLeft > 0) {
+        return new Promise((resolve) => {
+          setTimeout(() => {
+            resolve(fetch(attemptsLeft - 1));
+          }, 1000);
+        });
+      }
+
+      throw error;
+    }
+  };
+
+  return fetch(maxAttempts);
 };
