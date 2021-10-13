@@ -10,13 +10,15 @@
 
 /* THE MODEL FILE IS AUTO GENERATED DURING BUILD, YOU SHOULD NOT EDIT THE MODEL, EDIT THE TEMPLATE INSTEAD  */
 
-with price AS
-         (
-             select hp.*,
-                    ROW_NUMBER() OVER (PARTITION BY hp.code ORDER BY hp.date::timestamp DESC) as inv_row_number
-             from {{ ref('historical_prices') }} hp
-             where close is not null AND open is not null --we get latest by date not-null prices (with inv_row_number=1) (if any)
-         ),
+with latest_price AS
+        (
+            select distinct on (hp.code) hp.*
+            from historical_prices hp
+            where close is not null
+              AND open is not null
+              and date > NOW() - interval '1 week'
+            order by hp.code, hp.date DESC --we get latest by date not-null prices (if any)
+        ),
      ct as
          (
              select t.symbol                                                     as ticker_code,
@@ -36,7 +38,7 @@ with price AS
                         WHEN countries."sub-region" LIKE '%Latin America%' THEN 'latam'
                         END                                                      as country_group
              from {{ ref('tickers') }} t
-                      LEFT JOIN price latest_price ON latest_price.code = t.symbol AND latest_price.inv_row_number = 1
+                      LEFT JOIN latest_price ON latest_price.code = t.symbol
                       LEFT JOIN {{ ref('ticker_industries') }} ti on t.symbol = ti.symbol
                       LEFT JOIN {{ ref('gainy_industries') }} gi on ti.industry_id = gi.id
                       LEFT JOIN {{ ref('ticker_categories') }} tc on t.symbol = tc.symbol --here we have N:N relationship, so for interests we must use distinct in the end (we will get duplicates otherwise)

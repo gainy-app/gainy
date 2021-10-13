@@ -16,7 +16,7 @@ for model_name in models:
             if(not sql or not int(enabled)):
                 continue
 
-            lines = sql.lower().split("\n")
+            lines = sql.split("\n")
             lines = filter(lambda x: not re.match(r'^(select|order)', x), lines)
             lines = map(lambda x: x.replace('where', '').strip(), lines)
             sql = " ".join(lines)
