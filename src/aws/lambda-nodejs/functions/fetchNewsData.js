@@ -15,10 +15,12 @@ exports.fetchNewsData = async (event) => {
     return badRequestResponse(e.message);
   }
 
-  const { symbol, limit } = input;
+  const { limit } = input;
+  const symbol = input.symbol.trim();
   if (!symbol) {
-    return badRequestResponse("symbol is unset");
+    return successfulResponse([]);
   }
+
   if (limit && limit > maxLimit) {
     return badRequestResponse("max limit is 10");
   }
