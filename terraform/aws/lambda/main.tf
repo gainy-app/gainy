@@ -187,6 +187,12 @@ resource "docker_registry_image" "lambda_python" {
       BASE_IMAGE_REGISTRY_ADDRESS = var.base_image_registry_address
       BASE_IMAGE_VERSION          = var.base_image_version
     }
+
+    auth_config {
+      host_name = local.ecr_address
+      user_name = data.aws_ecr_authorization_token.token.user_name
+      password  = data.aws_ecr_authorization_token.token.password
+    }
   }
 }
 
