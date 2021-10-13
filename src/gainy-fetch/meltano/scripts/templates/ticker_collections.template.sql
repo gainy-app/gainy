@@ -2,7 +2,6 @@
   config(
     materialized = "table",
     post_hook = [
-      fk(this, 'collection_id', 'collections', 'id'),
       'create unique index if not exists {{ get_index_name(this, "symbol__collection_id") }} (symbol, collection_id)',
     ]
   )
@@ -18,7 +17,7 @@ with historical_prices as (select * from {{ ref('historical_prices') }}),
      gainy_industries as (select * from {{ ref('gainy_industries') }}),
      ticker_categories as (select * from {{ ref('ticker_categories') }}),
      categories as (select * from {{ ref('categories') }}),
-     collections as (select * from {{ ref('collections') }}),
+     collections as (select id::int, name from {{ source('gainy', 'raw_collections') }}),
      countries as (select * from {{ source('gainy', 'raw_countries') }}),
      latest_price AS
          (

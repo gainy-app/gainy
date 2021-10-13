@@ -212,6 +212,44 @@ models:
           - type:
               type: 'character varying'
 
+  - name: collections
+    columns:
+      - name: id
+        tests:
+          - unique
+          - exists
+          - type:
+              type: 'integer'
+      - name: name
+        tests:
+          - exists
+          - not_null
+          - type:
+              type: 'character varying'
+      - name: description
+        tests:
+          - exists
+          - type:
+              type: 'character varying'
+      - name: enabled
+        tests:
+          - exists
+          - accepted_values:
+              values: [ '0', '1' ]
+          - type:
+              type: 'character varying'
+      - name: image_url
+        tests:
+          - exists
+          - type:
+              type: 'character varying'
+      - name: size
+        tests:
+          - exists
+          - not_null
+          - type:
+              type: 'integer'
+
   - name: ticker_categories
     columns:
       - name: category_id
