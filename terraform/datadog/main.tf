@@ -92,21 +92,21 @@ resource "datadog_monitor" "hasura_alb_active_connections" {
   message = "Hasura Active Connections Monitor triggered. Notify: @slack-${var.slack_channel_name} <!channel>"
   #  escalation_message = "Escalation message @pagerduty"
 
-  query = "avg(last_7d):anomalies(sum:aws.applicationelb.active_connection_count{name:*-production}.as_count(), 'basic', 2, direction='both', alert_window='last_6h', interval=300, count_default_zero='true') > 0.8"
+  query = "avg(last_7d):anomalies(sum:aws.applicationelb.active_connection_count{name:*-production}.as_count(), 'basic', 2, direction='both', alert_window='last_1d', interval=300, count_default_zero='true') > 0.8"
 
   monitor_threshold_windows {
-    recovery_window = "last_6h"
-    trigger_window  = "last_6h"
+    recovery_window = "last_1d"
+    trigger_window  = "last_1d"
   }
 
   monitor_thresholds {
     critical         = "0.8"
-    warning          = "0.3"
+    warning          = "0.5"
     warning_recovery = "0"
   }
 
   require_full_window = true
-  notify_no_data      = true
+  notify_no_data      = false
   renotify_interval   = 15
 
   tags = ["hasura"]
@@ -194,7 +194,7 @@ resource "datadog_monitor" "lambda_invocations" {
 
   monitor_thresholds {
     critical         = "1"
-    warning          = "0.3"
+    warning          = "0.5"
     warning_recovery = "0"
   }
 
@@ -220,7 +220,7 @@ resource "datadog_monitor" "lambda_duration" {
 
   monitor_thresholds {
     critical         = "1"
-    warning          = "0.3"
+    warning          = "0.5"
     warning_recovery = "0"
   }
 
@@ -237,7 +237,7 @@ resource "datadog_monitor" "lambda_errors" {
   message = "Lambda Errors Monitor triggered. Notify: @slack-${var.slack_channel_name} <!channel>"
   #  escalation_message = "Escalation message @pagerduty"
 
-  query             = "avg(last_7d):anomalies(sum:aws.lambda.errors{resource:*_production}, 'basic', 2, direction='above', alert_window='last_1h', interval=300, count_default_zero='true') >= 0.01"
+  query             = "avg(last_7d):anomalies(sum:aws.lambda.errors{resource:*_production} by {functionname}.as_count(), 'basic', 2, direction='above', alert_window='last_1h', interval=300, count_default_zero='true') >= 0.01"
   no_data_timeframe = 120
 
   monitor_threshold_windows {
