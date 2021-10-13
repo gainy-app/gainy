@@ -1,6 +1,7 @@
-FROM public.ecr.aws/lambda/python:3.9
+ARG BASE_IMAGE_VERSION
+ARG BASE_IMAGE_REGISTRY_ADDRESS
 
-RUN pip install poetry
+FROM ${BASE_IMAGE_REGISTRY_ADDRESS}/gainy-lambda-python:${BASE_IMAGE_VERSION}
 
 COPY poetry.lock pyproject.toml /var/
 RUN cd /var && poetry export | python3 -mpip install -r /dev/stdin

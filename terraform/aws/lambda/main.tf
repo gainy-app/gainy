@@ -11,6 +11,8 @@ variable "vpc_security_group_ids" {}
 variable "vpc_subnet_ids" {}
 variable "datadog_api_key" {}
 variable "datadog_app_key" {}
+variable "base_image_registry_address" {}
+variable "base_image_version" {}
 
 output "aws_apigatewayv2_api_endpoint" {
   value = "${aws_apigatewayv2_api.lambda.api_endpoint}/${aws_apigatewayv2_stage.lambda.name}"
@@ -181,6 +183,10 @@ resource "docker_registry_image" "lambda_python" {
   build {
     context    = local.python_root_dir
     dockerfile = "Dockerfile"
+    build_args = {
+      BASE_IMAGE_REGISTRY_ADDRESS = var.base_image_registry_address
+      BASE_IMAGE_VERSION          = var.base_image_version
+    }
   }
 }
 

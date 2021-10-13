@@ -90,6 +90,9 @@ services:
   lambda-python-trigger:
     build:
       context: ./src/aws/lambda-python
+      args:
+        BASE_IMAGE_REGISTRY_ADDRESS: ${BASE_IMAGE_REGISTRY_ADDRESS}
+        BASE_IMAGE_VERSION: ${BASE_IMAGE_VERSION}
     restart: always
     volumes:
       - ./src/aws/lambda-python/lambda_python:/var/task
