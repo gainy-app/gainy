@@ -63,7 +63,7 @@ dividends_tmp as (
 			first_value("date"::date) over (partition by code order by "date" desc) as latest_date,
 			first_value("value"::numeric) over (partition by code order by "date" desc) as latest_value
 		from
-			public.dividends
+			{{ source('eod', 'dividends') }}
 	) d
 ),
 dividends_ago as (

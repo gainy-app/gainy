@@ -19,6 +19,7 @@ with historical_prices as (select * from {{ ref('historical_prices') }}),
      ticker_categories as (select * from {{ ref('ticker_categories') }}),
      categories as (select * from {{ ref('categories') }}),
      collections as (select * from {{ ref('collections') }}),
+     countries as (select * from {{ source('gainy', 'raw_countries') }}),
      latest_price AS
          (
              select distinct on (hp.code) hp.*
@@ -56,7 +57,7 @@ with historical_prices as (select * from {{ ref('historical_prices') }}),
                       LEFT JOIN ticker_categories tc
                                 on t.symbol = tc.symbol --here we have N:N relationship, so for interests we must use distinct in the end (we will get duplicates otherwise)
                       LEFT JOIN categories c on tc.category_id = c.id
-                      LEFT JOIN raw_countries countries
+                      LEFT JOIN countries
                                 on countries.name = t.country_name OR countries."alpha-2" = t.country_name OR
                                    countries."alpha-3" = t.country_name
          ),

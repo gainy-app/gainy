@@ -16,6 +16,6 @@ select code                                   as symbol,
        valuation ->> 'EnterpriseValue'        as enterprise_value,
        valuation ->> 'EnterpriseValueEbitda'  as enterprise_value_ebidta,
        valuation ->> 'EnterpriseValueRevenue' as enterprise_value_revenue
-from fundamentals f inner join {{  ref('tickers') }} as t on f.code = t.symbol
+from {{ source('eod', 'fundamentals') }} f inner join {{  ref('tickers') }} as t on f.code = t.symbol
 
 
