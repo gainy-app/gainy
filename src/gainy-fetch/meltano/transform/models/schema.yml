@@ -657,3 +657,46 @@ models:
           - exists
           - type:
               type: 'double precision'
+
+  - name: analyst_ratings
+    columns:
+      - name: symbol
+        tests:
+          - exists
+          - type:
+              type: 'text'
+      - name: buy
+        tests:
+          - exists
+          - type:
+              type: 'integer'
+      - name: hold
+        tests:
+          - exists
+          - type:
+              type: 'integer'
+      - name: sell
+        tests:
+          - exists
+          - type:
+              type: 'integer'
+      - name: rating
+        tests:
+          - exists
+          - type:
+              type: 'double precision'
+      - name: strong_buy
+        tests:
+          - exists
+          - type:
+              type: 'integer'
+      - name: strong_sell
+        tests:
+          - exists
+          - type:
+              type: 'integer'
+      - name: target_price
+        tests:
+          - exists
+          - type:
+              type: 'double precision'

@@ -318,6 +318,9 @@
       filter: {}
 - table:
     schema: public
+    name: analyst_ratings
+- table:
+    schema: public
     name: categories
   select_permissions:
   - role: user
@@ -726,6 +729,16 @@
 - table:
     schema: public
     name: tickers
+  object_relationships:
+  - name: ticker_analyst_ratings
+    using:
+      manual_configuration:
+        remote_table:
+          schema: public
+          name: analyst_ratings
+        insertion_order: null
+        column_mapping:
+          symbol: symbol
   array_relationships:
   - name: historical_growth_rates
     using:
