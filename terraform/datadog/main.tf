@@ -211,11 +211,11 @@ resource "datadog_monitor" "lambda_duration" {
   message = "Lambda Duration Monitor triggered. Notify: @slack-${var.slack_channel_name} <!channel>"
   #  escalation_message = "Escalation message @pagerduty"
 
-  query = "avg(last_7d):anomalies(sum:aws.lambda.duration{resource:*_production} by {functionname}.as_count(), 'basic', 2, direction='above', alert_window='last_6h', interval=300, count_default_zero='true') > 1"
+  query = "avg(last_7d):anomalies(sum:aws.lambda.duration{resource:*_production} by {functionname}.as_count(), 'basic', 2, direction='above', alert_window='last_2d', interval=300, count_default_zero='true') > 1"
 
   monitor_threshold_windows {
-    recovery_window = "last_6h"
-    trigger_window  = "last_6h"
+    recovery_window = "last_2d"
+    trigger_window  = "last_2d"
   }
 
   monitor_thresholds {
@@ -226,7 +226,7 @@ resource "datadog_monitor" "lambda_duration" {
 
   require_full_window = true
   notify_no_data      = false
-  renotify_interval   = 60
+  renotify_interval   = 720
 
   tags = ["lambda"]
 }
