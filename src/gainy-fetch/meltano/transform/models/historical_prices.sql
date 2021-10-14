@@ -17,4 +17,4 @@ SELECT rhp.code,
        rhp.open,
        rhp.volume
 from {{ source('eod','raw_historical_prices') }} rhp
-join {{ ref('tickers') }} ON tickers.symbol = rhp.code
+join {{ ref('tickers') }} t ON t.symbol = rhp.code
