@@ -11,7 +11,7 @@
 with expanded_quaterly_cash_flow as (
     select code as symbol,
            (json_each((financials -> 'Cash_Flow' ->> 'quarterly')::json)).*
-    from fundamentals f
+    from {{ source('eod', 'fundamentals') }} f
              inner join {{ ref ('tickers') }} as t
     on f.code = t.symbol
 )

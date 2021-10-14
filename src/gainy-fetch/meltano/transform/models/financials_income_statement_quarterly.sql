@@ -17,7 +17,7 @@ with
     select code as symbol,
            (json_each((financials -> 'Income_Statement' ->> 'quarterly')::json)).*,
            updatedat::date as updated_at
-    from fundamentals f
+    from {{ source('eod', 'fundamentals') }} f
              inner join {{ ref('tickers') }} as t on f.code = t.symbol
 -- {% if is_incremental() %}
 --     join max_updated_at on true

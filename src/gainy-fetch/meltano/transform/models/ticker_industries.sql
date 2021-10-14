@@ -9,6 +9,7 @@
   )
 }}
 
+WITH raw_ticker_industries as (SELECT * FROM {{ source('gainy', 'raw_ticker_industries') }})
 SELECT code                as symbol,
        gainy_industries.id as industry_id
 FROM raw_ticker_industries

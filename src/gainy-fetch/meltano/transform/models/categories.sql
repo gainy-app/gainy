@@ -12,4 +12,4 @@ SELECT id::int,
        name::text,
        icon_url::text,
        risk_score::int
-from raw_categories
+from {{ source ('gainy', 'raw_categories') }}
