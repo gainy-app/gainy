@@ -352,6 +352,7 @@
       - image_url
       - description
       - enabled
+      - size
       filter: {}
       allow_aggregations: true
 - table:
