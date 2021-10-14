@@ -21,5 +21,5 @@ select t.symbol, t."type", t."name", t.description, t.phone, t.logo_url, t.web_u
 from {{ ref('base_tickers') }} t
     left join volumes v
         on t.symbol = v.symbol
-where v.avg_volume >= {{ min_daily_volume }}
+where v.avg_volume >= {{ min_daily_volume }} or t.description is null
 
