@@ -9,4 +9,4 @@
 select
  code as symbol,
  {{ j }}
-from fundamentals
+from {{ source('eod', 'fundamentals') }}

@@ -1,5 +1,26 @@
 version: 2
 
+sources:
+  - name: gainy
+    description: Gainy in-house datasets such as collections, industries, interests, categotries, etc.
+    schema: public
+    tables:
+      - name: raw_gainy_industries
+      - name: raw_ticker_industries
+      - name: raw_collections
+      - name: raw_categories
+      - name: raw_interests
+      - name: raw_countries
+
+  - name: eod
+    description: Financial data from https://eodhistoricaldata.com/
+    schema: public
+    tables:
+      - name: fundamentals
+      - name: dividends
+      - name: options
+      - name: raw_historical_prices
+
 models:
   - name: categories
     columns:
@@ -190,6 +211,44 @@ models:
           - exists
           - type:
               type: 'character varying'
+
+  - name: collections
+    columns:
+      - name: id
+        tests:
+          - unique
+          - exists
+          - type:
+              type: 'integer'
+      - name: name
+        tests:
+          - exists
+          - not_null
+          - type:
+              type: 'character varying'
+      - name: description
+        tests:
+          - exists
+          - type:
+              type: 'character varying'
+      - name: enabled
+        tests:
+          - exists
+          - accepted_values:
+              values: [ '0', '1' ]
+          - type:
+              type: 'character varying'
+      - name: image_url
+        tests:
+          - exists
+          - type:
+              type: 'character varying'
+      - name: size
+        tests:
+          - exists
+          - not_null
+          - type:
+              type: 'integer'
 
   - name: ticker_categories
     columns:

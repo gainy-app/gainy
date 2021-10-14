@@ -45,6 +45,28 @@ services:
     entrypoint: "/wait.sh"
     command: "invoke airflow webserver -p 5001"
 
+  meltano-dbt-docs:
+    restart: always
+    env_file:
+      - .env
+    build:
+      context: ./src/gainy-fetch
+      args:
+        BASE_IMAGE_REGISTRY_ADDRESS: ${BASE_IMAGE_REGISTRY_ADDRESS}
+        BASE_IMAGE_VERSION: ${BASE_IMAGE_VERSION}
+    ports:
+      - "5002:5002"
+    volumes:
+      - ./src/gainy-fetch/meltano/scripts:/project/scripts:delegated
+      - ./src/gainy-fetch/meltano/meltano.template.yml:/project/meltano.template.yml:delegated
+      - ./src/gainy-fetch/meltano/transform:/project/transform:delegated
+      - ./src/gainy-fetch/dbt-docs.sh:/dbt-docs.sh
+    depends_on:
+      - postgres
+      - meltano-airflow-scheduler
+    entrypoint: "/dbt-docs.sh"
+    command: "invoke dbt docs serve --port 5002"
+
   postgres:
     image: postgres:12
     restart: always

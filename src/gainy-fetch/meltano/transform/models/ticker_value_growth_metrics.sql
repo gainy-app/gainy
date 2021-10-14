@@ -112,7 +112,7 @@ with tickers as (select * from {{ ref('tickers') }}),
                         WHEN abs(v.forward_pe::float) > 0
                             THEN 1 / v.forward_pe::float END                                          as fwd_ep,
                     (f.splitsdividends ->> 'ForwardAnnualDividendYield')::float                       as dividend_yield
-             from fundamentals f
+             from {{ source('eod', 'fundamentals') }} f
                       JOIN tickers t
                            ON t.symbol = f.code
                       JOIN highlights h ON h.symbol = f.code
