@@ -7,11 +7,7 @@ query {
         image_url
         id
         description
-        ticker_collections_aggregate {
-            aggregate {
-                count
-            }
-        }
+        size(args: {profile_id: 1})
     }
 }
 ```
@@ -25,12 +21,8 @@ query {
         image_url
         name
         description
-        ticker_collections_aggregate {
-            aggregate {
-                count
-            }
-        }
-        ticker_collections {
+        size(args: {profile_id: 1})
+        ticker_collections(args: {profile_id: 1}) {
             ticker {
                 symbol
                 name
