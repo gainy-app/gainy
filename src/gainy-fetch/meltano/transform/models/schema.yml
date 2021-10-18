@@ -243,6 +243,16 @@ models:
           - exists
           - type:
               type: 'character varying'
+
+  - name: collection_sizes
+    description: Pre-aggregated sizes of non-personalized Gainy collections for query performance optimization
+    columns:
+      - name: collection_id
+        tests:
+          - unique
+          - exists
+          - type:
+              type: 'integer'
       - name: size
         tests:
           - exists
@@ -266,6 +276,7 @@ models:
               type: 'character varying'
 
   - name: ticker_collections
+    description: Lists of tickers in non-personalized Gainy collections
     columns:
       - name: symbol
         tests:
