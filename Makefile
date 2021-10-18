@@ -19,10 +19,6 @@ down:
 clean:
 	docker-compose down --rmi local -v --remove-orphans
 
-update: build update-quick
-
-update-quick: clean up install
-
 tf-fmt:
 	cd terraform && terraform fmt -recursive
 
@@ -38,15 +34,18 @@ tf-apply:
 hasura-console:
 	docker-compose exec -T hasura hasura console --address 0.0.0.0
 
+hasura-seed:
+	docker-compose exec -T hasura hasura seed apply
+
 style-check:
 	npx eslint src/aws/lambda-nodejs
 	npx prettier --check "src/aws/lambda-nodejs/**/*.js"
-	yapf --diff -r src/aws/lambda-python/
+	yapf --diff -r src/aws/lambda-python/ src/aws/router
 
 style-fix:
 	npx eslint src/aws/lambda-nodejs --fix
 	npx prettier --write "src/aws/lambda-nodejs/**/*.js"
-	yapf -i -r src/aws/lambda-python/
+	yapf -i -r src/aws/lambda-python/ src/aws/router
 
 extract-passwords:
 	cd terraform && terraform state pull | python ../extract_passwords.py
