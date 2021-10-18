@@ -319,6 +319,19 @@
 - table:
     schema: public
     name: analyst_ratings
+  select_permissions:
+  - role: user
+    permission:
+      columns:
+      - symbol
+      - buy
+      - hold
+      - sell
+      - rating
+      - strong_buy
+      - strong_sell
+      - target_price
+      filter: {}
 - table:
     schema: public
     name: categories
