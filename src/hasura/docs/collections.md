@@ -7,6 +7,7 @@ query {
         image_url
         id
         description
+        is_enabled(args: {profile_id: 1})
         size(args: {profile_id: 1})
     }
 }
@@ -21,6 +22,7 @@ query {
         image_url
         name
         description
+        is_enabled(args: {profile_id: 1})
         size(args: {profile_id: 1})
         ticker_collections(args: {profile_id: 1}) {
             ticker {

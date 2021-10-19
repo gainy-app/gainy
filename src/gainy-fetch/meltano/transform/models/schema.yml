@@ -1,8 +1,15 @@
 version: 2
 
 sources:
+  - name: app
+    description: Database tables created and updated via GraphQL quries, mainly related to user profiles
+    schema: app
+    tables:
+      - name: personalized_ticker_collections
+      - name: personalized_collection_sizes
+
   - name: gainy
-    description: Gainy in-house datasets such as collections, industries, interests, categotries, etc.
+    description: Gainy in-house datasets such as collections, industries, interests, categotries, etc
     schema: public
     tables:
       - name: raw_gainy_industries
@@ -243,16 +250,49 @@ models:
           - exists
           - type:
               type: 'character varying'
-
-  - name: collection_sizes
-    description: Pre-aggregated sizes of non-personalized Gainy collections for query performance optimization
-    columns:
-      - name: collection_id
+      - name: size
         tests:
-          - unique
           - exists
           - type:
               type: 'integer'
+
+  - name: profile_collections
+    description: A view to unify access to both personalized and non-personlized collections extended with `enabled` flag and size
+    columns:
+      - name: profile_id
+        tests:
+          - exists
+          - type:
+              type: 'integer'
+      - name: id
+        tests:
+          - exists
+          - not_null
+          - type:
+              type: 'integer'
+      - name: name
+        tests:
+          - exists
+          - not_null
+          - type:
+              type: 'character varying'
+      - name: description
+        tests:
+          - exists
+          - type:
+              type: 'character varying'
+      - name: image_url
+        tests:
+          - exists
+          - type:
+              type: 'character varying'
+      - name: enabled
+        tests:
+          - exists
+          - accepted_values:
+              values: [ '0', '1' ]
+          - type:
+              type: 'character varying'
       - name: size
         tests:
           - exists
@@ -290,6 +330,27 @@ models:
           - not_null
           - type:
               type: 'integer'
+
+  - name: profile_ticker_collections
+    description: A view to unify access to both personalized and non-personlized collection tickers
+    columns:
+      - name: profile_id
+        tests:
+          - exists
+          - type:
+              type: 'character varying'
+      - name: collection_id
+        tests:
+          - exists
+          - not_null
+          - type:
+              type: 'integer'
+      - name: symbol
+        tests:
+          - exists
+          - not_null
+          - type:
+              type: 'character varying'
 
   - name: ticker_events
     columns:

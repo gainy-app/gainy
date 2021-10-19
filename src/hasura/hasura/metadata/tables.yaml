@@ -394,14 +394,14 @@
       filter: {}
 - table:
     schema: public
-    name: collections
+    name: profile_collections
   array_relationships:
   - name: ticker_collections
     using:
       manual_configuration:
         remote_table:
           schema: public
-          name: ticker_collections
+          name: profile_ticker_collections
         insertion_order: null
         column_mapping:
           id: collection_id
@@ -656,7 +656,7 @@
       filter: {}
 - table:
     schema: public
-    name: ticker_collections
+    name: profile_ticker_collections
   object_relationships:
   - name: ticker
     using:
@@ -835,7 +835,7 @@
       manual_configuration:
         remote_table:
           schema: public
-          name: ticker_collections
+          name: profile_ticker_collections
         insertion_order: null
         column_mapping:
           symbol: symbol
