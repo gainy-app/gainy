@@ -47,7 +47,7 @@ custom_types:
     relationships:
     - remote_table:
         schema: public
-        name: collections
+        name: profile_collections
       name: collection
       source: default
       type: object
