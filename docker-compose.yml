@@ -96,6 +96,7 @@ services:
       - .env
     environment:
       HASURA_PORT: ${HASURA_PORT}
+      AWS_LAMBDA_API_GATEWAY_ENDPOINT: http://lambda-router:5000
 
   firebase:
     image: ${BASE_IMAGE_REGISTRY_ADDRESS}/gainy-firebase:${BASE_IMAGE_VERSION}
@@ -109,6 +110,14 @@ services:
     environment:
       GOOGLE_APPLICATION_CREDENTIALS: "/var/www/firebase.key.json"
 
+  lambda-router:
+    build:
+      context: ./src/aws/router
+    volumes:
+      - ./src/aws/router:/app
+    ports:
+      - "8082:5000"
+
   lambda-python-trigger:
     build:
       context: ./src/aws/lambda-python
@@ -120,8 +129,6 @@ services:
       - ./src/aws/lambda-python/lambda_python:/var/task
       - ./src/aws/lambda-python/poetry.lock:/var/poetry.lock
       - ./src/aws/lambda-python/pyproject.toml:/var/pyproject.toml
-    ports:
-      - "9010:8080"
     env_file:
       - .env
     environment:
@@ -133,6 +140,29 @@ services:
       AWS_LAMBDA_API_GATEWAY_PROXY_INTEGRATION: "false"
       ENV: "local"
     command: [ "hasura_handler.handle_trigger" ]
+
+  lambda-python-action:
+    build:
+      context: ./src/aws/lambda-python
+      args:
+        BASE_IMAGE_REGISTRY_ADDRESS: ${BASE_IMAGE_REGISTRY_ADDRESS}
+        BASE_IMAGE_VERSION: ${BASE_IMAGE_VERSION}
+    restart: always
+    volumes:
+      - ./src/aws/lambda-python/lambda_python:/var/task
+      - ./src/aws/lambda-python/poetry.lock:/var/poetry.lock
+      - ./src/aws/lambda-python/pyproject.toml:/var/pyproject.toml
+    env_file:
+      - .env
+    environment:
+      pg_host: "${PG_ADDRESS}"
+      pg_port: "${PG_PORT}"
+      pg_dbname: "${PG_DATABASE}"
+      pg_username: "${PG_USERNAME}"
+      pg_password: "${PG_PASSWORD}"
+      AWS_LAMBDA_API_GATEWAY_PROXY_INTEGRATION: "false"
+      ENV: "local"
+    command: [ "hasura_handler.handle_action" ]
 
 volumes:
   db_data:

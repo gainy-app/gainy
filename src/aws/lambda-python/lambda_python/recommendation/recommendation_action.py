@@ -1,4 +1,5 @@
 import os
+import json
 from typing import Dict, Tuple, List
 
 from common.hasura_exception import HasuraActionException
@@ -122,7 +123,16 @@ class GetRecommendedCollections(HasuraAction):
                                                collection_vs,
                                                df=document_frequencies,
                                                size=corpus_size)
-        return list(map(lambda c_v: {"id": c_v.item.name}, ranked_collections))
+
+        ranked_collections_ids = [c_v.item.name for c_v in ranked_collections]
+
+        print('get_recommended_collections ' +
+              json.dumps({
+                  'profile_id': profile_id,
+                  'collections': ranked_collections_ids,
+              }))
+
+        return [{"id": id} for id in ranked_collections_ids]
 
     @staticmethod
     def _read_corpus_size(db_conn):
