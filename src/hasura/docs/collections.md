@@ -7,6 +7,11 @@ query {
         image_url
         id
         description
+        ticker_collections_aggregate {
+            aggregate {
+                count
+            }
+        }
         enabled
         size
     }
@@ -22,6 +27,11 @@ query {
         image_url
         name
         description
+        ticker_collections_aggregate {
+            aggregate {
+                count
+            }
+        }
         enabled
         size
         ticker_collections {
