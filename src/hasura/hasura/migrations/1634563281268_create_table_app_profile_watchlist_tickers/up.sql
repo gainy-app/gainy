@@ -1,0 +1,1 @@
+CREATE TABLE "app"."profile_watchlist_tickers" ("profile_id" integer NOT NULL, "symbol" varchar NOT NULL, PRIMARY KEY ("profile_id","symbol") , FOREIGN KEY ("profile_id") REFERENCES "app"."profiles"("id") ON UPDATE cascade ON DELETE cascade);
