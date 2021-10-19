@@ -71,7 +71,6 @@ resource "random_password" "datadog_postgres" {
   special = false
 }
 
-
 resource "aws_instance" "bridge" {
   ami                         = data.aws_ami.ubuntu.id
   instance_type               = "t3.micro"
@@ -85,31 +84,31 @@ resource "aws_instance" "bridge" {
 
   provisioner "file" {
     destination = "/tmp/provision.sh"
-    content     = templatefile(
-    "${path.module}/templates/provision.sh",
-    {
-      pg_host             = var.pg_host
-      pg_password         = var.pg_password
-      pg_port             = var.pg_port
-      pg_username         = var.pg_username
-      pg_dbname           = var.pg_dbname
-      pg_datadog_password = random_password.datadog_postgres.result
-      datadog_api_key     = var.datadog_api_key
-    }
+    content = templatefile(
+      "${path.module}/templates/provision.sh",
+      {
+        pg_host             = var.pg_host
+        pg_password         = var.pg_password
+        pg_port             = var.pg_port
+        pg_username         = var.pg_username
+        pg_dbname           = var.pg_dbname
+        pg_datadog_password = random_password.datadog_postgres.result
+        datadog_api_key     = var.datadog_api_key
+      }
     )
   }
 
   provisioner "file" {
     destination = "/tmp/datadog.postgres.yaml"
-    content     = templatefile(
-    "${path.module}/templates/datadog.postgres.yaml",
-    {
-      pg_host             = var.pg_host
-      pg_port             = var.pg_port
-      pg_dbname           = var.pg_dbname
-      pg_datadog_password = random_password.datadog_postgres.result
-      env                 = var.env
-    }
+    content = templatefile(
+      "${path.module}/templates/datadog.postgres.yaml",
+      {
+        pg_host             = var.pg_host
+        pg_port             = var.pg_port
+        pg_dbname           = var.pg_dbname
+        pg_datadog_password = random_password.datadog_postgres.result
+        env                 = var.env
+      }
     )
   }
 
