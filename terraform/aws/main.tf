@@ -55,6 +55,13 @@ module "vpc_bridge" {
   public_subnet_id   = module.ecs.public_subnet_ids.0
   vpc_id             = module.ecs.vpc_id
   cloudflare_zone_id = var.cloudflare_zone_id
+  datadog_api_key    = var.datadog_api_key
+
+  pg_host     = module.rds.db_instance.address
+  pg_password = module.rds.db_instance.password
+  pg_port     = module.rds.db_instance.port
+  pg_username = module.rds.db_instance.username
+  pg_dbname   = module.rds.db_instance.name
 }
 
 module "meltano" {

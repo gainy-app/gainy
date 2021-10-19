@@ -328,3 +328,47 @@ resource "datadog_monitor" "rds_cpu" {
 
   tags = ["rds"]
 }
+
+#################################### Meltano ####################################
+
+resource "datadog_monitor" "meltano_dag_run_date" {
+  name    = "Airflow Meltano Dag Run Date"
+  type    = "metric alert"
+  message = "Airflow Meltano Dag Run Date triggered. Notify: @slack-${var.slack_channel_name} <!channel>"
+
+  query = "max(last_5m):min:postgresql.days_from_latest_dag_run{name:*-production} by {name} >= 1"
+
+  monitor_thresholds {
+    critical = 1
+  }
+
+  require_full_window = false
+  notify_no_data      = false
+
+  tags = ["meltano"]
+}
+
+resource "datadog_monitor" "meltano_dag_run_duration" {
+  name    = "Airflow Meltano Dag Run Duration"
+  type    = "query alert"
+  message = "Airflow Meltano Dag Run Duration triggered. Notify: @slack-${var.slack_channel_name} <!channel>"
+
+  query = "avg(last_10d):anomalies(sum:postgresql.latest_dag_run_duration_minutes by {dag_id}.as_count(), 'basic', 2, direction='above', alert_window='last_1d', interval=300, count_default_zero='true') > 0.25"
+
+  monitor_threshold_windows {
+    recovery_window = "last_1d"
+    trigger_window  = "last_1d"
+  }
+
+  monitor_thresholds {
+    critical         = "0.25"
+    warning          = "0.1"
+    warning_recovery = "0"
+  }
+
+  require_full_window = false
+  notify_no_data      = true
+  renotify_interval   = 15
+
+  tags = ["meltano"]
+}
