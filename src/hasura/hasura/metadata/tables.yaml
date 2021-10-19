@@ -395,28 +395,48 @@
 - table:
     schema: public
     name: profile_collections
+  configuration:
+    custom_root_fields: {}
+    custom_name: collections
+    custom_column_names: {}
+  object_relationships:
+    - name: profile
+      using:
+        manual_configuration:
+          remote_table:
+            schema: app
+            name: profiles
+          insertion_order: null
+          column_mapping:
+            profile_id: id
   array_relationships:
-  - name: ticker_collections
-    using:
-      manual_configuration:
-        remote_table:
-          schema: public
-          name: profile_ticker_collections
-        insertion_order: null
-        column_mapping:
-          id: collection_id
+    - name: ticker_collections
+      using:
+        manual_configuration:
+          remote_table:
+            schema: public
+            name: profile_ticker_collections
+          insertion_order: null
+          column_mapping:
+            id: collection_id
   select_permissions:
-  - role: user
-    permission:
-      columns:
-      - id
-      - name
-      - image_url
-      - description
-      - enabled
-      - size
-      filter: {}
-      allow_aggregations: true
+    - role: user
+      permission:
+        columns:
+          - id
+          - name
+          - image_url
+          - description
+          - enabled
+          - size
+        filter:
+          _or:
+            - profile:
+                user_id:
+                  _eq: X-Hasura-User-Id
+            - profile_id:
+                _is_null: true
+        allow_aggregations: true
 - table:
     schema: public
     name: gainy_industries
@@ -657,7 +677,20 @@
 - table:
     schema: public
     name: profile_ticker_collections
+  configuration:
+    custom_root_fields: {}
+    custom_name: ticker_collections
+    custom_column_names: {}
   object_relationships:
+  - name: profile
+    using:
+      manual_configuration:
+        remote_table:
+          schema: app
+          name: profiles
+        insertion_order: null
+        column_mapping:
+          profile_id: id
   - name: ticker
     using:
       manual_configuration:
@@ -673,7 +706,13 @@
       columns:
       - symbol
       - collection_id
-      filter: {}
+      filter:
+        _or:
+        - profile:
+            user_id:
+              _eq: X-Hasura-User-Id
+        - profile_id:
+            _is_null: true
       allow_aggregations: true
 - table:
     schema: public
