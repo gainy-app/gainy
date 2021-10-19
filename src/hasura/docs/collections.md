@@ -7,8 +7,8 @@ query {
         image_url
         id
         description
-        is_enabled(args: {profile_id: 1})
-        size(args: {profile_id: 1})
+        enabled
+        size
     }
 }
 ```
@@ -22,9 +22,9 @@ query {
         image_url
         name
         description
-        is_enabled(args: {profile_id: 1})
-        size(args: {profile_id: 1})
-        ticker_collections(args: {profile_id: 1}) {
+        enabled
+        size
+        ticker_collections {
             ticker {
                 symbol
                 name
@@ -70,6 +70,11 @@ query {
         id
         collection {
             name
+            ticker_collections {
+                ticker {
+                    symbol
+                }
+            }
         }
     }
 }
