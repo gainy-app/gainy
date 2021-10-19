@@ -115,6 +115,37 @@ mutation {
 }
 ```
 
+### Update watchlisted tickers
+
+```graphql
+
+mutation {
+    insert_app_profile_watchlist_tickers(
+        objects: [
+            {profile_id: 1, symbol: "AAPL"},
+        ],
+        on_conflict: {
+            constraint: profile_watchlist_tickers_pkey,
+            update_columns: []
+        }
+    ) {
+        returning {
+            symbol
+        }
+    }
+    delete_app_profile_watchlist_tickers(
+        where: {
+            symbol: {_in: ["AAPL"]},
+            profile_id: {_eq: 1}
+        }
+    ) {
+        returning {
+            symbol
+        }
+    }
+}
+```
+
 ### Delete user
 
 ```graphql
