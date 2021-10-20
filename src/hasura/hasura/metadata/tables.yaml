@@ -456,7 +456,7 @@
       using:
         manual_configuration:
           remote_table:
-            schema: public
+            schema: app
             name: profile_ticker_collections
           insertion_order: null
           column_mapping:
@@ -717,7 +717,7 @@
       - symbol
       filter: {}
 - table:
-    schema: public
+    schema: app
     name: profile_ticker_collections
   configuration:
     custom_root_fields: {}
@@ -915,7 +915,7 @@
     using:
       manual_configuration:
         remote_table:
-          schema: public
+          schema: app
           name: profile_ticker_collections
         insertion_order: null
         column_mapping:
