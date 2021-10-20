@@ -51,5 +51,8 @@ class HasuraTrigger(ABC):
             payload = data["old"]
         else:
             payload = {}
-        payload.update(data["new"])
+
+        if data["new"]:
+            payload.update(data["new"])
+
         return payload
