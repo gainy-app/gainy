@@ -52,6 +52,8 @@
           columns: '*'
         update:
           columns: '*'
+        delete:
+          columns: '*'
       retry_conf:
         num_retries: 0
         interval_sec: 10
@@ -160,6 +162,8 @@
         insert:
           columns: '*'
         update:
+          columns: '*'
+        delete:
           columns: '*'
       retry_conf:
         num_retries: 0
