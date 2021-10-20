@@ -25,14 +25,14 @@ class HasuraDispatcher(ABC):
 
                 return self.format_response(200, response)
             except HasuraActionException as he:
-                print(event)
+                print(f"event: {event}")
                 traceback.print_exc()
                 return self.format_response(he.http_code, {
                     "message": he.message,
                     "code": he.http_code
                 })
             except Exception as e:
-                print(event)
+                print(f"event: {event}")
                 traceback.print_exc()
                 return self.format_response(500, {
                     "message": str(e),

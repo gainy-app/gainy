@@ -24,7 +24,8 @@ class ChangeTop20Collection(HasuraTrigger):
                                              top_20_tickers)
 
     def get_profile_id(self, op, data):
-        return data["new"]["profile_id"]
+        payload = self._extract_payload(data)
+        return payload["profile_id"]
 
     def _update_personalized_collection(self, db_conn, profile_id,
                                         collection_id, ticker_list):
