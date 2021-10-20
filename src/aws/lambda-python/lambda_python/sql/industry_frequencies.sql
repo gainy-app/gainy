@@ -5,8 +5,8 @@ with collection_industries as (
                   on tc.symbol = ti.symbol
 )
 select ci.industry_id, count(*) as frequency
-from public.collections c
+from app.profile_collections c
          left join collection_industries ci
                    on c.id = ci.collection_id
-where c.enabled = '1'
+where c.enabled = '1' and c.personalized='0'
 group by ci.industry_id;

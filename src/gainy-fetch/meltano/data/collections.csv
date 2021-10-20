@@ -230,4 +230,4 @@ Resource mining,0,227,https://gainy-collections-production.s3.amazonaws.com/Reso
 Security & Protection,0,228,https://gainy-collections-production.s3.amazonaws.com/Security%20%26%20Protection.png,,1,0,where ct.g_industry ilike 'Mobile Data Capture' OR ct.g_industry ilike 'Security & Protection'
 Women's health,0,229,https://gainy-collections-production.s3.amazonaws.com/Womens%20health.png,,1,0,where ct.g_industry ilike 'Healthcare services & Equipment & Women''s health' OR ct.g_industry ilike 'Pharmaceuticals & Women''s health'
 EV charging companies,0,230,https://gainy-collections-production.s3.amazonaws.com/EV%20charging%20companies.png,,1,0,"where ticker_code IN ('BLNK','EVGO','TSLA','CHPT','RDS.A','RDS.B','BP','TPGY')"
-Top-20 for you,0,231,,,1,1,
+Top-20 for you,0,231,https://gainy-collections-production.s3.amazonaws.com/top%2020%20for%20you.png,,1,1,

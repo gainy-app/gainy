@@ -46,8 +46,8 @@ custom_types:
   - name: RecommendedCollection
     relationships:
     - remote_table:
-        schema: public
-        name: collections
+        schema: app
+        name: profile_collections
       name: collection
       source: default
       type: object
