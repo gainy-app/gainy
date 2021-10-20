@@ -127,12 +127,3 @@ class SetUserCategories(HasuraTrigger):
 
         return trunc(value * list_size)
 
-    @staticmethod
-    def _extract_payload(data):
-        # Update old values with new values to properly handle updates
-        if data["old"]:
-            payload = data["old"]
-        else:
-            payload = {}
-        payload.update(data["new"])
-        return payload

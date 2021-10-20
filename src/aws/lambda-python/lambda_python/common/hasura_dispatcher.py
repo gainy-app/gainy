@@ -43,7 +43,7 @@ class HasuraDispatcher(ABC):
 
     def choose_function_by_name(self, function_name):
         filtered_actions = list(
-            filter(lambda function: function_name == function.name,
+            filter(lambda function: function.is_applicable(function_name),
                    self.functions))
         if len(filtered_actions) != 1:
             raise HasuraActionException(

@@ -5,6 +5,7 @@ from recommendation.recommendation_action import GetMatchScoreByTicker, GetRecom
     GetMatchScoreByCollection
 
 # DB CONNECTION
+from trigger.set_top_20_collection import ChangeTop20Collection
 from trigger.set_user_categories import SetUserCategories
 from trigger.on_user_created import OnUserCreated
 
@@ -38,6 +39,7 @@ def handle_action(event, context):
 TRIGGERS = [
     SetUserCategories(),
     OnUserCreated(ENV),
+    ChangeTop20Collection()
 ]
 
 trigger_dispatcher = HasuraTriggerDispatcher(DB_CONN_STRING, TRIGGERS,
