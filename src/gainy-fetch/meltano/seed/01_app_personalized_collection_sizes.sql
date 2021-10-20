@@ -1,0 +1,2 @@
+-- Pre-calculated collection sizes for personalized collections - for Meltano-side tests
+CREATE TABLE IF NOT EXISTS "app"."personalized_collection_sizes" ("profile_id" integer NOT NULL, "collection_id" integer NOT NULL, "size" integer NOT NULL, PRIMARY KEY ("profile_id","collection_id") , FOREIGN KEY ("profile_id") REFERENCES "app"."profiles"("id") ON UPDATE cascade ON DELETE cascade);
