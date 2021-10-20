@@ -25,10 +25,10 @@ with open(os.path.join(
         "../sql/ticker_industries.sql")) as ticker_industry_vector_query_file:
     ticker_industry_vector_query = ticker_industry_vector_query_file.read()
 
-with open(os.path.join(
-        script_dir,
-        "../sql/ticker_categories_industries.sql")) as ticker_categories_industries_query_file:
-    ticker_categories_industries_query = ticker_categories_industries_query_file.read()
+with open(os.path.join(script_dir, "../sql/ticker_categories_industries.sql")
+          ) as ticker_categories_industries_query_file:
+    ticker_categories_industries_query = ticker_categories_industries_query_file.read(
+    )
 
 with open(os.path.join(script_dir, "../sql/profile_categories.sql")
           ) as profile_category_vector_query_file:
@@ -98,7 +98,8 @@ def get_ticker_vectors(db_conn, query) -> list[(DimVector, DimVector)]:
     cursor = db_conn.cursor()
     cursor.execute(query)
 
-    return [(NamedDimVector(row[0], row[1]), NamedDimVector(row[0], row[2])) for row in cursor.fetchall()]
+    return [(NamedDimVector(row[0], row[1]), NamedDimVector(row[0], row[2]))
+            for row in cursor.fetchall()]
 
 
 def query_vectors(db_conn, query, variables=None) -> List[NamedDimVector]:
@@ -113,7 +114,6 @@ def query_vectors(db_conn, query, variables=None) -> List[NamedDimVector]:
 
 
 #     RECOMMEND COLLECTIONS    #
-
 
 TOP_20_FOR_YOU_COLLECTION_ID = 232
 
@@ -142,9 +142,11 @@ class GetRecommendedCollections(HasuraAction):
         ranked_collections_ids = [c_v.item.name for c_v in ranked_collections]
 
         # Add `top-20 for you` collection as the top item
-        is_top_20_enabled = self._is_collection_enabled(db_conn, profile_id, TOP_20_FOR_YOU_COLLECTION_ID)
+        is_top_20_enabled = self._is_collection_enabled(
+            db_conn, profile_id, TOP_20_FOR_YOU_COLLECTION_ID)
         if is_top_20_enabled:
-            ranked_collections_ids = [TOP_20_FOR_YOU_COLLECTION_ID] + ranked_collections_ids
+            ranked_collections_ids = [TOP_20_FOR_YOU_COLLECTION_ID
+                                      ] + ranked_collections_ids
 
         print('get_recommended_collections ' +
               json.dumps({
@@ -154,13 +156,16 @@ class GetRecommendedCollections(HasuraAction):
 
         return [{"id": id} for id in ranked_collections_ids]
 
-    def _is_collection_enabled(self, db_conn, profile_id, collection_id) -> bool:
+    def _is_collection_enabled(self, db_conn, profile_id,
+                               collection_id) -> bool:
         with db_conn.cursor() as cursor:
             cursor.execute(
                 """SELECT enabled FROM public.profile_collections
                 WHERE (profile_id=%(profile_id)s OR profile_id IS NULL) AND id=%(collection_id)s""",
-                {"profile_id": profile_id, "collection_id": collection_id}
-            )
+                {
+                    "profile_id": profile_id,
+                    "collection_id": collection_id
+                })
 
             row = cursor.fetchone()
 
@@ -317,28 +322,30 @@ class GetMatchScoreByCollection(HasuraAction):
 #   TOP TICKERS BY MATCH SCORE   #
 
 
-def get_top_by_match_score(db_conn, profile_id: int, k: int = None) -> list[(str, MatchScore)]:
-    profile_category_v = get_profile_vector(db_conn, profile_category_vector_query, profile_id)
-    profile_industry_v = get_profile_vector(db_conn, profile_industry_vector_query, profile_id)
+def get_top_by_match_score(db_conn,
+                           profile_id: int,
+                           k: int = None) -> list[(str, MatchScore)]:
+    profile_category_v = get_profile_vector(db_conn,
+                                            profile_category_vector_query,
+                                            profile_id)
+    profile_industry_v = get_profile_vector(db_conn,
+                                            profile_industry_vector_query,
+                                            profile_id)
 
     risk_mapping = read_categories_risks(db_conn)
 
-    ticker_vs_list = get_ticker_vectors(db_conn, ticker_categories_industries_query)
+    ticker_vs_list = get_ticker_vectors(db_conn,
+                                        ticker_categories_industries_query)
 
     match_score_list = []
     for ticker_vs in ticker_vs_list:
-        match_score = profile_ticker_similarity(
-            profile_category_v,
-            ticker_vs[1],
-            risk_mapping,
-            profile_industry_v,
-            ticker_vs[0]
-        )
+        match_score = profile_ticker_similarity(profile_category_v,
+                                                ticker_vs[1], risk_mapping,
+                                                profile_industry_v,
+                                                ticker_vs[0])
         match_score_list.append((ticker_vs[0].name, match_score))
 
     # Uses minus `match_score` to correctly sort the list by both score and symbol
     match_score_list.sort(key=lambda m: (-m[1].match_score(), m[0]))
 
     return match_score_list[:k] if k else match_score_list
-
-

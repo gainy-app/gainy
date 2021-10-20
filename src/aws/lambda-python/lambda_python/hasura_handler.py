@@ -36,11 +36,7 @@ def handle_action(event, context):
     return action_dispatcher.handle(event, context)
 
 
-TRIGGERS = [
-    SetUserCategories(),
-    OnUserCreated(ENV),
-    ChangeTop20Collection()
-]
+TRIGGERS = [SetUserCategories(), OnUserCreated(ENV), ChangeTop20Collection()]
 
 trigger_dispatcher = HasuraTriggerDispatcher(DB_CONN_STRING, TRIGGERS,
                                              API_GATEWAY_PROXY_INTEGRATION)

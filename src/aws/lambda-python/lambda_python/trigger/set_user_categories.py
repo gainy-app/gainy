@@ -126,4 +126,3 @@ class SetUserCategories(HasuraTrigger):
             return list_size - 1
 
         return trunc(value * list_size)
-
