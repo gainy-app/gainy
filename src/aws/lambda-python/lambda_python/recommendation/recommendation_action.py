@@ -115,7 +115,7 @@ def query_vectors(db_conn, query, variables=None) -> List[NamedDimVector]:
 
 #     RECOMMEND COLLECTIONS    #
 
-TOP_20_FOR_YOU_COLLECTION_ID = 232
+TOP_20_FOR_YOU_COLLECTION_ID = 231
 
 
 class GetRecommendedCollections(HasuraAction):
