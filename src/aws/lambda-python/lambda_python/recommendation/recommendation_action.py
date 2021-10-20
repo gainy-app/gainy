@@ -295,9 +295,13 @@ class GetMatchScoreByCollection(HasuraAction):
         return result
 
     @staticmethod
-    def _get_ticker_vectors_by_collection(db_conn, ticker_vectors_query, profile_id, collection_id):
+    def _get_ticker_vectors_by_collection(db_conn, ticker_vectors_query,
+                                          profile_id, collection_id):
         cursor = db_conn.cursor()
-        cursor.execute(ticker_vectors_query, {"profile_id": profile_id, "collection_id": collection_id})
+        cursor.execute(ticker_vectors_query, {
+            "profile_id": profile_id,
+            "collection_id": collection_id
+        })
 
         vectors = []
         for row in cursor.fetchall():
