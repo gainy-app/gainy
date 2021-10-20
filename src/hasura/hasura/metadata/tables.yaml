@@ -435,7 +435,7 @@
       - name
       filter: {}
 - table:
-    schema: public
+    schema: app
     name: profile_collections
   configuration:
     custom_root_fields: {}
