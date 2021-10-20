@@ -246,7 +246,6 @@ models:
       - name: size
         tests:
           - exists
-          - not_null
           - type:
               type: 'integer'
 
