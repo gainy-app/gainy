@@ -25,12 +25,14 @@ class HasuraDispatcher(ABC):
 
                 return self.format_response(200, response)
             except HasuraActionException as he:
+                print(f"event: {event}")
                 traceback.print_exc()
                 return self.format_response(he.http_code, {
                     "message": he.message,
                     "code": he.http_code
                 })
             except Exception as e:
+                print(f"event: {event}")
                 traceback.print_exc()
                 return self.format_response(500, {
                     "message": str(e),
@@ -43,7 +45,7 @@ class HasuraDispatcher(ABC):
 
     def choose_function_by_name(self, function_name):
         filtered_actions = list(
-            filter(lambda function: function_name == function.name,
+            filter(lambda function: function.is_applicable(function_name),
                    self.functions))
         if len(filtered_actions) != 1:
             raise HasuraActionException(

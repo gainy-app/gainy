@@ -44,6 +44,21 @@
         profile:
           user_id:
             _eq: X-Hasura-User-Id
+  event_triggers:
+    - name: top_20_collection__profile_categories
+      definition:
+        enable_manual: false
+        insert:
+          columns: '*'
+        update:
+          columns: '*'
+        delete:
+          columns: '*'
+      retry_conf:
+        num_retries: 0
+        interval_sec: 10
+        timeout_sec: 60
+      webhook: '{{AWS_LAMBDA_API_GATEWAY_ENDPOINT}}/hasuraTrigger'
 - table:
     schema: app
     name: profile_favorite_collections
@@ -140,6 +155,21 @@
         profile:
           user_id:
             _eq: X-Hasura-User-Id
+  event_triggers:
+    - name: top_20_collection__profile_interests
+      definition:
+        enable_manual: false
+        insert:
+          columns: '*'
+        update:
+          columns: '*'
+        delete:
+          columns: '*'
+      retry_conf:
+        num_retries: 0
+        interval_sec: 10
+        timeout_sec: 60
+      webhook: '{{AWS_LAMBDA_API_GATEWAY_ENDPOINT}}/hasuraTrigger'
 - table:
     schema: app
     name: profile_scoring_settings
@@ -204,6 +234,18 @@
       check: null
   event_triggers:
   - name: set_user_categories
+    definition:
+      enable_manual: false
+      insert:
+        columns: '*'
+      update:
+        columns: '*'
+    retry_conf:
+      num_retries: 0
+      interval_sec: 10
+      timeout_sec: 60
+    webhook: '{{AWS_LAMBDA_API_GATEWAY_ENDPOINT}}/hasuraTrigger'
+  - name: top_20_collection__profile_scoring_settings
     definition:
       enable_manual: false
       insert:
@@ -393,30 +435,50 @@
       - name
       filter: {}
 - table:
-    schema: public
-    name: collections
+    schema: app
+    name: profile_collections
+  configuration:
+    custom_root_fields: {}
+    custom_name: collections
+    custom_column_names: {}
+  object_relationships:
+    - name: profile
+      using:
+        manual_configuration:
+          remote_table:
+            schema: app
+            name: profiles
+          insertion_order: null
+          column_mapping:
+            profile_id: id
   array_relationships:
-  - name: ticker_collections
-    using:
-      manual_configuration:
-        remote_table:
-          schema: public
-          name: ticker_collections
-        insertion_order: null
-        column_mapping:
-          id: collection_id
+    - name: ticker_collections
+      using:
+        manual_configuration:
+          remote_table:
+            schema: app
+            name: profile_ticker_collections
+          insertion_order: null
+          column_mapping:
+            id: collection_id
   select_permissions:
-  - role: user
-    permission:
-      columns:
-      - id
-      - name
-      - image_url
-      - description
-      - enabled
-      - size
-      filter: {}
-      allow_aggregations: true
+    - role: user
+      permission:
+        columns:
+          - id
+          - name
+          - image_url
+          - description
+          - enabled
+          - size
+        filter:
+          _or:
+            - profile:
+                user_id:
+                  _eq: X-Hasura-User-Id
+            - profile_id:
+                _is_null: true
+        allow_aggregations: true
 - table:
     schema: public
     name: gainy_industries
@@ -655,9 +717,22 @@
       - symbol
       filter: {}
 - table:
-    schema: public
-    name: ticker_collections
+    schema: app
+    name: profile_ticker_collections
+  configuration:
+    custom_root_fields: {}
+    custom_name: ticker_collections
+    custom_column_names: {}
   object_relationships:
+  - name: profile
+    using:
+      manual_configuration:
+        remote_table:
+          schema: app
+          name: profiles
+        insertion_order: null
+        column_mapping:
+          profile_id: id
   - name: ticker
     using:
       manual_configuration:
@@ -673,7 +748,13 @@
       columns:
       - symbol
       - collection_id
-      filter: {}
+      filter:
+        _or:
+        - profile:
+            user_id:
+              _eq: X-Hasura-User-Id
+        - profile_id:
+            _is_null: true
       allow_aggregations: true
 - table:
     schema: public
@@ -834,8 +915,8 @@
     using:
       manual_configuration:
         remote_table:
-          schema: public
-          name: ticker_collections
+          schema: app
+          name: profile_ticker_collections
         insertion_order: null
         column_mapping:
           symbol: symbol

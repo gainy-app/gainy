@@ -13,10 +13,10 @@
 
 
 with collections as (
-    select id::int, name, description, enabled, image_url
+    select id::int, name, description, enabled, personalized, image_url
     from {{ source ('gainy', 'raw_collections') }}
 ),
-base_collection_size as (
+collection_sizes as (
     select collection_id, count (*) as collection_size
     from {{ ref ('ticker_collections') }}
     group by collection_id
@@ -24,13 +24,10 @@ base_collection_size as (
 select c.id,
        c.name,
        c.description,
-       case
-           when c.enabled = '0' then '0'
-           when cs.collection_size is null or cs.collection_size < {{ min_collection_size }} then '0'
-           else '1'
-        end::varchar as enabled,
+       c.enabled,
+       c.personalized,
        c.image_url,
-       coalesce(cs.collection_size, 0)::integer as size
+       cs.collection_size::integer as size
 from collections c
-    left join base_collection_size cs
-        on c.id = cs.collection_id
+    left join collection_sizes cs
+on c.id = cs.collection_id
