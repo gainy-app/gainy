@@ -115,6 +115,9 @@ def query_vectors(db_conn, query, variables=None) -> List[NamedDimVector]:
 #     RECOMMEND COLLECTIONS    #
 
 
+TOP_20_FOR_YOU_COLLECTION_ID = 232
+
+
 class GetRecommendedCollections(HasuraAction):
     def __init__(self):
         super().__init__("get_recommended_collections", "profile_id")
@@ -138,6 +141,11 @@ class GetRecommendedCollections(HasuraAction):
 
         ranked_collections_ids = [c_v.item.name for c_v in ranked_collections]
 
+        # Add `top-20 for you` collection as the top item
+        is_top_20_enabled = self._is_collection_enabled(db_conn, profile_id, TOP_20_FOR_YOU_COLLECTION_ID)
+        if is_top_20_enabled:
+            ranked_collections_ids = [TOP_20_FOR_YOU_COLLECTION_ID] + ranked_collections_ids
+
         print('get_recommended_collections ' +
               json.dumps({
                   'profile_id': profile_id,
@@ -145,6 +153,18 @@ class GetRecommendedCollections(HasuraAction):
               }))
 
         return [{"id": id} for id in ranked_collections_ids]
+
+    def _is_collection_enabled(self, db_conn, profile_id, collection_id) -> bool:
+        with db_conn.cursor() as cursor:
+            cursor.execute(
+                """SELECT enabled FROM public.profile_collections
+                WHERE (profile_id=%(profile_id)s OR profile_id IS NULL) AND id=%(collection_id)s""",
+                {"profile_id": profile_id, "collection_id": collection_id}
+            )
+
+            row = cursor.fetchone()
+
+        return row and row[0] == "1"
 
     @staticmethod
     def _read_corpus_size(db_conn):

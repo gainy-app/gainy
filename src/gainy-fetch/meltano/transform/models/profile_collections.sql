@@ -14,6 +14,7 @@ with profile_collections as (
         description,
         image_url,
         enabled,
+        personalized,
         size
     from {{ ref('collections') }}
         where
@@ -26,6 +27,7 @@ with profile_collections as (
         c.description,
         c.image_url,
         enabled,
+        personalized,
         csp.size
     from {{ ref('collections') }} c
         join {{ source('app', 'personalized_collection_sizes') }} csp
@@ -44,5 +46,6 @@ select
         when size is null or size < {{ min_collection_size }} then '0'
         else '1'
     end as enabled,
+    personalized,
     coalesce(size, 0) as size
 from profile_collections
