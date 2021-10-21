@@ -20,22 +20,22 @@ plugins:
       config:
         files:
           - entity: raw_gainy_industries
-            file: data/gainy_industries.csv
+            path: data/gainy_industries.csv
             keys: ["id"]
           - entity: raw_ticker_industries
-            file: data/industry_tickers.csv
+            path: data/industry_tickers.csv
             keys: ["Code"]
           - entity: raw_collections
-            file: data/collections.csv
+            path: data/collections.csv
             keys: ["id"]
           - entity: raw_categories
-            file: data/categories.csv
+            path: data/categories.csv
             keys: ["id"]
           - entity: raw_interests
-            file: data/interests.csv
+            path: data/interests.csv
             keys: ["id"]
           - entity: raw_countries
-            file: data/countries.csv # https://github.com/lukes/ISO-3166-Countries-with-Regional-Codes/blob/master/all/all.json
+            path: data/countries.csv # https://github.com/lukes/ISO-3166-Countries-with-Regional-Codes/blob/master/all/all.json
             keys: ["name", "alpha-2", "alpha-3"]
   loaders:
     - name: target-postgres
