@@ -16,7 +16,7 @@ services:
       - ./src/gainy-fetch/meltano/data:/project/data:delegated
       - ./src/gainy-fetch/meltano/orchestrate:/project/orchestrate:delegated
       - ./src/gainy-fetch/meltano/seed:/project/seed:delegated
-      - meltano_data:/project/.meltano/run/airflow
+      - meltano_data:/project/.meltano
     environment:
       EODHISTORICALDATA_JOBS_COUNT: 1
       AIRFLOW_PASSWORD: admin
@@ -38,7 +38,7 @@ services:
       - "5001:5001"
     volumes:
       - ./src/gainy-fetch/meltano/orchestrate:/project/orchestrate:delegated
-      - meltano_data:/project/.meltano/run/airflow
+      - meltano_data:/project/.meltano
     depends_on:
       - postgres
       - meltano-airflow-scheduler
@@ -60,11 +60,10 @@ services:
       - ./src/gainy-fetch/meltano/scripts:/project/scripts:delegated
       - ./src/gainy-fetch/meltano/meltano.template.yml:/project/meltano.template.yml:delegated
       - ./src/gainy-fetch/meltano/transform:/project/transform:delegated
-      - ./src/gainy-fetch/dbt-docs.sh:/dbt-docs.sh
+      - meltano_data:/project/.meltano
     depends_on:
       - postgres
       - meltano-airflow-scheduler
-    entrypoint: "/dbt-docs.sh"
     command: "invoke dbt docs serve --port 5002"
 
   postgres:
