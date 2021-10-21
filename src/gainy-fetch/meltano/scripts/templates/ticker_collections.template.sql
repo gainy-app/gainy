@@ -1,10 +1,13 @@
 {{
   config(
-    materialized = "table",
+    materialized = "incremental",
+    unique_key = "id",
+    incremental_strategy = 'insert_overwrite',
     post_hook = [
       index(this, 'id', true),
       index(this, 'collection_id', false),
       'create unique index if not exists {{ get_index_name(this, "symbol__collection_id") }} (symbol, collection_id)',
+      'delete from {{this}} where created_at < (select max(created_at) from {{this}})',
     ]
   )
 }}
