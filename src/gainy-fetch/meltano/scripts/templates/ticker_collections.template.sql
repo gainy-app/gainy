@@ -1,9 +1,13 @@
 {{
   config(
-    materialized = "table",
+    materialized = "incremental",
+    unique_key = "id",
+    incremental_strategy = 'insert_overwrite',
     post_hook = [
+      index(this, 'id', true),
       index(this, 'collection_id', false),
-      'create unique index if not exists {{ get_index_name(this, "symbol__collection_id") }} (symbol, collection_id)'
+      'create unique index if not exists {{ get_index_name(this, "symbol__collection_id") }} (symbol, collection_id)',
+      'delete from {{this}} where created_at < (select max(created_at) from {{this}})',
     ]
   )
 }}
@@ -65,7 +69,10 @@ with historical_prices as (select * from {{ ref('historical_prices') }}),
          (
 -- __SELECT__ --
          )
-SELECT distinct t2.symbol, collection_id
+SELECT distinct CONCAT(t2.symbol, '_', collection_id::varchar) as id,
+                t2.symbol,
+                collection_id,
+                NOW() as created_at
 from tmp_ticker_collections
          join tickers t2 on tmp_ticker_collections.symbol = t2.symbol
          join collections c2 on tmp_ticker_collections.collection_id = c2.id

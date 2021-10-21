@@ -3,7 +3,9 @@
 
 {{
   config(
-    materialized = "table",
+    materialized = "incremental",
+    unique_key = "id",
+    incremental_strategy='insert_overwrite',
     post_hook=[
       index(this, 'id', true),
       fk('ticker_collections', 'collection_id', 'collections', 'id')
