@@ -16,7 +16,7 @@ variable "datadog_app_key" {}
 
 locals {
   ecs_instance_type                    = var.env == "production" ? "c5.2xlarge" : "t3.medium"
-  meltano_eodhistoricaldata_jobs_count = var.env == "production" ? 4 : 1
+  meltano_eodhistoricaldata_jobs_count = var.env == "production" ? 5 : 1
 
   hasura_cpu_credits            = var.env == "production" ? 512 : 128
   meltano_scheduler_cpu_credits = var.env == "production" ? 3072 : 256
