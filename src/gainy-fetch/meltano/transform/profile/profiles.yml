@@ -20,7 +20,7 @@ meltano:
       schema: "{{ env_var('DBT_TARGET_SCHEMA') }}"
     postgres:
       type: postgres
-      threads: 2
+      threads: 4
       host: "{{ env_var('PG_ADDRESS') }}"
       port: "{{ env_var('PG_PORT') | int }}"
       user: "{{ env_var('PG_USERNAME') }}"
