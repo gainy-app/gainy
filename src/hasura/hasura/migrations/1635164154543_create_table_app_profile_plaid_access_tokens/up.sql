@@ -1,0 +1,1 @@
+CREATE TABLE "app"."profile_plaid_access_tokens" ("id" serial NOT NULL, "profile_id" integer NOT NULL, "access_token" varchar NOT NULL, "item_id" varchar NOT NULL, "created_at" timestamptz NOT NULL DEFAULT now(), PRIMARY KEY ("id") , FOREIGN KEY ("profile_id") REFERENCES "app"."profiles"("id") ON UPDATE cascade ON DELETE cascade);

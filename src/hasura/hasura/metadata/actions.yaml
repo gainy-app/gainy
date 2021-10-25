@@ -35,6 +35,12 @@ actions:
     handler: '{{AWS_LAMBDA_API_GATEWAY_ENDPOINT}}/hasuraAction'
   permissions:
   - role: user
+- name: link_plaid_account
+  definition:
+    kind: ""
+    handler: '{{AWS_LAMBDA_API_GATEWAY_ENDPOINT}}/hasuraAction'
+  permissions:
+  - role: user
 custom_types:
   enums: []
   input_objects: []
@@ -63,4 +69,5 @@ custom_types:
       type: object
       field_mapping:
         symbol: symbol
+  - name: LinkPlaidAccountOutput
   scalars: []
