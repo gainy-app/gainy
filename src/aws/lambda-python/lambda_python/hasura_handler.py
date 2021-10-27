@@ -4,6 +4,7 @@ from common.hasura_dispatcher import HasuraActionDispatcher, HasuraTriggerDispat
 from recommendation.recommendation_action import GetMatchScoreByTicker, GetRecommendedCollections, \
     GetMatchScoreByCollection
 from portfolio.plaid.actions import *
+from portfolio.actions import *
 
 # DB CONNECTION
 from trigger.set_top_20_collection import ChangeTop20Collection
@@ -27,7 +28,10 @@ ACTIONS = [
     GetRecommendedCollections(),
     GetMatchScoreByTicker(),
     GetMatchScoreByCollection(),
-    LinkPlaidAccount()
+
+    # Portfolio
+    LinkPlaidAccount(),
+    GetPortfolioHoldings(),
 ]
 
 action_dispatcher = HasuraActionDispatcher(DB_CONN_STRING, ACTIONS,
