@@ -35,11 +35,8 @@ class GetPortfolioHoldings(HasuraAction):
         for entity in accounts:
             entity.profile_id = profile_id
         self.portfolio_repository.persist(db_conn, accounts)
-        accounts_dict = {
-            account.ref_id: account.id
-            for account in accounts
-        }
-        
+        accounts_dict = {account.ref_id: account.id for account in accounts}
+
         # persist holdings
         for entity in holdings:
             entity.profile_id = profile_id
