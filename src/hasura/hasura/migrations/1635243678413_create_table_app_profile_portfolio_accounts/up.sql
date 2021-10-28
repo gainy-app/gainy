@@ -12,16 +12,11 @@ CREATE TABLE "app"."profile_portfolio_accounts"
     "subtype"                   varchar          NOT NULL,
     "type"                      varchar          NOT NULL,
     "profile_id"                integer          NOT NULL,
-    "account_id"                integer,
     "created_at"                timestamptz      NOT NULL DEFAULT now(),
     "updated_at"                timestamptz      NOT NULL DEFAULT now(),
     PRIMARY KEY ("id"),
     FOREIGN KEY ("profile_id") REFERENCES "app"."profiles" ("id") ON UPDATE cascade ON DELETE cascade,
-    UNIQUE ("ref_id"),
-    constraint "profile_holdings_account_id_fkey"
-        foreign key ("account_id")
-            references "app"."profile_portfolio_accounts"
-                ("id") on update cascade on delete cascade
+    UNIQUE ("ref_id")
 );
 
 CREATE OR REPLACE FUNCTION "app"."set_current_timestamp_updated_at"()

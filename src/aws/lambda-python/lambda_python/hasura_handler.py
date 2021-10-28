@@ -32,6 +32,7 @@ ACTIONS = [
     # Portfolio
     LinkPlaidAccount(),
     GetPortfolioHoldings(),
+    GetPortfolioTransactions(),
 ]
 
 action_dispatcher = HasuraActionDispatcher(DB_CONN_STRING, ACTIONS,

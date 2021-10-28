@@ -39,6 +39,12 @@ type Query {
 }
 
 type Query {
+  get_portfolio_transactions(
+    profile_id: Int!
+  ): [PortfolioTransaction]
+}
+
+type Query {
   get_recommended_collections(
     profile_id: Int
   ): [RecommendedCollection]
@@ -112,5 +118,25 @@ type PortfolioHolding {
   security_id: Int!
   account_id: Int!
   profile_id: Int!
+}
+
+type PortfolioTransaction {
+  id: Int!
+  amount: Float!
+  cancel_transaction_id: String
+  date: String!
+  fees: Float!
+  iso_currency_code: String!
+  name: String!
+  price: Float!
+  quantity: Float!
+  subtype: String!
+  type: String!
+  ref_id: String!
+  security_id: Int!
+  profile_id: Int!
+  account_id: Int!
+  created_at: String!
+  updated_at: String!
 }
 

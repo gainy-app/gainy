@@ -280,6 +280,44 @@
             _eq: X-Hasura-User-Id
 - table:
     schema: app
+    name: profile_portfolio_transactions
+  object_relationships:
+  - name: account
+    using:
+      foreign_key_constraint_on: account_id
+  - name: profile
+    using:
+      foreign_key_constraint_on: profile_id
+  - name: security
+    using:
+      foreign_key_constraint_on: security_id
+  select_permissions:
+  - role: user
+    permission:
+      columns:
+      - id
+      - amount
+      - cancel_transaction_id
+      - date
+      - fees
+      - iso_currency_code
+      - name
+      - price
+      - quantity
+      - subtype
+      - type
+      - ref_id
+      - security_id
+      - profile_id
+      - account_id
+      - created_at
+      - updated_at
+      filter:
+        profile:
+          user_id:
+            _eq: X-Hasura-User-Id
+- table:
+    schema: app
     name: profile_scoring_settings
   object_relationships:
   - name: profile
@@ -494,13 +532,13 @@
         table:
           schema: app
           name: profile_interests
-  - name: securities
+  - name: portfolio_securities
     using:
       foreign_key_constraint_on:
         column: profile_id
         table:
           schema: app
-          name: securities
+          name: portfolio_securities
   insert_permissions:
   - role: user
     permission:
@@ -561,7 +599,7 @@
     webhook: '{{AWS_LAMBDA_API_GATEWAY_ENDPOINT}}/hasuraTrigger'
 - table:
     schema: app
-    name: securities
+    name: portfolio_securities
   object_relationships:
   - name: profile
     using:

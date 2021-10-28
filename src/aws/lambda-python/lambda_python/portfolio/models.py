@@ -49,6 +49,7 @@ class HoldingData(BaseModel):
     account_ref_id = None
     security_id = None
     profile_id = None
+    account_id = None
 
     def schema_name(self):
         return 'app'
@@ -61,6 +62,47 @@ class HoldingData(BaseModel):
 
     def normalization_excluded_fields(self):
         return ['security_ref_id', 'account_ref_id']
+
+    def unique_field_names(self):
+        return ['ref_id']
+
+
+class TransactionData(BaseModel):
+    id = None
+
+    amount = None
+    cancel_transaction_id = None
+    date = None
+    fees = None
+    iso_currency_code = None
+    name = None
+    price = None
+    quantity = None
+    subtype = None
+    type = None
+
+    ref_id = None
+    account_ref_id = None
+    security_ref_id = None
+
+    security_id = None
+    profile_id = None
+    account_id = None
+
+    created_at = None
+    updated_at = None
+
+    def schema_name(self):
+        return 'app'
+
+    def table_name(self):
+        return 'profile_portfolio_transactions'
+
+    def db_excluded_fields(self):
+        return ['security_ref_id', 'account_ref_id']
+
+    def normalization_excluded_fields(self):
+        return ['security_ref_id', 'account_ref_id', 'cancel_transaction_id']
 
     def unique_field_names(self):
         return ['ref_id']
@@ -83,7 +125,7 @@ class Security(BaseModel):
         return 'app'
 
     def table_name(self):
-        return 'securities'
+        return 'portfolio_securities'
 
     def unique_field_names(self):
         return ['ref_id']
