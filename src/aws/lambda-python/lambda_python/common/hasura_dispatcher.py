@@ -71,13 +71,14 @@ class HasuraDispatcher(ABC):
             if "admin" == hasura_role:
                 return
 
-            cursor = db_conn.cursor()
-            cursor.execute(f"SELECT user_id FROM app.profiles WHERE id = %s",
-                           (profile_id, ))
+            with db_conn.cursor() as cursor:
+                cursor.execute(
+                    f"SELECT user_id FROM app.profiles WHERE id = %s",
+                    (profile_id, ))
 
-            user = cursor.fetchone()
-            if user is None:
-                raise Exception('User not found')
+                user = cursor.fetchone()
+                if user is None:
+                    raise Exception('User not found')
 
             user_id = user[0]
             hasura_user_id = session_variables["x-hasura-user-id"]

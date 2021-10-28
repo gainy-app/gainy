@@ -33,6 +33,12 @@ type Query {
 }
 
 type Query {
+  get_portfolio_holdings(
+    profile_id: Int!
+  ): [PortfolioHolding]
+}
+
+type Query {
   get_recommended_collections(
     profile_id: Int
   ): [RecommendedCollection]
@@ -94,5 +100,17 @@ type MatchScore {
 
 type LinkPlaidAccountOutput {
   result: Boolean!
+}
+
+type PortfolioHolding {
+  id: Int!
+  iso_currency_code: String!
+  created_at: String!
+  updated_at: String!
+  quantity: Float!
+  ref_id: String!
+  security_id: Int!
+  account_id: Int!
+  profile_id: Int!
 }
 
