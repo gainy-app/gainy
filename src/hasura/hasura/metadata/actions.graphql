@@ -38,6 +38,13 @@ type Query {
   ): [RecommendedCollection]
 }
 
+type Query {
+  link_plaid_account(
+    profile_id: Int!
+    public_token: String!
+  ): LinkPlaidAccountOutput
+}
+
 type ChartDataPoint {
   datetime: String
   open: Float
@@ -83,5 +90,9 @@ type MatchScore {
   fits_risk: Int!
   fits_categories: Int!
   fits_interests: Int!
+}
+
+type LinkPlaidAccountOutput {
+  result: Boolean!
 }
 
