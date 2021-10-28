@@ -12,7 +12,8 @@ class PortfolioService:
         self.plaid_client = PlaidClient()
 
     def get_holdings(self, db_conn, profile_id):
-        profile_plaid_access_tokens = self.__get_access_tokens(db_conn, profile_id)
+        profile_plaid_access_tokens = self.__get_access_tokens(
+            db_conn, profile_id)
 
         result_threads = [
             self.plaid_client.get_investment_holdings(access_token,
@@ -43,21 +44,23 @@ class PortfolioService:
         }
 
     def get_transactions(self, db_conn, profile_id):
-        profile_plaid_access_tokens = self.__get_access_tokens(db_conn, profile_id)
+        profile_plaid_access_tokens = self.__get_access_tokens(
+            db_conn, profile_id)
 
         result_threads = [
-            self.plaid_client.get_investment_transactions(access_token,
-                                                          start_date=datetime.date.today() - datetime.timedelta(days=7),
-                                                          end_date=datetime.date.today(),
-                                                      async_req=True)
-            for access_token in profile_plaid_access_tokens
+            self.plaid_client.get_investment_transactions(
+                access_token,
+                start_date=datetime.date.today() - datetime.timedelta(days=7),
+                end_date=datetime.date.today(),
+                async_req=True) for access_token in profile_plaid_access_tokens
         ]
 
         # InvestmentsTransactionsGetResponse[]
         responses = [thread.get() for thread in result_threads]
 
         transactions = [
-            self.__hydrate_transaction_data(transaction_data) for response in responses
+            self.__hydrate_transaction_data(transaction_data)
+            for response in responses
             for transaction_data in response.investment_transactions
         ]
         securities = [
@@ -83,7 +86,9 @@ class PortfolioService:
 
             profile_plaid_access_tokens = cursor.fetchall()
 
-            return [access_token for [access_token] in profile_plaid_access_tokens]
+            return [
+                access_token for [access_token] in profile_plaid_access_tokens
+            ]
 
     def __hydrate_holding_data(self, data):
         model = HoldingData()

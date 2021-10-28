@@ -92,7 +92,8 @@ class GetPortfolioTransactions(HasuraAction):
         self.portfolio_repository.persist(db_conn, transactions)
 
         # cleanup
-        self.portfolio_repository.remove_other_by_profile_id(db_conn, transactions)
+        self.portfolio_repository.remove_other_by_profile_id(
+            db_conn, transactions)
         self.portfolio_repository.remove_other_by_profile_id(db_conn, accounts)
         self.portfolio_repository.remove_other_by_profile_id(
             db_conn, securities)

@@ -18,9 +18,15 @@ class PlaidClient:
 
         return response
 
-    def get_investment_transactions(self, access_token, start_date, end_date, async_req=False):
-        request = InvestmentsTransactionsGetRequest(access_token=access_token, start_date=start_date, end_date=end_date)
-        response = self.client.investments_transactions_get(request,
-                                                        async_req=async_req)
+    def get_investment_transactions(self,
+                                    access_token,
+                                    start_date,
+                                    end_date,
+                                    async_req=False):
+        request = InvestmentsTransactionsGetRequest(access_token=access_token,
+                                                    start_date=start_date,
+                                                    end_date=end_date)
+        response = self.client.investments_transactions_get(
+            request, async_req=async_req)
 
         return response
