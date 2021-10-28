@@ -11,7 +11,7 @@ PLAID_ENV = os.environ['PLAID_ENV']
 PLAID_HOSTS = {
     'sandbox': plaid.Environment.Sandbox,
     'development': plaid.Environment.Development,
-    'sandbox': plaid.Environment.Sandbox,
+    'production': plaid.Environment.Production,
 }
 
 if PLAID_ENV not in PLAID_HOSTS:
