@@ -15,7 +15,7 @@ with collection_industries as (
          group by cis.collection_id
      )
 select c.id, civ.collection_industry_vector
-from public.collections c
+from app.profile_collections c
          left join collection_industry_vectors civ
                    on c.id = civ.collection_id
-where c.enabled = '1';
+where c.enabled = '1' and c.personalized='0';

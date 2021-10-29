@@ -12,6 +12,8 @@ query {
                 count
             }
         }
+        enabled
+        size
     }
 }
 ```
@@ -30,6 +32,8 @@ query {
                 count
             }
         }
+        enabled
+        size
         ticker_collections {
             ticker {
                 symbol
@@ -76,6 +80,11 @@ query {
         id
         collection {
             name
+            ticker_collections {
+                ticker {
+                    symbol
+                }
+            }
         }
     }
 }

@@ -22,10 +22,7 @@ with tickers as (select * from {{ ref('tickers') }}),
                     div(date_part('month', hp.date::timestamp)::integer - 1, settings.month_period_divider) as month,
                     hp.date,
                     hp.open,
-                    hp.close,
-                    ROW_NUMBER() OVER (PARTITION BY hp.code, date_part('year', hp.date::timestamp), div(
-                                date_part('month', hp.date::timestamp)::integer - 1, settings.month_period_divider)
-                        ORDER BY hp.date)                                                                   AS idx
+                    hp.close
              from {{ ref('historical_prices') }} hp
                       join settings ON true
          ),
