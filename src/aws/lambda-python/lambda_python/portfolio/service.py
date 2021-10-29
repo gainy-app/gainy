@@ -60,8 +60,6 @@ class PortfolioService:
 
         # InvestmentsTransactionsGetResponse[]
         responses = [thread.get() for thread in result_threads]
-        print(
-            [response.total_investment_transactions for response in responses])
 
         transactions = [
             self.__hydrate_transaction_data(transaction_data)
