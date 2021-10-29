@@ -35,7 +35,7 @@
       { "name": "AIRFLOW_PASSWORD",                "value": "${airflow_password}" },
       { "name": "AIRFLOW_UI_PORT",                 "value": "${airflow_port}" },
       { "name": "AIRFLOW_DATABASE_URI",            "value": "postgresql://${pg_username}:${pg_password}@${pg_host}:${pg_port}/${pg_dbname}?options=-csearch_path=${pg_airflow_schema}" },
-      { "name": "EODHISTORICALDATA_JOBS_COUNT",    "value": "4" }
+      { "name": "EODHISTORICALDATA_JOBS_COUNT",    "value": "${eodhistoricaldata_jobs_count}" }
     ],
     "links": [],
     "workingDirectory": null,

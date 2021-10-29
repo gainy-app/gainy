@@ -23,13 +23,3 @@ class OnUserCreated(HasuraTrigger):
         datadog.api.Event.create(title="User Created",
                                  text="User Created #%d" % (profile_id),
                                  tags=["env:%s" % (self.env)])
-
-    @staticmethod
-    def _extract_payload(data):
-        # Update old values with new values to properly handle updates
-        if data["old"]:
-            payload = data["old"]
-        else:
-            payload = {}
-        payload.update(data["new"])
-        return payload

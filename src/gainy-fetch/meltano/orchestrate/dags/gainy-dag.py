@@ -88,6 +88,7 @@ dbt = BashOperator(
     task_id="dbt-transform",
     bash_command=f"cd {project_root}; {meltano_bin} invoke dbt run",
     dag=dag,
+    pool="dbt"
 )
 
 # dependencies

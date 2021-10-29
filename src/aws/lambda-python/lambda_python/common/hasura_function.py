@@ -20,6 +20,9 @@ class HasuraAction(ABC):
 
         return profile_id
 
+    def is_applicable(self, name) -> bool:
+        return name == self.name
+
     @abstractmethod
     def apply(self, db_conn, input_params):
         pass
@@ -28,7 +31,10 @@ class HasuraAction(ABC):
 class HasuraTrigger(ABC):
     def __init__(self, name):
         super().__init__()
-        self.name = name
+        self.names = name if type(name) is list else [name]
+
+    def is_applicable(self, name) -> bool:
+        return name in self.names
 
     @abstractmethod
     def apply(self, db_conn, op, data):
@@ -37,3 +43,16 @@ class HasuraTrigger(ABC):
     @abstractmethod
     def get_profile_id(self, op, data):
         pass
+
+    @staticmethod
+    def _extract_payload(data):
+        # Update old values with new values to properly handle updates
+        if data["old"]:
+            payload = data["old"]
+        else:
+            payload = {}
+
+        if data["new"]:
+            payload.update(data["new"])
+
+        return payload

@@ -1,4 +1,5 @@
 import csv
+import json
 import os
 import sys
 from math import trunc
@@ -94,18 +95,17 @@ class SetUserCategories(HasuraTrigger):
                 {'risk_score': final_score})
 
             rows = cursor.fetchall()
-            print(rows)
             categories = [row[0] for row in rows]
 
         profile_id = payload["profile_id"]
-        print({
+        print('set_user_categories ' + json.dumps({
             'profile_id': profile_id,
             'risk_needed': risk_needed,
             'risk_taking_ability': risk_taking_ability,
             'loss_tolerance': loss_tolerance,
             'final_score': final_score,
             'categories': categories,
-        })
+        }))
 
         with db_conn.cursor() as cursor:
             execute_values(
@@ -126,13 +126,3 @@ class SetUserCategories(HasuraTrigger):
             return list_size - 1
 
         return trunc(value * list_size)
-
-    @staticmethod
-    def _extract_payload(data):
-        # Update old values with new values to properly handle updates
-        if data["old"]:
-            payload = data["old"]
-        else:
-            payload = {}
-        payload.update(data["new"])
-        return payload

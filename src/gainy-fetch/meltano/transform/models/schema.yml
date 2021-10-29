@@ -2,7 +2,7 @@ version: 2
 
 sources:
   - name: gainy
-    description: Gainy in-house datasets such as collections, industries, interests, categotries, etc.
+    description: Gainy in-house datasets such as collections, industries, interests, categotries, etc
     schema: public
     tables:
       - name: raw_gainy_industries
@@ -246,7 +246,6 @@ models:
       - name: size
         tests:
           - exists
-          - not_null
           - type:
               type: 'integer'
 
@@ -266,6 +265,7 @@ models:
               type: 'character varying'
 
   - name: ticker_collections
+    description: Lists of tickers in non-personalized Gainy collections
     columns:
       - name: symbol
         tests:
