@@ -33,7 +33,6 @@ class PortfolioRepository:
                 if len(unique_field_names):
                     unique_field_names_escaped = sql.SQL(',').join(
                         map(sql.Identifier, unique_field_names))
-                    print(unique_field_names_escaped)
 
                     sql_string = sql_string + sql.SQL(
                         " ON CONFLICT({unique_field_names}) DO UPDATE SET {set_clause}"
@@ -50,7 +49,6 @@ class PortfolioRepository:
                     " RETURNING id, created_at, updated_at")
 
                 entity_dicts = [entity.to_dict() for entity in entities]
-                print(str(sql_string))
 
                 execute_values(
                     cursor, sql_string,

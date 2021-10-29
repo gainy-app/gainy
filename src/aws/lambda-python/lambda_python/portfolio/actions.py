@@ -62,8 +62,13 @@ class GetPortfolioTransactions(HasuraAction):
 
     def apply(self, db_conn, input_params):
         profile_id = input_params["profile_id"]
+        count = input_params.get("count", 100)
+        offset = input_params.get("offset", 0)
 
-        result = self.service.get_transactions(db_conn, profile_id)
+        result = self.service.get_transactions(db_conn,
+                                               profile_id,
+                                               count=count,
+                                               offset=offset)
 
         securities = result['securities']
         accounts = result['accounts']

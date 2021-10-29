@@ -41,6 +41,8 @@ type Query {
 type Query {
   get_portfolio_transactions(
     profile_id: Int!
+    count: Int
+    offset: Int
   ): [PortfolioTransaction]
 }
 
@@ -123,7 +125,6 @@ type PortfolioHolding {
 type PortfolioTransaction {
   id: Int!
   amount: Float!
-  cancel_transaction_id: String
   date: String!
   fees: Float!
   iso_currency_code: String!

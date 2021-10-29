@@ -71,7 +71,6 @@ class TransactionData(BaseModel):
     id = None
 
     amount = None
-    cancel_transaction_id = None
     date = None
     fees = None
     iso_currency_code = None
@@ -102,7 +101,7 @@ class TransactionData(BaseModel):
         return ['security_ref_id', 'account_ref_id']
 
     def normalization_excluded_fields(self):
-        return ['security_ref_id', 'account_ref_id', 'cancel_transaction_id']
+        return ['security_ref_id', 'account_ref_id']
 
     def unique_field_names(self):
         return ['ref_id']

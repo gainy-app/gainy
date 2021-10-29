@@ -43,20 +43,25 @@ class PortfolioService:
             'accounts': accounts,
         }
 
-    def get_transactions(self, db_conn, profile_id):
+    def get_transactions(self, db_conn, profile_id, count=100, offset=0):
         profile_plaid_access_tokens = self.__get_access_tokens(
             db_conn, profile_id)
 
         result_threads = [
             self.plaid_client.get_investment_transactions(
                 access_token,
-                start_date=datetime.date.today() - datetime.timedelta(days=7),
+                count=count,
+                offset=offset,
+                start_date=datetime.date.today() -
+                datetime.timedelta(days=20 * 365),
                 end_date=datetime.date.today(),
                 async_req=True) for access_token in profile_plaid_access_tokens
         ]
 
         # InvestmentsTransactionsGetResponse[]
         responses = [thread.get() for thread in result_threads]
+        print(
+            [response.total_investment_transactions for response in responses])
 
         transactions = [
             self.__hydrate_transaction_data(transaction_data)
@@ -104,7 +109,6 @@ class PortfolioService:
         model = TransactionData()
 
         model.amount = data.amount
-        model.cancel_transaction_id = data.cancel_transaction_id
         model.date = data.date.strftime('%Y-%m-%d')
         model.fees = data.fees
         model.iso_currency_code = data.iso_currency_code

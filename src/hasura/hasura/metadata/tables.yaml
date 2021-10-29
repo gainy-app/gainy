@@ -1,5 +1,48 @@
 - table:
     schema: app
+    name: portfolio_securities
+  object_relationships:
+  - name: profile
+    using:
+      foreign_key_constraint_on: profile_id
+  - name: tickers
+    using:
+      manual_configuration:
+        remote_table:
+          schema: public
+          name: tickers
+        insertion_order: null
+        column_mapping:
+          ticker_symbol: symbol
+  array_relationships:
+  - name: profile_holdings
+    using:
+      foreign_key_constraint_on:
+        column: security_id
+        table:
+          schema: app
+          name: profile_holdings
+  select_permissions:
+  - role: user
+    permission:
+      columns:
+      - id
+      - close_price
+      - close_price_as_of
+      - iso_currency_code
+      - name
+      - ref_id
+      - ticker_symbol
+      - type
+      - profile_id
+      - created_at
+      - updated_at
+      filter:
+        profile:
+          user_id:
+            _eq: X-Hasura-User-Id
+- table:
+    schema: app
     name: profile_categories
   object_relationships:
   - name: profile
@@ -297,7 +340,6 @@
       columns:
       - id
       - amount
-      - cancel_transaction_id
       - date
       - fees
       - iso_currency_code
@@ -504,6 +546,13 @@
           schema: app
           name: profile_scoring_settings
   array_relationships:
+  - name: portfolio_securities
+    using:
+      foreign_key_constraint_on:
+        column: profile_id
+        table:
+          schema: app
+          name: portfolio_securities
   - name: profile_categories
     using:
       foreign_key_constraint_on:
@@ -532,13 +581,6 @@
         table:
           schema: app
           name: profile_interests
-  - name: portfolio_securities
-    using:
-      foreign_key_constraint_on:
-        column: profile_id
-        table:
-          schema: app
-          name: portfolio_securities
   insert_permissions:
   - role: user
     permission:
@@ -597,49 +639,6 @@
       interval_sec: 10
       timeout_sec: 60
     webhook: '{{AWS_LAMBDA_API_GATEWAY_ENDPOINT}}/hasuraTrigger'
-- table:
-    schema: app
-    name: portfolio_securities
-  object_relationships:
-  - name: profile
-    using:
-      foreign_key_constraint_on: profile_id
-  - name: tickers
-    using:
-      manual_configuration:
-        remote_table:
-          schema: public
-          name: tickers
-        insertion_order: null
-        column_mapping:
-          ticker_symbol: symbol
-  array_relationships:
-  - name: profile_holdings
-    using:
-      foreign_key_constraint_on:
-        column: security_id
-        table:
-          schema: app
-          name: profile_holdings
-  select_permissions:
-  - role: user
-    permission:
-      columns:
-      - id
-      - close_price
-      - close_price_as_of
-      - iso_currency_code
-      - name
-      - ref_id
-      - ticker_symbol
-      - type
-      - profile_id
-      - created_at
-      - updated_at
-      filter:
-        profile:
-          user_id:
-            _eq: X-Hasura-User-Id
 - table:
     schema: app
     name: ticker_financial_periods

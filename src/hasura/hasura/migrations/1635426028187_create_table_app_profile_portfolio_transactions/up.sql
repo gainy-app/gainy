@@ -2,7 +2,6 @@ CREATE TABLE "app"."profile_portfolio_transactions"
 (
     "id"                    serial      NOT NULL,
     "amount"                float8      NOT NULL,
-    "cancel_transaction_id" varchar,
     "date"                  date        NOT NULL,
     "fees"                  float8      NOT NULL,
     "iso_currency_code"     varchar     NOT NULL,

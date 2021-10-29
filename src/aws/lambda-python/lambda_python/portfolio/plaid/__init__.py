@@ -3,6 +3,7 @@ import plaid
 from plaid.api import plaid_api
 from plaid.model.investments_holdings_get_request import InvestmentsHoldingsGetRequest
 from plaid.model.investments_transactions_get_request import InvestmentsTransactionsGetRequest
+from plaid.model.investments_transactions_get_request_options import InvestmentsTransactionsGetRequestOptions
 
 from portfolio.plaid.common import get_plaid_client, handle_error
 
@@ -22,10 +23,17 @@ class PlaidClient:
                                     access_token,
                                     start_date,
                                     end_date,
+                                    count=100,
+                                    offset=0,
                                     async_req=False):
-        request = InvestmentsTransactionsGetRequest(access_token=access_token,
-                                                    start_date=start_date,
-                                                    end_date=end_date)
+        request = InvestmentsTransactionsGetRequest(
+            access_token=access_token,
+            start_date=start_date,
+            end_date=end_date,
+            options=InvestmentsTransactionsGetRequestOptions(
+                count=count,
+                offset=offset,
+            ))
         response = self.client.investments_transactions_get(
             request, async_req=async_req)
 
