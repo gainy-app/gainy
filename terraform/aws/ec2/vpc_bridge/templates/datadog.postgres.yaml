@@ -1,0 +1,22 @@
+init_config:
+
+instances:
+  - dbm: true
+    host: ${pg_host}
+    port: ${pg_port}
+    username: datadog
+    password: ${pg_datadog_password}
+    dbname: ${pg_dbname}
+    disable_generic_tags: true
+    custom_queries:
+      - metric_prefix: postgresql
+        query: select distinct on (dag_id) dag_id, extract(days from least(date_trunc('day', now()) + interval '21 hours', date_trunc('week', now()) + interval '4 days' + interval '21 hours') - start_date) as days_from_latest_dag_run, extract(minutes from end_date - start_date) as latest_dag_run_duration_minutes from airflow.dag_run where state = 'success' and end_date is not null and dag_id in ('gainy-dag') order by dag_id, end_date desc
+        columns:
+          - name: dag_id
+            type: tag
+          - name: days_from_latest_dag_run
+            type: gauge
+          - name: latest_dag_run_duration_minutes
+            type: gauge
+        tags:
+          - env:${env}
