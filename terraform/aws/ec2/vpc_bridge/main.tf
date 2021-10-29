@@ -96,6 +96,13 @@ resource "aws_instance" "bridge" {
         datadog_api_key     = var.datadog_api_key
       }
     )
+
+    connection {
+      type        = "ssh"
+      user        = "ubuntu"
+      host        = aws_instance.bridge.public_ip
+      private_key = tls_private_key.bridge.private_key_pem
+    }
   }
 
   provisioner "file" {
@@ -110,6 +117,13 @@ resource "aws_instance" "bridge" {
         env                 = var.env
       }
     )
+
+    connection {
+      type        = "ssh"
+      user        = "ubuntu"
+      host        = aws_instance.bridge.public_ip
+      private_key = tls_private_key.bridge.private_key_pem
+    }
   }
 
   provisioner "remote-exec" {
@@ -117,6 +131,13 @@ resource "aws_instance" "bridge" {
       "chmod +x /tmp/provision.sh",
       "sudo /tmp/provision.sh",
     ]
+
+    connection {
+      type        = "ssh"
+      user        = "ubuntu"
+      host        = aws_instance.bridge.public_ip
+      private_key = tls_private_key.bridge.private_key_pem
+    }
   }
 }
 
