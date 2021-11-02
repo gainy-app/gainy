@@ -38,6 +38,7 @@ module "ecs" {
   source        = "./ecs"
   env           = var.env
   instance_type = local.ecs_instance_type
+  vpc_index     = index(["production", "test"], var.env)
 }
 
 module "rds" {
