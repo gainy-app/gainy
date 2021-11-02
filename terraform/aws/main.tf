@@ -63,6 +63,8 @@ module "vpc_bridge" {
   pg_port     = module.rds.db_instance.port
   pg_username = module.rds.db_instance.username
   pg_dbname   = module.rds.db_instance.name
+
+  pg_production_internal_sync_username = var.pg_production_internal_sync_username
 }
 
 module "meltano" {
@@ -88,6 +90,11 @@ module "meltano" {
   pg_port                     = module.rds.db_instance.port
   pg_username                 = module.rds.db_instance.username
   pg_dbname                   = module.rds.db_instance.name
+
+  pg_production_host                   = var.pg_production_host
+  pg_production_port                   = var.pg_production_port
+  pg_production_internal_sync_username = var.pg_production_internal_sync_username
+  pg_production_internal_sync_password = var.pg_production_internal_sync_password
 
   eodhistoricaldata_jobs_count = local.meltano_eodhistoricaldata_jobs_count
   scheduler_cpu_credits        = local.meltano_scheduler_cpu_credits

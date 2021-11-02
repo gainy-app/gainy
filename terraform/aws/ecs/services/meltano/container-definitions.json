@@ -94,6 +94,14 @@
       { "name": "TARGET_POSTGRES_PASSWORD",        "value": "${pg_password}" },
       { "name": "TARGET_POSTGRES_DBNAME",          "value": "${pg_dbname}" },
       { "name": "TARGET_POSTGRES_SCHEMA",          "value": "${pg_load_schema}" },
+
+      { "name": "TAP_POSTGRES_HOST",               "value": "${pg_production_host}" },
+      { "name": "TAP_POSTGRES_PORT",               "value": "${pg_production_port}" },
+      { "name": "TAP_POSTGRES_USER",               "value": "${pg_production_internal_sync_username}" },
+      { "name": "TAP_POSTGRES_PASSWORD",           "value": "${pg_production_internal_sync_password}" },
+      { "name": "TAP_POSTGRES_DBNAME",             "value": "${pg_dbname}" },
+      { "name": "TAP_POSTGRES_FILTER_SCHEMAS",     "value": "${pg_load_schema}" },
+
       { "name": "DBT_TARGET_SCHEMA",               "value": "${pg_transform_schema}" },
       { "name": "DBT_TARGET",                      "value": "postgres" }
     ],

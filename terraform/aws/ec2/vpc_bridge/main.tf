@@ -12,6 +12,7 @@ variable "pg_port" {}
 variable "pg_username" {}
 variable "pg_password" {}
 variable "pg_dbname" {}
+variable "pg_production_internal_sync_username" {}
 
 data "aws_ami" "ubuntu" {
   most_recent = true
@@ -63,6 +64,11 @@ resource "random_password" "datadog_postgres" {
   special = false
 }
 
+resource "random_password" "internal_sync_postgres" {
+  length  = 16
+  special = false
+}
+
 resource "aws_instance" "bridge" {
   ami                         = data.aws_ami.ubuntu.id
   instance_type               = "t3.micro"
@@ -79,13 +85,15 @@ resource "aws_instance" "bridge" {
     content = templatefile(
       "${path.module}/templates/provision.sh",
       {
-        pg_host             = var.pg_host
-        pg_password         = var.pg_password
-        pg_port             = var.pg_port
-        pg_username         = var.pg_username
-        pg_dbname           = var.pg_dbname
-        pg_datadog_password = random_password.datadog_postgres.result
-        datadog_api_key     = var.datadog_api_key
+        pg_host                   = var.pg_host
+        pg_password               = var.pg_password
+        pg_port                   = var.pg_port
+        pg_username               = var.pg_username
+        pg_dbname                 = var.pg_dbname
+        pg_datadog_password       = random_password.datadog_postgres.result
+        pg_internal_sync_username = var.pg_production_internal_sync_username
+        pg_internal_sync_password = random_password.internal_sync_postgres.result
+        datadog_api_key           = var.datadog_api_key
       }
     )
 

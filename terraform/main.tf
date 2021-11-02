@@ -62,6 +62,11 @@ module "aws" {
   base_image_version          = var.base_image_version
   datadog_api_key             = var.datadog_api_key
   datadog_app_key             = var.datadog_app_key
+
+  pg_production_host                   = var.pg_production_host
+  pg_production_port                   = var.pg_production_port
+  pg_production_internal_sync_username = var.pg_production_internal_sync_username
+  pg_production_internal_sync_password = var.pg_production_internal_sync_password
 }
 
 module "datadog" {

@@ -13,15 +13,19 @@ variable "base_image_version" {}
 variable "datadog_api_key" {}
 variable "datadog_app_key" {}
 
+variable "pg_production_host" {}
+variable "pg_production_port" {}
+variable "pg_production_internal_sync_username" {}
+variable "pg_production_internal_sync_password" {}
 
 locals {
-  ecs_instance_type                    = var.env == "production" ? "c5.2xlarge" : "t3.medium"
-  meltano_eodhistoricaldata_jobs_count = var.env == "production" ? 4 : 1
+  ecs_instance_type                    = var.env == "production" ? "c5.2xlarge" : "t3.large"
+  meltano_eodhistoricaldata_jobs_count = var.env == "production" ? 4 : 2
 
-  hasura_cpu_credits            = var.env == "production" ? 512 : 128
-  meltano_scheduler_cpu_credits = var.env == "production" ? 3072 : 256
+  hasura_cpu_credits            = var.env == "production" ? 512 : 512
+  meltano_scheduler_cpu_credits = var.env == "production" ? 3072 : 2048
 
   hasura_memory_credits            = var.env == "production" ? 1024 : 512
   meltano_ui_memory_credits        = var.env == "production" ? 1024 : 1024
-  meltano_scheduler_memory_credits = var.env == "production" ? 3072 : 1024
+  meltano_scheduler_memory_credits = var.env == "production" ? 3072 : 2048
 }

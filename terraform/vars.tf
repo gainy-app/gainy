@@ -77,3 +77,22 @@ variable "datadog_app_key" {
 variable "datadog_api_url" {
   type = string
 }
+
+#################################### Meltano internal data sync with production ####################################
+
+variable "pg_production_host" {
+  type      = string
+  sensitive = true
+}
+variable "pg_production_port" {
+  type      = string
+  sensitive = true
+}
+variable "pg_production_internal_sync_username" {
+  type = string
+}
+variable "pg_production_internal_sync_password" {
+  type      = string
+  sensitive = true
+}
+

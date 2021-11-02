@@ -131,6 +131,10 @@ jobs:
           TF_VAR_datadog_api_key: ${{ secrets.DATADOG_API_KEY }}
           TF_VAR_datadog_api_url: ${{ secrets.DATADOG_API_URL }}
           TF_VAR_datadog_app_key: ${{ secrets.DATADOG_APP_KEY }}
+          TF_VAR_pg_production_host: ${{ secrets.PG_PRODUCTION_HOST }}
+          TF_VAR_pg_production_port: ${{ secrets.PG_PRODUCTION_PORT }}
+          TF_VAR_pg_production_internal_sync_username: ${{ secrets.PG_PRODUCTION_INTERNAL_SYNC_USERNAME }}
+          TF_VAR_pg_production_internal_sync_password: ${{ secrets.PG_PRODUCTION_INTERNAL_SYNC_PASSWORD }}
 
       - uses: actions/github-script@0.9.0
         if: github.event_name == 'pull_request'
@@ -189,3 +193,7 @@ jobs:
           TF_VAR_datadog_api_key: ${{ secrets.DATADOG_API_KEY }}
           TF_VAR_datadog_api_url: ${{ secrets.DATADOG_API_URL }}
           TF_VAR_datadog_app_key: ${{ secrets.DATADOG_APP_KEY }}
+          TF_VAR_pg_production_host: ${{ secrets.PG_PRODUCTION_HOST }}
+          TF_VAR_pg_production_port: ${{ secrets.PG_PRODUCTION_PORT }}
+          TF_VAR_pg_production_internal_sync_username: ${{ secrets.PG_PRODUCTION_INTERNAL_SYNC_USERNAME }}
+          TF_VAR_pg_production_internal_sync_password: ${{ secrets.PG_PRODUCTION_INTERNAL_SYNC_PASSWORD }}

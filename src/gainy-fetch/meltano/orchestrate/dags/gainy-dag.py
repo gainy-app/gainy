@@ -18,6 +18,7 @@ logger = logging.getLogger(__name__)
 project_root = os.getenv("MELTANO_PROJECT_ROOT", os.getcwd())
 concurrency = int(os.getenv("EODHISTORICALDATA_JOBS_COUNT", 1))
 
+ENV = os.getenv("ENV")
 DEFAULT_ARGS = {
     "owner": "gainy",
     "depends_on_past": False,
@@ -52,6 +53,15 @@ schedules = json.loads(result.stdout)
 # Tags
 tags = ["meltano"]
 for schedule in schedules:
+    if 'env' in schedule and 'TARGET_ENVS' in schedule['env']:
+        target_envs = json.loads(schedule['env']['TARGET_ENVS'])
+        skipped = ENV in target_envs
+    else:
+        skipped = False
+    schedule['skipped'] = skipped
+    if skipped:
+        continue
+
     if not schedule['extractor'] in tags:
         tags.append(schedule['extractor'])
     if not schedule['loader'] in tags:
@@ -74,6 +84,9 @@ dag = DAG(
 # operators
 loaders = []
 for schedule in schedules:
+    if schedule['skipped']:
+        continue
+
     logger.info(f"Considering schedule '{schedule['name']}")
     loader = BashOperator(
         task_id=f"{schedule['name']}",
