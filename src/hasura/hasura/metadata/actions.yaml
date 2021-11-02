@@ -35,6 +35,12 @@ actions:
     handler: '{{AWS_LAMBDA_API_GATEWAY_ENDPOINT}}/hasuraAction'
   permissions:
   - role: user
+- name: get_portfolio_transactions
+  definition:
+    kind: ""
+    handler: '{{AWS_LAMBDA_API_GATEWAY_ENDPOINT}}/hasuraAction'
+  permissions:
+  - role: user
 - name: get_recommended_collections
   definition:
     kind: ""
@@ -88,7 +94,7 @@ custom_types:
         profile_id: id
     - remote_table:
         schema: app
-        name: securities
+        name: portfolio_securities
       name: security
       source: default
       type: array
@@ -102,4 +108,30 @@ custom_types:
       type: object
       field_mapping:
         account_id: id
+  - name: PortfolioTransaction
+    relationships:
+    - remote_table:
+        schema: app
+        name: profiles
+      name: profile
+      source: default
+      type: object
+      field_mapping:
+        profile_id: id
+    - remote_table:
+        schema: app
+        name: profile_portfolio_accounts
+      name: account
+      source: default
+      type: object
+      field_mapping:
+        account_id: id
+    - remote_table:
+        schema: app
+        name: portfolio_securities
+      name: security
+      source: default
+      type: object
+      field_mapping:
+        security_id: id
   scalars: []

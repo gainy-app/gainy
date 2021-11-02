@@ -1,2 +1,2 @@
-alter table "app"."securities" drop constraint "securities_profile_id_fkey";
-DROP TABLE "app"."securities";
+alter table "app"."portfolio_securities" drop constraint "portfolio_securities_profile_id_fkey";
+DROP TABLE "app"."portfolio_securities";
