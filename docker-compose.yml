@@ -3,7 +3,6 @@ services:
   meltano-airflow-scheduler:
     restart: always
     env_file:
-      - .env.dist
       - .env
     build:
       context: ./src/gainy-fetch
@@ -29,7 +28,6 @@ services:
   meltano-airflow-ui:
     restart: always
     env_file:
-      - .env.dist
       - .env
     build:
       context: ./src/gainy-fetch
@@ -50,7 +48,6 @@ services:
   meltano-dbt-docs:
     restart: always
     env_file:
-      - .env.dist
       - .env
     build:
       context: ./src/gainy-fetch
@@ -95,7 +92,6 @@ services:
     - "postgres"
     restart: always
     env_file:
-      - .env.dist
       - .env
     environment:
       HASURA_PORT: ${HASURA_PORT}
@@ -109,7 +105,6 @@ services:
     ports:
       - "8081:5000" # for auth demo hosting
     env_file:
-      - .env.dist
       - .env
     environment:
       GOOGLE_APPLICATION_CREDENTIALS: "/var/www/firebase.key.json"
@@ -134,7 +129,6 @@ services:
       - ./src/aws/lambda-python/poetry.lock:/var/poetry.lock
       - ./src/aws/lambda-python/pyproject.toml:/var/pyproject.toml
     env_file:
-      - .env.dist
       - .env
     environment:
       pg_host: "${PG_ADDRESS}"
@@ -158,7 +152,6 @@ services:
       - ./src/aws/lambda-python/poetry.lock:/var/poetry.lock
       - ./src/aws/lambda-python/pyproject.toml:/var/pyproject.toml
     env_file:
-      - .env.dist
       - .env
     environment:
       pg_host: "${PG_ADDRESS}"
