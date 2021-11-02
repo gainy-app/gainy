@@ -10,4 +10,4 @@
 }}
 
 SELECT id::int, name
-FROM raw_gainy_industries
+FROM {{ source('gainy', 'gainy_industries') }}

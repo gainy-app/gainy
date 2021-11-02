@@ -11,7 +11,7 @@
     with expanded as (
         select code as symbol,
                (json_each((earnings -> 'Annual')::json)).*
-        from {{ source('eod', 'fundamentals') }} f
+        from {{ source('eod', 'eod_fundamentals') }} f
                  inner join {{  ref('tickers') }} as t on f.code = t.symbol
     )
     select symbol,

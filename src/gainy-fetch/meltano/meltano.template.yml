@@ -19,22 +19,22 @@ plugins:
     - name: tap-csv
       config:
         files:
-          - entity: raw_gainy_industries
+          - entity: gainy_industries
             path: data/gainy_industries.csv
             keys: ["id"]
-          - entity: raw_ticker_industries
+          - entity: gainy_ticker_industries
             path: data/industry_tickers.csv
             keys: ["Code"]
-          - entity: raw_collections
+          - entity: gainy_collections
             path: data/collections.csv
             keys: ["id"]
-          - entity: raw_categories
+          - entity: gainy_categories
             path: data/categories.csv
             keys: ["id"]
-          - entity: raw_interests
+          - entity: gainy_interests
             path: data/interests.csv
             keys: ["id"]
-          - entity: raw_countries
+          - entity: gainy_countries
             path: data/countries.csv # https://github.com/lukes/ISO-3166-Countries-with-Regional-Codes/blob/master/all/all.json
             keys: ["name", "alpha-2", "alpha-3"]
   loaders:

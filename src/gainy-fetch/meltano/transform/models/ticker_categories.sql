@@ -44,7 +44,7 @@ UNION
              (
                  SELECT code,
                         SUM(callvolume) * 100 as call_option_shares_deliverable_outstanding
-                 FROM {{ source('eod', 'options') }} options
+                 FROM {{ source('eod', 'eod_options') }} options
                  WHERE expirationdate::timestamp > NOW()
                  GROUP BY code
              )
@@ -53,7 +53,7 @@ UNION
     from tickers t
              join {{ ref('categories') }} c ON c.name = 'Speculation'
              JOIN {{ ref('technicals') }} t2 on t.symbol = t2.symbol
-             JOIN {{ source('eod', 'fundamentals') }} f ON f.code = t.symbol
+             JOIN {{ source('eod', 'eod_fundamentals') }} f ON f.code = t.symbol
              JOIN max_eps on max_eps.symbol = t.symbol
              JOIN options_stats on options_stats.code = t.symbol
     WHERE t2.beta > 3
@@ -82,7 +82,7 @@ UNION
 )
 UNION
 (
-    WITH dividends as (select * from {{ source('eod', 'dividends') }}),
+    WITH dividends as (select * from {{ source('eod', 'eod_dividends') }}),
          max_dividend_date as (SELECT code, MAX(date::timestamp) as date from dividends GROUP BY code),
          last_five_years_dividends as (
              SELECT d.code, COUNT(DISTINCT date_part('year', d.date::timestamp)) as cnt
