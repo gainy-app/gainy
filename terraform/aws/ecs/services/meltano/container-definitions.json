@@ -93,8 +93,8 @@
       { "name": "TARGET_POSTGRES_USER",            "value": "${pg_username}" },
       { "name": "TARGET_POSTGRES_PASSWORD",        "value": "${pg_password}" },
       { "name": "TARGET_POSTGRES_DBNAME",          "value": "${pg_dbname}" },
-      { "name": "TARGET_POSTGRES_SCHEMA",          "value": "${pg_schema}" },
-      { "name": "DBT_TARGET_SCHEMA",               "value": "${pg_schema}" },
+      { "name": "TARGET_POSTGRES_SCHEMA",          "value": "${pg_load_schema}" },
+      { "name": "DBT_TARGET_SCHEMA",               "value": "${pg_transform_schema}" },
       { "name": "DBT_TARGET",                      "value": "postgres" }
     ],
     "links": [],

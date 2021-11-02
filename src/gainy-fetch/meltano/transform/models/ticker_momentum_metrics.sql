@@ -38,7 +38,7 @@ with tickers as (select * from {{ ref('tickers') }}),
                     t.gic_sector,
                     case when hp1.close > 0 THEN hp0.close / hp1.close - 1 - settings.local_risk_free_rate END AS MOM2,
                     case when hp2.close > 0 THEN hp0.close / hp2.close - 1 - settings.local_risk_free_rate END AS MOM12
-             from {{ source('eod', 'fundamentals') }} f
+             from {{ source('eod', 'eod_fundamentals') }} f
                       join settings ON true
                       join {{ ref('historical_prices') }} hp0 on hp0.code = f.code AND hp0.date::timestamp < NOW() - interval '1 month' AND hp0.date::timestamp > NOW() - interval '1 month' - interval '1 week'
                       join {{ ref('historical_prices') }} hp1 on hp1.code = f.code AND hp1.date::timestamp < NOW() - interval '2 month' AND hp1.date::timestamp > NOW() - interval '2 month' - interval '1 week'

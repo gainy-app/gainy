@@ -1,9 +1,19 @@
 ### Alternative stocks
 
 ```graphql
-query {
+{
     tickers {
         symbol
+        ticker_industries {
+            gainy_industry {
+                name
+                ticker_industries {
+                    ticker { # here are our alternative stocks
+                        symbol
+                    }
+                }
+            }
+        }
         ticker_interests {
             symbol
             interest_id
@@ -11,14 +21,9 @@ query {
                 icon_url
                 id
                 name
-                ticker_interests{ # here are our alternative stocks
-                    ticker{
-                        symbol
-                    }
-                }
             }
         }
-        ticker_analyst_ratings{
+        ticker_analyst_ratings {
             strong_buy
             buy
             hold

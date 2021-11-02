@@ -57,14 +57,6 @@ resource "aws_security_group" "bridge" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 }
-resource "aws_security_group_rule" "bridge-rds" {
-  type                     = "ingress"
-  from_port                = 5432
-  to_port                  = 5432
-  protocol                 = "tcp"
-  security_group_id        = var.vpc_default_sg_id
-  source_security_group_id = aws_security_group.bridge.id
-}
 
 resource "random_password" "datadog_postgres" {
   length  = 16

@@ -35,4 +35,4 @@
            (highlights ->> 'QuarterlyRevenueGrowthYOY')::real            as quarterly_revenue_growth_yoy,
            (highlights ->> 'QuarterlyEarningsGrowthYOY')::real           as quarterly_earnings_growth_yoy
 
-   from {{ source('eod', 'fundamentals') }} f inner join {{  ref('tickers') }} as t on f.code = t.symbol
+   from {{ source('eod', 'eod_fundamentals') }} f inner join {{  ref('tickers') }} as t on f.code = t.symbol

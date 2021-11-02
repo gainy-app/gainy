@@ -1,4 +1,4 @@
-create table if not exists public.dividends
+create table if not exists raw_data.eod_dividends
 (
     code            varchar not null,
     currency        varchar,
@@ -13,7 +13,7 @@ create table if not exists public.dividends
         primary key (code, date)
 );
 
-insert into public.dividends (code, currency, date, declarationdate, paymentdate, period, recorddate, unadjustedvalue, value)
+insert into raw_data.eod_dividends (code, currency, date, declarationdate, paymentdate, period, recorddate, unadjustedvalue, value)
 values  ('AAPL', 'USD', '1989-08-21', null, '1989-09-15', 'Quarterly', '1989-08-25', 0.1008, 0.0009),
         ('AAPL', 'USD', '1989-11-17', null, '1989-12-15', 'Quarterly', '1989-11-24', 0.112, 0.001),
         ('AAPL', 'USD', '1990-02-16', null, '1990-03-15', 'Quarterly', '1990-02-23', 0.112, 0.001),

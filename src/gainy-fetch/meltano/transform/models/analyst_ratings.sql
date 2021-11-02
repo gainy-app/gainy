@@ -18,4 +18,4 @@ select distinct code::text                       as symbol,
        (analystratings ->> 'StrongSell')::int    as strong_sell,
        (analystratings ->> 'TargetPrice')::float as target_price
 
-from {{ source('eod', 'fundamentals') }} f inner join {{  ref('tickers') }} as t on f.code = t.symbol
+from {{ source('eod', 'eod_fundamentals') }} f inner join {{  ref('tickers') }} as t on f.code = t.symbol

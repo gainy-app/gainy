@@ -1,4 +1,4 @@
-create table if not exists public.options
+create table if not exists raw_data.eod_options
 (
     code                     varchar not null,
     callopeninterest         numeric,
@@ -14,7 +14,7 @@ create table if not exists public.options
         primary key (code, expirationdate)
 );
 
-insert into public.options (code, callopeninterest, callvolume, expirationdate, impliedvolatility, optionscount, putcallopeninterestratio, putcallvolumeratio, putopeninterest, putvolume)
+insert into raw_data.eod_options (code, callopeninterest, callvolume, expirationdate, impliedvolatility, optionscount, putcallopeninterestratio, putcallvolumeratio, putopeninterest, putvolume)
 values  ('AAPL', 321797, 341722, '2021-10-01', 32.9849, 120, 0.4883451368409277, 0.5446269189575151, 157148, 186111),
         ('AAPL', 92173, 63466, '2021-10-08', 29.6176, 112, 0.8905644820066614, 0.9181924179875839, 82086, 58274),
         ('AAPL', 742222, 92107, '2021-10-15', 29.187, 114, 0.8230515937280221, 0.9030692564083077, 610887, 83179),
