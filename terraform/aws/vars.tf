@@ -27,5 +27,5 @@ locals {
 
   hasura_memory_credits            = var.env == "production" ? 1024 : 512
   meltano_ui_memory_credits        = var.env == "production" ? 1024 : 1024
-  meltano_scheduler_memory_credits = var.env == "production" ? 3072 : 2048
+  meltano_scheduler_memory_credits = var.env == "production" ? 3072 : 3072
 }
