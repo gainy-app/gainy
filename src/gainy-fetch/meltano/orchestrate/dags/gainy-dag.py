@@ -55,7 +55,7 @@ tags = ["meltano"]
 for schedule in schedules:
     if 'env' in schedule and 'TARGET_ENVS' in schedule['env']:
         target_envs = json.loads(schedule['env']['TARGET_ENVS'])
-        skipped = ENV in target_envs
+        skipped = ENV not in target_envs
     else:
         skipped = False
     schedule['skipped'] = skipped
