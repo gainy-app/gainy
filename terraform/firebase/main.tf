@@ -13,8 +13,9 @@ resource "google_project" "project" {
   }
 }
 resource "google_project_iam_member" "owner" {
-  role   = "roles/owner"
-  member = "user:${var.google_user}"
+  project = var.google_project_id
+  role    = "roles/owner"
+  member  = "user:${var.google_user}"
 
   depends_on = [google_project.project]
   lifecycle {
