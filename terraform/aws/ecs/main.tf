@@ -248,6 +248,7 @@ resource "aws_nat_gateway" "nat_gateway" {
  */
 resource "aws_route_table" "nat_route_table" {
   vpc_id = aws_vpc.vpc.id
+
   tags = {
     Name = "gainy-${var.env}-private"
   }
