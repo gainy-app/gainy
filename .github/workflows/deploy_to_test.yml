@@ -65,7 +65,6 @@ jobs:
           TF_VAR_google_organization_id: ${{ secrets.GOOGLE_ORGANIZATION_ID }}
           TF_VAR_google_region: ${{ secrets.GOOGLE_REGION }}
           TF_VAR_google_billing_id: ${{ secrets.GOOGLE_BILLING_ID }}
-          TF_VAR_hasura_jwt_secret: ${{ secrets.HASURA_JWT_SECRET }}
           TF_VAR_cloudflare_email: ${{ secrets.CLOUDFLARE_EMAIL }}
           TF_VAR_cloudflare_api_key: ${{ secrets.CLOUDFLARE_API_KEY }}
           TF_VAR_cloudflare_zone_id: ${{ secrets.CLOUDFLARE_ZONE_ID }}

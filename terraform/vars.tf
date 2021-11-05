@@ -47,8 +47,6 @@ variable "google_billing_id" {}
 variable "google_user" {}
 variable "google_organization_id" {}
 
-variable "hasura_jwt_secret" {}
-
 #################################### Cloudflare ####################################
 
 variable "cloudflare_email" {

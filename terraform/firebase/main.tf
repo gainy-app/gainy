@@ -1,11 +1,16 @@
+variable "env" {}
 variable "google_project_id" {}
 variable "google_billing_id" {}
 variable "google_user" {}
 variable "google_organization_id" {}
 
+locals {
+  google_project_id = var.env == "production" ? var.google_project_id : "${var.google_project_id}-${var.env}"
+}
+
 resource "google_project" "project" {
-  name            = "Gainy App CI"
-  project_id      = var.google_project_id
+  name            = var.env == "production" ? "Gainy App CI" : "Gainy App CI ${var.env}"
+  project_id      = local.google_project_id
   billing_account = var.google_billing_id
   org_id          = var.google_organization_id
   lifecycle {
@@ -13,7 +18,7 @@ resource "google_project" "project" {
   }
 }
 resource "google_project_iam_member" "owner" {
-  project = var.google_project_id
+  project = local.google_project_id
   role    = "roles/owner"
   member  = "user:${var.google_user}"
 
@@ -34,7 +39,7 @@ resource "google_project_service" "compute" {
 
 # Enable Cloud Functions API
 resource "google_project_service" "cf" {
-  project = var.google_project_id
+  project = local.google_project_id
   service = "cloudfunctions.googleapis.com"
 
   disable_dependent_services = true
@@ -47,7 +52,7 @@ resource "google_project_service" "cf" {
 
 # Enable Cloud Build API
 resource "google_project_service" "cb" {
-  project = var.google_project_id
+  project = local.google_project_id
   service = "cloudbuild.googleapis.com"
 
   disable_dependent_services = true
@@ -62,7 +67,7 @@ module "functions-processSignUp" {
   source               = "./functions"
   function_entry_point = "processSignUp"
   function_name        = "process_signup"
-  google_project_id    = var.google_project_id
+  google_project_id    = local.google_project_id
   depends_on           = [google_project_service.cf, google_project_service.cb, google_project_service.compute]
 }
 
@@ -70,6 +75,6 @@ module "functions-refreshToken" {
   source               = "./functions"
   function_entry_point = "refreshToken"
   function_name        = "refresh_token"
-  google_project_id    = var.google_project_id
+  google_project_id    = local.google_project_id
   depends_on           = [google_project_service.cf, google_project_service.cb, google_project_service.compute]
 }
