@@ -45,6 +45,7 @@ provider "datadog" {
 
 module "firebase" {
   source                 = "./firebase"
+  env                    = var.env
   google_project_id      = var.google_project_id
   google_billing_id      = var.google_billing_id
   google_user            = var.google_user
@@ -57,7 +58,12 @@ module "aws" {
   gnews_api_token             = var.gnews_api_token
   env                         = var.env
   cloudflare_zone_id          = var.cloudflare_zone_id
-  hasura_jwt_secret           = var.hasura_jwt_secret
+  hasura_jwt_secret = jsonencode({
+    "type"     = "RS256",
+    "jwk_url"  = "https://www.googleapis.com/service_accounts/v1/jwk/securetoken@system.gserviceaccount.com",
+    "audience" = module.firebase.google_project_id,
+    "issuer"   = "https://securetoken.google.com/${module.firebase.google_project_id}"
+  })
   base_image_registry_address = var.base_image_registry_address
   base_image_version          = var.base_image_version
   datadog_api_key             = var.datadog_api_key
