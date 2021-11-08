@@ -8,4 +8,4 @@
 }}
 
 SELECT id::int, name, icon_url, enabled
-FROM {{ source('gainy', 'raw_interests') }}
+FROM {{ source('gainy', 'gainy_interests') }}

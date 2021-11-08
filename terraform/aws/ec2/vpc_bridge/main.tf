@@ -5,6 +5,14 @@ variable "vpc_id" {}
 variable "vpc_default_sg_id" {}
 variable "public_subnet_id" {}
 variable "cloudflare_zone_id" {}
+variable "datadog_api_key" {}
+
+variable "pg_host" {}
+variable "pg_port" {}
+variable "pg_username" {}
+variable "pg_password" {}
+variable "pg_dbname" {}
+variable "pg_production_internal_sync_username" {}
 
 data "aws_ami" "ubuntu" {
   most_recent = true
@@ -50,13 +58,15 @@ resource "aws_security_group" "bridge" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 }
-resource "aws_security_group_rule" "bridge-rds" {
-  type                     = "ingress"
-  from_port                = 5432
-  to_port                  = 5432
-  protocol                 = "tcp"
-  security_group_id        = var.vpc_default_sg_id
-  source_security_group_id = aws_security_group.bridge.id
+
+resource "random_password" "datadog_postgres" {
+  length  = 16
+  special = false
+}
+
+resource "random_password" "internal_sync_postgres" {
+  length  = 16
+  special = false
 }
 
 resource "aws_instance" "bridge" {
@@ -68,6 +78,66 @@ resource "aws_instance" "bridge" {
   vpc_security_group_ids      = [aws_security_group.bridge.id]
   tags = {
     Name = "gainy-bridge-${var.env}"
+  }
+
+  provisioner "file" {
+    destination = "/tmp/provision.sh"
+    content = templatefile(
+      "${path.module}/templates/provision.sh",
+      {
+        pg_host                   = var.pg_host
+        pg_password               = var.pg_password
+        pg_port                   = var.pg_port
+        pg_username               = var.pg_username
+        pg_dbname                 = var.pg_dbname
+        pg_datadog_password       = random_password.datadog_postgres.result
+        pg_internal_sync_username = var.pg_production_internal_sync_username
+        pg_internal_sync_password = random_password.internal_sync_postgres.result
+        datadog_api_key           = var.datadog_api_key
+      }
+    )
+
+    connection {
+      type        = "ssh"
+      user        = "ubuntu"
+      host        = aws_instance.bridge.public_ip
+      private_key = tls_private_key.bridge.private_key_pem
+    }
+  }
+
+  provisioner "file" {
+    destination = "/tmp/datadog.postgres.yaml"
+    content = templatefile(
+      "${path.module}/templates/datadog.postgres.yaml",
+      {
+        pg_host             = var.pg_host
+        pg_port             = var.pg_port
+        pg_dbname           = var.pg_dbname
+        pg_datadog_password = random_password.datadog_postgres.result
+        env                 = var.env
+      }
+    )
+
+    connection {
+      type        = "ssh"
+      user        = "ubuntu"
+      host        = aws_instance.bridge.public_ip
+      private_key = tls_private_key.bridge.private_key_pem
+    }
+  }
+
+  provisioner "remote-exec" {
+    inline = [
+      "chmod +x /tmp/provision.sh",
+      "sudo /tmp/provision.sh",
+    ]
+
+    connection {
+      type        = "ssh"
+      user        = "ubuntu"
+      host        = aws_instance.bridge.public_ip
+      private_key = tls_private_key.bridge.private_key_pem
+    }
   }
 }
 

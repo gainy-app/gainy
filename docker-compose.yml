@@ -16,6 +16,7 @@ services:
       - ./src/gainy-fetch/meltano/data:/project/data:delegated
       - ./src/gainy-fetch/meltano/orchestrate:/project/orchestrate:delegated
       - ./src/gainy-fetch/meltano/seed:/project/seed:delegated
+      - ./src/gainy-fetch/meltano/extract:/project/extract:delegated
       - meltano_data:/project/.meltano
     environment:
       EODHISTORICALDATA_JOBS_COUNT: 1

@@ -9,9 +9,9 @@
   )
 }}
 
-WITH raw_ticker_industries as (SELECT * FROM {{ source('gainy', 'raw_ticker_industries') }})
+WITH raw_ticker_industries as (SELECT * FROM {{ source('gainy', 'gainy_ticker_industries') }})
 SELECT code                as symbol,
        gainy_industries.id as industry_id
 FROM raw_ticker_industries
          JOIN {{ ref('tickers') }} ON tickers.symbol = raw_ticker_industries.code
-         JOIN gainy_industries ON gainy_industries.name = "industry name"
+         JOIN {{ ref('gainy_industries') }} ON gainy_industries.name = "industry name"

@@ -3,23 +3,23 @@ version: 2
 sources:
   - name: gainy
     description: Gainy in-house datasets such as collections, industries, interests, categotries, etc
-    schema: public
+    schema: raw_data
     tables:
-      - name: raw_gainy_industries
-      - name: raw_ticker_industries
-      - name: raw_collections
-      - name: raw_categories
-      - name: raw_interests
-      - name: raw_countries
+      - name: gainy_industries
+      - name: gainy_ticker_industries
+      - name: gainy_collections
+      - name: gainy_categories
+      - name: gainy_interests
+      - name: gainy_countries
 
   - name: eod
     description: Financial data from https://eodhistoricaldata.com/
-    schema: public
+    schema: raw_data
     tables:
-      - name: fundamentals
-      - name: dividends
-      - name: options
-      - name: raw_historical_prices
+      - name: eod_fundamentals
+      - name: eod_dividends
+      - name: eod_options
+      - name: eod_historical_prices
 
 models:
   - name: categories

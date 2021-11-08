@@ -22,8 +22,8 @@ with historical_prices as (select * from {{ ref('historical_prices') }}),
      gainy_industries as (select * from {{ ref('gainy_industries') }}),
      ticker_categories as (select * from {{ ref('ticker_categories') }}),
      categories as (select * from {{ ref('categories') }}),
-     collections as (select id::int, name from {{ source('gainy', 'raw_collections') }} where personalized = '0'),
-     countries as (select * from {{ source('gainy', 'raw_countries') }}),
+     collections as (select id::int, name from {{ source('gainy', 'gainy_collections') }} where personalized = '0'),
+     countries as (select * from {{ source('gainy', 'gainy_countries') }}),
      latest_price AS
          (
              select distinct on (hp.code) hp.*

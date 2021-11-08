@@ -38,6 +38,7 @@ module "ecs" {
   source        = "./ecs"
   env           = var.env
   instance_type = local.ecs_instance_type
+  vpc_index     = index(["production", "test"], var.env)
 }
 
 module "rds" {
@@ -55,6 +56,15 @@ module "vpc_bridge" {
   public_subnet_id   = module.ecs.public_subnet_ids.0
   vpc_id             = module.ecs.vpc_id
   cloudflare_zone_id = var.cloudflare_zone_id
+  datadog_api_key    = var.datadog_api_key
+
+  pg_host     = module.rds.db_instance.address
+  pg_password = module.rds.db_instance.password
+  pg_port     = module.rds.db_instance.port
+  pg_username = module.rds.db_instance.username
+  pg_dbname   = module.rds.db_instance.name
+
+  pg_production_internal_sync_username = var.pg_production_internal_sync_username
 }
 
 module "meltano" {
@@ -80,6 +90,11 @@ module "meltano" {
   pg_port                     = module.rds.db_instance.port
   pg_username                 = module.rds.db_instance.username
   pg_dbname                   = module.rds.db_instance.name
+
+  pg_production_host                   = var.pg_production_host
+  pg_production_port                   = var.pg_production_port
+  pg_production_internal_sync_username = var.pg_production_internal_sync_username
+  pg_production_internal_sync_password = var.pg_production_internal_sync_password
 
   eodhistoricaldata_jobs_count = local.meltano_eodhistoricaldata_jobs_count
   scheduler_cpu_credits        = local.meltano_scheduler_cpu_credits

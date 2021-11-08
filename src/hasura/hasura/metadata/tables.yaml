@@ -581,6 +581,13 @@
         table:
           schema: app
           name: profile_interests
+  - name: profile_watchlist_tickers
+    using:
+      foreign_key_constraint_on:
+        column: profile_id
+        table:
+          schema: app
+          name: profile_watchlist_tickers
   insert_permissions:
   - role: user
     permission:

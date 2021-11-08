@@ -1,4 +1,4 @@
-create table if not exists public.raw_historical_prices
+create table if not exists raw_data.eod_historical_prices
 (
     code           varchar not null,
     adjusted_close double precision,
@@ -12,7 +12,7 @@ create table if not exists public.raw_historical_prices
         primary key (code, date)
 );
 
-insert into public.raw_historical_prices (code, adjusted_close, close, date, high, low, open, volume)
+insert into raw_data.eod_historical_prices (code, adjusted_close, close, date, high, low, open, volume)
 values  ('AAPL', 0.0881, 24.752, '1984-11-05', 25.3792, 24.5056, 24.752, 105369595),
         ('AAPL', 0.0934, 26.2528, '1984-11-06', 26.376, 24.9984, 26.2528, 225321590),
         ('AAPL', 0.0916, 25.7488, '1984-11-07', 26.376, 24.8752, 25.7488, 231548790),

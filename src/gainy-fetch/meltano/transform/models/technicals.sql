@@ -70,7 +70,7 @@ select f.code                                          as symbol,
        (technicals ->> 'SharesShort')::float           as shares_short,
        (technicals ->> 'ShortPercent')::float          as short_percent,
        (technicals ->> 'SharesShortPriorMonth')::float as shares_short_prior_month
-from {{ source('eod', 'fundamentals') }} f
+from {{ source('eod', 'eod_fundamentals') }} f
          JOIN tickers t ON t.symbol = f.code
          JOIN ticker_momentum_metrics tmm ON tmm.symbol = f.code
          JOIN ticker_value_growth_metrics tvgm ON tvgm.symbol = f.code

@@ -8,6 +8,19 @@ resource "random_password" "rds" {
   special = false
 }
 
+resource "aws_db_parameter_group" "default" {
+  family = "postgres12"
+
+  parameter {
+    name  = "log_statement"
+    value = "ddl"
+  }
+  parameter {
+    name  = "log_min_duration_statement"
+    value = 1000
+  }
+}
+
 resource "aws_db_instance" "db_instance" {
   identifier              = "${var.name}-${var.env}"
   engine                  = "postgres"
@@ -18,6 +31,8 @@ resource "aws_db_instance" "db_instance" {
   backup_retention_period = var.env == "production" ? 7 : 0
   storage_type            = var.env == "production" ? "io1" : "gp2"
   iops                    = var.env == "production" ? 1000 : null
+  deletion_protection     = var.env == "production" ? true : false
+  parameter_group_name    = aws_db_parameter_group.default.name
 
   publicly_accessible = false
 

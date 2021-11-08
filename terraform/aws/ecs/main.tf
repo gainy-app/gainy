@@ -3,6 +3,7 @@ variable "aws_zones" {
   default = ["us-east-1a", "us-east-1b"]
 }
 variable "instance_type" {}
+variable "vpc_index" {}
 
 /*
  * Determine most recent ECS optimized AMI
@@ -167,19 +168,42 @@ resource "aws_iam_instance_profile" "ecsInstanceProfile" {
  * Create VPC
  */
 resource "aws_vpc" "vpc" {
-  cidr_block = "10.0.0.0/16"
+  cidr_block = "10.${var.vpc_index}.0.0/16"
   tags = {
     Name = "gainy-${var.env}"
   }
   #  enable_dns_hostnames = true
   #  enable_dns_support   = true
 }
+
+/*
+ * Create VPC Peering Connection to production
+ */
+data "aws_vpc" "production" {
+  tags = {
+    Name = "gainy-production"
+  }
+}
+resource "aws_vpc_peering_connection" "to_prod" {
+  count       = var.env == "production" ? 0 : 1
+  peer_vpc_id = data.aws_vpc.production.id
+  vpc_id      = aws_vpc.vpc.id
+}
+
 /*
  * Get default security group for reference later
  */
 data "aws_security_group" "vpc_default_sg" {
   name   = "default"
   vpc_id = aws_vpc.vpc.id
+}
+resource "aws_security_group_rule" "bridge-rds" {
+  type              = "ingress"
+  from_port         = 5432
+  to_port           = 5432
+  protocol          = "tcp"
+  security_group_id = data.aws_security_group.vpc_default_sg.id
+  cidr_blocks       = ["10.0.0.0/8"]
 }
 
 /*
@@ -189,7 +213,7 @@ resource "aws_subnet" "public_subnet" {
   count             = length(var.aws_zones)
   vpc_id            = aws_vpc.vpc.id
   availability_zone = element(var.aws_zones, count.index)
-  cidr_block        = "10.0.${(count.index + 1) * 10}.0/24"
+  cidr_block        = "10.${var.vpc_index}.${(count.index + 1) * 10}.0/24"
   tags = {
     Name = "public-${element(var.aws_zones, count.index)}"
   }
@@ -198,7 +222,7 @@ resource "aws_subnet" "private_subnet" {
   count             = length(var.aws_zones)
   vpc_id            = aws_vpc.vpc.id
   availability_zone = element(var.aws_zones, count.index)
-  cidr_block        = "10.0.${(count.index + 1) * 11}.0/24"
+  cidr_block        = "10.${var.vpc_index}.${(count.index + 1) * 11}.0/24"
   tags = {
     Name = "private-${element(var.aws_zones, count.index)}"
   }
@@ -224,11 +248,21 @@ resource "aws_nat_gateway" "nat_gateway" {
  */
 resource "aws_route_table" "nat_route_table" {
   vpc_id = aws_vpc.vpc.id
+
+  tags = {
+    Name = "gainy-${var.env}-private"
+  }
 }
 resource "aws_route" "nat_route" {
   route_table_id         = aws_route_table.nat_route_table.id
   destination_cidr_block = "0.0.0.0/0"
   nat_gateway_id         = aws_nat_gateway.nat_gateway.id
+}
+resource "aws_route" "private_prod_vpc_route" {
+  count                     = var.env == "production" ? 0 : 1
+  route_table_id            = aws_route_table.nat_route_table.id
+  destination_cidr_block    = "10.0.0.0/16"
+  vpc_peering_connection_id = aws_vpc_peering_connection.to_prod[0].id
 }
 resource "aws_route_table_association" "private_route" {
   count          = length(var.aws_zones)
@@ -240,11 +274,21 @@ resource "aws_route_table_association" "private_route" {
  */
 resource "aws_route_table" "igw_route_table" {
   vpc_id = aws_vpc.vpc.id
+
+  tags = {
+    Name = "gainy-${var.env}-public"
+  }
 }
 resource "aws_route" "igw_route" {
   route_table_id         = aws_route_table.igw_route_table.id
   destination_cidr_block = "0.0.0.0/0"
   gateway_id             = aws_internet_gateway.internet_gateway.id
+}
+resource "aws_route" "public_prod_vpc_route" {
+  count                     = var.env == "production" ? 0 : 1
+  route_table_id            = aws_route_table.igw_route_table.id
+  destination_cidr_block    = "10.0.0.0/16"
+  vpc_peering_connection_id = aws_vpc_peering_connection.to_prod[0].id
 }
 resource "aws_route_table_association" "public_route" {
   count          = length(var.aws_zones)

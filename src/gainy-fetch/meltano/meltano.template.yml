@@ -19,24 +19,26 @@ plugins:
     - name: tap-csv
       config:
         files:
-          - entity: raw_gainy_industries
+          - entity: gainy_industries
             path: data/gainy_industries.csv
             keys: ["id"]
-          - entity: raw_ticker_industries
+          - entity: gainy_ticker_industries
             path: data/industry_tickers.csv
             keys: ["Code"]
-          - entity: raw_collections
+          - entity: gainy_collections
             path: data/collections.csv
             keys: ["id"]
-          - entity: raw_categories
+          - entity: gainy_categories
             path: data/categories.csv
             keys: ["id"]
-          - entity: raw_interests
+          - entity: gainy_interests
             path: data/interests.csv
             keys: ["id"]
-          - entity: raw_countries
+          - entity: gainy_countries
             path: data/countries.csv # https://github.com/lukes/ISO-3166-Countries-with-Regional-Codes/blob/master/all/all.json
             keys: ["name", "alpha-2", "alpha-3"]
+    - name: tap-postgres
+      catalog: extract/tap-postgres/tap.catalog.json
   loaders:
     - name: target-postgres
       variant: transferwise
@@ -65,11 +67,20 @@ schedules:
     interval: '@daily'
     start_date: 2021-09-03 13:52:48.598227
 
+  - name: prod-to-postgres
+    extractor: tap-postgres
+    loader: target-postgres
+    transform: skip
+    interval: '@daily'
+    start_date: 2021-09-03 13:52:48.598227
+    env:
+      TARGET_ENVS: '["test"]'
+
   - name: eodhistoricaldata-to-postgres-0
     extractor: tap-eodhistoricaldata
     loader: target-postgres
     transform: run
     interval: '@daily'
     start_date: 2021-06-17 10:40:58.742133
-#    env:
-#      TAP_EODHISTORICALDATA_SYMBOLS: '["GOOG","FB","PLUG","MSFT","HTHT","BA","VALE", "PSTG","ABBV","F","BMY","GM","LUV","AAPL", "ABNB","ATVI","COIN","JNJ","PFE","RIOT","TSLA"]'
+    env:
+      TARGET_ENVS: '["production","local"]'

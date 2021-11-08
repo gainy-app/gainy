@@ -8,7 +8,6 @@
     incremental_strategy='insert_overwrite',
     post_hook=[
       index(this, 'id', true),
-      fk('ticker_collections', 'collection_id', 'collections', 'id')
     ]
   )
 }}
@@ -16,7 +15,7 @@
 
 with collections as (
     select id::int, name, description, enabled, personalized, image_url
-    from {{ source ('gainy', 'raw_collections') }}
+    from {{ source ('gainy', 'gainy_collections') }}
 ),
 collection_sizes as (
     select collection_id, count (*) as collection_size
