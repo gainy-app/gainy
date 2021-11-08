@@ -61,8 +61,8 @@ module "aws" {
   hasura_jwt_secret = jsonencode({
     "type"     = "RS256",
     "jwk_url"  = "https://www.googleapis.com/service_accounts/v1/jwk/securetoken@system.gserviceaccount.com",
-    "audience" = var.google_project_id,
-    "issuer"   = "https://securetoken.google.com/${var.google_project_id}"
+    "audience" = module.firebase.google_project_id,
+    "issuer"   = "https://securetoken.google.com/${module.firebase.google_project_id}"
   })
   base_image_registry_address = var.base_image_registry_address
   base_image_version          = var.base_image_version

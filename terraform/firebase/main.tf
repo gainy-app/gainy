@@ -78,3 +78,7 @@ module "functions-refreshToken" {
   google_project_id    = local.google_project_id
   depends_on           = [google_project_service.cf, google_project_service.cb, google_project_service.compute]
 }
+
+output "google_project_id" {
+  value = local.google_project_id
+}
