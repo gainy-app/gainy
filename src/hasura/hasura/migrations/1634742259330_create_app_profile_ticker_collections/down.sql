@@ -1,1 +1,0 @@
-DROP VIEW "app"."profile_ticker_collections";

@@ -2,8 +2,8 @@
   config(
     materialized = "table",
     post_hook=[
-      fk(this, 'category_id', 'categories', 'id'),
-      fk(this, 'symbol', 'tickers', 'symbol'),
+      fk(this, 'category_id', this.schema, 'categories', 'id'),
+      fk(this, 'symbol', this.schema, 'tickers', 'symbol'),
       'create unique index if not exists {{ get_index_name(this, "symbol__category_id") }} (symbol, category_id)',
     ]
   )
@@ -14,17 +14,17 @@
 (
     WITH downside_deviation_stats AS
              (
-                 SELECT tickers.gic_sector,
+                 SELECT {{ ref('tickers') }}.gic_sector,
                         percentile_cont(0.5) WITHIN GROUP (ORDER BY downside_deviation) as median
-                 FROM technicals
-                          JOIN tickers ON tickers.symbol = technicals.symbol
+                 FROM {{ ref('technicals') }}
+                          JOIN {{ ref('tickers') }} ON tickers.symbol = technicals.symbol
                  GROUP BY tickers.gic_sector
              )
     select c.id as category_id,
            t.symbol
-    from tickers t
+    from {{ ref('tickers') }} t
              join {{ ref('categories') }} c ON c.name = 'Defensive'
-             JOIN technicals t2 on t.symbol = t2.symbol
+             JOIN {{ ref('technicals') }} t2 on t.symbol = t2.symbol
              JOIN downside_deviation_stats on downside_deviation_stats.gic_sector = t.gic_sector
     WHERE t2.beta < 1
       AND t2.downside_deviation < downside_deviation_stats.median
@@ -36,8 +36,8 @@ UNION
              (
                  select t.symbol,
                         MAX(eh.eps_actual) as value
-                 from tickers t
-                          JOIN earnings_history eh on t.symbol = eh.symbol
+                 from {{ ref('tickers') }} t
+                          JOIN {{ ref('earnings_history') }} eh on t.symbol = eh.symbol
                  GROUP BY t.symbol
              ),
          options_stats as
@@ -50,7 +50,7 @@ UNION
              )
     select c.id as category_id,
            t.symbol
-    from tickers t
+    from {{ ref('tickers') }} t
              join {{ ref('categories') }} c ON c.name = 'Speculation'
              JOIN {{ ref('technicals') }} t2 on t.symbol = t2.symbol
              JOIN {{ source('eod', 'eod_fundamentals') }} f ON f.code = t.symbol
@@ -106,7 +106,7 @@ UNION
          )
     select c.id     as category_id,
            t.symbol as ticker_symbol
-    from tickers t
+    from {{ ref('tickers') }} t
              join {{ ref('categories') }} c ON c.name = 'Dividend'
              join last_five_years_dividends lfyd ON lfyd.code = t.symbol
              join last_sixty_months_dividends lsmd ON lsmd.code = t.symbol

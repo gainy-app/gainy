@@ -60,7 +60,7 @@ resource "aws_ecs_task_definition" "meltano" {
       pg_username                  = var.pg_username
       pg_dbname                    = var.pg_dbname
       pg_load_schema               = "raw_data"
-      pg_transform_schema          = "public"
+      pg_transform_schema          = "${var.versioned_schema_prefix}_public"
       pg_meltano_schema            = "meltano"
       pg_airflow_schema            = "airflow"
       airflow_password             = random_password.airflow.result

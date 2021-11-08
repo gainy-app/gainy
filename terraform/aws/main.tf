@@ -1,4 +1,6 @@
-
+locals {
+  timestamp = formatdate("YYMMDDhhmmss", timestamp())
+}
 
 module "s3" {
   source = "./s3"
@@ -88,6 +90,7 @@ module "meltano" {
   pg_port                     = module.rds.db_instance.port
   pg_username                 = module.rds.db_instance.username
   pg_dbname                   = module.rds.db_instance.name
+  versioned_schema_prefix     = local.timestamp
 
   eodhistoricaldata_jobs_count = local.meltano_eodhistoricaldata_jobs_count
   scheduler_cpu_credits        = local.meltano_scheduler_cpu_credits
@@ -124,6 +127,7 @@ module "hasura" {
   hasura_enable_console           = "true"
   hasura_enable_dev_mode          = "true"
   hasura_jwt_secret               = var.hasura_jwt_secret
+  versioned_schema_prefix         = local.timestamp
 
   cpu_credits    = local.hasura_cpu_credits
   memory_credits = local.hasura_memory_credits
