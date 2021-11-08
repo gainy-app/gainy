@@ -9,6 +9,10 @@ variable "pg_port" {}
 variable "pg_username" {}
 variable "pg_password" {}
 variable "pg_dbname" {}
+variable "pg_production_host" {}
+variable "pg_production_port" {}
+variable "pg_production_internal_sync_username" {}
+variable "pg_production_internal_sync_password" {}
 variable "vpc_id" {}
 variable "vpc_default_sg_id" {}
 variable "public_https_sg_id" {}

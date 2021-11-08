@@ -1,0 +1,106 @@
+{
+  "streams": [
+    {
+      "table_name": "eod_historical_prices",
+      "stream": "eod_historical_prices",
+      "metadata": [
+        {
+          "breadcrumb": [],
+          "metadata": {
+            "replication-key": "date",
+            "replication-method": "INCREMENTAL",
+            "table-key-properties": [
+              "code",
+              "date"
+            ],
+            "schema-name": "raw_data",
+            "database-name": "gainy",
+            "selected": true
+          }
+        }
+      ],
+      "tap_stream_id": "raw_data-eod_historical_prices",
+      "schema": {
+        "type": "object",
+        "properties": {}
+      },
+      "selected": true
+    },
+    {
+      "table_name": "eod_fundamentals",
+      "stream": "eod_fundamentals",
+      "metadata": [
+        {
+          "breadcrumb": [],
+          "metadata": {
+            "replication-key": "updatedat",
+            "replication-method": "INCREMENTAL",
+            "table-key-properties": [
+              "code"
+            ],
+            "schema-name": "raw_data",
+            "database-name": "gainy",
+            "selected": true
+          }
+        }
+      ],
+      "tap_stream_id": "raw_data-eod_fundamentals",
+      "schema": {
+        "type": "object",
+        "properties": {}
+      },
+      "selected": true
+    },
+    {
+      "table_name": "eod_dividends",
+      "stream": "eod_dividends",
+      "metadata": [
+        {
+          "breadcrumb": [],
+          "metadata": {
+            "replication-key": "date",
+            "replication-method": "INCREMENTAL",
+            "table-key-properties": [
+              "code",
+              "date"
+            ],
+            "schema-name": "raw_data",
+            "database-name": "gainy",
+            "selected": true
+          }
+        }
+      ],
+      "tap_stream_id": "raw_data-eod_dividends",
+      "schema": {
+        "type": "object",
+        "properties": {}
+      },
+      "selected": true
+    },
+    {
+      "table_name": "eod_options",
+      "stream": "eod_options",
+      "metadata": [
+        {
+          "breadcrumb": [],
+          "metadata": {
+            "replication-method": "FULL_TABLE",
+            "table-key-properties": [
+              "code",
+              "expirationdate"
+            ],
+            "schema-name": "raw_data",
+            "database-name": "gainy",
+            "selected": true
+          }
+        }
+      ],
+      "tap_stream_id": "raw_data-eod_options",
+      "schema": {
+        "type": "object",
+        "properties": {}
+      },
+      "selected": true
+    }
+  ]
+}
