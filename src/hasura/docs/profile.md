@@ -118,7 +118,6 @@ mutation {
 ### Update watchlisted tickers
 
 ```graphql
-
 mutation {
     insert_app_profile_watchlist_tickers(
         objects: [
@@ -143,6 +142,92 @@ mutation {
             symbol
         }
     }
+}
+```
+
+### Metrics settings
+
+```graphql
+mutation {
+    delete_app_profile_ticker_metrics_settings(
+        where: {
+            id: {_in: [20]},
+            profile_id: {_eq: 1}
+        }
+    ) {
+        returning {
+            field_name
+        }
+    }
+    insert_app_profile_ticker_metrics_settings(
+        objects: [
+            {profile_id: 1, field_name: "market_capitalization", order: 0},
+            {id: 21, profile_id: 1, field_name: "avg_volume_10d", order: 1},
+            {id: 22, profile_id: 1, field_name: "avg_volume_90d", order: 2},
+        ],
+        on_conflict: {
+            constraint: profile_ticker_metrics_settings_pkey,
+            update_columns: [field_name order]
+        }
+    ) {
+        returning {
+            id
+            field_name
+            order
+        }
+    }
+}
+
+query{
+  app_profile_ticker_metrics_settings(where: {profile_id: {_eq: 1}}, order_by: {order: asc}){
+    id
+    field_name
+    order
+  }
+}
+```
+
+### Metrics settings for a collection
+
+```graphql
+mutation {
+    delete_app_profile_ticker_metrics_settings(
+        where: {
+            id: {_in: [26]},
+            profile_id: {_eq: 1}
+        }
+    ) {
+        returning {
+            field_name
+        }
+    }
+    insert_app_profile_ticker_metrics_settings(
+        objects: [
+            {profile_id: 1, collection_id: 1, field_name: "market_capitalization", order: 0},
+            {id: 27, profile_id: 1, collection_id: 1, field_name: "avg_volume_10d", order: 1},
+            {id: 28, profile_id: 1, collection_id: 1, field_name: "avg_volume_90d", order: 2},
+        ],
+        on_conflict: {
+            constraint: profile_ticker_metrics_settings_pkey,
+            update_columns: [collection_id field_name order]
+        }
+    ) {
+        returning {
+            id
+            collection_id 
+            field_name
+            order
+        }
+    }
+}
+
+query{
+  app_profile_ticker_metrics_settings(where: {profile_id: {_eq: 1}, collection_id: {_eq: 1}}, order_by: {order: asc}){
+    id
+    collection_id
+    field_name
+    order
+  }
 }
 ```
 

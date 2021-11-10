@@ -9,8 +9,6 @@
   )
 }}
 
-/*       { 'columns': ['category_id', 'symbol'], 'unique': true }, # TODO specify name not starting with a digit (else hasura will fail) */
-
 (
     WITH downside_deviation_stats AS
              (

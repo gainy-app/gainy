@@ -700,3 +700,71 @@ models:
           - exists
           - type:
               type: 'double precision'
+
+  - name: ticker_metrics
+    columns:
+      - name: symbol
+        tests:
+          - exists
+          - type:
+              type: 'character varying'
+      - name: market_capitalization
+        tests:
+          - exists
+          - type:
+              type: 'bigint'
+      - name: month_price_change
+        tests:
+          - exists
+          - type:
+              type: 'double precision'
+      - name: quarterly_revenue_growth_yoy
+        tests:
+          - exists
+          - type:
+              type: 'double precision'
+      - name: enterprise_value_to_sales
+        tests:
+          - exists
+          - type:
+              type: 'double precision'
+      - name: profit_margin
+        tests:
+          - exists
+          - type:
+              type: 'double precision'
+      - name: avg_volume_10d
+        tests:
+          - exists
+          - type:
+              type: 'double precision'
+      - name: short_percent_outstanding
+        tests:
+          - exists
+          - type:
+              type: 'double precision'
+      - name: shares_outstanding
+        tests:
+          - exists
+          - type:
+              type: 'bigint'
+      - name: avg_volume_90d
+        tests:
+          - exists
+          - type:
+              type: 'double precision'
+      - name: shares_float
+        tests:
+          - exists
+          - type:
+              type: 'bigint'
+      - name: short_ratio
+        tests:
+          - exists
+          - type:
+              type: 'double precision'
+      - name: beta
+        tests:
+          - exists
+          - type:
+              type: 'double precision'
