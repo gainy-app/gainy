@@ -16,7 +16,8 @@ data "archive_file" "source" {
 
 # Create bucket that will host the source code
 resource "google_storage_bucket" "bucket" {
-  name = "${var.google_project_id}-${lower(var.function_name)}"
+  location = "US"
+  name     = "${var.google_project_id}-${lower(var.function_name)}"
 }
 
 # Add source code zip to bucket

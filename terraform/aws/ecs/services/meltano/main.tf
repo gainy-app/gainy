@@ -52,26 +52,30 @@ resource "aws_ecs_task_definition" "meltano" {
   container_definitions = templatefile(
     "${path.module}/container-definitions.json",
     {
-      env                          = var.env
-      eodhistoricaldata_api_token  = var.eodhistoricaldata_api_token
-      pg_host                      = var.pg_host
-      pg_password                  = var.pg_password
-      pg_port                      = var.pg_port
-      pg_username                  = var.pg_username
-      pg_dbname                    = var.pg_dbname
-      pg_load_schema               = "raw_data"
-      pg_transform_schema          = "${var.versioned_schema_prefix}_public"
-      pg_meltano_schema            = "meltano"
-      pg_airflow_schema            = "airflow"
-      airflow_password             = random_password.airflow.result
-      image                        = docker_registry_image.meltano.name
-      aws_log_group_name           = var.aws_log_group_name
-      aws_log_region               = var.aws_log_region
-      airflow_port                 = 5001
-      eodhistoricaldata_jobs_count = var.eodhistoricaldata_jobs_count
-      ui_memory_credits            = var.ui_memory_credits
-      scheduler_memory_credits     = var.scheduler_memory_credits
-      scheduler_cpu_credits        = var.scheduler_cpu_credits
+      env                                  = var.env
+      eodhistoricaldata_api_token          = var.eodhistoricaldata_api_token
+      pg_host                              = var.pg_host
+      pg_password                          = var.pg_password
+      pg_port                              = var.pg_port
+      pg_username                          = var.pg_username
+      pg_dbname                            = var.pg_dbname
+      pg_load_schema                       = "raw_data"
+      pg_transform_schema                  = "${var.versioned_schema_prefix}_public"
+      pg_production_host                   = var.pg_production_host
+      pg_production_port                   = var.pg_production_port
+      pg_production_internal_sync_username = var.pg_production_internal_sync_username
+      pg_production_internal_sync_password = var.pg_production_internal_sync_password
+      pg_meltano_schema                    = "meltano"
+      pg_airflow_schema                    = "airflow"
+      airflow_password                     = random_password.airflow.result
+      image                                = docker_registry_image.meltano.name
+      aws_log_group_name                   = var.aws_log_group_name
+      aws_log_region                       = var.aws_log_region
+      airflow_port                         = 5001
+      eodhistoricaldata_jobs_count         = var.eodhistoricaldata_jobs_count
+      ui_memory_credits                    = var.ui_memory_credits
+      scheduler_memory_credits             = var.scheduler_memory_credits
+      scheduler_cpu_credits                = var.scheduler_cpu_credits
     }
   )
 }
