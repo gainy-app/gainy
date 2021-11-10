@@ -86,6 +86,7 @@ module "service-hasura" {
   aws_ecs_task_definition_revision = aws_ecs_task_definition.hasura.revision
   container_port                   = 8080
   task_definition                  = "${aws_ecs_task_definition.hasura.family}:${aws_ecs_task_definition.hasura.revision}"
+  minimum_healthy_tasks_percent    = 100
 }
 
 output "service_url" {

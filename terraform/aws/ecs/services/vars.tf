@@ -14,3 +14,4 @@ variable "cloudflare_zone_id" {}
 variable "container_name" {}
 variable "container_port" {}
 variable "task_definition" {}
+variable "minimum_healthy_tasks_percent" {}

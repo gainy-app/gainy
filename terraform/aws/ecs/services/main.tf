@@ -66,7 +66,7 @@ resource "aws_ecs_service" "service" {
   desired_count                      = 1 #length(module.ecs.aws_zones)
   iam_role                           = var.ecs_service_role_arn
   deployment_maximum_percent         = "200"
-  deployment_minimum_healthy_percent = "0"
+  deployment_minimum_healthy_percent = var.minimum_healthy_tasks_percent
 
   ordered_placement_strategy {
     type  = "spread"

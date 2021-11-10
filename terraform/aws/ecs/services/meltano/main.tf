@@ -93,6 +93,7 @@ module "service-meltano" {
   aws_ecs_task_definition_revision = aws_ecs_task_definition.meltano.revision
   container_port                   = 5001
   task_definition                  = "${aws_ecs_task_definition.meltano.family}:${aws_ecs_task_definition.meltano.revision}"
+  minimum_healthy_tasks_percent    = 0
 }
 
 output "service_url" {
