@@ -92,7 +92,7 @@ module "meltano" {
   pg_port                     = module.rds.db_instance.port
   pg_username                 = module.rds.db_instance.username
   pg_dbname                   = module.rds.db_instance.name
-  versioned_schema_prefix     = local.timestamp
+  versioned_schema_suffix     = local.timestamp
 
   pg_production_host                   = var.pg_production_host
   pg_production_port                   = var.pg_production_port
@@ -134,7 +134,7 @@ module "hasura" {
   hasura_enable_console           = "true"
   hasura_enable_dev_mode          = "true"
   hasura_jwt_secret               = var.hasura_jwt_secret
-  versioned_schema_prefix         = local.timestamp
+  versioned_schema_suffix         = local.timestamp
 
   cpu_credits    = local.hasura_cpu_credits
   memory_credits = local.hasura_memory_credits

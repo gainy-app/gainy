@@ -5,14 +5,14 @@ export PARAMS ?= $(filter-out $@,$(MAKECMDGOALS))
 
 up:
 	- cp -n src/gainy-fetch/meltano/symbols.local.json.dist src/gainy-fetch/meltano/symbols.local.json
-	docker-compose pull --include-deps
+	- docker-compose pull --include-deps
 	docker-compose up
 
 upd:
 	docker-compose up -d
 
 build:
-	docker-compose build
+	docker-compose build --parallel
 
 down:
 	docker-compose down

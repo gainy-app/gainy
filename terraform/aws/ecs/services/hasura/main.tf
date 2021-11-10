@@ -64,7 +64,7 @@ resource "aws_ecs_task_definition" "hasura" {
       image                           = docker_registry_image.hasura.name
       memory_credits                  = var.memory_credits
       cpu_credits                     = var.cpu_credits
-      pg_transform_schema             = "${var.versioned_schema_prefix}_public"
+      pg_transform_schema             = "public_${var.versioned_schema_suffix}"
     }
   )
 }

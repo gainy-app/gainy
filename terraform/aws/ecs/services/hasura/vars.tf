@@ -25,4 +25,4 @@ variable "memory_credits" {}
 variable "cpu_credits" {}
 variable "base_image_registry_address" {}
 variable "base_image_version" {}
-variable "versioned_schema_prefix" {}
+variable "versioned_schema_suffix" {}

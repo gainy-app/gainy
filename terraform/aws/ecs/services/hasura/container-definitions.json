@@ -43,6 +43,9 @@
     "cpu": ${cpu_credits},
     "privileged": null,
     "memoryReservation": null,
+    "dependsOn": [
+      { "condition": "HEALTHY", "containerName": "meltano-airflow-scheduler" }
+    ],
     "logConfiguration": {
       "logDriver": "awslogs",
       "options": {
