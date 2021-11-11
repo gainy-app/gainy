@@ -102,7 +102,7 @@ resource "aws_ecs_task_definition" "default" {
       pg_username                          = var.pg_username
       pg_dbname                            = var.pg_dbname
       pg_load_schema                       = "raw_data"
-      pg_transform_schema                  = "public_${var.versioned_schema_suffix}"
+      pg_transform_schema                  = "public" # "public_${var.versioned_schema_suffix}" # TODO deployment_v2 blocked by versioned hasura views
       pg_production_host                   = var.pg_production_host
       pg_production_port                   = var.pg_production_port
       pg_production_internal_sync_username = var.pg_production_internal_sync_username
