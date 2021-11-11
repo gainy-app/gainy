@@ -1,12 +1,14 @@
 {% macro index(this, column, unique) %}
 
-    {% set sql %}
+{% set sql %}
     {% if unique %}
-    ALTER TABLE {{ this.name }} DROP CONSTRAINT IF EXISTS {{ this.name }}_unique_{{ column }};
-    ALTER TABLE {{ this.name }} ADD CONSTRAINT {{ this.name }}_unique_{{ column }} UNIQUE ({{column}});
+        ALTER TABLE {{ this.schema }}.{{ this.name }} DROP CONSTRAINT IF EXISTS {{ this.name }}_unique_{{ column }};
+        ALTER TABLE {{ this.schema }}.{{ this.name }} ADD CONSTRAINT {{ this.name }}_unique_{{ column }} UNIQUE ({{column}});
+    {% else %}
+        DROP INDEX IF EXISTS {{ this.schema }}.{{ this.name }}_index_{{ column }};
+        CREATE INDEX {{ this.name }}_index_{{ column }} ON {{ this.schema }}.{{ this.name }} ({{column}});
     {% endif %}
-{#    create {% if unique %} unique {% endif %} index if not exists "{{ this.name }}__index_on_{{ column }}" on {{ this.name }} ("{{ column }}");#}
-    {% endset %}
+{% endset %}
 
 
 {{ return(after_commit(sql)) }}

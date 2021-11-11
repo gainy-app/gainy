@@ -5,14 +5,14 @@ export PARAMS ?= $(filter-out $@,$(MAKECMDGOALS))
 
 up:
 	- cp -n src/gainy-fetch/meltano/symbols.local.json.dist src/gainy-fetch/meltano/symbols.local.json
-	docker-compose pull --include-deps
+	- docker-compose pull --include-deps
 	docker-compose up
 
 upd:
 	docker-compose up -d
 
 build:
-	docker-compose build
+	docker-compose build --parallel
 
 down:
 	docker-compose down
@@ -49,7 +49,7 @@ style-fix:
 	yapf -i -r src/aws/lambda-python/ src/aws/router
 
 extract-passwords:
-	cd terraform && terraform state pull | python ../extract_passwords.py
+	cd terraform && terraform state pull | python3 ../extract_passwords.py
 
 test:
 	docker-compose -p gainy_test -f docker-compose.test.yml run --entrypoint python3 test-meltano tests/image_urls.py
