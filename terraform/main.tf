@@ -82,7 +82,6 @@ module "datadog" {
   datadog_api_url     = var.datadog_api_url
   datadog_app_key     = var.datadog_app_key
   env                 = var.env
-  hasura_service_name = "hasura-production" # TODO module.aws.hasura_service_name
 }
 
 #################################### Outputs ####################################
