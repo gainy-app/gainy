@@ -160,10 +160,10 @@ module "hasura-elb" {
  * Create ECS Service
  */
 resource "aws_ecs_service" "service" {
-  name                               = "gainy-${var.env}"
-  cluster                            = var.ecs_cluster_name
-  desired_count                      = 1
-#  iam_role                           = var.ecs_service_role_arn
+  name          = "gainy-${var.env}"
+  cluster       = var.ecs_cluster_name
+  desired_count = 1
+  #  iam_role                           = var.ecs_service_role_arn
   deployment_maximum_percent         = 200
   deployment_minimum_healthy_percent = 100
 
