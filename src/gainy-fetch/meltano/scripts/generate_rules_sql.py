@@ -7,6 +7,7 @@ models = [
 ]
 
 for model_name in models:
+    model_name_ref = "{{ ref('%s') }}" % (model_name)
     model_name_singular = re.sub(r's$', '', model_name)
     queries = []
     with open('../data/%s.csv' % (model_name)) as csvfile:
@@ -24,7 +25,7 @@ for model_name in models:
 
             queries.append(
                 "select %s.id as %s_id, ct.ticker_code as symbol from ct join %s on %s.name = '%s' where %s" %
-                (model_name, model_name_singular, model_name, model_name, name, sql)
+                (model_name, model_name_singular, model_name_ref, model_name, name, sql)
             )
 
     final_sql = "\nUNION\n".join(queries)

@@ -2,7 +2,7 @@
   config(
     materialized = "table",
     post_hook=[
-      fk(this, 'symbol', 'tickers', 'symbol'),
+      fk(this, 'symbol', this.schema, 'tickers', 'symbol'),
       'create unique index if not exists {{ get_index_name(this, "symbol") }} (symbol)',
     ]
   )
@@ -23,7 +23,7 @@ select upcoming_reports.symbol,
        upcoming_reports.symbol || ' reports earnings on ' || date || '.' as description,
        now()                                                             as created_at
 from upcoming_reports
-         join tickers on tickers.symbol = upcoming_reports.symbol
+         join {{ ref('tickers') }} on tickers.symbol = upcoming_reports.symbol
 where date <= now() + interval '2 weeks'
   and date > now()
 

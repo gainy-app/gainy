@@ -25,6 +25,11 @@ services:
       - postgres
     entrypoint: "/init.sh"
     command: "invoke airflow scheduler"
+    healthcheck:
+      test: [ "CMD", "curl", "http://localhost:8793" ]
+      interval: 30s
+      retries: 3
+      start_period: 30s
 
   meltano-airflow-ui:
     restart: always
@@ -84,18 +89,17 @@ services:
         BASE_IMAGE_REGISTRY_ADDRESS: ${BASE_IMAGE_REGISTRY_ADDRESS}
         BASE_IMAGE_VERSION: ${BASE_IMAGE_VERSION}
     ports:
-    - "${HASURA_PORT}:${HASURA_PORT}"
-    - "9693:9693"
-    - "9695:9695"
+      - "9693:9693"
+      - "9695:9695"
     volumes:
-      - ./src/hasura/hasura:/hasura:delegated
+      - ./src/hasura/hasura:/hasura
     depends_on:
-    - "postgres"
+      - postgres
+      - meltano-airflow-scheduler
     restart: always
     env_file:
       - .env
     environment:
-      HASURA_PORT: ${HASURA_PORT}
       AWS_LAMBDA_API_GATEWAY_ENDPOINT: http://lambda-router:5000
 
   firebase:
