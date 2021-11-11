@@ -84,7 +84,6 @@ resource "aws_ecs_task_definition" "default" {
   container_definitions = templatefile(
     "${path.module}/container-definitions.json",
     {
-      hasura_port                     = 8080
       hasura_enable_console           = var.hasura_enable_console
       hasura_enable_dev_mode          = var.hasura_enable_dev_mode
       hasura_admin_secret             = random_password.hasura.result

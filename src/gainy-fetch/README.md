@@ -33,7 +33,6 @@ psql -h localhost -U postgres # and enter postgrespassword
 ```bash
 cd ../..
 export `heroku config -a gainy-fetch-dev -s`
-export HASURA_PORT=5000
 docker-compose up meltano -d 
 docker-compose exec meltano meltano schedule run eodhistoricaldata-to-postgres # to run stage 0 of load
 ```

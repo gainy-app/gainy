@@ -89,7 +89,6 @@ services:
         BASE_IMAGE_REGISTRY_ADDRESS: ${BASE_IMAGE_REGISTRY_ADDRESS}
         BASE_IMAGE_VERSION: ${BASE_IMAGE_VERSION}
     ports:
-      - "${HASURA_PORT}:${HASURA_PORT}"
       - "9693:9693"
       - "9695:9695"
     volumes:
@@ -101,7 +100,6 @@ services:
     env_file:
       - .env
     environment:
-      HASURA_PORT: ${HASURA_PORT}
       AWS_LAMBDA_API_GATEWAY_ENDPOINT: http://lambda-router:5000
 
   firebase:
