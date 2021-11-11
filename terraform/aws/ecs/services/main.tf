@@ -1,72 +1,171 @@
-data "aws_acm_certificate" "sslcert" {
-  domain = "*.${var.domain}"
+locals {
+  ecr_repo               = var.repository_name
+  meltano_root_dir       = abspath("${path.cwd}/../src/gainy-fetch")
+  meltano_image_tag      = format("meltano-%s-%s", var.env, data.archive_file.meltano_source.output_md5)
+  meltano_ecr_image_name = format("%v/%v:%v", var.ecr_address, local.ecr_repo, local.meltano_image_tag)
+  hasura_root_dir        = abspath("${path.cwd}/../src/hasura")
+  hasura_image_tag       = format("hasura-%s-%s", var.env, data.archive_file.hasura_source.output_md5)
+  hasura_ecr_image_name  = format("%v/%v:%v", var.ecr_address, local.ecr_repo, local.hasura_image_tag)
+}
+
+resource "random_password" "hasura" {
+  length           = 16
+  special          = true
+  override_special = "!#$%&*()-_=+[]{}<>:?"
 }
 
 /*
- * Create application load balancer
+ * Create an image
  */
-resource "aws_alb" "alb" {
-  name            = "alb-${var.name}-${var.env}"
-  internal        = false
-  security_groups = [var.vpc_default_sg_id, var.public_https_sg_id, var.public_http_sg_id]
-  subnets         = var.public_subnet_ids
+data "archive_file" "meltano_source" {
+  type        = "zip"
+  source_dir  = local.meltano_root_dir
+  output_path = "/tmp/meltano-source.zip"
+  excludes    = ["meltano/.meltano"]
 }
+data "archive_file" "hasura_source" {
+  type        = "zip"
+  source_dir  = local.hasura_root_dir
+  output_path = "/tmp/hasura-source.zip"
+}
+data "aws_ecr_authorization_token" "token" {}
+resource "docker_registry_image" "meltano" {
+  name = local.meltano_ecr_image_name
+  build {
+    context    = local.meltano_root_dir
+    dockerfile = "Dockerfile"
+    build_args = {
+      BASE_IMAGE_REGISTRY_ADDRESS = var.base_image_registry_address
+      BASE_IMAGE_VERSION          = var.base_image_version
+    }
+
+    auth_config {
+      host_name = var.ecr_address
+      user_name = data.aws_ecr_authorization_token.token.user_name
+      password  = data.aws_ecr_authorization_token.token.password
+    }
+  }
+}
+resource "docker_registry_image" "hasura" {
+  name = local.hasura_ecr_image_name
+  build {
+    context    = local.hasura_root_dir
+    dockerfile = "Dockerfile"
+    build_args = {
+      BASE_IMAGE_REGISTRY_ADDRESS = var.base_image_registry_address
+      BASE_IMAGE_VERSION          = var.base_image_version
+    }
+
+    auth_config {
+      host_name = var.ecr_address
+      user_name = data.aws_ecr_authorization_token.token.user_name
+      password  = data.aws_ecr_authorization_token.token.password
+    }
+  }
+}
+
 /*
- * Create target group for ALB
+ * Create task definition
  */
-resource "aws_alb_target_group" "default" {
-  name     = "tg-${var.name}-${var.env}"
-  port     = "80"
-  protocol = "HTTP"
-  vpc_id   = var.vpc_id
-  stickiness {
-    type = "lb_cookie"
-  }
-  health_check {
-    interval = 60
-    matcher  = "200,302"
-  }
+resource "random_password" "airflow" {
+  length           = 16
+  special          = true
+  override_special = "!#$%&*()-_=+[]{}<>:?"
 }
-/*
- * Create listeners to connect ALB to target group
- */
-resource "aws_alb_listener" "https" {
-  load_balancer_arn = aws_alb.alb.arn
-  port              = "443"
-  protocol          = "HTTPS"
-  ssl_policy        = "ELBSecurityPolicy-2016-08"
-  certificate_arn   = data.aws_acm_certificate.sslcert.arn
-  default_action {
-    target_group_arn = aws_alb_target_group.default.arn
-    type             = "forward"
+resource "aws_ecs_task_definition" "meltano" {
+  family                   = "meltano-${var.env}"
+  network_mode             = "bridge"
+  requires_compatibilities = []
+  tags                     = {}
+  volume {
+    name = "meltano-data"
   }
-  tags = {
-    Name = "${var.name}-${var.env}"
-  }
+
+  container_definitions = templatefile(
+    "${path.module}/container-definitions.json",
+    {
+      hasura_port                     = 8080
+      hasura_enable_console           = var.hasura_enable_console
+      hasura_enable_dev_mode          = var.hasura_enable_dev_mode
+      hasura_admin_secret             = random_password.hasura.result
+      hasura_jwt_secret               = var.hasura_jwt_secret
+      aws_lambda_api_gateway_endpoint = var.aws_lambda_api_gateway_endpoint
+      hasura_image                    = docker_registry_image.hasura.name
+      hasura_memory_credits           = var.hasura_memory_credits
+      hasura_cpu_credits              = var.hasura_cpu_credits
+
+      env                                  = var.env
+      eodhistoricaldata_api_token          = var.eodhistoricaldata_api_token
+      pg_host                              = var.pg_host
+      pg_password                          = var.pg_password
+      pg_port                              = var.pg_port
+      pg_username                          = var.pg_username
+      pg_dbname                            = var.pg_dbname
+      pg_load_schema                       = "raw_data"
+      pg_transform_schema                  = "public_${var.versioned_schema_suffix}"
+      pg_production_host                   = var.pg_production_host
+      pg_production_port                   = var.pg_production_port
+      pg_production_internal_sync_username = var.pg_production_internal_sync_username
+      pg_production_internal_sync_password = var.pg_production_internal_sync_password
+      pg_meltano_schema                    = "meltano"
+      pg_airflow_schema                    = "airflow"
+      airflow_password                     = random_password.airflow.result
+      meltano_image                        = docker_registry_image.meltano.name
+      aws_log_group_name                   = var.aws_log_group_name
+      aws_log_region                       = var.aws_log_region
+      airflow_port                         = 5001
+      eodhistoricaldata_jobs_count         = var.eodhistoricaldata_jobs_count
+      airflow_ui_memory_credits            = var.ui_memory_credits
+      airflow_scheduler_memory_credits     = var.scheduler_memory_credits
+      airflow_scheduler_cpu_credits        = var.scheduler_cpu_credits
+    }
+  )
 }
-resource "aws_alb_listener" "http" {
-  load_balancer_arn = aws_alb.alb.arn
-  port              = "80"
-  protocol          = "HTTP"
-  default_action {
-    target_group_arn = aws_alb_target_group.default.arn
-    type             = "forward"
-  }
-  tags = {
-    Name = "${var.name}-${var.env}"
-  }
+
+module "meltano-elb" {
+  source                           = "./elb"
+  name                             = "meltano-airflow"
+  env                              = var.env
+  domain                           = var.domain
+  vpc_id                           = var.vpc_id
+  vpc_default_sg_id                = var.vpc_default_sg_id
+  public_https_sg_id               = var.public_https_sg_id
+  public_http_sg_id                = var.public_http_sg_id
+  public_subnet_ids                = var.public_subnet_ids
+  ecs_cluster_name                 = var.ecs_cluster_name
+  ecs_service_role_arn             = var.ecs_service_role_arn
+  cloudflare_zone_id               = var.cloudflare_zone_id
+  aws_ecs_task_definition_family   = aws_ecs_task_definition.meltano.family
+  aws_ecs_task_definition_revision = aws_ecs_task_definition.meltano.revision
+}
+
+module "hasura-elb" {
+  source                           = "./elb"
+  name                             = "hasura"
+  env                              = var.env
+  domain                           = var.domain
+  vpc_id                           = var.vpc_id
+  vpc_default_sg_id                = var.vpc_default_sg_id
+  public_https_sg_id               = var.public_https_sg_id
+  public_http_sg_id                = var.public_http_sg_id
+  public_subnet_ids                = var.public_subnet_ids
+  ecs_cluster_name                 = var.ecs_cluster_name
+  ecs_service_role_arn             = var.ecs_service_role_arn
+  cloudflare_zone_id               = var.cloudflare_zone_id
+  aws_ecs_task_definition_family   = aws_ecs_task_definition.meltano.family
+  aws_ecs_task_definition_revision = aws_ecs_task_definition.meltano.revision
 }
 
 /*
  * Create ECS Service
  */
 resource "aws_ecs_service" "service" {
-  name                               = "${var.name}-${var.env}"
+  name                               = "gainy-${var.env}"
   cluster                            = var.ecs_cluster_name
-  desired_count                      = 1 #length(module.ecs.aws_zones)
+  desired_count                      = 1
   iam_role                           = var.ecs_service_role_arn
-  deployment_maximum_percent         = "200"
-  deployment_minimum_healthy_percent = var.minimum_healthy_tasks_percent
+  deployment_maximum_percent         = 200
+  deployment_minimum_healthy_percent = 100
 
   ordered_placement_strategy {
     type  = "spread"
@@ -74,29 +173,29 @@ resource "aws_ecs_service" "service" {
   }
 
   load_balancer {
-    target_group_arn = aws_alb_target_group.default.arn
-    container_name   = var.container_name
-    container_port   = var.container_port
+    target_group_arn = module.meltano-elb.aws_alb_target_group_arn
+    container_name   = "meltano-airflow-ui"
+    container_port   = 5001
   }
 
-  task_definition      = var.task_definition
+  load_balancer {
+    target_group_arn = module.hasura-elb.aws_alb_target_group_arn
+    container_name   = "hasura"
+    container_port   = 8080
+  }
+
+  task_definition      = "${aws_ecs_task_definition.meltano.family}:${aws_ecs_task_definition.meltano.revision}"
   force_new_deployment = true
 }
 
-/*
- * Create Cloudflare DNS record
- */
-resource "cloudflare_record" "service" {
-  name    = "${var.name}-${var.env}"
-  value   = aws_alb.alb.dns_name
-  type    = "CNAME"
-  proxied = true
-  zone_id = var.cloudflare_zone_id
+output "meltano_url" {
+  value = module.meltano-elb.url
 }
 
-output "url" {
-  value = cloudflare_record.service.hostname
+output "hasura_url" {
+  value = module.hasura-elb.url
 }
-output "aws_ecs_service" {
-  value = aws_ecs_service.service
+
+output "name" {
+  value = aws_ecs_service.service.name
 }
