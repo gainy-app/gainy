@@ -72,8 +72,8 @@ resource "random_password" "airflow" {
   special          = true
   override_special = "!#$%&*()-_=+[]{}<>:?"
 }
-resource "aws_ecs_task_definition" "meltano" {
-  family                   = "meltano-${var.env}"
+resource "aws_ecs_task_definition" "default" {
+  family                   = "gainy-${var.env}"
   network_mode             = "bridge"
   requires_compatibilities = []
   tags                     = {}
@@ -135,8 +135,8 @@ module "meltano-elb" {
   ecs_cluster_name                 = var.ecs_cluster_name
   ecs_service_role_arn             = var.ecs_service_role_arn
   cloudflare_zone_id               = var.cloudflare_zone_id
-  aws_ecs_task_definition_family   = aws_ecs_task_definition.meltano.family
-  aws_ecs_task_definition_revision = aws_ecs_task_definition.meltano.revision
+  aws_ecs_task_definition_family   = aws_ecs_task_definition.default.family
+  aws_ecs_task_definition_revision = aws_ecs_task_definition.default.revision
 }
 
 module "hasura-elb" {
@@ -152,18 +152,17 @@ module "hasura-elb" {
   ecs_cluster_name                 = var.ecs_cluster_name
   ecs_service_role_arn             = var.ecs_service_role_arn
   cloudflare_zone_id               = var.cloudflare_zone_id
-  aws_ecs_task_definition_family   = aws_ecs_task_definition.meltano.family
-  aws_ecs_task_definition_revision = aws_ecs_task_definition.meltano.revision
+  aws_ecs_task_definition_family   = aws_ecs_task_definition.default.family
+  aws_ecs_task_definition_revision = aws_ecs_task_definition.default.revision
 }
 
 /*
  * Create ECS Service
  */
 resource "aws_ecs_service" "service" {
-  name          = "gainy-${var.env}"
-  cluster       = var.ecs_cluster_name
-  desired_count = 1
-  #  iam_role                           = var.ecs_service_role_arn
+  name                               = "gainy-${var.env}"
+  cluster                            = var.ecs_cluster_name
+  desired_count                      = 1
   deployment_maximum_percent         = 200
   deployment_minimum_healthy_percent = 100
 
@@ -184,7 +183,7 @@ resource "aws_ecs_service" "service" {
     container_port   = 8080
   }
 
-  task_definition      = "${aws_ecs_task_definition.meltano.family}:${aws_ecs_task_definition.meltano.revision}"
+  task_definition      = "${aws_ecs_task_definition.default.family}:${aws_ecs_task_definition.default.revision}"
   force_new_deployment = true
 }
 

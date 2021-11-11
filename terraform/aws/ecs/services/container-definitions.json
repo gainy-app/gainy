@@ -176,7 +176,7 @@
     "memoryReservation": null,
     "healthCheck": {
       "command": [ "CMD-SHELL", "curl http://localhost:8793/ || exit 1" ],
-      "interval": 60,
+      "interval": 120,
       "retries": 10
     },
     "logConfiguration": {
