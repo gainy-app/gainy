@@ -48,7 +48,7 @@
     "healthCheck": {
       "command": [ "CMD-SHELL", "curl http://localhost:8080/ || exit 1" ],
       "interval": 5,
-      "retries": 10
+      "retries": 2
     },
     "logConfiguration": {
       "logDriver": "awslogs",
@@ -180,8 +180,8 @@
     "memoryReservation": null,
     "healthCheck": {
       "command": [ "CMD-SHELL", "curl http://localhost:8793/ || exit 1" ],
-      "interval": 120,
-      "retries": 10
+      "interval": 10,
+      "retries": 2
     },
     "logConfiguration": {
       "logDriver": "awslogs",
