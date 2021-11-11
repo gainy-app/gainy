@@ -357,7 +357,7 @@ resource "aws_launch_configuration" "as_conf" {
   security_groups      = [data.aws_security_group.vpc_default_sg.id]
   iam_instance_profile = aws_iam_instance_profile.ecsInstanceProfile.id
   root_block_device {
-    volume_size = "40"
+    volume_size = "20"
   }
   user_data_base64 = data.template_cloudinit_config.cloud_init_merged.rendered
   lifecycle {
