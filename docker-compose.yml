@@ -89,6 +89,7 @@ services:
         BASE_IMAGE_REGISTRY_ADDRESS: ${BASE_IMAGE_REGISTRY_ADDRESS}
         BASE_IMAGE_VERSION: ${BASE_IMAGE_VERSION}
     ports:
+      - "8080:8080"
       - "9693:9693"
       - "9695:9695"
     volumes:
