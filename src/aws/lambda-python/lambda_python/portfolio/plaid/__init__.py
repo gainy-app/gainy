@@ -12,10 +12,9 @@ class PlaidClient:
     def __init__(self):
         self.client = get_plaid_client()
 
-    def get_investment_holdings(self, access_token, async_req=False):
+    def get_investment_holdings(self, access_token):
         request = InvestmentsHoldingsGetRequest(access_token=access_token)
-        response = self.client.investments_holdings_get(request,
-                                                        async_req=async_req)
+        response = self.client.investments_holdings_get(request)
 
         return response
 
@@ -24,8 +23,7 @@ class PlaidClient:
                                     start_date,
                                     end_date,
                                     count=100,
-                                    offset=0,
-                                    async_req=False):
+                                    offset=0):
         request = InvestmentsTransactionsGetRequest(
             access_token=access_token,
             start_date=start_date,
@@ -34,7 +32,6 @@ class PlaidClient:
                 count=count,
                 offset=offset,
             ))
-        response = self.client.investments_transactions_get(
-            request, async_req=async_req)
+        response = self.client.investments_transactions_get(request)
 
         return response
