@@ -1,3 +1,13 @@
+### Create Link Token
+
+```graphql
+{
+    create_plaid_link_token(profile_id: 2, redirect_uri: "https://app.gainy.application.ios"){
+        link_token
+    }
+}
+```
+
 ### Link Account
 
 ```graphql
