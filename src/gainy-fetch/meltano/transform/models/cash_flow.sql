@@ -1,12 +1,19 @@
 {{
   config(
     materialized = "table",
-    dist = "symbol",
     post_hook=[
+      index(this, 'id', true),
       index(this, 'symbol', false),
     ]
   )
 }}
+
+/*
+TODO:incremental_model
+    materialized = "incremental",
+    unique_key = "id",
+    incremental_strategy = 'insert_overwrite',
+ */
 
 with expanded_quaterly_cash_flow as (
     select code as symbol,
@@ -17,6 +24,7 @@ with expanded_quaterly_cash_flow as (
 )
 select symbol,
        key::date                                                  as date,
+       CONCAT(symbol, '_', key::varchar)                          as id,
        (value ->> 'netIncome')::float                             as net_income,
        (value ->> 'investments')::float                           as investments,
        (value ->> 'changeInCash')::float                          as change_in_cash,
