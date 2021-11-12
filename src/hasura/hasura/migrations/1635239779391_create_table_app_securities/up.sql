@@ -1,8 +1,8 @@
 CREATE TABLE "app"."portfolio_securities"
 (
     "id"                serial      NOT NULL,
-    "close_price"       float8      NOT NULL,
-    "close_price_as_of" date        NOT NULL,
+    "close_price"       float8      NULL,
+    "close_price_as_of" date        NULL,
     "iso_currency_code" varchar     NOT NULL,
     "name"              varchar     NOT NULL,
     "ref_id"            varchar     NOT NULL,
