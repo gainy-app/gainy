@@ -487,6 +487,61 @@
       allow_aggregations: true
 - table:
     schema: app
+    name: profile_ticker_metrics_settings
+  object_relationships:
+  - name: profile
+    using:
+      foreign_key_constraint_on: profile_id
+  insert_permissions:
+  - role: user
+    permission:
+      check:
+        profile:
+          user_id:
+            _eq: X-Hasura-User-Id
+      columns:
+      - collection_id
+      - field_name
+      - order
+      - profile_id
+      backend_only: false
+  select_permissions:
+  - role: user
+    permission:
+      columns:
+      - collection_id
+      - created_at
+      - field_name
+      - id
+      - order
+      - profile_id
+      - updated_at
+      filter:
+        profile:
+          user_id:
+            _eq: X-Hasura-User-Id
+  update_permissions:
+  - role: user
+    permission:
+      columns:
+      - collection_id
+      - field_name
+      - order
+      - profile_id
+      filter:
+        profile:
+          user_id:
+            _eq: X-Hasura-User-Id
+      check: null
+  delete_permissions:
+  - role: user
+    permission:
+      filter:
+        profile:
+          user_id:
+            _eq: X-Hasura-User-Id
+- table:
+    schema: app
     name: profile_watchlist_tickers
   object_relationships:
   - name: profile
@@ -1036,6 +1091,37 @@
       filter: {}
 - table:
     schema: public
+    name: ticker_metrics
+  object_relationships:
+  - name: ticker
+    using:
+      manual_configuration:
+        remote_table:
+          schema: public
+          name: tickers
+        insertion_order: null
+        column_mapping:
+          symbol: symbol
+  select_permissions:
+  - role: user
+    permission:
+      columns:
+      - symbol
+      - market_capitalization
+      - month_price_change
+      - quarterly_revenue_growth_yoy
+      - enterprise_value_to_sales
+      - profit_margin
+      - avg_volume_10d
+      - short_percent_outstanding
+      - shares_outstanding
+      - avg_volume_90d
+      - shares_float
+      - short_ratio
+      - beta
+      filter: {}
+- table:
+    schema: public
     name: tickers
   object_relationships:
   - name: ticker_analyst_ratings
@@ -1044,6 +1130,15 @@
         remote_table:
           schema: public
           name: analyst_ratings
+        insertion_order: null
+        column_mapping:
+          symbol: symbol
+  - name: ticker_metrics
+    using:
+      manual_configuration:
+        remote_table:
+          schema: public
+          name: ticker_metrics
         insertion_order: null
         column_mapping:
           symbol: symbol
