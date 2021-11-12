@@ -2,6 +2,7 @@ import os
 import plaid
 import itertools
 import datetime
+import multiprocessing.dummy as mt
 
 from portfolio.plaid import PlaidClient
 from portfolio.models import HoldingData, Security, Account, TransactionData
@@ -15,14 +16,11 @@ class PortfolioService:
         profile_plaid_access_tokens = self.__get_access_tokens(
             db_conn, profile_id)
 
-        result_threads = [
-            self.plaid_client.get_investment_holdings(access_token,
-                                                      async_req=True)
+        # InvestmentsHoldingsGetResponse[]
+        responses = [
+            self.plaid_client.get_investment_holdings(access_token)
             for access_token in profile_plaid_access_tokens
         ]
-
-        # InvestmentsHoldingsGetResponse[]
-        responses = [thread.get() for thread in result_threads]
 
         holdings = [
             self.__hydrate_holding_data(holding_data) for response in responses
@@ -47,19 +45,17 @@ class PortfolioService:
         profile_plaid_access_tokens = self.__get_access_tokens(
             db_conn, profile_id)
 
-        result_threads = [
+        # InvestmentsTransactionsGetResponse[]
+        responses = [
             self.plaid_client.get_investment_transactions(
                 access_token,
                 count=count,
                 offset=offset,
                 start_date=datetime.date.today() -
                 datetime.timedelta(days=20 * 365),
-                end_date=datetime.date.today(),
-                async_req=True) for access_token in profile_plaid_access_tokens
+                end_date=datetime.date.today())
+            for access_token in profile_plaid_access_tokens
         ]
-
-        # InvestmentsTransactionsGetResponse[]
-        responses = [thread.get() for thread in result_threads]
 
         transactions = [
             self.__hydrate_transaction_data(transaction_data)

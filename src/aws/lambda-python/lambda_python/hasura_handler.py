@@ -30,6 +30,7 @@ ACTIONS = [
     GetMatchScoreByCollection(),
 
     # Portfolio
+    CreatePlaidLinkToken(),
     LinkPlaidAccount(),
     GetPortfolioHoldings(),
     GetPortfolioTransactions(),

@@ -94,3 +94,17 @@ variable "pg_production_internal_sync_password" {
   sensitive = true
 }
 
+#################################### Plaid ####################################
+
+variable "plaid_client_id" {
+  type      = string
+  sensitive = true
+}
+variable "plaid_secret" {
+  type      = string
+  sensitive = true
+}
+variable "plaid_env" {
+  type = string
+}
+

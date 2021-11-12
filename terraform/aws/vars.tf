@@ -18,6 +18,10 @@ variable "pg_production_port" {}
 variable "pg_production_internal_sync_username" {}
 variable "pg_production_internal_sync_password" {}
 
+variable "plaid_client_id" {}
+variable "plaid_secret" {}
+variable "plaid_env" {}
+
 locals {
   ecs_instance_type                    = var.env == "production" ? "c5.2xlarge" : "r5.large"
   meltano_eodhistoricaldata_jobs_count = var.env == "production" ? 4 : 1

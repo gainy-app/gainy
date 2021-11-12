@@ -1,4 +1,11 @@
 type Query {
+  create_plaid_link_token(
+    profile_id: Int!
+    redirect_uri: String!
+  ): CreatePlaidLinkTokenOutput
+}
+
+type Query {
   fetchChartData(
     symbol: String!
     period: String!
@@ -139,5 +146,9 @@ type PortfolioTransaction {
   account_id: Int!
   created_at: String!
   updated_at: String!
+}
+
+type CreatePlaidLinkTokenOutput {
+  link_token: String!
 }
 
