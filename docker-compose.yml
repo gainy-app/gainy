@@ -169,26 +169,6 @@ services:
       ENV: "local"
     command: [ "hasura_handler.handle_action" ]
 
-  plaid-quickstart-backend:
-    build:
-      context: ./src/plaid/quickstart/python
-    environment:
-      PLAID_CLIENT_ID: ${PLAID_CLIENT_ID}
-      PLAID_SECRET: ${PLAID_SECRET}
-      PLAID_PRODUCTS: ${PLAID_PRODUCTS}
-      PLAID_COUNTRY_CODES: ${PLAID_COUNTRY_CODES}
-      PLAID_REDIRECT_URI: ${PLAID_REDIRECT_URI}
-      PLAID_ENV: ${PLAID_ENV}
-
-  plaid-quickstart-frontend:
-    depends_on:
-      - "plaid-quickstart-backend"
-    environment:
-        REACT_APP_API_HOST: "http://plaid-quickstart-backend:8000"
-    build:
-      context: ./src/plaid/quickstart/frontend
-    ports: ["8083:3000"]
-
 volumes:
   db_data:
   meltano_data:
