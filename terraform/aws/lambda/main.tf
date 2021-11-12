@@ -249,6 +249,9 @@ module "hasuraAction" {
     DATADOG_API_KEY = var.datadog_api_key
     DATADOG_APP_KEY = var.datadog_app_key
     ENV             = var.env
+    PLAID_CLIENT_ID = var.plaid_client_id
+    PLAID_SECRET    = var.plaid_secret
+    PLAID_ENV       = var.plaid_env
   }
   vpc_security_group_ids = var.vpc_security_group_ids
   vpc_subnet_ids         = var.vpc_subnet_ids
