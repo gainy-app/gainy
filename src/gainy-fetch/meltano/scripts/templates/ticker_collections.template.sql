@@ -8,6 +8,7 @@
       index(this, 'collection_id', false),
       'create unique index if not exists {{ get_index_name(this, "symbol__collection_id") }} (symbol, collection_id)',
       'delete from {{this}} where created_at < (select max(created_at) from {{this}})',
+      'update {{ ref("collections") }} c set size = collection_sizes.size from (select collection_id, count(*) as size from {{this}} GROUP BY collection_id) collection_sizes where collection_sizes.collection_id = c.id',
     ]
   )
 }}

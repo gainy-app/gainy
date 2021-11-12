@@ -13,3 +13,4 @@ SELECT id::int,
        icon_url::text,
        risk_score::int
 from {{ source ('gainy', 'gainy_categories') }}
+where enabled = '1'

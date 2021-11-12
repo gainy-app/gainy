@@ -9,5 +9,4 @@ variable "slack_channel_name" {
   default = "alerts"
 }
 
-variable "hasura_service_name" {}
 variable "env" {}

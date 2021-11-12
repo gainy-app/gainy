@@ -76,7 +76,7 @@ dag = DAG(
     tags=tags,
     catchup=False,
     default_args=DEFAULT_ARGS,
-    schedule_interval="0 21 * * 1-5",
+    schedule_interval="0 23 * * 1-5" if ENV == "production" else "0 0 * * 1-5",
     max_active_runs=1,
     is_paused_upon_creation=True
 )
