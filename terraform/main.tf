@@ -73,6 +73,10 @@ module "aws" {
   pg_production_port                   = var.pg_production_port
   pg_production_internal_sync_username = var.pg_production_internal_sync_username
   pg_production_internal_sync_password = var.pg_production_internal_sync_password
+
+  plaid_client_id = var.plaid_client_id
+  plaid_secret    = var.plaid_secret
+  plaid_env       = var.plaid_env
 }
 
 module "datadog" {

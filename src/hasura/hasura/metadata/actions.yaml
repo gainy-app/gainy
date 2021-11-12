@@ -1,4 +1,10 @@
 actions:
+- name: create_plaid_link_token
+  definition:
+    kind: ""
+    handler: '{{AWS_LAMBDA_API_GATEWAY_ENDPOINT}}/hasuraAction'
+  permissions:
+  - role: user
 - name: fetchChartData
   definition:
     kind: ""
@@ -29,7 +35,25 @@ actions:
     handler: '{{AWS_LAMBDA_API_GATEWAY_ENDPOINT}}/hasuraAction'
   permissions:
   - role: user
+- name: get_portfolio_holdings
+  definition:
+    kind: ""
+    handler: '{{AWS_LAMBDA_API_GATEWAY_ENDPOINT}}/hasuraAction'
+  permissions:
+  - role: user
+- name: get_portfolio_transactions
+  definition:
+    kind: ""
+    handler: '{{AWS_LAMBDA_API_GATEWAY_ENDPOINT}}/hasuraAction'
+  permissions:
+  - role: user
 - name: get_recommended_collections
+  definition:
+    kind: ""
+    handler: '{{AWS_LAMBDA_API_GATEWAY_ENDPOINT}}/hasuraAction'
+  permissions:
+  - role: user
+- name: link_plaid_account
   definition:
     kind: ""
     handler: '{{AWS_LAMBDA_API_GATEWAY_ENDPOINT}}/hasuraAction'
@@ -63,4 +87,58 @@ custom_types:
       type: object
       field_mapping:
         symbol: symbol
+  - name: LinkPlaidAccountOutput
+  - name: PortfolioHolding
+    relationships:
+    - remote_table:
+        schema: app
+        name: profiles
+      name: profile
+      source: default
+      type: object
+      field_mapping:
+        profile_id: id
+    - remote_table:
+        schema: app
+        name: portfolio_securities
+      name: security
+      source: default
+      type: array
+      field_mapping:
+        security_id: id
+    - remote_table:
+        schema: app
+        name: profile_portfolio_accounts
+      name: account
+      source: default
+      type: object
+      field_mapping:
+        account_id: id
+  - name: PortfolioTransaction
+    relationships:
+    - remote_table:
+        schema: app
+        name: profiles
+      name: profile
+      source: default
+      type: object
+      field_mapping:
+        profile_id: id
+    - remote_table:
+        schema: app
+        name: profile_portfolio_accounts
+      name: account
+      source: default
+      type: object
+      field_mapping:
+        account_id: id
+    - remote_table:
+        schema: app
+        name: portfolio_securities
+      name: security
+      source: default
+      type: object
+      field_mapping:
+        security_id: id
+  - name: CreatePlaidLinkTokenOutput
   scalars: []

@@ -109,7 +109,7 @@ jobs:
       - name: Terraform Plan
         id: plan
         if: github.event_name == 'pull_request'
-        run: terraform plan -no-color
+        run: terraform plan -no-color -lock=false
         continue-on-error: true
         working-directory: terraform
         env:
@@ -134,6 +134,9 @@ jobs:
           TF_VAR_pg_production_port: ${{ secrets.PG_PRODUCTION_PORT }}
           TF_VAR_pg_production_internal_sync_username: ${{ secrets.PG_PRODUCTION_INTERNAL_SYNC_USERNAME }}
           TF_VAR_pg_production_internal_sync_password: ${{ secrets.PG_PRODUCTION_INTERNAL_SYNC_PASSWORD }}
+          TF_VAR_plaid_client_id: ${{ secrets.PLAID_CLIENT_ID }}
+          TF_VAR_plaid_secret: ${{ secrets.PLAID_SECRET }}
+          TF_VAR_plaid_env: ${{ secrets.PLAID_ENV }}
 
       - uses: actions/github-script@0.9.0
         if: github.event_name == 'pull_request'
@@ -195,3 +198,6 @@ jobs:
           TF_VAR_pg_production_port: ${{ secrets.PG_PRODUCTION_PORT }}
           TF_VAR_pg_production_internal_sync_username: ${{ secrets.PG_PRODUCTION_INTERNAL_SYNC_USERNAME }}
           TF_VAR_pg_production_internal_sync_password: ${{ secrets.PG_PRODUCTION_INTERNAL_SYNC_PASSWORD }}
+          TF_VAR_plaid_client_id: ${{ secrets.PLAID_CLIENT_ID }}
+          TF_VAR_plaid_secret: ${{ secrets.PLAID_SECRET }}
+          TF_VAR_plaid_env: ${{ secrets.PLAID_ENV }}

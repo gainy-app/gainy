@@ -3,6 +3,8 @@ import os
 from common.hasura_dispatcher import HasuraActionDispatcher, HasuraTriggerDispatcher
 from recommendation.recommendation_action import GetMatchScoreByTicker, GetRecommendedCollections, \
     GetMatchScoreByCollection
+from portfolio.plaid.actions import *
+from portfolio.actions import *
 
 # DB CONNECTION
 from trigger.set_top_20_collection import ChangeTop20Collection
@@ -25,7 +27,13 @@ API_GATEWAY_PROXY_INTEGRATION = os.environ.get(
 ACTIONS = [
     GetRecommendedCollections(),
     GetMatchScoreByTicker(),
-    GetMatchScoreByCollection()
+    GetMatchScoreByCollection(),
+
+    # Portfolio
+    CreatePlaidLinkToken(),
+    LinkPlaidAccount(),
+    GetPortfolioHoldings(),
+    GetPortfolioTransactions(),
 ]
 
 action_dispatcher = HasuraActionDispatcher(DB_CONN_STRING, ACTIONS,
