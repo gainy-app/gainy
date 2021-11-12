@@ -76,13 +76,12 @@ module "aws" {
 }
 
 module "datadog" {
-  count               = var.env == "production" ? 1 : 0
-  source              = "./datadog"
-  datadog_api_key     = var.datadog_api_key
-  datadog_api_url     = var.datadog_api_url
-  datadog_app_key     = var.datadog_app_key
-  env                 = var.env
-  hasura_service_name = "hasura-production" # TODO module.aws.hasura_service_name
+  count           = var.env == "production" ? 1 : 0
+  source          = "./datadog"
+  datadog_api_key = var.datadog_api_key
+  datadog_api_url = var.datadog_api_url
+  datadog_app_key = var.datadog_app_key
+  env             = var.env
 }
 
 #################################### Outputs ####################################

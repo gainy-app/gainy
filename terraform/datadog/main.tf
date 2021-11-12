@@ -114,13 +114,13 @@ resource "datadog_monitor" "hasura_alb_active_connections" {
 
 #################################### ECS ####################################
 
-resource "datadog_monitor" "hasura_cpu" {
-  name    = "Hasura CPU Utilization"
+resource "datadog_monitor" "ecs_cpu" {
+  name    = "ECS CPU Utilization"
   type    = "metric alert"
-  message = "Hasura CPU Utilization Monitor triggered. Notify: @slack-${var.slack_channel_name} <!channel>"
+  message = "ECS CPU Utilization Monitor triggered. Notify: @slack-${var.slack_channel_name} <!channel>"
   #  escalation_message = "Escalation message @pagerduty"
 
-  query = "avg(last_1h):avg:aws.ecs.service.cpuutilization{servicename:${var.hasura_service_name}} > 40"
+  query = "avg(last_1h):avg:aws.ecs.service.cpuutilization{servicename:gainy-production} > 40"
 
   monitor_thresholds {
     warning_recovery  = 10
@@ -137,12 +137,12 @@ resource "datadog_monitor" "hasura_cpu" {
 }
 
 resource "datadog_monitor" "hasura_memory" {
-  name    = "Hasura Memory Utilization"
+  name    = "ECS Memory Utilization"
   type    = "metric alert"
-  message = "Hasura Memory Utilization Monitor triggered. Notify: @slack-${var.slack_channel_name} <!channel>"
+  message = "ECS Memory Utilization Monitor triggered. Notify: @slack-${var.slack_channel_name} <!channel>"
   #  escalation_message = "Escalation message @pagerduty"
 
-  query = "avg(last_1h):avg:aws.ecs.service.memory_utilization{servicename:${var.hasura_service_name}} > 50"
+  query = "avg(last_1h):avg:aws.ecs.service.memory_utilization{servicename:gainy-production} > 50"
 
   monitor_thresholds {
     warning_recovery  = 35

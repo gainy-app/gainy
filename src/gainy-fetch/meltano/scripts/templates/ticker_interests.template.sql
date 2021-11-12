@@ -2,7 +2,7 @@
   config(
     materialized = "table",
     post_hook=[
-      fk(this, 'interest_id', 'interests', 'id'),
+      fk(this, 'interest_id', this.schema, 'interests', 'id'),
       'create unique index if not exists {{ get_index_name(this, "symbol__interest_id") }} (symbol, interest_id)',
     ]
   )
@@ -13,7 +13,7 @@
 with latest_price AS
         (
             select distinct on (hp.code) hp.*
-            from historical_prices hp
+            from {{ ref('historical_prices') }} hp
             where close is not null
               AND open is not null
               and date > NOW() - interval '1 week'

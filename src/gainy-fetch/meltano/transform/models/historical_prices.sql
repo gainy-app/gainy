@@ -3,7 +3,7 @@
     materialized = "table",
     post_hook=[
       'create unique index if not exists {{ get_index_name(this, "code__date") }} (code, date)',
-      fk(this, 'code', 'tickers', 'symbol'),
+      fk(this, 'code', this.schema, 'tickers', 'symbol'),
     ]
   )
 }}

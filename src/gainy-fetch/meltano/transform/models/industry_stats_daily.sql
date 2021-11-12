@@ -4,7 +4,7 @@
     post_hook=[
       index(this, 'industry_id'),
       index(this, 'date'),
-      fk(this, 'industry_id', 'gainy_industries', 'id'),
+      fk(this, 'industry_id', this.schema, 'gainy_industries', 'id'),
     ]
   )
 }}

@@ -1,6 +1,3 @@
-{% set min_collection_size = 2 %}
-
-
 {{
   config(
     materialized = "incremental",
@@ -16,11 +13,6 @@
 with collections as (
     select id::int, name, description, enabled, personalized, image_url
     from {{ source ('gainy', 'gainy_collections') }}
-),
-collection_sizes as (
-    select collection_id, count (*) as collection_size
-    from {{ ref ('ticker_collections') }}
-    group by collection_id
 )
 select c.id,
        c.name,
@@ -28,7 +20,5 @@ select c.id,
        c.enabled,
        c.personalized,
        c.image_url,
-       cs.collection_size::integer as size
+       0::integer as size
 from collections c
-    left join collection_sizes cs
-on c.id = cs.collection_id
