@@ -38,60 +38,11 @@ with tickers as (select * from {{ ref('tickers') }}),
          ),
      egrsf as
          (
-             with eps_actual as
-                      (
-                          select ea.symbol,
-                                 ea.eps_actual as value
-                          from earnings_annual ea
-                                   left join earnings_annual ea_next
-                                             ON ea_next.symbol = ea.symbol AND
-                                                ea_next.date::timestamp > ea.date::timestamp
-                          WHERE ea_next.date IS NULL
-                      ),
-                  eps_metrics as
-                      (
-                          SELECT et.symbol,
-                                 eps_actual.value                   as eps0,
-                                 et.earnings_estimate_avg           as eps1,
-                                 et_next_year.earnings_estimate_avg as eps2
-                          FROM earnings_trend et
-                                   left join earnings_trend et_next
-                                             ON et_next.symbol = et.symbol AND
-                                                et_next.date::timestamp >
-                                                et.date::timestamp AND
-                                                et.period = et_next.period
-                                   join earnings_trend et_next_year
-                                        ON et_next_year.symbol = et.symbol AND et_next_year.period = '+1y'
-                                   left join earnings_trend et_next_year_next
-                                             ON et_next_year_next.symbol = et.symbol AND
-                                                et_next_year_next.period = '+1y' AND
-                                                et_next_year_next.date::timestamp > et_next_year.date::timestamp
-                                   JOIN eps_actual ON eps_actual.symbol = et.symbol
-                          WHERE et_next.symbol IS NULL
-                            AND et_next_year_next.symbol IS NULL
-                            AND et.period = '0y'
-                      ),
-                  cur_month as (SELECT date_part('month', NOW()) as value),
-                  eps12 as
-                      (
-                          SELECT symbol,
-                                 cur_month.value,
-                                 (cur_month.value * eps0 + (12 - cur_month.value) * eps1) / 12 as b,
-                                 (cur_month.value * eps1 + (12 - cur_month.value) * eps2) / 12 as f
-                          from eps_metrics
-                                   JOIN cur_month ON true
-                      )
-             SELECT eps12.symbol,
-                    eps0,
-                    eps1,
-                    eps2,
-                    cur_month.value                                                        as M,
-                    eps12.f                                                                AS eps12_f,
-                    eps12.b                                                                AS eps12_b,
-                    CASE WHEN abs(eps12.b) > 0 THEN (eps12.f - eps12.b) / abs(eps12.b) END as value
-             from eps12
-                      JOIN eps_metrics ON eps_metrics.symbol = eps12.symbol
-                      JOIN cur_month ON true
+              select distinct on (et.symbol) et.symbol,
+                     et.growth as value
+              from earnings_trend et
+              where et.period = '0y'
+              order by et.symbol, et.date DESC
          ),
      vg_metrics as
          (
@@ -124,11 +75,10 @@ with tickers as (select * from {{ ref('tickers') }}),
          ),
      vg_metrics_stats as
          (
-             SELECT gic_sector,
-                 /*AVG(lt_fwd_eps)                      as avg_lt_fwd_eps,*/
-                 /*stddev_pop(lt_fwd_eps)               as stddev_lt_fwd_eps,*/
-                    AVG(st_fwd_eps)                      as avg_st_fwd_eps,
+             SELECT AVG(st_fwd_eps)                      as avg_st_fwd_eps,
                     stddev_pop(st_fwd_eps)               as stddev_st_fwd_eps,
+                    /*AVG(lt_fwd_eps)                      as avg_lt_fwd_eps,*/
+                    /*stddev_pop(lt_fwd_eps)               as stddev_lt_fwd_eps,*/
                     AVG(cur_internal_growth_rate)        as avg_cur_internal_growth_rate,
                     stddev_pop(cur_internal_growth_rate) as stddev_cur_internal_growth_rate,
                     AVG(hist_eps_growth)                 as avg_hist_eps_growth,
@@ -142,7 +92,6 @@ with tickers as (select * from {{ ref('tickers') }}),
                     AVG(dividend_yield)                  as avg_dividend_yield,
                     stddev_pop(dividend_yield)           as stddev_dividend_yield
              from vg_metrics vgm
-             GROUP BY vgm.gic_sector
          ),
      z_score as
          (
@@ -169,7 +118,7 @@ with tickers as (select * from {{ ref('tickers') }}),
                         WHEN ABS(stddev_dividend_yield) > 0
                             THEN (dividend_yield - avg_dividend_yield) / stddev_dividend_yield END          as z_score_dividend_yield
              from vg_metrics
-                      JOIN vg_metrics_stats ON vg_metrics_stats.gic_sector = vg_metrics.gic_sector
+                      JOIN vg_metrics_stats ON true
          ),
      windsored_z_score as
          (
@@ -199,13 +148,6 @@ with tickers as (select * from {{ ref('tickers') }}),
              from z_score zs
          )
 SELECT t.symbol,
-
-       eps0,
-       eps1,
-       eps2,
-       M,
-       eps12_f,
-       eps12_b,
 
        st_fwd_eps,
        cur_internal_growth_rate,
@@ -255,6 +197,6 @@ SELECT t.symbol,
 from tickers t
          JOIN egrsf ON egrsf.symbol = t.symbol
          JOIN vg_metrics ON vg_metrics.code = t.symbol
-         JOIN vg_metrics_stats ON vg_metrics_stats.gic_sector = t.gic_sector
+         JOIN vg_metrics_stats ON true
          JOIN z_score ON z_score.code = t.symbol
          JOIN windsored_z_score ON windsored_z_score.code = t.symbol
