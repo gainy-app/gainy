@@ -10,7 +10,29 @@ instances:
     disable_generic_tags: true
     custom_queries:
       - metric_prefix: postgresql
-        query: select distinct on (dag_id) dag_id, extract(days from least(date_trunc('day', now()) + interval '21 hours', date_trunc('week', now()) + interval '4 days' + interval '21 hours') - start_date) as days_from_latest_dag_run, extract(minutes from end_date - start_date) as latest_dag_run_duration_minutes from airflow.dag_run where state = 'success' and end_date is not null and dag_id in ('gainy-dag') order by dag_id, end_date desc
+        query: >
+          with expanded_dag_runs as
+                   (
+                       select *,
+                              case
+                                  when extract(isodow from start_date) < 5
+                                      then start_date + interval '1 day'
+                                  else date_trunc('week', start_date) +
+                                       interval '7 days' +
+                                       (start_date -
+                                        date_trunc('day', start_date))
+                                  end next_run_date
+                       from airflow.dag_run
+                       where state = 'success'
+                         and end_date is not null
+                         and dag_id in ('gainy-dag')
+                   )
+          select distinct on (dag_id) dag_id,
+                                      FLOOR(extract(hours from now() - next_run_date + interval '22 hours') / 24
+                                          )                                       as days_from_latest_dag_run,
+                                      extract(minutes from end_date - start_date) as latest_dag_run_duration_minutes
+          from expanded_dag_runs
+          order by dag_id, end_date desc
         columns:
           - name: dag_id
             type: tag
