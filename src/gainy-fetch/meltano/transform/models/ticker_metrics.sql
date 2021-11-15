@@ -70,9 +70,12 @@ with highlights as (select * from {{ ref('highlights') }}),
                                               date,
                                               stddev_pop(adjusted_close)
                                               OVER (partition by code ORDER BY date desc ROWS BETWEEN CURRENT ROW AND 255 FOLLOWING) as absolute_historical_volatility_adjusted,
-                                              stddev_pop(adjusted_close)
-                                              OVER (partition by code ORDER BY date desc ROWS BETWEEN CURRENT ROW AND 255 FOLLOWING) /
-                                              adjusted_close                                                                         as relative_historical_volatility_adjusted
+                                              case
+                                                  when adjusted_close > 0 then
+                                                                  stddev_pop(adjusted_close)
+                                                                  OVER (partition by code ORDER BY date desc ROWS BETWEEN CURRENT ROW AND 255 FOLLOWING) /
+                                                                  adjusted_close
+                                                  end                                                                                as relative_historical_volatility_adjusted
                                        from historical_prices
                                        where date > now() - interval '2 year'
                                        order by code, date desc
@@ -202,8 +205,11 @@ with highlights as (select * from {{ ref('highlights') }}),
                   )
          select tickers.symbol,
                 highlights.quarterly_revenue_growth_yoy::double precision        as revenue_growth_yoy,
-                COALESCE(earnings_trend_1y.revenue_estimate_avg, earnings_trend_0y.revenue_estimate_avg) /
-                latest_expanded_income_statement_quarterly.total_revenue_ttm - 1 as revenue_growth_fwd,
+                case
+                    when latest_expanded_income_statement_quarterly.total_revenue_ttm > 0
+                        then COALESCE(earnings_trend_1y.revenue_estimate_avg, earnings_trend_0y.revenue_estimate_avg) /
+                             latest_expanded_income_statement_quarterly.total_revenue_ttm - 1
+                    end                                                          as revenue_growth_fwd,
                 ebitda_growth_yoy.value                                          as ebitda_growth_yoy,
                 eps_actual_growth_yoy.value                                      as eps_growth_yoy,
                 -- SeekingAlpha: The forward growth rate is a compounded annual growth rate from the most recently completed fiscal year's EPS (FY(-1)) to analysts' consensus EPS estimates for two fiscal years forward (FY2).
@@ -247,7 +253,9 @@ with highlights as (select * from {{ ref('highlights') }}),
                     valuation.enterprise_value_revenue::double precision as enterprise_value_to_sales,
                     highlights.pe_ratio::double precision                as price_to_earnings_ttm,
                     valuation.price_sales_ttm                            as price_to_sales_ttm,
-                    today_price.price / highlights.book_value            as price_to_book_value,
+                    case when highlights.book_value > 0 then
+                        today_price.price / highlights.book_value
+                        end                                              as price_to_book_value,
                     valuation.enterprise_value_ebidta                    as enterprise_value_to_ebitda
              from tickers
                       left join highlights
