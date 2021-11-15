@@ -45,17 +45,31 @@
         description
         ticker_metrics {
             market_capitalization
-            avg_volume_10d
-            avg_volume_90d
-            beta
             enterprise_value_to_sales
             month_price_change
             quarterly_revenue_growth_yoy
             profit_margin
-            short_ratio
+            # trading
+            avg_volume_10d
             short_percent_outstanding
             shares_outstanding
+            avg_volume_90d
             shares_float
+            short_ratio
+            beta
+            absolute_historical_volatility_adjusted_current
+            relative_historical_volatility_adjusted_current
+            absolute_historical_volatility_adjusted_min_1y
+            absolute_historical_volatility_adjusted_max_1y
+            relative_historical_volatility_adjusted_min_1y
+            relative_historical_volatility_adjusted_max_1y
+            implied_volatility
+            # growth
+            revenue_growth_yoy
+            revenue_growth_fwd
+            ebitda_growth_yoy
+            eps_growth_yoy
+            eps_growth_fwd
         }
         ticker_industries {
             gainy_industry {

@@ -718,11 +718,6 @@ models:
           - exists
           - type:
               type: 'double precision'
-      - name: quarterly_revenue_growth_yoy
-        tests:
-          - exists
-          - type:
-              type: 'double precision'
       - name: enterprise_value_to_sales
         tests:
           - exists
@@ -733,6 +728,7 @@ models:
           - exists
           - type:
               type: 'double precision'
+# trading
       - name: avg_volume_10d
         tests:
           - exists
@@ -764,6 +760,67 @@ models:
           - type:
               type: 'double precision'
       - name: beta
+        tests:
+          - exists
+          - type:
+              type: 'double precision'
+      - name: absolute_historical_volatility_adjusted_current
+        tests:
+          - exists
+          - type:
+              type: 'double precision'
+      - name: relative_historical_volatility_adjusted_current
+        tests:
+          - exists
+          - type:
+              type: 'double precision'
+      - name: absolute_historical_volatility_adjusted_min_1y
+        tests:
+          - exists
+          - type:
+              type: 'double precision'
+      - name: absolute_historical_volatility_adjusted_max_1y
+        tests:
+          - exists
+          - type:
+              type: 'double precision'
+      - name: relative_historical_volatility_adjusted_min_1y
+        tests:
+          - exists
+          - type:
+              type: 'double precision'
+      - name: relative_historical_volatility_adjusted_max_1y
+        tests:
+          - exists
+          - type:
+              type: 'double precision'
+      - name: implied_volatility
+        tests:
+          - exists
+          - type:
+              type: 'double precision'
+# growth
+      - name: revenue_growth_yoy
+        tests:
+          - exists
+          - type:
+              type: 'double precision'
+      - name: revenue_growth_fwd
+        tests:
+          - exists
+          - type:
+              type: 'double precision'
+      - name: ebitda_growth_yoy
+        tests:
+          - exists
+          - type:
+              type: 'double precision'
+      - name: eps_growth_yoy
+        tests:
+          - exists
+          - type:
+              type: 'double precision'
+      - name: eps_growth_fwd
         tests:
           - exists
           - type:
