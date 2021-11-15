@@ -13,6 +13,9 @@ variable "datadog_api_key" {}
 variable "datadog_app_key" {}
 variable "base_image_registry_address" {}
 variable "base_image_version" {}
+variable "plaid_client_id" {}
+variable "plaid_secret" {}
+variable "plaid_env" {}
 
 output "aws_apigatewayv2_api_endpoint" {
   value = "${aws_apigatewayv2_api.lambda.api_endpoint}/${aws_apigatewayv2_stage.lambda.name}"
@@ -217,6 +220,9 @@ module "hasuraTrigger" {
     DATADOG_API_KEY = var.datadog_api_key
     DATADOG_APP_KEY = var.datadog_app_key
     ENV             = var.env
+    PLAID_CLIENT_ID = var.plaid_client_id
+    PLAID_SECRET    = var.plaid_secret
+    PLAID_ENV       = var.plaid_env
   }
   vpc_security_group_ids = var.vpc_security_group_ids
   vpc_subnet_ids         = var.vpc_subnet_ids
@@ -243,6 +249,9 @@ module "hasuraAction" {
     DATADOG_API_KEY = var.datadog_api_key
     DATADOG_APP_KEY = var.datadog_app_key
     ENV             = var.env
+    PLAID_CLIENT_ID = var.plaid_client_id
+    PLAID_SECRET    = var.plaid_secret
+    PLAID_ENV       = var.plaid_env
   }
   vpc_security_group_ids = var.vpc_security_group_ids
   vpc_subnet_ids         = var.vpc_subnet_ids
