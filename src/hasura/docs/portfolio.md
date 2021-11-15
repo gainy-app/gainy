@@ -1,3 +1,16 @@
+### Check whether profile has linked plaid accounts
+
+```graphql
+{
+    app_profiles {
+        profile_plaid_access_tokens {
+            id
+        }
+    }
+}
+
+```
+
 ### Create Link Token
 
 ```graphql
