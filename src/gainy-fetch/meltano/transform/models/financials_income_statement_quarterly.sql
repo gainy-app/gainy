@@ -1,6 +1,8 @@
 {{
   config(
-    materialized = "table",
+    materialized = "incremental",
+    unique_key = "id",
+    incremental_strategy = 'insert_overwrite',
     post_hook=[
       index(this, 'id', true),
       index(this, 'symbol', false),
@@ -16,20 +18,18 @@ TODO:incremental_model
  */
 
 with
---      max_updated_at as
---     (select max(updated_at) as date from {{ this }}),
+{% if is_incremental() %}
+     max_updated_at as (select max(date) as max_date from {{ this }}),
+{% endif %}
      expanded as
-    (
-    select code as symbol,
-           (json_each((financials -> 'Income_Statement' ->> 'quarterly')::json)).*,
-           updatedat::date as updated_at
-    from {{ source('eod', 'eod_fundamentals') }} f
-             inner join {{ ref('tickers') }} as t on f.code = t.symbol
--- {% if is_incremental() %}
---     join max_updated_at on true
---     where updated_at::date >= max_updated_at.date
--- {% endif %}
-)
+         (
+             select code            as symbol,
+                    (json_each((financials -> 'Income_Statement' ->> 'quarterly')::json)).*,
+                    updatedat::date as updated_at
+             from {{ source('eod', 'eod_fundamentals') }} f
+             inner join {{ ref('tickers') }} as t
+             on f.code = t.symbol
+         )
 select symbol,
        key::date                                              as date,
        CONCAT(symbol, '_', key::varchar)::varchar             as id,
@@ -66,5 +66,9 @@ select symbol,
        (value ->> 'sellingGeneralAdministrative')::float      as selling_general_administrative,
        (value ->> 'netIncomeApplicableToCommonShares')::float as net_income_applicable_to_common_shares,
        (value ->> 'preferredStockAndOtherAdjustments')::float as preferred_stock_and_other_adjustments,
-       updated_at                                             as updated_at
+       now()                                                  as updated_at
 from expanded
+{% if is_incremental() %}
+    join max_updated_at on true
+    where key::date >= max_updated_at.max_date
+{% endif %}
