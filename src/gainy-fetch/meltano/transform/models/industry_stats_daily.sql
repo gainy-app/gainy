@@ -2,12 +2,19 @@
   config(
     materialized = "table",
     post_hook=[
+      index(this, 'id', true),
       index(this, 'industry_id'),
       index(this, 'date'),
-      fk(this, 'industry_id', this.schema, 'gainy_industries', 'id'),
     ]
   )
 }}
+
+/*
+TODO:incremental_model
+    materialized = "incremental",
+    unique_key = "id",
+    incremental_strategy = 'insert_overwrite',
+ */
 
 with price_stats as
          (
@@ -35,6 +42,7 @@ with price_stats as
          )
 select price_stats.date,
        price_stats.industry_id,
+       CONCAT(price_stats.industry_id, '_',price_stats.date::varchar)::varchar as id,
        median_price,
        median_growth_rate_1d,
        median_growth_rate_1w,

@@ -708,31 +708,12 @@ models:
           - exists
           - type:
               type: 'character varying'
-      - name: market_capitalization
-        tests:
-          - exists
-          - type:
-              type: 'bigint'
-      - name: month_price_change
-        tests:
-          - exists
-          - type:
-              type: 'double precision'
-      - name: quarterly_revenue_growth_yoy
-        tests:
-          - exists
-          - type:
-              type: 'double precision'
-      - name: enterprise_value_to_sales
-        tests:
-          - exists
-          - type:
-              type: 'double precision'
       - name: profit_margin
         tests:
           - exists
           - type:
               type: 'double precision'
+# trading
       - name: avg_volume_10d
         tests:
           - exists
@@ -768,3 +749,163 @@ models:
           - exists
           - type:
               type: 'double precision'
+      - name: absolute_historical_volatility_adjusted_current
+        tests:
+          - exists
+          - type:
+              type: 'double precision'
+      - name: relative_historical_volatility_adjusted_current
+        tests:
+          - exists
+          - type:
+              type: 'double precision'
+      - name: absolute_historical_volatility_adjusted_min_1y
+        tests:
+          - exists
+          - type:
+              type: 'double precision'
+      - name: absolute_historical_volatility_adjusted_max_1y
+        tests:
+          - exists
+          - type:
+              type: 'double precision'
+      - name: relative_historical_volatility_adjusted_min_1y
+        tests:
+          - exists
+          - type:
+              type: 'double precision'
+      - name: relative_historical_volatility_adjusted_max_1y
+        tests:
+          - exists
+          - type:
+              type: 'double precision'
+      - name: implied_volatility
+        tests:
+          - exists
+          - type:
+              type: 'double precision'
+# growth
+      - name: revenue_growth_yoy
+        tests:
+          - exists
+          - type:
+              type: 'double precision'
+      - name: revenue_growth_fwd
+        tests:
+          - exists
+          - type:
+              type: 'double precision'
+      - name: ebitda_growth_yoy
+        tests:
+          - exists
+          - type:
+              type: 'double precision'
+      - name: eps_growth_yoy
+        tests:
+          - exists
+          - type:
+              type: 'double precision'
+      - name: eps_growth_fwd
+        tests:
+          - exists
+          - type:
+              type: 'double precision'
+# general
+      - name: address_city
+        tests:
+          - exists
+          - type:
+              type: 'character varying'
+      - name: address_state
+        tests:
+          - exists
+          - type:
+              type: 'character varying'
+      - name: address_county
+        tests:
+          - exists
+          - type:
+              type: 'character varying'
+      - name: address_full
+        tests:
+          - exists
+          - type:
+              type: 'character varying'
+      - name: exchange_name
+        tests:
+          - exists
+          - type:
+              type: 'character varying'
+# valuation
+      - name: market_capitalization
+        tests:
+          - exists
+          - type:
+              type: 'bigint'
+      - name: enterprise_value_to_sales
+        tests:
+          - exists
+          - type:
+              type: 'double precision'
+      - name: price_to_earnings_ttm
+        tests:
+          - exists
+          - type:
+              type: 'double precision'
+      - name: price_to_sales_ttm
+        tests:
+          - exists
+          - type:
+              type: 'double precision'
+      - name: price_to_book_value
+        tests:
+          - exists
+          - type:
+              type: 'double precision'
+      - name: enterprise_value_to_ebitda
+        tests:
+          - exists
+          - type:
+              type: 'double precision'
+# momentum
+      - name: price_change_1m
+        tests:
+          - exists
+          - type:
+              type: 'double precision'
+      - name: price_change_3m
+        tests:
+          - exists
+          - type:
+              type: 'double precision'
+      - name: price_change_1y
+        tests:
+          - exists
+          - type:
+              type: 'double precision'
+# dividend
+      - name: dividend_yield
+        tests:
+          - exists
+          - type:
+              type: 'double precision'
+      - name: dividends_per_share
+        tests:
+          - exists
+          - type:
+              type: 'double precision'
+      - name: dividend_payout_ratio
+        tests:
+          - exists
+          - type:
+              type: 'double precision'
+      - name: years_of_consecutive_dividend_growth
+        tests:
+          - exists
+          - type:
+              type: 'integer'
+      - name: dividend_frequency
+        tests:
+          - exists
+          - type:
+              type: 'character varying'

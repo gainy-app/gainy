@@ -1,13 +1,19 @@
 {{
   config(
-    materialized = "incremental",
-    unique_key = "symbol",
-    incremental_strategy='insert_overwrite',
+    materialized = "table",
     post_hook=[
+      index(this, 'id', true),
       index(this, 'symbol', false),
     ]
   )
 }}
+
+/*
+TODO:incremental_model
+    materialized = "incremental",
+    unique_key = "id",
+    incremental_strategy = 'insert_overwrite',
+ */
 
 with
 --      max_updated_at as
@@ -26,8 +32,9 @@ with
 )
 select symbol,
        key::date                                              as date,
+       CONCAT(symbol, '_', key::varchar)::varchar             as id,
        (value ->> 'ebit')::float                              as ebit,
-       (value ->> 'ebitda')::text                             as ebitda,
+       (value ->> 'ebitda')::float                            as ebitda,
        (value ->> 'netIncome')::float                         as net_income,
        (value ->> 'otherItems')::float                        as other_items,
        (value ->> 'filing_date')::timestamp                   as filing_date,

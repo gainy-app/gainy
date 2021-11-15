@@ -44,18 +44,51 @@
         name
         description
         ticker_metrics {
-            market_capitalization
-            avg_volume_10d
-            avg_volume_90d
-            beta
-            enterprise_value_to_sales
-            month_price_change
-            quarterly_revenue_growth_yoy
             profit_margin
-            short_ratio
+            # trading
+            avg_volume_10d
             short_percent_outstanding
             shares_outstanding
+            avg_volume_90d
             shares_float
+            short_ratio
+            beta
+            absolute_historical_volatility_adjusted_current
+            relative_historical_volatility_adjusted_current
+            absolute_historical_volatility_adjusted_min_1y
+            absolute_historical_volatility_adjusted_max_1y
+            relative_historical_volatility_adjusted_min_1y
+            relative_historical_volatility_adjusted_max_1y
+            implied_volatility
+            # growth
+            revenue_growth_yoy
+            revenue_growth_fwd
+            ebitda_growth_yoy
+            eps_growth_yoy
+            eps_growth_fwd
+            #general
+            address_city
+            address_state
+            address_county
+            address_full
+            exchange_name
+            #valuation
+            market_capitalization
+            enterprise_value_to_sales
+            price_to_earnings_ttm
+            price_to_sales_ttm
+            price_to_book_value
+            enterprise_value_to_ebitda
+            #momentum
+            price_change_1m
+            price_change_3m
+            price_change_1y
+            #dividend
+            dividend_yield
+            dividends_per_share
+            dividend_payout_ratio
+            years_of_consecutive_dividend_growth
+            dividend_frequency
         }
         ticker_industries {
             gainy_industry {
