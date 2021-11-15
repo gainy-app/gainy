@@ -16,7 +16,7 @@ TODO:incremental_model
  */
 
 SELECT rhp.code,
-       CONCAT(rhp.code, '_', rhp.date) as id,
+       CONCAT(rhp.code, '_', rhp.date)::varchar as id,
        rhp.adjusted_close,
        rhp.close,
        rhp.date::date,

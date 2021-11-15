@@ -70,7 +70,7 @@ with historical_prices as (select * from {{ ref('historical_prices') }}),
          (
 -- __SELECT__ --
          )
-SELECT distinct CONCAT(t2.symbol, '_', collection_id::varchar) as id,
+SELECT distinct CONCAT(t2.symbol, '_', collection_id::varchar)::varchar as id,
                 t2.symbol,
                 collection_id,
                 NOW() as created_at

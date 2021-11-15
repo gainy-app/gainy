@@ -16,12 +16,14 @@ with highlights as (select * from {{ ref('highlights') }}),
      earnings_history as (select * from {{ ref('earnings_history') }}),
      earnings_annual as (select * from {{ ref('earnings_annual') }}),
      raw_eod_options as (SELECT * FROM {{ source('eod', 'eod_options') }}),
+     raw_eod_fundamentals as (SELECT * FROM {{ source('eod', 'eod_fundamentals') }}),
      marked_prices as
          (
              select distinct on (hp.code, hp.period) *
              from (
                       select *,
                              case
+                                 when hp."date" <= hp.cur_date - interval '1 year' then '1y'
                                  when hp."date" <= hp.cur_date - interval '3 month' then '3m'
                                  when hp."date" <= hp.cur_date - interval '1 month' then '1m'
                                  when hp."date" <= hp.cur_date - interval '10 days' then '10d'
@@ -40,7 +42,7 @@ with highlights as (select * from {{ ref('highlights') }}),
              order by hp.code, hp.period, hp.date desc
          ),
      today_price as (select * from marked_prices mp where period = '0d'),
-     trading_stats as
+     trading_metrics as
          (
              with avg_volume_10d as
                       (
@@ -133,7 +135,7 @@ with highlights as (select * from {{ ref('highlights') }}),
                       left join historical_volatility on t.symbol = historical_volatility.code
                       left join implied_volatility on t.symbol = implied_volatility.code
          ),
-     growth_stats as (
+     growth_metrics as (
          with expanded_income_statement_quarterly as
                   (
                       select *,
@@ -221,43 +223,157 @@ with highlights as (select * from {{ ref('highlights') }}),
                             on latest_expanded_income_statement_quarterly.symbol = tickers.symbol
                   left join latest_expanded_earnings_history_with_eps_actual
                             on latest_expanded_earnings_history_with_eps_actual.symbol = tickers.symbol
-     )
+     ),
+     general_data as
+         (
+             select code                                                          as symbol,
+                    (general -> 'AddressData' ->> 'City') :: character varying    as address_city,
+                    (general -> 'AddressData' ->> 'State') :: character varying   as address_state,
+                    (general -> 'AddressData' ->> 'Country') :: character varying as address_county,
+                    (general ->> 'Address') :: character varying                  as address_full,
+                    (general ->> 'Exchange') :: character varying                 as exchange_name
+             from raw_eod_fundamentals
+         ),
+     valuation_metrics as
+         (
+             select tickers.symbol,
+                    highlights.market_capitalization::bigint,
+                    valuation.enterprise_value_revenue::double precision as enterprise_value_to_sales,
+                    highlights.pe_ratio::double precision                as price_to_earnings_ttm,
+                    valuation.price_sales_ttm                            as price_to_sales_ttm,
+                    today_price.price / highlights.book_value            as price_to_book_value,
+                    valuation.enterprise_value_ebidta                    as enterprise_value_to_ebitda
+             from tickers
+                      left join highlights
+                                on tickers.symbol = highlights.symbol
+                      left join valuation on tickers.symbol = valuation.symbol
+                      left join today_price on tickers.symbol = today_price.code
+         ),
+     momentum_metrics as
+         (
+             select symbol,
+                    case
+                        when today_price.price > 0 then
+                                (select mp.price from marked_prices mp where code = t.symbol and period = '1m') /
+                                today_price.price
+                        end::double precision as price_change_1m,
+                    case
+                        when today_price.price > 0 then
+                                (select mp.price from marked_prices mp where code = t.symbol and period = '3m') /
+                                today_price.price
+                        end::double precision as price_change_3m,
+                    case
+                        when today_price.price > 0 then
+                                (select mp.price from marked_prices mp where code = t.symbol and period = '1y') /
+                                today_price.price
+                        end::double precision as price_change_1y
+             from tickers t
+                      join today_price on t.symbol = today_price.code
+         ),
+     dividend_metrics as
+         (
+             with expanded_dividends as
+                      (
+                          select *,
+                                 min(has_grown)
+                                 OVER (partition by code ORDER BY date ROWS BETWEEN CURRENT ROW and UNBOUNDED FOLLOWING) as has_grown_sequential
+                          from (
+                                   select *,
+                                          (value >= last_value(value)
+                                                    OVER (partition by code ORDER BY date DESC ROWS BETWEEN CURRENT ROW AND 1 FOLLOWING)
+                                              and
+                                           date::date - last_value(date::date)
+                                                        OVER (partition by code ORDER BY date DESC ROWS BETWEEN CURRENT ROW AND 1 FOLLOWING) <=
+                                           case
+                                               when period = 'Annual' then 12 * 30 + 45
+                                               when period = 'Quarterly' then 3 * 30 + 45
+                                               when period = 'SemiAnnual' then 6 * 30 + 45
+                                               when period = 'Monthly' then 30 + 15
+                                               end)::int as has_grown
+                                   from raw_data.eod_dividends
+                                   order by code, raw_data.eod_dividends.date DESC
+                               ) t
+                          order by code, date DESC
+                      ),
+                  dividend_stats as
+                      (
+                          select distinct on (code) code,
+                                                    FLOOR(
+                                                                        sum(has_grown_sequential)
+                                                                        OVER (partition by expanded_dividends.code
+                                                                            ORDER BY expanded_dividends.date DESC
+                                                                            ROWS BETWEEN CURRENT ROW and UNBOUNDED FOLLOWING
+                                                                            ) /
+                                                                        4)::int as years_of_consecutive_dividend_growth,
+                                                    period::varchar             as dividend_frequency
+                          from expanded_dividends
+                          order by code, date desc
+                      )
+             select raw_eod_fundamentals.code                                                  as symbol,
+                    highlights.dividend_yield::double precision,
+                    highlights.dividend_share::double precision                                as dividends_per_share,
+                    (raw_eod_fundamentals.splitsdividends ->> 'PayoutRatio')::double precision as dividend_payout_ratio,
+                    dividend_stats.years_of_consecutive_dividend_growth,
+                    dividend_stats.dividend_frequency
+             from raw_eod_fundamentals
+                      left join highlights on raw_eod_fundamentals.code = highlights.symbol
+                      left join dividend_stats on raw_eod_fundamentals.code = dividend_stats.code
+         )
 select DISTINCT ON
     (t.symbol) t.symbol,
 
     /* Selected */
-               highlights.market_capitalization::bigint,
-               case
-                   when today_price.price > 0
-                       then (select mp.price from marked_prices mp where code = highlights.symbol and period = '1m') /
-                            today_price.price
-                   end::double precision                            as month_price_change,
-               valuation.enterprise_value_revenue::double precision as enterprise_value_to_sales,
                highlights.profit_margin::double precision,
 
-               trading_stats.avg_volume_10d,
-               trading_stats.short_percent_outstanding,
-               trading_stats.shares_outstanding,
-               trading_stats.avg_volume_90d,
-               trading_stats.shares_float,
-               trading_stats.short_ratio,
-               trading_stats.beta,
-               trading_stats.absolute_historical_volatility_adjusted_current,
-               trading_stats.relative_historical_volatility_adjusted_current,
-               trading_stats.absolute_historical_volatility_adjusted_min_1y,
-               trading_stats.absolute_historical_volatility_adjusted_max_1y,
-               trading_stats.relative_historical_volatility_adjusted_min_1y,
-               trading_stats.relative_historical_volatility_adjusted_max_1y,
-               trading_stats.implied_volatility,
+               trading_metrics.avg_volume_10d,
+               trading_metrics.short_percent_outstanding,
+               trading_metrics.shares_outstanding,
+               trading_metrics.avg_volume_90d,
+               trading_metrics.shares_float,
+               trading_metrics.short_ratio,
+               trading_metrics.beta,
+               trading_metrics.absolute_historical_volatility_adjusted_current,
+               trading_metrics.relative_historical_volatility_adjusted_current,
+               trading_metrics.absolute_historical_volatility_adjusted_min_1y,
+               trading_metrics.absolute_historical_volatility_adjusted_max_1y,
+               trading_metrics.relative_historical_volatility_adjusted_min_1y,
+               trading_metrics.relative_historical_volatility_adjusted_max_1y,
+               trading_metrics.implied_volatility,
 
-               growth_stats.revenue_growth_yoy,
-               growth_stats.revenue_growth_fwd,
-               growth_stats.ebitda_growth_yoy,
-               growth_stats.eps_growth_yoy,
-               growth_stats.eps_growth_fwd
+               growth_metrics.revenue_growth_yoy,
+               growth_metrics.revenue_growth_fwd,
+               growth_metrics.ebitda_growth_yoy,
+               growth_metrics.eps_growth_yoy,
+               growth_metrics.eps_growth_fwd,
+
+               general_data.address_city,
+               general_data.address_state,
+               general_data.address_county,
+               general_data.address_full,
+               general_data.exchange_name,
+
+               valuation_metrics.market_capitalization,
+               valuation_metrics.enterprise_value_to_sales,
+               valuation_metrics.price_to_earnings_ttm,
+               valuation_metrics.price_to_sales_ttm,
+               valuation_metrics.price_to_book_value,
+               valuation_metrics.enterprise_value_to_ebitda,
+
+               momentum_metrics.price_change_1m,
+               momentum_metrics.price_change_3m,
+               momentum_metrics.price_change_1y,
+
+               dividend_metrics.dividend_yield,
+               dividend_metrics.dividends_per_share,
+               dividend_metrics.dividend_payout_ratio,
+               dividend_metrics.years_of_consecutive_dividend_growth,
+               dividend_metrics.dividend_frequency
 from tickers t
          left join highlights on t.symbol = highlights.symbol
-         left join valuation on t.symbol = valuation.symbol
          left join today_price on t.symbol = today_price.code
-         left join trading_stats on t.symbol = trading_stats.symbol
-         left join growth_stats on t.symbol = growth_stats.symbol
+         left join trading_metrics on t.symbol = trading_metrics.symbol
+         left join growth_metrics on t.symbol = growth_metrics.symbol
+         left join general_data on t.symbol = general_data.symbol
+         left join valuation_metrics on t.symbol = valuation_metrics.symbol
+         left join momentum_metrics on t.symbol = momentum_metrics.symbol
+         left join dividend_metrics on t.symbol = dividend_metrics.symbol

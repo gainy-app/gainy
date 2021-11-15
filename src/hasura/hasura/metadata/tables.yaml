@@ -225,32 +225,6 @@
             _eq: X-Hasura-User-Id
 - table:
     schema: app
-    name: profile_holdings
-  object_relationships:
-  - name: profile
-    using:
-      foreign_key_constraint_on: profile_id
-  - name: profile_portfolio_account
-    using:
-      foreign_key_constraint_on: account_id
-  - name: security
-    using:
-      foreign_key_constraint_on: security_id
-  select_permissions:
-  - role: user
-    permission:
-      columns:
-      - id
-      - iso_currency_code
-      - quantity
-      - security_id
-      - profile_id
-      filter:
-        profile:
-          user_id:
-            _eq: X-Hasura-User-Id
-- table:
-    schema: app
     name: profile_interests
   object_relationships:
   - name: profile
@@ -310,80 +284,6 @@
       interval_sec: 10
       timeout_sec: 60
     webhook: '{{AWS_LAMBDA_API_GATEWAY_ENDPOINT}}/hasuraTrigger'
-- table:
-    schema: app
-    name: profile_portfolio_accounts
-  object_relationships:
-  - name: profile
-    using:
-      foreign_key_constraint_on: profile_id
-  array_relationships:
-  - name: profile_holdings
-    using:
-      foreign_key_constraint_on:
-        column: account_id
-        table:
-          schema: app
-          name: profile_holdings
-  select_permissions:
-  - role: user
-    permission:
-      columns:
-      - id
-      - ref_id
-      - balance_available
-      - balance_current
-      - balance_iso_currency_code
-      - balance_limit
-      - mask
-      - name
-      - official_name
-      - subtype
-      - type
-      - profile_id
-      - created_at
-      - updated_at
-      filter:
-        profile:
-          user_id:
-            _eq: X-Hasura-User-Id
-- table:
-    schema: app
-    name: profile_portfolio_transactions
-  object_relationships:
-  - name: account
-    using:
-      foreign_key_constraint_on: account_id
-  - name: profile
-    using:
-      foreign_key_constraint_on: profile_id
-  - name: security
-    using:
-      foreign_key_constraint_on: security_id
-  select_permissions:
-  - role: user
-    permission:
-      columns:
-      - id
-      - amount
-      - date
-      - fees
-      - iso_currency_code
-      - name
-      - price
-      - quantity
-      - subtype
-      - type
-      - ref_id
-      - security_id
-      - profile_id
-      - account_id
-      - created_at
-      - updated_at
-      filter:
-        profile:
-          user_id:
-            _eq: X-Hasura-User-Id
 - table:
     schema: app
     name: profile_portfolio_accounts
@@ -1207,9 +1107,6 @@
     permission:
       columns:
       - symbol
-      - market_capitalization
-      - month_price_change
-      - enterprise_value_to_sales
       - profit_margin
       - avg_volume_10d
       - short_percent_outstanding
@@ -1230,6 +1127,25 @@
       - ebitda_growth_yoy
       - eps_growth_yoy
       - eps_growth_fwd
+      - address_city
+      - address_state
+      - address_county
+      - address_full
+      - exchange_name
+      - market_capitalization
+      - enterprise_value_to_sales
+      - price_to_earnings_ttm
+      - price_to_sales_ttm
+      - price_to_book_value
+      - enterprise_value_to_ebitda
+      - price_change_1m
+      - price_change_3m
+      - price_change_1y
+      - dividend_yield
+      - dividends_per_share
+      - dividend_payout_ratio
+      - years_of_consecutive_dividend_growth
+      - dividend_frequency
       filter: {}
 - table:
     schema: public

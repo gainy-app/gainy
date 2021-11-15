@@ -42,7 +42,7 @@ with price_stats as
          )
 select price_stats.date,
        price_stats.industry_id,
-       CONCAT(price_stats.industry_id, '_',price_stats.date::varchar) as id,
+       CONCAT(price_stats.industry_id, '_',price_stats.date::varchar)::varchar as id,
        median_price,
        median_growth_rate_1d,
        median_growth_rate_1w,

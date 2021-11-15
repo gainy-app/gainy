@@ -24,7 +24,7 @@ with expanded_quaterly_cash_flow as (
 )
 select symbol,
        key::date                                                  as date,
-       CONCAT(symbol, '_', key::varchar)                          as id,
+       CONCAT(symbol, '_', key::varchar)::varchar                 as id,
        (value ->> 'netIncome')::float                             as net_income,
        (value ->> 'investments')::float                           as investments,
        (value ->> 'changeInCash')::float                          as change_in_cash,
