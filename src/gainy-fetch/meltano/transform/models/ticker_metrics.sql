@@ -209,8 +209,14 @@ with highlights as (select * from {{ ref('highlights') }}),
                 -- SeekingAlpha: The forward growth rate is a compounded annual growth rate from the most recently completed fiscal year's EPS (FY(-1)) to analysts' consensus EPS estimates for two fiscal years forward (FY2).
                 case
                     when latest_earnings_annual.eps_actual > 0 then
-                        coalesce(sqrt(earnings_trend_1y.earnings_estimate_avg / latest_earnings_annual.eps_actual) - 1,
-                                 earnings_trend_0y.earnings_estimate_avg / latest_earnings_annual.eps_actual - 1)
+                        coalesce(sqrt(case
+                                          when earnings_trend_1y.earnings_estimate_avg > 0
+                                              then earnings_trend_1y.earnings_estimate_avg end /
+                                      latest_earnings_annual.eps_actual) - 1,
+                                 case
+                                     when earnings_trend_0y.earnings_estimate_avg > 0
+                                         then earnings_trend_0y.earnings_estimate_avg end /
+                                 latest_earnings_annual.eps_actual - 1)
                     end                                                          as eps_growth_fwd
          from tickers
                   left join highlights on highlights.symbol = tickers.symbol
