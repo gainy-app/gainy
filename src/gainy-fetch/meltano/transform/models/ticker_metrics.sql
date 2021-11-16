@@ -12,6 +12,7 @@ with highlights as (select * from {{ ref('highlights') }}),
      technicals as (select * from {{ ref('technicals') }}),
      ticker_shares_stats as (select * from {{ ref('ticker_shares_stats') }}),
      financials_income_statement_quarterly as (select * from {{ ref('financials_income_statement_quarterly') }}),
+     financials_income_statement_yearly as (select * from {{ ref('financials_income_statement_yearly') }}),
      earnings_trend as (select * from {{ ref('earnings_trend') }}),
      earnings_history as (select * from {{ ref('earnings_history') }}),
      earnings_annual as (select * from {{ ref('earnings_annual') }}),
@@ -42,6 +43,38 @@ with highlights as (select * from {{ ref('highlights') }}),
              order by hp.code, hp.period, hp.date desc
          ),
      today_price as (select * from marked_prices mp where period = '0d'),
+     expanded_earnings_history as
+         (
+             select *,
+                    sum(eps_actual)
+                    OVER (partition by symbol ORDER BY date desc ROWS BETWEEN CURRENT ROW AND 3 FOLLOWING) as eps_actual_ttm
+             from earnings_history
+             order by symbol, date desc
+         ),
+
+     latest_expanded_earnings_history_with_eps_actual as
+         (
+             select distinct on (symbol) *
+             from expanded_earnings_history
+             where eps_actual is not null
+             order by symbol, date desc
+         ),
+     earnings_trend_0y as
+         (
+             select distinct on (symbol) * from earnings_trend where period = '0y' order by symbol, date desc
+         ),
+     latest_income_statement_yearly as
+         (
+             select distinct on (symbol) * from financials_income_statement_yearly order by symbol, date desc
+         ),
+     expanded_income_statement_quarterly as
+         (
+             select *,
+                    sum(ebitda)
+                    OVER (partition by symbol ORDER BY date desc ROWS BETWEEN CURRENT ROW AND 3 FOLLOWING) as ebitda_ttm
+             from financials_income_statement_quarterly
+             order by symbol, date desc
+         ),
      trading_metrics as
          (
              with avg_volume_10d as
@@ -139,25 +172,7 @@ with highlights as (select * from {{ ref('highlights') }}),
                       left join implied_volatility on t.symbol = implied_volatility.code
          ),
      growth_metrics as (
-         with expanded_income_statement_quarterly as
-                  (
-                      select *,
-                             sum(total_revenue)
-                             OVER (partition by symbol ORDER BY date desc ROWS BETWEEN CURRENT ROW AND 3 FOLLOWING) as total_revenue_ttm,
-                             sum(ebitda)
-                             OVER (partition by symbol ORDER BY date desc ROWS BETWEEN CURRENT ROW AND 3 FOLLOWING) as ebitda_ttm
-                      from financials_income_statement_quarterly
-                      order by symbol, date desc
-                  ),
-              expanded_earnings_history as
-                  (
-                      select *,
-                             sum(eps_actual)
-                             OVER (partition by symbol ORDER BY date desc ROWS BETWEEN CURRENT ROW AND 3 FOLLOWING) as eps_actual_ttm
-                      from earnings_history
-                      order by symbol, date desc
-                  ),
-              ebitda_growth_yoy as
+         with ebitda_growth_yoy as
                   (
                       select distinct on (symbol) *,
                                                   ebitda_ttm /
@@ -178,24 +193,9 @@ with highlights as (select * from {{ ref('highlights') }}),
                       where eps_actual is not null
                       order by symbol
                   ),
-              earnings_trend_0y as
-                  (
-                      select distinct on (symbol) * from earnings_trend where period = '0y' order by symbol, date desc
-                  ),
               earnings_trend_1y as
                   (
                       select distinct on (symbol) * from earnings_trend where period = '+1y' order by symbol, date desc
-                  ),
-              latest_expanded_income_statement_quarterly as
-                  (
-                      select distinct on (symbol) * from expanded_income_statement_quarterly order by symbol, date desc
-                  ),
-              latest_expanded_earnings_history_with_eps_actual as
-                  (
-                      select distinct on (symbol) *
-                      from expanded_earnings_history
-                      where eps_actual is not null
-                      order by symbol, date desc
                   ),
               latest_earnings_annual as
                   (
@@ -205,10 +205,17 @@ with highlights as (select * from {{ ref('highlights') }}),
                   )
          select tickers.symbol,
                 highlights.quarterly_revenue_growth_yoy::double precision        as revenue_growth_yoy,
+                -- SeekingAlpha: The forward growth rate is a compounded annual growth rate from the most recently completed fiscal year's revenue (FY (-1)) to analysts' consensus revenue estimates for two fiscal years forward (FY 2).
                 case
-                    when latest_expanded_income_statement_quarterly.total_revenue_ttm > 0
-                        then COALESCE(earnings_trend_1y.revenue_estimate_avg, earnings_trend_0y.revenue_estimate_avg) /
-                             latest_expanded_income_statement_quarterly.total_revenue_ttm - 1
+                    when latest_income_statement_yearly.total_revenue > 0 then
+                        coalesce(sqrt(case
+                                          when earnings_trend_1y.revenue_estimate_avg > 0
+                                              then earnings_trend_1y.revenue_estimate_avg end /
+                                      latest_income_statement_yearly.total_revenue) - 1,
+                                 case
+                                     when earnings_trend_0y.revenue_estimate_avg > 0
+                                         then earnings_trend_0y.revenue_estimate_avg end /
+                                 latest_income_statement_yearly.total_revenue - 1)
                     end                                                          as revenue_growth_fwd,
                 ebitda_growth_yoy.value                                          as ebitda_growth_yoy,
                 eps_actual_growth_yoy.value                                      as eps_growth_yoy,
@@ -230,9 +237,8 @@ with highlights as (select * from {{ ref('highlights') }}),
                   left join eps_actual_growth_yoy on eps_actual_growth_yoy.symbol = tickers.symbol
                   left join earnings_trend_0y on earnings_trend_0y.symbol = tickers.symbol
                   left join earnings_trend_1y on earnings_trend_1y.symbol = tickers.symbol
+                  left join latest_income_statement_yearly on latest_income_statement_yearly.symbol = tickers.symbol
                   left join latest_earnings_annual on latest_earnings_annual.symbol = tickers.symbol
-                  left join latest_expanded_income_statement_quarterly
-                            on latest_expanded_income_statement_quarterly.symbol = tickers.symbol
                   left join latest_expanded_earnings_history_with_eps_actual
                             on latest_expanded_earnings_history_with_eps_actual.symbol = tickers.symbol
      ),
@@ -332,6 +338,21 @@ with highlights as (select * from {{ ref('highlights') }}),
              from raw_eod_fundamentals
                       left join highlights on raw_eod_fundamentals.code = highlights.symbol
                       left join dividend_stats on raw_eod_fundamentals.code = dividend_stats.code
+         ),
+     earnings_metrics as
+         (
+             select tickers.symbol,
+                    latest_expanded_earnings_history_with_eps_actual.eps_actual::double precision,
+                    latest_expanded_earnings_history_with_eps_actual.eps_estimate,
+                    highlights.beaten_quarterly_eps_estimation_count_ttm,
+                    latest_expanded_earnings_history_with_eps_actual.surprise_percent as eps_surprise,
+                    earnings_trend_0y.revenue_estimate_avg                            as revenue_estimate_avg_0y,
+                    highlights.revenue_ttm::double precision
+             from tickers
+                      join latest_expanded_earnings_history_with_eps_actual
+                           on latest_expanded_earnings_history_with_eps_actual.symbol = tickers.symbol
+                      join earnings_trend_0y on earnings_trend_0y.symbol = tickers.symbol
+                      join highlights on tickers.symbol = highlights.symbol
          )
 select DISTINCT ON
     (t.symbol) t.symbol,
@@ -381,7 +402,14 @@ select DISTINCT ON
                dividend_metrics.dividends_per_share,
                dividend_metrics.dividend_payout_ratio,
                dividend_metrics.years_of_consecutive_dividend_growth,
-               dividend_metrics.dividend_frequency
+               dividend_metrics.dividend_frequency,
+
+               earnings_metrics.eps_actual,
+               earnings_metrics.eps_estimate,
+               earnings_metrics.beaten_quarterly_eps_estimation_count_ttm,
+               earnings_metrics.eps_surprise,
+               earnings_metrics.revenue_estimate_avg_0y,
+               earnings_metrics.revenue_ttm
 from tickers t
          left join highlights on t.symbol = highlights.symbol
          left join today_price on t.symbol = today_price.code
@@ -391,3 +419,4 @@ from tickers t
          left join valuation_metrics on t.symbol = valuation_metrics.symbol
          left join momentum_metrics on t.symbol = momentum_metrics.symbol
          left join dividend_metrics on t.symbol = dividend_metrics.symbol
+         left join earnings_metrics on t.symbol = earnings_metrics.symbol

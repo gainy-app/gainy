@@ -1,6 +1,8 @@
 {{
   config(
-    materialized = "table",
+    materialized = "incremental",
+    unique_key = "id",
+    incremental_strategy = 'insert_overwrite',
     post_hook=[
       index(this, 'id', true),
       index(this, 'symbol', false),
@@ -8,20 +10,19 @@
   )
 }}
 
-/*
-TODO:incremental_model
-    materialized = "incremental",
-    unique_key = "id",
-    incremental_strategy = 'insert_overwrite',
- */
 
-with expanded_quaterly_cash_flow as (
-    select code as symbol,
-           (json_each((financials -> 'Cash_Flow' ->> 'quarterly')::json)).*
-    from {{ source('eod', 'eod_fundamentals') }} f
+with
+{% if is_incremental() %}
+     max_updated_at as (select max(date) as max_date from {{ this }}),
+{% endif %}
+     expanded_quaterly_cash_flow as
+         (
+             select code as symbol,
+                    (json_each((financials -> 'Cash_Flow' ->> 'quarterly')::json)).*
+             from {{ source('eod', 'eod_fundamentals') }} f
              inner join {{ ref ('tickers') }} as t
-    on f.code = t.symbol
-)
+             on f.code = t.symbol
+         )
 select symbol,
        key::date                                                  as date,
        CONCAT(symbol, '_', key::varchar)::varchar                 as id,
@@ -54,4 +55,10 @@ select symbol,
        (value ->> 'otherCashflowsFromInvestingActivities')::float as other_cashflows_from_investing_activities,
        (value ->> 'totalCashflowsFromInvestingActivities')::float as total_cashflows_from_investing_activities
 from expanded_quaterly_cash_flow
+{% if is_incremental() %}
+    join max_updated_at on true
+{% endif %}
 where key != '0000-00-00'
+{% if is_incremental() %}
+    and key::date >= max_updated_at.max_date
+{% endif %}

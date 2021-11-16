@@ -10,33 +10,15 @@
 
 with earnings_history as (select * from {{ ref('earnings_history') }}),
      tickers as (select * from {{ ref('tickers') }}),
-     upcoming_reports as
+     highlights as (select * from {{ ref('highlights') }}),
+     upcoming_report_date as
          (
              select symbol,
                     min(report_date) as date
              from earnings_history
              where eps_actual is null
+               and report_date BETWEEN now() and now() + interval '2 weeks'
              group by symbol
-         ),
-     recent_reports as
-         (
-             select symbol, max(report_date) as recent_report
-             from earnings_history
-             where eps_difference is not null
-             group by symbol
-         ),
-     distinct_reports as
-         (
-             select report_date,
-                    symbol,
-                    eps_difference,
-                    max(date)                                                         as date,
-                    ROW_NUMBER() over (partition by symbol order by report_date desc) as r
-             from earnings_history
-             where eps_difference is not null
-               and report_date < now()
-             group by report_date, symbol, eps_difference
-             order by date desc
          )
 
 /* IPO'ed during last 3 months */
@@ -49,19 +31,14 @@ where ipo_date > now() - interval '3 months'
 union
 
 /* Upcoming earnings. Bit expectations x/4 times.  */
-select distinct_reports.symbol,
+select tickers.symbol,
        case
-           when max(upcoming_reports.date) is not null
-               then 'Reports earnings on ' || max(upcoming_reports.date) || '. '
+           when upcoming_report_date.date is not null
+               then 'Reports earnings on ' || upcoming_report_date.date || '. '
            else '' end ||
-       'Beaten analysts expectations ' ||
-       count(1) || ' of 4 last quarters.' as highlight,
-       now()                              as created_at
-from distinct_reports
-         left join recent_reports on recent_reports.symbol = distinct_reports.symbol
-         left join upcoming_reports on distinct_reports.symbol = upcoming_reports.symbol and
-                                       upcoming_reports.date <= now() + interval '2 weeks' and
-                                       upcoming_reports.date > now()
-where eps_difference > 0
-  and r <= 4
-group by distinct_reports.symbol
+       'Beaten analysts expectations ' || highlights.beaten_quarterly_eps_estimation_count_ttm ||
+       ' of 4 last quarters.' as highlight,
+       now()                  as created_at
+from tickers
+         left join highlights on highlights.symbol = tickers.symbol
+         left join upcoming_report_date on tickers.symbol = upcoming_report_date.symbol

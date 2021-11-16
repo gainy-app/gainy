@@ -1,6 +1,8 @@
 {{
   config(
-    materialized = "table",
+    materialized = "incremental",
+    unique_key = "id",
+    incremental_strategy = 'insert_overwrite',
     post_hook=[
       index(this, 'id', true),
       index(this, 'industry_id'),
@@ -9,14 +11,12 @@
   )
 }}
 
-/*
-TODO:incremental_model
-    materialized = "incremental",
-    unique_key = "id",
-    incremental_strategy = 'insert_overwrite',
- */
 
-with price_stats as
+with
+{% if is_incremental() %}
+     max_updated_at as (select max(date) as max_date from {{ this }}),
+{% endif %}
+     price_stats as
          (
              select hp.date::timestamp                                     as date,
                     ti.industry_id,
@@ -51,3 +51,7 @@ select price_stats.date,
        median_growth_rate_1y
 from price_stats
          left join growth_rate_stats grs on grs.industry_id = price_stats.industry_id and grs.date = price_stats.date
+{% if is_incremental() %}
+    join max_updated_at on true
+    where price_stats.date >= max_updated_at.max_date
+{% endif %}

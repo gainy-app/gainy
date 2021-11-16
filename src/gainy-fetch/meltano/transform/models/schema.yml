@@ -909,3 +909,34 @@ models:
           - exists
           - type:
               type: 'character varying'
+# earnings
+      - name: eps_actual
+        tests:
+          - exists
+          - type:
+              type: 'double precision'
+      - name: eps_estimate
+        tests:
+          - exists
+          - type:
+              type: 'double precision'
+      - name: beaten_quarterly_eps_estimation_count_ttm
+        tests:
+          - exists
+          - type:
+              type: 'integer'
+      - name: eps_surprise
+        tests:
+          - exists
+          - type:
+              type: 'double precision'
+      - name: revenue_estimate_avg_0y
+        tests:
+          - exists
+          - type:
+              type: 'double precision'
+      - name: revenue_ttm
+        tests:
+          - exists
+          - type:
+              type: 'double precision'
