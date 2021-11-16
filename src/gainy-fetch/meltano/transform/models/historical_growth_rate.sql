@@ -1,6 +1,8 @@
 {{
   config(
-    materialized = "table",
+    materialized = "incremental",
+    unique_key = "id",
+    incremental_strategy = 'insert_overwrite',
     post_hook=[
       index(this, 'symbol'),
       index(this, 'date'),
@@ -9,17 +11,11 @@
   )
 }}
 
-/*
-TODO:incremental_model
-    materialized = "incremental",
-    unique_key = "id",
-    incremental_strategy = 'insert_overwrite',
- */
 
--- {% if is_incremental() %}
--- with
---      max_updated_at as (select max(date) as max_date from {{ this }})
--- {% endif %}
+{% if is_incremental() %}
+with
+     max_updated_at as (select symbol, max(date) as max_date from {{ this }} group by symbol)
+{% endif %}
 SELECT code                             as symbol,
        date::date,
        CONCAT(code, '_', date)::varchar as id,
@@ -72,7 +68,7 @@ SELECT code                             as symbol,
            END                          as growth_rate_1y
 from {{ ref('historical_prices') }}
 join {{ ref('tickers') }} ON tickers.symbol = historical_prices.code
--- {% if is_incremental() %}
---     join max_updated_at on true
---     where date::date >= max_updated_at.max_date
--- {% endif %}
+{% if is_incremental() %}
+    left join max_updated_at on tickers.symbol = max_updated_at.symbol
+    where date::date >= max_updated_at.max_date or max_updated_at.max_date is null
+{% endif %}

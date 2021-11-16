@@ -96,6 +96,15 @@
             eps_surprise
             revenue_estimate_avg_0y
             revenue_ttm
+            #financials
+            revenue_per_share_ttm
+            net_income
+            roi
+            asset_cash_and_equivalents
+            roa
+            total_assets
+            ebitda
+            net_debt
         }
         ticker_industries {
             gainy_industry {

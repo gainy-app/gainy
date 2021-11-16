@@ -940,3 +940,44 @@ models:
           - exists
           - type:
               type: 'double precision'
+# earnings
+      - name: revenue_per_share_ttm
+        tests:
+          - exists
+          - type:
+              type: 'double precision'
+      - name: net_income
+        tests:
+          - exists
+          - type:
+              type: 'double precision'
+      - name: roi
+        tests:
+          - exists
+          - type:
+              type: 'double precision'
+      - name: asset_cash_and_equivalents
+        tests:
+          - exists
+          - type:
+              type: 'double precision'
+      - name: roa
+        tests:
+          - exists
+          - type:
+              type: 'double precision'
+      - name: total_assets
+        tests:
+          - exists
+          - type:
+              type: 'double precision'
+      - name: ebitda
+        tests:
+          - exists
+          - type:
+              type: 'double precision'
+      - name: net_debt
+        tests:
+          - exists
+          - type:
+              type: 'double precision'

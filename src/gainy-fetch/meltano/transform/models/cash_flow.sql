@@ -13,7 +13,7 @@
 
 with
 {% if is_incremental() %}
-     max_updated_at as (select max(date) as max_date from {{ this }}),
+    max_updated_at as (select symbol, max(date) as max_date from {{ this }} group by symbol),
 {% endif %}
      expanded_quaterly_cash_flow as
          (
@@ -23,9 +23,10 @@ with
              inner join {{ ref ('tickers') }} as t
              on f.code = t.symbol
          )
-select symbol,
+select expanded_quaterly_cash_flow.symbol,
        key::date                                                  as date,
-       CONCAT(symbol, '_', key::varchar)::varchar                 as id,
+       CONCAT(expanded_quaterly_cash_flow.symbol,
+              '_', key::varchar)::varchar                         as id,
        (value ->> 'netIncome')::float                             as net_income,
        (value ->> 'investments')::float                           as investments,
        (value ->> 'changeInCash')::float                          as change_in_cash,
@@ -56,9 +57,9 @@ select symbol,
        (value ->> 'totalCashflowsFromInvestingActivities')::float as total_cashflows_from_investing_activities
 from expanded_quaterly_cash_flow
 {% if is_incremental() %}
-    join max_updated_at on true
+    left join max_updated_at on expanded_quaterly_cash_flow.symbol = max_updated_at.symbol
 {% endif %}
 where key != '0000-00-00'
 {% if is_incremental() %}
-    and key::date >= max_updated_at.max_date
+    and key::date >= max_updated_at.max_date or max_updated_at.max_date is null
 {% endif %}

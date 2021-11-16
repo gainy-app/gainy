@@ -13,6 +13,7 @@ with highlights as (select * from {{ ref('highlights') }}),
      ticker_shares_stats as (select * from {{ ref('ticker_shares_stats') }}),
      financials_income_statement_quarterly as (select * from {{ ref('financials_income_statement_quarterly') }}),
      financials_income_statement_yearly as (select * from {{ ref('financials_income_statement_yearly') }}),
+     financials_balance_sheet_quarterly as (select * from {{ ref('financials_balance_sheet_quarterly') }}),
      earnings_trend as (select * from {{ ref('earnings_trend') }}),
      earnings_history as (select * from {{ ref('earnings_history') }}),
      earnings_annual as (select * from {{ ref('earnings_annual') }}),
@@ -353,6 +354,26 @@ with highlights as (select * from {{ ref('highlights') }}),
                            on latest_expanded_earnings_history_with_eps_actual.symbol = tickers.symbol
                       join earnings_trend_0y on earnings_trend_0y.symbol = tickers.symbol
                       join highlights on tickers.symbol = highlights.symbol
+         ),
+     financials_metrics as
+         (
+             with latest_balance_sheet_quarterly as
+                      (
+                          select distinct on (symbol) * from financials_balance_sheet_quarterly order by symbol, date desc
+                      )
+             select tickers.symbol,
+                    highlights.revenue_per_share_ttm::double precision,
+                    latest_income_statement_yearly.net_income,
+                    latest_income_statement_yearly.net_income / latest_income_statement_yearly.cost_of_revenue as roi,
+                    latest_balance_sheet_quarterly.cash                                                        as asset_cash_and_equivalents,
+                    latest_income_statement_yearly.net_income / latest_balance_sheet_quarterly.total_assets    as roa,
+                    latest_balance_sheet_quarterly.total_assets,
+                    latest_income_statement_yearly.ebitda,
+                    latest_balance_sheet_quarterly.net_debt
+             from tickers
+                      join highlights on tickers.symbol = highlights.symbol
+                      join latest_income_statement_yearly on latest_income_statement_yearly.symbol = tickers.symbol
+                      join latest_balance_sheet_quarterly on latest_balance_sheet_quarterly.symbol = tickers.symbol
          )
 select DISTINCT ON
     (t.symbol) t.symbol,
@@ -409,7 +430,16 @@ select DISTINCT ON
                earnings_metrics.beaten_quarterly_eps_estimation_count_ttm,
                earnings_metrics.eps_surprise,
                earnings_metrics.revenue_estimate_avg_0y,
-               earnings_metrics.revenue_ttm
+               earnings_metrics.revenue_ttm,
+
+               financials_metrics.revenue_per_share_ttm,
+               financials_metrics.net_income,
+               financials_metrics.roi,
+               financials_metrics.asset_cash_and_equivalents,
+               financials_metrics.roa,
+               financials_metrics.total_assets,
+               financials_metrics.ebitda,
+               financials_metrics.net_debt
 from tickers t
          left join highlights on t.symbol = highlights.symbol
          left join today_price on t.symbol = today_price.code
@@ -420,3 +450,4 @@ from tickers t
          left join momentum_metrics on t.symbol = momentum_metrics.symbol
          left join dividend_metrics on t.symbol = dividend_metrics.symbol
          left join earnings_metrics on t.symbol = earnings_metrics.symbol
+         left join financials_metrics on t.symbol = financials_metrics.symbol

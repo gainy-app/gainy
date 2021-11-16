@@ -13,7 +13,7 @@
 
 {% if is_incremental() %}
 with
-    max_updated_at as (select max(date) as max_date from {{ this }})
+    max_updated_at as (select code, max(date) as max_date from {{ this }} group by code)
 {% endif %}
 SELECT rhp.code,
        CONCAT(rhp.code, '_', rhp.date)::varchar as id,
@@ -27,6 +27,6 @@ SELECT rhp.code,
 from {{ source('eod', 'eod_historical_prices') }} rhp
 join {{ ref('tickers') }} t ON t.symbol = rhp.code
 {% if is_incremental() %}
-    join max_updated_at on true
-    where date::date >= max_updated_at.max_date
+    left join max_updated_at on rhp.code = max_updated_at.code
+    where rhp.date::date >= max_updated_at.max_date or max_updated_at.max_date is null
 {% endif %}
