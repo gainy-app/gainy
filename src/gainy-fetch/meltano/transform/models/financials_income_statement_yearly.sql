@@ -6,6 +6,7 @@
     post_hook=[
       index(this, 'id', true),
       index(this, 'symbol', false),
+      index(this, 'date', false),
     ]
   )
 }}
@@ -13,7 +14,7 @@
 
 with
 {% if is_incremental() %}
-     max_updated_at as (select max(date) as max_date from {{ this }}),
+     max_updated_at as (select symbol, max(date) as max_date from {{ this }} group by symbol),
 {% endif %}
      expanded as
          (
@@ -24,9 +25,9 @@ with
              inner join {{ ref('tickers') }} as t
              on f.code = t.symbol
          )
-select symbol,
+select expanded.symbol,
        key::date                                              as date,
-       CONCAT(symbol, '_', key::varchar)::varchar             as id,
+       CONCAT(expanded.symbol, '_', key::varchar)::varchar    as id,
        (value ->> 'ebit')::float                              as ebit,
        (value ->> 'ebitda')::float                            as ebitda,
        (value ->> 'netIncome')::float                         as net_income,
@@ -63,6 +64,6 @@ select symbol,
        updated_at                                             as updated_at
 from expanded
 {% if is_incremental() %}
-    join max_updated_at on true
-    where key::date >= max_updated_at.max_date
+    left join max_updated_at on expanded.symbol = max_updated_at.symbol
+    where key::date >= max_updated_at.max_date or max_updated_at.max_date is null
 {% endif %}

@@ -14,7 +14,7 @@
 
 with
 {% if is_incremental() %}
-     max_updated_at as (select max(date) as max_date from {{ this }}),
+     max_updated_at as (select industry_id, max(date) as max_date from {{ this }} group by industry_id),
 {% endif %}
      price_stats as
          (
@@ -52,6 +52,6 @@ select price_stats.date,
 from price_stats
          left join growth_rate_stats grs on grs.industry_id = price_stats.industry_id and grs.date = price_stats.date
 {% if is_incremental() %}
-    join max_updated_at on true
-    where price_stats.date >= max_updated_at.max_date
+    left join max_updated_at on price_stats.industry_id = max_updated_at.industry_id
+    where price_stats.date >= max_updated_at.max_date or max_updated_at.max_date is null
 {% endif %}
