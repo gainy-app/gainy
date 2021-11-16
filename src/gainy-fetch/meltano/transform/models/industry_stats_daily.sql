@@ -14,7 +14,7 @@
 
 with
 {% if is_incremental() %}
-    max_updated_at as (select industry_id, max(date) as max_date from {{ this }} group by industry_id),
+     max_updated_at as (select industry_id, max(date) as max_date from {{ this }} group by industry_id),
 {% endif %}
      price_stats as
          (
