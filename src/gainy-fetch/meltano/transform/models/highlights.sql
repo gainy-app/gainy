@@ -12,7 +12,7 @@ with expanded_earnings_history as
          (
              select *,
                     (eps_difference > 0)::int as eps_difference_positive
-             from earnings_history
+             from {{ ref('earnings_history') }}
              where eps_difference is not null
                and report_date < now()
              order by date desc
@@ -51,7 +51,7 @@ select distinct code                                                           a
                 (highlights ->> 'EPSEstimateCurrentQuarter')::real             as eps_estimate_current_quarter,
                 (highlights ->> 'QuarterlyRevenueGrowthYOY')::real             as quarterly_revenue_growth_yoy,
                 (highlights ->> 'QuarterlyEarningsGrowthYOY')::real            as quarterly_earnings_growth_yoy,
-                beaten_quarterly_eps_estimation_count_ttm.value                as beaten_quarterly_eps_estimation_count_ttm
+                beaten_quarterly_eps_estimation_count_ttm.value::int           as beaten_quarterly_eps_estimation_count_ttm
 
 from {{ source('eod', 'eod_fundamentals') }} f
 inner join {{  ref('tickers') }} as t on f.code = t.symbol

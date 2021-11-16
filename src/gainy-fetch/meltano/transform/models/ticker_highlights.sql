@@ -10,6 +10,7 @@
 
 with earnings_history as (select * from {{ ref('earnings_history') }}),
      tickers as (select * from {{ ref('tickers') }}),
+     highlights as (select * from {{ ref('highlights') }}),
      upcoming_report_date as
          (
              select symbol,

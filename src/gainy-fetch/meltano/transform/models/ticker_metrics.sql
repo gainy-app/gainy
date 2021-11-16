@@ -342,12 +342,12 @@ with highlights as (select * from {{ ref('highlights') }}),
      earnings_metrics as
          (
              select tickers.symbol,
-                    latest_expanded_earnings_history_with_eps_actual.eps_actual,
+                    latest_expanded_earnings_history_with_eps_actual.eps_actual::double precision,
                     latest_expanded_earnings_history_with_eps_actual.eps_estimate,
                     highlights.beaten_quarterly_eps_estimation_count_ttm,
                     latest_expanded_earnings_history_with_eps_actual.surprise_percent as eps_surprise,
                     earnings_trend_0y.revenue_estimate_avg                            as revenue_estimate_avg_0y,
-                    highlights.revenue_ttm
+                    highlights.revenue_ttm::double precision
              from tickers
                       join latest_expanded_earnings_history_with_eps_actual
                            on latest_expanded_earnings_history_with_eps_actual.symbol = tickers.symbol
