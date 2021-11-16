@@ -364,9 +364,16 @@ with highlights as (select * from {{ ref('highlights') }}),
              select tickers.symbol,
                     highlights.revenue_per_share_ttm::double precision,
                     latest_income_statement_yearly.net_income,
-                    latest_income_statement_yearly.net_income / latest_income_statement_yearly.cost_of_revenue as roi,
-                    latest_balance_sheet_quarterly.cash                                                        as asset_cash_and_equivalents,
-                    latest_income_statement_yearly.net_income / latest_balance_sheet_quarterly.total_assets    as roa,
+                    case
+                        when latest_income_statement_yearly.cost_of_revenue > 0
+                            then latest_income_statement_yearly.net_income /
+                                 latest_income_statement_yearly.cost_of_revenue
+                        end                             as roi,
+                    latest_balance_sheet_quarterly.cash as asset_cash_and_equivalents,
+                    case
+                        when latest_balance_sheet_quarterly.total_assets
+                            then latest_income_statement_yearly.net_income / latest_balance_sheet_quarterly.total_assets
+                        end                             as roa,
                     latest_balance_sheet_quarterly.total_assets,
                     latest_income_statement_yearly.ebitda,
                     latest_balance_sheet_quarterly.net_debt
