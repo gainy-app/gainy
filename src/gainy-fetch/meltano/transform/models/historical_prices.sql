@@ -13,7 +13,7 @@
 
 {% if is_incremental() %}
 with
-    max_updated_at as (select code, max(date) as max_date from {{ this }} group by code)
+     max_updated_at as (select code, max(date) as max_date from {{ this }} group by code)
 {% endif %}
 SELECT rhp.code,
        CONCAT(rhp.code, '_', rhp.date)::varchar as id,

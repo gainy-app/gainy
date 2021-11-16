@@ -14,7 +14,7 @@
 
 with
 {% if is_incremental() %}
-    max_updated_at as (select symbol, max(date) as max_date from {{ this }} group by symbol),
+     max_updated_at as (select symbol, max(date) as max_date from {{ this }} group by symbol),
 {% endif %}
      expanded as
          (
