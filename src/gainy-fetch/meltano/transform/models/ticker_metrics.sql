@@ -371,7 +371,7 @@ with highlights as (select * from {{ ref('highlights') }}),
                         end                             as roi,
                     latest_balance_sheet_quarterly.cash as asset_cash_and_equivalents,
                     case
-                        when latest_balance_sheet_quarterly.total_assets
+                        when latest_balance_sheet_quarterly.total_assets > 0
                             then latest_income_statement_yearly.net_income / latest_balance_sheet_quarterly.total_assets
                         end                             as roa,
                     latest_balance_sheet_quarterly.total_assets,
