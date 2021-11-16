@@ -89,6 +89,13 @@
             dividend_payout_ratio
             years_of_consecutive_dividend_growth
             dividend_frequency
+            #earnings
+            eps_actual
+            eps_estimate
+            beaten_quarterly_eps_estimation_count_ttm
+            eps_surprise
+            revenue_estimate_avg_0y
+            revenue_ttm
         }
         ticker_industries {
             gainy_industry {

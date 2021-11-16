@@ -18,7 +18,7 @@ with
      expanded as
          (
              select code            as symbol,
-                    (json_each((financials -> 'Income_Statement' ->> 'quarterly')::json)).*,
+                    (json_each((financials -> 'Income_Statement' ->> 'yearly')::json)).*,
                     updatedat::date as updated_at
              from {{ source('eod', 'eod_fundamentals') }} f
              inner join {{ ref('tickers') }} as t
