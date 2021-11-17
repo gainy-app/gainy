@@ -20,5 +20,5 @@ select t.*
 from {{ ref('base_tickers') }} t
     join volumes v
         on t.symbol = v.symbol
-where v.avg_volume >= {{ min_daily_volume }} and t.description is not null
+where (v.avg_volume is not null and v.avg_volume >= {{ min_daily_volume }}) and (t.description is not null or length(t.description) < 5)
 
