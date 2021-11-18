@@ -1,0 +1,51 @@
+- index:
+    name: !ENV ${ENV}_tickers
+    source:
+      table:
+        schema: public
+        name: ticker_search
+      attributes:
+        - symbol
+        - name
+        - description
+        - tag_1
+        - tag_2
+        - daily_volume_avg
+      primary_key:
+        - symbol
+    settings:
+      searchableAttributes:
+        - symbol
+        - name
+        - tag_1
+        - tag_2
+        - unordered(description)
+      typoTolerance: strict
+      minWordSizefor1Typo: 4
+      minWordSizefor2Typos: 8
+
+- index:
+    name: !ENV ${ENV}_collections
+    source:
+      table:
+        schema: public
+        name: collection_search
+      attributes:
+        - id
+        - name
+        - description
+        - tag_1
+        - tag_2
+        - tag_3
+      primary_key:
+        - id
+    settings:
+      searchableAttributes:
+        - name
+        - unordered(description)
+        - tag_1
+        - tag_2
+        - tag_3
+      typoTolerance: strict
+      minWordSizefor1Typo: 4
+      minWordSizefor2Typos: 8
