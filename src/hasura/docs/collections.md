@@ -89,3 +89,24 @@ query {
     }
 }
 ```
+
+### Collection search
+
+```graphql
+query  {
+    search_collections(query: "green energy") {
+        id
+        collection {
+            name
+            image_url
+            enabled
+            description
+            ticker_collections_aggregate {
+                aggregate {
+                    count
+                }
+            }
+        }
+    }
+}
+```
