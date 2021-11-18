@@ -8,7 +8,7 @@ services:
       context: ./src/gainy-fetch
       args:
         BASE_IMAGE_REGISTRY_ADDRESS: ${BASE_IMAGE_REGISTRY_ADDRESS}
-        BASE_IMAGE_VERSION: algolia-target-0.1
+        BASE_IMAGE_VERSION: v1.0.9-beta
     volumes:
       - ./src/gainy-fetch/meltano/scripts:/project/scripts:delegated
       - ./src/gainy-fetch/meltano/meltano.template.yml:/project/meltano.template.yml:delegated
@@ -39,7 +39,7 @@ services:
       context: ./src/gainy-fetch
       args:
         BASE_IMAGE_REGISTRY_ADDRESS: ${BASE_IMAGE_REGISTRY_ADDRESS}
-        BASE_IMAGE_VERSION: algolia-target-0.1
+        BASE_IMAGE_VERSION: v1.0.9-beta
     ports:
       - "5001:5001"
     volumes:
@@ -59,7 +59,7 @@ services:
       context: ./src/gainy-fetch
       args:
         BASE_IMAGE_REGISTRY_ADDRESS: ${BASE_IMAGE_REGISTRY_ADDRESS}
-        BASE_IMAGE_VERSION: algolia-target-0.1
+        BASE_IMAGE_VERSION: v1.0.9-beta
     ports:
       - "5002:5002"
     volumes:
