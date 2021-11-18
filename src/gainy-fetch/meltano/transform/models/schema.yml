@@ -520,6 +520,78 @@ models:
           - type:
               type: 'timestamp without time zone'
 
+
+  - name: ticker_search
+    columns:
+      - name: symbol
+        tests:
+          - not_null
+          - unique
+          - exists
+          - type:
+              type: 'character varying'
+      - name: name
+        tests:
+          - exists
+          - type:
+              type: 'character varying'
+      - name: description
+        tests:
+          - exists
+          - type:
+              type: 'character varying'
+      - name: tag_1
+        tests:
+          - exists
+          - type:
+              type: 'ARRAY'
+      - name: tag_2
+        tests:
+          - exists
+          - type:
+              type: 'ARRAY'
+      - name: daily_volume_avg
+        tests:
+          - exists
+          - not_null
+          - type:
+              type:  'real'
+
+  - name: collection_search
+    columns:
+      - name: id
+        tests:
+          - not_null
+          - unique
+          - exists
+          - type:
+              type: 'integer'
+      - name: name
+        tests:
+          - exists
+          - type:
+              type: 'character varying'
+      - name: description
+        tests:
+          - exists
+          - type:
+              type: 'character varying'
+      - name: tag_1
+        tests:
+          - exists
+          - type:
+              type: 'ARRAY'
+      - name: tag_2
+        tests:
+          - exists
+          - type:
+              type: 'ARRAY'
+      - name: tag_3
+        tests:
+          - exists
+          - type:
+              type: 'ARRAY'
+
   - name: growth_rate_1m
     columns:
       - name: symbol
@@ -981,3 +1053,23 @@ models:
           - exists
           - type:
               type: 'double precision'
+
+
+exposures:
+  - name: ticker_search_index
+    type: application
+    description: Ticker search index in Algolia
+    depends_on:
+      - ref('ticker_search')
+    owner:
+      name: Vasilii Khomutov
+      email: vasilii@gainy.app
+
+  - name: collection_search_index
+    type: application
+    description: Collection search index in Algolia
+    depends_on:
+      - ref('collection_search')
+    owner:
+      name: Vasilii Khomutov
+      email: vasilii@gainy.app
