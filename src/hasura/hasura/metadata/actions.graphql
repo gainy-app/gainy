@@ -60,19 +60,19 @@ type Query {
 }
 
 type Query {
-  search_collections(
-    query: String!
-    offset: Int
-    limit: Int
-  ): [Collection]
-}
-
-type Query {
   search_tickers(
     query: String!
     offset: Int
     limit: Int
   ): [Ticker]
+}
+
+type Query {
+  search_collections(
+    query: String!
+    offset: Int
+    limit: Int
+  ): [Collection]
 }
 
 type Query {
@@ -116,12 +116,12 @@ type LiveStockPriceData {
   close: Float
 }
 
-type Collection {
-  id: Int!
-}
-
 type Ticker {
   symbol: String!
+}
+
+type Collection {
+  id: Int!
 }
 
 type MatchScore {
