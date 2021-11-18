@@ -1,227 +1,219 @@
 name,id
 3D Printing,1
-Aerospace & Defense,2
-Agriculture & AgTech,3
-Air Cargo Transport,4
-Aircraft Leasing,5
-Airlines,6
-Auto Manufacturers,7
-Auto Parts & Services,8
-Basic Chemicals,9
-Battery Tech,10
-Building Products,11
-Cannabis,12
-Clean Energy,13
-Specialty Chemicals,14
-Cleaning & Decontamination,15
-Coal,16
-Construction & Infrastructure,17
-Construction Machinery,18
-Building Materials,19
-Consulting Services,20
-Container and Packaging,21
-Drones,22
-Electricity Generation,23
-Electronic Components,24
-Energy Exploration,25
-Furnishing & Fixtures,26
-Home Construction & Maintenance,27
-Gold & Silver,28
-Heavy Machinery & Parts,29
-Household Products,30
-Industrial Conglomerates,31
-Industrial Metals,32
-Lighting Systems,33
-Liquified Natural Gas,34
-Maritime Transportation,35
-MLPs,36
-Modular Office & Storage,37
-Nutrition & Health,38
-Oil & Gas Services,39
-Oil & Gas Producer,40
-Parking,41
-Power Generation & Distribution,42
-Print Marketing,43
-Rail Freight,44
-Sharing Economy,45
-Security & Protection,46
-Renewable Energy,47
-Solar Energy,48
-Staffing Services,49
-Supply Chain Services,50
-Telecomm Infrastructure,51
-Real Estate Technology,52
-Investment Management Firm,53
-Retail Brokerage,54
-Traded Private Investment Funds,55
-Investment Banking & Advisory,56
-Debt Collections,57
-Pharmaceuticals & Dystrophy disease,58
-Pharmaceuticals & Cancer disease,59
-Pharmaceuticals,60
-Healthcare services & People care,61
-Healthcare services & Equipment,62
-Healthcare services & Hospitals,63
-Trucking,64
-Vehicle Rental,65
-Waste Management,66
-Water Management,67
-Bread & Condiments,68
-Coffee & Tea,69
-Dairy,70
-Fruits & Vegetables,71
-Health Supplements,72
-Meat & Poultry,73
-Medical/Cosmetic Ingredients,74
-Pets,75
-Pharmacies,76
-Snacks & Candy,77
-Soft/Sports Drink,78
-Supermarkets,79
-Wine & Liquor,80
-5G communication,81
-Advanced Materials,82
-Analytics and AI,83
-Apparel Manufacturing & Retail,84
-AR/VR,85
-Auto Dealer,86
-Auto Marketplace,87
-Business Intelligence,88
-Casino and Resorts,89
-Casual Dining,90
-Cloud-Based Communications,91
-Computer Vision and Sensor,92
-Contract Management,93
-CRM/Customer Success,94
-Cryptocurrency,95
-Cybersecurity,96
-Data Center,97
-Data Storage and Management,98
-Digital Content Publisher,99
-Digital Marketing & Advertising,100
-Digital Media/Web,101
-Discount Retail,102
-Distributed Work Tools,103
-Domain Registry,104
-E-commerce Operations,105
-E-commerce Platforms,106
-Education Services,107
-Education Technology,108
-Electric Vehicles,109
-Electronic Display,110
-Electronics Manufacturing,111
-Electronics Power Management,112
-Enterprise Cloud,113
-Enterprise Technology,114
-Fiber Optics and Laser,115
-Food Delivery,116
-Gaming & Esports,117
-Home and Furniture retail,118
-Hotels,119
-Lease-to-Own Retailer,120
-Identity & Authentication,121
-Insurance Marketplace & Technology,122
-Internet and Cellular Provider,123
-IoT,124
-IT Services,125
-Luxury Retail,126
-Memory and Storage,127
-Mobile Data Capture,128
-Nanotechnology,129
-Network Equipment,130
-Online Travel Company,131
-Outdoor & Lifestyle Products,132
-Payment Systems,133
-Plastics,134
-Precision manufacturing,135
-ProSports Management,136
-Publishers,137
-Recreational Vehicle,138
-Retail Supply Chain,139
-Satellite Communication,140
-Semiconductor Equipments,141
-Semiconductor Manufacturing,142
-Semiconductor Materials,143
-Social Media,144
-Streaming,145
-Supply Chain Technology,146
-Technology Conglomerate,147
-Technology Consulting,148
-Trading System,149
-Consumer Lending,150
-Pharmaceuticals & Drugs discovery,151
-Healthcare services & Information technology,152
-Healthcare services & Equipment & Laboratory,153
-Real Estate Property Management,154
-Real Estate Investment & Development,155
-TV and Radio,156
-TV Shopping Network,157
-Video Technology,158
-Asset-Based Finance Company,159
-Auto Financing,160
-Banks,161
-closed-end mutual fund,162
-Commercial Real Estate Brokerage & Services,163
-Crowdfunding & Incubator,164
-Data Center REIT,165
-Diversified REIT,166
-Financial Exchanges & Data,167
-Fintech Analytics & Operations,168
-Health Care REIT,169
-Health insurance,170
-Healthcare Finance,171
-Hotel REIT,172
-Industrial REIT,173
-Infrastructure Investment Fund,174
-Infrastructure REIT,175
-Insurance Brokers,176
-Investment Research & Data,177
-Land & Farm REIT,178
-Life Insurance,179
-Mortgage Insurance Company,180
-Mortgage REIT,181
-Multiline Insurance,182
-Office REIT,183
-Pawn Shops,184
-Precious Metal Trading,185
-Property & Casualty Insurance,186
-Reinsurance,187
-Residential Mortgage Financing,188
-Retail REIT,189
-Retirement Asset Management,190
-Security Brokerage & Capital Markets,191
-Student Loan,192
-Traded Growth/Venture Funds,193
-Wealth Management,194
-Biotechnology,195
-Pharmaceuticals & Liver disease,196
-Pharmaceuticals & Autoimmune disease,197
-Healthcare services & Equipment & Diagnostics,198
-Pharmaceuticals & Eye disease,199
-Pharmaceuticals & COVID,200
-Healthcare services & Equipment & Implants,201
-Pharmaceuticals & Women's health,202
-Pharmaceuticals & Cannabis,203
-Pharmaceuticals & Leukemia disease,204
-Healthcare services & Equipment & Dermatology,205
-Healthcare services & Equipment & Monitoring,206
-Healthcare services & Equipment & Robotics,207
-Pharmaceuticals & Lung cancer disease,208
-Pharmaceuticals & Neurological disease,209
-Healthcare services & Equipment & Cardiovascular,210
-Healthcare services & Equipment & Man's health,211
-Pharmaceuticals & Dermatology,212
-Healthcare services & Equipment & COVID,213
-Healthcare services & Equipment & Women's health,214
-Pharmaceuticals & Man's health,215
-Pharmaceuticals & Transplantology,216
-Pharmaceuticals & Animal health,217
-Pharmaceuticals & Rare disease,218
-Pharmaceuticals & Respiratory disease,219
-Pharmaceuticals & Cardiovascular disease,220
-Healthcare services & Equipment & Animal health,221
-Pharmaceuticals & Gastroenterological disease,222
-Pharmaceuticals & Sleep disorder,223
-Pharmaceuticals & Pneumonia disease,224
-Pharmaceuticals & Kidney disease,225
-Shell company & SPAC,226
+Advanced Materials,2
+Aerospace & Defense,3
+Agriculture & AgTech,4
+Air Cargo Transport,5
+Aircraft Leasing,6
+Airlines,7
+Analytics and AI,8
+Animal health,9
+Animals Health insurance,10
+Apparel Manufacturing & Retail,11
+AR/VR,12
+Asset-Based Finance Company,13
+Auto Dealer,14
+Auto Financing,15
+Auto Manufacturers,16
+Auto Marketplace,17
+Auto Parts & Services,18
+Autoimmune disease,19
+Banks,20
+Basic Chemicals,21
+Battery Tech,22
+Biopharmaceutical,23
+Bread & Condiments,24
+Building Materials,25
+Building Products,26
+Business Intelligence,27
+Cancer disease,28
+Cannabis,29
+Cardiovascular Services & Equipment,30
+Casino and Resorts,31
+Clean Energy,32
+Cleaning & Decontamination,33
+Closed-end mutual fund,34
+Cloud-Based Communications,35
+Coal mining,36
+Coffee & Tea,37
+Computer Vision and Sensor,38
+Construction & Infrastructure,39
+Construction Machinery,40
+Consulting Services,41
+Consumer Lending,42
+Container and Packaging,43
+Contract Management,44
+COVID Pharmaceuticals,45
+Crowdfunding platform,46
+Cryptocurrency brokerage,47
+Cryptocurrency infrastructure,48
+Cryptocurrency mining,49
+Cybersecurity,50
+Dairy,51
+Data Center,52
+Data Centers,53
+Data Storage and Management,54
+Debt Collections,55
+Dermatology Pharmaceuticals,56
+Dermatology services & Equipment,57
+Digital Content Publisher,58
+Digital Marketing & Advertising,59
+Digital Media/Web,60
+Discount Retail,61
+Distributed Work Tools,62
+Domain Registry,63
+Drones,64
+Dystrophy disease,65
+E-commerce Operations,66
+E-commerce Platforms,67
+Education Services,68
+Education Technology,69
+Electric Vehicles,70
+Electric Vehicles charging,71
+Electricity Generation,72
+Electronic Components,73
+Electronic Display,74
+Electronics Manufacturing,75
+Electronics Power Management,76
+Enterprise Cloud,77
+Enterprise Software and Services,78
+Eye disease,79
+Fiber Optics and Laser,80
+Financial and Screening Technologies,81
+Financial Exchanges & Data,82
+Food Delivery,83
+Fruits & Vegetables,84
+Furnishing & Fixtures,85
+Gaming & Esports,86
+Gastroenterological disease,87
+Gold & Silver,88
+Health Care REIT,89
+Health Supplements,90
+Healthcare and COVID services,91
+Healthcare Finance,92
+Healthcare Information technology,93
+Healthcare Robotics,94
+Healthcare services,95
+Healthcare services & Equipment,96
+Heavy Machinery & Parts,97
+Home and Furniture retail,98
+Home Construction & Maintenance,99
+Hospitals,100
+Hotels,101
+Household Products,102
+Identity & Authentication,103
+Implants & Equipment,104
+Industrial Conglomerates,105
+Industrial estate investment trust,106
+Industrial Metals,107
+Infrastructure Investment Fund,108
+Insurance Brokers,109
+Insurance Marketplace & Technology,110
+Internet and Cellular Provider,111
+Investment Banking & Advisory,112
+Investment Management Firm,113
+Investment Research & Data,114
+IoT,115
+Kidney disease,116
+Laboratory Equipment,117
+Land & Farm estate investments,118
+Lease-to-Own Retailer,119
+Leukemia disease,120
+Lighting Systems,121
+Liquified Natural Gas,122
+Liver disease,123
+Lung cancer disease,124
+Luxury Retail,125
+Man's health,126
+Maritime Transportation,127
+Meat & Poultry,128
+Medical/Cosmetic Ingredients,129
+Memory and Storage,130
+Mobile Data Capture,131
+Modular Office & Storage,132
+Mortgage Insurance Company,133
+Mortgage investments,134
+Nanotechnology,135
+Network Equipment,136
+Neurological disease,137
+Nutrition & Health,138
+Office estate investments,139
+Oil & Gas Producer,140
+Oil & Gas Services,141
+Online Travel Company,142
+Outdoor & Lifestyle Products,143
+Parking,144
+Pawn Shops,145
+Payment Systems,146
+People care,147
+Pets,148
+Pharmaceuticals,149
+Pharmaceuticals & Drugs discovery,150
+Pharmacies,151
+Plastics,152
+Pneumonia disease,153
+Power Generation & Distribution,154
+Precious Metal Trading,155
+Precision manufacturing,156
+Print Marketing,157
+Property & Casualty Insurance,158
+ProSports Management,159
+Publishers,160
+Rail Freight,161
+Rare disease,162
+Real Estate Brokerage & Services,163
+Real Estate Investment & Development,164
+Real Estate Marketplace,165
+Real Estate Property Management,166
+Real Estate Property Management Technology,167
+Real Estate Technology,168
+Recreational Vehicle,169
+Recruitment marketplace,170
+Reinsurance,171
+Renewable Energy,172
+Residential Mortgage Financing,173
+Respiratory disease,174
+Restaurants,175
+Retail Brokerage,176
+Retail estate investments,177
+Retail Supply Chain,178
+Retirement Asset Management,179
+Sales and Marketing Technologies,180
+Satellite Communication,181
+Security & Protection,182
+Security Brokerage & Capital Markets,183
+Semiconductor Equipments,184
+Semiconductor Manufacturing,185
+Semiconductor Materials,186
+Sharing Economy,187
+Shell company & SPAC,188
+Sleep disorder,189
+Snacks & Candy,190
+Social Media,191
+Social Media Enterprise Software,192
+Soft/Sports Drink,193
+Solar Energy,194
+Specialty Chemicals,195
+Staffing Services,196
+Streaming,197
+Student Loan,198
+Supermarkets,199
+Supply Chain Services,200
+Supply Chain Technology,201
+Technology Conglomerate,202
+Technology Consulting,203
+Telecom infrastructure,204
+Traded Growth/Venture Funds,205
+Traded Private Investment Funds,206
+Trading System,207
+Transplantology,208
+Trucking,209
+TV and Radio,210
+TV Shopping Network,211
+Vehicle Rental,212
+Video Technology,213
+Waste Management,214
+Water Management,215
+Wealth Management,216
+Wine & Liquor,217
+Women's health,218
