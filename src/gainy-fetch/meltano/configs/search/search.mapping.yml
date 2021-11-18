@@ -1,5 +1,5 @@
 - index:
-    name: !ENV ${ENV}_tickers
+    name: !ENV ${ALGOLIA_TICKERS_INDEX}
     source:
       table:
         schema: public
@@ -25,7 +25,7 @@
       minWordSizefor2Typos: 8
 
 - index:
-    name: !ENV ${ENV}_collections
+    name: !ENV ${ALGOLIA_COLLECTIONS_INDEX}
     source:
       table:
         schema: public
