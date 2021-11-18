@@ -42,8 +42,10 @@ ACTIONS = [
     GetPortfolioTransactions(),
 
     # Search
-    SearchTickers(ALGOLIA_APP_ID, ALGOLIA_SEARCH_API_KEY, ALGOLIA_TICKERS_INDEX),
-    SearchCollections(ALGOLIA_APP_ID, ALGOLIA_SEARCH_API_KEY, ALGOLIA_COLLECTIONS_INDEX)
+    SearchTickers(ALGOLIA_APP_ID, ALGOLIA_SEARCH_API_KEY,
+                  ALGOLIA_TICKERS_INDEX),
+    SearchCollections(ALGOLIA_APP_ID, ALGOLIA_SEARCH_API_KEY,
+                      ALGOLIA_COLLECTIONS_INDEX)
 ]
 
 action_dispatcher = HasuraActionDispatcher(DB_CONN_STRING, ACTIONS,
