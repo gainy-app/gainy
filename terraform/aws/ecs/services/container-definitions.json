@@ -166,7 +166,12 @@
       { "name": "TAP_POSTGRES_FILTER_SCHEMAS",     "value": "${pg_load_schema}" },
 
       { "name": "DBT_TARGET_SCHEMA",               "value": "${pg_transform_schema}" },
-      { "name": "DBT_TARGET",                      "value": "postgres" }
+      { "name": "DBT_TARGET",                      "value": "postgres" },
+
+      { "name": "ALGOLIA_APP_ID",                  "value": "${algolia_app_id}" },
+      { "name": "ALGOLIA_TICKERS_INDEX",           "value": "${algolia_tickers_index}" },
+      { "name": "ALGOLIA_COLLECTIONS_INDEX",       "value": "${algolia_collections_index}" },
+      { "name": "ALGOLIA_INDEXING_API_KEY",        "value": "${algolia_indexing_key}" }
     ],
     "links": [],
     "workingDirectory": null,

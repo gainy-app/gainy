@@ -15,6 +15,9 @@ terraform {
     datadog = {
       source = "DataDog/datadog"
     }
+    algolia = {
+      source = "philippe-vandermoere/algolia"
+    }
   }
 }
 
@@ -41,7 +44,19 @@ provider "datadog" {
   app_key = var.datadog_app_key
 }
 
+provider "algolia" {
+  application_id = var.algolia_app_id
+  api_key        = var.algolia_admin_api_key
+}
+
 #################################### Modules ####################################
+
+module "algolia" {
+  source = "./algolia"
+  algolia_app_id = var.algolia_app_id
+  algolia_admin_api_key = var.algolia_admin_api_key
+  env = var.env
+}
 
 module "firebase" {
   source                 = "./firebase"
@@ -77,6 +92,12 @@ module "aws" {
   plaid_client_id = var.plaid_client_id
   plaid_secret    = var.plaid_secret
   plaid_env       = var.plaid_env
+
+  algolia_tickers_index=      module.algolia.algolia_tickers_index
+  algolia_collections_index=  module.algolia.algolia_collections_index
+  algolia_app_id=             var.algolia_app_id
+  algolia_indexing_key=       module.algolia.algolia_indexing_key
+  algolia_search_key=         module.algolia.algolia_search_key
 }
 
 module "datadog" {

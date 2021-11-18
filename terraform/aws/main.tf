@@ -34,9 +34,15 @@ module "lambda" {
 
   base_image_registry_address = var.base_image_registry_address
   base_image_version          = var.base_image_version
+
   plaid_client_id             = var.plaid_client_id
   plaid_secret                = var.plaid_secret
   plaid_env                   = var.plaid_env
+
+  algolia_tickers_index       = var.algolia_tickers_index
+  algolia_collections_index   = var.algolia_collections_index
+  algolia_app_id              = var.algolia_app_id
+  algolia_search_key          = var.algolia_search_key
 }
 
 module "ecs" {
@@ -116,6 +122,11 @@ module "ecs-service" {
 
   base_image_registry_address = var.base_image_registry_address
   base_image_version          = var.base_image_version
+
+  algolia_tickers_index       = var.algolia_tickers_index
+  algolia_collections_index   = var.algolia_collections_index
+  algolia_app_id              = var.algolia_app_id
+  algolia_indexing_key        = var.algolia_indexing_key
 }
 
 output "bridge_instance_url" {

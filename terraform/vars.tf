@@ -76,6 +76,16 @@ variable "datadog_api_url" {
   type = string
 }
 
+#################################### Algolia ####################################
+
+variable "algolia_app_id" {
+  type      = string
+}
+variable "algolia_admin_api_key" {
+  type      = string
+  sensitive = true
+}
+
 #################################### Meltano internal data sync with production ####################################
 
 variable "pg_production_host" {
