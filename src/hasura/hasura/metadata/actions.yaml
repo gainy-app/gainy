@@ -67,7 +67,7 @@ custom_types:
   - name: NewsDataPoint
   - name: LivePriceData
   - name: LiveStockPriceData
-  - name: RecommendedCollection
+  - name: Collection
     relationships:
     - remote_table:
         schema: app
@@ -77,6 +77,16 @@ custom_types:
       type: object
       field_mapping:
         id: id
+  - name: Ticker
+    relationships:
+      - remote_table:
+          schema: public
+          name: tickers
+        name: ticker
+        source: default
+        type: object
+        field_mapping:
+          symbol: symbol
   - name: MatchScore
     relationships:
     - remote_table:
