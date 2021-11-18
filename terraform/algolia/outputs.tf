@@ -7,7 +7,7 @@ output "algolia_collections_index" {
 }
 
 output "algolia_indexing_key" {
-  value     = algolia_api_key.search_key.key
+  value     = algolia_api_key.indexing_key.key
   sensitive = true
 }
 
