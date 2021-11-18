@@ -7,6 +7,7 @@ from portfolio.plaid.actions import *
 from portfolio.actions import *
 
 # DB CONNECTION
+from search.algolia_search import SearchTickers, SearchCollections
 from trigger.set_top_20_collection import ChangeTop20Collection
 from trigger.set_user_categories import SetUserCategories
 from trigger.on_user_created import OnUserCreated
@@ -21,6 +22,11 @@ PASSWORD = os.environ['pg_password']
 
 DB_CONN_STRING = f"postgresql://{USERNAME}:{PASSWORD}@{HOST}:{PORT}/{DB_NAME}"
 
+ALGOLIA_APP_ID = os.environ["ALGOLIA_APP_ID"]
+ALGOLIA_TICKERS_INDEX = os.environ["ALGOLIA_TICKERS_INDEX"]
+ALGOLIA_COLLECTIONS_INDEX = os.environ["ALGOLIA_COLLECTIONS_INDEX"]
+ALGOLIA_SEARCH_API_KEY = os.environ["ALGOLIA_SEARCH_API_KEY"]
+
 API_GATEWAY_PROXY_INTEGRATION = os.environ.get(
     "AWS_LAMBDA_API_GATEWAY_PROXY_INTEGRATION", "True") == "True"
 
@@ -34,6 +40,10 @@ ACTIONS = [
     LinkPlaidAccount(),
     GetPortfolioHoldings(),
     GetPortfolioTransactions(),
+
+    # Search
+    SearchTickers(ALGOLIA_APP_ID, ALGOLIA_SEARCH_API_KEY, ALGOLIA_TICKERS_INDEX),
+    SearchCollections(ALGOLIA_APP_ID, ALGOLIA_SEARCH_API_KEY, ALGOLIA_COLLECTIONS_INDEX)
 ]
 
 action_dispatcher = HasuraActionDispatcher(DB_CONN_STRING, ACTIONS,

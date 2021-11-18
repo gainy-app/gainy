@@ -166,7 +166,12 @@ services:
       pg_username: "${PG_USERNAME}"
       pg_password: "${PG_PASSWORD}"
       AWS_LAMBDA_API_GATEWAY_PROXY_INTEGRATION: "false"
+      ALGOLIA_APP_ID:            ${ALGOLIA_APP_ID}
+      ALGOLIA_TICKERS_INDEX:     ${ALGOLIA_TICKERS_INDEX}
+      ALGOLIA_COLLECTIONS_INDEX: ${ALGOLIA_COLLECTIONS_INDEX}
+      ALGOLIA_SEARCH_API_KEY:    ${ALGOLIA_SEARCH_API_KEY}
       ENV: "local"
+
     command: [ "hasura_handler.handle_action" ]
 
 volumes:

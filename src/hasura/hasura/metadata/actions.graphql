@@ -56,7 +56,23 @@ type Query {
 type Query {
   get_recommended_collections(
     profile_id: Int
-  ): [RecommendedCollection]
+  ): [Collection]
+}
+
+type Query {
+  search_collections(
+    query: String!
+    offset: Int
+    limit: Int
+  ): [Collection]
+}
+
+type Query {
+  search_tickers(
+    query: String!
+    offset: Int
+    limit: Int
+  ): [Ticker]
 }
 
 type Query {
@@ -100,8 +116,12 @@ type LiveStockPriceData {
   close: Float
 }
 
-type RecommendedCollection {
+type Collection {
   id: Int!
+}
+
+type Ticker {
+  symbol: String!
 }
 
 type MatchScore {
