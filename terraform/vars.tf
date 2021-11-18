@@ -79,7 +79,7 @@ variable "datadog_api_url" {
 #################################### Algolia ####################################
 
 variable "algolia_app_id" {
-  type      = string
+  type = string
 }
 variable "algolia_admin_api_key" {
   type      = string
