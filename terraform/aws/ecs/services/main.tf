@@ -36,7 +36,7 @@ resource "docker_registry_image" "meltano" {
     dockerfile = "Dockerfile"
     build_args = {
       BASE_IMAGE_REGISTRY_ADDRESS = var.base_image_registry_address
-      BASE_IMAGE_VERSION          = var.base_image_version
+      BASE_IMAGE_VERSION          = "v1.0.9-beta"
     }
 
     auth_config {
