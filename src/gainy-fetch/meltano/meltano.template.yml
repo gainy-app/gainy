@@ -54,8 +54,8 @@ plugins:
       namespace: target-algolia
       pip_url: /target-algolia
       config:
-        app_id: $TARGET_ALGOLIA_APP_ID
-        api_key: $TARGET_ALGOLIA_API_KEY
+        app_id: $ALGOLIA_APP_ID
+        api_key: $ALGOLIA_INDEXING_API_KEY
         index_mapping_file: configs/search/search.mapping.yml
   transformers:
     - name: dbt
