@@ -29,7 +29,7 @@ select t.symbol,
        t.description,
        ti.ticker_industries as tag_1,
        tc.ticker_categories as tag_2,
-       tv.daily_volume_avg
+       tv.daily_volume_avg::real
 from {{ ref('tickers') }} t
          left join ticker_volumes tv
                    on t.symbol = tv.symbol
