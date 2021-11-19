@@ -117,6 +117,10 @@ resource "aws_ecs_task_definition" "default" {
       airflow_ui_memory_credits            = var.ui_memory_credits
       airflow_scheduler_memory_credits     = var.scheduler_memory_credits
       airflow_scheduler_cpu_credits        = var.scheduler_cpu_credits
+      algolia_tickers_index                = var.algolia_tickers_index
+      algolia_collections_index            = var.algolia_collections_index
+      algolia_app_id                       = var.algolia_app_id
+      algolia_indexing_key                 = var.algolia_indexing_key
     }
   )
 }

@@ -16,7 +16,7 @@ services:
       - ./src/gainy-fetch/meltano/data:/project/data
       - ./src/gainy-fetch/meltano/orchestrate:/project/orchestrate
       - ./src/gainy-fetch/meltano/seed:/project/seed
-      - ./src/gainy-fetch/meltano/extract:/project/extract
+      - ./src/gainy-fetch/meltano/configs:/project/configs
       - ./tests:/project/tests
     environment:
       EODHISTORICALDATA_JOBS_COUNT: 1
