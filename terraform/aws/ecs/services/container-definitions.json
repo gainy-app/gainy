@@ -30,9 +30,7 @@
       { "name": "HASURA_GRAPHQL_DEV_MODE",              "value": "${hasura_enable_dev_mode}" },
       { "name": "HASURA_GRAPHQL_ADMIN_SECRET",          "value": "${hasura_admin_secret}" },
       { "name": "HASURA_GRAPHQL_JWT_SECRET",            "value": ${jsonencode(hasura_jwt_secret)} },
-      { "name": "AWS_LAMBDA_API_GATEWAY_ENDPOINT",      "value": "${aws_lambda_api_gateway_endpoint}" },
-      { "name": "MELTANO_AIRFLOW_SCHEDULER_HOST",       "value": "localhost" },
-      { "name": "MELTANO_AIRFLOW_SCHEDULER_PORT",       "value": "8793" }
+      { "name": "AWS_LAMBDA_API_GATEWAY_ENDPOINT",      "value": "${aws_lambda_api_gateway_endpoint}" }
     ],
     "links": [],
     "workingDirectory": null,

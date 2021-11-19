@@ -102,8 +102,6 @@ services:
       - .env
     environment:
       AWS_LAMBDA_API_GATEWAY_ENDPOINT: http://lambda-router:5000
-      MELTANO_AIRFLOW_SCHEDULER_HOST: meltano-airflow-scheduler
-      MELTANO_AIRFLOW_SCHEDULER_PORT: 8793
 
   firebase:
     image: ${BASE_IMAGE_REGISTRY_ADDRESS}/gainy-firebase:${BASE_IMAGE_VERSION}
