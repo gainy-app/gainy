@@ -7,6 +7,6 @@ select t.symbol, tcv.ticker_category_vector
 from public.tickers t
          left join ticker_category_vectors tcv
                    on t.symbol = tcv.symbol
-         left join app.profile_ticker_collections as ptc
+         left join public.profile_ticker_collections as ptc
                    on t.symbol = ptc.symbol
 where ptc.collection_id = %(collection_id)s and (ptc.profile_id=%(profile_id)s or ptc.profile_id is null);

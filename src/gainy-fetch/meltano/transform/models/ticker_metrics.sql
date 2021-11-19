@@ -38,6 +38,7 @@ with highlights as (select * from {{ ref('highlights') }}),
                                       volume,
                                       first_value("date"::date) over (partition by code order by "date" desc) as cur_date
                                from historical_prices
+                               where historical_prices."date" > now() - interval '13 months'
                            ) hp
                   ) hp
              where period is not null
@@ -273,21 +274,33 @@ with highlights as (select * from {{ ref('highlights') }}),
      momentum_metrics as
          (
              select symbol,
-                    case
-                        when today_price.price > 0 then
-                                (select mp.price from marked_prices mp where code = t.symbol and period = '1m') /
-                                today_price.price
-                        end::double precision as price_change_1m,
-                    case
-                        when today_price.price > 0 then
-                                (select mp.price from marked_prices mp where code = t.symbol and period = '3m') /
-                                today_price.price
-                        end::double precision as price_change_3m,
-                    case
-                        when today_price.price > 0 then
-                                (select mp.price from marked_prices mp where code = t.symbol and period = '1y') /
-                                today_price.price
-                        end::double precision as price_change_1y
+                    (
+                                today_price.price /
+                                (
+                                    select case when mp.price > 0 then mp.price end
+                                    from marked_prices mp
+                                    where code = t.symbol
+                                      and period = '1m'
+                                ) - 1
+                        )::double precision as price_change_1m,
+                    (
+                                today_price.price /
+                                (
+                                    select case when mp.price > 0 then mp.price end
+                                    from marked_prices mp
+                                    where code = t.symbol
+                                      and period = '3m'
+                                ) - 1
+                        )::double precision as price_change_3m,
+                    (
+                                today_price.price /
+                                (
+                                    select case when mp.price > 0 then mp.price end
+                                    from marked_prices mp
+                                    where code = t.symbol
+                                      and period = '1y'
+                                ) - 1
+                        )::double precision as price_change_1y
              from tickers t
                       join today_price on t.symbol = today_price.code
          ),
@@ -437,8 +450,9 @@ select DISTINCT ON
                earnings_metrics.beaten_quarterly_eps_estimation_count_ttm,
                earnings_metrics.eps_surprise,
                earnings_metrics.revenue_estimate_avg_0y,
-               earnings_metrics.revenue_ttm,
+               earnings_metrics.revenue_ttm as revenue_actual,
 
+               earnings_metrics.revenue_ttm,
                financials_metrics.revenue_per_share_ttm,
                financials_metrics.net_income,
                financials_metrics.roi,

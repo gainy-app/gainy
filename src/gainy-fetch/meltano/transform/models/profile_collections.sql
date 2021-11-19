@@ -1,4 +1,9 @@
-CREATE OR REPLACE VIEW "app"."profile_collections" AS
+{{
+  config(
+    materialized = "view"
+  )
+}}
+
 WITH profile_collections AS (
     SELECT NULL :: integer AS profile_id,
            collections.id,
@@ -8,7 +13,7 @@ WITH profile_collections AS (
            collections.enabled,
            collections.personalized,
            collections.size
-    FROM public.collections
+    FROM {{ ref('collections') }}
     WHERE ((collections.personalized) :: text = '0' :: text)
     UNION
     SELECT csp.profile_id,
@@ -20,8 +25,8 @@ WITH profile_collections AS (
            c.personalized,
            csp.size
     FROM (
-          public.collections c
-             JOIN app.personalized_collection_sizes csp ON ((c.id = csp.collection_id))
+             {{ ref('collections') }} c
+             JOIN {{ source('app', 'personalized_collection_sizes') }} csp ON ((c.id = csp.collection_id))
         )
     WHERE ((c.personalized) :: text = '1' :: text)
 )
@@ -37,4 +42,4 @@ SELECT profile_collections.profile_id,
            END                               AS enabled,
        profile_collections.personalized,
        COALESCE(profile_collections.size, 0) AS size
-FROM profile_collections;
+FROM profile_collections

@@ -23,6 +23,7 @@ services:
       AIRFLOW_PASSWORD: admin
     depends_on:
       - postgres
+      - hasura
     entrypoint: "/init.sh"
     command: "invoke airflow scheduler"
     healthcheck:
@@ -96,7 +97,6 @@ services:
       - ./src/hasura/hasura:/hasura
     depends_on:
       - postgres
-      - meltano-airflow-scheduler
     restart: always
     env_file:
       - .env

@@ -42,9 +42,6 @@
     "cpu": ${hasura_cpu_credits},
     "privileged": null,
     "memoryReservation": null,
-    "dependsOn": [
-      { "condition": "HEALTHY", "containerName": "meltano-airflow-scheduler" }
-    ],
     "healthCheck": {
       "command": [ "CMD-SHELL", "curl http://localhost:8080/ || exit 1" ],
       "interval": 5,

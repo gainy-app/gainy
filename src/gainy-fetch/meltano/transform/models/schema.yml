@@ -21,6 +21,16 @@ sources:
       - name: eod_options
       - name: eod_historical_prices
 
+  - name: app
+    description: Mobile App data, managed by hasura
+    schema: app
+    tables:
+      - name: profile_portfolio_transactions
+      - name: portfolio_securities
+      - name: profile_holdings
+      - name: personalized_collection_sizes
+      - name: personalized_ticker_collections
+
 models:
   - name: categories
     columns:
@@ -1007,12 +1017,17 @@ models:
           - exists
           - type:
               type: 'double precision'
+      - name: revenue_actual
+        tests:
+          - exists
+          - type:
+              type: 'double precision'
+      # financials
       - name: revenue_ttm
         tests:
           - exists
           - type:
               type: 'double precision'
-# earnings
       - name: revenue_per_share_ttm
         tests:
           - exists
@@ -1054,6 +1069,262 @@ models:
           - type:
               type: 'double precision'
 
+  - name: portfolio_transaction_gains
+    columns:
+      - name: transaction_id
+        tests:
+          - exists
+          - type:
+              type: 'integer'
+      - name: updated_at
+        tests:
+          - exists
+          - type:
+              type: 'timestamp without time zone'
+      - name: relative_gain_1w
+        tests:
+          - exists
+          - type:
+              type: 'double precision'
+      - name: relative_gain_1m
+        tests:
+          - exists
+          - type:
+              type: 'double precision'
+      - name: relative_gain_3m
+        tests:
+          - exists
+          - type:
+              type: 'double precision'
+      - name: relative_gain_1y
+        tests:
+          - exists
+          - type:
+              type: 'double precision'
+      - name: relative_gain_5y
+        tests:
+          - exists
+          - type:
+              type: 'double precision'
+      - name: relative_gain_total
+        tests:
+          - exists
+          - type:
+              type: 'double precision'
+      - name: absolute_gain_1w
+        tests:
+          - exists
+          - type:
+              type: 'double precision'
+      - name: absolute_gain_1m
+        tests:
+          - exists
+          - type:
+              type: 'double precision'
+      - name: absolute_gain_3m
+        tests:
+          - exists
+          - type:
+              type: 'double precision'
+      - name: absolute_gain_1y
+        tests:
+          - exists
+          - type:
+              type: 'double precision'
+      - name: absolute_gain_5y
+        tests:
+          - exists
+          - type:
+              type: 'double precision'
+      - name: absolute_gain_total
+        tests:
+          - exists
+          - type:
+              type: 'double precision'
+
+  - name: portfolio_holding_gains
+    columns:
+      - name: holding_id
+        tests:
+          - exists
+          - type:
+              type: 'integer'
+      - name: updated_at
+        tests:
+          - exists
+          - type:
+              type: 'timestamp without time zone'
+      - name: actual_value
+        tests:
+          - exists
+          - type:
+              type: 'double precision'
+      - name: value_to_portfolio_value
+        tests:
+          - exists
+          - type:
+              type: 'double precision'
+      - name: relative_gain_1w
+        tests:
+          - exists
+          - type:
+              type: 'double precision'
+      - name: relative_gain_1m
+        tests:
+          - exists
+          - type:
+              type: 'double precision'
+      - name: relative_gain_3m
+        tests:
+          - exists
+          - type:
+              type: 'double precision'
+      - name: relative_gain_1y
+        tests:
+          - exists
+          - type:
+              type: 'double precision'
+      - name: relative_gain_5y
+        tests:
+          - exists
+          - type:
+              type: 'double precision'
+      - name: relative_gain_total
+        tests:
+          - exists
+          - type:
+              type: 'double precision'
+      - name: absolute_gain_1w
+        tests:
+          - exists
+          - type:
+              type: 'double precision'
+      - name: absolute_gain_1m
+        tests:
+          - exists
+          - type:
+              type: 'double precision'
+      - name: absolute_gain_3m
+        tests:
+          - exists
+          - type:
+              type: 'double precision'
+      - name: absolute_gain_1y
+        tests:
+          - exists
+          - type:
+              type: 'double precision'
+      - name: absolute_gain_5y
+        tests:
+          - exists
+          - type:
+              type: 'double precision'
+      - name: absolute_gain_total
+        tests:
+          - exists
+          - type:
+              type: 'double precision'
+
+  - name: portfolio_gains
+    columns:
+      - name: profile_id
+        tests:
+          - exists
+          - type:
+              type: 'integer'
+      - name: actual_value
+        tests:
+          - exists
+          - type:
+              type: 'double precision'
+      - name: updated_at
+        tests:
+          - exists
+          - type:
+              type: 'timestamp without time zone'
+      - name: relative_gain_1w
+        tests:
+          - exists
+          - type:
+              type: 'double precision'
+      - name: relative_gain_1m
+        tests:
+          - exists
+          - type:
+              type: 'double precision'
+      - name: relative_gain_3m
+        tests:
+          - exists
+          - type:
+              type: 'double precision'
+      - name: relative_gain_1y
+        tests:
+          - exists
+          - type:
+              type: 'double precision'
+      - name: relative_gain_5y
+        tests:
+          - exists
+          - type:
+              type: 'double precision'
+      - name: relative_gain_total
+        tests:
+          - exists
+          - type:
+              type: 'double precision'
+      - name: absolute_gain_1w
+        tests:
+          - exists
+          - type:
+              type: 'double precision'
+      - name: absolute_gain_1m
+        tests:
+          - exists
+          - type:
+              type: 'double precision'
+      - name: absolute_gain_3m
+        tests:
+          - exists
+          - type:
+              type: 'double precision'
+      - name: absolute_gain_1y
+        tests:
+          - exists
+          - type:
+              type: 'double precision'
+      - name: absolute_gain_5y
+        tests:
+          - exists
+          - type:
+              type: 'double precision'
+      - name: absolute_gain_total
+        tests:
+          - exists
+          - type:
+              type: 'double precision'
+
+  - name: portfolio_chart
+    columns:
+      - name: profile_id
+        tests:
+          - exists
+          - type:
+              type: 'integer'
+      - name: value
+        tests:
+          - exists
+          - type:
+              type: 'double precision'
+      - name: date
+        tests:
+          - exists
+          - type:
+              type: 'timestamp without time zone'
+      - name: period
+        tests:
+          - exists
+          - type:
+              type: 'character varying'
 
 exposures:
   - name: ticker_search_index
