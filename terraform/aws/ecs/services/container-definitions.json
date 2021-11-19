@@ -30,7 +30,9 @@
       { "name": "HASURA_GRAPHQL_DEV_MODE",              "value": "${hasura_enable_dev_mode}" },
       { "name": "HASURA_GRAPHQL_ADMIN_SECRET",          "value": "${hasura_admin_secret}" },
       { "name": "HASURA_GRAPHQL_JWT_SECRET",            "value": ${jsonencode(hasura_jwt_secret)} },
-      { "name": "AWS_LAMBDA_API_GATEWAY_ENDPOINT",      "value": "${aws_lambda_api_gateway_endpoint}" }
+      { "name": "AWS_LAMBDA_API_GATEWAY_ENDPOINT",      "value": "${aws_lambda_api_gateway_endpoint}" },
+      { "name": "MELTANO_AIRFLOW_SCHEDULER_HOST",       "value": "localhost" },
+      { "name": "MELTANO_AIRFLOW_SCHEDULER_PORT",       "value": "8793" }
     ],
     "links": [],
     "workingDirectory": null,
@@ -123,7 +125,13 @@
     "dnsServers": null,
     "disableNetworking": null,
     "dnsSearchDomains": null,
-    "portMappings": [],
+    "portMappings": [
+      {
+        "hostPort": 8793,
+        "containerPort": 8793,
+        "protocol": "tcp"
+      }
+    ],
     "hostname": null,
     "essential": true,
     "entryPoint": ["/init.sh"],

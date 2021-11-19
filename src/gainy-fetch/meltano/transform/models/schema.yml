@@ -28,6 +28,8 @@ sources:
       - name: profile_portfolio_transactions
       - name: portfolio_securities
       - name: profile_holdings
+      - name: personalized_collection_sizes
+      - name: personalized_ticker_collections
 
 models:
   - name: categories

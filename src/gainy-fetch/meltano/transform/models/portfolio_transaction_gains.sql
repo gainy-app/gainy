@@ -62,7 +62,7 @@ with relative_data as
                  {% if is_incremental() %}
                                                              (old_portfolio_transaction_gains.updated_at is null or historical_prices.date > old_portfolio_transaction_gains.updated_at) and
                  {% endif %}
-                                                             historical_prices.code = 'AAPL' -- portfolio_securities.ticker_symbol
+                                                             historical_prices.code = portfolio_securities.ticker_symbol
              where profile_portfolio_transactions.type in ('buy', 'sell')
                and portfolio_securities.type in ('mutual fund', 'equity', 'etf')
              order by profile_portfolio_transactions.id, historical_prices.date desc

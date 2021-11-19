@@ -103,7 +103,7 @@
       timeout_sec: 60
     webhook: '{{AWS_LAMBDA_API_GATEWAY_ENDPOINT}}/hasuraTrigger'
 - table:
-    schema: app
+    schema: public
     name: profile_collections
   configuration:
     custom_root_fields: {}
@@ -124,7 +124,7 @@
     using:
       manual_configuration:
         remote_table:
-          schema: app
+          schema: public
           name: profile_ticker_collections
         insertion_order: null
         column_mapping:
@@ -493,7 +493,7 @@
       timeout_sec: 60
     webhook: '{{AWS_LAMBDA_API_GATEWAY_ENDPOINT}}/hasuraTrigger'
 - table:
-    schema: app
+    schema: public
     name: profile_ticker_collections
   configuration:
     custom_root_fields: {}
@@ -1389,7 +1389,7 @@
     using:
       manual_configuration:
         remote_table:
-          schema: app
+          schema: public
           name: profile_ticker_collections
         insertion_order: null
         column_mapping:
