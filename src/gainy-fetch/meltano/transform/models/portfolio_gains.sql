@@ -33,9 +33,11 @@ with expanded_holdings as
                             portfolio_holding_gains.absolute_gain_5y::numeric,
                             portfolio_holding_gains.absolute_gain_total::numeric
                       from {{ ref('portfolio_holding_gains') }}
+                               join {{ source ('app', 'profile_holdings') }} on profile_holdings.id = portfolio_holding_gains.holding_id
+                               join {{ source ('app', 'portfolio_securities') }}
+                                    on portfolio_securities.id = profile_holdings.security_id
                                join {{ ref('historical_prices') }}
                                     on historical_prices.code = portfolio_securities.ticker_symbol
-                               join {{ source ('app', 'profile_holdings') }} on profile_holdings.id = portfolio_holding_gains.holding_id
                       {% if is_incremental() %}
                                left join {{ this }} old_portfolio_gains
                                     on old_portfolio_gains.profile_id = profile_holdings.profile_id
