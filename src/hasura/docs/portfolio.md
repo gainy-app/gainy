@@ -179,3 +179,65 @@
   }
 }
 ```
+
+### Get Transactions
+
+```graphql
+{
+    get_portfolio_transactions(profile_id: 1) {
+        id
+        quantity
+        iso_currency_code
+        profile_id
+        security_id
+        security {
+            close_price
+            close_price_as_of
+            created_at
+            iso_currency_code
+            id
+            name
+            ticker_symbol
+            type
+            updated_at
+            tickers {
+                name
+                sector
+                symbol
+            }
+        }
+        account {
+            balance_available
+            balance_current
+            balance_iso_currency_code
+            balance_limit
+            created_at
+            id
+            mask
+            name
+            official_name
+            subtype
+            type
+        }
+        amount
+        date
+        fees
+        name
+        price
+    }
+}
+```
+
+### Chart
+
+periods: 1d, 1w, 1m
+
+```GraphQL
+{
+    portfolio_chart(where: {profile_id: {_eq: 1}, period: {_eq: "1d"}}, order_by: {date: asc}) {
+        date
+        period
+        value
+    }
+}
+```

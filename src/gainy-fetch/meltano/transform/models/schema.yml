@@ -1303,6 +1303,29 @@ models:
           - type:
               type: 'double precision'
 
+  - name: portfolio_chart
+    columns:
+      - name: profile_id
+        tests:
+          - exists
+          - type:
+              type: 'integer'
+      - name: value
+        tests:
+          - exists
+          - type:
+              type: 'double precision'
+      - name: date
+        tests:
+          - exists
+          - type:
+              type: 'timestamp without time zone'
+      - name: period
+        tests:
+          - exists
+          - type:
+              type: 'character varying'
+
 exposures:
   - name: ticker_search_index
     type: application

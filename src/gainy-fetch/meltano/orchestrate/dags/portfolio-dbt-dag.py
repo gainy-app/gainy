@@ -8,6 +8,7 @@ except ImportError:
     from airflow.operators.bash import BashOperator
 
 from datetime import datetime, timedelta
+from pathlib import Path
 
 
 logger = logging.getLogger(__name__)
@@ -29,6 +30,14 @@ DEFAULT_ARGS = {
 }
 
 
+# Meltano
+meltano_bin = ".meltano/run/bin"
+if not Path(project_root).joinpath(meltano_bin).exists():
+    logger.warning(
+        f"A symlink to the 'meltano' executable could not be found at '{meltano_bin}'. Falling back on expecting it to be in the PATH instead."
+    )
+    meltano_bin = "meltano"
+
 # DAG
 
 ##################################################################################################################
@@ -46,7 +55,7 @@ dag = DAG(
 )
 dbt = BashOperator(
     task_id="dbt-portfolio",
-    bash_command=f"cd {project_root}; {meltano_bin} invoke dbt run --model portfolio_holding_gains portfolio_transaction_gains portfolio_gains",
+    bash_command=f"cd {project_root}; {meltano_bin} invoke dbt run --model portfolio_holding_gains portfolio_transaction_gains portfolio_gains portfolio_chart",
     dag=dag,
     pool="dbt"
 )
