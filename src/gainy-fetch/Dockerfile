@@ -8,7 +8,7 @@ COPY meltano/orchestrate /project/orchestrate
 COPY meltano/scripts /project/scripts
 COPY meltano/seed /project/seed
 COPY meltano/transform /project/transform
-COPY meltano/extract /project/extract
+COPY meltano/configs /project/configs
 COPY meltano/meltano.template.yml meltano/symbols* /project/
 
 ENV ENV=local

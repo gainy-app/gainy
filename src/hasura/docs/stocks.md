@@ -115,3 +115,20 @@
     }
 }
 ```
+
+### Ticker search
+
+```graphql
+query  {
+    search_tickers(query: "momentum", limit: 5) {
+        symbol
+        ticker {
+            name
+            description
+            ticker_highlights {
+                highlight
+            }
+        }
+    }
+}
+```

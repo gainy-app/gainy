@@ -31,6 +31,7 @@ DEFAULT_ARGS = {
     "start_date": datetime(2021, 9, 1)
 }
 
+
 # Meltano
 meltano_bin = ".meltano/run/bin"
 
@@ -39,6 +40,7 @@ if not Path(project_root).joinpath(meltano_bin).exists():
         f"A symlink to the 'meltano' executable could not be found at '{meltano_bin}'. Falling back on expecting it to be in the PATH instead."
     )
     meltano_bin = "meltano"
+
 
 # Schedules
 result = subprocess.run(
@@ -50,30 +52,35 @@ result = subprocess.run(
 )
 schedules = json.loads(result.stdout)
 
-# Tags
-tags = ["meltano"]
+
+# Process schedule parameters
 for schedule in schedules:
     if 'env' in schedule and 'TARGET_ENVS' in schedule['env']:
         target_envs = json.loads(schedule['env']['TARGET_ENVS'])
-        skipped = ENV not in target_envs
+        schedule['skipped'] = ENV not in target_envs
     else:
-        skipped = False
-    schedule['skipped'] = skipped
-    if skipped:
+        schedule['skipped'] = False
+
+    schedule['downstream'] = "DOWNSTREAM" == schedule.get('env', {}).get('INTEGRATION', 'UPSTREAM')
+
+
+# Tags
+tags = {'dbt'}
+for schedule in schedules:
+    if schedule['skipped']:
         continue
 
-    if not schedule['extractor'] in tags:
-        tags.append(schedule['extractor'])
-    if not schedule['loader'] in tags:
-        tags.append(schedule['loader'])
-    if (schedule['loader'] == 'run' or 'only') and not "dbt" in tags:
-        tags.append('dbt')
+    if schedule['downstream']:
+        tags.add(schedule['loader'])
+    else:
+        tags.add(schedule['extractor'])
+
 
 # DAG
 dag_id = "gainy-dag"
 dag = DAG(
     dag_id,
-    tags=tags,
+    tags=list(tags),
     catchup=False,
     default_args=DEFAULT_ARGS,
     schedule_interval="0 23 * * 1-5" if ENV == "production" else "0 0 * * 1-5",
@@ -81,21 +88,28 @@ dag = DAG(
     is_paused_upon_creation=True
 )
 
-# operators
-loaders = []
+# Operators
+upstream = []
+downstream = []
+
 for schedule in schedules:
     if schedule['skipped']:
         continue
 
     logger.info(f"Considering schedule '{schedule['name']}")
-    loader = BashOperator(
+    operator = BashOperator(
         task_id=f"{schedule['name']}",
         bash_command=f"cd {project_root}; {meltano_bin} schedule run {schedule['name']} --transform=skip",
         dag=dag,
         task_concurrency=concurrency,
         pool_slots=concurrency
     )
-    loaders.append(loader)
+
+    if schedule['downstream']:
+        downstream.append(operator)
+    else:
+        upstream.append(operator)
+
 
 dbt = BashOperator(
     task_id="dbt-transform",
@@ -105,7 +119,7 @@ dbt = BashOperator(
 )
 
 # dependencies
-loaders >> dbt
+upstream >> dbt >> downstream
 
 # register the dag
 globals()[dag_id] = dag

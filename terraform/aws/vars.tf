@@ -22,6 +22,12 @@ variable "plaid_client_id" {}
 variable "plaid_secret" {}
 variable "plaid_env" {}
 
+variable "algolia_tickers_index" {}
+variable "algolia_collections_index" {}
+variable "algolia_app_id" {}
+variable "algolia_indexing_key" {}
+variable "algolia_search_key" {}
+
 locals {
   ecs_instance_type                    = var.env == "production" ? "c5.2xlarge" : "r5.large"
   meltano_eodhistoricaldata_jobs_count = var.env == "production" ? 4 : 1
