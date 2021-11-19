@@ -47,8 +47,6 @@ services:
 #      - "8080:8080"
 #      - "9693:9693"
 #      - "9695:9695"
-    volumes:
-      - ./src/hasura/hasura:/hasura
     depends_on:
       - test-postgres
     restart: always
@@ -59,17 +57,3 @@ services:
       HASURA_GRAPHQL_DATABASE_URL: "postgres://postgres:postgrespassword@test-postgres:5432/postgres"
       HASURA_GRAPHQL_PUBLIC_SCHEMA_NAME: public
 #      AWS_LAMBDA_API_GATEWAY_ENDPOINT: http://lambda-router:5000
-
-#  firebase:
-#    build:
-#      context: ./src/firebase
-#      dockerfile: hosting.Dockerfile
-#    restart: always
-#    volumes:
-#      - ./src/firebase:/var/www:delegated
-#    ports:
-#      - "8081:5000" # for auth demo hosting
-#    env_file:
-#      - .env
-#    environment:
-#      GOOGLE_APPLICATION_CREDENTIALS: "/var/www/firebase.key.json"
