@@ -44,7 +44,6 @@
         name
         description
         ticker_metrics {
-            profit_margin
             # trading
             avg_volume_10d
             short_percent_outstanding
@@ -95,8 +94,10 @@
             beaten_quarterly_eps_estimation_count_ttm
             eps_surprise
             revenue_estimate_avg_0y
-            revenue_ttm
+            revenue_actual
             #financials
+            profit_margin
+            revenue_ttm
             revenue_per_share_ttm
             net_income
             roi

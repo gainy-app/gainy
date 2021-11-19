@@ -121,3 +121,61 @@
     }
 }
 ```
+
+### Gains
+
+```GraphQL
+{
+  app_profiles {
+    portfolio_gains {
+      absolute_gain_1m
+      absolute_gain_1w
+      absolute_gain_1y
+      absolute_gain_3m
+      absolute_gain_5y
+      absolute_gain_total
+      actual_value
+      relative_gain_1m
+      relative_gain_1w
+      relative_gain_1y
+      relative_gain_3m
+      relative_gain_5y
+      relative_gain_total
+    }
+    profile_holdings {
+      portfolio_holding_gains {
+        absolute_gain_1m
+        absolute_gain_1w
+        absolute_gain_1y
+        absolute_gain_3m
+        absolute_gain_5y
+        absolute_gain_total
+        actual_value
+        relative_gain_1m
+        relative_gain_1w
+        relative_gain_1y
+        relative_gain_3m
+        relative_gain_5y
+        relative_gain_total
+        value_to_portfolio_value
+      }
+      holding_transactions {
+        portfolio_transaction_gains {
+          absolute_gain_1m
+          absolute_gain_1w
+          absolute_gain_1y
+          absolute_gain_3m
+          absolute_gain_5y
+          absolute_gain_total
+          relative_gain_1m
+          relative_gain_1w
+          relative_gain_1y
+          relative_gain_3m
+          relative_gain_5y
+          relative_gain_total
+        }
+      }
+    }
+  }
+}
+```

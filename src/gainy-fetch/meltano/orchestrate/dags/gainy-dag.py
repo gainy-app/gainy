@@ -111,3 +111,28 @@ loaders >> dbt
 globals()[dag_id] = dag
 
 logger.info(f"DAG '{dag_id}' created")
+
+##################################################################################################################
+
+dag_id = "portfolio-dbt-dag"
+tags = ["meltano", "dbt"]
+dag = DAG(
+    dag_id,
+    tags=tags,
+    catchup=False,
+    default_args=DEFAULT_ARGS,
+    schedule_interval="* * * * 1-5" if ENV == "production" else "*/5 * * * 1-5",
+    max_active_runs=1,
+    is_paused_upon_creation=False
+)
+dbt = BashOperator(
+    task_id="dbt-portfolio",
+    bash_command=f"cd {project_root}; {meltano_bin} invoke dbt run --model portfolio_holding_gains portfolio_transaction_gains portfolio_gains",
+    dag=dag,
+    pool="dbt"
+)
+
+# register the dag
+globals()[dag_id] = dag
+
+logger.info(f"DAG '{dag_id}' created")

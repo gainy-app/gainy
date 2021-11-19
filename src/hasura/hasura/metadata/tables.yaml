@@ -201,6 +201,15 @@
     schema: app
     name: profile_holdings
   object_relationships:
+  - name: portfolio_holding_gains
+    using:
+      manual_configuration:
+        remote_table:
+          schema: public
+          name: portfolio_holding_gains
+        insertion_order: null
+        column_mapping:
+          id: holding_id
   - name: profile
     using:
       foreign_key_constraint_on: profile_id
@@ -210,6 +219,17 @@
   - name: security
     using:
       foreign_key_constraint_on: security_id
+  array_relationships:
+  - name: holding_transactions
+    using:
+      manual_configuration:
+        remote_table:
+          schema: app
+          name: profile_portfolio_transactions
+        insertion_order: null
+        column_mapping:
+          security_id: security_id
+          profile_id: profile_id
   select_permissions:
   - role: user
     permission:
@@ -346,6 +366,15 @@
   - name: account
     using:
       foreign_key_constraint_on: account_id
+  - name: portfolio_transaction_gains
+    using:
+      manual_configuration:
+        remote_table:
+          schema: public
+          name: portfolio_transaction_gains
+        insertion_order: null
+        column_mapping:
+          id: transaction_id
   - name: profile
     using:
       foreign_key_constraint_on: profile_id
@@ -611,6 +640,15 @@
     schema: app
     name: profiles
   object_relationships:
+  - name: portfolio_gains
+    using:
+      manual_configuration:
+        remote_table:
+          schema: public
+          name: portfolio_gains
+        insertion_order: null
+        column_mapping:
+          id: profile_id
   - name: profile_scoring_setting
     using:
       foreign_key_constraint_on:
@@ -982,6 +1020,116 @@
       filter: {}
 - table:
     schema: public
+    name: portfolio_gains
+  object_relationships:
+  - name: profile
+    using:
+      manual_configuration:
+        remote_table:
+          schema: app
+          name: profiles
+        insertion_order: null
+        column_mapping:
+          profile_id: id
+  select_permissions:
+  - role: user
+    permission:
+      columns:
+      - profile_id
+      - updated_at
+      - actual_value
+      - relative_gain_1w
+      - relative_gain_1m
+      - relative_gain_3m
+      - relative_gain_1y
+      - relative_gain_5y
+      - relative_gain_total
+      - absolute_gain_1w
+      - absolute_gain_1m
+      - absolute_gain_3m
+      - absolute_gain_1y
+      - absolute_gain_5y
+      - absolute_gain_total
+      filter:
+        profile:
+          user_id:
+            _eq: X-Hasura-User-Id
+- table:
+    schema: public
+    name: portfolio_holding_gains
+  object_relationships:
+  - name: holding
+    using:
+      manual_configuration:
+        remote_table:
+          schema: app
+          name: profile_holdings
+        insertion_order: null
+        column_mapping:
+          holding_id: id
+  select_permissions:
+  - role: user
+    permission:
+      columns:
+      - holding_id
+      - updated_at
+      - actual_value
+      - value_to_portfolio_value
+      - relative_gain_1w
+      - relative_gain_1m
+      - relative_gain_3m
+      - relative_gain_1y
+      - relative_gain_5y
+      - relative_gain_total
+      - absolute_gain_1w
+      - absolute_gain_1m
+      - absolute_gain_3m
+      - absolute_gain_1y
+      - absolute_gain_5y
+      - absolute_gain_total
+      filter:
+        holding:
+          profile:
+            user_id:
+              _eq: X-Hasura-User-Id
+- table:
+    schema: public
+    name: portfolio_transaction_gains
+  object_relationships:
+  - name: transaction
+    using:
+      manual_configuration:
+        remote_table:
+          schema: app
+          name: profile_portfolio_transactions
+        insertion_order: null
+        column_mapping:
+          transaction_id: id
+  select_permissions:
+  - role: user
+    permission:
+      columns:
+      - transaction_id
+      - updated_at
+      - relative_gain_1w
+      - relative_gain_1m
+      - relative_gain_3m
+      - relative_gain_1y
+      - relative_gain_5y
+      - relative_gain_total
+      - absolute_gain_1w
+      - absolute_gain_1m
+      - absolute_gain_3m
+      - absolute_gain_1y
+      - absolute_gain_5y
+      - absolute_gain_total
+      filter:
+        transaction:
+          profile:
+            user_id:
+              _eq: X-Hasura-User-Id
+- table:
+    schema: public
     name: ticker_categories
   object_relationships:
   - name: categories
@@ -1131,26 +1279,22 @@
   - role: user
     permission:
       columns:
-      - market_capitalization
-      - shares_float
-      - shares_outstanding
+      - absolute_historical_volatility_adjusted_current
+      - absolute_historical_volatility_adjusted_max_1y
+      - absolute_historical_volatility_adjusted_min_1y
       - address_city
       - address_county
       - address_full
       - address_state
-      - dividend_frequency
-      - exchange_name
-      - symbol
-      - absolute_historical_volatility_adjusted_current
-      - absolute_historical_volatility_adjusted_max_1y
-      - absolute_historical_volatility_adjusted_min_1y
       - asset_cash_and_equivalents
       - avg_volume_10d
       - avg_volume_90d
+      - beaten_quarterly_eps_estimation_count_ttm
       - beta
+      - dividend_frequency
       - dividend_payout_ratio
-      - dividends_per_share
       - dividend_yield
+      - dividends_per_share
       - ebitda
       - ebitda_growth_yoy
       - enterprise_value_to_ebitda
@@ -1160,7 +1304,9 @@
       - eps_growth_fwd
       - eps_growth_yoy
       - eps_surprise
+      - exchange_name
       - implied_volatility
+      - market_capitalization
       - net_debt
       - net_income
       - price_change_1m
@@ -1173,18 +1319,21 @@
       - relative_historical_volatility_adjusted_current
       - relative_historical_volatility_adjusted_max_1y
       - relative_historical_volatility_adjusted_min_1y
+      - revenue_actual
       - revenue_estimate_avg_0y
       - revenue_growth_fwd
       - revenue_growth_yoy
+      - revenue_per_share_ttm
       - revenue_ttm
       - roa
       - roi
+      - shares_float
+      - shares_outstanding
       - short_percent_outstanding
       - short_ratio
+      - symbol
       - total_assets
-      - beaten_quarterly_eps_estimation_count_ttm
       - years_of_consecutive_dividend_growth
-      - revenue_per_share_ttm
       filter: {}
 - table:
     schema: public

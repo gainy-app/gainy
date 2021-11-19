@@ -140,5 +140,13 @@ custom_types:
       type: object
       field_mapping:
         security_id: id
+    - remote_table:
+        schema: public
+        name: portfolio_transaction_gains
+      name: gains
+      source: default
+      type: object
+      field_mapping:
+        id: transaction_id
   - name: CreatePlaidLinkTokenOutput
   scalars: []

@@ -70,7 +70,7 @@ schedules:
   - name: prod-to-postgres
     extractor: tap-postgres
     loader: target-postgres
-    transform: skip
+    transform: run
     interval: '@daily'
     start_date: 2021-09-03 13:52:48.598227
     env:
