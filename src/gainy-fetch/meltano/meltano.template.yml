@@ -21,24 +21,28 @@ plugins:
         files:
           - entity: gainy_industries
             path: data/gainy_industries.csv
-            keys: ["id"]
+            keys: [ "id" ]
           - entity: gainy_ticker_industries
             path: data/industry_tickers.csv
-            keys: ["Code"]
+            keys: [ "Code" ]
           - entity: gainy_collections
             path: data/collections.csv
-            keys: ["id"]
+            keys: [ "id" ]
           - entity: gainy_categories
             path: data/categories.csv
-            keys: ["id"]
+            keys: [ "id" ]
           - entity: gainy_interests
             path: data/interests.csv
-            keys: ["id"]
+            keys: [ "id" ]
           - entity: gainy_countries
             path: data/countries.csv # https://github.com/lukes/ISO-3166-Countries-with-Regional-Codes/blob/master/all/all.json
-            keys: ["name", "alpha-2", "alpha-3"]
-    - name: tap-postgres
-      catalog: extract/tap-postgres/tap.catalog.json
+            keys: [ "name", "alpha-2", "alpha-3" ]
+    - name: tap-postgres--sync
+      inherit_from: tap-postgres
+      catalog: configs/raw-sync/tap.catalog.json
+    - name: tap-postgres--search
+      inherit_from: tap-postgres
+      catalog: configs/search/tap.catalog.json
   loaders:
     - name: target-postgres
       variant: transferwise
@@ -46,6 +50,13 @@ plugins:
       config:
         batch_size_rows: 100
         parallelism: 5
+    - name: target-algolia
+      namespace: target-algolia
+      pip_url: /target-algolia
+      config:
+        app_id: $ALGOLIA_APP_ID
+        api_key: $ALGOLIA_INDEXING_API_KEY
+        index_mapping_file: configs/search/search.mapping.yml
   transformers:
     - name: dbt
       pip_url: dbt==0.20.1
@@ -68,7 +79,7 @@ schedules:
     start_date: 2021-09-03 13:52:48.598227
 
   - name: prod-to-postgres
-    extractor: tap-postgres
+    extractor: tap-postgres--sync
     loader: target-postgres
     transform: run
     interval: '@daily'
@@ -84,3 +95,13 @@ schedules:
     start_date: 2021-06-17 10:40:58.742133
     env:
       TARGET_ENVS: '["production","local"]'
+
+  - name: postgres-to-search
+    extractor: tap-postgres--search
+    loader: target-algolia
+    transform: skip
+    interval: '@daily'
+    start_date: 2021-11-15 00:00:00.000000
+    env:
+      TARGET_ENVS: '["production","test"]'
+      INTEGRATION: 'DOWNSTREAM'
