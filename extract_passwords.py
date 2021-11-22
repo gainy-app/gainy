@@ -11,8 +11,7 @@ mapping = [
 ]
 
 for key, field in mapping:
-    resources = filter(lambda record: record['type'] + '.' + record['name'] == key, data['resources'])
-    if len(resources):
+    for resource in filter(lambda record: record['type'] + '.' + record['name'] == key, data['resources']):
         print(key)
-        print(resources[0]['instances'][0]['attributes'][field])
+        print(resource['instances'][0]['attributes'][field])
         print()

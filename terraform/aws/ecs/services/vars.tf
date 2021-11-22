@@ -35,3 +35,7 @@ variable "hasura_cpu_credits" {}
 variable "base_image_registry_address" {}
 variable "base_image_version" {}
 variable "versioned_schema_suffix" {}
+variable "algolia_tickers_index" {}
+variable "algolia_collections_index" {}
+variable "algolia_app_id" {}
+variable "algolia_indexing_key" {}
