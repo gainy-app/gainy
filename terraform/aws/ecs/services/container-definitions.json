@@ -223,7 +223,7 @@
       { "name": "PG_USERNAME",        "value": "${pg_username}" },
       { "name": "PG_PASSWORD",        "value": "${pg_password}" },
       { "name": "ENV",                "value": "${env}" },
-      { "name": "PUBLIC_SCHEMA_NAME", "value": "${pg_transform_schema}" },
+      { "name": "PUBLIC_SCHEMA_NAME", "value": "${pg_transform_schema}" }
     ],
     "links": [],
     "workingDirectory": null,
