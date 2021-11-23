@@ -59,18 +59,18 @@ actions:
     handler: '{{AWS_LAMBDA_API_GATEWAY_ENDPOINT}}/hasuraAction'
   permissions:
   - role: user
-- name: search_tickers
-  definition:
-    kind: ""
-    handler: '{{AWS_LAMBDA_API_GATEWAY_ENDPOINT}}/hasuraAction'
-  permissions:
-    - role: user
 - name: search_collections
   definition:
     kind: ""
     handler: '{{AWS_LAMBDA_API_GATEWAY_ENDPOINT}}/hasuraAction'
   permissions:
-    - role: user
+  - role: user
+- name: search_tickers
+  definition:
+    kind: ""
+    handler: '{{AWS_LAMBDA_API_GATEWAY_ENDPOINT}}/hasuraAction'
+  permissions:
+  - role: user
 custom_types:
   enums: []
   input_objects: []
@@ -79,6 +79,16 @@ custom_types:
   - name: NewsDataPoint
   - name: LivePriceData
   - name: LiveStockPriceData
+  - name: Ticker
+    relationships:
+    - remote_table:
+        schema: public
+        name: tickers
+      name: ticker
+      source: default
+      type: object
+      field_mapping:
+        symbol: symbol
   - name: Collection
     relationships:
     - remote_table:
@@ -89,16 +99,6 @@ custom_types:
       type: object
       field_mapping:
         id: id
-  - name: Ticker
-    relationships:
-      - remote_table:
-          schema: public
-          name: tickers
-        name: ticker
-        source: default
-        type: object
-        field_mapping:
-          symbol: symbol
   - name: MatchScore
     relationships:
     - remote_table:

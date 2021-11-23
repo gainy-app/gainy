@@ -20,6 +20,7 @@ sources:
       - name: eod_dividends
       - name: eod_options
       - name: eod_historical_prices
+      - name: eod_intraday_prices
 
   - name: app
     description: Mobile App data, managed by hasura
@@ -638,19 +639,34 @@ models:
           - type:
               type: 'double precision'
 
-  - name: historical_prices_1m
+  - name: historical_prices_aggregated
     columns:
       - name: symbol
         tests:
           - exists
           - type:
               type: 'character varying'
-      - name: date
+      - name: period
         tests:
           - exists
           - type:
-              type: 'date'
+              type: 'character varying'
+      - name: time
+        tests:
+          - exists
+          - type:
+              type: 'timestamp without time zone'
       - name: open
+        tests:
+          - exists
+          - type:
+              type: 'double precision'
+      - name: high
+        tests:
+          - exists
+          - type:
+              type: 'double precision'
+      - name: low
         tests:
           - exists
           - type:
@@ -665,30 +681,7 @@ models:
           - exists
           - type:
               type: 'double precision'
-
-  - name: historical_prices_1w
-    columns:
-      - name: symbol
-        tests:
-          - exists
-          - type:
-              type: 'character varying'
-      - name: date
-        tests:
-          - exists
-          - type:
-              type: 'date'
-      - name: open
-        tests:
-          - exists
-          - type:
-              type: 'double precision'
-      - name: close
-        tests:
-          - exists
-          - type:
-              type: 'double precision'
-      - name: adjusted_close
+      - name: volume
         tests:
           - exists
           - type:
@@ -1081,6 +1074,11 @@ models:
           - exists
           - type:
               type: 'timestamp without time zone'
+      - name: relative_gain_1d
+        tests:
+          - exists
+          - type:
+              type: 'double precision'
       - name: relative_gain_1w
         tests:
           - exists
@@ -1107,6 +1105,11 @@ models:
           - type:
               type: 'double precision'
       - name: relative_gain_total
+        tests:
+          - exists
+          - type:
+              type: 'double precision'
+      - name: absolute_gain_1d
         tests:
           - exists
           - type:
@@ -1164,6 +1167,11 @@ models:
           - exists
           - type:
               type: 'double precision'
+      - name: relative_gain_1d
+        tests:
+          - exists
+          - type:
+              type: 'double precision'
       - name: relative_gain_1w
         tests:
           - exists
@@ -1190,6 +1198,11 @@ models:
           - type:
               type: 'double precision'
       - name: relative_gain_total
+        tests:
+          - exists
+          - type:
+              type: 'double precision'
+      - name: absolute_gain_1d
         tests:
           - exists
           - type:
@@ -1242,6 +1255,11 @@ models:
           - exists
           - type:
               type: 'timestamp without time zone'
+      - name: relative_gain_1d
+        tests:
+          - exists
+          - type:
+              type: 'double precision'
       - name: relative_gain_1w
         tests:
           - exists
@@ -1268,6 +1286,11 @@ models:
           - type:
               type: 'double precision'
       - name: relative_gain_total
+        tests:
+          - exists
+          - type:
+              type: 'double precision'
+      - name: absolute_gain_1d
         tests:
           - exists
           - type:
@@ -1325,6 +1348,39 @@ models:
           - exists
           - type:
               type: 'character varying'
+
+  - name: ticker_realtime_metrics
+    columns:
+      - name: symbol
+        tests:
+          - exists
+          - type:
+              type: 'character varying'
+      - name: time
+        tests:
+          - exists
+          - type:
+              type: 'timestamp without time zone'
+      - name: actual_price
+        tests:
+          - exists
+          - type:
+              type: 'double precision'
+      - name: absolute_daily_change
+        tests:
+          - exists
+          - type:
+              type: 'double precision'
+      - name: relative_daily_change
+        tests:
+          - exists
+          - type:
+              type: 'double precision'
+      - name: daily_volume
+        tests:
+          - exists
+          - type:
+              type: 'double precision'
 
 exposures:
   - name: ticker_search_index
