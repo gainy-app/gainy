@@ -2,7 +2,7 @@ from enum import Enum
 from math import sqrt
 from typing import Dict
 
-from recommendation.dim_vector import DimVector
+from recommendation.core.dim_vector import DimVector
 
 # IS MATCH
 
