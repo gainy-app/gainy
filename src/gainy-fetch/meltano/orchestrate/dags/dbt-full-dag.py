@@ -42,7 +42,7 @@ if not Path(project_root).joinpath(meltano_bin).exists():
 
 ##################################################################################################################
 
-dag_id = "dbt-only"
+dag_id = "dbt-only-full"
 tags = ["meltano", "dbt"]
 dag = DAG(
     dag_id,
