@@ -16,7 +16,7 @@ with latest_daily_prices as
                                                  time,
                                                  case when adjusted_close > 0 then adjusted_close end as adjusted_close
              from historical_prices_aggregated
-             where period = '1d'
+             where period = '1d' and time > now() - interval '1 week'
              order by symbol, period, time desc
          )
 select distinct on (
