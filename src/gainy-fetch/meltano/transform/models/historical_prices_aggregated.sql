@@ -83,7 +83,7 @@ with max_date_15min as
     order by symbol, time_truncated, time
 )
 
-union
+union all
 
 select (code || '_' || date || '_1d')::varchar as id,
        code                                    as symbol,
@@ -100,7 +100,7 @@ from {{ ref('historical_prices') }}
 left join max_date_1d on max_date_1d.symbol = code
 where max_date_1d.time is null or date > max_date_1d.time
 {% endif %}
-union
+union all
 
 (
     select DISTINCT ON (
@@ -130,7 +130,7 @@ union
     order by code, date_trunc('week', date), date
 )
 
-union
+union all
 
 (
     select DISTINCT ON (
