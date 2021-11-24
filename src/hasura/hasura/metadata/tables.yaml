@@ -811,45 +811,20 @@
       filter: {}
 - table:
     schema: public
-    name: historical_prices
+    name: historical_prices_aggregated
   select_permissions:
   - role: user
     permission:
       columns:
-      - code
       - adjusted_close
       - close
-      - date
       - high
       - low
       - open
+      - period
+      - symbol
+      - time
       - volume
-      filter: {}
-- table:
-    schema: public
-    name: historical_prices_1m
-  select_permissions:
-  - role: user
-    permission:
-      columns:
-      - symbol
-      - date
-      - open
-      - close
-      - adjusted_close
-      filter: {}
-- table:
-    schema: public
-    name: historical_prices_1w
-  select_permissions:
-  - role: user
-    permission:
-      columns:
-      - symbol
-      - date
-      - open
-      - close
-      - adjusted_close
       filter: {}
 - table:
     schema: public
@@ -1362,8 +1337,31 @@
       filter: {}
 - table:
     schema: public
+    name: ticker_realtime_metrics
+  select_permissions:
+  - role: user
+    permission:
+      columns:
+      - symbol
+      - time
+      - actual_price
+      - absolute_daily_change
+      - relative_daily_change
+      - daily_volume
+      filter: {}
+- table:
+    schema: public
     name: tickers
   object_relationships:
+  - name: realtime_metrics
+    using:
+      manual_configuration:
+        remote_table:
+          schema: public
+          name: ticker_realtime_metrics
+        insertion_order: null
+        column_mapping:
+          symbol: symbol
   - name: ticker_analyst_ratings
     using:
       manual_configuration:
@@ -1392,15 +1390,6 @@
         insertion_order: null
         column_mapping:
           symbol: symbol
-  - name: historical_prices
-    using:
-      manual_configuration:
-        remote_table:
-          schema: public
-          name: historical_prices
-        insertion_order: null
-        column_mapping:
-          symbol: code
   - name: ticker_categories
     using:
       manual_configuration:
@@ -1461,24 +1450,6 @@
         remote_table:
           schema: public
           name: ticker_highlights
-        insertion_order: null
-        column_mapping:
-          symbol: symbol
-  - name: ticker_historical_prices_1m
-    using:
-      manual_configuration:
-        remote_table:
-          schema: public
-          name: historical_prices_1m
-        insertion_order: null
-        column_mapping:
-          symbol: symbol
-  - name: ticker_historical_prices_1w
-    using:
-      manual_configuration:
-        remote_table:
-          schema: public
-          name: historical_prices_1w
         insertion_order: null
         column_mapping:
           symbol: symbol

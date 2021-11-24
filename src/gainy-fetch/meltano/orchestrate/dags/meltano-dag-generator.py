@@ -104,34 +104,3 @@ for schedule in schedules:
     globals()[dag_id] = dag
 
     logger.info(f"DAG created for schedule '{schedule['name']}'")
-
-### DBT only
-args = DEFAULT_ARGS.copy()
-if schedule["start_date"]:
-    args["start_date"] = schedule["start_date"]
-
-dag_id = f"meltano-dbt-only"
-
-tags = DEFAULT_TAGS.copy()
-tags.append("dbt-only")
-
-dag = DAG(
-    dag_id,
-    tags=tags,
-    catchup=False,
-    default_args=args,
-    schedule_interval=schedule["interval"],
-    max_active_runs=1,
-    is_paused_upon_creation=True
-)
-
-elt = BashOperator(
-    task_id="transform",
-    bash_command=f"cd {project_root}; {meltano_bin} invoke dbt run",
-    dag=dag,
-)
-
-# register the dag
-globals()[dag_id] = dag
-
-logger.info(f"DAG created for DBT")

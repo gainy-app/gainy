@@ -174,6 +174,22 @@ services:
 
     command: [ "hasura_handler.handle_action" ]
 
+  websockets:
+    build:
+      context: ./src/websockets
+    restart: always
+    volumes:
+      - ./src/websockets:/srv
+    environment:
+      API_TOKEN: "OeAFFmMliFG5orCUuwAKQ8l4WWFQ67YX"
+      PG_HOST: "${PG_ADDRESS}"
+      PG_PORT: "${PG_PORT}"
+      PG_DBNAME: "${PG_DATABASE}"
+      PG_USERNAME: "${PG_USERNAME}"
+      PG_PASSWORD: "${PG_PASSWORD}"
+      ENV: "local"
+      PUBLIC_SCHEMA_NAME: public
+
 volumes:
   db_data:
   meltano_data:

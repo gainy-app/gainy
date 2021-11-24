@@ -1,31 +1,37 @@
-### Intra-day prices
-```graphql
-query {
-  fetchChartData(period: "1D", symbol: "AAPL") {
-    close
-    datetime
-    high
-    low
-    open
-    volume
-  }
+### Chart
+
+periods: 15min, 1d, 1w, 1m
+
+```GraphQL
+{
+    historical_prices_aggregated(where: {symbol: {_eq: "AAPL"}, period: {_eq: "15min"}}, order_by: {time: asc}) {
+        symbol
+        time
+        period
+        open
+        high
+        low
+        close
+        adjusted_close
+        volume
+    }
 }
 ```
 
 ### Realtime prices
 
 ```graphql
-query {
-  fetchLivePrices(symbols: ["AAPL", "GOOG"]) {
-    close
-    daily_change
-    daily_change_p
-    datetime
-    symbol
-  }
+{
+    tickers{
+        realtime_metrics{
+            actual_price
+            relative_daily_change
+        }
+    }
 }
 ```
 
+## Queries below are deprecated
 ### Daily prices and growth rate with industry median
 
 ```graphql

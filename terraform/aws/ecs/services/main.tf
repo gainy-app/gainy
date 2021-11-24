@@ -1,11 +1,17 @@
 locals {
-  ecr_repo               = var.repository_name
+  ecr_repo = var.repository_name
+
   meltano_root_dir       = abspath("${path.cwd}/../src/gainy-fetch")
   meltano_image_tag      = format("meltano-%s-%s", var.env, data.archive_file.meltano_source.output_md5)
   meltano_ecr_image_name = format("%v/%v:%v", var.ecr_address, local.ecr_repo, local.meltano_image_tag)
-  hasura_root_dir        = abspath("${path.cwd}/../src/hasura")
-  hasura_image_tag       = format("hasura-%s-%s", var.env, data.archive_file.hasura_source.output_md5)
-  hasura_ecr_image_name  = format("%v/%v:%v", var.ecr_address, local.ecr_repo, local.hasura_image_tag)
+
+  hasura_root_dir       = abspath("${path.cwd}/../src/hasura")
+  hasura_image_tag      = format("hasura-%s-%s", var.env, data.archive_file.hasura_source.output_md5)
+  hasura_ecr_image_name = format("%v/%v:%v", var.ecr_address, local.ecr_repo, local.hasura_image_tag)
+
+  websockets_root_dir       = abspath("${path.cwd}/../src/websockets")
+  websockets_image_tag      = format("websockets-%s-%s", var.env, data.archive_file.websockets_source.output_md5)
+  websockets_ecr_image_name = format("%v/%v:%v", var.ecr_address, local.ecr_repo, local.websockets_image_tag)
 }
 
 resource "random_password" "hasura" {
@@ -27,6 +33,11 @@ data "archive_file" "hasura_source" {
   type        = "zip"
   source_dir  = local.hasura_root_dir
   output_path = "/tmp/hasura-source.zip"
+}
+data "archive_file" "websockets_source" {
+  type        = "zip"
+  source_dir  = local.websockets_root_dir
+  output_path = "/tmp/websockets-source.zip"
 }
 data "aws_ecr_authorization_token" "token" {}
 resource "docker_registry_image" "meltano" {
@@ -63,6 +74,13 @@ resource "docker_registry_image" "hasura" {
     }
   }
 }
+resource "docker_registry_image" "websockets" {
+  name = local.websockets_ecr_image_name
+  build {
+    context    = local.websockets_root_dir
+    dockerfile = "Dockerfile"
+  }
+}
 
 /*
  * Create task definition
@@ -92,6 +110,9 @@ resource "aws_ecs_task_definition" "default" {
       hasura_image                    = docker_registry_image.hasura.name
       hasura_memory_credits           = var.hasura_memory_credits
       hasura_cpu_credits              = var.hasura_cpu_credits
+
+      websockets_memory_credits = var.websockets_memory_credits
+      websockets_image          = docker_registry_image.websockets.name
 
       env                                  = var.env
       eodhistoricaldata_api_token          = var.eodhistoricaldata_api_token

@@ -200,5 +200,48 @@
         "awslogs-stream-prefix": "meltano"
       }
     }
+  },
+  {
+    "name": "websockets",
+    "memory": ${websockets_memory_credits},
+    "extraHosts": null,
+    "dnsServers": null,
+    "disableNetworking": null,
+    "dnsSearchDomains": null,
+    "portMappings": [],
+    "hostname": null,
+    "essential": true,
+    "entryPoint": [],
+    "mountPoints": [],
+    "ulimits": null,
+    "dockerSecurityOptions": null,
+    "environment": [
+      { "name": "API_TOKEN",          "value": "${eodhistoricaldata_api_token}" },
+      { "name": "PG_HOST",            "value": "${pg_host}" },
+      { "name": "PG_PORT",            "value": "${pg_port}" },
+      { "name": "PG_DBNAME",          "value": "${pg_dbname}" },
+      { "name": "PG_USERNAME",        "value": "${pg_username}" },
+      { "name": "PG_PASSWORD",        "value": "${pg_password}" },
+      { "name": "ENV",                "value": "${env}" },
+      { "name": "PUBLIC_SCHEMA_NAME", "value": "${pg_transform_schema}" }
+    ],
+    "links": [],
+    "workingDirectory": null,
+    "readonlyRootFilesystem": null,
+    "image": "${websockets_image}",
+    "command": [],
+    "user": null,
+    "dockerLabels": null,
+    "cpu": null,
+    "privileged": null,
+    "memoryReservation": null,
+    "logConfiguration": {
+      "logDriver": "awslogs",
+      "options": {
+        "awslogs-group": "${aws_log_group_name}",
+        "awslogs-region": "${aws_log_region}",
+        "awslogs-stream-prefix": "websockets"
+      }
+    }
   }
 ]
