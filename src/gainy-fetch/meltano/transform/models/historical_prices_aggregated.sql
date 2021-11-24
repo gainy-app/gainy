@@ -15,38 +15,14 @@
 
 
 {% if is_incremental() %}
-with max_date_15min as
+with max_date as
          (
              select symbol,
+                    period,
                     max(time) as time
-             from {{ this }}
-             where period = '15min'
-             group by symbol
-         ),
-     max_date_1d as
-         (
-             select symbol,
-                    max(time) as time
-             from {{ this }}
-             where period = '1d'
-             group by symbol
-         ),
-     max_date_1w as
-         (
-             select symbol,
-                    max(time) as time
-             from {{ this }}
-             where period = '1w'
-             group by symbol
-         ),
-     max_date_1m as
-         (
-             select symbol,
-                    max(time) as time
-             from {{ this }}
-             where period = '1m'
-             group by symbol
-         )
+             from historical_prices_aggregated
+             group by symbol, period
+      )
 {% endif %}
 (
     with expanded_intraday_prices as
@@ -56,8 +32,8 @@ with max_date_15min as
                         interval '1 minute' * mod(extract(minutes from eod_intraday_prices.time)::int, 15) as time_truncated
                  from {{ source('eod', 'eod_intraday_prices') }}
                  {% if is_incremental() %}
-                 left join max_date_15min on max_date_15min.symbol = eod_intraday_prices.symbol
-                 where max_date_15min.time is null or eod_intraday_prices.time >= max_date_15min.time
+                 left join max_date on max_date.symbol = eod_intraday_prices.symbol and max_date.period = '15min'
+                 where max_date.time is null or eod_intraday_prices.time >= max_date.time
                  {% endif %}
              )
     select DISTINCT ON (
@@ -97,9 +73,10 @@ select (code || '_' || date || '_1d')::varchar as id,
        volume::double precision
 from {{ ref('historical_prices') }}
 {% if is_incremental() %}
-left join max_date_1d on max_date_1d.symbol = code
-where max_date_1d.time is null or date > max_date_1d.time
+left join max_date on max_date.symbol = code and max_date.period = '1d'
+where max_date.time is null or date > max_date.time
 {% endif %}
+
 union all
 
 (
@@ -124,8 +101,8 @@ union all
           OVER (partition by code, date_trunc('week', date)))::double precision                                             as volume
     from {{ ref('historical_prices') }}
     {% if is_incremental() %}
-    left join max_date_1w on max_date_1w.symbol = code
-    where max_date_1w.time is null or date > max_date_1w.time
+    left join max_date on max_date.symbol = code and max_date.period = '1w'
+    where max_date.time is null or date >= max_date.time
     {% endif %}
     order by code, date_trunc('week', date), date
 )
@@ -154,8 +131,8 @@ union all
           OVER (partition by code, date_trunc('month', date)))::double precision                                             as volume
     from {{ ref('historical_prices') }}
     {% if is_incremental() %}
-    left join max_date_1m on max_date_1m.symbol = code
-    where max_date_1m.time is null or date > max_date_1m.time
+    left join max_date on max_date.symbol = code and max_date.period = '1m'
+    where max_date.time is null or date >= max_date.time
     {% endif %}
     order by code, date_trunc('month', date), date
 )
