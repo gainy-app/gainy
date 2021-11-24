@@ -102,6 +102,8 @@ module "ecs-service" {
   hasura_cpu_credits              = local.hasura_cpu_credits
   hasura_memory_credits           = local.hasura_memory_credits
 
+  websockets_memory_credits = local.websockets_memory_credits
+
   eodhistoricaldata_api_token = var.eodhistoricaldata_api_token
   pg_host                     = module.rds.db_instance.address
   pg_password                 = module.rds.db_instance.password
