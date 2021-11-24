@@ -1,64 +1,26 @@
+from abc import ABC
 from typing import List, Dict, Tuple
 
 from common.hasura_function import HasuraAction
 from recommendation.core.dim_vector import NamedDimVector
-from recommendation.data_access import read_categories_risks, \
-    read_profile_industry_vector, \
-    read_profile_category_vector, read_ticker_industry_vector, read_ticker_category_vector, \
-    read_ticker_industry_vectors_by_collection, read_ticker_category_vectors_by_collection
+from recommendation.data_access import read_categories_risks, read_profile_industry_vector, \
+    read_profile_category_vector, read_ticker_industry_vectors, read_ticker_category_vectors, read_collection_tickers
 from recommendation.match_score.match_score import profile_ticker_similarity, is_match
 
 
-class GetMatchScoreByTicker(HasuraAction):
-    def __init__(self):
-        super().__init__("get_match_score_by_ticker", "profile_id")
+class AbstractMatchScoreAction(HasuraAction, ABC):
 
-    def apply(self, db_conn, input_params):
-        profile_id = input_params["profile_id"]
-        profile_category_vector = read_profile_category_vector(db_conn, profile_id)
-        profile_industry_vector = read_profile_industry_vector(db_conn, profile_id)
+    def __init__(self, name, profile_id_param):
+        super().__init__(name, profile_id_param)
 
-        ticker = input_params["symbol"]
-        ticker_category_vector = read_ticker_category_vector(db_conn, ticker)
-        ticker_industry_vector = read_ticker_industry_vector(db_conn, ticker)
-
-        risks = read_categories_risks(db_conn)
-
-        match_score = profile_ticker_similarity(profile_category_vector,
-                                                ticker_category_vector, risks,
-                                                profile_industry_vector,
-                                                ticker_industry_vector)
-        explanation = match_score.explain()
-        return {
-            "symbol": ticker,
-            "is_match": is_match(profile_category_vector,
-                                 ticker_category_vector),
-            "match_score": match_score.match_score(),
-            "fits_risk": explanation.risk_level.value,
-            "fits_categories": explanation.category_level.value,
-            "fits_interests": explanation.interest_level.value
-        }
-
-
-#     MATCH SCORE BY COLLECTIONS  #
-
-
-class GetMatchScoreByCollection(HasuraAction):
-    def __init__(self):
-        super().__init__("get_match_scores_by_collection", "profile_id")
-
-    def apply(self, db_conn, input_params):
-        profile_id = input_params["profile_id"]
+    def compute_match_scores(self, db_conn, profile_id, symbols):
         profile_category_vector = read_profile_category_vector(db_conn, profile_id)
         profile_industry_vector = read_profile_industry_vector(db_conn, profile_id)
 
         risks = read_categories_risks(db_conn)
 
-        collection_id = input_params["collection_id"]
-        ticker_industry_vectors = \
-            read_ticker_industry_vectors_by_collection(db_conn, profile_id, collection_id)
-        ticker_category_vectors = \
-            read_ticker_category_vectors_by_collection(db_conn, profile_id, collection_id)
+        ticker_industry_vectors = read_ticker_industry_vectors(db_conn, symbols)
+        ticker_category_vectors = read_ticker_category_vectors(db_conn, symbols)
 
         ticker_category_vectors_dict = self._index_ticker_collection_vectors(
             ticker_category_vectors)
@@ -66,9 +28,7 @@ class GetMatchScoreByCollection(HasuraAction):
             ticker_industry_vectors)
 
         result = []
-        all_ticker_collection_pairs = \
-            set(ticker_category_vectors_dict.keys()).union(ticker_industry_vectors_dict.keys())
-        for symbol in all_ticker_collection_pairs:
+        for symbol in symbols:
             ticker_category_vector = ticker_category_vectors_dict.get(
                 symbol, NamedDimVector(symbol, {}))
             ticker_industry_vector = ticker_industry_vectors_dict.get(
@@ -107,4 +67,42 @@ class GetMatchScoreByCollection(HasuraAction):
             result[vector.name] = vector
 
         return result
+
+
+class GetMatchScoreByTicker(AbstractMatchScoreAction):
+
+    def __init__(self):
+        super().__init__("get_match_score_by_ticker", "profile_id")
+
+    def apply(self, db_conn, input_params):
+        profile_id = input_params["profile_id"]
+        ticker = input_params["symbol"]
+
+        return super().compute_match_scores(db_conn, profile_id, [ticker])[0]
+
+
+class GetMatchScoreByTickerList(AbstractMatchScoreAction):
+
+    def __init__(self):
+        super().__init__("get_match_scores_by_ticker_list", "profile_id")
+
+    def apply(self, db_conn, input_params):
+        profile_id = input_params["profile_id"]
+        tickers = input_params["symbols"]
+
+        return super().compute_match_scores(db_conn, profile_id, tickers)
+
+
+class GetMatchScoreByCollection(AbstractMatchScoreAction):
+
+    def __init__(self):
+        super().__init__("get_match_scores_by_collection", "profile_id")
+
+    def apply(self, db_conn, input_params):
+        profile_id = input_params["profile_id"]
+        collection_id = input_params["collection_id"]
+
+        collection_tickers = read_collection_tickers(db_conn, profile_id, collection_id)
+
+        return super().compute_match_scores(db_conn, profile_id, collection_tickers)
 

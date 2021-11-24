@@ -1,4 +1,5 @@
 import os
+from operator import itemgetter
 from typing import List
 
 from psycopg2.extras import execute_values
@@ -36,18 +37,6 @@ with open(os.path.join(script_dir, "sql/profile_industries.sql")
           ) as _profile_industry_vector_query_file:
     _profile_industry_vector_query = _profile_industry_vector_query_file.read()
 
-with open(
-        os.path.join(script_dir, "sql/ticker_categories_by_collection.sql")
-) as _ticker_categories_by_collection_query_file:
-    _ticker_categories_by_collection_query = _ticker_categories_by_collection_query_file.read(
-    )
-
-with open(
-        os.path.join(script_dir, "sql/ticker_industries_by_collection.sql")
-) as _ticker_industries_by_collection_query_file:
-    _ticker_industries_by_collection_query = _ticker_industries_by_collection_query_file.read(
-    )
-
 with open(os.path.join(
         script_dir,
         "sql/industry_frequencies.sql")) as _industry_frequencies_query_file:
@@ -67,34 +56,20 @@ def read_categories_risks(db_conn):
     return dict(cursor.fetchall())
 
 
-def read_ticker_category_vectors_by_collection(db_conn, profile_id, collection_id):
-    return _get_ticker_vectors_by_collection(db_conn, _ticker_categories_by_collection_query, profile_id, collection_id)
+def read_ticker_category_vectors(db_conn, symbols: List[str]) -> List[NamedDimVector]:
+    return _get_ticker_vectors(db_conn, _ticker_category_vector_query, symbols)
 
 
-def read_ticker_industry_vectors_by_collection(db_conn, profile_id, collection_id):
-    return _get_ticker_vectors_by_collection(db_conn, _ticker_industries_by_collection_query, profile_id, collection_id)
+def read_ticker_industry_vectors(db_conn, symbols: List[str]) -> List[NamedDimVector]:
+    return _get_ticker_vectors(db_conn, _ticker_industry_vector_query, symbols)
 
 
-def _get_ticker_vectors_by_collection(db_conn, ticker_vectors_query, profile_id, collection_id):
-    cursor = db_conn.cursor()
-    cursor.execute(ticker_vectors_query, {
-        "profile_id": profile_id,
-        "collection_id": collection_id
-    })
-
-    vectors = []
-    for row in cursor.fetchall():
-        vectors.append(NamedDimVector(row[0], row[1]))
-
-    return vectors
+def read_ticker_category_vector(db_conn, symbol: str) -> NamedDimVector:
+    return _get_ticker_vectors(db_conn, _ticker_category_vector_query, [symbol])[0]
 
 
-def read_ticker_category_vector(db_conn, symbol):
-    return _get_ticker_vector(db_conn, _ticker_category_vector_query, symbol)
-
-
-def read_ticker_industry_vector(db_conn, symbol):
-    return _get_ticker_vector(db_conn, _ticker_industry_vector_query, symbol)
+def read_ticker_industry_vector(db_conn, symbol: str) -> NamedDimVector:
+    return _get_ticker_vectors(db_conn, _ticker_industry_vector_query, [symbol])[0]
 
 
 def read_profile_category_vector(db_conn, profile_id):
@@ -114,12 +89,12 @@ def _get_profile_vector(db_conn, profile_vector_query, profile_id):
     return vectors[0]
 
 
-def _get_ticker_vector(db_conn, ticker_vector_query, symbol):
-    vectors = _query_vectors(db_conn, ticker_vector_query, {"symbol": symbol})
+def _get_ticker_vectors(db_conn, ticker_vector_query, symbols) -> List[NamedDimVector]:
+    vectors = _query_vectors(db_conn, ticker_vector_query, {"symbols": tuple(symbols)})
     if not vectors:
-        raise HasuraActionException(400, f"Symbol {symbol} not found")
+        raise HasuraActionException(400, f"None of symbols {symbols} were found")
 
-    return vectors[0]
+    return vectors
 
 
 def read_all_ticker_category_and_industry_vectors(db_conn) -> list[(DimVector, DimVector)]:
@@ -159,7 +134,20 @@ def read_industry_frequencies(db_conn):
     return document_frequencies
 
 
-def is_collection_enabled(db_conn, profile_id, collection_id) -> bool:
+def read_collection_tickers(db_conn, profile_id: str, collection_id: str) -> List[str]:
+    with db_conn.cursor() as cursor:
+        cursor.execute(
+            """SELECT symbol FROM public.profile_ticker_collections 
+            WHERE (profile_id=%(profile_id)s OR profile_id IS NULL) AND collection_id=%(collection_id)s""",
+            {
+                "profile_id": profile_id,
+                "collection_id": collection_id
+            })
+
+        return list(map(itemgetter(0), cursor.fetchall()))
+
+
+def is_collection_enabled(db_conn, profile_id: str, collection_id: str) -> bool:
     with db_conn.cursor() as cursor:
         cursor.execute(
             """SELECT enabled FROM public.profile_collections

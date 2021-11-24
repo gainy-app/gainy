@@ -1,7 +1,8 @@
 import os
 
 from common.hasura_dispatcher import HasuraActionDispatcher, HasuraTriggerDispatcher
-from recommendation.match_score_action import GetMatchScoreByCollection, GetMatchScoreByTicker
+from recommendation.match_score_action import GetMatchScoreByCollection, GetMatchScoreByTicker, \
+    GetMatchScoreByTickerList
 from recommendation.recommendation_action import GetRecommendedCollections
 from portfolio.plaid.actions import *
 from portfolio.actions import *
@@ -33,6 +34,7 @@ API_GATEWAY_PROXY_INTEGRATION = os.environ.get(
 ACTIONS = [
     GetRecommendedCollections(),
     GetMatchScoreByTicker(),
+    GetMatchScoreByTickerList(),
     GetMatchScoreByCollection(),
 
     # Portfolio

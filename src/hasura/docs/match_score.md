@@ -16,6 +16,24 @@ query {
 }
 ```
 
+### Get match scores by ticker list
+
+```graphql
+query {
+    get_match_scores_by_ticker_list(profile_id: 1, symbols: ["GOOGL", "AAPL"]) {
+        symbol
+        is_match
+        match_score
+        fits_risk
+        fits_categories
+        fits_interests
+        ticker {
+            name
+        }
+    }
+}
+```
+
 ### Get match scores by collection id
 
 ```graphql
