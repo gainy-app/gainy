@@ -29,12 +29,14 @@ with open(os.path.join(script_dir, "sql/ticker_categories_industries.sql")
     _ticker_categories_industries_query = _ticker_categories_industries_query_file.read(
     )
 
-with open(os.path.join(script_dir, "sql/profile_categories.sql")
-          ) as _profile_category_vector_query_file:
+with open(os.path.join(
+        script_dir,
+        "sql/profile_categories.sql")) as _profile_category_vector_query_file:
     _profile_category_vector_query = _profile_category_vector_query_file.read()
 
-with open(os.path.join(script_dir, "sql/profile_industries.sql")
-          ) as _profile_industry_vector_query_file:
+with open(os.path.join(
+        script_dir,
+        "sql/profile_industries.sql")) as _profile_industry_vector_query_file:
     _profile_industry_vector_query = _profile_industry_vector_query_file.read()
 
 with open(os.path.join(
@@ -56,28 +58,34 @@ def read_categories_risks(db_conn):
     return dict(cursor.fetchall())
 
 
-def read_ticker_category_vectors(db_conn, symbols: List[str]) -> List[NamedDimVector]:
+def read_ticker_category_vectors(db_conn,
+                                 symbols: List[str]) -> List[NamedDimVector]:
     return _get_ticker_vectors(db_conn, _ticker_category_vector_query, symbols)
 
 
-def read_ticker_industry_vectors(db_conn, symbols: List[str]) -> List[NamedDimVector]:
+def read_ticker_industry_vectors(db_conn,
+                                 symbols: List[str]) -> List[NamedDimVector]:
     return _get_ticker_vectors(db_conn, _ticker_industry_vector_query, symbols)
 
 
 def read_ticker_category_vector(db_conn, symbol: str) -> NamedDimVector:
-    return _get_ticker_vectors(db_conn, _ticker_category_vector_query, [symbol])[0]
+    return _get_ticker_vectors(db_conn, _ticker_category_vector_query,
+                               [symbol])[0]
 
 
 def read_ticker_industry_vector(db_conn, symbol: str) -> NamedDimVector:
-    return _get_ticker_vectors(db_conn, _ticker_industry_vector_query, [symbol])[0]
+    return _get_ticker_vectors(db_conn, _ticker_industry_vector_query,
+                               [symbol])[0]
 
 
 def read_profile_category_vector(db_conn, profile_id):
-    return _get_profile_vector(db_conn, _profile_category_vector_query, profile_id)
+    return _get_profile_vector(db_conn, _profile_category_vector_query,
+                               profile_id)
 
 
 def read_profile_industry_vector(db_conn, profile_id):
-    return _get_profile_vector(db_conn, _profile_industry_vector_query, profile_id)
+    return _get_profile_vector(db_conn, _profile_industry_vector_query,
+                               profile_id)
 
 
 def _get_profile_vector(db_conn, profile_vector_query, profile_id):
@@ -89,15 +97,19 @@ def _get_profile_vector(db_conn, profile_vector_query, profile_id):
     return vectors[0]
 
 
-def _get_ticker_vectors(db_conn, ticker_vector_query, symbols) -> List[NamedDimVector]:
-    vectors = _query_vectors(db_conn, ticker_vector_query, {"symbols": tuple(symbols)})
+def _get_ticker_vectors(db_conn, ticker_vector_query,
+                        symbols) -> List[NamedDimVector]:
+    vectors = _query_vectors(db_conn, ticker_vector_query,
+                             {"symbols": tuple(symbols)})
     if not vectors:
-        raise HasuraActionException(400, f"None of symbols {symbols} were found")
+        raise HasuraActionException(400,
+                                    f"None of symbols {symbols} were found")
 
     return vectors
 
 
-def read_all_ticker_category_and_industry_vectors(db_conn) -> list[(DimVector, DimVector)]:
+def read_all_ticker_category_and_industry_vectors(
+        db_conn) -> list[(DimVector, DimVector)]:
     cursor = db_conn.cursor()
     cursor.execute(_ticker_categories_industries_query)
 
@@ -134,7 +146,8 @@ def read_industry_frequencies(db_conn):
     return document_frequencies
 
 
-def read_collection_tickers(db_conn, profile_id: str, collection_id: str) -> List[str]:
+def read_collection_tickers(db_conn, profile_id: str,
+                            collection_id: str) -> List[str]:
     with db_conn.cursor() as cursor:
         cursor.execute(
             """SELECT symbol FROM public.profile_ticker_collections 
@@ -147,7 +160,8 @@ def read_collection_tickers(db_conn, profile_id: str, collection_id: str) -> Lis
         return list(map(itemgetter(0), cursor.fetchall()))
 
 
-def is_collection_enabled(db_conn, profile_id: str, collection_id: str) -> bool:
+def is_collection_enabled(db_conn, profile_id: str,
+                          collection_id: str) -> bool:
     with db_conn.cursor() as cursor:
         cursor.execute(
             """SELECT enabled FROM public.profile_collections
@@ -162,7 +176,8 @@ def is_collection_enabled(db_conn, profile_id: str, collection_id: str) -> bool:
     return row and row[0] == "1"
 
 
-def update_personalized_collection(db_conn, profile_id, collection_id, ticker_list):
+def update_personalized_collection(db_conn, profile_id, collection_id,
+                                   ticker_list):
     with db_conn.cursor() as cursor:
         cursor.execute(
             """SELECT profile_id, collection_id FROM app.personalized_collection_sizes 
@@ -201,5 +216,4 @@ def update_personalized_collection(db_conn, profile_id, collection_id, ticker_li
         execute_values(
             cursor,
             "INSERT INTO app.personalized_ticker_collections(profile_id, collection_id, symbol) VALUES %s",
-            [(profile_id, collection_id, symbol)
-             for symbol in ticker_list])
+            [(profile_id, collection_id, symbol) for symbol in ticker_list])

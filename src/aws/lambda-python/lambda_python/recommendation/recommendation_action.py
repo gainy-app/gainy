@@ -29,7 +29,8 @@ class GetRecommendedCollections(HasuraAction):
         ranked_collections_ids = [c_v.item.name for c_v in ranked_collections]
 
         # Add `top-20 for you` collection as the top item
-        is_top_20_enabled = is_collection_enabled(db_conn, profile_id, TOP_20_FOR_YOU_COLLECTION_ID)
+        is_top_20_enabled = is_collection_enabled(
+            db_conn, profile_id, TOP_20_FOR_YOU_COLLECTION_ID)
         if is_top_20_enabled:
             ranked_collections_ids = [TOP_20_FOR_YOU_COLLECTION_ID
                                       ] + ranked_collections_ids
@@ -41,6 +42,3 @@ class GetRecommendedCollections(HasuraAction):
               }))
 
         return [{"id": id} for id in ranked_collections_ids]
-
-
-
