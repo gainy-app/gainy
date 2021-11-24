@@ -5,7 +5,7 @@
     incremental_strategy = 'insert_overwrite',
     post_hook=[
       index(this, 'id', true),
-      'create unique index if not exists {{ get_index_name(this, "symbol__time__period") }} (symbol, time, period)',
+      'create unique index if not exists {{ get_index_name(this, "symbol__period__time") }} (symbol, period, time desc)',
     ]
   )
 }}
