@@ -67,7 +67,7 @@ resource "datadog_monitor" "hasura_alb_5xx" {
   message = "Hasura 5xx Errors Monitor triggered. Notify: @slack-${var.slack_channel_name} <!channel>"
   #  escalation_message = "Escalation message @pagerduty"
 
-  query = "avg(last_1h):anomalies(sum:aws.applicationelb.httpcode_target_5xx{name:*-production}.as_count(), 'basic', 2, direction='above', alert_window='last_1h', interval=300, count_default_zero='true') > 0.01"
+  query = "avg(last_1h):anomalies(sum:aws.applicationelb.httpcode_target_5xx{name:*-production}.as_count(), 'basic', 2, direction='above', alert_window='last_15min', interval=300, count_default_zero='true') > 0.01"
 
   monitor_threshold_windows {
     recovery_window = "last_15min"
