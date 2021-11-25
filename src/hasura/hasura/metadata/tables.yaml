@@ -2,9 +2,6 @@
     schema: app
     name: portfolio_securities
   object_relationships:
-  - name: profile
-    using:
-      foreign_key_constraint_on: profile_id
   - name: tickers
     using:
       manual_configuration:
@@ -26,21 +23,17 @@
   - role: user
     permission:
       columns:
-      - id
       - close_price
       - close_price_as_of
+      - created_at
+      - id
       - iso_currency_code
       - name
       - ref_id
       - ticker_symbol
       - type
-      - profile_id
-      - created_at
       - updated_at
-      filter:
-        profile:
-          user_id:
-            _eq: X-Hasura-User-Id
+      filter: {}
 - table:
     schema: app
     name: profile_categories
@@ -572,13 +565,6 @@
           schema: app
           name: profile_scoring_settings
   array_relationships:
-  - name: portfolio_securities
-    using:
-      foreign_key_constraint_on:
-        column: profile_id
-        table:
-          schema: app
-          name: portfolio_securities
   - name: profile_categories
     using:
       foreign_key_constraint_on:
