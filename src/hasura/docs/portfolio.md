@@ -128,6 +128,7 @@
 {
   app_profiles {
     portfolio_gains {
+      absolute_gain_1d
       absolute_gain_1m
       absolute_gain_1w
       absolute_gain_1y
@@ -135,6 +136,7 @@
       absolute_gain_5y
       absolute_gain_total
       actual_value
+      relative_gain_1d
       relative_gain_1m
       relative_gain_1w
       relative_gain_1y
@@ -144,6 +146,7 @@
     }
     profile_holdings {
       portfolio_holding_gains {
+        absolute_gain_1d
         absolute_gain_1m
         absolute_gain_1w
         absolute_gain_1y
@@ -151,6 +154,7 @@
         absolute_gain_5y
         absolute_gain_total
         actual_value
+        relative_gain_1d
         relative_gain_1m
         relative_gain_1w
         relative_gain_1y
@@ -161,12 +165,14 @@
       }
       holding_transactions {
         portfolio_transaction_gains {
+          absolute_gain_1d
           absolute_gain_1m
           absolute_gain_1w
           absolute_gain_1y
           absolute_gain_3m
           absolute_gain_5y
           absolute_gain_total
+          relative_gain_1d
           relative_gain_1m
           relative_gain_1w
           relative_gain_1y
@@ -182,7 +188,7 @@
 
 ### Chart
 
-periods: 1d, 1w, 1m
+periods: 15min, 1d, 1w, 1m
 
 ```GraphQL
 {

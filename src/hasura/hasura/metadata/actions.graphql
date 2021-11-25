@@ -67,11 +67,10 @@ type Query {
 }
 
 type Query {
-  search_tickers(
-    query: String!
-    offset: Int
-    limit: Int
-  ): [Ticker]
+  link_plaid_account(
+    profile_id: Int!
+    public_token: String!
+  ): LinkPlaidAccountOutput
 }
 
 type Query {
@@ -83,10 +82,11 @@ type Query {
 }
 
 type Query {
-  link_plaid_account(
-    profile_id: Int!
-    public_token: String!
-  ): LinkPlaidAccountOutput
+  search_tickers(
+    query: String!
+    offset: Int
+    limit: Int
+  ): [Ticker]
 }
 
 type ChartDataPoint {
