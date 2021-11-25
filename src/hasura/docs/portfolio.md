@@ -31,6 +31,16 @@
 }
 ```
 
+### Unlink Account
+
+```graphql
+mutation{
+    delete_app_profile_plaid_access_tokens_by_pk(id: 1){
+        id
+    }
+}
+```
+
 ### Get Holdings
 
 ```graphql
@@ -162,6 +172,7 @@
         relative_gain_5y
         relative_gain_total
         value_to_portfolio_value
+        long_term_tax_holdings
       }
       holding_transactions {
         portfolio_transaction_gains {

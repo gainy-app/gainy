@@ -277,6 +277,13 @@
         profile:
           user_id:
             _eq: X-Hasura-User-Id
+  delete_permissions:
+  - role: user
+    permission:
+      filter:
+        profile:
+          user_id:
+            _eq: X-Hasura-User-Id
 - table:
     schema: app
     name: profile_portfolio_accounts

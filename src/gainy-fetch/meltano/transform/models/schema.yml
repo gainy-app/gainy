@@ -1237,6 +1237,11 @@ models:
           - exists
           - type:
               type: 'double precision'
+      - name: long_term_tax
+        tests:
+          - exists
+          - type:
+              type: 'boolean'
 
   - name: portfolio_gains
     columns:

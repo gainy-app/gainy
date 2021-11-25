@@ -52,8 +52,35 @@ with expanded_holdings as
                       order by profile_portfolio_transactions.id, historical_prices_aggregated.time desc
                   ) t
              group by t.holding_id
+         ),
+     long_term_tax_holdings as
+         (
+             select distinct on (
+                 holding_id
+                 ) holding_id
+             from (
+                      select profile_holdings.id                                                                                            as holding_id,
+                             date,
+                             cumsum,
+                             min(cumsum)
+                             over (partition by t.profile_id, t.security_id order by date rows between current row and unbounded following) as cumsummin
+                      from (
+                               select profile_id,
+                                      security_id,
+                                      date,
+                                      sum(amount) over (partition by security_id, profile_id order by date) as cumsum
+                               from app.profile_portfolio_transactions
+                           ) t
+                               join app.profile_holdings
+                                    on profile_holdings.profile_id = t.profile_id and
+                                       profile_holdings.security_id = t.security_id
+                  ) t
+             where date < now() - interval '1 year'
+               and cumsummin > 0
+             order by holding_id, date
          )
-select holding_id,
+
+select expanded_holdings.holding_id,
        updated_at,
        actual_value,
        actual_value / sum(actual_value) over (partition by profile_id)                as value_to_portfolio_value,
@@ -70,5 +97,7 @@ select holding_id,
        absolute_gain_3m::double precision,
        absolute_gain_1y::double precision,
        absolute_gain_5y::double precision,
-       absolute_gain_total::double precision
+       absolute_gain_total::double precision,
+       (long_term_tax_holdings.holding_id is not null)                                as long_term_tax
 from expanded_holdings
+left join long_term_tax_holdings on long_term_tax_holdings.holding_id = expanded_holdings.holding_id
