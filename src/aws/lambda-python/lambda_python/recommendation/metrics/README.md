@@ -1,4 +1,4 @@
-**Note:** this package (`metrics`) contains code which is required for model serving on Lambda function side. It'll be moved to a separate package in the near future.
+**Note:** this package (`metrics`) contains code which is not required for model serving on Lambda function side. It'll be moved to a separate package in the near future.
 
 **Running**
 

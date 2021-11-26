@@ -66,3 +66,9 @@ class DimVector:
             return 0.0
 
         return DimVector.dot_product(self, other) / self_norm / other_norm
+
+
+class NamedDimVector(DimVector):
+    def __init__(self, name, coordinates):
+        super().__init__(coordinates)
+        self.name = name
