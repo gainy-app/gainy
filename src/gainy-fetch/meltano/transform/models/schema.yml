@@ -1237,6 +1237,64 @@ models:
           - exists
           - type:
               type: 'double precision'
+
+  - name: portfolio_holding_details
+    columns:
+      - name: holding_id
+        tests:
+          - exists
+          - type:
+              type: 'integer'
+      - name: ticker_symbol
+        tests:
+          - exists
+          - type:
+              type: 'character varying'
+      - name: account_id
+        tests:
+          - exists
+          - type:
+              type: 'integer'
+      - name: purchase_date
+        tests:
+          - exists
+          - type:
+              type: 'timestamp without time zone'
+      - name: relative_gain_total
+        tests:
+          - exists
+          - type:
+              type: 'double precision'
+      - name: relative_gain_1d
+        tests:
+          - exists
+          - type:
+              type: 'double precision'
+      - name: value_to_portfolio_value
+        tests:
+          - exists
+          - type:
+              type: 'double precision'
+      - name: ticker_name
+        tests:
+          - exists
+          - type:
+              type: 'character varying'
+      - name: market_capitalization
+        tests:
+          - exists
+          - type:
+              type: 'bigint'
+      - name: next_earnings_date
+        tests:
+          - exists
+          - type:
+              type: 'timestamp without time zone'
+      - name: security_type
+        tests:
+          - exists
+          - type:
+              type: 'character varying'
       - name: ltt_quantity_total
         tests:
           - exists
