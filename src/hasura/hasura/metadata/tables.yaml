@@ -957,21 +957,23 @@
   - role: user
     permission:
       columns:
-      - profile_id
-      - updated_at
-      - actual_value
-      - relative_gain_1w
-      - relative_gain_1m
-      - relative_gain_3m
-      - relative_gain_1y
-      - relative_gain_5y
-      - relative_gain_total
-      - absolute_gain_1w
+      - absolute_gain_1d
       - absolute_gain_1m
-      - absolute_gain_3m
+      - absolute_gain_1w
       - absolute_gain_1y
+      - absolute_gain_3m
       - absolute_gain_5y
       - absolute_gain_total
+      - actual_value
+      - profile_id
+      - relative_gain_1d
+      - relative_gain_1m
+      - relative_gain_1w
+      - relative_gain_1y
+      - relative_gain_3m
+      - relative_gain_5y
+      - relative_gain_total
+      - updated_at
       filter:
         profile:
           user_id:
@@ -993,22 +995,25 @@
   - role: user
     permission:
       columns:
-      - holding_id
-      - updated_at
-      - actual_value
-      - value_to_portfolio_value
-      - relative_gain_1w
-      - relative_gain_1m
-      - relative_gain_3m
-      - relative_gain_1y
-      - relative_gain_5y
-      - relative_gain_total
-      - absolute_gain_1w
+      - absolute_gain_1d
       - absolute_gain_1m
-      - absolute_gain_3m
+      - absolute_gain_1w
       - absolute_gain_1y
+      - absolute_gain_3m
       - absolute_gain_5y
       - absolute_gain_total
+      - actual_value
+      - holding_id
+      - ltt_quantity_total
+      - relative_gain_1d
+      - relative_gain_1m
+      - relative_gain_1w
+      - relative_gain_1y
+      - relative_gain_3m
+      - relative_gain_5y
+      - relative_gain_total
+      - updated_at
+      - value_to_portfolio_value
       filter:
         holding:
           profile:
@@ -1031,20 +1036,22 @@
   - role: user
     permission:
       columns:
-      - transaction_id
-      - updated_at
-      - relative_gain_1w
-      - relative_gain_1m
-      - relative_gain_3m
-      - relative_gain_1y
-      - relative_gain_5y
-      - relative_gain_total
-      - absolute_gain_1w
+      - absolute_gain_1d
       - absolute_gain_1m
-      - absolute_gain_3m
+      - absolute_gain_1w
       - absolute_gain_1y
+      - absolute_gain_3m
       - absolute_gain_5y
       - absolute_gain_total
+      - relative_gain_1d
+      - relative_gain_1m
+      - relative_gain_1w
+      - relative_gain_1y
+      - relative_gain_3m
+      - relative_gain_5y
+      - relative_gain_total
+      - transaction_id
+      - updated_at
       filter:
         transaction:
           profile:

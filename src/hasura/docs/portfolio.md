@@ -172,7 +172,7 @@ mutation{
         relative_gain_5y
         relative_gain_total
         value_to_portfolio_value
-        long_term_tax_holdings
+        ltt_quantity_total
       }
       holding_transactions {
         portfolio_transaction_gains {

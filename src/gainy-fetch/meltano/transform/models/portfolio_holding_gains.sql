@@ -55,31 +55,34 @@ with expanded_holdings as
          ),
      long_term_tax_holdings as
          (
-             select distinct on (
-                 holding_id
-                 ) holding_id
+             select distinct on (holding_id) holding_id,
+                                             ltt_quantity_total
              from (
-                      select profile_holdings.id                                                                                            as holding_id,
+                      select profile_holdings.id                                                                                                             as holding_id,
+                             quantity_sign,
                              date,
-                             cumsum,
                              min(cumsum)
-                             over (partition by t.profile_id, t.security_id order by date rows between current row and unbounded following) as cumsummin
+                             over (partition by t.profile_id, t.security_id order by t.quantity_sign, date rows between current row and unbounded following) as ltt_quantity_total
                       from (
-                               select profile_id,
+                               select profile_portfolio_transactions.profile_id,
                                       security_id,
                                       date,
-                                      sum(amount) over (partition by security_id, profile_id order by date) as cumsum
-                               from app.profile_portfolio_transactions
+                                      sign(quantity)                                                                                           as quantity_sign,
+                                      sum(quantity)
+                                      over (partition by security_id, profile_portfolio_transactions.profile_id order by sign(quantity), date) as cumsum
+                               from {{ source('app', 'profile_portfolio_transactions') }}
+                                        join {{ source('app', 'portfolio_securities') }}
+                                             on portfolio_securities.id = profile_portfolio_transactions.security_id
+                               where profile_portfolio_transactions.type in ('buy', 'sell')
+                                 and portfolio_securities.type in ('mutual fund', 'equity', 'etf')
                            ) t
-                               join app.profile_holdings
+                                join {{ source('app', 'profile_holdings') }}
                                     on profile_holdings.profile_id = t.profile_id and
                                        profile_holdings.security_id = t.security_id
                   ) t
              where date < now() - interval '1 year'
-               and cumsummin > 0
-             order by holding_id, date
+             order by holding_id, quantity_sign desc, date desc
          )
-
 select expanded_holdings.holding_id,
        updated_at,
        actual_value,
@@ -98,6 +101,6 @@ select expanded_holdings.holding_id,
        absolute_gain_1y::double precision,
        absolute_gain_5y::double precision,
        absolute_gain_total::double precision,
-       (long_term_tax_holdings.holding_id is not null)                                as long_term_tax
+       coalesce(long_term_tax_holdings.ltt_quantity_total, 0)                         as ltt_quantity_total
 from expanded_holdings
 left join long_term_tax_holdings on long_term_tax_holdings.holding_id = expanded_holdings.holding_id
