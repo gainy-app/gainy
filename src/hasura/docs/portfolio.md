@@ -204,7 +204,7 @@ periods: 15min, 1d, 1w, 1m
 ```GraphQL
 {
     portfolio_chart(where: {profile_id: {_eq: 1}, period: {_eq: "1d"}}, order_by: {date: asc}) {
-        date
+        datetime
         period
         value
     }

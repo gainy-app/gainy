@@ -933,6 +933,7 @@
     permission:
       columns:
       - date
+      - datetime
       - period
       - profile_id
       - value

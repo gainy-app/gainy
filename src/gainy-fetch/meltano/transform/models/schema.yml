@@ -1348,6 +1348,11 @@ models:
           - exists
           - type:
               type: 'timestamp without time zone'
+      - name: datetime
+        tests:
+          - exists
+          - type:
+              type: 'timestamp without time zone'
       - name: period
         tests:
           - exists
