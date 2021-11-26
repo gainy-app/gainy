@@ -92,19 +92,19 @@
             eps_actual
             eps_estimate
             beaten_quarterly_eps_estimation_count_ttm
-            eps_surprise
+            eps_difference
             revenue_estimate_avg_0y
             revenue_actual
             #financials
             profit_margin
             revenue_ttm
             revenue_per_share_ttm
-            net_income
+            net_income_ttm
             roi
             asset_cash_and_equivalents
             roa
             total_assets
-            ebitda
+            ebitda_ttm
             net_debt
         }
         ticker_industries {
