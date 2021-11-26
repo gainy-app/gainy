@@ -1,4 +1,4 @@
-from recommendation.dim_vector import DimVector
+from recommendation.core.dim_vector import DimVector
 
 
 def double_normalization_k(vector: DimVector, k: float = 0.5) -> DimVector:
