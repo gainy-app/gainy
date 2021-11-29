@@ -249,14 +249,14 @@ periods: 15min, 1d, 1w, 1m
         icon_url
     }
     
-    # interests options:
+    # categories options:
     categories {
         id
         name
         icon_url
     }
 
-    # interests options:
+    # security_type options:
     #    cash: Cash, currency, and money market funds
     #    derivative: Options, warrants, and other derivative instruments
     #    equity: Domestic and foreign equities
