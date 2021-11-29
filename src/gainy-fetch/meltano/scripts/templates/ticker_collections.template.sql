@@ -80,15 +80,15 @@ with historical_prices as (select * from {{ ref('historical_prices') }}),
                         WHEN countries."sub-region" LIKE '%Latin America%' THEN 'latam'
                         END               as country_group
              from tickers t
-                      LEFT JOIN ticker_industries on t.symbol = ticker_industries.symbol
+                      LEFT JOIN ticker_industries on t.symbol = ticker_industries.symbol --here we have N:N relationship, so we must use distinct in the end (we will get duplicates otherwise)
                       LEFT JOIN gainy_industries on ticker_industries.industry_id = gainy_industries.id
-                      LEFT JOIN ticker_interests on t.symbol = ticker_interests.symbol
+                      LEFT JOIN ticker_interests on t.symbol = ticker_interests.symbol --here we have N:N relationship, so we must use distinct in the end (we will get duplicates otherwise)
                       LEFT JOIN interests on ticker_interests.interest_id = interests.id
                       LEFT JOIN latest_price ON latest_price.code = t.symbol           
                       LEFT JOIN price_1month ON price_1month.code = t.symbol
                       LEFT JOIN price_1year ON price_1year.code = t.symbol           
                       LEFT JOIN ticker_categories tc
-                                on t.symbol = tc.symbol --here we have N:N relationship, so for interests we must use distinct in the end (we will get duplicates otherwise)
+                                on t.symbol = tc.symbol --here we have N:N relationship, so we must use distinct in the end (we will get duplicates otherwise)
                       LEFT JOIN categories c on tc.category_id = c.id
                       LEFT JOIN countries
                                 on countries.name = t.country_name OR countries."alpha-2" = t.country_name OR
