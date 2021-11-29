@@ -1252,6 +1252,11 @@ models:
           - exists
           - type:
               type: 'double precision'
+      - name: ltt_quantity_total
+        tests:
+          - exists
+          - type:
+              type: 'double precision'
 
   - name: portfolio_holding_details
     columns:
@@ -1417,6 +1422,11 @@ models:
           - type:
               type: 'double precision'
       - name: date
+        tests:
+          - exists
+          - type:
+              type: 'timestamp without time zone'
+      - name: datetime
         tests:
           - exists
           - type:

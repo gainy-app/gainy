@@ -172,6 +172,7 @@ mutation{
         relative_gain_5y
         relative_gain_total
         value_to_portfolio_value
+        ltt_quantity_total
       }
       holding_transactions {
         portfolio_transaction_gains {
@@ -203,7 +204,7 @@ periods: 15min, 1d, 1w, 1m
 ```GraphQL
 {
     portfolio_chart(where: {profile_id: {_eq: 1}, period: {_eq: "1d"}}, order_by: {date: asc}) {
-        date
+        datetime
         period
         value
     }
