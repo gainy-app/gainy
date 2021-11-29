@@ -19,6 +19,24 @@ with latest_price AS
               and date > NOW() - interval '1 week'
             order by hp.code, hp.date DESC --we get latest by date not-null prices (if any)
         ),
+     price_1month AS
+        (
+             select distinct on (hp.code) hp.*
+             from {{ ref('historical_prices') }} hp
+             where close is not null --need only close
+               and date < NOW() - interval '0.5 month' --buffer 0.5 month to catch some data up to 1 month
+               and date >= NOW() - interval '1 month'
+             order by hp.code, hp.date ASC
+        ),
+     price_1year AS
+        (
+             select distinct on (hp.code) hp.*
+             from {{ ref('historical_prices') }} hp
+             where close is not null --need only close
+               and date < NOW() - interval '1 month' --if company new we just try to get most earliest date
+               and date >= NOW() - interval '1 year' --up to 1 year but farther than 1 month to not overlap selection with previous one
+             order by hp.code, hp.date ASC
+        ),
      ct as
          (
              select t.symbol                                                     as ticker_code,
@@ -28,7 +46,15 @@ with latest_price AS
                     CASE
                        WHEN latest_price.close > 0 AND latest_price.open > 0
                        THEN (latest_price.close - latest_price.open) / latest_price.open --else NULL
-                       END                                                       as chrt,
+                       END                                                       as chrt_1d,
+                    CASE
+                        WHEN latest_price.close > 0 AND price_1month.close > 0
+                            THEN (latest_price.close - price_1month.close) / price_1month.close --else NULL
+                        END                                                      as chrt_1m,
+                    CASE
+                        WHEN latest_price.close > 0 AND price_1year.close > 0
+                            THEN (latest_price.close - price_1year.close) / price_1year.close --else NULL
+                        END                                                      as chrt_1y,
                     t.type                                                       as ttype,
                     gi.name                                                      as g_industry,
                     t.gic_sector                                                 as gics_sector,
@@ -39,6 +65,8 @@ with latest_price AS
                         END                                                      as country_group
              from {{ ref('tickers') }} t
                       LEFT JOIN latest_price ON latest_price.code = t.symbol
+                      LEFT JOIN price_1month ON price_1month.code = t.symbol
+                      LEFT JOIN price_1year ON price_1year.code = t.symbol
                       LEFT JOIN {{ ref('ticker_industries') }} ti on t.symbol = ti.symbol
                       LEFT JOIN {{ ref('gainy_industries') }} gi on ti.industry_id = gi.id
                       LEFT JOIN {{ ref('ticker_categories') }} tc on t.symbol = tc.symbol --here we have N:N relationship, so for interests we must use distinct in the end (we will get duplicates otherwise)
