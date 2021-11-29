@@ -942,6 +942,7 @@
     permission:
       columns:
       - date
+      - datetime
       - period
       - profile_id
       - value
@@ -1056,6 +1057,7 @@
       - absolute_gain_total
       - actual_value
       - holding_id
+      - ltt_quantity_total
       - relative_gain_1d
       - relative_gain_1m
       - relative_gain_1w
