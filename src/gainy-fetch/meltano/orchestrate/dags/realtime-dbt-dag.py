@@ -42,6 +42,16 @@ if not Path(project_root).joinpath(meltano_bin).exists():
 
 ##################################################################################################################
 
+models = [
+    'ticker_realtime_metrics',
+    'historical_prices_aggregated',
+    'portfolio_holding_gains',
+    'portfolio_holding_details',
+    'portfolio_transaction_gains',
+    'portfolio_gains',
+    'portfolio_chart',
+]
+
 dag_id = "realtime-dbt-dag"
 tags = ["meltano", "dbt"]
 dag = DAG(
@@ -55,7 +65,7 @@ dag = DAG(
 )
 dbt = BashOperator(
     task_id="dbt-portfolio",
-    bash_command=f"cd {project_root}; {meltano_bin} invoke dbt run --model ticker_realtime_metrics historical_prices_aggregated portfolio_holding_gains portfolio_transaction_gains portfolio_gains portfolio_chart",
+    bash_command=f"cd {project_root}; {meltano_bin} invoke dbt run --model " + " ".join(models),
     dag=dag,
     pool="dbt"
 )

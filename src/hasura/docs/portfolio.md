@@ -31,6 +31,16 @@
 }
 ```
 
+### Unlink Account
+
+```graphql
+mutation{
+    delete_app_profile_plaid_access_tokens_by_pk(id: 1){
+        id
+    }
+}
+```
+
 ### Get Holdings
 
 ```graphql
@@ -197,5 +207,63 @@ periods: 15min, 1d, 1w, 1m
         period
         value
     }
+}
+```
+
+### Sorting / Filtering
+
+```GraphQL
+{
+    # app_profile_holdings(order_by: {holding_details: {purchase_date: asc}})
+    # app_profile_holdings(order_by: {holding_details: {relative_gain_total: asc}})
+    # app_profile_holdings(order_by: {holding_details: {relative_gain_1d: asc}})
+    # app_profile_holdings(order_by: {holding_details: {value_to_portfolio_value: asc}})
+    # app_profile_holdings(order_by: {holding_details: {ticker_name: asc}})
+    # app_profile_holdings(order_by: {holding_details: {market_capitalization: asc}})
+    # app_profile_holdings(order_by: {holding_details: {next_earnings_date: asc}})
+    # app_profile_holdings(where: {holding_details: {account_id: {_eq: 7}}})
+    # app_profile_holdings(where: {holding_details: {ticker: {ticker_interests: {interest_id: {_in: [5]}}}}})
+    # app_profile_holdings(where: {holding_details: {ticker: {ticker_categories: {category_id: {_in: []}}}}}) 
+    # app_profile_holdings(where: {holding_details: {security_type: {_in: ["equity"]}}})
+    # app_profile_holdings(where: {holding_details: {ltt_quantity_total: {_gt: 0}}})
+    
+    # account options:
+    app_profile_portfolio_accounts {
+        balance_available
+        balance_current
+        balance_iso_currency_code
+        balance_limit
+        created_at
+        mask
+        name
+        official_name
+        subtype
+        type
+        updated_at
+    }
+    
+    # interests options:
+    interests(where: {enabled: {_eq: "1"}}) {
+        id
+        name
+        icon_url
+    }
+    
+    # categories options:
+    categories {
+        id
+        name
+        icon_url
+    }
+
+    # security_type options:
+    #    cash: Cash, currency, and money market funds
+    #    derivative: Options, warrants, and other derivative instruments
+    #    equity: Domestic and foreign equities
+    #    etf: Multi-asset exchange-traded investment funds
+    #    fixed income: Bonds and certificates of deposit (CDs)
+    #    loan: Loans and loan receivables.
+    #    mutual fund: Open- and closed-end vehicles pooling funds of multiple investors.
+    #    other: Unknown or other investment types
 }
 ```
