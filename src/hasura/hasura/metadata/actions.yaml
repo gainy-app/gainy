@@ -35,6 +35,12 @@ actions:
     handler: '{{AWS_LAMBDA_API_GATEWAY_ENDPOINT}}/hasuraAction'
   permissions:
   - role: user
+- name: get_match_scores_by_ticker_list
+  definition:
+    kind: ""
+    handler: '{{AWS_LAMBDA_API_GATEWAY_ENDPOINT}}/hasuraAction'
+  permissions:
+    - role: user
 - name: get_portfolio_holdings
   definition:
     kind: ""
@@ -136,6 +142,14 @@ custom_types:
       type: object
       field_mapping:
         account_id: id
+    - remote_table:
+        schema: public
+        name: portfolio_holding_details
+      name: holding_details
+      source: default
+      type: object
+      field_mapping:
+        id: holding_id
   - name: PortfolioTransaction
     relationships:
     - remote_table:

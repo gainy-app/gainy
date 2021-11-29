@@ -44,8 +44,7 @@ with expanded_holdings as
                                     on portfolio_securities.id = profile_portfolio_transactions.security_id
                                join {{ ref('historical_prices_aggregated') }}
                                     on historical_prices_aggregated.symbol = portfolio_securities.ticker_symbol and
-                                       historical_prices_aggregated.time >= now() - interval '1 week' and
-                                       historical_prices_aggregated.period = '15min'
+                                       historical_prices_aggregated.time >= now() - interval '1 week'
                                join {{ source ('app', 'profile_holdings') }}
                                     on profile_holdings.profile_id = profile_portfolio_transactions.profile_id and
                                        profile_holdings.security_id = profile_portfolio_transactions.security_id

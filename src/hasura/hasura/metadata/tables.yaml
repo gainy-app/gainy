@@ -156,6 +156,15 @@
     schema: app
     name: profile_holdings
   object_relationships:
+  - name: holding_details
+    using:
+      manual_configuration:
+        remote_table:
+          schema: public
+          name: portfolio_holding_details
+        insertion_order: null
+        column_mapping:
+          id: holding_id
   - name: portfolio_holding_gains
     using:
       manual_configuration:
@@ -979,6 +988,49 @@
         profile:
           user_id:
             _eq: X-Hasura-User-Id
+- table:
+    schema: public
+    name: portfolio_holding_details
+  object_relationships:
+  - name: holding
+    using:
+      manual_configuration:
+        remote_table:
+          schema: app
+          name: profile_holdings
+        insertion_order: null
+        column_mapping:
+          holding_id: id
+  - name: ticker
+    using:
+      manual_configuration:
+        remote_table:
+          schema: public
+          name: tickers
+        insertion_order: null
+        column_mapping:
+          ticker_symbol: symbol
+  select_permissions:
+  - role: user
+    permission:
+      columns:
+      - holding_id
+      - ticker_symbol
+      - account_id
+      - purchase_date
+      - relative_gain_total
+      - relative_gain_1d
+      - value_to_portfolio_value
+      - ticker_name
+      - market_capitalization
+      - next_earnings_date
+      - security_type
+      - ltt_quantity_total
+      filter:
+        holding:
+          profile:
+            user_id:
+              _eq: X-Hasura-User-Id
 - table:
     schema: public
     name: portfolio_holding_gains

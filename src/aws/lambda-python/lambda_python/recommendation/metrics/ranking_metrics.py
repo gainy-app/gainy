@@ -1,5 +1,4 @@
 import getopt
-import os
 import sys
 from typing import Any
 
@@ -7,18 +6,8 @@ import psycopg2
 from sklearn.metrics import average_precision_score
 
 from recommendation.collection_ranking import TFIDFWithNorm1_5CollectionRanking, TFCollectionRanking
-from recommendation.recommendation_action import get_profile_vector, query_vectors, GetRecommendedCollections
-
-script_dir = os.path.dirname(__file__)
-
-with open(os.path.join(script_dir, "../sql/profile_industries.sql")
-          ) as profile_industry_vector_query_file:
-    profile_industry_vector_query = profile_industry_vector_query_file.read()
-
-with open(os.path.join(script_dir, "../sql/collection_industries.sql")
-          ) as collection_industry_vector_query_file:
-    collection_industry_vector_query = collection_industry_vector_query_file.read(
-    )
+from recommendation.data_access import read_profile_industry_vector, read_all_collection_industry_vectors, \
+    read_industry_frequencies, read_industry_corpus_size
 
 
 def print_map_metrics(db_conn_string, *rankings):
@@ -26,11 +15,10 @@ def print_map_metrics(db_conn_string, *rankings):
         profiles = read_profiles_ids(db_conn)
 
         fav_cols = read_favourite_collections(db_conn)
-        collection_vs = query_vectors(db_conn,
-                                      collection_industry_vector_query)
+        collection_vs = read_all_collection_industry_vectors(db_conn)
 
-        df = GetRecommendedCollections._read_document_frequencies(db_conn)
-        corpus_size = GetRecommendedCollections._read_corpus_size(db_conn)
+        df = read_industry_frequencies(db_conn)
+        corpus_size = read_industry_corpus_size(db_conn)
         params = {"df": df, "size": corpus_size}
 
     for ranking in rankings:
@@ -72,8 +60,7 @@ def mean_average_precision(db_conn, profiles, collection_vs, ranking, fav_cols,
     ap_sum = 0.0
     profile_count = 0
     for profile in profiles:
-        profile_v = get_profile_vector(db_conn, profile_industry_vector_query,
-                                       profile)
+        profile_v = read_profile_industry_vector(db_conn, profile)
 
         ranked_collections = ranking.rank(profile_v, collection_vs,
                                           **params)[:15]

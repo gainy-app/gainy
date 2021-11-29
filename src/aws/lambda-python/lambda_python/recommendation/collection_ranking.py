@@ -1,8 +1,8 @@
 from abc import ABC, abstractmethod
 import math
 
-from recommendation.dim_vector import DimVector
-from recommendation.normalization import double_normalization_k
+from recommendation.core.dim_vector import DimVector
+from recommendation.core.normalization import double_normalization_k
 
 
 class RankedItem:

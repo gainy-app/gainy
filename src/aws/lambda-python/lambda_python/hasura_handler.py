@@ -1,14 +1,15 @@
 import os
 
 from common.hasura_dispatcher import HasuraActionDispatcher, HasuraTriggerDispatcher
-from recommendation.recommendation_action import GetMatchScoreByTicker, GetRecommendedCollections, \
-    GetMatchScoreByCollection
+from recommendation.match_score_action import GetMatchScoreByCollection, GetMatchScoreByTicker, \
+    GetMatchScoreByTickerList
+from recommendation.recommendation_action import GetRecommendedCollections
 from portfolio.plaid.actions import *
 from portfolio.actions import *
 
 # DB CONNECTION
 from search.algolia_search import SearchTickers, SearchCollections
-from trigger.set_top_20_collection import ChangeTop20Collection
+from trigger.set_top_20_collection import SetTop20Collection
 from trigger.set_user_categories import SetUserCategories
 from trigger.on_user_created import OnUserCreated
 
@@ -33,6 +34,7 @@ API_GATEWAY_PROXY_INTEGRATION = os.environ.get(
 ACTIONS = [
     GetRecommendedCollections(),
     GetMatchScoreByTicker(),
+    GetMatchScoreByTickerList(),
     GetMatchScoreByCollection(),
 
     # Portfolio
@@ -56,7 +58,7 @@ def handle_action(event, context):
     return action_dispatcher.handle(event, context)
 
 
-TRIGGERS = [SetUserCategories(), OnUserCreated(ENV), ChangeTop20Collection()]
+TRIGGERS = [SetUserCategories(), OnUserCreated(ENV), SetTop20Collection()]
 
 trigger_dispatcher = HasuraTriggerDispatcher(DB_CONN_STRING, TRIGGERS,
                                              API_GATEWAY_PROXY_INTEGRATION)
