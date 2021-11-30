@@ -1363,6 +1363,7 @@
       - dividend_yield
       - dividends_per_share
       - ebitda
+      - ebitda_ttm
       - ebitda_growth_yoy
       - enterprise_value_to_ebitda
       - enterprise_value_to_sales
@@ -1371,11 +1372,13 @@
       - eps_growth_fwd
       - eps_growth_yoy
       - eps_surprise
+      - eps_difference
       - exchange_name
       - implied_volatility
       - market_capitalization
       - net_debt
       - net_income
+      - net_income_ttm
       - price_change_1m
       - price_change_1y
       - price_change_3m

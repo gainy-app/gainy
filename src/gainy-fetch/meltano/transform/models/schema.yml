@@ -1005,6 +1005,11 @@ models:
           - exists
           - type:
               type: 'double precision'
+      - name: eps_difference
+        tests:
+          - exists
+          - type:
+              type: 'double precision'
       - name: revenue_estimate_avg_0y
         tests:
           - exists
@@ -1031,6 +1036,11 @@ models:
           - exists
           - type:
               type: 'double precision'
+      - name: net_income_ttm
+        tests:
+          - exists
+          - type:
+              type: 'double precision'
       - name: roi
         tests:
           - exists
@@ -1052,6 +1062,11 @@ models:
           - type:
               type: 'double precision'
       - name: ebitda
+        tests:
+          - exists
+          - type:
+              type: 'double precision'
+      - name: ebitda_ttm
         tests:
           - exists
           - type:
