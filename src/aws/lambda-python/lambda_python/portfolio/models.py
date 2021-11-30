@@ -116,7 +116,6 @@ class Security(BaseModel):
     ref_id = None
     ticker_symbol = None
     type = None
-    profile_id = None
     created_at = None
     updated_at = None
 

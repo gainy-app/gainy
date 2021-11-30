@@ -10,20 +10,20 @@ values  (1, 'LJy8onGroWTK97vkwxMRuXmZyjomzdtP3bv1K', 100, 110, 'USD', null, '000
         (9, 'GJB1o8bgopTMVAjL8nQkc9Ln56pLjrH1Zlrmp', null, 56302.06, 'USD', null, '8888', 'Plaid Mortgage', null, 'mortgage', 'loan', 1, '2021-11-12 14:06:51.602102 +00:00', '2021-11-18 05:41:28.397620 +00:00');
 
 
-insert into app.portfolio_securities (id, close_price, close_price_as_of, iso_currency_code, name, ref_id, ticker_symbol, type, profile_id, created_at, updated_at)
-values  (9, 28.17, '2021-11-17 00:00:00.000000', 'USD', 'Cambiar International Equity Instl', '3AVe95eyPjHRlGaLdknRsEZ3GM3gq4TGzeM9l', 'CAMYX', 'mutual fund', 1, '2021-11-12 14:06:51.602102 +00:00', '2021-11-18 05:41:28.397620 +00:00'),
-        (10, 60585.01953125, '2021-11-18 00:00:00.000000', 'USD', 'Bitcoin', '7Dv19k16PZtvaeloyBgLCxP95o9ynrFggkRaw', 'CUR:BTC', 'cash', 1, '2021-11-12 14:06:51.602102 +00:00', '2021-11-18 05:41:28.397620 +00:00'),
-        (11, 0.011, '2021-11-18 00:00:00.000000', 'USD', 'NFLX 02/01/18 355.00 Call', '8E4L9XLl6MudjEpwPAAgivmdZRdBPJuvMPlPb', 'NFLX180201C00355000', 'derivative', 1, '2021-11-12 14:06:51.602102 +00:00', '2021-11-18 05:41:28.397620 +00:00'),
-        (12, null, '2021-11-18 00:00:00.000000', 'USD', 'Trp Equity Income', '8E4L9XLl6MurjR94Q1zdSvmdZRdBPJuxyXMBg', null, 'mutual fund', 1, '2021-11-12 14:06:51.602102 +00:00', '2021-11-18 05:41:28.397620 +00:00'),
-        (13, 10.45, '2021-11-17 00:00:00.000000', 'USD', 'DoubleLine Total Return Bond I', 'AE5rBXra1AuZLE34rkvvIyG8918m3wtRzElnJ', 'DBLTX', 'mutual fund', 1, '2021-11-12 14:06:51.602102 +00:00', '2021-11-18 05:41:28.397620 +00:00'),
-        (15, 1, '2021-11-18 00:00:00.000000', 'USD', 'U S Dollar', 'd6ePmbPxgWCWmMVv66q9iPV94n91vMtov5Are', null, 'cash', 1, '2021-11-12 14:06:51.602102 +00:00', '2021-11-18 05:41:28.397620 +00:00'),
-        (17, 13.73, '2021-11-18 00:00:00.000000', 'USD', 'Nh Portfolio 1055 (Fidelity Index)', 'nnmo8doZ4lfKNEDe3mPJipLGkaGw3jfPrpxoN', null, 'etf', 1, '2021-11-12 14:06:51.602102 +00:00', '2021-11-18 05:41:28.397620 +00:00'),
-        (18, 38.36, '2021-11-17 00:00:00.000000', 'USD', 'T. Rowe Price Equity Income', 'nnmo8doZ4lfKNpNVerPqCpLGkaGw3jfPrxBP1', 'PRFDX', 'mutual fund', 1, '2021-11-12 14:06:51.602102 +00:00', '2021-11-18 05:41:28.397620 +00:00'),
-        (19, 43.98, '2021-11-17 00:00:00.000000', 'USD', 'Southside Bancshares Inc.', 'qy5E8kELlrTnL87xGVjpIBRedAenDzt89pa9q', 'SBSI', 'equity', 1, '2021-11-12 14:06:51.602102 +00:00', '2021-11-18 05:41:28.397620 +00:00'),
-        (20, 35, '2021-11-17 00:00:00.000000', 'USD', 'Matthews Pacific Tiger Instl', 'rnXlmPlpqzf3p85Ro9kWugkb86bZpeHLEEd7n', 'MIPTX', 'mutual fund', 1, '2021-11-12 14:06:51.602102 +00:00', '2021-11-18 05:41:28.397620 +00:00'),
-        (21, 29.71, '2021-11-17 00:00:00.000000', 'USD', 'iShares MSCI Brazil Index', 'wmDB8ZBW3aUVPnxMbgarinRK7eKzMbfAJJDEJ', 'EWZ', 'etf', 1, '2021-11-12 14:06:51.602102 +00:00', '2021-11-18 05:41:28.397620 +00:00'),
-        (16, 4.75, '2021-11-17 00:00:00.000000', 'USD', 'NH Hotel Group S.A.', 'gWwemqe4pntelG7JlBA7tmJVjlVpNoujWQra1', 'NHHEF', 'equity', 1, '2021-11-12 14:06:51.602102 +00:00', '2021-11-19 10:45:21.634671 +00:00'),
-        (14, 150, '2021-11-17 00:00:00.000000', 'USD', 'Apple Inc.', 'WDwEPnEmJjt5lp75wl65t1rBmpBZvAHogp7WZ', 'AAPL', 'equity', 1, '2021-11-12 14:06:51.602102 +00:00', '2021-11-19 10:45:21.634671 +00:00');
+insert into app.portfolio_securities (id, close_price, close_price_as_of, iso_currency_code, name, ref_id, ticker_symbol, type, created_at, updated_at)
+values  (9, 28.17, '2021-11-17 00:00:00.000000', 'USD', 'Cambiar International Equity Instl', '3AVe95eyPjHRlGaLdknRsEZ3GM3gq4TGzeM9l', 'CAMYX', 'mutual fund', '2021-11-12 14:06:51.602102 +00:00', '2021-11-18 05:41:28.397620 +00:00'),
+        (10, 60585.01953125, '2021-11-18 00:00:00.000000', 'USD', 'Bitcoin', '7Dv19k16PZtvaeloyBgLCxP95o9ynrFggkRaw', 'CUR:BTC', 'cash', '2021-11-12 14:06:51.602102 +00:00', '2021-11-18 05:41:28.397620 +00:00'),
+        (11, 0.011, '2021-11-18 00:00:00.000000', 'USD', 'NFLX 02/01/18 355.00 Call', '8E4L9XLl6MudjEpwPAAgivmdZRdBPJuvMPlPb', 'NFLX180201C00355000', 'derivative', '2021-11-12 14:06:51.602102 +00:00', '2021-11-18 05:41:28.397620 +00:00'),
+        (12, null, '2021-11-18 00:00:00.000000', 'USD', 'Trp Equity Income', '8E4L9XLl6MurjR94Q1zdSvmdZRdBPJuxyXMBg', null, 'mutual fund', '2021-11-12 14:06:51.602102 +00:00', '2021-11-18 05:41:28.397620 +00:00'),
+        (13, 10.45, '2021-11-17 00:00:00.000000', 'USD', 'DoubleLine Total Return Bond I', 'AE5rBXra1AuZLE34rkvvIyG8918m3wtRzElnJ', 'DBLTX', 'mutual fund', '2021-11-12 14:06:51.602102 +00:00', '2021-11-18 05:41:28.397620 +00:00'),
+        (15, 1, '2021-11-18 00:00:00.000000', 'USD', 'U S Dollar', 'd6ePmbPxgWCWmMVv66q9iPV94n91vMtov5Are', null, 'cash', '2021-11-12 14:06:51.602102 +00:00', '2021-11-18 05:41:28.397620 +00:00'),
+        (17, 13.73, '2021-11-18 00:00:00.000000', 'USD', 'Nh Portfolio 1055 (Fidelity Index)', 'nnmo8doZ4lfKNEDe3mPJipLGkaGw3jfPrpxoN', null, 'etf', '2021-11-12 14:06:51.602102 +00:00', '2021-11-18 05:41:28.397620 +00:00'),
+        (18, 38.36, '2021-11-17 00:00:00.000000', 'USD', 'T. Rowe Price Equity Income', 'nnmo8doZ4lfKNpNVerPqCpLGkaGw3jfPrxBP1', 'PRFDX', 'mutual fund', '2021-11-12 14:06:51.602102 +00:00', '2021-11-18 05:41:28.397620 +00:00'),
+        (19, 43.98, '2021-11-17 00:00:00.000000', 'USD', 'Southside Bancshares Inc.', 'qy5E8kELlrTnL87xGVjpIBRedAenDzt89pa9q', 'SBSI', 'equity', '2021-11-12 14:06:51.602102 +00:00', '2021-11-18 05:41:28.397620 +00:00'),
+        (20, 35, '2021-11-17 00:00:00.000000', 'USD', 'Matthews Pacific Tiger Instl', 'rnXlmPlpqzf3p85Ro9kWugkb86bZpeHLEEd7n', 'MIPTX', 'mutual fund', '2021-11-12 14:06:51.602102 +00:00', '2021-11-18 05:41:28.397620 +00:00'),
+        (21, 29.71, '2021-11-17 00:00:00.000000', 'USD', 'iShares MSCI Brazil Index', 'wmDB8ZBW3aUVPnxMbgarinRK7eKzMbfAJJDEJ', 'EWZ', 'etf', '2021-11-12 14:06:51.602102 +00:00', '2021-11-18 05:41:28.397620 +00:00'),
+        (16, 4.75, '2021-11-17 00:00:00.000000', 'USD', 'NH Hotel Group S.A.', 'gWwemqe4pntelG7JlBA7tmJVjlVpNoujWQra1', 'NHHEF', 'equity', '2021-11-12 14:06:51.602102 +00:00', '2021-11-19 10:45:21.634671 +00:00'),
+        (14, 150, '2021-11-17 00:00:00.000000', 'USD', 'Apple Inc.', 'WDwEPnEmJjt5lp75wl65t1rBmpBZvAHogp7WZ', 'AAPL', 'equity', '2021-11-12 14:06:51.602102 +00:00', '2021-11-19 10:45:21.634671 +00:00');
 
 insert into app.profile_holdings (id, iso_currency_code, quantity, security_id, profile_id, account_id, ref_id, created_at, updated_at)
 values  (2, 'USD', 100, 14, 1, 7, 'W3grzlw7zdi6vp3obZAecRQJMjqQa1tlBrAnr_WDwEPnEmJjt5lp75wl65t1rBmpBZvAHogp7WZ', '2021-11-12 14:06:51.602102 +00:00', '2021-11-19 10:45:52.978221 +00:00');
