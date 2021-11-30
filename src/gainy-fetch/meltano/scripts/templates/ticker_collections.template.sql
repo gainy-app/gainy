@@ -25,6 +25,7 @@ with historical_prices as (select * from {{ ref('historical_prices') }}),
      categories as (select * from {{ ref('categories') }}),
      collections as (select id::int, name from {{ source('gainy', 'gainy_collections') }} where personalized = '0'),
      countries as (select * from {{ source('gainy', 'gainy_countries') }}),
+     technicals as (select * from {{ ref('technicals') }}),
      latest_price AS
          (
              select distinct on (hp.code) hp.*
@@ -54,31 +55,32 @@ with historical_prices as (select * from {{ ref('historical_prices') }}),
         ),
      ct as
          (
-             select t.symbol              as ticker_code,
+             select t.symbol                  as ticker_code,
                     t.country_name,
                     t.ipo_date,
-                    latest_price.close    as price,
+                    latest_price.close        as price,
                     CASE
                         WHEN latest_price.close > 0 AND latest_price.open > 0
                             THEN (latest_price.close - latest_price.open) / latest_price.open --else NULL
-                        END               as chrt_1d,
+                        END                   as chrt_1d,
                     CASE
                         WHEN latest_price.close > 0 AND price_1month.close > 0
                             THEN (latest_price.close - price_1month.close) / price_1month.close --else NULL
-                        END               as chrt_1m,
+                        END                   as chrt_1m,
                     CASE
                         WHEN latest_price.close > 0 AND price_1year.close > 0
                             THEN (latest_price.close - price_1year.close) / price_1year.close --else NULL
-                        END               as chrt_1y,
-                    t.type                as ttype,
-                    t.gic_sector          as gics_sector,
-                    gainy_industries.name as g_industry,
-                    interests.name        as g_interest,
-                    lower(c.name)         as investcat,
+                        END                   as chrt_1y,
+                    t.type                    as ttype,
+                    t.gic_sector              as gics_sector,
+                    gainy_industries.name     as g_industry,
+                    interests.name            as g_interest,
+                    lower(c.name)             as investcat,
                     CASE
                         WHEN countries.region = 'Europe' THEN 'europe'
                         WHEN countries."sub-region" LIKE '%Latin America%' THEN 'latam'
-                        END               as country_group
+                        END                   as country_group,
+                    technicals.short_percent  as short_percent
              from tickers t
                       LEFT JOIN ticker_industries on t.symbol = ticker_industries.symbol --here we have N:N relationship, so we must use distinct in the end (we will get duplicates otherwise)
                       LEFT JOIN gainy_industries on ticker_industries.industry_id = gainy_industries.id
@@ -93,6 +95,7 @@ with historical_prices as (select * from {{ ref('historical_prices') }}),
                       LEFT JOIN countries
                                 on countries.name = t.country_name OR countries."alpha-2" = t.country_name OR
                                    countries."alpha-3" = t.country_name
+                      LEFT JOIN technicals on t.symbol = technicals.symbol
          ),
      tmp_ticker_collections as
          (
