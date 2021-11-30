@@ -23,7 +23,8 @@ with max_date as
 select profile_portfolio_transactions.profile_id,
        (profile_portfolio_transactions.profile_id || '_' || historical_prices_aggregated.time || '_' ||
         historical_prices_aggregated.period)::varchar                              as id,
-       historical_prices_aggregated.time                                           as date,
+       historical_prices_aggregated.time                                           as date, -- TODO remove
+       historical_prices_aggregated.time                                           as datetime,
        historical_prices_aggregated.period                                         as period,
        sum(profile_portfolio_transactions.quantity::numeric *
            historical_prices_aggregated.adjusted_close::numeric)::double precision as value

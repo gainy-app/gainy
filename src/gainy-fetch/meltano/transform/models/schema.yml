@@ -1005,6 +1005,11 @@ models:
           - exists
           - type:
               type: 'double precision'
+      - name: eps_difference
+        tests:
+          - exists
+          - type:
+              type: 'double precision'
       - name: revenue_estimate_avg_0y
         tests:
           - exists
@@ -1031,6 +1036,11 @@ models:
           - exists
           - type:
               type: 'double precision'
+      - name: net_income_ttm
+        tests:
+          - exists
+          - type:
+              type: 'double precision'
       - name: roi
         tests:
           - exists
@@ -1052,6 +1062,11 @@ models:
           - type:
               type: 'double precision'
       - name: ebitda
+        tests:
+          - exists
+          - type:
+              type: 'double precision'
+      - name: ebitda_ttm
         tests:
           - exists
           - type:
@@ -1237,6 +1252,74 @@ models:
           - exists
           - type:
               type: 'double precision'
+      - name: ltt_quantity_total
+        tests:
+          - exists
+          - type:
+              type: 'double precision'
+
+  - name: portfolio_holding_details
+    columns:
+      - name: holding_id
+        tests:
+          - exists
+          - type:
+              type: 'integer'
+      - name: ticker_symbol
+        tests:
+          - exists
+          - type:
+              type: 'character varying'
+      - name: account_id
+        tests:
+          - exists
+          - type:
+              type: 'integer'
+      - name: purchase_date
+        tests:
+          - exists
+          - type:
+              type: 'timestamp without time zone'
+      - name: relative_gain_total
+        tests:
+          - exists
+          - type:
+              type: 'double precision'
+      - name: relative_gain_1d
+        tests:
+          - exists
+          - type:
+              type: 'double precision'
+      - name: value_to_portfolio_value
+        tests:
+          - exists
+          - type:
+              type: 'double precision'
+      - name: ticker_name
+        tests:
+          - exists
+          - type:
+              type: 'character varying'
+      - name: market_capitalization
+        tests:
+          - exists
+          - type:
+              type: 'bigint'
+      - name: next_earnings_date
+        tests:
+          - exists
+          - type:
+              type: 'timestamp without time zone'
+      - name: security_type
+        tests:
+          - exists
+          - type:
+              type: 'character varying'
+      - name: ltt_quantity_total
+        tests:
+          - exists
+          - type:
+              type: 'double precision'
 
   - name: portfolio_gains
     columns:
@@ -1339,6 +1422,11 @@ models:
           - type:
               type: 'double precision'
       - name: date
+        tests:
+          - exists
+          - type:
+              type: 'timestamp without time zone'
+      - name: datetime
         tests:
           - exists
           - type:
