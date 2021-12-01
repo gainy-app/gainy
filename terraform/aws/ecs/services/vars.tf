@@ -40,5 +40,3 @@ variable "algolia_collections_index" {}
 variable "algolia_app_id" {}
 variable "algolia_indexing_key" {}
 variable "websockets_memory_credits" {}
-variable "datadog_api_key" {}
-variable "datadog_app_key" {}
