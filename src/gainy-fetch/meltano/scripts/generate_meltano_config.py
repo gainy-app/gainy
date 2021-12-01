@@ -1,46 +1,73 @@
 import sys, os, json, yaml, copy
+from typing import List
 
-def chunks(lst, n):
-    """Yield successive n-sized chunks from lst."""
-    for i in range(0, len(lst), n):
-        yield lst[i:i + n]
+
+def _read_inputs(env, split_num) -> (str, List[str]):
+    symbols_file = "symbols.%s.json" % (ENV)
+    exchanges_file = "exchanges.%s.json" % (ENV)
+
+    if os.path.exists(symbols_file) == os.path.exists(exchanges_file):
+        raise Exception(f"Either symbol list or exchange list should be available for environment: {env}")
+
+    if os.path.exists(symbols_file):
+        if split_num > 1:
+            raise Exception(f"Symbol list is not allowed with multiple splits: {env}")
+
+        with open(symbols_file, "r") as f:
+            symbols = json.load(f)
+
+        return "TAP_EODHISTORICALDATA_SYMBOLS", symbols
+    else:
+        with open(exchanges_file, "r") as f:
+            exchanges = json.load(f)
+
+        return "TAP_EODHISTORICALDATA_EXCHANGES", exchanges
+
+
+def _fill_in_eod_schedule(template, env, split_id, split_num) -> dict:
+    new_schedule = copy.deepcopy(template)
+    new_schedule["name"] = 'eodhistoricaldata-to-postgres-%02d' % (split_id)
+
+    if "env" not in new_schedule:
+        new_schedule["env"] = {}
+
+    env_var, env_var_values = _read_inputs(env, split_num)
+    new_schedule["env"][env_var] = json.dumps(env_var_values)
+
+    if split_num and split_num > 1:
+        new_schedule["env"]["TAP_EODHISTORICALDATA_SPLIT_ID"] = split_id
+        new_schedule["env"]["TAP_EODHISTORICALDATA_SPLIT_NUM"] = split_num
+
+    return new_schedule
+
+
+def _generate_schedules(env, split_num):
+    eod_schedules = list(filter(lambda x: x['name'].startswith('eodhistoricaldata-to-postgres'), config['schedules']))
+    non_eod_schedules = list(filter(lambda x: not x['name'].startswith('eodhistoricaldata-to-postgres'), config['schedules']))
+
+    if len(eod_schedules) == 0:
+        raise Exception('no eod schedules found')
+
+    eod_schedule_template = eod_schedules[0]
+    new_eod_schedules = [_fill_in_eod_schedule(eod_schedule_template, env, k, split_num) for k in range(0, split_num)]
+
+    return non_eod_schedules + new_eod_schedules
+
+
+# #####   Configure and run   #####
+
+if len(sys.argv) < 2:
+    raise Exception('usage: generate_meltano_config.py local|test|production')
+ENV = sys.argv[1]
 
 if 'EODHISTORICALDATA_JOBS_COUNT' not in os.environ:
     raise Exception('env var EODHISTORICALDATA_JOBS_COUNT must be set')
-if len(sys.argv) < 2:
-    raise Exception('usage: generate_meltano_config.py local|production')
-
-chunks_count = json.loads(os.environ['EODHISTORICALDATA_JOBS_COUNT'])
-env = sys.argv[1]
-symbols_file = "symbols.%s.json" % (env)
-
-if not os.path.exists(symbols_file):
-    raise Exception('%s does not exist' % (symbols_file))
-
-with open(symbols_file, "r") as f:
-    symbols = json.load(f)
+SPLIT_COUNT = json.loads(os.environ['EODHISTORICALDATA_JOBS_COUNT'])
 
 with open("meltano.template.yml", "r") as f:
     config = yaml.safe_load(f)
 
-eod_schedules = list(filter(lambda x: x['name'].startswith('eodhistoricaldata-to-postgres'), config['schedules']))
-non_eod_schedules = list(filter(lambda x: not x['name'].startswith('eodhistoricaldata-to-postgres'), config['schedules']))
-
-if len(eod_schedules) == 0:
-    raise Error('no eod schedules found')
-
-eod_schedule_template = eod_schedules[0]
-chunk_size = (len(symbols) + chunks_count - 1) // chunks_count # ceil
-new_eod_schedules = []
-for k,chunk in enumerate(chunks(symbols, chunk_size)):
-    new_schedule = copy.deepcopy(eod_schedule_template)
-    new_schedule['name'] = 'eodhistoricaldata-to-postgres-%02d' % (k)
-    if 'env' not in new_schedule:
-        new_schedule['env'] = {}
-    new_schedule['env']['TAP_EODHISTORICALDATA_SYMBOLS'] = json.dumps(chunk)
-    new_eod_schedules.append(new_schedule)
-
-config['schedules'] = non_eod_schedules + new_eod_schedules
+config['schedules'] = _generate_schedules(ENV, SPLIT_COUNT)
 
 with open("meltano.yml", "w") as f:
     yaml.dump(config, f)
