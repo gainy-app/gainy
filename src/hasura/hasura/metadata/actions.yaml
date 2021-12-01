@@ -150,6 +150,14 @@ custom_types:
       type: object
       field_mapping:
         id: holding_id
+    - remote_table:
+        schema: app
+        name: profile_holdings
+      name: holding
+      source: default
+      type: object
+      field_mapping:
+        id: id
   - name: PortfolioTransaction
     relationships:
     - remote_table:
@@ -176,5 +184,13 @@ custom_types:
       type: object
       field_mapping:
         security_id: id
+    - remote_table:
+        schema: app
+        name: profile_portfolio_transactions
+      name: transaction
+      source: default
+      type: object
+      field_mapping:
+        id: id
   - name: CreatePlaidLinkTokenOutput
   scalars: []

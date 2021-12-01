@@ -149,6 +149,9 @@
     schema: app
     name: profile_holdings
   object_relationships:
+  - name: account
+    using:
+      foreign_key_constraint_on: account_id
   - name: holding_details
     using:
       manual_configuration:
@@ -170,9 +173,6 @@
   - name: profile
     using:
       foreign_key_constraint_on: profile_id
-  - name: profile_portfolio_account
-    using:
-      foreign_key_constraint_on: account_id
   - name: security
     using:
       foreign_key_constraint_on: security_id
