@@ -13,9 +13,12 @@ plugins:
         - state
       settings:
         - name: api_token
-        - name: start_symbol
         - name: symbols
           kind: array
+        - name: exchanges
+          kind: array
+        - name: split-id
+        - name: split-num
     - name: tap-csv
       config:
         files:
