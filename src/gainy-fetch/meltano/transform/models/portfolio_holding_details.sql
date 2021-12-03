@@ -76,7 +76,7 @@ select profile_holdings.id                                    as holding_id,
        coalesce(long_term_tax_holdings.ltt_quantity_total, 0) as ltt_quantity_total
 from {{ source('app', 'profile_holdings') }}
          left join first_purchase_date on first_purchase_date.holding_id = profile_holdings.id
-         left join portfolio_holding_gains on portfolio_holding_gains.holding_id = profile_holdings.id
+         left join {{ ref('portfolio_holding_gains') }} on portfolio_holding_gains.holding_id = profile_holdings.id
          left join {{ source('app', 'portfolio_securities') }} on portfolio_securities.id = profile_holdings.security_id
          left join {{ ref('base_tickers') }} on base_tickers.symbol = portfolio_securities.ticker_symbol
          left join next_earnings_date on next_earnings_date.symbol = base_tickers.symbol

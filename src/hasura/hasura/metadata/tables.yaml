@@ -825,7 +825,7 @@
       - open
       - period
       - symbol
-      - time
+      - datetime
       - volume
       filter: {}
 - table:
