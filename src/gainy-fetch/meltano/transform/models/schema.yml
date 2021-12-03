@@ -651,7 +651,7 @@ models:
           - exists
           - type:
               type: 'character varying'
-      - name: time
+      - name: datetime
         tests:
           - exists
           - type:

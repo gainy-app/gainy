@@ -203,7 +203,7 @@ periods: 15min, 1d, 1w, 1m
 
 ```GraphQL
 {
-    portfolio_chart(where: {profile_id: {_eq: 1}, period: {_eq: "1d"}}, order_by: {date: asc}) {
+    portfolio_chart(where: {profile_id: {_eq: 16}, period: {_eq: "1d"}, datetime: {_gte: "2021-11-02T06:00:00"}}, order_by: {datetime: asc}) {
         datetime
         period
         value
