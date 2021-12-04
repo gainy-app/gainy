@@ -1,5 +1,6 @@
 import os
 import plaid
+import json
 
 from portfolio.service import PortfolioService
 from portfolio.repository import PortfolioRepository
