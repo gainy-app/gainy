@@ -30,6 +30,10 @@ class BaseModel(ABC):
     def unique_field_names(self):
         return []
 
+    def unique_id(self):
+        values_dict = self.to_dict()
+        return '_'.join([values_dict[i] for i in self.unique_field_names()])
+
     def db_excluded_fields(self):
         return ['created_at', 'updated_at']
 

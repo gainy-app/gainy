@@ -6,7 +6,7 @@ periods: 15min, 1d, 1w, 1m
 {
     historical_prices_aggregated(where: {symbol: {_eq: "AAPL"}, period: {_eq: "15min"}}, order_by: {time: asc}) {
         symbol
-        time
+        datetime
         period
         open
         high
