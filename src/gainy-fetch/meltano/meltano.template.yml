@@ -43,6 +43,8 @@ plugins:
     - name: tap-postgres--sync
       inherit_from: tap-postgres
       catalog: configs/raw-sync/tap.catalog.json
+      config:
+        itersize: 1
     - name: tap-postgres--search
       inherit_from: tap-postgres
       catalog: configs/search/tap.catalog.json
