@@ -49,11 +49,11 @@ class PortfolioRepository:
                     " RETURNING id, created_at, updated_at")
 
                 entity_dicts = [entity.to_dict() for entity in entities]
+                values = [[
+                    entity_dict[field_name] for field_name in field_names
+                ] for entity_dict in entity_dicts]
 
-                execute_values(
-                    cursor, sql_string,
-                    [[entity_dict[field_name] for field_name in field_names]
-                     for entity_dict in entity_dicts])
+                execute_values(cursor, sql_string, values)
 
                 returned = cursor.fetchall()
 

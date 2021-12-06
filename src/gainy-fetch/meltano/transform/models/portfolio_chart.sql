@@ -15,9 +15,10 @@
 with max_date as
          (
              select profile_id,
+                    period,
                     max(date) as date
              from portfolio_chart old_portfolio_chart
-             group by profile_id
+             group by profile_id, period
       )
 {% endif %}
 select profile_portfolio_transactions.profile_id,
@@ -35,7 +36,7 @@ from {{ source('app', 'profile_portfolio_transactions') }}
          left join max_date on max_date.profile_id = profile_portfolio_transactions.profile_id
 {% endif %}
          join {{ ref('historical_prices_aggregated') }}
-              on historical_prices_aggregated.time >= profile_portfolio_transactions.date and
+              on historical_prices_aggregated.datetime >= profile_portfolio_transactions.date and
 {% if is_incremental() %}
                  (max_date.date is null or historical_prices_aggregated.time >= max_date.date) and
 {% endif %}

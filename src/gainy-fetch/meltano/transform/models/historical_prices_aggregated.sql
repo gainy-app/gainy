@@ -38,7 +38,8 @@ with max_date as
         time_truncated
         ) (symbol || '_' || time_truncated || '_15min')::varchar                                                         as id,
           symbol                                                                                                         as symbol,
-          time_truncated::timestamp                                                                                      as time,
+          time_truncated::timestamp                                                                                      as time, -- TODO remove
+          time_truncated::timestamp                                                                                      as datetime,
           '15min'::varchar                                                                                               as period,
           first_value(open::double precision)
           OVER (partition by symbol, time_truncated order by time rows between current row and unbounded following)      as open,
@@ -61,6 +62,7 @@ union all
 select (code || '_' || date || '_1d')::varchar as id,
        code                                    as symbol,
        date::timestamp                         as time,
+       date::timestamp                         as datetime,
        '1d'::varchar                           as period,
        open::double precision,
        high::double precision,
@@ -80,10 +82,11 @@ union all
     select DISTINCT ON (
         code,
         date_trunc('week', date)
-        ) (code || '_' || date_trunc('week', date) || '_1w')::varchar                                                                                                   as id,
-          code                                                                                                                                      as symbol,
-          date_trunc('week', date)::timestamp                                                                                                       as time,
-          '1w'::varchar                                                                                                                             as period,
+        ) (code || '_' || date_trunc('week', date) || '_1w')::varchar                                                       as id,
+          code                                                                                                              as symbol,
+          date_trunc('week', date)::timestamp                                                                               as time,
+          date_trunc('week', date)::timestamp                                                                               as datetime,
+          '1w'::varchar                                                                                                     as period,
           first_value(open::double precision)
           OVER (partition by code, date_trunc('week', date) order by date rows between current row and unbounded following) as open,
           max(high::double precision)
@@ -111,9 +114,10 @@ union all
         code,
         date_trunc('month', date)
         ) (code || '_' || date_trunc('month', date) || '_1m')::varchar                                                                                                    as id,
-          code                                                                                                                                       as symbol,
-          date_trunc('month', date)::timestamp                                                                                                       as time,
-          '1m'::varchar                                                                                                                              as period,
+          code                                                                                                               as symbol,
+          date_trunc('month', date)::timestamp                                                                               as time,
+          date_trunc('month', date)::timestamp                                                                               as datetime,
+          '1m'::varchar                                                                                                      as period,
           first_value(open::double precision)
           OVER (partition by code, date_trunc('month', date) order by date rows between current row and unbounded following) as open,
           max(high::double precision)

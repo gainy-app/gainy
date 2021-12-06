@@ -3,8 +3,8 @@ from typing import List
 
 
 def _read_inputs(env, split_num) -> (str, List[str]):
-    symbols_file = "symbols.%s.json" % (ENV)
-    exchanges_file = "exchanges.%s.json" % (ENV)
+    symbols_file = "symbols.%s.json" % (env)
+    exchanges_file = "exchanges.%s.json" % (env)
 
     if os.path.exists(symbols_file) == os.path.exists(exchanges_file):
         raise Exception(f"Either symbol list or exchange list should be available for environment: {env}")
@@ -35,8 +35,8 @@ def _fill_in_eod_schedule(template, env, split_id, split_num) -> dict:
     new_schedule["env"][env_var] = json.dumps(env_var_values)
 
     if split_num and split_num > 1:
-        new_schedule["env"]["TAP_EODHISTORICALDATA_SPLIT_ID"] = split_id
-        new_schedule["env"]["TAP_EODHISTORICALDATA_SPLIT_NUM"] = split_num
+        new_schedule["env"]["TAP_EODHISTORICALDATA_SPLIT_ID"] = str(split_id)
+        new_schedule["env"]["TAP_EODHISTORICALDATA_SPLIT_NUM"] = str(split_num)
 
     return new_schedule
 
