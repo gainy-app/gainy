@@ -57,7 +57,7 @@ with historical_prices as (select * from {{ ref('historical_prices') }}),
      t_vol_10d_ranktopperc_commonstock AS
         (    
              select tm.symbol,
-                    PERCENT_RANK() OVER(order by tm.avg_volume_10d desc) as vol_10d_ranktopperc_commonstocks
+                    PERCENT_RANK() OVER(order by tm.avg_volume_10d desc) as vol_10d_ranktopperc_commonstock
              from ticker_metrics tm
              JOIN tickers t on t.symbol = tm.symbol
              where t.type ilike 'Common Stock'
