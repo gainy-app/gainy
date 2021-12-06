@@ -26,6 +26,7 @@ with historical_prices as (select * from {{ ref('historical_prices') }}),
      collections as (select id::int, name from {{ source('gainy', 'gainy_collections') }} where personalized = '0'),
      countries as (select * from {{ source('gainy', 'gainy_countries') }}),
      technicals as (select * from {{ ref('technicals') }}),
+     ticker_metrics as (select * from {{ ref('ticker_metrics') }}),
      latest_price AS
          (
              select distinct on (hp.code) hp.*
@@ -53,34 +54,52 @@ with historical_prices as (select * from {{ ref('historical_prices') }}),
                and date >= NOW() - interval '1 year' --up to 1 year but farther than 1 month to not overlap selection with previous one
              order by hp.code, hp.date ASC
         ),
+     t_vol_10d_ranktopperc_commonstock AS
+        (    
+             select tm.symbol,
+                    PERCENT_RANK() OVER(order by tm.avg_volume_10d desc) as vol_10d_ranktopperc_commonstocks
+             from ticker_metrics tm
+             JOIN tickers t on t.symbol = tm.symbol
+             where t.type ilike 'Common Stock'
+        ),
+     t_vol_10d_ranktopperc_etf AS
+        (    
+             select tm.symbol,
+                    PERCENT_RANK() OVER(order by tm.avg_volume_10d desc) as vol_10d_ranktopperc_etf
+             from ticker_metrics tm
+             JOIN tickers t on t.symbol = tm.symbol
+             where t.type ilike 'ETF'
+        ),
      ct as
          (
-             select t.symbol                  as ticker_code,
+             select t.symbol                                  as ticker_code,
                     t.country_name,
                     t.ipo_date,
-                    latest_price.close        as price,
+                    latest_price.close                        as price,
                     CASE
                         WHEN latest_price.close > 0 AND latest_price.open > 0
                             THEN (latest_price.close - latest_price.open) / latest_price.open --else NULL
-                        END                   as chrt_1d,
+                        END                                   as chrt_1d,
                     CASE
                         WHEN latest_price.close > 0 AND price_1month.close > 0
                             THEN (latest_price.close - price_1month.close) / price_1month.close --else NULL
-                        END                   as chrt_1m,
+                        END                                   as chrt_1m,
                     CASE
                         WHEN latest_price.close > 0 AND price_1year.close > 0
                             THEN (latest_price.close - price_1year.close) / price_1year.close --else NULL
-                        END                   as chrt_1y,
-                    t.type                    as ttype,
-                    t.gic_sector              as gics_sector,
-                    gainy_industries.name     as g_industry,
-                    interests.name            as g_interest,
-                    lower(c.name)             as investcat,
+                        END                                   as chrt_1y,
+                    t.type                                    as ttype,
+                    t.gic_sector                              as gics_sector,
+                    gainy_industries.name                     as g_industry,
+                    interests.name                            as g_interest,
+                    lower(c.name)                             as investcat,
                     CASE
                         WHEN countries.region = 'Europe' THEN 'europe'
                         WHEN countries."sub-region" LIKE '%Latin America%' THEN 'latam'
-                        END                   as country_group,
-                    technicals.short_percent  as short_percent
+                        END                                   as country_group,
+                    technicals.short_percent,
+                    t_vol_10d_ranktopperc_commonstock.vol_10d_ranktopperc_commonstock,
+                    t_vol_10d_ranktopperc_etf.vol_10d_ranktopperc_etf
              from tickers t
                       LEFT JOIN ticker_industries on t.symbol = ticker_industries.symbol --here we have N:N relationship, so we must use distinct in the end (we will get duplicates otherwise)
                       LEFT JOIN gainy_industries on ticker_industries.industry_id = gainy_industries.id
@@ -96,6 +115,8 @@ with historical_prices as (select * from {{ ref('historical_prices') }}),
                                 on countries.name = t.country_name OR countries."alpha-2" = t.country_name OR
                                    countries."alpha-3" = t.country_name
                       LEFT JOIN technicals on t.symbol = technicals.symbol
+                      LEFT JOIN t_vol_10d_ranktopperc_commonstock on t_vol_10d_ranktopperc_commonstock.symbol = t.symbol
+                      LEFT JOIN t_vol_10d_ranktopperc_etf on t_vol_10d_ranktopperc_etf.symbol = t.symbol
          ),
      tmp_ticker_collections as
          (
