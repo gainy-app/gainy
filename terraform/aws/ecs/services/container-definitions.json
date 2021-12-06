@@ -142,6 +142,7 @@
       { "name": "PG_PASSWORD",                         "value": "${pg_password}" },
       { "name": "PG_PORT",                             "value": "${pg_port}" },
       { "name": "PG_USERNAME",                         "value": "${pg_username}" },
+      { "name": "MELTANO_ELT_BUFFER_SIZE",             "value": "104857600" },
       { "name": "MELTANO_DATABASE_URI",                "value": "postgresql://${pg_username}:${pg_password}@${pg_host}:${pg_port}/${pg_dbname}?options=-csearch_path=${pg_meltano_schema}" },
       { "name": "AIRFLOW_PASSWORD",                    "value": "${airflow_password}" },
       { "name": "AIRFLOW_UI_PORT",                     "value": "${airflow_port}" },
