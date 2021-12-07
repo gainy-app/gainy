@@ -37,12 +37,12 @@ with time_series_15min as
                     mod(extract(minutes from eod_intraday_prices.time)::int, 15) as time_truncated
              from {{ ref('tickers') }}
                       left join {{ source('eod', 'eod_intraday_prices') }} on eod_intraday_prices.symbol = tickers.symbol
-{% if is_incremental() %}
-                      left join max_date
-                                on max_date.symbol = eod_intraday_prices.symbol and max_date.period = '15min'
-             where max_date.time is null
-                or eod_intraday_prices.time >= max_date.time
-{% endif %}
+-- {% if is_incremental() %}
+--                       left join max_date
+--                                 on max_date.symbol = eod_intraday_prices.symbol and max_date.period = '15min'
+--              where max_date.time is null
+--                 or eod_intraday_prices.time >= max_date.time
+-- {% endif %}
          ),
      combined_intraday_prices as
          (
@@ -67,14 +67,14 @@ with time_series_15min as
                    (sum(volume::numeric)
                     OVER (partition by expanded_intraday_prices.symbol, time_truncated rows between current row and unbounded following))::double precision                    as volume
              from expanded_intraday_prices
-{% if is_incremental() %}
-                      left join max_date
-                                on max_date.symbol = expanded_intraday_prices.symbol and max_date.period = '15min'
-{% endif %}
+-- {% if is_incremental() %}
+--                       left join max_date
+--                                 on max_date.symbol = expanded_intraday_prices.symbol and max_date.period = '15min'
+-- {% endif %}
              where time_truncated < now() - interval '15 minutes'
-{% if is_incremental() %}
-               and (max_date.time is null or expanded_intraday_prices.time_truncated > max_date.time)
-{% endif %}
+-- {% if is_incremental() %}
+--                and (max_date.time is null or expanded_intraday_prices.time_truncated > max_date.time)
+-- {% endif %}
              order by symbol, time_truncated, time
          )
 select distinct on (

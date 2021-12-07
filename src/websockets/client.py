@@ -24,7 +24,7 @@ DB_CONN_STRING = f"postgresql://{PG_USERNAME}:{PG_PASSWORD}@{PG_HOST}:{PG_PORT}/
 
 logging.basicConfig()
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG if ENV == "local" else logging.WARNING)
+logger.setLevel(logging.DEBUG if ENV == "local" else logging.INFO)
 
 
 class PricesListener:
