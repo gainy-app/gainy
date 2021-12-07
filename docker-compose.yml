@@ -21,6 +21,7 @@ services:
     environment:
       EODHISTORICALDATA_JOBS_COUNT: 1
       AIRFLOW_PASSWORD: admin
+      DBT_THREADS: 1
     depends_on:
       - postgres
       - hasura
