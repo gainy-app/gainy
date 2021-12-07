@@ -57,6 +57,8 @@ services:
     restart: always
     env_file:
       - .env
+    environment:
+      DBT_THREADS: 1
     build:
       context: ./src/gainy-fetch
       args:

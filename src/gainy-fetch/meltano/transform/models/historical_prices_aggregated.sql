@@ -27,7 +27,7 @@ with time_series_15min as
              SELECT date_trunc('minute', dd) -
                     interval '1 minute' *
                     (mod(extract(minutes from dd)::int, 15) + 15) as datetime
-             FROM generate_series(now() - interval '1 day', now(), interval '15 minutes') dd
+             FROM generate_series(now()::timestamp without time zone - interval '1 day', now()::timestamp without time zone, interval '15 minutes') dd
          ),
      expanded_intraday_prices as
          (

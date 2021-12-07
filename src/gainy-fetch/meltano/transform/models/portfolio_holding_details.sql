@@ -35,7 +35,7 @@ with first_purchase_date as
      long_term_tax_holdings as
          (
              select distinct on (holding_id) holding_id,
-                                             ltt_quantity_total
+                                             ltt_quantity_total::double precision
              from (
                       select profile_holdings.id                                                                                                             as holding_id,
                              quantity_sign,
