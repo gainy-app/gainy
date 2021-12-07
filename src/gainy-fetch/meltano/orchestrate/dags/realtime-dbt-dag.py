@@ -54,17 +54,12 @@ models = [
 
 dag_id = "realtime-dbt-dag"
 tags = ["meltano", "dbt"]
-"""
-We want to operate during US exchanges trading hours, which are typically from 7am to 8pm ET.
-Which is 12am to 1am UTC. We'll extend this period by 1 hour both sides and split at midnight.
-Thus, the UTC periods are 0-2 and 11-23.
-"""
 dag = DAG(
     dag_id,
     tags=tags,
     catchup=False,
     default_args=DEFAULT_ARGS,
-    schedule_interval="1,16,31,46 0-2,11-23 * * 1-5",
+    schedule_interval="1,16,31,46 * * * 1-5",
     max_active_runs=1,
     is_paused_upon_creation=False
 )
