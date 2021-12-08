@@ -54,21 +54,14 @@ with historical_prices as (select * from {{ ref('historical_prices') }}),
                and date >= NOW() - interval '1 year' --up to 1 year but farther than 1 month to not overlap selection with previous one
              order by hp.code, hp.date ASC
         ),
-     t_vol_10d_ranktopperc_commonstock AS
-        (    
+     t_ranks AS
+        (
              select tm.symbol,
-                    PERCENT_RANK() OVER(order by tm.avg_volume_10d desc) as vol_10d_ranktopperc_commonstock
+                    ROW_NUMBER() OVER(partition by t.type order by tm.avg_volume_10d desc)     as vol_10d_topintype_order,
+                    (ROW_NUMBER() OVER(partition by t.type order by tm.avg_volume_10d desc)) /
+                    (count(*)     OVER(partition by t.type))::float                            as vol_10d_topintype_percent
              from ticker_metrics tm
              JOIN tickers t on t.symbol = tm.symbol
-             where t.type ilike 'Common Stock'
-        ),
-     t_vol_10d_ranktopperc_etf AS
-        (    
-             select tm.symbol,
-                    PERCENT_RANK() OVER(order by tm.avg_volume_10d desc) as vol_10d_ranktopperc_etf
-             from ticker_metrics tm
-             JOIN tickers t on t.symbol = tm.symbol
-             where t.type ilike 'ETF'
         ),
      ct as
          (
@@ -98,8 +91,8 @@ with historical_prices as (select * from {{ ref('historical_prices') }}),
                         WHEN countries."sub-region" LIKE '%Latin America%' THEN 'latam'
                         END                                   as country_group,
                     technicals.short_percent,
-                    t_vol_10d_ranktopperc_commonstock.vol_10d_ranktopperc_commonstock,
-                    t_vol_10d_ranktopperc_etf.vol_10d_ranktopperc_etf
+                    t_ranks.vol_10d_topintype_order,
+                    t_ranks.vol_10d_topintype_percent
              from tickers t
                       LEFT JOIN ticker_industries on t.symbol = ticker_industries.symbol --here we have N:N relationship, so we must use distinct in the end (we will get duplicates otherwise)
                       LEFT JOIN gainy_industries on ticker_industries.industry_id = gainy_industries.id
@@ -115,8 +108,7 @@ with historical_prices as (select * from {{ ref('historical_prices') }}),
                                 on countries.name = t.country_name OR countries."alpha-2" = t.country_name OR
                                    countries."alpha-3" = t.country_name
                       LEFT JOIN technicals on t.symbol = technicals.symbol
-                      LEFT JOIN t_vol_10d_ranktopperc_commonstock on t_vol_10d_ranktopperc_commonstock.symbol = t.symbol
-                      LEFT JOIN t_vol_10d_ranktopperc_etf on t_vol_10d_ranktopperc_etf.symbol = t.symbol
+                      LEFT JOIN t_ranks on t_ranks.symbol = t.symbol
          ),
      tmp_ticker_collections as
          (
