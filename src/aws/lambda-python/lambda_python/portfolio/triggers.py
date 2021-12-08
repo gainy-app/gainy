@@ -17,13 +17,12 @@ class OnPlaidAccessTokenCreated(HasuraTrigger):
         access_token = payload
         access_token['service'] = SERVICE_PLAID
 
-        holdings_count = self.portfolio_service.sync_token_holdings(db_conn, access_token)
-        transactions_count = self.portfolio_service.sync_token_transactions(db_conn, access_token)
+        holdings_count = self.portfolio_service.sync_token_holdings(
+            db_conn, access_token)
+        transactions_count = self.portfolio_service.sync_token_transactions(
+            db_conn, access_token)
 
         return {
             'holdings_count': holdings_count,
             'transactions_count': transactions_count,
         }
-
-
-

@@ -18,7 +18,6 @@ from portfolio.plaid.common import get_plaid_client, handle_error
 from common.hasura_function import HasuraAction
 from common.hasura_exception import HasuraActionException
 
-
 PLAID_WEBHOOK_URL = os.getenv("PLAID_WEBHOOK_URL")
 
 
@@ -81,6 +80,7 @@ class LinkPlaidAccount(HasuraAction):
 
         return {'result': True}
 
+
 class PlaidWebhook(HasuraAction):
     def __init__(self):
         super().__init__("plaid_webhook")
@@ -93,22 +93,24 @@ class PlaidWebhook(HasuraAction):
         item_id = input_params['item_id']
         with db_conn.cursor() as cursor:
             cursor.execute(
-                "SELECT id, profile_id, access_token FROM app.profile_plaid_access_tokens WHERE item_id = %(item_id)s", {
-                    "item_id": item_id
-                })
+                "SELECT id, profile_id, access_token FROM app.profile_plaid_access_tokens WHERE item_id = %(item_id)s",
+                {"item_id": item_id})
 
             access_tokens = [
-                dict(zip(['id', 'profile_id', 'access_token', 'service'], row + (SERVICE_PLAID, )))
-                for row in cursor.fetchall()
+                dict(
+                    zip(['id', 'profile_id', 'access_token', 'service'],
+                        row + (SERVICE_PLAID, ))) for row in cursor.fetchall()
             ]
 
         count = 0
         webhook_type = input_params['webhook_type']
         for access_token in access_tokens:
             if webhook_type == 'HOLDINGS':
-                count += self.portfolio_service.sync_token_holdings(db_conn, access_token)
+                count += self.portfolio_service.sync_token_holdings(
+                    db_conn, access_token)
             elif webhook_type == 'INVESTMENTS_TRANSACTIONS':
-                count += self.portfolio_service.sync_token_transactions(db_conn, access_token)
+                count += self.portfolio_service.sync_token_transactions(
+                    db_conn, access_token)
 
         return {'count': count}
 
@@ -121,18 +123,23 @@ class PlaidWebhook(HasuraAction):
 
         key = response['key']
         if key['expired_at'] is not None:
-            raise HasuraActionException(400, "Failed to validate plaid request key: Key expired")
+            raise HasuraActionException(
+                400, "Failed to validate plaid request key: Key expired")
 
         # Validate the signature and extract the claims.
         try:
             claims = jwt.decode(signed_jwt, key, algorithms=['ES256'])
             print('claims', claims)
         except jwt.JWTError as e:
-            raise HasuraActionException(400, "Failed to validate plaid request key: decode failed with: %s" % (str(e)))
+            raise HasuraActionException(
+                400,
+                "Failed to validate plaid request key: decode failed with: %s"
+                % (str(e)))
 
         # Ensure that the token is not expired.
         if claims["iat"] < time.time() - 5 * 60:
-            raise HasuraActionException(400, "Failed to validate plaid request key: claim expired")
+            raise HasuraActionException(
+                400, "Failed to validate plaid request key: claim expired")
 
         # Compute the has of the body.
         m = hashlib.sha256()
@@ -143,4 +150,6 @@ class PlaidWebhook(HasuraAction):
         # Ensure that the hash of the body matches the claim.
         # Use constant time comparison to prevent timing attacks.
         if not hmac.compare_digest(body_hash, claims['request_body_sha256']):
-            raise HasuraActionException(400, "Failed to validate plaid request key: body hash mismatch")
+            raise HasuraActionException(
+                400,
+                "Failed to validate plaid request key: body hash mismatch")

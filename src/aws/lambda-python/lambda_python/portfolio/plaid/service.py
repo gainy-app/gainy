@@ -24,8 +24,7 @@ class PlaidService:
             for security in response.securities
         ]
         accounts = [
-            self.__hydrate_account(account)
-            for account in response.accounts
+            self.__hydrate_account(account) for account in response.accounts
         ]
         for i in holdings:
             i.plaid_access_token_id = plaid_access_token["id"]
@@ -38,7 +37,11 @@ class PlaidService:
             'accounts': accounts,
         }
 
-    def get_transactions(self, db_conn, plaid_access_token, count=100, offset=0):
+    def get_transactions(self,
+                         db_conn,
+                         plaid_access_token,
+                         count=100,
+                         offset=0):
         # InvestmentsTransactionsGetResponse[]
         response = self.plaid_client.get_investment_transactions(
             plaid_access_token["access_token"],
@@ -57,8 +60,7 @@ class PlaidService:
             for security in response.securities
         ]
         accounts = [
-            self.__hydrate_account(account)
-            for account in response.accounts
+            self.__hydrate_account(account) for account in response.accounts
         ]
         for i in transactions:
             i.plaid_access_token_id = plaid_access_token["id"]
