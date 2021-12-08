@@ -24,7 +24,7 @@ class HasuraAction(ABC):
         return name == self.name
 
     @abstractmethod
-    def apply(self, db_conn, input_params):
+    def apply(self, db_conn, input_params, headers):
         pass
 
 

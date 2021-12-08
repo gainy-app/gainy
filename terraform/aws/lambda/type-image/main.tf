@@ -14,9 +14,6 @@ variable "aws_iam_role_lambda_exec_role" {}
 variable "image_uri" {}
 variable "vpc_security_group_ids" {}
 variable "vpc_subnet_ids" {}
-variable "request_parameters" {
-  default = {}
-}
 
 resource "aws_iam_role_policy_attachment" "iam_role_policy_attachment_lambda_vpc_access_execution" {
   role       = var.aws_iam_role_lambda_exec_role.name
@@ -55,5 +52,4 @@ module "route" {
   aws_iam_role_lambda_exec_role             = var.aws_iam_role_lambda_exec_role
   aws_lambda_invoke_arn                     = aws_lambda_function.lambda.invoke_arn
   aws_lambda_function_name                  = aws_lambda_function.lambda.function_name
-  request_parameters                        = var.request_parameters
 }

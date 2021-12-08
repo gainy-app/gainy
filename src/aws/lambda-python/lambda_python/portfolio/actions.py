@@ -8,7 +8,7 @@ class GetPortfolioHoldings(HasuraAction):
 
         self.service = PortfolioService()
 
-    def apply(self, db_conn, input_params):
+    def apply(self, db_conn, input_params, headers):
         profile_id = input_params["profile_id"]
 
         holdings = self.service.get_holdings(db_conn, profile_id)
@@ -22,7 +22,7 @@ class GetPortfolioTransactions(HasuraAction):
 
         self.service = PortfolioService()
 
-    def apply(self, db_conn, input_params):
+    def apply(self, db_conn, input_params, headers):
         profile_id = input_params["profile_id"]
         count = input_params.get("count", 100)
         offset = input_params.get("offset", 0)

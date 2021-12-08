@@ -17,12 +17,12 @@ class HasuraDispatcher(ABC):
         self.is_gateway_proxy = is_gateway_proxy
 
     def handle(self, event, context):
-        print(event)
+        headers = event['headers'] if 'headers' in event else {}
         request = self.extract_request(event)
 
         with psycopg2.connect(self.db_conn_string) as db_conn:
             try:
-                response = self.apply(db_conn, request)
+                response = self.apply(db_conn, request, headers)
 
                 return self.format_response(200, response)
             except HasuraActionException as he:
@@ -41,7 +41,7 @@ class HasuraDispatcher(ABC):
                 })
 
     @abstractmethod
-    def apply(self, dn_conn, request):
+    def apply(self, dn_conn, request, headers):
         pass
 
     def choose_function_by_name(self, function_name):
@@ -100,7 +100,7 @@ class HasuraActionDispatcher(HasuraDispatcher):
                  is_gateway_proxy: bool = True):
         super().__init__(db_conn_string, actions, is_gateway_proxy)
 
-    def apply(self, db_conn, request):
+    def apply(self, db_conn, request, headers):
         action = self.choose_function_by_name(request["action"]["name"])
 
         input_params = request["input"]
@@ -111,7 +111,7 @@ class HasuraActionDispatcher(HasuraDispatcher):
             self.check_authorization(db_conn, action,
                                      request["session_variables"])
 
-        return action.apply(db_conn, input_params)
+        return action.apply(db_conn, input_params, headers)
 
 
 class HasuraTriggerDispatcher(HasuraDispatcher):
@@ -121,7 +121,7 @@ class HasuraTriggerDispatcher(HasuraDispatcher):
                  is_gateway_proxy: bool = True):
         super().__init__(db_conn_string, triggers, is_gateway_proxy)
 
-    def apply(self, db_conn, request):
+    def apply(self, db_conn, request, headers):
         trigger = self.choose_function_by_name(request["trigger"]["name"])
 
         op = request["event"]["op"]

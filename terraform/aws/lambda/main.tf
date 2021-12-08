@@ -249,10 +249,6 @@ module "hasuraAction" {
   aws_iam_role_lambda_exec_role             = aws_iam_role.lambda_exec
   image_uri                                 = docker_registry_image.lambda_python.name
 
-  request_parameters = {
-    "append:header.Plaid-Verification" = "$request.header.Plaid-Verification"
-  }
-
   env_vars = {
     pg_host                   = var.pg_host
     pg_port                   = var.pg_port

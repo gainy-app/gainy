@@ -27,7 +27,7 @@ class CreatePlaidLinkToken(HasuraAction):
 
         self.client = get_plaid_client()
 
-    def apply(self, db_conn, input_params):
+    def apply(self, db_conn, input_params, headers):
         profile_id = input_params["profile_id"]
         redirect_uri = input_params["redirect_uri"]
 
@@ -57,7 +57,7 @@ class LinkPlaidAccount(HasuraAction):
 
         self.client = get_plaid_client()
 
-    def apply(self, db_conn, input_params):
+    def apply(self, db_conn, input_params, headers):
         profile_id = input_params["profile_id"]
         public_token = input_params["public_token"]
 
@@ -87,8 +87,9 @@ class PlaidWebhook(HasuraAction):
 
         self.portfolio_service = PortfolioService()
 
-    def apply(self, db_conn, input_params):
-        print(input_params)
+    def apply(self, db_conn, input_params, headers):
+        print(input_params, headers)
+        self.verify(input_params, headers)
 
         item_id = input_params['item_id']
         with db_conn.cursor() as cursor:
