@@ -251,7 +251,6 @@ module "hasuraAction" {
 
   request_parameters = {
     "integration.request.header.Plaid-Verification" = "method.request.header.Plaid-Verification"
-    "integration.request.header.plaid-verification" = "method.request.header.plaid-verification"
   }
 
   env_vars = {
