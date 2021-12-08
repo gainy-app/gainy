@@ -1,7 +1,7 @@
 - name: allowed-queries
   definition:
     queries:
-    - name: Plaid Webhook
+    - name: plaid_webhook
       query: |-
         mutation plaid_webhook (
           $webhook_type: String!

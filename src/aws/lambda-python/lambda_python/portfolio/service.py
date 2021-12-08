@@ -106,11 +106,6 @@ class PortfolioService:
             entity.account_id = accounts_dict[entity.account_ref_id]
         self.portfolio_repository.persist(db_conn, transactions)
 
-        # cleanup
-        self.portfolio_repository.remove_other_by_profile_id(
-            db_conn, transactions)
-        self.portfolio_repository.remove_other_by_profile_id(db_conn, accounts)
-
     def __get_service(self, name):
         if name not in self.services:
             raise Error('Service %s not supported' % (name))

@@ -250,7 +250,7 @@ module "hasuraAction" {
   image_uri                                 = docker_registry_image.lambda_python.name
 
   request_parameters = {
-    "append:header.Plaid-Verification" = "method.request.header.Plaid-Verification"
+    "append:header.Plaid-Verification" = "$request.header.Plaid-Verification"
   }
 
   env_vars = {
@@ -269,7 +269,7 @@ module "hasuraAction" {
     ALGOLIA_TICKERS_INDEX     = var.algolia_tickers_index
     ALGOLIA_COLLECTIONS_INDEX = var.algolia_collections_index
     ALGOLIA_SEARCH_API_KEY    = var.algolia_search_key
-    PLAID_WEBHOOK_URL         = "${var.hasura_url}/api/rest/plaid_webhook"
+    PLAID_WEBHOOK_URL         = "https://${var.hasura_url}/api/rest/plaid_webhook"
   }
   vpc_security_group_ids = var.vpc_security_group_ids
   vpc_subnet_ids         = var.vpc_subnet_ids
