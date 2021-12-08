@@ -169,6 +169,7 @@
       { "name": "TAP_POSTGRES__SYNC_DBNAME",           "value": "${pg_dbname}" },
       { "name": "TAP_POSTGRES__SYNC_FILTER_SCHEMAS",   "value": "${pg_load_schema}" },
 
+      { "name": "DBT_THREADS",                         "value": "${dbt_threads}" },
       { "name": "DBT_TARGET_SCHEMA",                   "value": "${pg_transform_schema}" },
       { "name": "DBT_TARGET",                          "value": "postgres" },
 

@@ -58,7 +58,18 @@ with relative_data as
                                1
                        )                                        as relative_gain_total,
                    profile_portfolio_transactions.quantity::numeric
-             from {{ source('app', 'profile_portfolio_transactions') }}
+             from (
+                      select id,
+                             profile_id,
+                             security_id,
+                             type,
+                             date,
+                             abs(profile_portfolio_transactions.quantity::numeric) *
+                             case
+                                 when profile_portfolio_transactions.type = 'buy' then 1
+                                 else -1 end as quantity
+                      from {{ source('app', 'profile_portfolio_transactions') }}
+                  ) profile_portfolio_transactions
                       join {{ source('app', 'portfolio_securities') }}
                            on portfolio_securities.id = profile_portfolio_transactions.security_id
                       join {{ ref('historical_prices_aggregated') }}

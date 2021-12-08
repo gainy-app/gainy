@@ -27,7 +27,8 @@ select profile_portfolio_transactions.profile_id,
        historical_prices_aggregated.time                                           as date, -- TODO remove
        historical_prices_aggregated.time                                           as datetime,
        historical_prices_aggregated.period                                         as period,
-       sum(profile_portfolio_transactions.quantity::numeric *
+       sum(abs(profile_portfolio_transactions.quantity::numeric) *
+           case when profile_portfolio_transactions.type = 'buy' then 1 else -1 end *
            historical_prices_aggregated.adjusted_close::numeric)::double precision as value
 from {{ source('app', 'profile_portfolio_transactions') }}
          join {{ source('app', 'portfolio_securities') }}

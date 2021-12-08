@@ -24,7 +24,7 @@ DB_CONN_STRING = f"postgresql://{PG_USERNAME}:{PG_PASSWORD}@{PG_HOST}:{PG_PORT}/
 
 logging.basicConfig()
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG if ENV == "local" else logging.WARNING)
+logger.setLevel(logging.DEBUG if ENV == "local" else logging.INFO)
 
 
 class PricesListener:
@@ -69,19 +69,23 @@ class PricesListener:
             }
 
     def handle_message(self, message):
-        logger.debug(message)
-        if not message:
-            return
+        try:
+            logger.debug(message)
+            if not message:
+                return
 
-        message = json.loads(message)
+            message = json.loads(message)
 
-        # {"status_code":200,"message":"Authorized"}
-        if "status_code" in message:
-            if message["status_code"] != 200:
-                logger.error(message)
-            return
+            # {"status_code":200,"message":"Authorized"}
+            if "status_code" in message:
+                if message["status_code"] != 200:
+                    logger.error(message)
+                return
 
-        self.handle_price_message(message)
+            self.handle_price_message(message)
+        except e:
+            logger.error(e)
+            raise e
 
     async def start(self):
         logger.info("connecting to websocket for symbols: %s",
@@ -111,7 +115,7 @@ class PricesListener:
                 await asyncio.sleep(
                     (self.granularity -
                      round(time.time() * 1000) % self.granularity) / 1000 + 1)
-                logger.info("__sync_records %d" % (time.time() * 1000))
+                logger.debug("__sync_records %d" % (time.time() * 1000))
 
                 # latest fully closed time period
                 current_key = round(time.time() * 1000) // self.granularity - 1

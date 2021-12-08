@@ -59,7 +59,7 @@ dag = DAG(
     tags=tags,
     catchup=False,
     default_args=DEFAULT_ARGS,
-    schedule_interval="*/5 * * * 1-5",
+    schedule_interval="1,16,31,46 * * * 1-5",
     max_active_runs=1,
     is_paused_upon_creation=False
 )
