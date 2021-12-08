@@ -250,7 +250,7 @@ module "hasuraAction" {
   image_uri                                 = docker_registry_image.lambda_python.name
 
   request_parameters = {
-    "integration.request.header.Plaid-Verification" = "method.request.header.Plaid-Verification"
+    "append:header.Plaid-Verification" = "method.request.header.Plaid-Verification"
   }
 
   env_vars = {
