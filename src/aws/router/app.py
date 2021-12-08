@@ -12,7 +12,8 @@ app = Flask(__name__)
 def proxy_python_hasura_action():
     resp = requests.post(
         "http://lambda-python-action:8080/2015-03-31/functions/function/invocations",
-        json=request.get_json())
+        json=request.get_json(),
+        headers=request.headers)
 
     headers = [(name, value) for (name, value) in resp.raw.headers.items()
                if name.lower() not in excluded_headers]
@@ -24,7 +25,8 @@ def proxy_python_hasura_action():
 def proxy_python_hasura_trigger():
     resp = requests.post(
         "http://lambda-python-trigger:8080/2015-03-31/functions/function/invocations",
-        json=request.get_json())
+        json=request.get_json(),
+        headers=request.headers)
 
     headers = [(name, value) for (name, value) in resp.raw.headers.items()
                if name.lower() not in excluded_headers]

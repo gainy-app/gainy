@@ -17,6 +17,7 @@ class HasuraDispatcher(ABC):
         self.is_gateway_proxy = is_gateway_proxy
 
     def handle(self, event, context):
+        print(event)
         request = self.extract_request(event)
 
         with psycopg2.connect(self.db_conn_string) as db_conn:
@@ -103,10 +104,12 @@ class HasuraActionDispatcher(HasuraDispatcher):
         action = self.choose_function_by_name(request["action"]["name"])
 
         input_params = request["input"]
-        profile_id = action.get_profile_id(input_params)
 
-        self.check_authorization(db_conn, profile_id,
-                                 request["session_variables"])
+        # public endpoints won't be tied to profile
+        if action.profile_id_param is not None:
+            profile_id = action.get_profile_id(input_params)
+            self.check_authorization(db_conn, action,
+                                     request["session_variables"])
 
         return action.apply(db_conn, input_params)
 
@@ -125,7 +128,10 @@ class HasuraTriggerDispatcher(HasuraDispatcher):
         data = request["event"]["data"]
 
         profile_id = trigger.get_profile_id(op, data)
-        self.check_authorization(db_conn, profile_id,
-                                 request["event"]["session_variables"])
+
+        session_variables = request["event"]["session_variables"]
+        # TODO if trigger is called via db operation directly (not via hasura) - it won't have hasura role
+        if session_variables is not None:
+            self.check_authorization(db_conn, profile_id, session_variables)
 
         return trigger.apply(db_conn, op, data)

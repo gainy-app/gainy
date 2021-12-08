@@ -31,6 +31,7 @@ module "lambda" {
   vpc_subnet_ids              = module.ecs.private_subnet_ids
   datadog_api_key             = var.datadog_api_key
   datadog_app_key             = var.datadog_app_key
+  hasura_url                  = module.ecs-service.hasura_url
 
   base_image_registry_address = var.base_image_registry_address
   base_image_version          = var.base_image_version
