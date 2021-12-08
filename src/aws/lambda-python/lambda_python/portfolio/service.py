@@ -17,28 +17,38 @@ class PortfolioService:
             db_conn, profile_id)
 
         # InvestmentsHoldingsGetResponse[]
-        responses = [
-            self.plaid_client.get_investment_holdings(access_token)
-            for access_token in profile_plaid_access_tokens
-        ]
+        holdings = []
+        securities = []
+        accounts = []
+        for plaid_access_token in profile_plaid_access_tokens:
+            response = self.plaid_client.get_investment_holdings(
+                plaid_access_token["access_token"])
 
-        holdings = [
-            self.__hydrate_holding_data(holding_data) for response in responses
-            for holding_data in response.holdings
-        ]
-        securities = [
-            self.__hydrate_security(security) for response in responses
-            for security in response.securities
-        ]
-        accounts = [
-            self.__hydrate_account(account) for response in responses
-            for account in response.accounts
-        ]
+            token_holdings = [
+                self.__hydrate_holding_data(holding_data)
+                for holding_data in response.holdings
+            ]
+            token_securities = [
+                self.__hydrate_security(security)
+                for security in response.securities
+            ]
+            token_accounts = [
+                self.__hydrate_account(account)
+                for account in response.accounts
+            ]
+            for i in token_holdings:
+                i.plaid_access_token_id = plaid_access_token["id"]
+            for i in token_accounts:
+                i.plaid_access_token_id = plaid_access_token["id"]
+
+            holdings += token_holdings
+            securities += token_securities
+            accounts += token_accounts
 
         return {
-            'holdings': holdings,
-            'securities': securities,
-            'accounts': accounts,
+            'holdings': self.__unique(holdings),
+            'securities': self.__unique(securities),
+            'accounts': self.__unique(accounts),
         }
 
     def get_transactions(self, db_conn, profile_id, count=100, offset=0):
@@ -46,47 +56,60 @@ class PortfolioService:
             db_conn, profile_id)
 
         # InvestmentsTransactionsGetResponse[]
-        responses = [
-            self.plaid_client.get_investment_transactions(
-                access_token,
+        transactions = []
+        securities = []
+        accounts = []
+        for plaid_access_token in profile_plaid_access_tokens:
+            response = self.plaid_client.get_investment_transactions(
+                plaid_access_token["access_token"],
                 count=count,
                 offset=offset,
                 start_date=datetime.date.today() -
                 datetime.timedelta(days=20 * 365),
                 end_date=datetime.date.today())
-            for access_token in profile_plaid_access_tokens
-        ]
 
-        transactions = [
-            self.__hydrate_transaction_data(transaction_data)
-            for response in responses
-            for transaction_data in response.investment_transactions
-        ]
-        securities = [
-            self.__hydrate_security(security) for response in responses
-            for security in response.securities
-        ]
-        accounts = [
-            self.__hydrate_account(account) for response in responses
-            for account in response.accounts
-        ]
+            token_transactions = [
+                self.__hydrate_transaction_data(transaction_data)
+                for transaction_data in response.investment_transactions
+            ]
+            token_securities = [
+                self.__hydrate_security(security)
+                for security in response.securities
+            ]
+            token_accounts = [
+                self.__hydrate_account(account)
+                for account in response.accounts
+            ]
+            for i in token_transactions:
+                i.plaid_access_token_id = plaid_access_token["id"]
+            for i in token_accounts:
+                i.plaid_access_token_id = plaid_access_token["id"]
+
+            transactions += token_transactions
+            securities += token_securities
+            accounts += token_accounts
 
         return {
-            'transactions': transactions,
-            'securities': securities,
-            'accounts': accounts,
+            'transactions': self.__unique(transactions),
+            'securities': self.__unique(securities),
+            'accounts': self.__unique(accounts),
         }
+
+    def __unique(self, entities):
+        d = {entity.unique_id(): entity for entity in entities}
+        return d.values()
 
     def __get_access_tokens(self, db_conn, profile_id):
         with db_conn.cursor() as cursor:
             cursor.execute(
-                f"SELECT access_token FROM app.profile_plaid_access_tokens WHERE profile_id = %s",
+                f"SELECT id, access_token FROM app.profile_plaid_access_tokens WHERE profile_id = %s",
                 (profile_id, ))
 
             profile_plaid_access_tokens = cursor.fetchall()
 
             return [
-                access_token for [access_token] in profile_plaid_access_tokens
+                dict(zip(['id', 'access_token'], row))
+                for row in profile_plaid_access_tokens
             ]
 
     def __hydrate_holding_data(self, data):

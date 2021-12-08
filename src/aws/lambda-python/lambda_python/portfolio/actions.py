@@ -1,5 +1,6 @@
 import os
 import plaid
+import json
 
 from portfolio.service import PortfolioService
 from portfolio.repository import PortfolioRepository
@@ -23,8 +24,6 @@ class GetPortfolioHoldings(HasuraAction):
         holdings = result['holdings']
 
         # persist securities
-        for entity in securities:
-            entity.profile_id = profile_id
         self.portfolio_repository.persist(db_conn, securities)
         securities_dict = {
             security.ref_id: security.id
@@ -47,8 +46,6 @@ class GetPortfolioHoldings(HasuraAction):
         # cleanup
         self.portfolio_repository.remove_other_by_profile_id(db_conn, holdings)
         self.portfolio_repository.remove_other_by_profile_id(db_conn, accounts)
-        self.portfolio_repository.remove_other_by_profile_id(
-            db_conn, securities)
 
         return [i.normalize() for i in result['holdings']]
 
@@ -75,8 +72,6 @@ class GetPortfolioTransactions(HasuraAction):
         transactions = result['transactions']
 
         # persist securities
-        for entity in securities:
-            entity.profile_id = profile_id
         self.portfolio_repository.persist(db_conn, securities)
         securities_dict = {
             security.ref_id: security.id
@@ -100,7 +95,5 @@ class GetPortfolioTransactions(HasuraAction):
         self.portfolio_repository.remove_other_by_profile_id(
             db_conn, transactions)
         self.portfolio_repository.remove_other_by_profile_id(db_conn, accounts)
-        self.portfolio_repository.remove_other_by_profile_id(
-            db_conn, securities)
 
         return [i.normalize() for i in result['transactions']]

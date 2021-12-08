@@ -2,9 +2,6 @@
     schema: app
     name: portfolio_securities
   object_relationships:
-  - name: profile
-    using:
-      foreign_key_constraint_on: profile_id
   - name: tickers
     using:
       manual_configuration:
@@ -26,21 +23,17 @@
   - role: user
     permission:
       columns:
-      - id
       - close_price
       - close_price_as_of
+      - created_at
+      - id
       - iso_currency_code
       - name
       - ref_id
       - ticker_symbol
       - type
-      - profile_id
-      - created_at
       - updated_at
-      filter:
-        profile:
-          user_id:
-            _eq: X-Hasura-User-Id
+      filter: {}
 - table:
     schema: app
     name: profile_categories
@@ -156,6 +149,9 @@
     schema: app
     name: profile_holdings
   object_relationships:
+  - name: account
+    using:
+      foreign_key_constraint_on: account_id
   - name: holding_details
     using:
       manual_configuration:
@@ -177,9 +173,6 @@
   - name: profile
     using:
       foreign_key_constraint_on: profile_id
-  - name: profile_portfolio_account
-    using:
-      foreign_key_constraint_on: account_id
   - name: security
     using:
       foreign_key_constraint_on: security_id
@@ -588,13 +581,6 @@
           schema: app
           name: profile_scoring_settings
   array_relationships:
-  - name: portfolio_securities
-    using:
-      foreign_key_constraint_on:
-        column: profile_id
-        table:
-          schema: app
-          name: portfolio_securities
   - name: profile_categories
     using:
       foreign_key_constraint_on:
@@ -782,6 +768,12 @@
         column_mapping:
           id: industry_id
   select_permissions:
+  - role: anonymous
+    permission:
+      columns:
+      - id
+      - name
+      filter: {}
   - role: user
     permission:
       columns:
@@ -829,6 +821,19 @@
     schema: public
     name: historical_prices_aggregated
   select_permissions:
+  - role: anonymous
+    permission:
+      columns:
+      - adjusted_close
+      - close
+      - datetime
+      - high
+      - low
+      - open
+      - period
+      - symbol
+      - volume
+      filter: {}
   - role: user
     permission:
       columns:
@@ -839,7 +844,7 @@
       - open
       - period
       - symbol
-      - time
+      - datetime
       - volume
       filter: {}
 - table:
@@ -1138,6 +1143,23 @@
         column_mapping:
           id: collection_id
   select_permissions:
+  - role: anonymous
+    permission:
+      columns:
+      - description
+      - id
+      - image_url
+      - name
+      - profile_id
+      - size
+      filter:
+        _and:
+        - profile_id:
+            _is_null: true
+        - personalized:
+            _eq: "0"
+        - enabled:
+            _eq: "1"
   - role: user
     permission:
       columns:
@@ -1182,6 +1204,15 @@
         column_mapping:
           symbol: symbol
   select_permissions:
+  - role: anonymous
+    permission:
+      columns:
+      - collection_id
+      - symbol
+      filter:
+        profile_id:
+          _is_null: true
+      allow_aggregations: true
   - role: user
     permission:
       columns:
@@ -1233,6 +1264,12 @@
     schema: public
     name: ticker_financials
   select_permissions:
+  - role: anonymous
+    permission:
+      columns:
+      - dividend_growth
+      - symbol
+      filter: {}
   - role: user
     permission:
       columns:
@@ -1264,6 +1301,13 @@
         column_mapping:
           symbol: symbol
   select_permissions:
+  - role: anonymous
+    permission:
+      columns:
+      - symbol
+      - highlight
+      - created_at
+      filter: {}
   - role: user
     permission:
       columns:
@@ -1294,6 +1338,12 @@
         column_mapping:
           symbol: symbol
   select_permissions:
+  - role: anonymous
+    permission:
+      columns:
+      - symbol
+      - industry_id
+      filter: {}
   - role: user
     permission:
       columns:
@@ -1343,6 +1393,68 @@
         column_mapping:
           symbol: symbol
   select_permissions:
+  - role: anonymous
+    permission:
+      columns:
+      - symbol
+      - profit_margin
+      - avg_volume_10d
+      - short_percent_outstanding
+      - shares_outstanding
+      - avg_volume_90d
+      - shares_float
+      - short_ratio
+      - beta
+      - absolute_historical_volatility_adjusted_current
+      - relative_historical_volatility_adjusted_current
+      - absolute_historical_volatility_adjusted_min_1y
+      - absolute_historical_volatility_adjusted_max_1y
+      - relative_historical_volatility_adjusted_min_1y
+      - relative_historical_volatility_adjusted_max_1y
+      - implied_volatility
+      - revenue_growth_yoy
+      - revenue_growth_fwd
+      - ebitda_growth_yoy
+      - eps_growth_yoy
+      - eps_growth_fwd
+      - address_city
+      - address_state
+      - address_county
+      - address_full
+      - exchange_name
+      - market_capitalization
+      - enterprise_value_to_sales
+      - price_to_earnings_ttm
+      - price_to_sales_ttm
+      - price_to_book_value
+      - enterprise_value_to_ebitda
+      - price_change_1m
+      - price_change_3m
+      - price_change_1y
+      - dividend_yield
+      - dividends_per_share
+      - dividend_payout_ratio
+      - years_of_consecutive_dividend_growth
+      - dividend_frequency
+      - eps_actual
+      - eps_estimate
+      - beaten_quarterly_eps_estimation_count_ttm
+      - eps_surprise
+      - eps_difference
+      - revenue_estimate_avg_0y
+      - revenue_actual
+      - revenue_ttm
+      - revenue_per_share_ttm
+      - net_income
+      - net_income_ttm
+      - roi
+      - asset_cash_and_equivalents
+      - roa
+      - total_assets
+      - ebitda
+      - ebitda_ttm
+      - net_debt
+      filter: {}
   - role: user
     permission:
       columns:
@@ -1363,6 +1475,7 @@
       - dividend_yield
       - dividends_per_share
       - ebitda
+      - ebitda_ttm
       - ebitda_growth_yoy
       - enterprise_value_to_ebitda
       - enterprise_value_to_sales
@@ -1371,11 +1484,13 @@
       - eps_growth_fwd
       - eps_growth_yoy
       - eps_surprise
+      - eps_difference
       - exchange_name
       - implied_volatility
       - market_capitalization
       - net_debt
       - net_income
+      - net_income_ttm
       - price_change_1m
       - price_change_1y
       - price_change_3m
@@ -1539,6 +1654,26 @@
         column_mapping:
           symbol: symbol
   select_permissions:
+  - role: anonymous
+    permission:
+      columns:
+      - symbol
+      - type
+      - name
+      - description
+      - phone
+      - logo_url
+      - web_url
+      - ipo_date
+      - sector
+      - industry
+      - gic_sector
+      - gic_group
+      - gic_industry
+      - gic_sub_industry
+      - country_name
+      - updated_at
+      filter: {}
   - role: user
     permission:
       columns:

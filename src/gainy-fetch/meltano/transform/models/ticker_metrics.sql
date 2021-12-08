@@ -73,7 +73,13 @@ with highlights as (select * from {{ ref('highlights') }}),
          (
              select *,
                     sum(ebitda)
-                    OVER (partition by symbol ORDER BY date desc ROWS BETWEEN CURRENT ROW AND 3 FOLLOWING) as ebitda_ttm
+                    OVER (partition by symbol ORDER BY date desc ROWS BETWEEN CURRENT ROW AND 3 FOLLOWING) as ebitda_ttm,
+                    sum(gross_profit)
+                    OVER (partition by symbol ORDER BY date desc ROWS BETWEEN CURRENT ROW AND 3 FOLLOWING) as gross_profit_ttm,
+                    sum(cost_of_revenue)
+                    OVER (partition by symbol ORDER BY date desc ROWS BETWEEN CURRENT ROW AND 3 FOLLOWING) as cost_of_revenue_ttm,
+                    sum(net_income)
+                    OVER (partition by symbol ORDER BY date desc ROWS BETWEEN CURRENT ROW AND 3 FOLLOWING) as net_income_ttm
              from financials_income_statement_quarterly
              order by symbol, date desc
          ),
@@ -360,6 +366,7 @@ with highlights as (select * from {{ ref('highlights') }}),
                     latest_expanded_earnings_history_with_eps_actual.eps_estimate,
                     highlights.beaten_quarterly_eps_estimation_count_ttm,
                     latest_expanded_earnings_history_with_eps_actual.surprise_percent as eps_surprise,
+                    latest_expanded_earnings_history_with_eps_actual.eps_difference,
                     earnings_trend_0y.revenue_estimate_avg                            as revenue_estimate_avg_0y,
                     highlights.revenue_ttm::double precision
              from tickers
@@ -377,23 +384,26 @@ with highlights as (select * from {{ ref('highlights') }}),
              select tickers.symbol,
                     highlights.revenue_per_share_ttm::double precision,
                     latest_income_statement_yearly.net_income,
+                    expanded_income_statement_quarterly.net_income_ttm,
                     case
-                        when latest_income_statement_yearly.cost_of_revenue > 0
-                            then latest_income_statement_yearly.net_income /
-                                 latest_income_statement_yearly.cost_of_revenue
+                        when expanded_income_statement_quarterly.cost_of_revenue_ttm > 0
+                            then expanded_income_statement_quarterly.gross_profit_ttm /
+                                 expanded_income_statement_quarterly.cost_of_revenue_ttm
                         end                             as roi,
                     latest_balance_sheet_quarterly.cash as asset_cash_and_equivalents,
                     case
                         when latest_balance_sheet_quarterly.total_assets > 0
-                            then latest_income_statement_yearly.net_income / latest_balance_sheet_quarterly.total_assets
+                            then expanded_income_statement_quarterly.net_income_ttm / latest_balance_sheet_quarterly.total_assets
                         end                             as roa,
                     latest_balance_sheet_quarterly.total_assets,
                     latest_income_statement_yearly.ebitda,
+                    expanded_income_statement_quarterly.ebitda_ttm,
                     latest_balance_sheet_quarterly.net_debt
              from tickers
                       join highlights on tickers.symbol = highlights.symbol
                       join latest_income_statement_yearly on latest_income_statement_yearly.symbol = tickers.symbol
                       join latest_balance_sheet_quarterly on latest_balance_sheet_quarterly.symbol = tickers.symbol
+                      join expanded_income_statement_quarterly on expanded_income_statement_quarterly.symbol = tickers.symbol
          )
 select DISTINCT ON
     (t.symbol) t.symbol,
@@ -449,17 +459,20 @@ select DISTINCT ON
                earnings_metrics.eps_estimate,
                earnings_metrics.beaten_quarterly_eps_estimation_count_ttm,
                earnings_metrics.eps_surprise,
+               earnings_metrics.eps_difference,
                earnings_metrics.revenue_estimate_avg_0y,
                earnings_metrics.revenue_ttm as revenue_actual,
 
                earnings_metrics.revenue_ttm,
                financials_metrics.revenue_per_share_ttm,
                financials_metrics.net_income,
+               financials_metrics.net_income_ttm,
                financials_metrics.roi,
                financials_metrics.asset_cash_and_equivalents,
                financials_metrics.roa,
                financials_metrics.total_assets,
                financials_metrics.ebitda,
+               financials_metrics.ebitda_ttm,
                financials_metrics.net_debt
 from tickers t
          left join highlights on t.symbol = highlights.symbol

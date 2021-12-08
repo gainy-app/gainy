@@ -15,31 +15,33 @@
 with max_date as
          (
              select profile_id,
+                    period,
                     max(date) as date
              from portfolio_chart old_portfolio_chart
-             group by profile_id
+             group by profile_id, period
       )
 {% endif %}
-select portfolio_securities.profile_id,
-       (portfolio_securities.profile_id || '_' || historical_prices_aggregated.time || '_' ||
+select profile_portfolio_transactions.profile_id,
+       (profile_portfolio_transactions.profile_id || '_' || historical_prices_aggregated.time || '_' ||
         historical_prices_aggregated.period)::varchar                              as id,
        historical_prices_aggregated.time                                           as date, -- TODO remove
        historical_prices_aggregated.time                                           as datetime,
        historical_prices_aggregated.period                                         as period,
-       sum(profile_portfolio_transactions.quantity::numeric *
+       sum(abs(profile_portfolio_transactions.quantity::numeric) *
+           case when profile_portfolio_transactions.type = 'buy' then 1 else -1 end *
            historical_prices_aggregated.adjusted_close::numeric)::double precision as value
 from {{ source('app', 'profile_portfolio_transactions') }}
          join {{ source('app', 'portfolio_securities') }}
               on portfolio_securities.id = profile_portfolio_transactions.security_id
 {% if is_incremental() %}
-         left join max_date on max_date.profile_id = portfolio_securities.profile_id
+         left join max_date on max_date.profile_id = profile_portfolio_transactions.profile_id
 {% endif %}
          join {{ ref('historical_prices_aggregated') }}
-              on historical_prices_aggregated.time >= profile_portfolio_transactions.date and
+              on historical_prices_aggregated.datetime >= profile_portfolio_transactions.date and
 {% if is_incremental() %}
                  (max_date.date is null or historical_prices_aggregated.time >= max_date.date) and
 {% endif %}
                  historical_prices_aggregated.symbol = portfolio_securities.ticker_symbol
 where profile_portfolio_transactions.type in ('buy', 'sell')
   and portfolio_securities.type in ('mutual fund', 'equity', 'etf')
-group by portfolio_securities.profile_id, historical_prices_aggregated.period, historical_prices_aggregated.time
+group by profile_portfolio_transactions.profile_id, historical_prices_aggregated.period, historical_prices_aggregated.time

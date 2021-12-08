@@ -21,6 +21,7 @@ services:
     environment:
       EODHISTORICALDATA_JOBS_COUNT: 1
       AIRFLOW_PASSWORD: admin
+      DBT_THREADS: 1
     depends_on:
       - postgres
       - hasura
@@ -56,6 +57,8 @@ services:
     restart: always
     env_file:
       - .env
+    environment:
+      DBT_THREADS: 1
     build:
       context: ./src/gainy-fetch
       args:

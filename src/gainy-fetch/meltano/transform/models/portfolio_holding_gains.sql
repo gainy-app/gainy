@@ -44,7 +44,7 @@ with expanded_holdings as
                                     on portfolio_securities.id = profile_portfolio_transactions.security_id
                                join {{ ref('historical_prices_aggregated') }}
                                     on historical_prices_aggregated.symbol = portfolio_securities.ticker_symbol and
-                                       historical_prices_aggregated.time >= now() - interval '1 week'
+                                       historical_prices_aggregated.datetime >= now() - interval '1 week'
                                join {{ source ('app', 'profile_holdings') }}
                                     on profile_holdings.profile_id = profile_portfolio_transactions.profile_id and
                                        profile_holdings.security_id = profile_portfolio_transactions.security_id
@@ -55,7 +55,7 @@ with expanded_holdings as
      long_term_tax_holdings as
          (
              select distinct on (holding_id) holding_id,
-                                             ltt_quantity_total
+                                             ltt_quantity_total::double precision
              from (
                       select profile_holdings.id                                                                                                             as holding_id,
                              quantity_sign,
@@ -69,7 +69,17 @@ with expanded_holdings as
                                       sign(quantity)                                                                                           as quantity_sign,
                                       sum(quantity)
                                       over (partition by security_id, profile_portfolio_transactions.profile_id order by sign(quantity), date) as cumsum
-                               from {{ source('app', 'profile_portfolio_transactions') }}
+                               from (
+                                        select profile_id,
+                                               security_id,
+                                               type,
+                                               date,
+                                               abs(profile_portfolio_transactions.quantity::numeric) *
+                                               case
+                                                   when profile_portfolio_transactions.type = 'buy' then 1
+                                                   else -1 end as quantity
+                                        from {{ source('app', 'profile_portfolio_transactions') }}
+                                    ) profile_portfolio_transactions
                                         join {{ source('app', 'portfolio_securities') }}
                                              on portfolio_securities.id = profile_portfolio_transactions.security_id
                                where profile_portfolio_transactions.type in ('buy', 'sell')
