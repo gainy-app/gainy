@@ -10,6 +10,13 @@ class HasuraAction(ABC):
         self.profile_id_param = profile_id_param
 
     def get_profile_id(self, input_params):
+        """
+        Extract user profile id from request input. It must return profile id, if the particular
+        action accepts it as a parameter. Otherwise, it must return None.
+
+        :param input_params: action request parameters.
+        :return: user profile id or none.
+        """
         if not self.profile_id_param:
             return None
 
@@ -42,6 +49,15 @@ class HasuraTrigger(ABC):
 
     @abstractmethod
     def get_profile_id(self, op, data):
+        """
+        Extract user profile id from request input. It must return profile id, if the trigger
+        is personalized and uses it internally. Otherwise, it must return None.
+
+        :param op: trigger operation.
+        :param data: trigger input data.
+        :return: user profile id or none.
+        """
+
         pass
 
     @staticmethod
