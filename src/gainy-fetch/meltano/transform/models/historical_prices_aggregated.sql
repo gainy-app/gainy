@@ -122,7 +122,7 @@ union all
         )
     select distinct on (
         code, time_series_1d.datetime
-        )(code || '_' || date || '_1d')::varchar as id,
+        )(code || '_' || time_series_1d.datetime || '_1d')::varchar as id,
          code                                    as symbol,
          time_series_1d.datetime                 as time,
          time_series_1d.datetime                 as datetime,
