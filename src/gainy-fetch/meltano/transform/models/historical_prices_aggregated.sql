@@ -122,11 +122,11 @@ union all
         )
     select distinct on (
         code, time_series_1d.datetime
-        )(code || '_' || time_series_1d.datetime::date || '_1d')::varchar as id,
-         code                                    as symbol,
-         time_series_1d.datetime                 as time,
-         time_series_1d.datetime                 as datetime,
-         '1d'::varchar                           as period,
+        ) (code || '_' || time_series_1d.datetime::date || '_1d')::varchar                    as id,
+         code                                                                                 as symbol,
+         time_series_1d.datetime                                                              as time,
+         time_series_1d.datetime                                                              as datetime,
+         '1d'::varchar                                                                        as period,
          case
              when historical_prices.date = time_series_1d.datetime then historical_prices.open
              else historical_prices.close end                                                 as open,
@@ -166,36 +166,35 @@ union all
 
     select distinct on (
         symbol, time_series_1w.datetime
-        ) id,
+        ) (symbol || '_' || time_series_1w.datetime::timestamptz || '_1w')::varchar as id,
           symbol,
-          time_series_1w.datetime                       as time,
-          time_series_1w.datetime                       as datetime,
+          time_series_1w.datetime                                                   as time,
+          time_series_1w.datetime                                                   as datetime,
           period,
           case
               when historical_prices.datetime = time_series_1w.datetime then historical_prices.open
-              else historical_prices.close end          as open,
+              else historical_prices.close end                                      as open,
           case
               when historical_prices.datetime = time_series_1w.datetime then historical_prices.high
-              else historical_prices.close end          as high,
+              else historical_prices.close end                                      as high,
           case
               when historical_prices.datetime = time_series_1w.datetime then historical_prices.low
-              else historical_prices.close end          as low,
+              else historical_prices.close end                                      as low,
           case
               when historical_prices.datetime = time_series_1w.datetime then historical_prices.close
-              else historical_prices.close end          as close,
+              else historical_prices.close end                                      as close,
           case
               when historical_prices.datetime = time_series_1w.datetime
                   then historical_prices.adjusted_close
-              else historical_prices.adjusted_close end as adjusted_close,
+              else historical_prices.adjusted_close end                             as adjusted_close,
           case
               when historical_prices.datetime = time_series_1w.datetime then historical_prices.volume
-              else 0.0 end                              as volume
+              else 0.0 end                                                          as volume
     from (
              select DISTINCT ON (
                  code,
                  date_trunc('week', date)
-                 ) (code || '_' || date_trunc('week', date) || '_1w')::varchar                                                       as id,
-                   code                                                                                                              as symbol,
+                 ) code                                                                                                              as symbol,
                    date_trunc('week', date)::timestamp                                                                               as time,
                    date_trunc('week', date)::timestamp                                                                               as datetime,
                    '1w'::varchar                                                                                                     as period,
@@ -234,39 +233,38 @@ union all
 
     select distinct on (
         symbol, time_series_1m.datetime
-        ) id,
+        ) (symbol || '_' || time_series_1m.datetime::timestamptz || '_1m')::varchar as id,
           symbol,
-          time_series_1m.datetime                       as time,
-          time_series_1m.datetime                       as datetime,
+          time_series_1m.datetime                                                   as time,
+          time_series_1m.datetime                                                   as datetime,
           period,
           case
               when historical_prices.datetime = time_series_1m.datetime then historical_prices.open
-              else historical_prices.close end          as open,
+              else historical_prices.close end                                      as open,
           case
               when historical_prices.datetime = time_series_1m.datetime then historical_prices.high
-              else historical_prices.close end          as high,
+              else historical_prices.close end                                      as high,
           case
               when historical_prices.datetime = time_series_1m.datetime then historical_prices.low
-              else historical_prices.close end          as low,
+              else historical_prices.close end                                      as low,
           case
               when historical_prices.datetime = time_series_1m.datetime then historical_prices.close
-              else historical_prices.close end          as close,
+              else historical_prices.close end                                      as close,
           case
               when historical_prices.datetime = time_series_1m.datetime
                   then historical_prices.adjusted_close
-              else historical_prices.adjusted_close end as adjusted_close,
+              else historical_prices.adjusted_close end                             as adjusted_close,
           case
               when historical_prices.datetime = time_series_1m.datetime then historical_prices.volume
-              else 0.0 end                              as volume
+              else 0.0 end                                                          as volume
     from (
              select DISTINCT ON (
                  code,
                  date_trunc('month', date)
-                 ) (code || '_' || date_trunc('month', date) || '_1m')::varchar                                                       as id,
-                   code                                                                                                              as symbol,
+                 ) code                                                                                                               as symbol,
                    date_trunc('month', date)::timestamp                                                                               as time,
                    date_trunc('month', date)::timestamp                                                                               as datetime,
-                   '1m'::varchar                                                                                                     as period,
+                   '1m'::varchar                                                                                                      as period,
                    first_value(open::double precision)
                    OVER (partition by code, date_trunc('month', date) order by date rows between current row and unbounded following) as open,
                    max(high::double precision)
