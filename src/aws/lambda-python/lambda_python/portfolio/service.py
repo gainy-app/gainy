@@ -44,7 +44,7 @@ class PortfolioService:
         for access_token in self.__get_access_tokens(db_conn, profile_id):
             token_data = self.__get_service(
                 access_token['service']).get_transactions(db_conn,
-                                                          plaid_access_token,
+                                                          access_token,
                                                           count=count,
                                                           offset=offset)
 
