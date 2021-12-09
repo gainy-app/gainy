@@ -108,7 +108,7 @@ class HasuraActionDispatcher(HasuraDispatcher):
         # public endpoints won't be tied to profile
         if action.profile_id_param is not None:
             profile_id = action.get_profile_id(input_params)
-            self.check_authorization(db_conn, action,
+            self.check_authorization(db_conn, profile_id,
                                      request["session_variables"])
 
         return action.apply(db_conn, input_params, headers)
