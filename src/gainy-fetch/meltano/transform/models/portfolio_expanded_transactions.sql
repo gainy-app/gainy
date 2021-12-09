@@ -21,7 +21,7 @@ with normalized_transactions as
                     security_id,
                     profile_id,
                     account_id,
-                    quantity * case when type = 'sell' then -1 else 1 end as quantity_norm
+                    abs(quantity) * case when type = 'sell' then -1 else 1 end as quantity_norm
              from {{ source('app', 'profile_portfolio_transactions') }}
          ),
      expanded_transactions as
@@ -46,20 +46,20 @@ with normalized_transactions as
     select distinct on (
         expanded_transactions.security_id,
         expanded_transactions.account_id
-        ) null::int                                                                               as id,
-          'auto_' || expanded_transactions.account_id || '_' || expanded_transactions.security_id as uniq_id,
-          historical_prices.adjusted_close * abs(rolling_quantity)                                as amount,
-          null::timestamp                                                                         as datetime,
+        ) null::int                                                                                as id,
+          'auto0_' || expanded_transactions.account_id || '_' || expanded_transactions.security_id as uniq_id,
+          historical_prices.adjusted_close * abs(rolling_quantity)                                 as amount,
+          null::timestamp                                                                          as datetime,
           'ASSUMPTION BOUGHT ' || abs(rolling_quantity) || ' ' || portfolio_securities_normalized.name || ' @ ' ||
-          historical_prices.adjusted_close                                                        as name,
-          historical_prices.adjusted_close                                                        as price,
-          abs(rolling_quantity)                                                                   as quantity,
-          'buy'                                                                                   as subtype,
-          'buy'                                                                                   as type,
+          historical_prices.adjusted_close                                                         as name,
+          historical_prices.adjusted_close                                                         as price,
+          abs(rolling_quantity)                                                                    as quantity,
+          'buy'                                                                                    as subtype,
+          'buy'                                                                                    as type,
           expanded_transactions.security_id,
           expanded_transactions.profile_id,
           expanded_transactions.account_id,
-          abs(rolling_quantity)                                                                   as quantity_norm
+          abs(rolling_quantity)                                                                    as quantity_norm
     from expanded_transactions
              join {{ ref('portfolio_securities_normalized') }} on portfolio_securities_normalized.id = expanded_transactions.security_id
              left join first_trade_date on first_trade_date.code = portfolio_securities_normalized.ticker_symbol
@@ -78,7 +78,7 @@ union all
         security_id,
         account_id
         ) null::int                                                                                as id,
-          'auto_' || account_id || '_' || security_id                                              as uniq_id,
+          'auto1_' || account_id || '_' || security_id                                             as uniq_id,
           historical_prices.adjusted_close * diff                                                  as amount,
           null::timestamp                                                                          as datetime,
           'ASSUMPTION BOUGHT ' || diff || ' ' || name || ' @ ' || historical_prices.adjusted_close as name,

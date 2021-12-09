@@ -12,23 +12,23 @@
 with expanded_holdings as
          (
              select t.holding_id,
-                    min(profile_id)               as profile_id,
-                    max(updated_at)               as updated_at,
-                    sum(quantity * current_price) as actual_value,
-                    sum(absolute_gain_1d)         as absolute_gain_1d,
-                    sum(absolute_gain_1w)         as absolute_gain_1w,
-                    sum(absolute_gain_1m)         as absolute_gain_1m,
-                    sum(absolute_gain_3m)         as absolute_gain_3m,
-                    sum(absolute_gain_1y)         as absolute_gain_1y,
-                    sum(absolute_gain_5y)         as absolute_gain_5y,
-                    sum(absolute_gain_total)      as absolute_gain_total
+                    min(profile_id)                    as profile_id,
+                    max(updated_at)                    as updated_at,
+                    sum(quantity_norm * current_price) as actual_value,
+                    sum(absolute_gain_1d)              as absolute_gain_1d,
+                    sum(absolute_gain_1w)              as absolute_gain_1w,
+                    sum(absolute_gain_1m)              as absolute_gain_1m,
+                    sum(absolute_gain_3m)              as absolute_gain_3m,
+                    sum(absolute_gain_1y)              as absolute_gain_1y,
+                    sum(absolute_gain_5y)              as absolute_gain_5y,
+                    sum(absolute_gain_total)           as absolute_gain_total
              from (
                       select distinct on (
-                          portfolio_expanded_transactions.id
+                          portfolio_expanded_transactions.uniq_id
                           ) profile_holdings.id                                  as holding_id,
                             profile_holdings.profile_id,
                             portfolio_transaction_gains.updated_at,
-                            profile_holdings.quantity,
+                            portfolio_expanded_transactions.quantity_norm::numeric,
                             historical_prices_aggregated.adjusted_close::numeric as current_price,
                             portfolio_transaction_gains.absolute_gain_1d::numeric,
                             portfolio_transaction_gains.absolute_gain_1w::numeric,
@@ -39,7 +39,7 @@ with expanded_holdings as
                             portfolio_transaction_gains.absolute_gain_total::numeric
                       from {{ ref('portfolio_transaction_gains') }}
                                join {{ ref('portfolio_expanded_transactions') }}
-                                    on portfolio_expanded_transactions.id = portfolio_transaction_gains.transaction_id
+                                    on portfolio_expanded_transactions.uniq_id = portfolio_transaction_gains.transaction_uniq_id
                                join {{ source ('app', 'portfolio_securities') }}
                                     on portfolio_securities.id = portfolio_expanded_transactions.security_id
                                join {{ ref('historical_prices_aggregated') }}
@@ -48,7 +48,7 @@ with expanded_holdings as
                                join {{ source ('app', 'profile_holdings') }}
                                     on profile_holdings.profile_id = portfolio_expanded_transactions.profile_id and
                                        profile_holdings.security_id = portfolio_expanded_transactions.security_id
-                      order by portfolio_expanded_transactions.id, historical_prices_aggregated.time desc
+                      order by portfolio_expanded_transactions.uniq_id, historical_prices_aggregated.time desc
                   ) t
              group by t.holding_id
          ),

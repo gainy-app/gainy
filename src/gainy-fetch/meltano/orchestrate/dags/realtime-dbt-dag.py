@@ -51,6 +51,10 @@ models = [
     'portfolio_transaction_gains',
     'portfolio_gains',
     'portfolio_chart',
+    'portfolio_securities_normalized',
+    'profile_holding_groups',
+    'profile_holdings_normalized',
+    'portfolio_holding_group_gains',
 ]
 
 dag_id = "realtime-dbt-dag"

@@ -17,7 +17,7 @@ with max_date as
              select profile_id,
                     period,
                     max(date) as date
-             from portfolio_chart old_portfolio_chart
+             from {{ this }} old_portfolio_chart
              group by profile_id, period
       )
 {% endif %}
@@ -32,15 +32,17 @@ select portfolio_expanded_transactions.profile_id,
 from {{ ref('portfolio_expanded_transactions') }}
          join {{ ref('portfolio_securities_normalized') }}
               on portfolio_securities_normalized.id = portfolio_expanded_transactions.security_id
-{% if is_incremental() %}
-         left join max_date on max_date.profile_id = portfolio_expanded_transactions.profile_id
-{% endif %}
          join {{ ref('historical_prices_aggregated') }}
               on (historical_prices_aggregated.datetime >= portfolio_expanded_transactions.datetime or
                   portfolio_expanded_transactions.datetime is null) and
-{% if is_incremental() %}
-                 (max_date.date is null or historical_prices_aggregated.time >= max_date.date) and
-{% endif %}
                  historical_prices_aggregated.symbol = portfolio_securities_normalized.ticker_symbol
+{% if is_incremental() %}
+         left join max_date
+                   on max_date.profile_id = portfolio_expanded_transactions.profile_id and
+                      max_date.period = historical_prices_aggregated.period
+{% endif %}
 where portfolio_expanded_transactions.type in ('buy', 'sell')
+{% if is_incremental() %}
+  and (max_date.date is null or historical_prices_aggregated.time >= max_date.date)
+{% endif %}
 group by portfolio_expanded_transactions.profile_id, historical_prices_aggregated.period, historical_prices_aggregated.time
