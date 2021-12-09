@@ -39,8 +39,6 @@ with latest_price AS
                         END                                                      as country_group
              from {{ ref('tickers') }} t
                       LEFT JOIN latest_price ON latest_price.code = t.symbol
-                      LEFT JOIN price_1month ON price_1month.code = t.symbol
-                      LEFT JOIN price_1year ON price_1year.code = t.symbol
                       LEFT JOIN {{ ref('ticker_industries') }} ti on t.symbol = ti.symbol --here we have N:N relationship, so we must use distinct in the end (we will get duplicates otherwise)
                       LEFT JOIN {{ ref('gainy_industries') }} gi on ti.industry_id = gi.id
                       LEFT JOIN {{ ref('ticker_categories') }} tc on t.symbol = tc.symbol --here we have N:N relationship, so we must use distinct in the end (we will get duplicates otherwise)
