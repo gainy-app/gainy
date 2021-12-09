@@ -59,16 +59,16 @@ with expanded_holdings as
              from (
                       select profile_holdings.id                                                                                                             as holding_id,
                              quantity_sign,
-                             date,
+                             datetime,
                              min(cumsum)
-                             over (partition by t.profile_id, t.security_id order by t.quantity_sign, date rows between current row and unbounded following) as ltt_quantity_total
+                             over (partition by t.profile_id, t.security_id order by t.quantity_sign, datetime rows between current row and unbounded following) as ltt_quantity_total
                       from (
                                select portfolio_expanded_transactions.profile_id,
                                       security_id,
-                                      date,
+                                      datetime,
                                       sign(quantity_norm)                                                                                            as quantity_sign,
                                       sum(quantity_norm)
-                                      over (partition by security_id, portfolio_expanded_transactions.profile_id order by sign(quantity_norm), date) as cumsum
+                                      over (partition by security_id, portfolio_expanded_transactions.profile_id order by sign(quantity_norm), datetime) as cumsum
                                from {{ ref('portfolio_expanded_transactions') }}
                                         join {{ source('app', 'portfolio_securities') }}
                                              on portfolio_securities.id = portfolio_expanded_transactions.security_id
@@ -79,8 +79,8 @@ with expanded_holdings as
                                     on profile_holdings.profile_id = t.profile_id and
                                        profile_holdings.security_id = t.security_id
                   ) t
-             where date < now() - interval '1 year'
-             order by holding_id, quantity_sign desc, date desc
+             where datetime < now() - interval '1 year'
+             order by holding_id, quantity_sign desc, datetime desc
          )
 select expanded_holdings.holding_id,
        updated_at,

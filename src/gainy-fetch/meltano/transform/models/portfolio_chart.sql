@@ -36,7 +36,7 @@ from {{ ref('portfolio_expanded_transactions') }}
          left join max_date on max_date.profile_id = portfolio_expanded_transactions.profile_id
 {% endif %}
          join {{ ref('historical_prices_aggregated') }}
-              on historical_prices_aggregated.datetime >= portfolio_expanded_transactions.date and
+              on historical_prices_aggregated.datetime >= portfolio_expanded_transactions.datetime and
 {% if is_incremental() %}
                  (max_date.date is null or historical_prices_aggregated.time >= max_date.date) and
 {% endif %}

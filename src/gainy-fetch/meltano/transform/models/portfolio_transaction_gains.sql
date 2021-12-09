@@ -62,7 +62,7 @@ with relative_data as
                       join {{ source('app', 'portfolio_securities') }}
                            on portfolio_securities.id = portfolio_expanded_transactions.security_id
                       join {{ ref('historical_prices_aggregated') }}
-                           on historical_prices_aggregated.datetime >= portfolio_expanded_transactions.date and
+                           on historical_prices_aggregated.datetime >= portfolio_expanded_transactions.datetime and
                               (
                                       (historical_prices_aggregated.period = '15min' and
                                        historical_prices_aggregated.datetime >=
