@@ -81,6 +81,7 @@ with historical_prices as (select * from {{ ref('historical_prices') }}),
                                 on countries.name = t.country_name OR countries."alpha-2" = t.country_name OR
                                    countries."alpha-3" = t.country_name
                       LEFT JOIN t_ranks on t_ranks.symbol = t.symbol
+                      LEFT JOIN ticker_metrics on ticker_metrics.symbol = t.symbol
          ),
      tmp_ticker_collections as
          (
