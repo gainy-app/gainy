@@ -237,6 +237,7 @@ Covid vaccine stocks,0,235,,Companies actively fighting against COVID,1,0,"where
 Most active stocks,0,236,,Most traded Stocks in recent days,1,0,where (ct.ttype ilike 'common stock' AND ct.vol_10d_topintype_percent <=0.2 AND ct.vol_10d_topintype_order <=50)
 Most active ETFs,0,237,,Most traded ETFs in recent days,1,0,where (ct.ttype ilike 'ETF' AND ct.vol_10d_topintype_percent <=0.2 AND ct.vol_10d_topintype_order <=20)
 Make-up stocks,0,238,,Makeup and cosmetics companies,1,0,"where (ct.ttype ilike 'common stock' AND ct.ticker_code IN ('JWEL','IPAR','EL','ULTA', 'COTY','ELF','UG','REV', 'IFF','NTCO','BON','TUP', 'BFRA','YSG','NUS','UL'))"
+Stocks for bloggers,0,239,,The ultimate pack of companies whose products bloggers use daily: from Photoshop to the Internet,1,0,"where (ct.ttype ilike 'common stock' AND ct.ticker_code IN ('ADBE', 'PINS', 'FB', 'GPRO', 'SNAP', 'APPL', 'CAJ', 'NIKE', 'T'))"
 Defensive stocks,0,10001,,"Common stocks, category: Defensive",0,0,where (ct.ttype ilike 'common stock' AND ct.investcat ilike 'Defensive')
 Speculation stocks,0,10002,,"Common stocks, category: Speculation",1,0,where (ct.ttype ilike 'common stock' AND ct.investcat ilike 'Speculation')
 Penny stocks,0,10005,,"Common stocks, category: Penny",1,0,where (ct.ttype ilike 'common stock' AND ct.investcat ilike 'Penny')
