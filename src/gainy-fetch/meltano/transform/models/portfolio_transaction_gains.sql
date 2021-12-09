@@ -12,68 +12,57 @@
 with relative_data as
          (
              select distinct on (
-                 profile_portfolio_transactions.id
-                 ) profile_portfolio_transactions.id            as transaction_id,
+                 portfolio_expanded_transactions.id
+                 ) portfolio_expanded_transactions.id            as transaction_id,
                    historical_prices_aggregated.datetime::timestamp as updated_at,
-                   sign(profile_portfolio_transactions.quantity)::numeric * (
+                   sign(portfolio_expanded_transactions.quantity_norm)::numeric * (
                                historical_prices_aggregated.adjusted_close::numeric /
                                first_value(historical_prices_aggregated.adjusted_close::numeric)
                                over (partition by historical_prices_aggregated.symbol ORDER BY historical_prices_aggregated.datetime RANGE INTERVAL '1 day' PRECEDING) -
                                1
                        )                                        as relative_gain_1d,
-                   sign(profile_portfolio_transactions.quantity)::numeric * (
+                   sign(portfolio_expanded_transactions.quantity_norm)::numeric * (
                                historical_prices_aggregated.adjusted_close::numeric /
                                first_value(historical_prices_aggregated.adjusted_close::numeric)
                                over (partition by historical_prices_aggregated.symbol ORDER BY historical_prices_aggregated.datetime RANGE INTERVAL '1 week' PRECEDING) -
                                1
                        )                                        as relative_gain_1w,
-                   sign(profile_portfolio_transactions.quantity)::numeric * (
+                   sign(portfolio_expanded_transactions.quantity_norm)::numeric * (
                                historical_prices_aggregated.adjusted_close::numeric /
                                first_value(historical_prices_aggregated.adjusted_close::numeric)
                                over (partition by historical_prices_aggregated.symbol ORDER BY historical_prices_aggregated.datetime RANGE INTERVAL '1 month' PRECEDING) -
                                1
                        )                                        as relative_gain_1m,
-                   sign(profile_portfolio_transactions.quantity)::numeric * (
+                   sign(portfolio_expanded_transactions.quantity_norm)::numeric * (
                                historical_prices_aggregated.adjusted_close::numeric /
                                first_value(historical_prices_aggregated.adjusted_close::numeric)
                                over (partition by historical_prices_aggregated.symbol ORDER BY historical_prices_aggregated.datetime RANGE INTERVAL '3 months' PRECEDING) -
                                1
                        )                                        as relative_gain_3m,
-                   sign(profile_portfolio_transactions.quantity)::numeric * (
+                   sign(portfolio_expanded_transactions.quantity_norm)::numeric * (
                                historical_prices_aggregated.adjusted_close::numeric /
                                first_value(historical_prices_aggregated.adjusted_close::numeric)
                                over (partition by historical_prices_aggregated.symbol ORDER BY historical_prices_aggregated.datetime RANGE INTERVAL '1 year' PRECEDING) -
                                1
                        )                                        as relative_gain_1y,
-                   sign(profile_portfolio_transactions.quantity)::numeric * (
+                   sign(portfolio_expanded_transactions.quantity_norm)::numeric * (
                                historical_prices_aggregated.adjusted_close::numeric /
                                first_value(historical_prices_aggregated.adjusted_close::numeric)
                                over (partition by historical_prices_aggregated.symbol ORDER BY historical_prices_aggregated.datetime RANGE INTERVAL '5 years' PRECEDING) -
                                1
                        )                                        as relative_gain_5y,
-                   sign(profile_portfolio_transactions.quantity)::numeric * (
+                   sign(portfolio_expanded_transactions.quantity_norm)::numeric * (
                                historical_prices_aggregated.adjusted_close::numeric /
                                first_value(historical_prices_aggregated.adjusted_close::numeric)
                                over (partition by historical_prices_aggregated.symbol ORDER BY historical_prices_aggregated.datetime RANGE UNBOUNDED PRECEDING) -
                                1
                        )                                        as relative_gain_total,
-                   profile_portfolio_transactions.quantity::numeric
-             from (
-                      select id,
-                             profile_id,
-                             security_id,
-                             type,
-                             date,
-                             abs(profile_portfolio_transactions.quantity::numeric) *
-                             case
-                                 when profile_portfolio_transactions.type = 'buy' then 1
-                                 else -1 end as quantity
-                      from {{ source('app', 'profile_portfolio_transactions') }}
-                  ) profile_portfolio_transactions
+                   portfolio_expanded_transactions.quantity_norm::numeric
+             from {{ ref('portfolio_expanded_transactions') }}
                       join {{ source('app', 'portfolio_securities') }}
-                           on portfolio_securities.id = profile_portfolio_transactions.security_id
+                           on portfolio_securities.id = portfolio_expanded_transactions.security_id
                       join {{ ref('historical_prices_aggregated') }}
-                           on historical_prices_aggregated.datetime >= profile_portfolio_transactions.date and
+                           on historical_prices_aggregated.datetime >= portfolio_expanded_transactions.date and
                               (
                                       (historical_prices_aggregated.period = '15min' and
                                        historical_prices_aggregated.datetime >=
@@ -89,9 +78,10 @@ with relative_data as
                                        now() - interval '5 year' - interval '1 week')
                                   ) and
                               historical_prices_aggregated.symbol = portfolio_securities.ticker_symbol
-             where profile_portfolio_transactions.type in ('buy', 'sell')
+             where portfolio_expanded_transactions.id is not null
+               and portfolio_expanded_transactions.type in ('buy', 'sell')
                and portfolio_securities.type in ('mutual fund', 'equity', 'etf')
-             order by profile_portfolio_transactions.id, historical_prices_aggregated.datetime desc
+             order by portfolio_expanded_transactions.id, historical_prices_aggregated.datetime desc
          )
 select transaction_id,
        updated_at,
@@ -102,11 +92,11 @@ select transaction_id,
        relative_gain_1y::double precision,
        relative_gain_5y::double precision,
        relative_gain_total::double precision,
-       (relative_gain_1d * abs(quantity))::double precision    as absolute_gain_1d,
-       (relative_gain_1w * abs(quantity))::double precision    as absolute_gain_1w,
-       (relative_gain_1m * abs(quantity))::double precision    as absolute_gain_1m,
-       (relative_gain_3m * abs(quantity))::double precision    as absolute_gain_3m,
-       (relative_gain_1y * abs(quantity))::double precision    as absolute_gain_1y,
-       (relative_gain_5y * abs(quantity))::double precision    as absolute_gain_5y,
-       (relative_gain_total * abs(quantity))::double precision as absolute_gain_total
+       (relative_gain_1d * abs(quantity_norm))::double precision    as absolute_gain_1d,
+       (relative_gain_1w * abs(quantity_norm))::double precision    as absolute_gain_1w,
+       (relative_gain_1m * abs(quantity_norm))::double precision    as absolute_gain_1m,
+       (relative_gain_3m * abs(quantity_norm))::double precision    as absolute_gain_3m,
+       (relative_gain_1y * abs(quantity_norm))::double precision    as absolute_gain_1y,
+       (relative_gain_5y * abs(quantity_norm))::double precision    as absolute_gain_5y,
+       (relative_gain_total * abs(quantity_norm))::double precision as absolute_gain_total
 from relative_data

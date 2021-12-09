@@ -43,26 +43,16 @@ with first_purchase_date as
                              min(cumsum)
                              over (partition by t.profile_id, t.security_id order by t.quantity_sign, date rows between current row and unbounded following) as ltt_quantity_total
                       from (
-                               select profile_portfolio_transactions.profile_id,
+                               select portfolio_expanded_transactions.profile_id,
                                       security_id,
                                       date,
-                                      sign(quantity)                                                                                           as quantity_sign,
-                                      sum(quantity)
-                                      over (partition by security_id, profile_portfolio_transactions.profile_id order by sign(quantity), date) as cumsum
-                               from (
-                                   select profile_id,
-                                          security_id,
-                                          type,
-                                          date,
-                                          abs(profile_portfolio_transactions.quantity::numeric) *
-                                          case
-                                              when profile_portfolio_transactions.type = 'buy' then 1
-                                              else -1 end as quantity
-                                   from {{ source('app', 'profile_portfolio_transactions') }}
-                                   ) profile_portfolio_transactions
+                                      sign(quantity_norm)                                                                                            as quantity_sign,
+                                      sum(quantity_norm)
+                                      over (partition by security_id, portfolio_expanded_transactions.profile_id order by sign(quantity_norm), date) as cumsum
+                               from {{ ref('portfolio_expanded_transactions') }}
                                         join {{ source('app', 'portfolio_securities') }}
-                                             on portfolio_securities.id = profile_portfolio_transactions.security_id
-                               where profile_portfolio_transactions.type in ('buy', 'sell')
+                                             on portfolio_securities.id = portfolio_expanded_transactions.security_id
+                               where portfolio_expanded_transactions.type in ('buy', 'sell')
                                  and portfolio_securities.type in ('mutual fund', 'equity', 'etf')
                            ) t
                                join {{ source('app', 'profile_holdings') }}

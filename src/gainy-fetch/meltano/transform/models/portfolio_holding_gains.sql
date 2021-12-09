@@ -24,7 +24,7 @@ with expanded_holdings as
                     sum(absolute_gain_total)      as absolute_gain_total
              from (
                       select distinct on (
-                          profile_portfolio_transactions.id
+                          portfolio_expanded_transactions.id
                           ) profile_holdings.id                                  as holding_id,
                             profile_holdings.profile_id,
                             portfolio_transaction_gains.updated_at,
@@ -38,17 +38,17 @@ with expanded_holdings as
                             portfolio_transaction_gains.absolute_gain_5y::numeric,
                             portfolio_transaction_gains.absolute_gain_total::numeric
                       from {{ ref('portfolio_transaction_gains') }}
-                               join {{ source ('app', 'profile_portfolio_transactions') }}
-                                    on profile_portfolio_transactions.id = portfolio_transaction_gains.transaction_id
+                               join {{ ref('portfolio_expanded_transactions') }}
+                                    on portfolio_expanded_transactions.id = portfolio_transaction_gains.transaction_id
                                join {{ source ('app', 'portfolio_securities') }}
-                                    on portfolio_securities.id = profile_portfolio_transactions.security_id
+                                    on portfolio_securities.id = portfolio_expanded_transactions.security_id
                                join {{ ref('historical_prices_aggregated') }}
                                     on historical_prices_aggregated.symbol = portfolio_securities.ticker_symbol and
                                        historical_prices_aggregated.datetime >= now() - interval '1 week'
                                join {{ source ('app', 'profile_holdings') }}
-                                    on profile_holdings.profile_id = profile_portfolio_transactions.profile_id and
-                                       profile_holdings.security_id = profile_portfolio_transactions.security_id
-                      order by profile_portfolio_transactions.id, historical_prices_aggregated.time desc
+                                    on profile_holdings.profile_id = portfolio_expanded_transactions.profile_id and
+                                       profile_holdings.security_id = portfolio_expanded_transactions.security_id
+                      order by portfolio_expanded_transactions.id, historical_prices_aggregated.time desc
                   ) t
              group by t.holding_id
          ),
@@ -63,26 +63,16 @@ with expanded_holdings as
                              min(cumsum)
                              over (partition by t.profile_id, t.security_id order by t.quantity_sign, date rows between current row and unbounded following) as ltt_quantity_total
                       from (
-                               select profile_portfolio_transactions.profile_id,
+                               select portfolio_expanded_transactions.profile_id,
                                       security_id,
                                       date,
-                                      sign(quantity)                                                                                           as quantity_sign,
-                                      sum(quantity)
-                                      over (partition by security_id, profile_portfolio_transactions.profile_id order by sign(quantity), date) as cumsum
-                               from (
-                                        select profile_id,
-                                               security_id,
-                                               type,
-                                               date,
-                                               abs(profile_portfolio_transactions.quantity::numeric) *
-                                               case
-                                                   when profile_portfolio_transactions.type = 'buy' then 1
-                                                   else -1 end as quantity
-                                        from {{ source('app', 'profile_portfolio_transactions') }}
-                                    ) profile_portfolio_transactions
+                                      sign(quantity_norm)                                                                                            as quantity_sign,
+                                      sum(quantity_norm)
+                                      over (partition by security_id, portfolio_expanded_transactions.profile_id order by sign(quantity_norm), date) as cumsum
+                               from {{ ref('portfolio_expanded_transactions') }}
                                         join {{ source('app', 'portfolio_securities') }}
-                                             on portfolio_securities.id = profile_portfolio_transactions.security_id
-                               where profile_portfolio_transactions.type in ('buy', 'sell')
+                                             on portfolio_securities.id = portfolio_expanded_transactions.security_id
+                               where portfolio_expanded_transactions.type in ('buy', 'sell')
                                  and portfolio_securities.type in ('mutual fund', 'equity', 'etf')
                            ) t
                                 join {{ source('app', 'profile_holdings') }}

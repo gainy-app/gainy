@@ -45,6 +45,7 @@ if not Path(project_root).joinpath(meltano_bin).exists():
 models = [
     'ticker_realtime_metrics',
     'historical_prices_aggregated',
+    'portfolio_expanded_transactions',
     'portfolio_holding_gains',
     'portfolio_holding_details',
     'portfolio_transaction_gains',
