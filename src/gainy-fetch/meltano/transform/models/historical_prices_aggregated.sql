@@ -150,7 +150,7 @@ union all
              join time_series_1d on time_series_1d.datetime between historical_prices.date and historical_prices.date + interval '1 week'
     {% if is_incremental() %}
         left join max_date on max_date.symbol = code and max_date.period = '1d'
-        where max_date.time is null or date >= max_date.time
+        where max_date.time is null or date >= max_date.time - interval '1 week'
     {% endif %}
     order by code, time_series_1d.datetime, date desc
 )
