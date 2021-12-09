@@ -92,7 +92,7 @@ union all
           diff                                                                                     as quantity_norm
     from (
              select distinct on (
-                 expanded_transactions.account_id, expanded_transactions.security_id
+                 profile_holdings_normalized.account_id, profile_holdings_normalized.security_id
                  ) profile_holdings_normalized.quantity,
                    profile_holdings_normalized.name,
                    profile_holdings_normalized.ticker_symbol,
@@ -105,7 +105,7 @@ union all
                       left join expanded_transactions
                                 on profile_holdings_normalized.account_id = expanded_transactions.account_id and
                                    profile_holdings_normalized.security_id = expanded_transactions.security_id
-             order by expanded_transactions.account_id, expanded_transactions.security_id,
+             order by profile_holdings_normalized.account_id, profile_holdings_normalized.security_id,
                       expanded_transactions.date desc
          ) t
              left join first_trade_date on first_trade_date.code = ticker_symbol

@@ -30,17 +30,17 @@ select portfolio_expanded_transactions.profile_id,
        sum(portfolio_expanded_transactions.quantity_norm::numeric *
            historical_prices_aggregated.adjusted_close::numeric)::double precision as value
 from {{ ref('portfolio_expanded_transactions') }}
-         join {{ source('app', 'portfolio_securities') }}
-              on portfolio_securities.id = portfolio_expanded_transactions.security_id
+         join {{ ref('portfolio_securities_normalized') }}
+              on portfolio_securities_normalized.id = portfolio_expanded_transactions.security_id
 {% if is_incremental() %}
          left join max_date on max_date.profile_id = portfolio_expanded_transactions.profile_id
 {% endif %}
          join {{ ref('historical_prices_aggregated') }}
-              on historical_prices_aggregated.datetime >= portfolio_expanded_transactions.datetime and
+              on (historical_prices_aggregated.datetime >= portfolio_expanded_transactions.datetime or
+                  portfolio_expanded_transactions.datetime is null) and
 {% if is_incremental() %}
                  (max_date.date is null or historical_prices_aggregated.time >= max_date.date) and
 {% endif %}
-                 historical_prices_aggregated.symbol = portfolio_securities.ticker_symbol
+                 historical_prices_aggregated.symbol = portfolio_securities_normalized.ticker_symbol
 where portfolio_expanded_transactions.type in ('buy', 'sell')
-  and portfolio_securities.type in ('mutual fund', 'equity', 'etf')
 group by portfolio_expanded_transactions.profile_id, historical_prices_aggregated.period, historical_prices_aggregated.time
