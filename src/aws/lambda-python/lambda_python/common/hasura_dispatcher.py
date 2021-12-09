@@ -105,7 +105,8 @@ class HasuraActionDispatcher(HasuraDispatcher):
         input_params = request["input"]
         profile_id = action.get_profile_id(input_params)
         if profile_id:
-            self.check_authorization(db_conn, profile_id, request["session_variables"])
+            self.check_authorization(db_conn, profile_id,
+                                     request["session_variables"])
 
         return action.apply(db_conn, input_params)
 
@@ -125,6 +126,7 @@ class HasuraTriggerDispatcher(HasuraDispatcher):
 
         profile_id = trigger.get_profile_id(op, data)
         if profile_id:
-            self.check_authorization(db_conn, profile_id, request["event"]["session_variables"])
+            self.check_authorization(db_conn, profile_id,
+                                     request["event"]["session_variables"])
 
         return trigger.apply(db_conn, op, data)
