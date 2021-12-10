@@ -1,0 +1,9 @@
+- definition:
+    query:
+      collection_name: allowed-queries
+      query_name: plaid_webhook
+  url: plaid_webhook
+  methods:
+    - POST
+  name: plaid_webhook
+  comment:

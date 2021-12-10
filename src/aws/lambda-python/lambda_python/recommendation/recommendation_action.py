@@ -12,7 +12,7 @@ class GetRecommendedCollections(HasuraAction):
         super().__init__("get_recommended_collections", "profile_id")
         self.ranking = TFIDFWithNorm1_5CollectionRanking()
 
-    def apply(self, db_conn, input_params):
+    def apply(self, db_conn, input_params, headers):
         profile_id = input_params["profile_id"]
 
         document_frequencies = read_industry_frequencies(db_conn)

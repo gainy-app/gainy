@@ -4,7 +4,6 @@ variable "aws_apigatewayv2_api_lambda_execution_arn" {}
 variable "aws_iam_role_lambda_exec_role" {}
 variable "aws_lambda_invoke_arn" {}
 variable "aws_lambda_function_name" {}
-
 resource "aws_apigatewayv2_integration" "lambda" {
   api_id = var.aws_apigatewayv2_api_lambda_id
 

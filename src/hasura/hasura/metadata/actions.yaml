@@ -65,6 +65,13 @@ actions:
     handler: '{{AWS_LAMBDA_API_GATEWAY_ENDPOINT}}/hasuraAction'
   permissions:
   - role: user
+- name: plaid_webhook
+  definition:
+    kind: synchronous
+    handler: '{{AWS_LAMBDA_API_GATEWAY_ENDPOINT}}/hasuraAction'
+    forward_client_headers: true
+  permissions:
+  - role: anonymous
 - name: search_collections
   definition:
     kind: ""
@@ -79,7 +86,8 @@ actions:
   - role: user
 custom_types:
   enums: []
-  input_objects: []
+  input_objects:
+  - name: PlaidWebhookError
   objects:
   - name: ChartDataPoint
   - name: NewsDataPoint
@@ -193,4 +201,5 @@ custom_types:
       field_mapping:
         id: id
   - name: CreatePlaidLinkTokenOutput
+  - name: PlaidWebhookOutput
   scalars: []

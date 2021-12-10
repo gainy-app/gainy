@@ -20,6 +20,7 @@ variable "algolia_tickers_index" {}
 variable "algolia_collections_index" {}
 variable "algolia_app_id" {}
 variable "algolia_search_key" {}
+variable "hasura_url" {}
 
 output "aws_apigatewayv2_api_endpoint" {
   value = "${aws_apigatewayv2_api.lambda.api_endpoint}/${aws_apigatewayv2_stage.lambda.name}"
@@ -264,6 +265,7 @@ module "hasuraAction" {
     ALGOLIA_TICKERS_INDEX     = var.algolia_tickers_index
     ALGOLIA_COLLECTIONS_INDEX = var.algolia_collections_index
     ALGOLIA_SEARCH_API_KEY    = var.algolia_search_key
+    PLAID_WEBHOOK_URL         = "https://${var.hasura_url}/api/rest/plaid_webhook"
   }
   vpc_security_group_ids = var.vpc_security_group_ids
   vpc_subnet_ids         = var.vpc_subnet_ids
