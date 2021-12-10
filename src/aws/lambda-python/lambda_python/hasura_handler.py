@@ -6,6 +6,7 @@ from recommendation.match_score_action import GetMatchScoreByCollection, GetMatc
 from recommendation.recommendation_action import GetRecommendedCollections
 from portfolio.plaid.actions import *
 from portfolio.actions import *
+from portfolio.triggers import *
 
 # DB CONNECTION
 from search.algolia_search import SearchTickers, SearchCollections
@@ -42,6 +43,7 @@ ACTIONS = [
     LinkPlaidAccount(),
     GetPortfolioHoldings(),
     GetPortfolioTransactions(),
+    PlaidWebhook(),
 
     # Search
     SearchTickers(ALGOLIA_APP_ID, ALGOLIA_SEARCH_API_KEY,
@@ -58,7 +60,12 @@ def handle_action(event, context):
     return action_dispatcher.handle(event, context)
 
 
-TRIGGERS = [SetUserCategories(), OnUserCreated(ENV), SetTop20Collection()]
+TRIGGERS = [
+    SetUserCategories(),
+    OnUserCreated(ENV),
+    SetTop20Collection(),
+    OnPlaidAccessTokenCreated(),
+]
 
 trigger_dispatcher = HasuraTriggerDispatcher(DB_CONN_STRING, TRIGGERS,
                                              API_GATEWAY_PROXY_INTEGRATION)
