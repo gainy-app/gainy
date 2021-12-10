@@ -1090,6 +1090,79 @@
               _eq: X-Hasura-User-Id
 - table:
     schema: public
+    name: portfolio_holding_group_details
+  object_relationships:
+  - name: profile
+    using:
+      manual_configuration:
+        remote_table:
+          schema: app
+          name: profiles
+        insertion_order: null
+        column_mapping:
+          profile_id: id
+  select_permissions:
+  - role: user
+    permission:
+      columns:
+      - profile_id
+      - ticker_symbol
+      - purchase_date
+      - relative_gain_total
+      - relative_gain_1d
+      - value_to_portfolio_value
+      - ticker_name
+      - market_capitalization
+      - next_earnings_date
+      - security_type
+      - ltt_quantity_total
+      filter:
+        profile:
+          user_id:
+            _eq: X-Hasura-User-Id
+- table:
+    schema: public
+    name: portfolio_holding_group_gains
+  object_relationships:
+  - name: profile
+    using:
+      manual_configuration:
+        remote_table:
+          schema: app
+          name: profiles
+        insertion_order: null
+        column_mapping:
+          profile_id: id
+  select_permissions:
+  - role: user
+    permission:
+      columns:
+      - absolute_gain_1d
+      - absolute_gain_1m
+      - absolute_gain_1w
+      - absolute_gain_1y
+      - absolute_gain_3m
+      - absolute_gain_5y
+      - absolute_gain_total
+      - actual_value
+      - ltt_quantity_total
+      - profile_id
+      - relative_gain_1d
+      - relative_gain_1m
+      - relative_gain_1w
+      - relative_gain_1y
+      - relative_gain_3m
+      - relative_gain_5y
+      - relative_gain_total
+      - ticker_symbol
+      - updated_at
+      - value_to_portfolio_value
+      filter:
+        profile:
+          user_id:
+            _eq: X-Hasura-User-Id
+- table:
+    schema: public
     name: portfolio_transaction_gains
   object_relationships:
   - name: transaction
@@ -1188,6 +1261,129 @@
         - profile_id:
             _is_null: true
       allow_aggregations: true
+- table:
+    schema: public
+    name: profile_holding_groups
+  object_relationships:
+  - name: details
+    using:
+      manual_configuration:
+        remote_table:
+          schema: public
+          name: portfolio_holding_group_details
+        insertion_order: null
+        column_mapping:
+          symbol: ticker_symbol
+          profile_id: profile_id
+  - name: gains
+    using:
+      manual_configuration:
+        remote_table:
+          schema: public
+          name: portfolio_holding_group_gains
+        insertion_order: null
+        column_mapping:
+          symbol: ticker_symbol
+          profile_id: profile_id
+  - name: profile
+    using:
+      manual_configuration:
+        remote_table:
+          schema: app
+          name: profiles
+        insertion_order: null
+        column_mapping:
+          profile_id: id
+  - name: ticker
+    using:
+      manual_configuration:
+        remote_table:
+          schema: public
+          name: tickers
+        insertion_order: null
+        column_mapping:
+          symbol: symbol
+  array_relationships:
+  - name: holdings
+    using:
+      manual_configuration:
+        remote_table:
+          schema: public
+          name: profile_holdings_normalized
+        insertion_order: null
+        column_mapping:
+          symbol: ticker_symbol
+          profile_id: profile_id
+  select_permissions:
+  - role: user
+    permission:
+      columns:
+      - profile_id
+      - symbol
+      - quantity
+      filter:
+        profile:
+          user_id:
+            _eq: X-Hasura-User-Id
+- table:
+    schema: public
+    name: profile_holdings_normalized
+  object_relationships:
+  - name: gains
+    using:
+      manual_configuration:
+        remote_table:
+          schema: public
+          name: portfolio_holding_gains
+        insertion_order: null
+        column_mapping:
+          holding_id: holding_id
+  - name: holding_details
+    using:
+      manual_configuration:
+        remote_table:
+          schema: public
+          name: portfolio_holding_details
+        insertion_order: null
+        column_mapping:
+          holding_id: holding_id
+  - name: profile
+    using:
+      manual_configuration:
+        remote_table:
+          schema: app
+          name: profiles
+        insertion_order: null
+        column_mapping:
+          profile_id: id
+  array_relationships:
+  - name: transactions
+    using:
+      manual_configuration:
+        remote_table:
+          schema: app
+          name: profile_portfolio_transactions
+        insertion_order: null
+        column_mapping:
+          security_id: security_id
+          account_id: account_id
+          profile_id: profile_id
+  select_permissions:
+  - role: user
+    permission:
+      columns:
+      - holding_id
+      - security_id
+      - profile_id
+      - account_id
+      - quantity
+      - name
+      - ticker_symbol
+      - type
+      filter:
+        profile:
+          user_id:
+            _eq: X-Hasura-User-Id
 - table:
     schema: public
     name: profile_ticker_collections

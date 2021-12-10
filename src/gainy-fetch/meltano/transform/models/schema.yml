@@ -1258,6 +1258,109 @@ models:
           - type:
               type: 'double precision'
 
+  - name: portfolio_holding_group_gains
+    columns:
+      - name: profile_id
+        tests:
+          - exists
+          - type:
+              type: 'integer'
+      - name: ticker_symbol
+        tests:
+          - exists
+          - type:
+              type: 'character varying'
+      - name: updated_at
+        tests:
+          - exists
+          - type:
+              type: 'timestamp without time zone'
+      - name: actual_value
+        tests:
+          - exists
+          - type:
+              type: 'double precision'
+      - name: value_to_portfolio_value
+        tests:
+          - exists
+          - type:
+              type: 'double precision'
+      - name: relative_gain_1d
+        tests:
+          - exists
+          - type:
+              type: 'double precision'
+      - name: relative_gain_1w
+        tests:
+          - exists
+          - type:
+              type: 'double precision'
+      - name: relative_gain_1m
+        tests:
+          - exists
+          - type:
+              type: 'double precision'
+      - name: relative_gain_3m
+        tests:
+          - exists
+          - type:
+              type: 'double precision'
+      - name: relative_gain_1y
+        tests:
+          - exists
+          - type:
+              type: 'double precision'
+      - name: relative_gain_5y
+        tests:
+          - exists
+          - type:
+              type: 'double precision'
+      - name: relative_gain_total
+        tests:
+          - exists
+          - type:
+              type: 'double precision'
+      - name: absolute_gain_1d
+        tests:
+          - exists
+          - type:
+              type: 'double precision'
+      - name: absolute_gain_1w
+        tests:
+          - exists
+          - type:
+              type: 'double precision'
+      - name: absolute_gain_1m
+        tests:
+          - exists
+          - type:
+              type: 'double precision'
+      - name: absolute_gain_3m
+        tests:
+          - exists
+          - type:
+              type: 'double precision'
+      - name: absolute_gain_1y
+        tests:
+          - exists
+          - type:
+              type: 'double precision'
+      - name: absolute_gain_5y
+        tests:
+          - exists
+          - type:
+              type: 'double precision'
+      - name: absolute_gain_total
+        tests:
+          - exists
+          - type:
+              type: 'double precision'
+      - name: ltt_quantity_total
+        tests:
+          - exists
+          - type:
+              type: 'double precision'
+
   - name: portfolio_holding_details
     columns:
       - name: holding_id
@@ -1275,6 +1378,64 @@ models:
           - exists
           - type:
               type: 'integer'
+      - name: purchase_date
+        tests:
+          - exists
+          - type:
+              type: 'timestamp without time zone'
+      - name: relative_gain_total
+        tests:
+          - exists
+          - type:
+              type: 'double precision'
+      - name: relative_gain_1d
+        tests:
+          - exists
+          - type:
+              type: 'double precision'
+      - name: value_to_portfolio_value
+        tests:
+          - exists
+          - type:
+              type: 'double precision'
+      - name: ticker_name
+        tests:
+          - exists
+          - type:
+              type: 'character varying'
+      - name: market_capitalization
+        tests:
+          - exists
+          - type:
+              type: 'bigint'
+      - name: next_earnings_date
+        tests:
+          - exists
+          - type:
+              type: 'timestamp without time zone'
+      - name: security_type
+        tests:
+          - exists
+          - type:
+              type: 'character varying'
+      - name: ltt_quantity_total
+        tests:
+          - exists
+          - type:
+              type: 'double precision'
+
+  - name: portfolio_holding_group_details
+    columns:
+      - name: profile_id
+        tests:
+          - exists
+          - type:
+              type: 'integer'
+      - name: ticker_symbol
+        tests:
+          - exists
+          - type:
+              type: 'character varying'
       - name: purchase_date
         tests:
           - exists
