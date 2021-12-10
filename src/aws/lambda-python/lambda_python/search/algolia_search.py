@@ -14,7 +14,7 @@ class SearchAction(HasuraAction, ABC):
         self.search_index = search_client.init_index(tickers_index)
         self.attributes_to_retrieve = attributes_to_retrieve
 
-    def apply(self, db_conn, input_params):
+    def apply(self, db_conn, input_params, headers):
         query = input_params["query"]
         offset = input_params.get("offset", 0)
         limit = input_params.get("limit", 10)

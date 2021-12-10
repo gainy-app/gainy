@@ -73,6 +73,19 @@ type Query {
   ): LinkPlaidAccountOutput
 }
 
+type Mutation {
+  plaid_webhook(
+    webhook_type: String!
+    webhook_code: String!
+    item_id: String!
+    error: PlaidWebhookError
+    new_holdings: Int
+    updated_holdings: Int
+    new_investments_transactions: Int
+    canceled_investments_transactions: Int
+  ): PlaidWebhookOutput
+}
+
 type Query {
   search_collections(
     query: String!
@@ -87,6 +100,10 @@ type Query {
     offset: Int
     limit: Int
   ): [Ticker]
+}
+
+input PlaidWebhookError {
+  error_code: Int
 }
 
 type ChartDataPoint {
@@ -179,5 +196,9 @@ type PortfolioTransaction {
 
 type CreatePlaidLinkTokenOutput {
   link_token: String!
+}
+
+type PlaidWebhookOutput {
+  count: Int!
 }
 

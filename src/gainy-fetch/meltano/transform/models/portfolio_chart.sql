@@ -17,31 +17,32 @@ with max_date as
              select profile_id,
                     period,
                     max(date) as date
-             from portfolio_chart old_portfolio_chart
+             from {{ this }} old_portfolio_chart
              group by profile_id, period
       )
 {% endif %}
-select profile_portfolio_transactions.profile_id,
-       (profile_portfolio_transactions.profile_id || '_' || historical_prices_aggregated.time || '_' ||
+select portfolio_expanded_transactions.profile_id,
+       (portfolio_expanded_transactions.profile_id || '_' || historical_prices_aggregated.time || '_' ||
         historical_prices_aggregated.period)::varchar                              as id,
        historical_prices_aggregated.time                                           as date, -- TODO remove
        historical_prices_aggregated.time                                           as datetime,
        historical_prices_aggregated.period                                         as period,
-       sum(abs(profile_portfolio_transactions.quantity::numeric) *
-           case when profile_portfolio_transactions.type = 'buy' then 1 else -1 end *
+       sum(portfolio_expanded_transactions.quantity_norm::numeric *
            historical_prices_aggregated.adjusted_close::numeric)::double precision as value
-from {{ source('app', 'profile_portfolio_transactions') }}
-         join {{ source('app', 'portfolio_securities') }}
-              on portfolio_securities.id = profile_portfolio_transactions.security_id
-{% if is_incremental() %}
-         left join max_date on max_date.profile_id = profile_portfolio_transactions.profile_id
-{% endif %}
+from {{ ref('portfolio_expanded_transactions') }}
+         join {{ ref('portfolio_securities_normalized') }}
+              on portfolio_securities_normalized.id = portfolio_expanded_transactions.security_id
          join {{ ref('historical_prices_aggregated') }}
-              on historical_prices_aggregated.datetime >= profile_portfolio_transactions.date and
+              on (historical_prices_aggregated.datetime >= portfolio_expanded_transactions.datetime or
+                  portfolio_expanded_transactions.datetime is null) and
+                 historical_prices_aggregated.symbol = portfolio_securities_normalized.ticker_symbol
 {% if is_incremental() %}
-                 (max_date.date is null or historical_prices_aggregated.time >= max_date.date) and
+         left join max_date
+                   on max_date.profile_id = portfolio_expanded_transactions.profile_id and
+                      max_date.period = historical_prices_aggregated.period
 {% endif %}
-                 historical_prices_aggregated.symbol = portfolio_securities.ticker_symbol
-where profile_portfolio_transactions.type in ('buy', 'sell')
-  and portfolio_securities.type in ('mutual fund', 'equity', 'etf')
-group by profile_portfolio_transactions.profile_id, historical_prices_aggregated.period, historical_prices_aggregated.time
+where portfolio_expanded_transactions.type in ('buy', 'sell')
+{% if is_incremental() %}
+  and (max_date.date is null or historical_prices_aggregated.time >= max_date.date)
+{% endif %}
+group by portfolio_expanded_transactions.profile_id, historical_prices_aggregated.period, historical_prices_aggregated.time
