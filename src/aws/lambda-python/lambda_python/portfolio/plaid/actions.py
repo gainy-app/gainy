@@ -91,41 +91,48 @@ class PlaidWebhook(HasuraAction):
         print(input_params, headers)
         self.verify(input_params, headers)
 
-        item_id = input_params['item_id']
-        with db_conn.cursor() as cursor:
-            cursor.execute(
-                "SELECT id, profile_id, access_token FROM app.profile_plaid_access_tokens WHERE item_id = %(item_id)s",
-                {"item_id": item_id})
+        try:
+            item_id = input_params['item_id']
+            with db_conn.cursor() as cursor:
+                cursor.execute(
+                    "SELECT id, profile_id, access_token FROM app.profile_plaid_access_tokens WHERE item_id = %(item_id)s",
+                    {"item_id": item_id})
 
-            access_tokens = [
-                dict(
-                    zip(['id', 'profile_id', 'access_token', 'service'],
-                        row + (SERVICE_PLAID, ))) for row in cursor.fetchall()
-            ]
+                access_tokens = [
+                    dict(
+                        zip(['id', 'profile_id', 'access_token', 'service'],
+                            row + (SERVICE_PLAID, )))
+                    for row in cursor.fetchall()
+                ]
 
-        count = 0
-        webhook_type = input_params['webhook_type']
-        for access_token in access_tokens:
-            if webhook_type == 'HOLDINGS':
-                count += self.portfolio_service.sync_token_holdings(
-                    db_conn, access_token)
-            elif webhook_type == 'INVESTMENTS_TRANSACTIONS':
-                count += self.portfolio_service.sync_token_transactions(
-                    db_conn, access_token)
+            count = 0
+            webhook_type = input_params['webhook_type']
+            for access_token in access_tokens:
+                if webhook_type == 'HOLDINGS':
+                    count += self.portfolio_service.sync_token_holdings(
+                        db_conn, access_token)
+                elif webhook_type == 'INVESTMENTS_TRANSACTIONS':
+                    count += self.portfolio_service.sync_token_transactions(
+                        db_conn, access_token)
 
-        return {'count': count}
+            return {'count': count}
+        except e:
+            print("[PLAID_WEBHOOK] %s" % (e))
+            raise e
 
     def verify(self, body, headers):
         signed_jwt = headers.get('plaid-verification')
         current_key_id = jwt.get_unverified_header(signed_jwt)['kid']
 
         response = self.client.webhook_verification_key_get(current_key_id)
-        print('response', response)
+        print('[PLAID_WEBHOOK] response', response)
 
         key = response['key']
         if key['expired_at'] is not None:
             raise HasuraActionException(
-                400, "Failed to validate plaid request key: Key expired")
+                400,
+                "[PLAID_WEBHOOK] Failed to validate plaid request key: Key expired"
+            )
 
         # Validate the signature and extract the claims.
         try:
@@ -134,23 +141,26 @@ class PlaidWebhook(HasuraAction):
         except jwt.JWTError as e:
             raise HasuraActionException(
                 400,
-                "Failed to validate plaid request key: decode failed with: %s"
+                "[PLAID_WEBHOOK] Failed to validate plaid request key: decode failed with: %s"
                 % (str(e)))
 
         # Ensure that the token is not expired.
         if claims["iat"] < time.time() - 5 * 60:
             raise HasuraActionException(
-                400, "Failed to validate plaid request key: claim expired")
+                400,
+                "[PLAID_WEBHOOK] Failed to validate plaid request key: claim expired"
+            )
 
         # Compute the has of the body.
         m = hashlib.sha256()
         m.update(body.encode())
         body_hash = m.hexdigest()
-        print('body_hash', body_hash)
+        print('[PLAID_WEBHOOK] body_hash', body_hash)
 
         # Ensure that the hash of the body matches the claim.
         # Use constant time comparison to prevent timing attacks.
         if not hmac.compare_digest(body_hash, claims['request_body_sha256']):
             raise HasuraActionException(
                 400,
-                "Failed to validate plaid request key: body hash mismatch")
+                "[PLAID_WEBHOOK] Failed to validate plaid request key: body hash mismatch"
+            )
