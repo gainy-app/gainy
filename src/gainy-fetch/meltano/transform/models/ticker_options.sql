@@ -21,7 +21,7 @@ expanded as
                json_array_elements((json_each(options::json)).value) as value
 
         from {{ source('eod', 'eod_options') }} f
-                 inner join tickers as t
+                 inner join {{ ref('tickers') }} as t
                             on f.code = t.symbol
     )
 select expanded.symbol,
