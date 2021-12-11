@@ -65,7 +65,7 @@ from (
              select portfolio_expanded_transactions.profile_id,
                     time_period.datetime               as datetime,
                     time_period.period                 as period,
-                    portfolio_expanded_transactions.quantity_norm::numeric *
+                    100 * portfolio_expanded_transactions.quantity_norm::numeric *
                     ticker_options.last_price::numeric as value
              from {{ ref('portfolio_expanded_transactions') }}
                       join {{ ref('portfolio_securities_normalized') }}
