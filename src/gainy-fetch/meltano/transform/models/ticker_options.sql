@@ -24,7 +24,9 @@ expanded as
         where json_extract_path(options::json, 'CALL') is not null
            or json_extract_path(options::json, 'PUT') is not null
     )
-select expanded.symbol,
+select distinct on (
+       expanded.symbol, (value ->> 'contractName')::varchar
+    )  expanded.symbol,
        (value ->> 'ask')::float                as ask,
        (value ->> 'bid')::float                as bid,
        (value ->> 'change')::float             as change,
