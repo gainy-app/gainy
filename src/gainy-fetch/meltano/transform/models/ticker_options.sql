@@ -19,10 +19,10 @@ expanded as
     (
         select code                                                  as symbol,
                json_array_elements((json_each(options::json)).value) as value
-
-        from {{ source('eod', 'eod_options') }} f
-                 inner join {{ ref('tickers') }} as t
-                            on f.code = t.symbol
+        from {{ source('eod', 'eod_options') }}
+                 join {{ ref('tickers') }} on eod_options.code = tickers.symbol
+        where json_extract_path(options::json, 'CALL') is not null
+           or json_extract_path(options::json, 'PUT') is not null
     )
 select expanded.symbol,
        (value ->> 'ask')::float                as ask,

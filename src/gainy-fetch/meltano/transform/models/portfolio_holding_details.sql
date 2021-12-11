@@ -71,7 +71,7 @@ select profile_holdings.id                                    as holding_id,
        base_tickers.name                                      as ticker_name,
        ticker_metrics.market_capitalization,
        next_earnings_date.date::timestamp                     as next_earnings_date,
-       portfolio_securities_normalized.type                              as security_type,
+       portfolio_securities_normalized.type                   as security_type,
        coalesce(long_term_tax_holdings.ltt_quantity_total, 0) as ltt_quantity_total
 from {{ source('app', 'profile_holdings') }}
          left join first_purchase_date on first_purchase_date.holding_id = profile_holdings.id
