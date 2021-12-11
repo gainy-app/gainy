@@ -25,7 +25,7 @@ expanded as
            or json_extract_path(options::json, 'PUT') is not null
     )
 select distinct on (
-       expanded.symbol, (value ->> 'contractName')::varchar
+       (value ->> 'contractName')::varchar
     )  expanded.symbol,
        (value ->> 'ask')::float                as ask,
        (value ->> 'bid')::float                as bid,
@@ -60,6 +60,8 @@ select distinct on (
 from expanded
 {% if is_incremental() %}
          left join max_updated_at on expanded.symbol = max_updated_at.symbol
-where (value ->> 'updatedAt')::timestamp >= max_updated_at.max_date
-   or max_updated_at.max_date is null
+{% endif %}
+where (value ->> 'contractName')::varchar != '' and (value ->> 'contractName')::varchar is not null
+{% if is_incremental() %}
+  and ((value ->> 'updatedAt')::timestamp >= max_updated_at.max_date or max_updated_at.max_date is null)
 {% endif %}
