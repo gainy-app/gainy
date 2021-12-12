@@ -58,10 +58,17 @@ from (
          -- options
          (
              with time_period as
-                 (
-                     select distinct datetime, period
-                     from historical_prices_aggregated
-                 )
+                      (
+                          select distinct datetime, period
+                          from historical_prices_aggregated
+                      ),
+                  first_transaction_date as
+                      (
+                          select profile_id,
+                                 min(date) as date
+                          from {{ source('app', 'profile_portfolio_transactions') }}
+                          group by profile_id
+                      )
              select portfolio_expanded_transactions.profile_id,
                     time_period.datetime               as datetime,
                     time_period.period                 as period,
@@ -72,7 +79,8 @@ from (
                            on portfolio_securities_normalized.id = portfolio_expanded_transactions.security_id
                       join {{ ref('ticker_options') }}
                            on ticker_options.contract_name = portfolio_securities_normalized.original_ticker_symbol
-                      join time_period on true
+                      join first_transaction_date on first_transaction_date.profile_id = portfolio_expanded_transactions.profile_id
+                      join time_period on time_period.datetime >= first_transaction_date.date
 {% if is_incremental() %}
                       left join max_date
                                 on max_date.profile_id = portfolio_expanded_transactions.profile_id and

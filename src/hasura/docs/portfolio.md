@@ -283,7 +283,6 @@ periods: 15min, 1d, 1w, 1m
             purchase_date
             relative_gain_1d
             relative_gain_total
-            security_type
             ticker_name
             ticker_symbol
             value_to_portfolio_value

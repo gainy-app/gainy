@@ -25,11 +25,13 @@ with expanded_holdings as
              from (
                       select distinct on (
                           portfolio_expanded_transactions.uniq_id
-                          ) profile_holdings.id                                  as holding_id,
+                          ) profile_holdings.id                                    as holding_id,
                             profile_holdings.profile_id,
                             portfolio_transaction_gains.updated_at,
-                            portfolio_expanded_transactions.quantity_norm::numeric,
-                            historical_prices_aggregated.adjusted_close::numeric as current_price,
+                            case when ticker_options.contract_name is null then 1 else 100 end *
+                            portfolio_expanded_transactions.quantity_norm::numeric as quantity_norm,
+                            coalesce(ticker_options.last_price::numeric,
+                                     historical_prices_aggregated.adjusted_close)  as current_price,
                             portfolio_transaction_gains.absolute_gain_1d::numeric,
                             portfolio_transaction_gains.absolute_gain_1w::numeric,
                             portfolio_transaction_gains.absolute_gain_1m::numeric,
@@ -39,13 +41,18 @@ with expanded_holdings as
                             portfolio_transaction_gains.absolute_gain_total::numeric
                       from {{ ref('portfolio_transaction_gains') }}
                                join {{ ref('portfolio_expanded_transactions') }}
-                                    on portfolio_expanded_transactions.uniq_id = portfolio_transaction_gains.transaction_uniq_id
+                                    on portfolio_expanded_transactions.uniq_id =
+                                       portfolio_transaction_gains.transaction_uniq_id
                                join {{ ref('portfolio_securities_normalized') }}
                                     on portfolio_securities_normalized.id = portfolio_expanded_transactions.security_id
-                               join {{ ref('historical_prices_aggregated') }}
-                                    on historical_prices_aggregated.symbol = portfolio_securities_normalized.ticker_symbol and
-                                       historical_prices_aggregated.datetime >= now() - interval '1 week'
-                               join {{ source ('app', 'profile_holdings') }}
+                               left join {{ ref('historical_prices_aggregated') }}
+                                         on historical_prices_aggregated.symbol =
+                                            portfolio_securities_normalized.ticker_symbol and
+                                            historical_prices_aggregated.datetime >= now() - interval '1 week'
+                               left join {{ ref('ticker_options') }}
+                                         on ticker_options.contract_name =
+                                            portfolio_securities_normalized.original_ticker_symbol
+                               join {{ source('app', 'profile_holdings') }}
                                     on profile_holdings.profile_id = portfolio_expanded_transactions.profile_id and
                                        profile_holdings.security_id = portfolio_expanded_transactions.security_id
                       order by portfolio_expanded_transactions.uniq_id, historical_prices_aggregated.time desc
@@ -57,7 +64,7 @@ with expanded_holdings as
              select distinct on (holding_id) holding_id,
                                              ltt_quantity_total::double precision
              from (
-                      select profile_holdings.id                                                                                                             as holding_id,
+                      select profile_holdings.id                                                                                                                 as holding_id,
                              quantity_sign,
                              datetime,
                              min(cumsum)
@@ -66,13 +73,13 @@ with expanded_holdings as
                                select portfolio_expanded_transactions.profile_id,
                                       security_id,
                                       datetime,
-                                      sign(quantity_norm)                                                                                            as quantity_sign,
+                                      sign(quantity_norm)                                                                                                as quantity_sign,
                                       sum(quantity_norm)
                                       over (partition by security_id, portfolio_expanded_transactions.profile_id order by sign(quantity_norm), datetime) as cumsum
                                from {{ ref('portfolio_expanded_transactions') }}
                                where portfolio_expanded_transactions.type in ('buy', 'sell')
                            ) t
-                                join {{ source('app', 'profile_holdings') }}
+                               join {{ source('app', 'profile_holdings') }}
                                     on profile_holdings.profile_id = t.profile_id and
                                        profile_holdings.security_id = t.security_id
                   ) t
@@ -97,6 +104,6 @@ select expanded_holdings.holding_id,
        absolute_gain_1y::double precision,
        absolute_gain_5y::double precision,
        absolute_gain_total::double precision,
-       coalesce(long_term_tax_holdings.ltt_quantity_total, 0)                         as ltt_quantity_total
+       coalesce(long_term_tax_holdings.ltt_quantity_total, 0)                              as ltt_quantity_total
 from expanded_holdings
-left join long_term_tax_holdings on long_term_tax_holdings.holding_id = expanded_holdings.holding_id
+         left join long_term_tax_holdings on long_term_tax_holdings.holding_id = expanded_holdings.holding_id

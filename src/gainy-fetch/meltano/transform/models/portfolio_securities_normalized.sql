@@ -8,7 +8,7 @@ select portfolio_securities.id,
        portfolio_securities.name,
        case
            when portfolio_securities.type = 'derivative'
-               then regexp_replace(portfolio_securities.ticker_symbol, '\d{6}C\d{8}$', '')
+               then regexp_replace(portfolio_securities.ticker_symbol, '\d{6}[CP]\d{8}$', '')
            else portfolio_securities.ticker_symbol
            end                            as ticker_symbol,
        portfolio_securities.ticker_symbol as original_ticker_symbol,

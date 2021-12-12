@@ -18,7 +18,8 @@ with
 expanded as
     (
         select code                                                  as symbol,
-               json_array_elements((json_each(options::json)).value) as value
+               json_array_elements((json_each(options::json)).value) as value,
+               tickers.name                                          as ticker_name
         from {{ source('eod', 'eod_options') }}
                  join {{ ref('tickers') }} on eod_options.code = tickers.symbol
         where json_extract_path(options::json, 'CALL') is not null
@@ -56,7 +57,11 @@ select distinct on (
        (value ->> 'type')::varchar             as type,
        (value ->> 'updatedAt')::timestamp      as updated_at,
        (value ->> 'vega')::float               as vega,
-       (value ->> 'volume')::int               as volume
+       (value ->> 'volume')::int               as volume,
+       expanded.symbol || ' ' ||
+       to_char((value ->> 'expirationDate')::date, 'MM/dd/YYYY') || ' ' ||
+       (value ->> 'strike') || ' ' ||
+       INITCAP((value ->> 'type'))             as name
 from expanded
 {% if is_incremental() %}
          left join max_updated_at on expanded.symbol = max_updated_at.symbol

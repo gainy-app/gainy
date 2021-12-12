@@ -112,8 +112,7 @@ union all
           coalesce(ticker_options.last_price, historical_prices.adjusted_close) * diff as amount,
           null::timestamp                                                              as datetime,
           'ASSUMPTION BOUGHT ' || diff || ' ' ||
-          coalesce(ticker_options.symbol || ' ' || to_char(ticker_options.expiration_date, 'MM/dd/YYYY') || ' ' ||
-                   ticker_options.strike || ' ' || INITCAP(ticker_options.type), t.name) || ' @ ' ||
+          coalesce(ticker_options.name, t.name) || ' @ ' ||
           coalesce(ticker_options.last_price, historical_prices.adjusted_close)        as name,
           coalesce(ticker_options.last_price, historical_prices.adjusted_close)        as price,
           diff                                                                         as quantity,
