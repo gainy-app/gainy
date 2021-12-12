@@ -2,7 +2,6 @@
   config(
     materialized = "incremental",
     unique_key = "profile_id",
-    incremental_strategy = 'insert_overwrite',
     post_hook=[
       index(this, 'profile_id', true),
     ]

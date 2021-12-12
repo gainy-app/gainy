@@ -2,7 +2,6 @@
   config(
     materialized = "incremental",
     unique_key = "holding_id",
-    incremental_strategy = 'insert_overwrite',
     post_hook=[
       index(this, 'holding_id', true),
       index(this, 'ticker_symbol'),
