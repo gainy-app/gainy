@@ -14,4 +14,4 @@ select portfolio_securities.id,
        portfolio_securities.ticker_symbol as original_ticker_symbol,
        portfolio_securities.type
 from {{ source('app', 'portfolio_securities') }}
-where portfolio_securities.type in ('mutual fund', 'equity', 'etf', 'derivative', 'cash')
+where portfolio_securities.type in ('mutual fund', 'equity', 'etf', 'derivative')

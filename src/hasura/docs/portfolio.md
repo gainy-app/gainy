@@ -275,6 +275,23 @@ periods: 15min, 1d, 1w, 1m
 
 ```GraphQL
 {
+    portfolio_gains (where:{profile_id: {_eq: 1}}) {
+        absolute_gain_1d
+        absolute_gain_1m
+        absolute_gain_1w
+        absolute_gain_1y
+        absolute_gain_3m
+        absolute_gain_5y
+        absolute_gain_total
+        actual_value
+        relative_gain_1d
+        relative_gain_1m
+        relative_gain_1w
+        relative_gain_1y
+        relative_gain_3m
+        relative_gain_5y
+        relative_gain_total
+    }
     profile_holding_groups(where:{profile_id: {_eq: 1}}) {
         details {
             ltt_quantity_total

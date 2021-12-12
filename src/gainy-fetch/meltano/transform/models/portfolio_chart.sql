@@ -10,17 +10,24 @@
   )
 }}
 
-
+with
+     first_transaction_date as
+         (
+             select profile_id,
+                    min(date) as date
+             from {{ source('app', 'profile_portfolio_transactions') }}
+             group by profile_id
 {% if is_incremental() %}
-with max_date as
+         ),
+     max_date as
          (
              select profile_id,
                     period,
                     max(date) as date
              from {{ this }} old_portfolio_chart
              group by profile_id, period
-         )
 {% endif %}
+         )
 select profile_id,
        period,
        datetime,
@@ -42,12 +49,14 @@ from (
                            on (historical_prices_aggregated.datetime >= portfolio_expanded_transactions.datetime or
                                portfolio_expanded_transactions.datetime is null) and
                               historical_prices_aggregated.symbol = portfolio_securities_normalized.ticker_symbol
+                      join first_transaction_date on first_transaction_date.profile_id = portfolio_expanded_transactions.profile_id
 {% if is_incremental() %}
                       left join max_date
                                 on max_date.profile_id = portfolio_expanded_transactions.profile_id and
                                    max_date.period = historical_prices_aggregated.period
 {% endif %}
              where portfolio_expanded_transactions.type in ('buy', 'sell')
+               and historical_prices_aggregated.time >= first_transaction_date.date
 {% if is_incremental() %}
                and (max_date.date is null or historical_prices_aggregated.time >= max_date.date)
 {% endif %}
@@ -61,13 +70,6 @@ from (
                       (
                           select distinct datetime, period
                           from historical_prices_aggregated
-                      ),
-                  first_transaction_date as
-                      (
-                          select profile_id,
-                                 min(date) as date
-                          from {{ source('app', 'profile_portfolio_transactions') }}
-                          group by profile_id
                       )
              select portfolio_expanded_transactions.profile_id,
                     time_period.datetime               as datetime,
