@@ -91,7 +91,8 @@ with max_date as
              group by symbol, period
       )
 {% endif %}
-select * from (
+
+(
     with time_series_15min as
              (
                  SELECT date_trunc('minute', dd) -
@@ -174,7 +175,7 @@ select * from (
                      combined_intraday_prices.datetime is null
 --     order by combined_intraday_prices.symbol || '_' || time_series_15min.datetime || '_15min', combined_intraday_prices.datetime desc
     order by combined_intraday_prices.symbol, time_series_15min.datetime, combined_intraday_prices.datetime desc
-) t
+)
 
 union all
 
