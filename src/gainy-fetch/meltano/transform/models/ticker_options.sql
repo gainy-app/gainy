@@ -58,10 +58,10 @@ select distinct on (
        (value ->> 'updatedAt')::timestamp      as updated_at,
        (value ->> 'vega')::float               as vega,
        (value ->> 'volume')::int               as volume,
-       expanded.symbol || ' ' ||
-       to_char((value ->> 'expirationDate')::date, 'MM/dd/YYYY') || ' ' ||
-       (value ->> 'strike') || ' ' ||
-       INITCAP((value ->> 'type'))             as name
+       (expanded.symbol || ' ' ||
+        to_char((value ->> 'expirationDate')::date, 'MM/dd/YYYY') || ' ' ||
+        (value ->> 'strike') || ' ' ||
+        INITCAP((value ->> 'type')))::varchar  as name
 from expanded
 {% if is_incremental() %}
          left join max_updated_at on expanded.symbol = max_updated_at.symbol
