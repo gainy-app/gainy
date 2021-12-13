@@ -15,11 +15,9 @@
 with period_settings as
          (
              select date_trunc('minute', now()) -
-                    interval '2 days' - -- todo remove line
                     interval '1 minute' *
                     mod(extract(minutes from now())::int, 15) as period_end,
                     date_trunc('minute', now()) - interval '15 minute' -
-                    interval '2 days' - -- todo remove line
                     interval '1 minute' *
                     mod(extract(minutes from now())::int, 15) as period_start
          ),
@@ -59,7 +57,7 @@ with period_settings as
                                          symbol
              from {{ this }}
              where period = '15min'
-               and datetime > now() - interval '1 hour' - interval '2 days' -- todo remove
+               and datetime > now() - interval '1 hour'
              order by symbol, datetime desc
          )
 select (tickers.symbol || '_' ||
