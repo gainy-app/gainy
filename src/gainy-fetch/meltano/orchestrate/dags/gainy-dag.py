@@ -125,7 +125,7 @@ dbt_snapshot = BashOperator(
 )
 
 # dependencies
-upstream >> dbt >> dbt_snapshot >> downstream
+upstream >> dbt_snapshot >> dbt >> downstream
 
 # register the dag
 globals()[dag_id] = dag
