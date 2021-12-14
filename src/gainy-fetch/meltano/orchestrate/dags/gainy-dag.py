@@ -117,9 +117,15 @@ dbt = BashOperator(
     dag=dag,
     pool="dbt"
 )
+dbt_snapshot = BashOperator(
+    task_id="dbt-snapshot",
+    bash_command=f"cd {project_root}; {meltano_bin} invoke dbt snapshot",
+    dag=dag,
+    pool="dbt"
+)
 
 # dependencies
-upstream >> dbt >> downstream
+upstream >> dbt_snapshot >> dbt >> downstream
 
 # register the dag
 globals()[dag_id] = dag
