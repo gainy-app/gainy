@@ -24,13 +24,11 @@ with first_purchase_date as
          ),
      next_earnings_date as
          (
-             select distinct on (
-                 symbol
-                 ) symbol,
-                   date
-             from {{ ref('earnings_trend') }}
-             where date >= now()
-             order by symbol, date
+             select symbol,
+                    min(report_date) as date
+             from {{ ref('earnings_history') }}
+             where eps_actual is null
+             group by symbol
          ),
      long_term_tax_holdings as
          (
