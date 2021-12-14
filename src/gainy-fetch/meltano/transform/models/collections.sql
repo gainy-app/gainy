@@ -2,7 +2,6 @@
   config(
     materialized = "incremental",
     unique_key = "id",
-    incremental_strategy='insert_overwrite',
     post_hook=[
       index(this, 'id', true),
     ]

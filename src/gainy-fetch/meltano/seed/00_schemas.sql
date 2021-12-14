@@ -13,5 +13,5 @@ create table if not exists raw_data.eod_intraday_prices
     volume      double precision,
     granularity int,
     constraint intraday_prices_pk
-        primary key (symbol, time)
+        primary key (time, symbol)
 );

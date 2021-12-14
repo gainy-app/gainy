@@ -2,7 +2,6 @@
   config(
     materialized = "incremental",
     unique_key = "contract_name",
-    incremental_strategy = 'insert_overwrite',
     post_hook=[
       index(this, 'contract_name', true),
       index(this, 'symbol', false),
