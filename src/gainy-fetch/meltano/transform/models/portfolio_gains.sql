@@ -23,8 +23,6 @@ with expanded_holdings as
                     sum(absolute_gain_total::numeric)       as absolute_gain_total
              from {{ ref('portfolio_holding_gains') }}
                       join {{ source ('app', 'profile_holdings') }} on profile_holdings.id = portfolio_holding_gains.holding_id
-                      join {{ source ('app', 'portfolio_securities') }}
-                           on portfolio_securities.id = profile_holdings.security_id
              group by profile_holdings.profile_id
          )
 select profile_id,

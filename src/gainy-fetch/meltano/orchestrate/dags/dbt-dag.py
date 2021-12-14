@@ -53,12 +53,20 @@ dag = DAG(
     max_active_runs=1,
     is_paused_upon_creation=True
 )
+dbt_snapshot = BashOperator(
+    task_id="dbt-snapshot",
+    bash_command=f"cd {project_root}; {meltano_bin} invoke dbt snapshot",
+    dag=dag,
+    pool="dbt"
+)
 dbt = BashOperator(
     task_id="dbt-portfolio",
     bash_command=f"cd {project_root}; {meltano_bin} invoke dbt run",
     dag=dag,
     pool="dbt"
 )
+
+dbt_snapshot >> dbt
 
 # register the dag
 globals()[dag_id] = dag
