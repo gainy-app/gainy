@@ -1433,7 +1433,7 @@ models:
         tests:
           - exists
           - type:
-              type: 'varchar'
+              type: 'character varying'
       - name: quantity
         tests:
           - exists
