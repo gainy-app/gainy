@@ -2,7 +2,7 @@
 
 {% set sql %}
     ALTER TABLE {{ from_table }}
-    ADD CONSTRAINT fk_{{ from_column }}_{{ to_table }}_{{ to_column }} FOREIGN KEY ({{from_column}}) REFERENCES {{to_schema}}.{{to_table}} ({{to_column}});
+    ADD CONSTRAINT fk_{{ from_column }}_{{ to_table }}_{{ to_column }} FOREIGN KEY ({{from_column}}) REFERENCES {{to_schema}}.{{to_table}} ({{to_column}}) on update cascade on delete cascade;
 {% endset %}
 
 {{ return(after_commit(sql)) }}

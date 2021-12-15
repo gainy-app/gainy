@@ -27,6 +27,7 @@ sources:
     description: Mobile App data, managed by hasura
     schema: app
     tables:
+      - name: profile_portfolio_accounts
       - name: profile_portfolio_transactions
       - name: portfolio_securities
       - name: profile_holdings
@@ -820,6 +821,11 @@ models:
           - exists
           - type:
               type: 'double precision'
+      - name: short_percent
+        tests:
+          - exists
+          - type:
+              type: 'double precision'
       - name: beta
         tests:
           - exists
@@ -986,6 +992,11 @@ models:
           - type:
               type: 'character varying'
 # earnings
+      - name: eps_ttm
+        tests:
+          - exists
+          - type:
+              type: 'double precision'
       - name: eps_actual
         tests:
           - exists
@@ -1424,7 +1435,21 @@ models:
           - exists
           - type:
               type: 'double precision'
-
+      - name: name
+        tests:
+          - exists
+          - type:
+              type: 'character varying'
+      - name: quantity
+        tests:
+          - exists
+          - type:
+              type: 'double precision'
+      - name: avg_cost
+        tests:
+          - exists
+          - type:
+              type: 'double precision'
   - name: portfolio_holding_group_details
     columns:
       - name: profile_id

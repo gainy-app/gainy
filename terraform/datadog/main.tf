@@ -37,28 +37,6 @@ resource "datadog_monitor" "billing_spend" {
   tags = ["billing"]
 }
 
-resource "datadog_monitor" "billing_budget" {
-  name    = "Billing Budget"
-  type    = "metric alert"
-  message = "Billing Budget Monitor triggered. Notify: @slack-${var.slack_channel_name} <!channel>"
-  #  escalation_message = "Escalation message @pagerduty"
-
-  query = "avg(last_1h):sum:aws.billing.budget_limit{*} - sum:aws.billing.forecasted_spend{*} < 0"
-
-  monitor_thresholds {
-    warning_recovery  = 300
-    warning           = 200
-    critical_recovery = 100
-    critical          = 0
-  }
-
-  require_full_window = false
-  notify_no_data      = false
-  renotify_interval   = 15
-
-  tags = ["billing"]
-}
-
 #################################### ALB ####################################
 
 resource "datadog_monitor" "hasura_alb_5xx" {
