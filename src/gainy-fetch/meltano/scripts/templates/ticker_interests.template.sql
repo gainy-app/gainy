@@ -28,7 +28,7 @@ with latest_price AS
                     CASE
                        WHEN latest_price.close > 0 AND latest_price.open > 0
                        THEN (latest_price.close - latest_price.open) / latest_price.open --else NULL
-                       END                                                       as chrt,
+                       END                                                       as chrt_1d,
                     t.type                                                       as ttype,
                     gi.name                                                      as g_industry,
                     t.gic_sector                                                 as gics_sector,
@@ -39,9 +39,9 @@ with latest_price AS
                         END                                                      as country_group
              from {{ ref('tickers') }} t
                       LEFT JOIN latest_price ON latest_price.code = t.symbol
-                      LEFT JOIN {{ ref('ticker_industries') }} ti on t.symbol = ti.symbol
+                      LEFT JOIN {{ ref('ticker_industries') }} ti on t.symbol = ti.symbol --here we have N:N relationship, so we must use distinct in the end (we will get duplicates otherwise)
                       LEFT JOIN {{ ref('gainy_industries') }} gi on ti.industry_id = gi.id
-                      LEFT JOIN {{ ref('ticker_categories') }} tc on t.symbol = tc.symbol --here we have N:N relationship, so for interests we must use distinct in the end (we will get duplicates otherwise)
+                      LEFT JOIN {{ ref('ticker_categories') }} tc on t.symbol = tc.symbol --here we have N:N relationship, so we must use distinct in the end (we will get duplicates otherwise)
                       LEFT JOIN {{ ref('categories') }} c on tc.category_id = c.id
                       LEFT JOIN {{ source('gainy', 'gainy_countries') }} countries
                            on countries.name = t.country_name OR countries."alpha-2" = t.country_name OR
