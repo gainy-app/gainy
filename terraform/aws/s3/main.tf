@@ -26,3 +26,16 @@ resource "aws_s3_bucket" "interests" {
     Name = "Gainy interests"
   }
 }
+
+resource "aws_s3_bucket" "mlflow" {
+  bucket = "gainy-mlflow-${var.env}"
+  acl    = "private"
+
+  tags = {
+    Name = "Gainy MLflow"
+  }
+}
+
+output "mlflow_artifact_bucket" {
+  value = aws_s3_bucket.mlflow.bucket
+}

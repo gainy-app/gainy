@@ -4,6 +4,7 @@ variable "aws_zones" {
 }
 variable "instance_type" {}
 variable "vpc_index" {}
+variable "mlflow_artifact_bucket" {}
 
 /*
  * Determine most recent ECS optimized AMI
@@ -135,6 +136,7 @@ resource "aws_iam_role" "ecsServiceRole" {
 }
 EOF
 }
+
 resource "aws_iam_role_policy" "ecsServiceRolePolicy" {
   name   = "ecsServiceRolePolicy-${random_id.code.hex}"
   role   = aws_iam_role.ecsServiceRole.id
@@ -154,6 +156,13 @@ resource "aws_iam_role_policy" "ecsServiceRolePolicy" {
        "elasticloadbalancing:RegisterTargets"
      ],
      "Resource": "*"
+   },
+   {
+     "Effect": "Allow",
+     "Action": [
+       "s3:*"
+     ],
+     "Resource": "arn:aws:s3:::${var.mlflow_artifact_bucket}/*"
    }
  ]
 }

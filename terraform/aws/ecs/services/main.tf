@@ -143,9 +143,10 @@ resource "aws_ecs_task_definition" "default" {
       algolia_collections_index            = var.algolia_collections_index
       algolia_app_id                       = var.algolia_app_id
       algolia_indexing_key                 = var.algolia_indexing_key
-
-      datadog_api_key = var.datadog_api_key
-      datadog_app_key = var.datadog_app_key
+      datadog_api_key                      = var.datadog_api_key
+      datadog_app_key                      = var.datadog_app_key
+      mlflow_artifact_location             = "s3://${var.mlflow_artifact_bucket}"
+      pg_mlflow_schema                     = "mlflow"
     }
   )
 }

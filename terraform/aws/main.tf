@@ -47,10 +47,11 @@ module "lambda" {
 }
 
 module "ecs" {
-  source        = "./ecs"
-  env           = var.env
-  instance_type = local.ecs_instance_type
-  vpc_index     = index(["production", "test"], var.env)
+  source                 = "./ecs"
+  env                    = var.env
+  instance_type          = local.ecs_instance_type
+  vpc_index              = index(["production", "test"], var.env)
+  mlflow_artifact_bucket = module.s3.mlflow_artifact_bucket
 }
 
 module "rds" {
@@ -133,6 +134,8 @@ module "ecs-service" {
 
   datadog_api_key = var.datadog_api_key
   datadog_app_key = var.datadog_app_key
+
+  mlflow_artifact_bucket = module.s3.mlflow_artifact_bucket
 }
 
 output "bridge_instance_url" {
