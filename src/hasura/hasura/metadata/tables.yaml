@@ -1608,6 +1608,7 @@
       - symbol
       - profit_margin
       - avg_volume_10d
+      - short_percent
       - short_percent_outstanding
       - shares_outstanding
       - avg_volume_90d
@@ -1722,6 +1723,7 @@
       - roi
       - shares_float
       - shares_outstanding
+      - short_percent
       - short_percent_outstanding
       - short_ratio
       - symbol

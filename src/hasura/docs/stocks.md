@@ -46,7 +46,7 @@
         ticker_metrics {
             # trading
             avg_volume_10d
-            short_percent_outstanding
+            short_percent
             shares_outstanding
             avg_volume_90d
             shares_float

@@ -820,6 +820,11 @@ models:
           - exists
           - type:
               type: 'double precision'
+      - name: short_percent
+        tests:
+          - exists
+          - type:
+              type: 'double precision'
       - name: beta
         tests:
           - exists

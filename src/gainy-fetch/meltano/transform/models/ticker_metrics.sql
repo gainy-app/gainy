@@ -158,7 +158,6 @@ with highlights as (select * from {{ ref('highlights') }}),
                       )
              select t.symbol,
                     avg_volume_10d.value::double precision as avg_volume_10d,
-                    ticker_shares_stats.short_percent_outstanding::double precision,
                     ticker_shares_stats.shares_outstanding::bigint,
                     avg_volume_90d.value::double precision as avg_volume_90d,
                     ticker_shares_stats.shares_float::bigint,
@@ -414,12 +413,12 @@ select DISTINCT ON
                highlights.profit_margin::double precision,
 
                trading_metrics.avg_volume_10d,
-               trading_metrics.short_percent_outstanding,
                trading_metrics.shares_outstanding,
                trading_metrics.avg_volume_90d,
                trading_metrics.shares_float,
                trading_metrics.short_ratio,
                trading_metrics.short_percent,
+               trading_metrics.short_percent as short_percent_outstanding, -- todo remove
                trading_metrics.beta,
                trading_metrics.absolute_historical_volatility_adjusted_current,
                trading_metrics.relative_historical_volatility_adjusted_current,
