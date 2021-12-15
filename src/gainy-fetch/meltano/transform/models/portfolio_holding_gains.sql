@@ -8,7 +8,15 @@
   )
 }}
 
-with expanded_holdings as
+with actual_prices as
+     (
+         select distinct on (symbol) symbol, adjusted_close, '0d'::varchar as period
+         from historical_prices_aggregated
+         where ((period = '15min' and datetime > now() - interval '2 hour') or (period = '1d' and datetime > now() - interval '1 week'))
+           and adjusted_close is not null
+         order by symbol, datetime desc
+     ),
+     expanded_holdings as
          (
              select t.holding_id,
                     min(profile_id)                    as profile_id,
@@ -30,6 +38,7 @@ with expanded_holdings as
                             case when ticker_options.contract_name is null then 1 else 100 end *
                             portfolio_expanded_transactions.quantity_norm::numeric as quantity_norm,
                             coalesce(ticker_options.last_price::numeric,
+                                     actual_prices.adjusted_close,
                                      historical_prices_aggregated.adjusted_close)  as current_price,
                             portfolio_transaction_gains.absolute_gain_1d::numeric,
                             portfolio_transaction_gains.absolute_gain_1w::numeric,
@@ -54,6 +63,8 @@ with expanded_holdings as
                                join {{ source('app', 'profile_holdings') }}
                                     on profile_holdings.profile_id = portfolio_expanded_transactions.profile_id and
                                        profile_holdings.security_id = portfolio_expanded_transactions.security_id
+                               left join actual_prices
+                                         on actual_prices.symbol = portfolio_securities_normalized.original_ticker_symbol
                       order by portfolio_expanded_transactions.uniq_id, historical_prices_aggregated.time desc
                   ) t
              group by t.holding_id
@@ -89,13 +100,41 @@ select expanded_holdings.holding_id,
        updated_at,
        actual_value::double precision,
        (actual_value / sum(actual_value) over (partition by profile_id))::double precision as value_to_portfolio_value,
-       (absolute_gain_1d / (actual_value - absolute_gain_1d))::double precision            as relative_gain_1d,
-       (absolute_gain_1w / (actual_value - absolute_gain_1w))::double precision            as relative_gain_1w,
-       (absolute_gain_1m / (actual_value - absolute_gain_1m))::double precision            as relative_gain_1m,
-       (absolute_gain_3m / (actual_value - absolute_gain_3m))::double precision            as relative_gain_3m,
-       (absolute_gain_1y / (actual_value - absolute_gain_1y))::double precision            as relative_gain_1y,
-       (absolute_gain_5y / (actual_value - absolute_gain_5y))::double precision            as relative_gain_5y,
-       (absolute_gain_total / (actual_value - absolute_gain_total))::double precision      as relative_gain_total,
+       (case
+            when abs(actual_value - absolute_gain_1d) < 1e-2
+                then 1
+            else absolute_gain_1d / (actual_value - absolute_gain_1d)
+           end)::double precision                                                          as relative_gain_1d,
+       (case
+            when abs(actual_value - absolute_gain_1w) < 1e-2
+                then 1
+            else absolute_gain_1w / (actual_value - absolute_gain_1w)
+           end)::double precision                                                          as relative_gain_1w,
+       (case
+            when abs(actual_value - absolute_gain_1m) < 1e-2
+                then 1
+            else absolute_gain_1m / (actual_value - absolute_gain_1m)
+           end)::double precision                                                          as relative_gain_1m,
+       (case
+            when abs(actual_value - absolute_gain_3m) < 1e-2
+                then 1
+            else absolute_gain_3m / (actual_value - absolute_gain_3m)
+           end)::double precision                                                          as relative_gain_3m,
+       (case
+            when abs(actual_value - absolute_gain_1y) < 1e-2
+                then 1
+            else absolute_gain_1y / (actual_value - absolute_gain_1y)
+           end)::double precision                                                          as relative_gain_1y,
+       (case
+            when abs(actual_value - absolute_gain_5y) < 1e-2
+                then 1
+            else absolute_gain_5y / (actual_value - absolute_gain_5y)
+           end)::double precision                                                          as relative_gain_5y,
+       (case
+            when abs(actual_value - absolute_gain_total) < 1e-2
+                then 1
+            else absolute_gain_total / (actual_value - absolute_gain_total)
+           end)::double precision                                                          as relative_gain_total,
        absolute_gain_1d::double precision,
        absolute_gain_1w::double precision,
        absolute_gain_1m::double precision,

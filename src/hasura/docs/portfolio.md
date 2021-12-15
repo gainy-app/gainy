@@ -367,6 +367,9 @@ periods: 15min, 1d, 1w, 1m
                 ltt_quantity_total
                 security_type
                 account_id
+                name
+                quantity
+                avg_cost
             }
             gains {
                 absolute_gain_1d
