@@ -11,6 +11,7 @@ sources:
       - name: gainy_categories
       - name: gainy_interests
       - name: gainy_countries
+      - name: auto_ticker_industries
 
   - name: eod
     description: Financial data from https://eodhistoricaldata.com/

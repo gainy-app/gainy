@@ -111,6 +111,12 @@ for schedule in schedules:
         upstream.append(operator)
 
 
+industry_assignments_generator = BashOperator(
+    task_id="industry-assignments-generator",
+    bash_command="gainy_industry_assignment predict",
+    dag=dag
+)
+
 dbt = BashOperator(
     task_id="dbt-transform",
     bash_command=f"cd {project_root}; {meltano_bin} invoke dbt run",
@@ -119,7 +125,7 @@ dbt = BashOperator(
 )
 
 # dependencies
-upstream >> dbt >> downstream
+upstream >> industry_assignments_generator >> dbt >> downstream
 
 # register the dag
 globals()[dag_id] = dag
