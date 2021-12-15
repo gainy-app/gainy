@@ -22,3 +22,5 @@ clean-targets:
 - dbt_modules
 - logs
 models:
+vars:
+  realtime: false

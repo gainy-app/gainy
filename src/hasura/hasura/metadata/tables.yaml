@@ -1114,7 +1114,6 @@
       - ticker_name
       - market_capitalization
       - next_earnings_date
-      - security_type
       - ltt_quantity_total
       filter:
         profile:
