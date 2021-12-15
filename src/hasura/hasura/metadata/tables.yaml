@@ -1042,6 +1042,9 @@
       - next_earnings_date
       - security_type
       - ltt_quantity_total
+      - name
+      - quantity
+      - avg_cost
       filter:
         holding:
           profile:
@@ -1642,6 +1645,7 @@
       - dividend_payout_ratio
       - years_of_consecutive_dividend_growth
       - dividend_frequency
+      - eps_ttm
       - eps_actual
       - eps_estimate
       - beaten_quarterly_eps_estimation_count_ttm
@@ -1685,6 +1689,7 @@
       - ebitda_growth_yoy
       - enterprise_value_to_ebitda
       - enterprise_value_to_sales
+      - eps_ttm
       - eps_actual
       - eps_estimate
       - eps_growth_fwd

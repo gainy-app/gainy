@@ -8,7 +8,14 @@
   )
 }}
 
-with expanded_holdings as
+with actual_prices as
+     (
+         select distinct on (symbol) symbol, adjusted_close, '0d'::varchar as period
+         from historical_prices_aggregated
+         where period = '15min' and datetime > now() - interval '2 hour'
+         order by symbol, datetime desc
+     ),
+     expanded_holdings as
          (
              select t.holding_id,
                     min(profile_id)                    as profile_id,
@@ -30,6 +37,7 @@ with expanded_holdings as
                             case when ticker_options.contract_name is null then 1 else 100 end *
                             portfolio_expanded_transactions.quantity_norm::numeric as quantity_norm,
                             coalesce(ticker_options.last_price::numeric,
+                                     actual_prices.adjusted_close,
                                      historical_prices_aggregated.adjusted_close)  as current_price,
                             portfolio_transaction_gains.absolute_gain_1d::numeric,
                             portfolio_transaction_gains.absolute_gain_1w::numeric,
@@ -54,6 +62,8 @@ with expanded_holdings as
                                join {{ source('app', 'profile_holdings') }}
                                     on profile_holdings.profile_id = portfolio_expanded_transactions.profile_id and
                                        profile_holdings.security_id = portfolio_expanded_transactions.security_id
+                               left join actual_prices
+                                         on actual_prices.symbol = portfolio_securities_normalized.original_ticker_symbol
                       order by portfolio_expanded_transactions.uniq_id, historical_prices_aggregated.time desc
                   ) t
              group by t.holding_id

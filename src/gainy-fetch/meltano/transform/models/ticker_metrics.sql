@@ -363,6 +363,7 @@ with highlights as (select * from {{ ref('highlights') }}),
      earnings_metrics as
          (
              select tickers.symbol,
+                    latest_expanded_earnings_history_with_eps_actual.eps_actual_ttm::double precision,
                     latest_expanded_earnings_history_with_eps_actual.eps_actual::double precision,
                     latest_expanded_earnings_history_with_eps_actual.eps_estimate,
                     highlights.beaten_quarterly_eps_estimation_count_ttm,
@@ -457,6 +458,7 @@ select DISTINCT ON
                dividend_metrics.years_of_consecutive_dividend_growth,
                dividend_metrics.dividend_frequency,
 
+               earnings_metrics.eps_actual_ttm as eps_ttm,
                earnings_metrics.eps_actual,
                earnings_metrics.eps_estimate,
                earnings_metrics.beaten_quarterly_eps_estimation_count_ttm,

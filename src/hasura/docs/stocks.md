@@ -89,7 +89,7 @@
             years_of_consecutive_dividend_growth
             dividend_frequency
             #earnings
-            eps_actual
+            eps_ttm
             eps_estimate
             beaten_quarterly_eps_estimation_count_ttm
             eps_difference

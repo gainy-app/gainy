@@ -26,7 +26,7 @@ with first_purchase_date as
              select symbol,
                     min(report_date) as date
              from {{ ref('earnings_history') }}
-             where eps_actual is null
+             where report_date >= now()
              group by symbol
          ),
      long_term_tax_holdings as
@@ -58,9 +58,9 @@ with first_purchase_date as
              where datetime < now() - interval '1 year'
              order by holding_id, quantity_sign desc, datetime desc
          )
-select profile_holdings.id                                    as holding_id,
+select profile_holdings_normalized.holding_id,
        portfolio_securities_normalized.original_ticker_symbol as ticker_symbol,
-       profile_holdings.account_id,
+       profile_holdings_normalized.account_id,
        first_purchase_date.date::timestamp                    as purchase_date,
        relative_gain_total,
        relative_gain_1d,
@@ -69,13 +69,16 @@ select profile_holdings.id                                    as holding_id,
        ticker_metrics.market_capitalization,
        next_earnings_date.date::timestamp                     as next_earnings_date,
        portfolio_securities_normalized.type                   as security_type,
-       coalesce(long_term_tax_holdings.ltt_quantity_total, 0) as ltt_quantity_total
-from {{ source('app', 'profile_holdings') }}
-         left join first_purchase_date on first_purchase_date.holding_id = profile_holdings.id
-         left join {{ ref('portfolio_holding_gains') }} on portfolio_holding_gains.holding_id = profile_holdings.id
-         left join {{ ref('portfolio_securities_normalized') }} on portfolio_securities_normalized.id = profile_holdings.security_id
+       coalesce(long_term_tax_holdings.ltt_quantity_total, 0) as ltt_quantity_total,
+       profile_holdings_normalized.name,
+       profile_holdings_normalized.quantity,
+       (actual_value - absolute_gain_total) / quantity        as avg_cost
+from {{ ref('profile_holdings_normalized') }}
+         left join first_purchase_date on first_purchase_date.holding_id = profile_holdings_normalized.holding_id
+         left join {{ ref('portfolio_holding_gains') }} on portfolio_holding_gains.holding_id = profile_holdings_normalized.holding_id
+         left join {{ ref('portfolio_securities_normalized') }} on portfolio_securities_normalized.id = profile_holdings_normalized.security_id
          left join {{ ref('base_tickers') }} on base_tickers.symbol = portfolio_securities_normalized.ticker_symbol
          left join next_earnings_date on next_earnings_date.symbol = base_tickers.symbol
          left join {{ ref('ticker_metrics') }} on ticker_metrics.symbol = base_tickers.symbol
-         left join long_term_tax_holdings on long_term_tax_holdings.holding_id = profile_holdings.id
+         left join long_term_tax_holdings on long_term_tax_holdings.holding_id = profile_holdings_normalized.holding_id
          left join {{ ref('ticker_options') }} on ticker_options.contract_name = portfolio_securities_normalized.original_ticker_symbol
