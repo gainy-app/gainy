@@ -130,9 +130,7 @@ with actual_prices as
                                             historical_prices_aggregated.datetime >=
                                             now() - interval '5 year' - interval '1 week')
                                        )
-                                   and
-                                   historical_prices_aggregated.symbol = portfolio_securities_normalized.ticker_symbol and
-                                   historical_prices_aggregated.datetime >= portfolio_expanded_transactions.datetime
+                                   and historical_prices_aggregated.symbol = portfolio_securities_normalized.ticker_symbol
                       left join actual_prices
                                 on actual_prices.symbol = portfolio_securities_normalized.original_ticker_symbol
                       left join {{ ref('ticker_options') }}
