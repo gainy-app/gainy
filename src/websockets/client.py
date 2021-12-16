@@ -85,20 +85,28 @@ class PricesListener:
             # {"status_code":200,"message":"Authorized"}
             if "status_code" in message:
                 if message["status_code"] != 200:
-                    logger.error(message)
+                    logger.error("[%s] %s", self.log_prefix, message)
                 return
 
             self.handle_price_message(message)
         except e:
-            logger.error('handle_message %s', e)
+            logger.error('[%s] handle_message %s', self.log_prefix, e)
             raise e
 
     async def start(self):
         self.__sync_records_task = asyncio.ensure_future(self.__sync_records())
         url = "wss://ws.eodhistoricaldata.com/ws/us?api_token=%s" % (
             self.api_token)
+        first_attempt = True
 
-        for i in range(10):
+        while True:
+            if first_attempt:
+                first_attempt = False
+            else:
+                logger.info("[%s] sleeping before reconnecting to websocket",
+                            self.log_prefix)
+                time.sleep(60)
+
             try:
                 async for websocket in websockets.connect(url):
                     self.websocket = websocket
@@ -114,7 +122,8 @@ class PricesListener:
                             self.handle_message(message)
 
                     except websockets.ConnectionClosed as e:
-                        logger.error("ConnectionClosed Error caught: %s", e)
+                        logger.error("[%s] ConnectionClosed Error caught: %s",
+                                     self.log_prefix, e)
 
                         continue
 
