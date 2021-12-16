@@ -137,6 +137,7 @@
     "dockerSecurityOptions": null,
     "environment": [
       { "name": "ENV",                                 "value": "${env}" },
+      { "name": "AWS_DEFAULT_REGION",                  "value": "us-east-1" },
       { "name": "PG_DATABASE",                         "value": "${pg_dbname}" },
       { "name": "PG_ADDRESS",                          "value": "${pg_host}" },
       { "name": "PG_PASSWORD",                         "value": "${pg_password}" },
