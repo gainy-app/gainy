@@ -57,6 +57,7 @@ class PricesListener:
         decimal_price = Decimal(price)
         decimal_volume = Decimal(volume)
 
+        logger.debug("[%s] handle_price_message key %s", self.log_prefix, key)
         if key in self.__buckets[symbol]:
             self.__buckets[symbol][key]["high"] = max(
                 self.__buckets[symbol][key]["high"], decimal_price)
@@ -136,19 +137,26 @@ class PricesListener:
                 await asyncio.sleep(
                     (self.granularity -
                      round(time.time() * 1000) % self.granularity) / 1000 + 1)
-                logger.info("[%s] __sync_records %d", self.log_prefix,
-                            time.time() * 1000)
 
                 # latest fully closed time period
                 current_key = round(time.time() * 1000) // self.granularity - 1
                 date = datetime.datetime.fromtimestamp(current_key *
                                                        self.granularity / 1000)
+
+                symbols_with_records = [
+                    symbol for symbol in self.symbols
+                    if symbol in self.__buckets
+                    and current_key in self.__buckets[symbol]
+                ]
+                logger.info("[%s] __sync_records %s", self.log_prefix,
+                            ",".join(symbols_with_records))
+                logger.debug("[%s] current_key %s", self.log_prefix,
+                             current_key)
+
                 values = []
                 for symbol in self.symbols:
                     if symbol not in self.__buckets or current_key not in self.__buckets[
                             symbol]:
-                        logger.debug("[%s] no data for symbol %s",
-                                     self.log_prefix, symbol)
                         self.volume_zero_count[symbol] += 1
 
                         if self.volume_zero_count[
@@ -227,7 +235,7 @@ def get_symbols():
 
 
 async def main():
-    max_size = 50
+    max_size = 100
     symbols_tasks = {}
 
     while True:
