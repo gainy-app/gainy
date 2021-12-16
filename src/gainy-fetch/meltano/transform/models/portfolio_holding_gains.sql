@@ -8,66 +8,142 @@
   )
 }}
 
+
 with actual_prices as
-     (
-         select distinct on (symbol) symbol, adjusted_close, '0d'::varchar as period
-         from historical_prices_aggregated
-         where ((period = '15min' and datetime > now() - interval '2 hour') or (period = '1d' and datetime > now() - interval '1 week'))
-           and adjusted_close is not null
-         order by symbol, datetime desc
-     ),
-     expanded_holdings as
          (
-             select t.holding_id,
-                    min(profile_id)                    as profile_id,
-                    max(updated_at)                    as updated_at,
-                    sum(quantity_norm * current_price) as actual_value,
-                    sum(absolute_gain_1d)              as absolute_gain_1d,
-                    sum(absolute_gain_1w)              as absolute_gain_1w,
-                    sum(absolute_gain_1m)              as absolute_gain_1m,
-                    sum(absolute_gain_3m)              as absolute_gain_3m,
-                    sum(absolute_gain_1y)              as absolute_gain_1y,
-                    sum(absolute_gain_5y)              as absolute_gain_5y,
-                    sum(absolute_gain_total)           as absolute_gain_total
-             from (
-                      select distinct on (
-                          portfolio_expanded_transactions.uniq_id
-                          ) profile_holdings.id                                    as holding_id,
-                            profile_holdings.profile_id,
-                            portfolio_transaction_gains.updated_at,
-                            case when ticker_options.contract_name is null then 1 else 100 end *
-                            portfolio_expanded_transactions.quantity_norm::numeric as quantity_norm,
-                            coalesce(ticker_options.last_price::numeric,
-                                     actual_prices.adjusted_close,
-                                     historical_prices_aggregated.adjusted_close)  as current_price,
-                            portfolio_transaction_gains.absolute_gain_1d::numeric,
-                            portfolio_transaction_gains.absolute_gain_1w::numeric,
-                            portfolio_transaction_gains.absolute_gain_1m::numeric,
-                            portfolio_transaction_gains.absolute_gain_3m::numeric,
-                            portfolio_transaction_gains.absolute_gain_1y::numeric,
-                            portfolio_transaction_gains.absolute_gain_5y::numeric,
-                            portfolio_transaction_gains.absolute_gain_total::numeric
-                      from {{ ref('portfolio_transaction_gains') }}
-                               join {{ ref('portfolio_expanded_transactions') }}
-                                    on portfolio_expanded_transactions.uniq_id =
-                                       portfolio_transaction_gains.transaction_uniq_id
-                               join {{ ref('portfolio_securities_normalized') }}
-                                    on portfolio_securities_normalized.id = portfolio_expanded_transactions.security_id
-                               left join {{ ref('historical_prices_aggregated') }}
-                                         on historical_prices_aggregated.symbol =
-                                            portfolio_securities_normalized.ticker_symbol and
-                                            historical_prices_aggregated.datetime >= now() - interval '1 week'
-                               left join {{ ref('ticker_options') }}
-                                         on ticker_options.contract_name =
-                                            portfolio_securities_normalized.original_ticker_symbol
-                               join {{ source('app', 'profile_holdings') }}
-                                    on profile_holdings.profile_id = portfolio_expanded_transactions.profile_id and
-                                       profile_holdings.security_id = portfolio_expanded_transactions.security_id
-                               left join actual_prices
-                                         on actual_prices.symbol = portfolio_securities_normalized.original_ticker_symbol
-                      order by portfolio_expanded_transactions.uniq_id, historical_prices_aggregated.time desc
-                  ) t
-             group by t.holding_id
+             select distinct on (symbol) symbol, adjusted_close, '0d'::varchar as period
+             from {{ ref('historical_prices_aggregated') }}
+             where ((period = '15min' and datetime > now() - interval '2 hour') or
+                    (period = '1d' and datetime > now() - interval '1 week'))
+               and adjusted_close is not null
+             order by symbol, datetime desc
+         ),
+     first_profile_security_trade_date as (
+         select profile_id,
+                security_id,
+                min(date) as date
+         from {{ source('app', 'profile_portfolio_transactions') }}
+         group by profile_id, security_id
+     ),
+     first_profile_trade_date as (
+         select profile_id,
+                min(date) as date
+         from {{ source('app', 'profile_portfolio_transactions') }}
+         group by profile_id
+     ),
+     relative_data as
+         (
+             select distinct on (
+                 profile_holdings.id
+                 ) profile_holdings.id                                                                  as holding_id,
+                   profile_holdings.profile_id,
+                   now()::timestamp                                                                     as updated_at,
+                   coalesce(actual_prices.adjusted_close,
+                            ticker_options.last_price,
+                            historical_prices_aggregated.adjusted_close)::numeric                       as actual_price,
+
+                   (coalesce(actual_prices.adjusted_close,
+                             ticker_options.last_price * 100,
+                             historical_prices_aggregated.adjusted_close) * quantity)::double precision as actual_value,
+
+                   case
+                       when ticker_options.contract_name is null
+                           then (
+                                   actual_prices.adjusted_close::numeric /
+                                   first_value(
+                                   historical_prices_aggregated.adjusted_close::numeric)
+                                   over (partition by historical_prices_aggregated.symbol ORDER BY historical_prices_aggregated.datetime RANGE INTERVAL '0 day' PRECEDING) -
+                                   1)
+                       else 0 end                                                                       as relative_gain_1d,
+                   case
+                       when ticker_options.contract_name is null
+                           then (
+                                   actual_prices.adjusted_close::numeric /
+                                   first_value(
+                                   historical_prices_aggregated.adjusted_close::numeric)
+                                   over (partition by historical_prices_aggregated.symbol ORDER BY historical_prices_aggregated.datetime RANGE INTERVAL '1 week' PRECEDING) -
+                                   1)
+                       else 0 end                                                                       as relative_gain_1w,
+                   case
+                       when ticker_options.contract_name is null
+                           then (
+                                   actual_prices.adjusted_close::numeric /
+                                   first_value(
+                                   historical_prices_aggregated.adjusted_close::numeric)
+                                   over (partition by historical_prices_aggregated.symbol ORDER BY historical_prices_aggregated.datetime RANGE INTERVAL '1 month' PRECEDING) -
+                                   1)
+                       else 0 end                                                                       as relative_gain_1m,
+                   case
+                       when ticker_options.contract_name is null
+                           then (
+                                   actual_prices.adjusted_close::numeric /
+                                   first_value(
+                                   historical_prices_aggregated.adjusted_close::numeric)
+                                   over (partition by historical_prices_aggregated.symbol ORDER BY historical_prices_aggregated.datetime RANGE INTERVAL '3 months' PRECEDING) -
+                                   1)
+                       else 0 end                                                                       as relative_gain_3m,
+                   case
+                       when ticker_options.contract_name is null
+                           then (
+                                   actual_prices.adjusted_close::numeric /
+                                   first_value(
+                                   historical_prices_aggregated.adjusted_close::numeric)
+                                   over (partition by historical_prices_aggregated.symbol ORDER BY historical_prices_aggregated.datetime RANGE INTERVAL '1 year' PRECEDING) -
+                                   1)
+                       else 0 end                                                                       as relative_gain_1y,
+                   case
+                       when ticker_options.contract_name is null
+                           then (
+                                   actual_prices.adjusted_close::numeric /
+                                   first_value(
+                                   historical_prices_aggregated.adjusted_close::numeric)
+                                   over (partition by historical_prices_aggregated.symbol ORDER BY historical_prices_aggregated.datetime RANGE INTERVAL '5 years' PRECEDING) -
+                                   1)
+                       else 0
+                       end                                                                              as relative_gain_5y,
+                   case
+                       when ticker_options.contract_name is null
+                           then (
+                                   actual_prices.adjusted_close::numeric /
+                                   first_value(
+                                   historical_prices_aggregated.adjusted_close::numeric)
+                                   over (partition by historical_prices_aggregated.symbol ORDER BY historical_prices_aggregated.datetime RANGE UNBOUNDED PRECEDING) -
+                                   1)
+                       else 0
+                       end                                                                              as relative_gain_total,
+                   profile_holdings.quantity::numeric
+             from {{ source('app', 'profile_holdings') }}
+                      join {{ ref('portfolio_securities_normalized') }}
+                           on portfolio_securities_normalized.id = profile_holdings.security_id
+                      left join first_profile_security_trade_date
+                                on first_profile_security_trade_date.profile_id = profile_holdings.profile_id
+                                    and first_profile_security_trade_date.security_id = profile_holdings.security_id
+                      left join first_profile_trade_date
+                                on first_profile_trade_date.profile_id = profile_holdings.profile_id
+                      left join {{ ref('historical_prices_aggregated') }}
+                                on historical_prices_aggregated.symbol = portfolio_securities_normalized.ticker_symbol
+                                    and (historical_prices_aggregated.datetime >=
+                                         coalesce(first_profile_security_trade_date.date, first_profile_trade_date.date)
+                                        or (first_profile_security_trade_date.date is null and
+                                            first_profile_trade_date.date is null))
+                                    and (
+                                           (historical_prices_aggregated.period = '1d' and
+                                            historical_prices_aggregated.datetime >=
+                                            now() - interval '3 month' - interval '1 week') or
+                                           (historical_prices_aggregated.period = '1w' and
+                                            historical_prices_aggregated.datetime >=
+                                            now() - interval '1 year' - interval '1 week') or
+                                           (historical_prices_aggregated.period = '1m' and
+                                            historical_prices_aggregated.datetime >=
+                                            now() - interval '5 year' - interval '1 week')
+                                       )
+                      left join actual_prices
+                                on actual_prices.symbol = portfolio_securities_normalized.original_ticker_symbol
+                      left join {{ ref('ticker_options') }}
+                                on ticker_options.contract_name = portfolio_securities_normalized.original_ticker_symbol
+             where (historical_prices_aggregated.symbol is not null or ticker_options.contract_name is not null)
+               and historical_prices_aggregated.datetime < now()::date
+             order by profile_holdings.id, historical_prices_aggregated.datetime desc
          ),
      long_term_tax_holdings as
          (
@@ -88,6 +164,7 @@ with actual_prices as
                                       over (partition by security_id, portfolio_expanded_transactions.profile_id order by sign(quantity_norm), datetime) as cumsum
                                from {{ ref('portfolio_expanded_transactions') }}
                                where portfolio_expanded_transactions.type in ('buy', 'sell')
+                                 and portfolio_expanded_transactions.id is not null
                            ) t
                                join {{ source('app', 'profile_holdings') }}
                                     on profile_holdings.profile_id = t.profile_id and
@@ -96,52 +173,24 @@ with actual_prices as
              where datetime < now() - interval '1 year'
              order by holding_id, quantity_sign desc, datetime desc
          )
-select expanded_holdings.holding_id,
+select relative_data.holding_id,
        updated_at,
-       actual_value::double precision,
+       actual_value,
        (actual_value / sum(actual_value) over (partition by profile_id))::double precision as value_to_portfolio_value,
-       (case
-            when abs(actual_value - absolute_gain_1d) < 1e-2
-                then 1
-            else absolute_gain_1d / (actual_value - absolute_gain_1d)
-           end)::double precision                                                          as relative_gain_1d,
-       (case
-            when abs(actual_value - absolute_gain_1w) < 1e-2
-                then 1
-            else absolute_gain_1w / (actual_value - absolute_gain_1w)
-           end)::double precision                                                          as relative_gain_1w,
-       (case
-            when abs(actual_value - absolute_gain_1m) < 1e-2
-                then 1
-            else absolute_gain_1m / (actual_value - absolute_gain_1m)
-           end)::double precision                                                          as relative_gain_1m,
-       (case
-            when abs(actual_value - absolute_gain_3m) < 1e-2
-                then 1
-            else absolute_gain_3m / (actual_value - absolute_gain_3m)
-           end)::double precision                                                          as relative_gain_3m,
-       (case
-            when abs(actual_value - absolute_gain_1y) < 1e-2
-                then 1
-            else absolute_gain_1y / (actual_value - absolute_gain_1y)
-           end)::double precision                                                          as relative_gain_1y,
-       (case
-            when abs(actual_value - absolute_gain_5y) < 1e-2
-                then 1
-            else absolute_gain_5y / (actual_value - absolute_gain_5y)
-           end)::double precision                                                          as relative_gain_5y,
-       (case
-            when abs(actual_value - absolute_gain_total) < 1e-2
-                then 1
-            else absolute_gain_total / (actual_value - absolute_gain_total)
-           end)::double precision                                                          as relative_gain_total,
-       absolute_gain_1d::double precision,
-       absolute_gain_1w::double precision,
-       absolute_gain_1m::double precision,
-       absolute_gain_3m::double precision,
-       absolute_gain_1y::double precision,
-       absolute_gain_5y::double precision,
-       absolute_gain_total::double precision,
+       relative_gain_1d::double precision,
+       relative_gain_1w::double precision,
+       relative_gain_1m::double precision,
+       relative_gain_3m::double precision,
+       relative_gain_1y::double precision,
+       relative_gain_5y::double precision,
+       relative_gain_total::double precision,
+       (actual_price * (1 - 1 / (1 + relative_gain_1d)) * quantity)::double precision      as absolute_gain_1d,
+       (actual_price * (1 - 1 / (1 + relative_gain_1w)) * quantity)::double precision      as absolute_gain_1w,
+       (actual_price * (1 - 1 / (1 + relative_gain_1m)) * quantity)::double precision      as absolute_gain_1m,
+       (actual_price * (1 - 1 / (1 + relative_gain_3m)) * quantity)::double precision      as absolute_gain_3m,
+       (actual_price * (1 - 1 / (1 + relative_gain_1y)) * quantity)::double precision      as absolute_gain_1y,
+       (actual_price * (1 - 1 / (1 + relative_gain_5y)) * quantity)::double precision      as absolute_gain_5y,
+       (actual_price * (1 - 1 / (1 + relative_gain_total)) * quantity)::double precision   as absolute_gain_total,
        coalesce(long_term_tax_holdings.ltt_quantity_total, 0)                              as ltt_quantity_total
-from expanded_holdings
-         left join long_term_tax_holdings on long_term_tax_holdings.holding_id = expanded_holdings.holding_id
+from relative_data
+         left join long_term_tax_holdings on long_term_tax_holdings.holding_id = relative_data.holding_id
