@@ -6,6 +6,7 @@ import json
 import os
 import time
 import datetime
+import hashlib
 from decimal import Decimal
 import psycopg2
 from psycopg2.extras import execute_values
@@ -32,9 +33,13 @@ class PricesListener:
         self.__buckets = {}
         self.__last_written_key = {}
         self.symbols = symbols
+        self.log_prefix = hashlib.sha1(
+            (",".join(symbols)).encode('utf-8')).hexdigest()
         self.granularity = 10000  # 10 seconds
         self.api_token = API_TOKEN
         self.db_conn_string = DB_CONN_STRING
+        self.volume_zero_threshold = 60  # reconnect if receive consequtive 60 buckets with volume 0 (10 minutes of no data)
+        self.__init_volume_zero_count()
 
     def handle_price_message(self, message):
         # Message format: {"s":"AAPL","p":161.14,"c":[12,37],"v":1,"dp":false,"t":1637573639704}
@@ -70,7 +75,7 @@ class PricesListener:
 
     def handle_message(self, message):
         try:
-            logger.debug(message)
+            logger.debug("[%s] %s", self.log_prefix, message)
             if not message:
                 return
 
@@ -84,29 +89,45 @@ class PricesListener:
 
             self.handle_price_message(message)
         except e:
-            logger.error(e)
+            logger.error('handle_message %s', e)
             raise e
 
     async def start(self):
-        logger.info("connecting to websocket for symbols: %s",
-                    ",".join(self.symbols))
-
         self.__sync_records_task = asyncio.ensure_future(self.__sync_records())
+        url = "wss://ws.eodhistoricaldata.com/ws/us?api_token=%s" % (
+            self.api_token)
 
-        async for websocket in websockets.connect(
-                "wss://ws.eodhistoricaldata.com/ws/us?api_token=%s" %
-            (self.api_token)):
+        for i in range(10):
             try:
-                await websocket.send(
-                    json.dumps({
-                        "action": "subscribe",
-                        "symbols": ",".join(self.symbols)
-                    }))
-                async for message in websocket:
-                    self.handle_message(message)
+                async for websocket in websockets.connect(url):
+                    self.websocket = websocket
+                    logger.info("[%s] connected to websocket for symbols: %s",
+                                self.log_prefix, ",".join(self.symbols))
+                    try:
+                        await websocket.send(
+                            json.dumps({
+                                "action": "subscribe",
+                                "symbols": ",".join(self.symbols)
+                            }))
+                        async for message in websocket:
+                            self.handle_message(message)
 
-            except websockets.ConnectionClosed:
+                    except websockets.ConnectionClosed as e:
+                        logger.error("ConnectionClosed Error caught: %s", e)
+
+                        continue
+
+                logger.error("[%s] reached the end of websockets.connect loop",
+                             self.log_prefix)
+
+            except e:
+                logger.error("[%s] %s Error caught in start func: %s",
+                             self.log_prefix,
+                             type(e).__name__, str(e))
+
                 continue
+
+        logger.error("[%s] reached the end of start func", self.log_prefix)
 
     async def __sync_records(self):
         while True:
@@ -115,7 +136,8 @@ class PricesListener:
                 await asyncio.sleep(
                     (self.granularity -
                      round(time.time() * 1000) % self.granularity) / 1000 + 1)
-                logger.debug("__sync_records %d" % (time.time() * 1000))
+                logger.info("[%s] __sync_records %d", self.log_prefix,
+                            time.time() * 1000)
 
                 # latest fully closed time period
                 current_key = round(time.time() * 1000) // self.granularity - 1
@@ -126,6 +148,22 @@ class PricesListener:
                     if current_key not in bucket:
                         continue
 
+                    volume = bucket[current_key]["volume"]
+                    if volume == 0:
+                        logger.debug("[%s] %s volume %s", self.log_prefix,
+                                     symbol, volume)
+                        self.volume_zero_count[symbol] += 1
+
+                        if self.websocket is not None and self.volume_zero_count[
+                                symbol] >= self.volume_zero_threshold:
+                            logger.info(
+                                "[%s] volume_zero_threshold reached for symbol %s, reconnecting",
+                                self.log_prefix, symbol)
+                            self.__init_volume_zero_count()
+                            await self.websocket.close()
+                    else:
+                        self.volume_zero_count[symbol] = 0
+
                     values.append((
                         symbol,
                         date,
@@ -133,7 +171,7 @@ class PricesListener:
                         bucket[current_key]["high"],
                         bucket[current_key]["low"],
                         bucket[current_key]["close"],
-                        bucket[current_key]["volume"],
+                        volume,
                         self.granularity,
                     ))
 
@@ -141,8 +179,8 @@ class PricesListener:
 
                 self.__persist_records(values)
 
-            except Exception as e:
-                logger.error("__sync_records: " + str(e))
+            except e:
+                logger.error("[%s] __sync_records: %s", self.log_prefix, e)
 
     def __persist_records(self, values):
         if not len(values):
@@ -167,6 +205,9 @@ class PricesListener:
         with psycopg2.connect(self.db_conn_string) as db_conn:
             with db_conn.cursor() as cursor:
                 execute_values(cursor, sql_clause, values)
+
+    def __init_volume_zero_count(self):
+        self.volume_zero_count = {symbol: 0 for symbol in self.symbols}
 
 
 def get_symbols():
