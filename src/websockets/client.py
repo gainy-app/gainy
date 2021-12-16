@@ -144,25 +144,31 @@ class PricesListener:
                 date = datetime.datetime.fromtimestamp(current_key *
                                                        self.granularity / 1000)
                 values = []
-                for symbol, bucket in self.__buckets.items():
-                    if current_key not in bucket:
-                        continue
-
-                    volume = bucket[current_key]["volume"]
-                    if volume == 0:
-                        logger.debug("[%s] %s volume %s", self.log_prefix,
-                                     symbol, volume)
+                for symbol in self.symbols:
+                    if symbol not in self.__buckets or current_key not in self.__buckets[
+                            symbol]:
+                        logger.debug("[%s] no data for symbol %s",
+                                     self.log_prefix, symbol)
                         self.volume_zero_count[symbol] += 1
 
-                        if self.websocket is not None and self.volume_zero_count[
+                        if self.volume_zero_count[
                                 symbol] >= self.volume_zero_threshold:
                             logger.info(
                                 "[%s] volume_zero_threshold reached for symbol %s, reconnecting",
                                 self.log_prefix, symbol)
+
                             self.__init_volume_zero_count()
-                            await self.websocket.close()
-                    else:
-                        self.volume_zero_count[symbol] = 0
+
+                            if self.websocket is not None:
+                                await self.websocket.close()
+                            else:
+                                logger.error("[%s] websocket is null",
+                                             self.log_prefix)
+
+                        continue
+
+                    self.volume_zero_count[symbol] = 0
+                    bucket = self.__buckets[symbol]
 
                     values.append((
                         symbol,
@@ -171,7 +177,7 @@ class PricesListener:
                         bucket[current_key]["high"],
                         bucket[current_key]["low"],
                         bucket[current_key]["close"],
-                        volume,
+                        bucket[current_key]["volume"],
                         self.granularity,
                     ))
 
