@@ -254,7 +254,7 @@ async def main():
             for i in range(0, len(new_symbols), max_size)
         ]
 
-        if ENV !== "production" and len(chunks) > 1:
+        if ENV != "production" and len(chunks) > 1:
             chunks = chunks[0:1]
 
         for symbols in chunks:
