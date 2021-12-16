@@ -93,7 +93,6 @@ resource "random_password" "airflow" {
 resource "aws_ecs_task_definition" "default" {
   family                   = "gainy-${var.env}"
   network_mode             = "bridge"
-  task_role_arn            = var.ecs_task_role_arn
   requires_compatibilities = []
   tags                     = {}
   volume {

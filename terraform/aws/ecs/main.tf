@@ -114,6 +114,13 @@ resource "aws_iam_role_policy" "ecsInstanceRolePolicy" {
    {
      "Effect": "Allow",
      "Action": [
+       "s3:*"
+     ],
+     "Resource": "arn:aws:s3:::${var.mlflow_artifact_bucket}/*"
+   },
+   {
+     "Effect": "Allow",
+     "Action": [
                 "codeartifact:DescribePackageVersion",
                 "codeartifact:DescribeRepository",
                 "codeartifact:GetPackageVersionReadme",
@@ -133,43 +140,6 @@ EOF
 /*
  * Create ECS IAM Service Role and Policy
  */
-resource "aws_iam_role" "ecsTaskRole" {
-  name               = "${var.env}-ecsTaskRole-${random_id.code.hex}"
-  assume_role_policy = <<EOF
-{
- "Version": "2008-10-17",
- "Statement": [
-   {
-     "Sid": "",
-     "Effect": "Allow",
-     "Principal": {
-       "Service": "ecs-tasks.amazonaws.com"
-     },
-     "Action": "sts:AssumeRole"
-   }
- ]
-}
-EOF
-}
-
-resource "aws_iam_role_policy" "ecsTaskRolePolicy" {
-  name   = "${var.env}-ecsTaskRolePolicy-${random_id.code.hex}"
-  role   = aws_iam_role.ecsTaskRole.id
-  policy = <<EOF
-{
- "Version": "2012-10-17",
- "Statement": [
-   {
-     "Effect": "Allow",
-     "Action": [
-       "s3:*"
-     ],
-     "Resource": "arn:aws:s3:::${var.mlflow_artifact_bucket}/*"
-   }
- ]
-}
-EOF
-}
 
 resource "aws_iam_role" "ecsServiceRole" {
   name               = "${var.env}-ecsServiceRole-${random_id.code.hex}"
@@ -483,9 +453,6 @@ output "ecs_cluster" {
 }
 output "ecs_service_role_arn" {
   value = aws_iam_role.ecsServiceRole.arn
-}
-output "ecs_task_role_arn" {
-  value = aws_iam_role.ecsTaskRole.arn
 }
 output "private_subnet_ids" {
   value = aws_subnet.private_subnet.*.id
