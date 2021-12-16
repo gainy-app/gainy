@@ -116,11 +116,12 @@ resource "aws_iam_role_policy" "ecsInstanceRolePolicy" {
      "Action": [
        "s3:*"
      ],
-     "Resource": "arn:aws:s3:::${var.mlflow_artifact_bucket}/*"
+     "Resource": "arn:aws:s3:::*"
    },
    {
      "Effect": "Allow",
      "Action": [
+                "codeartifact:GetAuthorizationToken",
                 "codeartifact:DescribePackageVersion",
                 "codeartifact:DescribeRepository",
                 "codeartifact:GetPackageVersionReadme",
