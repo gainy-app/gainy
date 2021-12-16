@@ -4,9 +4,12 @@
     post_hook=[
       index(this, 'id', true),
       index(this, 'uniq_id', true),
+      fk(this, 'account_id', 'app', 'profile_portfolio_accounts', 'id')
     ]
   )
 }}
+
+/* todo make incremental with post_hook 'delete from {{ this }} where uniq_id in (select uniq_id from {{ this }} left join {{ source('app', 'profile_portfolio_accounts') }} on profile_portfolio_accounts.id = portfolio_expanded_transactions.account_id where profile_portfolio_accounts.id is null)' */
 
 with normalized_transactions as
          (
