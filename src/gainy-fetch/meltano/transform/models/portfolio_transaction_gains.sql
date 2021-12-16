@@ -150,11 +150,18 @@ select transaction_id,
        relative_gain_1y::double precision,
        relative_gain_5y::double precision,
        relative_gain_total::double precision,
-       (actual_price * (1 - 1 / (1 + sign(quantity_norm) * relative_gain_1d)) * abs(quantity_norm))::double precision    as absolute_gain_1d,
-       (actual_price * (1 - 1 / (1 + sign(quantity_norm) * relative_gain_1w)) * abs(quantity_norm))::double precision    as absolute_gain_1w,
-       (actual_price * (1 - 1 / (1 + sign(quantity_norm) * relative_gain_1m)) * abs(quantity_norm))::double precision    as absolute_gain_1m,
-       (actual_price * (1 - 1 / (1 + sign(quantity_norm) * relative_gain_3m)) * abs(quantity_norm))::double precision    as absolute_gain_3m,
-       (actual_price * (1 - 1 / (1 + sign(quantity_norm) * relative_gain_1y)) * abs(quantity_norm))::double precision    as absolute_gain_1y,
-       (actual_price * (1 - 1 / (1 + sign(quantity_norm) * relative_gain_5y)) * abs(quantity_norm))::double precision    as absolute_gain_5y,
-       (actual_price * (1 - 1 / (1 + sign(quantity_norm) * relative_gain_total)) * abs(quantity_norm))::double precision as absolute_gain_total
+       sign(quantity_norm) * (actual_price * (1 - 1 / (1 + sign(quantity_norm) * relative_gain_1d)) *
+                              abs(quantity_norm))::double precision as absolute_gain_1d,
+       sign(quantity_norm) * (actual_price * (1 - 1 / (1 + sign(quantity_norm) * relative_gain_1w)) *
+                              abs(quantity_norm))::double precision as absolute_gain_1w,
+       sign(quantity_norm) * (actual_price * (1 - 1 / (1 + sign(quantity_norm) * relative_gain_1m)) *
+                              abs(quantity_norm))::double precision as absolute_gain_1m,
+       sign(quantity_norm) * (actual_price * (1 - 1 / (1 + sign(quantity_norm) * relative_gain_3m)) *
+                              abs(quantity_norm))::double precision as absolute_gain_3m,
+       sign(quantity_norm) * (actual_price * (1 - 1 / (1 + sign(quantity_norm) * relative_gain_1y)) *
+                              abs(quantity_norm))::double precision as absolute_gain_1y,
+       sign(quantity_norm) * (actual_price * (1 - 1 / (1 + sign(quantity_norm) * relative_gain_5y)) *
+                              abs(quantity_norm))::double precision as absolute_gain_5y,
+       sign(quantity_norm) * (actual_price * (1 - 1 / (1 + sign(quantity_norm) * relative_gain_total)) *
+                              abs(quantity_norm))::double precision as absolute_gain_total
 from relative_data

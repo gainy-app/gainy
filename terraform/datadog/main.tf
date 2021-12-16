@@ -58,7 +58,7 @@ resource "datadog_monitor" "hasura_alb_5xx" {
   }
 
   require_full_window = false
-  notify_no_data      = true
+  notify_no_data      = false
   renotify_interval   = 60
 
   tags = ["hasura"]
