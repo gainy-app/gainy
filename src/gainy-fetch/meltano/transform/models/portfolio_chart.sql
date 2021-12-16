@@ -69,7 +69,7 @@ from (
                            on (historical_prices_aggregated.datetime >= portfolio_expanded_transactions.datetime or
                                portfolio_expanded_transactions.datetime is null) and
                               historical_prices_aggregated.symbol = portfolio_securities_normalized.ticker_symbol
-                      join first_transaction_date on first_transaction_date.profile_id = portfolio_expanded_transactions.profile_id
+                      left join first_transaction_date on first_transaction_date.profile_id = portfolio_expanded_transactions.profile_id
                       join current_transaction_stats on current_transaction_stats.profile_id = portfolio_expanded_transactions.profile_id
 {% if is_incremental() %}
                       left join old_transaction_stats on old_transaction_stats.profile_id = portfolio_expanded_transactions.profile_id
@@ -78,7 +78,7 @@ from (
                                    max_date.period = historical_prices_aggregated.period
 {% endif %}
              where portfolio_expanded_transactions.type in ('buy', 'sell')
-               and historical_prices_aggregated.time >= first_transaction_date.date
+               and (first_transaction_date.profile_id is null or historical_prices_aggregated.time >= first_transaction_date.date)
 {% if is_incremental() %}
                and (old_transaction_stats.profile_id is null
                  or old_transaction_stats.transactions_count != current_transaction_stats.transactions_count
@@ -108,7 +108,7 @@ from (
                       join {{ ref('ticker_options') }}
                            on ticker_options.contract_name = portfolio_securities_normalized.original_ticker_symbol
                       join first_transaction_date on first_transaction_date.profile_id = portfolio_expanded_transactions.profile_id
-                      join time_period on time_period.datetime >= first_transaction_date.date
+                      join time_period on (first_transaction_date.profile_id is null or time_period.time >= first_transaction_date.date)
                       join current_transaction_stats on current_transaction_stats.profile_id = portfolio_expanded_transactions.profile_id
 {% if is_incremental() %}
                       left join old_transaction_stats on old_transaction_stats.profile_id = portfolio_expanded_transactions.profile_id
