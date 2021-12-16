@@ -108,7 +108,7 @@ from (
                       join {{ ref('ticker_options') }}
                            on ticker_options.contract_name = portfolio_securities_normalized.original_ticker_symbol
                       join first_transaction_date on first_transaction_date.profile_id = portfolio_expanded_transactions.profile_id
-                      join time_period on (first_transaction_date.profile_id is null or time_period.time >= first_transaction_date.date)
+                      join time_period on (first_transaction_date.profile_id is null or time_period.datetime >= first_transaction_date.date)
                       join current_transaction_stats on current_transaction_stats.profile_id = portfolio_expanded_transactions.profile_id
 {% if is_incremental() %}
                       left join old_transaction_stats on old_transaction_stats.profile_id = portfolio_expanded_transactions.profile_id
