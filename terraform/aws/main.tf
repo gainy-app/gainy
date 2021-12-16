@@ -93,7 +93,8 @@ module "ecs-service" {
   public_http_sg_id    = module.ecs.public_http_sg_id
   public_subnet_ids    = module.ecs.public_subnet_ids
   ecs_cluster_name     = module.ecs.ecs_cluster.name
-  ecs_service_role_arn = module.ecs.ecsServiceRole_arn
+  ecs_service_role_arn = module.ecs.ecs_service_role_arn
+  ecs_task_role_arn    = module.ecs.ecs_task_role_arn
   cloudflare_zone_id   = var.cloudflare_zone_id
   domain               = var.domain
 

@@ -43,3 +43,4 @@ variable "websockets_memory_credits" {}
 variable "datadog_api_key" {}
 variable "datadog_app_key" {}
 variable "mlflow_artifact_bucket" {}
+variable "ecs_task_role_arn" {}

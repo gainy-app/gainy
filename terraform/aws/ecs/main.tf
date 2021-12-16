@@ -54,7 +54,7 @@ resource "random_id" "code" {
   byte_length = 4
 }
 resource "aws_iam_role" "ecsInstanceRole" {
-  name               = "ecsInstanceRole-${random_id.code.hex}"
+  name               = "${var.env}-ecsInstanceRole-${random_id.code.hex}"
   assume_role_policy = <<EOF
 {
  "Version": "2008-10-17",
@@ -72,7 +72,7 @@ resource "aws_iam_role" "ecsInstanceRole" {
 EOF
 }
 resource "aws_iam_role_policy" "ecsInstanceRolePolicy" {
-  name   = "ecsInstanceRolePolicy-${random_id.code.hex}"
+  name   = "${var.env}-ecsInstanceRolePolicy-${random_id.code.hex}"
   role   = aws_iam_role.ecsInstanceRole.id
   policy = <<EOF
 {
@@ -110,59 +110,6 @@ resource "aws_iam_role_policy" "ecsInstanceRolePolicy" {
      "Resource": [
        "arn:aws:logs:*:*:*"
      ]
-   }
- ]
-}
-EOF
-}
-/*
- * Create ECS IAM Service Role and Policy
- */
-resource "aws_iam_role" "ecsServiceRole" {
-  name               = "ecsServiceRole-${random_id.code.hex}"
-  assume_role_policy = <<EOF
-{
- "Version": "2008-10-17",
- "Statement": [
-   {
-     "Sid": "",
-     "Effect": "Allow",
-     "Principal": {
-       "Service": "ecs.amazonaws.com"
-     },
-     "Action": "sts:AssumeRole"
-   }
- ]
-}
-EOF
-}
-
-resource "aws_iam_role_policy" "ecsServiceRolePolicy" {
-  name   = "ecsServiceRolePolicy-${random_id.code.hex}"
-  role   = aws_iam_role.ecsServiceRole.id
-  policy = <<EOF
-{
- "Version": "2012-10-17",
- "Statement": [
-   {
-     "Effect": "Allow",
-     "Action": [
-       "ec2:AuthorizeSecurityGroupIngress",
-       "ec2:Describe*",
-       "elasticloadbalancing:DeregisterInstancesFromLoadBalancer",
-       "elasticloadbalancing:DeregisterTargets",
-       "elasticloadbalancing:Describe*",
-       "elasticloadbalancing:RegisterInstancesWithLoadBalancer",
-       "elasticloadbalancing:RegisterTargets"
-     ],
-     "Resource": "*"
-   },
-   {
-     "Effect": "Allow",
-     "Action": [
-       "s3:*"
-     ],
-     "Resource": "arn:aws:s3:::${var.mlflow_artifact_bucket}/*"
    },
    {
      "Effect": "Allow",
@@ -183,6 +130,91 @@ resource "aws_iam_role_policy" "ecsServiceRolePolicy" {
 }
 EOF
 }
+/*
+ * Create ECS IAM Service Role and Policy
+ */
+resource "aws_iam_role" "ecsTaskRole" {
+  name               = "${var.env}-ecsTaskRole-${random_id.code.hex}"
+  assume_role_policy = <<EOF
+{
+ "Version": "2008-10-17",
+ "Statement": [
+   {
+     "Sid": "",
+     "Effect": "Allow",
+     "Principal": {
+       "Service": "ecs.amazonaws.com"
+     },
+     "Action": "sts:AssumeRole"
+   }
+ ]
+}
+EOF
+}
+
+resource "aws_iam_role_policy" "ecsTaskRolePolicy" {
+  name   = "${var.env}-ecsTaskRolePolicy-${random_id.code.hex}"
+  role   = aws_iam_role.ecsTaskRole.id
+  policy = <<EOF
+{
+ "Version": "2012-10-17",
+ "Statement": [
+   {
+     "Effect": "Allow",
+     "Action": [
+       "s3:*"
+     ],
+     "Resource": "arn:aws:s3:::${var.mlflow_artifact_bucket}/*"
+   }
+ ]
+}
+EOF
+}
+
+resource "aws_iam_role" "ecsServiceRole" {
+  name               = "${var.env}-ecsServiceRole-${random_id.code.hex}"
+  assume_role_policy = <<EOF
+{
+ "Version": "2008-10-17",
+ "Statement": [
+   {
+     "Sid": "",
+     "Effect": "Allow",
+     "Principal": {
+       "Service": "ecs.amazonaws.com"
+     },
+     "Action": "sts:AssumeRole"
+   }
+ ]
+}
+EOF
+}
+
+resource "aws_iam_role_policy" "ecsServiceRolePolicy" {
+  name   = "${var.env}-ecsServiceRolePolicy-${random_id.code.hex}"
+  role   = aws_iam_role.ecsServiceRole.id
+  policy = <<EOF
+{
+ "Version": "2012-10-17",
+ "Statement": [
+   {
+     "Effect": "Allow",
+     "Action": [
+       "ec2:AuthorizeSecurityGroupIngress",
+       "ec2:Describe*",
+       "elasticloadbalancing:DeregisterInstancesFromLoadBalancer",
+       "elasticloadbalancing:DeregisterTargets",
+       "elasticloadbalancing:Describe*",
+       "elasticloadbalancing:RegisterInstancesWithLoadBalancer",
+       "elasticloadbalancing:RegisterTargets"
+     ],
+     "Resource": "*"
+   }
+ ]
+}
+EOF
+}
+
 resource "aws_iam_instance_profile" "ecsInstanceProfile" {
   name = "ecsInstanceProfile-${random_id.code.hex}"
   role = aws_iam_role.ecsInstanceRole.name
@@ -449,8 +481,11 @@ output "aws_cloudwatch_log_group" {
 output "ecs_cluster" {
   value = aws_ecs_cluster.ecs_cluster
 }
-output "ecsServiceRole_arn" {
+output "ecs_service_role_arn" {
   value = aws_iam_role.ecsServiceRole.arn
+}
+output "ecs_task_role_arn" {
+  value = aws_iam_role.ecsTaskRole.arn
 }
 output "private_subnet_ids" {
   value = aws_subnet.private_subnet.*.id
