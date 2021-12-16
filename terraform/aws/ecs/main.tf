@@ -130,7 +130,8 @@ resource "aws_iam_role_policy" "ecsInstanceRolePolicy" {
                 "codeartifact:ListPackageVersions",
                 "codeartifact:ListPackageVersionAssets",
                 "codeartifact:ListPackageVersionDependencies",
-                "codeartifact:ReadFromRepository"
+                "codeartifact:ReadFromRepository",
+                "sts:GetServiceBearerToken"
             ],
       "Resource": "*"
    }
