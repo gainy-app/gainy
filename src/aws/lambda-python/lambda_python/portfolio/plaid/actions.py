@@ -11,7 +11,7 @@ from plaid.model.link_token_create_request_user import LinkTokenCreateRequestUse
 from plaid.model.webhook_verification_key_get_request import WebhookVerificationKeyGetRequest
 from plaid.model.country_code import CountryCode
 from plaid.model.products import Products
-from portfolio.plaid import PlaidService
+from portfolio.plaid import PlaidClient, PlaidService
 from portfolio.service import PortfolioService, SERVICE_PLAID
 
 from portfolio.plaid.common import get_plaid_client, handle_error
@@ -86,12 +86,13 @@ class PlaidWebhook(HasuraAction):
         super().__init__("plaid_webhook")
 
         self.portfolio_service = PortfolioService()
+        self.client = PlaidClient()
 
     def apply(self, db_conn, input_params, headers):
         print(input_params, headers)
-        self.verify(input_params, headers)
 
         try:
+            self.verify(input_params, headers)
             item_id = input_params['item_id']
             with db_conn.cursor() as cursor:
                 cursor.execute(
