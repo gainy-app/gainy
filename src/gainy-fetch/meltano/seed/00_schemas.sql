@@ -1,5 +1,6 @@
 CREATE SCHEMA IF NOT EXISTS meltano;
 CREATE SCHEMA IF NOT EXISTS airflow;
+CREATE SCHEMA IF NOT EXISTS mlflow;
 CREATE SCHEMA IF NOT EXISTS raw_data;
 
 create table if not exists raw_data.eod_intraday_prices
