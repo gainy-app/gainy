@@ -184,7 +184,7 @@ services:
     volumes:
       - ./src/websockets:/srv
     environment:
-      API_TOKEN: "60c3492f939d81.26092664" # "OeAFFmMliFG5orCUuwAKQ8l4WWFQ67YX"
+      API_TOKEN: "OeAFFmMliFG5orCUuwAKQ8l4WWFQ67YX"
       PG_HOST: "${PG_ADDRESS}"
       PG_PORT: "${PG_PORT}"
       PG_DBNAME: "${PG_DATABASE}"

@@ -26,7 +26,6 @@ class HubspotService:
                 })
             api_response = self.__get_client().crm.contacts.basic_api.create(
                 simple_public_object_input=simple_public_object_input)
-            #             print(api_response.to_dict())
             logger.info("Successfully created hubspot contact %s",
                         json.dumps(api_response.to_dict(), default=str))
         except ApiException as e:
