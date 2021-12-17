@@ -52,7 +52,7 @@ with actual_prices as
                                    actual_prices.adjusted_close::numeric /
                                    first_value(
                                    historical_prices_aggregated.adjusted_close::numeric)
-                                   over (partition by historical_prices_aggregated.symbol ORDER BY historical_prices_aggregated.datetime RANGE INTERVAL '0 day' PRECEDING) -
+                                   over (partition by profile_holdings.id, historical_prices_aggregated.symbol ORDER BY historical_prices_aggregated.datetime RANGE INTERVAL '0 day' PRECEDING) -
                                    1)
                        else 0 end                                                                       as relative_gain_1d,
                    case
@@ -61,7 +61,7 @@ with actual_prices as
                                    actual_prices.adjusted_close::numeric /
                                    first_value(
                                    historical_prices_aggregated.adjusted_close::numeric)
-                                   over (partition by historical_prices_aggregated.symbol ORDER BY historical_prices_aggregated.datetime RANGE INTERVAL '1 week' PRECEDING) -
+                                   over (partition by profile_holdings.id, historical_prices_aggregated.symbol ORDER BY historical_prices_aggregated.datetime RANGE INTERVAL '1 week' PRECEDING) -
                                    1)
                        else 0 end                                                                       as relative_gain_1w,
                    case
@@ -70,7 +70,7 @@ with actual_prices as
                                    actual_prices.adjusted_close::numeric /
                                    first_value(
                                    historical_prices_aggregated.adjusted_close::numeric)
-                                   over (partition by historical_prices_aggregated.symbol ORDER BY historical_prices_aggregated.datetime RANGE INTERVAL '1 month' PRECEDING) -
+                                   over (partition by profile_holdings.id, historical_prices_aggregated.symbol ORDER BY historical_prices_aggregated.datetime RANGE INTERVAL '1 month' PRECEDING) -
                                    1)
                        else 0 end                                                                       as relative_gain_1m,
                    case
@@ -79,7 +79,7 @@ with actual_prices as
                                    actual_prices.adjusted_close::numeric /
                                    first_value(
                                    historical_prices_aggregated.adjusted_close::numeric)
-                                   over (partition by historical_prices_aggregated.symbol ORDER BY historical_prices_aggregated.datetime RANGE INTERVAL '3 months' PRECEDING) -
+                                   over (partition by profile_holdings.id, historical_prices_aggregated.symbol ORDER BY historical_prices_aggregated.datetime RANGE INTERVAL '3 months' PRECEDING) -
                                    1)
                        else 0 end                                                                       as relative_gain_3m,
                    case
@@ -88,7 +88,7 @@ with actual_prices as
                                    actual_prices.adjusted_close::numeric /
                                    first_value(
                                    historical_prices_aggregated.adjusted_close::numeric)
-                                   over (partition by historical_prices_aggregated.symbol ORDER BY historical_prices_aggregated.datetime RANGE INTERVAL '1 year' PRECEDING) -
+                                   over (partition by profile_holdings.id, historical_prices_aggregated.symbol ORDER BY historical_prices_aggregated.datetime RANGE INTERVAL '1 year' PRECEDING) -
                                    1)
                        else 0 end                                                                       as relative_gain_1y,
                    case
@@ -97,7 +97,7 @@ with actual_prices as
                                    actual_prices.adjusted_close::numeric /
                                    first_value(
                                    historical_prices_aggregated.adjusted_close::numeric)
-                                   over (partition by historical_prices_aggregated.symbol ORDER BY historical_prices_aggregated.datetime RANGE INTERVAL '5 years' PRECEDING) -
+                                   over (partition by profile_holdings.id, historical_prices_aggregated.symbol ORDER BY historical_prices_aggregated.datetime RANGE INTERVAL '5 years' PRECEDING) -
                                    1)
                        else 0
                        end                                                                              as relative_gain_5y,
@@ -107,7 +107,7 @@ with actual_prices as
                                    actual_prices.adjusted_close::numeric /
                                    first_value(
                                    historical_prices_aggregated.adjusted_close::numeric)
-                                   over (partition by historical_prices_aggregated.symbol ORDER BY historical_prices_aggregated.datetime RANGE UNBOUNDED PRECEDING) -
+                                   over (partition by profile_holdings.id, historical_prices_aggregated.symbol ORDER BY historical_prices_aggregated.datetime RANGE UNBOUNDED PRECEDING) -
                                    1)
                        else 0
                        end                                                                              as relative_gain_total,
