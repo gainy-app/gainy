@@ -32,10 +32,15 @@ class OnUserCreated(HasuraTrigger):
                                      text="User Created #%d" % (profile_id),
                                      tags=["env:%s" % (self.env)])
         except Exception as e:
-            logging.error("[%s] Exception when sending datadog event: %s", __name__, e)
+            logging.error("[%s] Exception when sending datadog event: %s",
+                          __name__, e)
 
-        if self.env == "production"
+        if self.env == "production":
             try:
-                self.hubspot_service.create_contact(payload["email"], payload["first_name"], payload["last_name"])
+                self.hubspot_service.create_contact(payload["email"],
+                                                    payload["first_name"],
+                                                    payload["last_name"])
             except Exception as e:
-                logging.error("[%s] Exception when creating hubspot contact: %s", __name__, e)
+                logging.error(
+                    "[%s] Exception when creating hubspot contact: %s",
+                    __name__, e)

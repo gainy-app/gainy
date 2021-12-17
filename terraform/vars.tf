@@ -18,7 +18,7 @@ variable "base_image_version" {
   type = string
 }
 variable "hubspot_api_key" {
-  type = string
+  type      = string
   sensitive = true
 }
 

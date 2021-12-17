@@ -10,6 +10,7 @@ logger = get_logger(__name__)
 ENV = os.environ['ENV']
 HUBSPOT_API_KEY = os.getenv("HUBSPOT_API_KEY")
 
+
 class HubspotService:
     def __init__(self):
         self.api_client = None
@@ -21,13 +22,13 @@ class HubspotService:
                     "email": email,
                     "firstname": first_name,
                     "lastname": last_name,
-                }
-            )
+                    "api": "app",
+                })
             api_response = self.__get_client().crm.contacts.basic_api.create(
-                simple_public_object_input=simple_public_object_input
-            )
-#             print(api_response.to_dict())
-            logger.info("Successfully created hubspot contact %s", json.dumps(api_response.to_dict(), default=str))
+                simple_public_object_input=simple_public_object_input)
+            #             print(api_response.to_dict())
+            logger.info("Successfully created hubspot contact %s",
+                        json.dumps(api_response.to_dict(), default=str))
         except ApiException as e:
             logger.error("Exception when creating contact: %s", e)
 
@@ -36,4 +37,3 @@ class HubspotService:
             self.api_client = HubSpot(api_key=HUBSPOT_API_KEY)
 
         return self.api_client
-
