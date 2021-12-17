@@ -74,13 +74,13 @@ class PricesListener:
                 "volume": decimal_volume,
             }
 
-    def handle_message(self, message):
+    def handle_message(self, message_raw):
         try:
-            logger.debug("[%s] %s", self.log_prefix, message)
-            if not message:
+            logger.debug("[%s] %s", self.log_prefix, message_raw)
+            if not message_raw:
                 return
 
-            message = json.loads(message)
+            message = json.loads(message_raw)
 
             # {"status_code":200,"message":"Authorized"}
             if "status_code" in message:
@@ -90,8 +90,7 @@ class PricesListener:
 
             self.handle_price_message(message)
         except Exception as e:
-            logger.error('[%s] handle_message %s', self.log_prefix, e)
-            raise e
+            logger.error('[%s] handle_message %s: %s', self.log_prefix, message_raw, e)
 
     async def start(self):
         self.__sync_records_task = asyncio.ensure_future(self.__sync_records())
