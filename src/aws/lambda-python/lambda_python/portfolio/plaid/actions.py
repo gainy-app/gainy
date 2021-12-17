@@ -116,7 +116,7 @@ class PlaidWebhook(HasuraAction):
                         db_conn, access_token)
 
             return {'count': count}
-        except e:
+        except Exception as e:
             print("[PLAID_WEBHOOK] %s" % (e))
             raise e
 

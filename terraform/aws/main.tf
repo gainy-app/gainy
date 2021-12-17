@@ -32,6 +32,7 @@ module "lambda" {
   datadog_api_key             = var.datadog_api_key
   datadog_app_key             = var.datadog_app_key
   hasura_url                  = module.ecs-service.hasura_url
+  hubspot_api_key             = var.hubspot_api_key
 
   base_image_registry_address = var.base_image_registry_address
   base_image_version          = var.base_image_version

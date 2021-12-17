@@ -17,6 +17,10 @@ variable "base_image_registry_address" {
 variable "base_image_version" {
   type = string
 }
+variable "hubspot_api_key" {
+  type = string
+  sensitive = true
+}
 
 #################################### AWS ####################################
 

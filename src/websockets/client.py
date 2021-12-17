@@ -89,7 +89,7 @@ class PricesListener:
                 return
 
             self.handle_price_message(message)
-        except e:
+        except Exception as e:
             logger.error('handle_message %s', e)
             raise e
 
@@ -121,7 +121,7 @@ class PricesListener:
                 logger.error("[%s] reached the end of websockets.connect loop",
                              self.log_prefix)
 
-            except e:
+            except Exception as e:
                 logger.error("[%s] %s Error caught in start func: %s",
                              self.log_prefix,
                              type(e).__name__, str(e))
@@ -193,7 +193,7 @@ class PricesListener:
 
                 self.__persist_records(values)
 
-            except e:
+            except Exception as e:
                 logger.error("[%s] __sync_records: %s", self.log_prefix, e)
 
     def __persist_records(self, values):
