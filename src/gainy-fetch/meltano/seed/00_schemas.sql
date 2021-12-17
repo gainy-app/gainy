@@ -1,5 +1,6 @@
 CREATE SCHEMA IF NOT EXISTS meltano;
 CREATE SCHEMA IF NOT EXISTS airflow;
+CREATE SCHEMA IF NOT EXISTS mlflow;
 CREATE SCHEMA IF NOT EXISTS raw_data;
 
 create table if not exists raw_data.eod_intraday_prices
@@ -14,4 +15,13 @@ create table if not exists raw_data.eod_intraday_prices
     granularity int,
     constraint intraday_prices_pk
         primary key (time, symbol)
+);
+
+create table if not exists raw_data.auto_ticker_industries
+(
+    symbol              varchar,
+    industry_id_1       int,
+    industry_id_2       int,
+
+    primary key (symbol)
 );
