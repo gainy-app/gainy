@@ -124,7 +124,7 @@ class PlaidWebhook(HasuraAction):
         signed_jwt = headers.get('plaid-verification')
         current_key_id = jwt.get_unverified_header(signed_jwt)['kid']
 
-        response = self.client.webhook_verification_key_get(current_key_id)
+        response = self.client.webhook_verification_key_get(current_key_id).to_dict()
         print('[PLAID_WEBHOOK] response', response)
 
         key = response['key']
