@@ -37,8 +37,6 @@ industries_2 as (
 ),
 all_industries as (
     select symbol, industry_id from industries_1
-    union
-    select symbol, industry_id from industries_2
 )
 select ai.symbol, industry_id
 from all_industries ai
