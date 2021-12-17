@@ -8,7 +8,6 @@ import plaid
 from plaid.model.item_public_token_exchange_request import ItemPublicTokenExchangeRequest
 from plaid.model.link_token_create_request import LinkTokenCreateRequest
 from plaid.model.link_token_create_request_user import LinkTokenCreateRequestUser
-from plaid.model.webhook_verification_key_get_request import WebhookVerificationKeyGetRequest
 from plaid.model.country_code import CountryCode
 from plaid.model.products import Products
 from portfolio.plaid import PlaidClient, PlaidService
@@ -117,7 +116,7 @@ class PlaidWebhook(HasuraAction):
                         db_conn, access_token)
 
             return {'count': count}
-        except e:
+        except Exception as e:
             print("[PLAID_WEBHOOK] %s" % (e))
             raise e
 
