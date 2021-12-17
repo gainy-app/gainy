@@ -18,19 +18,19 @@ with actual_prices as
                and adjusted_close is not null
              order by symbol, datetime desc
          ),
-     first_profile_security_trade_date as (
-         select profile_id,
-                security_id,
-                min(date) as date
-         from {{ source('app', 'profile_portfolio_transactions') }}
-         group by profile_id, security_id
-     ),
-     first_profile_trade_date as (
-         select profile_id,
-                min(date) as date
-         from {{ source('app', 'profile_portfolio_transactions') }}
-         group by profile_id
-     ),
+--      first_profile_security_trade_date as (
+--          select profile_id,
+--                 security_id,
+--                 min(date) as date
+--          from {{ source('app', 'profile_portfolio_transactions') }}
+--          group by profile_id, security_id
+--      ),
+--      first_profile_trade_date as (
+--          select profile_id,
+--                 min(date) as date
+--          from {{ source('app', 'profile_portfolio_transactions') }}
+--          group by profile_id
+--      ),
      relative_data as
          (
              select distinct on (
@@ -52,7 +52,7 @@ with actual_prices as
                                    actual_prices.adjusted_close::numeric /
                                    first_value(
                                    historical_prices_aggregated.adjusted_close::numeric)
-                                   over (partition by historical_prices_aggregated.symbol ORDER BY historical_prices_aggregated.datetime RANGE INTERVAL '0 day' PRECEDING) -
+                                   over (partition by profile_holdings.id, historical_prices_aggregated.symbol ORDER BY historical_prices_aggregated.datetime RANGE INTERVAL '0 day' PRECEDING) -
                                    1)
                        else 0 end                                                                       as relative_gain_1d,
                    case
@@ -61,7 +61,7 @@ with actual_prices as
                                    actual_prices.adjusted_close::numeric /
                                    first_value(
                                    historical_prices_aggregated.adjusted_close::numeric)
-                                   over (partition by historical_prices_aggregated.symbol ORDER BY historical_prices_aggregated.datetime RANGE INTERVAL '1 week' PRECEDING) -
+                                   over (partition by profile_holdings.id, historical_prices_aggregated.symbol ORDER BY historical_prices_aggregated.datetime RANGE INTERVAL '1 week' PRECEDING) -
                                    1)
                        else 0 end                                                                       as relative_gain_1w,
                    case
@@ -70,7 +70,7 @@ with actual_prices as
                                    actual_prices.adjusted_close::numeric /
                                    first_value(
                                    historical_prices_aggregated.adjusted_close::numeric)
-                                   over (partition by historical_prices_aggregated.symbol ORDER BY historical_prices_aggregated.datetime RANGE INTERVAL '1 month' PRECEDING) -
+                                   over (partition by profile_holdings.id, historical_prices_aggregated.symbol ORDER BY historical_prices_aggregated.datetime RANGE INTERVAL '1 month' PRECEDING) -
                                    1)
                        else 0 end                                                                       as relative_gain_1m,
                    case
@@ -79,7 +79,7 @@ with actual_prices as
                                    actual_prices.adjusted_close::numeric /
                                    first_value(
                                    historical_prices_aggregated.adjusted_close::numeric)
-                                   over (partition by historical_prices_aggregated.symbol ORDER BY historical_prices_aggregated.datetime RANGE INTERVAL '3 months' PRECEDING) -
+                                   over (partition by profile_holdings.id, historical_prices_aggregated.symbol ORDER BY historical_prices_aggregated.datetime RANGE INTERVAL '3 months' PRECEDING) -
                                    1)
                        else 0 end                                                                       as relative_gain_3m,
                    case
@@ -88,7 +88,7 @@ with actual_prices as
                                    actual_prices.adjusted_close::numeric /
                                    first_value(
                                    historical_prices_aggregated.adjusted_close::numeric)
-                                   over (partition by historical_prices_aggregated.symbol ORDER BY historical_prices_aggregated.datetime RANGE INTERVAL '1 year' PRECEDING) -
+                                   over (partition by profile_holdings.id, historical_prices_aggregated.symbol ORDER BY historical_prices_aggregated.datetime RANGE INTERVAL '1 year' PRECEDING) -
                                    1)
                        else 0 end                                                                       as relative_gain_1y,
                    case
@@ -97,7 +97,7 @@ with actual_prices as
                                    actual_prices.adjusted_close::numeric /
                                    first_value(
                                    historical_prices_aggregated.adjusted_close::numeric)
-                                   over (partition by historical_prices_aggregated.symbol ORDER BY historical_prices_aggregated.datetime RANGE INTERVAL '5 years' PRECEDING) -
+                                   over (partition by profile_holdings.id, historical_prices_aggregated.symbol ORDER BY historical_prices_aggregated.datetime RANGE INTERVAL '5 years' PRECEDING) -
                                    1)
                        else 0
                        end                                                                              as relative_gain_5y,
@@ -107,7 +107,7 @@ with actual_prices as
                                    actual_prices.adjusted_close::numeric /
                                    first_value(
                                    historical_prices_aggregated.adjusted_close::numeric)
-                                   over (partition by historical_prices_aggregated.symbol ORDER BY historical_prices_aggregated.datetime RANGE UNBOUNDED PRECEDING) -
+                                   over (partition by profile_holdings.id, historical_prices_aggregated.symbol ORDER BY historical_prices_aggregated.datetime RANGE UNBOUNDED PRECEDING) -
                                    1)
                        else 0
                        end                                                                              as relative_gain_total,
@@ -115,28 +115,33 @@ with actual_prices as
              from {{ source('app', 'profile_holdings') }}
                       join {{ ref('portfolio_securities_normalized') }}
                            on portfolio_securities_normalized.id = profile_holdings.security_id
-                      left join first_profile_security_trade_date
-                                on first_profile_security_trade_date.profile_id = profile_holdings.profile_id
-                                    and first_profile_security_trade_date.security_id = profile_holdings.security_id
-                      left join first_profile_trade_date
-                                on first_profile_trade_date.profile_id = profile_holdings.profile_id
+--                       left join first_profile_security_trade_date
+--                                 on first_profile_security_trade_date.profile_id = profile_holdings.profile_id
+--                                     and first_profile_security_trade_date.security_id = profile_holdings.security_id
+--                       left join first_profile_trade_date
+--                                 on first_profile_trade_date.profile_id = profile_holdings.profile_id
+                      left join tickers
+                                on tickers.symbol = portfolio_securities_normalized.ticker_symbol
                       left join {{ ref('historical_prices_aggregated') }}
                                 on historical_prices_aggregated.symbol = portfolio_securities_normalized.ticker_symbol
+--                                     and (historical_prices_aggregated.datetime >=
+--                                          coalesce(first_profile_security_trade_date.date, first_profile_trade_date.date)
+--                                         or (first_profile_security_trade_date.date is null and
+--                                             first_profile_trade_date.date is null))
                                     and (historical_prices_aggregated.datetime >=
-                                         coalesce(first_profile_security_trade_date.date, first_profile_trade_date.date)
-                                        or (first_profile_security_trade_date.date is null and
-                                            first_profile_trade_date.date is null))
-                                    and (
-                                           (historical_prices_aggregated.period = '1d' and
-                                            historical_prices_aggregated.datetime >=
-                                            now() - interval '3 month' - interval '1 week') or
-                                           (historical_prices_aggregated.period = '1w' and
-                                            historical_prices_aggregated.datetime >=
-                                            now() - interval '1 year' - interval '1 week') or
-                                           (historical_prices_aggregated.period = '1m' and
-                                            historical_prices_aggregated.datetime >=
-                                            now() - interval '5 year' - interval '1 week')
-                                       )
+                                         tickers.ipo_date or tickers.ipo_date is null)
+                                    and historical_prices_aggregated.period = '1d'
+--                                     and (
+--                                            (historical_prices_aggregated.period = '1d' and
+--                                             historical_prices_aggregated.datetime >=
+--                                             now() - interval '3 month' - interval '1 week') or
+--                                            (historical_prices_aggregated.period = '1w' and
+--                                             historical_prices_aggregated.datetime >=
+--                                             now() - interval '1 year' - interval '1 week') or
+--                                            (historical_prices_aggregated.period = '1m' and
+--                                             historical_prices_aggregated.datetime >=
+--                                             now() - interval '5 year' - interval '1 week')
+--                                        )
                       left join actual_prices
                                 on actual_prices.symbol = portfolio_securities_normalized.original_ticker_symbol
                       left join {{ ref('ticker_options') }}

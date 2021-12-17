@@ -1,6 +1,7 @@
 from plaid.model.investments_holdings_get_request import InvestmentsHoldingsGetRequest
 from plaid.model.investments_transactions_get_request import InvestmentsTransactionsGetRequest
 from plaid.model.investments_transactions_get_request_options import InvestmentsTransactionsGetRequestOptions
+from plaid.model.webhook_verification_key_get_request import WebhookVerificationKeyGetRequest
 
 from portfolio.plaid.common import get_plaid_client, handle_error
 
