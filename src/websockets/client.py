@@ -83,8 +83,16 @@ class PricesListener:
             message = json.loads(message_raw)
 
             # {"status_code":200,"message":"Authorized"}
+            # {"status":500,"message":"Server error"}
             if "status_code" in message:
-                if message["status_code"] != 200:
+                status = message["status_code"]
+            elif "status" in message:
+                status = message["status"]
+            else:
+                status = None
+
+            if status is not None:
+                if status != 200:
                     logger.error("[%s] %s", self.log_prefix, message)
                 return
 
