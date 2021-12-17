@@ -74,31 +74,46 @@ class PricesListener:
                 "volume": decimal_volume,
             }
 
-    def handle_message(self, message):
+    def handle_message(self, message_raw):
         try:
-            logger.debug("[%s] %s", self.log_prefix, message)
-            if not message:
+            logger.debug("[%s] %s", self.log_prefix, message_raw)
+            if not message_raw:
                 return
 
-            message = json.loads(message)
+            message = json.loads(message_raw)
 
             # {"status_code":200,"message":"Authorized"}
+            # {"status":500,"message":"Server error"}
             if "status_code" in message:
-                if message["status_code"] != 200:
-                    logger.error(message)
+                status = message["status_code"]
+            elif "status" in message:
+                status = message["status"]
+            else:
+                status = None
+
+            if status is not None:
+                if status != 200:
+                    logger.error("[%s] %s", self.log_prefix, message)
                 return
 
             self.handle_price_message(message)
         except Exception as e:
-            logger.error('handle_message %s', e)
-            raise e
+            logger.error('[%s] handle_message %s: %s', self.log_prefix, message_raw, e)
 
     async def start(self):
         self.__sync_records_task = asyncio.ensure_future(self.__sync_records())
         url = "wss://ws.eodhistoricaldata.com/ws/us?api_token=%s" % (
             self.api_token)
+        first_attempt = True
 
-        for i in range(10):
+        while True:
+            if first_attempt:
+                first_attempt = False
+            else:
+                logger.info("[%s] sleeping before reconnecting to websocket",
+                            self.log_prefix)
+                time.sleep(60)
+
             try:
                 async for websocket in websockets.connect(url):
                     self.websocket = websocket
@@ -114,7 +129,8 @@ class PricesListener:
                             self.handle_message(message)
 
                     except websockets.ConnectionClosed as e:
-                        logger.error("ConnectionClosed Error caught: %s", e)
+                        logger.error("[%s] ConnectionClosed Error caught: %s",
+                                     self.log_prefix, e)
 
                         continue
 
@@ -253,6 +269,9 @@ async def main():
             new_symbols[i:i + max_size]
             for i in range(0, len(new_symbols), max_size)
         ]
+
+        if ENV != "production" and len(chunks) > 1:
+            chunks = chunks[0:1]
 
         for symbols in chunks:
             task = asyncio.create_task(PricesListener(symbols).start())

@@ -8,6 +8,8 @@
       updated_at='updated_at',
     )
 }}
+
+/* todo investigate why there is no pk in resulting table */
 /* todo change target_schema to variable */
 
 select code,

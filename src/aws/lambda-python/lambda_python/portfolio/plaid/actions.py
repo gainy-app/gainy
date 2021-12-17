@@ -8,10 +8,9 @@ import plaid
 from plaid.model.item_public_token_exchange_request import ItemPublicTokenExchangeRequest
 from plaid.model.link_token_create_request import LinkTokenCreateRequest
 from plaid.model.link_token_create_request_user import LinkTokenCreateRequestUser
-from plaid.model.webhook_verification_key_get_request import WebhookVerificationKeyGetRequest
 from plaid.model.country_code import CountryCode
 from plaid.model.products import Products
-from portfolio.plaid import PlaidService
+from portfolio.plaid import PlaidClient, PlaidService
 from portfolio.service import PortfolioService, SERVICE_PLAID
 
 from portfolio.plaid.common import get_plaid_client, handle_error
@@ -86,12 +85,13 @@ class PlaidWebhook(HasuraAction):
         super().__init__("plaid_webhook")
 
         self.portfolio_service = PortfolioService()
+        self.client = PlaidClient()
 
     def apply(self, db_conn, input_params, headers):
         print(input_params, headers)
-        self.verify(input_params, headers)
 
         try:
+            self.verify(input_params, headers)
             item_id = input_params['item_id']
             with db_conn.cursor() as cursor:
                 cursor.execute(
@@ -124,7 +124,7 @@ class PlaidWebhook(HasuraAction):
         signed_jwt = headers.get('plaid-verification')
         current_key_id = jwt.get_unverified_header(signed_jwt)['kid']
 
-        response = self.client.webhook_verification_key_get(current_key_id)
+        response = self.client.webhook_verification_key_get(current_key_id).to_dict()
         print('[PLAID_WEBHOOK] response', response)
 
         key = response['key']

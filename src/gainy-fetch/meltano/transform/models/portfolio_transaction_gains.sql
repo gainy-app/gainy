@@ -11,7 +11,9 @@ with actual_prices as
      (
          select distinct on (symbol) symbol, adjusted_close, '0d'::varchar as period
          from historical_prices_aggregated
-         where period = '15min' and datetime > now() - interval '2 hour'
+         where ((period = '15min' and datetime > now() - interval '2 hour') or
+                (period = '1d' and datetime > now() - interval '1 week'))
+           and adjusted_close is not null
          order by symbol, datetime desc
      ),
      relative_data as
@@ -32,7 +34,7 @@ with actual_prices as
                                    actual_prices.adjusted_close::numeric /
                                    first_value(
                                    historical_prices_aggregated.adjusted_close::numeric)
-                                   over (partition by historical_prices_aggregated.symbol ORDER BY historical_prices_aggregated.datetime RANGE INTERVAL '0 day' PRECEDING) -
+                                   over (partition by portfolio_expanded_transactions.uniq_id, historical_prices_aggregated.symbol ORDER BY historical_prices_aggregated.datetime RANGE INTERVAL '0 day' PRECEDING) -
                                    1)
                        else 0 end                                                                                                                           as relative_gain_1d,
                    sign(portfolio_expanded_transactions.quantity_norm)::numeric *
@@ -46,7 +48,7 @@ with actual_prices as
                                        else
                                                    first_value(
                                                    historical_prices_aggregated.adjusted_close::numeric)
-                                                   over (partition by historical_prices_aggregated.symbol ORDER BY historical_prices_aggregated.datetime RANGE INTERVAL '1 week' PRECEDING)
+                                                   over (partition by portfolio_expanded_transactions.uniq_id, historical_prices_aggregated.symbol ORDER BY historical_prices_aggregated.datetime RANGE INTERVAL '1 week' PRECEDING)
                                        end - 1)
                        else 0 end                                                                                                                           as relative_gain_1w,
                    sign(portfolio_expanded_transactions.quantity_norm)::numeric *
@@ -60,7 +62,7 @@ with actual_prices as
                                        else
                                                    first_value(
                                                    historical_prices_aggregated.adjusted_close::numeric)
-                                                   over (partition by historical_prices_aggregated.symbol ORDER BY historical_prices_aggregated.datetime RANGE INTERVAL '1 month' PRECEDING)
+                                                   over (partition by portfolio_expanded_transactions.uniq_id, historical_prices_aggregated.symbol ORDER BY historical_prices_aggregated.datetime RANGE INTERVAL '1 month' PRECEDING)
                                        end - 1)
                        else 0 end                                                                                                                           as relative_gain_1m,
                    sign(portfolio_expanded_transactions.quantity_norm)::numeric *
@@ -74,7 +76,7 @@ with actual_prices as
                                        else
                                                    first_value(
                                                    historical_prices_aggregated.adjusted_close::numeric)
-                                                   over (partition by historical_prices_aggregated.symbol ORDER BY historical_prices_aggregated.datetime RANGE INTERVAL '3 months' PRECEDING)
+                                                   over (partition by portfolio_expanded_transactions.uniq_id, historical_prices_aggregated.symbol ORDER BY historical_prices_aggregated.datetime RANGE INTERVAL '3 months' PRECEDING)
                                        end - 1)
                        else 0 end                                                                                                                           as relative_gain_3m,
                    sign(portfolio_expanded_transactions.quantity_norm)::numeric *
@@ -88,7 +90,7 @@ with actual_prices as
                                        else
                                                    first_value(
                                                    historical_prices_aggregated.adjusted_close::numeric)
-                                                   over (partition by historical_prices_aggregated.symbol ORDER BY historical_prices_aggregated.datetime RANGE INTERVAL '1 year' PRECEDING)
+                                                   over (partition by portfolio_expanded_transactions.uniq_id, historical_prices_aggregated.symbol ORDER BY historical_prices_aggregated.datetime RANGE INTERVAL '1 year' PRECEDING)
                                        end - 1)
                        else 0 end                                                                                                                           as relative_gain_1y,
                    sign(portfolio_expanded_transactions.quantity_norm)::numeric *
@@ -101,7 +103,7 @@ with actual_prices as
                                            then portfolio_expanded_transactions.price
                                        else first_value(
                                             historical_prices_aggregated.adjusted_close::numeric)
-                                            over (partition by historical_prices_aggregated.symbol ORDER BY historical_prices_aggregated.datetime RANGE INTERVAL '5 years' PRECEDING)
+                                            over (partition by portfolio_expanded_transactions.uniq_id, historical_prices_aggregated.symbol ORDER BY historical_prices_aggregated.datetime RANGE INTERVAL '5 years' PRECEDING)
                                        end - 1)
                        else 0 end                                                                                                                           as relative_gain_5y,
                    sign(portfolio_expanded_transactions.quantity_norm)::numeric *
