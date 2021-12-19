@@ -7,7 +7,16 @@
   )
 }}
 
-with expanded_holding_groups as
+with actual_prices as
+         (
+             select distinct on (symbol) symbol, adjusted_close, '0d'::varchar as period
+             from {{ ref('historical_prices_aggregated') }}
+             where ((period = '15min' and datetime > now() - interval '2 hour') or
+                    (period = '1d' and datetime > now() - interval '1 week'))
+               and adjusted_close is not null
+             order by symbol, datetime desc
+         ),
+     expanded_holding_groups as
          (
              select profile_id,
                     ticker_symbol,
@@ -33,13 +42,13 @@ select profile_id,
        actual_value::double precision,
        value_to_portfolio_value::double precision,
        ltt_quantity_total::double precision,
-       (absolute_gain_1d / (actual_value - absolute_gain_1d))::double precision       as relative_gain_1d,
-       (absolute_gain_1w / (actual_value - absolute_gain_1w))::double precision       as relative_gain_1w,
-       (absolute_gain_1m / (actual_value - absolute_gain_1m))::double precision       as relative_gain_1m,
-       (absolute_gain_3m / (actual_value - absolute_gain_3m))::double precision       as relative_gain_3m,
-       (absolute_gain_1y / (actual_value - absolute_gain_1y))::double precision       as relative_gain_1y,
-       (absolute_gain_5y / (actual_value - absolute_gain_5y))::double precision       as relative_gain_5y,
-       (absolute_gain_total / (actual_value - absolute_gain_total))::double precision as relative_gain_total,
+       (absolute_gain_1d / (actual_prices.adjusted_close - absolute_gain_1d))::double precision       as relative_gain_1d,
+       (absolute_gain_1w / (actual_prices.adjusted_close - absolute_gain_1w))::double precision       as relative_gain_1w,
+       (absolute_gain_1m / (actual_prices.adjusted_close - absolute_gain_1m))::double precision       as relative_gain_1m,
+       (absolute_gain_3m / (actual_prices.adjusted_close - absolute_gain_3m))::double precision       as relative_gain_3m,
+       (absolute_gain_1y / (actual_prices.adjusted_close - absolute_gain_1y))::double precision       as relative_gain_1y,
+       (absolute_gain_5y / (actual_prices.adjusted_close - absolute_gain_5y))::double precision       as relative_gain_5y,
+       (absolute_gain_total / (actual_prices.adjusted_close - absolute_gain_total))::double precision as relative_gain_total,
        absolute_gain_1d::double precision,
        absolute_gain_1w::double precision,
        absolute_gain_1m::double precision,
@@ -48,3 +57,4 @@ select profile_id,
        absolute_gain_5y::double precision,
        absolute_gain_total::double precision
 from expanded_holding_groups
+        left join actual_prices on actual_prices.symbol = expanded_holding_groups.ticker_symbol
