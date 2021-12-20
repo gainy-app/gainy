@@ -4,6 +4,7 @@ from typing import Dict
 
 from recommendation.core.dim_vector import DimVector
 
+
 # IS MATCH
 
 
@@ -20,9 +21,8 @@ def is_match(profile_category_vector: DimVector,
 
 def get_interest_similarity(profile_industries: DimVector,
                             ticker_industries: DimVector) -> float:
-    return DimVector.dot_product(
-        normalized_profile_industries_vector(profile_industries),
-        ticker_industries)
+    norm_profile_industries = normalized_profile_industries_vector(profile_industries)
+    return DimVector.cosine_similarity(norm_profile_industries, ticker_industries)
 
 
 def normalized_profile_industries_vector(vector: DimVector) -> DimVector:
@@ -133,7 +133,7 @@ class MatchScoreExplainer:
                                   component) -> SimilarityLevel:
 
         for lower_bound, upper_bound, similarity_level in self.config[
-                component]:
+            component]:
             if (not lower_bound or lower_bound <= similarity) and (
                     not upper_bound or upper_bound > similarity):
                 return similarity_level
@@ -175,11 +175,11 @@ class MatchScore:
 
 
 def profile_ticker_similarity(
-    profile_categories: DimVector,
-    ticker_categories: DimVector,
-    risk_mapping: Dict[str, int],
-    profile_industries: DimVector,
-    ticker_industries: DimVector,
+        profile_categories: DimVector,
+        ticker_categories: DimVector,
+        risk_mapping: Dict[str, int],
+        profile_industries: DimVector,
+        ticker_industries: DimVector,
 ) -> MatchScore:
     risk_weight = 1 / 3
     category_weight = 1 / 3
