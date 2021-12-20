@@ -22,8 +22,9 @@ def get_interest_similarity(profile_industries: DimVector,
                             ticker_industries: DimVector) -> float:
     norm_profile_industries = normalized_profile_industries_vector(
         profile_industries)
-    return DimVector.cosine_similarity(norm_profile_industries,
-                                       ticker_industries)
+    return DimVector.dot_product(norm_profile_industries,
+                                 ticker_industries) / DimVector.norm(
+                                     ticker_industries, order=1)
 
 
 def normalized_profile_industries_vector(vector: DimVector) -> DimVector:
