@@ -15,3 +15,12 @@ create table if not exists raw_data.eod_intraday_prices
     constraint intraday_prices_pk
         primary key (time, symbol)
 );
+
+create table if not exists raw_data.auto_ticker_industries
+(
+    symbol              varchar,
+    industry_id_1       int,
+    industry_id_2       int,
+
+    primary key (symbol)
+);
