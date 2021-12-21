@@ -98,7 +98,8 @@ class PricesListener:
 
             self.handle_price_message(message)
         except Exception as e:
-            logger.error('[%s] handle_message %s: %s', self.log_prefix, message_raw, e)
+            logger.error('[%s] handle_message %s: %s', self.log_prefix,
+                         message_raw, e)
 
     async def start(self):
         self.__sync_records_task = asyncio.ensure_future(self.__sync_records())
