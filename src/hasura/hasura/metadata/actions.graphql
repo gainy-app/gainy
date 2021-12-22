@@ -151,7 +151,6 @@ type Collection {
 type MatchScore {
   symbol: String!
   match_score: Int!
-  is_match: Boolean!
   fits_risk: Int!
   fits_categories: Int!
   fits_interests: Int!

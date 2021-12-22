@@ -5,18 +5,6 @@ from typing import Dict, List
 from recommendation.core.dim_vector import DimVector, NamedDimVector
 
 
-# IS MATCH
-
-# TODO: deprecated
-
-def is_match(profile_category_vector: DimVector,
-             ticker_category_vector: DimVector) -> bool:
-    profile_categories = profile_category_vector.dims
-    ticker_categories = ticker_category_vector.dims
-
-    return len(set(profile_categories).intersection(ticker_categories)) > 0
-
-
 # INDUSTRY SIMILARITY SCORE
 
 

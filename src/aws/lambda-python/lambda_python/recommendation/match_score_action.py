@@ -6,7 +6,7 @@ from recommendation.core.dim_vector import NamedDimVector
 from recommendation.data_access import read_categories_risks, read_profile_industry_vector, \
     read_profile_category_vector, read_ticker_industry_vectors, read_ticker_category_vectors, read_collection_tickers, \
     read_profile_interest_vectors
-from recommendation.match_score.match_score import profile_ticker_similarity, is_match
+from recommendation.match_score.match_score import profile_ticker_similarity
 
 
 class AbstractMatchScoreAction(HasuraAction, ABC):
@@ -48,8 +48,6 @@ class AbstractMatchScoreAction(HasuraAction, ABC):
             result.append({
                 "symbol":
                 symbol,
-                "is_match":
-                is_match(profile_category_vector, ticker_category_vector),
                 "match_score":
                 match_score.match_score(),
                 "fits_risk":
