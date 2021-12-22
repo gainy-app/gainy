@@ -46,22 +46,14 @@ class AbstractMatchScoreAction(HasuraAction, ABC):
 
             explanation = match_score.explain()
             result.append({
-                "symbol":
-                symbol,
-                "match_score":
-                match_score.match_score(),
-                "fits_risk":
-                explanation.risk_level.value,
-                "risk_similarity":
-                explanation.risk_similarity,
-                "fits_categories":
-                explanation.category_level.value,
-                "category_matches":
-                explanation.category_matches,
-                "fits_interests":
-                explanation.interest_level.value,
-                "interest_matches":
-                explanation.interest_matches
+                "symbol": symbol,
+                "match_score": match_score.match_score(),
+                "fits_risk": explanation.risk_level.value,
+                "risk_similarity": explanation.risk_similarity,
+                "fits_categories": explanation.category_level.value,
+                "category_matches": explanation.category_matches,
+                "fits_interests": explanation.interest_level.value,
+                "interest_matches": explanation.interest_matches
             })
 
         return result

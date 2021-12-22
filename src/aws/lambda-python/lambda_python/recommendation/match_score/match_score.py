@@ -4,12 +4,12 @@ from typing import Dict, List
 
 from recommendation.core.dim_vector import DimVector, NamedDimVector
 
-
 # INDUSTRY SIMILARITY SCORE
 
 
-def get_interest_similarity(profile_interest_vs: List[NamedDimVector],
-                            ticker_industry_v: DimVector) -> (float, List[str]):
+def get_interest_similarity(
+        profile_interest_vs: List[NamedDimVector],
+        ticker_industry_v: DimVector) -> (float, List[int]):
     interest_score = 0
     interest_matches = []
 
@@ -83,13 +83,17 @@ def get_risk_similarity(profile_categories: DimVector,
 # CATEGORY SIMILARITY SCORE
 
 
-def get_category_similarity(profile_category_v: DimVector,
-                            ticker_category_v: DimVector) -> (float, List[str]):
+def get_category_similarity(
+        profile_category_v: DimVector,
+        ticker_category_v: DimVector) -> (float, List[int]):
 
-    category_similarity = profile_category_v.cosine_similarity(ticker_category_v)
+    category_similarity = profile_category_v.cosine_similarity(
+        ticker_category_v)
 
-    category_matches = sorted(set(profile_category_v.dims).intersection(ticker_category_v.dims))
-    category_matches = list(map(lambda category_id: int(category_id), category_matches))
+    category_matches = sorted(
+        set(profile_category_v.dims).intersection(ticker_category_v.dims))
+    category_matches = list(
+        map(lambda category_id: int(category_id), category_matches))
 
     return category_similarity, category_matches
 
@@ -123,15 +127,9 @@ EXPLANATION_CONFIG = {
 
 
 class MatchScoreExplanation:
-    def __init__(
-        self,
-        risk_level: SimilarityLevel,
-        risk_similarity: float,
-        category_level: SimilarityLevel,
-        category_matches: List[str],
-        interest_level: SimilarityLevel,
-        interest_matches: List[str]
-    ):
+    def __init__(self, risk_level: SimilarityLevel, risk_similarity: float,
+                 category_level: SimilarityLevel, category_matches: List[int],
+                 interest_level: SimilarityLevel, interest_matches: List[int]):
         self.risk_level = risk_level
         self.risk_similarity = risk_similarity
         self.category_level = category_level
@@ -155,10 +153,9 @@ class MatchScoreExplainer:
 
         return SimilarityLevel.LOW
 
-    def explanation(self, risk_similarity,
-                    category_similarity, category_matches,
-                    interest_similarity, interest_matches
-    ) -> MatchScoreExplanation:
+    def explanation(self, risk_similarity, category_similarity,
+                    category_matches, interest_similarity,
+                    interest_matches) -> MatchScoreExplanation:
 
         risk_level = self._apply_explanation_config(risk_similarity,
                                                     MatchScoreComponent.RISK)
@@ -167,14 +164,15 @@ class MatchScoreExplainer:
         interest_level = self._apply_explanation_config(
             interest_similarity, MatchScoreComponent.INTEREST)
 
-        return MatchScoreExplanation(risk_level, risk_similarity, category_level, category_matches,
+        return MatchScoreExplanation(risk_level, risk_similarity,
+                                     category_level, category_matches,
                                      interest_level, interest_matches)
 
 
 class MatchScore:
     def __init__(self, similarity: float, risk_similarity: float,
-                 category_similarity: float, category_matches: List[str],
-                 interest_similarity: float, interest_matches: List[str]):
+                 category_similarity: float, category_matches: List[int],
+                 interest_similarity: float, interest_matches: List[int]):
         self.similarity = similarity
 
         self.risk_similarity = risk_similarity
@@ -199,20 +197,26 @@ class MatchScore:
 
 
 def profile_ticker_similarity(
-        profile_categories: DimVector,
-        ticker_categories: DimVector,
-        risk_mapping: Dict[str, int],
-        profile_interests: List[NamedDimVector],
-        ticker_industries: DimVector,
+    profile_categories: DimVector,
+    ticker_categories: DimVector,
+    risk_mapping: Dict[str, int],
+    profile_interests: List[NamedDimVector],
+    ticker_industries: DimVector,
 ) -> MatchScore:
     risk_weight = 1 / 3
     category_weight = 1 / 3
     interest_weight = 1 / 3
 
-    risk_similarity = get_risk_similarity(profile_categories, ticker_categories, risk_mapping)
-    (category_similarity, category_matches) = get_category_similarity(profile_categories, ticker_categories)
-    (interest_similarity, interest_matches) = get_interest_similarity(profile_interests, ticker_industries)
+    risk_similarity = get_risk_similarity(profile_categories,
+                                          ticker_categories, risk_mapping)
+    (category_similarity,
+     category_matches) = get_category_similarity(profile_categories,
+                                                 ticker_categories)
+    (interest_similarity,
+     interest_matches) = get_interest_similarity(profile_interests,
+                                                 ticker_industries)
 
     similarity = risk_weight * risk_similarity + category_weight * category_similarity + interest_weight * interest_similarity
 
-    return MatchScore(similarity, risk_similarity, category_similarity, category_matches, interest_similarity, interest_matches)
+    return MatchScore(similarity, risk_similarity, category_similarity,
+                      category_matches, interest_similarity, interest_matches)
