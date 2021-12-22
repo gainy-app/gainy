@@ -97,7 +97,7 @@ select  DISTINCT ON (h.symbol) h.symbol,
         END                                  as dividend_growth,
         pa.price_3m_ago::real                as quarter_ago_close,
         case
-            when price_1m_ago != 0 then (cur_price / price_3m_ago - 1)::real
+            when price_3m_ago != 0 then (cur_price / price_3m_ago - 1)::real
         end                                  as quarter_price_performance,
         now()                                as created_at,
         h.profit_margin::real                as net_profit_margin,
