@@ -47,6 +47,7 @@ class AbstractMatchScoreAction(HasuraAction, ABC):
             explanation = match_score.explain()
             result.append({
                 "symbol": symbol,
+                "is_match": True,  # Deprecated, will be removed
                 "match_score": match_score.match_score(),
                 "fits_risk": explanation.risk_level.value,
                 "risk_similarity": explanation.risk_similarity,
