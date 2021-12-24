@@ -1,6 +1,6 @@
 import os
 from operator import itemgetter
-from typing import List
+from typing import List, Dict
 
 from psycopg2.extras import execute_values
 
@@ -38,6 +38,12 @@ with open(os.path.join(
         script_dir,
         "sql/profile_industries.sql")) as _profile_industry_vector_query_file:
     _profile_industry_vector_query = _profile_industry_vector_query_file.read()
+
+with open(os.path.join(
+        script_dir,
+        "sql/profile_interests.sql")) as _profile_interest_vectors_query_file:
+    _profile_interest_vectors_query = _profile_interest_vectors_query_file.read(
+    )
 
 with open(os.path.join(
         script_dir,
@@ -86,6 +92,16 @@ def read_profile_category_vector(db_conn, profile_id):
 def read_profile_industry_vector(db_conn, profile_id):
     return _get_profile_vector(db_conn, _profile_industry_vector_query,
                                profile_id)
+
+
+def read_profile_interest_vectors(db_conn, profile_id) -> List[NamedDimVector]:
+    vectors = _query_vectors(db_conn, _profile_interest_vectors_query,
+                             {"profile_id": profile_id})
+
+    if not vectors:
+        raise HasuraActionException(400, f"Missing profile `{profile_id}`")
+
+    return vectors
 
 
 def _get_profile_vector(db_conn, profile_vector_query, profile_id):

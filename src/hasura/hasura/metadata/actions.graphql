@@ -153,8 +153,11 @@ type MatchScore {
   match_score: Int!
   is_match: Boolean!
   fits_risk: Int!
+  risk_similarity: Float!
   fits_categories: Int!
+  category_matches: String
   fits_interests: Int!
+  interest_matches: String
 }
 
 type LinkPlaidAccountOutput {
