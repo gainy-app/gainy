@@ -1,7 +1,10 @@
 {{
   config(
     materialized = "incremental",
-    unique_key = "id"
+    unique_key = "id",
+    post_hook=[
+      index(this, 'id', true),
+    ]
   )
 }}
 
