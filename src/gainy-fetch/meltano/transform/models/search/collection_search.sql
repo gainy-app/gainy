@@ -6,7 +6,7 @@
 
 with collection_category_tags as (
     select
-        collection_id,
+        cc.collection_id,
         c."name" as tag,
         case
             when category_grade >= 0.5 then 2
@@ -18,7 +18,7 @@ with collection_category_tags as (
 ),
 collection_industry_tags as (
     select
-        collection_id,
+        ci.collection_id,
         gi."name" as tag,
         case
             when industry_grade >= 0.6 then 1
