@@ -4,8 +4,9 @@ from typing import List, Dict, Tuple
 from common.hasura_function import HasuraAction
 from recommendation.core.dim_vector import NamedDimVector
 from recommendation.data_access import read_categories_risks, read_profile_industry_vector, \
-    read_profile_category_vector, read_ticker_industry_vectors, read_ticker_category_vectors, read_collection_tickers
-from recommendation.match_score.match_score import profile_ticker_similarity, is_match
+    read_profile_category_vector, read_ticker_industry_vectors, read_ticker_category_vectors, read_collection_tickers, \
+    read_profile_interest_vectors
+from recommendation.match_score.match_score import profile_ticker_similarity
 
 
 class AbstractMatchScoreAction(HasuraAction, ABC):
@@ -15,7 +16,7 @@ class AbstractMatchScoreAction(HasuraAction, ABC):
     def compute_match_scores(self, db_conn, profile_id, symbols):
         profile_category_vector = read_profile_category_vector(
             db_conn, profile_id)
-        profile_industry_vector = read_profile_industry_vector(
+        profile_interest_vectors = read_profile_interest_vectors(
             db_conn, profile_id)
 
         risks = read_categories_risks(db_conn)
@@ -40,23 +41,20 @@ class AbstractMatchScoreAction(HasuraAction, ABC):
             match_score = profile_ticker_similarity(profile_category_vector,
                                                     ticker_category_vector,
                                                     risks,
-                                                    profile_industry_vector,
+                                                    profile_interest_vectors,
                                                     ticker_industry_vector)
 
             explanation = match_score.explain()
             result.append({
-                "symbol":
-                symbol,
-                "is_match":
-                is_match(profile_category_vector, ticker_category_vector),
-                "match_score":
-                match_score.match_score(),
-                "fits_risk":
-                explanation.risk_level.value,
-                "fits_categories":
-                explanation.category_level.value,
-                "fits_interests":
-                explanation.interest_level.value
+                "symbol": symbol,
+                "is_match": True,  # Deprecated, will be removed
+                "match_score": match_score.match_score(),
+                "fits_risk": explanation.risk_level.value,
+                "risk_similarity": explanation.risk_similarity,
+                "fits_categories": explanation.category_level.value,
+                "category_matches": explanation.category_matches,
+                "fits_interests": explanation.interest_level.value,
+                "interest_matches": explanation.interest_matches
             })
 
         return result
