@@ -9,5 +9,5 @@
   )
 }}
 
-SELECT id::int, name
+SELECT id::int, name, (20000 + id::int) as collection_id
 FROM {{ source('gainy', 'gainy_industries') }}
