@@ -34,7 +34,7 @@ SPACs,32,where ct.g_industry ilike 'Shell company & SPAC',1,https://gainy-intere
 Social Media,33,where ct.g_industry ilike 'Social Media',1,https://gainy-interests-production.s3.amazonaws.com/Social%20media%403x.png
 Utilities,34,where ct.g_industry ilike 'Cleaning & Decontamination' OR ct.g_industry ilike 'Electricity Generation' OR ct.g_industry ilike 'Electronics Power Management' OR ct.g_industry ilike 'Lighting Systems' OR ct.g_industry ilike 'Waste Management' OR ct.g_industry ilike 'Water Management',1,https://gainy-interests-production.s3.amazonaws.com/Utilities%403x.png
 Electric Vehicles,35,where ct.g_industry ilike 'Electric Vehicles' OR ct.g_industry ilike 'Electric Vehicles charging',1,https://gainy-interests-production.s3.amazonaws.com/Tesla%403x.png
-Gig Economy,36,where ct.g_industry ilike 'E-commerce Platforms' OR ct.g_industry ilike 'Payment Systems' OR ct.g_industry ilike 'Sharing Economy',1,https://gainy-interests-production.s3.amazonaws.com/Gig%20Economy%403x.png
+Gig Economy,36,where ct.g_industry ilike 'Payment Systems' OR ct.g_industry ilike 'Sharing Economy',1,https://gainy-interests-production.s3.amazonaws.com/Gig%20Economy%403x.png
 Sharing Economy,37,where ct.g_industry ilike 'Sharing Economy',1,https://gainy-interests-production.s3.amazonaws.com/Sharing%20economy%403x.png
 Beverages,38,where ct.g_industry ilike 'Coffee & Tea' OR ct.g_industry ilike 'Soft/Sports Drink' OR ct.g_industry ilike 'Wine & Liquor',1,https://gainy-interests-production.s3.amazonaws.com/Beverages%403x.png
 Streaming,39,where ct.g_industry ilike 'Streaming',1,https://gainy-interests-production.s3.amazonaws.com/Netflix%403x.png
