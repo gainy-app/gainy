@@ -17,7 +17,7 @@ with volumes as (
          group by code
      ),
      latest_price as (
-         select max(date) as date
+         select code as symbol, max(date) as date
          from {{ source('eod', 'eod_historical_prices') }}
          group by code
      )
