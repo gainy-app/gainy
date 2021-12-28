@@ -15,9 +15,7 @@ except ImportError:
 from datetime import timedelta
 from pathlib import Path
 
-
 logger = logging.getLogger(__name__)
-
 
 DEFAULT_ARGS = {
     "owner": "gainy",
@@ -41,7 +39,6 @@ if not Path(project_root).joinpath(meltano_bin).exists():
         f"A symlink to the 'meltano' executable could not be found at '{meltano_bin}'. Falling back on expecting it to be in the PATH instead."
     )
     meltano_bin = "meltano"
-
 
 result = subprocess.run(
     [meltano_bin, "schedule", "list", "--format=json"],
@@ -84,19 +81,18 @@ for schedule in schedules:
     #
     # Because our extractors do not support date-window extraction, it serves no
     # purpose to enqueue date-chunked jobs for complete extraction window.
-    dag = DAG(
-        dag_id,
-        tags=tags,
-        catchup=False,
-        default_args=args,
-        schedule_interval=schedule["interval"],
-        max_active_runs=1,
-        is_paused_upon_creation=True
-    )
+    dag = DAG(dag_id,
+              tags=tags,
+              catchup=False,
+              default_args=args,
+              schedule_interval=schedule["interval"],
+              max_active_runs=1,
+              is_paused_upon_creation=True)
 
     elt = BashOperator(
         task_id="extract_load",
-        bash_command=f"cd {project_root}; {meltano_bin} schedule run {schedule['name']}",
+        bash_command=
+        f"cd {project_root}; {meltano_bin} schedule run {schedule['name']}",
         dag=dag,
     )
 

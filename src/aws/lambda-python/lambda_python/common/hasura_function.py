@@ -4,6 +4,7 @@ from common.hasura_exception import HasuraActionException
 
 
 class HasuraAction(ABC):
+
     def __init__(self, name, profile_id_param=None):
         super().__init__()
         self.name = name
@@ -29,6 +30,7 @@ class HasuraAction(ABC):
 
 
 class HasuraTrigger(ABC):
+
     def __init__(self, name):
         super().__init__()
         self.names = name if type(name) is list else [name]

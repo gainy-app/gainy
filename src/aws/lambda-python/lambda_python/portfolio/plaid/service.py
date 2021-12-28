@@ -4,6 +4,7 @@ from portfolio.models import HoldingData, Security, Account, TransactionData
 
 
 class PlaidService:
+
     def __init__(self):
         self.plaid_client = PlaidClient()
 

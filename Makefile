@@ -41,12 +41,12 @@ hasura-seed:
 style-check:
 	npx eslint src/aws/lambda-nodejs
 	npx prettier --check "src/aws/lambda-nodejs/**/*.js"
-	yapf --diff -r src/aws/lambda-python/ src/aws/router src/websockets
+	yapf --diff -r src/aws/lambda-python/ src/aws/router src/websockets src/gainy-fetch/meltano/orchestrate/dags
 
 style-fix:
 	npx eslint src/aws/lambda-nodejs --fix
 	npx prettier --write "src/aws/lambda-nodejs/**/*.js"
-	yapf -i -r src/aws/lambda-python/ src/aws/router src/websockets
+	yapf -i -r src/aws/lambda-python/ src/aws/router src/websockets src/gainy-fetch/meltano/orchestrate/dags
 
 extract-passwords:
 	cd terraform && terraform state pull | python3 ../extract_passwords.py

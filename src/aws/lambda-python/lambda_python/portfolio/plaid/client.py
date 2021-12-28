@@ -7,6 +7,7 @@ from portfolio.plaid.common import get_plaid_client, handle_error
 
 
 class PlaidClient:
+
     def __init__(self):
         self.client = get_plaid_client()
 

@@ -4,6 +4,7 @@ from psycopg2 import sql
 
 
 class PortfolioRepository:
+
     def persist(self, db_conn, entities):
         if isinstance(entities, BaseModel):
             entities = [entity]
