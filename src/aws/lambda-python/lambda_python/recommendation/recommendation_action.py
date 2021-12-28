@@ -8,6 +8,7 @@ from recommendation.top_for_you import TOP_20_FOR_YOU_COLLECTION_ID
 
 
 class GetRecommendedCollections(HasuraAction):
+
     def __init__(self):
         super().__init__("get_recommended_collections", "profile_id")
         self.ranking = TFIDFWithNorm1_5CollectionRanking()

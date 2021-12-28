@@ -6,6 +6,7 @@ from recommendation.core.normalization import double_normalization_k
 
 
 class RankedItem:
+
     def __init__(self, item, rank_score: float):
         self.item = item
         self.rank_score = rank_score
@@ -20,6 +21,7 @@ class CollectionRanking(ABC):
     Additional parameters might be passed to the algorithm - e.g. industry frequencies for TF*IDF-based
     algorithm.
     """
+
     def rank(self, profile_v: DimVector, collection_vs: list[DimVector],
              **params) -> list[RankedItem]:
         ranked_items = list(
@@ -42,6 +44,7 @@ class TFCollectionRanking(CollectionRanking):
     TFCollectionRanking is a baseline ranking method. It is based on term frequency and cosine similarity
     with no normalization.
     """
+
     def rank_score(self, profile_v: DimVector, collection_v: DimVector,
                    **params) -> float:
         return profile_v.cosine_similarity(collection_v)
@@ -72,6 +75,7 @@ class TFIDFWithNorm1_5CollectionRanking(CollectionRanking):
     in L_{1.5} space (comparing to more typical L_{2} norm in Euclidean space). This similarity measure
     gives more intuitive ranking results, as well as better metrics for the existing users.
     """
+
     def rank_score(self, profile_v: DimVector, collection_v: DimVector,
                    **params) -> float:
         df = params['df']

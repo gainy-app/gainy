@@ -12,6 +12,7 @@ HUBSPOT_API_KEY = os.getenv("HUBSPOT_API_KEY")
 
 
 class HubspotService:
+
     def __init__(self):
         self.api_client = None
 

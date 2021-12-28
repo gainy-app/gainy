@@ -3,6 +3,7 @@ from common.hasura_function import HasuraTrigger
 
 
 class OnPlaidAccessTokenCreated(HasuraTrigger):
+
     def __init__(self):
         super().__init__("on_plaid_access_token_created")
 

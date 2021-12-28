@@ -19,6 +19,7 @@ class DimVector:
     - https://github.com/wagdav/dimarray (and https://github.com/perrette/dimarray) - custom implementations of
     similar data structure with wider functionality. Unfortunately, booth are outdated.
     """
+
     def __init__(self, coordinates):
         if coordinates:
             dim_list = []
@@ -69,6 +70,7 @@ class DimVector:
 
 
 class NamedDimVector(DimVector):
+
     def __init__(self, name, coordinates):
         super().__init__(coordinates)
         self.name = name

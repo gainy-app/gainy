@@ -10,6 +10,7 @@ from recommendation.match_score.match_score import profile_ticker_similarity
 
 
 class AbstractMatchScoreAction(HasuraAction, ABC):
+
     def __init__(self, name, profile_id_param):
         super().__init__(name, profile_id_param)
 
@@ -71,6 +72,7 @@ class AbstractMatchScoreAction(HasuraAction, ABC):
 
 
 class GetMatchScoreByTicker(AbstractMatchScoreAction):
+
     def __init__(self):
         super().__init__("get_match_score_by_ticker", "profile_id")
 
@@ -82,6 +84,7 @@ class GetMatchScoreByTicker(AbstractMatchScoreAction):
 
 
 class GetMatchScoreByTickerList(AbstractMatchScoreAction):
+
     def __init__(self):
         super().__init__("get_match_scores_by_ticker_list", "profile_id")
 
@@ -93,6 +96,7 @@ class GetMatchScoreByTickerList(AbstractMatchScoreAction):
 
 
 class GetMatchScoreByCollection(AbstractMatchScoreAction):
+
     def __init__(self):
         super().__init__("get_match_scores_by_collection", "profile_id")
 

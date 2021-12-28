@@ -15,6 +15,7 @@ datadog.initialize()
 
 
 class OnUserCreated(HasuraTrigger):
+
     def __init__(self, env):
         self.env = env
         self.hubspot_service = HubspotService()

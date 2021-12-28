@@ -5,6 +5,7 @@ SERVICE_PLAID = 'plaid'
 
 
 class PortfolioService:
+
     def __init__(self):
         self.portfolio_repository = PortfolioRepository()
         self.services = {SERVICE_PLAID: PlaidService()}

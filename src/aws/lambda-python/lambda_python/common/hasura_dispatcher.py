@@ -11,6 +11,7 @@ from common.hasura_response import base_response
 
 
 class HasuraDispatcher(ABC):
+
     def __init__(self, db_conn_string, functions, is_gateway_proxy=True):
         self.db_conn_string = db_conn_string
         self.functions = functions
@@ -94,6 +95,7 @@ class HasuraDispatcher(ABC):
 
 
 class HasuraActionDispatcher(HasuraDispatcher):
+
     def __init__(self,
                  db_conn_string: str,
                  actions: List[HasuraAction],
@@ -115,6 +117,7 @@ class HasuraActionDispatcher(HasuraDispatcher):
 
 
 class HasuraTriggerDispatcher(HasuraDispatcher):
+
     def __init__(self,
                  db_conn_string: str,
                  triggers: List[HasuraTrigger],
