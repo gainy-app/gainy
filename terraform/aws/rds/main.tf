@@ -49,6 +49,7 @@ resource "aws_db_instance" "db_instance" {
   storage_encrypted = true
   apply_immediately = true
 
+  performance_insights_enabled    = true
   enabled_cloudwatch_logs_exports = ["postgresql"]
 
   tags = {

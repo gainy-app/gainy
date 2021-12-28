@@ -85,7 +85,6 @@ resource "datadog_monitor" "hasura_alb_active_connections" {
 
   require_full_window = true
   notify_no_data      = false
-  renotify_interval   = 15
 
   tags = ["hasura"]
 }
