@@ -3,6 +3,7 @@ with collection_industries as (
     from ticker_collections tc
              join ticker_industries ti
                   on tc.symbol = ti.symbol
+    where ti.industry_order = 1
 )
 select ci.industry_id, count(*) as frequency
 from public.profile_collections c

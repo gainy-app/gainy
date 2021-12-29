@@ -1,9 +1,10 @@
 with collection_industries as (
-    select tc.collection_id, ti.industry_id
-    from ticker_collections tc
-             join ticker_industries ti
-                  on tc.symbol = ti.symbol
-),
+        select tc.collection_id, ti.industry_id
+        from ticker_collections tc
+                 join ticker_industries ti
+                      on tc.symbol = ti.symbol
+        where ti.industry_order = 1
+     ),
      collection_industry_scores as (
          select collection_id, industry_id, count(*) ::real as industry_count
          from collection_industries
