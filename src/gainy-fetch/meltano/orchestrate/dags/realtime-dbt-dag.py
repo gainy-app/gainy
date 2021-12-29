@@ -10,7 +10,6 @@ except ImportError:
 from datetime import datetime, timedelta
 from pathlib import Path
 
-
 logger = logging.getLogger(__name__)
 
 project_root = os.getenv("MELTANO_PROJECT_ROOT", os.getcwd())
@@ -28,7 +27,6 @@ DEFAULT_ARGS = {
     "concurrency": concurrency,
     "start_date": datetime(2021, 9, 1)
 }
-
 
 # Meltano
 meltano_bin = ".meltano/run/bin"
@@ -61,21 +59,19 @@ models = " ".join([
 vars = '{"realtime": true}'
 dag_id = "realtime-dbt-dag"
 tags = ["meltano", "dbt"]
-dag = DAG(
-    dag_id,
-    tags=tags,
-    catchup=False,
-    default_args=DEFAULT_ARGS,
-    schedule_interval="*/5 * * * 1-5",
-    max_active_runs=1,
-    is_paused_upon_creation=False
-)
+dag = DAG(dag_id,
+          tags=tags,
+          catchup=False,
+          default_args=DEFAULT_ARGS,
+          schedule_interval="*/5 * * * 1-5",
+          max_active_runs=1,
+          is_paused_upon_creation=False)
 dbt = BashOperator(
     task_id="dbt-portfolio",
-    bash_command=f"cd {project_root}; {meltano_bin} invoke dbt run --vars '{vars}' --model {models}",
+    bash_command=
+    f"cd {project_root}; {meltano_bin} invoke dbt run --vars '{vars}' --model {models}",
     dag=dag,
-    pool="dbt"
-)
+    pool="dbt")
 
 # register the dag
 globals()[dag_id] = dag

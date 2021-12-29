@@ -3,6 +3,7 @@ import datetime
 
 
 class BaseModel(ABC):
+
     def to_dict(self):
         return self.__dict__
 

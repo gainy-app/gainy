@@ -29,6 +29,7 @@ logger.setLevel(logging.DEBUG if ENV == "local" else logging.INFO)
 
 
 class PricesListener:
+
     def __init__(self, symbols):
         self.__buckets = {}
         self.__last_written_key = {}

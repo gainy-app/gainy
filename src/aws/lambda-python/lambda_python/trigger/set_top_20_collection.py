@@ -4,6 +4,7 @@ from recommendation.top_for_you import get_top_by_match_score, TOP_20_FOR_YOU_CO
 
 
 class SetTop20Collection(HasuraTrigger):
+
     def __init__(self):
         super().__init__([
             "top_20_collection__profile_categories",

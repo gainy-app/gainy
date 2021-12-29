@@ -127,6 +127,7 @@ EXPLANATION_CONFIG = {
 
 
 class MatchScoreExplanation:
+
     def __init__(self, risk_level: SimilarityLevel, risk_similarity: float,
                  category_level: SimilarityLevel, category_matches: List[int],
                  interest_level: SimilarityLevel, interest_matches: List[int]):
@@ -139,6 +140,7 @@ class MatchScoreExplanation:
 
 
 class MatchScoreExplainer:
+
     def __init__(self, config):
         self.config = config
 
@@ -170,6 +172,7 @@ class MatchScoreExplainer:
 
 
 class MatchScore:
+
     def __init__(self, similarity: float, risk_similarity: float,
                  category_similarity: float, category_matches: List[int],
                  interest_similarity: float, interest_matches: List[int]):

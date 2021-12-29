@@ -706,6 +706,18 @@
     schema: public
     name: analyst_ratings
   select_permissions:
+  - role: anonymous
+    permission:
+      columns:
+      - rating
+      - target_price
+      - buy
+      - hold
+      - sell
+      - strong_buy
+      - strong_sell
+      - symbol
+      filter: {}
   - role: user
     permission:
       columns:
@@ -1737,6 +1749,16 @@
     schema: public
     name: ticker_realtime_metrics
   select_permissions:
+  - role: anonymous
+    permission:
+      columns:
+      - symbol
+      - time
+      - actual_price
+      - absolute_daily_change
+      - relative_daily_change
+      - daily_volume
+      filter: {}
   - role: user
     permission:
       columns:

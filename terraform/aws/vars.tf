@@ -6,6 +6,7 @@ variable "domain" {
 }
 variable "cloudflare_zone_id" {}
 variable "hasura_jwt_secret" {}
+variable "hubspot_api_key" {}
 
 variable "base_image_registry_address" {}
 variable "base_image_version" {}
