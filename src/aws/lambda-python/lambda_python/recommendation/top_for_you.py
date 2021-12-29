@@ -1,5 +1,4 @@
 from recommendation.data_access import read_categories_risks, \
-    read_profile_industry_vector, \
     read_profile_category_vector, read_all_ticker_category_and_industry_vectors, read_profile_interest_vectors
 from recommendation.match_score.match_score import MatchScore, profile_ticker_similarity
 
@@ -19,8 +18,7 @@ def get_top_by_match_score(db_conn,
     match_score_list = []
     for ticker_vs in ticker_vs_list:
         match_score = profile_ticker_similarity(profile_category_v,
-                                                ticker_vs[1],
-                                                risk_mapping,
+                                                ticker_vs[1], risk_mapping,
                                                 profile_interest_vs,
                                                 ticker_vs[0])
         match_score_list.append((ticker_vs[0].name, match_score))
