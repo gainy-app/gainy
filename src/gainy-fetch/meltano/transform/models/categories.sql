@@ -20,5 +20,6 @@ WITH gainy_categories_with_collection_id AS (
 )
 SELECT gc.id, gc.name, gc.icon_url, gc.risk_score, gc.collection_id
 FROM gainy_categories_with_collection_id gc
+    -- The below reference to `collections` table is required for DBT to build correct model dependency graph
     JOIN {{ ref('collections') }} c
         ON gc.collection_id = c.id
