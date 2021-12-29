@@ -21,6 +21,7 @@ PLAID_WEBHOOK_URL = os.getenv("PLAID_WEBHOOK_URL")
 
 
 class CreatePlaidLinkToken(HasuraAction):
+
     def __init__(self):
         super().__init__("create_plaid_link_token", "profile_id")
 
@@ -51,6 +52,7 @@ class CreatePlaidLinkToken(HasuraAction):
 
 
 class LinkPlaidAccount(HasuraAction):
+
     def __init__(self):
         super().__init__("link_plaid_account", "profile_id")
 
@@ -81,6 +83,7 @@ class LinkPlaidAccount(HasuraAction):
 
 
 class PlaidWebhook(HasuraAction):
+
     def __init__(self):
         super().__init__("plaid_webhook")
 
@@ -138,7 +141,6 @@ class PlaidWebhook(HasuraAction):
         # Validate the signature and extract the claims.
         try:
             claims = jwt.decode(signed_jwt, key, algorithms=['ES256'])
-            print('claims', claims)
         except jwt.JWTError as e:
             raise HasuraActionException(
                 400,
@@ -151,6 +153,8 @@ class PlaidWebhook(HasuraAction):
                 400,
                 "[PLAID_WEBHOOK] Failed to validate plaid request key: claim expired"
             )
+
+        return  # check skipped as we currently don't have raw body to compute hash from
 
         # Compute the has of the body.
         m = hashlib.sha256()

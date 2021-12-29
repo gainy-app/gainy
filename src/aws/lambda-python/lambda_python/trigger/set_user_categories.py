@@ -20,6 +20,7 @@ with open(
 
 
 class SetUserCategories(HasuraTrigger):
+
     def __init__(self):
         super().__init__("set_user_categories")
 

@@ -3,6 +3,7 @@ from common.hasura_function import HasuraAction
 
 
 class GetPortfolioHoldings(HasuraAction):
+
     def __init__(self):
         super().__init__("get_portfolio_holdings", "profile_id")
 
@@ -17,6 +18,7 @@ class GetPortfolioHoldings(HasuraAction):
 
 
 class GetPortfolioTransactions(HasuraAction):
+
     def __init__(self):
         super().__init__("get_portfolio_transactions", "profile_id")
 
