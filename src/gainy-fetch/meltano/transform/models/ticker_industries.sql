@@ -16,7 +16,7 @@ with manual_industries as (
             on gti."industry name" = gi."name"
 ),
 tickers_with_industries as (
-    select ati.symbol, industry_id_0, industry_id_1, industry_id_2
+    select coalesce(ati.symbol, mi.symbol) as symbol, industry_id_0, industry_id_1, industry_id_2
     from {{ source('gainy', 'auto_ticker_industries') }} ati
         full outer join manual_industries mi
             on ati.symbol = mi.symbol

@@ -2,7 +2,7 @@ version: 2
 
 sources:
   - name: gainy
-    description: Gainy in-house datasets such as collections, industries, interests, categotries, etc
+    description: Gainy in-house datasets such as collections, industries, interests, categories, etc
     schema: raw_data
     tables:
       - name: gainy_industries
@@ -53,6 +53,33 @@ models:
           - exists
           - type:
               type: 'text'
+      - name: collection_id
+        tests:
+          - unique
+          # - not_null # temporary disabled as not all linked to collections
+          - type:
+              type: 'integer'
+
+
+  - name: gainy_industries
+    columns:
+      - name: id
+        tests:
+          - unique
+          - not_null
+          - type:
+              type: 'integer'
+      - name: name
+        tests:
+          - not_null
+          - type:
+              type: 'character varying'
+      - name: collection_id
+        tests:
+          - unique
+          # - not_null # temporary disabled as not all linked to collections
+          - type:
+              type: 'integer'
 
   - name: historical_growth_rate
     columns:

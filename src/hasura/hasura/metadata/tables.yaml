@@ -740,6 +740,7 @@
       - icon_url
       - id
       - name
+      - collection_id
       filter: {}
 - table:
     schema: public
@@ -796,12 +797,14 @@
       columns:
       - id
       - name
+      - collection_id
       filter: {}
   - role: user
     permission:
       columns:
       - id
       - name
+      - collection_id
       filter: {}
 - table:
     schema: public
