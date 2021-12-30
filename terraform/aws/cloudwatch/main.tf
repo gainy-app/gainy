@@ -23,7 +23,7 @@ data "archive_file" "canary_scripts" {
         hasura_admin_secret = var.hasura_admin_secret
       }
     )
-    filename = "hasura.py"
+    filename = "python/hasura.py"
   }
 }
 
