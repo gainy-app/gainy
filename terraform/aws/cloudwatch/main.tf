@@ -99,7 +99,7 @@ resource "aws_iam_role" "canary_exec" {
 resource "aws_synthetics_canary" "hasura" {
   name                 = local.hasura_canary_name
   artifact_s3_location = "s3://${local.artifact_s3_bucket_name}/${local.artifact_s3_hasura_directory}"
-  execution_role_arn   = "some-role"
+  execution_role_arn   = aws_iam_role.canary_exec.arn
   handler              = "hasura.handler"
   zip_file             = data.archive_file.canary_scripts.output_path
   runtime_version      = "syn-python-selenium-1.0"
