@@ -223,6 +223,11 @@ output "hasura_url" {
   value = module.hasura-elb.url
 }
 
+output "hasura_admin_secret" {
+  value     = random_password.hasura.result
+  sensitive = true
+}
+
 output "name" {
   value = aws_ecs_service.service.name
 }
