@@ -14,17 +14,14 @@ locals {
 data "archive_file" "canary_scripts" {
   type        = "zip"
   output_path = "/tmp/canary_scripts.zip"
-
-  source {
-    content = templatefile(
-      "${path.module}/canary_scripts/hasura.py",
-      {
-        hasura_url          = var.hasura_url
-        hasura_admin_secret = var.hasura_admin_secret
-      }
-    )
-    filename = "hasura.py"
-  }
+  source_content = templatefile(
+    "${path.module}/canary_scripts/hasura.py",
+    {
+      hasura_url          = var.hasura_url
+      hasura_admin_secret = var.hasura_admin_secret
+    }
+  )
+  source_content_filename = "hasura.py"
 }
 
 resource "aws_s3_bucket" "artifacts" {
@@ -126,6 +123,7 @@ resource "aws_synthetics_canary" "hasura" {
   handler              = "hasura.handler"
   zip_file             = data.archive_file.canary_scripts.output_path
   runtime_version      = "syn-python-selenium-1.0"
+  start_canary         = true
 
   schedule {
     expression = "rate(1 minute)"
