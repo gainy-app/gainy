@@ -291,8 +291,8 @@ resource "datadog_monitor" "rds_cpu" {
   query = "avg(last_14d):anomalies(sum:aws.rds.cpuutilization{dbinstanceidentifier:*-production}, 'basic', 2, direction='above', alert_window='last_4d', interval=300, count_default_zero='true') > 0.8"
 
   monitor_threshold_windows {
-    recovery_window = "last_6h"
-    trigger_window  = "last_6h"
+    recovery_window = "last_4d"
+    trigger_window  = "last_4d"
   }
 
   monitor_thresholds {
