@@ -313,14 +313,15 @@ resource "datadog_monitor" "meltano_dag_run_date" {
   type    = "metric alert"
   message = "Airflow Meltano Dag Run Date triggered. Notify: @slack-${var.slack_channel_name} <!channel>"
 
-  query = "max(last_5m):min:postgresql.days_from_latest_dag_run{env:production} by {dag_id} >= 1"
+  query = "max(last_5m):min:postgresql.days_from_latest_dag_run{postgres_env:production} by {dag_id} >= 1"
 
   monitor_thresholds {
     critical = 1
   }
 
   require_full_window = false
-  notify_no_data      = false
+  notify_no_data      = true
+  renotify_interval   = 240
 
   tags = ["meltano"]
 }
@@ -330,7 +331,7 @@ resource "datadog_monitor" "meltano_dag_run_duration" {
   type    = "query alert"
   message = "Airflow Meltano Dag Run Duration triggered. Notify: @slack-${var.slack_channel_name} <!channel>"
 
-  query = "avg(last_10d):anomalies(sum:postgresql.latest_dag_run_duration_minutes{env:production} by {dag_id}.as_count(), 'basic', 2, direction='above', alert_window='last_1d', interval=300, count_default_zero='true') > 0.25"
+  query = "avg(last_10d):anomalies(sum:postgresql.latest_dag_run_duration_minutes{postgres_env:production} by {dag_id}.as_count(), 'basic', 2, direction='above', alert_window='last_1d', interval=300, count_default_zero='true') > 0.25"
 
   monitor_threshold_windows {
     recovery_window = "last_1d"
@@ -345,6 +346,7 @@ resource "datadog_monitor" "meltano_dag_run_duration" {
 
   require_full_window = false
   notify_no_data      = true
+  renotify_interval   = 240
 
   tags = ["meltano"]
 }

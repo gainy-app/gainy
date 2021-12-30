@@ -34,11 +34,13 @@ instances:
           from expanded_dag_runs
           order by dag_id, end_date desc
         columns:
-          - name: dag_id
-            type: tag
           - name: days_from_latest_dag_run
             type: gauge
           - name: latest_dag_run_duration_minutes
+            type: gauge
+          - name: failed_dag_runs
+            type: gauge
+          - name: failed_tasks
             type: gauge
         tags:
           - env:${env}
