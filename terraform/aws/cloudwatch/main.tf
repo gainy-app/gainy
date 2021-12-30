@@ -9,15 +9,15 @@ locals {
   artifact_s3_bucket_name      = "gainy-cw-syn-results-${var.env}"
   artifact_s3_hasura_directory = "hasura"
   hasura_canary_name           = "hasura-${var.env}"
+  canary_source_filepath       = "${path.module}/canary_scripts/hasura.py"
 }
-
 data "archive_file" "canary_scripts" {
   type        = "zip"
-  output_path = "/tmp/canary_scripts.zip"
+  output_path = "/tmp/canary_scripts_${filemd5(local.canary_source_filepath)}.zip"
 
   source {
     content = templatefile(
-      "${path.module}/canary_scripts/hasura.py",
+      local.canary_source_filepath,
       {
         hasura_url          = "https://${var.hasura_url}"
         hasura_admin_secret = var.hasura_admin_secret
@@ -124,7 +124,7 @@ resource "aws_synthetics_canary" "hasura" {
   artifact_s3_location = "s3://${local.artifact_s3_bucket_name}/${local.artifact_s3_hasura_directory}"
   execution_role_arn   = aws_iam_role.canary_exec.arn
   handler              = "hasura.handler"
-  zip_file             = data.archive_file.canary_scripts.output_path
+  zip_file             = "${data.archive_file.canary_scripts.output_path}#${data.archive_file.canary_scripts.output_md5}"
   runtime_version      = "syn-python-selenium-1.0"
   start_canary         = true
 
