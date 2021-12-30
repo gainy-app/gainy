@@ -19,7 +19,7 @@ data "archive_file" "canary_scripts" {
     content = templatefile(
       "${path.module}/canary_scripts/hasura.py",
       {
-        hasura_url          = var.hasura_url
+        hasura_url          = "https://${var.hasura_url}"
         hasura_admin_secret = var.hasura_admin_secret
       }
     )

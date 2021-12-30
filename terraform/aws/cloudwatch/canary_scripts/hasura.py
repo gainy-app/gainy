@@ -6,7 +6,8 @@ from aws_synthetics.selenium import synthetics_webdriver as syn_webdriver
 from aws_synthetics.common import synthetics_logger as logger
 
 HASURA_URL = os.getenv("HASURA_URL", "${hasura_url}")
-HASURA_ADMIN_SECRET = os.getenv("HASURA_ADMIN_SECRET", "${hasura_admin_secret}")
+HASURA_ADMIN_SECRET = os.getenv("HASURA_ADMIN_SECRET",
+                                "${hasura_admin_secret}")
 
 
 def verify_request(method, url, post_data=None, headers={}):
@@ -17,18 +18,21 @@ def verify_request(method, url, post_data=None, headers={}):
     else:
         headers["User-Agent"] = "{}".format(user_agent)
 
-    logger.info("Making request with Method: '%s' URL: %s: Data: %s Headers: %s" % (
-        method, url, json.dumps(post_data), json.dumps(headers)))
+    logger.info(
+        "Making request with Method: '%s' URL: %s: Data: %s Headers: %s" %
+        (method, url, json.dumps(post_data), json.dumps(headers)))
 
     if parsed_url.scheme == "https":
-        conn = http.client.HTTPSConnection(parsed_url.hostname, parsed_url.port)
+        conn = http.client.HTTPSConnection(parsed_url.hostname,
+                                           parsed_url.port)
     else:
         conn = http.client.HTTPConnection(parsed_url.hostname, parsed_url.port)
 
     conn.request(method, url, str(post_data), headers)
     response = conn.getresponse()
     logger.info("Status Code: %s " % response.status)
-    logger.info("Response Headers: %s" % json.dumps(response.headers.as_string()))
+    logger.info("Response Headers: %s" %
+                json.dumps(response.headers.as_string()))
 
     if not response.status or response.status < 200 or response.status > 299:
         try:
@@ -39,7 +43,8 @@ def verify_request(method, url, post_data=None, headers={}):
                 raise Exception("Failed: %s" % response.reason)
             else:
                 conn.close()
-                raise Exception("Failed with status code: %s" % response.status)
+                raise Exception("Failed with status code: %s" %
+                                response.status)
 
     logger.info("Response: %s" % response.read().decode())
     logger.info("HTTP request successfully executed")
@@ -51,10 +56,14 @@ def main():
     url1 = HASURA_URL
     method1 = 'POST'
     postData1 = json.dumps({
-        "query":"{\n  collections(where: {enabled: {_eq: \"1\"}, _or: [{personalized: {_eq: \"1\"}, profile_id: {_eq: 8}}, {personalized: {_eq: \"0\"}}]}) {\n    id\n    name\n    enabled\n    personalized\n  }\n}\n",
-        "variables":null
+        "query":
+        "{\n  collections(where: {enabled: {_eq: \"1\"}, _or: [{personalized: {_eq: \"1\"}, profile_id: {_eq: 8}}, {personalized: {_eq: \"0\"}}]}) {\n    id\n    name\n    enabled\n    personalized\n  }\n}\n",
+        "variables": None
     })
-    headers1 = {"x-hasura-admin-secret":HASURA_ADMIN_SECRET, "content-type":"application/json"}
+    headers1 = {
+        "x-hasura-admin-secret": HASURA_ADMIN_SECRET,
+        "content-type": "application/json"
+    }
 
     verify_request(method1, url1, postData1, headers1)
 
