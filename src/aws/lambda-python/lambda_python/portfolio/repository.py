@@ -64,7 +64,7 @@ class PortfolioRepository:
                     entity.created_at = created_at
                     entity.updated_at = updated_at
 
-    def remove_other_by_profile_id(self, db_conn, entities):
+    def remove_other_by_access_token(self, db_conn, entities):
         if isinstance(entities, BaseModel):
             entities = [entity]
 
@@ -74,18 +74,22 @@ class PortfolioRepository:
             for (schema_name,
                  table_name), entities in entities_grouped.items():
 
-                profile_id = entities[0].profile_id
-                excluded_ids = [entity.id for entity in entities if entity.id]
+                plaid_access_token_ids = set(
+                    [entity.plaid_access_token_id for entity in entities])
+                excluded_ids = set(
+                    [entity.id for entity in entities if entity.id])
 
                 sql_string = sql.SQL(
-                    "DELETE FROM {schema_name}.{table_name} WHERE profile_id = %(profile_id)s AND id not in %(excluded_ids)s"
+                    "DELETE FROM {schema_name}.{table_name} WHERE plaid_access_token_id IN %(plaid_access_token_ids)s AND id NOT IN %(excluded_ids)s"
                 ).format(schema_name=sql.Identifier(schema_name),
                          table_name=sql.Identifier(table_name))
 
-                cursor.execute(sql_string, {
-                    'profile_id': profile_id,
-                    'excluded_ids': tuple(excluded_ids)
-                })
+                cursor.execute(
+                    sql_string, {
+                        'plaid_access_token_ids':
+                        tuple(plaid_access_token_ids),
+                        'excluded_ids': tuple(excluded_ids)
+                    })
 
     def __group_entities(self, entities):
         entities_grouped = {}

@@ -92,8 +92,10 @@ class PortfolioService:
         self.portfolio_repository.persist(db_conn, holdings)
 
         # cleanup
-        self.portfolio_repository.remove_other_by_profile_id(db_conn, holdings)
-        self.portfolio_repository.remove_other_by_profile_id(db_conn, accounts)
+        self.portfolio_repository.remove_other_by_access_token(
+            db_conn, holdings)
+        self.portfolio_repository.remove_other_by_access_token(
+            db_conn, accounts)
 
     def persist_transaction_data(self, db_conn, profile_id, securities,
                                  accounts, transactions):

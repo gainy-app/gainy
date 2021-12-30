@@ -55,6 +55,7 @@ class HoldingData(BaseModel):
     security_id = None
     profile_id = None
     account_id = None
+    plaid_access_token_id = None
 
     def schema_name(self):
         return 'app'
@@ -92,6 +93,7 @@ class TransactionData(BaseModel):
     security_id = None
     profile_id = None
     account_id = None
+    plaid_access_token_id = None
 
     created_at = None
     updated_at = None
@@ -148,6 +150,7 @@ class Account(BaseModel):
     profile_id = None
     created_at = None
     updated_at = None
+    plaid_access_token_id = None
 
     def schema_name(self):
         return 'app'
