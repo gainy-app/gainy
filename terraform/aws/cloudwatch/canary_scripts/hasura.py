@@ -18,9 +18,7 @@ def verify_request(method, url, post_data=None, headers={}):
     else:
         headers["User-Agent"] = "{}".format(user_agent)
 
-    logger.info(
-        "Making request with Method: '%s' URL: %s: Data: %s Headers: %s" %
-        (method, url, json.dumps(post_data), json.dumps(headers)))
+    logger.info("%s %s '%s'" % (method, url, post_data['query']))
 
     if parsed_url.scheme == "https":
         conn = http.client.HTTPSConnection(parsed_url.hostname,
@@ -53,7 +51,7 @@ def verify_request(method, url, post_data=None, headers={}):
 
 def main():
 
-    url1 = HASURA_URL
+    url1 = "%s/v1/graphql" % (HASURA_URL)
     method1 = 'POST'
     postData1 = json.dumps({
         "query":
