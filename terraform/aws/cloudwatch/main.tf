@@ -14,14 +14,17 @@ locals {
 data "archive_file" "canary_scripts" {
   type        = "zip"
   output_path = "/tmp/canary_scripts.zip"
-  source_content = templatefile(
-    "${path.module}/canary_scripts/hasura.py",
-    {
-      hasura_url          = var.hasura_url
-      hasura_admin_secret = var.hasura_admin_secret
-    }
-  )
-  source_content_filename = "hasura.py"
+
+  source {
+    content = templatefile(
+      "${path.module}/canary_scripts/hasura.py",
+      {
+        hasura_url          = var.hasura_url
+        hasura_admin_secret = var.hasura_admin_secret
+      }
+    )
+    filename = "hasura.py"
+  }
 }
 
 resource "aws_s3_bucket" "artifacts" {
