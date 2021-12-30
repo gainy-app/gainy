@@ -6,9 +6,9 @@ data "aws_region" "current" {}
 data "aws_caller_identity" "this" {}
 
 locals {
-  artifact_s3_bucket_name = "gainy-cw-syn-results-${var.env}"
+  artifact_s3_bucket_name      = "gainy-cw-syn-results-${var.env}"
   artifact_s3_hasura_directory = "hasura"
-  hasura_canary_name = "hasura-${var.env}"
+  hasura_canary_name           = "hasura-${var.env}"
 }
 
 data "archive_file" "canary_scripts" {
@@ -16,10 +16,10 @@ data "archive_file" "canary_scripts" {
   output_path = "/tmp/canary_scripts.zip"
 
   source {
-    content  = templatefile(
+    content = templatefile(
       "${path.module}/canary_scripts/hasura.py",
       {
-        hasura_url = var.hasura_url
+        hasura_url          = var.hasura_url
         hasura_admin_secret = var.hasura_admin_secret
       }
     )
@@ -40,55 +40,55 @@ resource "aws_iam_role" "canary_exec" {
   name = "synthetics_canary_${var.env}"
 
   assume_role_policy = jsonencode({
-    "Version": "2012-10-17",
-    "Statement": [
+    "Version" : "2012-10-17",
+    "Statement" : [
       {
-        "Effect": "Allow",
-        "Action": [
+        "Effect" : "Allow",
+        "Action" : [
           "s3:PutObject",
           "s3:GetObject"
         ],
-        "Resource": [
+        "Resource" : [
           "arn:aws:s3:::${local.artifact_s3_bucket_name}/${local.artifact_s3_hasura_directory}/*"
         ]
       },
       {
-        "Effect": "Allow",
-        "Action": [
+        "Effect" : "Allow",
+        "Action" : [
           "s3:GetBucketLocation"
         ],
-        "Resource": [
+        "Resource" : [
           "arn:aws:s3:::${local.artifact_s3_bucket_name}"
         ]
       },
       {
-        "Effect": "Allow",
-        "Action": [
+        "Effect" : "Allow",
+        "Action" : [
           "logs:CreateLogStream",
           "logs:PutLogEvents",
           "logs:CreateLogGroup"
         ],
-        "Resource": [
+        "Resource" : [
           "arn:aws:logs:${data.aws_region.current.name}:${data.aws_caller_identity.this.account_id}:log-group:/aws/lambda/cwsyn-${local.hasura_canary_name}-*"
         ]
       },
       {
-        "Effect": "Allow",
-        "Action": [
+        "Effect" : "Allow",
+        "Action" : [
           "s3:ListAllMyBuckets",
           "xray:PutTraceSegments"
         ],
-        "Resource": [
+        "Resource" : [
           "*"
         ]
       },
       {
-        "Effect": "Allow",
-        "Resource": "*",
-        "Action": "cloudwatch:PutMetricData",
-        "Condition": {
-          "StringEquals": {
-            "cloudwatch:namespace": "CloudWatchSynthetics"
+        "Effect" : "Allow",
+        "Resource" : "*",
+        "Action" : "cloudwatch:PutMetricData",
+        "Condition" : {
+          "StringEquals" : {
+            "cloudwatch:namespace" : "CloudWatchSynthetics"
           }
         }
       }

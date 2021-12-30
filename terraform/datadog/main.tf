@@ -85,6 +85,7 @@ resource "datadog_monitor" "hasura_alb_active_connections" {
 
   require_full_window = true
   notify_no_data      = false
+  renotify_interval   = 240
 
   tags = ["hasura"]
 }
@@ -162,17 +163,18 @@ resource "datadog_monitor" "lambda_invocations" {
   message = "Lambda Invocations Monitor triggered. Notify: @slack-${var.slack_channel_name} <!channel>"
   #  escalation_message = "Escalation message @pagerduty"
 
-  query = "avg(last_1d):anomalies(sum:aws.lambda.invocations{resource:*_production} by {functionname}.as_count(), 'basic', 2, direction='above', alert_window='last_6h', interval=300, count_default_zero='true') > 1"
+  query = "avg(last_7d):anomalies(sum:aws.lambda.invocations{resource:*_production} by {functionname}.as_count(), 'basic', 2, direction='above', alert_window='last_1d', interval=300, count_default_zero='true') > 1"
 
   monitor_threshold_windows {
-    recovery_window = "last_6h"
-    trigger_window  = "last_6h"
+    recovery_window = "last_1d"
+    trigger_window  = "last_1d"
   }
 
   monitor_thresholds {
-    critical         = "1"
-    warning          = "0.5"
-    warning_recovery = "0"
+    critical          = "1"
+    critical_recovery = "0.9"
+    warning           = "0.5"
+    warning_recovery  = "0.45"
   }
 
   require_full_window = false
@@ -286,7 +288,7 @@ resource "datadog_monitor" "rds_cpu" {
   message = "RDS CPU Monitor triggered. Notify: @slack-${var.slack_channel_name} <!channel>"
   #  escalation_message = "Escalation message @pagerduty"
 
-  query = "avg(last_1d):anomalies(sum:aws.rds.cpuutilization{dbinstanceidentifier:*-production}, 'basic', 2, direction='both', alert_window='last_6h', interval=300, count_default_zero='true') > 0.8"
+  query = "avg(last_14d):anomalies(sum:aws.rds.cpuutilization{dbinstanceidentifier:*-production}, 'basic', 2, direction='above', alert_window='last_4d', interval=300, count_default_zero='true') > 0.8"
 
   monitor_threshold_windows {
     recovery_window = "last_6h"
@@ -294,9 +296,10 @@ resource "datadog_monitor" "rds_cpu" {
   }
 
   monitor_thresholds {
-    critical         = "0.8"
-    warning          = "0.5"
-    warning_recovery = "0"
+    critical          = "0.8"
+    critical_recovery = "0.7"
+    warning           = "0.5"
+    warning_recovery  = "0.4"
   }
 
   require_full_window = false
