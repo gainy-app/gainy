@@ -37,9 +37,27 @@ resource "aws_s3_bucket" "artifacts" {
 }
 
 resource "aws_iam_role" "canary_exec" {
-  name = "synthetics_canary_${var.env}"
+  name               = "synthetics_canary_${var.env}"
+  assume_role_policy = <<-EOF
+    {
+      "Version": "2012-10-17",
+      "Statement": [
+        {
+          "Effect": "Allow",
+          "Principal": {
+            "Service": "lambda.amazonaws.com"
+          },
+          "Action": "sts:AssumeRole"
+        }
+      ]
+    }
+  EOF
+}
+resource "aws_iam_policy" "canary_exec" {
+  name        = "synthetics_canary_${var.env}"
+  description = "Canary Exec Policy ${var.env}"
 
-  assume_role_policy = jsonencode({
+  policy = jsonencode({
     "Version" : "2012-10-17",
     "Statement" : [
       {
@@ -94,6 +112,11 @@ resource "aws_iam_role" "canary_exec" {
       }
     ]
   })
+}
+
+resource "aws_iam_role_policy_attachment" "attachment" {
+  role       = aws_iam_role.canary_exec.name
+  policy_arn = aws_iam_policy.canary_exec.arn
 }
 
 resource "aws_synthetics_canary" "hasura" {
