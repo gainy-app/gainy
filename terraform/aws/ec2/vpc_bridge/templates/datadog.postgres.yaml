@@ -13,26 +13,46 @@ instances:
         query: >
           with expanded_dag_runs as
                    (
-                       select *,
-                              case
-                                  when extract(isodow from start_date) < 5
-                                      then start_date + interval '1 day'
-                                  else date_trunc('week', start_date) +
-                                       interval '7 days' +
-                                       (start_date -
-                                        date_trunc('day', start_date))
-                                  end next_run_date
+                       select distinct on (dag_id) *,
+                                                   case
+                                                       when extract(isodow from start_date) < 5
+                                                           then start_date + interval '1 day'
+                                                       else date_trunc('week', start_date) +
+                                                            interval '7 days' +
+                                                            (start_date -
+                                                             date_trunc('day', start_date))
+                                                       end next_run_date
                        from airflow.dag_run
                        where state = 'success'
-                         and end_date is not null
                          and dag_id in ('gainy-dag')
+                       order by dag_id, end_date desc
+                   ),
+               successful_dag_runs_metrics as
+                   (
+                       select GREATEST(0, FLOOR(
+                               extract(hours from now() - next_run_date + interval '22 hours') / 24
+                           ))                                             as days_from_latest_dag_run,
+                              extract(minutes from end_date - start_date) as latest_dag_run_duration_minutes
+                       from expanded_dag_runs
+                   ),
+               failed_dag_runs_metrics as
+                   (
+                       select count(*) as failed_dag_runs
+                       from airflow.dag_run
+                       where state = 'failed'
+                         and dag_id in ('gainy-dag', 'realtime-dbt-dag')
+                         and start_date > now() - interval '1 day'
+                   ),
+               failed_tasks_metrics as
+                   (
+                       select count(*) as failed_tasks
+                       from airflow.task_fail
+                       where dag_id in ('gainy-dag', 'realtime-dbt-dag')
+                         and start_date > now() - interval '1 day'
                    )
-          select distinct on (dag_id) dag_id,
-                                      FLOOR(extract(hours from now() - next_run_date + interval '22 hours') / 24
-                                          )                                       as days_from_latest_dag_run,
-                                      extract(minutes from end_date - start_date) as latest_dag_run_duration_minutes
-          from expanded_dag_runs
-          order by dag_id, end_date desc
+          select * from successful_dag_runs_metrics
+          join failed_dag_runs_metrics on true
+          join failed_tasks_metrics on true
         columns:
           - name: days_from_latest_dag_run
             type: gauge

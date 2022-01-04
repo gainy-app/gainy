@@ -9,7 +9,8 @@ locals {
   artifact_s3_bucket_name      = "gainy-cw-syn-results-${var.env}"
   artifact_s3_hasura_directory = "hasura"
   hasura_canary_name           = "hasura-${var.env}"
-  canary_source_filepath       = "${path.module}/canary_scripts/hasura.py"
+  canary_source_directory      = "${path.module}/canary_scripts"
+  canary_source_filepath       = "${local.canary_source_directory}/hasura.py"
 }
 data "archive_file" "canary_scripts" {
   type        = "zip"
@@ -24,6 +25,11 @@ data "archive_file" "canary_scripts" {
       }
     )
     filename = "python/hasura.py"
+  }
+
+  source {
+    content = file("${local.canary_source_directory}/queries/GetPlaidHoldings.graphql")
+    filename = "python/queries/GetPlaidHoldings.graphql"
   }
 }
 
