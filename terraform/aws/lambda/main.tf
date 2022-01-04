@@ -44,7 +44,7 @@ resource "aws_apigatewayv2_api" "lambda" {
 resource "aws_apigatewayv2_stage" "lambda" {
   api_id = aws_apigatewayv2_api.lambda.id
 
-  name        = "default"
+  name        = "default_${var.env}"
   auto_deploy = true
 
   access_log_settings {
