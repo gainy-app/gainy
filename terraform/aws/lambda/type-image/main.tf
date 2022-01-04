@@ -51,6 +51,6 @@ module "route" {
   aws_apigatewayv2_api_lambda_id            = var.aws_apigatewayv2_api_lambda_id
   aws_apigatewayv2_api_lambda_execution_arn = var.aws_apigatewayv2_api_lambda_execution_arn
   aws_iam_role_lambda_exec_role             = var.aws_iam_role_lambda_exec_role
-  aws_lambda_invoke_arn                     = aws_lambda_function.lambda.invoke_arn
+  aws_lambda_invoke_arn                     = "${aws_lambda_function.lambda.invoke_arn}:${aws_lambda_function.lambda.version}"
   aws_lambda_function_name                  = aws_lambda_function.lambda.function_name
 }
