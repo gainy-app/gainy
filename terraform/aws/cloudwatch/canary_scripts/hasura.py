@@ -153,7 +153,7 @@ def check_portfolio():
     profiles = make_graphql_request(
         query, None, None)['data']['app_profile_plaid_access_tokens']
 
-    with open('queries/GetPlaidHoldings.graphql', 'r') as f:
+    with open(os.path.join(os.path.dirname(__file__), 'queries/GetPlaidHoldings.graphql'), 'r') as f:
         query = f.read()
 
     for profile in profiles:
