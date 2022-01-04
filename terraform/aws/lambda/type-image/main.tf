@@ -31,6 +31,7 @@ resource "aws_lambda_function" "lambda" {
   }
 
   timeout = var.timeout
+  publish = true
 
   role = var.aws_iam_role_lambda_exec_role.arn
 
