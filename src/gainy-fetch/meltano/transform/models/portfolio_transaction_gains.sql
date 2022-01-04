@@ -20,25 +20,23 @@ with actual_prices as
          (
              select distinct on (
                  portfolio_expanded_transactions.uniq_id
-                 ) portfolio_expanded_transactions.id                             as transaction_id,
-                   portfolio_expanded_transactions.uniq_id                        as transaction_uniq_id,
+                 ) portfolio_expanded_transactions.id                                                                                                       as transaction_id,
+                   portfolio_expanded_transactions.uniq_id                                                                                                  as transaction_uniq_id,
                    coalesce(historical_prices_aggregated.datetime,
-                            ticker_options.last_trade_datetime)::timestamp        as updated_at,
+                            ticker_options.last_trade_datetime)::timestamp                                                                                  as updated_at,
                    coalesce(actual_prices.adjusted_close,
                             ticker_options.last_price,
-                            historical_prices_aggregated.adjusted_close)::numeric as actual_price,
+                            historical_prices_aggregated.adjusted_close)::numeric                                                                           as actual_price,
                    sign(portfolio_expanded_transactions.quantity_norm)::numeric *
                    case
                        when ticker_options.contract_name is null
                            then (
                                    actual_prices.adjusted_close::numeric /
                                    first_value(
-                                   case
-                                       when historical_prices_aggregated.adjusted_close > 0
-                                           then historical_prices_aggregated.adjusted_close::numeric end)
+                                   historical_prices_aggregated.adjusted_close::numeric)
                                    over (partition by portfolio_expanded_transactions.uniq_id, historical_prices_aggregated.symbol ORDER BY historical_prices_aggregated.datetime RANGE INTERVAL '0 day' PRECEDING) -
                                    1)
-                       else 0 end                                                 as relative_gain_1d,
+                       else 0 end                                                                                                                           as relative_gain_1d,
                    sign(portfolio_expanded_transactions.quantity_norm)::numeric *
                    case
                        when ticker_options.contract_name is null
@@ -46,17 +44,13 @@ with actual_prices as
                                    historical_prices_aggregated.adjusted_close::numeric /
                                    case
                                        when portfolio_expanded_transactions.datetime >= now() - interval '1 week'
-                                           then case
-                                                    when portfolio_expanded_transactions.price > 0
-                                                        then portfolio_expanded_transactions.price::numeric end
+                                           then portfolio_expanded_transactions.price
                                        else
                                                    first_value(
-                                                   case
-                                                       when historical_prices_aggregated.adjusted_close > 0
-                                                           then historical_prices_aggregated.adjusted_close::numeric end)
+                                                   historical_prices_aggregated.adjusted_close::numeric)
                                                    over (partition by portfolio_expanded_transactions.uniq_id, historical_prices_aggregated.symbol ORDER BY historical_prices_aggregated.datetime RANGE INTERVAL '1 week' PRECEDING)
                                        end - 1)
-                       else 0 end                                                 as relative_gain_1w,
+                       else 0 end                                                                                                                           as relative_gain_1w,
                    sign(portfolio_expanded_transactions.quantity_norm)::numeric *
                    case
                        when ticker_options.contract_name is null
@@ -64,17 +58,13 @@ with actual_prices as
                                    historical_prices_aggregated.adjusted_close::numeric /
                                    case
                                        when portfolio_expanded_transactions.datetime >= now() - interval '1 month'
-                                           then case
-                                                    when portfolio_expanded_transactions.price > 0
-                                                        then portfolio_expanded_transactions.price::numeric end
+                                           then portfolio_expanded_transactions.price
                                        else
                                                    first_value(
-                                                   case
-                                                       when historical_prices_aggregated.adjusted_close > 0
-                                                           then historical_prices_aggregated.adjusted_close::numeric end)
+                                                   historical_prices_aggregated.adjusted_close::numeric)
                                                    over (partition by portfolio_expanded_transactions.uniq_id, historical_prices_aggregated.symbol ORDER BY historical_prices_aggregated.datetime RANGE INTERVAL '1 month' PRECEDING)
                                        end - 1)
-                       else 0 end                                                 as relative_gain_1m,
+                       else 0 end                                                                                                                           as relative_gain_1m,
                    sign(portfolio_expanded_transactions.quantity_norm)::numeric *
                    case
                        when ticker_options.contract_name is null
@@ -82,17 +72,13 @@ with actual_prices as
                                    historical_prices_aggregated.adjusted_close::numeric /
                                    case
                                        when portfolio_expanded_transactions.datetime >= now() - interval '3 months'
-                                           then case
-                                                    when portfolio_expanded_transactions.price > 0
-                                                        then portfolio_expanded_transactions.price::numeric end
+                                           then portfolio_expanded_transactions.price
                                        else
                                                    first_value(
-                                                   case
-                                                       when historical_prices_aggregated.adjusted_close > 0
-                                                           then historical_prices_aggregated.adjusted_close::numeric end)
+                                                   historical_prices_aggregated.adjusted_close::numeric)
                                                    over (partition by portfolio_expanded_transactions.uniq_id, historical_prices_aggregated.symbol ORDER BY historical_prices_aggregated.datetime RANGE INTERVAL '3 months' PRECEDING)
                                        end - 1)
-                       else 0 end                                                 as relative_gain_3m,
+                       else 0 end                                                                                                                           as relative_gain_3m,
                    sign(portfolio_expanded_transactions.quantity_norm)::numeric *
                    case
                        when ticker_options.contract_name is null
@@ -100,17 +86,13 @@ with actual_prices as
                                    historical_prices_aggregated.adjusted_close::numeric /
                                    case
                                        when portfolio_expanded_transactions.datetime >= now() - interval '1 year'
-                                           then case
-                                                    when portfolio_expanded_transactions.price > 0
-                                                        then portfolio_expanded_transactions.price::numeric end
+                                           then portfolio_expanded_transactions.price
                                        else
                                                    first_value(
-                                                   case
-                                                       when historical_prices_aggregated.adjusted_close > 0
-                                                           then historical_prices_aggregated.adjusted_close::numeric end)
+                                                   historical_prices_aggregated.adjusted_close::numeric)
                                                    over (partition by portfolio_expanded_transactions.uniq_id, historical_prices_aggregated.symbol ORDER BY historical_prices_aggregated.datetime RANGE INTERVAL '1 year' PRECEDING)
                                        end - 1)
-                       else 0 end                                                 as relative_gain_1y,
+                       else 0 end                                                                                                                           as relative_gain_1y,
                    sign(portfolio_expanded_transactions.quantity_norm)::numeric *
                    case
                        when ticker_options.contract_name is null
@@ -118,26 +100,20 @@ with actual_prices as
                                    historical_prices_aggregated.adjusted_close::numeric /
                                    case
                                        when portfolio_expanded_transactions.datetime >= now() - interval '5 years'
-                                           then case
-                                                    when portfolio_expanded_transactions.price > 0
-                                                        then portfolio_expanded_transactions.price::numeric end
+                                           then portfolio_expanded_transactions.price
                                        else first_value(
-                                            case
-                                                when historical_prices_aggregated.adjusted_close > 0
-                                                    then historical_prices_aggregated.adjusted_close::numeric end)
+                                            historical_prices_aggregated.adjusted_close::numeric)
                                             over (partition by portfolio_expanded_transactions.uniq_id, historical_prices_aggregated.symbol ORDER BY historical_prices_aggregated.datetime RANGE INTERVAL '5 years' PRECEDING)
                                        end - 1)
-                       else 0 end                                                 as relative_gain_5y,
+                       else 0 end                                                                                                                           as relative_gain_5y,
                    sign(portfolio_expanded_transactions.quantity_norm)::numeric *
                    case
                        when ticker_options.contract_name is null
                            then (
                                    historical_prices_aggregated.adjusted_close::numeric /
-                                   case
-                                       when portfolio_expanded_transactions.price > 0
-                                           then portfolio_expanded_transactions.price::numeric end -
+                                   portfolio_expanded_transactions.price -
                                    1)
-                       else 0 end                                                 as relative_gain_total,
+                       else 0 end                                                                                                                           as relative_gain_total,
                    portfolio_expanded_transactions.quantity_norm::numeric
              from {{ ref('portfolio_expanded_transactions') }}
                       join {{ ref('portfolio_securities_normalized') }}
