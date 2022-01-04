@@ -50,7 +50,8 @@ instances:
                        where dag_id in ('gainy-dag', 'realtime-dbt-dag')
                          and start_date > now() - interval '1 day'
                    )
-          select * from successful_dag_runs_metrics
+          select *
+          from successful_dag_runs_metrics
           join failed_dag_runs_metrics on true
           join failed_tasks_metrics on true
         columns:
