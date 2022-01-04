@@ -427,7 +427,7 @@ resource "datadog_monitor" "cloudwatch_synthetics_success_percent" {
   tags = ["canaries"]
 }
 
-resource "datadog_monitor" "meltano_dag_run_duration" {
+resource "datadog_monitor" "cloudwatch_synthetics_duration" {
   name    = "CloudWatch Synthetics Duration"
   type    = "query alert"
   message = "CloudWatch Synthetics Duration triggered. Notify: @slack-${var.slack_channel_name} <!channel>"
