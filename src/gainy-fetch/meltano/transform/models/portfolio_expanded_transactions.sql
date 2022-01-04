@@ -4,7 +4,6 @@
     post_hook=[
       index(this, 'id', true),
       index(this, 'uniq_id', true),
-      fk(this, 'account_id', 'app', 'profile_portfolio_accounts', 'id')
     ]
   )
 }}
