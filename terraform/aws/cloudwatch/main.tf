@@ -28,7 +28,7 @@ data "archive_file" "canary_scripts" {
   }
 
   source {
-    content = file("${local.canary_source_directory}/queries/GetPlaidHoldings.graphql")
+    content  = file("${local.canary_source_directory}/queries/GetPlaidHoldings.graphql")
     filename = "python/queries/GetPlaidHoldings.graphql"
   }
 }
