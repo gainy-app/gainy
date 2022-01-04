@@ -37,14 +37,15 @@ resource "aws_cloudwatch_log_group" "api_gw" {
 }
 
 resource "aws_apigatewayv2_api" "lambda" {
-  name          = "serverless_lambda_gw_${var.env}_${var.deployment_key}"
+  name          = "serverless_lambda_gw_${var.env}"
   protocol_type = "HTTP"
+  version       = var.deployment_key
 }
 
 resource "aws_apigatewayv2_stage" "lambda" {
   api_id = aws_apigatewayv2_api.lambda.id
 
-  name        = "serverless_lambda_stage_${var.env}_${var.deployment_key}"
+  name        = "serverless_lambda_stage_${var.env}"
   auto_deploy = true
 
   access_log_settings {
