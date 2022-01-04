@@ -9,7 +9,7 @@ instances:
     dbname: ${pg_dbname}
     disable_generic_tags: true
     custom_queries:
-      - metric_prefix: postgresql
+      - metric_prefix: app
         query: >
           with dags (dag_id) as (values ('gainy-dag'), ('realtime-dbt-dag')),
                expanded_dag_runs as
