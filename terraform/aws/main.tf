@@ -29,6 +29,7 @@ module "lambda" {
   container_repository        = aws_ecr_repository.default.name
   vpc_security_group_ids      = [module.ecs.vpc_default_sg_id]
   vpc_subnet_ids              = module.ecs.private_subnet_ids
+  deployment_key              = local.timestamp
   datadog_api_key             = var.datadog_api_key
   datadog_app_key             = var.datadog_app_key
   hasura_url                  = module.ecs-service.hasura_url
