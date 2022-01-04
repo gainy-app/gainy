@@ -354,7 +354,7 @@ resource "datadog_monitor" "meltano_dag_run_duration" {
   tags = ["meltano"]
 }
 
-resource "datadog_monitor" "meltano_dag_run_duration" {
+resource "datadog_monitor" "meltano_failed_dag_runs" {
   name    = "Airflow Meltano Failed Dag Runs"
   type    = "query alert"
   message = "Airflow Meltano Failed Dag Runs triggered. Notify: @slack-${var.slack_channel_name} <!channel>"
@@ -379,7 +379,7 @@ resource "datadog_monitor" "meltano_dag_run_duration" {
   tags = ["meltano"]
 }
 
-resource "datadog_monitor" "meltano_dag_run_duration" {
+resource "datadog_monitor" "meltano_failed_tasks" {
   name    = "Airflow Meltano Failed Tasks"
   type    = "query alert"
   message = "Airflow Meltano Failed Tasks triggered. Notify: @slack-${var.slack_channel_name} <!channel>"
