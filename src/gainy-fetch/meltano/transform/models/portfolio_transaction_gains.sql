@@ -1,6 +1,7 @@
 {{
   config(
-    materialized = "table",
+    materialized = "incremental",
+    unique_key = "transaction_uniq_id",
     post_hook=[
       index(this, 'transaction_id', true),
     ]

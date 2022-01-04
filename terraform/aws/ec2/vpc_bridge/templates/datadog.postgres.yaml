@@ -9,36 +9,71 @@ instances:
     dbname: ${pg_dbname}
     disable_generic_tags: true
     custom_queries:
-      - metric_prefix: postgresql
+      - metric_prefix: app
         query: >
-          with expanded_dag_runs as
+          with dags (dag_id) as (values ('gainy-dag'), ('realtime-dbt-dag')),
+               expanded_dag_runs as
                    (
-                       select *,
-                              case
-                                  when extract(isodow from start_date) < 5
-                                      then start_date + interval '1 day'
-                                  else date_trunc('week', start_date) +
-                                       interval '7 days' +
-                                       (start_date -
-                                        date_trunc('day', start_date))
-                                  end next_run_date
+                       select distinct on (dag_id) *,
+                                                   case
+                                                       when extract(isodow from start_date) < 5
+                                                           then start_date + interval '1 day'
+                                                       else date_trunc('week', start_date) +
+                                                            interval '7 days' +
+                                                            (start_date -
+                                                             date_trunc('day', start_date))
+                                                       end next_run_date
                        from airflow.dag_run
                        where state = 'success'
-                         and end_date is not null
-                         and dag_id in ('gainy-dag')
+                       order by dag_id, end_date desc
+                   ),
+               successful_dag_runs_metrics as
+                   (
+                       select dag_id,
+                              GREATEST(0, FLOOR(
+                                      extract(hours from now() - next_run_date + interval '22 hours') / 24
+                                  ))                                      as days_from_latest_dag_run,
+                              extract(minutes from end_date - start_date) as latest_dag_run_duration_minutes
+                       from expanded_dag_runs
+                   ),
+               failed_dag_runs_metrics as
+                   (
+                       select dag_id,
+                              count(*) as failed_dag_runs
+                       from airflow.dag_run
+                       where state = 'failed'
+                         and start_date > now() - interval '10 day'
+                         and (dag_id != 'realtime-dbt-dag' or start_date > now() - interval '1 day')
+                       group by dag_id
+                   ),
+               failed_tasks_metrics as
+                   (
+                       select dag_id,
+                              count(*) as failed_tasks
+                       from airflow.task_fail
+                       where start_date > now() - interval '10 day'
+                         and (dag_id != 'realtime-dbt-dag' or start_date > now() - interval '1 day')
+                       group by dag_id
                    )
-          select distinct on (dag_id) dag_id,
-                                      FLOOR(extract(hours from now() - next_run_date + interval '22 hours') / 24
-                                          )                                       as days_from_latest_dag_run,
-                                      extract(minutes from end_date - start_date) as latest_dag_run_duration_minutes
-          from expanded_dag_runs
-          order by dag_id, end_date desc
+          select dags.dag_id,
+                 successful_dag_runs_metrics.days_from_latest_dag_run,
+                 successful_dag_runs_metrics.latest_dag_run_duration_minutes,
+                 coalesce(failed_dag_runs_metrics.failed_dag_runs, 0) as failed_dag_runs,
+                 coalesce(failed_tasks_metrics.failed_tasks, 0)       as failed_tasks
+          from dags
+                   left join successful_dag_runs_metrics on successful_dag_runs_metrics.dag_id = dags.dag_id
+                   left join failed_dag_runs_metrics on failed_dag_runs_metrics.dag_id = dags.dag_id
+                   left join failed_tasks_metrics on failed_tasks_metrics.dag_id = dags.dag_id
         columns:
           - name: dag_id
             type: tag
           - name: days_from_latest_dag_run
             type: gauge
           - name: latest_dag_run_duration_minutes
+            type: gauge
+          - name: failed_dag_runs
+            type: gauge
+          - name: failed_tasks
             type: gauge
         tags:
           - env:${env}

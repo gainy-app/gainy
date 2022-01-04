@@ -136,6 +136,14 @@ module "ecs-service" {
   datadog_app_key = var.datadog_app_key
 }
 
+
+module "cloudwatch" {
+  source              = "./cloudwatch"
+  env                 = var.env
+  hasura_admin_secret = module.ecs-service.hasura_admin_secret
+  hasura_url          = module.ecs-service.hasura_url
+}
+
 output "bridge_instance_url" {
   value = module.vpc_bridge.bridge_instance_url
 }
