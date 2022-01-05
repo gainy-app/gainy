@@ -115,6 +115,7 @@ resource "null_resource" "bridge" {
   triggers = {
     provision_script_content = local.provision_script_content
     datadog_config_content   = local.datadog_config_content
+    bridge_instance_id       = aws_instance.bridge.id
   }
 
   provisioner "file" {
