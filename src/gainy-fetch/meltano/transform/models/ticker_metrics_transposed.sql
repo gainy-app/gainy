@@ -162,7 +162,7 @@ with ticker_metrics as (select * from {{ ref('ticker_metrics') }}),
 
 select concat(symbol, '_', metric_id)::varchar as id,
        symbol,
-       metric_id,
+       metric_id::varchar,
        value_double,
        value_string,
        value_bigint
