@@ -55,7 +55,7 @@ Flow:
    5. portfolio_chart - holdings X historical_prices_aggregated
    6. portfolio_transaction_gains - currently almost unused due to incomplete data
 ### Realtime prices
-`websockets/client.py` is responsible for listening EOD websockets for realtime prices.
+`websockets/client_eod.py` is responsible for listening EOD websockets for realtime prices.
 Known problems:
 - eod randomly closing connections
 - eod randomly not sending any data

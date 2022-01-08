@@ -184,7 +184,9 @@ services:
     volumes:
       - ./src/websockets:/srv
     environment:
-      API_TOKEN: "OeAFFmMliFG5orCUuwAKQ8l4WWFQ67YX"
+      EOD_API_TOKEN: "OeAFFmMliFG5orCUuwAKQ8l4WWFQ67YX"
+      POLYGON_API_TOKEN: "${POLYGON_API_TOKEN}"
+      POLYGON_HOST: "delayed.polygon.io" # socket.polygon.io for real-time
       PG_HOST: "${PG_ADDRESS}"
       PG_PORT: "${PG_PORT}"
       PG_DBNAME: "${PG_DATABASE}"
@@ -192,6 +194,7 @@ services:
       PG_PASSWORD: "${PG_PASSWORD}"
       ENV: "local"
       PUBLIC_SCHEMA_NAME: public
+    command: ["client_polygon.py"]
 
 volumes:
   db_data:

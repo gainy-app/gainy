@@ -220,7 +220,7 @@
     "ulimits": null,
     "dockerSecurityOptions": null,
     "environment": [
-      { "name": "API_TOKEN",          "value": "${eodhistoricaldata_api_token}" },
+      { "name": "EOD_API_TOKEN",          "value": "${eodhistoricaldata_api_token}" },
       { "name": "PG_HOST",            "value": "${pg_host}" },
       { "name": "PG_PORT",            "value": "${pg_port}" },
       { "name": "PG_DBNAME",          "value": "${pg_dbname}" },
