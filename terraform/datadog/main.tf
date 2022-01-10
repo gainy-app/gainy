@@ -443,10 +443,10 @@ resource "datadog_monitor" "cloudwatch_synthetics_duration" {
   }
 
   monitor_thresholds {
-    critical          = "0.25"
-    critical_recovery = "0.20"
-    warning           = "0.1"
-    warning_recovery  = "0"
+    critical          = "0.5"
+    critical_recovery = "0.4"
+    warning           = "0.3"
+    warning_recovery  = "0.2"
   }
 
   require_full_window = false
