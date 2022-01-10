@@ -32,7 +32,7 @@ resource "datadog_monitor" "billing_spend" {
 
   require_full_window = false
   notify_no_data      = false
-  renotify_interval   = 240
+  renotify_interval   = 1440
 
   tags = ["billing"]
 }
@@ -78,9 +78,10 @@ resource "datadog_monitor" "hasura_alb_active_connections" {
   }
 
   monitor_thresholds {
-    critical         = "0.8"
-    warning          = "0.5"
-    warning_recovery = "0"
+    critical          = "0.8"
+    critical_recovery = "0.7"
+    warning           = "0.5"
+    warning_recovery  = "0.4"
   }
 
   require_full_window = true
@@ -190,7 +191,7 @@ resource "datadog_monitor" "lambda_duration" {
   message = "Lambda Duration Monitor triggered. Notify: @slack-${var.slack_channel_name} <!channel>"
   #  escalation_message = "Escalation message @pagerduty"
 
-  query = "avg(last_7d):anomalies(sum:aws.lambda.duration{resource:*_production} by {functionname}.as_count(), 'basic', 2, direction='above', alert_window='last_2d', interval=300, count_default_zero='true') > 1"
+  query = "avg(last_7d):anomalies(sum:aws.lambda.duration{resource:*_production} by {functionname}.as_count(), 'basic', 2, direction='above', alert_window='last_2d', interval=300, count_default_zero='true') > 0.7"
 
   monitor_threshold_windows {
     recovery_window = "last_2d"
@@ -198,9 +199,10 @@ resource "datadog_monitor" "lambda_duration" {
   }
 
   monitor_thresholds {
-    critical         = "1"
-    warning          = "0.5"
-    warning_recovery = "0"
+    critical          = "0.7"
+    critical_recovery = "0.6"
+    warning           = "0.5"
+    warning_recovery  = "0.4"
   }
 
   require_full_window = true
@@ -342,14 +344,15 @@ resource "datadog_monitor" "meltano_dag_run_duration" {
   }
 
   monitor_thresholds {
-    critical         = "0.25"
-    warning          = "0.1"
-    warning_recovery = "0"
+    critical          = "0.25"
+    critical_recovery = "0.2"
+    warning           = "0.1"
+    warning_recovery  = "0"
   }
 
   require_full_window = false
   notify_no_data      = true
-  renotify_interval   = 240
+  renotify_interval   = 720
 
   tags = ["meltano"]
 }
@@ -440,9 +443,10 @@ resource "datadog_monitor" "cloudwatch_synthetics_duration" {
   }
 
   monitor_thresholds {
-    critical         = "0.25"
-    warning          = "0.1"
-    warning_recovery = "0"
+    critical          = "0.5"
+    critical_recovery = "0.4"
+    warning           = "0.3"
+    warning_recovery  = "0.2"
   }
 
   require_full_window = false
