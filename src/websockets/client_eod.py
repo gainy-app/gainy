@@ -14,6 +14,7 @@ EOD_API_TOKEN = os.environ["EOD_API_TOKEN"]
 
 logger = get_logger(__name__)
 
+
 class PricesListener:
 
     def __init__(self, symbols):

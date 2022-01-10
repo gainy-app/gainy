@@ -148,7 +148,7 @@ resource "aws_ecs_task_definition" "default" {
       datadog_app_key = var.datadog_app_key
 
       polygon_api_token               = var.polygon_api_token
-      polygon_realtime_streaming_host = var.polygon_realtime_streaming_host
+      polygon_realtime_streaming_host = "delayed.polygon.io" # socket.polygon.io for real-time
     }
   )
 }

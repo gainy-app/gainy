@@ -10,12 +10,14 @@ ENV = os.environ["ENV"]
 POLYGON_API_TOKEN = os.environ["POLYGON_API_TOKEN"]
 POLYGON_REALTIME_STREAMING_HOST = os.environ["POLYGON_REALTIME_STREAMING_HOST"]
 
-NO_MESSAGES_RECONNECT_TIMEOUT = 600 # reconnect if no messages for 10 minutes
+NO_MESSAGES_RECONNECT_TIMEOUT = 600  # reconnect if no messages for 10 minutes
 MAX_INSERT_RECORDS_COUNT = 1000
 
 logger = get_logger(__name__)
 
+
 class PricesListener:
+
     def __init__(self, symbols):
         self.symbols = symbols
         self.api_token = POLYGON_API_TOKEN
@@ -43,14 +45,22 @@ class PricesListener:
 
         async with self.records_queue_lock:
             self.records_queue.put_nowait({
-                "symbol": symbol,
-                "date": datetime.datetime.fromtimestamp(timestamp_start / 1000),
-                "granularity": timestamp_end - timestamp_start,
-                "open": open,
-                "high": high,
-                "low": low,
-                "close": close,
-                "volume": volume,
+                "symbol":
+                symbol,
+                "date":
+                datetime.datetime.fromtimestamp(timestamp_start / 1000),
+                "granularity":
+                timestamp_end - timestamp_start,
+                "open":
+                open,
+                "high":
+                high,
+                "low":
+                low,
+                "close":
+                close,
+                "volume":
+                volume,
             })
 
     async def handle_message(self, message):
@@ -68,13 +78,17 @@ class PricesListener:
             logger.error('handle_message %s: %s', message, e)
 
     async def listen(self):
-        stream_client = polygon.AsyncStreamClient(self.api_token, StreamCluster.STOCKS, host=self.host)
+        stream_client = polygon.AsyncStreamClient(self.api_token,
+                                                  StreamCluster.STOCKS,
+                                                  host=self.host)
 
-        await stream_client.subscribe_stock_minute_aggregates(list(self.symbols), self.handle_message)
+        await stream_client.subscribe_stock_minute_aggregates(
+            list(self.symbols), self.handle_message)
 
         while 1:
             try:
-                await stream_client.handle_messages(reconnect=True, max_reconnection_attempts=100)
+                await stream_client.handle_messages(
+                    reconnect=True, max_reconnection_attempts=100)
             except Exception as e:
                 logger.error("%s Error caught in start func: %s",
                              type(e).__name__, str(e))
@@ -99,12 +113,13 @@ class PricesListener:
                     continue
 
                 for record in records:
-                    self.__latest_symbol_message[record['symbol']] = current_timestamp
+                    self.__latest_symbol_message[
+                        record['symbol']] = current_timestamp
 
-                symbols_with_records = list(set([
-                    record['symbol'] for record in records
-                ]))
-                logger.info("__sync_records %d %s", current_timestamp, ",".join(symbols_with_records))
+                symbols_with_records = list(
+                    set([record['symbol'] for record in records]))
+                logger.info("__sync_records %d %s", current_timestamp,
+                            ",".join(symbols_with_records))
 
                 values = [(
                     record['symbol'],
@@ -135,7 +150,9 @@ class PricesListener:
                 continue
 
             timeout_threshold = current_timestamp - self.__no_messages_reconnect_timeout
-            logger.debug('should_reconnect %s %d %d', symbol, self.__latest_symbol_message[symbol], timeout_threshold)
+            logger.debug('should_reconnect %s %d %d', symbol,
+                         self.__latest_symbol_message[symbol],
+                         timeout_threshold)
             if self.__latest_symbol_message[symbol] > timeout_threshold:
                 return False
 
@@ -149,7 +166,7 @@ async def main():
     listen_task = None
     sync_task = None
 
-#     should_run = ENV == "production"
+    #     should_run = ENV == "production"
     should_run = ENV == "test"
 
     while True:

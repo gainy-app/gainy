@@ -84,6 +84,7 @@ module "aws" {
   datadog_api_key             = var.datadog_api_key
   datadog_app_key             = var.datadog_app_key
   hubspot_api_key             = var.hubspot_api_key
+  polygon_api_token           = var.polygon_api_token
 
   pg_production_host                   = var.pg_production_host
   pg_production_port                   = var.pg_production_port
