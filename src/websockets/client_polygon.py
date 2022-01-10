@@ -1,29 +1,25 @@
 import asyncio
 import polygon
 from polygon.enums import StreamCluster
-import logging
 import os
-# import time
 import datetime
 from decimal import Decimal
-from common import get_symbols, persist_records
+from common import get_logger, get_symbols, persist_records
 
 ENV = os.environ["ENV"]
 POLYGON_API_TOKEN = os.environ["POLYGON_API_TOKEN"]
-POLYGON_HOST = os.environ["POLYGON_HOST"]
+POLYGON_REALTIME_STREAMING_HOST = os.environ["POLYGON_REALTIME_STREAMING_HOST"]
 
-NO_MESSAGES_RECONNECT_TIMEOUT = 86400 # reconnect if no messages for any symbol for 1 day
+NO_MESSAGES_RECONNECT_TIMEOUT = 600 # reconnect if no messages for 10 minutes
 MAX_INSERT_RECORDS_COUNT = 1000
-logging.basicConfig()
-logger = logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG if ENV == "local" else logging.INFO)
 
+logger = get_logger(__name__)
 
 class PricesListener:
     def __init__(self, symbols):
         self.symbols = symbols
         self.api_token = POLYGON_API_TOKEN
-        self.host = POLYGON_HOST
+        self.host = POLYGON_REALTIME_STREAMING_HOST
 
         self.__no_messages_reconnect_timeout = NO_MESSAGES_RECONNECT_TIMEOUT
         self.__latest_symbol_message = {}
@@ -79,11 +75,10 @@ class PricesListener:
         while 1:
             try:
                 await stream_client.handle_messages(reconnect=True, max_reconnection_attempts=100)
-                await asyncio.sleep(90)
             except Exception as e:
                 logger.error("%s Error caught in start func: %s",
                              type(e).__name__, str(e))
-            logger.debug("reached the end of loop")
+                await asyncio.sleep(90)
 
         logger.error("reached the end of start func")
 
@@ -122,7 +117,7 @@ class PricesListener:
                     record['granularity'],
                 ) for record in records]
 
-                persist_records(values)
+                persist_records(values, "polygon")
 
             except Exception as e:
                 logger.error("__sync_records: %s", e)
@@ -137,15 +132,14 @@ class PricesListener:
 
         for symbol in self.symbols:
             if symbol not in self.__latest_symbol_message:
-                logger.debug('should_reconnect %s None', symbol)
-                return True
+                continue
 
             timeout_threshold = current_timestamp - self.__no_messages_reconnect_timeout
             logger.debug('should_reconnect %s %d %d', symbol, self.__latest_symbol_message[symbol], timeout_threshold)
-            if self.__latest_symbol_message[symbol] < timeout_threshold:
-                return True
+            if self.__latest_symbol_message[symbol] > timeout_threshold:
+                return False
 
-        return False
+        return True
 
 
 async def main():
@@ -155,10 +149,13 @@ async def main():
     listen_task = None
     sync_task = None
 
+#     should_run = ENV == "production"
+    should_run = ENV == "test"
+
     while True:
         symbols = set(get_symbols())
 
-        if tracked_symbols != symbols or should_reconnect:
+        if should_run and tracked_symbols != symbols or should_reconnect:
             tracked_symbols = symbols
 
             if listen_task is not None:
@@ -171,8 +168,10 @@ async def main():
             sync_task = asyncio.create_task(listener.sync())
 
         await asyncio.sleep(NO_MESSAGES_RECONNECT_TIMEOUT)
-        should_reconnect = listener.should_reconnect()
-        logger.info("should_reconnect: %d", should_reconnect)
+
+        if should_run:
+            should_reconnect = listener.should_reconnect()
+            logger.info("should_reconnect: %d", should_reconnect)
 
 
 if __name__ == "__main__":

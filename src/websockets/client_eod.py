@@ -1,6 +1,5 @@
 import asyncio
 import websockets
-import logging
 import sys
 import json
 import os
@@ -8,15 +7,12 @@ import time
 import datetime
 import hashlib
 from decimal import Decimal
-from common import get_symbols, persist_records
+from common import get_logger, get_symbols, persist_records
 
 ENV = os.environ["ENV"]
 EOD_API_TOKEN = os.environ["EOD_API_TOKEN"]
 
-logging.basicConfig()
-logger = logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG if ENV == "local" else logging.INFO)
-
+logger = get_logger(__name__)
 
 class PricesListener:
 
@@ -26,7 +22,7 @@ class PricesListener:
         self.symbols = symbols
         self.log_prefix = hashlib.sha1(
             (",".join(symbols)).encode('utf-8')).hexdigest()
-        self.granularity = 10000  # 10 seconds
+        self.granularity = 60000  # 60 seconds
         self.api_token = EOD_API_TOKEN
         self.volume_zero_threshold = 60  # reconnect if receive consequtive 60 buckets with volume 0 (10 minutes of no data)
         self.__init_volume_zero_count()
@@ -198,7 +194,7 @@ class PricesListener:
 
                     del bucket[current_key]
 
-                persist_records(values)
+                persist_records(values, "eod")
 
             except Exception as e:
                 logger.error("[%s] __sync_records: %s", self.log_prefix, e)

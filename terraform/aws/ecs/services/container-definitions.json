@@ -206,7 +206,7 @@
     }
   },
   {
-    "name": "websockets",
+    "name": "websockets_eod",
     "memory": ${websockets_memory_credits},
     "extraHosts": null,
     "dnsServers": null,
@@ -220,14 +220,16 @@
     "ulimits": null,
     "dockerSecurityOptions": null,
     "environment": [
-      { "name": "EOD_API_TOKEN",          "value": "${eodhistoricaldata_api_token}" },
+      { "name": "EOD_API_TOKEN",      "value": "${eodhistoricaldata_api_token}" },
       { "name": "PG_HOST",            "value": "${pg_host}" },
       { "name": "PG_PORT",            "value": "${pg_port}" },
       { "name": "PG_DBNAME",          "value": "${pg_dbname}" },
       { "name": "PG_USERNAME",        "value": "${pg_username}" },
       { "name": "PG_PASSWORD",        "value": "${pg_password}" },
       { "name": "ENV",                "value": "${env}" },
-      { "name": "PUBLIC_SCHEMA_NAME", "value": "${pg_transform_schema}" }
+      { "name": "PUBLIC_SCHEMA_NAME", "value": "${pg_transform_schema}" },
+      { "name": "DD_API_KEY",         "value": "${datadog_api_key}" },
+      { "name": "DD_SITE",            "value": "datadoghq.com" }
     ],
     "links": [],
     "workingDirectory": null,
@@ -244,7 +246,53 @@
       "options": {
         "awslogs-group": "${aws_log_group_name}",
         "awslogs-region": "${aws_log_region}",
-        "awslogs-stream-prefix": "websockets"
+        "awslogs-stream-prefix": "websockets_eod"
+      }
+    }
+  },
+  {
+    "name": "websockets_polygon",
+    "memory": ${websockets_memory_credits},
+    "extraHosts": null,
+    "dnsServers": null,
+    "disableNetworking": null,
+    "dnsSearchDomains": null,
+    "portMappings": [],
+    "hostname": null,
+    "essential": true,
+    "entryPoint": [],
+    "mountPoints": [],
+    "ulimits": null,
+    "dockerSecurityOptions": null,
+    "environment": [
+      { "name": "POLYGON_API_TOKEN",               "value": "${polygon_api_token}" },
+      { "name": "POLYGON_REALTIME_STREAMING_HOST", "value": "${polygon_realtime_streaming_host}" },
+      { "name": "PG_HOST",                         "value": "${pg_host}" },
+      { "name": "PG_PORT",                         "value": "${pg_port}" },
+      { "name": "PG_DBNAME",                       "value": "${pg_dbname}" },
+      { "name": "PG_USERNAME",                     "value": "${pg_username}" },
+      { "name": "PG_PASSWORD",                     "value": "${pg_password}" },
+      { "name": "ENV",                             "value": "${env}" },
+      { "name": "PUBLIC_SCHEMA_NAME",              "value": "${pg_transform_schema}" },
+      { "name": "DD_API_KEY",                      "value": "${datadog_api_key}" },
+      { "name": "DD_SITE",                         "value": "datadoghq.com" }
+    ],
+    "links": [],
+    "workingDirectory": null,
+    "readonlyRootFilesystem": null,
+    "image": "${websockets_image}",
+    "command": [],
+    "user": null,
+    "dockerLabels": null,
+    "cpu": null,
+    "privileged": null,
+    "memoryReservation": null,
+    "logConfiguration": {
+      "logDriver": "awslogs",
+      "options": {
+        "awslogs-group": "${aws_log_group_name}",
+        "awslogs-region": "${aws_log_region}",
+        "awslogs-stream-prefix": "websockets_polygon"
       }
     }
   }
