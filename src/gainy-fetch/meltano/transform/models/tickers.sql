@@ -13,7 +13,7 @@
 with volumes as (
          select code as symbol, avg(volume) as avg_volume
          from {{ source('eod', 'eod_historical_prices') }}
-         where "date"::date >= NOW() - interval '90 days'
+         where "date"::date >= NOW() - interval '30 days'
          group by code
      ),
      latest_price as (
@@ -30,5 +30,5 @@ where v.avg_volume is not null
   and t.description is not null
   and length (t.description) >= 5
   and latest_price.date is not null
-  and latest_price.date::date >= now() - interval '90 days'
+  and latest_price.date::date >= now() - interval '7 days'
 
