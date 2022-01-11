@@ -82,19 +82,20 @@ class PricesListener:
                                                   StreamCluster.STOCKS,
                                                   host=self.host)
 
-        await stream_client.subscribe_stock_minute_aggregates(
-            list(self.symbols), self.handle_message)
+        try:
+            await stream_client.subscribe_stock_minute_aggregates(
+                list(self.symbols), self.handle_message)
 
-        while 1:
-            try:
-                await stream_client.handle_messages(
-                    reconnect=True, max_reconnection_attempts=100)
-            except Exception as e:
-                logger.error("%s Error caught in start func: %s",
-                             type(e).__name__, str(e))
-                await asyncio.sleep(90)
-
-        logger.error("reached the end of start func")
+            while 1:
+                try:
+                    await stream_client.handle_messages(
+                        reconnect=True, max_reconnection_attempts=100)
+                except Exception as e:
+                    logger.error("%s Error caught in start func: %s",
+                                 type(e).__name__, str(e))
+                    await asyncio.sleep(90)
+        finally:
+            await stream_client.close_stream()
 
     async def sync(self):
         while True:
