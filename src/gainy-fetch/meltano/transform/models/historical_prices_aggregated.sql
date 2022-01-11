@@ -14,12 +14,12 @@
 {% if is_incremental() and var('realtime') %}
 with period_settings as
          (
-             select date_trunc('minute', now()) -
+             select date_trunc('minute', now()) - interval '30 minute' -
                     interval '1 minute' *
-                    mod(extract(minutes from now())::int, 15) as period_end,
+                    mod(extract(minutes from now())::int, 15) as period_start,
                     date_trunc('minute', now()) - interval '15 minute' -
                     interval '1 minute' *
-                    mod(extract(minutes from now())::int, 15) as period_start
+                    mod(extract(minutes from now())::int, 15) as period_end
          ),
      expanded_intraday_prices as
          (
@@ -57,7 +57,7 @@ with period_settings as
                                          symbol
              from {{ this }}
              where period = '15min'
-               and datetime > now() - interval '1 hour'
+               and datetime > now() - interval '4 days'
              order by symbol, datetime desc
          )
 select (tickers.symbol || '_' ||

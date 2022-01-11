@@ -177,14 +177,14 @@ services:
 
     command: [ "hasura_handler.handle_action" ]
 
-  websockets:
+  websockets_eod:
     build:
       context: ./src/websockets
     restart: always
     volumes:
       - ./src/websockets:/srv
     environment:
-      API_TOKEN: "OeAFFmMliFG5orCUuwAKQ8l4WWFQ67YX"
+      EOD_API_TOKEN: "OeAFFmMliFG5orCUuwAKQ8l4WWFQ67YX"
       PG_HOST: "${PG_ADDRESS}"
       PG_PORT: "${PG_PORT}"
       PG_DBNAME: "${PG_DATABASE}"
@@ -192,6 +192,29 @@ services:
       PG_PASSWORD: "${PG_PASSWORD}"
       ENV: "local"
       PUBLIC_SCHEMA_NAME: public
+      DD_API_KEY: "${DATADOG_API_KEY}"
+      DD_SITE: "datadoghq.com"
+    command: ["client_eod.py"]
+
+  websockets_polygon:
+    build:
+      context: ./src/websockets
+    restart: always
+    volumes:
+      - ./src/websockets:/srv
+    environment:
+      POLYGON_API_TOKEN: "${POLYGON_API_TOKEN}"
+      POLYGON_REALTIME_STREAMING_HOST: "delayed.polygon.io" # socket.polygon.io for real-time
+      PG_HOST: "${PG_ADDRESS}"
+      PG_PORT: "${PG_PORT}"
+      PG_DBNAME: "${PG_DATABASE}"
+      PG_USERNAME: "${PG_USERNAME}"
+      PG_PASSWORD: "${PG_PASSWORD}"
+      ENV: "local"
+      PUBLIC_SCHEMA_NAME: public
+      DD_API_KEY: "${DATADOG_API_KEY}"
+      DD_SITE: "datadoghq.com"
+    command: ["client_polygon.py"]
 
 volumes:
   db_data:

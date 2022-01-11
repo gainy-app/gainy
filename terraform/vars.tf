@@ -80,6 +80,13 @@ variable "datadog_api_url" {
   type = string
 }
 
+#################################### Polygon ####################################
+
+variable "polygon_api_token" {
+  type      = string
+  sensitive = true
+}
+
 #################################### Algolia ####################################
 
 variable "algolia_app_id" {

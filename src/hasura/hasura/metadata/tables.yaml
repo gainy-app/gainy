@@ -1749,6 +1749,19 @@
       filter: {}
 - table:
     schema: public
+    name: ticker_metrics_transposed
+  select_permissions:
+  - role: user
+    permission:
+      columns:
+      - metric_id
+      - symbol
+      - value_bigint
+      - value_double
+      - value_string
+      filter: {}
+- table:
+    schema: public
     name: ticker_realtime_metrics
   select_permissions:
   - role: anonymous
@@ -1809,6 +1822,15 @@
         remote_table:
           schema: public
           name: historical_growth_rate
+        insertion_order: null
+        column_mapping:
+          symbol: symbol
+  - name: metrics_transposed
+    using:
+      manual_configuration:
+        remote_table:
+          schema: public
+          name: ticker_metrics_transposed
         insertion_order: null
         column_mapping:
           symbol: symbol
