@@ -166,8 +166,7 @@ async def main():
     listen_task = None
     sync_task = None
 
-    #     should_run = ENV == "production"
-    should_run = ENV == "test"
+    should_run = ENV == "production"
 
     while True:
         symbols = set(get_symbols())
