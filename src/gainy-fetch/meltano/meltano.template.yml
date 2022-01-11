@@ -19,6 +19,16 @@ plugins:
           kind: array
         - name: split_id
         - name: split_num
+    - name: tap-polygon
+      namespace: tap_polygon
+      pip_url: /tap-polygon
+      executable: tap-polygon
+      capabilities:
+        - discover
+        - catalog
+        - state
+      settings:
+        - name: api_key
     - name: tap-csv
       config:
         files:
@@ -40,6 +50,9 @@ plugins:
           - entity: gainy_countries
             path: data/countries.csv # https://github.com/lukes/ISO-3166-Countries-with-Regional-Codes/blob/master/all/all.json
             keys: [ "name", "alpha-2", "alpha-3" ]
+          - entity: exchanges
+            path: data/exchanges.csv
+            keys: [ "name" ]
     - name: tap-postgres--sync
       inherit_from: tap-postgres
       catalog: configs/raw-sync/tap.catalog.json
@@ -79,7 +92,14 @@ schedules:
   - name: csv-to-postgres
     extractor: tap-csv
     loader: target-postgres
-    transform: run
+    transform: skip
+    interval: '@daily'
+    start_date: 2021-09-03 13:52:48.598227
+
+  - name: polygon-to-postgres
+    extractor: tap-polygon
+    loader: target-postgres
+    transform: skip
     interval: '@daily'
     start_date: 2021-09-03 13:52:48.598227
 
@@ -95,7 +115,7 @@ schedules:
   - name: eodhistoricaldata-to-postgres-0
     extractor: tap-eodhistoricaldata
     loader: target-postgres
-    transform: run
+    transform: skip
     interval: '@daily'
     start_date: 2021-06-17 10:40:58.742133
     env:

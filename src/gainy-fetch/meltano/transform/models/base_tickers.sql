@@ -18,6 +18,7 @@ select (general ->> 'Code')::character varying           as symbol,
        (general ->> 'GicGroup')::character varying       as gic_group,
        (general ->> 'GicIndustry')::character varying    as gic_industry,
        (general ->> 'GicSubIndustry')::character varying as gic_sub_industry,
+       (general ->> 'Exchange')::character varying       as exchange,
        -- TODO while this is good enough for Europe, China and LatAm - other countries should be rechecked.
        --  For instance "South Korea" is not the official name, as well as "United States"
        coalesce(

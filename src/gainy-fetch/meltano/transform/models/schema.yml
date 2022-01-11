@@ -12,6 +12,7 @@ sources:
       - name: gainy_interests
       - name: gainy_countries
       - name: auto_ticker_industries
+      - name: exchanges
 
   - name: eod
     description: Financial data from https://eodhistoricaldata.com/
@@ -22,6 +23,12 @@ sources:
       - name: eod_options
       - name: eod_historical_prices
       - name: eod_intraday_prices
+
+  - name: polygon
+    description: Financial data from https://polygon.io/
+    schema: raw_data
+    tables:
+      - name: polygon_marketstatus_upcoming
 
   - name: app
     description: Mobile App data, managed by hasura
