@@ -744,6 +744,36 @@
       filter: {}
 - table:
     schema: public
+    name: chart
+  select_permissions:
+  - role: anonymous
+    permission:
+      columns:
+      - period
+      - symbol
+      - adjusted_close
+      - close
+      - high
+      - low
+      - open
+      - volume
+      - datetime
+      filter: {}
+  - role: user
+    permission:
+      columns:
+      - symbol
+      - datetime
+      - period
+      - open
+      - high
+      - low
+      - close
+      - adjusted_close
+      - volume
+      filter: {}
+- table:
+    schema: public
     name: gainy_industries
   array_relationships:
   - name: industry_stats_dailies

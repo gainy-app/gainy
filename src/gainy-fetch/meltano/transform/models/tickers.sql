@@ -2,9 +2,11 @@
 
 {{
   config(
-    materialized = "table",
+    materialized = "incremental",
+    unique_key = "symbol",
     post_hook=[
       index(this, 'symbol', true),
+      'delete from {{this}} where updated_at < (select max(updated_at) from {{this}})::date',
     ]
   )
 }}
@@ -20,7 +22,23 @@ with volumes as (
          from {{ source('eod', 'eod_historical_prices') }}
          group by code
      )
-select t.*
+select t.symbol,
+       t.type,
+       t.name,
+       t.description,
+       t.phone,
+       t.logo_url,
+       t.web_url,
+       t.ipo_date,
+       t.sector,
+       t.industry,
+       t.gic_sector,
+       t.gic_group,
+       t.gic_industry,
+       t.gic_sub_industry,
+       t.exchange,
+       t.country_name,
+       now()::timestamp as updated_at
 from {{ ref('base_tickers') }} t
     join volumes v on t.symbol = v.symbol
     join latest_price on t.symbol = latest_price.symbol

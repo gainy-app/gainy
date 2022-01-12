@@ -723,6 +723,54 @@ models:
           - type:
               type: 'double precision'
 
+  - name: chart
+    columns:
+      - name: symbol
+        tests:
+          - exists
+          - type:
+              type: 'character varying'
+      - name: period
+        tests:
+          - exists
+          - type:
+              type: 'character varying'
+      - name: datetime
+        tests:
+          - exists
+          - type:
+              type: 'timestamp without time zone'
+      - name: open
+        tests:
+          - exists
+          - type:
+              type: 'double precision'
+      - name: high
+        tests:
+          - exists
+          - type:
+              type: 'double precision'
+      - name: low
+        tests:
+          - exists
+          - type:
+              type: 'double precision'
+      - name: close
+        tests:
+          - exists
+          - type:
+              type: 'double precision'
+      - name: adjusted_close
+        tests:
+          - exists
+          - type:
+              type: 'double precision'
+      - name: volume
+        tests:
+          - exists
+          - type:
+              type: 'double precision'
+
   - name: industry_median_1m
     columns:
       - name: industry_id

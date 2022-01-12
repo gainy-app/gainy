@@ -1,5 +1,25 @@
 ### Chart
 
+periods: 1d, 1w, 1m, 3m, 1y, 5y, all
+
+```GraphQL
+{
+    chart(where: {symbol: {_eq: "AAPL"}, period: {_eq: "1d"}}) {
+        symbol
+        volume
+        period
+        open
+        low
+        high
+        datetime
+        close
+        adjusted_close
+    }
+}
+```
+
+### Chart (raw)
+
 periods: 15min, 1d, 1w, 1m
 
 ```GraphQL
@@ -17,36 +37,6 @@ periods: 15min, 1d, 1w, 1m
     }
 }
 ```
-
-### Intra-day Chart
-
-Firstly we'll need to know exchange's schedule for the past couple of days:
-```GraphQL
-{
-    exchange_schedule(order_by: {date: desc}, where: {date: {_lte: "2022-01-11", _gte: "2022-01-04"}}) {
-        date
-        exchange_name
-        open_at
-        close_at
-    }
-}
-```
-
-Then having the ticker exchange, we can extract the schedule for a particular day:
-```GraphQL
-{
-    tickers{
-        exchange
-    }
-}
-```
-
-General rules:
-- if a date is not present in `exchange_schedule`, then the market is closed on that date;
-- if a date is present - then the market is open from `open_at` to `close_at`
-- when a user opens the stock screen, we need to find the latest record in `exchange_schedule` with appropriate `exchange` and `open_at` less then `now()`
-- having this record we need to make a request to `historical_prices_aggregated`, which will return either the latest open trading session of current one (incomplete)
-- I would suggest requesting exchange_schedule on the app start and caching it, then implement the logic above to work with cached values
 
 ### Realtime prices
 
