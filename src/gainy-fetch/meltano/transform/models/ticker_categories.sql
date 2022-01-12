@@ -9,6 +9,9 @@
   )
 }}
 
+WITH common_stocks AS (
+    SELECT * FROM {{ ref('tickers') }} WHERE "type" = 'Common Stock'
+)
 (
     WITH downside_deviation_stats AS
              (
@@ -20,7 +23,7 @@
              )
     select c.id as category_id,
            t.symbol
-    from {{ ref('tickers') }} t
+    from common_stocks t
              join {{ ref('categories') }} c ON c.name = 'Defensive'
              JOIN {{ ref('technicals') }} t2 on t.symbol = t2.symbol
              JOIN downside_deviation_stats on downside_deviation_stats.gic_sector = t.gic_sector
@@ -48,7 +51,7 @@ UNION
              )
     select c.id as category_id,
            t.symbol
-    from {{ ref('tickers') }} t
+    from common_stocks t
              join {{ ref('categories') }} c ON c.name = 'Speculation'
              JOIN {{ ref('technicals') }} t2 on t.symbol = t2.symbol
              JOIN {{ source('eod', 'eod_fundamentals') }} f ON f.code = t.symbol
@@ -71,7 +74,7 @@ UNION
 (
     select c.id as category_id,
            t.symbol
-    from {{ ref('tickers') }} t
+    from common_stocks t
              join {{ ref('categories') }} c ON c.name = 'Penny'
              LEFT JOIN {{ ref('historical_prices') }} hp on t.symbol = hp.code
              LEFT JOIN {{ ref('historical_prices') }} hp_next on t.symbol = hp_next.code AND hp_next.date::timestamp > hp.date::timestamp
@@ -104,7 +107,7 @@ UNION
          )
     select c.id     as category_id,
            t.symbol as ticker_symbol
-    from {{ ref('tickers') }} t
+    from common_stocks t
              join {{ ref('categories') }} c ON c.name = 'Dividend'
              join last_five_years_dividends lfyd ON lfyd.code = t.symbol
              join last_sixty_months_dividends lsmd ON lsmd.code = t.symbol
@@ -120,7 +123,7 @@ UNION
 (
     select c.id as category_id,
            t.symbol
-    from {{ ref('tickers') }} t
+    from common_stocks t
              join {{ ref('categories') }} c ON c.name = 'Momentum'
              join {{ ref('technicals') }} ON technicals.symbol = t.symbol
     WHERE technicals.combined_momentum_score > 0
@@ -129,7 +132,7 @@ UNION
 (
     select c.id as category_id,
            t.symbol
-    from {{ ref('tickers') }} t
+    from common_stocks t
              join {{ ref('categories') }} c ON c.name = 'Value'
              join {{ ref('technicals') }} ON technicals.symbol = t.symbol
     WHERE technicals.value_score > 0
@@ -139,7 +142,7 @@ UNION
 (
     select c.id as category_id,
            t.symbol
-    from {{ ref('tickers') }} t
+    from common_stocks t
              join {{ ref('categories') }} c ON c.name = 'Growth'
              join {{ ref('technicals') }} ON technicals.symbol = t.symbol
     WHERE technicals.value_score < 0
