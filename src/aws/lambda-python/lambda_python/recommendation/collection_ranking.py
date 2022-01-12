@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 import math
 
-from recommendation.core.dim_vector import DimVector
+from recommendation.core.dim_vector import DimVector, NamedDimVector
 from recommendation.core.normalization import double_normalization_k
 
 
@@ -22,7 +22,7 @@ class CollectionRanking(ABC):
     algorithm.
     """
 
-    def rank(self, profile_v: DimVector, collection_vs: list[DimVector],
+    def rank(self, profile_v: NamedDimVector, collection_vs: list[NamedDimVector],
              **params) -> list[RankedItem]:
         ranked_items = list(
             map(
@@ -34,7 +34,7 @@ class CollectionRanking(ABC):
         return ranked_items
 
     @abstractmethod
-    def rank_score(self, profile_v: DimVector, collection_v: DimVector,
+    def rank_score(self, profile_v: DimVector, collection_v: NamedDimVector,
                    **params) -> float:
         pass
 
@@ -45,7 +45,7 @@ class TFCollectionRanking(CollectionRanking):
     with no normalization.
     """
 
-    def rank_score(self, profile_v: DimVector, collection_v: DimVector,
+    def rank_score(self, profile_v: NamedDimVector, collection_v: NamedDimVector,
                    **params) -> float:
         return profile_v.cosine_similarity(collection_v)
 
@@ -76,7 +76,7 @@ class TFIDFWithNorm1_5CollectionRanking(CollectionRanking):
     gives more intuitive ranking results, as well as better metrics for the existing users.
     """
 
-    def rank_score(self, profile_v: DimVector, collection_v: DimVector,
+    def rank_score(self, profile_v: NamedDimVector, collection_v: NamedDimVector,
                    **params) -> float:
         df = params['df']
         corpus_size = params['size']
@@ -90,7 +90,7 @@ class TFIDFWithNorm1_5CollectionRanking(CollectionRanking):
     @staticmethod
     def _similarity(norm_profile_v, norm_collection_v):
         return norm_profile_v.cosine_similarity(norm_collection_v,
-                                                norm_order=1.5)
+                                                norm_order=1)
 
     @staticmethod
     def _normalize_profile_vector(profile_v: DimVector) -> DimVector:
@@ -115,3 +115,22 @@ class TFIDFWithNorm1_5CollectionRanking(CollectionRanking):
             new_coordinates[dim] = tf * idf
 
         return DimVector(new_coordinates)
+
+
+class MatchScoreCollectionRanking(CollectionRanking):
+
+    def rank_score(self, profile_v: NamedDimVector, collection_v: NamedDimVector,
+                   **params) -> float:
+
+        ticker_match_scores = params['ticker_match_scores']
+        collection_tickers_map = params['collection_tickers']
+
+        tickers = collection_tickers_map.get(collection_v.name, [])
+        if not tickers:
+            return 0.0
+
+        collection_score_sum = 0
+        for ticker in tickers:
+            collection_score_sum += ticker_match_scores.get(ticker, 0)
+
+        return collection_score_sum / len(tickers)

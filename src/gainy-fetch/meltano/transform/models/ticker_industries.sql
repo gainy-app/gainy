@@ -40,8 +40,8 @@ industries_2 as (
 ),
 all_industries as (
     select symbol, industry_id, 1 as industry_order from industries_1
---         union
---     select symbol, industry_id, 2 as industry_order from industries_2
+        union
+    select symbol, industry_id, 2 as industry_order from industries_2
 )
 select ai.symbol, industry_id, industry_order
 from all_industries ai
