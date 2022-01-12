@@ -9,7 +9,10 @@
   )
 }}
 
-with manual_industries as (
+with common_stocks as (
+    select * from {{ ref('tickers') }} where type = 'Common Stock'
+),
+manual_industries as (
     select code as symbol, cast (id as integer) as industry_id_0
     from {{ source('gainy', 'gainy_ticker_industries') }} gti
         join {{ ref('gainy_industries') }} gi
@@ -36,9 +39,11 @@ industries_2 as (
     from tickers_with_industries
 ),
 all_industries as (
-    select symbol, industry_id from industries_1
+    select symbol, industry_id, 1 as industry_order from industries_1
+        union
+    select symbol, industry_id, 2 as industry_order from industries_2
 )
-select ai.symbol, industry_id
+select ai.symbol, industry_id, industry_order
 from all_industries ai
-         join {{ ref ('tickers') }} t
-              on ai.symbol = t.symbol
+         join common_stocks cs
+              on ai.symbol = cs.symbol
