@@ -812,6 +812,34 @@ models:
           - type:
               type: 'double precision'
 
+  - name: ticker_metrics_transposed
+    columns:
+      - name: symbol
+        tests:
+          - exists
+          - type:
+              type: 'character varying'
+      - name: metric_id
+        tests:
+          - exists
+          - type:
+              type: 'character varying'
+      - name: value_double
+        tests:
+          - exists
+          - type:
+              type: 'double precision'
+      - name: value_string
+        tests:
+          - exists
+          - type:
+              type: 'character varying'
+      - name: value_bigint
+        tests:
+          - exists
+          - type:
+              type: 'bigint'
+
   - name: ticker_metrics
     columns:
       - name: symbol
