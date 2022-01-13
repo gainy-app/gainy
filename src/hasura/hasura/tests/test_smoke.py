@@ -43,7 +43,7 @@ def make_request(method, url, post_data=None, headers={}):
         if response_data is not None:
             logger.error("Response: %s" % response_data)
 
-        if 'errors' in response_data:
+        if response_data is not None and 'errors' in response_data:
             messages = [i['message'] for i in response_data['errors']]
             raise Exception("Failed: %s" % json.dumps(messages))
         elif response.reason != 'OK':
