@@ -4,8 +4,8 @@ import logging
 import threading
 import os
 
-LAMBDA_PYTHON_ACTION_HOST = os.getenv('LAMBDA_PYTHON_ACTION_HOST') # lambda-python-action
-LAMBDA_PYTHON_TRIGGER_HOST = os.getenv('LAMBDA_PYTHON_TRIGGER_HOST') # lambda-python-trigger
+LAMBDA_PYTHON_ACTION_HOST = os.getenv('LAMBDA_PYTHON_ACTION_HOST')
+LAMBDA_PYTHON_TRIGGER_HOST = os.getenv('LAMBDA_PYTHON_TRIGGER_HOST')
 
 logging.basicConfig()
 logger = logging.getLogger(__name__)
@@ -28,7 +28,8 @@ def proxy_python_hasura_action():
     try:
         with lock:
             resp = requests.post(
-                "http://%s:8080/2015-03-31/functions/function/invocations" % (LAMBDA_PYTHON_ACTION_HOST),
+                "http://%s:8080/2015-03-31/functions/function/invocations" %
+                (LAMBDA_PYTHON_ACTION_HOST),
                 json=request.get_json(),
                 headers=request.headers)
     except Exception as e:
@@ -51,7 +52,8 @@ def proxy_python_hasura_trigger():
     try:
         with lock:
             resp = requests.post(
-                "http://%s:8080/2015-03-31/functions/function/invocations" % (LAMBDA_PYTHON_TRIGGER_HOST),
+                "http://%s:8080/2015-03-31/functions/function/invocations" %
+                (LAMBDA_PYTHON_TRIGGER_HOST),
                 json=data,
                 headers=request.headers)
     except Exception as e:
