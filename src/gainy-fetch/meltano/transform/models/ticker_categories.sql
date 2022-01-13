@@ -1,10 +1,11 @@
 {{
   config(
-    materialized = "table",
+    materialized = "incremental",
+    unique_key = "id",
     post_hook=[
-      fk(this, 'category_id', this.schema, 'categories', 'id'),
-      fk(this, 'symbol', this.schema, 'tickers', 'symbol'),
+      index(this, 'id', true),
       'create unique index if not exists {{ get_index_name(this, "symbol__category_id") }} (symbol, category_id)',
+      'delete from {{this}} where updated_at < (select max(updated_at) from {{this}})',
     ]
   )
 }}
@@ -21,8 +22,10 @@ WITH common_stocks AS (
                           JOIN {{ ref('tickers') }} ON tickers.symbol = technicals.symbol
                  GROUP BY tickers.gic_sector
              )
-    select c.id as category_id,
-           t.symbol
+    select concat(c.id, '_', t.symbol)::varchar as id,
+           c.id as category_id,
+           t.symbol,
+           now()::timestamp as updated_at
     from common_stocks t
              join {{ ref('categories') }} c ON c.name = 'Defensive'
              JOIN {{ ref('technicals') }} t2 on t.symbol = t2.symbol
@@ -49,8 +52,10 @@ UNION
                  WHERE expirationdate::timestamp > NOW()
                  GROUP BY code
              )
-    select c.id as category_id,
-           t.symbol
+    select concat(c.id, '_', t.symbol)::varchar as id,
+           c.id             as category_id,
+           t.symbol,
+           now()::timestamp as updated_at
     from common_stocks t
              join {{ ref('categories') }} c ON c.name = 'Speculation'
              JOIN {{ ref('technicals') }} t2 on t.symbol = t2.symbol
@@ -64,16 +69,20 @@ UNION
 )
 UNION
 (
-    select c.id as category_id,
-           t.symbol
+    select concat(c.id, '_', t.symbol)::varchar as id,
+           c.id             as category_id,
+           t.symbol,
+           now()::timestamp as updated_at
     from {{ ref('tickers') }} t
              join {{ ref('categories') }} c ON c.name = 'ETF'
     WHERE t.type = 'ETF'
 )
 UNION
 (
-    select c.id as category_id,
-           t.symbol
+    select concat(c.id, '_', t.symbol)::varchar as id,
+           c.id             as category_id,
+           t.symbol,
+           now()::timestamp as updated_at
     from common_stocks t
              join {{ ref('categories') }} c ON c.name = 'Penny'
              LEFT JOIN {{ ref('historical_prices') }} hp on t.symbol = hp.code
@@ -105,8 +114,10 @@ UNION
              WHERE eh.date::timestamp > NOW() - interval '5 years'
              GROUP BY eh.symbol
          )
-    select c.id     as category_id,
-           t.symbol as ticker_symbol
+    select concat(c.id, '_', t.symbol)::varchar as id,
+           c.id             as category_id,
+           t.symbol,
+           now()::timestamp as updated_at
     from common_stocks t
              join {{ ref('categories') }} c ON c.name = 'Dividend'
              join last_five_years_dividends lfyd ON lfyd.code = t.symbol
@@ -121,8 +132,10 @@ UNION
 )
 UNION
 (
-    select c.id as category_id,
-           t.symbol
+    select concat(c.id, '_', t.symbol)::varchar as id,
+           c.id             as category_id,
+           t.symbol,
+           now()::timestamp as updated_at
     from common_stocks t
              join {{ ref('categories') }} c ON c.name = 'Momentum'
              join {{ ref('technicals') }} ON technicals.symbol = t.symbol
@@ -130,8 +143,10 @@ UNION
 )
 UNION
 (
-    select c.id as category_id,
-           t.symbol
+    select concat(c.id, '_', t.symbol)::varchar as id,
+           c.id             as category_id,
+           t.symbol,
+           now()::timestamp as updated_at
     from common_stocks t
              join {{ ref('categories') }} c ON c.name = 'Value'
              join {{ ref('technicals') }} ON technicals.symbol = t.symbol
@@ -140,8 +155,10 @@ UNION
 )
 UNION
 (
-    select c.id as category_id,
-           t.symbol
+    select concat(c.id, '_', t.symbol)::varchar as id,
+           c.id             as category_id,
+           t.symbol,
+           now()::timestamp as updated_at
     from common_stocks t
              join {{ ref('categories') }} c ON c.name = 'Growth'
              join {{ ref('technicals') }} ON technicals.symbol = t.symbol
