@@ -176,8 +176,8 @@ class MatchScoreExplainer:
             interest_similarity, MatchScoreComponent.INTEREST)
 
         return MatchScoreExplanation(risk_level, risk_similarity,
-                                     category_level, category_matches,
-                                     interest_level, interest_matches)
+                                     category_level, category_matches if category_level.value > 0 else [],
+                                     interest_level, interest_matches if interest_level.value > 0 else [])
 
 
 class MatchScore:

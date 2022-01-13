@@ -176,6 +176,33 @@ def read_collection_tickers(db_conn, profile_id: str,
         return list(map(itemgetter(0), cursor.fetchall()))
 
 
+def read_collection_match_scores(db_conn, profile_id: str) -> Dict[str, float]:
+    with open(os.path.join(script_dir, "sql/collection_ranking_scores.sql")) as _collection_ranking_scores_query_file:
+        _collection_ranking_scores_query = _collection_ranking_scores_query_file.read()
+
+    with db_conn.cursor() as cursor:
+        cursor.execute(
+            _collection_ranking_scores_query,
+            {"profile_id": profile_id}
+        )
+
+        return dict(cursor.fetchall())
+
+
+def read_ticker_match_scores(db_conn, profile_id: str, symbols: List[str]) -> list:
+    _ticker_match_scores_query = """select symbol, match_score, fits_risk, risk_similarity, fits_categories, category_matches, fits_interests, interest_matches
+    from app.profile_ticker_match_view
+    where profile_id = %(profile_id)s and symbol in %(symbols)s;"""
+
+    with db_conn.cursor() as cursor:
+        cursor.execute(
+            _ticker_match_scores_query,
+            {"profile_id": profile_id, "symbols": tuple(symbols)}
+        )
+
+        return list(cursor.fetchall())
+
+
 def is_collection_enabled(db_conn, profile_id: str,
                           collection_id: str) -> bool:
     with db_conn.cursor() as cursor:

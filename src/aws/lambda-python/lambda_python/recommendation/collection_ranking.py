@@ -122,15 +122,5 @@ class MatchScoreCollectionRanking(CollectionRanking):
     def rank_score(self, profile_v: NamedDimVector, collection_v: NamedDimVector,
                    **params) -> float:
 
-        ticker_match_scores = params['ticker_match_scores']
-        collection_tickers_map = params['collection_tickers']
-
-        tickers = collection_tickers_map.get(collection_v.name, [])
-        if not tickers:
-            return 0.0
-
-        collection_score_sum = 0
-        for ticker in tickers:
-            collection_score_sum += ticker_match_scores.get(ticker, 0)
-
-        return collection_score_sum / len(tickers)
+        collection_match_scores = params['collection_match_scores']
+        return collection_match_scores.get(collection_v.name, 0)
