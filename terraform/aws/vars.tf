@@ -38,7 +38,7 @@ locals {
   hasura_cpu_credits            = var.env == "production" ? 512 : 256
   meltano_scheduler_cpu_credits = var.env == "production" ? 3072 : 512
 
-  hasura_healthcheck_interval = var.env == "production" ? 90 : 150
+  hasura_healthcheck_interval = var.env == "production" ? 90 : 120
   hasura_healthcheck_retries  = var.env == "production" ? 10 : 10
 
   websockets_memory_credits = 512
