@@ -1,9 +1,11 @@
 {{
   config(
-    materialized = "table",
+    materialized = "incremental",
+    unique_key = "uniq_id",
     post_hook=[
       index(this, 'id', true),
       index(this, 'uniq_id', true),
+      'delete from {{this}} where updated_at < (select max(updated_at) from {{this}})',
     ]
   )
 }}
@@ -100,7 +102,8 @@ with normalized_transactions as
                   ) t
          )
 
-select *
+select *,
+       now() as updated_at
 from mismatched_sell_transactions
 
 union all
@@ -124,7 +127,8 @@ union all
           security_id,
           profile_id,
           account_id,
-          diff                                                                         as quantity_norm
+          diff                                                                         as quantity_norm,
+          now() as updated_at
     from (
              select distinct on (
                  profile_holdings_normalized.account_id, profile_holdings_normalized.security_id
@@ -169,5 +173,6 @@ select id,
        security_id,
        profile_id,
        account_id,
-       quantity_norm
+       quantity_norm,
+       now() as updated_at
 from normalized_transactions

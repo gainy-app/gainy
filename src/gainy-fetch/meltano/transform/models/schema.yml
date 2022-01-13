@@ -1505,6 +1505,7 @@ models:
           - exists
           - type:
               type: 'double precision'
+
   - name: portfolio_holding_group_details
     columns:
       - name: profile_id
