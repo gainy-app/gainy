@@ -110,6 +110,8 @@ resource "aws_ecs_task_definition" "default" {
       hasura_image                    = docker_registry_image.hasura.name
       hasura_memory_credits           = var.hasura_memory_credits
       hasura_cpu_credits              = var.hasura_cpu_credits
+      hasura_healthcheck_interval     = var.hasura_healthcheck_interval
+      hasura_healthcheck_retries      = var.hasura_healthcheck_retries
 
       websockets_memory_credits = var.websockets_memory_credits
       websockets_image          = docker_registry_image.websockets.name

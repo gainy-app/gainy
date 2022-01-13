@@ -44,8 +44,8 @@
     "memoryReservation": null,
     "healthCheck": {
       "command": [ "CMD-SHELL", "pytest tests/test_smoke.py || exit 1" ],
-      "interval": 150,
-      "retries": 2
+      "interval": ${hasura_healthcheck_interval},
+      "retries": ${hasura_healthcheck_retries}
     },
     "logConfiguration": {
       "logDriver": "awslogs",
