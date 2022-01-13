@@ -36,6 +36,7 @@ select t.symbol,
        t.gic_group,
        t.gic_industry,
        t.gic_sub_industry,
+       t.exchange,
        t.country_name,
        now()::timestamp as updated_at
 from {{ ref('base_tickers') }} t
@@ -47,4 +48,3 @@ where v.avg_volume is not null
   and length (t.description) >= 5
   and latest_price.date is not null
   and latest_price.date::date >= now() - interval '7 days'
-
