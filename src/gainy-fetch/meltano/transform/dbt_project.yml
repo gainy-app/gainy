@@ -22,5 +22,6 @@ clean-targets:
 - dbt_modules
 - logs
 models:
+  +on_schema_change: "sync_all_columns"
 vars:
   realtime: false

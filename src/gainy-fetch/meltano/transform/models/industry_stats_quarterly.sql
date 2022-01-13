@@ -1,15 +1,16 @@
 {{
   config(
-    materialized = "table",
+    materialized = "incremental",
+    unique_key = "id",
     post_hook=[
       index(this, 'industry_id'),
       index(this, 'date'),
-      fk(this, 'industry_id', this.schema, 'gainy_industries', 'id'),
     ]
   )
 }}
 
-select fisq.date::timestamp,
+select concat(ti.industry_id, '_', fisq.date::timestamp)::varchar as id,
+       fisq.date::timestamp,
        ti.industry_id,
        percentile_cont(0.5) WITHIN GROUP (ORDER BY net_income)    as median_net_income,
        percentile_cont(0.5) WITHIN GROUP (ORDER BY total_revenue) as median_revenue
