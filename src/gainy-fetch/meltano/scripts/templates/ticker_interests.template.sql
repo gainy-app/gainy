@@ -1,9 +1,11 @@
 {{
   config(
-    materialized = "table",
+    materialized = "incremental",
+    unique_key = "id",
     post_hook=[
-      fk(this, 'interest_id', this.schema, 'interests', 'id'),
+      index(this, 'id', true),
       'create unique index if not exists {{ get_index_name(this, "symbol__interest_id") }} (symbol, interest_id)',
+      'delete from {{this}} where updated_at < (select max(updated_at) from {{this}})',
     ]
   )
 }}
@@ -51,7 +53,10 @@ with latest_price AS
          (
 -- __SELECT__ --
          )
-SELECT distinct t2.symbol, interest_id
+SELECT distinct concat(t2.symbol, '_', interest_id)::varchar as id,
+                t2.symbol,
+                interest_id,
+                now() as updated_at
 from tmp_ticker_interests
     join {{ ref ('tickers') }} t2 on tmp_ticker_interests.symbol = t2.symbol
     join {{ ref ('interests') }} c2 on tmp_ticker_interests.interest_id = c2.id

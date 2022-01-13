@@ -1,9 +1,11 @@
 {{
   config(
-    materialized = "table",
+    materialized = "incremental",
+    unique_key = "id",
     post_hook=[
+      index(this, 'id', true),
       index(this, 'symbol', false),
-      fk(this, 'symbol', this.schema, 'tickers', 'symbol')
+      'delete from {{this}} where created_at < (select max(created_at) from {{this}})',
     ]
   )
 }}
@@ -22,7 +24,8 @@ with earnings_history as (select * from {{ ref('earnings_history') }}),
          )
 
 /* IPO'ed during last 3 months */
-select symbol,
+select concat(symbol, '_ipo')::varchar as id,
+       symbol,
        'Went public on ' || ipo_date as highlight,
        now()                         as created_at
 from tickers
@@ -31,7 +34,8 @@ where ipo_date > now() - interval '3 months'
 union
 
 /* Upcoming earnings. Bit expectations x/4 times.  */
-select tickers.symbol,
+select concat(tickers.symbol, '_upcoming_earnings')::varchar as id,
+       tickers.symbol,
        case
            when upcoming_report_date.date is not null
                then 'Reports earnings on ' || upcoming_report_date.date || '. '

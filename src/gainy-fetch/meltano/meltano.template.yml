@@ -77,7 +77,7 @@ plugins:
         index_mapping_file: configs/search/search.mapping.yml
   transformers:
     - name: dbt
-      pip_url: dbt==0.20.1
+      pip_url: dbt==0.21.1
       config:
         target: postgres
         models: '*'
