@@ -1,7 +1,9 @@
 {{
   config(
-    materialized = "table",
+    materialized = "incremental",
+    unique_key = "id",
     post_hook=[
+      index(this, 'id', true),
       'create unique index if not exists {{ get_index_name(this, "profile_id__ticker_symbol") }} (profile_id, ticker_symbol)',
     ]
   )
@@ -172,7 +174,8 @@ with actual_prices as
              order by expanded_holding_groups.profile_id, expanded_holding_groups.ticker_symbol,
                       historical_prices_aggregated.datetime desc
          )
-select profile_id,
+select concat(profile_id, '_', ticker_symbol)::varchar as id,
+       profile_id,
        ticker_symbol,
        updated_at,
        actual_value::double precision,
