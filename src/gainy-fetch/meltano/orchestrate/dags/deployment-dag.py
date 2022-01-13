@@ -52,7 +52,7 @@ dag = DAG(dag_id,
 dbt = BashOperator(
     task_id="dbt-portfolio",
     bash_command=
-    f"cd {project_root}; {meltano_bin} schedule run csv-to-postgres --transform run",
+    f"cd {project_root}; {meltano_bin} schedule run csv-to-postgres --force --transform run",
     dag=dag,
     pool="dbt")
 
