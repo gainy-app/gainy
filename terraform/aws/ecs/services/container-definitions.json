@@ -44,7 +44,7 @@
     "memoryReservation": null,
     "healthCheck": {
       "command": [ "CMD-SHELL", "pytest tests/test_smoke.py" ],
-      "interval": 5,
+      "interval": 150,
       "retries": 2
     },
     "logConfiguration": {
