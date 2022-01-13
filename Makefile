@@ -56,6 +56,7 @@ extract-passwords:
 test: configure
 	docker-compose -p gainy_test -f docker-compose.test.yml run test-meltano invoke dbt test
 	docker-compose -p gainy_test -f docker-compose.test.yml run --entrypoint python3 test-meltano tests/image_urls.py
+	sleep 10
 	docker-compose -p gainy_test -f docker-compose.test.yml exec -T test-hasura pytest
 	make test-clean
 
