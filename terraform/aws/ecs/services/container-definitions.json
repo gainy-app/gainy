@@ -43,7 +43,7 @@
     "privileged": null,
     "memoryReservation": null,
     "healthCheck": {
-      "command": [ "CMD-SHELL", "curl http://localhost:8080/ || exit 1" ],
+      "command": [ "CMD-SHELL", "pytest tests/test_smoke.py" ],
       "interval": 5,
       "retries": 2
     },
