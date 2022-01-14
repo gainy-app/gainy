@@ -1,3 +1,5 @@
+import time
+
 from recommendation.data_access import read_categories_risks, \
     read_profile_category_vector, read_all_ticker_category_and_industry_vectors, read_profile_interest_vectors
 from recommendation.match_score.match_score import MatchScore, profile_ticker_similarity
@@ -8,13 +10,21 @@ TOP_20_FOR_YOU_COLLECTION_ID = 231
 def get_top_by_match_score(db_conn,
                            profile_id: int,
                            k: int = None) -> list[(str, MatchScore)]:
+
+    start = time.time()
     profile_category_v = read_profile_category_vector(db_conn, profile_id)
     profile_interest_vs = read_profile_interest_vectors(db_conn, profile_id)
+    print(f"LAMBDA_PROFILE: Load profile data: {time.time() - start} ms")
 
+    start = time.time()
     risk_mapping = read_categories_risks(db_conn)
+    print(f"LAMBDA_PROFILE: Load category risk data: {time.time() - start} ms")
 
+    start = time.time()
     ticker_vs_list = read_all_ticker_category_and_industry_vectors(db_conn)
+    print(f"LAMBDA_PROFILE: Load all ticker data: {time.time() - start} ms")
 
+    start = time.time()
     match_score_list = []
     for ticker_vs in ticker_vs_list:
         match_score = profile_ticker_similarity(profile_category_v,
@@ -25,5 +35,7 @@ def get_top_by_match_score(db_conn,
 
     # Uses minus `match_score` to correctly sort the list by both score and symbol
     match_score_list.sort(key=lambda m: (-m[1].match_score(), m[0]))
+
+    print(f"LAMBDA_PROFILE: Compute match scores: {time.time() - start} ms")
 
     return match_score_list[:k] if k else match_score_list
