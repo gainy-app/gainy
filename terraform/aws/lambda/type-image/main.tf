@@ -14,6 +14,9 @@ variable "aws_iam_role_lambda_exec_role" {}
 variable "image_uri" {}
 variable "vpc_security_group_ids" {}
 variable "vpc_subnet_ids" {}
+variable "memory_size" {
+  default = 128
+}
 
 resource "aws_iam_role_policy_attachment" "iam_role_policy_attachment_lambda_vpc_access_execution" {
   role       = var.aws_iam_role_lambda_exec_role.name
@@ -31,6 +34,8 @@ resource "aws_lambda_function" "lambda" {
   }
 
   timeout = var.timeout
+
+  memory_size = var.memory_size
 
   role = var.aws_iam_role_lambda_exec_role.arn
 

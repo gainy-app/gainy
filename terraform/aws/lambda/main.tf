@@ -216,6 +216,7 @@ module "hasuraTrigger" {
   aws_apigatewayv2_api_lambda_execution_arn = aws_apigatewayv2_api.lambda.execution_arn
   aws_iam_role_lambda_exec_role             = aws_iam_role.lambda_exec
   image_uri                                 = docker_registry_image.lambda_python.name
+  memory_size                               = 1024
 
   env_vars = {
     pg_host                   = var.pg_host
