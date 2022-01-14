@@ -1,52 +1,105 @@
+import time
 from enum import Enum
 from math import sqrt
 from typing import Dict, List
 from collections import Counter
 
+import numpy as np
+
 from recommendation.core.dim_vector import DimVector, NamedDimVector
 
 # INDUSTRY SIMILARITY SCORE
+from utils.performance import log_metric
 
 
 def get_interest_similarity(
         profile_interest_vs: List[NamedDimVector],
         ticker_industry_v: DimVector) -> (float, List[int]):
 
+    start_1 = time.time()
+    start_1_0 = time.time()
     all_industry_list = []
     for profile_interest_v in profile_interest_vs:
         all_industry_list += profile_interest_v.dims
+    log_metric("get_interest_similarity.interest_score.counter.flatten_list", time.time() - start_1_0)
 
     if not ticker_industry_v.dims or not all_industry_list:
         return 0.0, []
 
-    profile_industry_v = DimVector(Counter(all_industry_list))
+    start_1_1 = time.time()
+    counter = Counter(all_industry_list)
+    log_metric("get_interest_similarity.interest_score.counter.counter", time.time() - start_1_1)
 
-    interest_score = DimVector.dot_product(
-        normalized_profile_industries_vector(profile_industry_v),
-        ticker_industry_v) / DimVector.norm(ticker_industry_v, order=1)
+    start_1_2 = time.time()
+    profile_industry_v = DimVector(counter)
+    log_metric("get_interest_similarity.interest_score.counter.dim_vector", time.time() - start_1_2)
+    log_metric("get_interest_similarity.interest_score.counter", time.time() - start_1)
 
+    start_2 = time.time()
+    start_2_1 = time.time()
+    normed_profile_v = normalized_profile_industries_vector(profile_industry_v)
+    log_metric("get_interest_similarity.interest_score.dot_product.norm_profile", time.time() - start_2_1)
+
+    start_2_2 = time.time()
+    norm_ticker = DimVector.norm(ticker_industry_v, order=1)
+    log_metric("get_interest_similarity.interest_score.dot_product.norm_ticker", time.time() - start_2_2)
+
+    start_2_3 = time.time()
+    interest_score = DimVector.dot_product(normed_profile_v, ticker_industry_v) / norm_ticker
+    log_metric("get_interest_similarity.interest_score.dot_product.dot_product", time.time() - start_2_3)
+
+    log_metric("get_interest_similarity.interest_score.dot_product", time.time() - start_2)
+
+    log_metric("get_interest_similarity.interest_score", time.time() - start_1)
+
+    start = time.time()
     interest_matches = []
     for profile_interest_v in profile_interest_vs:
-        if DimVector.dot_product(profile_interest_v, ticker_industry_v) > 0:
+        start_3_1 = time.time()
+        has_common_industry = _has_common_industry(profile_interest_v, ticker_industry_v)
+        log_metric("get_interest_similarity.interest_matches.dot_product", time.time() - start_3_1)
+
+        if has_common_industry:
             interest_matches.append(profile_interest_v.name)
 
+    log_metric("get_interest_similarity.interest_matches", time.time() - start)
+
     return interest_score, interest_matches
+
+
+def _has_common_industry(profile_interest_v, ticker_industry_v):
+    return DimVector.dot_product(profile_interest_v, ticker_industry_v) > 0
+
+
+def _reshape(profile_interest_v, ticker_industry_v):
+    return DimVector.dot_product(profile_interest_v, ticker_industry_v) > 0
 
 
 def normalized_profile_industries_vector(vector: DimVector) -> DimVector:
     if len(vector.dims) == 0:
         return vector
 
+    start_1 = time.time()
     max_value = max(vector.values)
     min_value = min(vector.values)
+    log_metric("normalized_profile_industries_vector.min_max", time.time() - start_1)
 
-    new_coordinates = {}
     denominator = 1.0 + sqrt(max_value) - sqrt(min_value)
-    for (dim, value) in zip(vector.dims, vector.values):
-        new_coordinates[dim] = (1.0 + sqrt(value) -
-                                sqrt(min_value)) / denominator
 
-    return DimVector(new_coordinates)
+    start_2 = time.time()
+    new_values = (1.0 + np.sqrt(vector.values) - np.sqrt(min_value)) / denominator
+
+    log_metric("normalized_profile_industries_vector.new_coordinates", time.time() - start_2)
+
+    start_3 = time.time()
+    t = zip(vector.dims, new_values)
+    log_metric("normalized_profile_industries_vector.zip", time.time() - start_3)
+
+    start_4 = time.time()
+    res = DimVector(t)
+    log_metric("normalized_profile_industries_vector.dim_vector", time.time() - start_4)
+
+    return res
 
 
 # RISK SIMILARITY SCORE
@@ -219,14 +272,22 @@ def profile_ticker_similarity(
     category_weight = 1 / 4
     interest_weight = 1 / 2
 
+    start = time.time()
     risk_similarity = get_risk_similarity(profile_categories,
                                           ticker_categories, risk_mapping)
+    log_metric("get_risk_similarity", time.time() - start)
+
+    start = time.time()
     (category_similarity,
      category_matches) = get_category_similarity(profile_categories,
                                                  ticker_categories)
+    log_metric("get_category_similarity", time.time() - start)
+
+    start = time.time()
     (interest_similarity,
      interest_matches) = get_interest_similarity(profile_interests,
                                                  ticker_industries)
+    log_metric("get_interest_similarity", time.time() - start)
 
     similarity = risk_weight * risk_similarity + category_weight * category_similarity + interest_weight * interest_similarity
 

@@ -24,16 +24,16 @@ class SetTop20Collection(HasuraTrigger):
 
         start = time.time()
         self._save_match_score(db_conn, profile_id, tickers_with_match_score)
-        print(f"LAMBDA_PROFILE: Save match scores to DB: {time.time() - start} ms")
+        print(f"LAMBDA_PROFILE: Save match scores to DB: {time.time() - start}")
 
         start = time.time()
         top_20_tickers = [ticker[0] for ticker in tickers_with_match_score[:20]]
         update_personalized_collection(db_conn, profile_id,
                                        TOP_20_FOR_YOU_COLLECTION_ID,
                                        top_20_tickers)
-        print(f"LAMBDA_PROFILE: Update top-20 collection: {time.time() - start} ms")
+        print(f"LAMBDA_PROFILE: Update top-20 collection: {time.time() - start}")
 
-        print(f"LAMBDA_PROFILE: Total execution time: {time.time() - start_total} ms")
+        print(f"LAMBDA_PROFILE: Total execution time: {time.time() - start_total}")
 
 
     def _save_match_score(self, db_conn, profile_id, tickers_with_match_score):
