@@ -40,36 +40,19 @@ if not Path(project_root).joinpath(meltano_bin).exists():
 
 ##################################################################################################################
 
-models = " ".join([
-    'historical_prices_aggregated',
-    'portfolio_chart',
-    'portfolio_expanded_transactions',
-    'portfolio_gains',
-    'portfolio_holding_details',
-    'portfolio_holding_gains',
-    'portfolio_holding_group_details',
-    'portfolio_holding_group_gains',
-    #     'portfolio_securities_normalized',
-    'portfolio_transaction_gains',
-    #     'profile_holding_groups',
-    #     'profile_holdings_normalized',
-    'ticker_realtime_metrics',
-])
-
-vars = '{"realtime": true}'
-dag_id = "realtime-dbt-dag"
-tags = ["meltano", "dbt"]
+dag_id = "deployment"
+tags = ["meltano", "csv", "postgres", "dbt"]
 dag = DAG(dag_id,
           tags=tags,
           catchup=False,
           default_args=DEFAULT_ARGS,
-          schedule_interval="*/5 * * * *",
+          schedule_interval=None,
           max_active_runs=1,
           is_paused_upon_creation=False)
 dbt = BashOperator(
     task_id="dbt-portfolio",
     bash_command=
-    f"cd {project_root}; {meltano_bin} invoke dbt run --vars '{vars}' --model {models}",
+    f"cd {project_root}; {meltano_bin} schedule run csv-to-postgres --force --transform run",
     dag=dag,
     pool="dbt")
 

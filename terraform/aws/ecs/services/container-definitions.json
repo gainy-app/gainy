@@ -43,9 +43,9 @@
     "privileged": null,
     "memoryReservation": null,
     "healthCheck": {
-      "command": [ "CMD-SHELL", "curl http://localhost:8080/ || exit 1" ],
-      "interval": 5,
-      "retries": 2
+      "command": [ "CMD-SHELL", "pytest tests/test_smoke.py || exit 1" ],
+      "interval": ${hasura_healthcheck_interval},
+      "retries": ${hasura_healthcheck_retries}
     },
     "logConfiguration": {
       "logDriver": "awslogs",
@@ -208,7 +208,7 @@
   },
   {
     "name": "websockets_eod",
-    "memory": ${websockets_memory_credits},
+    "memory": ${eod_websockets_memory_credits},
     "extraHosts": null,
     "dnsServers": null,
     "disableNetworking": null,
@@ -253,7 +253,7 @@
   },
   {
     "name": "websockets_polygon",
-    "memory": ${websockets_memory_credits},
+    "memory": ${polygon_websockets_memory_credits},
     "extraHosts": null,
     "dnsServers": null,
     "disableNetworking": null,
