@@ -37,7 +37,8 @@ class GetMatchScoreByTicker(AbstractMatchScoreAction):
         profile_id = input_params["profile_id"]
         ticker = input_params["symbol"]
 
-        return super().read_match_scores(RecommendationRepository(db_conn), profile_id, [ticker])[0]
+        return super().read_match_scores(RecommendationRepository(db_conn),
+                                         profile_id, [ticker])[0]
 
 
 # Deprecated: should read Match score from DB via GraphQL instead
@@ -50,7 +51,8 @@ class GetMatchScoreByTickerList(AbstractMatchScoreAction):
         profile_id = input_params["profile_id"]
         tickers = input_params["symbols"]
 
-        return super().read_match_scores(RecommendationRepository(db_conn), profile_id, tickers)
+        return super().read_match_scores(RecommendationRepository(db_conn),
+                                         profile_id, tickers)
 
 
 # Deprecated: should read Match score from DB via GraphQL instead
@@ -64,5 +66,7 @@ class GetMatchScoreByCollection(AbstractMatchScoreAction):
         collection_id = input_params["collection_id"]
 
         repository = RecommendationRepository(db_conn)
-        collection_tickers = repository.read_collection_tickers(profile_id, collection_id)
-        return super().read_match_scores(repository, profile_id, collection_tickers)
+        collection_tickers = repository.read_collection_tickers(
+            profile_id, collection_id)
+        return super().read_match_scores(repository, profile_id,
+                                         collection_tickers)

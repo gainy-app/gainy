@@ -20,19 +20,30 @@ class SetRecommendations(HasuraTrigger):
 
         repository = RecommendationRepository(db_conn)
 
-        tickers_with_match_score = self.get_and_sort_by_match_score(repository, profile_id)
+        tickers_with_match_score = self.get_and_sort_by_match_score(
+            repository, profile_id)
         repository.update_match_score(profile_id, tickers_with_match_score)
 
-        top_20_tickers = [ticker[0] for ticker in tickers_with_match_score[:20]]
-        repository.update_personalized_collection(profile_id, TOP_20_FOR_YOU_COLLECTION_ID, top_20_tickers)
+        top_20_tickers = [
+            ticker[0] for ticker in tickers_with_match_score[:20]
+        ]
+        repository.update_personalized_collection(
+            profile_id, TOP_20_FOR_YOU_COLLECTION_ID, top_20_tickers)
 
-    def get_and_sort_by_match_score(self, repository, profile_id: int, top_k: int = None) -> List[Tuple[str, MatchScore]]:
-        profile_category_v = repository.read_profile_category_vector(profile_id)
-        profile_interest_vs = repository.read_profile_interest_vectors(profile_id)
+    def get_and_sort_by_match_score(
+            self,
+            repository,
+            profile_id: int,
+            top_k: int = None) -> List[Tuple[str, MatchScore]]:
+        profile_category_v = repository.read_profile_category_vector(
+            profile_id)
+        profile_interest_vs = repository.read_profile_interest_vectors(
+            profile_id)
 
         risk_mapping = repository.read_categories_risks()
 
-        ticker_vs_list = repository.read_all_ticker_category_and_industry_vectors()
+        ticker_vs_list = repository.read_all_ticker_category_and_industry_vectors(
+        )
 
         match_score_list = []
         for ticker_vs in ticker_vs_list:

@@ -38,7 +38,8 @@ class DimVector:
     def dot_product(first, second):
         result = 0.0
         for dim in set(first.dims).intersection(second.dims):
-            result += first._coordinates.get(dim, 0) * second._coordinates.get(dim, 0)
+            result += first._coordinates.get(dim, 0) * second._coordinates.get(
+                dim, 0)
 
         return result
 

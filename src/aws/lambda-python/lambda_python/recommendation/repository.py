@@ -27,9 +27,11 @@ class RecommendationRepository:
     def read_profile_category_vector(self, profile_id) -> DimVector:
         with open(os.path.join(script_dir, "sql/profile_categories.sql")
                   ) as _profile_category_vector_query_file:
-            _profile_category_vector_query = _profile_category_vector_query_file.read()
+            _profile_category_vector_query = _profile_category_vector_query_file.read(
+            )
 
-        vectors = self._query_vectors(_profile_category_vector_query, {"profile_id": profile_id})
+        vectors = self._query_vectors(_profile_category_vector_query,
+                                      {"profile_id": profile_id})
         if not vectors:
             raise HasuraActionException(400, f"Profile {profile_id} not found")
         return vectors[0]
@@ -40,23 +42,27 @@ class RecommendationRepository:
             _profile_interest_vectors_query = _profile_interest_vectors_query_file.read(
             )
 
-        vectors = self._query_vectors(_profile_interest_vectors_query, {"profile_id": profile_id})
+        vectors = self._query_vectors(_profile_interest_vectors_query,
+                                      {"profile_id": profile_id})
         if not vectors:
             raise HasuraActionException(400, f"Missing profile `{profile_id}`")
 
         return vectors
 
-    def read_all_ticker_category_and_industry_vectors(self) -> list[(DimVector, DimVector)]:
+    def read_all_ticker_category_and_industry_vectors(
+            self) -> list[(DimVector, DimVector)]:
 
-        with open(os.path.join(script_dir, "sql/ticker_categories_industries.sql")
-                  ) as _ticker_categories_industries_query_file:
+        with open(
+                os.path.join(script_dir, "sql/ticker_categories_industries.sql"
+                             )) as _ticker_categories_industries_query_file:
             _ticker_categories_industries_query = _ticker_categories_industries_query_file.read(
             )
 
         cursor = self.db_conn.cursor()
         cursor.execute(_ticker_categories_industries_query)
 
-        return [(DimVector(row[0], row[1]), DimVector(row[0], row[2])) for row in cursor.fetchall()]
+        return [(DimVector(row[0], row[1]), DimVector(row[0], row[2]))
+                for row in cursor.fetchall()]
 
     def _query_vectors(self, query, variables=None) -> List[DimVector]:
         cursor = self.db_conn.cursor()
@@ -68,15 +74,16 @@ class RecommendationRepository:
 
         return vectors
 
-    def read_sorted_collection_match_scores(self, profile_id: str) -> List[Tuple[int, float]]:
-        with open(os.path.join(script_dir, "sql/collection_ranking_scores.sql")) as _collection_ranking_scores_query_file:
-            _collection_ranking_scores_query = _collection_ranking_scores_query_file.read()
+    def read_sorted_collection_match_scores(
+            self, profile_id: str) -> List[Tuple[int, float]]:
+        with open(os.path.join(script_dir, "sql/collection_ranking_scores.sql")
+                  ) as _collection_ranking_scores_query_file:
+            _collection_ranking_scores_query = _collection_ranking_scores_query_file.read(
+            )
 
         with self.db_conn.cursor() as cursor:
-            cursor.execute(
-                _collection_ranking_scores_query,
-                {"profile_id": profile_id}
-            )
+            cursor.execute(_collection_ranking_scores_query,
+                           {"profile_id": profile_id})
 
             return list(cursor.fetchall())
 
@@ -95,21 +102,27 @@ class RecommendationRepository:
             return list(map(itemgetter(0), cursor.fetchall()))
 
     # Deprecated
-    def read_ticker_match_scores(self, profile_id: str, symbols: List[str]) -> list:
+    def read_ticker_match_scores(self, profile_id: str,
+                                 symbols: List[str]) -> list:
         _ticker_match_scores_query = """select symbol, match_score, fits_risk, risk_similarity, fits_categories, category_matches, fits_interests, interest_matches
         from app.profile_ticker_match_score
         where profile_id = %(profile_id)s and symbol in %(symbols)s;"""
 
         with self.db_conn.cursor() as cursor:
-            cursor.execute(
-                _ticker_match_scores_query,
-                {"profile_id": profile_id, "symbols": tuple(symbols)}
-            )
+            cursor.execute(_ticker_match_scores_query, {
+                "profile_id": profile_id,
+                "symbols": tuple(symbols)
+            })
 
             return list(cursor.fetchall())
 
-    def update_match_score(self, profile_id, tickers_with_match_score: List[Tuple[str, MatchScore]]):
-        match_score_json_list = json.dumps(list(map(RecommendationRepository._match_score_as_json, tickers_with_match_score)))
+    def update_match_score(self, profile_id,
+                           tickers_with_match_score: List[Tuple[str,
+                                                                MatchScore]]):
+        match_score_json_list = json.dumps(
+            list(
+                map(RecommendationRepository._match_score_as_json,
+                    tickers_with_match_score)))
 
         with self.db_conn.cursor() as cursor:
             cursor.execute(
@@ -119,8 +132,7 @@ class RecommendationRepository:
                 {
                     "profile_id": profile_id,
                     "match_score_json": match_score_json_list
-                }
-            )
+                })
 
     @staticmethod
     def _match_score_as_json(ticker_with_match_score: Tuple[str, MatchScore]):
@@ -177,5 +189,5 @@ class RecommendationRepository:
             execute_values(
                 cursor,
                 "INSERT INTO app.personalized_ticker_collections(profile_id, collection_id, symbol) VALUES %s",
-                [(profile_id, collection_id, symbol) for symbol in ticker_list])
-
+                [(profile_id, collection_id, symbol)
+                 for symbol in ticker_list])

@@ -15,11 +15,14 @@ class GetRecommendedCollections(HasuraAction):
         profile_id = input_params["profile_id"]
 
         repository = RecommendationRepository(db_conn)
-        sorted_collection_match_scores = repository.read_sorted_collection_match_scores(profile_id)
-        sorted_collections_ids = list(map(itemgetter(0), sorted_collection_match_scores))
+        sorted_collection_match_scores = repository.read_sorted_collection_match_scores(
+            profile_id)
+        sorted_collections_ids = list(
+            map(itemgetter(0), sorted_collection_match_scores))
 
         # Add `top-20 for you` collection as the top item
-        ranked_collections_ids = [TOP_20_FOR_YOU_COLLECTION_ID] + sorted_collections_ids
+        ranked_collections_ids = [TOP_20_FOR_YOU_COLLECTION_ID
+                                  ] + sorted_collections_ids
 
         print('get_recommended_collections ' +
               json.dumps({
@@ -28,4 +31,3 @@ class GetRecommendedCollections(HasuraAction):
               }))
 
         return [{"id": id} for id in ranked_collections_ids]
-
