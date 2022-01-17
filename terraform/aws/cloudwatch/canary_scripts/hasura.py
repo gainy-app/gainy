@@ -51,11 +51,7 @@ def make_request(method, url, post_data=None, headers={}):
     if response_data is None or 'data' not in response_data or not response.status or response.status < 200 or response.status > 299:
         if response_data is not None:
             logger.error("Response: %s" % response_data)
-
-        if response_data is not None and 'errors' in response_data:
-            messages = [i['message'] for i in response_data['errors']]
-            raise Exception("Failed: %s" % json.dumps(messages))
-        elif response.reason != 'OK':
+        if response.reason:
             raise Exception("Failed: %s" % response.reason)
         else:
             raise Exception("Failed with status code: %s" % response.status)

@@ -103,8 +103,6 @@ module "ecs-service" {
   hasura_jwt_secret               = var.hasura_jwt_secret
   hasura_cpu_credits              = local.hasura_cpu_credits
   hasura_memory_credits           = local.hasura_memory_credits
-  hasura_healthcheck_interval     = local.hasura_healthcheck_interval
-  hasura_healthcheck_retries      = local.hasura_healthcheck_retries
 
   websockets_memory_credits = local.websockets_memory_credits
 
