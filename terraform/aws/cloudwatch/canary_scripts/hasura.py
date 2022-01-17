@@ -17,7 +17,6 @@ MIN_COLLECTIONS_COUNT = 200
 MIN_PERSONALIZED_COLLECTIONS_COUNT = 1
 MIN_INTEREST_COUNT = 25
 MIN_CATEGORIES_COUNT = 5
-MIN_PORTFOLIO_HOLDING_GROUPS_COUNT = 5
 
 
 def make_request(method, url, post_data=None, headers={}):
@@ -169,17 +168,6 @@ def check_portfolio():
 
         assert data['portfolio_gains'] is not None
         assert data['profile_holding_groups'] is not None
-        assert len(data['profile_holding_groups']
-                   ) >= MIN_PORTFOLIO_HOLDING_GROUPS_COUNT
-
-        for holding_group in data['profile_holding_groups']:
-            assert holding_group['details'] is not None
-            assert holding_group['gains'] is not None
-            assert holding_group['holdings'] is not None
-            assert len(holding_group['holdings']) > 0
-            for holding in holding_group['holdings']:
-                assert holding['holding_details'] is not None
-                assert holding['gains'] is not None
 
 
 def handler(event, context):
