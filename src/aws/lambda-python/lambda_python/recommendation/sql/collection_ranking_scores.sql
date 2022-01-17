@@ -1,7 +1,7 @@
 with collection_ticker_match_score as (
     select profile_id, collection_id, match_score
     from ticker_collections tc
-             join app.profile_ticker_match_view ptm
+             join app.profile_ticker_match_score ptm
                   on tc.symbol = ptm.symbol
     ),
     collection_ranking_score as (

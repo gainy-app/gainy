@@ -1,2 +1,2 @@
-drop table app.profile_ticker_match;
-drop view app.profile_ticker_match_view;
+drop table app.profile_ticker_match_score_json;
+drop view app.profile_ticker_match_score;

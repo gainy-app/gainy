@@ -469,6 +469,27 @@
     webhook: '{{AWS_LAMBDA_API_GATEWAY_ENDPOINT}}/hasuraTrigger'
 - table:
     schema: app
+    name: profile_ticker_match_score
+  object_relationships:
+  - name: profile
+    using:
+      manual_configuration:
+        remote_table:
+          schema: app
+          name: profiles
+        insertion_order: null
+        column_mapping:
+          profile_id: id
+  select_permissions:
+  - role: user
+    permission:
+      columns: []
+      filter:
+        profile:
+          user_id:
+            _eq: X-Hasura-User-Id
+- table:
+    schema: app
     name: profile_ticker_metrics_settings
   object_relationships:
   - name: profile
@@ -741,36 +762,6 @@
       - id
       - name
       - collection_id
-      filter: {}
-- table:
-    schema: public
-    name: chart
-  select_permissions:
-  - role: anonymous
-    permission:
-      columns:
-      - period
-      - symbol
-      - adjusted_close
-      - close
-      - high
-      - low
-      - open
-      - volume
-      - datetime
-      filter: {}
-  - role: user
-    permission:
-      columns:
-      - symbol
-      - datetime
-      - period
-      - open
-      - high
-      - low
-      - close
-      - adjusted_close
-      - volume
       filter: {}
 - table:
     schema: public
@@ -1816,6 +1807,15 @@
     schema: public
     name: tickers
   object_relationships:
+  - name: match_score
+    using:
+      manual_configuration:
+        remote_table:
+          schema: app
+          name: profile_ticker_match_score
+        insertion_order: null
+        column_mapping:
+          symbol: symbol
   - name: realtime_metrics
     using:
       manual_configuration:

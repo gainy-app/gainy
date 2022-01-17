@@ -97,7 +97,7 @@ class RecommendationRepository:
     # Deprecated
     def read_ticker_match_scores(self, profile_id: str, symbols: List[str]) -> list:
         _ticker_match_scores_query = """select symbol, match_score, fits_risk, risk_similarity, fits_categories, category_matches, fits_interests, interest_matches
-        from app.profile_ticker_match_view
+        from app.profile_ticker_match_score
         where profile_id = %(profile_id)s and symbol in %(symbols)s;"""
 
         with self.db_conn.cursor() as cursor:
@@ -113,7 +113,7 @@ class RecommendationRepository:
 
         with self.db_conn.cursor() as cursor:
             cursor.execute(
-                """INSERT INTO app.profile_ticker_match(profile, match_score_json)
+                """INSERT INTO app.profile_ticker_match_score_json(profile, match_score_json)
                 VALUES (%(profile_id)s, %(match_score_json)s)
                 ON CONFLICT (profile) DO UPDATE SET match_score_json = EXCLUDED.match_score_json""",
                 {

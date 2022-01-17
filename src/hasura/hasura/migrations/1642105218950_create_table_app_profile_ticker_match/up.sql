@@ -1,16 +1,16 @@
-create table app.profile_ticker_match (
-                                          profile                int4  PRIMARY KEY,
-                                          match_score_json       jsonb NOT NULL
+create table app.profile_ticker_match_score_json (
+    profile                int4  PRIMARY KEY,
+    match_score_json       jsonb NOT NULL
 );
 
 
-create view app.profile_ticker_match_view as
+create view app.profile_ticker_match_score as
 with tmp_exploded_match_score as (
     select
         profile,
         match_score
     from
-        app.profile_ticker_match, jsonb_array_elements(app.profile_ticker_match.match_score_json) as match_score
+        app.profile_ticker_match_score_json, jsonb_array_elements(app.profile_ticker_match_score_json.match_score_json) as match_score
 )
 select
     profile as profile_id,
