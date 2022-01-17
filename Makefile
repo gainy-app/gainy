@@ -3,8 +3,10 @@ export PARAMS ?= $(filter-out $@,$(MAKECMDGOALS))
 -include .env.make
 -include .env
 
-up:
+configure:
 	- cp -n src/gainy-fetch/meltano/symbols.local.json.dist src/gainy-fetch/meltano/symbols.local.json
+
+up: configure
 	- docker-compose pull --include-deps
 	docker-compose up
 
@@ -51,9 +53,11 @@ style-fix:
 extract-passwords:
 	cd terraform && terraform state pull | python3 ../extract_passwords.py
 
-test:
-	docker-compose -p gainy_test -f docker-compose.test.yml run --entrypoint python3 test-meltano tests/image_urls.py
+test: configure
 	docker-compose -p gainy_test -f docker-compose.test.yml run test-meltano invoke dbt test
+	docker-compose -p gainy_test -f docker-compose.test.yml run --entrypoint python3 test-meltano tests/image_urls.py
+	sleep 10
+	docker-compose -p gainy_test -f docker-compose.test.yml exec -T test-hasura pytest
 	make test-clean
 
 test-clean:
