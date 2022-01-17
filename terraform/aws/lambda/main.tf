@@ -210,7 +210,7 @@ module "hasuraTrigger" {
   env                                       = var.env
   function_name                             = "hasuraTrigger"
   handler                                   = "hasura_handler.handle_trigger"
-  timeout                                   = 300
+  timeout                                   = 150
   route                                     = "POST /hasuraTrigger"
   aws_apigatewayv2_api_lambda_id            = aws_apigatewayv2_api.lambda.id
   aws_apigatewayv2_api_lambda_execution_arn = aws_apigatewayv2_api.lambda.execution_arn

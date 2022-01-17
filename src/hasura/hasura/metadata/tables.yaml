@@ -81,7 +81,7 @@
           user_id:
             _eq: X-Hasura-User-Id
   event_triggers:
-  - name: top_20_collection__profile_categories
+  - name: recommendations__profile_categories
     definition:
       enable_manual: false
       insert:
@@ -91,9 +91,9 @@
       update:
         columns: '*'
     retry_conf:
-      num_retries: 0
-      interval_sec: 10
-      timeout_sec: 60
+      num_retries: 1
+      interval_sec: 30
+      timeout_sec: 150
     webhook: '{{AWS_LAMBDA_API_GATEWAY_ENDPOINT}}/hasuraTrigger'
 - table:
     schema: app
@@ -247,7 +247,7 @@
           user_id:
             _eq: X-Hasura-User-Id
   event_triggers:
-  - name: top_20_collection__profile_interests
+  - name: recommendations__profile_interests
     definition:
       enable_manual: false
       insert:
@@ -257,9 +257,9 @@
       update:
         columns: '*'
     retry_conf:
-      num_retries: 0
-      interval_sec: 10
-      timeout_sec: 60
+      num_retries: 1
+      interval_sec: 30
+      timeout_sec: 150
     webhook: '{{AWS_LAMBDA_API_GATEWAY_ENDPOINT}}/hasuraTrigger'
 - table:
     schema: app
@@ -451,11 +451,11 @@
       update:
         columns: '*'
     retry_conf:
-      num_retries: 0
+      num_retries: 1
       interval_sec: 10
       timeout_sec: 60
     webhook: '{{AWS_LAMBDA_API_GATEWAY_ENDPOINT}}/hasuraTrigger'
-  - name: top_20_collection__profile_scoring_settings
+  - name: recommendations__profile_scoring_settings
     definition:
       enable_manual: false
       insert:
@@ -463,9 +463,9 @@
       update:
         columns: '*'
     retry_conf:
-      num_retries: 0
-      interval_sec: 10
-      timeout_sec: 60
+      num_retries: 1
+      interval_sec: 30
+      timeout_sec: 150
     webhook: '{{AWS_LAMBDA_API_GATEWAY_ENDPOINT}}/hasuraTrigger'
 - table:
     schema: app
