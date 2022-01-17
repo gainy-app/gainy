@@ -1,5 +1,4 @@
 import numpy as np
-from numpy import dot
 from numpy.linalg import norm
 
 
@@ -20,7 +19,8 @@ class DimVector:
     similar data structure with wider functionality. Unfortunately, booth are outdated.
     """
 
-    def __init__(self, coordinates):
+    def __init__(self, name, coordinates):
+        self.name = name
         if coordinates:
             self._coordinates = dict(coordinates)
             self.dims = list(self._coordinates.keys())
@@ -50,10 +50,3 @@ class DimVector:
             return 0.0
 
         return DimVector.dot_product(self, other) / self_norm / other_norm
-
-
-class NamedDimVector(DimVector):
-
-    def __init__(self, name, coordinates):
-        super().__init__(coordinates)
-        self.name = name

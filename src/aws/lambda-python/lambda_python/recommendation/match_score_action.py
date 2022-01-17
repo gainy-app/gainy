@@ -1,12 +1,7 @@
 from abc import ABC
-from typing import List, Dict, Tuple
 
 from common.hasura_function import HasuraAction
-from recommendation.core.dim_vector import NamedDimVector
-from recommendation.data_access import read_categories_risks, read_profile_industry_vector, \
-    read_profile_category_vector, read_ticker_industry_vectors, read_ticker_category_vectors, read_collection_tickers, \
-    read_profile_interest_vectors, read_ticker_match_scores
-from recommendation.match_score.match_score import profile_ticker_similarity
+from recommendation.repository import RecommendationRepository
 
 
 class AbstractMatchScoreAction(HasuraAction, ABC):
@@ -14,9 +9,9 @@ class AbstractMatchScoreAction(HasuraAction, ABC):
     def __init__(self, name, profile_id_param):
         super().__init__(name, profile_id_param)
 
-    def read_match_scores(self, db_conn, profile_id, symbols):
+    def read_match_scores(self, repository, profile_id, symbols):
         result = []
-        for row in read_ticker_match_scores(db_conn, profile_id, symbols):
+        for row in repository.read_ticker_match_scores(profile_id, symbols):
             result.append({
                 "symbol": row[0],
                 "is_match": True,  # Deprecated, will be removed
@@ -32,6 +27,7 @@ class AbstractMatchScoreAction(HasuraAction, ABC):
         return result
 
 
+# Deprecated: should read Match score from DB via GraphQL instead
 class GetMatchScoreByTicker(AbstractMatchScoreAction):
 
     def __init__(self):
@@ -41,9 +37,10 @@ class GetMatchScoreByTicker(AbstractMatchScoreAction):
         profile_id = input_params["profile_id"]
         ticker = input_params["symbol"]
 
-        return super().read_match_scores(db_conn, profile_id, [ticker])[0]
+        return super().read_match_scores(RecommendationRepository(db_conn), profile_id, [ticker])[0]
 
 
+# Deprecated: should read Match score from DB via GraphQL instead
 class GetMatchScoreByTickerList(AbstractMatchScoreAction):
 
     def __init__(self):
@@ -53,9 +50,10 @@ class GetMatchScoreByTickerList(AbstractMatchScoreAction):
         profile_id = input_params["profile_id"]
         tickers = input_params["symbols"]
 
-        return super().read_match_scores(db_conn, profile_id, tickers)
+        return super().read_match_scores(RecommendationRepository(db_conn), profile_id, tickers)
 
 
+# Deprecated: should read Match score from DB via GraphQL instead
 class GetMatchScoreByCollection(AbstractMatchScoreAction):
 
     def __init__(self):
@@ -65,8 +63,6 @@ class GetMatchScoreByCollection(AbstractMatchScoreAction):
         profile_id = input_params["profile_id"]
         collection_id = input_params["collection_id"]
 
-        collection_tickers = read_collection_tickers(db_conn, profile_id,
-                                                     collection_id)
-
-        return super().read_match_scores(db_conn, profile_id,
-                                            collection_tickers)
+        repository = RecommendationRepository(db_conn)
+        collection_tickers = repository.read_collection_tickers(profile_id, collection_id)
+        return super().read_match_scores(repository, profile_id, collection_tickers)
