@@ -17,7 +17,7 @@ MIN_COLLECTIONS_COUNT = 200
 MIN_PERSONALIZED_COLLECTIONS_COUNT = 1
 MIN_INTEREST_COUNT = 25
 MIN_CATEGORIES_COUNT = 5
-MIN_PORTFOLIO_HOLDING_GROUPS_COUNT = 5
+MIN_PORTFOLIO_HOLDING_GROUPS_COUNT = 1
 
 
 def make_request(method, url, post_data=None, headers={}):
@@ -153,7 +153,7 @@ def check_chart():
 
 
 def check_portfolio():
-    query = '{ app_profile_plaid_access_tokens(distinct_on: [profile_id], where: {profile: {email: {_regex: "gainy.app$"} } } ) { profile{ id user_id } } }'
+    query = '{ app_profile_plaid_access_tokens(distinct_on: [profile_id], where: {profile: {email: {_in: ["test3@example.com", "info@gainy.app", "boris@gainy.app"]} } } ) { profile{ id user_id } } }'
     profiles = make_graphql_request(
         query, None, None)['data']['app_profile_plaid_access_tokens']
 
