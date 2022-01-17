@@ -1,6 +1,6 @@
 import datetime
 from portfolio.plaid import PlaidClient
-from portfolio.models import HoldingData, Security, Account, TransactionData
+from portfolio.models import HoldingData, Security, Account, TransactionData, Institution
 
 
 class PlaidService:
@@ -74,6 +74,27 @@ class PlaidService:
             'accounts': accounts,
         }
 
+    def get_institution(self, db_conn, plaid_access_token):
+        item_response = self.plaid_client.get_item(
+            plaid_access_token['access_token'])
+        print(item_response)
+        institution_id = item_response['item']['institution_id']
+
+        institution_response = self.plaid_client.get_institution(
+            institution_id)
+        print(institution_response)
+
+        return self.__hydrate_institution(institution_response['institution'])
+
+    def set_token_institution(self, db_conn, plaid_access_token, institution):
+        with db_conn.cursor() as cursor:
+            cursor.execute(
+                "UPDATE app.profile_plaid_access_tokens SET institution_id = %(institution_id)s WHERE id = %(plaid_access_token_id)s",
+                {
+                    "institution_id": institution.id,
+                    "plaid_access_token_id": plaid_access_token['id'],
+                })
+
     def __hydrate_holding_data(self, data):
         model = HoldingData()
         model.iso_currency_code = data.iso_currency_code
@@ -128,5 +149,12 @@ class PlaidService:
         model.official_name = data['official_name']
         model.subtype = str(data['subtype'])
         model.type = str(data['type'])
+
+        return model
+
+    def __hydrate_institution(self, data):
+        model = Institution()
+        model.ref_id = data['institution_id']
+        model.name = data['name']
 
         return model

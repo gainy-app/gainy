@@ -1,5 +1,17 @@
 - table:
     schema: app
+    name: plaid_institutions
+  select_permissions:
+  - role: user
+    permission:
+      columns:
+      - created_at
+      - id
+      - name
+      - updated_at
+      filter: {}
+- table:
+    schema: app
     name: portfolio_securities
   object_relationships:
   - name: tickers
@@ -149,6 +161,9 @@
     schema: app
     name: profile_holdings
   object_relationships:
+  - name: access_token
+    using:
+      foreign_key_constraint_on: plaid_access_token_id
   - name: account
     using:
       foreign_key_constraint_on: account_id
@@ -265,6 +280,9 @@
     schema: app
     name: profile_plaid_access_tokens
   object_relationships:
+  - name: institution
+    using:
+      foreign_key_constraint_on: institution_id
   - name: profile
     using:
       foreign_key_constraint_on: profile_id

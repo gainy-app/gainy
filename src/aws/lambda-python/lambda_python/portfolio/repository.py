@@ -7,7 +7,7 @@ class PortfolioRepository:
 
     def persist(self, db_conn, entities):
         if isinstance(entities, BaseModel):
-            entities = [entity]
+            entities = [entities]
 
         entities_grouped = self.__group_entities(entities)
 

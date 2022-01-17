@@ -160,3 +160,23 @@ class Account(BaseModel):
 
     def unique_field_names(self):
         return ['ref_id']
+
+
+class Institution(BaseModel):
+    id = None
+    ref_id = None
+    name = None
+    primary_color = None
+    url = None
+    logo = None
+    created_at = None
+    updated_at = None
+
+    def schema_name(self):
+        return 'app'
+
+    def table_name(self):
+        return 'plaid_institutions'
+
+    def unique_field_names(self):
+        return ['ref_id']
