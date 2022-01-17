@@ -5,4 +5,3 @@
 .terraform
 terraform/builds
 __pycache__
-.pytest_cache
