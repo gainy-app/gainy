@@ -208,7 +208,7 @@
   },
   {
     "name": "websockets_eod",
-    "memory": ${websockets_memory_credits},
+    "memory": ${eod_websockets_memory_credits},
     "extraHosts": null,
     "dnsServers": null,
     "disableNetworking": null,
@@ -253,7 +253,7 @@
   },
   {
     "name": "websockets_polygon",
-    "memory": ${websockets_memory_credits},
+    "memory": ${polygon_websockets_memory_credits},
     "extraHosts": null,
     "dnsServers": null,
     "disableNetworking": null,

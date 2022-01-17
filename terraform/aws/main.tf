@@ -106,7 +106,8 @@ module "ecs-service" {
   hasura_healthcheck_interval     = local.hasura_healthcheck_interval
   hasura_healthcheck_retries      = local.hasura_healthcheck_retries
 
-  websockets_memory_credits = local.websockets_memory_credits
+  eod_websockets_memory_credits     = local.eod_websockets_memory_credits
+  polygon_websockets_memory_credits = local.polygon_websockets_memory_credits
 
   eodhistoricaldata_api_token = var.eodhistoricaldata_api_token
   pg_host                     = module.rds.db_instance.address
