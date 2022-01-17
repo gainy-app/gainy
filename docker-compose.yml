@@ -125,9 +125,6 @@ services:
       - ./src/aws/router:/app
     ports:
       - "8082:5000"
-    environment:
-      LAMBDA_PYTHON_ACTION_HOST: lambda-python-action
-      LAMBDA_PYTHON_TRIGGER_HOST: lambda-python-trigger
 
   lambda-python-trigger:
     build:
