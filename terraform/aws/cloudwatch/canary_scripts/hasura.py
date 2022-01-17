@@ -158,6 +158,7 @@ def check_portfolio():
         query = f.read()
 
     data = make_graphql_request(query, {"profileId": PROFILE_ID})['data']
+    print(data)
     assert data['portfolio_gains'] is not None
     assert data['profile_holding_groups'] is not None
 
