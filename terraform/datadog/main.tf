@@ -390,7 +390,7 @@ resource "datadog_monitor" "cloudwatch_synthetics_success_percent" {
   type    = "metric alert"
   message = "CloudWatch Synthetics Success Percent. Notify: @slack-${var.slack_channel_name} <!channel>"
 
-  query = "min(last_15m):min:cloudwatchsynthetics.SuccessPercent{canaryname:*-production} by {canaryname} < 85"
+  query = "avg(last_15m):min:cloudwatchsynthetics.SuccessPercent{canaryname:*-production} by {canaryname} < 85"
 
   monitor_thresholds {
     warning_recovery  = 100

@@ -152,22 +152,14 @@ def check_chart():
 
 
 def check_portfolio():
-    query = '{ app_profile_plaid_access_tokens(distinct_on: [profile_id], where: {profile: {email: {_regex: "gainy.app$"} } } ) { profile{ id user_id } } }'
-    profiles = make_graphql_request(
-        query, None, None)['data']['app_profile_plaid_access_tokens']
-
     with open(
             os.path.join(os.path.dirname(__file__),
                          'queries/GetPlaidHoldings.graphql'), 'r') as f:
         query = f.read()
 
-    for profile in profiles:
-        data = make_graphql_request(query,
-                                    {"profileId": profile['profile']['id']},
-                                    profile['profile']['user_id'])['data']
-
-        assert data['portfolio_gains'] is not None
-        assert data['profile_holding_groups'] is not None
+    data = make_graphql_request(query, {"profileId": PROFILE_ID})['data']
+    assert data['portfolio_gains'] is not None
+    assert data['profile_holding_groups'] is not None
 
 
 def handler(event, context):
