@@ -1,6 +1,7 @@
 from typing import List, Tuple
 
 from common.hasura_function import HasuraTrigger
+from recommendation.models import MatchScoreModel
 from recommendation.repository import RecommendationRepository
 from recommendation.match_score import MatchScore, profile_ticker_similarity
 from recommendation import TOP_20_FOR_YOU_COLLECTION_ID
@@ -22,7 +23,12 @@ class SetRecommendations(HasuraTrigger):
 
         tickers_with_match_score = self.get_and_sort_by_match_score(
             repository, profile_id)
-        repository.update_match_score(profile_id, tickers_with_match_score)
+
+        match_score_entities = [
+            MatchScoreModel(profile_id, ticker, match_score)
+            for ticker, match_score in tickers_with_match_score
+        ]
+        repository.persist(db_conn, match_score_entities)
 
         top_20_tickers = [
             ticker[0] for ticker in tickers_with_match_score[:20]

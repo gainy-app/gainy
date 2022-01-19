@@ -6,13 +6,14 @@ from typing import List, Tuple, Dict
 from psycopg2.extras import execute_values
 
 from common.hasura_exception import HasuraActionException
+from data_access.repository import Repository
 from recommendation.core import DimVector
 from recommendation.match_score import MatchScore
 
 script_dir = os.path.dirname(__file__)
 
 
-class RecommendationRepository:
+class RecommendationRepository(Repository):
 
     def __init__(self, db_conn):
         self.db_conn = db_conn
@@ -133,21 +134,6 @@ class RecommendationRepository:
                     "profile_id": profile_id,
                     "match_score_json": match_score_json_list
                 })
-
-    @staticmethod
-    def _match_score_as_json(ticker_with_match_score: Tuple[str, MatchScore]):
-        explanation = ticker_with_match_score[1].explain()
-
-        return {
-            "symbol": ticker_with_match_score[0],
-            "match_score": ticker_with_match_score[1].match_score(),
-            "fits_risk": explanation.risk_level.value,
-            "risk_similarity": explanation.risk_similarity,
-            "fits_categories": explanation.category_level.value,
-            "category_matches": explanation.category_matches,
-            "fits_interests": explanation.interest_level.value,
-            "interest_matches": explanation.interest_matches
-        }
 
     def update_personalized_collection(self, profile_id, collection_id,
                                        ticker_list):

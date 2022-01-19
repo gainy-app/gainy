@@ -1,11 +1,10 @@
-from abc import ABC, abstractmethod
+from data_access.models import AbstractBaseModel
+
+from abc import ABC
 import datetime
 
 
-class BaseModel(ABC):
-
-    def to_dict(self):
-        return self.__dict__
+class BaseModel(AbstractBaseModel, ABC):
 
     def normalize(self):
         d = self.to_dict().copy()
@@ -17,16 +16,6 @@ class BaseModel(ABC):
                 d[k] = i.isoformat()
 
         return d
-
-    @property
-    @abstractmethod
-    def schema_name(self):
-        pass
-
-    @property
-    @abstractmethod
-    def table_name(self):
-        pass
 
     def unique_field_names(self):
         return []
@@ -41,8 +30,8 @@ class BaseModel(ABC):
     def normalization_excluded_fields(self):
         return []
 
-    def id_field(self):
-        return 'id'
+    def key_fields(self):
+        return ['id']
 
 
 class HoldingData(BaseModel):
@@ -160,3 +149,4 @@ class Account(BaseModel):
 
     def unique_field_names(self):
         return ['ref_id']
+
