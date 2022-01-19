@@ -49,7 +49,8 @@ class Repository:
                         non_persistent_fields)
                     sql_string = sql_string + sql.SQL(
                         " RETURNING {non_persistent_fields}").format(
-                        non_persistent_fields=non_persistent_fields_escaped)
+                            non_persistent_fields=non_persistent_fields_escaped
+                        )
 
                 entity_dicts = [entity.to_dict() for entity in entities]
                 values = [[
@@ -62,7 +63,8 @@ class Repository:
                     returned = cursor.fetchall()
 
                     for entity, returned_row in zip(entities, returned):
-                        for db_excluded_field, value in zip(non_persistent_fields, returned_row):
+                        for db_excluded_field, value in zip(
+                                non_persistent_fields, returned_row):
                             entity.__setattr__(db_excluded_field, value)
 
     @staticmethod

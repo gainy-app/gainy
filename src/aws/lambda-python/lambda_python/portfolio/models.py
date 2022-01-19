@@ -56,7 +56,9 @@ class HoldingData(PortfolioBaseModel):
 
     @property
     def db_excluded_fields(self):
-        return super().db_excluded_fields + ['security_ref_id', 'account_ref_id']
+        return super().db_excluded_fields + [
+            'security_ref_id', 'account_ref_id'
+        ]
 
     @property
     def normalization_excluded_fields(self):
@@ -102,7 +104,9 @@ class TransactionData(PortfolioBaseModel):
 
     @property
     def db_excluded_fields(self):
-        return super().db_excluded_fields + ['security_ref_id', 'account_ref_id']
+        return super().db_excluded_fields + [
+            'security_ref_id', 'account_ref_id'
+        ]
 
     @property
     def normalization_excluded_fields(self):
