@@ -26,6 +26,10 @@ class PortfolioBaseModel(BaseModel, ABC):
         return ['id', 'created_at', 'updated_at']
 
     @property
+    def non_persistent_fields(self):
+        return ['id', 'created_at', 'updated_at']
+
+    @property
     def normalization_excluded_fields(self):
         return []
 
@@ -52,7 +56,7 @@ class HoldingData(PortfolioBaseModel):
 
     @property
     def db_excluded_fields(self):
-        return ['id', 'security_ref_id', 'account_ref_id']
+        return super().db_excluded_fields + ['security_ref_id', 'account_ref_id']
 
     @property
     def normalization_excluded_fields(self):
@@ -98,7 +102,7 @@ class TransactionData(PortfolioBaseModel):
 
     @property
     def db_excluded_fields(self):
-        return ['id', 'security_ref_id', 'account_ref_id']
+        return super().db_excluded_fields + ['security_ref_id', 'account_ref_id']
 
     @property
     def normalization_excluded_fields(self):

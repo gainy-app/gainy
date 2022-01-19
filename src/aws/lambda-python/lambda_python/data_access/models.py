@@ -22,6 +22,11 @@ class BaseModel(ABC):
         return []
 
     @property
+    def non_persistent_fields(self) -> List[str]:
+        """Typically, auto-generated fields like `id` or `created_at`"""
+        return []
+
+    @property
     @abstractmethod
     def key_fields(self) -> List[str]:
         pass

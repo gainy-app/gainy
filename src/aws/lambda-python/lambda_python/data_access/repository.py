@@ -10,7 +10,7 @@ class Repository:
         if isinstance(entities, BaseModel):
             entities = [entities]
 
-        entities_grouped = self.__group_entities(entities)
+        entities_grouped = self._group_entities(entities)
 
         with db_conn.cursor() as cursor:
             for (schema_name,
@@ -43,13 +43,13 @@ class Repository:
                             if field_name not in key_fields
                         ]))
 
-                db_excluded_fields = entities[0].db_excluded_fields
-                if db_excluded_fields:
-                    db_excluded_fields_escaped = self._escape_fields(
-                        db_excluded_fields)
+                non_persistent_fields = entities[0].non_persistent_fields
+                if non_persistent_fields:
+                    non_persistent_fields_escaped = self._escape_fields(
+                        non_persistent_fields)
                     sql_string = sql_string + sql.SQL(
-                        " RETURNING {db_excluded_fields}").format(
-                            db_excluded_fields=db_excluded_fields_escaped)
+                        " RETURNING {non_persistent_fields}").format(
+                        non_persistent_fields=non_persistent_fields_escaped)
 
                 entity_dicts = [entity.to_dict() for entity in entities]
                 values = [[
@@ -58,12 +58,11 @@ class Repository:
 
                 execute_values(cursor, sql_string, values)
 
-                if db_excluded_fields:
+                if non_persistent_fields:
                     returned = cursor.fetchall()
 
                     for entity, returned_row in zip(entities, returned):
-                        for db_excluded_field, value in zip(
-                                db_excluded_fields, returned_row):
+                        for db_excluded_field, value in zip(non_persistent_fields, returned_row):
                             entity.__setattr__(db_excluded_field, value)
 
     @staticmethod
@@ -72,7 +71,7 @@ class Repository:
             map(sql.Identifier, field_names))
         return field_names_escaped
 
-    def __group_entities(self, entities):
+    def _group_entities(self, entities):
         entities_grouped = {}
 
         for entity in entities:

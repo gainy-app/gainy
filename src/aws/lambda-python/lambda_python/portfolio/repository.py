@@ -10,7 +10,7 @@ class PortfolioRepository(Repository):
         if isinstance(entities, BaseModel):
             entities = [entities]
 
-        entities_grouped = self.__group_entities(entities)
+        entities_grouped = self._group_entities(entities)
 
         with db_conn.cursor() as cursor:
             for (schema_name,
