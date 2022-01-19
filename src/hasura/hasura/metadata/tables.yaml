@@ -483,7 +483,15 @@
   select_permissions:
   - role: user
     permission:
-      columns: []
+      columns:
+        - category_matches
+        - fits_categories
+        - fits_interests
+        - fits_risk
+        - interest_matches
+        - match_score
+        - risk_similarity
+        - symbol
       filter:
         profile:
           user_id:
