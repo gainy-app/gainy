@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 from typing import List, Any, Dict
 
 
-class AbstractBaseModel(ABC):
+class BaseModel(ABC):
 
     def to_dict(self) -> Dict[str, Any]:
         return self.__dict__

@@ -1,6 +1,6 @@
-from data_access.models import BaseModel
 from psycopg2 import sql
 
+from data_access.models import BaseModel
 from data_access.repository import Repository
 
 

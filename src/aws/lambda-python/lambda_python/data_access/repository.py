@@ -1,13 +1,13 @@
 from psycopg2 import sql
 from psycopg2.extras import execute_values
 
-from data_access.models import AbstractBaseModel
+from data_access.models import BaseModel
 
 
 class Repository:
 
     def persist(self, db_conn, entities):
-        if isinstance(entities, AbstractBaseModel):
+        if isinstance(entities, BaseModel):
             entities = [entities]
 
         entities_grouped = self.__group_entities(entities)

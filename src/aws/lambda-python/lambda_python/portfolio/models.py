@@ -1,10 +1,10 @@
-from data_access.models import AbstractBaseModel
+from data_access.models import BaseModel
 
 from abc import ABC
 import datetime
 
 
-class BaseModel(AbstractBaseModel, ABC):
+class PortfolioBaseModel(BaseModel, ABC):
 
     def normalize(self):
         d = self.to_dict().copy()
@@ -34,7 +34,7 @@ class BaseModel(AbstractBaseModel, ABC):
         return ['id']
 
 
-class HoldingData(BaseModel):
+class HoldingData(PortfolioBaseModel):
     id = None
     iso_currency_code = None
     quantity = None
@@ -62,7 +62,7 @@ class HoldingData(BaseModel):
         return ['ref_id']
 
 
-class TransactionData(BaseModel):
+class TransactionData(PortfolioBaseModel):
     id = None
 
     amount = None
@@ -103,7 +103,7 @@ class TransactionData(BaseModel):
         return ['ref_id']
 
 
-class Security(BaseModel):
+class Security(PortfolioBaseModel):
     id = None
     close_price = None
     close_price_as_of = None
@@ -125,7 +125,7 @@ class Security(BaseModel):
         return ['ref_id']
 
 
-class Account(BaseModel):
+class Account(PortfolioBaseModel):
     ref_id = None
     balance_available = None
     balance_current = None

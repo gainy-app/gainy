@@ -1,11 +1,10 @@
 import json
-from typing import List
 
-from data_access.models import AbstractBaseModel
+from data_access.models import BaseModel
 from recommendation.match_score import MatchScore
 
 
-class MatchScoreModel(AbstractBaseModel):
+class MatchScoreModel(BaseModel):
 
     schema_name = "app"
     table_name = "profile_ticker_match_score"
