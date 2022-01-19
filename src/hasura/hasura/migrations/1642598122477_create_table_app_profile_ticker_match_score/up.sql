@@ -1,6 +1,6 @@
 -- Drop deprecated tables and views on TEST and LOCAL envs
-drop table if exists app.profile_ticker_match_score_json;
 drop view if exists app.profile_ticker_match_score;
+drop table if exists app.profile_ticker_match_score_json;
 
 create table app.profile_ticker_match_score
 (
