@@ -1,10 +1,11 @@
 {{
   config(
-    materialized = "table",
+    materialized = "incremental",
+    unique_key = "id",
     post_hook=[
-      fk(this, 'symbol', this.schema, 'tickers', 'symbol'),
-      fk(this, 'industry_id', this.schema, 'gainy_industries', 'id'),
+      index(this, 'id', true),
       'create unique index if not exists {{ get_index_name(this, "industry_id__symbol") }} (industry_id, symbol)',
+      'delete from {{this}} where updated_at < (select max(updated_at) from {{this}})',
     ]
   )
 }}
@@ -40,10 +41,14 @@ industries_2 as (
 ),
 all_industries as (
     select symbol, industry_id, 1 as industry_order from industries_1
-        union
-    select symbol, industry_id, 2 as industry_order from industries_2
+--         union
+--     select symbol, industry_id, 2 as industry_order from industries_2
 )
-select ai.symbol, industry_id, industry_order
+select concat(ai.symbol, '_', industry_id)::varchar as id,
+       ai.symbol,
+       industry_id,
+       industry_order,
+       now() as updated_at
 from all_industries ai
          join common_stocks cs
               on ai.symbol = cs.symbol

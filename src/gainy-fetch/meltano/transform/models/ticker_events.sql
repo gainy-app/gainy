@@ -1,9 +1,10 @@
 {{
   config(
-    materialized = "table",
-    post_hook=[
-      fk(this, 'symbol', this.schema, 'tickers', 'symbol'),
-      'create unique index if not exists {{ get_index_name(this, "symbol") }} (symbol)',
+    materialized = "incremental",
+    unique_key = "id",
+    post_hook = [
+      index(this, 'id', true),
+      'delete from {{this}} where created_at < (select max(created_at) from {{this}})',
     ]
   )
 }}
@@ -16,7 +17,8 @@ with upcoming_reports as
              where eps_actual is null
              group by symbol
          )
-select upcoming_reports.symbol,
+select concat(upcoming_reports.symbol, '_', date)::varchar as id,
+       upcoming_reports.symbol,
        date,
        date::timestamptz                                                 as timestamp,
        'earnings_report'                                                 as type,

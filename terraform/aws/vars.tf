@@ -38,9 +38,13 @@ locals {
   hasura_cpu_credits            = var.env == "production" ? 512 : 256
   meltano_scheduler_cpu_credits = var.env == "production" ? 3072 : 512
 
-  websockets_memory_credits = 512
+  hasura_healthcheck_interval = var.env == "production" ? 90 : 120
+  hasura_healthcheck_retries  = var.env == "production" ? 10 : 10
 
-  hasura_memory_credits            = var.env == "production" ? 2048 : 1024
+  eod_websockets_memory_credits     = 512
+  polygon_websockets_memory_credits = 768
+
+  hasura_memory_credits            = var.env == "production" ? 2304 : 1024
   meltano_ui_memory_credits        = var.env == "production" ? 1024 : 1024
   meltano_scheduler_memory_credits = var.env == "production" ? 3072 : 3072
 }
