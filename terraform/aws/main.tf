@@ -139,6 +139,8 @@ module "ecs-service" {
   datadog_app_key = var.datadog_app_key
 
   polygon_api_token = var.polygon_api_token
+
+  health_check_grace_period_seconds = local.health_check_grace_period_seconds
 }
 
 

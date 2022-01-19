@@ -155,6 +155,37 @@ resource "aws_ecs_task_definition" "default" {
     }
   )
 }
+resource "aws_ecs_task_definition" "hasura" {
+  family                   = "gainy-hasura-${var.env}"
+  network_mode             = "bridge"
+  requires_compatibilities = []
+  tags                     = {}
+
+  container_definitions = templatefile(
+    "${path.module}/container-definitions-hasura.json",
+    {
+      hasura_enable_console           = var.hasura_enable_console
+      hasura_enable_dev_mode          = var.hasura_enable_dev_mode
+      hasura_admin_secret             = random_password.hasura.result
+      hasura_jwt_secret               = var.hasura_jwt_secret
+      aws_lambda_api_gateway_endpoint = var.aws_lambda_api_gateway_endpoint
+      hasura_image                    = docker_registry_image.hasura.name
+      hasura_memory_credits           = var.hasura_memory_credits
+      hasura_cpu_credits              = var.hasura_cpu_credits
+      hasura_healthcheck_interval     = var.hasura_healthcheck_interval
+      hasura_healthcheck_retries      = var.hasura_healthcheck_retries
+
+      pg_host             = var.pg_host
+      pg_password         = var.pg_password
+      pg_port             = var.pg_port
+      pg_username         = var.pg_username
+      pg_dbname           = var.pg_dbname
+      pg_transform_schema = "public" # "public_${var.versioned_schema_suffix}" # TODO deployment_v2 blocked by versioned hasura views
+      aws_log_group_name  = var.aws_log_group_name
+      aws_log_region      = var.aws_log_region
+    }
+  )
+}
 
 module "meltano-elb" {
   source                           = "./elb"
@@ -199,6 +230,7 @@ resource "aws_ecs_service" "service" {
   desired_count                      = 1
   deployment_maximum_percent         = 200
   deployment_minimum_healthy_percent = 100
+  health_check_grace_period_seconds  = var.health_check_grace_period_seconds
 
   ordered_placement_strategy {
     type  = "spread"
@@ -219,6 +251,63 @@ resource "aws_ecs_service" "service" {
 
   task_definition      = "${aws_ecs_task_definition.default.family}:${aws_ecs_task_definition.default.revision}"
   force_new_deployment = true
+}
+
+/*
+ * Create Hasura autoscaling service
+ */
+resource "aws_ecs_service" "hasura" {
+  count                              = var.env == "test" ? 1 : 0 # TODO move to production
+  name                               = "gainy-hasura-${var.env}"
+  cluster                            = var.ecs_cluster_name
+  desired_count                      = 0
+  deployment_maximum_percent         = 200
+  deployment_minimum_healthy_percent = 100
+  launch_type                        = "FARGATE"
+  health_check_grace_period_seconds  = var.health_check_grace_period_seconds
+
+  ordered_placement_strategy {
+    type  = "spread"
+    field = "instanceId"
+  }
+
+  load_balancer {
+    target_group_arn = module.hasura-elb.aws_alb_target_group_arn
+    container_name   = "hasura"
+    container_port   = 8080
+  }
+
+  task_definition      = "${aws_ecs_task_definition.hasura.family}:${aws_ecs_task_definition.hasura.revision}"
+  force_new_deployment = true
+
+  lifecycle {
+    ignore_changes = [desired_count]
+  }
+}
+resource "aws_appautoscaling_target" "hasura" {
+  count              = var.env == "test" ? 1 : 0 # TODO move to production
+  max_capacity       = 4
+  min_capacity       = 1
+  resource_id        = "service/${var.ecs_cluster_name}/${aws_ecs_service.hasura[0].name}"
+  scalable_dimension = "ecs:service:DesiredCount"
+  service_namespace  = "ecs"
+}
+
+resource "aws_appautoscaling_policy" "ecs_policy" {
+  count              = var.env == "test" ? 1 : 0 # TODO move to production
+  name               = "policy-gainy-hasura-${var.env}"
+  policy_type        = "TargetTrackingScaling"
+  resource_id        = aws_appautoscaling_target.hasura[0].resource_id
+  scalable_dimension = aws_appautoscaling_target.hasura[0].scalable_dimension
+  service_namespace  = aws_appautoscaling_target.hasura[0].service_namespace
+
+  target_tracking_scaling_policy_configuration {
+    target_value = 40
+
+    predefined_metric_specification {
+      predefined_metric_type = "ECSServiceAverageMemoryUtilization"
+    }
+  }
 }
 
 output "meltano_url" {

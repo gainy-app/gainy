@@ -46,3 +46,4 @@ variable "polygon_websockets_memory_credits" {}
 variable "datadog_api_key" {}
 variable "datadog_app_key" {}
 variable "polygon_api_token" {}
+variable "health_check_grace_period_seconds" {}
