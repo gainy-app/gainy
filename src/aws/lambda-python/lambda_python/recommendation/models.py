@@ -26,4 +26,3 @@ class MatchScoreModel(BaseModel):
         self.interest_matches = json.dumps(explanation.interest_matches)
 
         self.updated_at = None
-

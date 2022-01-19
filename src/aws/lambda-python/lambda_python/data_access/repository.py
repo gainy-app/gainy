@@ -38,17 +38,18 @@ class Repository:
                         key_field_names=key_field_names_escaped,
                         set_clause=sql.SQL(',').join([
                             sql.SQL("{field_name} = excluded.{field_name}").
-                                format(field_name=sql.Identifier(field_name))
+                            format(field_name=sql.Identifier(field_name))
                             for field_name in field_names
                             if field_name not in key_fields
                         ]))
 
                 db_excluded_fields = entities[0].db_excluded_fields
                 if db_excluded_fields:
-                    db_excluded_fields_escaped = self._escape_fields(db_excluded_fields)
+                    db_excluded_fields_escaped = self._escape_fields(
+                        db_excluded_fields)
                     sql_string = sql_string + sql.SQL(
-                        " RETURNING {db_excluded_fields}"
-                    ).format(db_excluded_fields=db_excluded_fields_escaped)
+                        " RETURNING {db_excluded_fields}").format(
+                            db_excluded_fields=db_excluded_fields_escaped)
 
                 entity_dicts = [entity.to_dict() for entity in entities]
                 values = [[
@@ -61,12 +62,14 @@ class Repository:
                     returned = cursor.fetchall()
 
                     for entity, returned_row in zip(entities, returned):
-                        for db_excluded_field, value in zip(db_excluded_fields, returned_row):
+                        for db_excluded_field, value in zip(
+                                db_excluded_fields, returned_row):
                             entity.__setattr__(db_excluded_field, value)
 
     @staticmethod
     def _escape_fields(field_names):
-        field_names_escaped = sql.SQL(',').join(map(sql.Identifier, field_names))
+        field_names_escaped = sql.SQL(',').join(
+            map(sql.Identifier, field_names))
         return field_names_escaped
 
     def __group_entities(self, entities):

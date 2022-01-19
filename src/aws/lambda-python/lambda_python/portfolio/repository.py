@@ -32,4 +32,3 @@ class PortfolioRepository(Repository):
                         tuple(plaid_access_token_ids),
                         'excluded_ids': tuple(excluded_ids)
                     })
-

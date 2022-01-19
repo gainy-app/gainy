@@ -161,4 +161,3 @@ class Account(PortfolioBaseModel):
     @property
     def key_fields(self):
         return ['ref_id']
-
