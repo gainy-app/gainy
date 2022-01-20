@@ -10,7 +10,7 @@ from portfolio.triggers import *
 
 # DB CONNECTION
 from search.algolia_search import SearchTickers, SearchCollections
-from trigger.set_top_20_collection import SetTop20Collection
+from trigger.set_recommendations import SetRecommendations
 from trigger.set_user_categories import SetUserCategories
 from trigger.on_user_created import OnUserCreated
 
@@ -63,7 +63,7 @@ def handle_action(event, context):
 TRIGGERS = [
     SetUserCategories(),
     OnUserCreated(ENV),
-    SetTop20Collection(),
+    SetRecommendations(),
     OnPlaidAccessTokenCreated(),
 ]
 
