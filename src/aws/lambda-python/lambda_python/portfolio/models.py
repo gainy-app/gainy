@@ -169,3 +169,26 @@ class Account(PortfolioBaseModel):
     @property
     def key_fields(self):
         return ['ref_id']
+
+
+class Institution(PortfolioBaseModel):
+    id = None
+    ref_id = None
+    name = None
+    primary_color = None
+    url = None
+    logo = None
+    created_at = None
+    updated_at = None
+
+    @property
+    def schema_name(self):
+        return 'app'
+
+    @property
+    def table_name(self):
+        return 'plaid_institutions'
+
+    @property
+    def key_fields(self):
+        return ['ref_id']

@@ -1,15 +1,47 @@
+import os
+from plaid.model.country_code import CountryCode
+from plaid.model.products import Products
+
+from plaid.model.link_token_create_request import LinkTokenCreateRequest
+from plaid.model.link_token_create_request_user import LinkTokenCreateRequestUser
+from plaid.model.item_public_token_exchange_request import ItemPublicTokenExchangeRequest
 from plaid.model.investments_holdings_get_request import InvestmentsHoldingsGetRequest
 from plaid.model.investments_transactions_get_request import InvestmentsTransactionsGetRequest
 from plaid.model.investments_transactions_get_request_options import InvestmentsTransactionsGetRequestOptions
 from plaid.model.webhook_verification_key_get_request import WebhookVerificationKeyGetRequest
+from plaid.model.item_get_request import ItemGetRequest
+from plaid.model.institutions_get_by_id_request import InstitutionsGetByIdRequest
 
 from portfolio.plaid.common import get_plaid_client, handle_error
+
+PLAID_WEBHOOK_URL = os.getenv("PLAID_WEBHOOK_URL")
+COUNTRY_CODES = [CountryCode('US')]
 
 
 class PlaidClient:
 
     def __init__(self):
         self.client = get_plaid_client()
+
+    def create_link_token(self, profile_id, redirect_uri):
+        #TODO when we have verified phone number, we can implement https://plaid.com/docs/link/returning-user/#enabling-the-returning-user-experience
+        request = LinkTokenCreateRequest(products=[Products('investments')],
+                                         client_name="Gainy",
+                                         country_codes=COUNTRY_CODES,
+                                         language='en',
+                                         redirect_uri=redirect_uri,
+                                         webhook=PLAID_WEBHOOK_URL,
+                                         user=LinkTokenCreateRequestUser(
+                                             client_user_id=str(profile_id), ))
+        response = self.client.link_token_create(request)
+
+        return response
+
+    def exchange_link_token(self, public_token):
+        request = ItemPublicTokenExchangeRequest(public_token=public_token)
+        response = self.client.item_public_token_exchange(request)
+
+        return response
 
     def get_investment_holdings(self, access_token):
         request = InvestmentsHoldingsGetRequest(access_token=access_token)
@@ -32,6 +64,19 @@ class PlaidClient:
                 offset=offset,
             ))
         response = self.client.investments_transactions_get(request)
+
+        return response
+
+    def get_item(self, access_token):
+        request = ItemGetRequest(access_token=access_token)
+        response = self.client.item_get(request)
+
+        return response
+
+    def get_institution(self, institution_id):
+        request = InstitutionsGetByIdRequest(institution_id=institution_id,
+                                             country_codes=COUNTRY_CODES)
+        response = self.client.institutions_get_by_id(request)
 
         return response
 
