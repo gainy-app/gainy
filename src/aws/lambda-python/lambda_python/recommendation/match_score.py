@@ -1,28 +1,47 @@
 from enum import Enum
 from math import sqrt
 from typing import Dict, List
+from collections import Counter
 
-from recommendation.core.dim_vector import DimVector, NamedDimVector
+import numpy as np
+
+from recommendation.core import DimVector
+
 
 # INDUSTRY SIMILARITY SCORE
-
-
 def get_interest_similarity(
-        profile_interest_vs: List[NamedDimVector],
+        profile_interest_vs: List[DimVector],
         ticker_industry_v: DimVector) -> (float, List[int]):
-    interest_score = 0
-    interest_matches = []
 
+    all_industry_list = []
     for profile_interest_v in profile_interest_vs:
-        current_interest_score = DimVector.dot_product(
-            normalized_profile_industries_vector(profile_interest_v),
-            ticker_industry_v) / DimVector.norm(ticker_industry_v, order=1)
+        all_industry_list += profile_interest_v.dims
 
-        interest_score = max(interest_score, current_interest_score)
-        if current_interest_score > 0:
+    if not ticker_industry_v.dims or not all_industry_list:
+        return 0.0, []
+
+    profile_id = profile_interest_vs[0].name
+    counter = Counter(all_industry_list)
+    profile_industry_v = DimVector(profile_id, counter)
+
+    normed_profile_v = normalized_profile_industries_vector(profile_industry_v)
+    norm_ticker = DimVector.norm(ticker_industry_v, order=1)
+    interest_score = DimVector.dot_product(normed_profile_v,
+                                           ticker_industry_v) / norm_ticker
+
+    interest_matches = []
+    for profile_interest_v in profile_interest_vs:
+        has_common_industry = _has_common_industry(profile_interest_v,
+                                                   ticker_industry_v)
+
+        if has_common_industry:
             interest_matches.append(profile_interest_v.name)
 
     return interest_score, interest_matches
+
+
+def _has_common_industry(profile_interest_v, ticker_industry_v):
+    return DimVector.dot_product(profile_interest_v, ticker_industry_v) > 0
 
 
 def normalized_profile_industries_vector(vector: DimVector) -> DimVector:
@@ -31,14 +50,12 @@ def normalized_profile_industries_vector(vector: DimVector) -> DimVector:
 
     max_value = max(vector.values)
     min_value = min(vector.values)
-
-    new_coordinates = {}
     denominator = 1.0 + sqrt(max_value) - sqrt(min_value)
-    for (dim, value) in zip(vector.dims, vector.values):
-        new_coordinates[dim] = (1.0 + sqrt(value) -
-                                sqrt(min_value)) / denominator
 
-    return DimVector(new_coordinates)
+    new_values = (1.0 + np.sqrt(vector.values) -
+                  np.sqrt(min_value)) / denominator
+
+    return DimVector(vector.name, zip(vector.dims, new_values))
 
 
 # RISK SIMILARITY SCORE
@@ -92,6 +109,7 @@ def get_category_similarity(
 
     category_matches = sorted(
         set(profile_category_v.dims).intersection(ticker_category_v.dims))
+
     category_matches = list(
         map(lambda category_id: int(category_id), category_matches))
 
@@ -166,9 +184,11 @@ class MatchScoreExplainer:
         interest_level = self._apply_explanation_config(
             interest_similarity, MatchScoreComponent.INTEREST)
 
-        return MatchScoreExplanation(risk_level, risk_similarity,
-                                     category_level, category_matches,
-                                     interest_level, interest_matches)
+        return MatchScoreExplanation(
+            risk_level, risk_similarity, category_level,
+            category_matches if category_level.value > 0 else [],
+            interest_level,
+            interest_matches if interest_level.value > 0 else [])
 
 
 class MatchScore:
@@ -203,12 +223,12 @@ def profile_ticker_similarity(
     profile_categories: DimVector,
     ticker_categories: DimVector,
     risk_mapping: Dict[str, int],
-    profile_interests: List[NamedDimVector],
+    profile_interests: List[DimVector],
     ticker_industries: DimVector,
 ) -> MatchScore:
-    risk_weight = 1 / 3
-    category_weight = 1 / 3
-    interest_weight = 1 / 3
+    risk_weight = 1 / 4
+    category_weight = 1 / 4
+    interest_weight = 1 / 2
 
     risk_similarity = get_risk_similarity(profile_categories,
                                           ticker_categories, risk_mapping)
