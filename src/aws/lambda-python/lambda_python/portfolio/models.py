@@ -181,11 +181,14 @@ class Institution(PortfolioBaseModel):
     created_at = None
     updated_at = None
 
+    @property
     def schema_name(self):
         return 'app'
 
+    @property
     def table_name(self):
         return 'plaid_institutions'
 
-    def unique_field_names(self):
+    @property
+    def key_fields(self):
         return ['ref_id']
