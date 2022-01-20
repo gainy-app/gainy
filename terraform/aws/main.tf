@@ -103,8 +103,11 @@ module "ecs-service" {
   hasura_jwt_secret               = var.hasura_jwt_secret
   hasura_cpu_credits              = local.hasura_cpu_credits
   hasura_memory_credits           = local.hasura_memory_credits
+  hasura_healthcheck_interval     = local.hasura_healthcheck_interval
+  hasura_healthcheck_retries      = local.hasura_healthcheck_retries
 
-  websockets_memory_credits = local.websockets_memory_credits
+  eod_websockets_memory_credits     = local.eod_websockets_memory_credits
+  polygon_websockets_memory_credits = local.polygon_websockets_memory_credits
 
   eodhistoricaldata_api_token = var.eodhistoricaldata_api_token
   pg_host                     = module.rds.db_instance.address
@@ -134,6 +137,8 @@ module "ecs-service" {
 
   datadog_api_key = var.datadog_api_key
   datadog_app_key = var.datadog_app_key
+
+  polygon_api_token = var.polygon_api_token
 }
 
 

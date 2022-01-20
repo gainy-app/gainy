@@ -110,9 +110,12 @@ resource "aws_ecs_task_definition" "default" {
       hasura_image                    = docker_registry_image.hasura.name
       hasura_memory_credits           = var.hasura_memory_credits
       hasura_cpu_credits              = var.hasura_cpu_credits
+      hasura_healthcheck_interval     = var.hasura_healthcheck_interval
+      hasura_healthcheck_retries      = var.hasura_healthcheck_retries
 
-      websockets_memory_credits = var.websockets_memory_credits
-      websockets_image          = docker_registry_image.websockets.name
+      eod_websockets_memory_credits     = var.eod_websockets_memory_credits
+      polygon_websockets_memory_credits = var.polygon_websockets_memory_credits
+      websockets_image                  = docker_registry_image.websockets.name
 
       env                                  = var.env
       eodhistoricaldata_api_token          = var.eodhistoricaldata_api_token
@@ -146,6 +149,9 @@ resource "aws_ecs_task_definition" "default" {
 
       datadog_api_key = var.datadog_api_key
       datadog_app_key = var.datadog_app_key
+
+      polygon_api_token               = var.polygon_api_token
+      polygon_realtime_streaming_host = "delayed.polygon.io" # socket.polygon.io for real-time
     }
   )
 }

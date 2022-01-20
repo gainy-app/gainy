@@ -1,22 +1,26 @@
 {{
   config(
-    materialized = "table",
+    materialized = "incremental",
+    unique_key = "id",
     post_hook=[
-      fk(this, 'symbol', this.schema, 'tickers', 'symbol'),
-      fk(this, 'industry_id', this.schema, 'gainy_industries', 'id'),
+      index(this, 'id', true),
       'create unique index if not exists {{ get_index_name(this, "industry_id__symbol") }} (industry_id, symbol)',
+      'delete from {{this}} where updated_at < (select max(updated_at) from {{this}})',
     ]
   )
 }}
 
-with manual_industries as (
+with common_stocks as (
+    select * from {{ ref('tickers') }} where type = 'Common Stock'
+),
+manual_industries as (
     select code as symbol, cast (id as integer) as industry_id_0
     from {{ source('gainy', 'gainy_ticker_industries') }} gti
         join {{ ref('gainy_industries') }} gi
             on gti."industry name" = gi."name"
 ),
 tickers_with_industries as (
-    select coalesce(ati.symbol, mi.symbol) as symbol, industry_id_0, industry_id_1, industry_id_2
+    select coalesce(ati.symbol, mi.symbol) as symbol, mi.industry_id_0, ati.industry_id_1, ati.industry_id_2
     from {{ source('gainy', 'auto_ticker_industries') }} ati
         full outer join manual_industries mi
             on ati.symbol = mi.symbol
@@ -40,7 +44,12 @@ all_industries as (
         union
     select symbol, industry_id, 2 as industry_order from industries_2
 )
-select ai.symbol, industry_id, industry_order
+select concat(ai.symbol, '_', industry_id)::varchar as id,
+       ai.symbol,
+       industry_id,
+       industry_order,
+       now() as updated_at
 from all_industries ai
-         join {{ ref ('tickers') }} t
-              on ai.symbol = t.symbol
+         join common_stocks cs
+              on ai.symbol = cs.symbol
+where ai.industry_id is not null

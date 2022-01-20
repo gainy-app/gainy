@@ -210,12 +210,13 @@ module "hasuraTrigger" {
   env                                       = var.env
   function_name                             = "hasuraTrigger"
   handler                                   = "hasura_handler.handle_trigger"
-  timeout                                   = 60
+  timeout                                   = 150
   route                                     = "POST /hasuraTrigger"
   aws_apigatewayv2_api_lambda_id            = aws_apigatewayv2_api.lambda.id
   aws_apigatewayv2_api_lambda_execution_arn = aws_apigatewayv2_api.lambda.execution_arn
   aws_iam_role_lambda_exec_role             = aws_iam_role.lambda_exec
   image_uri                                 = docker_registry_image.lambda_python.name
+  memory_size                               = var.env == "production" ? 512 : 256
 
   env_vars = {
     pg_host                   = var.pg_host

@@ -10,7 +10,7 @@ from portfolio.triggers import *
 
 # DB CONNECTION
 from search.algolia_search import SearchTickers, SearchCollections
-from trigger.set_top_20_collection import SetTop20Collection
+from trigger.set_recommendations import SetRecommendations
 from trigger.set_user_categories import SetUserCategories
 from trigger.on_user_created import OnUserCreated
 
@@ -24,12 +24,12 @@ PASSWORD = os.environ['pg_password']
 
 DB_CONN_STRING = f"postgresql://{USERNAME}:{PASSWORD}@{HOST}:{PORT}/{DB_NAME}"
 
-ALGOLIA_APP_ID = os.environ["ALGOLIA_APP_ID"]
-ALGOLIA_TICKERS_INDEX = os.environ["ALGOLIA_TICKERS_INDEX"]
-ALGOLIA_COLLECTIONS_INDEX = os.environ["ALGOLIA_COLLECTIONS_INDEX"]
-ALGOLIA_SEARCH_API_KEY = os.environ["ALGOLIA_SEARCH_API_KEY"]
+ALGOLIA_APP_ID = os.getenv("ALGOLIA_APP_ID")
+ALGOLIA_TICKERS_INDEX = os.getenv("ALGOLIA_TICKERS_INDEX")
+ALGOLIA_COLLECTIONS_INDEX = os.getenv("ALGOLIA_COLLECTIONS_INDEX")
+ALGOLIA_SEARCH_API_KEY = os.getenv("ALGOLIA_SEARCH_API_KEY")
 
-API_GATEWAY_PROXY_INTEGRATION = os.environ.get(
+API_GATEWAY_PROXY_INTEGRATION = os.getenv(
     "AWS_LAMBDA_API_GATEWAY_PROXY_INTEGRATION", "True") == "True"
 
 ACTIONS = [
@@ -63,7 +63,7 @@ def handle_action(event, context):
 TRIGGERS = [
     SetUserCategories(),
     OnUserCreated(ENV),
-    SetTop20Collection(),
+    SetRecommendations(),
     OnPlaidAccessTokenCreated(),
 ]
 

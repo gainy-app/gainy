@@ -1,5 +1,4 @@
 import numpy as np
-from numpy import dot
 from numpy.linalg import norm
 
 
@@ -20,44 +19,29 @@ class DimVector:
     similar data structure with wider functionality. Unfortunately, booth are outdated.
     """
 
-    def __init__(self, coordinates):
+    def __init__(self, name, coordinates):
+        self.name = name
         if coordinates:
-            dim_list = []
-            value_list = []
-            for (dim, value) in coordinates.items():
-                dim_list.append(dim)
-                value_list.append(value)
-
-            self.dims = dim_list
-            self.values = np.array(value_list)
+            self._coordinates = dict(coordinates)
+            self.dims = list(self._coordinates.keys())
+            self.values = np.array(list(self._coordinates.values()))
         else:
+            self._coordinates = {}
             self.dims = []
             self.values = np.array([])
-
-    @staticmethod
-    def reshape(vector, new_dims):
-        coordinates = dict([(new_dim, 0) for new_dim in new_dims])
-        for (dim, value) in zip(vector.dims, vector.values):
-            if dim in coordinates:
-                coordinates[dim] = value
-
-        return DimVector(coordinates)
 
     @staticmethod
     def norm(vector, order=2):
         return norm(vector.values, ord=order)
 
     @staticmethod
-    def dot_product(first, second, reshape=True):
-        common_dims = list(set(first.dims).union(second.dims))
+    def dot_product(first, second):
+        result = 0.0
+        for dim in set(first.dims).intersection(second.dims):
+            result += first._coordinates.get(dim, 0) * second._coordinates.get(
+                dim, 0)
 
-        if reshape:
-            first_reshaped = DimVector.reshape(first, common_dims)
-            second_reshaped = DimVector.reshape(second, common_dims)
-
-            return dot(first_reshaped.values, second_reshaped.values)
-        else:
-            return dot(first.values, second.values)
+        return result
 
     def cosine_similarity(self, other, norm_order=2):
         self_norm = DimVector.norm(self, order=norm_order)
@@ -67,10 +51,3 @@ class DimVector:
             return 0.0
 
         return DimVector.dot_product(self, other) / self_norm / other_norm
-
-
-class NamedDimVector(DimVector):
-
-    def __init__(self, name, coordinates):
-        super().__init__(coordinates)
-        self.name = name

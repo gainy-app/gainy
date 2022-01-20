@@ -1,6 +1,7 @@
 {{
   config(
-    materialized = "table",
+    materialized = "incremental",
+    unique_key = "symbol",
     post_hook=[
       index(this, 'symbol', true),
     ]
@@ -8,6 +9,7 @@
 }}
 
 with highlights as (select * from {{ ref('highlights') }}),
+     tickers as (select * from {{ ref('tickers') }}),
      valuation as (select * from {{ ref('valuation') }}),
      technicals as (select * from {{ ref('technicals') }}),
      ticker_shares_stats as (select * from {{ ref('ticker_shares_stats') }}),

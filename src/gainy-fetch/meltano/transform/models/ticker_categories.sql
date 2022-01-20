@@ -1,14 +1,18 @@
 {{
   config(
-    materialized = "table",
+    materialized = "incremental",
+    unique_key = "id",
     post_hook=[
-      fk(this, 'category_id', this.schema, 'categories', 'id'),
-      fk(this, 'symbol', this.schema, 'tickers', 'symbol'),
+      index(this, 'id', true),
       'create unique index if not exists {{ get_index_name(this, "symbol__category_id") }} (symbol, category_id)',
+      'delete from {{this}} where updated_at < (select max(updated_at) from {{this}})',
     ]
   )
 }}
 
+WITH common_stocks AS (
+    SELECT * FROM {{ ref('tickers') }} WHERE "type" = 'Common Stock'
+)
 (
     WITH downside_deviation_stats AS
              (
@@ -18,9 +22,11 @@
                           JOIN {{ ref('tickers') }} ON tickers.symbol = technicals.symbol
                  GROUP BY tickers.gic_sector
              )
-    select c.id as category_id,
-           t.symbol
-    from {{ ref('tickers') }} t
+    select concat(c.id, '_', t.symbol)::varchar as id,
+           c.id as category_id,
+           t.symbol,
+           now()::timestamp as updated_at
+    from common_stocks t
              join {{ ref('categories') }} c ON c.name = 'Defensive'
              JOIN {{ ref('technicals') }} t2 on t.symbol = t2.symbol
              JOIN downside_deviation_stats on downside_deviation_stats.gic_sector = t.gic_sector
@@ -46,9 +52,11 @@ UNION
                  WHERE expirationdate::timestamp > NOW()
                  GROUP BY code
              )
-    select c.id as category_id,
-           t.symbol
-    from {{ ref('tickers') }} t
+    select concat(c.id, '_', t.symbol)::varchar as id,
+           c.id             as category_id,
+           t.symbol,
+           now()::timestamp as updated_at
+    from common_stocks t
              join {{ ref('categories') }} c ON c.name = 'Speculation'
              JOIN {{ ref('technicals') }} t2 on t.symbol = t2.symbol
              JOIN {{ source('eod', 'eod_fundamentals') }} f ON f.code = t.symbol
@@ -61,17 +69,21 @@ UNION
 )
 UNION
 (
-    select c.id as category_id,
-           t.symbol
+    select concat(c.id, '_', t.symbol)::varchar as id,
+           c.id             as category_id,
+           t.symbol,
+           now()::timestamp as updated_at
     from {{ ref('tickers') }} t
              join {{ ref('categories') }} c ON c.name = 'ETF'
     WHERE t.type = 'ETF'
 )
 UNION
 (
-    select c.id as category_id,
-           t.symbol
-    from {{ ref('tickers') }} t
+    select concat(c.id, '_', t.symbol)::varchar as id,
+           c.id             as category_id,
+           t.symbol,
+           now()::timestamp as updated_at
+    from common_stocks t
              join {{ ref('categories') }} c ON c.name = 'Penny'
              LEFT JOIN {{ ref('historical_prices') }} hp on t.symbol = hp.code
              LEFT JOIN {{ ref('historical_prices') }} hp_next on t.symbol = hp_next.code AND hp_next.date::timestamp > hp.date::timestamp
@@ -102,9 +114,11 @@ UNION
              WHERE eh.date::timestamp > NOW() - interval '5 years'
              GROUP BY eh.symbol
          )
-    select c.id     as category_id,
-           t.symbol as ticker_symbol
-    from {{ ref('tickers') }} t
+    select concat(c.id, '_', t.symbol)::varchar as id,
+           c.id             as category_id,
+           t.symbol,
+           now()::timestamp as updated_at
+    from common_stocks t
              join {{ ref('categories') }} c ON c.name = 'Dividend'
              join last_five_years_dividends lfyd ON lfyd.code = t.symbol
              join last_sixty_months_dividends lsmd ON lsmd.code = t.symbol
@@ -118,18 +132,22 @@ UNION
 )
 UNION
 (
-    select c.id as category_id,
-           t.symbol
-    from {{ ref('tickers') }} t
+    select concat(c.id, '_', t.symbol)::varchar as id,
+           c.id             as category_id,
+           t.symbol,
+           now()::timestamp as updated_at
+    from common_stocks t
              join {{ ref('categories') }} c ON c.name = 'Momentum'
              join {{ ref('technicals') }} ON technicals.symbol = t.symbol
     WHERE technicals.combined_momentum_score > 0
 )
 UNION
 (
-    select c.id as category_id,
-           t.symbol
-    from {{ ref('tickers') }} t
+    select concat(c.id, '_', t.symbol)::varchar as id,
+           c.id             as category_id,
+           t.symbol,
+           now()::timestamp as updated_at
+    from common_stocks t
              join {{ ref('categories') }} c ON c.name = 'Value'
              join {{ ref('technicals') }} ON technicals.symbol = t.symbol
     WHERE technicals.value_score > 0
@@ -137,9 +155,11 @@ UNION
 )
 UNION
 (
-    select c.id as category_id,
-           t.symbol
-    from {{ ref('tickers') }} t
+    select concat(c.id, '_', t.symbol)::varchar as id,
+           c.id             as category_id,
+           t.symbol,
+           now()::timestamp as updated_at
+    from common_stocks t
              join {{ ref('categories') }} c ON c.name = 'Growth'
              join {{ ref('technicals') }} ON technicals.symbol = t.symbol
     WHERE technicals.value_score < 0

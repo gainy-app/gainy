@@ -43,9 +43,9 @@
     "privileged": null,
     "memoryReservation": null,
     "healthCheck": {
-      "command": [ "CMD-SHELL", "curl http://localhost:8080/ || exit 1" ],
-      "interval": 5,
-      "retries": 2
+      "command": [ "CMD-SHELL", "pytest tests/test_smoke.py || exit 1" ],
+      "interval": ${hasura_healthcheck_interval},
+      "retries": ${hasura_healthcheck_retries}
     },
     "logConfiguration": {
       "logDriver": "awslogs",
@@ -148,6 +148,7 @@
       { "name": "AIRFLOW_DATABASE_URI",                "value": "postgresql://${pg_username}:${pg_password}@${pg_host}:${pg_port}/${pg_dbname}?options=-csearch_path=${pg_airflow_schema}" },
       { "name": "EODHISTORICALDATA_JOBS_COUNT",        "value": "${eodhistoricaldata_jobs_count}" },
       { "name": "TAP_EODHISTORICALDATA_API_TOKEN",     "value": "${eodhistoricaldata_api_token}" },
+      { "name": "TAP_POLYGON_API_KEY",                 "value": "${polygon_api_token}" },
       { "name": "TARGET_POSTGRES_HOST",                "value": "${pg_host}" },
       { "name": "TARGET_POSTGRES_PORT",                "value": "${pg_port}" },
       { "name": "TARGET_POSTGRES_USER",                "value": "${pg_username}" },
@@ -206,8 +207,8 @@
     }
   },
   {
-    "name": "websockets",
-    "memory": ${websockets_memory_credits},
+    "name": "websockets_eod",
+    "memory": ${eod_websockets_memory_credits},
     "extraHosts": null,
     "dnsServers": null,
     "disableNetworking": null,
@@ -220,20 +221,22 @@
     "ulimits": null,
     "dockerSecurityOptions": null,
     "environment": [
-      { "name": "API_TOKEN",          "value": "${eodhistoricaldata_api_token}" },
+      { "name": "EOD_API_TOKEN",      "value": "${eodhistoricaldata_api_token}" },
       { "name": "PG_HOST",            "value": "${pg_host}" },
       { "name": "PG_PORT",            "value": "${pg_port}" },
       { "name": "PG_DBNAME",          "value": "${pg_dbname}" },
       { "name": "PG_USERNAME",        "value": "${pg_username}" },
       { "name": "PG_PASSWORD",        "value": "${pg_password}" },
       { "name": "ENV",                "value": "${env}" },
-      { "name": "PUBLIC_SCHEMA_NAME", "value": "${pg_transform_schema}" }
+      { "name": "PUBLIC_SCHEMA_NAME", "value": "${pg_transform_schema}" },
+      { "name": "DD_API_KEY",         "value": "${datadog_api_key}" },
+      { "name": "DD_SITE",            "value": "datadoghq.com" }
     ],
     "links": [],
     "workingDirectory": null,
     "readonlyRootFilesystem": null,
     "image": "${websockets_image}",
-    "command": [],
+    "command": ["client_eod.py"],
     "user": null,
     "dockerLabels": null,
     "cpu": null,
@@ -244,7 +247,53 @@
       "options": {
         "awslogs-group": "${aws_log_group_name}",
         "awslogs-region": "${aws_log_region}",
-        "awslogs-stream-prefix": "websockets"
+        "awslogs-stream-prefix": "websockets_eod"
+      }
+    }
+  },
+  {
+    "name": "websockets_polygon",
+    "memory": ${polygon_websockets_memory_credits},
+    "extraHosts": null,
+    "dnsServers": null,
+    "disableNetworking": null,
+    "dnsSearchDomains": null,
+    "portMappings": [],
+    "hostname": null,
+    "essential": true,
+    "entryPoint": [],
+    "mountPoints": [],
+    "ulimits": null,
+    "dockerSecurityOptions": null,
+    "environment": [
+      { "name": "POLYGON_API_TOKEN",               "value": "${polygon_api_token}" },
+      { "name": "POLYGON_REALTIME_STREAMING_HOST", "value": "${polygon_realtime_streaming_host}" },
+      { "name": "PG_HOST",                         "value": "${pg_host}" },
+      { "name": "PG_PORT",                         "value": "${pg_port}" },
+      { "name": "PG_DBNAME",                       "value": "${pg_dbname}" },
+      { "name": "PG_USERNAME",                     "value": "${pg_username}" },
+      { "name": "PG_PASSWORD",                     "value": "${pg_password}" },
+      { "name": "ENV",                             "value": "${env}" },
+      { "name": "PUBLIC_SCHEMA_NAME",              "value": "${pg_transform_schema}" },
+      { "name": "DD_API_KEY",                      "value": "${datadog_api_key}" },
+      { "name": "DD_SITE",                         "value": "datadoghq.com" }
+    ],
+    "links": [],
+    "workingDirectory": null,
+    "readonlyRootFilesystem": null,
+    "image": "${websockets_image}",
+    "command": ["client_polygon.py"],
+    "user": null,
+    "dockerLabels": null,
+    "cpu": null,
+    "privileged": null,
+    "memoryReservation": null,
+    "logConfiguration": {
+      "logDriver": "awslogs",
+      "options": {
+        "awslogs-group": "${aws_log_group_name}",
+        "awslogs-region": "${aws_log_region}",
+        "awslogs-stream-prefix": "websockets_polygon"
       }
     }
   }
