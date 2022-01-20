@@ -1632,12 +1632,14 @@
       columns:
       - symbol
       - industry_id
+      - industry_order
       filter: {}
   - role: user
     permission:
       columns:
       - symbol
       - industry_id
+      - industry_order
       filter: {}
 - table:
     schema: public
