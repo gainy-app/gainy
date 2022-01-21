@@ -192,11 +192,11 @@ resource "aws_iam_policy" "hasura_exec" {
   description = "Canary Exec Policy ${var.env}"
 
   policy = jsonencode({
-    "Version": "2012-10-17",
-    "Statement": [
+    "Version" : "2012-10-17",
+    "Statement" : [
       {
-        "Effect": "Allow",
-        "Action": [
+        "Effect" : "Allow",
+        "Action" : [
           "ecr:GetAuthorizationToken",
           "ecr:BatchCheckLayerAvailability",
           "ecr:GetDownloadUrlForLayer",
@@ -204,7 +204,7 @@ resource "aws_iam_policy" "hasura_exec" {
           "logs:CreateLogStream",
           "logs:PutLogEvents"
         ],
-        "Resource": "*"
+        "Resource" : "*"
       }
     ]
   })
@@ -226,10 +226,10 @@ resource "aws_ecs_task_definition" "hasura" {
   tags                     = {}
   execution_role_arn       = aws_iam_role.hasura.arn
 
-#  runtime_platform {
-#    operating_system_family = "LINUX"
-#    cpu_architecture        = "X86_64"
-#  }
+  #  runtime_platform {
+  #    operating_system_family = "LINUX"
+  #    cpu_architecture        = "X86_64"
+  #  }
 
   container_definitions = templatefile(
     "${path.module}/container-definitions-hasura.json",
