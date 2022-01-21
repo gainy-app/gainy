@@ -2,11 +2,11 @@ locals {
   ecr_repo = var.repository_name
 
   meltano_root_dir       = abspath("${path.cwd}/../src/gainy-fetch")
-  meltano_image_tag      = format("meltano-%s-%s", var.env, data.archive_file.meltano_source.output_md5)
+  meltano_image_tag      = format("meltano-%s-%s-%s", var.env, var.base_image_version, data.archive_file.meltano_source.output_md5)
   meltano_ecr_image_name = format("%v/%v:%v", var.ecr_address, local.ecr_repo, local.meltano_image_tag)
 
   hasura_root_dir       = abspath("${path.cwd}/../src/hasura")
-  hasura_image_tag      = format("hasura-%s-%s", var.env, data.archive_file.hasura_source.output_md5)
+  hasura_image_tag      = format("hasura-%s-%s-%s", var.env, var.base_image_version, data.archive_file.hasura_source.output_md5)
   hasura_ecr_image_name = format("%v/%v:%v", var.ecr_address, local.ecr_repo, local.hasura_image_tag)
 
   websockets_root_dir       = abspath("${path.cwd}/../src/websockets")
@@ -56,6 +56,10 @@ resource "docker_registry_image" "meltano" {
       password  = data.aws_ecr_authorization_token.token.password
     }
   }
+
+  lifecycle {
+    ignore_changes = [build["context"]]
+  }
 }
 resource "docker_registry_image" "hasura" {
   name = local.hasura_ecr_image_name
@@ -73,12 +77,20 @@ resource "docker_registry_image" "hasura" {
       password  = data.aws_ecr_authorization_token.token.password
     }
   }
+
+  lifecycle {
+    ignore_changes = [build["context"]]
+  }
 }
 resource "docker_registry_image" "websockets" {
   name = local.websockets_ecr_image_name
   build {
     context    = local.websockets_root_dir
     dockerfile = "Dockerfile"
+  }
+
+  lifecycle {
+    ignore_changes = [build["context"]]
   }
 }
 
@@ -92,7 +104,7 @@ resource "random_password" "airflow" {
 }
 resource "aws_ecs_task_definition" "default" {
   family                   = "gainy-${var.env}"
-  network_mode             = "bridge"
+  network_mode             = "awsvpc"
   requires_compatibilities = []
   tags                     = {}
   volume {
@@ -155,11 +167,69 @@ resource "aws_ecs_task_definition" "default" {
     }
   )
 }
+
+resource "aws_iam_role" "hasura" {
+  name               = "ecsInstanceRole-gainy-fargate-hasura-${var.env}"
+  assume_role_policy = <<EOF
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "",
+      "Effect": "Allow",
+      "Principal": {
+        "Service": "ecs-tasks.amazonaws.com"
+      },
+      "Action": "sts:AssumeRole"
+    }
+  ]
+}
+EOF
+}
+
+resource "aws_iam_policy" "hasura_exec" {
+  name        = "hasura_${var.env}"
+  description = "Canary Exec Policy ${var.env}"
+
+  policy = jsonencode({
+    "Version": "2012-10-17",
+    "Statement": [
+      {
+        "Effect": "Allow",
+        "Action": [
+          "ecr:GetAuthorizationToken",
+          "ecr:BatchCheckLayerAvailability",
+          "ecr:GetDownloadUrlForLayer",
+          "ecr:BatchGetImage",
+          "logs:CreateLogStream",
+          "logs:PutLogEvents"
+        ],
+        "Resource": "*"
+      }
+    ]
+  })
+}
+resource "aws_iam_role_policy_attachment" "iam_role_policy_attachment_hasura_default" {
+  role       = aws_iam_role.hasura.name
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy"
+}
+resource "aws_iam_role_policy_attachment" "iam_role_policy_attachment_hasura_custom" {
+  role       = aws_iam_role.hasura.name
+  policy_arn = aws_iam_policy.hasura_exec.arn
+}
 resource "aws_ecs_task_definition" "hasura" {
   family                   = "gainy-hasura-${var.env}"
-  network_mode             = "bridge"
-  requires_compatibilities = []
+  network_mode             = "awsvpc"
+  requires_compatibilities = ["FARGATE"]
+  cpu                      = var.hasura_cpu_credits
+  memory                   = var.hasura_memory_credits
   tags                     = {}
+  execution_role_arn       = aws_iam_role.hasura.arn
+
+#  runtime_platform {
+#    operating_system_family = "LINUX"
+#    cpu_architecture        = "X86_64"
+#  }
 
   container_definitions = templatefile(
     "${path.module}/container-definitions-hasura.json",
@@ -249,6 +319,10 @@ resource "aws_ecs_service" "service" {
     container_port   = 8080
   }
 
+  network_configuration {
+    subnets = var.private_subnet_ids
+  }
+
   task_definition      = "${aws_ecs_task_definition.default.family}:${aws_ecs_task_definition.default.revision}"
   force_new_deployment = true
 }
@@ -266,15 +340,14 @@ resource "aws_ecs_service" "hasura" {
   launch_type                        = "FARGATE"
   health_check_grace_period_seconds  = var.health_check_grace_period_seconds
 
-  ordered_placement_strategy {
-    type  = "spread"
-    field = "instanceId"
-  }
-
   load_balancer {
     target_group_arn = module.hasura-elb.aws_alb_target_group_arn
     container_name   = "hasura"
     container_port   = 8080
+  }
+
+  network_configuration {
+    subnets = var.private_subnet_ids
   }
 
   task_definition      = "${aws_ecs_task_definition.hasura.family}:${aws_ecs_task_definition.hasura.revision}"

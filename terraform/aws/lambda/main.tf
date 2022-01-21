@@ -104,7 +104,7 @@ locals {
   ecr_repo                     = var.container_repository
   nodejs_lambda_image_tag      = format("lambda-nodejs-%s-%s", var.env, data.archive_file.nodejs_source.output_md5)
   nodejs_lambda_ecr_image_name = format("%v/%v:%v", local.ecr_address, local.ecr_repo, local.nodejs_lambda_image_tag)
-  python_lambda_image_tag      = format("lambda-python-%s-%s", var.env, data.archive_file.python_source.output_md5)
+  python_lambda_image_tag      = format("lambda-python-%s-%s-%s", var.env, var.base_image_version, data.archive_file.python_source.output_md5)
   python_lambda_ecr_image_name = format("%v/%v:%v", local.ecr_address, local.ecr_repo, local.python_lambda_image_tag)
 }
 
@@ -120,6 +120,10 @@ resource "docker_registry_image" "lambda_nodejs" {
   build {
     context    = local.nodejs_root_dir
     dockerfile = "Dockerfile"
+  }
+
+  lifecycle {
+    ignore_changes = [build["context"]]
   }
 }
 
@@ -202,6 +206,10 @@ resource "docker_registry_image" "lambda_python" {
       user_name = data.aws_ecr_authorization_token.token.user_name
       password  = data.aws_ecr_authorization_token.token.password
     }
+  }
+
+  lifecycle {
+    ignore_changes = [build["context"]]
   }
 }
 
