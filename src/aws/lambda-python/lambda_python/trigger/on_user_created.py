@@ -1,4 +1,5 @@
 import os
+import re
 import sys
 import logging
 import datadog
@@ -27,6 +28,10 @@ class OnUserCreated(HasuraTrigger):
     def apply(self, db_conn, op, data):
         payload = self._extract_payload(data)
         profile_id = payload['id']
+        email = payload["email"]
+
+        if re.search(r'@gainy.app$', email) is not None:
+            return
 
         try:
             datadog.api.Event.create(title="User Created",
@@ -38,7 +43,7 @@ class OnUserCreated(HasuraTrigger):
 
         if self.env == "production":
             try:
-                self.hubspot_service.create_contact(payload["email"],
+                self.hubspot_service.create_contact(email,
                                                     payload["first_name"],
                                                     payload["last_name"])
             except Exception as e:
