@@ -331,7 +331,7 @@ resource "aws_ecs_service" "service" {
  * Create Hasura autoscaling service
  */
 resource "aws_ecs_service" "hasura" {
-  count                              = var.env == "test" ? 1 : 0 # TODO move to production
+  count                              = var.env == "production" ? 1 : 0
   name                               = "gainy-hasura-${var.env}"
   cluster                            = var.ecs_cluster_name
   desired_count                      = 0
@@ -358,7 +358,7 @@ resource "aws_ecs_service" "hasura" {
   }
 }
 resource "aws_appautoscaling_target" "hasura" {
-  count              = var.env == "test" ? 1 : 0 # TODO move to production
+  count              = var.env == "production" ? 1 : 0
   max_capacity       = 4
   min_capacity       = 1
   resource_id        = "service/${var.ecs_cluster_name}/${aws_ecs_service.hasura[0].name}"
@@ -367,7 +367,7 @@ resource "aws_appautoscaling_target" "hasura" {
 }
 
 resource "aws_appautoscaling_policy" "ecs_policy" {
-  count              = var.env == "test" ? 1 : 0 # TODO move to production
+  count              = var.env == "production" ? 1 : 0
   name               = "policy-gainy-hasura-${var.env}"
   policy_type        = "TargetTrackingScaling"
   resource_id        = aws_appautoscaling_target.hasura[0].resource_id
