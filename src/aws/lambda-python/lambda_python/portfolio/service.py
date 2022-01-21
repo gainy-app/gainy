@@ -79,6 +79,13 @@ class PortfolioService:
 
         return transactions_count
 
+    def sync_institution(self, db_conn, access_token):
+        institution = self.__get_service(
+            access_token['service']).get_institution(db_conn, access_token)
+        self.portfolio_repository.persist(db_conn, institution)
+        self.__get_service(access_token['service']).set_token_institution(
+            db_conn, access_token, institution)
+
     def persist_holding_data(self, db_conn, profile_id, securities, accounts,
                              holdings):
         securities_dict = self.__persist_securities(db_conn, securities)

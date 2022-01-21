@@ -1,0 +1,1 @@
+drop table if exists app.profile_ticker_match_score;
