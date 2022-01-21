@@ -242,8 +242,8 @@ resource "aws_ecs_task_definition" "hasura" {
       hasura_image                    = docker_registry_image.hasura.name
       hasura_memory_credits           = var.hasura_memory_credits
       hasura_cpu_credits              = var.hasura_cpu_credits
-      hasura_healthcheck_interval     = var.hasura_healthcheck_interval
-      hasura_healthcheck_retries      = var.hasura_healthcheck_retries
+      hasura_healthcheck_interval     = 30
+      hasura_healthcheck_retries      = 2
 
       pg_host             = var.pg_host
       pg_password         = var.pg_password
@@ -375,10 +375,12 @@ resource "aws_appautoscaling_policy" "ecs_policy" {
   service_namespace  = aws_appautoscaling_target.hasura[0].service_namespace
 
   target_tracking_scaling_policy_configuration {
-    target_value = 40
+    target_value = 500
+    scale_in_cooldown = 60
+    scale_out_cooldown = 60
 
     predefined_metric_specification {
-      predefined_metric_type = "ECSServiceAverageMemoryUtilization"
+      predefined_metric_type = "ALBRequestCountPerTarget"
     }
   }
 }
