@@ -31,6 +31,7 @@ variable "algolia_app_id" {}
 variable "algolia_indexing_key" {}
 variable "algolia_search_key" {}
 
+# https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task-cpu-memory-error.html
 locals {
   ecs_instance_type                    = var.env == "production" ? "c5.2xlarge" : "r5.large"
   meltano_eodhistoricaldata_jobs_count = var.env == "production" ? 4 : 1
@@ -45,7 +46,7 @@ locals {
   eod_websockets_memory_credits     = 512
   polygon_websockets_memory_credits = 768
 
-  hasura_memory_credits            = var.env == "production" ? 2304 : 1024
+  hasura_memory_credits            = var.env == "production" ? 2048 : 1024
   meltano_ui_memory_credits        = var.env == "production" ? 1024 : 1024
   meltano_scheduler_memory_credits = var.env == "production" ? 3072 : 3072
 }
