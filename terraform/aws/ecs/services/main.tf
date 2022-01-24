@@ -380,8 +380,8 @@ resource "aws_appautoscaling_policy" "ecs_policy" {
     scale_out_cooldown = 60
 
     predefined_metric_specification {
-      predefined_metric_type = "tg-hasura-${var.env}"
-      resource_label         = ""
+      predefined_metric_type = "ALBRequestCountPerTarget"
+      resource_label         = "tg-hasura-${var.env}"
     }
   }
 }
