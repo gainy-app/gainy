@@ -2,11 +2,11 @@ locals {
   ecr_repo = var.repository_name
 
   meltano_root_dir       = abspath("${path.cwd}/../src/gainy-fetch")
-  meltano_image_tag      = format("meltano-%s-%s", var.env, data.archive_file.meltano_source.output_md5)
+  meltano_image_tag      = format("meltano-%s-%s-%s", var.env, var.base_image_version, data.archive_file.meltano_source.output_md5)
   meltano_ecr_image_name = format("%v/%v:%v", var.ecr_address, local.ecr_repo, local.meltano_image_tag)
 
   hasura_root_dir       = abspath("${path.cwd}/../src/hasura")
-  hasura_image_tag      = format("hasura-%s-%s", var.env, data.archive_file.hasura_source.output_md5)
+  hasura_image_tag      = format("hasura-%s-%s-%s", var.env, var.base_image_version, data.archive_file.hasura_source.output_md5)
   hasura_ecr_image_name = format("%v/%v:%v", var.ecr_address, local.ecr_repo, local.hasura_image_tag)
 
   websockets_root_dir       = abspath("${path.cwd}/../src/websockets")
@@ -56,6 +56,10 @@ resource "docker_registry_image" "meltano" {
       password  = data.aws_ecr_authorization_token.token.password
     }
   }
+
+  lifecycle {
+    ignore_changes = [build["context"]]
+  }
 }
 resource "docker_registry_image" "hasura" {
   name = local.hasura_ecr_image_name
@@ -73,12 +77,20 @@ resource "docker_registry_image" "hasura" {
       password  = data.aws_ecr_authorization_token.token.password
     }
   }
+
+  lifecycle {
+    ignore_changes = [build["context"]]
+  }
 }
 resource "docker_registry_image" "websockets" {
   name = local.websockets_ecr_image_name
   build {
     context    = local.websockets_root_dir
     dockerfile = "Dockerfile"
+  }
+
+  lifecycle {
+    ignore_changes = [build["context"]]
   }
 }
 
@@ -92,7 +104,7 @@ resource "random_password" "airflow" {
 }
 resource "aws_ecs_task_definition" "default" {
   family                   = "gainy-${var.env}"
-  network_mode             = "bridge"
+  network_mode             = "awsvpc"
   requires_compatibilities = []
   tags                     = {}
   volume {
@@ -156,6 +168,95 @@ resource "aws_ecs_task_definition" "default" {
   )
 }
 
+resource "aws_iam_role" "hasura" {
+  name               = "ecsInstanceRole-gainy-fargate-hasura-${var.env}"
+  assume_role_policy = <<EOF
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "",
+      "Effect": "Allow",
+      "Principal": {
+        "Service": "ecs-tasks.amazonaws.com"
+      },
+      "Action": "sts:AssumeRole"
+    }
+  ]
+}
+EOF
+}
+
+resource "aws_iam_policy" "hasura_exec" {
+  name        = "hasura_${var.env}"
+  description = "Canary Exec Policy ${var.env}"
+
+  policy = jsonencode({
+    "Version" : "2012-10-17",
+    "Statement" : [
+      {
+        "Effect" : "Allow",
+        "Action" : [
+          "ecr:GetAuthorizationToken",
+          "ecr:BatchCheckLayerAvailability",
+          "ecr:GetDownloadUrlForLayer",
+          "ecr:BatchGetImage",
+          "logs:CreateLogStream",
+          "logs:PutLogEvents"
+        ],
+        "Resource" : "*"
+      }
+    ]
+  })
+}
+resource "aws_iam_role_policy_attachment" "iam_role_policy_attachment_hasura_default" {
+  role       = aws_iam_role.hasura.name
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy"
+}
+resource "aws_iam_role_policy_attachment" "iam_role_policy_attachment_hasura_custom" {
+  role       = aws_iam_role.hasura.name
+  policy_arn = aws_iam_policy.hasura_exec.arn
+}
+resource "aws_ecs_task_definition" "hasura" {
+  family                   = "gainy-hasura-${var.env}"
+  network_mode             = "awsvpc"
+  requires_compatibilities = ["FARGATE"]
+  cpu                      = var.hasura_cpu_credits
+  memory                   = var.hasura_memory_credits
+  tags                     = {}
+  execution_role_arn       = aws_iam_role.hasura.arn
+
+  #  runtime_platform {
+  #    operating_system_family = "LINUX"
+  #    cpu_architecture        = "X86_64"
+  #  }
+
+  container_definitions = templatefile(
+    "${path.module}/container-definitions-hasura.json",
+    {
+      hasura_enable_console           = var.hasura_enable_console
+      hasura_enable_dev_mode          = var.hasura_enable_dev_mode
+      hasura_admin_secret             = random_password.hasura.result
+      hasura_jwt_secret               = var.hasura_jwt_secret
+      aws_lambda_api_gateway_endpoint = var.aws_lambda_api_gateway_endpoint
+      hasura_image                    = docker_registry_image.hasura.name
+      hasura_memory_credits           = var.hasura_memory_credits
+      hasura_cpu_credits              = var.hasura_cpu_credits
+      hasura_healthcheck_interval     = 30
+      hasura_healthcheck_retries      = 2
+
+      pg_host             = var.pg_host
+      pg_password         = var.pg_password
+      pg_port             = var.pg_port
+      pg_username         = var.pg_username
+      pg_dbname           = var.pg_dbname
+      pg_transform_schema = "public" # "public_${var.versioned_schema_suffix}" # TODO deployment_v2 blocked by versioned hasura views
+      aws_log_group_name  = var.aws_log_group_name
+      aws_log_region      = var.aws_log_region
+    }
+  )
+}
+
 module "meltano-elb" {
   source                           = "./elb"
   name                             = "meltano-airflow"
@@ -199,6 +300,7 @@ resource "aws_ecs_service" "service" {
   desired_count                      = 1
   deployment_maximum_percent         = 200
   deployment_minimum_healthy_percent = 100
+  health_check_grace_period_seconds  = var.health_check_grace_period_seconds
 
   ordered_placement_strategy {
     type  = "spread"
@@ -217,8 +319,70 @@ resource "aws_ecs_service" "service" {
     container_port   = 8080
   }
 
+  network_configuration {
+    subnets = var.private_subnet_ids
+  }
+
   task_definition      = "${aws_ecs_task_definition.default.family}:${aws_ecs_task_definition.default.revision}"
   force_new_deployment = true
+}
+
+/*
+ * Create Hasura autoscaling service
+ */
+resource "aws_ecs_service" "hasura" {
+  count                              = var.env == "production" ? 1 : 0
+  name                               = "gainy-hasura-${var.env}"
+  cluster                            = var.ecs_cluster_name
+  desired_count                      = 0
+  deployment_maximum_percent         = 200
+  deployment_minimum_healthy_percent = 100
+  launch_type                        = "FARGATE"
+  health_check_grace_period_seconds  = var.health_check_grace_period_seconds
+
+  load_balancer {
+    target_group_arn = module.hasura-elb.aws_alb_target_group_arn
+    container_name   = "hasura"
+    container_port   = 8080
+  }
+
+  network_configuration {
+    subnets = var.private_subnet_ids
+  }
+
+  task_definition      = "${aws_ecs_task_definition.hasura.family}:${aws_ecs_task_definition.hasura.revision}"
+  force_new_deployment = true
+
+  lifecycle {
+    ignore_changes = [desired_count]
+  }
+}
+resource "aws_appautoscaling_target" "hasura" {
+  count              = var.env == "production" ? 1 : 0
+  max_capacity       = 4
+  min_capacity       = 1
+  resource_id        = "service/${var.ecs_cluster_name}/${aws_ecs_service.hasura[0].name}"
+  scalable_dimension = "ecs:service:DesiredCount"
+  service_namespace  = "ecs"
+}
+
+resource "aws_appautoscaling_policy" "ecs_policy" {
+  count              = var.env == "production" ? 1 : 0
+  name               = "policy-gainy-hasura-${var.env}"
+  policy_type        = "TargetTrackingScaling"
+  resource_id        = aws_appautoscaling_target.hasura[0].resource_id
+  scalable_dimension = aws_appautoscaling_target.hasura[0].scalable_dimension
+  service_namespace  = aws_appautoscaling_target.hasura[0].service_namespace
+
+  target_tracking_scaling_policy_configuration {
+    target_value       = 500
+    scale_in_cooldown  = 60
+    scale_out_cooldown = 60
+
+    predefined_metric_specification {
+      predefined_metric_type = "ALBRequestCountPerTarget"
+    }
+  }
 }
 
 output "meltano_url" {

@@ -35,11 +35,12 @@ locals {
   ecs_instance_type                    = var.env == "production" ? "c5.2xlarge" : "r5.large"
   meltano_eodhistoricaldata_jobs_count = var.env == "production" ? 4 : 1
 
-  hasura_cpu_credits            = var.env == "production" ? 512 : 256
+  hasura_cpu_credits            = var.env == "production" ? 1024 : 512
   meltano_scheduler_cpu_credits = var.env == "production" ? 3072 : 512
 
-  hasura_healthcheck_interval = var.env == "production" ? 90 : 120
-  hasura_healthcheck_retries  = var.env == "production" ? 10 : 10
+  hasura_healthcheck_interval       = var.env == "production" ? 60 : 60
+  hasura_healthcheck_retries        = var.env == "production" ? 3 : 3
+  health_check_grace_period_seconds = var.env == "production" ? 60 * 10 : 60 * 20
 
   eod_websockets_memory_credits     = 512
   polygon_websockets_memory_credits = 768

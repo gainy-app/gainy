@@ -96,6 +96,7 @@ module "ecs-service" {
   ecs_service_role_arn = module.ecs.ecsServiceRole_arn
   cloudflare_zone_id   = var.cloudflare_zone_id
   domain               = var.domain
+  private_subnet_ids   = module.ecs.private_subnet_ids
 
   aws_lambda_api_gateway_endpoint = module.lambda.aws_apigatewayv2_api_endpoint
   hasura_enable_console           = "true"
@@ -139,6 +140,8 @@ module "ecs-service" {
   datadog_app_key = var.datadog_app_key
 
   polygon_api_token = var.polygon_api_token
+
+  health_check_grace_period_seconds = local.health_check_grace_period_seconds
 }
 
 
