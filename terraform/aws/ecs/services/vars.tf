@@ -9,6 +9,7 @@ variable "pg_port" {}
 variable "pg_username" {}
 variable "pg_password" {}
 variable "pg_dbname" {}
+variable "pg_replica_uris" {}
 variable "pg_production_host" {}
 variable "pg_production_port" {}
 variable "pg_production_internal_sync_username" {}

@@ -44,7 +44,7 @@ resource "aws_db_instance" "db_instance" {
 
   db_subnet_group_name   = var.db_subnet_group_name
   vpc_security_group_ids = [var.vpc_default_sg_id]
-  skip_final_snapshot    = true # TODO revert to var.env == "production" ? false : true
+  skip_final_snapshot    = var.env == "production" ? false : true
 
   storage_encrypted = true
   apply_immediately = true
@@ -54,10 +54,34 @@ resource "aws_db_instance" "db_instance" {
 
   tags = {
     Environment = var.env
-    Terraform   = "true"
+  }
+}
+
+resource "aws_db_instance" "db_replica" {
+  count                = var.env == "production" ? 1 : 0
+  identifier           = "${var.name}-${var.env}-replica${count.index}"
+  replicate_source_db  = aws_db_instance.db_instance.identifier
+  instance_class       = var.env == "production" ? "db.m6g.2xlarge" : "db.m6g.large"
+  storage_type         = var.env == "production" ? "io1" : "io1"
+  iops                 = var.env == "production" ? 1999 : 1000
+  parameter_group_name = aws_db_parameter_group.default.name
+
+  publicly_accessible    = false
+  vpc_security_group_ids = [var.vpc_default_sg_id]
+  apply_immediately      = true
+
+  performance_insights_enabled    = true
+  enabled_cloudwatch_logs_exports = ["postgresql"]
+
+  tags = {
+    Environment = var.env
+    Replica     = "true"
   }
 }
 
 output "db_instance" {
   value = aws_db_instance.db_instance
+}
+output "db_replica" {
+  value = aws_db_instance.db_replica
 }

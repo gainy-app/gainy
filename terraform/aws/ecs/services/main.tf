@@ -136,6 +136,7 @@ resource "aws_ecs_task_definition" "default" {
       pg_port                              = var.pg_port
       pg_username                          = var.pg_username
       pg_dbname                            = var.pg_dbname
+      pg_replica_uris                      = var.pg_replica_uris
       pg_load_schema                       = "raw_data"
       pg_transform_schema                  = "public" # "public_${var.versioned_schema_suffix}" # TODO deployment_v2 blocked by versioned hasura views
       dbt_threads                          = var.env == "production" ? 4 : 4
@@ -250,6 +251,7 @@ resource "aws_ecs_task_definition" "hasura" {
       pg_port             = var.pg_port
       pg_username         = var.pg_username
       pg_dbname           = var.pg_dbname
+      pg_replica_uris     = var.pg_replica_uris
       pg_transform_schema = "public" # "public_${var.versioned_schema_suffix}" # TODO deployment_v2 blocked by versioned hasura views
       aws_log_group_name  = var.aws_log_group_name
       aws_log_region      = var.aws_log_region
