@@ -73,6 +73,9 @@ resource "cloudflare_record" "service" {
 output "url" {
   value = cloudflare_record.service.hostname
 }
-output "aws_alb_target_group_arn" {
-  value = aws_alb_target_group.default.arn
+output "aws_alb" {
+  value = aws_alb.alb
+}
+output "aws_alb_target_group" {
+  value = aws_alb_target_group.default
 }

@@ -308,13 +308,13 @@ resource "aws_ecs_service" "service" {
   }
 
   load_balancer {
-    target_group_arn = module.meltano-elb.aws_alb_target_group_arn
+    target_group_arn = module.meltano-elb.aws_alb_target_group.arn
     container_name   = "meltano-airflow-ui"
     container_port   = 5001
   }
 
   load_balancer {
-    target_group_arn = module.hasura-elb.aws_alb_target_group_arn
+    target_group_arn = module.hasura-elb.aws_alb_target_group.arn
     container_name   = "hasura"
     container_port   = 8080
   }
@@ -341,7 +341,7 @@ resource "aws_ecs_service" "hasura" {
   health_check_grace_period_seconds  = var.health_check_grace_period_seconds
 
   load_balancer {
-    target_group_arn = module.hasura-elb.aws_alb_target_group_arn
+    target_group_arn = module.hasura-elb.aws_alb_target_group.arn
     container_name   = "hasura"
     container_port   = 8080
   }
@@ -381,7 +381,7 @@ resource "aws_appautoscaling_policy" "ecs_policy" {
 
     predefined_metric_specification {
       predefined_metric_type = "ALBRequestCountPerTarget"
-      resource_label         = "tg-hasura-${var.env}"
+      resource_label         = "${module.hasura-elb.aws_alb.arn_suffix}/${module.hasura-elb.aws_alb_target_group.arn_suffix}"
     }
   }
 }
