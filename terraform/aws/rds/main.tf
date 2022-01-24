@@ -66,6 +66,7 @@ resource "aws_db_instance" "db_replica" {
   storage_type         = var.env == "production" ? "io1" : "io1"
   iops                 = var.env == "production" ? 1999 : 1000
   parameter_group_name = aws_db_parameter_group.default.name
+  storage_encrypted    = true
 
   publicly_accessible    = false
   vpc_security_group_ids = [var.vpc_default_sg_id]
