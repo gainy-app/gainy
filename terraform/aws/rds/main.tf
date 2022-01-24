@@ -42,9 +42,10 @@ resource "aws_db_instance" "db_instance" {
 
   password = random_password.rds.result
 
-  db_subnet_group_name   = var.db_subnet_group_name
-  vpc_security_group_ids = [var.vpc_default_sg_id]
-  skip_final_snapshot    = var.env == "production" ? false : true
+  db_subnet_group_name      = var.db_subnet_group_name
+  vpc_security_group_ids    = [var.vpc_default_sg_id]
+  skip_final_snapshot       = var.env == "production" ? false : true
+  final_snapshot_identifier = "${var.name}-${var.env}-final"
 
   storage_encrypted = true
   apply_immediately = true
