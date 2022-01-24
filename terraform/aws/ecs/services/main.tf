@@ -381,7 +381,7 @@ resource "aws_appautoscaling_policy" "ecs_policy" {
 
     predefined_metric_specification {
       predefined_metric_type = "tg-hasura-${var.env}"
-      resource_label = ""
+      resource_label         = ""
     }
   }
 }
