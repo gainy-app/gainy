@@ -62,7 +62,7 @@ resource "aws_db_instance" "db_replica" {
   count                = var.env == "production" ? 0 : 0 # todo add replicas after figuring out hot to use them in hasura
   identifier           = "${var.name}-${var.env}-replica${count.index}"
   replicate_source_db  = aws_db_instance.db_instance.identifier
-  instance_class       = var.env == "production" ? "db.m6g.2xlarge" : "db.m6g.large"
+  instance_class       = var.env == "production" ? "db.m6g.4xlarge" : "db.m6g.large"
   storage_type         = var.env == "production" ? "io1" : "io1"
   iops                 = var.env == "production" ? 1999 : 1000
   parameter_group_name = aws_db_parameter_group.default.name
