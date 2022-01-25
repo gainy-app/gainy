@@ -377,7 +377,7 @@ resource "aws_appautoscaling_policy" "ecs_policy" {
   service_namespace  = aws_appautoscaling_target.hasura[0].service_namespace
 
   target_tracking_scaling_policy_configuration {
-    target_value       = 3000
+    target_value       = 20000
     scale_in_cooldown  = 60
     scale_out_cooldown = 60
 
