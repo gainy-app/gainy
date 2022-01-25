@@ -117,24 +117,6 @@ class RecommendationRepository(Repository):
 
             return list(cursor.fetchall())
 
-    def update_match_score(self, profile_id,
-                           tickers_with_match_score: List[Tuple[str,
-                                                                MatchScore]]):
-        match_score_json_list = json.dumps(
-            list(
-                map(RecommendationRepository._match_score_as_json,
-                    tickers_with_match_score)))
-
-        with self.db_conn.cursor() as cursor:
-            cursor.execute(
-                """INSERT INTO app.profile_ticker_match_score_json(profile, match_score_json)
-                VALUES (%(profile_id)s, %(match_score_json)s)
-                ON CONFLICT (profile) DO UPDATE SET match_score_json = EXCLUDED.match_score_json""",
-                {
-                    "profile_id": profile_id,
-                    "match_score_json": match_score_json_list
-                })
-
     def update_personalized_collection(self, profile_id, collection_id,
                                        ticker_list):
         with self.db_conn.cursor() as cursor:
