@@ -3,12 +3,10 @@ import requests
 import json
 import datetime
 import logging
-from common import make_graphql_request, PROFILE_ID
+from common import make_graphql_request, PROFILE_ID, MIN_PORTFOLIO_HOLDING_GROUPS_COUNT
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
-
-MIN_PORTFOLIO_HOLDING_GROUPS_COUNT = 1
 
 def test_portfolio():
     with open(
