@@ -28,6 +28,14 @@ if ENV == ENV_LOCAL:
     MIN_PERSONALIZED_COLLECTIONS_COUNT = 0
 
 
+def get_personalized_collections():
+    query = 'query($profileId: Int!) {collections(where: {enabled: {_eq: "1"}, personalized: {_eq: "1"}, profile_id: {_eq: $profileId} } ) { id name enabled personalized} }'
+    data = make_graphql_request(query, {"profileId": PROFILE_ID},
+                                None)['data']['collections']
+
+    assert len(data) >= MIN_PERSONALIZED_COLLECTIONS_COUNT
+    return data
+
 def make_request(method, url, post_data=None, headers={}):
     logger.info("%s %s '%s'" % (method, url, post_data['query']))
     response = requests.request(method, url, json=post_data, headers=headers)
