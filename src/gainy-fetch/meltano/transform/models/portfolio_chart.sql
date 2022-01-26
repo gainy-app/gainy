@@ -79,6 +79,7 @@ from (
 {% endif %}
              where portfolio_expanded_transactions.type in ('buy', 'sell')
                and (first_transaction_date.profile_id is null or historical_prices_aggregated.time >= first_transaction_date.date)
+               and historical_prices_aggregated.period != '15min'
 {% if is_incremental() %}
                and (old_transaction_stats.profile_id is null
                  or old_transaction_stats.transactions_count != current_transaction_stats.transactions_count
@@ -90,12 +91,51 @@ from (
 
          union all
 
+         (
+             select portfolio_expanded_transactions.profile_id,
+                    chart.datetime,
+                    '15min'::varchar                  as period,
+                    portfolio_expanded_transactions.quantity_norm::numeric *
+                    chart.adjusted_close::numeric as value
+             from portfolio_expanded_transactions
+                      join portfolio_securities_normalized
+                           on portfolio_securities_normalized.id = portfolio_expanded_transactions.security_id
+                      join chart
+                           on (chart.datetime >= portfolio_expanded_transactions.datetime or
+                               portfolio_expanded_transactions.datetime is null) and
+                              chart.symbol = portfolio_securities_normalized.ticker_symbol
+{% if is_incremental() %}
+                      join current_transaction_stats
+                           on current_transaction_stats.profile_id = portfolio_expanded_transactions.profile_id
+                      left join old_transaction_stats on old_transaction_stats.profile_id = portfolio_expanded_transactions.profile_id
+                      left join max_date
+                                on max_date.profile_id = portfolio_expanded_transactions.profile_id and
+                                   max_date.period = '15min'
+{% endif %}
+             where portfolio_expanded_transactions.type in ('buy', 'sell')
+               and chart.period = '1d'
+{% if is_incremental() %}
+               and (old_transaction_stats.profile_id is null
+                or old_transaction_stats.transactions_count != current_transaction_stats.transactions_count
+                or old_transaction_stats.last_transaction_datetime != current_transaction_stats.last_transaction_datetime
+                or max_date.date is null
+                or chart.datetime >= max_date.date)
+{% endif %}
+         )
+
+         union all
+
          -- options
          (
              with time_period as
                       (
                           select distinct datetime, period
-                          from historical_prices_aggregated
+                          from {{ ref('historical_prices_aggregated') }}
+                          where historical_prices_aggregated.period != '15min'
+                          union all
+                          select distinct datetime, '15min'::varchar as period
+                          from {{ ref('chart') }}
+                          where chart.period = '1d'
                       )
              select portfolio_expanded_transactions.profile_id,
                     time_period.datetime               as datetime,

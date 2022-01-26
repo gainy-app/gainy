@@ -80,7 +80,7 @@ with
                       left join {{ ref('ticker_metrics') }}
                                 on ticker_metrics.symbol = tickers.symbol
                       left join {{ ref('ticker_realtime_metrics') }}
-                                on ticker_metrics.symbol = tickers.symbol
+                                on ticker_realtime_metrics.symbol = tickers.symbol
                       left join {{ ref('historical_prices_aggregated') }}
                                 on historical_prices_aggregated.symbol = portfolio_securities_normalized.ticker_symbol
 --                                     and (historical_prices_aggregated.datetime >=
