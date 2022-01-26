@@ -109,6 +109,11 @@
     "dependsOn": [
       { "condition": "HEALTHY", "containerName": "meltano-airflow-scheduler" }
     ],
+    "healthCheck": {
+      "command": [ "CMD-SHELL", "curl http://localhost:5001/health | grep unhealthy && exit 1" ],
+      "interval": 10,
+      "retries": 2
+    },
     "logConfiguration": {
       "logDriver": "awslogs",
       "options": {

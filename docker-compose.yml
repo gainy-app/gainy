@@ -52,6 +52,11 @@ services:
       - meltano-airflow-scheduler
     entrypoint: "/wait.sh"
     command: "invoke airflow webserver -p 5001"
+    healthcheck:
+      test: [ "CMD", "curl http://localhost:5001/health | grep unhealthy && exit 1" ]
+      interval: 30s
+      retries: 3
+      start_period: 300s
 
   meltano-dbt-docs:
     restart: always
