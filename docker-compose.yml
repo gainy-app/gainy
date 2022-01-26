@@ -31,7 +31,7 @@ services:
       test: [ "CMD", "curl", "http://localhost:8793" ]
       interval: 30s
       retries: 3
-      start_period: 30s
+      start_period: 300s
 
   meltano-airflow-ui:
     restart: always
@@ -53,7 +53,7 @@ services:
     entrypoint: "/wait.sh"
     command: "invoke airflow webserver -p 5001"
     healthcheck:
-      test: [ "CMD", "curl http://localhost:5001/health | grep unhealthy && exit 1" ]
+      test: [ "CMD", "! curl http://localhost:5001/health | grep unhealthy" ]
       interval: 30s
       retries: 3
       start_period: 300s
