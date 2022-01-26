@@ -461,18 +461,6 @@
             _eq: X-Hasura-User-Id
       check: null
   event_triggers:
-  - name: set_user_categories
-    definition:
-      enable_manual: false
-      insert:
-        columns: '*'
-      update:
-        columns: '*'
-    retry_conf:
-      num_retries: 1
-      interval_sec: 10
-      timeout_sec: 60
-    webhook: '{{AWS_LAMBDA_API_GATEWAY_ENDPOINT}}/hasuraTrigger'
   - name: recommendations__profile_scoring_settings
     definition:
       enable_manual: false
@@ -484,6 +472,18 @@
       num_retries: 1
       interval_sec: 30
       timeout_sec: 150
+    webhook: '{{AWS_LAMBDA_API_GATEWAY_ENDPOINT}}/hasuraTrigger'
+  - name: set_user_categories
+    definition:
+      enable_manual: false
+      insert:
+        columns: '*'
+      update:
+        columns: '*'
+    retry_conf:
+      num_retries: 1
+      interval_sec: 10
+      timeout_sec: 60
     webhook: '{{AWS_LAMBDA_API_GATEWAY_ENDPOINT}}/hasuraTrigger'
 - table:
     schema: app
@@ -502,14 +502,14 @@
   - role: user
     permission:
       columns:
-        - category_matches
-        - fits_categories
-        - fits_interests
-        - fits_risk
-        - interest_matches
-        - match_score
-        - risk_similarity
-        - symbol
+      - category_matches
+      - fits_categories
+      - fits_interests
+      - fits_risk
+      - interest_matches
+      - match_score
+      - risk_similarity
+      - symbol
       filter:
         profile:
           user_id:
@@ -1786,17 +1786,17 @@
       - dividend_yield
       - dividends_per_share
       - ebitda
-      - ebitda_ttm
       - ebitda_growth_yoy
+      - ebitda_ttm
       - enterprise_value_to_ebitda
       - enterprise_value_to_sales
-      - eps_ttm
       - eps_actual
+      - eps_difference
       - eps_estimate
       - eps_growth_fwd
       - eps_growth_yoy
       - eps_surprise
-      - eps_difference
+      - eps_ttm
       - exchange_name
       - implied_volatility
       - market_capitalization
@@ -1804,8 +1804,11 @@
       - net_income
       - net_income_ttm
       - price_change_1m
+      - price_change_1w
       - price_change_1y
       - price_change_3m
+      - price_change_5y
+      - price_change_all
       - price_to_book_value
       - price_to_earnings_ttm
       - price_to_sales_ttm
