@@ -98,14 +98,7 @@ with actual_prices as
                    coalesce(actual_prices.adjusted_close,
                             historical_prices_aggregated.adjusted_close)::numeric as actual_price,
 
-                   actual_prices.adjusted_close::numeric /
-                   first_value(
-                   case
-                       when historical_prices_aggregated.adjusted_close > 0
-                           then historical_prices_aggregated.adjusted_close::numeric end
-                       )
-                   over (partition by historical_prices_aggregated.symbol ORDER BY historical_prices_aggregated.datetime RANGE INTERVAL '0 day' PRECEDING) -
-                   1                                                              as relative_gain_1d,
+                   ticker_realtime_metrics.relative_daily_change                  as relative_gain_1d,
 
                    actual_prices.adjusted_close::numeric /
                    first_value(
@@ -164,6 +157,8 @@ with actual_prices as
              from expanded_holding_groups
                       left join {{ ref('tickers') }}
                                 on tickers.symbol = expanded_holding_groups.ticker_symbol
+                      left join {{ ref('ticker_realtime_metrics') }}
+                                on ticker_realtime_metrics.symbol = tickers.symbol
                       left join {{ ref('historical_prices_aggregated') }}
                                 on historical_prices_aggregated.symbol = expanded_holding_groups.ticker_symbol
                                     and (historical_prices_aggregated.datetime >=

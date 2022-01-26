@@ -48,14 +48,7 @@ with actual_prices as
 
                    case
                        when ticker_options.contract_name is null
-                           then (
-                                   actual_prices.adjusted_close::numeric /
-                                   first_value(
-                                   case
-                                       when historical_prices_aggregated.adjusted_close > 0
-                                           then historical_prices_aggregated.adjusted_close::numeric end)
-                                   over (partition by profile_holdings.id, historical_prices_aggregated.symbol ORDER BY historical_prices_aggregated.datetime RANGE INTERVAL '0 day' PRECEDING) -
-                                   1)
+                           then ticker_realtime_metrics.relative_daily_change
                        else 0 end                                                                       as relative_gain_1d,
                    case
                        when ticker_options.contract_name is null
@@ -136,6 +129,8 @@ with actual_prices as
 --                                 on first_profile_trade_date.profile_id = profile_holdings.profile_id
                       left join {{ ref('tickers') }}
                                 on tickers.symbol = portfolio_securities_normalized.ticker_symbol
+                      left join {{ ref('ticker_realtime_metrics') }}
+                                on ticker_realtime_metrics.symbol = tickers.symbol
                       left join {{ ref('historical_prices_aggregated') }}
                                 on historical_prices_aggregated.symbol = portfolio_securities_normalized.ticker_symbol
 --                                     and (historical_prices_aggregated.datetime >=
