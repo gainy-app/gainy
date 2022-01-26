@@ -162,6 +162,7 @@ type MatchScore {
 
 type LinkPlaidAccountOutput {
   result: Boolean!
+  plaid_access_token_id: Int
 }
 
 type PortfolioHolding {
