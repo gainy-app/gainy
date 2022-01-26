@@ -27,11 +27,6 @@ services:
       - hasura
     entrypoint: "/init.sh"
     command: "invoke airflow scheduler"
-    healthcheck:
-      test: [ "CMD", "curl", "http://localhost:8793" ]
-      interval: 30s
-      retries: 3
-      start_period: 30s
 
   meltano-airflow-ui:
     restart: always

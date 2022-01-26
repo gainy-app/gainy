@@ -53,13 +53,16 @@ class LinkPlaidAccount(HasuraAction):
         with db_conn.cursor() as cursor:
             cursor.execute(
                 "INSERT INTO app.profile_plaid_access_tokens(profile_id, access_token, item_id) "
-                "VALUES (%(profile_id)s, %(access_token)s, %(item_id)s)", {
+                "VALUES (%(profile_id)s, %(access_token)s, %(item_id)s) RETURNING id",
+                {
                     "profile_id": profile_id,
                     "access_token": response['access_token'],
                     "item_id": response['item_id'],
                 })
+            returned = cursor.fetchall()
+            id = returned[0][0]
 
-        return {'result': True}
+        return {'result': True, 'plaid_access_token_id': id}
 
 
 class PlaidWebhook(HasuraAction):
@@ -71,7 +74,7 @@ class PlaidWebhook(HasuraAction):
         self.client = PlaidClient()
 
     def apply(self, db_conn, input_params, headers):
-        print(input_params, headers)
+        print("[PLAID_WEBHOOK] %s" % (input_params))
 
         try:
             self.verify(input_params, headers)
