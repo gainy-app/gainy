@@ -60,7 +60,6 @@ class LinkPlaidAccount(HasuraAction):
                     "item_id": response['item_id'],
                 })
             returned = cursor.fetchall()
-            print(returned)
             id = returned[0][0]
 
         return {'result': True, 'plaid_access_token_id': id}
