@@ -9,6 +9,7 @@ variable "pg_port" {}
 variable "pg_username" {}
 variable "pg_password" {}
 variable "pg_dbname" {}
+variable "pg_replica_uris" {}
 variable "pg_production_host" {}
 variable "pg_production_port" {}
 variable "pg_production_internal_sync_username" {}
@@ -46,3 +47,5 @@ variable "polygon_websockets_memory_credits" {}
 variable "datadog_api_key" {}
 variable "datadog_app_key" {}
 variable "polygon_api_token" {}
+variable "health_check_grace_period_seconds" {}
+variable "private_subnet_ids" {}

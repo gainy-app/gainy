@@ -15,10 +15,12 @@ resource "aws_alb" "alb" {
  * Create target group for ALB
  */
 resource "aws_alb_target_group" "default" {
-  name     = "tg-${var.name}-${var.env}"
-  port     = "80"
-  protocol = "HTTP"
-  vpc_id   = var.vpc_id
+  name        = "tg-${var.name}-${var.env}"
+  port        = "80"
+  protocol    = "HTTP"
+  vpc_id      = var.vpc_id
+  target_type = "ip"
+
   stickiness {
     type = "lb_cookie"
   }
@@ -71,6 +73,9 @@ resource "cloudflare_record" "service" {
 output "url" {
   value = cloudflare_record.service.hostname
 }
-output "aws_alb_target_group_arn" {
-  value = aws_alb_target_group.default.arn
+output "aws_alb" {
+  value = aws_alb.alb
+}
+output "aws_alb_target_group" {
+  value = aws_alb_target_group.default
 }

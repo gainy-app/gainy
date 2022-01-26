@@ -8,7 +8,7 @@
     "dnsSearchDomains": null,
     "portMappings": [
       {
-        "hostPort": 0,
+        "hostPort": 8080,
         "containerPort": 8080,
         "protocol": "tcp"
       }
@@ -25,6 +25,7 @@
       { "name": "HASURA_GRAPHQL_METADATA_DATABASE_URL", "value": "postgres://${pg_username}:${pg_password}@${pg_host}:${pg_port}/${pg_dbname}" },
       { "name": "HASURA_GRAPHQL_ENABLED_LOG_TYPES",     "value": "startup, http-log, webhook-log, websocket-log, query-log" },
       { "name": "HASURA_GRAPHQL_DATABASE_URL",          "value": "postgres://${pg_username}:${pg_password}@${pg_host}:${pg_port}/${pg_dbname}" },
+      { "name": "HASURA_GRAPHQL_READ_REPLICA_URLS",     "value": "${pg_replica_uris}" },
       { "name": "HASURA_GRAPHQL_PUBLIC_SCHEMA_NAME",    "value": "${pg_transform_schema}" },
       { "name": "HASURA_GRAPHQL_ENABLE_CONSOLE",        "value": "${hasura_enable_console}" },
       { "name": "HASURA_GRAPHQL_DEV_MODE",              "value": "${hasura_enable_dev_mode}" },
@@ -45,7 +46,8 @@
     "healthCheck": {
       "command": [ "CMD-SHELL", "pytest tests/test_smoke.py || exit 1" ],
       "interval": ${hasura_healthcheck_interval},
-      "retries": ${hasura_healthcheck_retries}
+      "retries": ${hasura_healthcheck_retries},
+      "timeout": 30
     },
     "logConfiguration": {
       "logDriver": "awslogs",
@@ -65,7 +67,7 @@
     "dnsSearchDomains": null,
     "portMappings": [
       {
-        "hostPort": 0,
+        "hostPort": ${airflow_port},
         "containerPort": ${airflow_port},
         "protocol": "tcp"
       }
@@ -82,17 +84,17 @@
     "ulimits": null,
     "dockerSecurityOptions": null,
     "environment": [
-      { "name": "ENV",                             "value": "${env}" },
-      { "name": "PG_DATABASE",                     "value": "${pg_dbname}" },
-      { "name": "PG_ADDRESS",                      "value": "${pg_host}" },
-      { "name": "PG_PASSWORD",                     "value": "${pg_password}" },
-      { "name": "PG_PORT",                         "value": "${pg_port}" },
-      { "name": "PG_USERNAME",                     "value": "${pg_username}" },
-      { "name": "MELTANO_DATABASE_URI",            "value": "postgresql://${pg_username}:${pg_password}@${pg_host}:${pg_port}/${pg_dbname}?options=-csearch_path=${pg_meltano_schema}" },
-      { "name": "AIRFLOW_PASSWORD",                "value": "${airflow_password}" },
-      { "name": "AIRFLOW_UI_PORT",                 "value": "${airflow_port}" },
-      { "name": "AIRFLOW_DATABASE_URI",            "value": "postgresql://${pg_username}:${pg_password}@${pg_host}:${pg_port}/${pg_dbname}?options=-csearch_path=${pg_airflow_schema}" },
-      { "name": "EODHISTORICALDATA_JOBS_COUNT",    "value": "${eodhistoricaldata_jobs_count}" }
+      { "name": "ENV",                          "value": "${env}" },
+      { "name": "PG_DATABASE",                  "value": "${pg_dbname}" },
+      { "name": "PG_ADDRESS",                   "value": "${pg_host}" },
+      { "name": "PG_PASSWORD",                  "value": "${pg_password}" },
+      { "name": "PG_PORT",                      "value": "${pg_port}" },
+      { "name": "PG_USERNAME",                  "value": "${pg_username}" },
+      { "name": "MELTANO_DATABASE_URI",         "value": "postgresql://${pg_username}:${pg_password}@${pg_host}:${pg_port}/${pg_dbname}?options=-csearch_path=${pg_meltano_schema}" },
+      { "name": "AIRFLOW_PASSWORD",             "value": "${airflow_password}" },
+      { "name": "AIRFLOW_UI_PORT",              "value": "${airflow_port}" },
+      { "name": "AIRFLOW_DATABASE_URI",         "value": "postgresql://${pg_username}:${pg_password}@${pg_host}:${pg_port}/${pg_dbname}?options=-csearch_path=${pg_airflow_schema}" },
+      { "name": "EODHISTORICALDATA_JOBS_COUNT", "value": "${eodhistoricaldata_jobs_count}" }
     ],
     "links": [],
     "workingDirectory": null,

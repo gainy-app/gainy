@@ -104,7 +104,7 @@ locals {
   ecr_repo                     = var.container_repository
   nodejs_lambda_image_tag      = format("lambda-nodejs-%s-%s", var.env, data.archive_file.nodejs_source.output_md5)
   nodejs_lambda_ecr_image_name = format("%v/%v:%v", local.ecr_address, local.ecr_repo, local.nodejs_lambda_image_tag)
-  python_lambda_image_tag      = format("lambda-python-%s-%s", var.env, data.archive_file.python_source.output_md5)
+  python_lambda_image_tag      = format("lambda-python-%s-%s-%s", var.env, var.base_image_version, data.archive_file.python_source.output_md5)
   python_lambda_ecr_image_name = format("%v/%v:%v", local.ecr_address, local.ecr_repo, local.python_lambda_image_tag)
 }
 
@@ -120,6 +120,10 @@ resource "docker_registry_image" "lambda_nodejs" {
   build {
     context    = local.nodejs_root_dir
     dockerfile = "Dockerfile"
+  }
+
+  lifecycle {
+    ignore_changes = [build["context"]]
   }
 }
 
@@ -203,6 +207,10 @@ resource "docker_registry_image" "lambda_python" {
       password  = data.aws_ecr_authorization_token.token.password
     }
   }
+
+  lifecycle {
+    ignore_changes = [build["context"]]
+  }
 }
 
 module "hasuraTrigger" {
@@ -245,12 +253,13 @@ module "hasuraAction" {
   env                                       = var.env
   function_name                             = "hasuraAction"
   handler                                   = "hasura_handler.handle_action"
-  timeout                                   = 10
+  timeout                                   = 30
   route                                     = "POST /hasuraAction"
   aws_apigatewayv2_api_lambda_id            = aws_apigatewayv2_api.lambda.id
   aws_apigatewayv2_api_lambda_execution_arn = aws_apigatewayv2_api.lambda.execution_arn
   aws_iam_role_lambda_exec_role             = aws_iam_role.lambda_exec
   image_uri                                 = docker_registry_image.lambda_python.name
+  memory_size                               = var.env == "production" ? 256 : 128
 
   env_vars = {
     pg_host                   = var.pg_host
