@@ -127,8 +127,8 @@ with
                  or max_date.date is null
                  or chart_dates.datetime is null
                  or chart_dates.datetime >= max_date.date)
-             order by portfolio_expanded_transactions.uniq_id, chart_dates.datetime, chart.datetime desc
 {% endif %}
+             order by portfolio_expanded_transactions.uniq_id, chart_dates.datetime, chart.datetime desc
          )
 
          union all
