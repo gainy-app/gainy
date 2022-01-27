@@ -10,6 +10,7 @@
 
 with highlights as (select * from {{ ref('highlights') }}),
      tickers as (select * from {{ ref('tickers') }}),
+     ticker_realtime_metrics as (select * from {{ ref('ticker_realtime_metrics') }}),
      chart as (select * from {{ ref('chart') }}),
      valuation as (select * from {{ ref('valuation') }}),
      technicals as (select * from {{ ref('technicals') }}),
@@ -302,25 +303,26 @@ with highlights as (select * from {{ ref('highlights') }}),
                           order by chart.symbol, chart.period, chart.datetime, historical_prices_aggregated.datetime desc
                       )
              select tickers.symbol,
-                    previous_periods_1w.period_close / case
+                    ticker_realtime_metrics.actual_price / case
                                                            when previous_periods_1w.prev_period_close > 0
                                                                then previous_periods_1w.prev_period_close end - 1 as price_change_1w,
-                    previous_periods_1m.period_close / case
+                    ticker_realtime_metrics.actual_price / case
                                                            when previous_periods_1m.prev_period_close > 0
                                                                then previous_periods_1m.prev_period_close end - 1 as price_change_1m,
-                    previous_periods_3m.period_close / case
+                    ticker_realtime_metrics.actual_price / case
                                                            when previous_periods_3m.prev_period_close > 0
                                                                then previous_periods_3m.prev_period_close end - 1 as price_change_3m,
-                    previous_periods_1y.period_close / case
+                    ticker_realtime_metrics.actual_price / case
                                                            when previous_periods_1y.prev_period_close > 0
                                                                then previous_periods_1y.prev_period_close end - 1 as price_change_1y,
-                    previous_periods_5y.period_close / case
+                    ticker_realtime_metrics.actual_price / case
                                                            when previous_periods_5y.prev_period_close > 0
                                                                then previous_periods_5y.prev_period_close end - 1 as price_change_5y,
-                    previous_periods_all.period_close / case
+                    ticker_realtime_metrics.actual_price / case
                                                            when previous_periods_all.prev_period_close > 0
                                                                then previous_periods_all.prev_period_close end - 1 as price_change_all
              from tickers
+                      join ticker_realtime_metrics on ticker_realtime_metrics.symbol = tickers.symbol
                       left join previous_periods previous_periods_1w
                                 on previous_periods_1w.symbol = tickers.symbol and previous_periods_1w.period = '1w'
                       left join previous_periods previous_periods_1m
