@@ -27,45 +27,45 @@ with
          (
              select distinct on (
                  profile_holdings.id
-                 ) profile_holdings.id                                                      as holding_id,
+                 ) profile_holdings.id                                                           as holding_id,
                    profile_holdings.profile_id,
-                   now()::timestamp                                                         as updated_at,
-                   coalesce(ticker_realtime_metrics.actual_price,
-                            ticker_options.last_price)::numeric                             as actual_price,
+                   now()::timestamp                                                              as updated_at,
+                   coalesce(ticker_options.last_price,
+                            ticker_realtime_metrics.actual_price)::numeric                       as actual_price,
 
-                   (coalesce(ticker_realtime_metrics.actual_price,
-                             ticker_options.last_price * 100) * quantity)::double precision as actual_value,
+                   (coalesce(ticker_options.last_price * 100,
+                             ticker_realtime_metrics.actual_price) * quantity)::double precision as actual_value,
 
                    case
                        when ticker_options.contract_name is null
                            then ticker_realtime_metrics.relative_daily_change
-                       else 0 end                                                           as relative_gain_1d,
+                       else 0 end                                                                as relative_gain_1d,
                    case
                        when ticker_options.contract_name is null
                            then ticker_metrics.price_change_1w
-                       else 0 end                                                           as relative_gain_1w,
+                       else 0 end                                                                as relative_gain_1w,
                    case
                        when ticker_options.contract_name is null
                            then ticker_metrics.price_change_1m
-                       else 0 end                                                           as relative_gain_1m,
+                       else 0 end                                                                as relative_gain_1m,
                    case
                        when ticker_options.contract_name is null
                            then ticker_metrics.price_change_3m
-                       else 0 end                                                           as relative_gain_3m,
+                       else 0 end                                                                as relative_gain_3m,
                    case
                        when ticker_options.contract_name is null
                            then ticker_metrics.price_change_1y
-                       else 0 end                                                           as relative_gain_1y,
+                       else 0 end                                                                as relative_gain_1y,
                    case
                        when ticker_options.contract_name is null
                            then ticker_metrics.price_change_5y
                        else 0
-                       end                                                                  as relative_gain_5y,
+                       end                                                                       as relative_gain_5y,
                    case
                        when ticker_options.contract_name is null
                            then ticker_metrics.price_change_all
                        else 0
-                       end                                                                  as relative_gain_total,
+                       end                                                                       as relative_gain_total,
                    profile_holdings.quantity::numeric
              from {{ source('app', 'profile_holdings') }}
                       join {{ ref('portfolio_securities_normalized') }}

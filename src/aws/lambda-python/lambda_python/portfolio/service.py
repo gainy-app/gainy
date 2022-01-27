@@ -37,7 +37,7 @@ class PortfolioService:
 
         return len(holdings)
 
-    def get_transactions(self, db_conn, profile_id, count=100, offset=0):
+    def get_transactions(self, db_conn, profile_id, count=500, offset=0):
         transactions = []
         securities = []
         accounts = []

@@ -3,6 +3,8 @@ from psycopg2.extras import execute_values
 
 from data_access.models import BaseModel
 
+MAX_TRANSACTION_SIZE = 100
+
 
 class Repository:
 
@@ -12,60 +14,80 @@ class Repository:
 
         entities_grouped = self._group_entities(entities)
 
+        for (schema_name,
+             table_name), group_entities in entities_grouped.items():
+
+            chunks_count = (len(entities) + MAX_TRANSACTION_SIZE -
+                            1) // MAX_TRANSACTION_SIZE
+            for chunk_id in range(chunks_count):
+
+                l_bound = chunk_id * MAX_TRANSACTION_SIZE
+                r_bound = min(len(group_entities),
+                              (chunk_id + 1) * MAX_TRANSACTION_SIZE)
+                chunk = group_entities[l_bound:r_bound]
+
+                self._persist_chunk(db_conn, schema_name, table_name, chunk)
+
+    def _persist_chunk(self, db_conn, schema_name, table_name, entities):
+        field_names = [
+            field_name for field_name in entities[0].to_dict().keys()
+            if field_name not in entities[0].db_excluded_fields
+        ]
+        non_persistent_fields = entities[0].non_persistent_fields
+
+        sql_string = self._get_insert_statement(schema_name, table_name,
+                                                field_names, entities)
+
+        entity_dicts = [entity.to_dict() for entity in entities]
+        values = [[entity_dict[field_name] for field_name in field_names]
+                  for entity_dict in entity_dicts]
+
         with db_conn.cursor() as cursor:
-            for (schema_name,
-                 table_name), entities in entities_grouped.items():
+            execute_values(cursor, sql_string, values)
 
-                field_names = [
-                    field_name for field_name in entities[0].to_dict().keys()
-                    if field_name not in entities[0].db_excluded_fields
-                ]
-                field_names_escaped = self._escape_fields(field_names)
+            if not non_persistent_fields:
+                return
 
-                sql_string = sql.SQL(
-                    "INSERT INTO {schema_name}.{table_name} ({field_names}) VALUES %s"
-                ).format(schema_name=sql.Identifier(schema_name),
-                         table_name=sql.Identifier(table_name),
-                         field_names=field_names_escaped)
+            returned = cursor.fetchall()
 
-                key_fields = entities[0].key_fields
-                if key_fields:
-                    key_field_names_escaped = self._escape_fields(key_fields)
+        for entity, returned_row in zip(entities, returned):
+            for db_excluded_field, value in zip(non_persistent_fields,
+                                                returned_row):
+                entity.__setattr__(db_excluded_field, value)
 
-                    sql_string = sql_string + sql.SQL(
-                        " ON CONFLICT({key_field_names}) DO UPDATE SET {set_clause}"
-                    ).format(
-                        key_field_names=key_field_names_escaped,
-                        set_clause=sql.SQL(',').join([
-                            sql.SQL("{field_name} = excluded.{field_name}").
-                            format(field_name=sql.Identifier(field_name))
-                            for field_name in field_names
-                            if field_name not in key_fields
-                        ]))
+    def _get_insert_statement(self, schema_name, table_name, field_names,
+                              entities):
+        field_names_escaped = self._escape_fields(field_names)
 
-                non_persistent_fields = entities[0].non_persistent_fields
-                if non_persistent_fields:
-                    non_persistent_fields_escaped = self._escape_fields(
-                        non_persistent_fields)
-                    sql_string = sql_string + sql.SQL(
-                        " RETURNING {non_persistent_fields}").format(
-                            non_persistent_fields=non_persistent_fields_escaped
-                        )
+        sql_string = sql.SQL(
+            "INSERT INTO {schema_name}.{table_name} ({field_names}) VALUES %s"
+        ).format(schema_name=sql.Identifier(schema_name),
+                 table_name=sql.Identifier(table_name),
+                 field_names=field_names_escaped)
 
-                entity_dicts = [entity.to_dict() for entity in entities]
-                values = [[
-                    entity_dict[field_name] for field_name in field_names
-                ] for entity_dict in entity_dicts]
+        key_fields = entities[0].key_fields
+        if key_fields:
+            key_field_names_escaped = self._escape_fields(key_fields)
 
-                execute_values(cursor, sql_string, values)
+            sql_string = sql_string + sql.SQL(
+                " ON CONFLICT({key_field_names}) DO UPDATE SET {set_clause}"
+            ).format(
+                key_field_names=key_field_names_escaped,
+                set_clause=sql.SQL(',').join([
+                    sql.SQL("{field_name} = excluded.{field_name}").format(
+                        field_name=sql.Identifier(field_name))
+                    for field_name in field_names
+                    if field_name not in key_fields
+                ]))
 
-                if non_persistent_fields:
-                    returned = cursor.fetchall()
-
-                    for entity, returned_row in zip(entities, returned):
-                        for db_excluded_field, value in zip(
-                                non_persistent_fields, returned_row):
-                            entity.__setattr__(db_excluded_field, value)
+        non_persistent_fields = entities[0].non_persistent_fields
+        if non_persistent_fields:
+            non_persistent_fields_escaped = self._escape_fields(
+                non_persistent_fields)
+            sql_string = sql_string + sql.SQL(
+                " RETURNING {non_persistent_fields}").format(
+                    non_persistent_fields=non_persistent_fields_escaped)
+        return sql_string
 
     @staticmethod
     def _escape_fields(field_names):

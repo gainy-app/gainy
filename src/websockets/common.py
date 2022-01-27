@@ -37,8 +37,8 @@ def get_symbols():
     with psycopg2.connect(DB_CONN_STRING) as db_conn:
         with db_conn.cursor() as cursor:
             cursor.execute(
-                sql.SQL("SELECT symbol FROM {public_schema_name}.tickers").
-                format(public_schema_name=sql.Identifier(PUBLIC_SCHEMA_NAME)))
+                sql.SQL("SELECT symbol FROM {public_schema_name}.base_tickers")
+                .format(public_schema_name=sql.Identifier(PUBLIC_SCHEMA_NAME)))
             tickers = cursor.fetchall()
             return [ticker[0] for ticker in tickers]
 
