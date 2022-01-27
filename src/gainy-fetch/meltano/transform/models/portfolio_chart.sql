@@ -53,7 +53,8 @@ with
                     historical_prices_aggregated.time                    as datetime,
                     historical_prices_aggregated.period                  as period,
                     portfolio_expanded_transactions.quantity_norm::numeric *
-                    historical_prices_aggregated.adjusted_close::numeric as value
+                    historical_prices_aggregated.adjusted_close::numeric as value,
+                    'chart'                                              as source
              from {{ ref('portfolio_expanded_transactions') }}
                       join {{ ref('portfolio_securities_normalized') }}
                            on portfolio_securities_normalized.id = portfolio_expanded_transactions.security_id
@@ -83,6 +84,7 @@ with
 
          union all
 
+         -- realtime
          (
              with chart_dates as (
                  select distinct datetime
@@ -96,7 +98,8 @@ with
                    chart_dates.datetime,
                    '15min'::varchar              as period,
                    portfolio_expanded_transactions.quantity_norm::numeric *
-                   chart.adjusted_close::numeric as value
+                   chart.adjusted_close::numeric as value,
+                   'realtime'                    as source
              from {{ ref('portfolio_expanded_transactions') }}
                       join {{ ref('portfolio_securities_normalized') }}
                            on portfolio_securities_normalized.id = portfolio_expanded_transactions.security_id
@@ -149,7 +152,8 @@ with
                     time_period.datetime               as datetime,
                     time_period.period                 as period,
                     100 * portfolio_expanded_transactions.quantity_norm::numeric *
-                    ticker_options.last_price::numeric as value
+                    ticker_options.last_price::numeric as value,
+                    'options'                          as source
              from {{ ref('portfolio_expanded_transactions') }}
                       join {{ ref('portfolio_securities_normalized') }}
                            on portfolio_securities_normalized.id = portfolio_expanded_transactions.security_id
@@ -176,6 +180,12 @@ with
      ),
      chart_data_null as (
          select distinct profile_id, period, datetime from chart_data where value is null
+     ),
+     chart_data_not_null as (
+         select profile_id, period, datetime, count(distinct source) as cnt
+         from chart_data
+         where value is not null
+         group by profile_id, period, datetime
      )
 
 select chart_data.profile_id,
@@ -192,5 +202,9 @@ from chart_data
                    on chart_data_null.profile_id = chart_data.profile_id
                        and chart_data_null.period = chart_data.period
                        and chart_data_null.datetime = chart_data.datetime
-where chart_data_null.profile_id is null
+         join chart_data_not_null
+              on chart_data_not_null.profile_id = chart_data.profile_id
+                  and chart_data_not_null.period = chart_data.period
+                  and chart_data_not_null.datetime = chart_data.datetime
+where chart_data_null.profile_id is null and chart_data_not_null.cnt = 2
 group by chart_data.profile_id, chart_data.period, chart_data.datetime
