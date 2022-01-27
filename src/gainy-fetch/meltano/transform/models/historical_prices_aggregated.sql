@@ -14,6 +14,13 @@
 {% if is_incremental() and var('realtime') %}
 with period_settings as
          (
+             select date_trunc('minute', now()) - interval '30 minute' -
+                    interval '1 minute' *
+                    mod(extract(minutes from now())::int, 15) as period_start,
+                    date_trunc('minute', now()) - interval '15 minute' -
+                    interval '1 minute' *
+                    mod(extract(minutes from now())::int, 15) as period_end
+             union all
              select date_trunc('minute', now()) - interval '15 minute' -
                     interval '1 minute' *
                     mod(extract(minutes from now())::int, 15) as period_start,
@@ -70,9 +77,9 @@ with period_settings as
                and datetime > now() - interval '4 days'
              order by symbol, datetime desc
          )
-select (tickers.symbol || '_' ||
+select (base_tickers.symbol || '_' ||
         coalesce(new_data.period_start, latest_old_data.period_start)::timestamp || '_15min')::varchar as id,
-       tickers.symbol,
+       base_tickers.symbol,
        coalesce(new_data.period_start, latest_old_data.period_start)::timestamp                        as time,
        coalesce(new_data.period_start, latest_old_data.period_start)::timestamp                        as datetime,
        '15min'::varchar                                                                                as period,
@@ -82,11 +89,13 @@ select (tickers.symbol || '_' ||
        coalesce(new_data.close, latest_old_data.close)                                                 as close,
        coalesce(new_data.close, latest_old_data.adjusted_close)                                        as adjusted_close,
        coalesce(new_data.volume, 0)                                                                    as volume
-from {{ ref('tickers') }}
-         left join new_data on new_data.symbol = tickers.symbol
-         left join latest_old_data on latest_old_data.symbol = tickers.symbol
+from {{ ref('base_tickers') }}
+         left join new_data on new_data.symbol = base_tickers.symbol
+         left join latest_old_data on latest_old_data.symbol = base_tickers.symbol
 where new_data.symbol is not null
    or latest_old_data.symbol is not null
+
+-- end realtime
 {% else %}
 
 
@@ -115,8 +124,8 @@ with max_date as
                         date_trunc('minute', eod_intraday_prices.time) -
                         interval '1 minute' *
                         mod(extract(minutes from eod_intraday_prices.time)::int, 15) as time_truncated
-                 from {{ ref('tickers') }}
-                          left join {{ source('eod', 'eod_intraday_prices') }} on eod_intraday_prices.symbol = tickers.symbol
+                 from {{ ref('base_tickers') }}
+                          left join {{ source('eod', 'eod_intraday_prices') }} on eod_intraday_prices.symbol = base_tickers.symbol
 {% if is_incremental() %}
                           left join max_date
                                     on max_date.symbol = eod_intraday_prices.symbol and max_date.period = '15min'
@@ -177,8 +186,8 @@ with max_date as
           case
               when combined_intraday_prices.datetime = time_series_15min.datetime then combined_intraday_prices.volume
               else 0.0 end                                                                            as volume
-    from {{ ref('tickers') }}
-             join combined_intraday_prices on combined_intraday_prices.symbol = tickers.symbol
+    from {{ ref('base_tickers') }}
+             join combined_intraday_prices on combined_intraday_prices.symbol = base_tickers.symbol
              join time_series_15min
                   on time_series_15min.datetime >= combined_intraday_prices.datetime or
                      combined_intraday_prices.datetime is null
