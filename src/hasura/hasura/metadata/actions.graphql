@@ -194,6 +194,7 @@ type PortfolioTransaction {
   profile_id: Int!
   account_id: Int!
   created_at: String!
+  updated_at: String!
   plaid_access_token_id: Int!
 }
 
