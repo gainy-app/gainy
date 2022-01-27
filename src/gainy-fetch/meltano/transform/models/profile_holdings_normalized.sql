@@ -37,3 +37,4 @@ from {{ source('app', 'profile_holdings') }}
          left join {{ source('app', 'plaid_institutions') }} on plaid_institutions.id = profile_plaid_access_tokens.institution_id
          left join robinhood_options on robinhood_options.profile_id = profile_holdings.profile_id
 where portfolio_securities_normalized.type in ('mutual fund', 'equity', 'etf', 'derivative', 'cash')
+  and profile_holdings.quantity > 0
