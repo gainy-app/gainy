@@ -43,11 +43,12 @@ class PortfolioService:
         accounts = []
 
         for access_token in self.__get_access_tokens(db_conn, profile_id):
-            token_data = self.__get_service(
-                access_token['service']).get_transactions(db_conn,
-                                                          access_token,
-                                                          count=count,
-                                                          offset=offset)
+            self.sync_institution(db_conn, access_token)
+            token_service = self.__get_service(access_token['service'])
+            token_data = token_service.get_transactions(db_conn,
+                                                        access_token,
+                                                        count=count,
+                                                        offset=offset)
 
             transactions += token_data['transactions']
             securities += token_data['securities']
