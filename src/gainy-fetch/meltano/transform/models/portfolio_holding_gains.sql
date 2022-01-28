@@ -9,15 +9,7 @@
 }}
 
 
-with actual_prices as
-         (
-             select distinct on (symbol) symbol, adjusted_close, '0d'::varchar as period
-             from {{ ref('historical_prices_aggregated') }}
-             where ((period = '15min' and datetime > now() - interval '2 hour') or
-                    (period = '1d' and datetime > now() - interval '1 week'))
-               and adjusted_close is not null
-             order by symbol, datetime desc
-         ),
+with
 --      first_profile_security_trade_date as (
 --          select profile_id,
 --                 security_id,
@@ -35,82 +27,45 @@ with actual_prices as
          (
              select distinct on (
                  profile_holdings.id
-                 ) profile_holdings.id                                                                  as holding_id,
+                 ) profile_holdings.id                                                           as holding_id,
                    profile_holdings.profile_id,
-                   now()::timestamp                                                                     as updated_at,
-                   coalesce(actual_prices.adjusted_close,
-                            ticker_options.last_price,
-                            historical_prices_aggregated.adjusted_close)::numeric                       as actual_price,
+                   now()::timestamp                                                              as updated_at,
+                   coalesce(ticker_options.last_price,
+                            ticker_realtime_metrics.actual_price)::numeric                       as actual_price,
 
-                   (coalesce(actual_prices.adjusted_close,
-                             ticker_options.last_price * 100,
-                             historical_prices_aggregated.adjusted_close) * quantity)::double precision as actual_value,
+                   (coalesce(ticker_options.last_price * 100,
+                             ticker_realtime_metrics.actual_price) * quantity)::double precision as actual_value,
 
                    case
                        when ticker_options.contract_name is null
-                           then (
-                                   actual_prices.adjusted_close::numeric /
-                                   first_value(
-                                   historical_prices_aggregated.adjusted_close::numeric)
-                                   over (partition by profile_holdings.id, historical_prices_aggregated.symbol ORDER BY historical_prices_aggregated.datetime RANGE INTERVAL '0 day' PRECEDING) -
-                                   1)
-                       else 0 end                                                                       as relative_gain_1d,
+                           then ticker_realtime_metrics.relative_daily_change
+                       else 0 end                                                                as relative_gain_1d,
                    case
                        when ticker_options.contract_name is null
-                           then (
-                                   actual_prices.adjusted_close::numeric /
-                                   first_value(
-                                   historical_prices_aggregated.adjusted_close::numeric)
-                                   over (partition by profile_holdings.id, historical_prices_aggregated.symbol ORDER BY historical_prices_aggregated.datetime RANGE INTERVAL '1 week' PRECEDING) -
-                                   1)
-                       else 0 end                                                                       as relative_gain_1w,
+                           then ticker_metrics.price_change_1w
+                       else 0 end                                                                as relative_gain_1w,
                    case
                        when ticker_options.contract_name is null
-                           then (
-                                   actual_prices.adjusted_close::numeric /
-                                   first_value(
-                                   historical_prices_aggregated.adjusted_close::numeric)
-                                   over (partition by profile_holdings.id, historical_prices_aggregated.symbol ORDER BY historical_prices_aggregated.datetime RANGE INTERVAL '1 month' PRECEDING) -
-                                   1)
-                       else 0 end                                                                       as relative_gain_1m,
+                           then ticker_metrics.price_change_1m
+                       else 0 end                                                                as relative_gain_1m,
                    case
                        when ticker_options.contract_name is null
-                           then (
-                                   actual_prices.adjusted_close::numeric /
-                                   first_value(
-                                   historical_prices_aggregated.adjusted_close::numeric)
-                                   over (partition by profile_holdings.id, historical_prices_aggregated.symbol ORDER BY historical_prices_aggregated.datetime RANGE INTERVAL '3 months' PRECEDING) -
-                                   1)
-                       else 0 end                                                                       as relative_gain_3m,
+                           then ticker_metrics.price_change_3m
+                       else 0 end                                                                as relative_gain_3m,
                    case
                        when ticker_options.contract_name is null
-                           then (
-                                   actual_prices.adjusted_close::numeric /
-                                   first_value(
-                                   historical_prices_aggregated.adjusted_close::numeric)
-                                   over (partition by profile_holdings.id, historical_prices_aggregated.symbol ORDER BY historical_prices_aggregated.datetime RANGE INTERVAL '1 year' PRECEDING) -
-                                   1)
-                       else 0 end                                                                       as relative_gain_1y,
+                           then ticker_metrics.price_change_1y
+                       else 0 end                                                                as relative_gain_1y,
                    case
                        when ticker_options.contract_name is null
-                           then (
-                                   actual_prices.adjusted_close::numeric /
-                                   first_value(
-                                   historical_prices_aggregated.adjusted_close::numeric)
-                                   over (partition by profile_holdings.id, historical_prices_aggregated.symbol ORDER BY historical_prices_aggregated.datetime RANGE INTERVAL '5 years' PRECEDING) -
-                                   1)
+                           then ticker_metrics.price_change_5y
                        else 0
-                       end                                                                              as relative_gain_5y,
+                       end                                                                       as relative_gain_5y,
                    case
                        when ticker_options.contract_name is null
-                           then (
-                                   actual_prices.adjusted_close::numeric /
-                                   first_value(
-                                   historical_prices_aggregated.adjusted_close::numeric)
-                                   over (partition by profile_holdings.id, historical_prices_aggregated.symbol ORDER BY historical_prices_aggregated.datetime RANGE UNBOUNDED PRECEDING) -
-                                   1)
+                           then ticker_metrics.price_change_all
                        else 0
-                       end                                                                              as relative_gain_total,
+                       end                                                                       as relative_gain_total,
                    profile_holdings.quantity::numeric
              from {{ source('app', 'profile_holdings') }}
                       join {{ ref('portfolio_securities_normalized') }}
@@ -120,8 +75,12 @@ with actual_prices as
 --                                     and first_profile_security_trade_date.security_id = profile_holdings.security_id
 --                       left join first_profile_trade_date
 --                                 on first_profile_trade_date.profile_id = profile_holdings.profile_id
-                      left join tickers
+                      left join {{ ref('tickers') }}
                                 on tickers.symbol = portfolio_securities_normalized.ticker_symbol
+                      left join {{ ref('ticker_metrics') }}
+                                on ticker_metrics.symbol = tickers.symbol
+                      left join {{ ref('ticker_realtime_metrics') }}
+                                on ticker_realtime_metrics.symbol = tickers.symbol
                       left join {{ ref('historical_prices_aggregated') }}
                                 on historical_prices_aggregated.symbol = portfolio_securities_normalized.ticker_symbol
 --                                     and (historical_prices_aggregated.datetime >=
@@ -142,8 +101,6 @@ with actual_prices as
 --                                             historical_prices_aggregated.datetime >=
 --                                             now() - interval '5 year' - interval '1 week')
 --                                        )
-                      left join actual_prices
-                                on actual_prices.symbol = portfolio_securities_normalized.original_ticker_symbol
                       left join {{ ref('ticker_options') }}
                                 on ticker_options.contract_name = portfolio_securities_normalized.original_ticker_symbol
              where (historical_prices_aggregated.symbol is not null or ticker_options.contract_name is not null)

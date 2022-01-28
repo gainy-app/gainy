@@ -8,29 +8,31 @@
   )
 }}
 
-with latest_daily_prices as
+with latest_trading_day as
          (
              select distinct on (symbol) symbol,
-                                         time,
-                                         case when adjusted_close > 0 then adjusted_close end as adjusted_close
-             from historical_prices_aggregated
-             where period = '1d' and time > now() - interval '1 week'
-             order by symbol, time desc
+                                         last_value(close)
+                                         over (partition by symbol rows between current row and unbounded following) as close_price,
+                                         last_value(datetime)
+                                         over (partition by symbol rows between current row and unbounded following) as close_datetime,
+                                         sum(volume)
+                                         over (partition by symbol rows between current row and unbounded following) as volume
+             from {{ ref('chart') }}
+             where period = '1d'
+             order by symbol, datetime
          )
 select distinct on (
-    historical_prices_aggregated.symbol
-    ) historical_prices_aggregated.symbol,
-      historical_prices_aggregated.time,
-      historical_prices_aggregated.adjusted_close                               as actual_price,
-      historical_prices_aggregated.adjusted_close -
-      latest_daily_prices.adjusted_close                                        as absolute_daily_change,
-      (historical_prices_aggregated.adjusted_close / latest_daily_prices.adjusted_close) -
-      1                                                                         as relative_daily_change,
-      (sum(historical_prices_aggregated.volume::numeric)
-       OVER (partition by historical_prices_aggregated.symbol
-           order by historical_prices_aggregated.time desc
-           rows between current row and unbounded following))::double precision as daily_volume
-from {{ ref('historical_prices_aggregated') }}
-         join latest_daily_prices on latest_daily_prices.symbol = historical_prices_aggregated.symbol
-where historical_prices_aggregated.period = '15min'
-order by historical_prices_aggregated.symbol, historical_prices_aggregated.time desc
+    latest_trading_day.symbol
+    ) latest_trading_day.symbol,
+      latest_trading_day.close_datetime                                                  as time,
+      latest_trading_day.close_price                                                     as actual_price,
+      latest_trading_day.close_price - historical_prices_aggregated.adjusted_close       as absolute_daily_change,
+      (latest_trading_day.close_price / historical_prices_aggregated.adjusted_close) - 1 as relative_daily_change,
+      latest_trading_day.volume::double precision                                        as daily_volume
+from latest_trading_day
+         join {{ ref('historical_prices_aggregated') }}
+              on historical_prices_aggregated.period = '1d'
+                  and historical_prices_aggregated.symbol = latest_trading_day.symbol
+                  and historical_prices_aggregated.datetime < latest_trading_day.close_datetime::date
+                  and historical_prices_aggregated.datetime > latest_trading_day.close_datetime - interval '1 week'
+order by latest_trading_day.symbol, historical_prices_aggregated.datetime desc

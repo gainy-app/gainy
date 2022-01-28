@@ -26,7 +26,7 @@ class GetPortfolioTransactions(HasuraAction):
 
     def apply(self, db_conn, input_params, headers):
         profile_id = input_params["profile_id"]
-        count = input_params.get("count", 100)
+        count = input_params.get("count", 500)
         offset = input_params.get("offset", 0)
 
         transactions = self.service.get_transactions(db_conn,

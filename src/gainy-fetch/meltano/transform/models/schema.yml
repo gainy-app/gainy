@@ -12,6 +12,7 @@ sources:
       - name: gainy_interests
       - name: gainy_countries
       - name: auto_ticker_industries
+      - name: exchanges
 
   - name: eod
     description: Financial data from https://eodhistoricaldata.com/
@@ -23,6 +24,12 @@ sources:
       - name: eod_historical_prices
       - name: eod_intraday_prices
 
+  - name: polygon
+    description: Financial data from https://polygon.io/
+    schema: raw_data
+    tables:
+      - name: polygon_marketstatus_upcoming
+
   - name: app
     description: Mobile App data, managed by hasura
     schema: app
@@ -33,6 +40,8 @@ sources:
       - name: profile_holdings
       - name: personalized_collection_sizes
       - name: personalized_ticker_collections
+      - name: profile_plaid_access_tokens
+      - name: plaid_institutions
 
 models:
   - name: categories
@@ -716,6 +725,54 @@ models:
           - type:
               type: 'double precision'
 
+  - name: chart
+    columns:
+      - name: symbol
+        tests:
+          - exists
+          - type:
+              type: 'character varying'
+      - name: period
+        tests:
+          - exists
+          - type:
+              type: 'character varying'
+      - name: datetime
+        tests:
+          - exists
+          - type:
+              type: 'timestamp without time zone'
+      - name: open
+        tests:
+          - exists
+          - type:
+              type: 'double precision'
+      - name: high
+        tests:
+          - exists
+          - type:
+              type: 'double precision'
+      - name: low
+        tests:
+          - exists
+          - type:
+              type: 'double precision'
+      - name: close
+        tests:
+          - exists
+          - type:
+              type: 'double precision'
+      - name: adjusted_close
+        tests:
+          - exists
+          - type:
+              type: 'double precision'
+      - name: volume
+        tests:
+          - exists
+          - type:
+              type: 'double precision'
+
   - name: industry_median_1m
     columns:
       - name: industry_id
@@ -804,6 +861,34 @@ models:
           - exists
           - type:
               type: 'double precision'
+
+  - name: ticker_metrics_transposed
+    columns:
+      - name: symbol
+        tests:
+          - exists
+          - type:
+              type: 'character varying'
+      - name: metric_id
+        tests:
+          - exists
+          - type:
+              type: 'character varying'
+      - name: value_double
+        tests:
+          - exists
+          - type:
+              type: 'double precision'
+      - name: value_string
+        tests:
+          - exists
+          - type:
+              type: 'character varying'
+      - name: value_bigint
+        tests:
+          - exists
+          - type:
+              type: 'bigint'
 
   - name: ticker_metrics
     columns:
@@ -1477,6 +1562,7 @@ models:
           - exists
           - type:
               type: 'double precision'
+
   - name: portfolio_holding_group_details
     columns:
       - name: profile_id

@@ -97,6 +97,7 @@ module "ecs-service" {
   ecs_service_role_arn = module.ecs.ecsServiceRole_arn
   cloudflare_zone_id   = var.cloudflare_zone_id
   domain               = var.domain
+  private_subnet_ids   = module.ecs.private_subnet_ids
 
   aws_lambda_api_gateway_endpoint = module.lambda.aws_apigatewayv2_api_endpoint
   hasura_enable_console           = "true"
@@ -104,8 +105,11 @@ module "ecs-service" {
   hasura_jwt_secret               = var.hasura_jwt_secret
   hasura_cpu_credits              = local.hasura_cpu_credits
   hasura_memory_credits           = local.hasura_memory_credits
+  hasura_healthcheck_interval     = local.hasura_healthcheck_interval
+  hasura_healthcheck_retries      = local.hasura_healthcheck_retries
 
-  websockets_memory_credits = local.websockets_memory_credits
+  eod_websockets_memory_credits     = local.eod_websockets_memory_credits
+  polygon_websockets_memory_credits = local.polygon_websockets_memory_credits
 
   eodhistoricaldata_api_token = var.eodhistoricaldata_api_token
   pg_host                     = module.rds.db_instance.address
@@ -113,6 +117,7 @@ module "ecs-service" {
   pg_port                     = module.rds.db_instance.port
   pg_username                 = module.rds.db_instance.username
   pg_dbname                   = module.rds.db_instance.name
+  pg_replica_uris             = sensitive(join(",", [for index, replica in module.rds.db_replica[*] : format("postgres://%s:%s@%s:%d/%s", replica.username, module.rds.db_instance.password, replica.address, replica.port, replica.name)]))
   versioned_schema_suffix     = local.timestamp
 
   pg_production_host                   = var.pg_production_host
@@ -135,6 +140,10 @@ module "ecs-service" {
 
   datadog_api_key = var.datadog_api_key
   datadog_app_key = var.datadog_app_key
+
+  polygon_api_token = var.polygon_api_token
+
+  health_check_grace_period_seconds = local.health_check_grace_period_seconds
 }
 
 

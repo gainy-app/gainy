@@ -5,9 +5,9 @@ from plaid.api import plaid_api
 
 from common.hasura_exception import HasuraActionException
 
-PLAID_CLIENT_ID = os.environ['PLAID_CLIENT_ID']
-PLAID_SECRET = os.environ['PLAID_SECRET']
-PLAID_ENV = os.environ['PLAID_ENV']
+PLAID_CLIENT_ID = os.getenv('PLAID_CLIENT_ID')
+PLAID_SECRET = os.getenv('PLAID_SECRET')
+PLAID_ENV = os.getenv('PLAID_ENV')
 PLAID_HOSTS = {
     'sandbox': plaid.Environment.Sandbox,
     'development': plaid.Environment.Development,

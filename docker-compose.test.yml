@@ -25,7 +25,7 @@ services:
       TARGET_POSTGRES_HOST: test-postgres
       MELTANO_DATABASE_URI: "postgresql://postgres:postgrespassword@test-postgres:5432/postgres?options=-csearch_path%3Dmeltano"
       NO_AIRFLOW: "true"
-      ENV: test
+      ENV: "local"
       DBT_THREADS: 2
     depends_on:
       - test-postgres
@@ -44,12 +44,9 @@ services:
       args:
         BASE_IMAGE_REGISTRY_ADDRESS: ${BASE_IMAGE_REGISTRY_ADDRESS}
         BASE_IMAGE_VERSION: ${BASE_IMAGE_VERSION}
-#    ports:
-#      - "8080:8080"
-#      - "9693:9693"
-#      - "9695:9695"
     depends_on:
       - test-postgres
+      - test-lambda-router
     restart: always
     env_file:
       - .env
@@ -57,4 +54,65 @@ services:
       HASURA_GRAPHQL_METADATA_DATABASE_URL: "postgres://postgres:postgrespassword@test-postgres:5432/postgres"
       HASURA_GRAPHQL_DATABASE_URL: "postgres://postgres:postgrespassword@test-postgres:5432/postgres"
       HASURA_GRAPHQL_PUBLIC_SCHEMA_NAME: public
-#      AWS_LAMBDA_API_GATEWAY_ENDPOINT: http://lambda-router:5000
+      AWS_LAMBDA_API_GATEWAY_ENDPOINT: http://test-lambda-router:5000
+
+  test-lambda-router:
+    build:
+      context: ./src/aws/router
+    depends_on:
+      - test-lambda-python-action
+      - test-lambda-python-trigger
+    volumes:
+      - ./src/aws/router:/app
+    environment:
+      LAMBDA_PYTHON_ACTION_HOST: test-lambda-python-action
+      LAMBDA_PYTHON_TRIGGER_HOST: test-lambda-python-trigger
+
+  test-lambda-python-trigger:
+    build:
+      context: ./src/aws/lambda-python
+      args:
+        BASE_IMAGE_REGISTRY_ADDRESS: ${BASE_IMAGE_REGISTRY_ADDRESS}
+        BASE_IMAGE_VERSION: ${BASE_IMAGE_VERSION}
+    restart: always
+    volumes:
+      - ./src/aws/lambda-python/lambda_python:/var/task
+      - ./src/aws/lambda-python/poetry.lock:/var/poetry.lock
+      - ./src/aws/lambda-python/pyproject.toml:/var/pyproject.toml
+    environment:
+      pg_host: "test-postgres"
+      pg_port: "5432"
+      pg_dbname: "postgres"
+      pg_username: "postgres"
+      pg_password: "postgrespassword"
+      AWS_LAMBDA_API_GATEWAY_PROXY_INTEGRATION: "false"
+      ALGOLIA_APP_ID: "test"
+      ALGOLIA_API_KEY: "test"
+      ENV: "local"
+      PLAID_ENV: "sandbox"
+    command: [ "hasura_handler.handle_trigger" ]
+
+  test-lambda-python-action:
+    build:
+      context: ./src/aws/lambda-python
+      args:
+        BASE_IMAGE_REGISTRY_ADDRESS: ${BASE_IMAGE_REGISTRY_ADDRESS}
+        BASE_IMAGE_VERSION: ${BASE_IMAGE_VERSION}
+    restart: always
+    volumes:
+      - ./src/aws/lambda-python/lambda_python:/var/task
+      - ./src/aws/lambda-python/poetry.lock:/var/poetry.lock
+      - ./src/aws/lambda-python/pyproject.toml:/var/pyproject.toml
+    environment:
+      pg_host: "test-postgres"
+      pg_port: "5432"
+      pg_dbname: "postgres"
+      pg_username: "postgres"
+      pg_password: "postgrespassword"
+      AWS_LAMBDA_API_GATEWAY_PROXY_INTEGRATION: "false"
+      ALGOLIA_APP_ID: "test"
+      ALGOLIA_API_KEY: "test"
+      ENV: "local"
+      PLAID_ENV: "sandbox"
+
+    command: [ "hasura_handler.handle_action" ]

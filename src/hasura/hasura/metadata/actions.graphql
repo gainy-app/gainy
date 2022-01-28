@@ -62,7 +62,8 @@ type Query {
 
 type Query {
   get_recommended_collections(
-    profile_id: Int
+    profile_id: Int!
+    limit: Int
   ): [Collection]
 }
 
@@ -162,11 +163,12 @@ type MatchScore {
 
 type LinkPlaidAccountOutput {
   result: Boolean!
+  plaid_access_token_id: Int
 }
 
 type PortfolioHolding {
   id: Int!
-  iso_currency_code: String!
+  iso_currency_code: String
   created_at: String!
   updated_at: String!
   quantity: Float!
@@ -182,7 +184,7 @@ type PortfolioTransaction {
   amount: Float!
   date: String!
   fees: Float!
-  iso_currency_code: String!
+  iso_currency_code: String
   name: String!
   price: Float!
   quantity: Float!

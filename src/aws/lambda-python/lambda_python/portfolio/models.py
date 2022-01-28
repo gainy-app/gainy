@@ -1,15 +1,14 @@
-from abc import ABC, abstractmethod
+from data_access.models import BaseModel
+
+from abc import ABC
 import datetime
 
 
-class BaseModel(ABC):
-
-    def to_dict(self):
-        return self.__dict__
+class PortfolioBaseModel(BaseModel, ABC):
 
     def normalize(self):
         d = self.to_dict().copy()
-        for i in self.normalization_excluded_fields():
+        for i in self.normalization_excluded_fields:
             del d[i]
 
         for k, i in d.items():
@@ -18,34 +17,24 @@ class BaseModel(ABC):
 
         return d
 
-    @property
-    @abstractmethod
-    def schema_name(self):
-        pass
-
-    @property
-    @abstractmethod
-    def table_name(self):
-        pass
-
-    def unique_field_names(self):
-        return []
-
     def unique_id(self):
         values_dict = self.to_dict()
-        return '_'.join([values_dict[i] for i in self.unique_field_names()])
+        return '_'.join([values_dict[i] for i in self.key_fields])
 
+    @property
     def db_excluded_fields(self):
-        return ['created_at', 'updated_at']
+        return ['id', 'created_at', 'updated_at']
 
+    @property
+    def non_persistent_fields(self):
+        return ['id', 'created_at', 'updated_at']
+
+    @property
     def normalization_excluded_fields(self):
         return []
 
-    def id_field(self):
-        return 'id'
 
-
-class HoldingData(BaseModel):
+class HoldingData(PortfolioBaseModel):
     id = None
     iso_currency_code = None
     quantity = None
@@ -57,23 +46,30 @@ class HoldingData(BaseModel):
     account_id = None
     plaid_access_token_id = None
 
+    @property
     def schema_name(self):
         return 'app'
 
+    @property
     def table_name(self):
         return 'profile_holdings'
 
+    @property
     def db_excluded_fields(self):
-        return ['security_ref_id', 'account_ref_id']
+        return super().db_excluded_fields + [
+            'security_ref_id', 'account_ref_id'
+        ]
 
+    @property
     def normalization_excluded_fields(self):
         return ['security_ref_id', 'account_ref_id']
 
-    def unique_field_names(self):
+    @property
+    def key_fields(self):
         return ['ref_id']
 
 
-class TransactionData(BaseModel):
+class TransactionData(PortfolioBaseModel):
     id = None
 
     amount = None
@@ -98,23 +94,30 @@ class TransactionData(BaseModel):
     created_at = None
     updated_at = None
 
+    @property
     def schema_name(self):
         return 'app'
 
+    @property
     def table_name(self):
         return 'profile_portfolio_transactions'
 
+    @property
     def db_excluded_fields(self):
-        return ['security_ref_id', 'account_ref_id']
+        return super().db_excluded_fields + [
+            'security_ref_id', 'account_ref_id'
+        ]
 
+    @property
     def normalization_excluded_fields(self):
         return ['security_ref_id', 'account_ref_id']
 
-    def unique_field_names(self):
+    @property
+    def key_fields(self):
         return ['ref_id']
 
 
-class Security(BaseModel):
+class Security(PortfolioBaseModel):
     id = None
     close_price = None
     close_price_as_of = None
@@ -126,17 +129,20 @@ class Security(BaseModel):
     created_at = None
     updated_at = None
 
+    @property
     def schema_name(self):
         return 'app'
 
+    @property
     def table_name(self):
         return 'portfolio_securities'
 
-    def unique_field_names(self):
+    @property
+    def key_fields(self):
         return ['ref_id']
 
 
-class Account(BaseModel):
+class Account(PortfolioBaseModel):
     ref_id = None
     balance_available = None
     balance_current = None
@@ -152,11 +158,37 @@ class Account(BaseModel):
     updated_at = None
     plaid_access_token_id = None
 
+    @property
     def schema_name(self):
         return 'app'
 
+    @property
     def table_name(self):
         return 'profile_portfolio_accounts'
 
-    def unique_field_names(self):
+    @property
+    def key_fields(self):
+        return ['ref_id']
+
+
+class Institution(PortfolioBaseModel):
+    id = None
+    ref_id = None
+    name = None
+    primary_color = None
+    url = None
+    logo = None
+    created_at = None
+    updated_at = None
+
+    @property
+    def schema_name(self):
+        return 'app'
+
+    @property
+    def table_name(self):
+        return 'plaid_institutions'
+
+    @property
+    def key_fields(self):
         return ['ref_id']
