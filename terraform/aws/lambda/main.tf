@@ -69,7 +69,7 @@ resource "aws_apigatewayv2_stage" "lambda" {
 #################################### Role ####################################
 
 resource "aws_iam_role" "lambda_exec" {
-  name = "serverless_lambda_${var.env}"
+  name = "serverless_lambda_${var.env}_${var.deployment_key}"
 
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
