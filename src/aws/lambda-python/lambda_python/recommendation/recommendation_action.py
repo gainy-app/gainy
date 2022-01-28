@@ -13,10 +13,11 @@ class GetRecommendedCollections(HasuraAction):
 
     def apply(self, db_conn, input_params, headers):
         profile_id = input_params["profile_id"]
+        limit = input_params.get("limit", 30)
 
         repository = RecommendationRepository(db_conn)
         sorted_collection_match_scores = repository.read_sorted_collection_match_scores(
-            profile_id)
+            profile_id, limit)
         sorted_collections_ids = list(
             map(itemgetter(0), sorted_collection_match_scores))
 

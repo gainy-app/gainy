@@ -62,7 +62,8 @@ type Query {
 
 type Query {
   get_recommended_collections(
-    profile_id: Int
+    profile_id: Int!
+    limit: Int
   ): [Collection]
 }
 

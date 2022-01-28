@@ -76,15 +76,17 @@ class RecommendationRepository(Repository):
         return vectors
 
     def read_sorted_collection_match_scores(
-            self, profile_id: str) -> List[Tuple[int, float]]:
+            self, profile_id: str, limit: int) -> List[Tuple[int, float]]:
         with open(os.path.join(script_dir, "sql/collection_ranking_scores.sql")
                   ) as _collection_ranking_scores_query_file:
             _collection_ranking_scores_query = _collection_ranking_scores_query_file.read(
             )
 
         with self.db_conn.cursor() as cursor:
-            cursor.execute(_collection_ranking_scores_query,
-                           {"profile_id": profile_id})
+            cursor.execute(_collection_ranking_scores_query, {
+                "profile_id": profile_id,
+                "limit": limit
+            })
 
             return list(cursor.fetchall())
 

@@ -12,4 +12,5 @@ from collections c
                    on c.id = crs.collection_id
 where c.enabled = '1'
   and c.personalized = '0'
-order by ranking_score desc;
+order by ranking_score desc
+limit %(limit)s;
