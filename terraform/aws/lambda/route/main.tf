@@ -1,4 +1,5 @@
 variable "route" {}
+variable "function_name" {}
 variable "aws_apigatewayv2_api_lambda_id" {}
 variable "aws_apigatewayv2_api_lambda_execution_arn" {}
 variable "aws_iam_role_lambda_exec_role" {}
@@ -25,5 +26,5 @@ resource "aws_lambda_permission" "api_gw" {
   function_name = var.aws_lambda_function_name
   principal     = "apigateway.amazonaws.com"
 
-  source_arn = "${var.aws_apigatewayv2_api_lambda_execution_arn}/*/*/${var.aws_lambda_function_name}"
+  source_arn = "${var.aws_apigatewayv2_api_lambda_execution_arn}/*/*/${var.function_name}"
 }

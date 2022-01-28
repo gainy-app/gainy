@@ -58,4 +58,5 @@ module "route" {
   aws_iam_role_lambda_exec_role             = var.aws_iam_role_lambda_exec_role
   aws_lambda_invoke_arn                     = "${aws_lambda_function.lambda.arn}:${aws_lambda_function.lambda.version}"
   aws_lambda_function_name                  = aws_lambda_function.lambda.function_name
+  function_name                             = var.function_name
 }
