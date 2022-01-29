@@ -54,7 +54,7 @@ jobs:
         # grep only needed resources
         # tr to make it a one-liner
         # sed to filter out :: command, that github apparently adds to step output for some f-cked up reason
-        run: echo "::set-output name=resources::$(terraform state list | grep -P 'aws_apigatewayv2_integration|aws_apigatewayv2_route|aws_lambda_permission|module.aws.module.lambda.aws_apigatewayv2_api' | tr '\n' ' ' | sed 's/::.*//')"
+        run: echo "::set-output name=resources::$(terraform state list | grep -P 'aws_apigatewayv2_integration|aws_apigatewayv2_route|aws_lambda_permission' | tr '\n' ' ' | sed 's/::.*//')"
         working-directory: terraform
 
       - name: Terraform State Cleanup
