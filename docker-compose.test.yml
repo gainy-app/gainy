@@ -9,6 +9,7 @@ services:
       args:
         BASE_IMAGE_REGISTRY_ADDRESS: ${BASE_IMAGE_REGISTRY_ADDRESS}
         BASE_IMAGE_VERSION: ${BASE_IMAGE_VERSION}
+        CODEARTIFACT_PIPY_URL: ${CODEARTIFACT_PIPY_URL}
     volumes:
       - ./src/gainy-fetch/meltano/meltano.template.yml:/project/meltano.template.yml
       - ./src/gainy-fetch/meltano/scripts:/project/scripts
@@ -74,6 +75,7 @@ services:
       args:
         BASE_IMAGE_REGISTRY_ADDRESS: ${BASE_IMAGE_REGISTRY_ADDRESS}
         BASE_IMAGE_VERSION: ${BASE_IMAGE_VERSION}
+        CODEARTIFACT_PIPY_URL: ${CODEARTIFACT_PIPY_URL}
     restart: always
     volumes:
       - ./src/aws/lambda-python/lambda_python:/var/task
@@ -98,6 +100,7 @@ services:
       args:
         BASE_IMAGE_REGISTRY_ADDRESS: ${BASE_IMAGE_REGISTRY_ADDRESS}
         BASE_IMAGE_VERSION: ${BASE_IMAGE_VERSION}
+        CODEARTIFACT_PIPY_URL: ${CODEARTIFACT_PIPY_URL}
     restart: always
     volumes:
       - ./src/aws/lambda-python/lambda_python:/var/task

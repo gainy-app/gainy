@@ -100,6 +100,8 @@ module "aws" {
   algolia_app_id            = var.algolia_app_id
   algolia_indexing_key      = module.algolia.algolia_indexing_key
   algolia_search_key        = module.algolia.algolia_search_key
+
+  codeartifact_pipy_url     = var.codeartifact_pipy_url
 }
 
 module "datadog" {

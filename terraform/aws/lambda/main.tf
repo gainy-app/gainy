@@ -22,6 +22,7 @@ variable "algolia_app_id" {}
 variable "algolia_search_key" {}
 variable "hasura_url" {}
 variable "hubspot_api_key" {}
+variable "codeartifact_pipy_url" {}
 
 output "aws_apigatewayv2_api_endpoint" {
   value = "${aws_apigatewayv2_api.lambda.api_endpoint}/${aws_apigatewayv2_stage.lambda.name}"
@@ -199,6 +200,7 @@ resource "docker_registry_image" "lambda_python" {
     build_args = {
       BASE_IMAGE_REGISTRY_ADDRESS = var.base_image_registry_address
       BASE_IMAGE_VERSION          = var.base_image_version
+      CODEARTIFACT_PIPY_URL       = var.codeartifact_pipy_url
     }
 
     auth_config {

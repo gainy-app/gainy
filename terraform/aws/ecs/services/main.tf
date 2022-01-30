@@ -48,6 +48,7 @@ resource "docker_registry_image" "meltano" {
     build_args = {
       BASE_IMAGE_REGISTRY_ADDRESS = var.base_image_registry_address
       BASE_IMAGE_VERSION          = var.base_image_version
+      CODEARTIFACT_PIPY_URL       = var.codeartifact_pipy_url
     }
 
     auth_config {

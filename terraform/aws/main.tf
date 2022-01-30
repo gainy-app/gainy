@@ -45,6 +45,8 @@ module "lambda" {
   algolia_collections_index = var.algolia_collections_index
   algolia_app_id            = var.algolia_app_id
   algolia_search_key        = var.algolia_search_key
+
+  codeartifact_pipy_url     = var.codeartifact_pipy_url
 }
 
 module "ecs" {
@@ -146,6 +148,7 @@ module "ecs-service" {
   health_check_grace_period_seconds = local.health_check_grace_period_seconds
 
   mlflow_artifact_bucket = module.s3.mlflow_artifact_bucket
+  codeartifact_pipy_url  = var.codeartifact_pipy_url
 }
 
 

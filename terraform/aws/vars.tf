@@ -31,6 +31,8 @@ variable "algolia_app_id" {}
 variable "algolia_indexing_key" {}
 variable "algolia_search_key" {}
 
+variable "codeartifact_pipy_url" {}
+
 # https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task-cpu-memory-error.html
 locals {
   ecs_instance_type                    = var.env == "production" ? "c5.2xlarge" : "r5.large"

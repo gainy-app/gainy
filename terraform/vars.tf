@@ -34,6 +34,9 @@ variable "aws_access_key" {
 variable "aws_secret_key" {
   sensitive = true
 }
+variable "codeartifact_pipy_url" {
+  type = string
+}
 
 #################################### Google Cloud & Firebase ####################################
 
