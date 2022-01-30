@@ -46,7 +46,8 @@ class PlaidClient:
 
     def get_investment_holdings(self, access_token):
         request = InvestmentsHoldingsGetRequest(access_token=access_token)
-        response = self.get_client(access_token).investments_holdings_get(request)
+        response = self.get_client(access_token).investments_holdings_get(
+            request)
 
         return response
 
@@ -64,7 +65,8 @@ class PlaidClient:
                 count=count,
                 offset=offset,
             ))
-        response = self.get_client(access_token).investments_transactions_get(request)
+        response = self.get_client(access_token).investments_transactions_get(
+            request)
 
         return response
 
@@ -77,13 +79,15 @@ class PlaidClient:
     def get_institution(self, access_token, institution_id):
         request = InstitutionsGetByIdRequest(institution_id=institution_id,
                                              country_codes=COUNTRY_CODES)
-        response = self.get_client(access_token).institutions_get_by_id(request)
+        response = self.get_client(access_token).institutions_get_by_id(
+            request)
 
         return response
 
     def webhook_verification_key_get(self, current_key_id, access_token):
         request = WebhookVerificationKeyGetRequest(current_key_id)
-        response = self.get_client(access_token).webhook_verification_key_get(request)
+        response = self.get_client(access_token).webhook_verification_key_get(
+            request)
 
         return response
 

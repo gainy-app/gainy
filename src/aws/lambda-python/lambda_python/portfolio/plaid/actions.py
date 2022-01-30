@@ -17,6 +17,7 @@ logger = get_logger(__name__)
 
 DEFAULT_ENV = "development"
 
+
 class CreatePlaidLinkToken(HasuraAction):
 
     def __init__(self):
@@ -26,10 +27,11 @@ class CreatePlaidLinkToken(HasuraAction):
     def apply(self, db_conn, input_params, headers):
         profile_id = input_params["profile_id"]
         redirect_uri = input_params["redirect_uri"]
-        env = input_params.get("env", DEFAULT_ENV) # default for legacy app
+        env = input_params.get("env", DEFAULT_ENV)  # default for legacy app
 
         try:
-            response = self.client.create_link_token(profile_id, redirect_uri, env)
+            response = self.client.create_link_token(profile_id, redirect_uri,
+                                                     env)
             link_token = response['link_token']
 
             return {'link_token': response['link_token']}
@@ -46,7 +48,7 @@ class LinkPlaidAccount(HasuraAction):
     def apply(self, db_conn, input_params, headers):
         profile_id = input_params["profile_id"]
         public_token = input_params["public_token"]
-        env = input_params.get("env", DEFAULT_ENV) # default for legacy app
+        env = input_params.get("env", DEFAULT_ENV)  # default for legacy app
 
         try:
             response = self.client.exchange_link_token(public_token, env)
@@ -94,12 +96,14 @@ class PlaidWebhook(HasuraAction):
                 ]
 
             if len(access_tokens):
-                self.verify(input_params, headers, access_tokens[0]['access_token'])
+                self.verify(input_params, headers,
+                            access_tokens[0]['access_token'])
 
                 count = 0
                 webhook_type = input_params['webhook_type']
                 for access_token in access_tokens:
-                    self.portfolio_service.sync_institution(db_conn, access_token)
+                    self.portfolio_service.sync_institution(
+                        db_conn, access_token)
                     if webhook_type == 'HOLDINGS':
                         count += self.portfolio_service.sync_token_holdings(
                             db_conn, access_token)
