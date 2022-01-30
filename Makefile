@@ -3,8 +3,10 @@ export PARAMS ?= $(filter-out $@,$(MAKECMDGOALS))
 -include .env.make
 -include .env
 
-up:
+configure:
 	- cp -n src/gainy-fetch/meltano/symbols.local.json.dist src/gainy-fetch/meltano/symbols.local.json
+
+up: configure
 	- docker-compose pull --include-deps
 	docker-compose up
 
@@ -41,19 +43,22 @@ hasura-seed:
 style-check:
 	npx eslint src/aws/lambda-nodejs
 	npx prettier --check "src/aws/lambda-nodejs/**/*.js"
-	yapf --diff -r src/aws/lambda-python/ src/aws/router src/websockets
+	yapf --diff -r src/aws/lambda-python/ src/aws/router src/websockets src/gainy-fetch/meltano/orchestrate/dags terraform
 
 style-fix:
 	npx eslint src/aws/lambda-nodejs --fix
 	npx prettier --write "src/aws/lambda-nodejs/**/*.js"
-	yapf -i -r src/aws/lambda-python/ src/aws/router src/websockets
+	yapf -i -r src/aws/lambda-python/ src/aws/router src/websockets src/gainy-fetch/meltano/orchestrate/dags terraform
 
 extract-passwords:
 	cd terraform && terraform state pull | python3 ../extract_passwords.py
 
-test:
-	docker-compose -p gainy_test -f docker-compose.test.yml run --entrypoint python3 test-meltano tests/image_urls.py
+test: configure
 	docker-compose -p gainy_test -f docker-compose.test.yml run test-meltano invoke dbt test
+	docker-compose -p gainy_test -f docker-compose.test.yml run --entrypoint python3 test-meltano tests/image_urls.py
+	sleep 10
+	docker-compose -p gainy_test -f docker-compose.test.yml run test-meltano invoke dbt run  --vars '{"realtime": true}' --model portfolio_gains portfolio_holding_details portfolio_holding_gains portfolio_holding_group_details portfolio_holding_group_gains
+	docker-compose -p gainy_test -f docker-compose.test.yml exec -T test-hasura pytest
 	make test-clean
 
 test-clean:

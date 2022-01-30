@@ -1,6 +1,7 @@
 {{
   config(
-    materialized = "table",
+    materialized = "incremental",
+    unique_key = "symbol",
     post_hook=[
       index(this, 'symbol', true),
     ]
@@ -8,6 +9,9 @@
 }}
 
 with highlights as (select * from {{ ref('highlights') }}),
+     tickers as (select * from {{ ref('tickers') }}),
+     ticker_realtime_metrics as (select * from {{ ref('ticker_realtime_metrics') }}),
+     chart as (select * from {{ ref('chart') }}),
      valuation as (select * from {{ ref('valuation') }}),
      technicals as (select * from {{ ref('technicals') }}),
      ticker_shares_stats as (select * from {{ ref('ticker_shares_stats') }}),
@@ -279,36 +283,58 @@ with highlights as (select * from {{ ref('highlights') }}),
          ),
      momentum_metrics as
          (
-             select symbol,
-                    (
-                                today_price.price /
-                                (
-                                    select case when mp.price > 0 then mp.price end
-                                    from marked_prices mp
-                                    where code = t.symbol
-                                      and period = '1m'
-                                ) - 1
-                        )::double precision as price_change_1m,
-                    (
-                                today_price.price /
-                                (
-                                    select case when mp.price > 0 then mp.price end
-                                    from marked_prices mp
-                                    where code = t.symbol
-                                      and period = '3m'
-                                ) - 1
-                        )::double precision as price_change_3m,
-                    (
-                                today_price.price /
-                                (
-                                    select case when mp.price > 0 then mp.price end
-                                    from marked_prices mp
-                                    where code = t.symbol
-                                      and period = '1y'
-                                ) - 1
-                        )::double precision as price_change_1y
-             from tickers t
-                      join today_price on t.symbol = today_price.code
+             with previous_periods as
+                      (
+                          select distinct on (
+                              chart.symbol, chart.period
+                              ) chart.symbol,
+                                chart.period,
+                                chart.datetime                              as period_start,
+                                chart.adjusted_close                        as period_close,
+                                historical_prices_aggregated.datetime       as prev_date,
+                                historical_prices_aggregated.adjusted_close as prev_period_close
+                          from chart
+                                   join historical_prices_aggregated
+                                        on historical_prices_aggregated.symbol = chart.symbol
+                                            and historical_prices_aggregated.period = '1d'
+                                            and historical_prices_aggregated.datetime < chart.datetime
+                                            and historical_prices_aggregated.datetime > chart.datetime - interval '1 week'
+                          where chart.period in ('1w', '1m', '3m', '1y', '5y', 'all')
+                          order by chart.symbol, chart.period, chart.datetime, historical_prices_aggregated.datetime desc
+                      )
+             select tickers.symbol,
+                    ticker_realtime_metrics.actual_price / case
+                                                           when previous_periods_1w.prev_period_close > 0
+                                                               then previous_periods_1w.prev_period_close end - 1 as price_change_1w,
+                    ticker_realtime_metrics.actual_price / case
+                                                           when previous_periods_1m.prev_period_close > 0
+                                                               then previous_periods_1m.prev_period_close end - 1 as price_change_1m,
+                    ticker_realtime_metrics.actual_price / case
+                                                           when previous_periods_3m.prev_period_close > 0
+                                                               then previous_periods_3m.prev_period_close end - 1 as price_change_3m,
+                    ticker_realtime_metrics.actual_price / case
+                                                           when previous_periods_1y.prev_period_close > 0
+                                                               then previous_periods_1y.prev_period_close end - 1 as price_change_1y,
+                    ticker_realtime_metrics.actual_price / case
+                                                           when previous_periods_5y.prev_period_close > 0
+                                                               then previous_periods_5y.prev_period_close end - 1 as price_change_5y,
+                    ticker_realtime_metrics.actual_price / case
+                                                           when previous_periods_all.prev_period_close > 0
+                                                               then previous_periods_all.prev_period_close end - 1 as price_change_all
+             from tickers
+                      join ticker_realtime_metrics on ticker_realtime_metrics.symbol = tickers.symbol
+                      left join previous_periods previous_periods_1w
+                                on previous_periods_1w.symbol = tickers.symbol and previous_periods_1w.period = '1w'
+                      left join previous_periods previous_periods_1m
+                                on previous_periods_1m.symbol = tickers.symbol and previous_periods_1m.period = '1m'
+                      left join previous_periods previous_periods_3m
+                                on previous_periods_3m.symbol = tickers.symbol and previous_periods_3m.period = '3m'
+                      left join previous_periods previous_periods_1y
+                                on previous_periods_1y.symbol = tickers.symbol and previous_periods_1y.period = '1y'
+                      left join previous_periods previous_periods_5y
+                                on previous_periods_5y.symbol = tickers.symbol and previous_periods_5y.period = '5y'
+                      left join previous_periods previous_periods_all
+                                on previous_periods_all.symbol = tickers.symbol and previous_periods_all.period = '5y'
          ),
      dividend_metrics as
          (
@@ -447,9 +473,12 @@ select DISTINCT ON
                valuation_metrics.price_to_book_value,
                valuation_metrics.enterprise_value_to_ebitda,
 
+               momentum_metrics.price_change_1w,
                momentum_metrics.price_change_1m,
                momentum_metrics.price_change_3m,
                momentum_metrics.price_change_1y,
+               momentum_metrics.price_change_5y,
+               momentum_metrics.price_change_all,
 
                dividend_metrics.dividend_yield,
                dividend_metrics.dividends_per_share,

@@ -2,11 +2,20 @@
 
 {% set sql %}
     {% if unique %}
-        ALTER TABLE {{ this.schema }}.{{ this.name }} DROP CONSTRAINT IF EXISTS {{ this.name }}_unique_{{ column }};
-        ALTER TABLE {{ this.schema }}.{{ this.name }} ADD CONSTRAINT {{ this.name }}_unique_{{ column }} UNIQUE ({{column}});
+        DO $$
+        BEGIN
+            IF NOT EXISTS (
+                SELECT constraint_schema, constraint_name
+                FROM information_schema.table_constraints
+                WHERE constraint_schema =  {{ "'" + this.schema + "'" }}
+                    AND constraint_name = {{ "'" + this.name + "_unique_" + column + "'" }}
+            )
+            THEN
+                ALTER TABLE {{ this.schema + "." + this.name }} ADD CONSTRAINT {{ this.name + "_unique_" + column }} UNIQUE ({{column}});
+            END IF;
+        END$$;
     {% else %}
-        DROP INDEX IF EXISTS {{ this.schema }}.{{ this.name }}_index_{{ column }};
-        CREATE INDEX {{ this.name }}_index_{{ column }} ON {{ this.schema }}.{{ this.name }} ({{column}});
+        CREATE INDEX IF NOT EXISTS {{ this.name }}_index_{{ column }} ON {{ this.schema }}.{{ this.name }} ({{column}});
     {% endif %}
 {% endset %}
 

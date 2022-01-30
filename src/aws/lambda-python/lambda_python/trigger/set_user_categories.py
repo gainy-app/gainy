@@ -20,6 +20,7 @@ with open(
 
 
 class SetUserCategories(HasuraTrigger):
+
     def __init__(self):
         super().__init__("set_user_categories")
 
@@ -108,6 +109,10 @@ class SetUserCategories(HasuraTrigger):
         }))
 
         with db_conn.cursor() as cursor:
+            cursor.execute(
+                "delete from app.profile_categories where profile_id = %(profile_id)s",
+                {'profile_id': profile_id})
+
             execute_values(
                 cursor,
                 "INSERT INTO app.profile_categories (profile_id, category_id) VALUES %s",

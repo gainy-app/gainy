@@ -5,6 +5,7 @@ SERVICE_PLAID = 'plaid'
 
 
 class PortfolioService:
+
     def __init__(self):
         self.portfolio_repository = PortfolioRepository()
         self.services = {SERVICE_PLAID: PlaidService()}
@@ -36,17 +37,18 @@ class PortfolioService:
 
         return len(holdings)
 
-    def get_transactions(self, db_conn, profile_id, count=100, offset=0):
+    def get_transactions(self, db_conn, profile_id, count=500, offset=0):
         transactions = []
         securities = []
         accounts = []
 
         for access_token in self.__get_access_tokens(db_conn, profile_id):
-            token_data = self.__get_service(
-                access_token['service']).get_transactions(db_conn,
-                                                          access_token,
-                                                          count=count,
-                                                          offset=offset)
+            self.sync_institution(db_conn, access_token)
+            token_service = self.__get_service(access_token['service'])
+            token_data = token_service.get_transactions(db_conn,
+                                                        access_token,
+                                                        count=count,
+                                                        offset=offset)
 
             transactions += token_data['transactions']
             securities += token_data['securities']
@@ -78,6 +80,13 @@ class PortfolioService:
 
         return transactions_count
 
+    def sync_institution(self, db_conn, access_token):
+        institution = self.__get_service(
+            access_token['service']).get_institution(db_conn, access_token)
+        self.portfolio_repository.persist(db_conn, institution)
+        self.__get_service(access_token['service']).set_token_institution(
+            db_conn, access_token, institution)
+
     def persist_holding_data(self, db_conn, profile_id, securities, accounts,
                              holdings):
         securities_dict = self.__persist_securities(db_conn, securities)
@@ -91,8 +100,10 @@ class PortfolioService:
         self.portfolio_repository.persist(db_conn, holdings)
 
         # cleanup
-        self.portfolio_repository.remove_other_by_profile_id(db_conn, holdings)
-        self.portfolio_repository.remove_other_by_profile_id(db_conn, accounts)
+        self.portfolio_repository.remove_other_by_access_token(
+            db_conn, holdings)
+        self.portfolio_repository.remove_other_by_access_token(
+            db_conn, accounts)
 
     def persist_transaction_data(self, db_conn, profile_id, securities,
                                  accounts, transactions):

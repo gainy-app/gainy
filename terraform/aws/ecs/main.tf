@@ -32,6 +32,11 @@ resource "aws_cloudwatch_log_group" "this" {
 resource "aws_ecs_cluster" "ecs_cluster" {
   name = "gainy-cluster-${var.env}"
 
+  setting {
+    name  = "containerInsights"
+    value = "enabled"
+  }
+
   configuration {
     execute_command_configuration {
       kms_key_id = aws_kms_key.this.arn

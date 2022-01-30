@@ -223,6 +223,7 @@ periods: 15min, 1d, 1w, 1m
     # app_profile_holdings(order_by: {holding_details: {market_capitalization: asc}})
     # app_profile_holdings(order_by: {holding_details: {next_earnings_date: asc}})
     # app_profile_holdings(where: {holding_details: {account_id: {_eq: 7}}})
+    # app_profile_holdings(where: {access_token: {institution: {id: {_eq: 2}}}})
     # app_profile_holdings(where: {holding_details: {ticker: {ticker_interests: {interest_id: {_in: [5]}}}}})
     # app_profile_holdings(where: {holding_details: {ticker: {ticker_categories: {category_id: {_in: []}}}}}) 
     # app_profile_holdings(where: {holding_details: {security_type: {_in: ["equity"]}}})
@@ -243,6 +244,9 @@ periods: 15min, 1d, 1w, 1m
         updated_at
     }
     
+    # broker options:
+    app_profile_plaid_access_tokens { institution { id name } }
+
     # interests options:
     interests(where: {enabled: {_eq: "1"}}) {
         id

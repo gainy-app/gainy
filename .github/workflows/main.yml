@@ -27,12 +27,10 @@ jobs:
         run: npx prettier --check "./**/*.js"
 
       - name: YAPF install
-        working-directory: src/aws/lambda-python
         run: pip3 install yapf toml
 
       - name: YAPF
-        working-directory: src/aws/lambda-python/
-        run: yapf --diff -r . > /dev/null
+        run: yapf --diff -r src/aws/lambda-python/ src/aws/router src/websockets src/gainy-fetch/meltano/orchestrate/dags terraform > /dev/null
 
   test:
     name: "Run tests"
@@ -139,6 +137,8 @@ jobs:
           TF_VAR_plaid_env: ${{ secrets.PLAID_ENV }}
           TF_VAR_algolia_app_id: ${{ secrets.ALGOLIA_APP_ID }}
           TF_VAR_algolia_admin_api_key: ${{ secrets.ALGOLIA_ADMIN_API_KEY }}
+          TF_VAR_hubspot_api_key: ${{ secrets.HUBSPOT_API_KEY }}
+          TF_VAR_polygon_api_token: ${{ secrets.POLYGON_API_TOKEN }}
 
       - uses: actions/github-script@0.9.0
         if: github.event_name == 'pull_request'
@@ -205,3 +205,5 @@ jobs:
           TF_VAR_plaid_env: ${{ secrets.PLAID_ENV }}
           TF_VAR_algolia_app_id: ${{ secrets.ALGOLIA_APP_ID }}
           TF_VAR_algolia_admin_api_key: ${{ secrets.ALGOLIA_ADMIN_API_KEY }}
+          TF_VAR_hubspot_api_key: ${{ secrets.HUBSPOT_API_KEY }}
+          TF_VAR_polygon_api_token: ${{ secrets.POLYGON_API_TOKEN }}

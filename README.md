@@ -42,3 +42,21 @@ make update-quick # sometimes first run fails - to be investigated
    We have two environments: `production` and `test`.
    `production` environment deployment is triggered upon a push to the `main` repository.
    `test` environment deployment is triggered manually [here](https://github.com/gainy-app/gainy/actions/workflows/deploy_to_test.yml).
+
+## Key modules
+### Portfolio
+Flow:
+1. Plaid is syncronized via trigger when new access token is created and updated on the webhook event
+2. dbt then calculates chart and gains:
+   1. portfolio_holding_gains - calculates gains over time for each holding
+   2. portfolio_holding_details - calculates data for filtering and sorting of holdings in the app
+   3. portfolio_holding_group details and gains - just a sum of the two entities above over the company
+   4. portfolio_gains - sum of gains over the profile
+   5. portfolio_chart - holdings X historical_prices_aggregated
+   6. portfolio_transaction_gains - currently almost unused due to incomplete data
+### Realtime prices
+- `websockets/client_eod.py` is responsible for listening EOD websockets for realtime prices.
+- `websockets/client_polygon.py` is responsible for listening Polygon.io websockets for realtime prices.
+Known problems:
+- eod randomly closing connections
+- eod randomly not sending any data

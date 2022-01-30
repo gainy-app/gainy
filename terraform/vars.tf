@@ -17,6 +17,10 @@ variable "base_image_registry_address" {
 variable "base_image_version" {
   type = string
 }
+variable "hubspot_api_key" {
+  type      = string
+  sensitive = true
+}
 
 #################################### AWS ####################################
 
@@ -74,6 +78,13 @@ variable "datadog_app_key" {
 }
 variable "datadog_api_url" {
   type = string
+}
+
+#################################### Polygon ####################################
+
+variable "polygon_api_token" {
+  type      = string
+  sensitive = true
 }
 
 #################################### Algolia ####################################

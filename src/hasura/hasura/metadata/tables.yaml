@@ -1,5 +1,17 @@
 - table:
     schema: app
+    name: plaid_institutions
+  select_permissions:
+  - role: user
+    permission:
+      columns:
+      - created_at
+      - id
+      - name
+      - updated_at
+      filter: {}
+- table:
+    schema: app
     name: portfolio_securities
   object_relationships:
   - name: tickers
@@ -81,7 +93,7 @@
           user_id:
             _eq: X-Hasura-User-Id
   event_triggers:
-  - name: top_20_collection__profile_categories
+  - name: recommendations__profile_categories
     definition:
       enable_manual: false
       insert:
@@ -91,14 +103,23 @@
       update:
         columns: '*'
     retry_conf:
-      num_retries: 0
-      interval_sec: 10
-      timeout_sec: 60
+      num_retries: 1
+      interval_sec: 30
+      timeout_sec: 150
     webhook: '{{AWS_LAMBDA_API_GATEWAY_ENDPOINT}}/hasuraTrigger'
 - table:
     schema: app
     name: profile_favorite_collections
   object_relationships:
+  - name: collection
+    using:
+      manual_configuration:
+        remote_table:
+          schema: public
+          name: profile_collections
+        insertion_order: null
+        column_mapping:
+          collection_id: id
   - name: profile
     using:
       foreign_key_constraint_on: profile_id
@@ -149,6 +170,9 @@
     schema: app
     name: profile_holdings
   object_relationships:
+  - name: access_token
+    using:
+      foreign_key_constraint_on: plaid_access_token_id
   - name: account
     using:
       foreign_key_constraint_on: account_id
@@ -247,7 +271,7 @@
           user_id:
             _eq: X-Hasura-User-Id
   event_triggers:
-  - name: top_20_collection__profile_interests
+  - name: recommendations__profile_interests
     definition:
       enable_manual: false
       insert:
@@ -257,14 +281,17 @@
       update:
         columns: '*'
     retry_conf:
-      num_retries: 0
-      interval_sec: 10
-      timeout_sec: 60
+      num_retries: 1
+      interval_sec: 30
+      timeout_sec: 150
     webhook: '{{AWS_LAMBDA_API_GATEWAY_ENDPOINT}}/hasuraTrigger'
 - table:
     schema: app
     name: profile_plaid_access_tokens
   object_relationships:
+  - name: institution
+    using:
+      foreign_key_constraint_on: institution_id
   - name: profile
     using:
       foreign_key_constraint_on: profile_id
@@ -443,6 +470,18 @@
             _eq: X-Hasura-User-Id
       check: null
   event_triggers:
+  - name: recommendations__profile_scoring_settings
+    definition:
+      enable_manual: false
+      insert:
+        columns: '*'
+      update:
+        columns: '*'
+    retry_conf:
+      num_retries: 1
+      interval_sec: 30
+      timeout_sec: 150
+    webhook: '{{AWS_LAMBDA_API_GATEWAY_ENDPOINT}}/hasuraTrigger'
   - name: set_user_categories
     definition:
       enable_manual: false
@@ -451,22 +490,39 @@
       update:
         columns: '*'
     retry_conf:
-      num_retries: 0
+      num_retries: 1
       interval_sec: 10
       timeout_sec: 60
     webhook: '{{AWS_LAMBDA_API_GATEWAY_ENDPOINT}}/hasuraTrigger'
-  - name: top_20_collection__profile_scoring_settings
-    definition:
-      enable_manual: false
-      insert:
-        columns: '*'
-      update:
-        columns: '*'
-    retry_conf:
-      num_retries: 0
-      interval_sec: 10
-      timeout_sec: 60
-    webhook: '{{AWS_LAMBDA_API_GATEWAY_ENDPOINT}}/hasuraTrigger'
+- table:
+    schema: app
+    name: profile_ticker_match_score
+  object_relationships:
+  - name: profile
+    using:
+      manual_configuration:
+        remote_table:
+          schema: app
+          name: profiles
+        insertion_order: null
+        column_mapping:
+          profile_id: id
+  select_permissions:
+  - role: user
+    permission:
+      columns:
+      - category_matches
+      - fits_categories
+      - fits_interests
+      - fits_risk
+      - interest_matches
+      - match_score
+      - risk_similarity
+      - symbol
+      filter:
+        profile:
+          user_id:
+            _eq: X-Hasura-User-Id
 - table:
     schema: app
     name: profile_ticker_metrics_settings
@@ -681,6 +737,12 @@
       check:
         user_id:
           _eq: X-Hasura-User-Id
+  delete_permissions:
+  - role: user
+    permission:
+      filter:
+        user_id:
+          _eq: X-Hasura-User-Id
   event_triggers:
   - name: on_user_created
     definition:
@@ -706,6 +768,18 @@
     schema: public
     name: analyst_ratings
   select_permissions:
+  - role: anonymous
+    permission:
+      columns:
+      - rating
+      - target_price
+      - buy
+      - hold
+      - sell
+      - strong_buy
+      - strong_sell
+      - symbol
+      filter: {}
   - role: user
     permission:
       columns:
@@ -728,6 +802,37 @@
       - icon_url
       - id
       - name
+      - collection_id
+      filter: {}
+- table:
+    schema: public
+    name: chart
+  select_permissions:
+  - role: anonymous
+    permission:
+      columns:
+      - period
+      - symbol
+      - adjusted_close
+      - close
+      - high
+      - low
+      - open
+      - volume
+      - datetime
+      filter: {}
+  - role: user
+    permission:
+      columns:
+      - symbol
+      - datetime
+      - period
+      - open
+      - high
+      - low
+      - close
+      - adjusted_close
+      - volume
       filter: {}
 - table:
     schema: public
@@ -784,12 +889,14 @@
       columns:
       - id
       - name
+      - collection_id
       filter: {}
   - role: user
     permission:
       columns:
       - id
       - name
+      - collection_id
       filter: {}
 - table:
     schema: public
@@ -1552,12 +1659,14 @@
       columns:
       - symbol
       - industry_id
+      - industry_order
       filter: {}
   - role: user
     permission:
       columns:
       - symbol
       - industry_id
+      - industry_order
       filter: {}
 - table:
     schema: public
@@ -1686,17 +1795,17 @@
       - dividend_yield
       - dividends_per_share
       - ebitda
-      - ebitda_ttm
       - ebitda_growth_yoy
+      - ebitda_ttm
       - enterprise_value_to_ebitda
       - enterprise_value_to_sales
-      - eps_ttm
       - eps_actual
+      - eps_difference
       - eps_estimate
       - eps_growth_fwd
       - eps_growth_yoy
       - eps_surprise
-      - eps_difference
+      - eps_ttm
       - exchange_name
       - implied_volatility
       - market_capitalization
@@ -1704,8 +1813,11 @@
       - net_income
       - net_income_ttm
       - price_change_1m
+      - price_change_1w
       - price_change_1y
       - price_change_3m
+      - price_change_5y
+      - price_change_all
       - price_to_book_value
       - price_to_earnings_ttm
       - price_to_sales_ttm
@@ -1732,8 +1844,31 @@
       filter: {}
 - table:
     schema: public
+    name: ticker_metrics_transposed
+  select_permissions:
+  - role: user
+    permission:
+      columns:
+      - metric_id
+      - symbol
+      - value_bigint
+      - value_double
+      - value_string
+      filter: {}
+- table:
+    schema: public
     name: ticker_realtime_metrics
   select_permissions:
+  - role: anonymous
+    permission:
+      columns:
+      - symbol
+      - time
+      - actual_price
+      - absolute_daily_change
+      - relative_daily_change
+      - daily_volume
+      filter: {}
   - role: user
     permission:
       columns:
@@ -1748,6 +1883,15 @@
     schema: public
     name: tickers
   object_relationships:
+  - name: match_score
+    using:
+      manual_configuration:
+        remote_table:
+          schema: app
+          name: profile_ticker_match_score
+        insertion_order: null
+        column_mapping:
+          symbol: symbol
   - name: realtime_metrics
     using:
       manual_configuration:
@@ -1782,6 +1926,15 @@
         remote_table:
           schema: public
           name: historical_growth_rate
+        insertion_order: null
+        column_mapping:
+          symbol: symbol
+  - name: metrics_transposed
+    using:
+      manual_configuration:
+        remote_table:
+          schema: public
+          name: ticker_metrics_transposed
         insertion_order: null
         column_mapping:
           symbol: symbol

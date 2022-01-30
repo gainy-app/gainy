@@ -5,6 +5,7 @@
     tickers {
         symbol
         ticker_industries {
+            industry_order
             gainy_industry {
                 name
                 ticker_industries {
@@ -108,6 +109,7 @@
             net_debt
         }
         ticker_industries {
+            industry_order
             gainy_industry {
                 id
                 name

@@ -8,6 +8,7 @@ from operator import itemgetter
 
 
 class SearchAction(HasuraAction, ABC):
+
     def __init__(self, action_name, algolia_app_id, algolia_search_api_key,
                  tickers_index, attributes_to_retrieve, key_attribute):
         super().__init__(action_name)
@@ -63,6 +64,7 @@ class SearchAction(HasuraAction, ABC):
 
 
 class SearchTickers(SearchAction):
+
     def __init__(self, algolia_app_id, algolia_search_api_key, tickers_index):
         super().__init__("search_tickers", algolia_app_id,
                          algolia_search_api_key, tickers_index, ["symbol"],
@@ -73,6 +75,7 @@ class SearchTickers(SearchAction):
 
 
 class SearchCollections(SearchAction):
+
     def __init__(self, algolia_app_id, algolia_search_api_key, tickers_index):
         super().__init__("search_collections", algolia_app_id,
                          algolia_search_api_key, tickers_index, ["id"], "id")

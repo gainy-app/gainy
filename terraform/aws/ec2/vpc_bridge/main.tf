@@ -14,6 +14,34 @@ variable "pg_password" {}
 variable "pg_dbname" {}
 variable "pg_production_internal_sync_username" {}
 
+locals {
+  provision_script_content = templatefile(
+    "${path.module}/templates/provision.sh",
+    {
+      pg_host                   = var.pg_host
+      pg_password               = var.pg_password
+      pg_port                   = var.pg_port
+      pg_username               = var.pg_username
+      pg_dbname                 = var.pg_dbname
+      pg_datadog_password       = random_password.datadog_postgres.result
+      pg_internal_sync_username = var.pg_production_internal_sync_username
+      pg_internal_sync_password = random_password.internal_sync_postgres.result
+      datadog_api_key           = var.datadog_api_key
+    }
+  )
+
+  datadog_config_content = templatefile(
+    "${path.module}/templates/datadog.postgres.yaml",
+    {
+      pg_host             = var.pg_host
+      pg_port             = var.pg_port
+      pg_dbname           = var.pg_dbname
+      pg_datadog_password = random_password.datadog_postgres.result
+      env                 = var.env
+    }
+  )
+}
+
 data "aws_ami" "ubuntu" {
   most_recent = true
 
@@ -80,22 +108,19 @@ resource "aws_instance" "bridge" {
     Name = "gainy-bridge-${var.env}"
   }
 
+}
+
+resource "null_resource" "bridge" {
+  # Changes to any instance of the cluster requires re-provisioning
+  triggers = {
+    provision_script_content = local.provision_script_content
+    datadog_config_content   = local.datadog_config_content
+    bridge_instance_id       = aws_instance.bridge.id
+  }
+
   provisioner "file" {
     destination = "/tmp/provision.sh"
-    content = templatefile(
-      "${path.module}/templates/provision.sh",
-      {
-        pg_host                   = var.pg_host
-        pg_password               = var.pg_password
-        pg_port                   = var.pg_port
-        pg_username               = var.pg_username
-        pg_dbname                 = var.pg_dbname
-        pg_datadog_password       = random_password.datadog_postgres.result
-        pg_internal_sync_username = var.pg_production_internal_sync_username
-        pg_internal_sync_password = random_password.internal_sync_postgres.result
-        datadog_api_key           = var.datadog_api_key
-      }
-    )
+    content     = local.provision_script_content
 
     connection {
       type        = "ssh"
@@ -107,16 +132,7 @@ resource "aws_instance" "bridge" {
 
   provisioner "file" {
     destination = "/tmp/datadog.postgres.yaml"
-    content = templatefile(
-      "${path.module}/templates/datadog.postgres.yaml",
-      {
-        pg_host             = var.pg_host
-        pg_port             = var.pg_port
-        pg_dbname           = var.pg_dbname
-        pg_datadog_password = random_password.datadog_postgres.result
-        env                 = var.env
-      }
-    )
+    content     = local.datadog_config_content
 
     connection {
       type        = "ssh"

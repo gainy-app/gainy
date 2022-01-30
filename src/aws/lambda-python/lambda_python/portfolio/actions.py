@@ -3,6 +3,7 @@ from common.hasura_function import HasuraAction
 
 
 class GetPortfolioHoldings(HasuraAction):
+
     def __init__(self):
         super().__init__("get_portfolio_holdings", "profile_id")
 
@@ -17,6 +18,7 @@ class GetPortfolioHoldings(HasuraAction):
 
 
 class GetPortfolioTransactions(HasuraAction):
+
     def __init__(self):
         super().__init__("get_portfolio_transactions", "profile_id")
 
@@ -24,7 +26,7 @@ class GetPortfolioTransactions(HasuraAction):
 
     def apply(self, db_conn, input_params, headers):
         profile_id = input_params["profile_id"]
-        count = input_params.get("count", 100)
+        count = input_params.get("count", 500)
         offset = input_params.get("offset", 0)
 
         transactions = self.service.get_transactions(db_conn,
