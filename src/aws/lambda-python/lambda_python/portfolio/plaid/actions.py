@@ -8,13 +8,14 @@ import plaid
 from portfolio.plaid import PlaidClient, PlaidService
 from portfolio.service import PortfolioService, SERVICE_PLAID
 
-from portfolio.plaid.common import get_plaid_client, handle_error
+from portfolio.plaid.common import handle_error
 from common.hasura_function import HasuraAction
 from common.hasura_exception import HasuraActionException
 from service.logging import get_logger
 
 logger = get_logger(__name__)
 
+DEFAULT_ENV = "development"
 
 class CreatePlaidLinkToken(HasuraAction):
 
@@ -25,9 +26,10 @@ class CreatePlaidLinkToken(HasuraAction):
     def apply(self, db_conn, input_params, headers):
         profile_id = input_params["profile_id"]
         redirect_uri = input_params["redirect_uri"]
+        env = input_params.get("env", DEFAULT_ENV) # default for legacy app
 
         try:
-            response = self.client.create_link_token(profile_id, redirect_uri)
+            response = self.client.create_link_token(profile_id, redirect_uri, env)
             link_token = response['link_token']
 
             return {'link_token': response['link_token']}
@@ -44,9 +46,10 @@ class LinkPlaidAccount(HasuraAction):
     def apply(self, db_conn, input_params, headers):
         profile_id = input_params["profile_id"]
         public_token = input_params["public_token"]
+        env = input_params.get("env", DEFAULT_ENV) # default for legacy app
 
         try:
-            response = self.client.exchange_link_token(public_token)
+            response = self.client.exchange_link_token(public_token, env)
         except plaid.ApiException as e:
             handle_error(e)
 
@@ -77,7 +80,6 @@ class PlaidWebhook(HasuraAction):
         print("[PLAID_WEBHOOK] %s" % (input_params))
 
         try:
-            self.verify(input_params, headers)
             item_id = input_params['item_id']
             with db_conn.cursor() as cursor:
                 cursor.execute(
@@ -91,28 +93,31 @@ class PlaidWebhook(HasuraAction):
                     for row in cursor.fetchall()
                 ]
 
-            count = 0
-            webhook_type = input_params['webhook_type']
-            for access_token in access_tokens:
-                self.portfolio_service.sync_institution(db_conn, access_token)
-                if webhook_type == 'HOLDINGS':
-                    count += self.portfolio_service.sync_token_holdings(
-                        db_conn, access_token)
-                elif webhook_type == 'INVESTMENTS_TRANSACTIONS':
-                    count += self.portfolio_service.sync_token_transactions(
-                        db_conn, access_token)
+            if len(access_tokens):
+                self.verify(input_params, headers, access_tokens[0]['access_token'])
 
-            return {'count': count}
+                count = 0
+                webhook_type = input_params['webhook_type']
+                for access_token in access_tokens:
+                    self.portfolio_service.sync_institution(db_conn, access_token)
+                    if webhook_type == 'HOLDINGS':
+                        count += self.portfolio_service.sync_token_holdings(
+                            db_conn, access_token)
+                    elif webhook_type == 'INVESTMENTS_TRANSACTIONS':
+                        count += self.portfolio_service.sync_token_transactions(
+                            db_conn, access_token)
+
+                return {'count': count}
         except Exception as e:
             print("[PLAID_WEBHOOK] %s" % (e))
             raise e
 
-    def verify(self, body, headers):
+    def verify(self, body, headers, access_token):
         signed_jwt = headers.get('plaid-verification')
         current_key_id = jwt.get_unverified_header(signed_jwt)['kid']
 
         response = self.client.webhook_verification_key_get(
-            current_key_id).to_dict()
+            current_key_id, access_token).to_dict()
         print('[PLAID_WEBHOOK] response', response)
 
         key = response['key']
