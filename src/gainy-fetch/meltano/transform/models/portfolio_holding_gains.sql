@@ -33,9 +33,13 @@ with
                    coalesce(ticker_options.last_price,
                             ticker_realtime_metrics.actual_price)::numeric                       as actual_price,
 
-                   (coalesce(ticker_options.last_price * 100,
-                             ticker_realtime_metrics.actual_price) * quantity)::double precision as actual_value,
-
+                   case
+                       when portfolio_securities_normalized.type = 'cash' and
+                            portfolio_securities_normalized.original_ticker_symbol = 'CUR:USD'
+                           then quantity
+                       else (coalesce(ticker_options.last_price * 100,
+                                      ticker_realtime_metrics.actual_price) *
+                             quantity)::double precision end                                     as actual_value,
                    case
                        when ticker_options.contract_name is null
                            then ticker_realtime_metrics.relative_daily_change
@@ -103,8 +107,9 @@ with
 --                                        )
                       left join {{ ref('ticker_options') }}
                                 on ticker_options.contract_name = portfolio_securities_normalized.original_ticker_symbol
-             where (historical_prices_aggregated.symbol is not null or ticker_options.contract_name is not null)
-               and historical_prices_aggregated.datetime < now()::date
+             where (historical_prices_aggregated.symbol is not null and historical_prices_aggregated.datetime < now()::date)
+                or ticker_options.contract_name is not null
+                or (portfolio_securities_normalized.type = 'cash' and portfolio_securities_normalized.original_ticker_symbol = 'CUR:USD')
              order by profile_holdings.id, historical_prices_aggregated.datetime desc
          ),
      long_term_tax_holdings as
