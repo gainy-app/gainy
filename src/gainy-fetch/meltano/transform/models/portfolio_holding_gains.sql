@@ -33,9 +33,13 @@ with
                    coalesce(ticker_options.last_price,
                             ticker_realtime_metrics.actual_price)::numeric                       as actual_price,
 
-                   (coalesce(ticker_options.last_price * 100,
-                             ticker_realtime_metrics.actual_price) * quantity)::double precision as actual_value,
-
+                   case
+                       when portfolio_securities_normalized.type = 'cash' and
+                            portfolio_securities_normalized.original_ticker_symbol = 'CUR:USD'
+                           then quantity
+                       else (coalesce(ticker_options.last_price * 100,
+                                      ticker_realtime_metrics.actual_price) *
+                             quantity)::double precision end                                     as actual_value,
                    case
                        when ticker_options.contract_name is null
                            then ticker_realtime_metrics.relative_daily_change
@@ -103,8 +107,9 @@ with
 --                                        )
                       left join {{ ref('ticker_options') }}
                                 on ticker_options.contract_name = portfolio_securities_normalized.original_ticker_symbol
-             where (historical_prices_aggregated.symbol is not null or ticker_options.contract_name is not null)
-               and historical_prices_aggregated.datetime < now()::date
+             where (historical_prices_aggregated.symbol is not null and historical_prices_aggregated.datetime < now()::date)
+                or ticker_options.contract_name is not null
+                or (portfolio_securities_normalized.type = 'cash' and portfolio_securities_normalized.original_ticker_symbol = 'CUR:USD')
              order by profile_holdings.id, historical_prices_aggregated.datetime desc
          ),
      long_term_tax_holdings as
@@ -138,7 +143,7 @@ with
 select relative_data.holding_id,
        updated_at,
        actual_value,
-       (actual_value / sum(actual_value) over (partition by profile_id))::double precision as value_to_portfolio_value,
+       (actual_value / (1e-9 + sum(actual_value) over (partition by profile_id)))::double precision as value_to_portfolio_value,
        relative_gain_1d::double precision,
        relative_gain_1w::double precision,
        relative_gain_1m::double precision,
@@ -146,13 +151,13 @@ select relative_data.holding_id,
        relative_gain_1y::double precision,
        relative_gain_5y::double precision,
        relative_gain_total::double precision,
-       (actual_price * (1 - 1 / (1 + relative_gain_1d)))::double precision      as absolute_gain_1d,
-       (actual_price * (1 - 1 / (1 + relative_gain_1w)))::double precision      as absolute_gain_1w,
-       (actual_price * (1 - 1 / (1 + relative_gain_1m)))::double precision      as absolute_gain_1m,
-       (actual_price * (1 - 1 / (1 + relative_gain_3m)))::double precision      as absolute_gain_3m,
-       (actual_price * (1 - 1 / (1 + relative_gain_1y)))::double precision      as absolute_gain_1y,
-       (actual_price * (1 - 1 / (1 + relative_gain_5y)))::double precision      as absolute_gain_5y,
-       (actual_price * (1 - 1 / (1 + relative_gain_total)))::double precision   as absolute_gain_total,
-       coalesce(long_term_tax_holdings.ltt_quantity_total, 0)                              as ltt_quantity_total
+       (actual_price * (1 - 1 / (1 + relative_gain_1d)))::double precision                          as absolute_gain_1d,
+       (actual_price * (1 - 1 / (1 + relative_gain_1w)))::double precision                          as absolute_gain_1w,
+       (actual_price * (1 - 1 / (1 + relative_gain_1m)))::double precision                          as absolute_gain_1m,
+       (actual_price * (1 - 1 / (1 + relative_gain_3m)))::double precision                          as absolute_gain_3m,
+       (actual_price * (1 - 1 / (1 + relative_gain_1y)))::double precision                          as absolute_gain_1y,
+       (actual_price * (1 - 1 / (1 + relative_gain_5y)))::double precision                          as absolute_gain_5y,
+       (actual_price * (1 - 1 / (1 + relative_gain_total)))::double precision                       as absolute_gain_total,
+       coalesce(long_term_tax_holdings.ltt_quantity_total, 0)                                       as ltt_quantity_total
 from relative_data
          left join long_term_tax_holdings on long_term_tax_holdings.holding_id = relative_data.holding_id
