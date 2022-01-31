@@ -160,5 +160,5 @@ from chart_data
          join chart_data_not_null_global
               on chart_data_not_null_global.profile_id = chart_data.profile_id
 where chart_data_null.profile_id is null
-  and chart_data_not_null.cnt = chart_data_not_null_global.cnt
+  and chart_data_not_null.cnt = chart_data_not_null_global.cnt - 1
 group by chart_data.profile_id, chart_data.period, chart_data.datetime
