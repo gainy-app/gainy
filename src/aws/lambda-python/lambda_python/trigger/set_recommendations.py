@@ -12,8 +12,7 @@ class SetRecommendations(HasuraTrigger):
     def __init__(self):
         super().__init__([
             "recommendations__profile_categories",
-            "recommendations__profile_interests",
-            "recommendations__profile_scoring_settings"
+            "recommendations__profile_interests"
         ])
 
     def apply(self, db_conn, op, data):
