@@ -2,6 +2,7 @@ type Query {
   create_plaid_link_token(
     profile_id: Int!
     redirect_uri: String!
+    env: String
   ): CreatePlaidLinkTokenOutput
 }
 
@@ -71,6 +72,7 @@ type Query {
   link_plaid_account(
     profile_id: Int!
     public_token: String!
+    env: String
   ): LinkPlaidAccountOutput
 }
 
