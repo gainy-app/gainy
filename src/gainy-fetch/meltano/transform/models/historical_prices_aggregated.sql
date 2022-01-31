@@ -78,22 +78,19 @@ with period_settings as
              order by symbol, datetime desc
          )
 select (base_tickers.symbol || '_' ||
-        period_settings.period_start || '_15min')::varchar      as id,
+        coalesce(new_data.period_start, latest_old_data.period_start)::timestamp || '_15min')::varchar as id,
        base_tickers.symbol,
-       period_settings.period_start                             as time,
-       period_settings.period_start                             as datetime,
-       '15min'::varchar                                         as period,
-       coalesce(new_data.open, latest_old_data.close)           as open,
-       coalesce(new_data.high, latest_old_data.close)           as high,
-       coalesce(new_data.low, latest_old_data.close)            as low,
-       coalesce(new_data.close, latest_old_data.close)          as close,
-       coalesce(new_data.close, latest_old_data.adjusted_close) as adjusted_close,
-       coalesce(new_data.volume, 0)                             as volume
+       coalesce(new_data.period_start, latest_old_data.period_start)::timestamp                        as time,
+       coalesce(new_data.period_start, latest_old_data.period_start)::timestamp                        as datetime,
+       '15min'::varchar                                                                                as period,
+       coalesce(new_data.open, latest_old_data.close)                                                  as open,
+       coalesce(new_data.high, latest_old_data.close)                                                  as high,
+       coalesce(new_data.low, latest_old_data.close)                                                   as low,
+       coalesce(new_data.close, latest_old_data.close)                                                 as close,
+       coalesce(new_data.close, latest_old_data.adjusted_close)                                        as adjusted_close,
+       coalesce(new_data.volume, 0)                                                                    as volume
 from {{ ref('base_tickers') }}
-         join period_settings on true
-         left join new_data
-                   on new_data.symbol = base_tickers.symbol
-                          and new_data.period_start = period_settings.period_start
+         left join new_data on new_data.symbol = base_tickers.symbol
          left join latest_old_data on latest_old_data.symbol = base_tickers.symbol
 where new_data.symbol is not null
    or latest_old_data.symbol is not null
