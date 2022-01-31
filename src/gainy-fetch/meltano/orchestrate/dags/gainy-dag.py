@@ -110,8 +110,14 @@ dbt = BashOperator(
     dag=dag,
     pool="dbt")
 
+recommendation = BashOperator(
+    task_id="update-recommendations",
+    bash_command="gainy_recommendation",
+    dag=dag
+)
+
 # dependencies
-upstream >> dbt >> downstream
+upstream >> dbt >> downstream >> recommendation
 
 # register the dag
 globals()[dag_id] = dag
