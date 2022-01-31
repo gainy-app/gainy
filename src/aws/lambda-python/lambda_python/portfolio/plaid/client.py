@@ -22,8 +22,9 @@ class PlaidClient:
 
     def __init__(self):
         self.client = get_plaid_client()
+        self.development_client = get_plaid_client('development')
 
-    def create_link_token(self, profile_id, redirect_uri):
+    def create_link_token(self, profile_id, redirect_uri, env=None):
         #TODO when we have verified phone number, we can implement https://plaid.com/docs/link/returning-user/#enabling-the-returning-user-experience
         request = LinkTokenCreateRequest(products=[Products('investments')],
                                          client_name="Gainy",
@@ -33,19 +34,20 @@ class PlaidClient:
                                          webhook=PLAID_WEBHOOK_URL,
                                          user=LinkTokenCreateRequestUser(
                                              client_user_id=str(profile_id), ))
-        response = self.client.link_token_create(request)
+        response = self.get_client(env).link_token_create(request)
 
         return response
 
-    def exchange_link_token(self, public_token):
+    def exchange_link_token(self, public_token, env=None):
         request = ItemPublicTokenExchangeRequest(public_token=public_token)
-        response = self.client.item_public_token_exchange(request)
+        response = self.get_client(env).item_public_token_exchange(request)
 
         return response
 
     def get_investment_holdings(self, access_token):
         request = InvestmentsHoldingsGetRequest(access_token=access_token)
-        response = self.client.investments_holdings_get(request)
+        response = self.get_client(access_token).investments_holdings_get(
+            request)
 
         return response
 
@@ -63,25 +65,34 @@ class PlaidClient:
                 count=count,
                 offset=offset,
             ))
-        response = self.client.investments_transactions_get(request)
+        response = self.get_client(access_token).investments_transactions_get(
+            request)
 
         return response
 
     def get_item(self, access_token):
         request = ItemGetRequest(access_token=access_token)
-        response = self.client.item_get(request)
+        response = self.get_client(access_token).item_get(request)
 
         return response
 
-    def get_institution(self, institution_id):
+    def get_institution(self, access_token, institution_id):
         request = InstitutionsGetByIdRequest(institution_id=institution_id,
                                              country_codes=COUNTRY_CODES)
-        response = self.client.institutions_get_by_id(request)
+        response = self.get_client(access_token).institutions_get_by_id(
+            request)
 
         return response
 
-    def webhook_verification_key_get(self, current_key_id):
+    def webhook_verification_key_get(self, current_key_id, access_token):
         request = WebhookVerificationKeyGetRequest(current_key_id)
-        response = self.client.webhook_verification_key_get(request)
+        response = self.get_client(access_token).webhook_verification_key_get(
+            request)
 
         return response
+
+    def get_client(self, access_token):
+        if access_token and access_token.find('development') > -1:
+            return self.development_client
+
+        return self.client

@@ -15,6 +15,7 @@ variable "base_image_registry_address" {}
 variable "base_image_version" {}
 variable "plaid_client_id" {}
 variable "plaid_secret" {}
+variable "plaid_development_secret" {}
 variable "plaid_env" {}
 variable "algolia_tickers_index" {}
 variable "algolia_collections_index" {}
@@ -238,6 +239,7 @@ module "hasuraTrigger" {
     ENV                       = var.env
     PLAID_CLIENT_ID           = var.plaid_client_id
     PLAID_SECRET              = var.plaid_secret
+    PLAID_DEVELOPMENT_SECRET  = var.plaid_development_secret
     PLAID_ENV                 = var.plaid_env
     ALGOLIA_APP_ID            = var.algolia_app_id
     ALGOLIA_TICKERS_INDEX     = var.algolia_tickers_index
@@ -273,6 +275,7 @@ module "hasuraAction" {
     ENV                       = var.env
     PLAID_CLIENT_ID           = var.plaid_client_id
     PLAID_SECRET              = var.plaid_secret
+    PLAID_DEVELOPMENT_SECRET  = var.plaid_development_secret
     PLAID_ENV                 = var.plaid_env
     ALGOLIA_APP_ID            = var.algolia_app_id
     ALGOLIA_TICKERS_INDEX     = var.algolia_tickers_index

@@ -91,9 +91,10 @@ module "aws" {
   pg_production_internal_sync_username = var.pg_production_internal_sync_username
   pg_production_internal_sync_password = var.pg_production_internal_sync_password
 
-  plaid_client_id = var.plaid_client_id
-  plaid_secret    = var.plaid_secret
-  plaid_env       = var.plaid_env
+  plaid_client_id          = var.plaid_client_id
+  plaid_secret             = var.plaid_secret
+  plaid_development_secret = var.plaid_development_secret
+  plaid_env                = var.plaid_env
 
   algolia_tickers_index     = module.algolia.algolia_tickers_index
   algolia_collections_index = module.algolia.algolia_collections_index
