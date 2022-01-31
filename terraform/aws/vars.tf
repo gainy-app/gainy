@@ -23,6 +23,7 @@ variable "pg_production_internal_sync_password" {}
 
 variable "plaid_client_id" {}
 variable "plaid_secret" {}
+variable "plaid_development_secret" {}
 variable "plaid_env" {}
 
 variable "algolia_tickers_index" {}

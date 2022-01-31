@@ -80,7 +80,7 @@ class PlaidService:
         institution_id = item_response['item']['institution_id']
 
         institution_response = self.plaid_client.get_institution(
-            institution_id)
+            plaid_access_token['access_token'], institution_id)
 
         return self.__hydrate_institution(institution_response['institution'])
 
