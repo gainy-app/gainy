@@ -5,6 +5,7 @@
     post_hook=[
       index(this, 'id', true),
       'create unique index if not exists {{ get_index_name(this, "profile_id__date__period") }} (profile_id, date, period)',
+      'delete from {{this}} where updated_at is null or updated_at < (select max(updated_at) from {{this}})',
     ]
   )
 }}
@@ -17,34 +18,15 @@ with
              from {{ source('app', 'profile_portfolio_transactions') }}
              group by profile_id
          ),
-     current_transaction_stats as
+     time_period as
          (
-             select profile_id,
-                    count(portfolio_expanded_transactions.uniq_id) as transactions_count,
-                    max(portfolio_expanded_transactions.datetime)  as last_transaction_datetime
-             from portfolio_expanded_transactions
-                      join portfolio_securities_normalized
-                           on portfolio_securities_normalized.id = portfolio_expanded_transactions.security_id
-             where portfolio_expanded_transactions.type in ('buy', 'sell')
-             group by profile_id
-{% if is_incremental() %}
-         ),
-     old_transaction_stats as
-         (
-             select profile_id,
-                    max(transactions_count)        as transactions_count,
-                    max(last_transaction_datetime) as last_transaction_datetime
-             from {{ this }}
-             group by profile_id
-         ),
-     max_date as
-         (
-             select profile_id,
-                    period,
-                    max(date) as date
-             from {{ this }}
-             group by profile_id, period
-{% endif %}
+             select distinct datetime, period
+             from {{ ref('historical_prices_aggregated') }}
+             where historical_prices_aggregated.period != '15min'
+             union all
+             select distinct datetime, '15min'::varchar as period
+             from {{ ref('chart') }}
+             where chart.period = '1d'
          ),
      chart_data as (
          -- stocks
@@ -63,23 +45,9 @@ with
                                portfolio_expanded_transactions.datetime is null) and
                               historical_prices_aggregated.symbol = portfolio_securities_normalized.ticker_symbol
                       left join first_transaction_date on first_transaction_date.profile_id = portfolio_expanded_transactions.profile_id
-                      join current_transaction_stats on current_transaction_stats.profile_id = portfolio_expanded_transactions.profile_id
-{% if is_incremental() %}
-                      left join old_transaction_stats on old_transaction_stats.profile_id = portfolio_expanded_transactions.profile_id
-                      left join max_date
-                                on max_date.profile_id = portfolio_expanded_transactions.profile_id and
-                                   max_date.period = historical_prices_aggregated.period
-{% endif %}
              where portfolio_expanded_transactions.type in ('buy', 'sell')
                and (first_transaction_date.profile_id is null or historical_prices_aggregated.time >= first_transaction_date.date)
                and historical_prices_aggregated.period != '15min'
-{% if is_incremental() %}
-               and (old_transaction_stats.profile_id is null
-                 or old_transaction_stats.transactions_count != current_transaction_stats.transactions_count
-                 or old_transaction_stats.last_transaction_datetime != current_transaction_stats.last_transaction_datetime
-                 or max_date.date is null
-                 or historical_prices_aggregated.time >= max_date.date)
-{% endif %}
          )
 
          union all
@@ -113,24 +81,7 @@ with
                                     and chart.datetime > chart_dates.datetime - interval '1 hour'
                                     and chart.symbol = portfolio_securities_normalized.ticker_symbol
                                     and chart.period = '1d'
-{% if is_incremental() %}
-                      join current_transaction_stats
-                           on current_transaction_stats.profile_id = portfolio_expanded_transactions.profile_id
-                      left join old_transaction_stats on old_transaction_stats.profile_id = portfolio_expanded_transactions.profile_id
-                      left join max_date
-                                on max_date.profile_id = portfolio_expanded_transactions.profile_id and
-                                   max_date.period = '15min'
-{% endif %}
              where portfolio_expanded_transactions.type in ('buy', 'sell')
-
-{% if is_incremental() %}
-               and (old_transaction_stats.profile_id is null
-                 or old_transaction_stats.transactions_count != current_transaction_stats.transactions_count
-                 or old_transaction_stats.last_transaction_datetime != current_transaction_stats.last_transaction_datetime
-                 or max_date.date is null
-                 or chart_dates.datetime is null
-                 or chart_dates.datetime >= max_date.date)
-{% endif %}
              order by portfolio_expanded_transactions.uniq_id, chart_dates.datetime, chart.datetime desc
          )
 
@@ -138,16 +89,6 @@ with
 
          -- options
          (
-             with time_period as
-                      (
-                          select distinct datetime, period
-                          from {{ ref('historical_prices_aggregated') }}
-                          where historical_prices_aggregated.period != '15min'
-                          union all
-                          select distinct datetime, '15min'::varchar as period
-                          from {{ ref('chart') }}
-                          where chart.period = '1d'
-                      )
              select portfolio_expanded_transactions.profile_id,
                     time_period.datetime               as datetime,
                     time_period.period                 as period,
@@ -161,21 +102,27 @@ with
                            on ticker_options.contract_name = portfolio_securities_normalized.original_ticker_symbol
                       join first_transaction_date on first_transaction_date.profile_id = portfolio_expanded_transactions.profile_id
                       join time_period on (first_transaction_date.profile_id is null or time_period.datetime >= first_transaction_date.date)
-                      join current_transaction_stats on current_transaction_stats.profile_id = portfolio_expanded_transactions.profile_id
-{% if is_incremental() %}
-                      left join old_transaction_stats on old_transaction_stats.profile_id = portfolio_expanded_transactions.profile_id
-                      left join max_date
-                                on max_date.profile_id = portfolio_expanded_transactions.profile_id and
-                                   max_date.period = time_period.period
-{% endif %}
              where portfolio_expanded_transactions.type in ('buy', 'sell')
-{% if is_incremental() %}
-               and (old_transaction_stats.profile_id is null
-                 or old_transaction_stats.transactions_count != current_transaction_stats.transactions_count
-                 or old_transaction_stats.last_transaction_datetime != current_transaction_stats.last_transaction_datetime
-                 or max_date.date is null
-                 or time_period.datetime >= max_date.date)
-{% endif %}
+         )
+
+         union all
+
+         -- currencies
+         (
+             select profile_holdings_normalized.profile_id,
+                    time_period.datetime                          as datetime,
+                    time_period.period                            as period,
+                    profile_holdings_normalized.quantity::numeric as value,
+                    'currencies'                                  as source
+             from {{ ref('profile_holdings_normalized') }}
+                      join {{ ref('portfolio_securities_normalized') }}
+                           on portfolio_securities_normalized.id = profile_holdings_normalized.security_id
+                      join first_transaction_date
+                           on first_transaction_date.profile_id = profile_holdings_normalized.profile_id
+                      join time_period on (first_transaction_date.profile_id is null or
+                                           time_period.datetime >= first_transaction_date.date)
+             where profile_holdings_normalized.type = 'cash'
+               and portfolio_securities_normalized.ticker_symbol = 'CUR:USD'
          )
      ),
      chart_data_null as (
@@ -186,6 +133,12 @@ with
          from chart_data
          where value is not null
          group by profile_id, period, datetime
+     ),
+     chart_data_not_null_global as (
+         select profile_id, count(distinct source) as cnt
+         from chart_data
+         where value is not null
+         group by profile_id
      )
 
 select chart_data.profile_id,
@@ -194,10 +147,8 @@ select chart_data.profile_id,
        chart_data.datetime                                                                        as date,
        (chart_data.profile_id || '_' || chart_data.datetime || '_' || chart_data.period)::varchar as id,
        sum(value)::double precision                                                               as value,
-       max(current_transaction_stats.transactions_count)                                          as transactions_count,
-       max(current_transaction_stats.last_transaction_datetime)                                   as last_transaction_datetime
+       now()                                                                                      as updated_at
 from chart_data
-         join current_transaction_stats on current_transaction_stats.profile_id = chart_data.profile_id
          left join chart_data_null
                    on chart_data_null.profile_id = chart_data.profile_id
                        and chart_data_null.period = chart_data.period
@@ -206,5 +157,8 @@ from chart_data
               on chart_data_not_null.profile_id = chart_data.profile_id
                   and chart_data_not_null.period = chart_data.period
                   and chart_data_not_null.datetime = chart_data.datetime
-where chart_data_null.profile_id is null and chart_data_not_null.cnt = 2
+         join chart_data_not_null_global
+              on chart_data_not_null_global.profile_id = chart_data.profile_id
+where chart_data_null.profile_id is null
+  and chart_data_not_null.cnt = chart_data_not_null_global.cnt - 1
 group by chart_data.profile_id, chart_data.period, chart_data.datetime
