@@ -334,7 +334,7 @@ with highlights as (select * from {{ ref('highlights') }}),
                       left join previous_periods previous_periods_5y
                                 on previous_periods_5y.symbol = tickers.symbol and previous_periods_5y.period = '5y'
                       left join previous_periods previous_periods_all
-                                on previous_periods_all.symbol = tickers.symbol and previous_periods_all.period = '5y'
+                                on previous_periods_all.symbol = tickers.symbol and previous_periods_all.period = 'all'
          ),
      dividend_metrics as
          (

@@ -12,11 +12,11 @@ with latest_trading_day as
          (
              select distinct on (symbol) symbol,
                                          last_value(close)
-                                         over (partition by symbol rows between current row and unbounded following) as close_price,
+                                         over (partition by symbol order by datetime rows between current row and unbounded following) as close_price,
                                          last_value(datetime)
-                                         over (partition by symbol rows between current row and unbounded following) as close_datetime,
+                                         over (partition by symbol order by datetime rows between current row and unbounded following) as close_datetime,
                                          sum(volume)
-                                         over (partition by symbol rows between current row and unbounded following) as volume
+                                         over (partition by symbol order by datetime rows between current row and unbounded following) as volume
              from {{ ref('chart') }}
              where period = '1d'
              order by symbol, datetime

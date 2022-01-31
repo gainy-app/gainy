@@ -15,3 +15,4 @@ select portfolio_securities.id,
        portfolio_securities.type
 from {{ source('app', 'portfolio_securities') }}
 where portfolio_securities.type in ('mutual fund', 'equity', 'etf', 'derivative')
+   or (portfolio_securities.type = 'cash' and portfolio_securities.ticker_symbol = 'CUR:USD')
