@@ -1,169 +1,170 @@
 Industry Name,Code
-3D Printing,VJET
-3D Printing,SGLB
-3D Printing,XONE
-3D Printing,SSYS
 3D Printing,MTLS
+3D Printing,SGLB
+3D Printing,SSYS
+3D Printing,VJET
+3D Printing,XONE
 Advanced Materials,CPSH
-Advanced Materials,SGOC
-Advanced Materials,RBCN
-Advanced Materials,IVAC
 Advanced Materials,HUN
+Advanced Materials,IVAC
 Advanced Materials,MMAT
 Advanced Materials,PYR
-Aerospace & Defense,AVAV
-Aerospace & Defense,ISSC
-Aerospace & Defense,RADA
-Aerospace & Defense,TATT
-Aerospace & Defense,VSEC
-Aerospace & Defense,ESLT
-Aerospace & Defense,WWD
+Advanced Materials,RBCN
+Advanced Materials,SGOC
 Aerospace & Defense,ATRO
-Aerospace & Defense,ULBI
+Aerospace & Defense,AVAV
+Aerospace & Defense,ESLT
+Aerospace & Defense,ISSC
 Aerospace & Defense,MRCY
+Aerospace & Defense,RADA
 Aerospace & Defense,SPCE
-Agriculture & AgTech,CDZI
-Agriculture & AgTech,RAVN
+Aerospace & Defense,TATT
+Aerospace & Defense,ULBI
+Aerospace & Defense,VSEC
+Aerospace & Defense,WWD
 Agriculture & AgTech,AGFS
-Agriculture & AgTech,ARTW
 Agriculture & AgTech,AGFY
+Agriculture & AgTech,ARTW
 Agriculture & AgTech,BIOX
-Agriculture & AgTech,RKDA
-Agriculture & AgTech,SEED
-Agriculture & AgTech,ZIVO
+Agriculture & AgTech,CDZI
+Agriculture & AgTech,CRESY
 Agriculture & AgTech,CYAN
 Agriculture & AgTech,GRWG
+Agriculture & AgTech,RAVN
+Agriculture & AgTech,RKDA
+Agriculture & AgTech,SEED
 Agriculture & AgTech,WFCF
-Agriculture & AgTech,CRESY
+Agriculture & AgTech,ZIVO
 Air Cargo Transport,AIRT
 Air Cargo Transport,AIRTP
 Air Cargo Transport,AIRTW
 Air Cargo Transport,ATSG
 Aircraft Leasing,WLFC
-Airlines,ALGT
 Airlines,AAL
 Airlines,AAWW
-Airlines,OMAB
+Airlines,ALGT
+Airlines,DAL
 Airlines,HA
 Airlines,JBLU
 Airlines,MESA
+Airlines,OMAB
 Airlines,RYAAY
 Airlines,SKYW
 Airlines,UAL
-Airlines,DAL
-Analytics and AI,NUAN
-Analytics and AI,TLND
-Analytics and AI,LKCO
-Analytics and AI,SUMO
-Analytics and AI,DOMO
-Analytics and AI,SPLK
+Analytics and AI,ALTR
 Analytics and AI,CRNC
 Analytics and AI,DDOG
-Analytics and AI,MARK
-Analytics and AI,VERI
-Analytics and AI,INPX
-Analytics and AI,INOD
+Analytics and AI,DOMO
 Analytics and AI,DUOT
+Analytics and AI,INOD
+Analytics and AI,INPX
+Analytics and AI,LKCO
+Analytics and AI,MARK
 Analytics and AI,MSTR
-Analytics and AI,ALTR
+Analytics and AI,NUAN
 Analytics and AI,PLTR
+Analytics and AI,SPLK
+Analytics and AI,SUMO
+Analytics and AI,TLND
+Analytics and AI,VERI
+Animal health,AXLA
 Animal health,CVET
 Animal health,HSKA
 Animal health,IDXX
-Animal health,NEOG
-Animal health,PDCO
-Animal health,AXLA
 Animal health,KIN
+Animal health,NEOG
 Animal health,PAHC
+Animal health,PDCO
 Animal health,SNES
 Animal health,YTEN
 Animal health,ZOM
 Animals Health insurance,TRUP
-Apparel Manufacturing & Retail,FIVE
-Apparel Manufacturing & Retail,FOSL
-Apparel Manufacturing & Retail,HIBB
-Apparel Manufacturing & Retail,PLCE
-Apparel Manufacturing & Retail,ICON
-Apparel Manufacturing & Retail,ROST
-Apparel Manufacturing & Retail,SCVL
-Apparel Manufacturing & Retail,LE
-Apparel Manufacturing & Retail,RCKY
-Apparel Manufacturing & Retail,SHOO
-Apparel Manufacturing & Retail,NAKD
-Apparel Manufacturing & Retail,URBN
-Apparel Manufacturing & Retail,WEYS
-Apparel Manufacturing & Retail,POSH
-Apparel Manufacturing & Retail,SQBG
-Apparel Manufacturing & Retail,SGC
-Apparel Manufacturing & Retail,KBSF
-Apparel Manufacturing & Retail,WINA
 Apparel Manufacturing & Retail,CROX
 Apparel Manufacturing & Retail,CTRN
 Apparel Manufacturing & Retail,DLTH
 Apparel Manufacturing & Retail,EVK
+Apparel Manufacturing & Retail,FIVE
+Apparel Manufacturing & Retail,FOSL
+Apparel Manufacturing & Retail,HIBB
+Apparel Manufacturing & Retail,ICON
+Apparel Manufacturing & Retail,KBSF
+Apparel Manufacturing & Retail,LE
 Apparel Manufacturing & Retail,M
+Apparel Manufacturing & Retail,NAKD
 Apparel Manufacturing & Retail,NKE
-AR/VR,VUZI
+Apparel Manufacturing & Retail,PLCE
+Apparel Manufacturing & Retail,POSH
+Apparel Manufacturing & Retail,RCKY
+Apparel Manufacturing & Retail,ROST
+Apparel Manufacturing & Retail,SCVL
+Apparel Manufacturing & Retail,SGC
+Apparel Manufacturing & Retail,SHOO
+Apparel Manufacturing & Retail,SQBG
+Apparel Manufacturing & Retail,URBN
+Apparel Manufacturing & Retail,WEYS
+Apparel Manufacturing & Retail,WINA
 AR/VR,BHAT
+AR/VR,VUZI
 Asset-Based Finance Company,GEG
-Asset-Based Finance Company,MFIN
-Asset-Based Finance Company,HGBL
 Asset-Based Finance Company,GWGH
+Asset-Based Finance Company,HGBL
+Asset-Based Finance Company,MFIN
 Auto Dealer,CRMT
 Auto Dealer,KXIN
 Auto Dealer,LAZY
 Auto Dealer,LMPX
 Auto Financing,AIHS
-Auto Financing,NICK
 Auto Financing,CACC
 Auto Financing,CPSS
-Auto Manufacturers,PCAR
-Auto Manufacturers,HMC
+Auto Financing,NICK
 Auto Manufacturers,F
 Auto Manufacturers,GM
-Auto Manufacturers,TM
-Auto Manufacturers,STLA
-Auto Manufacturers,TTM
+Auto Manufacturers,HMC
+Auto Manufacturers,PCAR
 Auto Manufacturers,RACE
-Auto Marketplace,CPRT
-Auto Marketplace,TRUE
-Auto Marketplace,VRM
-Auto Marketplace,CARG
-Auto Marketplace,PRTS
+Auto Manufacturers,STLA
+Auto Manufacturers,TM
+Auto Manufacturers,TTM
 Auto Marketplace,AUTO
-Auto Marketplace,UXIN
+Auto Marketplace,CARG
+Auto Marketplace,CPRT
+Auto Marketplace,PRTS
 Auto Marketplace,RMBL
+Auto Marketplace,UXIN
+Auto Marketplace,VRM
+Auto Marketplace,TRUE
 Auto Parts & Services,AIMC
-Auto Parts & Services,CVGI
-Auto Parts & Services,RUSHA
-Auto Parts & Services,SHYF
-Auto Parts & Services,REKR
 Auto Parts & Services,BLBD
-Auto Parts & Services,NNBR
-Auto Parts & Services,WPRT
-Auto Parts & Services,CDK
-Auto Parts & Services,PFIN
-Auto Parts & Services,GT
-Auto Parts & Services,VC
-Auto Parts & Services,MPAA
-Auto Parts & Services,XPEL
 Auto Parts & Services,CAAS
-Auto Parts & Services,THRM
-Auto Parts & Services,ORLY
+Auto Parts & Services,CDK
+Auto Parts & Services,CVGI
 Auto Parts & Services,DORM
 Auto Parts & Services,FOXF
-Auto Parts & Services,VOXX
 Auto Parts & Services,FRSX
+Auto Parts & Services,GT
 Auto Parts & Services,GTX
 Auto Parts & Services,ITRN
 Auto Parts & Services,LKQ
 Auto Parts & Services,MNRO
+Auto Parts & Services,MPAA
+Auto Parts & Services,NNBR
+Auto Parts & Services,ORLY
+Auto Parts & Services,PFIN
+Auto Parts & Services,REKR
+Auto Parts & Services,RUSHA
+Auto Parts & Services,SHYF
 Auto Parts & Services,STRT
+Auto Parts & Services,THRM
+Auto Parts & Services,VC
+Auto Parts & Services,VOXX
+Auto Parts & Services,WPRT
+Auto Parts & Services,XPEL
+Autoimmune disease,ABBV
 Autoimmune disease,AKTX
+Autoimmune disease,AMGN
 Autoimmune disease,BBIO
 Autoimmune disease,BIIB
 Autoimmune disease,BLU
-Autoimmune disease,AMGN
 Autoimmune disease,EDSA
 Autoimmune disease,HOTH
 Autoimmune disease,IMUX
@@ -173,427 +174,419 @@ Autoimmune disease,RDUS
 Autoimmune disease,SLGL
 Autoimmune disease,SWTX
 Autoimmune disease,XFOR
-Autoimmune disease,ABBV
-Banks,BCOW
-Banks,CARV
-Banks,CFFN
-Banks,CLBK
-Banks,EBSB
-Banks,ESBK
-Banks,FFIC
-Banks,GFED
-Banks,HBCP
-Banks,HFBL
-Banks,KFFB
-Banks,LARK
-Banks,PDLB
-Banks,SMBC
-Banks,TSBK
-Banks,BFST
-Banks,BMRC
-Banks,BRKL
-Banks,OSBC
-Banks,CASH
-Banks,CCB
-Banks,MNSB
-Banks,CVBF
-Banks,EQBK
-Banks,FGBI
-Banks,FLIC
-Banks,FMAO
-Banks,FNCB
-Banks,FRBA
-Banks,FUNC
-Banks,HBMD
-Banks,HTBK
-Banks,HTLF
-Banks,ISTR
-Banks,LMST
-Banks,NBN
-Banks,NRIM
-Banks,NWFL
-Banks,RBCAA
-Banks,RRBI
-Banks,SBNY
-Banks,SIVB
-Banks,SSBI
-Banks,BANF
-Banks,CFB
-Banks,CVLY
-Banks,CZWI
-Banks,FBNC
-Banks,FCNCA
-Banks,FMBH
-Banks,LKFN
-Banks,PBFS
-Banks,PEBK
-Banks,PROV
-Banks,RNST
-Banks,UBSI
-Banks,UCBI
-Banks,AMAL
-Banks,BANR
-Banks,BSBK
-Banks,BSVN
-Banks,SVBI
-Banks,CFBK
-Banks,NBTB
-Banks,EMCF
-Banks,FCAP
-Banks,FFBW
-Banks,FFNW
-Banks,FRBK
-Banks,FSBW
-Banks,FSEA
-Banks,FSFG
-Banks,FXNC
-Banks,GBCI
-Banks,HMNF
-Banks,IBTX
-Banks,ISBC
-Banks,KRNY
-Banks,LSBK
-Banks,MBWM
-Banks,MCBC
-Banks,MFNC
-Banks,MSVB
-Banks,NFBK
-Banks,NWBI
-Banks,OCFC
-Banks,ORRF
-Banks,PBHC
-Banks,PBIP
-Banks,PFC
-Banks,RVSB
-Banks,SFBC
-Banks,WVFC
-Banks,WSFS
-Banks,ATLO
-Banks,BOCH
-Banks,BKSC
-Banks,CALB
-Banks,CARE
-Banks,MPB
-Banks,GSBC
-Banks,HOMB
-Banks,HTBI
-Banks,HWBK
-Banks,LOB
-Banks,OFED
-Banks,PPBI
-Banks,SFST
-Banks,SLCT
-Banks,UBFO
-Banks,WABC
-Banks,WNEB
-Banks,PKBK
-Banks,BWB
-Banks,CBMB
-Banks,CBTX
-Banks,CWBC
-Banks,DCOM
-Banks,EBMT
-Banks,ESQ
-Banks,FDBC
-Banks,FIBK
-Banks,FNLC
-Banks,FNWB
-Banks,GCBC
-Banks,HFWA
-Banks,IROQ
-Banks,LEVL
-Banks,RBKB
-Banks,RBNC
-Banks,SBCF
-Banks,SBSI
-Banks,SMBK
-Banks,SPFI
-Banks,STXB
-Banks,TBK
-Banks,TCBK
-Banks,WTBA
-Banks,OVBC
-Banks,CCNE
-Banks,CLDB
-Banks,FFBC
-Banks,FMNB
-Banks,FRAF
-Banks,GABC
-Banks,HBNC
-Banks,LCNB
-Banks,PEBO
-Banks,UBOH
-Banks,SBFG
-Banks,TFSL
-Banks,TOWN
-Banks,UBCP
-Banks,COFS
-Banks,BOKF
-Banks,CBSH
-Banks,EWBC
-Banks,HBT
-Banks,INBK
-Banks,PBCT
-Banks,PGC
-Banks,TCBI
-Banks,UMBF
-Banks,UMPQ
-Banks,UVSP
-Banks,WAFD
-Banks,WTFC
-Banks,ZION
+Banks,ABCB
 Banks,ABTX
-Banks,OPHC
-Banks,GLBZ
+Banks,ACBI
+Banks,ACNB
+Banks,AFBI
+Banks,ALRS
+Banks,AMAL
+Banks,AMNB
+Banks,AMRB
+Banks,AMTB
+Banks,AMTBB
+Banks,AROW
+Banks,ASRV
+Banks,ATLO
+Banks,AUB
 Banks,AUBN
-Banks,MLVF
-Banks,PNBK
+Banks,BAC
+Banks,BANF
+Banks,BANR
+Banks,BBD
+Banks,BCBP
+Banks,BCML
+Banks,BCOW
 Banks,BFC
 Banks,BFIN
-Banks,AMRB
-Banks,AFBI
-Banks,CBAN
-Banks,CCBG
-Banks,CNOB
-Banks,CSTR
-Banks,ESSA
-Banks,FBMS
-Banks,FCCO
-Banks,FUSB
-Banks,PFBI
-Banks,ABCB
-Banks,ACNB
-Banks,ACBI
-Banks,HWC
-Banks,ICBK
-Banks,MCBS
-Banks,NCBS
-Banks,PLBC
-Banks,PNFP
-Banks,SAL
-Banks,SFBS
-Banks,SHBI
-Banks,SSB
-Banks,TCFC
-Banks,WMPN
-Banks,BCML
-Banks,BSRR
-Banks,BYFC
-Banks,FCBP
-Banks,HAFC
-Banks,HOPE
-Banks,OPBK
-Banks,OVLY
-Banks,PACW
-Banks,PCB
-Banks,PFBC
-Banks,PMBC
-Banks,RBB
-Banks,SBT
-Banks,FFIN
-Banks,PFIS
-Banks,IBOC
-Banks,OZK
-Banks,RIVE
-Banks,VLY
-Banks,WASH
-Banks,MRLN
-Banks,FITB
-Banks,FITBP
-Banks,MBCN
-Banks,AROW
-Banks,EFSC
-Banks,FBIZ
-Banks,FFWM
-Banks,FRME
-Banks,MYFW
-Banks,ONB
-Banks,SRCE
-Banks,SYBT
-Banks,TRMK
-Banks,COLB
-Banks,ALRS
-Banks,AMNB
-Banks,CBFV
+Banks,BFST
+Banks,BKSC
+Banks,BMRC
+Banks,BMTC
+Banks,BOCH
+Banks,BOKF
+Banks,BOTJ
 Banks,BPOP
+Banks,BPRN
+Banks,BRKL
+Banks,BSBK
+Banks,BSRR
+Banks,BSVN
+Banks,BUSE
+Banks,BWB
+Banks,BWFG
+Banks,BYFC
+Banks,C
+Banks,CAC
+Banks,CALB
+Banks,CARE
+Banks,CARV
+Banks,CASH
+Banks,CATC
+Banks,CATY
+Banks,CBAN
+Banks,CBFV
+Banks,CBMB
+Banks,CBNK
+Banks,CBSH
+Banks,CBTX
+Banks,CCB
+Banks,CCBG
+Banks,CCNE
+Banks,CFB
+Banks,CFBK
+Banks,CFFI
+Banks,CFFN
 Banks,CHCO
 Banks,CHMG
 Banks,CIVB
-Banks,CTBI
-Banks,CVCY
-Banks,FHB
-Banks,FISI
-Banks,MSBI
-Banks,MVBF
-Banks,QCRH
-Banks,SASR
-Banks,SMMF
-Banks,STBA
-Banks,THFF
-Banks,WSBC
-Banks,WSBF
-Banks,BMTC
-Banks,CFFI
-Banks,CZNC
-Banks,ESXB
-Banks,FCBC
-Banks,FVCB
-Banks,OPOF
-Banks,RMBI
-Banks,TRST
-Banks,VABK
-Banks,PWOD
-Banks,ASRV
-Banks,BCBP
-Banks,AUB
-Banks,BOTJ
-Banks,BWFG
-Banks,CATY
 Banks,CIZN
-Banks,UNB
-Banks,EBC
-Banks,EGBN
-Banks,FCCY
-Banks,FRST
-Banks,FULT
-Banks,MRBK
-Banks,HMST
-Banks,IBCP
-Banks,LBAI
-Banks,MBIN
-Banks,MGYR
-Banks,PFHD
-Banks,TBBK
-Banks,UNTY
-Banks,VBFC
+Banks,CLBK
+Banks,CLDB
 Banks,CNBKA
+Banks,CNOB
+Banks,COFS
+Banks,COLB
+Banks,CSTR
+Banks,CTBI
+Banks,CVBF
+Banks,CVCY
+Banks,CVLY
+Banks,CWBC
+Banks,CZNC
+Banks,CZWI
+Banks,DCOM
+Banks,EBC
+Banks,EBMT
+Banks,EBSB
 Banks,EBTC
-Banks,HIFS
-Banks,HONE
-Banks,HVBC
-Banks,INDB
-Banks,PCSB
-Banks,PVBC
-Banks,RNDB
-Banks,TBNK
+Banks,EFSC
+Banks,EGBN
+Banks,EMCF
+Banks,EQBK
+Banks,ESBK
+Banks,ESQ
+Banks,ESSA
+Banks,ESXB
+Banks,EWBC
+Banks,FBIZ
+Banks,FBMS
+Banks,FBNC
+Banks,FCAP
+Banks,FCBC
+Banks,FCBP
+Banks,FCCO
+Banks,FCCY
+Banks,FCNCA
+Banks,FDBC
+Banks,FFBC
+Banks,FFBW
+Banks,FFIC
+Banks,FFIN
+Banks,FFNW
+Banks,FFWM
+Banks,FGBI
+Banks,FHB
+Banks,FIBK
+Banks,FISI
+Banks,FITB
+Banks,FITBP
+Banks,FLIC
+Banks,FMAO
+Banks,FMBH
+Banks,FMBI
+Banks,FMNB
+Banks,FNCB
+Banks,FNLC
+Banks,FNWB
+Banks,FRAF
+Banks,FRBA
+Banks,FRBK
+Banks,FRME
+Banks,FRST
+Banks,FSBW
+Banks,FSEA
+Banks,FSFG
+Banks,FULT
+Banks,FUNC
+Banks,FUSB
+Banks,FVCB
+Banks,FXNC
+Banks,GABC
+Banks,GBCI
+Banks,GCBC
+Banks,GFED
+Banks,GLBZ
+Banks,GNTY
+Banks,GSBC
+Banks,HAFC
 Banks,HBAN
 Banks,HBANN
 Banks,HBANO
-Banks,AMTB
-Banks,BPRN
-Banks,GNTY
-Banks,AMTBB
-Banks,BUSE
-Banks,CBNK
-Banks,MOFG
-Banks,FMBI
-Banks,LBC
-Banks,NKSH
-Banks,OBNK
-Banks,SFNC
-Banks,TSC
-Banks,VBTX
-Banks,CAC
-Banks,CATC
-Banks,C
-Banks,ITUB
-Banks,BBD
-Banks,JPM
-Banks,BAC
-Banks,WFC
-Banks,RY
+Banks,HBCP
+Banks,HBMD
+Banks,HBNC
+Banks,HBT
+Banks,HFBL
+Banks,HFWA
+Banks,HIFS
+Banks,HMNF
+Banks,HMST
+Banks,HOMB
+Banks,HONE
+Banks,HOPE
 Banks,HSBC
+Banks,HTBI
+Banks,HTBK
+Banks,HTLF
+Banks,HVBC
+Banks,HWBK
+Banks,HWC
+Banks,IBCP
+Banks,IBOC
+Banks,IBTX
+Banks,ICBK
+Banks,INBK
+Banks,INDB
+Banks,IROQ
+Banks,ISBC
+Banks,ISTR
+Banks,ITUB
+Banks,JPM
+Banks,KFFB
+Banks,KRNY
+Banks,LARK
+Banks,LBAI
+Banks,LBC
+Banks,LCNB
+Banks,LEVL
+Banks,LKFN
+Banks,LMST
+Banks,LOB
+Banks,LSBK
+Banks,MBCN
+Banks,MBIN
+Banks,MBWM
+Banks,MCBC
+Banks,MCBS
+Banks,MFNC
+Banks,MGYR
+Banks,MLVF
+Banks,MNSB
+Banks,MOFG
+Banks,MPB
+Banks,MRBK
+Banks,MRLN
+Banks,MSBI
+Banks,MSVB
+Banks,MVBF
+Banks,MYFW
+Banks,NBN
+Banks,NBTB
+Banks,NCBS
+Banks,NFBK
+Banks,NKSH
+Banks,NRIM
+Banks,NWBI
+Banks,NWFL
+Banks,OBNK
+Banks,OCFC
+Banks,OFED
+Banks,ONB
+Banks,OPBK
+Banks,OPHC
+Banks,OPOF
+Banks,ORRF
+Banks,OSBC
+Banks,OVBC
+Banks,OVLY
+Banks,OZK
+Banks,PACW
+Banks,PBCT
+Banks,PBFS
+Banks,PBHC
+Banks,PBIP
+Banks,PCB
+Banks,PCSB
+Banks,PDLB
+Banks,PEBK
+Banks,PEBO
+Banks,PFBC
+Banks,PFBI
+Banks,PFC
+Banks,PFHD
+Banks,PFIS
+Banks,PGC
+Banks,PKBK
+Banks,PLBC
+Banks,PMBC
+Banks,PNBK
+Banks,PNFP
+Banks,PPBI
+Banks,PROV
+Banks,PVBC
+Banks,PWOD
+Banks,QCRH
+Banks,RBB
+Banks,RBCAA
+Banks,RBKB
+Banks,RBNC
+Banks,RIVE
+Banks,RMBI
+Banks,RNDB
+Banks,RNST
+Banks,RRBI
+Banks,RVSB
+Banks,RY
+Banks,SAL
+Banks,SASR
+Banks,SBCF
+Banks,SBFG
+Banks,SBNY
+Banks,SBSI
+Banks,SBT
+Banks,SFBC
+Banks,SFBS
+Banks,SFNC
+Banks,SFST
+Banks,SHBI
+Banks,SIVB
+Banks,SLCT
+Banks,SMBC
+Banks,SMBK
+Banks,SMMF
+Banks,SPFI
+Banks,SRCE
+Banks,SSB
+Banks,SSBI
+Banks,STBA
+Banks,STXB
+Banks,SVBI
+Banks,SYBT
+Banks,TBBK
+Banks,TBK
+Banks,TBNK
+Banks,TCBI
+Banks,TCBK
+Banks,TCFC
 Banks,TD
-Basic Chemicals,HWKN
+Banks,TFSL
+Banks,THFF
+Banks,TOWN
+Banks,TRMK
+Banks,TRST
+Banks,TSBK
+Banks,TSC
+Banks,UBCP
+Banks,UBFO
+Banks,UBOH
+Banks,UBSI
+Banks,UCBI
+Banks,UMBF
+Banks,UMPQ
+Banks,UNB
+Banks,UNTY
+Banks,UVSP
+Banks,VABK
+Banks,VBFC
+Banks,VBTX
+Banks,VLY
+Banks,WABC
+Banks,WAFD
+Banks,WASH
+Banks,WFC
+Banks,WMPN
+Banks,WNEB
+Banks,WSBC
+Banks,WSBF
+Banks,WSFS
+Banks,WTBA
+Banks,WTFC
+Banks,WVFC
+Banks,ZION
 Basic Chemicals,GURE
+Basic Chemicals,HWKN
 Basic Chemicals,OBCI
 Battery Tech,FLUX
 Battery Tech,PLUG
 Battery Tech,WATT
-Biopharmaceutical,XENE
-Biopharmaceutical,XLRN
-Biopharmaceutical,XNCR
-Biopharmaceutical,XOMA
-Biopharmaceutical,XTLB
-Biopharmaceutical,ZEAL
 Biopharmaceutical,ABEO
+Biopharmaceutical,ABIO
+Biopharmaceutical,ABUS
+Biopharmaceutical,ACAD
+Biopharmaceutical,ACHV
+Biopharmaceutical,ACIU
+Biopharmaceutical,ACOR
+Biopharmaceutical,ADAP
 Biopharmaceutical,ADMA
-Biopharmaceutical,HARP
+Biopharmaceutical,ADVM
+Biopharmaceutical,ADXS
+Biopharmaceutical,AEZS
+Biopharmaceutical,AFMD
+Biopharmaceutical,AGEN
+Biopharmaceutical,AGIO
+Biopharmaceutical,AGLE
+Biopharmaceutical,AGTC
 Biopharmaceutical,AKBA
 Biopharmaceutical,ALBO
+Biopharmaceutical,ALDX
 Biopharmaceutical,ALEC
 Biopharmaceutical,ALGS
 Biopharmaceutical,ALKS
 Biopharmaceutical,ALLK
-Biopharmaceutical,AEZS
 Biopharmaceutical,ALLO
-Biopharmaceutical,GLMD
-Biopharmaceutical,GLPG
-Biopharmaceutical,GLSI
 Biopharmaceutical,ALNA
 Biopharmaceutical,ALNY
-Biopharmaceutical,AFMD
 Biopharmaceutical,ALPN
 Biopharmaceutical,ALRN
-Biopharmaceutical,AGEN
-Biopharmaceutical,AGIO
-Biopharmaceutical,AGLE
 Biopharmaceutical,ALT
 Biopharmaceutical,ALVR
 Biopharmaceutical,ALXN
+Biopharmaceutical,AMRN
+Biopharmaceutical,AMTI
+Biopharmaceutical,ANAB
 Biopharmaceutical,APLS
+Biopharmaceutical,APM
 Biopharmaceutical,APOP
-Biopharmaceutical,ALDX
 Biopharmaceutical,APTO
 Biopharmaceutical,APTX
 Biopharmaceutical,APVO
 Biopharmaceutical,ARAV
 Biopharmaceutical,ARCT
+Biopharmaceutical,ARDS
 Biopharmaceutical,ARDX
 Biopharmaceutical,ARGX
 Biopharmaceutical,ARNA
-Biopharmaceutical,CATB
-Biopharmaceutical,ANAB
+Biopharmaceutical,ARWR
 Biopharmaceutical,ASLN
 Biopharmaceutical,ASND
 Biopharmaceutical,ATHX
 Biopharmaceutical,ATRA
-Biopharmaceutical,APM
-Biopharmaceutical,ARWR
 Biopharmaceutical,AUPH
 Biopharmaceutical,AUTL
-Biopharmaceutical,ARDS
 Biopharmaceutical,AVEO
 Biopharmaceutical,AVRO
 Biopharmaceutical,AVXL
+Biopharmaceutical,AZRX
 Biopharmaceutical,BCDA
 Biopharmaceutical,BCLI
 Biopharmaceutical,BCRX
 Biopharmaceutical,BFRA
 Biopharmaceutical,BGNE
-Biopharmaceutical,BLRX
-Biopharmaceutical,ONCY
-Biopharmaceutical,AZRX
 Biopharmaceutical,BLCM
+Biopharmaceutical,BLRX
 Biopharmaceutical,BLUE
 Biopharmaceutical,BMRN
+Biopharmaceutical,BMY
+Biopharmaceutical,BNTC
 Biopharmaceutical,BPMC
 Biopharmaceutical,BTAI
-Biopharmaceutical,GLYC
-Biopharmaceutical,GMDA
-Biopharmaceutical,CALA
-Biopharmaceutical,GNCA
-Biopharmaceutical,GNPX
-Biopharmaceutical,BNTC
-Biopharmaceutical,AGTC
-Biopharmaceutical,AMRN
-Biopharmaceutical,AMTI
-Biopharmaceutical,ADXS
 Biopharmaceutical,BYSI
+Biopharmaceutical,CALA
 Biopharmaceutical,CAPR
 Biopharmaceutical,CARA
-Biopharmaceutical,MNKD
 Biopharmaceutical,CASI
+Biopharmaceutical,CATB
 Biopharmaceutical,CBIO
 Biopharmaceutical,CBLI
 Biopharmaceutical,CCXI
@@ -602,7 +595,6 @@ Biopharmaceutical,CDMO
 Biopharmaceutical,CDTX
 Biopharmaceutical,CFRX
 Biopharmaceutical,CHRS
-Biopharmaceutical,PBLA
 Biopharmaceutical,CKPT
 Biopharmaceutical,CLBS
 Biopharmaceutical,CLDX
@@ -612,8 +604,7 @@ Biopharmaceutical,CLSN
 Biopharmaceutical,CLVS
 Biopharmaceutical,CMRX
 Biopharmaceutical,CNCE
-Biopharmaceutical,NCNA
-Biopharmaceutical,RGLS
+Biopharmaceutical,COGT
 Biopharmaceutical,CPRX
 Biopharmaceutical,CRBP
 Biopharmaceutical,CRDF
@@ -634,16 +625,13 @@ Biopharmaceutical,DFFN
 Biopharmaceutical,DMAC
 Biopharmaceutical,DNLI
 Biopharmaceutical,DRNA
-Biopharmaceutical,GOSS
 Biopharmaceutical,DVAX
 Biopharmaceutical,EDIT
 Biopharmaceutical,EIGR
-Biopharmaceutical,SNGX
 Biopharmaceutical,ENOB
 Biopharmaceutical,ENTA
 Biopharmaceutical,ENTX
 Biopharmaceutical,EPIX
-Biopharmaceutical,MTEM
 Biopharmaceutical,EPZM
 Biopharmaceutical,EQ
 Biopharmaceutical,ESPR
@@ -653,28 +641,28 @@ Biopharmaceutical,EVLO
 Biopharmaceutical,EXEL
 Biopharmaceutical,FATE
 Biopharmaceutical,FBIO
-Biopharmaceutical,MOR
 Biopharmaceutical,FENC
 Biopharmaceutical,FGEN
 Biopharmaceutical,FIXX
 Biopharmaceutical,FOLD
 Biopharmaceutical,FWP
-Biopharmaceutical,GOVX
 Biopharmaceutical,GALT
 Biopharmaceutical,GBT
 Biopharmaceutical,GERN
+Biopharmaceutical,GLMD
+Biopharmaceutical,GLPG
+Biopharmaceutical,GLSI
+Biopharmaceutical,GLYC
+Biopharmaceutical,GMDA
+Biopharmaceutical,GNCA
+Biopharmaceutical,GNPX
+Biopharmaceutical,GOSS
+Biopharmaceutical,GOVX
 Biopharmaceutical,GRTS
-Biopharmaceutical,ABIO
 Biopharmaceutical,GTBP
-Biopharmaceutical,ABUS
 Biopharmaceutical,GTHX
 Biopharmaceutical,HALO
-Biopharmaceutical,ACHV
-Biopharmaceutical,ACIU
-Biopharmaceutical,ACOR
-Biopharmaceutical,ADAP
-Biopharmaceutical,ADVM
-Biopharmaceutical,ACAD
+Biopharmaceutical,HARP
 Biopharmaceutical,HGEN
 Biopharmaceutical,HRTX
 Biopharmaceutical,HTBX
@@ -683,12 +671,11 @@ Biopharmaceutical,ICCC
 Biopharmaceutical,ICPT
 Biopharmaceutical,IDRA
 Biopharmaceutical,IFRX
-Biopharmaceutical,MRKR
-Biopharmaceutical,IMRN
 Biopharmaceutical,IMAB
 Biopharmaceutical,IMGN
 Biopharmaceutical,IMMP
 Biopharmaceutical,IMNM
+Biopharmaceutical,IMRN
 Biopharmaceutical,IMV
 Biopharmaceutical,IMVT
 Biopharmaceutical,INCY
@@ -698,8 +685,6 @@ Biopharmaceutical,INO
 Biopharmaceutical,INSM
 Biopharmaceutical,IONS
 Biopharmaceutical,IOVA
-Biopharmaceutical,MRTX
-Biopharmaceutical,MRUS
 Biopharmaceutical,JNCE
 Biopharmaceutical,KALV
 Biopharmaceutical,KDMN
@@ -711,6 +696,7 @@ Biopharmaceutical,KURA
 Biopharmaceutical,KZIA
 Biopharmaceutical,KZR
 Biopharmaceutical,LGND
+Biopharmaceutical,LGVN
 Biopharmaceutical,LIFE
 Biopharmaceutical,LIXT
 Biopharmaceutical,LJPC
@@ -722,30 +708,40 @@ Biopharmaceutical,MACK
 Biopharmaceutical,MBIO
 Biopharmaceutical,MBRX
 Biopharmaceutical,MCRB
-Biopharmaceutical,NYMX
 Biopharmaceutical,MDGL
 Biopharmaceutical,MEIP
 Biopharmaceutical,MGNX
 Biopharmaceutical,MGTA
 Biopharmaceutical,MGTX
 Biopharmaceutical,MITO
+Biopharmaceutical,MNKD
 Biopharmaceutical,MNOV
+Biopharmaceutical,MOR
+Biopharmaceutical,MRKR
 Biopharmaceutical,MRNA
 Biopharmaceutical,MRSN
+Biopharmaceutical,MRTX
+Biopharmaceutical,MRUS
+Biopharmaceutical,MTEM
 Biopharmaceutical,MTP
 Biopharmaceutical,NBIX
+Biopharmaceutical,NCNA
 Biopharmaceutical,NERV
 Biopharmaceutical,NK
 Biopharmaceutical,NTEC
 Biopharmaceutical,NTLA
+Biopharmaceutical,NVAX
+Biopharmaceutical,NYMX
 Biopharmaceutical,OCX
-Biopharmaceutical,SMMT
 Biopharmaceutical,ONCS
+Biopharmaceutical,ONCY
 Biopharmaceutical,ORGS
 Biopharmaceutical,ORTX
 Biopharmaceutical,OTLK
 Biopharmaceutical,OVID
+Biopharmaceutical,PBLA
 Biopharmaceutical,PBYI
+Biopharmaceutical,PFE
 Biopharmaceutical,PHAS
 Biopharmaceutical,PHIO
 Biopharmaceutical,PIRS
@@ -753,13 +749,14 @@ Biopharmaceutical,PRQR
 Biopharmaceutical,PRTA
 Biopharmaceutical,PSTI
 Biopharmaceutical,PTCT
-Biopharmaceutical,PTIX
 Biopharmaceutical,PTE
 Biopharmaceutical,PTGX
+Biopharmaceutical,PTIX
 Biopharmaceutical,QURE
 Biopharmaceutical,RARE
 Biopharmaceutical,REGN
 Biopharmaceutical,REPL
+Biopharmaceutical,RGLS
 Biopharmaceutical,RGNX
 Biopharmaceutical,RIGL
 Biopharmaceutical,RNA
@@ -771,7 +768,9 @@ Biopharmaceutical,SELB
 Biopharmaceutical,SESN
 Biopharmaceutical,SGEN
 Biopharmaceutical,SGMO
+Biopharmaceutical,SMMT
 Biopharmaceutical,SNDX
+Biopharmaceutical,SNGX
 Biopharmaceutical,SPPI
 Biopharmaceutical,SPRO
 Biopharmaceutical,SRNE
@@ -814,51 +813,53 @@ Biopharmaceutical,VYGR
 Biopharmaceutical,WINT
 Biopharmaceutical,XBIO
 Biopharmaceutical,XBIT
-Biopharmaceutical,COGT
-Biopharmaceutical,NVAX
-Biopharmaceutical,LGVN
-Biopharmaceutical,PFE
-Biopharmaceutical,BMY
+Biopharmaceutical,XENE
+Biopharmaceutical,XLRN
+Biopharmaceutical,XNCR
+Biopharmaceutical,XOMA
+Biopharmaceutical,XTLB
+Biopharmaceutical,ZEAL
 Bread & Condiments,KHC
 Bread & Condiments,LANC
+Building Materials,APOG
+Building Materials,BBCP
+Building Materials,BECN
+Building Materials,CSTE
+Building Materials,HBP
 Building Materials,MERC
 Building Materials,OSN
 Building Materials,RETO
-Building Materials,BECN
-Building Materials,BBCP
 Building Materials,SMID
+Building Materials,TGLS
 Building Materials,USCR
 Building Materials,USLM
-Building Materials,CSTE
-Building Materials,HBP
-Building Materials,APOG
-Building Materials,TGLS
 Building Products,AAON
 Business Intelligence,RSSS
-Cancer disease,IPSC
+Cancer disease,ACET
+Cancer disease,ANIX
 Cancer disease,ATNX
 Cancer disease,BIOC
-Cancer disease,ONTX
 Cancer disease,BNTX
-Cancer disease,GMAB
-Cancer disease,ANIX
 Cancer disease,CNSP
 Cancer disease,CSBR
 Cancer disease,CTXR
 Cancer disease,ERYP
 Cancer disease,EXAS
+Cancer disease,GMAB
 Cancer disease,GRTX
-Cancer disease,ACET
-Cancer disease,PHIOW
 Cancer disease,HCM
 Cancer disease,IDYA
 Cancer disease,IPHA
+Cancer disease,IPSC
 Cancer disease,MNPR
 Cancer disease,NXTC
 Cancer disease,ODT
+Cancer disease,ONTX
 Cancer disease,PDSB
+Cancer disease,PHIOW
 Cancer disease,PSTV
 Cancer disease,PULM
+Cancer disease,QLGN
 Cancer disease,SLRX
 Cancer disease,SLS
 Cancer disease,STTK
@@ -867,145 +868,144 @@ Cancer disease,YMAB
 Cancer disease,ZIOP
 Cancer disease,ZLAB
 Cancer disease,ZNTL
-Cancer disease,QLGN
-Cannabis,KERNW
-Cannabis,KERN
-Cannabis,GNLN
+Cannabis,ACB
 Cannabis,APHA
-Cannabis,OGI
 Cannabis,ARTL
 Cannabis,ARTLW
 Cannabis,CGC
 Cannabis,CRON
-Cannabis,ACB
+Cannabis,GNLN
+Cannabis,KERN
+Cannabis,KERNW
+Cannabis,OGI
 Cannabis,SNDL
 Cannabis,TLRY
 Cannabis,ZYNE
+Cardiovascular Services & Equipment,ABMD
+Cardiovascular Services & Equipment,ANGO
 Cardiovascular Services & Equipment,ATRC
 Cardiovascular Services & Equipment,ATRI
 Cardiovascular Services & Equipment,AVGR
 Cardiovascular Services & Equipment,BCDAW
-Cardiovascular Services & Equipment,MMSI
-Cardiovascular Services & Equipment,ANGO
+Cardiovascular Services & Equipment,CRMD
 Cardiovascular Services & Equipment,CSII
-Cardiovascular Services & Equipment,ABMD
 Cardiovascular Services & Equipment,HJLI
 Cardiovascular Services & Equipment,ICUI
+Cardiovascular Services & Equipment,INVA
 Cardiovascular Services & Equipment,LMAT
+Cardiovascular Services & Equipment,LQDA
+Cardiovascular Services & Equipment,MMSI
 Cardiovascular Services & Equipment,NARI
 Cardiovascular Services & Equipment,NSPR
 Cardiovascular Services & Equipment,NVCN
+Cardiovascular Services & Equipment,OPTN
 Cardiovascular Services & Equipment,SILK
 Cardiovascular Services & Equipment,SRDX
 Cardiovascular Services & Equipment,SWAV
 Cardiovascular Services & Equipment,TCMD
-Cardiovascular Services & Equipment,CRMD
-Cardiovascular Services & Equipment,INVA
-Cardiovascular Services & Equipment,LQDA
-Cardiovascular Services & Equipment,OPTN
 Cardiovascular Services & Equipment,TFFP
 Cardiovascular Services & Equipment,XENT
-Casino and Resorts,MLCO
 Casino and Resorts,CNTY
 Casino and Resorts,CPHC
 Casino and Resorts,CZR
 Casino and Resorts,FLL
 Casino and Resorts,GDEN
 Casino and Resorts,MCRI
+Casino and Resorts,MLCO
+Casino and Resorts,OSW
+Casino and Resorts,PENN
 Casino and Resorts,RRR
 Casino and Resorts,WYNN
-Casino and Resorts,PENN
-Casino and Resorts,OSW
-Clean Energy,ROCK
-Clean Energy,GEVO
-Clean Energy,GPRE
-Clean Energy,GPP
-Clean Energy,LTBR
 Clean Energy,AMTX
-Clean Energy,TANH
-Clean Energy,REGI
 Clean Energy,ANDE
 Clean Energy,CHSCL
 Clean Energy,CHSCO
 Clean Energy,CHSCP
+Clean Energy,GEVO
+Clean Energy,GPP
+Clean Energy,GPRE
+Clean Energy,LTBR
+Clean Energy,REGI
+Clean Energy,ROCK
+Clean Energy,TANH
 Cleaning & Decontamination,AUVI
-Cleaning & Decontamination,TOMZ
 Cleaning & Decontamination,CECE
 Cleaning & Decontamination,FTEK
+Cleaning & Decontamination,TOMZ
 Closed-end mutual fund,BANX
 Closed-end mutual fund,OXLC
 Cloud-Based Communications,AUDC
 Cloud-Based Communications,BAND
+Cloud-Based Communications,CRNT
+Cloud-Based Communications,CXDO
 Cloud-Based Communications,DOX
 Cloud-Based Communications,RDCM
 Cloud-Based Communications,VG
-Cloud-Based Communications,CRNT
-Cloud-Based Communications,CXDO
-Coal mining,METC
 Coal mining,ADES
-Coal mining,ARLP
 Coal mining,AREC
-Coffee & Tea,NUZE
-Coffee & Tea,FARM
-Coffee & Tea,JVA
-Coffee & Tea,YGYIP
-Coffee & Tea,HAIN
-Coffee & Tea,MYT
+Coal mining,ARLP
+Coal mining,METC
 Coffee & Tea,DTEA
-Computer Vision and Sensor,ITI
-Computer Vision and Sensor,GNTX
+Coffee & Tea,FARM
+Coffee & Tea,HAIN
+Coffee & Tea,JVA
+Coffee & Tea,MYT
+Coffee & Tea,NUZE
+Coffee & Tea,YGYIP
 Computer Vision and Sensor,CGNX
 Computer Vision and Sensor,CYBE
-Computer Vision and Sensor,MVIS
+Computer Vision and Sensor,GNTX
 Computer Vision and Sensor,ISNS
+Computer Vision and Sensor,ITI
 Computer Vision and Sensor,LINK
+Computer Vision and Sensor,MVIS
 Computer Vision and Sensor,NEON
-Construction & Infrastructure,ROAD
+Construction & Infrastructure,BKEP
+Construction & Infrastructure,BKEPP
 Construction & Infrastructure,FAST
-Construction & Infrastructure,GLDD
-Construction & Infrastructure,GIFI
-Construction & Infrastructure,IESC
-Construction & Infrastructure,IEA
-Construction & Infrastructure,LMB
-Construction & Infrastructure,FSTR
 Construction & Infrastructure,FRTA
+Construction & Infrastructure,FSTR
+Construction & Infrastructure,GIFI
+Construction & Infrastructure,GLDD
+Construction & Infrastructure,IEA
+Construction & Infrastructure,IESC
+Construction & Infrastructure,LMB
 Construction & Infrastructure,NWPX
 Construction & Infrastructure,PPIH
+Construction & Infrastructure,ROAD
 Construction & Infrastructure,STRL
-Construction & Infrastructure,BKEPP
-Construction & Infrastructure,BKEP
+Construction Machinery,ASTE
+Construction Machinery,GENC
 Construction Machinery,MNTX
 Construction Machinery,TITN
-Construction Machinery,GENC
-Construction Machinery,ASTE
-Consulting Services,TRNS
+Consulting Services,ACN
+Consulting Services,CRAI
 Consulting Services,EXPO
-Consulting Services,TTEK
 Consulting Services,FORR
 Consulting Services,HSII
 Consulting Services,HURN
 Consulting Services,ICFI
-Consulting Services,NVEE
-Consulting Services,CRAI
-Consulting Services,RGP
 Consulting Services,J
-Consulting Services,ACN
+Consulting Services,NVEE
+Consulting Services,RGP
+Consulting Services,TRNS
+Consulting Services,TTEK
 Consumer Lending,AFRM
+Consumer Lending,ATLC
 Consumer Lending,JFIN
 Consumer Lending,LX
-Consumer Lending,WRLD
 Consumer Lending,OPRT
-Consumer Lending,TREE
-Consumer Lending,ATLC
-Consumer Lending,UPST
 Consumer Lending,PT
 Consumer Lending,QFIN
+Consumer Lending,TREE
+Consumer Lending,UPST
+Consumer Lending,WRLD
 Container and Packaging,LOOP
 Container and Packaging,PTVE
 Container and Packaging,SLGN
 Container and Packaging,TRS
-Contract Management,NTWK
 Contract Management,DOCU
+Contract Management,NTWK
 COVID Pharmaceuticals,ADPT
 COVID Pharmaceuticals,AVIR
 COVID Pharmaceuticals,DYAI
@@ -1014,317 +1014,317 @@ Crowdfunding platform,LYL
 Cryptocurrency brokerage,MOGO
 Cryptocurrency infrastructure,MFH
 Cryptocurrency mining,BTBT
-Cryptocurrency mining,RIOT
 Cryptocurrency mining,CAN
-Cryptocurrency mining,NCTY
 Cryptocurrency mining,MARA
-Cybersecurity,VRNS
+Cryptocurrency mining,NCTY
+Cryptocurrency mining,RIOT
+Cybersecurity,CHKP
+Cybersecurity,CRWD
 Cybersecurity,CSPI
 Cybersecurity,CTXS
-Cybersecurity,TENB
-Cybersecurity,TLS
-Cybersecurity,MIME
-Cybersecurity,ZIXI
-Cybersecurity,NTCT
-Cybersecurity,PFPT
-Cybersecurity,RPD
 Cybersecurity,CYBR
+Cybersecurity,CYRN
 Cybersecurity,FEYE
 Cybersecurity,FFIV
 Cybersecurity,FTNT
-Cybersecurity,JCOM
+Cybersecurity,INTZ
 Cybersecurity,JAMF
+Cybersecurity,JCOM
+Cybersecurity,MANT
+Cybersecurity,MCFE
+Cybersecurity,MIME
+Cybersecurity,NTCT
+Cybersecurity,PFPT
+Cybersecurity,QLYS
+Cybersecurity,RDWR
+Cybersecurity,RPD
+Cybersecurity,S
 Cybersecurity,SCWX
 Cybersecurity,SFET
-Cybersecurity,INTZ
-Cybersecurity,QLYS
+Cybersecurity,TENB
+Cybersecurity,TLS
+Cybersecurity,VRNS
 Cybersecurity,WKEY
+Cybersecurity,ZIXI
 Cybersecurity,ZS
-Cybersecurity,CHKP
-Cybersecurity,MANT
-Cybersecurity,CYRN
-Cybersecurity,CRWD
-Cybersecurity,RDWR
-Cybersecurity,MCFE
-Cybersecurity,S
 Dairy,CHEF
 Dairy,LWAY
-Data Centers,GDS
-Data Centers,VNET
-Data Centers,SIFY
 Data Centers,CONE
 Data Centers,EQIX
+Data Centers,GDS
+Data Centers,SIFY
+Data Centers,VNET
 Data Storage and Management,CVLT
 Data Storage and Management,QMCO
-Debt Collections,PFMT
-Debt Collections,PRAA
 Debt Collections,ECPG
 Debt Collections,LMFA
+Debt Collections,PFMT
+Debt Collections,PRAA
 Dermatology Pharmaceuticals,BBI
+Dermatology Pharmaceuticals,BFRI
 Dermatology Pharmaceuticals,CSTL
 Dermatology Pharmaceuticals,FBIOP
 Dermatology Pharmaceuticals,NOVN
 Dermatology Pharmaceuticals,RCEL
 Dermatology Pharmaceuticals,SNOA
 Dermatology Pharmaceuticals,VRCA
-Dermatology Pharmaceuticals,BFRI
 Dermatology services & Equipment,APYX
 Dermatology services & Equipment,PLSE
 Dermatology services & Equipment,SOLY
 Dermatology services & Equipment,SSKN
 Digital Content Publisher,DLPN
 Digital Content Publisher,GAIA
-Digital Content Publisher,IAC
-Digital Content Publisher,QTT
 Digital Content Publisher,GNUS
+Digital Content Publisher,IAC
 Digital Content Publisher,KRKR
-Digital Marketing & Advertising,SHSP
+Digital Content Publisher,QTT
+Digital Marketing & Advertising,ANTE
+Digital Marketing & Advertising,APPS
 Digital Marketing & Advertising,ATY
+Digital Marketing & Advertising,BABA
+Digital Marketing & Advertising,BOMN
 Digital Marketing & Advertising,CDLX
-Digital Marketing & Advertising,IZEA
-Digital Marketing & Advertising,NCMI
-Digital Marketing & Advertising,ICLK
-Digital Marketing & Advertising,SCOR
-Digital Marketing & Advertising,QNST
+Digital Marketing & Advertising,CNET
+Digital Marketing & Advertising,CREX
 Digital Marketing & Advertising,CRTO
+Digital Marketing & Advertising,FLNT
+Digital Marketing & Advertising,ICLK
+Digital Marketing & Advertising,ISIG
+Digital Marketing & Advertising,IZEA
+Digital Marketing & Advertising,MCHX
+Digital Marketing & Advertising,MDCA
+Digital Marketing & Advertising,MGNI
+Digital Marketing & Advertising,MRIN
+Digital Marketing & Advertising,NCMI
+Digital Marketing & Advertising,PERI
+Digital Marketing & Advertising,POPM
+Digital Marketing & Advertising,PUBM
+Digital Marketing & Advertising,QNST
+Digital Marketing & Advertising,SCOR
+Digital Marketing & Advertising,SHSP
 Digital Marketing & Advertising,TAOP
 Digital Marketing & Advertising,THRY
-Digital Marketing & Advertising,POPM
-Digital Marketing & Advertising,MRIN
-Digital Marketing & Advertising,ISIG
-Digital Marketing & Advertising,MCHX
-Digital Marketing & Advertising,FLNT
-Digital Marketing & Advertising,MGNI
-Digital Marketing & Advertising,CNET
-Digital Marketing & Advertising,PERI
-Digital Marketing & Advertising,ANTE
-Digital Marketing & Advertising,PUBM
 Digital Marketing & Advertising,TTD
-Digital Marketing & Advertising,APPS
-Digital Marketing & Advertising,CREX
-Digital Marketing & Advertising,BOMN
-Digital Marketing & Advertising,MDCA
-Digital Marketing & Advertising,BABA
+Digital Media/Web,AEYE
 Digital Media/Web,BLIN
 Digital Media/Web,OPRA
-Digital Media/Web,AEYE
-Discount Retail,FRG
 Discount Retail,DLTR
-Distributed Work Tools,FROG
-Distributed Work Tools,DBX
-Distributed Work Tools,ZM
-Distributed Work Tools,TEAM
+Discount Retail,FRG
 Distributed Work Tools,CLRO
+Distributed Work Tools,DBX
+Distributed Work Tools,FROG
+Distributed Work Tools,TEAM
+Distributed Work Tools,ZM
 Domain Registry,TCX
 Domain Registry,VRSN
 Drones,EH
 Dystrophy disease,DYN
 Dystrophy disease,SLDB
-E-commerce Operations,PFSW
-E-commerce Operations,KSPN
-E-commerce Operations,MYSZ
+E-commerce Operations,BIGC
 E-commerce Operations,BZUN
 E-commerce Operations,DADA
-E-commerce Operations,BIGC
+E-commerce Operations,KSPN
+E-commerce Operations,MYSZ
+E-commerce Operations,PFSW
+E-commerce Platforms,EBAY
+E-commerce Platforms,ETSY
+E-commerce Platforms,GRPN
+E-commerce Platforms,HX
+E-commerce Platforms,JD
 E-commerce Platforms,LQDT
 E-commerce Platforms,MELI
+E-commerce Platforms,OSTK
 E-commerce Platforms,OZON
-E-commerce Platforms,WISH
-E-commerce Platforms,GRPN
+E-commerce Platforms,PDD
 E-commerce Platforms,REAL
 E-commerce Platforms,SFIX
-E-commerce Platforms,EBAY
-E-commerce Platforms,JD
-E-commerce Platforms,PDD
+E-commerce Platforms,WISH
 E-commerce Platforms,YJ
-E-commerce Platforms,OSTK
-E-commerce Platforms,ETSY
-E-commerce Platforms,HX
-Education Services,HLG
-Education Services,LINC
-Education Services,TEDU
 Education Services,AACG
-Education Services,LAUR
-Education Services,PRDO
-Education Services,HMHC
-Education Services,WAFU
 Education Services,AFYA
 Education Services,APEI
-Education Services,TWOU
+Education Services,EDU
+Education Services,EEIQ
+Education Services,HLG
+Education Services,HMHC
+Education Services,JW-A
+Education Services,LAUR
+Education Services,LINC
 Education Services,LOPE
+Education Services,METX
+Education Services,PRDO
 Education Services,REDU
 Education Services,STRA
-Education Services,EEIQ
-Education Services,JW-A
-Education Services,METX
-Education Services,EDU
 Education Services,TAL
-Education Technology,ZVO
+Education Services,TEDU
+Education Services,TWOU
+Education Services,WAFU
+Education Technology,ARCE
+Education Technology,ASPU
 Education Technology,BOXL
 Education Technology,YQ
-Education Technology,ASPU
-Education Technology,ARCE
-Electric Vehicles,NIU
+Education Technology,ZVO
+Electric Vehicles,ARVL
+Electric Vehicles,AYRO
+Electric Vehicles,CENN
+Electric Vehicles,ELMS
+Electric Vehicles,FFIE
+Electric Vehicles,FSR
 Electric Vehicles,FUV
+Electric Vehicles,GOEV
+Electric Vehicles,GP
+Electric Vehicles,HYZN
+Electric Vehicles,HYZNW
 Electric Vehicles,IDEX
 Electric Vehicles,KNDI
-Electric Vehicles,TSLA
-Electric Vehicles,VMAR
-Electric Vehicles,WKHS
-Electric Vehicles,LI
-Electric Vehicles,SOLO
 Electric Vehicles,LCID
-Electric Vehicles,NIO
-Electric Vehicles,NKLA
-Electric Vehicles,XPEV
-Electric Vehicles,FSR
-Electric Vehicles,RIDE
-Electric Vehicles,GOEV
-Electric Vehicles,ARVL
-Electric Vehicles,HYZN
-Electric Vehicles,PTRA
-Electric Vehicles,FFIE
-Electric Vehicles,AYRO
+Electric Vehicles,LI
 Electric Vehicles,MULN
-Electric Vehicles,ELMS
-Electric Vehicles,GP
-Electric Vehicles,VLCN
-Electric Vehicles,HYZNW
-Electric Vehicles,CENN
+Electric Vehicles,NIO
+Electric Vehicles,NIU
+Electric Vehicles,NKLA
+Electric Vehicles,PTRA
+Electric Vehicles,RIDE
 Electric Vehicles,RIVN
 Electric Vehicles,SEV
+Electric Vehicles,SOLO
+Electric Vehicles,TSLA
+Electric Vehicles,VLCN
+Electric Vehicles,VMAR
+Electric Vehicles,WKHS
+Electric Vehicles,XPEV
 Electric Vehicles charging,BLNK
 Electricity Generation,AEP
+Electricity Generation,D
 Electricity Generation,EXC
-Electricity Generation,LNT
 Electricity Generation,FCEL
 Electricity Generation,HNRG
 Electricity Generation,IPLDP
+Electricity Generation,LNT
 Electricity Generation,MGEE
+Electricity Generation,NEE
 Electricity Generation,NWE
 Electricity Generation,OTTR
+Electricity Generation,PCG
 Electricity Generation,SPKE
 Electricity Generation,XEL
-Electricity Generation,D
-Electricity Generation,PCG
-Electricity Generation,NEE
-Electronic Components,HIHO
 Electronic Components,AMOT
-Electronic Components,MXIM
 Electronic Components,AVT
-Electronic Components,HOLI
 Electronic Components,CRUS
+Electronic Components,HIHO
+Electronic Components,HOLI
+Electronic Components,MXIM
 Electronic Components,SITM
 Electronic Components,TAIT
-Electronic Display,OLED
-Electronic Display,IMTE
 Electronic Display,DAKT
+Electronic Display,IMTE
 Electronic Display,KOPN
+Electronic Display,OLED
 Electronic Display,SYNA
-Electronics Manufacturing,SNPS
+Electronics Manufacturing,AAPL
+Electronics Manufacturing,ALOT
+Electronics Manufacturing,BNSO
+Electronics Manufacturing,CDNS
+Electronics Manufacturing,ELTK
+Electronics Manufacturing,FLEX
+Electronics Manufacturing,IEC
+Electronics Manufacturing,ITRI
 Electronics Manufacturing,KE
+Electronics Manufacturing,KOSS
 Electronics Manufacturing,KTCC
 Electronics Manufacturing,LOGI
-Electronics Manufacturing,PLXS
-Electronics Manufacturing,SONO
-Electronics Manufacturing,SYPR
 Electronics Manufacturing,NNDM
 Electronics Manufacturing,NSYS
-Electronics Manufacturing,PDFS
-Electronics Manufacturing,SANM
-Electronics Manufacturing,KOSS
-Electronics Manufacturing,TTMI
-Electronics Manufacturing,TACT
-Electronics Manufacturing,SGMA
-Electronics Manufacturing,BNSO
-Electronics Manufacturing,ITRI
-Electronics Manufacturing,ELTK
-Electronics Manufacturing,AAPL
-Electronics Manufacturing,CDNS
-Electronics Manufacturing,IEC
-Electronics Manufacturing,FLEX
 Electronics Manufacturing,OSIS
-Electronics Manufacturing,ALOT
+Electronics Manufacturing,PDFS
+Electronics Manufacturing,PLXS
+Electronics Manufacturing,SANM
+Electronics Manufacturing,SGMA
 Electronics Manufacturing,SKYT
-Electronics Power Management,POWI
-Electronics Power Management,RELL
+Electronics Manufacturing,SNPS
+Electronics Manufacturing,SONO
+Electronics Manufacturing,SYPR
+Electronics Manufacturing,TACT
+Electronics Manufacturing,TTMI
 Electronics Power Management,AEIS
 Electronics Power Management,AOSL
 Electronics Power Management,LFUS
 Electronics Power Management,OIIM
-Enterprise Cloud,NTNX
-Enterprise Cloud,KC
-Enterprise Cloud,NTAP
+Electronics Power Management,POWI
+Electronics Power Management,RELL
 Enterprise Cloud,AKAM
 Enterprise Cloud,ANY
-Enterprise Software and Services,MDB
-Enterprise Software and Services,LPSN
-Enterprise Software and Services,SNCR
-Enterprise Software and Services,EGAN
-Enterprise Software and Services,ALJJ
-Enterprise Software and Services,FIVN
-Enterprise Software and Services,IBEX
-Enterprise Software and Services,SYKE
-Enterprise Software and Services,TTEC
-Enterprise Software and Services,JG
-Enterprise Software and Services,TTGT
-Enterprise Software and Services,SRAX
-Enterprise Software and Services,NICE
-Enterprise Software and Services,PEGA
-Enterprise Software and Services,CNXC
-Enterprise Software and Services,VRNT
-Enterprise Software and Services,VERB
-Enterprise Software and Services,SREV
-Enterprise Software and Services,EVOL
-Enterprise Software and Services,SYNC
-Enterprise Software and Services,MNDO
-Enterprise Software and Services,WIX
+Enterprise Cloud,KC
+Enterprise Cloud,NTAP
+Enterprise Cloud,NTNX
 Enterprise Software and Services,ADBE
-Enterprise Software and Services,INTU
-Enterprise Software and Services,MTSL
-Enterprise Software and Services,QADA
+Enterprise Software and Services,ADP
+Enterprise Software and Services,AGYS
+Enterprise Software and Services,ALJJ
+Enterprise Software and Services,APPN
 Enterprise Software and Services,ASUR
+Enterprise Software and Services,AVCT
+Enterprise Software and Services,BL
+Enterprise Software and Services,BLKB
+Enterprise Software and Services,BNFT
+Enterprise Software and Services,CDW
+Enterprise Software and Services,CNDT
+Enterprise Software and Services,CNXC
+Enterprise Software and Services,CNXN
+Enterprise Software and Services,CRM
+Enterprise Software and Services,CSOD
+Enterprise Software and Services,CTSH
+Enterprise Software and Services,EGAN
+Enterprise Software and Services,EPAY
+Enterprise Software and Services,EVOL
+Enterprise Software and Services,EXLS
+Enterprise Software and Services,FIVN
+Enterprise Software and Services,FORTY
+Enterprise Software and Services,G
+Enterprise Software and Services,GTYH
+Enterprise Software and Services,GVP
+Enterprise Software and Services,IBEX
+Enterprise Software and Services,INTU
+Enterprise Software and Services,JG
+Enterprise Software and Services,LPSN
+Enterprise Software and Services,MDB
+Enterprise Software and Services,MGIC
+Enterprise Software and Services,MNDO
+Enterprise Software and Services,MNTV
+Enterprise Software and Services,MTSL
+Enterprise Software and Services,NICE
+Enterprise Software and Services,NSIT
+Enterprise Software and Services,ORCL
 Enterprise Software and Services,OTEX
 Enterprise Software and Services,PAYX
-Enterprise Software and Services,QADB
-Enterprise Software and Services,BLKB
-Enterprise Software and Services,GTYH
-Enterprise Software and Services,PRGS
-Enterprise Software and Services,BL
 Enterprise Software and Services,PCTY
-Enterprise Software and Services,CNDT
-Enterprise Software and Services,BNFT
-Enterprise Software and Services,SSNC
-Enterprise Software and Services,XELA
-Enterprise Software and Services,UPLD
-Enterprise Software and Services,SSNT
-Enterprise Software and Services,AGYS
-Enterprise Software and Services,WDAY
-Enterprise Software and Services,CSOD
-Enterprise Software and Services,MNTV
-Enterprise Software and Services,CTSH
-Enterprise Software and Services,EPAY
-Enterprise Software and Services,ADP
-Enterprise Software and Services,GVP
-Enterprise Software and Services,EXLS
-Enterprise Software and Services,APPN
-Enterprise Software and Services,AVCT
-Enterprise Software and Services,TSRI
-Enterprise Software and Services,NSIT
-Enterprise Software and Services,SPRT
-Enterprise Software and Services,FORTY
-Enterprise Software and Services,MGIC
-Enterprise Software and Services,WSTG
-Enterprise Software and Services,CNXN
-Enterprise Software and Services,CDW
-Enterprise Software and Services,PLUS
-Enterprise Software and Services,RMNI
-Enterprise Software and Services,U
-Enterprise Software and Services,G
+Enterprise Software and Services,PEGA
 Enterprise Software and Services,PHUN
-Enterprise Software and Services,CRM
-Enterprise Software and Services,ORCL
+Enterprise Software and Services,PLUS
+Enterprise Software and Services,PRGS
+Enterprise Software and Services,QADA
+Enterprise Software and Services,QADB
+Enterprise Software and Services,RMNI
 Enterprise Software and Services,SAP
+Enterprise Software and Services,SNCR
+Enterprise Software and Services,SPRT
+Enterprise Software and Services,SRAX
+Enterprise Software and Services,SREV
+Enterprise Software and Services,SSNC
+Enterprise Software and Services,SSNT
+Enterprise Software and Services,SYKE
+Enterprise Software and Services,SYNC
+Enterprise Software and Services,TSRI
+Enterprise Software and Services,TTEC
+Enterprise Software and Services,TTGT
+Enterprise Software and Services,U
+Enterprise Software and Services,UPLD
+Enterprise Software and Services,VERB
+Enterprise Software and Services,VRNT
+Enterprise Software and Services,WDAY
+Enterprise Software and Services,WIX
+Enterprise Software and Services,WSTG
+Enterprise Software and Services,XELA
 Eye disease,ALIM
 Eye disease,ARPO
 Eye disease,CLSD
@@ -1333,6 +1333,7 @@ Eye disease,EYPT
 Eye disease,ISEE
 Eye disease,OCGN
 Eye disease,OCUL
+Fiber Optics and Laser,COHR
 Fiber Optics and Laser,EMKR
 Fiber Optics and Laser,FARO
 Fiber Optics and Laser,IIVI
@@ -1341,128 +1342,127 @@ Fiber Optics and Laser,LASR
 Fiber Optics and Laser,LITE
 Fiber Optics and Laser,LPTH
 Fiber Optics and Laser,LUNA
-Fiber Optics and Laser,OCC
-Fiber Optics and Laser,NOVT
-Fiber Optics and Laser,COHR
-Fiber Optics and Laser,RFIL
 Fiber Optics and Laser,LWLG
+Fiber Optics and Laser,NOVT
 Fiber Optics and Laser,NPTN
-Financial and Screening Technologies,NCNO
+Fiber Optics and Laser,OCC
+Fiber Optics and Laser,RFIL
 Financial and Screening Technologies,GSKY
+Financial and Screening Technologies,NCNO
 Financial Exchanges & Data,CME
 Financial Exchanges & Data,NDAQ
+Food Delivery,GRAB
 Food Delivery,GRUB
 Food Delivery,WTRH
-Food Delivery,GRAB
-Fruits & Vegetables,VFF
-Fruits & Vegetables,WILC
-Fruits & Vegetables,LNDC
-Fruits & Vegetables,SANW
 Fruits & Vegetables,ALCO
 Fruits & Vegetables,CVGW
-Fruits & Vegetables,LMNR
 Fruits & Vegetables,FAMI
+Fruits & Vegetables,LMNR
+Fruits & Vegetables,LNDC
+Fruits & Vegetables,SANW
 Fruits & Vegetables,SENEA
 Fruits & Vegetables,SENEB
+Fruits & Vegetables,VFF
+Fruits & Vegetables,WILC
 Furnishing & Fixtures,AMWD
-Furnishing & Fixtures,TILE
-Furnishing & Fixtures,PATK
+Furnishing & Fixtures,DXYN
+Furnishing & Fixtures,MIDD
 Furnishing & Fixtures,OFLX
+Furnishing & Fixtures,PATK
+Furnishing & Fixtures,TILE
 Furnishing & Fixtures,UFPI
 Furnishing & Fixtures,WIRE
-Furnishing & Fixtures,MIDD
-Furnishing & Fixtures,DXYN
-Gaming & Esports,GRVY
-Gaming & Esports,HAS
-Gaming & Esports,GMBL
-Gaming & Esports,HEAR
-Gaming & Esports,SLGG
-Gaming & Esports,INSE
 Gaming & Esports,AESE
-Gaming & Esports,NGMS
-Gaming & Esports,GIGM
-Gaming & Esports,YVR
-Gaming & Esports,PLAY
-Gaming & Esports,SCPL
-Gaming & Esports,EA
-Gaming & Esports,FNKO
-Gaming & Esports,SGMS
-Gaming & Esports,CHDN
 Gaming & Esports,ATVI
-Gaming & Esports,ZNGA
-Gaming & Esports,TTWO
+Gaming & Esports,CHDN
 Gaming & Esports,CRSR
 Gaming & Esports,DKNG
+Gaming & Esports,EA
+Gaming & Esports,FNKO
+Gaming & Esports,GIGM
+Gaming & Esports,GMBL
+Gaming & Esports,GRVY
+Gaming & Esports,HAS
+Gaming & Esports,HEAR
+Gaming & Esports,INSE
+Gaming & Esports,NGMS
+Gaming & Esports,PLAY
 Gaming & Esports,RBLX
+Gaming & Esports,SCPL
+Gaming & Esports,SGMS
 Gaming & Esports,SKLZ
+Gaming & Esports,SLGG
+Gaming & Esports,TTWO
+Gaming & Esports,YVR
+Gaming & Esports,ZNGA
 Gastroenterological disease,EVOK
 Gastroenterological disease,IRWD
 Gastroenterological disease,JAGX
 Gastroenterological disease,PHAT
 Gastroenterological disease,RDHL
+Gold & Silver,AUY
+Gold & Silver,FCX
+Gold & Silver,GOLD
+Gold & Silver,KGC
 Gold & Silver,PAAS
 Gold & Silver,RGLD
 Gold & Silver,SSRM
 Gold & Silver,USAU
-Gold & Silver,FCX
-Gold & Silver,GOLD
-Gold & Silver,AUY
-Gold & Silver,KGC
-Health Care REIT,SBRA
 Health Care REIT,CTRE
 Health Care REIT,DHC
-Health Supplements,SXTC
-Health Supplements,TYHT
+Health Care REIT,SBRA
+Health Supplements,HAPP
+Health Supplements,LFVN
+Health Supplements,MOHO
+Health Supplements,MTEX
+Health Supplements,NATR
 Health Supplements,NBEV
 Health Supplements,NHTC
-Health Supplements,LFVN
-Health Supplements,NATR
-Health Supplements,MTEX
-Health Supplements,HAPP
+Health Supplements,SXTC
+Health Supplements,TYHT
 Health Supplements,WW
-Health Supplements,MOHO
-Healthcare and COVID services,AVCO
 Healthcare and COVID services,ATOS
+Healthcare and COVID services,AVCO
 Healthcare and COVID services,BLPH
 Healthcare and COVID services,BMRA
 Healthcare and COVID services,CEMI
+Healthcare and COVID services,CODX
 Healthcare and COVID services,FLGT
-Healthcare and COVID services,PRPO
 Healthcare and COVID services,OCDX
 Healthcare and COVID services,OSUR
+Healthcare and COVID services,PRPO
 Healthcare and COVID services,QTNT
 Healthcare and COVID services,TRIB
 Healthcare and COVID services,XAIR
-Healthcare and COVID services,CODX
-Healthcare Finance,SWKH
 Healthcare Finance,CLOV
-Healthcare Information technology,SPOK
-Healthcare Information technology,SY
+Healthcare Finance,SWKH
+Healthcare Information technology,ACCD
 Healthcare Information technology,CERN
 Healthcare Information technology,CHNG
 Healthcare Information technology,CHNGU
-Healthcare Information technology,NRC
 Healthcare Information technology,CPSI
 Healthcare Information technology,CRVL
 Healthcare Information technology,CYRX
 Healthcare Information technology,DRIO
-Healthcare Information technology,MTBC
-Healthcare Information technology,MTBCP
 Healthcare Information technology,GDRX
-Healthcare Information technology,STRM
-Healthcare Information technology,ACCD
 Healthcare Information technology,HCAT
 Healthcare Information technology,HQY
 Healthcare Information technology,HSTM
 Healthcare Information technology,INOV
 Healthcare Information technology,MDRX
+Healthcare Information technology,MTBC
+Healthcare Information technology,MTBCP
 Healthcare Information technology,NH
+Healthcare Information technology,NRC
 Healthcare Information technology,NXGN
 Healthcare Information technology,ONEM
 Healthcare Information technology,OPRX
 Healthcare Information technology,OTRK
 Healthcare Information technology,SDGR
 Healthcare Information technology,SLP
+Healthcare Information technology,SPOK
+Healthcare Information technology,STRM
+Healthcare Information technology,SY
 Healthcare Information technology,TRHC
 Healthcare Information technology,WORX
 Healthcare Robotics,ARAY
@@ -1476,58 +1476,56 @@ Healthcare Robotics,SRTS
 Healthcare Robotics,TELA
 Healthcare Robotics,THMO
 Healthcare Robotics,TMDI
-Healthcare services,NTUS
 Healthcare services,AEMD
-Healthcare services,GH
-Healthcare services,PMD
+Healthcare services,AQB
 Healthcare services,AXDX
 Healthcare services,BSGM
 Healthcare services,CDXS
 Healthcare services,CELC
 Healthcare services,CHEK
 Healthcare services,DMTK
+Healthcare services,DXCM
 Healthcare services,FONR
+Healthcare services,FTRP
 Healthcare services,GENE
+Healthcare services,GH
+Healthcare services,GRFS
 Healthcare services,ICAD
 Healthcare services,IRMD
+Healthcare services,IRTC
+Healthcare services,ITMR
 Healthcare services,LNTH
+Healthcare services,MASI
 Healthcare services,MYGN
 Healthcare services,NDRA
 Healthcare services,NEO
+Healthcare services,NMRD
 Healthcare services,NNOX
+Healthcare services,NTUS
+Healthcare services,NURO
 Healthcare services,OPGN
+Healthcare services,PMD
 Healthcare services,RDNT
 Healthcare services,RNLX
 Healthcare services,TECH
+Healthcare services,TMDX
+Healthcare services,UNH
 Healthcare services,VIVO
 Healthcare services,VRAY
 Healthcare services,XGN
-Healthcare services,AQB
-Healthcare services,DXCM
-Healthcare services,GRFS
-Healthcare services,IRTC
-Healthcare services,ITMR
-Healthcare services,MASI
-Healthcare services,NMRD
-Healthcare services,NURO
-Healthcare services,TMDX
-Healthcare services,FTRP
-Healthcare services,UNH
-Healthcare services & Equipment,UFPT
-Healthcare services & Equipment,BIMI
-Healthcare services & Equipment,EYE
-Healthcare services & Equipment,MOVE
+Healthcare services & Equipment,ABT
+Healthcare services & Equipment,AHPI
 Healthcare services & Equipment,ALGN
 Healthcare services & Equipment,APEN
-Healthcare services & Equipment,BLI
+Healthcare services & Equipment,BIMI
 Healthcare services & Equipment,BIOL
-Healthcare services & Equipment,AHPI
+Healthcare services & Equipment,BLI
 Healthcare services & Equipment,BWAY
 Healthcare services & Equipment,CDXC
 Healthcare services & Equipment,CTSO
 Healthcare services & Equipment,DYNT
 Healthcare services & Equipment,ECOR
-Healthcare services & Equipment,MOTS
+Healthcare services & Equipment,EYE
 Healthcare services & Equipment,HSDT
 Healthcare services & Equipment,HSIC
 Healthcare services & Equipment,IIN
@@ -1537,12 +1535,14 @@ Healthcare services & Equipment,IRIX
 Healthcare services & Equipment,ISRG
 Healthcare services & Equipment,KEQU
 Healthcare services & Equipment,KRMD
-Healthcare services & Equipment,NAOV
 Healthcare services & Equipment,LUNG
 Healthcare services & Equipment,MDGS
 Healthcare services & Equipment,MEDP
 Healthcare services & Equipment,MGLN
+Healthcare services & Equipment,MOTS
+Healthcare services & Equipment,MOVE
 Healthcare services & Equipment,MSON
+Healthcare services & Equipment,NAOV
 Healthcare services & Equipment,NDRAW
 Healthcare services & Equipment,NMTC
 Healthcare services & Equipment,NVCR
@@ -1558,98 +1558,97 @@ Healthcare services & Equipment,RGEN
 Healthcare services & Equipment,SDC
 Healthcare services & Equipment,STIM
 Healthcare services & Equipment,TTOO
+Healthcare services & Equipment,UFPT
 Healthcare services & Equipment,UTMD
 Healthcare services & Equipment,VMD
 Healthcare services & Equipment,VREX
 Healthcare services & Equipment,XRAY
 Healthcare services & Equipment,ZYXI
-Healthcare services & Equipment,ABT
-Heavy Machinery & Parts,JCTCF
 Heavy Machinery & Parts,BOOM
-Heavy Machinery & Parts,LAWS
-Heavy Machinery & Parts,HEES
 Heavy Machinery & Parts,BWEN
 Heavy Machinery & Parts,CMCO
+Heavy Machinery & Parts,EML
 Heavy Machinery & Parts,FELE
+Heavy Machinery & Parts,GTEC
+Heavy Machinery & Parts,HEES
 Heavy Machinery & Parts,HLIO
+Heavy Machinery & Parts,HURC
+Heavy Machinery & Parts,JCTCF
+Heavy Machinery & Parts,LAWS
+Heavy Machinery & Parts,ROLL
 Heavy Machinery & Parts,TAYD
 Heavy Machinery & Parts,TPIC
-Heavy Machinery & Parts,GTEC
-Heavy Machinery & Parts,HURC
-Heavy Machinery & Parts,ROLL
-Heavy Machinery & Parts,EML
-Home and Furniture retail,LOVE
-Home and Furniture retail,SNBR
-Home and Furniture retail,NVFY
+Home and Furniture retail,BBIG
 Home and Furniture retail,BSET
+Home and Furniture retail,CONN
 Home and Furniture retail,FLXS
 Home and Furniture retail,HOFT
-Home and Furniture retail,CONN
+Home and Furniture retail,LOVE
+Home and Furniture retail,NVFY
+Home and Furniture retail,SNBR
 Home and Furniture retail,W
-Home and Furniture retail,BBIG
-Home Construction & Maintenance,TTSH
-Home Construction & Maintenance,LIVE
 Home Construction & Maintenance,ANGI
 Home Construction & Maintenance,CVCO
 Home Construction & Maintenance,FTDR
 Home Construction & Maintenance,GRBK
+Home Construction & Maintenance,HD
 Home Construction & Maintenance,HOVNP
 Home Construction & Maintenance,LEGH
 Home Construction & Maintenance,LGIH
+Home Construction & Maintenance,LIVE
+Home Construction & Maintenance,LOW
 Home Construction & Maintenance,POOL
 Home Construction & Maintenance,TBLT
-Home Construction & Maintenance,HD
-Home Construction & Maintenance,LOW
-Hospitals,HCSG
-Hospitals,CCRN
+Home Construction & Maintenance,TTSH
 Hospitals,ACHC
+Hospitals,CCRN
+Hospitals,HCSG
 Hospitals,IMAC
 Hospitals,JYNT
 Hospitals,SGRY
 Hospitals,SMED
 Hospitals,TIG
+Hotels,H
+Hotels,HST
 Hotels,HTHT
+Hotels,INTG
 Hotels,MAR
 Hotels,PLYA
-Hotels,SOHON
-Hotels,SOHOO
-Hotels,HST
 Hotels,SOHO
 Hotels,SOHOB
-Hotels,INTG
-Hotels,H
+Hotels,SOHON
+Hotels,SOHOO
 Household Products,BBBY
-Household Products,FLWS
-Household Products,KIRK
-Household Products,LCUT
-Household Products,ULTA
-Household Products,PRPL
-Household Products,JAKK
-Household Products,NWL
-Household Products,OLLI
-Household Products,MAT
-Household Products,TSCO
 Household Products,BWMX
-Household Products,HELE
-Household Products,SIC
 Household Products,CRWS
 Household Products,CTIB
-Household Products,SUMR
+Household Products,FLWS
+Household Products,HELE
+Household Products,JAKK
+Household Products,KIRK
+Household Products,LCUT
+Household Products,MAT
+Household Products,NWL
+Household Products,OLLI
 Household Products,PG
-Identity & Authentication,SPCB
-Identity & Authentication,NXTD
+Household Products,PRPL
+Household Products,SIC
+Household Products,SUMR
+Household Products,TSCO
+Household Products,ULTA
+Identity & Authentication,AWRE
+Identity & Authentication,BKYI
 Identity & Authentication,IDN
+Identity & Authentication,MITK
+Identity & Authentication,NXTD
 Identity & Authentication,OKTA
 Identity & Authentication,OSPN
+Identity & Authentication,SPCB
 Identity & Authentication,VRME
-Identity & Authentication,MITK
-Identity & Authentication,BKYI
-Identity & Authentication,AWRE
-Implants & Equipment,NVIV
+Implants & Equipment,ANIK
 Implants & Equipment,ATEC
 Implants & Equipment,AXGN
 Implants & Equipment,AXNX
-Implants & Equipment,ANIK
 Implants & Equipment,CFMS
 Implants & Equipment,CLGN
 Implants & Equipment,ESTA
@@ -1659,6 +1658,7 @@ Implants & Equipment,KIDS
 Implants & Equipment,LIVN
 Implants & Equipment,MDXG
 Implants & Equipment,NUVA
+Implants & Equipment,NVIV
 Implants & Equipment,OFIX
 Implants & Equipment,ONVO
 Implants & Equipment,ORGO
@@ -1668,60 +1668,61 @@ Implants & Equipment,SIEN
 Implants & Equipment,SPNE
 Implants & Equipment,STAA
 Implants & Equipment,TNDM
-Industrial Conglomerates,HON
 Industrial Conglomerates,BRK-B
-Industrial estate investment trust,INDT
-Industrial estate investment trust,SELF
+Industrial Conglomerates,HON
 Industrial estate investment trust,ILPT
+Industrial estate investment trust,INDT
 Industrial estate investment trust,SBAC
+Industrial estate investment trust,SELF
 Industrial estate investment trust,UNIT
-Industrial Metals,PLL
 Industrial Metals,AQMS
+Industrial Metals,BBL
+Industrial Metals,BHP
 Industrial Metals,CENX
+Industrial Metals,CHNR
+Industrial Metals,CLF
+Industrial Metals,GLG
 Industrial Metals,GSM
 Industrial Metals,HAYN
 Industrial Metals,KALU
 Industrial Metals,LECO
-Industrial Metals,ZEUS
+Industrial Metals,PLL
 Industrial Metals,SCHN
 Industrial Metals,STLD
 Industrial Metals,USAP
-Industrial Metals,ZKIN
-Industrial Metals,CHNR
-Industrial Metals,GLG
-Industrial Metals,X
 Industrial Metals,VALE
-Industrial Metals,CLF
-Industrial Metals,BHP
-Industrial Metals,BBL
+Industrial Metals,X
+Industrial Metals,ZEUS
+Industrial Metals,ZKIN
 Infrastructure Investment Fund,ATAX
 Infrastructure Investment Fund,LMRK
 Infrastructure Investment Fund,LMRKN
 Infrastructure Investment Fund,LMRKO
 Infrastructure Investment Fund,LMRKP
-Insurance Brokers,ERIE
-Insurance Brokers,EHTH
-Insurance Brokers,FANH
-Insurance Brokers,GSHD
-Insurance Brokers,BRP
-Insurance Brokers,BHF
-Insurance Brokers,BHFAP
-Insurance Brokers,SNFCA
-Insurance Brokers,NWLI
-Insurance Brokers,VERY
 Insurance Brokers,AAME
 Insurance Brokers,ANAT
-Insurance Brokers,TIPT
+Insurance Brokers,BHF
+Insurance Brokers,BHFAP
+Insurance Brokers,BRP
+Insurance Brokers,EHTH
+Insurance Brokers,ERIE
+Insurance Brokers,FANH
+Insurance Brokers,GSHD
 Insurance Brokers,NSEC
-Insurance Marketplace & Technology,EVER
-Insurance Marketplace & Technology,EBIX
-Insurance Marketplace & Technology,SPNS
+Insurance Brokers,NWLI
+Insurance Brokers,SNFCA
+Insurance Brokers,TIPT
+Insurance Brokers,VERY
 Insurance Marketplace & Technology,DCT
-Internet and Cellular Provider,VZ
+Insurance Marketplace & Technology,EBIX
+Insurance Marketplace & Technology,EVER
+Insurance Marketplace & Technology,SPNS
 Internet and Cellular Provider,ALSK
+Internet and Cellular Provider,ATEX
 Internet and Cellular Provider,ATNI
 Internet and Cellular Provider,CCOI
 Internet and Cellular Provider,CHTR
+Internet and Cellular Provider,CMCSA
 Internet and Cellular Provider,CNSL
 Internet and Cellular Provider,LBRDA
 Internet and Cellular Provider,LBRDK
@@ -1729,26 +1730,25 @@ Internet and Cellular Provider,LBTYA
 Internet and Cellular Provider,LBTYB
 Internet and Cellular Provider,LBTYK
 Internet and Cellular Provider,LILA
-Internet and Cellular Provider,ATEX
 Internet and Cellular Provider,LILAK
-Internet and Cellular Provider,TIGO
-Internet and Cellular Provider,VEON
 Internet and Cellular Provider,OTEL
-Internet and Cellular Provider,VOD
 Internet and Cellular Provider,PTNR
 Internet and Cellular Provider,SHEN
-Internet and Cellular Provider,UTSI
-Internet and Cellular Provider,TMUS
-Internet and Cellular Provider,CMCSA
 Internet and Cellular Provider,T
+Internet and Cellular Provider,TIGO
+Internet and Cellular Provider,TMUS
+Internet and Cellular Provider,UTSI
+Internet and Cellular Provider,VEON
+Internet and Cellular Provider,VOD
+Internet and Cellular Provider,VZ
 Investment Banking & Advisory,ATIF
-Investment Banking & Advisory,RILY
 Investment Banking & Advisory,COWN
 Investment Banking & Advisory,DHIL
 Investment Banking & Advisory,GRNQ
-Investment Management Firm,IEP
+Investment Banking & Advisory,RILY
 Investment Management Firm,GROW
 Investment Management Firm,HNNA
+Investment Management Firm,IEP
 Investment Management Firm,SAMG
 Investment Management Firm,SEIC
 Investment Management Firm,TROW
@@ -1756,41 +1756,41 @@ Investment Management Firm,TURN
 Investment Management Firm,VCTR
 Investment Management Firm,VRTS
 Investment Management Firm,WETF
-Investment Research & Data,VALU
 Investment Research & Data,MORN
-IoT,SMSI
-IoT,TRMB
-IoT,PWFL
-IoT,IRBT
-IoT,IMMR
+Investment Research & Data,VALU
+IoT,AZPN
 IoT,BRQS
+IoT,BSQR
 IoT,CAMP
-IoT,PCTI
 IoT,CETX
 IoT,CETXP
-IoT,DGII
-IoT,BSQR
 IoT,CEVA
-IoT,ZBRA
-IoT,UEIC
+IoT,DGII
+IoT,IMMR
+IoT,IRBT
 IoT,LTRX
-IoT,PTC
-IoT,VIOT
-IoT,AZPN
-IoT,SWIR
-IoT,OSS
-IoT,PI
 IoT,ORBC
+IoT,OSS
+IoT,PCTI
+IoT,PI
+IoT,PTC
+IoT,PWFL
+IoT,SMSI
+IoT,SWIR
+IoT,TRMB
+IoT,UEIC
+IoT,VIOT
+IoT,ZBRA
 Kidney disease,RMTI
 Kidney disease,TCDA
+Laboratory Equipment,A
 Laboratory Equipment,APDN
 Laboratory Equipment,BLFS
 Laboratory Equipment,BNGO
 Laboratory Equipment,BRKR
 Laboratory Equipment,CERS
-Laboratory Equipment,SINT
+Laboratory Equipment,DHR
 Laboratory Equipment,DRRX
-Laboratory Equipment,PDEX
 Laboratory Equipment,FLDM
 Laboratory Equipment,HBIO
 Laboratory Equipment,HTGM
@@ -1798,18 +1798,18 @@ Laboratory Equipment,ILMN
 Laboratory Equipment,MLAB
 Laboratory Equipment,NSTG
 Laboratory Equipment,PACB
+Laboratory Equipment,PDEX
 Laboratory Equipment,PSNL
 Laboratory Equipment,QTRX
 Laboratory Equipment,SEER
+Laboratory Equipment,SINT
 Laboratory Equipment,SYNH
-Laboratory Equipment,TXG
-Laboratory Equipment,A
 Laboratory Equipment,TMO
-Laboratory Equipment,DHR
+Laboratory Equipment,TXG
 Land & Farm estate investments,LAND
 Land & Farm estate investments,PCH
-Lease-to-Own Retailer,RCII
 Lease-to-Own Retailer,FPAY
+Lease-to-Own Retailer,RCII
 Leukemia disease,APRE
 Leukemia disease,BPTH
 Leukemia disease,CYCCP
@@ -1817,25 +1817,25 @@ Leukemia disease,DTIL
 Leukemia disease,EGRX
 Leukemia disease,KRON
 Leukemia disease,ONCT
+Lighting Systems,CREE
 Lighting Systems,EFOI
+Lighting Systems,LEDS
 Lighting Systems,LYTS
 Lighting Systems,OESX
-Lighting Systems,LEDS
 Lighting Systems,REFR
-Lighting Systems,CREE
-Liquified Natural Gas,CLNE
+Liquified Natural Gas,ALTM
 Liquified Natural Gas,CCLP
+Liquified Natural Gas,CLNE
+Liquified Natural Gas,ET
 Liquified Natural Gas,GLNG
 Liquified Natural Gas,GMLPP
 Liquified Natural Gas,MEOH
-Liquified Natural Gas,NFE
 Liquified Natural Gas,NEXT
+Liquified Natural Gas,NFE
+Liquified Natural Gas,OMP
 Liquified Natural Gas,RGCO
 Liquified Natural Gas,SLNG
 Liquified Natural Gas,TELL
-Liquified Natural Gas,ALTM
-Liquified Natural Gas,OMP
-Liquified Natural Gas,ET
 Liver disease,AKRO
 Liver disease,ASMB
 Liver disease,CBAY
@@ -1847,111 +1847,111 @@ Liver disease,PCRX
 Liver disease,TTNP
 Lung cancer disease,ARVN
 Lung cancer disease,NLTX
-Luxury Retail,VRA
 Luxury Retail,CTHR
-Luxury Retail,XELB
+Luxury Retail,GIII
 Luxury Retail,LULU
 Luxury Retail,SECO
-Luxury Retail,GIII
+Luxury Retail,VRA
+Luxury Retail,XELB
 Man's health,ATRS
 Man's health,AYTU
 Man's health,ENDP
 Man's health,LPCN
 Man's health,PRPH
+Maritime Transportation,CCL
 Maritime Transportation,CPLP
 Maritime Transportation,CTRM
-Maritime Transportation,EGLE
 Maritime Transportation,EDRY
+Maritime Transportation,EGLE
 Maritime Transportation,ESEA
+Maritime Transportation,GASS
 Maritime Transportation,GLBS
 Maritime Transportation,GOGL
-Maritime Transportation,PANL
-Maritime Transportation,SHIP
-Maritime Transportation,SBLK
-Maritime Transportation,OMEX
 Maritime Transportation,GRIN
+Maritime Transportation,NCLH
+Maritime Transportation,OMEX
+Maritime Transportation,PANL
 Maritime Transportation,PATI
 Maritime Transportation,PXS
-Maritime Transportation,GASS
-Maritime Transportation,TOPS
+Maritime Transportation,SBLK
+Maritime Transportation,SHIP
 Maritime Transportation,SINO
-Maritime Transportation,CCL
-Maritime Transportation,NCLH
+Maritime Transportation,TOPS
 Meat & Poultry,BRID
 Meat & Poultry,BYND
+Meat & Poultry,CALM
 Meat & Poultry,HFFG
 Meat & Poultry,JBSS
+Meat & Poultry,PLIN
+Meat & Poultry,PME
 Meat & Poultry,PPC
 Meat & Poultry,SAFM
-Meat & Poultry,PME
-Meat & Poultry,PLIN
-Meat & Poultry,CALM
-Medical/Cosmetic Ingredients,RIBT
 Medical/Cosmetic Ingredients,IPAR
 Medical/Cosmetic Ingredients,NAII
 Medical/Cosmetic Ingredients,NEPT
+Medical/Cosmetic Ingredients,RIBT
 Medical/Cosmetic Ingredients,UG
+Memory and Storage,GSIT
+Memory and Storage,MU
 Memory and Storage,SGH
+Memory and Storage,SIMO
 Memory and Storage,SMCI
 Memory and Storage,STX
-Memory and Storage,MU
 Memory and Storage,WDC
-Memory and Storage,GSIT
-Memory and Storage,SIMO
-Mobile Data Capture,SCKT
 Mobile Data Capture,DMRC
+Mobile Data Capture,SCKT
 Mobile Data Capture,SCSC
 Modular Office & Storage,DRTT
-Modular Office & Storage,KBAL
-Modular Office & Storage,UHAL
 Modular Office & Storage,GFN
-Modular Office & Storage,MLHR
+Modular Office & Storage,KBAL
 Modular Office & Storage,MGRC
+Modular Office & Storage,MLHR
+Modular Office & Storage,ODP
 Modular Office & Storage,SGBX
+Modular Office & Storage,UHAL
 Modular Office & Storage,VIRC
 Modular Office & Storage,WSC
-Modular Office & Storage,ODP
 Mortgage Insurance Company,NMIH
 Mortgage investments,AGNC
 Mortgage investments,LOAN
+Mortgage investments,NLY
 Mortgage investments,NYMT
 Mortgage investments,NYMTO
 Mortgage investments,NYMTP
 Mortgage investments,TRMT
-Mortgage investments,NLY
+Motorcycles,BRDS
+Motorcycles,EZGO
 Motorcycles,HOG
 Motorcycles,PII
-Motorcycles,EZGO
-Motorcycles,BRDS
 Nanotechnology,NVEC
+Network Equipment,AAOI
+Network Equipment,ADTN
+Network Equipment,AIRG
+Network Equipment,ALLT
+Network Equipment,AVNW
+Network Equipment,CASA
+Network Equipment,CLFD
+Network Equipment,CMBM
+Network Equipment,COMM
+Network Equipment,CSCO
+Network Equipment,EXFO
+Network Equipment,EXTR
 Network Equipment,INFN
+Network Equipment,JCS
+Network Equipment,NOK
+Network Equipment,NTGR
+Network Equipment,QCOM
+Network Equipment,SILC
 Network Equipment,SONM
 Network Equipment,TCCO
-Network Equipment,AVNW
-Network Equipment,AIRG
-Network Equipment,CASA
-Network Equipment,EXFO
-Network Equipment,VIAV
-Network Equipment,CMBM
 Network Equipment,TESS
-Network Equipment,EXTR
-Network Equipment,NTGR
-Network Equipment,AAOI
-Network Equipment,CLFD
-Network Equipment,COMM
-Network Equipment,QCOM
-Network Equipment,JCS
-Network Equipment,ADTN
-Network Equipment,CSCO
-Network Equipment,ALLT
-Network Equipment,SILC
-Network Equipment,NOK
+Network Equipment,VIAV
+Neurological disease,ADMS
 Neurological disease,ATHE
 Neurological disease,AXSM
 Neurological disease,CRTX
 Neurological disease,CYCN
 Neurological disease,EYEN
-Neurological disease,ADMS
 Neurological disease,ITCI
 Neurological disease,KRTX
 Neurological disease,MRNS
@@ -1965,146 +1965,146 @@ Neurological disease,TRVI
 Neurological disease,WVE
 Nutrition & Health,ALTO
 Nutrition & Health,BCPC
-Office estate investments,GLPI
 Office estate investments,CMCT
 Office estate investments,CMCTP
+Office estate investments,GLPI
 Office estate investments,OPI
-Oil & Gas Producer,DMLP
-Oil & Gas Producer,FLMN
-Oil & Gas Producer,PFIE
-Oil & Gas Producer,VNOM
-Oil & Gas Producer,AXAS
 Oil & Gas Producer,APA
+Oil & Gas Producer,AXAS
 Oil & Gas Producer,BRY
 Oil & Gas Producer,CDEV
-Oil & Gas Producer,CHK
-Oil & Gas Producer,FANG
-Oil & Gas Producer,EPSN
-Oil & Gas Producer,MARPS
-Oil & Gas Producer,OAS
-Oil & Gas Producer,PDCE
-Oil & Gas Producer,PVAC
-Oil & Gas Producer,PNRG
-Oil & Gas Producer,RTLR
-Oil & Gas Producer,TGA
-Oil & Gas Producer,USEG
-Oil & Gas Producer,E
 Oil & Gas Producer,CEI
-Oil & Gas Producer,PBR
-Oil & Gas Producer,SWN
-Oil & Gas Producer,MRO
-Oil & Gas Producer,OXY
-Oil & Gas Producer,PBRA
-Oil & Gas Producer,PBR-A
-Oil & Gas Producer,XOM
+Oil & Gas Producer,CHK
 Oil & Gas Producer,CVX
-Oil & Gas Producer,RDS-B
+Oil & Gas Producer,DMLP
+Oil & Gas Producer,E
+Oil & Gas Producer,EPSN
+Oil & Gas Producer,FANG
+Oil & Gas Producer,FLMN
+Oil & Gas Producer,MARPS
+Oil & Gas Producer,MRO
+Oil & Gas Producer,OAS
+Oil & Gas Producer,OXY
+Oil & Gas Producer,PBR
+Oil & Gas Producer,PBR-A
+Oil & Gas Producer,PBRA
+Oil & Gas Producer,PDCE
+Oil & Gas Producer,PFIE
+Oil & Gas Producer,PNRG
+Oil & Gas Producer,PVAC
 Oil & Gas Producer,RDS-A
+Oil & Gas Producer,RDS-B
+Oil & Gas Producer,RTLR
+Oil & Gas Producer,SWN
+Oil & Gas Producer,TGA
 Oil & Gas Producer,TTE
+Oil & Gas Producer,USEG
+Oil & Gas Producer,VNOM
+Oil & Gas Producer,XOM
+Oil & Gas Services,BROG
+Oil & Gas Services,CHX
+Oil & Gas Services,CLIR
+Oil & Gas Services,DWSN
+Oil & Gas Services,ENG
+Oil & Gas Services,ERII
+Oil & Gas Services,GEOS
+Oil & Gas Services,KLXE
+Oil & Gas Services,KMI
 Oil & Gas Services,MMLP
+Oil & Gas Services,NCSM
+Oil & Gas Services,NESR
 Oil & Gas Services,PAA
 Oil & Gas Services,PAGP
-Oil & Gas Services,CHX
-Oil & Gas Services,KLXE
-Oil & Gas Services,TUSK
-Oil & Gas Services,NESR
+Oil & Gas Services,PRIM
 Oil & Gas Services,PTEN
 Oil & Gas Services,RCON
-Oil & Gas Services,SND
-Oil & Gas Services,DWSN
-Oil & Gas Services,GEOS
-Oil & Gas Services,ERII
-Oil & Gas Services,PRIM
-Oil & Gas Services,ENG
-Oil & Gas Services,WLDN
-Oil & Gas Services,BROG
-Oil & Gas Services,NCSM
-Oil & Gas Services,TH
-Oil & Gas Services,CLIR
-Oil & Gas Services,KMI
 Oil & Gas Services,RIG
+Oil & Gas Services,SND
+Oil & Gas Services,TH
+Oil & Gas Services,TUSK
+Oil & Gas Services,WLDN
 Online Travel Company,BKNG
-Online Travel Company,MMYT
 Online Travel Company,EXPE
-Online Travel Company,TOUR
 Online Travel Company,LTRPA
 Online Travel Company,LTRPB
 Online Travel Company,MKGI
+Online Travel Company,MMYT
 Online Travel Company,PCOM
 Online Travel Company,SABR
-Online Travel Company,TRVG
 Online Travel Company,TCOM
+Online Travel Company,TOUR
 Online Travel Company,TRIP
+Online Travel Company,TRVG
 Online Travel Company,TZOO
 Online Travel Company,YTRA
-Outdoor & Lifestyle Products,ZUMZ
-Outdoor & Lifestyle Products,GPRO
-Outdoor & Lifestyle Products,COLM
-Outdoor & Lifestyle Products,JRSH
 Outdoor & Lifestyle Products,AOUT
-Outdoor & Lifestyle Products,ESCA
-Outdoor & Lifestyle Products,GRMN
-Outdoor & Lifestyle Products,LIND
-Outdoor & Lifestyle Products,SPWH
-Outdoor & Lifestyle Products,ONEW
-Outdoor & Lifestyle Products,TLF
-Outdoor & Lifestyle Products,PTON
-Outdoor & Lifestyle Products,CLAR
 Outdoor & Lifestyle Products,ASO
 Outdoor & Lifestyle Products,BGFV
+Outdoor & Lifestyle Products,CLAR
+Outdoor & Lifestyle Products,COLM
+Outdoor & Lifestyle Products,ESCA
+Outdoor & Lifestyle Products,GPRO
+Outdoor & Lifestyle Products,GRMN
 Outdoor & Lifestyle Products,JOUT
+Outdoor & Lifestyle Products,JRSH
+Outdoor & Lifestyle Products,LIND
+Outdoor & Lifestyle Products,ONEW
+Outdoor & Lifestyle Products,PTON
+Outdoor & Lifestyle Products,SPWH
+Outdoor & Lifestyle Products,TLF
 Outdoor & Lifestyle Products,XSPA
+Outdoor & Lifestyle Products,ZUMZ
 Parking,SP
 Pawn Shops,EZPW
 Pawn Shops,FCFS
-Payment Systems,USIO
-Payment Systems,CSGS
-Payment Systems,EVOP
 Payment Systems,ACIW
-Payment Systems,IIIV
-Payment Systems,NETE
-Payment Systems,PRTH
-Payment Systems,PYPL
 Payment Systems,CASS
+Payment Systems,CSGS
 Payment Systems,CUEN
-Payment Systems,STNE
 Payment Systems,EEFT
+Payment Systems,EVOP
 Payment Systems,FISV
+Payment Systems,IIIV
 Payment Systems,IMXI
 Payment Systems,JKHY
+Payment Systems,MA
 Payment Systems,MGI
+Payment Systems,NETE
 Payment Systems,PAYS
+Payment Systems,PRTH
+Payment Systems,PSFE
+Payment Systems,PYPL
 Payment Systems,QIWI
 Payment Systems,RPAY
+Payment Systems,STNE
 Payment Systems,UEPS
+Payment Systems,USIO
 Payment Systems,V
-Payment Systems,PSFE
-Payment Systems,MA
-People care,DLHC
-People care,ALHC
-People care,AMEH
+People care,ADUS
 People care,AHCO
+People care,ALHC
 People care,AMED
-People care,MODV
+People care,AMEH
+People care,DLHC
 People care,ENSG
 People care,FVE
-People care,ADUS
 People care,LHCG
+People care,MODV
 People care,NVOS
 People care,PNTG
 People care,TVTY
 Pets,CENT
 Pets,CENTA
-Pets,FRPT
-Pets,PETZ
 Pets,DOGZ
+Pets,FRPT
 Pets,PETS
+Pets,PETZ
 Pets,WOOF
-Pharmaceuticals,AMRS
-Pharmaceuticals,MBII
-Pharmaceuticals,JAN
+Pharmaceuticals,ACRX
+Pharmaceuticals,ACST
+Pharmaceuticals,ADIL
 Pharmaceuticals,AERI
-Pharmaceuticals,GILD
+Pharmaceuticals,AMRS
 Pharmaceuticals,APLT
 Pharmaceuticals,AQST
 Pharmaceuticals,ASRT
@@ -2113,61 +2113,61 @@ Pharmaceuticals,AVDL
 Pharmaceuticals,AZN
 Pharmaceuticals,BCYC
 Pharmaceuticals,BDSI
-Pharmaceuticals,GNFT
 Pharmaceuticals,BVXV
 Pharmaceuticals,CABA
 Pharmaceuticals,CLXT
 Pharmaceuticals,CMPS
+Pharmaceuticals,COLL
 Pharmaceuticals,CORT
 Pharmaceuticals,CPIX
 Pharmaceuticals,CTXRW
-Pharmaceuticals,SIGA
 Pharmaceuticals,EARS
 Pharmaceuticals,ELOX
 Pharmaceuticals,ETON
-Pharmaceuticals,ACRX
-Pharmaceuticals,ACST
-Pharmaceuticals,ADIL
+Pharmaceuticals,GILD
+Pharmaceuticals,GNFT
 Pharmaceuticals,HEPA
 Pharmaceuticals,HROW
-Pharmaceuticals,MREO
 Pharmaceuticals,ITRM
+Pharmaceuticals,JAN
+Pharmaceuticals,JNJ
 Pharmaceuticals,KALA
+Pharmaceuticals,LLY
+Pharmaceuticals,MBII
 Pharmaceuticals,MDWD
 Pharmaceuticals,MIRM
+Pharmaceuticals,MREO
+Pharmaceuticals,MRK
+Pharmaceuticals,NVO
+Pharmaceuticals,NVS
 Pharmaceuticals,OMER
 Pharmaceuticals,OPK
 Pharmaceuticals,OPNT
 Pharmaceuticals,ORMP
 Pharmaceuticals,OYST
 Pharmaceuticals,PLXP
+Pharmaceuticals,PTPI
 Pharmaceuticals,REPH
 Pharmaceuticals,RPRX
 Pharmaceuticals,RVNC
 Pharmaceuticals,SBBP
 Pharmaceuticals,SCPH
+Pharmaceuticals,SIGA
 Pharmaceuticals,SNY
 Pharmaceuticals,STSA
 Pharmaceuticals,TBPH
 Pharmaceuticals,VIR
 Pharmaceuticals,VTRS
 Pharmaceuticals,XERS
-Pharmaceuticals,COLL
-Pharmaceuticals,PTPI
-Pharmaceuticals,JNJ
-Pharmaceuticals,LLY
-Pharmaceuticals,NVO
-Pharmaceuticals,MRK
-Pharmaceuticals,NVS
-Pharmaceuticals & Drugs discovery,ENLV
-Pharmaceuticals & Drugs discovery,CCCC
-Pharmaceuticals & Drugs discovery,MORF
-Pharmaceuticals & Drugs discovery,FULC
 Pharmaceuticals & Drugs discovery,ACRS
+Pharmaceuticals & Drugs discovery,CCCC
+Pharmaceuticals & Drugs discovery,ENLV
+Pharmaceuticals & Drugs discovery,FULC
 Pharmaceuticals & Drugs discovery,HOOK
 Pharmaceuticals & Drugs discovery,ICLR
 Pharmaceuticals & Drugs discovery,KLDO
 Pharmaceuticals & Drugs discovery,LMNL
+Pharmaceuticals & Drugs discovery,MORF
 Pharmaceuticals & Drugs discovery,NKTR
 Pharmaceuticals & Drugs discovery,NOTV
 Pharmaceuticals & Drugs discovery,OBSV
@@ -2176,363 +2176,358 @@ Pharmaceuticals & Drugs discovery,RETA
 Pharmaceuticals & Drugs discovery,THTX
 Pharmaceuticals & Drugs discovery,XBIOW
 Pharmacies,CJJD
+Pharmacies,CVS
 Pharmacies,WBA
 Pharmacies,YI
-Pharmacies,CVS
 Plastics,CXDC
 Plastics,DSWL
 Pneumonia disease,NBRV
 Pneumonia disease,PRTK
-Power Generation & Distribution,POWL
-Power Generation & Distribution,TWIN
-Power Generation & Distribution,VICR
+Power Generation & Distribution,AMSC
+Power Generation & Distribution,CLSK
 Power Generation & Distribution,MTRX
 Power Generation & Distribution,MYRG
-Power Generation & Distribution,AMSC
-Power Generation & Distribution,PPSI
 Power Generation & Distribution,POLA
-Power Generation & Distribution,CLSK
+Power Generation & Distribution,POWL
+Power Generation & Distribution,PPSI
+Power Generation & Distribution,TWIN
+Power Generation & Distribution,VICR
 Precious Metal Trading,AMRK
-Precision manufacturing,NATI
+Precision manufacturing,ADSK
+Precision manufacturing,ANSS
+Precision manufacturing,B
 Precision manufacturing,CODA
 Precision manufacturing,ELSE
-Precision manufacturing,SMIT
-Precision manufacturing,ANSS
 Precision manufacturing,MKSI
-Precision manufacturing,ADSK
-Precision manufacturing,B
+Precision manufacturing,NATI
+Precision manufacturing,SMIT
 Print Marketing,CMPR
 Print Marketing,FFHL
 Print Marketing,IKNX
 Print Marketing,KRNT
-Print Marketing,MATW
 Print Marketing,LAMR
-Property & Casualty Insurance,DGICA
-Property & Casualty Insurance,DGICB
-Property & Casualty Insurance,KINS
-Property & Casualty Insurance,NODK
-Property & Casualty Insurance,SAFT
-Property & Casualty Insurance,UIHC
-Property & Casualty Insurance,CINF
-Property & Casualty Insurance,CNFR
-Property & Casualty Insurance,FNHC
-Property & Casualty Insurance,HALL
-Property & Casualty Insurance,KNSL
-Property & Casualty Insurance,SIGI
-Property & Casualty Insurance,STFC
-Property & Casualty Insurance,UNAM
-Property & Casualty Insurance,AMSF
-Property & Casualty Insurance,GBLI
+Print Marketing,MATW
 Property & Casualty Insurance,ACGL
 Property & Casualty Insurance,ACGLO
 Property & Casualty Insurance,ACGLP
+Property & Casualty Insurance,AMSF
+Property & Casualty Insurance,CINF
+Property & Casualty Insurance,CNFR
+Property & Casualty Insurance,DGICA
+Property & Casualty Insurance,DGICB
+Property & Casualty Insurance,FNHC
+Property & Casualty Insurance,GBLI
+Property & Casualty Insurance,HALL
 Property & Casualty Insurance,ICCH
+Property & Casualty Insurance,ITIC
+Property & Casualty Insurance,KINS
+Property & Casualty Insurance,KNSL
+Property & Casualty Insurance,L
+Property & Casualty Insurance,NODK
 Property & Casualty Insurance,PLMR
 Property & Casualty Insurance,PPHI
+Property & Casualty Insurance,SAFT
+Property & Casualty Insurance,SIGI
+Property & Casualty Insurance,STFC
 Property & Casualty Insurance,UFCS
+Property & Casualty Insurance,UIHC
+Property & Casualty Insurance,UNAM
 Property & Casualty Insurance,WTRE
-Property & Casualty Insurance,ITIC
-Property & Casualty Insurance,L
-ProSports Management,FWONA
-ProSports Management,FWONK
 ProSports Management,BATRA
 ProSports Management,BATRK
+ProSports Management,FWONA
+ProSports Management,FWONK
 Publishers,CSSE
 Publishers,CSSEP
 Publishers,DJCO
-Publishers,PLBY
 Publishers,EDUC
 Publishers,LEE
 Publishers,NWS
 Publishers,NWSA
+Publishers,NYT
+Publishers,PLBY
 Publishers,SALM
 Publishers,SCHL
 Publishers,TPCO
-Publishers,NYT
-Rail Freight,RAIL
-Rail Freight,UNP
-Rail Freight,CP
 Rail Freight,CNI
-Rail Freight,NSC
-Rail Freight,WAB
-Rail Freight,TRN
-Rail Freight,KIQ
+Rail Freight,CP
 Rail Freight,GBX
-Rare disease,NMTR
+Rail Freight,KIQ
+Rail Freight,NSC
+Rail Freight,RAIL
+Rail Freight,TRN
+Rail Freight,UNP
+Rail Freight,WAB
+Rare disease,ACER
 Rare disease,CERC
 Rare disease,CHMA
 Rare disease,CNTG
 Rare disease,FLXN
 Rare disease,FREQ
-Rare disease,ACER
-Rare disease,SLNO
 Rare disease,NBSE
+Rare disease,NMTR
 Rare disease,RCKT
+Rare disease,SLNO
 Rare disease,STOK
 Rare disease,ZGNX
 Rare disease,ZSAN
 Real Estate Brokerage & Services,CIGI
-Real Estate Brokerage & Services,NMRK
 Real Estate Brokerage & Services,MDJH
-Real Estate Investment & Development,CHCI
-Real Estate Investment & Development,RDI
-Real Estate Investment & Development,RDIB
-Real Estate Investment & Development,BPYU
-Real Estate Investment & Development,GOOD
-Real Estate Investment & Development,GOODN
-Real Estate Investment & Development,MDRR
-Real Estate Investment & Development,FRPH
-Real Estate Investment & Development,OBAS
+Real Estate Brokerage & Services,NMRK
 Real Estate Investment & Development,BPY
 Real Estate Investment & Development,BPYPO
 Real Estate Investment & Development,BPYPP
-Real Estate Investment & Development,HGSH
+Real Estate Investment & Development,BPYU
+Real Estate Investment & Development,CHCI
+Real Estate Investment & Development,FRPH
+Real Estate Investment & Development,GOOD
+Real Estate Investment & Development,GOODN
 Real Estate Investment & Development,GYRO
+Real Estate Investment & Development,HGSH
 Real Estate Investment & Development,IRCP
+Real Estate Investment & Development,MDRR
 Real Estate Investment & Development,O
-Real Estate Marketplace,ZG
+Real Estate Investment & Development,OBAS
+Real Estate Investment & Development,RDI
+Real Estate Investment & Development,RDIB
 Real Estate Marketplace,Z
+Real Estate Marketplace,ZG
 Real Estate Property Management,FSV
 Real Estate Property Management,RMR
 Real Estate Property Management Technology,APPF
 Real Estate Property Management Technology,DUO
-Real Estate Technology,CSGP
-Real Estate Technology,CIH
-Real Estate Technology,QK
 Real Estate Technology,ASPS
+Real Estate Technology,CIH
+Real Estate Technology,CSGP
 Real Estate Technology,EXPI
 Real Estate Technology,FTHM
-Real Estate Technology,RDFN
 Real Estate Technology,OPEN
+Real Estate Technology,QK
+Real Estate Technology,RDFN
 Recreational Vehicle,DOOO
 Recreational Vehicle,MBUU
 Recreational Vehicle,MCFT
 Recruitment marketplace,HHR
 Recruitment marketplace,UPWK
-Reinsurance,OXBR
 Reinsurance,ESGR
 Reinsurance,ESGRO
 Reinsurance,FGF
+Reinsurance,GLRE
 Reinsurance,JRVR
 Reinsurance,MHLD
-Reinsurance,GLRE
+Reinsurance,OXBR
 Renewable Energy,AY
-Renewable Energy,BLDP
 Renewable Energy,BEEM
+Renewable Energy,BLDP
 Renewable Energy,IPWR
 Residential Mortgage Financing,COOP
-Respiratory disease,COCP
 Respiratory disease,ADMP
+Respiratory disease,COCP
 Respiratory disease,VRNA
 Respiratory disease,VXRT
-Restaurants,RAVE
-Restaurants,RRGB
-Restaurants,RUTH
-Restaurants,TA
-Restaurants,FRGI
-Restaurants,NATH
 Restaurants,ARKR
-Restaurants,BLMN
-Restaurants,GTIM
-Restaurants,BJRI
-Restaurants,PZZA
-Restaurants,CAKE
-Restaurants,CHUY
-Restaurants,STKS
-Restaurants,NDLS
-Restaurants,KRUS
-Restaurants,JACK
-Restaurants,PBPB
-Restaurants,TXRH
-Restaurants,LOCO
-Restaurants,RICK
-Restaurants,CBRL
-Restaurants,TACO
-Restaurants,WING
 Restaurants,BBQ
-Restaurants,TAST
+Restaurants,BJRI
+Restaurants,BLMN
+Restaurants,CAKE
+Restaurants,CBRL
+Restaurants,CHUY
 Restaurants,DENN
 Restaurants,FAT
-Restaurants,WEN
+Restaurants,FRGI
+Restaurants,GTIM
+Restaurants,JACK
+Restaurants,KRUS
 Restaurants,LK
-Restaurants,SBUX
+Restaurants,LOCO
 Restaurants,MCD
-Retail Brokerage,MICT
+Restaurants,NATH
+Restaurants,NDLS
+Restaurants,PBPB
+Restaurants,PZZA
+Restaurants,RAVE
+Restaurants,RICK
+Restaurants,RRGB
+Restaurants,RUTH
+Restaurants,SBUX
+Restaurants,STKS
+Restaurants,TA
+Restaurants,TACO
+Restaurants,TAST
+Restaurants,TXRH
+Restaurants,WEN
+Restaurants,WING
 Retail Brokerage,FRHC
 Retail Brokerage,FUTU
+Retail Brokerage,HOOD
 Retail Brokerage,IBKR
 Retail Brokerage,JRJC
+Retail Brokerage,MICT
 Retail Brokerage,SIEB
 Retail Brokerage,TIGR
-Retail Brokerage,HOOD
-Retail estate investments,MAYS
-Retail estate investments,STRS
 Retail estate investments,AFIN
 Retail estate investments,AFINP
+Retail estate investments,MAYS
 Retail estate investments,REG
 Retail estate investments,ROIC
+Retail estate investments,STRS
+Retail estate investments,SVC
 Retail estate investments,WHLR
 Retail estate investments,WHLRD
 Retail estate investments,WHLRP
-Retail estate investments,SVC
 Retail Supply Chain,CORE
-Retail Supply Chain,STMP
 Retail Supply Chain,SGRP
-Retirement Asset Management,WLTW
+Retail Supply Chain,STMP
 Retirement Asset Management,PFG
+Retirement Asset Management,WLTW
 Sales and Marketing Technologies,ZI
 Satellite Communication,CMTL
-Satellite Communication,SATS
-Satellite Communication,GILT
-Satellite Communication,IRDM
-Satellite Communication,GOGO
-Satellite Communication,VSAT
 Satellite Communication,FEIM
+Satellite Communication,GILT
+Satellite Communication,GOGO
+Satellite Communication,IRDM
 Satellite Communication,KVHI
 Satellite Communication,LORL
-Security & Protection,AXON
-Security & Protection,RDVT
-Security & Protection,VRSK
-Security & Protection,VTSI
-Security & Protection,CTAS
+Satellite Communication,SATS
+Satellite Communication,VSAT
+Security & Protection,ALRM
 Security & Protection,ASTC
+Security & Protection,AXON
+Security & Protection,CTAS
+Security & Protection,DGLY
+Security & Protection,DTSS
+Security & Protection,EVBG
+Security & Protection,FORD
+Security & Protection,GNSS
+Security & Protection,INVE
 Security & Protection,KTOS
+Security & Protection,LAKE
+Security & Protection,MAGS
 Security & Protection,MIND
 Security & Protection,MINDP
-Security & Protection,ALRM
 Security & Protection,NLOK
-Security & Protection,POWW
-Security & Protection,SSTI
-Security & Protection,VRRM
-Security & Protection,WRAP
-Security & Protection,GNSS
-Security & Protection,EVBG
-Security & Protection,DTSS
-Security & Protection,INVE
-Security & Protection,LAKE
 Security & Protection,NSSC
+Security & Protection,POWW
+Security & Protection,RDVT
+Security & Protection,SSTI
 Security & Protection,SWBI
-Security & Protection,DGLY
-Security & Protection,MAGS
-Security & Protection,FORD
-Security Brokerage & Capital Markets,LPLA
-Security Brokerage & Capital Markets,XP
+Security & Protection,VRRM
+Security & Protection,VRSK
+Security & Protection,VTSI
+Security & Protection,WRAP
 Security Brokerage & Capital Markets,BGCP
 Security Brokerage & Capital Markets,GGAL
+Security Brokerage & Capital Markets,LPLA
+Security Brokerage & Capital Markets,XP
+Semiconductor Equipments,ACLS
 Semiconductor Equipments,ACMR
-Semiconductor Equipments,ICHR
+Semiconductor Equipments,AEHR
+Semiconductor Equipments,AMAT
+Semiconductor Equipments,ASML
 Semiconductor Equipments,ASYS
+Semiconductor Equipments,BRKS
+Semiconductor Equipments,CAMT
+Semiconductor Equipments,COHU
+Semiconductor Equipments,CVV
+Semiconductor Equipments,DAIO
+Semiconductor Equipments,FORM
+Semiconductor Equipments,ICHR
+Semiconductor Equipments,IMOS
+Semiconductor Equipments,KEYS
 Semiconductor Equipments,KLAC
+Semiconductor Equipments,KLIC
 Semiconductor Equipments,LRCX
 Semiconductor Equipments,MKTY
-Semiconductor Equipments,AEHR
+Semiconductor Equipments,NVMI
+Semiconductor Equipments,TER
+Semiconductor Equipments,TSM
 Semiconductor Equipments,UCTT
 Semiconductor Equipments,VECO
-Semiconductor Equipments,ASML
-Semiconductor Equipments,TER
-Semiconductor Equipments,FORM
-Semiconductor Equipments,IMOS
-Semiconductor Equipments,BRKS
-Semiconductor Equipments,AMAT
-Semiconductor Equipments,COHU
-Semiconductor Equipments,KLIC
-Semiconductor Equipments,ACLS
-Semiconductor Equipments,CAMT
-Semiconductor Equipments,DAIO
-Semiconductor Equipments,CVV
-Semiconductor Equipments,NVMI
-Semiconductor Equipments,KEYS
-Semiconductor Equipments,TSM
-Semiconductor Manufacturing,NVDA
-Semiconductor Manufacturing,AVGO
-Semiconductor Manufacturing,XLNX
-Semiconductor Manufacturing,PXLW
-Semiconductor Manufacturing,TXN
-Semiconductor Manufacturing,MRVL
-Semiconductor Manufacturing,TSEM
-Semiconductor Manufacturing,AMKR
-Semiconductor Manufacturing,AKTS
-Semiconductor Manufacturing,BELFB
-Semiconductor Manufacturing,AMD
-Semiconductor Manufacturing,DIOD
-Semiconductor Manufacturing,RMBS
-Semiconductor Manufacturing,AMBA
-Semiconductor Manufacturing,MPWR
 Semiconductor Manufacturing,ADI
+Semiconductor Manufacturing,AKTS
+Semiconductor Manufacturing,ALGM
+Semiconductor Manufacturing,AMBA
+Semiconductor Manufacturing,AMD
+Semiconductor Manufacturing,AMKR
+Semiconductor Manufacturing,AVGO
+Semiconductor Manufacturing,BELFB
+Semiconductor Manufacturing,DIOD
 Semiconductor Manufacturing,DSPG
-Semiconductor Manufacturing,MRAM
+Semiconductor Manufacturing,HIMX
 Semiconductor Manufacturing,INTC
 Semiconductor Manufacturing,LSCC
+Semiconductor Manufacturing,MCHP
+Semiconductor Manufacturing,MOSY
+Semiconductor Manufacturing,MPWR
+Semiconductor Manufacturing,MRAM
+Semiconductor Manufacturing,MRVL
+Semiconductor Manufacturing,MTSI
+Semiconductor Manufacturing,NVDA
 Semiconductor Manufacturing,NXPI
 Semiconductor Manufacturing,ON
-Semiconductor Manufacturing,QUIK
-Semiconductor Manufacturing,MCHP
-Semiconductor Manufacturing,WISA
-Semiconductor Manufacturing,XPER
-Semiconductor Manufacturing,ALGM
+Semiconductor Manufacturing,PXLW
 Semiconductor Manufacturing,QRVO
+Semiconductor Manufacturing,QUIK
 Semiconductor Manufacturing,RESN
-Semiconductor Manufacturing,HIMX
+Semiconductor Manufacturing,RMBS
+Semiconductor Manufacturing,SLAB
 Semiconductor Manufacturing,SMTC
 Semiconductor Manufacturing,SWKS
-Semiconductor Manufacturing,MOSY
-Semiconductor Manufacturing,MTSI
-Semiconductor Manufacturing,SLAB
-Semiconductor Materials,AXTI
-Semiconductor Materials,ENTG
+Semiconductor Manufacturing,TSEM
+Semiconductor Manufacturing,TXN
+Semiconductor Manufacturing,WISA
+Semiconductor Manufacturing,XLNX
+Semiconductor Manufacturing,XPER
 Semiconductor Materials,ATOM
-Semiconductor Materials,PLAB
+Semiconductor Materials,AXTI
 Semiconductor Materials,CCMP
-Sharing Economy,LYFT
+Semiconductor Materials,ENTG
+Semiconductor Materials,PLAB
 Sharing Economy,ABNB
 Sharing Economy,DIDI
+Sharing Economy,LYFT
 Sharing Economy,UBER
-Shell company & SPAC,KINZU
-Shell company & SPAC,WHF
-Shell company & SPAC,DNAD
-Shell company & SPAC,GWAC
-Shell company & SPAC,MLAC
 Shell company & SPAC,ABGI
-Shell company & SPAC,GGGVU
-Shell company & SPAC,GGMC
-Shell company & SPAC,GGMCU
-Shell company & SPAC,GGPI
-Shell company & SPAC,GGPIU
-Shell company & SPAC,MLACU
+Shell company & SPAC,ACAH
+Shell company & SPAC,ACAHU
+Shell company & SPAC,ACEV
+Shell company & SPAC,ACEVU
+Shell company & SPAC,ACKIT
+Shell company & SPAC,ACKIU
+Shell company & SPAC,ACQR
+Shell company & SPAC,ACQRU
+Shell company & SPAC,ACTD
+Shell company & SPAC,ACTDU
+Shell company & SPAC,ADER
+Shell company & SPAC,ADERU
+Shell company & SPAC,ADOC
 Shell company & SPAC,AEAC
-Shell company & SPAC,AKIC
-Shell company & SPAC,ANZU
-Shell company & SPAC,ANZUU
-Shell company & SPAC,ALAC
-Shell company & SPAC,ALACU
-Shell company & SPAC,GHAC
-Shell company & SPAC,GHACU
-Shell company & SPAC,GHVI
-Shell company & SPAC,GHVIU
 Shell company & SPAC,AFAQ
 Shell company & SPAC,AFAQU
-Shell company & SPAC,GIGGU
-Shell company & SPAC,GIIX
-Shell company & SPAC,GIIXU
-Shell company & SPAC,GIWWU
-Shell company & SPAC,GLAQ
-Shell company & SPAC,GLBLU
-Shell company & SPAC,GLHA
-Shell company & SPAC,GLHAU
-Shell company & SPAC,GLSPT
-Shell company & SPAC,GXII
-Shell company & SPAC,GXIIU
 Shell company & SPAC,AGBA
-Shell company & SPAC,AGC
 Shell company & SPAC,AGBAU
-Shell company & SPAC,AGGRU
+Shell company & SPAC,AGC
 Shell company & SPAC,AGGR
+Shell company & SPAC,AGGRU
+Shell company & SPAC,AHAC
+Shell company & SPAC,AHACU
+Shell company & SPAC,AHACW
+Shell company & SPAC,AKIC
+Shell company & SPAC,ALAC
+Shell company & SPAC,ALACU
 Shell company & SPAC,ALTU
 Shell company & SPAC,AMAO
 Shell company & SPAC,AMAOU
+Shell company & SPAC,AMHC
+Shell company & SPAC,AMHCU
+Shell company & SPAC,ANDA
+Shell company & SPAC,ANZU
+Shell company & SPAC,ANZUU
 Shell company & SPAC,APXTU
+Shell company & SPAC,ARBG
 Shell company & SPAC,ARRW
 Shell company & SPAC,ARRWU
+Shell company & SPAC,ARYD
 Shell company & SPAC,ASAX
 Shell company & SPAC,ASAXU
 Shell company & SPAC,ASPC
@@ -2543,14 +2538,10 @@ Shell company & SPAC,ATVC
 Shell company & SPAC,ATVCU
 Shell company & SPAC,AURC
 Shell company & SPAC,AURCU
-Shell company & SPAC,ARBG
-Shell company & SPAC,ARYD
 Shell company & SPAC,BCAC
 Shell company & SPAC,BCTG
-Shell company & SPAC,MTAC
 Shell company & SPAC,BENE
 Shell company & SPAC,BENEU
-Shell company & SPAC,MTACU
 Shell company & SPAC,BHSE
 Shell company & SPAC,BHSEU
 Shell company & SPAC,BLSA
@@ -2558,36 +2549,21 @@ Shell company & SPAC,BLTS
 Shell company & SPAC,BLTSU
 Shell company & SPAC,BLUW
 Shell company & SPAC,BLUWU
-Shell company & SPAC,BTNB
 Shell company & SPAC,BOWX
 Shell company & SPAC,BREZ
-Shell company & SPAC,BTWN
 Shell company & SPAC,BRLIU
-Shell company & SPAC,BTWNU
 Shell company & SPAC,BSGAU
 Shell company & SPAC,BSKY
 Shell company & SPAC,BSKYU
 Shell company & SPAC,BTAQ
-Shell company & SPAC,CFIV
-Shell company & SPAC,CFIVU
-Shell company & SPAC,GMBT
-Shell company & SPAC,GMII
-Shell company & SPAC,GMIIU
-Shell company & SPAC,GNAC
-Shell company & SPAC,AHAC
-Shell company & SPAC,AHACU
-Shell company & SPAC,GOBI
-Shell company & SPAC,AMHC
-Shell company & SPAC,AMHCU
-Shell company & SPAC,HAAC
-Shell company & SPAC,ANDA
-Shell company & SPAC,NBST
+Shell company & SPAC,BTNB
+Shell company & SPAC,BTWN
+Shell company & SPAC,BTWNU
 Shell company & SPAC,BWAC
 Shell company & SPAC,BYTS
 Shell company & SPAC,BYTSU
 Shell company & SPAC,CAHC
 Shell company & SPAC,CAHCU
-Shell company & SPAC,NBSTU
 Shell company & SPAC,CENH
 Shell company & SPAC,CENHU
 Shell company & SPAC,CFAC
@@ -2595,18 +2571,21 @@ Shell company & SPAC,CFACU
 Shell company & SPAC,CFFE
 Shell company & SPAC,CFFEU
 Shell company & SPAC,CFFVU
+Shell company & SPAC,CFIV
+Shell company & SPAC,CFIVU
 Shell company & SPAC,CFV
 Shell company & SPAC,CFVI
 Shell company & SPAC,CFVIU
 Shell company & SPAC,CHPM
 Shell company & SPAC,CHPMU
-Shell company & SPAC,SBEAU
 Shell company & SPAC,CLRM
 Shell company & SPAC,CMII
 Shell company & SPAC,CMIIU
 Shell company & SPAC,CMLF
 Shell company & SPAC,CMLT
 Shell company & SPAC,CMLTU
+Shell company & SPAC,COLI
+Shell company & SPAC,COLIU
 Shell company & SPAC,CONX
 Shell company & SPAC,COVA
 Shell company & SPAC,COVAU
@@ -2620,6 +2599,7 @@ Shell company & SPAC,DCRCU
 Shell company & SPAC,DCRNU
 Shell company & SPAC,DFPH
 Shell company & SPAC,DFPHU
+Shell company & SPAC,DFPHW
 Shell company & SPAC,DGNS
 Shell company & SPAC,DGNU
 Shell company & SPAC,DHBC
@@ -2637,8 +2617,10 @@ Shell company & SPAC,DLCAU
 Shell company & SPAC,DNAA
 Shell company & SPAC,DNAB
 Shell company & SPAC,DNAC
+Shell company & SPAC,DNAD
 Shell company & SPAC,DRAYU
 Shell company & SPAC,DSAC
+Shell company & SPAC,DSACW
 Shell company & SPAC,DTOC
 Shell company & SPAC,DTOCU
 Shell company & SPAC,DUNE
@@ -2647,7 +2629,6 @@ Shell company & SPAC,DYNS
 Shell company & SPAC,EACPU
 Shell company & SPAC,EBAC
 Shell company & SPAC,EBACU
-Shell company & SPAC,NVSAU
 Shell company & SPAC,EJFA
 Shell company & SPAC,EJFAU
 Shell company & SPAC,ELMSW
@@ -2658,6 +2639,7 @@ Shell company & SPAC,ENNVU
 Shell company & SPAC,ENVIU
 Shell company & SPAC,EPHY
 Shell company & SPAC,ERESU
+Shell company & SPAC,ERESW
 Shell company & SPAC,ESSC
 Shell company & SPAC,ESSCU
 Shell company & SPAC,ETAC
@@ -2671,7 +2653,6 @@ Shell company & SPAC,FCACU
 Shell company & SPAC,FICVU
 Shell company & SPAC,FINM
 Shell company & SPAC,FINMU
-Shell company & SPAC,MOTN
 Shell company & SPAC,FLAC
 Shell company & SPAC,FMIV
 Shell company & SPAC,FMIVU
@@ -2685,6 +2666,7 @@ Shell company & SPAC,FRONU
 Shell company & SPAC,FRSG
 Shell company & SPAC,FRSGU
 Shell company & SPAC,FRWAU
+Shell company & SPAC,FRWAW
 Shell company & SPAC,FSRXU
 Shell company & SPAC,FSSI
 Shell company & SPAC,FSSIU
@@ -2704,8 +2686,30 @@ Shell company & SPAC,GBRG
 Shell company & SPAC,GBRGU
 Shell company & SPAC,GCAC
 Shell company & SPAC,GCACU
+Shell company & SPAC,GGGVU
+Shell company & SPAC,GGMC
+Shell company & SPAC,GGMCU
+Shell company & SPAC,GGPI
+Shell company & SPAC,GGPIU
+Shell company & SPAC,GHAC
+Shell company & SPAC,GHACU
+Shell company & SPAC,GHVI
+Shell company & SPAC,GHVIU
+Shell company & SPAC,GIGGU
+Shell company & SPAC,GIIX
+Shell company & SPAC,GIIXU
+Shell company & SPAC,GIWWU
+Shell company & SPAC,GLAQ
+Shell company & SPAC,GLBLU
+Shell company & SPAC,GLHA
+Shell company & SPAC,GLHAU
+Shell company & SPAC,GLSPT
+Shell company & SPAC,GMBT
+Shell company & SPAC,GMII
+Shell company & SPAC,GMIIU
+Shell company & SPAC,GNAC
+Shell company & SPAC,GOBI
 Shell company & SPAC,GPCOU
-Shell company & SPAC,HAACU
 Shell company & SPAC,GRCY
 Shell company & SPAC,GRCYU
 Shell company & SPAC,GRNV
@@ -2717,20 +2721,11 @@ Shell company & SPAC,GSEV
 Shell company & SPAC,GSEVU
 Shell company & SPAC,GTPA
 Shell company & SPAC,GTPB
-Shell company & SPAC,ACEV
-Shell company & SPAC,ACEVU
-Shell company & SPAC,ACKIT
-Shell company & SPAC,ACKIU
-Shell company & SPAC,ACQR
-Shell company & SPAC,ACQRU
-Shell company & SPAC,ACTD
-Shell company & SPAC,ACTDU
-Shell company & SPAC,ADER
-Shell company & SPAC,ADERU
-Shell company & SPAC,ADOC
-Shell company & SPAC,MRAC
-Shell company & SPAC,ACAH
-Shell company & SPAC,ACAHU
+Shell company & SPAC,GWAC
+Shell company & SPAC,GXII
+Shell company & SPAC,GXIIU
+Shell company & SPAC,HAAC
+Shell company & SPAC,HAACU
 Shell company & SPAC,HCAQ
 Shell company & SPAC,HCAR
 Shell company & SPAC,HCARU
@@ -2779,6 +2774,7 @@ Shell company & SPAC,KAIRU
 Shell company & SPAC,KIII
 Shell company & SPAC,KIIIU
 Shell company & SPAC,KINZ
+Shell company & SPAC,KINZU
 Shell company & SPAC,KLAQ
 Shell company & SPAC,KLAQU
 Shell company & SPAC,KRNL
@@ -2814,7 +2810,6 @@ Shell company & SPAC,LIVK
 Shell company & SPAC,LIVKU
 Shell company & SPAC,LJAQ
 Shell company & SPAC,LJAQU
-Shell company & SPAC,MSAC
 Shell company & SPAC,LMACA
 Shell company & SPAC,LMACU
 Shell company & SPAC,LMAO
@@ -2826,28 +2821,39 @@ Shell company & SPAC,LWAC
 Shell company & SPAC,LWACU
 Shell company & SPAC,MAAC
 Shell company & SPAC,MAACU
+Shell company & SPAC,MAACW
 Shell company & SPAC,MACA
 Shell company & SPAC,MACAU
 Shell company & SPAC,MACU
 Shell company & SPAC,MACUU
+Shell company & SPAC,MACUW
 Shell company & SPAC,MAQC
 Shell company & SPAC,MAQCU
 Shell company & SPAC,MBTC
 Shell company & SPAC,MBTCU
 Shell company & SPAC,MCAD
 Shell company & SPAC,MCADU
+Shell company & SPAC,MCAER
 Shell company & SPAC,MCAEU
 Shell company & SPAC,MCAFU
 Shell company & SPAC,MCMJ
-Shell company & SPAC,PRSR
 Shell company & SPAC,MITAU
+Shell company & SPAC,MLAC
+Shell company & SPAC,MLACU
 Shell company & SPAC,MON
+Shell company & SPAC,MOTN
+Shell company & SPAC,MRAC
+Shell company & SPAC,MSAC
 Shell company & SPAC,MSDA
 Shell company & SPAC,MSDAU
+Shell company & SPAC,MTAC
+Shell company & SPAC,MTACU
 Shell company & SPAC,MUDS
 Shell company & SPAC,MUDSU
 Shell company & SPAC,NAAC
 Shell company & SPAC,NAACU
+Shell company & SPAC,NBST
+Shell company & SPAC,NBSTU
 Shell company & SPAC,NDAC
 Shell company & SPAC,NDACU
 Shell company & SPAC,NEBC
@@ -2861,10 +2867,9 @@ Shell company & SPAC,NOACU
 Shell company & SPAC,NPA
 Shell company & SPAC,NRAC
 Shell company & SPAC,NVSA
-Shell company & SPAC,PSAG
+Shell company & SPAC,NVSAU
 Shell company & SPAC,OCAX
 Shell company & SPAC,OCAXU
-Shell company & SPAC,PSAGU
 Shell company & SPAC,OEPW
 Shell company & SPAC,OHPA
 Shell company & SPAC,OHPAU
@@ -2879,6 +2884,7 @@ Shell company & SPAC,PAIC
 Shell company & SPAC,PAICU
 Shell company & SPAC,PANA
 Shell company & SPAC,PAQC
+Shell company & SPAC,PAYOW
 Shell company & SPAC,PFDR
 Shell company & SPAC,PFDRU
 Shell company & SPAC,PGRWU
@@ -2891,8 +2897,11 @@ Shell company & SPAC,PMGMU
 Shell company & SPAC,POW
 Shell company & SPAC,POWRU
 Shell company & SPAC,PPGH
+Shell company & SPAC,PRSR
 Shell company & SPAC,PSAC
 Shell company & SPAC,PSACU
+Shell company & SPAC,PSAG
+Shell company & SPAC,PSAGU
 Shell company & SPAC,PTIC
 Shell company & SPAC,PTICU
 Shell company & SPAC,PTOC
@@ -2906,7 +2915,6 @@ Shell company & SPAC,RAMMU
 Shell company & SPAC,RCHG
 Shell company & SPAC,RCLF
 Shell company & SPAC,RCLFU
-Shell company & SPAC,SPKAU
 Shell company & SPAC,REVH
 Shell company & SPAC,REVHU
 Shell company & SPAC,RMGB
@@ -2923,6 +2931,7 @@ Shell company & SPAC,RXRA
 Shell company & SPAC,RXRAU
 Shell company & SPAC,SAII
 Shell company & SPAC,SBEA
+Shell company & SPAC,SBEAU
 Shell company & SPAC,SCAQ
 Shell company & SPAC,SCAQU
 Shell company & SPAC,SCLE
@@ -2938,13 +2947,14 @@ Shell company & SPAC,SHAC
 Shell company & SPAC,SHACU
 Shell company & SPAC,SHQAU
 Shell company & SPAC,SKYAU
-Shell company & SPAC,SLCR
 Shell company & SPAC,SLAMU
+Shell company & SPAC,SLCR
 Shell company & SPAC,SLCRU
 Shell company & SPAC,SMIHU
 Shell company & SPAC,SNRH
 Shell company & SPAC,SNRHU
 Shell company & SPAC,SOFI
+Shell company & SPAC,SPKAU
 Shell company & SPAC,SPKB
 Shell company & SPAC,SPKBU
 Shell company & SPAC,SPTKU
@@ -2974,6 +2984,7 @@ Shell company & SPAC,TCACU
 Shell company & SPAC,TCVA
 Shell company & SPAC,TDAC
 Shell company & SPAC,TDACU
+Shell company & SPAC,TDACW
 Shell company & SPAC,TEKK
 Shell company & SPAC,TETC
 Shell company & SPAC,TETCU
@@ -2998,7 +3009,9 @@ Shell company & SPAC,TVACU
 Shell company & SPAC,TWCT
 Shell company & SPAC,TZPS
 Shell company & SPAC,TZPSU
+Shell company & SPAC,UPTDU
 Shell company & SPAC,VACQ
+Shell company & SPAC,VACQW
 Shell company & SPAC,VAQC
 Shell company & SPAC,VCKA
 Shell company & SPAC,VCKAU
@@ -3021,9 +3034,11 @@ Shell company & SPAC,VTIQ
 Shell company & SPAC,VTIQU
 Shell company & SPAC,WALD
 Shell company & SPAC,WALDU
+Shell company & SPAC,WHF
 Shell company & SPAC,XPDI
 Shell company & SPAC,XPDIU
 Shell company & SPAC,YSAC
+Shell company & SPAC,YSACW
 Shell company & SPAC,ZGYH
 Shell company & SPAC,ZGYHU
 Shell company & SPAC,ZNTE
@@ -3031,156 +3046,139 @@ Shell company & SPAC,ZNTEU
 Shell company & SPAC,ZTAQU
 Shell company & SPAC,ZWRK
 Shell company & SPAC,ZWRKU
-Shell company & SPAC,COLI
-Shell company & SPAC,COLIU
-Shell company & SPAC,AHACW
-Shell company & SPAC,DFPHW
-Shell company & SPAC,DSACW
-Shell company & SPAC,ERESW
-Shell company & SPAC,FRWAW
-Shell company & SPAC,MAACW
-Shell company & SPAC,MACUW
-Shell company & SPAC,MCAER
-Shell company & SPAC,PAYOW
-Shell company & SPAC,TDACW
-Shell company & SPAC,UPTDU
-Shell company & SPAC,VACQW
-Shell company & SPAC,YSACW
 Sleep disorder,JAZZ
+Snacks & Candy,JJSF
+Snacks & Candy,K
+Snacks & Candy,MDLZ
 Snacks & Candy,RMCF
 Snacks & Candy,SMPL
 Snacks & Candy,STKL
-Snacks & Candy,JJSF
-Snacks & Candy,MDLZ
 Snacks & Candy,TWNK
 Snacks & Candy,TWNKW
-Snacks & Candy,K
-Social Media,YY
-Social Media,MOMO
 Social Media,FB
-Social Media,WB
+Social Media,MOMO
 Social Media,MOXC
 Social Media,MTCH
 Social Media,SNAP
 Social Media,TWTR
+Social Media,WB
+Social Media,YY
 Social Media Enterprise Software,SPT
+Soft/Sports Drink,ABEV
 Soft/Sports Drink,CELH
-Soft/Sports Drink,MNST
+Soft/Sports Drink,COKE
 Soft/Sports Drink,FIZZ
 Soft/Sports Drink,KDP
+Soft/Sports Drink,KO
+Soft/Sports Drink,MNST
 Soft/Sports Drink,PEP
-Soft/Sports Drink,COKE
 Soft/Sports Drink,REED
 Soft/Sports Drink,WTER
-Soft/Sports Drink,ABEV
-Soft/Sports Drink,KO
-Solar Energy,RUN
-Solar Energy,SUNW
-Solar Energy,VVPR
-Solar Energy,SEDG
-Solar Energy,MAXN
-Solar Energy,SPI
-Solar Energy,SPWR
+Solar Energy,CSIQ
 Solar Energy,ENPH
 Solar Energy,FSLR
-Solar Energy,CSIQ
+Solar Energy,MAXN
+Solar Energy,RUN
+Solar Energy,SEDG
+Solar Energy,SPI
+Solar Energy,SPWR
+Solar Energy,SUNW
+Solar Energy,VVPR
 Specialty Chemicals,CLMT
 Specialty Chemicals,CSWI
+Specialty Chemicals,HDSN
 Specialty Chemicals,IOSP
-Specialty Chemicals,SYNL
+Specialty Chemicals,LIN
 Specialty Chemicals,NDSN
 Specialty Chemicals,NTIC
-Specialty Chemicals,HDSN
-Specialty Chemicals,LIN
-Staffing Services,CCRC
-Staffing Services,KFRC
-Staffing Services,RCMT
-Staffing Services,WHLM
-Staffing Services,JOBS
+Specialty Chemicals,SYNL
 Staffing Services,BBSI
+Staffing Services,CCRC
 Staffing Services,HQI
 Staffing Services,HSON
+Staffing Services,JOBS
 Staffing Services,KELYA
 Staffing Services,KELYB
+Staffing Services,KFRC
 Staffing Services,PIXY
+Staffing Services,RCMT
 Staffing Services,STAF
+Staffing Services,WHLM
+Streaming,BILI
 Streaming,DOYU
 Streaming,IQ
 Streaming,LIVX
+Streaming,LLNW
 Streaming,NFLX
 Streaming,ROKU
-Streaming,BILI
-Streaming,LLNW
 Streaming,TME
 Student Loan,NAVI
 Student Loan,SLM
-Supermarkets,GO
 Supermarkets,CASY
+Supermarkets,COST
+Supermarkets,GO
+Supermarkets,IFMK
 Supermarkets,IMKTA
+Supermarkets,PSMT
+Supermarkets,SFM
 Supermarkets,SPTN
 Supermarkets,VLGEA
-Supermarkets,COST
-Supermarkets,IFMK
-Supermarkets,SFM
-Supermarkets,PSMT
 Supermarkets,WMT
-Supply Chain Services,EXPD
 Supply Chain Services,DXPE
+Supply Chain Services,EXPD
 Supply Chain Services,PKOH
 Supply Chain Services,UPS
-Supply Chain Technology,STCN
-Supply Chain Technology,MANH
-Supply Chain Technology,SPSC
-Supply Chain Technology,PBTS
-Supply Chain Technology,DSGX
-Supply Chain Technology,BOSC
 Supply Chain Technology,AMSWA
+Supply Chain Technology,BOSC
 Supply Chain Technology,COUP
+Supply Chain Technology,DSGX
+Supply Chain Technology,MANH
+Supply Chain Technology,PBTS
 Supply Chain Technology,PCYG
-Technology Conglomerate,BIDU
-Technology Conglomerate,MSFT
+Supply Chain Technology,SPSC
+Supply Chain Technology,STCN
 Technology Conglomerate,AMZN
-Technology Conglomerate,YNDX
-Technology Conglomerate,SOHU
-Technology Conglomerate,NTES
+Technology Conglomerate,BIDU
 Technology Conglomerate,GOOG
 Technology Conglomerate,GOOGL
-Technology Consulting,PRFT
+Technology Conglomerate,MSFT
+Technology Conglomerate,NTES
+Technology Conglomerate,SOHU
+Technology Conglomerate,YNDX
 Technology Consulting,ALYA
-Technology Consulting,CTG
 Technology Consulting,CLPS
+Technology Consulting,CTG
 Technology Consulting,GDYN
 Technology Consulting,HCKT
 Technology Consulting,III
-Telecom Infrastructure,ERIC
+Technology Consulting,PRFT
 Telecom Infrastructure,AEY
-Telecom Infrastructure,RBBN
+Telecom Infrastructure,APWC
+Telecom Infrastructure,DZSI
+Telecom Infrastructure,ERIC
 Telecom Infrastructure,FKWL
 Telecom Infrastructure,IDCC
 Telecom Infrastructure,INSG
-Telecom Infrastructure,DZSI
-Telecom Infrastructure,APWC
 Telecom Infrastructure,PLPC
+Telecom Infrastructure,RBBN
+Tobacco,BTI
+Tobacco,KAVL
+Tobacco,MO
 Tobacco,PM
 Tobacco,RLX
-Tobacco,MO
-Tobacco,BTI
-Tobacco,VGR
-Tobacco,KAVL
 Tobacco,TPB
 Tobacco,UVV
+Tobacco,VGR
 Traded Growth/Venture Funds,CSWC
 Traded Growth/Venture Funds,HLNE
-Traded Growth/Venture Funds,MRCC
 Traded Growth/Venture Funds,HRZN
+Traded Growth/Venture Funds,MRCC
 Traded Growth/Venture Funds,NEWT
 Traded Growth/Venture Funds,SSSS
 Traded Private Investment Funds,ACTG
-Traded Private Investment Funds,MMAC
-Traded Private Investment Funds,GLAD
+Traded Private Investment Funds,AINV
 Traded Private Investment Funds,ARCC
 Traded Private Investment Funds,BKCC
-Traded Private Investment Funds,AINV
 Traded Private Investment Funds,CG
 Traded Private Investment Funds,CGBD
 Traded Private Investment Funds,CPTA
@@ -3188,23 +3186,25 @@ Traded Private Investment Funds,FDUS
 Traded Private Investment Funds,GAIN
 Traded Private Investment Funds,GBDC
 Traded Private Investment Funds,GECC
-Traded Private Investment Funds,PFX
+Traded Private Investment Funds,GLAD
 Traded Private Investment Funds,ICMB
+Traded Private Investment Funds,MMAC
 Traded Private Investment Funds,NMFC
 Traded Private Investment Funds,OCSL
 Traded Private Investment Funds,OFS
 Traded Private Investment Funds,OXSQ
 Traded Private Investment Funds,OXSQL
 Traded Private Investment Funds,PFLT
+Traded Private Investment Funds,PFX
 Traded Private Investment Funds,PNNT
 Traded Private Investment Funds,PSEC
 Traded Private Investment Funds,RAND
 Traded Private Investment Funds,SLRC
 Traded Private Investment Funds,SUNS
 Traded Private Investment Funds,TCPC
-Trading System,MTC
 Trading System,AGMH
 Trading System,MKTX
+Trading System,MTC
 Trading System,TW
 Trading System,VIRT
 Transplantology,BCEL
@@ -3214,8 +3214,8 @@ Transplantology,IGMS
 Transplantology,TWST
 Trucking,ARCB
 Trucking,CHRW
-Trucking,CVLG
 Trucking,CSX
+Trucking,CVLG
 Trucking,DSKE
 Trucking,ECHO
 Trucking,FWRD
@@ -3226,101 +3226,101 @@ Trucking,LSTR
 Trucking,MRTN
 Trucking,ODFL
 Trucking,PTSI
+Trucking,R
 Trucking,SAIA
 Trucking,ULH
 Trucking,USAK
 Trucking,WERN
 Trucking,YELL
-Trucking,R
-TV and Radio,CIDM
+TV and Radio,AMC
+TV and Radio,AMCX
 TV and Radio,BBGI
-TV and Radio,SGA
-TV and Radio,UONE
-TV and Radio,UONEK
+TV and Radio,CIDM
+TV and Radio,CMLS
+TV and Radio,DIS
+TV and Radio,DISCA
+TV and Radio,DISCB
+TV and Radio,DISCK
 TV and Radio,DISH
 TV and Radio,FOX
 TV and Radio,FOXA
-TV and Radio,NXST
-TV and Radio,DISCA
-TV and Radio,DISCB
 TV and Radio,HMTV
-TV and Radio,DISCK
-TV and Radio,SBGI
-TV and Radio,SSP
-TV and Radio,VIAC
-TV and Radio,VIACA
-TV and Radio,CMLS
-TV and Radio,AMCX
 TV and Radio,LSXMA
 TV and Radio,LSXMB
 TV and Radio,LSXMK
+TV and Radio,NXST
+TV and Radio,SBGI
+TV and Radio,SGA
 TV and Radio,SIRI
-TV and Radio,AMC
-TV and Radio,DIS
-TV Shopping Network,QRTEA
+TV and Radio,SSP
+TV and Radio,UONE
+TV and Radio,UONEK
+TV and Radio,VIAC
+TV and Radio,VIACA
 TV Shopping Network,IMBI
+TV Shopping Network,QRTEA
 TV Shopping Network,QRTEB
 Vehicle Rental,CAR
 Vehicle Rental,HYRE
 Video Technology,API
-Video Technology,VISL
-Video Technology,QUMU
-Video Technology,XNET
-Video Technology,RNWK
 Video Technology,AVID
-Video Technology,SEAC
 Video Technology,BCOV
 Video Technology,HLIT
+Video Technology,QUMU
+Video Technology,RNWK
+Video Technology,SEAC
+Video Technology,VISL
+Video Technology,XNET
 Waste Management,BHTG
-Waste Management,CWST
 Waste Management,CREG
+Waste Management,CWST
+Waste Management,ECOL
+Waste Management,ECOLW
 Waste Management,HCCI
 Waste Management,PESI
 Waste Management,QRHC
 Waste Management,SRCL
-Waste Management,ECOL
-Waste Management,ECOLW
 Waste Management,VTNR
-Water Management,CLWT
-Water Management,LIQT
-Water Management,NEWA
 Water Management,AEGN
 Water Management,ARTNA
+Water Management,CLWT
 Water Management,CWCO
 Water Management,GWRS
+Water Management,LIQT
 Water Management,MSEX
-Water Management,PCYO
-Water Management,YORW
-Water Management,VWTR
 Water Management,NEPH
+Water Management,NEWA
+Water Management,PCYO
+Water Management,VWTR
+Water Management,YORW
+Wealth Management,BCOR
+Wealth Management,FOCS
 Wealth Management,JFU
+Wealth Management,MS
 Wealth Management,NTRS
 Wealth Management,PHCF
-Wealth Management,BCOR
 Wealth Management,PUYI
-Wealth Management,FOCS
-Wealth Management,MS
 Wealth Management,SCHW
 Wine & Liquor,EAST
+Wine & Liquor,MGPI
 Wine & Liquor,WVVI
 Wine & Liquor,WVVIP
-Wine & Liquor,MGPI
-Women's health,AWH
+Women's health,AGRX
 Women's health,AIH
+Women's health,AMPH
+Women's health,ANIP
+Women's health,AWH
 Women's health,CUTR
 Women's health,DARE
+Women's health,EOLS
+Women's health,EVFM
 Women's health,HOLX
 Women's health,INVO
+Women's health,NTRA
 Women's health,PGNY
 Women's health,PROG
 Women's health,QDEL
-Women's health,VIVE
-Women's health,AGRX
-Women's health,AMPH
-Women's health,ANIP
 Women's health,SCYX
-Women's health,EOLS
-Women's health,EVFM
-Women's health,NTRA
 Women's health,TLGT
 Women's health,TXMD
+Women's health,VIVE
