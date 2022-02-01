@@ -14,26 +14,26 @@
 {% if is_incremental() and var('realtime') %}
 with period_settings as
          (
-             select date_trunc('minute', now()) - interval '30 minute' -
+             select (date_trunc('minute', now()) - interval '30 minute' -
                     interval '1 minute' *
-                    mod(extract(minutes from now())::int, 15) as period_start,
-                    date_trunc('minute', now()) - interval '15 minute' -
+                    mod(extract(minutes from now())::int, 15))::timestamp as period_start,
+                    (date_trunc('minute', now()) - interval '15 minute' -
                     interval '1 minute' *
-                    mod(extract(minutes from now())::int, 15) as period_end
+                    mod(extract(minutes from now())::int, 15))::timestamp as period_end
              union all
-             select date_trunc('minute', now()) - interval '15 minute' -
+             select (date_trunc('minute', now()) - interval '15 minute' -
                     interval '1 minute' *
-                    mod(extract(minutes from now())::int, 15) as period_start,
-                    date_trunc('minute', now()) -
+                    mod(extract(minutes from now())::int, 15))::timestamp as period_start,
+                    (date_trunc('minute', now()) -
                     interval '1 minute' *
-                    mod(extract(minutes from now())::int, 15) as period_end
+                    mod(extract(minutes from now())::int, 15))::timestamp as period_end
              union all
-             select date_trunc('minute', now()) -
+             select (date_trunc('minute', now()) -
                     interval '1 minute' *
-                    mod(extract(minutes from now())::int, 15) as period_start,
-                    date_trunc('minute', now()) + interval '15 minute' -
+                    mod(extract(minutes from now())::int, 15))::timestamp as period_start,
+                    (date_trunc('minute', now()) + interval '15 minute' -
                     interval '1 minute' *
-                    mod(extract(minutes from now())::int, 15) as period_end
+                    mod(extract(minutes from now())::int, 15))::timestamp as period_end
          ),
      expanded_intraday_prices as
          (
@@ -78,19 +78,22 @@ with period_settings as
              order by symbol, datetime desc
          )
 select (base_tickers.symbol || '_' ||
-        coalesce(new_data.period_start, latest_old_data.period_start)::timestamp || '_15min')::varchar as id,
+        period_settings.period_start || '_15min')::varchar      as id,
        base_tickers.symbol,
-       coalesce(new_data.period_start, latest_old_data.period_start)::timestamp                        as time,
-       coalesce(new_data.period_start, latest_old_data.period_start)::timestamp                        as datetime,
-       '15min'::varchar                                                                                as period,
-       coalesce(new_data.open, latest_old_data.close)                                                  as open,
-       coalesce(new_data.high, latest_old_data.close)                                                  as high,
-       coalesce(new_data.low, latest_old_data.close)                                                   as low,
-       coalesce(new_data.close, latest_old_data.close)                                                 as close,
-       coalesce(new_data.close, latest_old_data.adjusted_close)                                        as adjusted_close,
-       coalesce(new_data.volume, 0)                                                                    as volume
+       period_settings.period_start                             as time,
+       period_settings.period_start                             as datetime,
+       '15min'::varchar                                         as period,
+       coalesce(new_data.open, latest_old_data.close)           as open,
+       coalesce(new_data.high, latest_old_data.close)           as high,
+       coalesce(new_data.low, latest_old_data.close)            as low,
+       coalesce(new_data.close, latest_old_data.close)          as close,
+       coalesce(new_data.close, latest_old_data.adjusted_close) as adjusted_close,
+       coalesce(new_data.volume, 0)                             as volume
 from {{ ref('base_tickers') }}
-         left join new_data on new_data.symbol = base_tickers.symbol
+         join period_settings on true
+         left join new_data
+                   on new_data.symbol = base_tickers.symbol
+                          and new_data.period_start = period_settings.period_start
          left join latest_old_data on latest_old_data.symbol = base_tickers.symbol
 where new_data.symbol is not null
    or latest_old_data.symbol is not null
