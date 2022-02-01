@@ -100,7 +100,7 @@ with
                            on portfolio_securities_normalized.id = portfolio_expanded_transactions.security_id
                       join {{ ref('ticker_options') }}
                            on ticker_options.contract_name = portfolio_securities_normalized.original_ticker_symbol
-                      join first_transaction_date on first_transaction_date.profile_id = portfolio_expanded_transactions.profile_id
+                      left join first_transaction_date on first_transaction_date.profile_id = portfolio_expanded_transactions.profile_id
                       join time_period on (first_transaction_date.profile_id is null or time_period.datetime >= first_transaction_date.date)
              where portfolio_expanded_transactions.type in ('buy', 'sell')
          )
@@ -117,7 +117,7 @@ with
              from {{ ref('profile_holdings_normalized') }}
                       join {{ ref('portfolio_securities_normalized') }}
                            on portfolio_securities_normalized.id = profile_holdings_normalized.security_id
-                      join first_transaction_date
+                      left join first_transaction_date
                            on first_transaction_date.profile_id = profile_holdings_normalized.profile_id
                       join time_period on (first_transaction_date.profile_id is null or
                                            time_period.datetime >= first_transaction_date.date)
