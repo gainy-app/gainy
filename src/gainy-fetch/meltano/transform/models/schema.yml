@@ -261,6 +261,33 @@ models:
           - type:
               type: 'character varying'
 
+  - name: interest_industries
+    columns:
+      - name: id
+        tests:
+          - unique
+          - exists
+          - type:
+              type: 'character varying'
+      - name: interest_id
+        tests:
+          - exists
+          - not_null
+          - type:
+              type: 'integer'
+      - name: industry_id
+        tests:
+          - exists
+          - not_null
+          - type:
+              type: 'integer'
+      - name: updated_at
+        tests:
+          - exists
+          - not_null
+          - type:
+              type: 'timestamp with time zone'
+
   - name: collections
     columns:
       - name: id
