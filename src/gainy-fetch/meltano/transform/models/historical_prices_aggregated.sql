@@ -27,13 +27,14 @@ with period_settings as
                     (date_trunc('minute', now()) -
                     interval '1 minute' *
                     mod(extract(minutes from now())::int, 15))::timestamp as period_end
-             union all
-             select (date_trunc('minute', now()) -
-                    interval '1 minute' *
-                    mod(extract(minutes from now())::int, 15))::timestamp as period_start,
-                    (date_trunc('minute', now()) + interval '15 minute' -
-                    interval '1 minute' *
-                    mod(extract(minutes from now())::int, 15))::timestamp as period_end
+-- uncomment when we have realtime prices
+--              union all
+--              select (date_trunc('minute', now()) -
+--                     interval '1 minute' *
+--                     mod(extract(minutes from now())::int, 15))::timestamp as period_start,
+--                     (date_trunc('minute', now()) + interval '15 minute' -
+--                     interval '1 minute' *
+--                     mod(extract(minutes from now())::int, 15))::timestamp as period_end
          ),
      expanded_intraday_prices as
          (
