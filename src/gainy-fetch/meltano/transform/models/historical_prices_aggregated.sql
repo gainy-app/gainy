@@ -14,26 +14,26 @@
 {% if is_incremental() and var('realtime') %}
 with period_settings as
          (
---              select date_trunc('minute', now()) - interval '30 minute' -
---                     interval '1 minute' *
---                     mod(extract(minutes from now())::int, 15) as period_start,
---                     date_trunc('minute', now()) - interval '15 minute' -
---                     interval '1 minute' *
---                     mod(extract(minutes from now())::int, 15) as period_end
---              union all
-             select date_trunc('minute', now()) - interval '15 minute' -
+             select (date_trunc('minute', now()) - interval '30 minute' -
                     interval '1 minute' *
-                    mod(extract(minutes from now())::int, 15) as period_start,
-                    date_trunc('minute', now()) -
+                    mod(extract(minutes from now())::int, 15))::timestamp as period_start,
+                    (date_trunc('minute', now()) - interval '15 minute' -
                     interval '1 minute' *
-                    mod(extract(minutes from now())::int, 15) as period_end
---              union all
---              select date_trunc('minute', now()) -
---                     interval '1 minute' *
---                     mod(extract(minutes from now())::int, 15) as period_start,
---                     date_trunc('minute', now()) + interval '15 minute' -
---                     interval '1 minute' *
---                     mod(extract(minutes from now())::int, 15) as period_end
+                    mod(extract(minutes from now())::int, 15))::timestamp as period_end
+             union all
+             select (date_trunc('minute', now()) - interval '15 minute' -
+                    interval '1 minute' *
+                    mod(extract(minutes from now())::int, 15))::timestamp as period_start,
+                    (date_trunc('minute', now()) -
+                    interval '1 minute' *
+                    mod(extract(minutes from now())::int, 15))::timestamp as period_end
+             union all
+             select (date_trunc('minute', now()) -
+                    interval '1 minute' *
+                    mod(extract(minutes from now())::int, 15))::timestamp as period_start,
+                    (date_trunc('minute', now()) + interval '15 minute' -
+                    interval '1 minute' *
+                    mod(extract(minutes from now())::int, 15))::timestamp as period_end
          ),
      expanded_intraday_prices as
          (
