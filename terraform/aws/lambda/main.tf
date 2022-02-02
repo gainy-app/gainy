@@ -280,6 +280,10 @@ module "hasuraAction" {
     ALGOLIA_TICKERS_INDEX     = var.algolia_tickers_index
     ALGOLIA_COLLECTIONS_INDEX = var.algolia_collections_index
     ALGOLIA_SEARCH_API_KEY    = var.algolia_search_key
+    ALGOLIA_SEARCH_API_KEY    = var.algolia_search_key
+    GNEWS_API_TOKEN           = var.gnews_api_token
+    REDIS_CACHE_HOST          = "redis-cache-dev.zzreep.0001.use1.cache.amazonaws.com"
+    REDIS_CACHE_PORT          = 6379
     PLAID_WEBHOOK_URL         = "https://${var.hasura_url}/api/rest/plaid_webhook"
   }
   vpc_security_group_ids = var.vpc_security_group_ids
