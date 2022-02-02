@@ -6,7 +6,7 @@
 
 with latest_open_trading_session as (
     select distinct on (exchange_name) *
-    from exchange_schedule
+    from {{ ref('exchange_schedule') }}
     where open_at <= now()
     order by exchange_name, date desc
 )
