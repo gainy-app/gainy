@@ -23,6 +23,8 @@ variable "algolia_app_id" {}
 variable "algolia_search_key" {}
 variable "hasura_url" {}
 variable "hubspot_api_key" {}
+variable "redis_cache_host" {}
+variable "redis_cache_port" {}
 
 output "aws_apigatewayv2_api_endpoint" {
   value = "${aws_apigatewayv2_api.lambda.api_endpoint}/${aws_apigatewayv2_stage.lambda.name}"
@@ -282,8 +284,8 @@ module "hasuraAction" {
     ALGOLIA_SEARCH_API_KEY    = var.algolia_search_key
     ALGOLIA_SEARCH_API_KEY    = var.algolia_search_key
     GNEWS_API_TOKEN           = var.gnews_api_token
-    REDIS_CACHE_HOST          = "redis-cache-dev.zzreep.0001.use1.cache.amazonaws.com"
-    REDIS_CACHE_PORT          = 6379
+    REDIS_CACHE_HOST          = var.redis_cache_host
+    REDIS_CACHE_PORT          = var.redis_cache_port
     PLAID_WEBHOOK_URL         = "https://${var.hasura_url}/api/rest/plaid_webhook"
   }
   vpc_security_group_ids = var.vpc_security_group_ids
