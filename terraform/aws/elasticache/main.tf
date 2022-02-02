@@ -3,8 +3,8 @@ variable "vpc_default_sg_id" {}
 variable "env" {}
 
 resource "aws_elasticache_subnet_group" "elasticache_subnet_group" {
-  name        = "elasticache-subnet-group-${var.env}"
-  subnet_ids  = var.private_subnet_ids
+  name       = "elasticache-subnet-group-${var.env}"
+  subnet_ids = var.private_subnet_ids
 }
 
 resource "aws_elasticache_cluster" "redis_cache" {
@@ -16,7 +16,7 @@ resource "aws_elasticache_cluster" "redis_cache" {
   port                 = 6379
   subnet_group_name    = aws_elasticache_subnet_group.elasticache_subnet_group.name
   security_group_ids   = [var.vpc_default_sg_id]
-  maintenance_window = "sun:05:00-sun:06:00"
+  maintenance_window   = "sun:05:00-sun:06:00"
 }
 
 output "redis_cache_host" {

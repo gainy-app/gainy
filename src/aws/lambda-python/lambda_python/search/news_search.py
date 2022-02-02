@@ -25,7 +25,9 @@ def load_url(url: str):
     if response.status_code == 200:
         return response.content
     else:
-        print(f"Url not loaded, http code: {response.status_code}, response: {response.content}")
+        print(
+            f"Url not loaded, http code: {response.status_code}, response: {response.content}"
+        )
         raise Exception(f"Url not loaded with status: {response.status_code}")
 
 
@@ -35,9 +37,7 @@ class SearchNews(HasuraAction):
         super().__init__("fetchNewsData")
         self.gnews_api_token = gnews_api_token
         self.caching_loader = CachingLoader(
-            RedisCache(redis_host, redis_port, ttl_seconds=60 * 60),
-            load_url
-        )
+            RedisCache(redis_host, redis_port, ttl_seconds=60 * 60), load_url)
 
     def apply(self, db_conn, input_params, headers):
         query = input_params["symbol"]
