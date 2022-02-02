@@ -20,9 +20,9 @@ resource "aws_elasticache_cluster" "redis_cache" {
 }
 
 output "redis_cache_host" {
-  value = aws_elasticache_cluster.redis_cache.cluster_address
+  value = aws_elasticache_cluster.redis_cache.cache_nodes[0].address
 }
 
 output "redis_cache_port" {
-  value = aws_elasticache_cluster.redis_cache.port
+  value = aws_elasticache_cluster.redis_cache.cache_nodes[0].port
 }
