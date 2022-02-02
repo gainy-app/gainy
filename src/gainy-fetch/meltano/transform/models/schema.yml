@@ -1791,6 +1791,21 @@ models:
           - exists
           - type:
               type: 'double precision'
+      - name: last_known_price
+        tests:
+          - exists
+          - type:
+              type: 'double precision'
+      - name: last_known_price_datetime
+        tests:
+          - exists
+          - type:
+              type: 'timestamp without time zone'
+      - name: previous_day_close_price
+        tests:
+          - exists
+          - type:
+              type: 'double precision'
 
 exposures:
   - name: ticker_search_index

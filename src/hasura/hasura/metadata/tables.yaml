@@ -1851,21 +1851,27 @@
     permission:
       columns:
       - symbol
-      - time
-      - actual_price
       - absolute_daily_change
-      - relative_daily_change
+      - actual_price
       - daily_volume
+      - last_known_price
+      - previous_day_close_price
+      - relative_daily_change
+      - last_known_price_datetime
+      - time
       filter: {}
   - role: user
     permission:
       columns:
       - symbol
-      - time
-      - actual_price
       - absolute_daily_change
-      - relative_daily_change
+      - actual_price
       - daily_volume
+      - last_known_price
+      - previous_day_close_price
+      - relative_daily_change
+      - last_known_price_datetime
+      - time
       filter: {}
 - table:
     schema: public
