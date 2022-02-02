@@ -1,21 +1,32 @@
 import json
+import time
 from datetime import datetime
 import pytz
 
 import backoff
 import requests
 from backoff import full_jitter
+import traceback
 
 from common.hasura_function import HasuraAction
 from search.cache import CachingLoader, RedisCache
 
 
-@backoff.on_predicate(backoff.fibo,
+@backoff.on_predicate(backoff.expo,
                       predicate=lambda res: res.status_code == 429,
                       max_tries=3,
-                      jitter=lambda v: 1 + full_jitter(v))
+                      jitter=lambda v: v / 2 + full_jitter(v / 2))
 def http_get_request(url: str):
     return requests.get(url)
+
+
+def load_url(url: str):
+    response = http_get_request(url)
+    if response.status_code == 200:
+        return response.content
+    else:
+        print(f"Url not loaded, http code: {response.status_code}, response: {response.content}")
+        raise Exception(f"Url not loaded with status: {response.status_code}")
 
 
 class SearchNews(HasuraAction):
@@ -24,27 +35,34 @@ class SearchNews(HasuraAction):
         super().__init__("fetchNewsData")
         self.gnews_api_token = gnews_api_token
         self.caching_loader = CachingLoader(
-            RedisCache(redis_host, redis_port),
-            lambda url: http_get_request(url).content)
+            RedisCache(redis_host, redis_port, ttl_seconds=60 * 60),
+            load_url
+        )
 
     def apply(self, db_conn, input_params, headers):
         query = input_params["symbol"]
         limit = input_params.get("limit", 5)
 
         url = self._build_url(query, limit)
-        response_json = json.loads(self.caching_loader.get(url))
+        try:
+            response_json = json.loads(self.caching_loader.get(url))
 
-        articles = response_json["articles"]
+            articles = response_json["articles"]
 
-        return [{
-            "datetime": self._reformat_datetime(article["publishedAt"]),
-            "title": article["title"],
-            "description": article["description"],
-            "url": article["url"],
-            "imageUrl": article["image"],
-            "sourceName": article["source"]["name"],
-            "sourceUrl": article["source"]["url"]
-        } for article in articles]
+            return [{
+                "datetime": self._reformat_datetime(article["publishedAt"]),
+                "title": article["title"],
+                "description": article["description"],
+                "url": article["url"],
+                "imageUrl": article["image"],
+                "sourceName": article["source"]["name"],
+                "sourceUrl": article["source"]["url"]
+            } for article in articles]
+        except:
+            print(f"Loading error for url: {url}, params: {input_params}")
+            traceback.print_exc()
+            # Temporary workaround to return empty list on any server side exception
+            return []
 
     @staticmethod
     def _reformat_datetime(time_string):
