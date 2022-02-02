@@ -12,92 +12,156 @@
 
 
 {% if is_incremental() and var('realtime') %}
-with period_settings as
-         (
-             select (date_trunc('minute', now()) - interval '30 minute' -
-                    interval '1 minute' *
-                    mod(extract(minutes from now())::int, 15))::timestamp as period_start,
-                    (date_trunc('minute', now()) - interval '15 minute' -
-                    interval '1 minute' *
-                    mod(extract(minutes from now())::int, 15))::timestamp as period_end
-             union all
-             select (date_trunc('minute', now()) - interval '15 minute' -
-                    interval '1 minute' *
-                    mod(extract(minutes from now())::int, 15))::timestamp as period_start,
-                    (date_trunc('minute', now()) -
-                    interval '1 minute' *
-                    mod(extract(minutes from now())::int, 15))::timestamp as period_end
--- uncomment when we have realtime prices
---              union all
---              select (date_trunc('minute', now()) -
---                     interval '1 minute' *
---                     mod(extract(minutes from now())::int, 15))::timestamp as period_start,
---                     (date_trunc('minute', now()) + interval '15 minute' -
---                     interval '1 minute' *
---                     mod(extract(minutes from now())::int, 15))::timestamp as period_end
-         ),
-     expanded_intraday_prices as
-         (
-             select eod_intraday_prices.*,
-                    period_settings.period_start
-             from {{ source('eod', 'eod_intraday_prices') }}
-                      join period_settings
-                           on eod_intraday_prices.time >= period_settings.period_start
-                               and eod_intraday_prices.time < period_settings.period_end
-         ),
-     new_data as
-         (
-             select DISTINCT ON (
-                 expanded_intraday_prices.symbol,
-                 period_start
-                 ) expanded_intraday_prices.symbol                                                                                                                           as symbol,
-                   period_start,
-                   first_value(open::double precision)
-                   OVER (partition by expanded_intraday_prices.symbol, period_start order by expanded_intraday_prices.time rows between current row and unbounded following) as open,
-                   max(high::double precision)
-                   OVER (partition by expanded_intraday_prices.symbol, period_start rows between current row and unbounded following)                                        as high,
-                   min(low::double precision)
-                   OVER (partition by expanded_intraday_prices.symbol, period_start rows between current row and unbounded following)                                        as low,
-                   last_value(close::double precision)
-                   OVER (partition by expanded_intraday_prices.symbol, period_start order by expanded_intraday_prices.time rows between current row and unbounded following) as close,
-                   (sum(volume::numeric)
-                    OVER (partition by expanded_intraday_prices.symbol, period_start rows between current row and unbounded following))::double precision                    as volume
-             from expanded_intraday_prices
-             order by symbol, period_start, time
-         ),
-     latest_old_data as
-         (
-             select distinct on (symbol) id,
-                                         datetime as period_start,
-                                         period,
-                                         close,
-                                         adjusted_close,
-                                         symbol
-             from {{ this }}
-             where period = '15min'
-               and datetime > now() - interval '4 days'
-             order by symbol, datetime desc
-         )
-select (base_tickers.symbol || '_' ||
-        period_settings.period_start || '_15min')::varchar      as id,
-       base_tickers.symbol,
-       period_settings.period_start                             as time,
-       period_settings.period_start                             as datetime,
-       '15min'::varchar                                         as period,
-       coalesce(new_data.open, latest_old_data.close)           as open,
-       coalesce(new_data.high, latest_old_data.close)           as high,
-       coalesce(new_data.low, latest_old_data.close)            as low,
-       coalesce(new_data.close, latest_old_data.close)          as close,
-       coalesce(new_data.close, latest_old_data.adjusted_close) as adjusted_close,
-       coalesce(new_data.volume, 0)                             as volume
-from {{ ref('base_tickers') }}
-         join period_settings on true
-         left join new_data
-                   on new_data.symbol = base_tickers.symbol
-                          and new_data.period_start = period_settings.period_start
-         left join latest_old_data on latest_old_data.symbol = base_tickers.symbol
-where new_data.symbol is not null
-   or latest_old_data.symbol is not null
+(
+    with period_settings as
+             (
+                 SELECT date_trunc('minute', dd) - interval '1 minute' as period_start,
+                        date_trunc('minute', dd)                       as period_end
+                 FROM generate_series(now()::timestamp - interval '30 minutes', now()::timestamp - interval '15 minutes',
+                                      interval '1 minutes') dd
+    -- uncomment when we have realtime prices
+    --              FROM generate_series(now()::timestamp - interval '15 minutes', now()::timestamp, interval '1 minutes') dd
+             ),
+         expanded_intraday_prices as
+             (
+                 select distinct on (
+                     symbol,
+                     period_start
+                     ) eod_intraday_prices.symbol,
+                       time,
+                       case
+                           when eod_intraday_prices.time = period_start then eod_intraday_prices.open
+                           else eod_intraday_prices.close end as open,
+                       case
+                           when eod_intraday_prices.time = period_start then eod_intraday_prices.high
+                           else eod_intraday_prices.close end as high,
+                       case
+                           when eod_intraday_prices.time = period_start then eod_intraday_prices.low
+                           else eod_intraday_prices.close end as low,
+                       eod_intraday_prices.close              as close,
+                       case
+                           when eod_intraday_prices.time = period_start then eod_intraday_prices.volume
+                           else 0.0 end                       as volume,
+                       period_settings.period_start
+                 from raw_data.eod_intraday_prices
+                          join period_settings
+                               on eod_intraday_prices.time >= now() - interval '30 minutes'
+                                   and eod_intraday_prices.time < period_settings.period_end
+                 order by symbol, period_start, time desc
+             ),
+         rolling_data as
+             (
+                 select DISTINCT ON (
+                     expanded_intraday_prices.symbol,
+                     period_start
+                     ) expanded_intraday_prices.symbol                                                                                                                           as symbol,
+                       period_start,
+                       first_value(open::double precision)
+                       OVER (partition by expanded_intraday_prices.symbol, period_start order by expanded_intraday_prices.time rows between current row and unbounded following) as open,
+                       max(high::double precision)
+                       OVER (partition by expanded_intraday_prices.symbol, period_start rows between current row and unbounded following)                                        as high,
+                       min(low::double precision)
+                       OVER (partition by expanded_intraday_prices.symbol, period_start rows between current row and unbounded following)                                        as low,
+                       last_value(close::double precision)
+                       OVER (partition by expanded_intraday_prices.symbol, period_start order by expanded_intraday_prices.time rows between current row and unbounded following) as close,
+                       (sum(volume::numeric)
+                        OVER (partition by expanded_intraday_prices.symbol, period_start rows between current row and unbounded following))::double precision                    as volume
+                 from expanded_intraday_prices
+                 order by symbol, period_start, time
+             )
+    select (symbol || '_' ||
+            period_start || '_1min')::varchar as id,
+           symbol,
+           period_start                       as time,
+           period_start                       as datetime,
+           '1min'::varchar                    as period,
+           open                               as open,
+           high                               as high,
+           low                                as low,
+           close                              as close,
+           close                              as adjusted_close,
+           coalesce(volume, 0)                as volume
+    from rolling_data
+)
+
+union all
+
+(
+    with period_settings as
+             (
+                 SELECT date_trunc('minute', dd) -
+                        interval '1 minute' *
+                        (mod(extract(minutes from dd)::int, 15) + 15) as period_start,
+                        date_trunc('minute', dd) -
+                        interval '1 minute' *
+                        (mod(extract(minutes from dd)::int, 15)) as period_end
+                 FROM generate_series(now()::timestamp - interval '15 minutes', now()::timestamp, interval '15 minutes') dd
+    -- uncomment when we have realtime prices
+    --              FROM generate_series(now()::timestamp - interval '15 minutes', now()::timestamp + interval '15 minutes', interval '15 minutes') dd
+             ),
+         expanded_intraday_prices as
+             (
+                 select eod_intraday_prices.*,
+                        period_settings.period_start
+                 from {{ source('eod', 'eod_intraday_prices') }}
+                          join period_settings
+                               on eod_intraday_prices.time >= period_settings.period_start
+                                   and eod_intraday_prices.time < period_settings.period_end
+             ),
+         new_data as
+             (
+                 select DISTINCT ON (
+                     expanded_intraday_prices.symbol,
+                     period_start
+                     ) expanded_intraday_prices.symbol                                                                                                                           as symbol,
+                       period_start,
+                       first_value(open::double precision)
+                       OVER (partition by expanded_intraday_prices.symbol, period_start order by expanded_intraday_prices.time rows between current row and unbounded following) as open,
+                       max(high::double precision)
+                       OVER (partition by expanded_intraday_prices.symbol, period_start rows between current row and unbounded following)                                        as high,
+                       min(low::double precision)
+                       OVER (partition by expanded_intraday_prices.symbol, period_start rows between current row and unbounded following)                                        as low,
+                       last_value(close::double precision)
+                       OVER (partition by expanded_intraday_prices.symbol, period_start order by expanded_intraday_prices.time rows between current row and unbounded following) as close,
+                       (sum(volume::numeric)
+                        OVER (partition by expanded_intraday_prices.symbol, period_start rows between current row and unbounded following))::double precision                    as volume
+                 from expanded_intraday_prices
+                 order by symbol, period_start, time
+             ),
+         latest_old_data as
+             (
+                 select distinct on (symbol) id,
+                                             datetime as period_start,
+                                             period,
+                                             close,
+                                             adjusted_close,
+                                             symbol
+                 from {{ this }}
+                 where period = '15min'
+                   and datetime > now() - interval '4 days'
+                 order by symbol, datetime desc
+             )
+    select (base_tickers.symbol || '_' ||
+            period_settings.period_start || '_15min')::varchar      as id,
+           base_tickers.symbol,
+           period_settings.period_start                             as time,
+           period_settings.period_start                             as datetime,
+           '15min'::varchar                                         as period,
+           coalesce(new_data.open, latest_old_data.close)           as open,
+           coalesce(new_data.high, latest_old_data.close)           as high,
+           coalesce(new_data.low, latest_old_data.close)            as low,
+           coalesce(new_data.close, latest_old_data.close)          as close,
+           coalesce(new_data.close, latest_old_data.adjusted_close) as adjusted_close,
+           coalesce(new_data.volume, 0)                             as volume
+    from {{ ref('base_tickers') }}
+             join period_settings on true
+             left join new_data
+                       on new_data.symbol = base_tickers.symbol
+                              and new_data.period_start = period_settings.period_start
+             left join latest_old_data on latest_old_data.symbol = base_tickers.symbol
+    where new_data.symbol is not null
+       or latest_old_data.symbol is not null
+)
 
 -- end realtime
 {% else %}
@@ -115,12 +179,89 @@ with max_date as
 {% endif %}
 
 (
+    with time_series_1min as
+             (
+                 SELECT date_trunc('minute', dd) as datetime
+                 FROM generate_series(now()::timestamp - interval '1 day', now()::timestamp, interval '1 minutes') dd
+             ),
+         expanded_intraday_prices as
+             (
+                 select eod_intraday_prices.*,
+                        date_trunc('minute', eod_intraday_prices.time) -
+                        interval '1 minute' *
+                        mod(extract(minutes from eod_intraday_prices.time)::int, 15) as time_truncated
+                 from {{ ref('base_tickers') }}
+                          left join {{ source('eod', 'eod_intraday_prices') }} on eod_intraday_prices.symbol = base_tickers.symbol
+{% if is_incremental() %}
+                          left join max_date
+                                    on max_date.symbol = eod_intraday_prices.symbol and max_date.period = '1min'
+                 where max_date.time is null
+                    or eod_intraday_prices.time >= max_date.time
+{% endif %}
+             ),
+         combined_intraday_prices as
+             (
+                 select DISTINCT ON (
+                     expanded_intraday_prices.symbol,
+                     time_truncated
+                     ) (expanded_intraday_prices.symbol || '_' || time_truncated || '_1min')::varchar                                                                             as id,
+                       expanded_intraday_prices.symbol                                                                                                                             as symbol,
+                       time_truncated::timestamp                                                                                                                                   as time, -- TODO remove
+                       time_truncated::timestamp                                                                                                                                   as datetime,
+                       '1min'::varchar                                                                                                                                            as period,
+                       first_value(open::double precision)
+                       OVER (partition by expanded_intraday_prices.symbol, time_truncated order by expanded_intraday_prices.time rows between current row and unbounded following) as open,
+                       max(high::double precision)
+                       OVER (partition by expanded_intraday_prices.symbol, time_truncated rows between current row and unbounded following)                                        as high,
+                       min(low::double precision)
+                       OVER (partition by expanded_intraday_prices.symbol, time_truncated rows between current row and unbounded following)                                        as low,
+                       last_value(close::double precision)
+                       OVER (partition by expanded_intraday_prices.symbol, time_truncated order by expanded_intraday_prices.time rows between current row and unbounded following) as close,
+                       (sum(volume::numeric)
+                        OVER (partition by expanded_intraday_prices.symbol, time_truncated rows between current row and unbounded following))::double precision                    as volume
+                 from expanded_intraday_prices
+                 where time_truncated < now() - interval '15 minutes'
+                   and expanded_intraday_prices.time_truncated > now() - interval '1 day'
+                 order by symbol, time_truncated, time
+             )
+    select distinct on (
+                    combined_intraday_prices.symbol, time_series_1min.datetime
+        ) (combined_intraday_prices.symbol || '_' || time_series_1min.datetime || '_1min')::varchar as id,
+          combined_intraday_prices.symbol,
+          time_series_1min.datetime                                                                 as time,
+          time_series_1min.datetime                                                                 as datetime,
+          combined_intraday_prices.period,
+          case
+              when combined_intraday_prices.datetime = time_series_1min.datetime then combined_intraday_prices.open
+              else combined_intraday_prices.close end                                               as open,
+          case
+              when combined_intraday_prices.datetime = time_series_1min.datetime then combined_intraday_prices.high
+              else combined_intraday_prices.close end                                               as high,
+          case
+              when combined_intraday_prices.datetime = time_series_1min.datetime then combined_intraday_prices.low
+              else combined_intraday_prices.close end                                               as low,
+          combined_intraday_prices.close                                                            as close,
+          combined_intraday_prices.close                                                            as adjusted_close,
+          case
+              when combined_intraday_prices.datetime = time_series_1min.datetime then combined_intraday_prices.volume
+              else 0.0 end                                                                          as volume
+    from {{ ref('base_tickers') }}
+             join combined_intraday_prices on combined_intraday_prices.symbol = base_tickers.symbol
+             join time_series_1min
+                  on time_series_1min.datetime >= combined_intraday_prices.datetime or
+                     combined_intraday_prices.datetime is null
+    order by combined_intraday_prices.symbol, time_series_1min.datetime, combined_intraday_prices.datetime desc
+)
+
+union all
+
+(
     with time_series_15min as
              (
                  SELECT date_trunc('minute', dd) -
                         interval '1 minute' *
                         (mod(extract(minutes from dd)::int, 15) + 15) as datetime
-                 FROM generate_series(now()::timestamp without time zone - interval '1 day', now()::timestamp without time zone, interval '15 minutes') dd
+                 FROM generate_series(now()::timestamp - interval '1 week', now()::timestamp, interval '15 minutes') dd
              ),
          expanded_intraday_prices as
              (
@@ -158,15 +299,8 @@ with max_date as
                        (sum(volume::numeric)
                         OVER (partition by expanded_intraday_prices.symbol, time_truncated rows between current row and unbounded following))::double precision                    as volume
                  from expanded_intraday_prices
-    -- {% if is_incremental() %}
-    --                       left join max_date
-    --                                 on max_date.symbol = expanded_intraday_prices.symbol and max_date.period = '15min'
-    -- {% endif %}
                  where time_truncated < now() - interval '15 minutes'
                    and expanded_intraday_prices.time_truncated > now() - interval '1 day'
-    -- {% if is_incremental() %}
-    --                and (max_date.time is null or expanded_intraday_prices.time_truncated > max_date.time)
-    -- {% endif %}
                  order by symbol, time_truncated, time
              )
     select distinct on (
@@ -195,7 +329,6 @@ with max_date as
              join time_series_15min
                   on time_series_15min.datetime >= combined_intraday_prices.datetime or
                      combined_intraday_prices.datetime is null
---     order by combined_intraday_prices.symbol || '_' || time_series_15min.datetime || '_15min', combined_intraday_prices.datetime desc
     order by combined_intraday_prices.symbol, time_series_15min.datetime, combined_intraday_prices.datetime desc
 )
 
