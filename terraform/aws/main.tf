@@ -63,6 +63,13 @@ module "rds" {
   vpc_default_sg_id    = module.ecs.vpc_default_sg_id
 }
 
+module "elasticache" {
+  source               = "./elasticache"
+  env                  = var.env
+  vpc_default_sg_id    = module.ecs.vpc_default_sg_id
+  private_subnet_ids   = module.ecs.private_subnet_ids
+}
+
 module "vpc_bridge" {
   source             = "./ec2/vpc_bridge"
   env                = var.env
