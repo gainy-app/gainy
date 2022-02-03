@@ -109,6 +109,7 @@
         {
           "breadcrumb": [],
           "metadata": {
+            "replication-key": "time",
             "replication-method": "FULL_TABLE",
             "table-key-properties": [
               "symbol",

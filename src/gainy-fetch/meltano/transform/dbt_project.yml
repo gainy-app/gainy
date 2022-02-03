@@ -23,5 +23,6 @@ clean-targets:
 - logs
 models:
   +on_schema_change: "sync_all_columns"
+  +incremental_strategy: "insert_overwrite"
 vars:
   realtime: false

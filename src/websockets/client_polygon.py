@@ -170,7 +170,7 @@ async def main():
     should_run = ENV == "production"
 
     while True:
-        symbols = set(get_symbols())
+        symbols = set([i.replace('-', '.') for i in get_symbols()])
 
         if should_run and tracked_symbols != symbols or should_reconnect:
             tracked_symbols = symbols
