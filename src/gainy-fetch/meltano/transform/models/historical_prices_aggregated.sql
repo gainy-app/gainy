@@ -6,10 +6,12 @@
       index(this, 'id', true),
       'create unique index if not exists {{ get_index_name(this, "symbol__period__datetime") }} (symbol, period, datetime)',
       'create index if not exists {{ get_index_name(this, "period__datetime") }} (period, datetime)',
-    ]
+    ],
   )
 }}
 
+-- dbt hint:
+-- depends_on: {{ ref('base_tickers') }}
 
 {% if is_incremental() and var('realtime') %}
 (
