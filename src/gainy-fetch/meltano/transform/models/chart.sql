@@ -26,7 +26,7 @@ with latest_open_trading_session as (
              join latest_open_trading_session
                   on latest_open_trading_session.exchange_name = (string_to_array(base_tickers.exchange, ' '))[1]
                       and latest_open_trading_session.date = historical_prices_aggregated.datetime::date
-    where period = '1min'
+    where period = '2min'
       and historical_prices_aggregated.datetime between latest_open_trading_session.open_at and latest_open_trading_session.close_at
 )
 

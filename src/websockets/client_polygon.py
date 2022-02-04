@@ -84,7 +84,8 @@ class PricesListener:
 
         try:
             await stream_client.subscribe_stock_minute_aggregates(
-                list(self.symbols), self.handle_message)
+                [i.replace('-', '.') for i in self.symbols],
+                self.handle_message)
 
             while 1:
                 try:
@@ -122,8 +123,12 @@ class PricesListener:
                 logger.info("__sync_records %d %s", current_timestamp,
                             ",".join(symbols_with_records))
 
+                symbol = record['symbol']
+                if symbol not in self.symbols:
+                    symbol = symbol.replace('.', '-')
+
                 values = [(
-                    record['symbol'],
+                    symbol,
                     record['date'],
                     record["open"],
                     record["high"],
@@ -170,7 +175,7 @@ async def main():
     should_run = ENV == "production"
 
     while True:
-        symbols = set([i.replace('-', '.') for i in get_symbols()])
+        symbols = set(get_symbols())
 
         if should_run and tracked_symbols != symbols or should_reconnect:
             tracked_symbols = symbols
