@@ -22,13 +22,16 @@ class GetRecommendedCollections(HasuraAction):
             map(itemgetter(0), sorted_collection_match_scores))
 
         # Add `top-20 for you` collection as the top item
-        ranked_collections_ids = [TOP_20_FOR_YOU_COLLECTION_ID
-                                  ] + sorted_collections_ids
+        is_top_20_enabled = repository.is_collection_enabled(
+            profile_id, TOP_20_FOR_YOU_COLLECTION_ID)
+        if is_top_20_enabled:
+            sorted_collections_ids = [TOP_20_FOR_YOU_COLLECTION_ID
+                                      ] + sorted_collections_ids
 
         print('get_recommended_collections ' +
               json.dumps({
                   'profile_id': profile_id,
-                  'collections': ranked_collections_ids,
+                  'collections': sorted_collections_ids,
               }))
 
-        return [{"id": id} for id in ranked_collections_ids]
+        return [{"id": id} for id in sorted_collections_ids]
