@@ -67,7 +67,7 @@ dag = DAG(dag_id,
           max_active_runs=1,
           is_paused_upon_creation=False)
 dbt = BashOperator(
-    task_id="dbt-portfolio",
+    task_id="dbt-realtime",
     bash_command=
     f"cd {project_root}; {meltano_bin} invoke dbt run --vars '{vars}' --model {models}",
     dag=dag,

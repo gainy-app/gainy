@@ -123,12 +123,14 @@ class PricesListener:
                 logger.info("__sync_records %d %s", current_timestamp,
                             ",".join(symbols_with_records))
 
-                symbol = record['symbol']
-                if symbol not in self.symbols:
-                    symbol = symbol.replace('.', '-')
+                for record in records:
+                    symbol = record['symbol']
+                    if symbol not in self.symbols:
+                        symbol = symbol.replace('.', '-')
+                        record['symbol'] = symbol
 
                 values = [(
-                    symbol,
+                    record['symbol'],
                     record['date'],
                     record["open"],
                     record["high"],
