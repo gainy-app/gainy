@@ -137,7 +137,7 @@ with max_date as
                                      first_value(close)
                                      OVER (partition by symbol, grp order by datetime)
                                  )::double precision                         as adjusted_close,
-                             coalesce(volume, 0)
+                             coalesce(volume, 0)                             as volume
                       from (
                                select *,
                                       sum(case when close is not null then 1 end)
@@ -264,7 +264,7 @@ union all
                             first_value(close)
                             OVER (partition by symbol, grp order by datetime)
                         )::double precision                          as adjusted_close,
-                    coalesce(volume, 0)
+                    coalesce(volume, 0)                              as volume
              from (
                       select *,
                              sum(case when close is not null then 1 end)
