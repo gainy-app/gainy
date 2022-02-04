@@ -93,7 +93,7 @@ class RecommendationRepository(Repository):
     def is_collection_enabled(self, profile_id, collection_id) -> bool:
         with self.db_conn.cursor() as cursor:
             cursor.execute(
-                """SELECT enabled FROM app.profile_collections
+                """SELECT enabled FROM public.profile_collections
                 WHERE (profile_id=%(profile_id)s OR profile_id IS NULL) AND id=%(collection_id)s""",
                 {
                     "profile_id": profile_id,
