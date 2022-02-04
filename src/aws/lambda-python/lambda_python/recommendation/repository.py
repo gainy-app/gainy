@@ -90,19 +90,6 @@ class RecommendationRepository(Repository):
 
             return list(cursor.fetchall())
 
-    def is_collection_enabled(self, profile_id, collection_id) -> bool:
-        with self.db_conn.cursor() as cursor:
-            cursor.execute(
-                """SELECT enabled FROM app.profile_collections
-                WHERE (profile_id=%(profile_id)s OR profile_id IS NULL) AND id=%(collection_id)s""",
-                {
-                    "profile_id": profile_id,
-                    "collection_id": collection_id
-                })
-
-            row = cursor.fetchone()
-            return row and int(row[0]) == 1
-
     # Deprecated
     def read_collection_tickers(self, profile_id: str,
                                 collection_id: str) -> List[str]:
