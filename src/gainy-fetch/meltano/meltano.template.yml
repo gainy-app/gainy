@@ -102,11 +102,13 @@ schedules:
     transform: skip
     interval: '@daily'
     start_date: 2021-09-03 13:52:48.598227
+    env:
+      TARGET_ENVS: '["production","local"]'
 
   - name: prod-to-postgres
     extractor: tap-postgres--sync
     loader: target-postgres
-    transform: run
+    transform: skip
     interval: '@daily'
     start_date: 2021-09-03 13:52:48.598227
     env:
