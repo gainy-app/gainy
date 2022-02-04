@@ -11,7 +11,7 @@ resource "aws_elasticache_cluster" "redis_cache" {
   cluster_id           = "redis-cache-${var.env}"
   engine               = "redis"
   parameter_group_name = "default.redis6.x"
-  node_type            = var.env == "production" ? "cache.t4g.small" : "cache.t4g.micro"
+  node_type            = var.env == "production" ? "cache.t4g.medium" : "cache.t4g.micro"
   num_cache_nodes      = 1
   port                 = 6379
   subnet_group_name    = aws_elasticache_subnet_group.elasticache_subnet_group.name
