@@ -46,6 +46,9 @@ module "lambda" {
   algolia_collections_index = var.algolia_collections_index
   algolia_app_id            = var.algolia_app_id
   algolia_search_key        = var.algolia_search_key
+
+  redis_cache_host = module.elasticache.redis_cache_host
+  redis_cache_port = module.elasticache.redis_cache_port
 }
 
 module "ecs" {
@@ -61,6 +64,13 @@ module "rds" {
   db_subnet_group_name = module.ecs.db_subnet_group_name
   name                 = "gainy"
   vpc_default_sg_id    = module.ecs.vpc_default_sg_id
+}
+
+module "elasticache" {
+  source             = "./elasticache"
+  env                = var.env
+  vpc_default_sg_id  = module.ecs.vpc_default_sg_id
+  private_subnet_ids = module.ecs.private_subnet_ids
 }
 
 module "vpc_bridge" {
