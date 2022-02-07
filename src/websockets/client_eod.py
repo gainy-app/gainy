@@ -229,7 +229,7 @@ async def main():
         if len(chunks) > 1:
             chunks = chunks[0:1]
 
-        if should_run:
+        if should_run and len(symbols_tasks) == 0:
             for symbols in chunks:
                 task = asyncio.create_task(PricesListener(symbols).start())
                 for symbol in symbols:
