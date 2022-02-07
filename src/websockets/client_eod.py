@@ -205,10 +205,8 @@ class PricesListener:
 
 
 async def main():
-    max_size = 500
+    max_size = 100
     symbols_tasks = {}
-
-    should_run = ENV == "production"
 
     while True:
         # get all symbols
@@ -226,14 +224,13 @@ async def main():
             for i in range(0, len(new_symbols), max_size)
         ]
 
-        if len(chunks) > 1:
+        if ENV != "production" and len(chunks) > 1:
             chunks = chunks[0:1]
 
-        if should_run:
-            for symbols in chunks:
-                task = asyncio.create_task(PricesListener(symbols).start())
-                for symbol in symbols:
-                    symbols_tasks[symbol] = task
+        for symbols in chunks:
+            task = asyncio.create_task(PricesListener(symbols).start())
+            for symbol in symbols:
+                symbols_tasks[symbol] = task
 
         await asyncio.sleep(3600)
 
