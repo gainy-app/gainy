@@ -63,6 +63,11 @@ plugins:
       catalog: configs/raw-sync/tap.catalog.fundamentals.json
       config:
         itersize: 1
+    - name: tap-postgres--sync-options
+      inherit_from: tap-postgres
+      catalog: configs/raw-sync/tap.catalog.options.json
+      config:
+        itersize: 10
     - name: tap-postgres--search
       inherit_from: tap-postgres
       catalog: configs/search/tap.catalog.json
@@ -70,9 +75,8 @@ plugins:
     - name: target-postgres
       variant: transferwise
       pip_url: pipelinewise-target-postgres
-    - name: target-postgres-fundamentals
-      variant: transferwise
-      pip_url: pipelinewise-target-postgres
+    - name: target-postgres-small-batch
+      inherit_from: target-postgres
       config:
         batch_size_rows: 100
     - name: target-algolia
@@ -114,7 +118,16 @@ schedules:
 
   - name: prod-to-postgres-fundamentals
     extractor: tap-postgres--sync-fundamentals
-    loader: target-postgres-fundamentals
+    loader: target-postgres-small-batch
+    transform: skip
+    interval: '@daily'
+    start_date: 2021-09-03 13:52:48.598227
+    env:
+      TARGET_ENVS: '["test"]'
+
+  - name: prod-to-postgres-options
+    extractor: tap-postgres--sync-options
+    loader: target-postgres-small-batch
     transform: skip
     interval: '@daily'
     start_date: 2021-09-03 13:52:48.598227

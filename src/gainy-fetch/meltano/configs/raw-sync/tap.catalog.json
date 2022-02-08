@@ -53,31 +53,6 @@
       "selected": true
     },
     {
-      "table_name": "eod_options",
-      "stream": "eod_options",
-      "metadata": [
-        {
-          "breadcrumb": [],
-          "metadata": {
-            "replication-method": "FULL_TABLE",
-            "table-key-properties": [
-              "code",
-              "expirationdate"
-            ],
-            "schema-name": "raw_data",
-            "database-name": "gainy",
-            "selected": true
-          }
-        }
-      ],
-      "tap_stream_id": "raw_data-eod_options",
-      "schema": {
-        "type": "object",
-        "properties": {}
-      },
-      "selected": true
-    },
-    {
       "table_name": "eod_intraday_prices",
       "stream": "eod_intraday_prices",
       "metadata": [
