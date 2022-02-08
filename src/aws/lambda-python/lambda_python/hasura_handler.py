@@ -48,6 +48,7 @@ ACTIONS = [
     LinkPlaidAccount(),
     GetPortfolioHoldings(),
     GetPortfolioTransactions(),
+    GetPortfolioChart(),
     PlaidWebhook(),
 
     # Search

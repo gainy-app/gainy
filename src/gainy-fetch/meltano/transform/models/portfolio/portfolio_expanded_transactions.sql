@@ -116,7 +116,7 @@ with robinhood_options as (
          )
 
 select t.id,
-       t.uniq_id,
+       t.uniq_id::varchar,
        t.amount,
        t.datetime,
        t.name,
