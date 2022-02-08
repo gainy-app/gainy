@@ -68,7 +68,7 @@ plugins:
     - name: target-postgres
       variant: transferwise
       pip_url: pipelinewise-target-postgres
-    - name: target-postgres--sync-fundamentals
+    - name: target-postgres-fundamentals
       variant: transferwise
       pip_url: pipelinewise-target-postgres
       config:
