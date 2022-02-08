@@ -9,13 +9,11 @@ from common import run, AbstractPriceListener, NO_MESSAGES_RECONNECT_TIMEOUT
 POLYGON_API_TOKEN = os.environ["POLYGON_API_TOKEN"]
 POLYGON_REALTIME_STREAMING_HOST = os.environ["POLYGON_REALTIME_STREAMING_HOST"]
 
-NO_MESSAGES_RECONNECT_TIMEOUT = 600  # reconnect if no messages for 10 minutes
-
 
 class PricesListener(AbstractPriceListener):
 
     def __init__(self, symbols):
-        super().__init__(symbols, "eod")
+        super().__init__(symbols, "polygon")
 
         self.api_token = POLYGON_API_TOKEN
         self.host = POLYGON_REALTIME_STREAMING_HOST
