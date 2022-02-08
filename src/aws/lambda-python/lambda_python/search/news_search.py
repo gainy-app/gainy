@@ -71,4 +71,4 @@ class SearchNews(HasuraAction):
         return datetime.strftime(parsed_datetime, "%Y-%m-%dT%H:%M:%S%z")
 
     def _build_url(self, query, limit) -> str:
-        return f"https://gnews.io/api/v4/search?token={self.gnews_api_token}&q={query}&max={limit}&lang=en"
+        return f"https://gnews.io/api/v4/search?token={self.gnews_api_token}&q=\"{query}\"&max={limit}&lang=en"

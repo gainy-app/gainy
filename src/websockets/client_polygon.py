@@ -84,7 +84,8 @@ class PricesListener:
 
         try:
             await stream_client.subscribe_stock_minute_aggregates(
-                list(self.symbols), self.handle_message)
+                [i.replace('-', '.') for i in self.symbols],
+                self.handle_message)
 
             while 1:
                 try:
@@ -121,6 +122,12 @@ class PricesListener:
                     set([record['symbol'] for record in records]))
                 logger.info("__sync_records %d %s", current_timestamp,
                             ",".join(symbols_with_records))
+
+                for record in records:
+                    symbol = record['symbol']
+                    if symbol not in self.symbols:
+                        symbol = symbol.replace('.', '-')
+                        record['symbol'] = symbol
 
                 values = [(
                     record['symbol'],

@@ -45,14 +45,20 @@ class SearchAction(HasuraAction, ABC):
             if record_and_flag[1]
         ]
 
+    @abstractmethod
+    def _enabled_only(self) -> bool:
+        pass
+
     def check_if_exists(self, db_conn, key_list: List[Any]) -> List[bool]:
         if not key_list:
             return []
 
         with db_conn.cursor() as cursor:
-            cursor.execute(
-                f"SELECT {self.key_attribute} FROM {self.table_name()} WHERE {self.key_attribute} IN %(key_list)s",
-                {"key_list": tuple(key_list)})
+            statement = f"SELECT {self.key_attribute} FROM {self.table_name()} WHERE {self.key_attribute} IN %(key_list)s"
+            if self._enabled_only():
+                statement += " AND enabled = '1'"
+
+            cursor.execute(statement, {"key_list": tuple(key_list)})
 
             existing_keys = set(map(itemgetter(0), cursor.fetchall()))
 
@@ -73,6 +79,9 @@ class SearchTickers(SearchAction):
     def table_name(self) -> str:
         return "public.tickers"
 
+    def _enabled_only(self) -> bool:
+        return False
+
 
 class SearchCollections(SearchAction):
 
@@ -82,3 +91,6 @@ class SearchCollections(SearchAction):
 
     def table_name(self) -> str:
         return "public.collections"
+
+    def _enabled_only(self) -> bool:
+        return True

@@ -33,12 +33,12 @@ with max_date as
                           order by exchange_name, date desc
                       ) t
              ),
-         time_series_2min as
+         time_series_3min as
              (
                  SELECT date_trunc('minute', dd) -
                         interval '1 minute' *
-                        mod(extract(minutes from dd)::int, 2) as time_truncated
-                 FROM generate_series(now()::timestamp - interval '1 week', now()::timestamp, interval '2 minutes') dd
+                        mod(extract(minutes from dd)::int, 3) as time_truncated
+                 FROM generate_series(now()::timestamp - interval '1 week', now()::timestamp, interval '3 minutes') dd
                           join latest_open_trading_session on true
                  where dd between latest_open_trading_session.open_at and latest_open_trading_session.close_at
 {% if is_incremental() and var('realtime') %}
@@ -50,7 +50,7 @@ with max_date as
                  select eod_intraday_prices.*,
                         date_trunc('minute', eod_intraday_prices.time) -
                         interval '1 minute' *
-                        mod(extract(minutes from eod_intraday_prices.time)::int, 2) as time_truncated
+                        mod(extract(minutes from eod_intraday_prices.time)::int, 3) as time_truncated
                  from {{ source('eod', 'eod_intraday_prices') }}
                           join latest_open_trading_session on true
                  where eod_intraday_prices.time between latest_open_trading_session.open_at - interval '1 hour' and latest_open_trading_session.close_at
@@ -60,11 +60,11 @@ with max_date as
                  select DISTINCT ON (
                      symbol,
                      time_truncated
-                     ) (symbol || '_' || time_truncated || '_2min')::varchar                                                           as id,
+                     ) (symbol || '_' || time_truncated || '_3min')::varchar                                                           as id,
                        symbol                                                                                                          as symbol,
                        time_truncated::timestamp                                                                                       as time, -- TODO remove
                        time_truncated::timestamp                                                                                       as datetime,
-                       '2min'::varchar                                                                                                 as period,
+                       '3min'::varchar                                                                                                 as period,
                        first_value(open::double precision)
                        OVER (partition by symbol, time_truncated order by time rows between current row and unbounded following)       as open,
                        max(high::double precision)
@@ -98,16 +98,16 @@ with max_date as
                                  null           as volume,
                                  time_truncated
                           from (select distinct symbol from expanded_intraday_prices) t1
-                                   join time_series_2min on true
+                                   join time_series_3min on true
                           where not exists(select 1
                                            from expanded_intraday_prices
                                            where expanded_intraday_prices.symbol = t1.symbol
-                                             and expanded_intraday_prices.time_truncated = time_series_2min.time_truncated)
+                                             and expanded_intraday_prices.time_truncated = time_series_3min.time_truncated)
                       ) t
                  order by symbol, time_truncated, time
              )
     select * from (
-                      select (symbol || '_' || datetime || '_2min')::varchar as id,
+                      select (symbol || '_' || datetime || '_3min')::varchar as id,
                              symbol,
                              datetime                                        as time,
                              datetime                                        as datetime,
