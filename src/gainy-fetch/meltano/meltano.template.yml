@@ -56,6 +56,8 @@ plugins:
     - name: tap-postgres--sync
       inherit_from: tap-postgres
       catalog: configs/raw-sync/tap.catalog.json
+      config:
+        itersize: 10000
     - name: tap-postgres--sync-fundamentals
       inherit_from: tap-postgres
       catalog: configs/raw-sync/tap.catalog.fundamentals.json
