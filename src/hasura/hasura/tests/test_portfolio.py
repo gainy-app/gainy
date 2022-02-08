@@ -52,4 +52,4 @@ def test_portfolio_chart():
     periods =  ["1d", "1w", "1m", "3m", "1y", "5y", "all"]
     for period in periods:
         data = make_graphql_request(query, {"profileId": PROFILE_ID, "periods": [period]})['data']
-        assert len(data['get_portfolio_chart']) > 0
+        assert len(data['get_portfolio_chart']) > 0, {"periods": [period]}
