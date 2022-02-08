@@ -27,31 +27,6 @@
       "selected": true
     },
     {
-      "table_name": "eod_fundamentals",
-      "stream": "eod_fundamentals",
-      "metadata": [
-        {
-          "breadcrumb": [],
-          "metadata": {
-            "replication-key": "updatedat",
-            "replication-method": "INCREMENTAL",
-            "table-key-properties": [
-              "code"
-            ],
-            "schema-name": "raw_data",
-            "database-name": "gainy",
-            "selected": true
-          }
-        }
-      ],
-      "tap_stream_id": "raw_data-eod_fundamentals",
-      "schema": {
-        "type": "object",
-        "properties": {}
-      },
-      "selected": true
-    },
-    {
       "table_name": "eod_dividends",
       "stream": "eod_dividends",
       "metadata": [
