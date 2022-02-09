@@ -1,6 +1,8 @@
 import os
 import datetime
 import logging
+import asyncio
+from abc import ABC, abstractmethod
 import psycopg2
 from psycopg2 import sql
 from psycopg2.extras import execute_values
@@ -11,6 +13,9 @@ from datadog_api_client.v1.model.point import Point
 from datadog_api_client.v1.model.series import Series
 
 METRIC_REALTIME_PRICES_COUNT = 'app.realtime_prices_count'
+
+NO_MESSAGES_RECONNECT_TIMEOUT = 600  # reconnect if no messages for 10 minutes
+MAX_INSERT_RECORDS_COUNT = 1000
 
 PG_HOST = os.environ['PG_HOST']
 PG_PORT = os.environ['PG_PORT']
@@ -86,3 +91,121 @@ def submit_dd_metric(metric_name, value, tags=[]):
     with ApiClient(dd_configuration) as api_client:
         api_instance = MetricsApi(api_client)
         api_instance.submit_metrics(body=body)
+
+
+class AbstractPriceListener(ABC):
+
+    def __init__(self, symbols, source):
+        self.symbols = symbols
+        self.source = source
+        self.records_queue = asyncio.Queue()
+        self.records_queue_lock = asyncio.Lock()
+        self.logger = get_logger(source)
+        self.max_insert_records_count = MAX_INSERT_RECORDS_COUNT
+        self._no_messages_reconnect_timeout = NO_MESSAGES_RECONNECT_TIMEOUT
+        self._latest_symbol_message = {}
+        self.start_timestamp = self.get_current_timestamp()
+        self.logger.debug("started at %d", self.start_timestamp)
+
+    def get_current_timestamp(self):
+        return datetime.datetime.now().timestamp()
+
+    @abstractmethod
+    async def listen(self):
+        pass
+
+    async def sync(self):
+        while True:
+            current_timestamp = self.get_current_timestamp()
+            try:
+                records = []
+                for i in range(self.max_insert_records_count):
+                    try:
+                        async with self.records_queue_lock:
+                            records.append(self.records_queue.get_nowait())
+                    except asyncio.QueueEmpty:
+                        break
+
+                if len(records) == 0:
+                    await asyncio.sleep(10)
+                    continue
+
+                for record in records:
+                    self._latest_symbol_message[
+                        record['symbol']] = current_timestamp
+
+                symbols_with_records = list(
+                    set([record['symbol'] for record in records]))
+                self.logger.info("__sync_records %d %s", current_timestamp,
+                                 ",".join(symbols_with_records))
+
+                for record in records:
+                    symbol = record['symbol']
+                    if symbol not in self.symbols:
+                        symbol = symbol.replace('.', '-')
+                        record['symbol'] = symbol
+
+                values = [(
+                    record['symbol'],
+                    record['date'],
+                    record["open"],
+                    record["high"],
+                    record["low"],
+                    record["close"],
+                    record["volume"],
+                    record['granularity'],
+                ) for record in records]
+
+                persist_records(values, self.source)
+
+            except Exception as e:
+                self.logger.error("__sync_records: %s", e)
+
+    def should_reconnect(self):
+        current_timestamp = self.get_current_timestamp()
+        if current_timestamp - self.start_timestamp < self._no_messages_reconnect_timeout:
+            return False
+
+        for symbol in self.symbols:
+            if symbol not in self._latest_symbol_message:
+                continue
+
+            timeout_threshold = current_timestamp - self._no_messages_reconnect_timeout
+            self.logger.debug('should_reconnect %s %d %d', symbol,
+                              self._latest_symbol_message[symbol],
+                              timeout_threshold)
+            if self._latest_symbol_message[symbol] > timeout_threshold:
+                return False
+
+        self.logger.info("should_reconnect: %d", True)
+        return True
+
+
+async def run(listener_factory):
+    tracked_symbols = None
+    task = None
+    should_reconnect = False
+    listen_task = None
+    sync_task = None
+
+    should_run = ENV == "production"
+
+    while True:
+        symbols = set(get_symbols())
+
+        if should_run and tracked_symbols != symbols or should_reconnect:
+            tracked_symbols = symbols
+
+            if listen_task is not None:
+                listen_task.cancel()
+            if sync_task is not None:
+                sync_task.cancel()
+
+            listener = listener_factory(symbols)
+            listen_task = asyncio.create_task(listener.listen())
+            sync_task = asyncio.create_task(listener.sync())
+
+        await asyncio.sleep(NO_MESSAGES_RECONNECT_TIMEOUT)
+
+        if should_run:
+            should_reconnect = listener.should_reconnect()
