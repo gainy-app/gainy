@@ -41,6 +41,13 @@ actions:
     handler: '{{AWS_LAMBDA_API_GATEWAY_ENDPOINT}}/hasuraAction'
   permissions:
   - role: user
+- name: get_portfolio_chart
+  definition:
+    kind: ""
+    handler: '{{AWS_LAMBDA_API_GATEWAY_ENDPOINT}}/hasuraAction'
+  permissions:
+  - role: user
+  comment: get_portfolio_chart
 - name: get_portfolio_holdings
   definition:
     kind: ""

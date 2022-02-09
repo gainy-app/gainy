@@ -192,3 +192,13 @@ class Institution(PortfolioBaseModel):
     @property
     def key_fields(self):
         return ['ref_id']
+
+
+class PortfolioChartFilter:
+    periods = None
+    account_ids = None
+    institution_ids = None
+    interest_ids = None
+    category_ids = None
+    security_types = None
+    ltt_only = None

@@ -45,14 +45,12 @@ models = " ".join([
     'portfolio_chart',
     'portfolio_expanded_transactions',
     'portfolio_gains',
+    'portfolio_holding_chart',
     'portfolio_holding_details',
     'portfolio_holding_gains',
     'portfolio_holding_group_details',
     'portfolio_holding_group_gains',
-    #     'portfolio_securities_normalized',
     'portfolio_transaction_gains',
-    #     'profile_holding_groups',
-    #     'profile_holdings_normalized',
     'ticker_realtime_metrics',
 ])
 

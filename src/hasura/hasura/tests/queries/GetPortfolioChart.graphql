@@ -1,0 +1,28 @@
+query GetPortfolioChart(
+    $profileId: Int!,
+    $periods: [String]!,
+    $interestIds: [Int],
+    $accountIds: [Int],
+    $categoryIds: [Int],
+    $institutionIds: [Int],
+    $lttOnly: Boolean,
+    $securityTypes: [String]
+) {
+    get_portfolio_chart(
+        profile_id: $profileId,
+        periods: $periods,
+        interest_ids: $interestIds,
+        account_ids: $accountIds,
+        category_ids: $categoryIds,
+        institution_ids: $institutionIds,
+        ltt_only: $lttOnly,
+        security_types: $securityTypes
+    ) {
+        datetime
+        period
+        open
+        high
+        low
+        close
+    }
+}

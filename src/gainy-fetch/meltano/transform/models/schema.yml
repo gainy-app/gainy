@@ -1759,6 +1759,49 @@ models:
           - type:
               type: 'character varying'
 
+  - name: portfolio_transaction_chart
+    columns:
+      - name: transactions_uniq_id
+        tests:
+          - exists
+          - type:
+              type: 'character varying'
+      - name: datetime
+        tests:
+          - exists
+          - type:
+              type: 'timestamp without time zone'
+      - name: period
+        tests:
+          - exists
+          - type:
+              type: 'character varying'
+      - name: open
+        tests:
+          - exists
+          - type:
+              type: 'numeric'
+      - name: high
+        tests:
+          - exists
+          - type:
+              type: 'numeric'
+      - name: low
+        tests:
+          - exists
+          - type:
+              type: 'numeric'
+      - name: close
+        tests:
+          - exists
+          - type:
+              type: 'numeric'
+      - name: adjusted_close
+        tests:
+          - exists
+          - type:
+              type: 'numeric'
+
   - name: ticker_realtime_metrics
     columns:
       - name: symbol

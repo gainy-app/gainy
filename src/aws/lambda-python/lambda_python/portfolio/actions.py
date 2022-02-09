@@ -1,4 +1,5 @@
 from portfolio.service import PortfolioService
+from portfolio.models import PortfolioChartFilter
 from common.hasura_function import HasuraAction
 
 
@@ -35,3 +36,29 @@ class GetPortfolioTransactions(HasuraAction):
                                                      offset=offset)
 
         return [i.normalize() for i in transactions]
+
+
+class GetPortfolioChart(HasuraAction):
+
+    def __init__(self):
+        super().__init__("get_portfolio_chart", "profile_id")
+
+        self.service = PortfolioService()
+
+    def apply(self, db_conn, input_params, headers):
+        profile_id = input_params["profile_id"]
+
+        filter = PortfolioChartFilter()
+        filter.periods = input_params.get("periods")
+        filter.account_ids = input_params.get("account_ids")
+        filter.institution_ids = input_params.get("institution_ids")
+        filter.interest_ids = input_params.get("interest_ids")
+        filter.category_ids = input_params.get("category_ids")
+        filter.security_types = input_params.get("security_types")
+        filter.ltt_only = input_params.get("ltt_only")
+
+        chart = self.service.get_portfolio_chart(db_conn, profile_id, filter)
+        for row in chart:
+            row['datetime'] = row['datetime'].isoformat()
+
+        return chart

@@ -41,13 +41,9 @@ hasura-seed:
 	docker-compose exec -T hasura hasura seed apply
 
 style-check:
-	npx eslint src/aws/lambda-nodejs
-	npx prettier --check "src/aws/lambda-nodejs/**/*.js"
 	yapf --diff -r src/aws/lambda-python/ src/aws/router src/websockets src/gainy-fetch/meltano/orchestrate/dags terraform
 
 style-fix:
-	npx eslint src/aws/lambda-nodejs --fix
-	npx prettier --write "src/aws/lambda-nodejs/**/*.js"
 	yapf -i -r src/aws/lambda-python/ src/aws/router src/websockets src/gainy-fetch/meltano/orchestrate/dags terraform
 
 extract-passwords:
@@ -56,7 +52,7 @@ extract-passwords:
 test: configure
 	docker-compose -p gainy_test -f docker-compose.test.yml run test-meltano invoke dbt test
 	docker-compose -p gainy_test -f docker-compose.test.yml run --entrypoint python3 test-meltano tests/image_urls.py
-	docker-compose -p gainy_test -f docker-compose.test.yml run test-meltano invoke dbt run  --vars '{"realtime": true}' --model historical_prices_aggregated portfolio_gains portfolio_holding_details portfolio_holding_gains portfolio_holding_group_details portfolio_holding_group_gains
+	docker-compose -p gainy_test -f docker-compose.test.yml run test-meltano invoke dbt run  --vars '{"realtime": true}' --model historical_prices_aggregated portfolio_gains portfolio_holding_details portfolio_holding_gains portfolio_holding_group_details portfolio_holding_group_gains portfolio_transaction_chart portfolio_expanded_transactions
 	docker-compose -p gainy_test -f docker-compose.test.yml run test-meltano invoke dbt test
 	docker-compose -p gainy_test -f docker-compose.test.yml exec -T test-hasura pytest
 	make test-clean
