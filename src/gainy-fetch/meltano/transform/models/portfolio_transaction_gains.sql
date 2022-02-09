@@ -177,18 +177,46 @@ select transaction_id,
        relative_gain_1y::double precision,
        relative_gain_5y::double precision,
        relative_gain_total::double precision,
-       sign(quantity_norm) * (actual_price * (1 - 1 / (1 + sign(quantity_norm) * relative_gain_1d)) *
-                              abs(quantity_norm))::double precision as absolute_gain_1d,
-       sign(quantity_norm) * (actual_price * (1 - 1 / (1 + sign(quantity_norm) * relative_gain_1w)) *
-                              abs(quantity_norm))::double precision as absolute_gain_1w,
-       sign(quantity_norm) * (actual_price * (1 - 1 / (1 + sign(quantity_norm) * relative_gain_1m)) *
-                              abs(quantity_norm))::double precision as absolute_gain_1m,
-       sign(quantity_norm) * (actual_price * (1 - 1 / (1 + sign(quantity_norm) * relative_gain_3m)) *
-                              abs(quantity_norm))::double precision as absolute_gain_3m,
-       sign(quantity_norm) * (actual_price * (1 - 1 / (1 + sign(quantity_norm) * relative_gain_1y)) *
-                              abs(quantity_norm))::double precision as absolute_gain_1y,
-       sign(quantity_norm) * (actual_price * (1 - 1 / (1 + sign(quantity_norm) * relative_gain_5y)) *
-                              abs(quantity_norm))::double precision as absolute_gain_5y,
-       sign(quantity_norm) * (actual_price * (1 - 1 / (1 + sign(quantity_norm) * relative_gain_total)) *
-                              abs(quantity_norm))::double precision as absolute_gain_total
+       case
+           when abs(1 + relative_gain_1d) < 1e-10
+               then sign(quantity_norm) * actual_price * relative_gain_1d
+           else sign(quantity_norm) * (actual_price * (1 - 1 / (1 + sign(quantity_norm) * relative_gain_1d)) *
+                                       abs(quantity_norm))::double precision
+           end as absolute_gain_1d,
+       case
+           when abs(1 + relative_gain_1w) < 1e-10
+               then sign(quantity_norm) * actual_price * relative_gain_1w
+           else sign(quantity_norm) * (actual_price * (1 - 1 / (1 + sign(quantity_norm) * relative_gain_1w)) *
+                                       abs(quantity_norm))::double precision
+           end as absolute_gain_1w,
+       case
+           when abs(1 + relative_gain_1m) < 1e-10
+               then sign(quantity_norm) * actual_price * relative_gain_1m
+           else sign(quantity_norm) * (actual_price * (1 - 1 / (1 + sign(quantity_norm) * relative_gain_1m)) *
+                                       abs(quantity_norm))::double precision
+           end as absolute_gain_1m,
+       case
+           when abs(1 + relative_gain_3m) < 1e-10
+               then sign(quantity_norm) * actual_price * relative_gain_3m
+           else sign(quantity_norm) * (actual_price * (1 - 1 / (1 + sign(quantity_norm) * relative_gain_3m)) *
+                                       abs(quantity_norm))::double precision
+           end as absolute_gain_3m,
+       case
+           when abs(1 + relative_gain_1y) < 1e-10
+               then sign(quantity_norm) * actual_price * relative_gain_1y
+           else sign(quantity_norm) * (actual_price * (1 - 1 / (1 + sign(quantity_norm) * relative_gain_1y)) *
+                                       abs(quantity_norm))::double precision
+           end as absolute_gain_1y,
+       case
+           when abs(1 + relative_gain_5y) < 1e-10
+               then sign(quantity_norm) * actual_price * relative_gain_5y
+           else sign(quantity_norm) * (actual_price * (1 - 1 / (1 + sign(quantity_norm) * relative_gain_5y)) *
+                                       abs(quantity_norm))::double precision
+           end as absolute_gain_5y,
+       case
+           when abs(1 + relative_gain_total) < 1e-10
+               then sign(quantity_norm) * actual_price * relative_gain_total
+           else sign(quantity_norm) * (actual_price * (1 - 1 / (1 + sign(quantity_norm) * relative_gain_total)) *
+                                       abs(quantity_norm))::double precision
+           end as absolute_gain_total
 from relative_data
