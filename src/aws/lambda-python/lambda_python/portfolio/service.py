@@ -301,7 +301,7 @@ class PortfolioService:
             cursor.execute(query, params)
             static_data = cursor.fetchall()
 
-        if not len(static_data):
+        if not len(static_data) or static_data[0][0] is None:
             return rows
 
         value = float(static_data[0][0])
