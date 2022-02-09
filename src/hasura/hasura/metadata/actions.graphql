@@ -129,6 +129,7 @@ type ChartDataPoint {
   high: Float
   low: Float
   close: Float
+  adjusted_close: Float
   volume: Float
 }
 
