@@ -57,7 +57,17 @@ plugins:
       inherit_from: tap-postgres
       catalog: configs/raw-sync/tap.catalog.json
       config:
+        itersize: 10000
+    - name: tap-postgres--sync-fundamentals
+      inherit_from: tap-postgres
+      catalog: configs/raw-sync/tap.catalog.fundamentals.json
+      config:
         itersize: 1
+    - name: tap-postgres--sync-options
+      inherit_from: tap-postgres
+      catalog: configs/raw-sync/tap.catalog.options.json
+      config:
+        itersize: 10
     - name: tap-postgres--search
       inherit_from: tap-postgres
       catalog: configs/search/tap.catalog.json
@@ -65,9 +75,10 @@ plugins:
     - name: target-postgres
       variant: transferwise
       pip_url: pipelinewise-target-postgres
+    - name: target-postgres-small-batch
+      inherit_from: target-postgres
       config:
         batch_size_rows: 100
-        parallelism: 5
     - name: target-algolia
       namespace: target-algolia
       pip_url: /target-algolia
@@ -102,11 +113,31 @@ schedules:
     transform: skip
     interval: '@daily'
     start_date: 2021-09-03 13:52:48.598227
+    env:
+      TARGET_ENVS: '["production","local"]'
+
+  - name: prod-to-postgres-fundamentals
+    extractor: tap-postgres--sync-fundamentals
+    loader: target-postgres-small-batch
+    transform: skip
+    interval: '@daily'
+    start_date: 2021-09-03 13:52:48.598227
+    env:
+      TARGET_ENVS: '["test"]'
+
+  - name: prod-to-postgres-options
+    extractor: tap-postgres--sync-options
+    loader: target-postgres-small-batch
+    transform: skip
+    interval: '@daily'
+    start_date: 2021-09-03 13:52:48.598227
+    env:
+      TARGET_ENVS: '["test"]'
 
   - name: prod-to-postgres
     extractor: tap-postgres--sync
     loader: target-postgres
-    transform: run
+    transform: skip
     interval: '@daily'
     start_date: 2021-09-03 13:52:48.598227
     env:
