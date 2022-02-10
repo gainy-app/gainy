@@ -42,7 +42,7 @@ with max_date as
                           join latest_open_trading_session on true
                  where dd between latest_open_trading_session.open_at and latest_open_trading_session.close_at
 {% if is_incremental() and var('realtime') %}
-                 and dd > now() - interval '15 minutes'
+                 and dd > now() - interval '20 minutes'
 {% endif %}
              ),
          expanded_intraday_prices as
@@ -86,7 +86,7 @@ with max_date as
                                  time_truncated
                           from expanded_intraday_prices
 {% if is_incremental() and var('realtime') %}
-                          where time > now() - interval '15 minutes'
+                          where time > now() - interval '20 minutes'
 {% endif %}
                           union all
                           select symbol,

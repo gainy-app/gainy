@@ -38,18 +38,6 @@ def get_logger(name):
     return logger
 
 
-def get_symbols():
-    with psycopg2.connect(DB_CONN_STRING) as db_conn:
-        with db_conn.cursor() as cursor:
-            cursor.execute(
-                sql.SQL(
-                    "SELECT symbol FROM {public_schema_name}.base_tickers where symbol is not null"
-                ).format(
-                    public_schema_name=sql.Identifier(PUBLIC_SCHEMA_NAME)))
-            tickers = cursor.fetchall()
-            return [ticker[0] for ticker in tickers]
-
-
 def persist_records(values, source):
     if not len(values):
         return
@@ -95,8 +83,8 @@ def submit_dd_metric(metric_name, value, tags=[]):
 
 class AbstractPriceListener(ABC):
 
-    def __init__(self, symbols, source):
-        self.symbols = symbols
+    def __init__(self, source):
+        self.symbols = self.filter_symbols(self.get_symbols())
         self.source = source
         self.records_queue = asyncio.Queue()
         self.records_queue_lock = asyncio.Lock()
@@ -105,7 +93,32 @@ class AbstractPriceListener(ABC):
         self._no_messages_reconnect_timeout = NO_MESSAGES_RECONNECT_TIMEOUT
         self._latest_symbol_message = {}
         self.start_timestamp = self.get_current_timestamp()
-        self.logger.debug("started at %d", self.start_timestamp)
+        self.logger.debug("started at %d for symbols %s", self.start_timestamp,
+                          self.symbols)
+
+    def get_symbols(self):
+        with psycopg2.connect(DB_CONN_STRING) as db_conn:
+            query = sql.SQL(
+                "SELECT symbol FROM {public_schema_name}.base_tickers where symbol is not null"
+            ).format(public_schema_name=sql.Identifier(PUBLIC_SCHEMA_NAME))
+
+            if self.supported_exchanges is not None:
+                exchanges = '|'.join(self.supported_exchanges)
+                query += sql.SQL(
+                    ' and lower(exchange) similar to {pattern}').format(
+                        pattern=sql.Literal('(%s)%%' % (exchanges)))
+
+            with db_conn.cursor() as cursor:
+                cursor.execute(query)
+                tickers = cursor.fetchall()
+                return set([ticker[0] for ticker in tickers])
+
+    def filter_symbols(self, symbols):
+        return symbols
+
+    @property
+    def supported_exchanges(self):
+        return None
 
     def get_current_timestamp(self):
         return datetime.datetime.now().timestamp()
@@ -113,6 +126,12 @@ class AbstractPriceListener(ABC):
     @abstractmethod
     async def listen(self):
         pass
+
+    def transform_symbol(self, symbol):
+        return symbol
+
+    def rev_transform_symbol(self, symbol):
+        return symbol
 
     async def sync(self):
         while True:
@@ -142,7 +161,7 @@ class AbstractPriceListener(ABC):
                 for record in records:
                     symbol = record['symbol']
                     if symbol not in self.symbols:
-                        symbol = symbol.replace('.', '-')
+                        symbol = self.rev_transform_symbol(symbol)
                         record['symbol'] = symbol
 
                 values = [(
@@ -166,42 +185,35 @@ class AbstractPriceListener(ABC):
         if current_timestamp - self.start_timestamp < self._no_messages_reconnect_timeout:
             return False
 
-        for symbol in self.symbols:
-            if symbol not in self._latest_symbol_message:
-                continue
+        if self.symbols != self.get_symbols():
+            self.logger.info("should_reconnect: symbols changed")
+            return True
 
-            timeout_threshold = current_timestamp - self._no_messages_reconnect_timeout
-            self.logger.debug('should_reconnect %s %d %d', symbol,
-                              self._latest_symbol_message[symbol],
-                              timeout_threshold)
-            if self._latest_symbol_message[symbol] > timeout_threshold:
-                return False
+        latest_message_time = max(self._latest_symbol_message.values())
+        no_messages_reconnect_threshold = current_timestamp - self._no_messages_reconnect_timeout
+        if latest_message_time < no_messages_reconnect_threshold:
+            self.logger.info("should_reconnect: no messages")
+            return True
 
-        self.logger.info("should_reconnect: %d", True)
-        return True
+        return False
 
 
 async def run(listener_factory):
-    tracked_symbols = None
     task = None
-    should_reconnect = False
+    should_reconnect = True
     listen_task = None
     sync_task = None
 
     should_run = ENV == "production"
 
     while True:
-        symbols = set(get_symbols())
-
-        if should_run and tracked_symbols != symbols or should_reconnect:
-            tracked_symbols = symbols
-
+        if should_run and should_reconnect:
             if listen_task is not None:
                 listen_task.cancel()
             if sync_task is not None:
                 sync_task.cancel()
 
-            listener = listener_factory(symbols)
+            listener = listener_factory()
             listen_task = asyncio.create_task(listener.listen())
             sync_task = asyncio.create_task(listener.sync())
 
