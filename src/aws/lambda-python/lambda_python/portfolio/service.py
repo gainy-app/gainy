@@ -67,7 +67,7 @@ class PortfolioService:
         return transactions
 
     def sync_token_transactions(self, db_conn, access_token):
-        transactions_count = 0
+        transaction_count = 0
         count = self.__get_service(
             access_token['service']).max_transactions_limit()
         for offset in range(0, 1000000, count):
@@ -81,11 +81,11 @@ class PortfolioService:
                                           data['securities'], data['accounts'],
                                           transactions)
 
-            transactions_count += len(transactions)
+            transaction_count += len(transactions)
             if len(transactions) < count:
                 break
 
-        return transactions_count
+        return transaction_count
 
     def sync_institution(self, db_conn, access_token):
         institution = self.__get_service(
@@ -219,8 +219,29 @@ class PortfolioService:
             cursor.execute(query, params)
             rows = cursor.fetchall()
 
+        rows = self._filter_chart_by_transaction_count(rows)
+
         return self._add_static_values_to_chart(db_conn, profile_id, filter,
                                                 rows)
+
+    def _filter_chart_by_transaction_count(self, rows):
+        transaction_counts = {}
+        for row in rows:
+            if row['period'] not in transaction_counts:
+                transaction_counts[row['period']] = {}
+            if row['transaction_count'] not in transaction_counts[
+                    row['period']]:
+                transaction_counts[row['period']][row['transaction_count']] = 0
+            transaction_counts[row['period']][row['transaction_count']] += 1
+
+        for period, period_values in transaction_counts.items():
+            max_transaction_count[period] = max(period_values,
+                                                key=period_values.get)
+
+        return [
+            row for i in rows
+            if row['transaction_count'] == max_transaction_count[row['period']]
+        ]
 
     def _add_static_values_to_chart(self, db_conn, profile_id, filter, rows):
         with open(os.path.join(SCRIPT_DIR,

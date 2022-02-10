@@ -16,6 +16,7 @@ with week_trading_sessions as
          )
 select period,
        portfolio_transaction_chart.datetime,
+       count(uniq_id)::double precision      as transaction_count,
        sum(open)::double precision           as open,
        sum(high)::double precision           as high,
        sum(low)::double precision            as low,
