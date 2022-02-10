@@ -93,7 +93,8 @@ class AbstractPriceListener(ABC):
         self._no_messages_reconnect_timeout = NO_MESSAGES_RECONNECT_TIMEOUT
         self._latest_symbol_message = {}
         self.start_timestamp = self.get_current_timestamp()
-        self.logger.debug("started at %d for symbols %s", self.start_timestamp, self.symbols)
+        self.logger.debug("started at %d for symbols %s", self.start_timestamp,
+                          self.symbols)
 
     def get_symbols(self):
         with psycopg2.connect(DB_CONN_STRING) as db_conn:
@@ -188,7 +189,8 @@ class AbstractPriceListener(ABC):
             self.logger.info("should_reconnect: symbols changed")
             return True
 
-        if max(self._latest_symbol_message.values()) > current_timestamp - self._no_messages_reconnect_timeout:
+        if max(self._latest_symbol_message.values()
+               ) > current_timestamp - self._no_messages_reconnect_timeout:
             self.logger.info("should_reconnect: no messages")
             return True
 

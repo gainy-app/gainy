@@ -150,4 +150,4 @@ class PricesListener(AbstractPriceListener):
 
 
 if __name__ == "__main__":
-    asyncio.run(run(lambda : PricesListener()))
+    asyncio.run(run(lambda: PricesListener()))

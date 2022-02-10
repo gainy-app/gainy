@@ -84,5 +84,6 @@ class PricesListener(AbstractPriceListener):
     def rev_transform_symbol(self, symbol):
         return i.replace('.', '-')
 
+
 if __name__ == "__main__":
-    asyncio.run(run(lambda : PricesListener()))
+    asyncio.run(run(lambda: PricesListener()))
