@@ -3,6 +3,7 @@ import websockets
 import json
 import os
 import datetime
+from abc import abstractmethod
 from decimal import Decimal
 from common import run, AbstractPriceListener, NO_MESSAGES_RECONNECT_TIMEOUT
 
@@ -11,13 +12,20 @@ EOD_API_TOKEN = os.environ["EOD_API_TOKEN"]
 
 class PricesListener(AbstractPriceListener):
 
-    def __init__(self, symbols):
-        super().__init__(symbols, "eod")
+    def __init__(self):
+        super().__init__("eod")
 
         self._buckets = {}
         self.granularity = 60000  # 60 seconds
         self.api_token = EOD_API_TOKEN
         self._first_filled_key = None
+
+    def filter_symbols(self, symbols):
+        return set(i for i in symbols if i.find('-') == -1)
+
+    @property
+    def supported_exchanges(self):
+        return ['nyse', 'nasdaq']
 
     async def handle_price_message(self, message):
         # Message format: {"s":"AAPL","p":161.14,"c":[12,37],"v":1,"dp":false,"t":1637573639704}
@@ -142,4 +150,4 @@ class PricesListener(AbstractPriceListener):
 
 
 if __name__ == "__main__":
-    asyncio.run(run(lambda symbols: PricesListener(symbols)))
+    asyncio.run(run(lambda: PricesListener()))
