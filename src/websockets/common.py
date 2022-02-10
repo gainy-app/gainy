@@ -189,8 +189,9 @@ class AbstractPriceListener(ABC):
             self.logger.info("should_reconnect: symbols changed")
             return True
 
-        if max(self._latest_symbol_message.values()
-               ) > current_timestamp - self._no_messages_reconnect_timeout:
+        latest_message_time = max(self._latest_symbol_message.values())
+        no_messages_reconnect_threshold = current_timestamp - self._no_messages_reconnect_timeout
+        if latest_message_time < no_messages_reconnect_threshold:
             self.logger.info("should_reconnect: no messages")
             return True
 
