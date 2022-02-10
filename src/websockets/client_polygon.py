@@ -79,10 +79,10 @@ class PricesListener(AbstractPriceListener):
             await stream_client.close_stream()
 
     def transform_symbol(self, symbol):
-        return i.replace('-', '.')
+        return symbol.replace('-', '.')
 
     def rev_transform_symbol(self, symbol):
-        return i.replace('.', '-')
+        return symbol.replace('.', '-')
 
 
 if __name__ == "__main__":
