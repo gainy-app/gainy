@@ -12,8 +12,8 @@ POLYGON_REALTIME_STREAMING_HOST = os.environ["POLYGON_REALTIME_STREAMING_HOST"]
 
 class PricesListener(AbstractPriceListener):
 
-    def __init__(self, symbols):
-        super().__init__(symbols, "polygon")
+    def __init__(self):
+        super().__init__("polygon")
 
         self.api_token = POLYGON_API_TOKEN
         self.host = POLYGON_REALTIME_STREAMING_HOST
@@ -64,7 +64,7 @@ class PricesListener(AbstractPriceListener):
 
         try:
             await stream_client.subscribe_stock_minute_aggregates(
-                [i.replace('-', '.') for i in self.symbols],
+                [self.transform_symbol(i) for i in self.symbols],
                 self.handle_message)
 
             while 1:
@@ -78,6 +78,11 @@ class PricesListener(AbstractPriceListener):
         finally:
             await stream_client.close_stream()
 
+    def transform_symbol(self, symbol):
+        return i.replace('-', '.')
+
+    def rev_transform_symbol(self, symbol):
+        return i.replace('.', '-')
 
 if __name__ == "__main__":
-    asyncio.run(run(lambda symbols: PricesListener(symbols)))
+    asyncio.run(run(lambda : PricesListener()))
