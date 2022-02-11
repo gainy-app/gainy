@@ -79,6 +79,7 @@ plugins:
       inherit_from: target-postgres
       config:
         batch_size_rows: 100
+        parallelism: 5
     - name: target-algolia
       namespace: target-algolia
       pip_url: /target-algolia
@@ -145,7 +146,7 @@ schedules:
 
   - name: eodhistoricaldata-to-postgres-0
     extractor: tap-eodhistoricaldata
-    loader: target-postgres
+    loader: target-postgres-small-batch
     transform: skip
     interval: '@daily'
     start_date: 2021-06-17 10:40:58.742133
