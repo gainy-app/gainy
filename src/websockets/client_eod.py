@@ -62,9 +62,9 @@ class PricesListener(AbstractPriceListener):
                 }
 
                 prev_key = key - 1
-                if prev_key in self._buckets[
-                        symbol] and self._first_filled_key is not None and self._first_filled_key < prev_key:
-                    self.logger.info("persisting key %d %s", prev_key, symbol)
+                prev_key_filled = prev_key in self._buckets[symbol]
+                if prev_key_filled and self._first_filled_key is not None and self._first_filled_key < prev_key:
+                    self.logger.debug("persisting key %d %s", prev_key, symbol)
                     date = datetime.datetime.fromtimestamp(
                         prev_key * self.granularity / 1000)
                     self.records_queue.put_nowait({
@@ -75,8 +75,12 @@ class PricesListener(AbstractPriceListener):
                         },
                         **self._buckets[symbol][prev_key]
                     })
+
                 if self._first_filled_key is None:
                     self._first_filled_key = prev_key
+
+                if prev_key_filled:
+                    del self._buckets[symbol][prev_key]
 
     async def handle_message(self, message_raw):
         try:

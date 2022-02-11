@@ -339,8 +339,8 @@ resource "datadog_monitor" "meltano_dag_run_duration" {
   query = "avg(last_10d):anomalies(sum:app.latest_dag_run_duration_minutes{postgres_env:production} by {dag_id}.as_count(), 'basic', 2, direction='above', alert_window='last_1d', interval=300, count_default_zero='true') > 0.25"
 
   monitor_threshold_windows {
-    recovery_window = "last_1d"
-    trigger_window  = "last_1d"
+    recovery_window = "last_3h"
+    trigger_window  = "last_3h"
   }
 
   monitor_thresholds {
@@ -365,8 +365,8 @@ resource "datadog_monitor" "meltano_failed_dag_runs" {
   query = "avg(last_10d):anomalies(sum:app.failed_dag_runs{postgres_env:production} by {dag_id}.as_count(), 'basic', 2, direction='above', alert_window='last_1d', interval=300, count_default_zero='true') > 0.2"
 
   monitor_threshold_windows {
-    recovery_window = "last_1d"
-    trigger_window  = "last_1d"
+    recovery_window = "last_3h"
+    trigger_window  = "last_3h"
   }
 
   monitor_thresholds {
