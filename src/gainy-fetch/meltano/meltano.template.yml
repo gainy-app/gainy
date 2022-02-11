@@ -79,6 +79,7 @@ plugins:
       inherit_from: target-postgres
       config:
         batch_size_rows: 100
+        parallelism: 5
     - name: target-algolia
       namespace: target-algolia
       pip_url: /target-algolia
