@@ -67,7 +67,7 @@ class PortfolioService:
         return transactions
 
     def sync_token_transactions(self, db_conn, access_token):
-        transaction_count = 0
+        transactions_count = 0
         count = self.__get_service(
             access_token['service']).max_transactions_limit()
         for offset in range(0, 1000000, count):
@@ -81,11 +81,11 @@ class PortfolioService:
                                           data['securities'], data['accounts'],
                                           transactions)
 
-            transaction_count += len(transactions)
+            transactions_count += len(transactions)
             if len(transactions) < count:
                 break
 
-        return transaction_count
+        return transactions_count
 
     def sync_institution(self, db_conn, access_token):
         institution = self.__get_service(
