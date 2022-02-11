@@ -47,8 +47,8 @@ from {{ ref('portfolio_expanded_transactions') }}
          join {{ ref('chart') }}
               on chart.symbol = portfolio_securities_normalized.original_ticker_symbol
                   and (chart.datetime >=
-                       coalesce(portfolio_expanded_transactions.datetime, first_profile_transaction_date.datetime) or
-                       coalesce(portfolio_expanded_transactions.datetime,
+                       coalesce(portfolio_expanded_transactions.date, first_profile_transaction_date.datetime) or
+                       coalesce(portfolio_expanded_transactions.date,
                                 first_profile_transaction_date.datetime) is null)
 {% if is_incremental() %}
          left join latest_transaction_chart_row

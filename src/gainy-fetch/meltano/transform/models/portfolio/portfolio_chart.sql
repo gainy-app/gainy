@@ -41,8 +41,8 @@ with
                       join {{ ref('portfolio_securities_normalized') }}
                            on portfolio_securities_normalized.id = portfolio_expanded_transactions.security_id
                       join {{ ref('historical_prices_aggregated') }}
-                           on (historical_prices_aggregated.datetime >= portfolio_expanded_transactions.datetime or
-                               portfolio_expanded_transactions.datetime is null) and
+                           on (historical_prices_aggregated.datetime >= portfolio_expanded_transactions.date or
+                               portfolio_expanded_transactions.date is null) and
                               historical_prices_aggregated.symbol = portfolio_securities_normalized.original_ticker_symbol
                       left join first_transaction_date on first_transaction_date.profile_id = portfolio_expanded_transactions.profile_id
              where portfolio_expanded_transactions.type in ('buy', 'sell')
@@ -74,8 +74,8 @@ with
                       join {{ ref('base_tickers') }}
                            on base_tickers.symbol = portfolio_securities_normalized.original_ticker_symbol
                       join chart_dates
-                           on (chart_dates.datetime >= portfolio_expanded_transactions.datetime or
-                               portfolio_expanded_transactions.datetime is null)
+                           on (chart_dates.datetime >= portfolio_expanded_transactions.date or
+                               portfolio_expanded_transactions.date is null)
                       left join {{ ref('chart') }}
                                 on chart.datetime <= chart_dates.datetime
                                     and chart.datetime > chart_dates.datetime - interval '1 hour'
