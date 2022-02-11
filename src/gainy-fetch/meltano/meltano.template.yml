@@ -78,7 +78,7 @@ plugins:
     - name: target-postgres-small-batch
       inherit_from: target-postgres
       config:
-        batch_size_rows: 100
+        batch_size_rows: 10
         parallelism: 5
     - name: target-algolia
       namespace: target-algolia
