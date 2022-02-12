@@ -252,11 +252,12 @@ class PortfolioService:
                 continue
 
             # for other periods transactions count should not decrease, so we pick all rows that follow a non-decreasing transaction count pattern
-            prev_transaction_count = prev_row['transaction_count']
-            prev_period = prev_row['period']
-            should_skip_other_periods = prev_row is not None and period == prev_period and transaction_count < prev_transaction_count
-            if period != '1d' and should_skip_other_periods:
-                continue
+            if prev_row is not None:
+                prev_transaction_count = prev_row['transaction_count']
+                prev_period = prev_row['period']
+                should_skip_other_periods = period == prev_period and transaction_count < prev_transaction_count
+                if period != '1d' and should_skip_other_periods:
+                    continue
 
             yield row
 
