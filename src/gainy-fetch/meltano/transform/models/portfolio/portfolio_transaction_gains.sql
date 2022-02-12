@@ -11,7 +11,7 @@
 with actual_prices as
      (
          select distinct on (symbol) symbol, adjusted_close, '0d'::varchar as period
-         from historical_prices_aggregated
+         from {{ ref('historical_prices_aggregated') }}
          where ((period = '15min' and datetime > now() - interval '2 hour') or
                 (period = '1d' and datetime > now() - interval '1 week'))
            and adjusted_close is not null

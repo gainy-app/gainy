@@ -283,7 +283,7 @@ union all
     with time_series_1d as
         (
             SELECT distinct date::timestamp as datetime
-            FROM historical_prices
+            FROM {{ ref('historical_prices') }}
         )
     select distinct on (
         code, time_series_1d.datetime
@@ -326,7 +326,7 @@ union all
     with time_series_1w as
              (
                  SELECT distinct date_trunc('week', date)::timestamp as datetime
-                 FROM historical_prices
+                 FROM {{ ref('historical_prices') }}
              )
 
     select distinct on (
@@ -393,7 +393,7 @@ union all
     with time_series_1m as
              (
                  SELECT distinct date_trunc('month', date)::timestamp as datetime
-                 FROM historical_prices
+                 FROM {{ ref('historical_prices') }}
              )
 
     select distinct on (

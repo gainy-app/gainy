@@ -170,13 +170,13 @@ class PortfolioService:
         if filter.interest_ids is not None or filter.category_ids is not None or filter.security_types is not None:
             join_clause.append(
                 sql.SQL(
-                    "join public.portfolio_securities_normalized on portfolio_securities_normalized.id = portfolio_expanded_transactions.security_id"
+                    "join portfolio_securities_normalized on portfolio_securities_normalized.id = portfolio_expanded_transactions.security_id"
                 ))
 
             if filter.interest_ids is not None and len(filter.interest_ids):
                 join_clause.append(
                     sql.SQL(
-                        "join public.ticker_interests on ticker_interests.symbol = portfolio_securities_normalized.ticker_symbol"
+                        "join ticker_interests on ticker_interests.symbol = portfolio_securities_normalized.ticker_symbol"
                     ))
                 where_clause.append(sql.SQL("interest_id in %(interest_ids)s"))
                 params['interest_ids'] = tuple(filter.interest_ids)
@@ -184,7 +184,7 @@ class PortfolioService:
             if filter.category_ids is not None and len(filter.category_ids):
                 join_clause.append(
                     sql.SQL(
-                        "join public.ticker_categories on ticker_categories.symbol = portfolio_securities_normalized.ticker_symbol"
+                        "join ticker_categories on ticker_categories.symbol = portfolio_securities_normalized.ticker_symbol"
                     ))
                 where_clause.append(sql.SQL("category_id in %(category_ids)s"))
                 params['category_ids'] = tuple(filter.category_ids)
@@ -204,7 +204,7 @@ class PortfolioService:
                 ))
             join_clause.append(
                 sql.SQL(
-                    "join public.portfolio_holding_details on portfolio_holding_details.holding_id = profile_holdings.id"
+                    "join portfolio_holding_details on portfolio_holding_details.holding_id = profile_holdings.id"
                 ))
             where_clause.append(
                 sql.SQL("portfolio_holding_details.ltt_quantity_total > 0"))
@@ -252,11 +252,12 @@ class PortfolioService:
                 continue
 
             # for other periods transactions count should not decrease, so we pick all rows that follow a non-decreasing transaction count pattern
-            prev_transaction_count = prev_row['transaction_count']
-            prev_period = prev_row['period']
-            should_skip_other_periods = prev_row is not None and period == prev_period and transaction_count < prev_transaction_count
-            if period != '1d' and should_skip_other_periods:
-                continue
+            if prev_row is not None:
+                prev_transaction_count = prev_row['transaction_count']
+                prev_period = prev_row['period']
+                should_skip_other_periods = period == prev_period and transaction_count < prev_transaction_count
+                if period != '1d' and should_skip_other_periods:
+                    continue
 
             yield row
 
@@ -301,7 +302,7 @@ class PortfolioService:
         if filter.interest_ids is not None and len(filter.interest_ids):
             join_clause.append(
                 sql.SQL(
-                    "join public.ticker_interests on ticker_interests.symbol = portfolio_securities_normalized.ticker_symbol"
+                    "join ticker_interests on ticker_interests.symbol = portfolio_securities_normalized.ticker_symbol"
                 ))
             where_clause.append(sql.SQL("interest_id in %(interest_ids)s"))
             params['interest_ids'] = tuple(filter.interest_ids)
@@ -309,7 +310,7 @@ class PortfolioService:
         if filter.category_ids is not None and len(filter.category_ids):
             join_clause.append(
                 sql.SQL(
-                    "join public.ticker_categories on ticker_categories.symbol = portfolio_securities_normalized.ticker_symbol"
+                    "join ticker_categories on ticker_categories.symbol = portfolio_securities_normalized.ticker_symbol"
                 ))
             where_clause.append(sql.SQL("category_id in %(category_ids)s"))
             params['category_ids'] = tuple(filter.category_ids)
@@ -324,7 +325,7 @@ class PortfolioService:
         if filter.ltt_only is not None and filter.ltt_only:
             join_clause.append(
                 sql.SQL(
-                    "join public.portfolio_holding_details on portfolio_holding_details.holding_id = profile_holdings_normalized.holding_id"
+                    "join portfolio_holding_details on portfolio_holding_details.holding_id = profile_holdings_normalized.holding_id"
                 ))
             where_clause.append(
                 sql.SQL("portfolio_holding_details.ltt_quantity_total > 0"))

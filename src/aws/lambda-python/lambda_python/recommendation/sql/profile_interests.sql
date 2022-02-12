@@ -1,7 +1,7 @@
 with profile_industries as (
     select distinct ap.profile_id, ii.interest_id, ii.industry_id
     from app.profile_interests ap
-             join public.interest_industries ii
+             join interest_industries ii
                   on ap.interest_id = ii.interest_id
 ),
      profile_industries_counts as (
