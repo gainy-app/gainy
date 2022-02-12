@@ -98,7 +98,8 @@ class AbstractPriceListener(ABC):
 
     def get_symbols(self):
         with psycopg2.connect(DB_CONN_STRING) as db_conn:
-            query = sql.SQL("SELECT symbol FROM base_tickers where symbol is not null")
+            query = sql.SQL(
+                "SELECT symbol FROM base_tickers where symbol is not null")
 
             if self.supported_exchanges is not None:
                 exchanges = '|'.join(self.supported_exchanges)
