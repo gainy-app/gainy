@@ -131,22 +131,18 @@ def check_categories():
 
 
 def check_chart():
-    query = 'query DiscoverCharts($period: String!, $symbol: String!, $dateG: timestamp!, $dateL: timestamp!) { historical_prices_aggregated(where: {symbol: {_eq: $symbol}, period: {_eq: $period}, datetime: {_gte: $dateG, _lte: $dateL}}, order_by: {datetime: asc}) { symbol datetime period open high low close adjusted_close volume } }'
+    query = 'query DiscoverCharts($period: String!, $symbol: String!) { chart(where: {symbol: {_eq: $symbol}, period: {_eq: $period}}, order_by: {datetime: asc}) { symbol datetime period open high low close adjusted_close volume } }'
     datasets = [
-        ("1d", datetime.datetime.now() - datetime.timedelta(days=10), 5),
-        ("1w", datetime.datetime.now() - datetime.timedelta(days=30), 4),
-        ("1m", datetime.datetime.now() - datetime.timedelta(days=200), 6),
+        ("1d", 100),
+        ("1w", 100),
+        ("1m", 20),
     ]
-    now = datetime.datetime.now()
 
-    for (period, date_from, min_count) in datasets:
-        data = make_graphql_request(
-            query, {
-                "period": period,
-                "symbol": "AAPL",
-                "dateG": date_from.isoformat(),
-                "dateL": now.isoformat(),
-            })['data']['historical_prices_aggregated']
+    for (period, min_count) in datasets:
+        data = make_graphql_request(query, {
+            "period": period,
+            "symbol": "AAPL",
+        })['data']['chart']
 
         assert len(data) >= min_count
 

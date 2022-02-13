@@ -20,5 +20,4 @@ def test_chart():
             "symbol": "AAPL",
         })['data']['chart']
 
-        print('chart %s %d', period, len(data))
         assert len(data) >= min_count
