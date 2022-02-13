@@ -275,186 +275,186 @@ union all
     where t2.close is not null
 )
 
-{% if not var('realtime') %}
-
-union all
-
-(
-    with time_series_1d as
-        (
-            SELECT distinct date::timestamp as datetime
-            FROM {{ ref('historical_prices') }}
-        )
-    select distinct on (
-        code, time_series_1d.datetime
-        ) (code || '_' || time_series_1d.datetime::date || '_1d')::varchar                    as id,
-         code                                                                                 as symbol,
-         time_series_1d.datetime                                                              as time,
-         time_series_1d.datetime                                                              as datetime,
-         '1d'::varchar                                                                        as period,
-         case
-             when historical_prices.date = time_series_1d.datetime then historical_prices.open
-             else historical_prices.close end                                                 as open,
-         case
-             when historical_prices.date = time_series_1d.datetime then historical_prices.high
-             else historical_prices.close end                                                 as high,
-         case
-             when historical_prices.date = time_series_1d.datetime then historical_prices.low
-             else historical_prices.close end                                                 as low,
-         case
-             when historical_prices.date = time_series_1d.datetime then historical_prices.close
-             else historical_prices.close end                                                 as close,
-         case
-             when historical_prices.date = time_series_1d.datetime
-                 then historical_prices.adjusted_close
-             else historical_prices.adjusted_close end                                        as adjusted_close,
-         case
-             when historical_prices.date = time_series_1d.datetime then historical_prices.volume
-             else 0.0 end                                                                            as volume
-    from {{ ref('historical_prices') }}
-             join time_series_1d on time_series_1d.datetime between historical_prices.date and historical_prices.date + interval '1 week'
-    {% if is_incremental() %}
-        left join max_date on max_date.symbol = code and max_date.period = '1d'
-        where (max_date.time is null or date >= max_date.time - interval '1 week')
-          and time_series_1d.datetime >= now() - interval '1 year' - interval '1 week'
-    {% else %}
-    where time_series_1d.datetime >= now() - interval '1 year' - interval '1 week'
-    {% endif %}
-    order by code, time_series_1d.datetime, date desc
-)
-
-union all
-
-(
-    with time_series_1w as
-             (
-                 SELECT distinct date_trunc('week', date)::timestamp as datetime
-                 FROM {{ ref('historical_prices') }}
-             )
-
-    select distinct on (
-        symbol, time_series_1w.datetime
-        ) (symbol || '_' || time_series_1w.datetime::timestamptz || '_1w')::varchar as id,
-          symbol,
-          time_series_1w.datetime                                                   as time,
-          time_series_1w.datetime                                                   as datetime,
-          period,
-          case
-              when historical_prices.datetime = time_series_1w.datetime then historical_prices.open
-              else historical_prices.close end                                      as open,
-          case
-              when historical_prices.datetime = time_series_1w.datetime then historical_prices.high
-              else historical_prices.close end                                      as high,
-          case
-              when historical_prices.datetime = time_series_1w.datetime then historical_prices.low
-              else historical_prices.close end                                      as low,
-          case
-              when historical_prices.datetime = time_series_1w.datetime then historical_prices.close
-              else historical_prices.close end                                      as close,
-          case
-              when historical_prices.datetime = time_series_1w.datetime
-                  then historical_prices.adjusted_close
-              else historical_prices.adjusted_close end                             as adjusted_close,
-          case
-              when historical_prices.datetime = time_series_1w.datetime then historical_prices.volume
-              else 0.0 end                                                          as volume
-    from (
-             select DISTINCT ON (
-                 code,
-                 date_trunc('week', date)
-                 ) code                                                                                                              as symbol,
-                   date_trunc('week', date)::timestamp                                                                               as time,
-                   date_trunc('week', date)::timestamp                                                                               as datetime,
-                   '1w'::varchar                                                                                                     as period,
-                   first_value(open::double precision)
-                   OVER (partition by code, date_trunc('week', date) order by date rows between current row and unbounded following) as open,
-                   max(high::double precision)
-                   OVER (partition by code, date_trunc('week', date) rows between current row and unbounded following)               as high,
-                   min(low::double precision)
-                   OVER (partition by code, date_trunc('week', date) rows between current row and unbounded following)               as low,
-                   last_value(close::double precision)
-                   OVER (partition by code, date_trunc('week', date) order by date rows between current row and unbounded following) as close,
-                   last_value(adjusted_close::double precision)
-                   OVER (partition by code, date_trunc('week', date) order by date rows between current row and unbounded following) as adjusted_close,
-                   (sum(volume::numeric)
-                    OVER (partition by code, date_trunc('week', date)))::double precision                                            as volume
-             from {{ ref('historical_prices') }}
-             {% if is_incremental() %}
-                 left join max_date on max_date.symbol = code and max_date.period = '1w'
-                 where max_date.time is null or date >= max_date.time
-             {% endif %}
-             order by code, date_trunc('week', date), date
-         ) historical_prices
-             join time_series_1w
-                  on time_series_1w.datetime between historical_prices.datetime and historical_prices.datetime + interval '1 month'
-    where time_series_1w.datetime >= now() - interval '5 year' - interval '1 week'
-    order by symbol, time_series_1w.datetime, historical_prices.datetime desc
-)
-
-union all
-
-(
-    with time_series_1m as
-             (
-                 SELECT distinct date_trunc('month', date)::timestamp as datetime
-                 FROM {{ ref('historical_prices') }}
-             )
-
-    select distinct on (
-        symbol, time_series_1m.datetime
-        ) (symbol || '_' || time_series_1m.datetime::timestamptz || '_1m')::varchar as id,
-          symbol,
-          time_series_1m.datetime                                                   as time,
-          time_series_1m.datetime                                                   as datetime,
-          period,
-          case
-              when historical_prices.datetime = time_series_1m.datetime then historical_prices.open
-              else historical_prices.close end                                      as open,
-          case
-              when historical_prices.datetime = time_series_1m.datetime then historical_prices.high
-              else historical_prices.close end                                      as high,
-          case
-              when historical_prices.datetime = time_series_1m.datetime then historical_prices.low
-              else historical_prices.close end                                      as low,
-          case
-              when historical_prices.datetime = time_series_1m.datetime then historical_prices.close
-              else historical_prices.close end                                      as close,
-          case
-              when historical_prices.datetime = time_series_1m.datetime
-                  then historical_prices.adjusted_close
-              else historical_prices.adjusted_close end                             as adjusted_close,
-          case
-              when historical_prices.datetime = time_series_1m.datetime then historical_prices.volume
-              else 0.0 end                                                          as volume
-    from (
-             select DISTINCT ON (
-                 code,
-                 date_trunc('month', date)
-                 ) code                                                                                                               as symbol,
-                   date_trunc('month', date)::timestamp                                                                               as time,
-                   date_trunc('month', date)::timestamp                                                                               as datetime,
-                   '1m'::varchar                                                                                                      as period,
-                   first_value(open::double precision)
-                   OVER (partition by code, date_trunc('month', date) order by date rows between current row and unbounded following) as open,
-                   max(high::double precision)
-                   OVER (partition by code, date_trunc('month', date) rows between current row and unbounded following)               as high,
-                   min(low::double precision)
-                   OVER (partition by code, date_trunc('month', date) rows between current row and unbounded following)               as low,
-                   last_value(close::double precision)
-                   OVER (partition by code, date_trunc('month', date) order by date rows between current row and unbounded following) as close,
-                   last_value(adjusted_close::double precision)
-                   OVER (partition by code, date_trunc('month', date) order by date rows between current row and unbounded following) as adjusted_close,
-                   (sum(volume::numeric)
-                    OVER (partition by code, date_trunc('month', date)))::double precision                                            as volume
-             from {{ ref('historical_prices') }}
-             {% if is_incremental() %}
-                 left join max_date on max_date.symbol = code and max_date.period = '1m'
-                 where max_date.time is null or date >= max_date.time
-             {% endif %}
-             order by code, date_trunc('month', date), date
-         ) historical_prices
-             join time_series_1m
-                  on time_series_1m.datetime between historical_prices.datetime and historical_prices.datetime + interval '1 month'
-    order by symbol, time_series_1m.datetime, historical_prices.datetime desc
-)
-{% endif %}
+-- {% if not var('realtime') %}
+--
+-- union all
+--
+-- (
+--     with time_series_1d as
+--         (
+--             SELECT distinct date::timestamp as datetime
+--             FROM {{ ref('historical_prices') }}
+--         )
+--     select distinct on (
+--         code, time_series_1d.datetime
+--         ) (code || '_' || time_series_1d.datetime::date || '_1d')::varchar                    as id,
+--          code                                                                                 as symbol,
+--          time_series_1d.datetime                                                              as time,
+--          time_series_1d.datetime                                                              as datetime,
+--          '1d'::varchar                                                                        as period,
+--          case
+--              when historical_prices.date = time_series_1d.datetime then historical_prices.open
+--              else historical_prices.close end                                                 as open,
+--          case
+--              when historical_prices.date = time_series_1d.datetime then historical_prices.high
+--              else historical_prices.close end                                                 as high,
+--          case
+--              when historical_prices.date = time_series_1d.datetime then historical_prices.low
+--              else historical_prices.close end                                                 as low,
+--          case
+--              when historical_prices.date = time_series_1d.datetime then historical_prices.close
+--              else historical_prices.close end                                                 as close,
+--          case
+--              when historical_prices.date = time_series_1d.datetime
+--                  then historical_prices.adjusted_close
+--              else historical_prices.adjusted_close end                                        as adjusted_close,
+--          case
+--              when historical_prices.date = time_series_1d.datetime then historical_prices.volume
+--              else 0.0 end                                                                            as volume
+--     from {{ ref('historical_prices') }}
+--              join time_series_1d on time_series_1d.datetime between historical_prices.date and historical_prices.date + interval '1 week'
+--     {% if is_incremental() %}
+--         left join max_date on max_date.symbol = code and max_date.period = '1d'
+--         where (max_date.time is null or date >= max_date.time - interval '1 week')
+--           and time_series_1d.datetime >= now() - interval '1 year' - interval '1 week'
+--     {% else %}
+--     where time_series_1d.datetime >= now() - interval '1 year' - interval '1 week'
+--     {% endif %}
+--     order by code, time_series_1d.datetime, date desc
+-- )
+--
+-- union all
+--
+-- (
+--     with time_series_1w as
+--              (
+--                  SELECT distinct date_trunc('week', date)::timestamp as datetime
+--                  FROM {{ ref('historical_prices') }}
+--              )
+--
+--     select distinct on (
+--         symbol, time_series_1w.datetime
+--         ) (symbol || '_' || time_series_1w.datetime::timestamptz || '_1w')::varchar as id,
+--           symbol,
+--           time_series_1w.datetime                                                   as time,
+--           time_series_1w.datetime                                                   as datetime,
+--           period,
+--           case
+--               when historical_prices.datetime = time_series_1w.datetime then historical_prices.open
+--               else historical_prices.close end                                      as open,
+--           case
+--               when historical_prices.datetime = time_series_1w.datetime then historical_prices.high
+--               else historical_prices.close end                                      as high,
+--           case
+--               when historical_prices.datetime = time_series_1w.datetime then historical_prices.low
+--               else historical_prices.close end                                      as low,
+--           case
+--               when historical_prices.datetime = time_series_1w.datetime then historical_prices.close
+--               else historical_prices.close end                                      as close,
+--           case
+--               when historical_prices.datetime = time_series_1w.datetime
+--                   then historical_prices.adjusted_close
+--               else historical_prices.adjusted_close end                             as adjusted_close,
+--           case
+--               when historical_prices.datetime = time_series_1w.datetime then historical_prices.volume
+--               else 0.0 end                                                          as volume
+--     from (
+--              select DISTINCT ON (
+--                  code,
+--                  date_trunc('week', date)
+--                  ) code                                                                                                              as symbol,
+--                    date_trunc('week', date)::timestamp                                                                               as time,
+--                    date_trunc('week', date)::timestamp                                                                               as datetime,
+--                    '1w'::varchar                                                                                                     as period,
+--                    first_value(open::double precision)
+--                    OVER (partition by code, date_trunc('week', date) order by date rows between current row and unbounded following) as open,
+--                    max(high::double precision)
+--                    OVER (partition by code, date_trunc('week', date) rows between current row and unbounded following)               as high,
+--                    min(low::double precision)
+--                    OVER (partition by code, date_trunc('week', date) rows between current row and unbounded following)               as low,
+--                    last_value(close::double precision)
+--                    OVER (partition by code, date_trunc('week', date) order by date rows between current row and unbounded following) as close,
+--                    last_value(adjusted_close::double precision)
+--                    OVER (partition by code, date_trunc('week', date) order by date rows between current row and unbounded following) as adjusted_close,
+--                    (sum(volume::numeric)
+--                     OVER (partition by code, date_trunc('week', date)))::double precision                                            as volume
+--              from {{ ref('historical_prices') }}
+--              {% if is_incremental() %}
+--                  left join max_date on max_date.symbol = code and max_date.period = '1w'
+--                  where max_date.time is null or date >= max_date.time
+--              {% endif %}
+--              order by code, date_trunc('week', date), date
+--          ) historical_prices
+--              join time_series_1w
+--                   on time_series_1w.datetime between historical_prices.datetime and historical_prices.datetime + interval '1 month'
+--     where time_series_1w.datetime >= now() - interval '5 year' - interval '1 week'
+--     order by symbol, time_series_1w.datetime, historical_prices.datetime desc
+-- )
+--
+-- union all
+--
+-- (
+--     with time_series_1m as
+--              (
+--                  SELECT distinct date_trunc('month', date)::timestamp as datetime
+--                  FROM {{ ref('historical_prices') }}
+--              )
+--
+--     select distinct on (
+--         symbol, time_series_1m.datetime
+--         ) (symbol || '_' || time_series_1m.datetime::timestamptz || '_1m')::varchar as id,
+--           symbol,
+--           time_series_1m.datetime                                                   as time,
+--           time_series_1m.datetime                                                   as datetime,
+--           period,
+--           case
+--               when historical_prices.datetime = time_series_1m.datetime then historical_prices.open
+--               else historical_prices.close end                                      as open,
+--           case
+--               when historical_prices.datetime = time_series_1m.datetime then historical_prices.high
+--               else historical_prices.close end                                      as high,
+--           case
+--               when historical_prices.datetime = time_series_1m.datetime then historical_prices.low
+--               else historical_prices.close end                                      as low,
+--           case
+--               when historical_prices.datetime = time_series_1m.datetime then historical_prices.close
+--               else historical_prices.close end                                      as close,
+--           case
+--               when historical_prices.datetime = time_series_1m.datetime
+--                   then historical_prices.adjusted_close
+--               else historical_prices.adjusted_close end                             as adjusted_close,
+--           case
+--               when historical_prices.datetime = time_series_1m.datetime then historical_prices.volume
+--               else 0.0 end                                                          as volume
+--     from (
+--              select DISTINCT ON (
+--                  code,
+--                  date_trunc('month', date)
+--                  ) code                                                                                                               as symbol,
+--                    date_trunc('month', date)::timestamp                                                                               as time,
+--                    date_trunc('month', date)::timestamp                                                                               as datetime,
+--                    '1m'::varchar                                                                                                      as period,
+--                    first_value(open::double precision)
+--                    OVER (partition by code, date_trunc('month', date) order by date rows between current row and unbounded following) as open,
+--                    max(high::double precision)
+--                    OVER (partition by code, date_trunc('month', date) rows between current row and unbounded following)               as high,
+--                    min(low::double precision)
+--                    OVER (partition by code, date_trunc('month', date) rows between current row and unbounded following)               as low,
+--                    last_value(close::double precision)
+--                    OVER (partition by code, date_trunc('month', date) order by date rows between current row and unbounded following) as close,
+--                    last_value(adjusted_close::double precision)
+--                    OVER (partition by code, date_trunc('month', date) order by date rows between current row and unbounded following) as adjusted_close,
+--                    (sum(volume::numeric)
+--                     OVER (partition by code, date_trunc('month', date)))::double precision                                            as volume
+--              from {{ ref('historical_prices') }}
+--              {% if is_incremental() %}
+--                  left join max_date on max_date.symbol = code and max_date.period = '1m'
+--                  where max_date.time is null or date >= max_date.time
+--              {% endif %}
+--              order by code, date_trunc('month', date), date
+--          ) historical_prices
+--              join time_series_1m
+--                   on time_series_1m.datetime between historical_prices.datetime and historical_prices.datetime + interval '1 month'
+--     order by symbol, time_series_1m.datetime, historical_prices.datetime desc
+-- )
+-- {% endif %}
