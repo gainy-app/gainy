@@ -18,11 +18,15 @@ logging.basicConfig()
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
-schema_activity_min_datetime = datetime.datetime.now(tz=datetime.timezone.utc) - datetime.timedelta(days=7)
+schema_activity_min_datetime = datetime.datetime.now(
+    tz=datetime.timezone.utc) - datetime.timedelta(days=7)
+
 
 def clean_schemas(db_conn):
     with db_conn.cursor() as cursor:
-        cursor.execute("SELECT schema_name FROM deployment.public_schemas WHERE deleted_at is null")
+        cursor.execute(
+            "SELECT schema_name FROM deployment.public_schemas WHERE deleted_at is null"
+        )
         schemas = map(itemgetter(0), cursor.fetchall())
 
         # we only select schemas starting with "public" and with some suffix
@@ -37,7 +41,8 @@ def clean_schemas(db_conn):
 
         schema_last_activity_at = {}
         for schema in schemas:
-            cursor.execute(f"SELECT last_activity_at FROM {schema}.deployment_metadata")
+            cursor.execute(
+                f"SELECT last_activity_at FROM {schema}.deployment_metadata")
             last_activity_at = cursor.fetchone()[0]
             schema_last_activity_at[schema] = last_activity_at
 
@@ -55,6 +60,7 @@ def clean_schemas(db_conn):
             query = f"drop schema {schema}"
             logger.warning(query)
             cursor.execute(query)
+
 
 def clean_realtime_data(db_conn):
     with db_conn.cursor() as cursor:

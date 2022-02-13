@@ -41,10 +41,10 @@ hasura-seed:
 	docker-compose exec -T hasura hasura seed apply
 
 style-check:
-	yapf --diff -r src/aws/lambda-python/ src/aws/router src/websockets src/gainy-fetch/meltano/orchestrate/dags src/hasura terraform
+	yapf --diff -r src/aws/lambda-python/ src/aws/router src/websockets src/gainy-fetch/meltano/orchestrate/dags src/hasura src/gainy-fetch terraform
 
 style-fix:
-	yapf -i -r src/aws/lambda-python/ src/aws/router src/websockets src/gainy-fetch/meltano/orchestrate/dags src/hasura terraform
+	yapf -i -r src/aws/lambda-python/ src/aws/router src/websockets src/gainy-fetch/meltano/orchestrate/dags src/hasura src/gainy-fetch terraform
 
 extract-passwords:
 	cd terraform && terraform state pull | python3 ../extract_passwords.py

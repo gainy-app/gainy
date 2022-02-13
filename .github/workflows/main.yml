@@ -18,7 +18,7 @@ jobs:
         run: pip3 install yapf toml
 
       - name: YAPF
-        run: yapf --diff -r src/aws/lambda-python/ src/aws/router src/websockets src/gainy-fetch/meltano/orchestrate/dags src/hasura terraform > /dev/null
+        run: yapf --diff -r src/aws/lambda-python/ src/aws/router src/websockets src/gainy-fetch/meltano/orchestrate/dags src/hasura src/gainy-fetch terraform > /dev/null
 
   test:
     name: "Run tests"
