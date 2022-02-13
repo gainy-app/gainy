@@ -41,6 +41,7 @@ if not Path(project_root).joinpath(meltano_bin).exists():
 ##################################################################################################################
 
 models = " ".join([
+    'deployment_metadata',
     'historical_prices_aggregated',
     'portfolio_chart',
     'portfolio_expanded_transactions',
