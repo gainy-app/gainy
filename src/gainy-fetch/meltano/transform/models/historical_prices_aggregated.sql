@@ -275,54 +275,54 @@ union all
     where t2.close is not null
 )
 
--- {% if not var('realtime') %}
---
--- union all
---
--- (
---     with time_series_1d as
---         (
---             SELECT distinct date::timestamp as datetime
---             FROM {{ ref('historical_prices') }}
---         )
---     select distinct on (
---         code, time_series_1d.datetime
---         ) (code || '_' || time_series_1d.datetime::date || '_1d')::varchar                    as id,
---          code                                                                                 as symbol,
---          time_series_1d.datetime                                                              as time,
---          time_series_1d.datetime                                                              as datetime,
---          '1d'::varchar                                                                        as period,
---          case
---              when historical_prices.date = time_series_1d.datetime then historical_prices.open
---              else historical_prices.close end                                                 as open,
---          case
---              when historical_prices.date = time_series_1d.datetime then historical_prices.high
---              else historical_prices.close end                                                 as high,
---          case
---              when historical_prices.date = time_series_1d.datetime then historical_prices.low
---              else historical_prices.close end                                                 as low,
---          case
---              when historical_prices.date = time_series_1d.datetime then historical_prices.close
---              else historical_prices.close end                                                 as close,
---          case
---              when historical_prices.date = time_series_1d.datetime
---                  then historical_prices.adjusted_close
---              else historical_prices.adjusted_close end                                        as adjusted_close,
---          case
---              when historical_prices.date = time_series_1d.datetime then historical_prices.volume
---              else 0.0 end                                                                            as volume
---     from {{ ref('historical_prices') }}
---              join time_series_1d on time_series_1d.datetime between historical_prices.date and historical_prices.date + interval '1 week'
---     {% if is_incremental() %}
---         left join max_date on max_date.symbol = code and max_date.period = '1d'
---         where (max_date.time is null or date >= max_date.time - interval '1 week')
---           and time_series_1d.datetime >= now() - interval '1 year' - interval '1 week'
---     {% else %}
---     where time_series_1d.datetime >= now() - interval '1 year' - interval '1 week'
---     {% endif %}
---     order by code, time_series_1d.datetime, date desc
--- )
---
+{% if not var('realtime') %}
+
+union all
+
+(
+    with time_series_1d as
+        (
+            SELECT distinct date::timestamp as datetime
+            FROM {{ ref('historical_prices') }}
+        )
+    select distinct on (
+        code, time_series_1d.datetime
+        ) (code || '_' || time_series_1d.datetime::date || '_1d')::varchar                    as id,
+         code                                                                                 as symbol,
+         time_series_1d.datetime                                                              as time,
+         time_series_1d.datetime                                                              as datetime,
+         '1d'::varchar                                                                        as period,
+         case
+             when historical_prices.date = time_series_1d.datetime then historical_prices.open
+             else historical_prices.close end                                                 as open,
+         case
+             when historical_prices.date = time_series_1d.datetime then historical_prices.high
+             else historical_prices.close end                                                 as high,
+         case
+             when historical_prices.date = time_series_1d.datetime then historical_prices.low
+             else historical_prices.close end                                                 as low,
+         case
+             when historical_prices.date = time_series_1d.datetime then historical_prices.close
+             else historical_prices.close end                                                 as close,
+         case
+             when historical_prices.date = time_series_1d.datetime
+                 then historical_prices.adjusted_close
+             else historical_prices.adjusted_close end                                        as adjusted_close,
+         case
+             when historical_prices.date = time_series_1d.datetime then historical_prices.volume
+             else 0.0 end                                                                            as volume
+    from {{ ref('historical_prices') }}
+             join time_series_1d on time_series_1d.datetime between historical_prices.date and historical_prices.date + interval '1 week'
+    {% if is_incremental() %}
+        left join max_date on max_date.symbol = code and max_date.period = '1d'
+        where (max_date.time is null or date >= max_date.time - interval '1 week')
+          and time_series_1d.datetime >= now() - interval '1 year' - interval '1 week'
+    {% else %}
+    where time_series_1d.datetime >= now() - interval '1 year' - interval '1 week'
+    {% endif %}
+    order by code, time_series_1d.datetime, date desc
+)
+
 -- union all
 --
 -- (
@@ -457,4 +457,4 @@ union all
 --                   on time_series_1m.datetime between historical_prices.datetime and historical_prices.datetime + interval '1 month'
 --     order by symbol, time_series_1m.datetime, historical_prices.datetime desc
 -- )
--- {% endif %}
+{% endif %}
