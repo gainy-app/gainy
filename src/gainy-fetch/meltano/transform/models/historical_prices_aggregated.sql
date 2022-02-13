@@ -315,7 +315,10 @@ union all
              join time_series_1d on time_series_1d.datetime between historical_prices.date and historical_prices.date + interval '1 week'
     {% if is_incremental() %}
         left join max_date on max_date.symbol = code and max_date.period = '1d'
-        where max_date.time is null or date >= max_date.time - interval '1 week'
+        where (max_date.time is null or date >= max_date.time - interval '1 week')
+          and time_series_1d.datetime >= now() - interval '1 year' - interval '1 week'
+    {% else %}
+    where time_series_1d.datetime >= now() - interval '1 year' - interval '1 week'
     {% endif %}
     order by code, time_series_1d.datetime, date desc
 )
@@ -384,6 +387,7 @@ union all
          ) historical_prices
              join time_series_1w
                   on time_series_1w.datetime between historical_prices.datetime and historical_prices.datetime + interval '1 month'
+    where time_series_1w.datetime >= now() - interval '5 year' - interval '1 week'
     order by symbol, time_series_1w.datetime, historical_prices.datetime desc
 )
 

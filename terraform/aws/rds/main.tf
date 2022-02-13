@@ -25,12 +25,12 @@ resource "aws_db_instance" "db_instance" {
   identifier              = "${var.name}-${var.env}"
   engine                  = "postgres"
   engine_version          = "12"
-  instance_class          = var.env == "production" ? "db.m6g.4xlarge" : "db.m6g.xlarge"
+  instance_class          = var.env == "production" ? "db.m6g.4xlarge" : "db.m6g.2xlarge"
   allocated_storage       = var.env == "production" ? 100 : 100
   max_allocated_storage   = var.env == "production" ? 1000 : 1000
   backup_retention_period = var.env == "production" ? 7 : 0
   storage_type            = var.env == "production" ? "io1" : "io1"
-  iops                    = var.env == "production" ? 1999 : 1000
+  iops                    = var.env == "production" ? 1999 : 1500
   deletion_protection     = var.env == "production" ? true : false
   parameter_group_name    = aws_db_parameter_group.default.name
 
