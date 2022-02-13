@@ -1,7 +1,3 @@
-import os
-import requests
-import json
-import datetime
 from common import make_graphql_request, get_personalized_collections, PROFILE_ID, MIN_PERSONALIZED_COLLECTIONS_COUNT
 
 
