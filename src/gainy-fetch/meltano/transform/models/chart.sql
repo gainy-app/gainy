@@ -35,7 +35,7 @@ union all
 (
     with week_trading_sessions as (
         select *
-        from exchange_schedule
+        from {{ ref('exchange_schedule') }}
         where open_at between now() - interval '1 week' and now()
     )
     select historical_prices_aggregated.symbol,

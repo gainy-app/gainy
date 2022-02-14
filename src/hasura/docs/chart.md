@@ -63,14 +63,9 @@ query MyQuery {
             open
             adjusted_close
         }
-        historical_growth_rates(where: {date: {_gte: "2021-09-04"}}) {
-            date
-            growth_rate_1d
-        }
         ticker_industries {
             gainy_industry {
                 industry_stats_dailies(where: {date: {_gte: "2021-09-04"}}) {
-                    median_growth_rate_1d
                     median_price
                     date
                 }
@@ -91,14 +86,9 @@ query {
             open
             adjusted_close
         }
-        ticker_growth_rate_1w(where: {date: {_gte: "2021-08-23"}}) {
-            date
-            growth_rate
-        }
         ticker_industries {
             gainy_industry {
                 ticker_industry_median_1w(where: {date: {_gte: "2021-08-23"}}) {
-                    median_growth_rate
                     median_price
                     date
                 }
@@ -119,14 +109,9 @@ query {
             open
             adjusted_close
         }
-        ticker_growth_rate_1m(where: {date: {_gte: "2021-08-01"}}) {
-            date
-            growth_rate
-        }
         ticker_industries {
             gainy_industry {
                 ticker_industry_median_1m(where: {date: {_gte: "2021-08-01"}}) {
-                    median_growth_rate
                     median_price
                     date
                 }

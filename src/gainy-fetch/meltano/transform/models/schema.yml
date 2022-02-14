@@ -90,44 +90,6 @@ models:
           - type:
               type: 'integer'
 
-  - name: historical_growth_rate
-    columns:
-      - name: symbol
-        tests:
-          - not_null
-          - type:
-              type: 'character varying'
-      - name: date
-        tests:
-          - not_null
-          - type:
-              type: 'date'
-      - name: growth_rate_1d
-        tests:
-          - exists
-          - type:
-              type: 'double precision'
-      - name: growth_rate_1w
-        tests:
-          - exists
-          - type:
-              type: 'double precision'
-      - name: growth_rate_1m
-        tests:
-          - exists
-          - type:
-              type: 'double precision'
-      - name: growth_rate_3m
-        tests:
-          - exists
-          - type:
-              type: 'double precision'
-      - name: growth_rate_1y
-        tests:
-          - exists
-          - type:
-              type: 'double precision'
-
   - name: historical_prices
     columns:
       - name: code
@@ -189,26 +151,6 @@ models:
           - type:
               type: 'double precision'
       - name: median_growth_rate_1d
-        tests:
-          - exists
-          - type:
-              type: 'double precision'
-      - name: median_growth_rate_1w
-        tests:
-          - exists
-          - type:
-              type: 'double precision'
-      - name: median_growth_rate_1m
-        tests:
-          - exists
-          - type:
-              type: 'double precision'
-      - name: median_growth_rate_3m
-        tests:
-          - exists
-          - type:
-              type: 'double precision'
-      - name: median_growth_rate_1y
         tests:
           - exists
           - type:
@@ -668,42 +610,6 @@ models:
           - type:
               type: 'ARRAY'
 
-  - name: growth_rate_1m
-    columns:
-      - name: symbol
-        tests:
-          - exists
-          - type:
-              type: 'character varying'
-      - name: date
-        tests:
-          - exists
-          - type:
-              type: 'timestamp without time zone'
-      - name: growth_rate
-        tests:
-          - exists
-          - type:
-              type: 'double precision'
-
-  - name: growth_rate_1w
-    columns:
-      - name: symbol
-        tests:
-          - exists
-          - type:
-              type: 'character varying'
-      - name: date
-        tests:
-          - exists
-          - type:
-              type: 'timestamp without time zone'
-      - name: growth_rate
-        tests:
-          - exists
-          - type:
-              type: 'double precision'
-
   - name: historical_prices_aggregated
     columns:
       - name: symbol
@@ -888,34 +794,6 @@ models:
           - exists
           - type:
               type: 'double precision'
-
-  - name: ticker_metrics_transposed
-    columns:
-      - name: symbol
-        tests:
-          - exists
-          - type:
-              type: 'character varying'
-      - name: metric_id
-        tests:
-          - exists
-          - type:
-              type: 'character varying'
-      - name: value_double
-        tests:
-          - exists
-          - type:
-              type: 'double precision'
-      - name: value_string
-        tests:
-          - exists
-          - type:
-              type: 'character varying'
-      - name: value_bigint
-        tests:
-          - exists
-          - type:
-              type: 'bigint'
 
   - name: ticker_metrics
     columns:

@@ -21,6 +21,8 @@ with highlights as (select * from {{ ref('highlights') }}),
      earnings_trend as (select * from {{ ref('earnings_trend') }}),
      earnings_history as (select * from {{ ref('earnings_history') }}),
      earnings_annual as (select * from {{ ref('earnings_annual') }}),
+     historical_prices as (select * from {{ ref('historical_prices') }}),
+     historical_prices_aggregated as (select * from {{ ref('historical_prices_aggregated') }}),
      raw_eod_options as (SELECT * FROM {{ source('eod', 'eod_options') }}),
      raw_eod_fundamentals as (SELECT * FROM {{ source('eod', 'eod_fundamentals') }}),
      marked_prices as
