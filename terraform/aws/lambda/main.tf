@@ -25,6 +25,7 @@ variable "hasura_url" {}
 variable "hubspot_api_key" {}
 variable "redis_cache_host" {}
 variable "redis_cache_port" {}
+variable "public_schema_name" {}
 
 output "aws_apigatewayv2_api_endpoint" {
   value = "${aws_apigatewayv2_api.lambda.api_endpoint}/${aws_apigatewayv2_stage.lambda.name}"
@@ -235,6 +236,7 @@ module "hasuraTrigger" {
     pg_dbname                 = var.pg_dbname
     pg_username               = var.pg_username
     pg_password               = var.pg_password
+    PUBLIC_SCHEMA_NAME        = var.public_schema_name
     DATADOG_API_KEY           = var.datadog_api_key
     DATADOG_APP_KEY           = var.datadog_app_key
     ENV                       = var.env
@@ -271,6 +273,7 @@ module "hasuraAction" {
     pg_dbname                 = var.pg_dbname
     pg_username               = var.pg_username
     pg_password               = var.pg_password
+    PUBLIC_SCHEMA_NAME        = var.public_schema_name
     DATADOG_API_KEY           = var.datadog_api_key
     DATADOG_APP_KEY           = var.datadog_app_key
     ENV                       = var.env
