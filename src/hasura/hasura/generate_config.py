@@ -1,14 +1,12 @@
 import sys, os, re, yaml
 
-ENV = os.getenv('ENV')
-if ENV == 'local':
-    sys.exit(0)
-
 if 'HASURA_GRAPHQL_PUBLIC_SCHEMA_NAME' not in os.environ:
     raise Exception('env var HASURA_GRAPHQL_PUBLIC_SCHEMA_NAME must be set')
 HASURA_GRAPHQL_PUBLIC_SCHEMA_NAME = os.getenv(
     'HASURA_GRAPHQL_PUBLIC_SCHEMA_NAME')
 
+if HASURA_GRAPHQL_PUBLIC_SCHEMA_NAME == 'public':
+    sys.exit(0)
 
 def should_replace_schema(schema):
     return re.match(r'^public', schema) is not None

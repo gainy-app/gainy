@@ -38,16 +38,16 @@ locals {
   meltano_eodhistoricaldata_jobs_count = var.env == "production" ? 3 : 1
 
   hasura_cpu_credits            = var.env == "production" ? 1024 : 512
-  meltano_scheduler_cpu_credits = var.env == "production" ? 3072 : 512
+  meltano_scheduler_cpu_credits = var.env == "production" ? 3072 : 1024
 
   hasura_healthcheck_interval       = var.env == "production" ? 60 : 60
   hasura_healthcheck_retries        = var.env == "production" ? 3 : 3
   health_check_grace_period_seconds = var.env == "production" ? 60 * 10 : 60 * 20
 
-  eod_websockets_memory_credits     = 512
-  polygon_websockets_memory_credits = 768
+  eod_websockets_memory_credits     = var.env == "production" ? 512 : 128
+  polygon_websockets_memory_credits = var.env == "production" ? 768 : 128
 
   hasura_memory_credits            = var.env == "production" ? 2048 : 1024
-  meltano_ui_memory_credits        = var.env == "production" ? 1024 : 1024
+  meltano_ui_memory_credits        = var.env == "production" ? 1024 : 1536
   meltano_scheduler_memory_credits = var.env == "production" ? 3072 : 3072
 }
