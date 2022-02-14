@@ -284,7 +284,7 @@ union all
              (
                  (
                      select code as symbol,
-                            date as datetime,
+                            date,
                             open,
                             high,
                             low,
@@ -299,68 +299,72 @@ union all
                      with time_series_1d as
                               (
                                   SELECT distinct date
-                                  FROM historical_prices
+                                  FROM {{ ref('historical_prices') }}
                                   where date >= now() - interval '1 year' - interval '1 week'
                               )
                      select code                   as symbol,
-                            time_series_1d.date    as datetime,
+                            time_series_1d.date,
                             null::double precision as open,
                             null::double precision as high,
                             null::double precision as low,
                             null::double precision as close,
                             null::double precision as volume,
                             null::double precision as adjusted_close
-                     from (select distinct code from historical_prices) t1
+                     from (select distinct code from {{ ref('historical_prices') }}) t1
                               join time_series_1d on true
                      where not exists(select 1
-                                      from historical_prices
+                                      from {{ ref('historical_prices') }}
                                       where historical_prices.code = t1.code
                                         and historical_prices.date = time_series_1d.date)
                  )
              )
     select *
     from (
-             select (symbol || '_' || datetime || '_1d')::varchar as id,
+             select DISTINCT ON (
+                 symbol,
+                 date
+                  ) (symbol || '_' || date || '_1d')::varchar as id,
                     symbol,
-                    datetime::timestamp                           as time,
-                    datetime::timestamp                           as datetime,
+                    date::timestamp                           as time,
+                    date::timestamp                           as datetime,
                     '1d'::varchar                                 as period,
                     coalesce(
                             open,
                             first_value(close)
-                            OVER (partition by symbol, grp order by datetime)
+                            OVER (partition by symbol, grp order by date)
                         )::double precision                       as open,
                     coalesce(
                             high,
                             first_value(close)
-                            OVER (partition by symbol, grp order by datetime)
+                            OVER (partition by symbol, grp order by date)
                         )::double precision                       as high,
                     coalesce(
                             low,
                             first_value(close)
-                            OVER (partition by symbol, grp order by datetime)
+                            OVER (partition by symbol, grp order by date)
                         )::double precision                       as low,
                     coalesce(
                             close,
                             first_value(close)
-                            OVER (partition by symbol, grp order by datetime)
+                            OVER (partition by symbol, grp order by date)
                         )::double precision                       as close,
                     coalesce(
                             close,
                             first_value(close)
-                            OVER (partition by symbol, grp order by datetime)
+                            OVER (partition by symbol, grp order by date)
                         )::double precision                       as adjusted_close,
                     coalesce(volume, 0)::double precision         as volume
              from (
                       select combined_daily_prices.*,
                              sum(case when close is not null then 1 end)
-                             over (partition by combined_daily_prices.symbol order by datetime) as grp
+                             over (partition by combined_daily_prices.symbol order by date) as grp
                       from combined_daily_prices
 {% if is_incremental() %}
                       left join max_date on max_date.symbol = combined_daily_prices.symbol and max_date.period = '1d'
-                      where (max_date.time is null or combined_daily_prices.datetime >= max_date.time - interval '1 week')
+                      where (max_date.time is null or combined_daily_prices.date >= max_date.time - interval '1 week')
 {% endif %}
                   ) t
+             order by symbol, date
          ) t2
     where t2.close is not null
 )
