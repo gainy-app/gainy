@@ -8,6 +8,7 @@ HASURA_GRAPHQL_PUBLIC_SCHEMA_NAME = os.getenv(
 if HASURA_GRAPHQL_PUBLIC_SCHEMA_NAME == 'public':
     sys.exit(0)
 
+
 def should_replace_schema(schema):
     return re.match(r'^public', schema) is not None
 
