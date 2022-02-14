@@ -925,6 +925,7 @@
       columns:
       - industry_id
       - date
+      - median_growth_rate
       - median_price
       filter: {}
 - table:
@@ -936,6 +937,7 @@
       columns:
       - industry_id
       - date
+      - median_growth_rate
       - median_price
       filter: {}
 - table:
@@ -948,6 +950,7 @@
       - date
       - industry_id
       - median_price
+      - median_growth_rate_1d
       filter: {}
 - table:
     schema: public

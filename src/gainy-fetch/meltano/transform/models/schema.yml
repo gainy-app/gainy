@@ -150,6 +150,11 @@ models:
           - exists
           - type:
               type: 'double precision'
+      - name: median_growth_rate_1d
+        tests:
+          - exists
+          - type:
+              type: 'double precision'
 
   - name: industry_stats_quarterly
     columns:
@@ -713,6 +718,11 @@ models:
           - exists
           - type:
               type: 'timestamp without time zone'
+      - name: median_growth_rate
+        tests:
+          - exists
+          - type:
+              type: 'double precision'
       - name: median_price
         tests:
           - exists
@@ -731,6 +741,11 @@ models:
           - exists
           - type:
               type: 'timestamp without time zone'
+      - name: median_growth_rate
+        tests:
+          - exists
+          - type:
+              type: 'double precision'
       - name: median_price
         tests:
           - exists

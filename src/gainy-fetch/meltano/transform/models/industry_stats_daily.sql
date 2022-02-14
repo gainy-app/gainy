@@ -28,6 +28,7 @@ with
 select price_stats.date,
        price_stats.industry_id,
        CONCAT(price_stats.industry_id, '_', price_stats.date::varchar)::varchar as id,
+      null::double precision                                                    as median_growth_rate_1d,
        median_price
 from price_stats
 {% if is_incremental() %}
