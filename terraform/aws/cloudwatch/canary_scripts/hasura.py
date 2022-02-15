@@ -132,10 +132,24 @@ def check_categories():
 
 
 def check_chart():
+    query = 'query ticker_realtime_metrics($symbol: String!) { ticker_realtime_metrics(where: {symbol: {_eq: $symbol}}) { time } }'
+    data = make_graphql_request(query, {
+        "symbol": "AAPL",
+    })['data']['ticker_realtime_metrics']
+
+    now = datetime.datetime.now(tz=datetime.timezone.utc)
+    ticker_time = datetime.datetime.fromisoformat(
+        data['time']).replace(tzinfo=datetime.timezone.utc)
+    time_diff = now - ticker_time
+    if not IS_PRODUCTION or time_diff.total_seconds() < 10:
+        expected_intraday_count = 0
+    else:
+        expected_intraday_count = 100
+
     query = 'query DiscoverCharts($period: String!, $symbol: String!) { chart(where: {symbol: {_eq: $symbol}, period: {_eq: $period}}, order_by: {datetime: asc}) { symbol datetime period open high low close adjusted_close volume } }'
     datasets = [
-        ("1d", 100 if IS_PRODUCTION else 0),
-        ("1w", 100),
+        ("1d", expected_intraday_count),
+        ("1w", 70),
         ("1m", 20),
     ]
 
