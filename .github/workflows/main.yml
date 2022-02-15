@@ -102,7 +102,8 @@ jobs:
 
       - name: Terraform State Cleanup
         id: state-clean
-        run: [ "${{ steps.state-clean-prepare.outputs.resources }}" != "" ] && terraform state rm ${{ steps.state-clean-prepare.outputs.resources }}
+        if: steps.state-clean-prepare.outputs.resources != ''
+        run: terraform state rm ${{ steps.state-clean-prepare.outputs.resources }}
         working-directory: terraform
 
       - name: Terraform Plan
