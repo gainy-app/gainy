@@ -134,7 +134,7 @@ module "fetchChartData" {
   function_name                             = "fetchChartData"
   handler                                   = "index.fetchChartData"
   timeout                                   = 10
-  route                                     = "POST /${var.deployment_key}/fetchChartData"
+  url                                       = "/${var.deployment_key}/fetchChartData"
   aws_apigatewayv2_api_lambda_id            = aws_apigatewayv2_api.lambda.id
   aws_apigatewayv2_api_lambda_execution_arn = aws_apigatewayv2_api.lambda.execution_arn
   aws_iam_role_lambda_exec_role             = aws_iam_role.lambda_exec
@@ -153,7 +153,7 @@ module "fetchNewsData" {
   function_name                             = "fetchNewsData"
   handler                                   = "index.fetchNewsData"
   timeout                                   = 10
-  route                                     = "POST /${var.deployment_key}/fetchNewsData"
+  url                                       = "/${var.deployment_key}/fetchNewsData"
   aws_apigatewayv2_api_lambda_id            = aws_apigatewayv2_api.lambda.id
   aws_apigatewayv2_api_lambda_execution_arn = aws_apigatewayv2_api.lambda.execution_arn
   aws_iam_role_lambda_exec_role             = aws_iam_role.lambda_exec
@@ -172,7 +172,7 @@ module "fetchLivePrices" {
   function_name                             = "fetchLivePrices"
   handler                                   = "index.fetchLivePrices"
   timeout                                   = 10
-  route                                     = "POST /${var.deployment_key}/fetchLivePrices"
+  url                                       = "/${var.deployment_key}/fetchLivePrices"
   aws_apigatewayv2_api_lambda_id            = aws_apigatewayv2_api.lambda.id
   aws_apigatewayv2_api_lambda_execution_arn = aws_apigatewayv2_api.lambda.execution_arn
   aws_iam_role_lambda_exec_role             = aws_iam_role.lambda_exec
@@ -220,7 +220,7 @@ module "hasuraTrigger" {
   function_name                             = "hasuraTrigger"
   handler                                   = "hasura_handler.handle_trigger"
   timeout                                   = 150
-  route                                     = "POST /${var.deployment_key}/hasuraTrigger"
+  url                                       = "/${var.deployment_key}/hasuraTrigger"
   aws_apigatewayv2_api_lambda_id            = aws_apigatewayv2_api.lambda.id
   aws_apigatewayv2_api_lambda_execution_arn = aws_apigatewayv2_api.lambda.execution_arn
   aws_iam_role_lambda_exec_role             = aws_iam_role.lambda_exec
@@ -255,7 +255,7 @@ module "hasuraAction" {
   function_name                             = "hasuraAction"
   handler                                   = "hasura_handler.handle_action"
   timeout                                   = 30
-  route                                     = "POST /${var.deployment_key}/hasuraAction"
+  url                                       = "/${var.deployment_key}/hasuraAction"
   aws_apigatewayv2_api_lambda_id            = aws_apigatewayv2_api.lambda.id
   aws_apigatewayv2_api_lambda_execution_arn = aws_apigatewayv2_api.lambda.execution_arn
   aws_iam_role_lambda_exec_role             = aws_iam_role.lambda_exec
