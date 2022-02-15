@@ -979,6 +979,18 @@
       filter: {}
 - table:
     schema: public
+    name: industry_median_chart
+  select_permissions:
+  - role: user
+    permission:
+      columns:
+      - datetime
+      - industry_id
+      - median_price
+      - period
+      filter: {}
+- table:
+    schema: public
     name: industry_stats_daily
   select_permissions:
   - role: user
