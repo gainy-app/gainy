@@ -261,6 +261,33 @@ models:
           - type:
               type: 'character varying'
 
+  - name: interest_industries
+    columns:
+      - name: id
+        tests:
+          - unique
+          - exists
+          - type:
+              type: 'character varying'
+      - name: interest_id
+        tests:
+          - exists
+          - not_null
+          - type:
+              type: 'integer'
+      - name: industry_id
+        tests:
+          - exists
+          - not_null
+          - type:
+              type: 'integer'
+      - name: updated_at
+        tests:
+          - exists
+          - not_null
+          - type:
+              type: 'timestamp with time zone'
+
   - name: collections
     columns:
       - name: id
@@ -1732,6 +1759,49 @@ models:
           - type:
               type: 'character varying'
 
+  - name: portfolio_transaction_chart
+    columns:
+      - name: transactions_uniq_id
+        tests:
+          - exists
+          - type:
+              type: 'character varying'
+      - name: datetime
+        tests:
+          - exists
+          - type:
+              type: 'timestamp without time zone'
+      - name: period
+        tests:
+          - exists
+          - type:
+              type: 'character varying'
+      - name: open
+        tests:
+          - exists
+          - type:
+              type: 'numeric'
+      - name: high
+        tests:
+          - exists
+          - type:
+              type: 'numeric'
+      - name: low
+        tests:
+          - exists
+          - type:
+              type: 'numeric'
+      - name: close
+        tests:
+          - exists
+          - type:
+              type: 'numeric'
+      - name: adjusted_close
+        tests:
+          - exists
+          - type:
+              type: 'numeric'
+
   - name: ticker_realtime_metrics
     columns:
       - name: symbol
@@ -1760,6 +1830,21 @@ models:
           - type:
               type: 'double precision'
       - name: daily_volume
+        tests:
+          - exists
+          - type:
+              type: 'double precision'
+      - name: last_known_price
+        tests:
+          - exists
+          - type:
+              type: 'double precision'
+      - name: last_known_price_datetime
+        tests:
+          - exists
+          - type:
+              type: 'timestamp without time zone'
+      - name: previous_day_close_price
         tests:
           - exists
           - type:

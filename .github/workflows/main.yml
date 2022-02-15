@@ -14,18 +14,6 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
 
-      - name: npm install
-        working-directory: src/aws/lambda-nodejs
-        run: npm install
-
-      - name: ESLint
-        working-directory: src/aws/lambda-nodejs
-        run: npx eslint .
-
-      - name: Prettier
-        working-directory: src/aws/lambda-nodejs
-        run: npx prettier --check "./**/*.js"
-
       - name: YAPF install
         run: pip3 install yapf toml
 
