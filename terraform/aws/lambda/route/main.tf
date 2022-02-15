@@ -23,5 +23,5 @@ resource "aws_lambda_permission" "api_gw" {
   function_name = var.aws_lambda_invoke_arn
   principal     = "apigateway.amazonaws.com"
 
-  source_arn = "${var.aws_apigatewayv2_api_lambda_execution_arn}/*/*${url}"
+  source_arn = "${var.aws_apigatewayv2_api_lambda_execution_arn}/*/*${var.url}"
 }
