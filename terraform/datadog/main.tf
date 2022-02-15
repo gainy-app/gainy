@@ -336,7 +336,7 @@ resource "datadog_monitor" "meltano_dag_run_duration" {
   type    = "query alert"
   message = "Airflow Meltano Dag Run Duration triggered. Notify: @slack-${var.slack_channel_name} <!channel>"
 
-  query = "avg(last_10d):anomalies(sum:app.latest_dag_run_duration_minutes{postgres_env:production} by {dag_id}.as_count(), 'basic', 2, direction='above', alert_window='last_3h', interval=300, count_default_zero='true') > 0.25"
+  query = "avg(last_1d):anomalies(sum:app.latest_dag_run_duration_minutes{postgres_env:production} by {dag_id}.as_count(), 'basic', 2, direction='above', alert_window='last_3h', interval=300, count_default_zero='true') > 0.25"
 
   monitor_threshold_windows {
     recovery_window = "last_3h"
@@ -344,10 +344,10 @@ resource "datadog_monitor" "meltano_dag_run_duration" {
   }
 
   monitor_thresholds {
-    critical          = "0.25"
-    critical_recovery = "0.2"
-    warning           = "0.1"
-    warning_recovery  = "0"
+    critical          = "0.35"
+    critical_recovery = "0.3"
+    warning           = "0.2"
+    warning_recovery  = "0.1"
   }
 
   require_full_window = false
