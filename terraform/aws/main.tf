@@ -1,5 +1,6 @@
 locals {
-  timestamp = formatdate("YYMMDDhhmmss", timestamp())
+  timestamp      = formatdate("YYMMDDhhmmss", timestamp())
+  deployment_key = local.timestamp
 }
 
 module "s3" {
@@ -30,6 +31,7 @@ module "lambda" {
   container_repository        = aws_ecr_repository.default.name
   vpc_security_group_ids      = [module.ecs.vpc_default_sg_id]
   vpc_subnet_ids              = module.ecs.private_subnet_ids
+  deployment_key              = local.deployment_key
   datadog_api_key             = var.datadog_api_key
   datadog_app_key             = var.datadog_app_key
   hasura_url                  = module.ecs-service.hasura_url
@@ -111,6 +113,7 @@ module "ecs-service" {
   private_subnet_ids   = module.ecs.private_subnet_ids
 
   aws_lambda_api_gateway_endpoint = module.lambda.aws_apigatewayv2_api_endpoint
+  deployment_key                  = local.deployment_key
   hasura_enable_console           = "true"
   hasura_enable_dev_mode          = "true"
   hasura_jwt_secret               = var.hasura_jwt_secret
