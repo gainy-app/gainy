@@ -11,7 +11,7 @@
 with actual_prices as
      (
          select distinct on (symbol) symbol, adjusted_close, '0d'::varchar as period
-         from historical_prices_aggregated
+         from {{ ref('historical_prices_aggregated') }}
          where ((period = '15min' and datetime > now() - interval '2 hour') or
                 (period = '1d' and datetime > now() - interval '1 week'))
            and adjusted_close is not null
@@ -46,7 +46,7 @@ with actual_prices as
                            then (
                                    historical_prices_aggregated.adjusted_close::numeric /
                                    case
-                                       when portfolio_expanded_transactions.datetime >= now() - interval '1 week'
+                                       when portfolio_expanded_transactions.date >= now() - interval '1 week'
                                            then case
                                                     when portfolio_expanded_transactions.price > 0
                                                         then portfolio_expanded_transactions.price::numeric end
@@ -64,7 +64,7 @@ with actual_prices as
                            then (
                                    historical_prices_aggregated.adjusted_close::numeric /
                                    case
-                                       when portfolio_expanded_transactions.datetime >= now() - interval '1 month'
+                                       when portfolio_expanded_transactions.date >= now() - interval '1 month'
                                            then case
                                                     when portfolio_expanded_transactions.price > 0
                                                         then portfolio_expanded_transactions.price::numeric end
@@ -82,7 +82,7 @@ with actual_prices as
                            then (
                                    historical_prices_aggregated.adjusted_close::numeric /
                                    case
-                                       when portfolio_expanded_transactions.datetime >= now() - interval '3 months'
+                                       when portfolio_expanded_transactions.date >= now() - interval '3 months'
                                            then case
                                                     when portfolio_expanded_transactions.price > 0
                                                         then portfolio_expanded_transactions.price::numeric end
@@ -100,7 +100,7 @@ with actual_prices as
                            then (
                                    historical_prices_aggregated.adjusted_close::numeric /
                                    case
-                                       when portfolio_expanded_transactions.datetime >= now() - interval '1 year'
+                                       when portfolio_expanded_transactions.date >= now() - interval '1 year'
                                            then case
                                                     when portfolio_expanded_transactions.price > 0
                                                         then portfolio_expanded_transactions.price::numeric end
@@ -118,7 +118,7 @@ with actual_prices as
                            then (
                                    historical_prices_aggregated.adjusted_close::numeric /
                                    case
-                                       when portfolio_expanded_transactions.datetime >= now() - interval '5 years'
+                                       when portfolio_expanded_transactions.date >= now() - interval '5 years'
                                            then case
                                                     when portfolio_expanded_transactions.price > 0
                                                         then portfolio_expanded_transactions.price::numeric end
@@ -144,8 +144,8 @@ with actual_prices as
                       join {{ ref('portfolio_securities_normalized') }}
                            on portfolio_securities_normalized.id = portfolio_expanded_transactions.security_id
                       left join {{ ref('historical_prices_aggregated') }}
-                                on (historical_prices_aggregated.datetime >= portfolio_expanded_transactions.datetime or
-                                    portfolio_expanded_transactions.datetime is null)
+                                on (historical_prices_aggregated.datetime >= portfolio_expanded_transactions.date or
+                                    portfolio_expanded_transactions.date is null)
                                     and (
                                            (historical_prices_aggregated.period = '1d' and
                                             historical_prices_aggregated.datetime >=
