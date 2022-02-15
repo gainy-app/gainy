@@ -13,6 +13,6 @@ select latest_historical_prices.code as symbol,
        latest_historical_prices.close + random() * 10 - 5 as close,
        latest_historical_prices.volume + random() * 10 - 5 as volume,
        60000 as granularity
-FROM generate_series(now() - interval '5 day', now(), interval '1 minute') dd
+FROM generate_series(now() - interval '1 week', now(), interval '1 minute') dd
          join latest_historical_prices on true
 where extract(isodow from dd) < 6

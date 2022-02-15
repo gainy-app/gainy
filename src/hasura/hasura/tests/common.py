@@ -37,6 +37,7 @@ def get_personalized_collections():
     assert len(data) >= MIN_PERSONALIZED_COLLECTIONS_COUNT
     return data
 
+
 def make_request(method, url, post_data=None, headers={}):
     logger.info("%s %s '%s'" % (method, url, post_data['query']))
     response = requests.request(method, url, json=post_data, headers=headers)
@@ -58,7 +59,8 @@ def make_request(method, url, post_data=None, headers={}):
         elif response.reason != 'OK':
             raise Exception("Failed: %s" % response.reason)
         else:
-            raise Exception("Failed with status code: %s" % response.status_code)
+            raise Exception("Failed with status code: %s" %
+                            response.status_code)
 
     logger.info("HTTP request successfully executed")
 
