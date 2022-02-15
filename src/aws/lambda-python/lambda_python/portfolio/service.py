@@ -98,6 +98,7 @@ class PortfolioService:
                              holdings):
         securities_dict = self.__persist_securities(db_conn, securities)
         accounts_dict = self.__persist_accounts(db_conn, accounts, profile_id)
+        holdings = self.__unique(holdings)
 
         # persist holdings
         for entity in holdings:
@@ -116,6 +117,7 @@ class PortfolioService:
                                  accounts, transactions):
         securities_dict = self.__persist_securities(db_conn, securities)
         accounts_dict = self.__persist_accounts(db_conn, accounts, profile_id)
+        transactions = self.__unique(transactions)
 
         # persist transactions
         for entity in transactions:

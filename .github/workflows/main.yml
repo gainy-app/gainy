@@ -102,6 +102,7 @@ jobs:
 
       - name: Terraform State Cleanup
         id: state-clean
+        if: steps.state-clean-prepare.outputs.resources != ''
         run: terraform state rm ${{ steps.state-clean-prepare.outputs.resources }}
         working-directory: terraform
 
