@@ -20,6 +20,9 @@ class PricesListener(AbstractPriceListener):
         self.api_token = EOD_API_TOKEN
         self._first_filled_key = None
 
+    def get_symbols(self):
+        return self.filter_symbols(super().get_symbols())
+
     def filter_symbols(self, symbols):
         return set(i for i in symbols if i.find('-') == -1)
 

@@ -84,7 +84,7 @@ def submit_dd_metric(metric_name, value, tags=[]):
 class AbstractPriceListener(ABC):
 
     def __init__(self, source):
-        self.symbols = self.filter_symbols(self.get_symbols())
+        self.symbols = self.get_symbols()
         self.source = source
         self.records_queue = asyncio.Queue()
         self.records_queue_lock = asyncio.Lock()
@@ -112,9 +112,6 @@ class AbstractPriceListener(ABC):
                 cursor.execute(query)
                 tickers = cursor.fetchall()
                 return set([ticker[0] for ticker in tickers])
-
-    def filter_symbols(self, symbols):
-        return symbols
 
     @property
     def supported_exchanges(self):
