@@ -120,7 +120,7 @@ class PlaidWebhook(HasuraAction):
             raise e
 
     def verify(self, body, headers, access_token):
-        signed_jwt = headers.get('plaid-verification')
+        signed_jwt = headers.get('Plaid-Verification')
         logger.info("headers %s", str(headers))
         logger.info("jwt %s", signed_jwt)
         current_key_id = jwt.get_unverified_header(signed_jwt)['kid']
