@@ -105,7 +105,7 @@ for schedule in schedules:
         upstream.append(operator)
 
 dbt = BashOperator(
-    task_id="dbt-transform",
+    task_id="dbt",
     bash_command=f"cd {project_root}; {meltano_bin} invoke dbt run",
     dag=dag,
     pool="dbt")

@@ -39,14 +39,18 @@ module "lambda" {
   base_image_registry_address = var.base_image_registry_address
   base_image_version          = var.base_image_version
 
-  plaid_client_id = var.plaid_client_id
-  plaid_secret    = var.plaid_secret
-  plaid_env       = var.plaid_env
+  plaid_client_id          = var.plaid_client_id
+  plaid_secret             = var.plaid_secret
+  plaid_development_secret = var.plaid_development_secret
+  plaid_env                = var.plaid_env
 
   algolia_tickers_index     = var.algolia_tickers_index
   algolia_collections_index = var.algolia_collections_index
   algolia_app_id            = var.algolia_app_id
   algolia_search_key        = var.algolia_search_key
+
+  redis_cache_host = module.elasticache.redis_cache_host
+  redis_cache_port = module.elasticache.redis_cache_port
 }
 
 module "ecs" {
@@ -62,6 +66,13 @@ module "rds" {
   db_subnet_group_name = module.ecs.db_subnet_group_name
   name                 = "gainy"
   vpc_default_sg_id    = module.ecs.vpc_default_sg_id
+}
+
+module "elasticache" {
+  source             = "./elasticache"
+  env                = var.env
+  vpc_default_sg_id  = module.ecs.vpc_default_sg_id
+  private_subnet_ids = module.ecs.private_subnet_ids
 }
 
 module "vpc_bridge" {

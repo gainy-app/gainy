@@ -1,4 +1,4 @@
-query GetPlaidHoldings($profileId: Int!) {
+query GetPortfolioHoldings($profileId: Int!) {
     portfolio_gains (where:{profile_id: {_eq: $profileId}}) {
         absolute_gain_1d
         absolute_gain_1m

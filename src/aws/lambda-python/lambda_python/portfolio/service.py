@@ -1,7 +1,14 @@
+import os
 from portfolio.plaid import PlaidService
 from portfolio.repository import PortfolioRepository
+from psycopg2 import sql
+from psycopg2.extras import RealDictCursor
+from service.logging import get_logger
+
+logger = get_logger(__name__)
 
 SERVICE_PLAID = 'plaid'
+SCRIPT_DIR = os.path.dirname(__file__)
 
 
 class PortfolioService:
@@ -116,6 +123,196 @@ class PortfolioService:
             entity.security_id = securities_dict[entity.security_ref_id]
             entity.account_id = accounts_dict[entity.account_ref_id]
         self.portfolio_repository.persist(db_conn, transactions)
+
+    def get_portfolio_chart(self, db_conn, profile_id, filter):
+        with open(os.path.join(SCRIPT_DIR, "sql/portfolio_chart.sql")) as f:
+            portfolio_chart_query = f.read()
+
+        params = {
+            "profile_id": profile_id,
+        }
+        where_clause = [
+            sql.SQL(
+                "portfolio_expanded_transactions.profile_id = %(profile_id)s")
+        ]
+        join_clause = []
+
+        if filter.periods is not None and len(filter.periods):
+            where_clause.append(
+                sql.SQL("portfolio_transaction_chart.period in %(periods)s"))
+            params['periods'] = tuple(filter.periods)
+
+        if filter.account_ids is not None or filter.institution_ids is not None:
+            join_clause.append(
+                sql.SQL(
+                    "join app.profile_portfolio_accounts on profile_portfolio_accounts.id = portfolio_expanded_transactions.account_id"
+                ))
+
+            if filter.account_ids is not None and len(filter.account_ids):
+                where_clause.append(
+                    sql.SQL(
+                        "portfolio_expanded_transactions.account_id in %(account_ids)s"
+                    ))
+                params['account_ids'] = tuple(filter.account_ids)
+
+            if filter.institution_ids is not None and len(
+                    filter.institution_ids):
+                join_clause.append(
+                    sql.SQL(
+                        "join app.profile_plaid_access_tokens on profile_plaid_access_tokens.id = profile_portfolio_accounts.plaid_access_token_id"
+                    ))
+                where_clause.append(
+                    sql.SQL(
+                        "profile_plaid_access_tokens.institution_id in %(institution_ids)s"
+                    ))
+                params['institution_ids'] = tuple(filter.institution_ids)
+
+        if filter.interest_ids is not None or filter.category_ids is not None or filter.security_types is not None:
+            join_clause.append(
+                sql.SQL(
+                    "join public.portfolio_securities_normalized on portfolio_securities_normalized.id = portfolio_expanded_transactions.security_id"
+                ))
+
+            if filter.interest_ids is not None and len(filter.interest_ids):
+                join_clause.append(
+                    sql.SQL(
+                        "join public.ticker_interests on ticker_interests.symbol = portfolio_securities_normalized.ticker_symbol"
+                    ))
+                where_clause.append(sql.SQL("interest_id in %(interest_ids)s"))
+                params['interest_ids'] = tuple(filter.interest_ids)
+
+            if filter.category_ids is not None and len(filter.category_ids):
+                join_clause.append(
+                    sql.SQL(
+                        "join public.ticker_categories on ticker_categories.symbol = portfolio_securities_normalized.ticker_symbol"
+                    ))
+                where_clause.append(sql.SQL("category_id in %(category_ids)s"))
+                params['category_ids'] = tuple(filter.category_ids)
+
+            if filter.security_types is not None and len(
+                    filter.security_types):
+                where_clause.append(
+                    sql.SQL(
+                        "portfolio_securities_normalized.type in %(security_types)s"
+                    ))
+                params['security_types'] = tuple(filter.security_types)
+
+        if filter.ltt_only is not None and filter.ltt_only:
+            join_clause.append(
+                sql.SQL(
+                    "join app.profile_holdings on profile_holdings.profile_id = portfolio_expanded_transactions.profile_id and profile_holdings.security_id = portfolio_expanded_transactions.security_id"
+                ))
+            join_clause.append(
+                sql.SQL(
+                    "join public.portfolio_holding_details on portfolio_holding_details.holding_id = profile_holdings.id"
+                ))
+            where_clause.append(
+                sql.SQL("portfolio_holding_details.ltt_quantity_total > 0"))
+
+        join_clause = sql.SQL("\n").join(join_clause)
+        where_clause = sql.SQL('and ') + sql.SQL(' and ').join(where_clause)
+        query = sql.SQL(portfolio_chart_query).format(
+            where_clause=where_clause, join_clause=join_clause)
+        logger.debug(query.as_string(db_conn))
+
+        with db_conn.cursor(cursor_factory=RealDictCursor) as cursor:
+            cursor.execute(query, params)
+            rows = cursor.fetchall()
+
+        return self._add_static_values_to_chart(db_conn, profile_id, filter,
+                                                rows)
+
+    def _add_static_values_to_chart(self, db_conn, profile_id, filter, rows):
+        with open(os.path.join(SCRIPT_DIR,
+                               "sql/portfolio_chart_static.sql")) as f:
+            portfolio_chart_query = f.read()
+
+        params = {
+            "profile_id": profile_id,
+        }
+        where_clause = [
+            sql.SQL("profile_holdings_normalized.profile_id = %(profile_id)s")
+        ]
+        join_clause = []
+
+        if filter.account_ids is not None or filter.institution_ids is not None:
+            join_clause.append(
+                sql.SQL(
+                    "join app.profile_portfolio_accounts on profile_portfolio_accounts.id = profile_holdings_normalized.account_id"
+                ))
+
+            if filter.account_ids is not None and len(filter.account_ids):
+                where_clause.append(
+                    sql.SQL(
+                        "profile_holdings_normalized.account_id in %(account_ids)s"
+                    ))
+                params['account_ids'] = tuple(filter.account_ids)
+
+            if filter.institution_ids is not None and len(
+                    filter.institution_ids):
+                join_clause.append(
+                    sql.SQL(
+                        "join app.profile_plaid_access_tokens on profile_plaid_access_tokens.id = profile_portfolio_accounts.plaid_access_token_id"
+                    ))
+                where_clause.append(
+                    sql.SQL(
+                        "profile_plaid_access_tokens.institution_id in %(institution_ids)s"
+                    ))
+                params['institution_ids'] = tuple(filter.institution_ids)
+
+        if filter.interest_ids is not None and len(filter.interest_ids):
+            join_clause.append(
+                sql.SQL(
+                    "join public.ticker_interests on ticker_interests.symbol = portfolio_securities_normalized.ticker_symbol"
+                ))
+            where_clause.append(sql.SQL("interest_id in %(interest_ids)s"))
+            params['interest_ids'] = tuple(filter.interest_ids)
+
+        if filter.category_ids is not None and len(filter.category_ids):
+            join_clause.append(
+                sql.SQL(
+                    "join public.ticker_categories on ticker_categories.symbol = portfolio_securities_normalized.ticker_symbol"
+                ))
+            where_clause.append(sql.SQL("category_id in %(category_ids)s"))
+            params['category_ids'] = tuple(filter.category_ids)
+
+        if filter.security_types is not None and len(filter.security_types):
+            where_clause.append(
+                sql.SQL(
+                    "portfolio_securities_normalized.type in %(security_types)s"
+                ))
+            params['security_types'] = tuple(filter.security_types)
+
+        if filter.ltt_only is not None and filter.ltt_only:
+            join_clause.append(
+                sql.SQL(
+                    "join public.portfolio_holding_details on portfolio_holding_details.holding_id = profile_holdings_normalized.holding_id"
+                ))
+            where_clause.append(
+                sql.SQL("portfolio_holding_details.ltt_quantity_total > 0"))
+
+        join_clause = sql.SQL("\n").join(join_clause)
+        where_clause = sql.SQL('and ') + sql.SQL(' and ').join(where_clause)
+        query = sql.SQL(portfolio_chart_query).format(
+            where_clause=where_clause, join_clause=join_clause)
+        logger.debug(query.as_string(db_conn))
+
+        with db_conn.cursor() as cursor:
+            cursor.execute(query, params)
+            static_data = cursor.fetchall()
+
+        if not len(static_data) or static_data[0][0] is None:
+            return rows
+
+        value = float(static_data[0][0])
+        for i in rows:
+            i['open'] += value
+            i['high'] += value
+            i['low'] += value
+            i['close'] += value
+            i['adjusted_close'] += value
+
+        return rows
 
     def __get_service(self, name):
         if name not in self.services:

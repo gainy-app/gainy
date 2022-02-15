@@ -23,6 +23,7 @@ variable "pg_production_internal_sync_password" {}
 
 variable "plaid_client_id" {}
 variable "plaid_secret" {}
+variable "plaid_development_secret" {}
 variable "plaid_env" {}
 
 variable "algolia_tickers_index" {}
@@ -34,7 +35,7 @@ variable "algolia_search_key" {}
 # https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task-cpu-memory-error.html
 locals {
   ecs_instance_type                    = var.env == "production" ? "c5.2xlarge" : "r5.large"
-  meltano_eodhistoricaldata_jobs_count = var.env == "production" ? 4 : 1
+  meltano_eodhistoricaldata_jobs_count = var.env == "production" ? 3 : 1
 
   hasura_cpu_credits            = var.env == "production" ? 1024 : 512
   meltano_scheduler_cpu_credits = var.env == "production" ? 3072 : 512

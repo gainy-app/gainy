@@ -14,18 +14,6 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
 
-      - name: npm install
-        working-directory: src/aws/lambda-nodejs
-        run: npm install
-
-      - name: ESLint
-        working-directory: src/aws/lambda-nodejs
-        run: npx eslint .
-
-      - name: Prettier
-        working-directory: src/aws/lambda-nodejs
-        run: npx prettier --check "./**/*.js"
-
       - name: YAPF install
         run: pip3 install yapf toml
 
@@ -134,6 +122,7 @@ jobs:
           TF_VAR_pg_production_internal_sync_password: ${{ secrets.PG_PRODUCTION_INTERNAL_SYNC_PASSWORD }}
           TF_VAR_plaid_client_id: ${{ secrets.PLAID_CLIENT_ID }}
           TF_VAR_plaid_secret: ${{ secrets.PLAID_SECRET }}
+          TF_VAR_plaid_development_secret: ${{ secrets.PLAID_DEVELOPMENT_SECRET }}
           TF_VAR_plaid_env: ${{ secrets.PLAID_ENV }}
           TF_VAR_algolia_app_id: ${{ secrets.ALGOLIA_APP_ID }}
           TF_VAR_algolia_admin_api_key: ${{ secrets.ALGOLIA_ADMIN_API_KEY }}
@@ -202,6 +191,7 @@ jobs:
           TF_VAR_pg_production_internal_sync_password: ${{ secrets.PG_PRODUCTION_INTERNAL_SYNC_PASSWORD }}
           TF_VAR_plaid_client_id: ${{ secrets.PLAID_CLIENT_ID }}
           TF_VAR_plaid_secret: ${{ secrets.PLAID_SECRET }}
+          TF_VAR_plaid_development_secret: ${{ secrets.PLAID_DEVELOPMENT_SECRET }}
           TF_VAR_plaid_env: ${{ secrets.PLAID_ENV }}
           TF_VAR_algolia_app_id: ${{ secrets.ALGOLIA_APP_ID }}
           TF_VAR_algolia_admin_api_key: ${{ secrets.ALGOLIA_ADMIN_API_KEY }}

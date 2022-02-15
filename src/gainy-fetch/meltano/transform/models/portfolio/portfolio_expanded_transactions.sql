@@ -6,6 +6,8 @@
       index(this, 'id', true),
       index(this, 'uniq_id', true),
       'delete from {{this}} where updated_at < (select max(updated_at) from {{this}})',
+      'delete from {{this}} where account_id not in (select id from app.profile_portfolio_accounts)',
+      fk(this, 'account_id', 'app', 'profile_portfolio_accounts', 'id')
     ]
   )
 }}
@@ -114,7 +116,7 @@ with robinhood_options as (
          )
 
 select t.id,
-       t.uniq_id,
+       t.uniq_id::varchar,
        t.amount,
        t.datetime,
        t.name,
@@ -191,6 +193,7 @@ from (
                       left join {{ ref('ticker_options') }}
                                 on ticker_options.contract_name = portfolio_securities_normalized.original_ticker_symbol
              where diff > 0
+               and portfolio_securities_normalized.type != 'cash'
          )
 
          union all
