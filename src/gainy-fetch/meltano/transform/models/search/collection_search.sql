@@ -13,7 +13,7 @@ with collection_category_tags as (
             else 4
         end as priority
         from {{ ref('collection_categories') }} cc
-            join public.categories c
+            join {{ ref('categories') }} c
                 on cc.category_id = c.id
 ),
 collection_industry_tags as (
@@ -27,7 +27,7 @@ collection_industry_tags as (
             else 4
         end as priority
         from {{ ref('collection_industries') }} ci
-            join public.gainy_industries gi
+            join {{ ref('gainy_industries') }} gi
                 on gi.id = ci.industry_id
 ),
 collection_tags as (
