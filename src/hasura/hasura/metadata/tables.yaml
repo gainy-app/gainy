@@ -888,43 +888,6 @@
       filter: {}
 - table:
     schema: public
-    name: growth_rate_1m
-  select_permissions:
-  - role: user
-    permission:
-      columns:
-      - symbol
-      - date
-      - growth_rate
-      filter: {}
-- table:
-    schema: public
-    name: growth_rate_1w
-  select_permissions:
-  - role: user
-    permission:
-      columns:
-      - symbol
-      - date
-      - growth_rate
-      filter: {}
-- table:
-    schema: public
-    name: historical_growth_rate
-  select_permissions:
-  - role: user
-    permission:
-      columns:
-      - symbol
-      - date
-      - growth_rate_1d
-      - growth_rate_1w
-      - growth_rate_1m
-      - growth_rate_3m
-      - growth_rate_1y
-      filter: {}
-- table:
-    schema: public
     name: historical_prices_aggregated
   select_permissions:
   - role: anonymous
@@ -988,10 +951,6 @@
       - industry_id
       - median_price
       - median_growth_rate_1d
-      - median_growth_rate_1w
-      - median_growth_rate_1m
-      - median_growth_rate_3m
-      - median_growth_rate_1y
       filter: {}
 - table:
     schema: public
@@ -1832,19 +1791,6 @@
       filter: {}
 - table:
     schema: public
-    name: ticker_metrics_transposed
-  select_permissions:
-  - role: user
-    permission:
-      columns:
-      - metric_id
-      - symbol
-      - value_bigint
-      - value_double
-      - value_string
-      filter: {}
-- table:
-    schema: public
     name: ticker_realtime_metrics
   select_permissions:
   - role: anonymous
@@ -1914,24 +1860,6 @@
         column_mapping:
           symbol: symbol
   array_relationships:
-  - name: historical_growth_rates
-    using:
-      manual_configuration:
-        remote_table:
-          schema: public
-          name: historical_growth_rate
-        insertion_order: null
-        column_mapping:
-          symbol: symbol
-  - name: metrics_transposed
-    using:
-      manual_configuration:
-        remote_table:
-          schema: public
-          name: ticker_metrics_transposed
-        insertion_order: null
-        column_mapping:
-          symbol: symbol
   - name: ticker_categories
     using:
       manual_configuration:
@@ -1965,24 +1893,6 @@
         remote_table:
           schema: public
           name: ticker_financials
-        insertion_order: null
-        column_mapping:
-          symbol: symbol
-  - name: ticker_growth_rate_1m
-    using:
-      manual_configuration:
-        remote_table:
-          schema: public
-          name: growth_rate_1m
-        insertion_order: null
-        column_mapping:
-          symbol: symbol
-  - name: ticker_growth_rate_1w
-    using:
-      manual_configuration:
-        remote_table:
-          schema: public
-          name: growth_rate_1w
         insertion_order: null
         column_mapping:
           symbol: symbol

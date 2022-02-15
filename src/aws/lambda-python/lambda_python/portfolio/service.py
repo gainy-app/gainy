@@ -98,6 +98,7 @@ class PortfolioService:
                              holdings):
         securities_dict = self.__persist_securities(db_conn, securities)
         accounts_dict = self.__persist_accounts(db_conn, accounts, profile_id)
+        holdings = self.__unique(holdings)
 
         # persist holdings
         for entity in holdings:
@@ -116,6 +117,7 @@ class PortfolioService:
                                  accounts, transactions):
         securities_dict = self.__persist_securities(db_conn, securities)
         accounts_dict = self.__persist_accounts(db_conn, accounts, profile_id)
+        transactions = self.__unique(transactions)
 
         # persist transactions
         for entity in transactions:
@@ -219,8 +221,47 @@ class PortfolioService:
             cursor.execute(query, params)
             rows = cursor.fetchall()
 
+        rows = list(self._filter_chart_by_transaction_count(rows))
+
         return self._add_static_values_to_chart(db_conn, profile_id, filter,
                                                 rows)
+
+    def _filter_chart_by_transaction_count(self, rows):
+        transaction_counts_1d = {}
+        for row in rows:
+            if row['period'] != '1d':
+                continue
+
+            if row['transaction_count'] not in transaction_counts_1d:
+                transaction_counts_1d[row['transaction_count']] = 0
+
+            transaction_counts_1d[row['transaction_count']] += 1
+
+        max_transaction_count_1d = max(
+            transaction_counts_1d, key=transaction_counts_1d.get
+        ) if len(transaction_counts_1d) > 0 else 0
+
+        prev_row = None
+        for row in sorted(rows,
+                          key=lambda row: (row['period'], row['datetime'])):
+
+            transaction_count = row['transaction_count']
+            period = row['period']
+
+            # during the day there is constant transaction_count, so we just pick all rows with max transaction_count
+            should_skip_1d = transaction_count != max_transaction_count_1d
+            if period == '1d' and should_skip_1d:
+                continue
+
+            # for other periods transactions count should not decrease, so we pick all rows that follow a non-decreasing transaction count pattern
+            if prev_row is not None:
+                prev_transaction_count = prev_row['transaction_count']
+                prev_period = prev_row['period']
+                should_skip_other_periods = period == prev_period and transaction_count < prev_transaction_count
+                if period != '1d' and should_skip_other_periods:
+                    continue
+
+            yield row
 
     def _add_static_values_to_chart(self, db_conn, profile_id, filter, rows):
         with open(os.path.join(SCRIPT_DIR,

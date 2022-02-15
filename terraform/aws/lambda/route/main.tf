@@ -1,9 +1,9 @@
-variable "route" {}
+variable "url" {}
 variable "aws_apigatewayv2_api_lambda_id" {}
 variable "aws_apigatewayv2_api_lambda_execution_arn" {}
 variable "aws_iam_role_lambda_exec_role" {}
 variable "aws_lambda_invoke_arn" {}
-variable "aws_lambda_function_name" {}
+
 resource "aws_apigatewayv2_integration" "lambda" {
   api_id = var.aws_apigatewayv2_api_lambda_id
 
@@ -15,14 +15,13 @@ resource "aws_apigatewayv2_integration" "lambda" {
 resource "aws_apigatewayv2_route" "route" {
   api_id = var.aws_apigatewayv2_api_lambda_id
 
-  route_key = var.route
+  route_key = "POST ${var.url}"
   target    = "integrations/${aws_apigatewayv2_integration.lambda.id}"
 }
 resource "aws_lambda_permission" "api_gw" {
-  statement_id  = "AllowExecutionFromAPIGateway"
   action        = "lambda:InvokeFunction"
-  function_name = var.aws_lambda_function_name
+  function_name = var.aws_lambda_invoke_arn
   principal     = "apigateway.amazonaws.com"
 
-  source_arn = "${var.aws_apigatewayv2_api_lambda_execution_arn}/*/*"
+  source_arn = "${var.aws_apigatewayv2_api_lambda_execution_arn}/*/*${var.url}"
 }
