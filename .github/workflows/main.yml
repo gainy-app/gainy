@@ -92,6 +92,19 @@ jobs:
         run: terraform validate -no-color
         working-directory: terraform
 
+      - name: Terraform State Cleanup Prepare
+        id: state-clean-prepare
+        # grep only needed resources
+        # tr to make it a one-liner
+        # sed to filter out :: command, that github apparently adds to step output for some f-cked up reason
+        run: echo "::set-output name=resources::$(terraform state list | grep -P 'aws_apigatewayv2_integration|aws_apigatewayv2_route|aws_lambda_permission' | tr '\n' ' ' | sed 's/::.*//')"
+        working-directory: terraform
+
+      - name: Terraform State Cleanup
+        id: state-clean
+        run: terraform state rm ${{ steps.state-clean-prepare.outputs.resources }}
+        working-directory: terraform
+
       - name: Terraform Plan
         id: plan
         if: github.event_name == 'pull_request'
