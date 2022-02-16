@@ -17,7 +17,7 @@ with first_profile_transaction_date as
                     min(date) as datetime
              from {{ source('app', 'profile_portfolio_transactions') }}
              group by profile_id
-{% if is_incremental() and not var('realtime') %}
+{% if is_incremental() %}
          ),
      latest_transaction_chart_row as
          (
@@ -50,7 +50,7 @@ from {{ ref('portfolio_expanded_transactions') }}
                        coalesce(portfolio_expanded_transactions.date, first_profile_transaction_date.datetime) or
                        coalesce(portfolio_expanded_transactions.date,
                                 first_profile_transaction_date.datetime) is null)
-{% if is_incremental() and not var('realtime') %}
+{% if is_incremental() %}
          left join latest_transaction_chart_row
               on latest_transaction_chart_row.transactions_uniq_id = portfolio_expanded_transactions.uniq_id
                   and latest_transaction_chart_row.period = chart.period
