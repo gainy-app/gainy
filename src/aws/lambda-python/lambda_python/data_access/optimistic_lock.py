@@ -6,7 +6,6 @@ from psycopg2._psycopg import connection
 
 from data_access.db_lock import LockManager
 from data_access.models import ResourceVersion
-from data_access.repository import Repository
 
 
 class ConcurrentVersionUpdate(Exception):
@@ -19,7 +18,7 @@ class ConcurrentVersionUpdate(Exception):
 
 class AbstractOptimisticLockingFunction(ABC):
 
-    def __init__(self, repo: Repository):
+    def __init__(self, repo):
         self.repo = repo
 
     @abstractmethod
@@ -54,9 +53,12 @@ class AbstractOptimisticLockingFunction(ABC):
             is_same_version = new_version and new_version.resource_version == cur_version.resource_version
             if is_creation or is_same_version:
                 new_version.update_version()
-                entities.append(new_version)
             else:
                 raise ConcurrentVersionUpdate(cur_version, new_version)
 
-            self.repo.persist(db_conn, entities)
+            self.repo.persist(db_conn, new_version)
+            self._do_persist(db_conn, entities)
             db_conn.commit()
+
+    def _do_persist(self, db_conn, entities):
+        self.repo.persist(db_conn, entities)
