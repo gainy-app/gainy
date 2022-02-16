@@ -10,159 +10,99 @@
   )
 }}
 
-with
-     first_transaction_date as
+with week_trading_sessions as
+         (
+             select min(open_at)                           as open_at,
+                    min(close_at)                          as close_at,
+                    min(date)                              as date,
+                    row_number() over (order by date desc) as idx
+             from {{ ref('exchange_schedule') }}
+             where open_at between now() - interval '1 week' and now()
+             group by date
+         ),
+     latest_open_trading_session as
+         (
+             select *
+             from week_trading_sessions
+             where idx = 1
+         ),
+     static_values as
          (
              select profile_id,
-                    min(date) as date
-             from {{ source('app', 'profile_portfolio_transactions') }}
-             group by profile_id
-         ),
-     time_period as
-         (
-             select distinct datetime, '15min'::varchar as period
-             from {{ ref('chart') }}
-             where chart.period = '1d'
-             and mod(date_part('minute', datetime)::int, 15) = 0
-             union all
-             select distinct datetime, '1d'::varchar as period
-             from {{ ref('chart') }}
-             where chart.period = '1m'
-             and datetime > now() - interval '1 week'
-             union all
-             select distinct datetime, '1w'::varchar as period
-             from {{ ref('chart') }}
-             where chart.period = '5y'
-             and datetime > now() - interval '1 year'
-             union all
-             select distinct datetime, '1m'::varchar as period
-             from {{ ref('chart') }}
-             where chart.period = 'all'
-         ),
-     chart_data as (
-         -- stocks
-         (
-             select portfolio_expanded_transactions.profile_id,
-                    historical_prices_aggregated.time                    as datetime,
-                    historical_prices_aggregated.period                  as period,
-                    portfolio_expanded_transactions.quantity_norm::numeric *
-                    historical_prices_aggregated.adjusted_close::numeric as value,
-                    'chart'                                              as source
-             from {{ ref('portfolio_expanded_transactions') }}
-                      join {{ ref('portfolio_securities_normalized') }}
-                           on portfolio_securities_normalized.id = portfolio_expanded_transactions.security_id
-                      join {{ ref('historical_prices_aggregated') }}
-                           on (historical_prices_aggregated.datetime >= portfolio_expanded_transactions.date or
-                               portfolio_expanded_transactions.date is null) and
-                              historical_prices_aggregated.symbol = portfolio_securities_normalized.original_ticker_symbol
-                      left join first_transaction_date on first_transaction_date.profile_id = portfolio_expanded_transactions.profile_id
-             where portfolio_expanded_transactions.type in ('buy', 'sell')
-               and (first_transaction_date.profile_id is null or historical_prices_aggregated.time >= first_transaction_date.date)
-               and (
-                     (historical_prices_aggregated.period = '1d' and
-                      historical_prices_aggregated.datetime >= now() - interval '1 week')
-                     or (historical_prices_aggregated.period = '1w' and
-                         historical_prices_aggregated.datetime >= now() - interval '1 year')
-                     or historical_prices_aggregated.period = '1m'
-                 )
-         )
-
-         union all
-
-         -- realtime
-         (
-             select portfolio_expanded_transactions.profile_id,
-                    chart.datetime,
-                    '15min'::varchar              as period,
-                    portfolio_expanded_transactions.quantity_norm::numeric *
-                    chart.adjusted_close::numeric as value,
-                    'realtime'                    as source
-             from {{ ref('portfolio_expanded_transactions') }}
-                      join {{ ref('portfolio_securities_normalized') }}
-                           on portfolio_securities_normalized.id = portfolio_expanded_transactions.security_id
-                      join {{ ref('base_tickers') }}
-                           on base_tickers.symbol = portfolio_securities_normalized.original_ticker_symbol
-                      left join {{ ref('chart') }}
-                                on chart.symbol = portfolio_securities_normalized.original_ticker_symbol
-                                    and chart.period = '1d'
-             where portfolio_expanded_transactions.type in ('buy', 'sell')
-               and chart.datetime in (select distinct datetime from {{ ref('chart') }} where period = '1w')
-         )
-
-         union all
-
-         -- options
-         (
-             select portfolio_expanded_transactions.profile_id,
-                    time_period.datetime               as datetime,
-                    time_period.period                 as period,
-                    100 * portfolio_expanded_transactions.quantity_norm::numeric *
-                    ticker_options.last_price::numeric as value,
-                    'options'                          as source
-             from {{ ref('portfolio_expanded_transactions') }}
-                      join {{ ref('portfolio_securities_normalized') }}
-                           on portfolio_securities_normalized.id = portfolio_expanded_transactions.security_id
-                      join {{ ref('ticker_options') }}
-                           on ticker_options.contract_name = portfolio_securities_normalized.original_ticker_symbol
-                      left join first_transaction_date on first_transaction_date.profile_id = portfolio_expanded_transactions.profile_id
-                      join time_period on (first_transaction_date.profile_id is null or time_period.datetime >= first_transaction_date.date)
-             where portfolio_expanded_transactions.type in ('buy', 'sell')
-         )
-
-         union all
-
-         -- currencies
-         (
-             select profile_holdings_normalized.profile_id,
-                    time_period.datetime                          as datetime,
-                    time_period.period                            as period,
-                    profile_holdings_normalized.quantity::numeric as value,
-                    'currencies'                                  as source
+                    sum(
+                            case
+                                when ticker_options.contract_name is not null
+                                    then 100 * profile_holdings_normalized.quantity::numeric * ticker_options.last_price::numeric
+                                when portfolio_securities_normalized.type = 'cash'
+                                    and portfolio_securities_normalized.ticker_symbol = 'CUR:USD'
+                                    then profile_holdings_normalized.quantity::numeric
+                                else 0
+                                end
+                        ) as value
              from {{ ref('profile_holdings_normalized') }}
                       join {{ ref('portfolio_securities_normalized') }}
                            on portfolio_securities_normalized.id = profile_holdings_normalized.security_id
-                      left join first_transaction_date
-                           on first_transaction_date.profile_id = profile_holdings_normalized.profile_id
-                      join time_period on (first_transaction_date.profile_id is null or
-                                           time_period.datetime >= first_transaction_date.date)
-             where profile_holdings_normalized.type = 'cash'
-               and portfolio_securities_normalized.ticker_symbol = 'CUR:USD'
+                      left join {{ ref('ticker_options') }}
+                                on ticker_options.contract_name = portfolio_securities_normalized.original_ticker_symbol
+             where (ticker_options.contract_name is not null
+                 or (portfolio_securities_normalized.type = 'cash' and
+                     portfolio_securities_normalized.ticker_symbol = 'CUR:USD'))
+             group by profile_id
+         ),
+     dynamic_values as
+         (
+             select profile_id,
+                    period,
+                    portfolio_transaction_chart.datetime,
+                    count(uniq_id)::double precision as transaction_count,
+                    sum(adjusted_close::numeric)     as value
+             from {{ ref('portfolio_transaction_chart') }}
+                      join {{ ref('portfolio_expanded_transactions') }}
+                           on portfolio_expanded_transactions.uniq_id = portfolio_transaction_chart.transactions_uniq_id
+                      left join week_trading_sessions
+                                on portfolio_transaction_chart.datetime between week_trading_sessions.open_at and week_trading_sessions.close_at
+                      left join latest_open_trading_session on true
+             where ((period = '1d' and week_trading_sessions.idx = 1)
+                 or (period = '1w' and week_trading_sessions.idx is not null)
+                 or (period = '1m' and
+                     portfolio_transaction_chart.datetime >= latest_open_trading_session.date - interval '1 month')
+                 or (period = '3m' and
+                     portfolio_transaction_chart.datetime >= latest_open_trading_session.date - interval '3 months')
+                 or (period = '1y' and
+                     portfolio_transaction_chart.datetime >= latest_open_trading_session.date - interval '1 year')
+                 or (period = '5y' and
+                     portfolio_transaction_chart.datetime >= latest_open_trading_session.date - interval '5 years')
+                 or (period = 'all'))
+             group by profile_id, period, portfolio_transaction_chart.datetime
+         ),
+     dynamic_values_extended as
+         (
+             select profile_id,
+                    case
+                        when period = '1d' then '15min'
+                        when period = '1m' then '1d'
+                        when period = '5y' then '1w'
+                        when period = 'all' then '1m'
+                        end::varchar                                                                                  as period,
+                    datetime,
+                    (profile_id || '_' || datetime || '_' || period)::varchar                                         as id,
+                    value,
+                    transaction_count,
+                    first_value(transaction_count)
+                    over (partition by profile_id, period order by datetime rows between 1 preceding and current row) as prev_transaction_count
+             from dynamic_values
+             where (period = '1d' and mod(date_part('minute', datetime)::int, 15) = 0)
+                or (period = '1m' and datetime > now() - interval '1 week')
+                or (period = '5y' and datetime > now() - interval '1 year')
+                or period = 'all'
          )
-     ),
-     chart_data_null as (
-         select distinct profile_id, period, datetime from chart_data where value is null
-     ),
-     chart_data_not_null as (
-         select profile_id, period, datetime, count(distinct source) as cnt
-         from chart_data
-         where value is not null
-         group by profile_id, period, datetime
-     ),
-     chart_data_not_null_global as (
-         select profile_id, count(distinct source) as cnt
-         from chart_data
-         where value is not null
-         group by profile_id
-     )
-
-select chart_data.profile_id,
-       chart_data.period,
-       chart_data.datetime,
-       chart_data.datetime                                                                        as date,
-       (chart_data.profile_id || '_' || chart_data.datetime || '_' || chart_data.period)::varchar as id,
-       sum(value)::double precision                                                               as value,
-       now()                                                                                      as updated_at
-from chart_data
-         left join chart_data_null
-                   on chart_data_null.profile_id = chart_data.profile_id
-                       and chart_data_null.period = chart_data.period
-                       and chart_data_null.datetime = chart_data.datetime
-         join chart_data_not_null
-              on chart_data_not_null.profile_id = chart_data.profile_id
-                  and chart_data_not_null.period = chart_data.period
-                  and chart_data_not_null.datetime = chart_data.datetime
-         join chart_data_not_null_global
-              on chart_data_not_null_global.profile_id = chart_data.profile_id
-where chart_data_null.profile_id is null
-  and chart_data_not_null.cnt = chart_data_not_null_global.cnt - 1
-group by chart_data.profile_id, chart_data.period, chart_data.datetime
+select dynamic_values_extended.profile_id,
+       period,
+       datetime,
+       datetime                                                                as date,
+       id,
+       (dynamic_values_extended.value + static_values.value)::double precision as value,
+       now()                                                                   as updated_at
+from dynamic_values_extended
+         left join static_values on static_values.profile_id = dynamic_values_extended.profile_id
+where transaction_count >= prev_transaction_count
