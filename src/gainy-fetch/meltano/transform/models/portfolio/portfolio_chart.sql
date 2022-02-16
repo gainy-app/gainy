@@ -20,14 +20,24 @@ with
          ),
      time_period as
          (
-             select distinct datetime, period
-             from {{ ref('historical_prices_aggregated') }}
-             where historical_prices_aggregated.period in ('1d', '1w', '1m')
-             union all
              select distinct datetime, '15min'::varchar as period
              from {{ ref('chart') }}
              where chart.period = '1d'
              and mod(date_part('minute', datetime)::int, 15) = 0
+             union all
+             select distinct datetime, '1d'::varchar as period
+             from {{ ref('chart') }}
+             where chart.period = '1m'
+             and datetime > now() - interval '1 week'
+             union all
+             select distinct datetime, '1w'::varchar as period
+             from {{ ref('chart') }}
+             where chart.period = '5y'
+             and datetime > now() - interval '1 year'
+             union all
+             select distinct datetime, '1m'::varchar as period
+             from {{ ref('chart') }}
+             where chart.period = 'all'
          ),
      chart_data as (
          -- stocks
@@ -48,42 +58,35 @@ with
                       left join first_transaction_date on first_transaction_date.profile_id = portfolio_expanded_transactions.profile_id
              where portfolio_expanded_transactions.type in ('buy', 'sell')
                and (first_transaction_date.profile_id is null or historical_prices_aggregated.time >= first_transaction_date.date)
-               and historical_prices_aggregated.period != '15min'
+               and (
+                     (historical_prices_aggregated.period = '1d' and
+                      historical_prices_aggregated.datetime >= now() - interval '1 week')
+                     or (historical_prices_aggregated.period = '1w' and
+                         historical_prices_aggregated.datetime >= now() - interval '1 year')
+                     or historical_prices_aggregated.period = '1m'
+                 )
          )
 
          union all
 
          -- realtime
          (
-             with chart_dates as (
-                 select distinct datetime
-                 from {{ ref('chart') }}
-                 where chart.period = '1d'
-             )
-             select distinct on (
-                 portfolio_expanded_transactions.uniq_id,
-                 chart_dates.datetime
-                 ) portfolio_expanded_transactions.profile_id,
-                   chart_dates.datetime,
-                   '15min'::varchar              as period,
-                   portfolio_expanded_transactions.quantity_norm::numeric *
-                   chart.adjusted_close::numeric as value,
-                   'realtime'                    as source
+             select portfolio_expanded_transactions.profile_id,
+                    chart.datetime,
+                    '15min'::varchar              as period,
+                    portfolio_expanded_transactions.quantity_norm::numeric *
+                    chart.adjusted_close::numeric as value,
+                    'realtime'                    as source
              from {{ ref('portfolio_expanded_transactions') }}
                       join {{ ref('portfolio_securities_normalized') }}
                            on portfolio_securities_normalized.id = portfolio_expanded_transactions.security_id
                       join {{ ref('base_tickers') }}
                            on base_tickers.symbol = portfolio_securities_normalized.original_ticker_symbol
-                      join chart_dates
-                           on (chart_dates.datetime >= portfolio_expanded_transactions.date or
-                               portfolio_expanded_transactions.date is null)
                       left join {{ ref('chart') }}
-                                on chart.datetime <= chart_dates.datetime
-                                    and chart.datetime > chart_dates.datetime - interval '1 hour'
-                                    and chart.symbol = portfolio_securities_normalized.original_ticker_symbol
+                                on chart.symbol = portfolio_securities_normalized.original_ticker_symbol
                                     and chart.period = '1d'
+                                    and mod(date_part('minute', chart.datetime)::int, 15) = 0
              where portfolio_expanded_transactions.type in ('buy', 'sell')
-             order by portfolio_expanded_transactions.uniq_id, chart_dates.datetime, chart.datetime desc
          )
 
          union all
