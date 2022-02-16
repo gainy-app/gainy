@@ -5,7 +5,7 @@ import traceback
 
 import psycopg2
 
-from data_access.lock import LockManager, ResourceType, DatabaseLock, LockAcquisitionTimeout
+from data_access.db_lock import LockManager, ResourceType, DatabaseLock, LockAcquisitionTimeout
 
 DB_CONN_STRING = "postgresql://postgres:postgrespassword@localhost:5432/postgres"
 
@@ -36,7 +36,7 @@ class TestThread(threading.Thread):
         self.resource_id = resource_id
 
     def run(self):
-        with psycopg2.connect(DB_CONN_STRING) as db_conn:
+        with psycopg2.connect(self.db_conn_string) as db_conn:
             for _ in range(0, 10):
                 try:
                     with LockManager.database_lock(db_conn, self.resource_type, self.resource_id, await_sec=5):
