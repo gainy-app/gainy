@@ -92,7 +92,7 @@ class SetUserCategories(HasuraTrigger):
 
         with db_conn.cursor() as cursor:
             cursor.execute(
-                "select id from public.categories where risk_score = %(risk_score)s",
+                "select id from categories where risk_score = %(risk_score)s",
                 {'risk_score': final_score})
 
             rows = cursor.fetchall()

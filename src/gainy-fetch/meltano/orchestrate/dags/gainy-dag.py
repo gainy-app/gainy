@@ -110,6 +110,11 @@ dbt = BashOperator(
     dag=dag,
     pool="dbt")
 
+clean = BashOperator(
+    task_id="clean",
+    bash_command=f"cd {project_root}; python3 scripts/cleanup.py",
+    dag=dag)
+
 # dependencies
 upstream >> dbt >> downstream
 

@@ -41,10 +41,10 @@ hasura-seed:
 	docker-compose exec -T hasura hasura seed apply
 
 style-check:
-	yapf --diff -r src/aws/lambda-python/ src/aws/router src/websockets src/gainy-fetch/meltano/orchestrate/dags terraform
+	yapf --diff -r src/aws/lambda-python/ src/aws/router src/websockets src/gainy-fetch/meltano/orchestrate/dags src/hasura src/gainy-fetch terraform
 
 style-fix:
-	yapf -i -r src/aws/lambda-python/ src/aws/router src/websockets src/gainy-fetch/meltano/orchestrate/dags terraform
+	yapf -i -r src/aws/lambda-python/ src/aws/router src/websockets src/gainy-fetch/meltano/orchestrate/dags src/hasura src/gainy-fetch terraform
 
 extract-passwords:
 	cd terraform && terraform state pull | python3 ../extract_passwords.py
@@ -52,8 +52,8 @@ extract-passwords:
 test: configure
 	docker-compose -p gainy_test -f docker-compose.test.yml run test-meltano invoke dbt test
 	docker-compose -p gainy_test -f docker-compose.test.yml run --entrypoint python3 test-meltano tests/image_urls.py
-	docker-compose -p gainy_test -f docker-compose.test.yml run test-meltano invoke dbt run  --vars '{"realtime": true}' --model historical_prices_aggregated portfolio_gains portfolio_holding_details portfolio_holding_gains portfolio_holding_group_details portfolio_holding_group_gains portfolio_transaction_chart portfolio_expanded_transactions
-	docker-compose -p gainy_test -f docker-compose.test.yml run test-meltano invoke dbt test
+	docker-compose -p gainy_test -f docker-compose.test.yml run --entrypoint "/wait.sh" test-meltano invoke dbt run  --vars '{"realtime": true}' --model historical_prices_aggregated portfolio_gains portfolio_holding_details portfolio_holding_gains portfolio_holding_group_details portfolio_holding_group_gains portfolio_transaction_chart portfolio_expanded_transactions
+	docker-compose -p gainy_test -f docker-compose.test.yml run --entrypoint "/wait.sh" test-meltano invoke dbt test
 	docker-compose -p gainy_test -f docker-compose.test.yml exec -T test-hasura pytest
 	make test-clean
 

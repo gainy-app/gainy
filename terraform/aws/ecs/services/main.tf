@@ -12,6 +12,8 @@ locals {
   websockets_root_dir       = abspath("${path.cwd}/../src/websockets")
   websockets_image_tag      = format("websockets-%s-%s", var.env, data.archive_file.websockets_source.output_md5)
   websockets_ecr_image_name = format("%v/%v:%v", var.ecr_address, local.ecr_repo, local.websockets_image_tag)
+
+  public_schema_name = "public_${var.versioned_schema_suffix}"
 }
 
 resource "random_password" "hasura" {
@@ -138,7 +140,7 @@ resource "aws_ecs_task_definition" "default" {
       pg_dbname                            = var.pg_dbname
       pg_replica_uris                      = var.pg_replica_uris
       pg_load_schema                       = "raw_data"
-      pg_transform_schema                  = "public" # "public_${var.versioned_schema_suffix}" # TODO deployment_v2 blocked by versioned hasura views
+      pg_transform_schema                  = local.public_schema_name
       dbt_threads                          = var.env == "production" ? 4 : 4
       pg_production_host                   = var.pg_production_host
       pg_production_port                   = var.pg_production_port
@@ -252,7 +254,7 @@ resource "aws_ecs_task_definition" "hasura" {
       pg_username         = var.pg_username
       pg_dbname           = var.pg_dbname
       pg_replica_uris     = var.pg_replica_uris
-      pg_transform_schema = "public" # "public_${var.versioned_schema_suffix}" # TODO deployment_v2 blocked by versioned hasura views
+      pg_transform_schema = local.public_schema_name
       aws_log_group_name  = var.aws_log_group_name
       aws_log_region      = var.aws_log_region
     }
@@ -403,4 +405,8 @@ output "hasura_admin_secret" {
 
 output "name" {
   value = aws_ecs_service.service.name
+}
+
+output "public_schema_name" {
+  value = local.public_schema_name
 }
