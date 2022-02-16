@@ -22,11 +22,12 @@ with
          (
              select distinct datetime, period
              from {{ ref('historical_prices_aggregated') }}
-             where historical_prices_aggregated.period != '15min'
+             where historical_prices_aggregated.period in ('1d', '1w', '1m')
              union all
              select distinct datetime, '15min'::varchar as period
              from {{ ref('chart') }}
              where chart.period = '1d'
+             and mod(date_part('minute', datetime)::int, 15) = 0
          ),
      chart_data as (
          -- stocks

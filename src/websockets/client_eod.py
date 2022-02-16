@@ -8,6 +8,7 @@ from decimal import Decimal
 from common import run, AbstractPriceListener, NO_MESSAGES_RECONNECT_TIMEOUT
 
 EOD_API_TOKEN = os.environ["EOD_API_TOKEN"]
+SYMBOLS_LIMIT = 11000
 
 
 class PricesListener(AbstractPriceListener):
@@ -24,7 +25,9 @@ class PricesListener(AbstractPriceListener):
         return self.filter_symbols(super().get_symbols())
 
     def filter_symbols(self, symbols):
-        return set(i for i in symbols if i.find('-') == -1)
+        symbols = [i for i in symbols if i.find('-') == -1]
+        symbols.sort()
+        return set(symbols[:SYMBOLS_LIMIT])
 
     @property
     def supported_exchanges(self):

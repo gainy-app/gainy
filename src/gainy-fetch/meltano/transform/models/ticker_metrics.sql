@@ -11,7 +11,6 @@
 with highlights as (select * from {{ ref('highlights') }}),
      tickers as (select * from {{ ref('tickers') }}),
      ticker_realtime_metrics as (select * from {{ ref('ticker_realtime_metrics') }}),
-     chart as (select * from {{ ref('chart') }}),
      valuation as (select * from {{ ref('valuation') }}),
      technicals as (select * from {{ ref('technicals') }}),
      ticker_shares_stats as (select * from {{ ref('ticker_shares_stats') }}),
@@ -22,7 +21,6 @@ with highlights as (select * from {{ ref('highlights') }}),
      earnings_history as (select * from {{ ref('earnings_history') }}),
      earnings_annual as (select * from {{ ref('earnings_annual') }}),
      historical_prices as (select * from {{ ref('historical_prices') }}),
-     historical_prices_aggregated as (select * from {{ ref('historical_prices_aggregated') }}),
      raw_eod_options as (SELECT * FROM {{ source('eod', 'eod_options') }}),
      raw_eod_fundamentals as (SELECT * FROM {{ source('eod', 'eod_fundamentals') }}),
      marked_prices as
@@ -31,11 +29,14 @@ with highlights as (select * from {{ ref('highlights') }}),
              from (
                       select *,
                              case
+                                 when hp."date" <= hp.cur_date - interval '5 year' then '5y'
                                  when hp."date" <= hp.cur_date - interval '1 year' then '1y'
                                  when hp."date" <= hp.cur_date - interval '3 month' then '3m'
                                  when hp."date" <= hp.cur_date - interval '1 month' then '1m'
                                  when hp."date" <= hp.cur_date - interval '10 days' then '10d'
+                                 when hp."date" <= hp.cur_date - interval '1 week' then '1w'
                                  when hp."date" <= hp.cur_date then '0d'
+                                 else 'all'
                                  end as period
                       from (
                                select code,
@@ -285,58 +286,39 @@ with highlights as (select * from {{ ref('highlights') }}),
          ),
      momentum_metrics as
          (
-             with previous_periods as
-                      (
-                          select distinct on (
-                              chart.symbol, chart.period
-                              ) chart.symbol,
-                                chart.period,
-                                chart.datetime                              as period_start,
-                                chart.adjusted_close                        as period_close,
-                                historical_prices_aggregated.datetime       as prev_date,
-                                historical_prices_aggregated.adjusted_close as prev_period_close
-                          from chart
-                                   join historical_prices_aggregated
-                                        on historical_prices_aggregated.symbol = chart.symbol
-                                            and historical_prices_aggregated.period = '1d'
-                                            and historical_prices_aggregated.datetime < chart.datetime
-                                            and historical_prices_aggregated.datetime > chart.datetime - interval '1 week'
-                          where chart.period in ('1w', '1m', '3m', '1y', '5y', 'all')
-                          order by chart.symbol, chart.period, chart.datetime, historical_prices_aggregated.datetime desc
-                      )
              select tickers.symbol,
                     ticker_realtime_metrics.actual_price / case
-                                                           when previous_periods_1w.prev_period_close > 0
-                                                               then previous_periods_1w.prev_period_close end - 1 as price_change_1w,
+                                                           when previous_periods_1w.price > 0
+                                                               then previous_periods_1w.price end - 1 as price_change_1w,
                     ticker_realtime_metrics.actual_price / case
-                                                           when previous_periods_1m.prev_period_close > 0
-                                                               then previous_periods_1m.prev_period_close end - 1 as price_change_1m,
+                                                           when previous_periods_1m.price > 0
+                                                               then previous_periods_1m.price end - 1 as price_change_1m,
                     ticker_realtime_metrics.actual_price / case
-                                                           when previous_periods_3m.prev_period_close > 0
-                                                               then previous_periods_3m.prev_period_close end - 1 as price_change_3m,
+                                                           when previous_periods_3m.price > 0
+                                                               then previous_periods_3m.price end - 1 as price_change_3m,
                     ticker_realtime_metrics.actual_price / case
-                                                           when previous_periods_1y.prev_period_close > 0
-                                                               then previous_periods_1y.prev_period_close end - 1 as price_change_1y,
+                                                           when previous_periods_1y.price > 0
+                                                               then previous_periods_1y.price end - 1 as price_change_1y,
                     ticker_realtime_metrics.actual_price / case
-                                                           when previous_periods_5y.prev_period_close > 0
-                                                               then previous_periods_5y.prev_period_close end - 1 as price_change_5y,
+                                                           when previous_periods_5y.price > 0
+                                                               then previous_periods_5y.price end - 1 as price_change_5y,
                     ticker_realtime_metrics.actual_price / case
-                                                           when previous_periods_all.prev_period_close > 0
-                                                               then previous_periods_all.prev_period_close end - 1 as price_change_all
+                                                           when previous_periods_all.price > 0
+                                                               then previous_periods_all.price end - 1 as price_change_all
              from tickers
                       join ticker_realtime_metrics on ticker_realtime_metrics.symbol = tickers.symbol
-                      left join previous_periods previous_periods_1w
-                                on previous_periods_1w.symbol = tickers.symbol and previous_periods_1w.period = '1w'
-                      left join previous_periods previous_periods_1m
-                                on previous_periods_1m.symbol = tickers.symbol and previous_periods_1m.period = '1m'
-                      left join previous_periods previous_periods_3m
-                                on previous_periods_3m.symbol = tickers.symbol and previous_periods_3m.period = '3m'
-                      left join previous_periods previous_periods_1y
-                                on previous_periods_1y.symbol = tickers.symbol and previous_periods_1y.period = '1y'
-                      left join previous_periods previous_periods_5y
-                                on previous_periods_5y.symbol = tickers.symbol and previous_periods_5y.period = '5y'
-                      left join previous_periods previous_periods_all
-                                on previous_periods_all.symbol = tickers.symbol and previous_periods_all.period = 'all'
+                      left join marked_prices previous_periods_1w
+                                on previous_periods_1w.code = tickers.symbol and previous_periods_1w.period = '1w'
+                      left join marked_prices previous_periods_1m
+                                on previous_periods_1m.code = tickers.symbol and previous_periods_1m.period = '1m'
+                      left join marked_prices previous_periods_3m
+                                on previous_periods_3m.code = tickers.symbol and previous_periods_3m.period = '3m'
+                      left join marked_prices previous_periods_1y
+                                on previous_periods_1y.code = tickers.symbol and previous_periods_1y.period = '1y'
+                      left join marked_prices previous_periods_5y
+                                on previous_periods_5y.code = tickers.symbol and previous_periods_5y.period = '5y'
+                      left join marked_prices previous_periods_all
+                                on previous_periods_all.code = tickers.symbol and previous_periods_all.period = 'all'
          ),
      dividend_metrics as
          (
