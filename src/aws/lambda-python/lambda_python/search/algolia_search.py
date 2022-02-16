@@ -77,7 +77,7 @@ class SearchTickers(SearchAction):
                          "symbol")
 
     def table_name(self) -> str:
-        return "public.tickers"
+        return "tickers"
 
     def _enabled_only(self) -> bool:
         return False
@@ -90,7 +90,7 @@ class SearchCollections(SearchAction):
                          algolia_search_api_key, tickers_index, ["id"], "id")
 
     def table_name(self) -> str:
-        return "public.collections"
+        return "collections"
 
     def _enabled_only(self) -> bool:
         return True

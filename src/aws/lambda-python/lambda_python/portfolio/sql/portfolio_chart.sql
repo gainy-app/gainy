@@ -4,7 +4,7 @@ with week_trading_sessions as
                     min(close_at)                          as close_at,
                     min(date)                              as date,
                     row_number() over (order by date desc) as idx
-             from public.exchange_schedule
+             from exchange_schedule
              where open_at between now() - interval '1 week' and now()
              group by date
          ),
@@ -22,8 +22,8 @@ select period,
        sum(low)::double precision            as low,
        sum(close)::double precision          as close,
        sum(adjusted_close)::double precision as adjusted_close
-from public.portfolio_transaction_chart
-         join public.portfolio_expanded_transactions
+from portfolio_transaction_chart
+         join portfolio_expanded_transactions
               on portfolio_expanded_transactions.uniq_id = portfolio_transaction_chart.transactions_uniq_id
          left join week_trading_sessions
                    on portfolio_transaction_chart.datetime between week_trading_sessions.open_at and week_trading_sessions.close_at

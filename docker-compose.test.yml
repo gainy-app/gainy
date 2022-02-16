@@ -27,6 +27,7 @@ services:
       NO_AIRFLOW: "true"
       ENV: "local"
       DBT_THREADS: 2
+      DBT_TARGET_SCHEMA: public_test
     depends_on:
       - test-postgres
       - test-hasura
@@ -53,7 +54,7 @@ services:
     environment:
       HASURA_GRAPHQL_METADATA_DATABASE_URL: "postgres://postgres:postgrespassword@test-postgres:5432/postgres"
       HASURA_GRAPHQL_DATABASE_URL: "postgres://postgres:postgrespassword@test-postgres:5432/postgres"
-      HASURA_GRAPHQL_PUBLIC_SCHEMA_NAME: public
+      HASURA_GRAPHQL_PUBLIC_SCHEMA_NAME: public_test
       AWS_LAMBDA_API_GATEWAY_ENDPOINT: http://test-lambda-router:5000
 
   test-lambda-router:
@@ -90,6 +91,7 @@ services:
       ALGOLIA_API_KEY: "test"
       ENV: "local"
       PLAID_ENV: "sandbox"
+      PUBLIC_SCHEMA_NAME: public_test
     command: [ "hasura_handler.handle_trigger" ]
 
   test-lambda-python-action:
@@ -114,5 +116,6 @@ services:
       ALGOLIA_API_KEY: "test"
       ENV: "local"
       PLAID_ENV: "sandbox"
+      PUBLIC_SCHEMA_NAME: public_test
 
     command: [ "hasura_handler.handle_action" ]

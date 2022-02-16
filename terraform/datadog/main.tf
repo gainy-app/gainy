@@ -326,7 +326,7 @@ resource "datadog_monitor" "meltano_dag_run_date" {
 
   require_full_window = false
   notify_no_data      = true
-  renotify_interval   = 240
+  renotify_interval   = 1440
 
   tags = ["meltano"]
 }
@@ -336,7 +336,7 @@ resource "datadog_monitor" "meltano_dag_run_duration" {
   type    = "query alert"
   message = "Airflow Meltano Dag Run Duration triggered. Notify: @slack-${var.slack_channel_name} <!channel>"
 
-  query = "avg(last_10d):anomalies(sum:app.latest_dag_run_duration_minutes{postgres_env:production} by {dag_id}.as_count(), 'basic', 2, direction='above', alert_window='last_3h', interval=300, count_default_zero='true') > 0.25"
+  query = "avg(last_1d):anomalies(sum:app.latest_dag_run_duration_minutes{postgres_env:production} by {dag_id}.as_count(), 'basic', 2, direction='above', alert_window='last_3h', interval=300, count_default_zero='true') > 0.35"
 
   monitor_threshold_windows {
     recovery_window = "last_3h"
@@ -344,10 +344,8 @@ resource "datadog_monitor" "meltano_dag_run_duration" {
   }
 
   monitor_thresholds {
-    critical          = "0.25"
-    critical_recovery = "0.2"
-    warning           = "0.1"
-    warning_recovery  = "0"
+    critical          = "0.35"
+    critical_recovery = "0.3"
   }
 
   require_full_window = false
@@ -362,18 +360,16 @@ resource "datadog_monitor" "meltano_failed_dag_runs" {
   type    = "query alert"
   message = "Airflow Meltano Failed Dag Runs triggered. Notify: @slack-${var.slack_channel_name} <!channel>"
 
-  query = "avg(last_10d):anomalies(sum:app.failed_dag_runs{postgres_env:production} by {dag_id}.as_count(), 'basic', 2, direction='above', alert_window='last_3h', interval=300, count_default_zero='true') > 0.2"
+  query = "avg(last_1d):anomalies(sum:app.failed_dag_runs{postgres_env:production} by {dag_id}.as_count(), 'basic', 2, direction='above', alert_window='last_1h', interval=300, count_default_zero='true') > 0.2"
 
   monitor_threshold_windows {
-    recovery_window = "last_3h"
-    trigger_window  = "last_3h"
+    recovery_window = "last_1h"
+    trigger_window  = "last_1h"
   }
 
   monitor_thresholds {
     critical          = "0.2"
     critical_recovery = "0.15"
-    warning           = "0.1"
-    warning_recovery  = "0.05"
   }
 
   require_full_window = false
@@ -390,18 +386,18 @@ resource "datadog_monitor" "cloudwatch_synthetics_success_percent" {
   type    = "metric alert"
   message = "CloudWatch Synthetics Success Percent. Notify: @slack-${var.slack_channel_name} <!channel>"
 
-  query = "avg(last_15m):min:cloudwatchsynthetics.SuccessPercent{canaryname:*-production} by {canaryname} < 85"
+  query = "avg(last_15m):min:cloudwatchsynthetics.SuccessPercent{canaryname:*-production} by {canaryname} < 80"
 
   monitor_thresholds {
     warning_recovery  = 100
     warning           = 95
-    critical_recovery = 90
-    critical          = 85
+    critical_recovery = 85
+    critical          = 80
   }
 
   require_full_window = false
   notify_no_data      = true
-  renotify_interval   = 240
+  renotify_interval   = 60
 
   tags = ["canaries"]
 }
@@ -421,8 +417,6 @@ resource "datadog_monitor" "cloudwatch_synthetics_duration" {
   monitor_thresholds {
     critical          = "0.5"
     critical_recovery = "0.4"
-    warning           = "0.3"
-    warning_recovery  = "0.2"
   }
 
   require_full_window = false

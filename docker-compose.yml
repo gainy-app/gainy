@@ -22,6 +22,7 @@ services:
       EODHISTORICALDATA_JOBS_COUNT: 1
       AIRFLOW_PASSWORD: admin
       DBT_THREADS: 2
+      DBT_TARGET_SCHEMA: "${PUBLIC_SCHEMA_NAME}"
     depends_on:
       - postgres
       - hasura
@@ -100,6 +101,7 @@ services:
       - .env
     environment:
       AWS_LAMBDA_API_GATEWAY_ENDPOINT: http://lambda-router:5000
+      HASURA_GRAPHQL_PUBLIC_SCHEMA_NAME: "${PUBLIC_SCHEMA_NAME}"
 
   firebase:
     image: ${BASE_IMAGE_REGISTRY_ADDRESS}/gainy-firebase:${BASE_IMAGE_VERSION}
@@ -145,6 +147,8 @@ services:
       pg_password: "${PG_PASSWORD}"
       AWS_LAMBDA_API_GATEWAY_PROXY_INTEGRATION: "false"
       ENV: "local"
+      PUBLIC_SCHEMA_NAME: "${PUBLIC_SCHEMA_NAME}"
+
     command: [ "hasura_handler.handle_trigger" ]
 
   lambda-python-action:
@@ -172,6 +176,7 @@ services:
       ALGOLIA_COLLECTIONS_INDEX: ${ALGOLIA_COLLECTIONS_INDEX}
       ALGOLIA_SEARCH_API_KEY:    ${ALGOLIA_SEARCH_API_KEY}
       ENV: "local"
+      PUBLIC_SCHEMA_NAME: "${PUBLIC_SCHEMA_NAME}"
 
     command: [ "hasura_handler.handle_action" ]
 
@@ -189,7 +194,7 @@ services:
       PG_USERNAME: "${PG_USERNAME}"
       PG_PASSWORD: "${PG_PASSWORD}"
       ENV: "local"
-      PUBLIC_SCHEMA_NAME: public
+      PUBLIC_SCHEMA_NAME: "${PUBLIC_SCHEMA_NAME}"
       DD_API_KEY: "${DATADOG_API_KEY}"
       DD_SITE: "datadoghq.com"
     command: ["client_eod.py"]
@@ -209,7 +214,7 @@ services:
       PG_USERNAME: "${PG_USERNAME}"
       PG_PASSWORD: "${PG_PASSWORD}"
       ENV: "local"
-      PUBLIC_SCHEMA_NAME: public
+      PUBLIC_SCHEMA_NAME: "${PUBLIC_SCHEMA_NAME}"
       DD_API_KEY: "${DATADOG_API_KEY}"
       DD_SITE: "datadoghq.com"
     command: ["client_polygon.py"]

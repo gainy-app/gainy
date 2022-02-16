@@ -134,8 +134,8 @@ def check_categories():
 def check_chart():
     query = 'query DiscoverCharts($period: String!, $symbol: String!) { chart(where: {symbol: {_eq: $symbol}, period: {_eq: $period}}, order_by: {datetime: asc}) { symbol datetime period open high low close adjusted_close volume } }'
     datasets = [
-        ("1d", 100 if IS_PRODUCTION else 0),
-        ("1w", 100),
+        ("1d", 0),
+        ("1w", 70),
         ("1m", 20),
     ]
 

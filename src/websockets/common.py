@@ -25,7 +25,7 @@ PG_PASSWORD = os.environ['PG_PASSWORD']
 PUBLIC_SCHEMA_NAME = os.environ['PUBLIC_SCHEMA_NAME']
 ENV = os.environ['ENV']
 
-DB_CONN_STRING = f"postgresql://{PG_USERNAME}:{PG_PASSWORD}@{PG_HOST}:{PG_PORT}/{PG_DBNAME}"
+DB_CONN_STRING = f"postgresql://{PG_USERNAME}:{PG_PASSWORD}@{PG_HOST}:{PG_PORT}/{PG_DBNAME}?options=-csearch_path%3D{PUBLIC_SCHEMA_NAME}"
 
 dd_configuration = Configuration()
 
@@ -84,7 +84,7 @@ def submit_dd_metric(metric_name, value, tags=[]):
 class AbstractPriceListener(ABC):
 
     def __init__(self, source):
-        self.symbols = self.filter_symbols(self.get_symbols())
+        self.symbols = self.get_symbols()
         self.source = source
         self.records_queue = asyncio.Queue()
         self.records_queue_lock = asyncio.Lock()
@@ -99,8 +99,7 @@ class AbstractPriceListener(ABC):
     def get_symbols(self):
         with psycopg2.connect(DB_CONN_STRING) as db_conn:
             query = sql.SQL(
-                "SELECT symbol FROM {public_schema_name}.base_tickers where symbol is not null"
-            ).format(public_schema_name=sql.Identifier(PUBLIC_SCHEMA_NAME))
+                "SELECT symbol FROM base_tickers where symbol is not null")
 
             if self.supported_exchanges is not None:
                 exchanges = '|'.join(self.supported_exchanges)
@@ -112,9 +111,6 @@ class AbstractPriceListener(ABC):
                 cursor.execute(query)
                 tickers = cursor.fetchall()
                 return set([ticker[0] for ticker in tickers])
-
-    def filter_symbols(self, symbols):
-        return symbols
 
     @property
     def supported_exchanges(self):
