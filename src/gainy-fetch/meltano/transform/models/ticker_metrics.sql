@@ -45,7 +45,6 @@ with highlights as (select * from {{ ref('highlights') }}),
                                       volume,
                                       first_value("date"::date) over (partition by code order by "date" desc) as cur_date
                                from historical_prices
-                               where historical_prices."date" > now() - interval '13 months'
                            ) hp
                   ) hp
              where period is not null
