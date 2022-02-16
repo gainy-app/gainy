@@ -346,8 +346,6 @@ resource "datadog_monitor" "meltano_dag_run_duration" {
   monitor_thresholds {
     critical          = "0.35"
     critical_recovery = "0.3"
-    warning           = "0.2"
-    warning_recovery  = "0.1"
   }
 
   require_full_window = false
@@ -372,8 +370,6 @@ resource "datadog_monitor" "meltano_failed_dag_runs" {
   monitor_thresholds {
     critical          = "0.2"
     critical_recovery = "0.15"
-    warning           = "0.1"
-    warning_recovery  = "0.05"
   }
 
   require_full_window = false
@@ -421,8 +417,6 @@ resource "datadog_monitor" "cloudwatch_synthetics_duration" {
   monitor_thresholds {
     critical          = "0.5"
     critical_recovery = "0.4"
-    warning           = "0.3"
-    warning_recovery  = "0.2"
   }
 
   require_full_window = false
