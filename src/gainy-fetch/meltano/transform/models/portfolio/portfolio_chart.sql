@@ -85,7 +85,6 @@ with
                       left join {{ ref('chart') }}
                                 on chart.symbol = portfolio_securities_normalized.original_ticker_symbol
                                     and chart.period = '1d'
-                                    and mod(date_part('minute', chart.datetime)::int, 15) = 0
              where portfolio_expanded_transactions.type in ('buy', 'sell')
                and chart.datetime in (select distinct datetime from {{ ref('chart') }} where period = '1w')
          )
