@@ -25,32 +25,42 @@ with highlights as (select * from {{ ref('highlights') }}),
      raw_eod_fundamentals as (SELECT * FROM {{ source('eod', 'eod_fundamentals') }}),
      marked_prices as
          (
-             select distinct on (hp.code, hp.period) *
-             from (
-                      select *,
-                             case
-                                 when hp."date" <= hp.cur_date - interval '5 year' then '5y'
-                                 when hp."date" <= hp.cur_date - interval '1 year' then '1y'
-                                 when hp."date" <= hp.cur_date - interval '3 month' then '3m'
-                                 when hp."date" <= hp.cur_date - interval '1 month' then '1m'
-                                 when hp."date" <= hp.cur_date - interval '10 days' then '10d'
-                                 when hp."date" <= hp.cur_date - interval '1 week' then '1w'
-                                 when hp."date" <= hp.cur_date then '0d'
-                                 else 'all'
-                                 end as period
-                      from (
-                               select code,
-                                      "date"::date,
-                                      adjusted_close::numeric                                                 as price,
-                                      volume,
-                                      first_value("date"::date) over (partition by code order by "date" desc) as cur_date
-                               from historical_prices
-                           ) hp
-                  ) hp
-             where period is not null
-             order by hp.code, hp.period, hp.date desc
+             select distinct on (
+                 code
+                 ) code,
+                   date                                                                                                           as date_0d,
+                   adjusted_close                                                                                                 as price_0d,
+                   first_value(date)
+                   over (partition by code order by date desc range between interval '1 week' following and unbounded following)  as date_1w,
+                   first_value(adjusted_close)
+                   over (partition by code order by date desc range between interval '1 week' following and unbounded following)  as price_1w,
+                   first_value(date)
+                   over (partition by code order by date desc range between interval '10 days' following and unbounded following) as date_10d,
+                   first_value(adjusted_close)
+                   over (partition by code order by date desc range between interval '10 days' following and unbounded following) as price_10d,
+                   first_value(date)
+                   over (partition by code order by date desc range between interval '1 month' following and unbounded following) as date_1m,
+                   first_value(adjusted_close)
+                   over (partition by code order by date desc range between interval '1 month' following and unbounded following) as price_1m,
+                   first_value(date)
+                   over (partition by code order by date desc range between interval '3 month' following and unbounded following) as date_3m,
+                   first_value(adjusted_close)
+                   over (partition by code order by date desc range between interval '3 month' following and unbounded following) as price_3m,
+                   first_value(date)
+                   over (partition by code order by date desc range between interval '1 year' following and unbounded following)  as date_1y,
+                   first_value(adjusted_close)
+                   over (partition by code order by date desc range between interval '1 year' following and unbounded following)  as price_1y,
+                   first_value(date)
+                   over (partition by code order by date desc range between interval '5 year' following and unbounded following)  as date_5y,
+                   first_value(adjusted_close)
+                   over (partition by code order by date desc range between interval '5 year' following and unbounded following)  as price_5y,
+                   last_value(date)
+                   over (partition by code order by date desc rows between current row and unbounded following)                   as date_all,
+                   last_value(adjusted_close)
+                   over (partition by code order by date desc rows between current row and unbounded following)                   as price_all
+             from {{ ref('historical_prices') }}
+             order by code, date desc
          ),
-     today_price as (select * from marked_prices mp where period = '0d'),
      expanded_earnings_history as
          (
              select *,
@@ -96,8 +106,7 @@ with highlights as (select * from {{ ref('highlights') }}),
                           select hp.code,
                                  avg(hp.volume) as value
                           from historical_prices hp
-                                   join marked_prices mp on mp.code = hp.code and mp.period = '10d'
-                          where hp.date > mp.date
+                          where hp.date > now() - interval '10 days'
                           group by hp.code
                       ),
                   avg_volume_90d as
@@ -105,8 +114,7 @@ with highlights as (select * from {{ ref('highlights') }}),
                           select hp.code,
                                  avg(hp.volume) as value
                           from historical_prices hp
-                                   join marked_prices mp on mp.code = hp.code and mp.period = '3m'
-                          where hp.date > mp.date
+                          where hp.date > now() - interval '90 days'
                           group by hp.code
                       ),
                   historical_volatility as
@@ -274,50 +282,51 @@ with highlights as (select * from {{ ref('highlights') }}),
                     highlights.pe_ratio::double precision                as price_to_earnings_ttm,
                     valuation.price_sales_ttm                            as price_to_sales_ttm,
                     case when highlights.book_value > 0 then
-                        today_price.price / highlights.book_value
+                                 marked_prices.price_0d / highlights.book_value
                         end                                              as price_to_book_value,
                     valuation.enterprise_value_ebidta                    as enterprise_value_to_ebitda
              from tickers
                       left join highlights
                                 on tickers.symbol = highlights.symbol
                       left join valuation on tickers.symbol = valuation.symbol
-                      left join today_price on tickers.symbol = today_price.code
+                      left join marked_prices on tickers.symbol = marked_prices.code
          ),
      momentum_metrics as
          (
              select tickers.symbol,
-                    ticker_realtime_metrics.actual_price / case
-                                                           when previous_periods_1w.price > 0
-                                                               then previous_periods_1w.price end - 1 as price_change_1w,
-                    ticker_realtime_metrics.actual_price / case
-                                                           when previous_periods_1m.price > 0
-                                                               then previous_periods_1m.price end - 1 as price_change_1m,
-                    ticker_realtime_metrics.actual_price / case
-                                                           when previous_periods_3m.price > 0
-                                                               then previous_periods_3m.price end - 1 as price_change_3m,
-                    ticker_realtime_metrics.actual_price / case
-                                                           when previous_periods_1y.price > 0
-                                                               then previous_periods_1y.price end - 1 as price_change_1y,
-                    ticker_realtime_metrics.actual_price / case
-                                                           when previous_periods_5y.price > 0
-                                                               then previous_periods_5y.price end - 1 as price_change_5y,
-                    ticker_realtime_metrics.actual_price / case
-                                                           when previous_periods_all.price > 0
-                                                               then previous_periods_all.price end - 1 as price_change_all
+                    ticker_realtime_metrics.actual_price /
+                    case
+                        when coalesce(marked_prices.price_1w, marked_prices.price_all) > 0
+                            then coalesce(marked_prices.price_1w, marked_prices.price_all)
+                        end - 1 as price_change_1w,
+                    ticker_realtime_metrics.actual_price /
+                    case
+                        when coalesce(marked_prices.price_1m, marked_prices.price_all) > 0
+                            then coalesce(marked_prices.price_1m, marked_prices.price_all)
+                        end - 1 as price_change_1m,
+                    ticker_realtime_metrics.actual_price /
+                    case
+                        when coalesce(marked_prices.price_3m, marked_prices.price_all) > 0
+                            then coalesce(marked_prices.price_3m, marked_prices.price_all)
+                        end - 1 as price_change_3m,
+                    ticker_realtime_metrics.actual_price /
+                    case
+                        when coalesce(marked_prices.price_1y, marked_prices.price_all) > 0
+                            then coalesce(marked_prices.price_1y, marked_prices.price_all)
+                        end - 1 as price_change_1y,
+                    ticker_realtime_metrics.actual_price /
+                    case
+                        when coalesce(marked_prices.price_5y, marked_prices.price_all) > 0
+                            then coalesce(marked_prices.price_5y, marked_prices.price_all)
+                        end - 1 as price_change_5y,
+                    ticker_realtime_metrics.actual_price /
+                    case
+                        when marked_prices.price_all > 0
+                            then marked_prices.price_all
+                        end - 1 as price_change_all
              from tickers
                       join ticker_realtime_metrics on ticker_realtime_metrics.symbol = tickers.symbol
-                      left join marked_prices previous_periods_1w
-                                on previous_periods_1w.code = tickers.symbol and previous_periods_1w.period = '1w'
-                      left join marked_prices previous_periods_1m
-                                on previous_periods_1m.code = tickers.symbol and previous_periods_1m.period = '1m'
-                      left join marked_prices previous_periods_3m
-                                on previous_periods_3m.code = tickers.symbol and previous_periods_3m.period = '3m'
-                      left join marked_prices previous_periods_1y
-                                on previous_periods_1y.code = tickers.symbol and previous_periods_1y.period = '1y'
-                      left join marked_prices previous_periods_5y
-                                on previous_periods_5y.code = tickers.symbol and previous_periods_5y.period = '5y'
-                      left join marked_prices previous_periods_all
-                                on previous_periods_all.code = tickers.symbol and previous_periods_all.period = 'all'
+                      left join marked_prices on marked_prices.code = tickers.symbol
          ),
      dividend_metrics as
          (
@@ -491,7 +500,6 @@ select DISTINCT ON
                financials_metrics.net_debt
 from tickers t
          left join highlights on t.symbol = highlights.symbol
-         left join today_price on t.symbol = today_price.code
          left join trading_metrics on t.symbol = trading_metrics.symbol
          left join growth_metrics on t.symbol = growth_metrics.symbol
          left join general_data on t.symbol = general_data.symbol

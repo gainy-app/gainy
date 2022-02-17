@@ -1,0 +1,1 @@
+drop table if exists "app"."profile_recommendations_metadata";

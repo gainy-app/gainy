@@ -78,6 +78,7 @@ type Query {
   get_recommended_collections(
     profile_id: Int!
     limit: Int
+    force: Boolean
   ): [Collection]
 }
 
