@@ -1,5 +1,5 @@
 import os
-from common import logger, make_graphql_request, get_personalized_collections, PROFILE_ID, MIN_PERSONALIZED_COLLECTIONS_COUNT
+from common import make_graphql_request, get_personalized_collections, PROFILE_ID, MIN_PERSONALIZED_COLLECTIONS_COUNT
 
 
 def get_recommended_collections():
@@ -37,14 +37,7 @@ def test_favorite_collections():
 
 
 def test_collection_metrics():
-    data = get_recommended_collections()
-    personalized_collection_ids = set(
-        [i['id'] for i in get_personalized_collections()])
-    non_personalized_collection_ids = set([
-        i['id'] for i in data if i['id'] not in personalized_collection_ids
-    ][:3])
-    collection_ids = non_personalized_collection_ids.union(
-        personalized_collection_ids)
+    collection_ids = [83]
 
     for collection_id in collection_ids:
         query = 'mutation InsertProfileFavoriteCollection($profileID: Int!, $collectionID: Int!){ insert_app_profile_favorite_collections(objects: {collection_id: $collectionID, profile_id: $profileID}, on_conflict: { constraint: profile_favorite_collections_pkey, update_columns: []}) { returning { collection_id } } }'
