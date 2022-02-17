@@ -20,7 +20,7 @@ with max_date as
              select industry_id,
                     period,
                     max(datetime) as datetime
-             from industry_median_chart
+             from {{ this }}
              group by industry_id, period
          )
 {% endif %}
