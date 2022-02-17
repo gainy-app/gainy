@@ -35,12 +35,15 @@ data "archive_file" "canary_scripts" {
 
 resource "aws_s3_bucket" "artifacts" {
   bucket = local.artifact_s3_bucket_name
-  acl    = "private"
 
   tags = {
     Name = "Gainy CloudWatch Synthetics Canary Artifacts"
   }
 }
+#resource "aws_s3_bucket_acl" "artifacts" {
+#  bucket = aws_s3_bucket.artifacts.id
+#  acl    = "private"
+#}
 
 resource "aws_iam_role" "canary_exec" {
   name               = "synthetics_canary_${var.env}"

@@ -7,11 +7,14 @@ def _read_inputs(env, split_num) -> (str, List[str]):
     exchanges_file = "exchanges.%s.json" % (env)
 
     if os.path.exists(symbols_file) == os.path.exists(exchanges_file):
-        raise Exception(f"Either symbol list or exchange list should be available for environment: {env}")
+        raise Exception(
+            f"Either symbol list or exchange list should be available for environment: {env}"
+        )
 
     if os.path.exists(symbols_file):
         if split_num > 1:
-            raise Exception(f"Symbol list is not allowed with multiple splits: {env}")
+            raise Exception(
+                f"Symbol list is not allowed with multiple splits: {env}")
 
         with open(symbols_file, "r") as f:
             symbols = json.load(f)
@@ -42,14 +45,22 @@ def _fill_in_eod_schedule(template, env, split_id, split_num) -> dict:
 
 
 def _generate_schedules(env, split_num):
-    eod_schedules = list(filter(lambda x: x['name'].startswith('eodhistoricaldata-to-postgres'), config['schedules']))
-    non_eod_schedules = list(filter(lambda x: not x['name'].startswith('eodhistoricaldata-to-postgres'), config['schedules']))
+    eod_schedules = list(
+        filter(lambda x: x['name'].startswith('eodhistoricaldata-to-postgres'),
+               config['schedules']))
+    non_eod_schedules = list(
+        filter(
+            lambda x: not x['name'].startswith('eodhistoricaldata-to-postgres'
+                                               ), config['schedules']))
 
     if len(eod_schedules) == 0:
         raise Exception('no eod schedules found')
 
     eod_schedule_template = eod_schedules[0]
-    new_eod_schedules = [_fill_in_eod_schedule(eod_schedule_template, env, k, split_num) for k in range(0, split_num)]
+    new_eod_schedules = [
+        _fill_in_eod_schedule(eod_schedule_template, env, k, split_num)
+        for k in range(0, split_num)
+    ]
 
     return non_eod_schedules + new_eod_schedules
 

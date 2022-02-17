@@ -14,23 +14,11 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
 
-      - name: npm install
-        working-directory: src/aws/lambda-nodejs
-        run: npm install
-
-      - name: ESLint
-        working-directory: src/aws/lambda-nodejs
-        run: npx eslint .
-
-      - name: Prettier
-        working-directory: src/aws/lambda-nodejs
-        run: npx prettier --check "./**/*.js"
-
       - name: YAPF install
         run: pip3 install yapf toml
 
       - name: YAPF
-        run: yapf --diff -r src/aws/lambda-python/ src/aws/router src/websockets src/gainy-fetch/meltano/orchestrate/dags terraform > /dev/null
+        run: yapf --diff -r src/aws/lambda-python/ src/aws/router src/websockets src/gainy-fetch/meltano/orchestrate/dags src/hasura src/gainy-fetch terraform > /dev/null
 
   test:
     name: "Run tests"
@@ -102,6 +90,20 @@ jobs:
       - name: Terraform Validate
         id: validate
         run: terraform validate -no-color
+        working-directory: terraform
+
+      - name: Terraform State Cleanup Prepare
+        id: state-clean-prepare
+        # grep only needed resources
+        # tr to make it a one-liner
+        # sed to filter out :: command, that github apparently adds to step output for some f-cked up reason
+        run: echo "::set-output name=resources::$(terraform state list | grep -P 'aws_apigatewayv2_integration|aws_apigatewayv2_route|aws_lambda_permission' | tr '\n' ' ' | sed 's/::.*//')"
+        working-directory: terraform
+
+      - name: Terraform State Cleanup
+        id: state-clean
+        if: steps.state-clean-prepare.outputs.resources != ''
+        run: terraform state rm ${{ steps.state-clean-prepare.outputs.resources }}
         working-directory: terraform
 
       - name: Terraform Plan

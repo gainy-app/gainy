@@ -68,7 +68,7 @@ with robinhood_options as (
                    expanded_transactions.security_id          as uniq_id,
                    coalesce(ticker_options.last_price, historical_prices.adjusted_close) *
                    abs(rolling_quantity)                      as amount,
-                   null::timestamp                            as datetime,
+                   null::date                                 as date,
                    'ASSUMPTION BOUGHT ' || abs(rolling_quantity) || ' ' ||
                    coalesce(ticker_options.symbol || ' ' || to_char(ticker_options.expiration_date, 'MM/dd/YYYY') ||
                             ' ' ||
@@ -116,9 +116,9 @@ with robinhood_options as (
          )
 
 select t.id,
-       t.uniq_id,
+       t.uniq_id::varchar,
        t.amount,
-       t.datetime,
+       t.date,
        t.name,
        t.price,
        t.quantity / case
@@ -152,7 +152,7 @@ from (
                  ) null::int                                                                    as id,
                    'auto1_' || account_id || '_' || security_id                                 as uniq_id,
                    coalesce(ticker_options.last_price, historical_prices.adjusted_close) * diff as amount,
-                   null::timestamp                                                              as datetime,
+                   null::date                                                                   as date,
                    'ASSUMPTION BOUGHT ' || diff || ' ' ||
                    coalesce(ticker_options.name, t.name) || ' @ ' ||
                    coalesce(ticker_options.last_price, historical_prices.adjusted_close)        as name,
@@ -201,7 +201,7 @@ from (
          select id,
                 id || '_' || account_id || '_' || security_id as uniq_id,
                 amount,
-                date::timestamp                               as datetime,
+                date                                          as date,
                 name,
                 price,
                 quantity,

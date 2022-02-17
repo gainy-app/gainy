@@ -79,7 +79,7 @@ class PlaidWebhook(HasuraAction):
         self.client = PlaidClient()
 
     def apply(self, db_conn, input_params, headers):
-        print("[PLAID_WEBHOOK] %s" % (input_params))
+        logger.info("[PLAID_WEBHOOK] %s", input_params)
 
         try:
             item_id = input_params['item_id']
@@ -96,8 +96,11 @@ class PlaidWebhook(HasuraAction):
                 ]
 
             if len(access_tokens):
-                self.verify(input_params, headers,
-                            access_tokens[0]['access_token'])
+                try:
+                    self.verify(input_params, headers,
+                                access_tokens[0]['access_token'])
+                except Exception as e:
+                    logger.error('[PLAID_WEBHOOK] verify: %s', e)
 
                 count = 0
                 webhook_type = input_params['webhook_type']
@@ -113,16 +116,19 @@ class PlaidWebhook(HasuraAction):
 
                 return {'count': count}
         except Exception as e:
-            print("[PLAID_WEBHOOK] %s" % (e))
+            logger.error("[PLAID_WEBHOOK] %s", e)
             raise e
 
     def verify(self, body, headers, access_token):
-        signed_jwt = headers.get('plaid-verification')
+        signed_jwt = headers.get('Plaid-Verification')
+        logger.info("headers %s", str(headers))
+        logger.info("jwt %s", signed_jwt)
         current_key_id = jwt.get_unverified_header(signed_jwt)['kid']
+        logger.info("current_key_id %s", current_key_id)
 
         response = self.client.webhook_verification_key_get(
             current_key_id, access_token).to_dict()
-        print('[PLAID_WEBHOOK] response', response)
+        logger.info('[PLAID_WEBHOOK] response %s', response)
 
         key = response['key']
         if key['expired_at'] is not None:
@@ -153,7 +159,7 @@ class PlaidWebhook(HasuraAction):
         m = hashlib.sha256()
         m.update(body.encode())
         body_hash = m.hexdigest()
-        print('[PLAID_WEBHOOK] body_hash', body_hash)
+        logger.info('[PLAID_WEBHOOK] body_hash %s', body_hash)
 
         # Ensure that the hash of the body matches the claim.
         # Use constant time comparison to prevent timing attacks.

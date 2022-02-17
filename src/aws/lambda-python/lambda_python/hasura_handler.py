@@ -16,6 +16,7 @@ from trigger.set_user_categories import SetUserCategories
 from trigger.on_user_created import OnUserCreated
 
 ENV = os.environ['ENV']
+PUBLIC_SCHEMA_NAME = os.environ['PUBLIC_SCHEMA_NAME']
 
 HOST = os.environ['pg_host']
 PORT = os.environ['pg_port']
@@ -23,7 +24,7 @@ DB_NAME = os.environ['pg_dbname']
 USERNAME = os.environ['pg_username']
 PASSWORD = os.environ['pg_password']
 
-DB_CONN_STRING = f"postgresql://{USERNAME}:{PASSWORD}@{HOST}:{PORT}/{DB_NAME}"
+DB_CONN_STRING = f"postgresql://{USERNAME}:{PASSWORD}@{HOST}:{PORT}/{DB_NAME}?options=-csearch_path%3D{PUBLIC_SCHEMA_NAME}"
 
 ALGOLIA_APP_ID = os.getenv("ALGOLIA_APP_ID")
 ALGOLIA_TICKERS_INDEX = os.getenv("ALGOLIA_TICKERS_INDEX")
@@ -48,6 +49,7 @@ ACTIONS = [
     LinkPlaidAccount(),
     GetPortfolioHoldings(),
     GetPortfolioTransactions(),
+    GetPortfolioChart(),
     PlaidWebhook(),
 
     # Search

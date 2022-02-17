@@ -3,6 +3,7 @@ import requests
 import json
 import datetime
 import logging
+import itertools
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
@@ -36,6 +37,7 @@ def get_personalized_collections():
     assert len(data) >= MIN_PERSONALIZED_COLLECTIONS_COUNT
     return data
 
+
 def make_request(method, url, post_data=None, headers={}):
     logger.info("%s %s '%s'" % (method, url, post_data['query']))
     response = requests.request(method, url, json=post_data, headers=headers)
@@ -57,7 +59,8 @@ def make_request(method, url, post_data=None, headers={}):
         elif response.reason != 'OK':
             raise Exception("Failed: %s" % response.reason)
         else:
-            raise Exception("Failed with status code: %s" % response.status_code)
+            raise Exception("Failed with status code: %s" %
+                            response.status_code)
 
     logger.info("HTTP request successfully executed")
 
@@ -80,3 +83,26 @@ def make_graphql_request(query, variables=None, user_id=USER_ID):
         headers["x-hasura-role"] = "user"
 
     return make_request('POST', HASURA_GRAPHQL_URL, postData, headers)
+
+
+def permute_params(full_options_dict):
+    test_sets = []
+    for k, possible_values in full_options_dict.items():
+        options = []
+
+        index_start = 0
+        if len(possible_values) > 0 and possible_values[0] is None:
+            options.append({})
+            index_start = 1
+
+        for index_end in range(index_start, len(possible_values)):
+            options.append({k: possible_values[index_start:index_end + 1]})
+
+        test_sets.append(options)
+
+    test_sets = itertools.product(*test_sets)
+    for test_set in test_sets:
+        d = {}
+        for j in test_set:
+            d.update(j)
+        yield d

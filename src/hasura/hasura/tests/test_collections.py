@@ -1,12 +1,4 @@
-import os
-import requests
-import json
-import datetime
-import logging
 from common import make_graphql_request, get_personalized_collections, PROFILE_ID, MIN_PERSONALIZED_COLLECTIONS_COUNT
-
-logger = logging.getLogger(__name__)
-logger.setLevel(logging.INFO)
 
 
 def test_recommended_collections():
@@ -20,4 +12,3 @@ def test_recommended_collections():
         [i['id'] for i in get_personalized_collections()])
     collection_ids = set([i['id'] for i in data])
     assert personalized_collection_ids.issubset(collection_ids)
-

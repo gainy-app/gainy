@@ -35,20 +35,16 @@ tf-apply:
 	cd terraform && source .env && terraform apply -auto-approve $(PARAMS)
 
 hasura-console:
-	docker-compose exec -T hasura hasura console --address 0.0.0.0
+	docker-compose exec -T hasura hasura console --address 0.0.0.0 --api-host http://0.0.0.0 --endpoint http://0.0.0.0:8080 --no-browser
 
 hasura-seed:
 	docker-compose exec -T hasura hasura seed apply
 
 style-check:
-	npx eslint src/aws/lambda-nodejs
-	npx prettier --check "src/aws/lambda-nodejs/**/*.js"
-	yapf --diff -r src/aws/lambda-python/ src/aws/router src/websockets src/gainy-fetch/meltano/orchestrate/dags terraform
+	yapf --diff -r src/aws/lambda-python/ src/aws/router src/websockets src/gainy-fetch/meltano/orchestrate/dags src/hasura src/gainy-fetch terraform
 
 style-fix:
-	npx eslint src/aws/lambda-nodejs --fix
-	npx prettier --write "src/aws/lambda-nodejs/**/*.js"
-	yapf -i -r src/aws/lambda-python/ src/aws/router src/websockets src/gainy-fetch/meltano/orchestrate/dags terraform
+	yapf -i -r src/aws/lambda-python/ src/aws/router src/websockets src/gainy-fetch/meltano/orchestrate/dags src/hasura src/gainy-fetch terraform
 
 extract-passwords:
 	cd terraform && terraform state pull | python3 ../extract_passwords.py
@@ -56,8 +52,8 @@ extract-passwords:
 test: configure
 	docker-compose -p gainy_test -f docker-compose.test.yml run test-meltano invoke dbt test
 	docker-compose -p gainy_test -f docker-compose.test.yml run --entrypoint python3 test-meltano tests/image_urls.py
-	sleep 10
-	docker-compose -p gainy_test -f docker-compose.test.yml run test-meltano invoke dbt run  --vars '{"realtime": true}' --model portfolio_gains portfolio_holding_details portfolio_holding_gains portfolio_holding_group_details portfolio_holding_group_gains
+	docker-compose -p gainy_test -f docker-compose.test.yml run --entrypoint "/wait.sh" test-meltano invoke dbt run  --vars '{"realtime": true}' --model historical_prices_aggregated portfolio_gains portfolio_holding_details portfolio_holding_gains portfolio_holding_group_details portfolio_holding_group_gains portfolio_transaction_chart portfolio_expanded_transactions
+	docker-compose -p gainy_test -f docker-compose.test.yml run --entrypoint "/wait.sh" test-meltano invoke dbt test
 	docker-compose -p gainy_test -f docker-compose.test.yml exec -T test-hasura pytest
 	make test-clean
 
