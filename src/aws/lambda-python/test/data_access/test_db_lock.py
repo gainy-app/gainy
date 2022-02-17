@@ -22,13 +22,8 @@ class Value:
 
 class TestThread(threading.Thread):
 
-    def __init__(
-            self,
-            db_conn_string: str,
-            value: Value,
-            resource_type: ResourceType,
-            resource_id: int
-    ):
+    def __init__(self, db_conn_string: str, value: Value,
+                 resource_type: ResourceType, resource_id: int):
         super().__init__()
         self.db_conn_string = db_conn_string
         self.value = value
@@ -39,9 +34,14 @@ class TestThread(threading.Thread):
         with psycopg2.connect(self.db_conn_string) as db_conn:
             for _ in range(0, 10):
                 try:
-                    with LockManager.database_lock(db_conn, self.resource_type, self.resource_id, await_sec=5):
+                    with LockManager.database_lock(db_conn,
+                                                   self.resource_type,
+                                                   self.resource_id,
+                                                   await_sec=5):
                         cur_value = self.value.get()
-                        time.sleep(random.choice(range(10)) / 1000)  # wait a little bit for concurrent modifications
+                        time.sleep(
+                            random.choice(range(10)) / 1000
+                        )  # wait a little bit for concurrent modifications
                         self.value.set(cur_value + 1)
                 except Exception as e:
                     traceback.print_exc()
@@ -107,7 +107,8 @@ def test_lock_acquisition_fails_after_timeout():
     _assert_not_locked(DB_CONN_STRING, ResourceType.GENERAL, resource_id)
 
 
-def _assert_not_locked(db_conn_string, resource_type: ResourceType, resource_id: int):
+def _assert_not_locked(db_conn_string, resource_type: ResourceType,
+                       resource_id: int):
     with psycopg2.connect(db_conn_string) as db_conn:
         lock = DatabaseLock(db_conn, resource_type)
         assert lock.try_lock(resource_id)

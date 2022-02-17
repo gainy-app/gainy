@@ -3,6 +3,7 @@ from operator import itemgetter
 
 from common.hasura_function import HasuraAction
 from recommendation import TOP_20_FOR_YOU_COLLECTION_ID
+from recommendation.compute import ComputeRecommendationsAndPersist
 from recommendation.repository import RecommendationRepository
 
 
@@ -14,6 +15,12 @@ class GetRecommendedCollections(HasuraAction):
     def apply(self, db_conn, input_params, headers):
         profile_id = input_params["profile_id"]
         limit = input_params.get("limit", 30)
+
+        force = input_params.get("force", False)
+        if force:
+            recommendations_func = ComputeRecommendationsAndPersist(
+                db_conn, profile_id)
+            recommendations_func.get_and_persist(db_conn, max_tries=3)
 
         repository = RecommendationRepository(db_conn)
         sorted_collection_match_scores = repository.read_sorted_collection_match_scores(
