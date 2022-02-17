@@ -91,6 +91,7 @@ def get_personalized_collections():
     assert len(data) >= MIN_PERSONALIZED_COLLECTIONS_COUNT
     return data
 
+
 def get_recommended_collections():
     query = '{ get_recommended_collections(profile_id: %d) { id collection { id name image_url enabled description ticker_collections_aggregate { aggregate { count } } } } }' % (
         PROFILE_ID)
@@ -133,19 +134,29 @@ def test_favorite_collections():
 
 def test_collection_metrics():
     data = get_recommended_collections()
-    personalized_collection_ids = set([i['id'] for i in get_personalized_collections()])
-    non_personalized_collection_ids = set([i['id'] for i in data if i['id'] not in personalized_collection_ids][:3])
-    collection_ids = non_personalized_collection_ids.union(personalized_collection_ids)
+    personalized_collection_ids = set(
+        [i['id'] for i in get_personalized_collections()])
+    non_personalized_collection_ids = set([
+        i['id'] for i in data if i['id'] not in personalized_collection_ids
+    ][:3])
+    collection_ids = non_personalized_collection_ids.union(
+        personalized_collection_ids)
 
     for collection_id in collection_ids:
         query = 'mutation InsertProfileFavoriteCollection($profileID: Int!, $collectionID: Int!){ insert_app_profile_favorite_collections(objects: {collection_id: $collectionID, profile_id: $profileID}, on_conflict: { constraint: profile_favorite_collections_pkey, update_columns: []}) { returning { collection_id } } }'
-        make_graphql_request(query, {"profileID": PROFILE_ID, "collectionID": collection_id})
+        make_graphql_request(query, {
+            "profileID": PROFILE_ID,
+            "collectionID": collection_id
+        })
 
     query_file = os.path.join(os.path.dirname(__file__),
                               'queries/GetHomeTabData.graphql')
     with open(query_file, 'r') as f:
         query = f.read()
-    data = make_graphql_request(query, {"profileId": PROFILE_ID, "rankedCount": 100})['data']
+    data = make_graphql_request(query, {
+        "profileId": PROFILE_ID,
+        "rankedCount": 100
+    })['data']
     assert len(data['profile_collection_tickers_performance_ranked']) >= 1
     assert len(data['app_profile_favorite_collections']) >= len(collection_ids)
     for i in data['app_profile_favorite_collections']:
@@ -153,7 +164,10 @@ def test_collection_metrics():
 
     for collection_id in collection_ids:
         query = 'mutation DeleteProfileFavoriteCollection($profileID: Int!, $collectionID: Int!){ delete_app_profile_favorite_collections( where: { collection_id: {_eq: $collectionID}, profile_id: {_eq: $profileID} } ) { returning { collection_id } } }'
-        make_graphql_request(query, {"profileID": PROFILE_ID, "collectionID": collection_id})
+        make_graphql_request(query, {
+            "profileID": PROFILE_ID,
+            "collectionID": collection_id
+        })
 
 
 def check_interests():
