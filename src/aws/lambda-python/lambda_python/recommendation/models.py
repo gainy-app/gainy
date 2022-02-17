@@ -68,4 +68,3 @@ class ProfileRecommendationsMetadata(BaseModel, ResourceVersion):
 
     def update_version(self):
         self.recommendations_version = self.recommendations_version + 1 if self.recommendations_version else 1
-

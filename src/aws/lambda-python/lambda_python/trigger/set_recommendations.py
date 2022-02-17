@@ -13,7 +13,8 @@ class SetRecommendations(HasuraTrigger):
     def apply(self, db_conn, op, data):
         profile_id = self.get_profile_id(op, data)
 
-        recommendations_func = ComputeRecommendationsAndPersist(db_conn, profile_id)
+        recommendations_func = ComputeRecommendationsAndPersist(
+            db_conn, profile_id)
         recommendations_func.get_and_persist(db_conn, max_tries=3)
 
     def get_profile_id(self, op, data):

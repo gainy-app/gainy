@@ -38,7 +38,7 @@ class GetMatchScoreByTicker(AbstractMatchScoreAction):
         ticker = input_params["symbol"]
 
         return self.read_match_scores(RecommendationRepository(db_conn),
-                                         profile_id, [ticker])[0]
+                                      profile_id, [ticker])[0]
 
 
 # Deprecated: should read Match score from DB via GraphQL instead

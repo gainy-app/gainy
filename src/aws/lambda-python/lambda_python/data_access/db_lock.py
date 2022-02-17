@@ -16,7 +16,9 @@ class ResourceType(enum.Enum):
 class LockAcquisitionTimeout(Exception):
 
     def __init__(self, resource_type: ResourceType, resource_id: int):
-        super().__init__(f"Lock not acquired for resource: type {resource_type}, id: {resource_id}")
+        super().__init__(
+            f"Lock not acquired for resource: type {resource_type}, id: {resource_id}"
+        )
 
 
 class DatabaseLock:
@@ -29,16 +31,17 @@ class DatabaseLock:
         with self.db_conn.cursor() as cursor:
             cursor.execute(
                 "SELECT pg_try_advisory_lock(%(resource_type)s, %(resource_id)s)",
-                {"resource_type": self.resource_type.value, "resource_id": resource_id}
-            )
+                {
+                    "resource_type": self.resource_type.value,
+                    "resource_id": resource_id
+                })
             return cursor.fetchone()[0]
 
     def lock(self, resource_id: int, await_sec: float = 1):
         backoff_on_predicate = backoff.on_predicate(
             lambda: backoff.expo(base=2, factor=0.01),
             max_time=await_sec,
-            jitter=lambda w: w / 2 + full_jitter(w / 2)
-        )
+            jitter=lambda w: w / 2 + full_jitter(w / 2))
         is_locked = backoff_on_predicate(lambda: self.try_lock(resource_id))()
 
         if not is_locked:
@@ -48,19 +51,16 @@ class DatabaseLock:
         with self.db_conn.cursor() as cursor:
             cursor.execute(
                 "SELECT pg_advisory_unlock(%(resource_type)s, %(resource_id)s)",
-                {"resource_type": self.resource_type.value, "resource_id": resource_id}
-            )
+                {
+                    "resource_type": self.resource_type.value,
+                    "resource_id": resource_id
+                })
 
 
 class DatabaseLockContext(AbstractContextManager):
 
-    def __init__(
-            self,
-            db_conn: connection,
-            resource_type: ResourceType,
-            resource_id: int,
-            await_sec: float
-    ):
+    def __init__(self, db_conn: connection, resource_type: ResourceType,
+                 resource_id: int, await_sec: float):
         self.db_lock = DatabaseLock(db_conn, resource_type)
         self.resource_id = resource_id
         self.await_sec = await_sec
@@ -81,16 +81,10 @@ class DatabaseLockContext(AbstractContextManager):
 class LockManager:
 
     @classmethod
-    def database_lock(
-            cls,
-            db_conn: connection,
-            resource_type: ResourceType,
-            resource_id: int,
-            await_sec: float = 1
-    ) -> DatabaseLockContext:
-        return DatabaseLockContext(
-            db_conn,
-            resource_type,
-            resource_id,
-            await_sec
-        )
+    def database_lock(cls,
+                      db_conn: connection,
+                      resource_type: ResourceType,
+                      resource_id: int,
+                      await_sec: float = 1) -> DatabaseLockContext:
+        return DatabaseLockContext(db_conn, resource_type, resource_id,
+                                   await_sec)

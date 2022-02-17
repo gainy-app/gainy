@@ -14,8 +14,7 @@ class TableLoad:
     def load(self, db_conn, clazz, filter_by: Dict[str, Any] = None):
         stmnt = sql.SQL("SELECT * FROM {schema_name}.{table_name}").format(
             schema_name=sql.Identifier(clazz.schema_name),
-            table_name=sql.Identifier(clazz.table_name)
-        )
+            table_name=sql.Identifier(clazz.table_name))
 
         if filter_by:
             stmnt += self._where_clause_stmnt(filter_by)
@@ -40,10 +39,10 @@ class TableLoad:
 
     @staticmethod
     def _where_clause_stmnt(filter_by: Dict[str, Any]):
-        condition = sql.SQL(" AND ").join(
-            [sql.SQL(f"{{field}} = %({field})s").format(field=sql.Identifier(field))
-             for field in filter_by.keys()]
-        )
+        condition = sql.SQL(" AND ").join([
+            sql.SQL(f"{{field}} = %({field})s").format(
+                field=sql.Identifier(field)) for field in filter_by.keys()
+        ])
         return sql.SQL(" WHERE ") + condition
 
 

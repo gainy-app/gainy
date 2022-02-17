@@ -10,7 +10,8 @@ from data_access.models import ResourceVersion
 
 class ConcurrentVersionUpdate(Exception):
 
-    def __init__(self, cur_version: ResourceVersion, next_version: ResourceVersion):
+    def __init__(self, cur_version: ResourceVersion,
+                 next_version: ResourceVersion):
         super().__init__(
             f"Concurrent update of resource {cur_version.resource_type.name}:{cur_version.resource_id}, expected version: {cur_version.resource_version}, actual version: {next_version.resource_version}"
         )
@@ -34,8 +35,7 @@ class AbstractOptimisticLockingFunction(ABC):
             lambda: backoff.expo(base=2, factor=0.1),
             exception=Exception,
             max_tries=max_tries,
-            jitter=lambda w: w / 2 + full_jitter(w / 2)
-        )
+            jitter=lambda w: w / 2 + full_jitter(w / 2))
         try:
             backoff_on_exception(lambda: self._try_get_and_persist(db_conn))()
         except Exception as e:
@@ -46,7 +46,8 @@ class AbstractOptimisticLockingFunction(ABC):
         cur_version = self.load_version(db_conn)
         entities = self.get_entities(db_conn)
 
-        with LockManager.database_lock(db_conn, cur_version.resource_type, cur_version.resource_id):
+        with LockManager.database_lock(db_conn, cur_version.resource_type,
+                                       cur_version.resource_id):
             new_version = self.load_version(db_conn)
 
             is_creation = cur_version.resource_version is None and not new_version
