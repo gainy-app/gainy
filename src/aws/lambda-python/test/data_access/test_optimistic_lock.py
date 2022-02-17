@@ -69,18 +69,17 @@ class MetadataClass(BaseModel, ResourceVersion):
 
 class TestGetAndPersist(AbstractOptimisticLockingFunction):
 
-    def __init__(
-            self,
-            repo: Repository,
-            profile_id: int,
-            objects_per_iter: int = 200
-    ):
+    def __init__(self,
+                 repo: Repository,
+                 profile_id: int,
+                 objects_per_iter: int = 200):
         super().__init__(repo)
         self.profile_id = profile_id
         self.objects_per_iter = objects_per_iter
 
     def load_version(self, db_conn: connection):
-        profile_metadata_list = self.repo.load(db_conn, MetadataClass, {"profile_id": self.profile_id})
+        profile_metadata_list = self.repo.load(db_conn, MetadataClass,
+                                               {"profile_id": self.profile_id})
         if len(profile_metadata_list) == 0:
             profile_metadata = MetadataClass()
             profile_metadata.profile_id = self.profile_id
@@ -89,10 +88,13 @@ class TestGetAndPersist(AbstractOptimisticLockingFunction):
             return profile_metadata_list[0]
 
     def get_entities(self, db_conn: connection):
-        entities = self.repo.load(db_conn, DataClass, {"profile_id": self.profile_id})
+        entities = self.repo.load(db_conn, DataClass,
+                                  {"profile_id": self.profile_id})
         for object_index in range(0, self.objects_per_iter):
             symbol = f"S{object_index}"
-            entity_by_symbol = [entity for entity in entities if entity.symbol == symbol]
+            entity_by_symbol = [
+                entity for entity in entities if entity.symbol == symbol
+            ]
             if len(entity_by_symbol) > 0:
                 entity = entity_by_symbol[0]
                 entity.value_list.append(len(entity.value_list) + 1)
@@ -110,12 +112,7 @@ class TestGetAndPersist(AbstractOptimisticLockingFunction):
 
 class TestThread(threading.Thread):
 
-    def __init__(
-            self,
-            db_conn_string,
-            profile_id: int,
-            max_iter: int = 5
-    ):
+    def __init__(self, db_conn_string, profile_id: int, max_iter: int = 5):
         super().__init__()
         self.db_conn_string = db_conn_string
         self.profile_id = profile_id
@@ -218,5 +215,5 @@ def _test_optimistic_locks(profile_num: int, threads_per_profile: int):
         data_list = repo.load(db_conn, DataClass)
         assert len(data_list) == 200 * profile_num
         for data in data_list:
-            assert set(data.value_list) == set(range(1, threads_per_profile * 5 + 1))
-
+            assert set(data.value_list) == set(
+                range(1, threads_per_profile * 5 + 1))
