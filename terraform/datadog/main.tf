@@ -143,7 +143,7 @@ resource "datadog_monitor" "healthy_hosts" {
   message = "ECS Healthy Hosts Monitor triggered. Notify: @slack-${var.slack_channel_name} <!channel>"
   #  escalation_message = "Escalation message @pagerduty"
 
-  query = "avg(last_15m):min:aws.applicationelb.healthy_host_count{name:*-production} by {name} < 1"
+  query = "avg(last_15m):avg:aws.applicationelb.healthy_host_count{name:*-production} by {name} < 1"
 
   monitor_thresholds {
     critical = 1
