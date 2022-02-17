@@ -1788,7 +1788,7 @@ models:
         tests:
           - exists
           - type:
-              type: 'character varying'
+              type: 'text'
       - name: personalized
         tests:
           - exists

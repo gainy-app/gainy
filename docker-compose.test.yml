@@ -26,7 +26,7 @@ services:
       MELTANO_DATABASE_URI: "postgresql://postgres:postgrespassword@test-postgres:5432/postgres?options=-csearch_path%3Dmeltano"
       NO_AIRFLOW: "true"
       ENV: "local"
-      DBT_THREADS: 2
+      DBT_THREADS: 4
       DBT_TARGET_SCHEMA: public_test
     depends_on:
       - test-postgres
