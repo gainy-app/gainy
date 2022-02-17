@@ -11,7 +11,6 @@ with all_ticker_collections as
          (
              select profile_favorite_collections.profile_id,
                     profile_favorite_collections.collection_id,
-                    personalized,
                     coalesce(ticker_collections.symbol, personalized_ticker_collections.symbol) as symbol
              from {{ source('app', 'profile_favorite_collections') }}
                       left join {{ ref('ticker_collections') }}
