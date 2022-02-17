@@ -21,7 +21,7 @@ services:
     environment:
       EODHISTORICALDATA_JOBS_COUNT: 1
       AIRFLOW_PASSWORD: admin
-      DBT_THREADS: 4
+      DBT_THREADS: 2
       DBT_TARGET_SCHEMA: "${PUBLIC_SCHEMA_NAME}"
     depends_on:
       - postgres

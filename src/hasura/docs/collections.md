@@ -115,7 +115,7 @@ query  {
 
 ```graphql
 query home_tab($profileId: Int, $rankedCount: Int) {
-    profile_collection_tickers_performance_ranked(where: {profile_id: {_eq: $profileId}, gainer_rank: {_lte: $rankedCount}, loser_rank: {_lte: $rankedCount}}) {
+    profile_collection_tickers_performance_ranked(where: {profile_id: {_eq: $profileId}, _or: [{gainer_rank: {_lte: $rankedCount}}, {loser_rank: {_lte: $rankedCount}}]}) {
         gainer_rank
         loser_rank
         profile_id

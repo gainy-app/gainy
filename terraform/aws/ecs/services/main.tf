@@ -141,7 +141,7 @@ resource "aws_ecs_task_definition" "default" {
       pg_replica_uris                      = var.pg_replica_uris
       pg_load_schema                       = "raw_data"
       pg_transform_schema                  = local.public_schema_name
-      dbt_threads                          = var.env == "production" ? 6 : 6
+      dbt_threads                          = var.env == "production" ? 4 : 4
       pg_production_host                   = var.pg_production_host
       pg_production_port                   = var.pg_production_port
       pg_production_internal_sync_username = var.pg_production_internal_sync_username
