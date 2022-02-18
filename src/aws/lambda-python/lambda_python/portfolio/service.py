@@ -306,7 +306,10 @@ class PortfolioService:
                 sql.SQL(
                     "join ticker_interests on ticker_interests.symbol = portfolio_securities_normalized.ticker_symbol"
                 ))
-            where_clause.append(sql.SQL("(interest_id in %(interest_ids)s) or portfolio_securities_normalized.type = 'cash'"))
+            where_clause.append(
+                sql.SQL(
+                    "(interest_id in %(interest_ids)s) or portfolio_securities_normalized.type = 'cash'"
+                ))
             params['interest_ids'] = tuple(filter.interest_ids)
 
         if filter.category_ids is not None and len(filter.category_ids):
@@ -314,7 +317,10 @@ class PortfolioService:
                 sql.SQL(
                     "join ticker_categories on ticker_categories.symbol = portfolio_securities_normalized.ticker_symbol"
                 ))
-            where_clause.append(sql.SQL("(category_id in %(category_ids)s) or portfolio_securities_normalized.type = 'cash'"))
+            where_clause.append(
+                sql.SQL(
+                    "(category_id in %(category_ids)s) or portfolio_securities_normalized.type = 'cash'"
+                ))
             params['category_ids'] = tuple(filter.category_ids)
 
         if filter.security_types is not None and len(filter.security_types):
