@@ -3,7 +3,10 @@ export PARAMS ?= $(filter-out $@,$(MAKECMDGOALS))
 -include .env.make
 -include .env
 
-configure:
+docker-auth:
+	aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin ${BASE_IMAGE_REGISTRY_ADDRESS}
+
+configure: docker-auth
 	- cp -n src/gainy-fetch/meltano/symbols.local.json.dist src/gainy-fetch/meltano/symbols.local.json
 
 up: configure
@@ -20,7 +23,7 @@ down:
 	docker-compose down
 
 clean:
-	docker-compose down --rmi local -v --remove-orphans
+	- docker-compose down --rmi local -v --remove-orphans
 
 tf-fmt:
 	cd terraform && terraform fmt -recursive
