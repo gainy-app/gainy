@@ -824,6 +824,35 @@
       filter: {}
 - table:
     schema: public
+    name: collection_metrics
+  object_relationships:
+  - name: profile
+    using:
+      manual_configuration:
+        remote_table:
+          schema: app
+          name: profiles
+        insertion_order: null
+        column_mapping:
+          profile_id: id
+  select_permissions:
+  - role: user
+    permission:
+      columns:
+      - profile_id
+      - collection_uniq_id
+      - absolute_daily_change
+      - relative_daily_change
+      - updated_at
+      filter:
+        _or:
+        - profile_id:
+            _is_null: true
+        - profile:
+            user_id:
+              _eq: X-Hasura-User-Id
+- table:
+    schema: public
     name: gainy_industries
   array_relationships:
   - name: industry_stats_dailies
@@ -1269,12 +1298,57 @@
               _eq: X-Hasura-User-Id
 - table:
     schema: public
+    name: profile_collection_tickers_performance_ranked
+  object_relationships:
+  - name: profile
+    using:
+      manual_configuration:
+        remote_table:
+          schema: app
+          name: profiles
+        insertion_order: null
+        column_mapping:
+          profile_id: id
+  - name: ticker
+    using:
+      manual_configuration:
+        remote_table:
+          schema: public
+          name: tickers
+        insertion_order: null
+        column_mapping:
+          symbol: symbol
+  select_permissions:
+  - role: user
+    permission:
+      columns:
+      - profile_id
+      - symbol
+      - relative_daily_change
+      - updated_at
+      - gainer_rank
+      - loser_rank
+      filter:
+        profile:
+          user_id:
+            _eq: X-Hasura-User-Id
+- table:
+    schema: public
     name: profile_collections
   configuration:
     custom_root_fields: {}
     custom_name: collections
     custom_column_names: {}
   object_relationships:
+  - name: metrics
+    using:
+      manual_configuration:
+        remote_table:
+          schema: public
+          name: collection_metrics
+        insertion_order: null
+        column_mapping:
+          uniq_id: collection_uniq_id
   - name: profile
     using:
       manual_configuration:

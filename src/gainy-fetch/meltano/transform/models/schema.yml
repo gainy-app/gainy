@@ -34,6 +34,7 @@ sources:
     description: Mobile App data, managed by hasura
     schema: app
     tables:
+      - name: profile_favorite_collections
       - name: profile_portfolio_accounts
       - name: profile_portfolio_transactions
       - name: portfolio_securities
@@ -1750,6 +1751,115 @@ models:
           - exists
           - type:
               type: 'double precision'
+
+  - name: profile_collections
+    columns:
+      - name: uniq_id
+        tests:
+          - exists
+          - type:
+              type: 'character varying'
+      - name: profile_id
+        tests:
+          - exists
+          - type:
+              type: 'integer'
+      - name: id
+        tests:
+          - exists
+          - type:
+              type: 'integer'
+      - name: name
+        tests:
+          - exists
+          - type:
+              type: 'character varying'
+      - name: description
+        tests:
+          - exists
+          - type:
+              type: 'character varying'
+      - name: image_url
+        tests:
+          - exists
+          - type:
+              type: 'character varying'
+      - name: enabled
+        tests:
+          - exists
+          - type:
+              type: 'text'
+      - name: personalized
+        tests:
+          - exists
+          - type:
+              type: 'character varying'
+      - name: size
+        tests:
+          - exists
+          - type:
+              type: 'integer'
+
+  - name: collection_metrics
+    columns:
+      - name: profile_id
+        tests:
+          - exists
+          - type:
+              type: 'integer'
+      - name: collection_uniq_id
+        tests:
+          - exists
+          - type:
+              type: 'character varying'
+      - name: absolute_daily_change
+        tests:
+          - exists
+          - type:
+              type: 'double precision'
+      - name: relative_daily_change
+        tests:
+          - exists
+          - type:
+              type: 'double precision'
+      - name: updated_at
+        tests:
+          - exists
+          - type:
+              type: 'timestamp without time zone'
+
+  - name: profile_collection_tickers_performance_ranked
+    columns:
+      - name: profile_id
+        tests:
+          - exists
+          - type:
+              type: 'integer'
+      - name: symbol
+        tests:
+          - exists
+          - type:
+              type: 'character varying'
+      - name: relative_daily_change
+        tests:
+          - exists
+          - type:
+              type: 'double precision'
+      - name: updated_at
+        tests:
+          - exists
+          - type:
+              type: 'timestamp without time zone'
+      - name: gainer_rank
+        tests:
+          - exists
+          - type:
+              type: 'integer'
+      - name: loser_rank
+        tests:
+          - exists
+          - type:
+              type: 'integer'
 
 exposures:
   - name: ticker_search_index
