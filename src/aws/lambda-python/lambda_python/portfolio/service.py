@@ -202,7 +202,7 @@ class PortfolioService:
         if filter.ltt_only is not None and filter.ltt_only:
             join_clause.append(
                 sql.SQL(
-                    "join app.profile_holdings on profile_holdings.profile_id = portfolio_expanded_transactions.profile_id and profile_holdings.security_id = portfolio_expanded_transactions.security_id"
+                    "join app.profile_holdings on profile_holdings.profile_id = portfolio_expanded_transactions.profile_id and profile_holdings.security_id = portfolio_expanded_transactions.security_id and profile_holdings.account_id = portfolio_expanded_transactions.account_id"
                 ))
             join_clause.append(
                 sql.SQL(

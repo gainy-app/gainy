@@ -18,7 +18,8 @@ with first_purchase_date as
              from {{ source('app', 'profile_portfolio_transactions') }}
                       join {{ source('app', 'profile_holdings') }}
                            on profile_holdings.profile_id = profile_portfolio_transactions.profile_id and
-                              profile_holdings.security_id = profile_portfolio_transactions.security_id
+                              profile_holdings.security_id = profile_portfolio_transactions.security_id and
+                              profile_holdings.account_id = profile_portfolio_transactions.account_id
              order by profile_holdings.id, date
          ),
      next_earnings_date as
@@ -42,6 +43,7 @@ with first_purchase_date as
                       from (
                                select portfolio_expanded_transactions.profile_id,
                                       security_id,
+                                      portfolio_expanded_transactions.account_id,
                                       date,
                                       sign(quantity_norm)                                                                                            as quantity_sign,
                                       sum(quantity_norm)
@@ -53,7 +55,8 @@ with first_purchase_date as
                            ) t
                                join {{ source('app', 'profile_holdings') }}
                                     on profile_holdings.profile_id = t.profile_id and
-                                       profile_holdings.security_id = t.security_id
+                                       profile_holdings.security_id = t.security_id and
+                                       profile_holdings.account_id = t.account_id
                   ) t
              where date < now() - interval '1 year'
              order by holding_id, quantity_sign desc, date desc
