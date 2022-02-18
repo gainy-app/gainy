@@ -28,10 +28,6 @@ with week_trading_sessions as
              from portfolio_transaction_chart
                       join portfolio_expanded_transactions
                            on portfolio_expanded_transactions.uniq_id = portfolio_transaction_chart.transactions_uniq_id
-                      join profile_holdings_normalized
-                           on profile_holdings_normalized.profile_id = portfolio_expanded_transactions.profile_id and
-                              profile_holdings_normalized.security_id = portfolio_expanded_transactions.security_id and
-                              profile_holdings_normalized.account_id = portfolio_expanded_transactions.account_id
                       left join week_trading_sessions
                                 on portfolio_transaction_chart.datetime between week_trading_sessions.open_at and week_trading_sessions.close_at
                       left join latest_open_trading_session on true

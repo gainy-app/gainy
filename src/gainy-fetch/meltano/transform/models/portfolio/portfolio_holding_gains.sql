@@ -135,9 +135,9 @@ with
                                  and portfolio_expanded_transactions.id is not null
                            ) t
                                join {{ source('app', 'profile_holdings') }}
-                                    on profile_holdings.profile_id = t.profile_id and
-                                       profile_holdings.security_id = t.security_id and
-                                       profile_holdings.account_id = t.account_id
+                                    on profile_holdings.profile_id = t.profile_id
+                                        and profile_holdings.security_id = t.security_id
+                                        and profile_holdings.account_id = t.account_id
                   ) t
              where date < now() - interval '1 year'
              order by holding_id, quantity_sign desc, date desc
