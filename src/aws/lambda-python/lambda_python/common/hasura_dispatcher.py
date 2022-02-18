@@ -13,7 +13,11 @@ from common.hasura_response import base_response
 
 class HasuraDispatcher(ABC):
 
-    def __init__(self, db_conn_string, functions, public_schema_name, is_gateway_proxy=True):
+    def __init__(self,
+                 db_conn_string,
+                 functions,
+                 public_schema_name,
+                 is_gateway_proxy=True):
         self.db_conn_string = db_conn_string
         self.functions = functions
         self.public_schema_name = public_schema_name
@@ -119,10 +123,11 @@ class HasuraDispatcher(ABC):
                     schema_name=sql.Identifier(self.public_schema_name),
                     extension_name=sql.Identifier(extension_name))
 
-                cursor.execute(query, {
-                    'schema_name': self.public_schema_name,
-                    'extension_name': extension_name
-                })
+                cursor.execute(
+                    query, {
+                        'schema_name': self.public_schema_name,
+                        'extension_name': extension_name
+                    })
 
 
 class HasuraActionDispatcher(HasuraDispatcher):
@@ -132,7 +137,8 @@ class HasuraActionDispatcher(HasuraDispatcher):
                  actions: List[HasuraAction],
                  public_schema_name: str,
                  is_gateway_proxy: bool = True):
-        super().__init__(db_conn_string, actions, public_schema_name, is_gateway_proxy)
+        super().__init__(db_conn_string, actions, public_schema_name,
+                         is_gateway_proxy)
 
     def apply(self, db_conn, request, headers):
         action = self.choose_function_by_name(request["action"]["name"])
@@ -155,7 +161,8 @@ class HasuraTriggerDispatcher(HasuraDispatcher):
                  triggers: List[HasuraTrigger],
                  public_schema_name: str,
                  is_gateway_proxy: bool = True):
-        super().__init__(db_conn_string, triggers, public_schema_name, is_gateway_proxy)
+        super().__init__(db_conn_string, triggers, public_schema_name,
+                         is_gateway_proxy)
 
     def apply(self, db_conn, request, headers):
         trigger = self.choose_function_by_name(request["trigger"]["name"])
