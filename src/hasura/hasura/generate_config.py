@@ -27,7 +27,8 @@ def generate_tables():
                 table['configuration']['custom_root_fields'] = {}
             if 'custom_column_names' not in table['configuration']:
                 table['configuration']['custom_column_names'] = {}
-            table['configuration']['custom_name'] = table['table']['name']
+            if 'custom_name' not in table['configuration']:
+                table['configuration']['custom_name'] = table['table']['name']
 
         for key in ['array_relationships', 'object_relationships']:
             if key not in table:
