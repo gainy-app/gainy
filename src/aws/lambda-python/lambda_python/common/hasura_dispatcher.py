@@ -28,7 +28,7 @@ class HasuraDispatcher(ABC):
         request = self.extract_request(event)
 
         with psycopg2.connect(self.db_conn_string) as db_conn:
-            self._ensure_schema_selected(db_conn)
+#             self._ensure_schema_selected(db_conn)
             try:
                 response = self.apply(db_conn, request, headers)
 
