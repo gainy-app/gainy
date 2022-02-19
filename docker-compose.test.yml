@@ -52,8 +52,8 @@ services:
     env_file:
       - .env
     environment:
-      HASURA_GRAPHQL_METADATA_DATABASE_URL: "postgres://postgres:postgrespassword@test-postgres:5432/postgres"
-      HASURA_GRAPHQL_DATABASE_URL: "postgres://postgres:postgrespassword@test-postgres:5432/postgres"
+      HASURA_GRAPHQL_METADATA_DATABASE_URL: "postgres://postgres:postgrespassword@test-postgres:5432/postgres?options=-csearch_path%3D$public_test"
+      HASURA_GRAPHQL_DATABASE_URL: "postgres://postgres:postgrespassword@test-postgres:5432/postgres?options=-csearch_path%3D$public_test"
       HASURA_GRAPHQL_PUBLIC_SCHEMA_NAME: public_test
       AWS_LAMBDA_API_GATEWAY_ENDPOINT: http://test-lambda-router:5000
 

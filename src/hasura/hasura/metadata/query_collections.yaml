@@ -11,7 +11,7 @@
           $new_holdings: Int
           $updated_holdings: Int
           $new_investments_transactions: Int
-          $canceled_investments_transactions: Int
+          $cancelled_investments_transactions: Int
         ) {
           plaid_webhook(
             webhook_type: $webhook_type
@@ -21,7 +21,7 @@
             new_holdings: $new_holdings
             updated_holdings: $updated_holdings
             new_investments_transactions: $new_investments_transactions
-            canceled_investments_transactions: $canceled_investments_transactions
+            cancelled_investments_transactions: $cancelled_investments_transactions
           ) {
             count
           }

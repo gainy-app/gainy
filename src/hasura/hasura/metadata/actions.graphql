@@ -99,7 +99,7 @@ type Mutation {
     new_holdings: Int
     updated_holdings: Int
     new_investments_transactions: Int
-    canceled_investments_transactions: Int
+    cancelled_investments_transactions: Int
   ): PlaidWebhookOutput
 }
 
