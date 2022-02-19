@@ -22,9 +22,9 @@
     "dockerSecurityOptions": null,
     "environment": [
       { "name": "HASURA_GRAPHQL_UNAUTHORIZED_ROLE",     "value": "anonymous" },
-      { "name": "HASURA_GRAPHQL_METADATA_DATABASE_URL", "value": "postgres://${pg_username}:${pg_password}@${pg_host}:${pg_port}/${pg_dbname}?options=-csearch_path%3D${pg_meltano_schema}" },
+      { "name": "HASURA_GRAPHQL_METADATA_DATABASE_URL", "value": "postgres://${pg_username}:${pg_password}@${pg_host}:${pg_port}/${pg_dbname}?options=-csearch_path%3D${pg_transform_schema}" },
       { "name": "HASURA_GRAPHQL_ENABLED_LOG_TYPES",     "value": "startup, http-log, webhook-log, websocket-log, query-log" },
-      { "name": "HASURA_GRAPHQL_DATABASE_URL",          "value": "postgres://${pg_username}:${pg_password}@${pg_host}:${pg_port}/${pg_dbname}?options=-csearch_path%3D${pg_meltano_schema}" },
+      { "name": "HASURA_GRAPHQL_DATABASE_URL",          "value": "postgres://${pg_username}:${pg_password}@${pg_host}:${pg_port}/${pg_dbname}?options=-csearch_path%3D${pg_transform_schema}" },
       { "name": "HASURA_GRAPHQL_READ_REPLICA_URLS",     "value": "${pg_replica_uris}" },
       { "name": "HASURA_GRAPHQL_PUBLIC_SCHEMA_NAME",    "value": "${pg_transform_schema}" },
       { "name": "HASURA_GRAPHQL_ENABLE_CONSOLE",        "value": "${hasura_enable_console}" },
