@@ -142,7 +142,7 @@ class PlaidService:
         model.balance_current = data['balances']['current']
         model.balance_iso_currency_code = data['balances']['iso_currency_code']
         model.balance_limit = data['balances']['limit']
-        model.mask = data['mask']
+        model.mask = data['mask'] or ""
         model.name = data['name']
         model.official_name = data['official_name']
         model.subtype = str(data['subtype'])

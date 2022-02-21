@@ -22,6 +22,11 @@ def generate_tables():
             table['table']['schema'] = HASURA_GRAPHQL_PUBLIC_SCHEMA_NAME
             if 'configuration' not in table:
                 table['configuration'] = {}
+
+            if 'custom_root_fields' not in table['configuration']:
+                table['configuration']['custom_root_fields'] = {}
+            if 'custom_column_names' not in table['configuration']:
+                table['configuration']['custom_column_names'] = {}
             if 'custom_name' not in table['configuration']:
                 table['configuration']['custom_name'] = table['table']['name']
 
