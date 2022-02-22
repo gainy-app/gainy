@@ -95,6 +95,7 @@ class PlaidWebhook(HasuraAction):
                     for row in cursor.fetchall()
                 ]
 
+            count = 0
             if len(access_tokens):
                 try:
                     self.verify(input_params, headers,
@@ -102,7 +103,6 @@ class PlaidWebhook(HasuraAction):
                 except Exception as e:
                     logger.error('[PLAID_WEBHOOK] verify: %s', e)
 
-                count = 0
                 webhook_type = input_params['webhook_type']
                 for access_token in access_tokens:
                     self.portfolio_service.sync_institution(
@@ -114,21 +114,17 @@ class PlaidWebhook(HasuraAction):
                         count += self.portfolio_service.sync_token_transactions(
                             db_conn, access_token)
 
-                return {'count': count}
+            return {'count': count}
         except Exception as e:
             logger.error("[PLAID_WEBHOOK] %s", e)
             raise e
 
     def verify(self, body, headers, access_token):
         signed_jwt = headers.get('Plaid-Verification')
-        logger.info("headers %s", str(headers))
-        logger.info("jwt %s", signed_jwt)
         current_key_id = jwt.get_unverified_header(signed_jwt)['kid']
-        logger.info("current_key_id %s", current_key_id)
 
         response = self.client.webhook_verification_key_get(
             current_key_id, access_token).to_dict()
-        logger.info('[PLAID_WEBHOOK] response %s', response)
 
         key = response['key']
         if key['expired_at'] is not None:

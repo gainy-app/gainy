@@ -98,6 +98,11 @@ class PortfolioService:
                              holdings):
         securities_dict = self.__persist_securities(db_conn, securities)
         accounts_dict = self.__persist_accounts(db_conn, accounts, profile_id)
+        holdings = [
+            i for i in holdings if i.security_ref_id is not None
+            and i.security_ref_id in securities_dict and i.account_ref_id
+            is not None and i.account_ref_id in accounts_dict
+        ]
         holdings = self.__unique(holdings)
 
         # persist holdings
@@ -117,6 +122,11 @@ class PortfolioService:
                                  accounts, transactions):
         securities_dict = self.__persist_securities(db_conn, securities)
         accounts_dict = self.__persist_accounts(db_conn, accounts, profile_id)
+        transactions = [
+            i for i in transactions if i.security_ref_id is not None
+            and i.security_ref_id in securities_dict and i.account_ref_id
+            is not None and i.account_ref_id in accounts_dict
+        ]
         transactions = self.__unique(transactions)
 
         # persist transactions
@@ -251,6 +261,7 @@ class PortfolioService:
             # during the day there is constant transaction_count, so we just pick all rows with max transaction_count
             should_skip_1d = transaction_count != max_transaction_count_1d
             if period == '1d' and should_skip_1d:
+                prev_row = row
                 continue
 
             # for other periods transactions count should not decrease, so we pick all rows that follow a non-decreasing transaction count pattern
@@ -259,8 +270,10 @@ class PortfolioService:
                 prev_period = prev_row['period']
                 should_skip_other_periods = period == prev_period and transaction_count < prev_transaction_count
                 if period != '1d' and should_skip_other_periods:
+                    prev_row = row
                     continue
 
+            prev_row = row
             yield row
 
     def _add_static_values_to_chart(self, db_conn, profile_id, filter, rows):
