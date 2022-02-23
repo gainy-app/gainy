@@ -24,6 +24,7 @@ DB_NAME = os.environ['pg_dbname']
 USERNAME = os.environ['pg_username']
 PASSWORD = os.environ['pg_password']
 
+# TODO: refactor to not use search_path as it's not allowed to use pycrypto extension for multiple schemas
 DB_CONN_STRING = f"postgresql://{USERNAME}:{PASSWORD}@{HOST}:{PORT}/{DB_NAME}?options=-csearch_path%3D{PUBLIC_SCHEMA_NAME}"
 
 ALGOLIA_APP_ID = os.getenv("ALGOLIA_APP_ID")
@@ -61,6 +62,7 @@ ACTIONS = [
 ]
 
 action_dispatcher = HasuraActionDispatcher(DB_CONN_STRING, ACTIONS,
+                                           PUBLIC_SCHEMA_NAME,
                                            API_GATEWAY_PROXY_INTEGRATION)
 
 
@@ -76,6 +78,7 @@ TRIGGERS = [
 ]
 
 trigger_dispatcher = HasuraTriggerDispatcher(DB_CONN_STRING, TRIGGERS,
+                                             PUBLIC_SCHEMA_NAME,
                                              API_GATEWAY_PROXY_INTEGRATION)
 
 

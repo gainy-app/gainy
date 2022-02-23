@@ -60,7 +60,7 @@
           "breadcrumb": [],
           "metadata": {
             "replication-key": "time",
-            "replication-method": "FULL_TABLE",
+            "replication-method": "INCREMENTAL",
             "table-key-properties": [
               "symbol",
               "time"

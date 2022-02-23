@@ -2,13 +2,13 @@ name: gainy
 version: '1.0'
 profile: meltano
 config-version: 2
-source-paths:
+model-paths:
 - models
 analysis-paths:
 - analysis
 test-paths:
 - tests
-data-paths:
+seed-paths:
 - data
 macro-paths:
 - macros
@@ -16,10 +16,8 @@ snapshot-paths:
 - snapshots
 target-path: ../.meltano/transformers/dbt/target
 log-path: logs
-modules-path: dbt_modules
 clean-targets:
 - ../.meltano/transformers/dbt/target
-- dbt_modules
 - logs
 models:
   +on_schema_change: "sync_all_columns"

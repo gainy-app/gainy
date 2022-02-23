@@ -98,6 +98,11 @@ class PortfolioService:
                              holdings):
         securities_dict = self.__persist_securities(db_conn, securities)
         accounts_dict = self.__persist_accounts(db_conn, accounts, profile_id)
+        holdings = [
+            i for i in holdings if i.security_ref_id is not None
+            and i.security_ref_id in securities_dict and i.account_ref_id
+            is not None and i.account_ref_id in accounts_dict
+        ]
         holdings = self.__unique(holdings)
 
         # persist holdings
@@ -117,6 +122,11 @@ class PortfolioService:
                                  accounts, transactions):
         securities_dict = self.__persist_securities(db_conn, securities)
         accounts_dict = self.__persist_accounts(db_conn, accounts, profile_id)
+        transactions = [
+            i for i in transactions if i.security_ref_id is not None
+            and i.security_ref_id in securities_dict and i.account_ref_id
+            is not None and i.account_ref_id in accounts_dict
+        ]
         transactions = self.__unique(transactions)
 
         # persist transactions
@@ -202,7 +212,7 @@ class PortfolioService:
         if filter.ltt_only is not None and filter.ltt_only:
             join_clause.append(
                 sql.SQL(
-                    "join app.profile_holdings on profile_holdings.profile_id = portfolio_expanded_transactions.profile_id and profile_holdings.security_id = portfolio_expanded_transactions.security_id"
+                    "join app.profile_holdings on profile_holdings.profile_id = portfolio_expanded_transactions.profile_id and profile_holdings.security_id = portfolio_expanded_transactions.security_id and profile_holdings.account_id = portfolio_expanded_transactions.account_id"
                 ))
             join_clause.append(
                 sql.SQL(
@@ -251,6 +261,7 @@ class PortfolioService:
             # during the day there is constant transaction_count, so we just pick all rows with max transaction_count
             should_skip_1d = transaction_count != max_transaction_count_1d
             if period == '1d' and should_skip_1d:
+                prev_row = row
                 continue
 
             # for other periods transactions count should not decrease, so we pick all rows that follow a non-decreasing transaction count pattern
@@ -259,8 +270,10 @@ class PortfolioService:
                 prev_period = prev_row['period']
                 should_skip_other_periods = period == prev_period and transaction_count < prev_transaction_count
                 if period != '1d' and should_skip_other_periods:
+                    prev_row = row
                     continue
 
+            prev_row = row
             yield row
 
     def _add_static_values_to_chart(self, db_conn, profile_id, filter, rows):
@@ -306,7 +319,10 @@ class PortfolioService:
                 sql.SQL(
                     "join ticker_interests on ticker_interests.symbol = portfolio_securities_normalized.ticker_symbol"
                 ))
-            where_clause.append(sql.SQL("interest_id in %(interest_ids)s"))
+            where_clause.append(
+                sql.SQL(
+                    "(interest_id in %(interest_ids)s) or portfolio_securities_normalized.type = 'cash'"
+                ))
             params['interest_ids'] = tuple(filter.interest_ids)
 
         if filter.category_ids is not None and len(filter.category_ids):
@@ -314,7 +330,10 @@ class PortfolioService:
                 sql.SQL(
                     "join ticker_categories on ticker_categories.symbol = portfolio_securities_normalized.ticker_symbol"
                 ))
-            where_clause.append(sql.SQL("category_id in %(category_ids)s"))
+            where_clause.append(
+                sql.SQL(
+                    "(category_id in %(category_ids)s) or portfolio_securities_normalized.type = 'cash'"
+                ))
             params['category_ids'] = tuple(filter.category_ids)
 
         if filter.security_types is not None and len(filter.security_types):
