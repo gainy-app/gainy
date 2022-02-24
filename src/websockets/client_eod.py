@@ -192,7 +192,7 @@ class PricesListener(AbstractPriceListener):
         return True
 
     def transform_symbol(self, symbol):
-        return re.sub(r'.CC$', '-USD', symbol)
+        return re.sub(r'\.CC$', '-USD', symbol)
 
     def rev_transform_symbol(self, symbol):
         if symbol in self._rev_transform_mapping:
