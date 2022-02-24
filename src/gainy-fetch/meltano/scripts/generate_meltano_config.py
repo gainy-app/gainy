@@ -88,29 +88,30 @@ config['schedules'] = _generate_schedules(ENV, SPLIT_COUNT)
 with open("meltano.yml", "w") as f:
     yaml.dump(config, f)
 
-### Algolia search mapping ###
+if DBT_TARGET_SCHEMA != 'public':
+    ### Algolia search mapping ###
 
-with open("configs/search/search.mapping.yml", "r") as f:
-    config = f.read()
+    with open("configs/search/search.mapping.yml", "r") as f:
+        config = f.read()
 
-config = re.sub(r'schema: public\w*', f'schema: {DBT_TARGET_SCHEMA}', config)
+    config = re.sub(r'schema: public\w*', f'schema: {DBT_TARGET_SCHEMA}', config)
 
-with open("configs/search/search.mapping.yml", "w") as f:
-    f.write(config)
+    with open("configs/search/search.mapping.yml", "w") as f:
+        f.write(config)
 
-### Algolia tap catalog ###
+    ### Algolia tap catalog ###
 
-with open("configs/search/tap.catalog.json", "r") as f:
-    config = json.load(f)
+    with open("configs/search/tap.catalog.json", "r") as f:
+        config = json.load(f)
 
-for stream in config['streams']:
-    for metadata in stream['metadata']:
-        if 'metadata' not in metadata:
-            continue
-        if 'schema-name' not in metadata['metadata']:
-            continue
-        metadata['metadata']['schema-name'] = DBT_TARGET_SCHEMA
-    stream['tap_stream_id'] = f"{DBT_TARGET_SCHEMA}-{stream['stream']}"
+    for stream in config['streams']:
+        for metadata in stream['metadata']:
+            if 'metadata' not in metadata:
+                continue
+            if 'schema-name' not in metadata['metadata']:
+                continue
+            metadata['metadata']['schema-name'] = DBT_TARGET_SCHEMA
+        stream['tap_stream_id'] = f"{DBT_TARGET_SCHEMA}-{stream['stream']}"
 
-with open("configs/search/tap.catalog.json", "w") as f:
-    json.dump(config, f)
+    with open("configs/search/tap.catalog.json", "w") as f:
+        json.dump(config, f)

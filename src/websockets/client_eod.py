@@ -35,7 +35,8 @@ class PricesListener(AbstractPriceListener):
         symbols = [ticker[0] for ticker in tickers]
         symbols = list(filter(lambda symbol: symbol.find('-') == -1, symbols))
         symbols.sort()
-        return set(MANDATORY_SYMBOLS + symbols[:SYMBOLS_LIMIT - len(MANDATORY_SYMBOLS)])
+        return set(MANDATORY_SYMBOLS +
+                   symbols[:SYMBOLS_LIMIT - len(MANDATORY_SYMBOLS)])
 
     async def handle_price_message(self, message):
         # Message format: {"s":"AAPL","p":161.14,"c":[12,37],"v":1,"dp":false,"t":1637573639704}
@@ -44,7 +45,8 @@ class PricesListener(AbstractPriceListener):
         price = message["p"]
         decimal_price = Decimal(price)
 
-        volume = message.get("v") or (Decimal(message.get("q")) * decimal_price)
+        volume = message.get("v") or (Decimal(message.get("q")) *
+                                      decimal_price)
         decimal_volume = Decimal(volume)
 
         if symbol not in self._buckets:
@@ -127,18 +129,22 @@ class PricesListener(AbstractPriceListener):
         await listen_crypto_task
 
     async def listen_us(self):
-        symbols = filter(lambda symbol: re.search(r'.CC$', symbol) is None, self.symbols)
+        symbols = filter(lambda symbol: re.search(r'.CC$', symbol) is None,
+                         self.symbols)
         symbols = list(symbols)
         await self._base_listen('us', symbols)
 
     async def listen_crypto(self):
-        symbols = list(filter(lambda symbol: re.search(r'.CC$', symbol) is not None, self.symbols))
+        symbols = list(
+            filter(lambda symbol: re.search(r'.CC$', symbol) is not None,
+                   self.symbols))
 
         self._rev_transform_mapping = {}
         for symbol in symbols:
             self._rev_transform_mapping[self.transform_symbol(symbol)] = symbol
 
-        symbols = list(map(lambda symbol: self.transform_symbol(symbol), symbols))
+        symbols = list(
+            map(lambda symbol: self.transform_symbol(symbol), symbols))
         await self._base_listen('crypto', symbols)
 
     async def _base_listen(self, endpoint, symbols):
@@ -155,7 +161,9 @@ class PricesListener(AbstractPriceListener):
             try:
                 async for websocket in websockets.connect(url):
                     self.websocket = websocket
-                    self.logger.info(f"connected to websocket '{endpoint}' for symbols: {','.join(symbols)}")
+                    self.logger.info(
+                        f"connected to websocket '{endpoint}' for symbols: {','.join(symbols)}"
+                    )
                     try:
                         await websocket.send(
                             json.dumps({
