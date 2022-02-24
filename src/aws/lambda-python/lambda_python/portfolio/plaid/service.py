@@ -128,7 +128,7 @@ class PlaidService:
         model.close_price_as_of = (data.close_price_as_of or
                                    datetime.date.today()).strftime('%Y-%m-%d')
         model.iso_currency_code = data.iso_currency_code
-        model.name = data.name
+        model.name = data.name or ""
         model.ref_id = data.security_id
         model.ticker_symbol = data.ticker_symbol
         model.type = data.type

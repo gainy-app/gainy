@@ -7,11 +7,11 @@ create table if not exists raw_data.eod_intraday_prices
 (
     symbol      varchar,
     time        timestamp,
-    open        double precision,
-    high        double precision,
-    low         double precision,
-    close       double precision,
-    volume      double precision,
+    open        numeric,
+    high        numeric,
+    low         numeric,
+    close       numeric,
+    volume      numeric,
     granularity int,
     constraint intraday_prices_pk
         primary key (time, symbol)
@@ -30,7 +30,7 @@ create table if not exists deployment.public_schemas
 (
     schema_name varchar   not null,
     deployed_at timestamp not null,
-    deleted_at  int,
+    deleted_at  timestamp,
 
     primary key (schema_name)
 );

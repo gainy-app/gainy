@@ -96,25 +96,8 @@ class AbstractPriceListener(ABC):
         self.logger.debug("started at %d for symbols %s", self.start_timestamp,
                           self.symbols)
 
-    def get_symbols(self):
-        with psycopg2.connect(DB_CONN_STRING) as db_conn:
-            query = sql.SQL(
-                "SELECT symbol FROM base_tickers where symbol is not null")
-
-            if self.supported_exchanges is not None:
-                exchanges = '|'.join(self.supported_exchanges)
-                query += sql.SQL(
-                    ' and lower(exchange) similar to {pattern}').format(
-                        pattern=sql.Literal('(%s)%%' % (exchanges)))
-
-            with db_conn.cursor() as cursor:
-                cursor.execute(query)
-                tickers = cursor.fetchall()
-                return set([ticker[0] for ticker in tickers])
-
-    @property
-    def supported_exchanges(self):
-        return None
+    def db_connect(self):
+        return psycopg2.connect(DB_CONN_STRING)
 
     def get_current_timestamp(self):
         return datetime.datetime.now().timestamp()
@@ -205,7 +188,7 @@ async def run(listener_factory):
     sync_task = None
     logger = get_logger(__name__)
 
-    should_run = ENV == "production"
+    should_run = ENV in ["production", "local"]
 
     while True:
         try:
