@@ -48,3 +48,4 @@ where v.avg_volume is not null
   and length (t.description) >= 5
   and latest_price.date is not null
   and latest_price.date::date >= now() - interval '7 days'
+  and type in ('FUND', 'ETF', 'Preferred Stock', 'Common Stock')
