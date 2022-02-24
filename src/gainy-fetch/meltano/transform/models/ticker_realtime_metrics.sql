@@ -41,7 +41,7 @@ select distinct on (
               then (latest_trading_day.close_price / historical_prices_aggregated.adjusted_close) - 1
           end                                                                      as relative_daily_change,
       latest_trading_day.volume::double precision                                  as daily_volume,
-      latest_realtime_datapoint.close::double precision                            as last_known_price,
+      latest_realtime_datapoint.close                                              as last_known_price,
       latest_realtime_datapoint.time::timestamp                                    as last_known_price_datetime,
       historical_prices_aggregated.adjusted_close                                  as previous_day_close_price
 from latest_trading_day

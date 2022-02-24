@@ -24,6 +24,7 @@ SELECT rhp.code,
        rhp.open,
        rhp.volume
 from {{ source('eod', 'eod_historical_prices') }} rhp
+join {{ ref('tickers') }} t ON t.symbol = rhp.code
 {% if is_incremental() %}
     left join max_updated_at on rhp.code = max_updated_at.code
     where rhp.date::date >= max_updated_at.max_date or max_updated_at.max_date is null

@@ -54,7 +54,6 @@ with max_date as
                  from {{ source('eod', 'eod_intraday_prices') }}
                           join latest_open_trading_session on true
                  where eod_intraday_prices.time between latest_open_trading_session.open_at - interval '1 hour' and latest_open_trading_session.close_at
-                    or (symbol like '%.CC' and time > now() - interval '1 day')
              ),
          combined_intraday_prices as
              (
@@ -181,7 +180,6 @@ union all
                  from {{ source('eod', 'eod_intraday_prices') }}
                           join week_trading_sessions on true
                  where eod_intraday_prices.time between week_trading_sessions.open_at - interval '1 hour' and week_trading_sessions.close_at
-                    or (symbol like '%.CC' and time > now() - interval '1 week')
              ),
          combined_intraday_prices as
              (

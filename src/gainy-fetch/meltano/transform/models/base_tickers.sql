@@ -8,10 +8,7 @@
   )
 }}
 
-select coalesce(
-                   general ->> 'Code',
-                   code
-           )::character varying                          as symbol,
+select (general ->> 'Code')::character varying           as symbol,
        (general ->> 'Type')::character varying           as type,
        (general ->> 'Name')::character varying           as name,
        (general -> 'Description')::character varying     as description,
