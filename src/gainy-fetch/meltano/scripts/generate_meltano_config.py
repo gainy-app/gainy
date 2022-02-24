@@ -94,7 +94,8 @@ if DBT_TARGET_SCHEMA != 'public':
     with open("configs/search/search.mapping.yml", "r") as f:
         config = f.read()
 
-    config = re.sub(r'schema: public\w*', f'schema: {DBT_TARGET_SCHEMA}', config)
+    config = re.sub(r'schema: public\w*', f'schema: {DBT_TARGET_SCHEMA}',
+                    config)
 
     with open("configs/search/search.mapping.yml", "w") as f:
         f.write(config)
