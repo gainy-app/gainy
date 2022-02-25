@@ -57,9 +57,13 @@ def clean_schemas(db_conn):
                 logger.info('Skipping schema %s: too recent', schema)
                 continue
 
-            query = f"drop schema {schema}"
+            query = f"drop schema {schema} cascade"
             logger.warning(query)
             cursor.execute(query)
+
+            cursor.execute(
+                "update deployment.public_schemas set deleted_at = now() where schema_name = %(schema)s",
+                {"schema": schema})
 
 
 def clean_realtime_data(db_conn):

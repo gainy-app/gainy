@@ -23,6 +23,7 @@ services:
       AIRFLOW_PASSWORD: admin
       DBT_THREADS: 2
       DBT_TARGET_SCHEMA: "${PUBLIC_SCHEMA_NAME}"
+      TAP_EODHISTORICALDATA_EXCHANGE_SYMBOLS_LIMIT: 10
     depends_on:
       - postgres
       - hasura
@@ -70,6 +71,7 @@ services:
     depends_on:
       - postgres
       - meltano-airflow-scheduler
+    entrypoint: "/wait.sh"
     command: "invoke dbt docs serve --port 5002"
 
   postgres:
@@ -114,6 +116,8 @@ services:
       - .env
     environment:
       GOOGLE_APPLICATION_CREDENTIALS: "/var/www/firebase.key.json"
+    deploy:
+      replicas: 0
 
   lambda-router:
     build:
@@ -198,6 +202,8 @@ services:
       DD_API_KEY: "${DATADOG_API_KEY}"
       DD_SITE: "datadoghq.com"
     command: ["client_eod.py"]
+    deploy:
+      replicas: 0
 
   websockets_polygon:
     build:
@@ -218,6 +224,8 @@ services:
       DD_API_KEY: "${DATADOG_API_KEY}"
       DD_SITE: "datadoghq.com"
     command: ["client_polygon.py"]
+    deploy:
+      replicas: 0
 
 volumes:
   db_data:

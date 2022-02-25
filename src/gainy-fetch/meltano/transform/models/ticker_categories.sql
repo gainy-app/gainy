@@ -11,7 +11,7 @@
 }}
 
 WITH common_stocks AS (
-    SELECT * FROM {{ ref('tickers') }} WHERE "type" = 'Common Stock'
+    SELECT * FROM {{ ref('tickers') }} WHERE "type" = 'common stock'
 )
 (
     WITH downside_deviation_stats AS
@@ -75,7 +75,7 @@ UNION
            now()::timestamp as updated_at
     from {{ ref('tickers') }} t
              join {{ ref('categories') }} c ON c.name = 'ETF'
-    WHERE t.type = 'ETF'
+    WHERE t.type = 'etf'
 )
 UNION
 (

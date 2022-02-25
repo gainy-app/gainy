@@ -133,6 +133,7 @@ resource "aws_ecs_task_definition" "default" {
 
       env                                  = var.env
       eodhistoricaldata_api_token          = var.eodhistoricaldata_api_token
+      eodhistoricaldata_exchanges          = jsonencode(["US", "CC", "INDX"])
       pg_host                              = var.pg_host
       pg_password                          = var.pg_password
       pg_port                              = var.pg_port

@@ -15,8 +15,11 @@ plugins:
         - name: api_token
         - name: exchanges
           kind: array
+        - name: exchange_symbols_limit
+          kind: integer
         - name: symbols
           kind: array
+        - name: symbols_type
         - name: split_id
         - name: split_num
     - name: tap-polygon

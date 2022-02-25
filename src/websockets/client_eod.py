@@ -3,12 +3,14 @@ import websockets
 import json
 import os
 import datetime
+import re
 from abc import abstractmethod
 from decimal import Decimal
 from common import run, AbstractPriceListener, NO_MESSAGES_RECONNECT_TIMEOUT
 
 EOD_API_TOKEN = os.environ["EOD_API_TOKEN"]
 SYMBOLS_LIMIT = 11000
+MANDATORY_SYMBOLS = ['DJI.INDX', 'GSPC.INDX', 'IXIC.INDX', 'BTC.CC']
 
 
 class PricesListener(AbstractPriceListener):
@@ -20,25 +22,32 @@ class PricesListener(AbstractPriceListener):
         self.granularity = 60000  # 60 seconds
         self.api_token = EOD_API_TOKEN
         self._first_filled_key = None
+        self._rev_transform_mapping = {}
 
     def get_symbols(self):
-        return self.filter_symbols(super().get_symbols())
+        with self.db_connect() as db_conn:
+            query = "SELECT symbol FROM base_tickers where symbol is not null and lower(exchange) similar to '(nyse|nasdaq)%'"
 
-    def filter_symbols(self, symbols):
-        symbols = [i for i in symbols if i.find('-') == -1]
+            with db_conn.cursor() as cursor:
+                cursor.execute(query)
+                tickers = cursor.fetchall()
+
+        symbols = [ticker[0] for ticker in tickers]
+        symbols = list(filter(lambda symbol: symbol.find('-') == -1, symbols))
         symbols.sort()
-        return set(symbols[:SYMBOLS_LIMIT])
-
-    @property
-    def supported_exchanges(self):
-        return ['nyse', 'nasdaq']
+        return set(MANDATORY_SYMBOLS +
+                   symbols[:SYMBOLS_LIMIT - len(MANDATORY_SYMBOLS)])
 
     async def handle_price_message(self, message):
         # Message format: {"s":"AAPL","p":161.14,"c":[12,37],"v":1,"dp":false,"t":1637573639704}
         symbol = message["s"]
         timestamp = message["t"]
         price = message["p"]
-        volume = message["v"]
+        decimal_price = Decimal(price)
+
+        volume = message.get("v") or (Decimal(message.get("q")) *
+                                      decimal_price)
+        decimal_volume = Decimal(volume)
 
         if symbol not in self._buckets:
             self._buckets[symbol] = {}
@@ -46,8 +55,6 @@ class PricesListener(AbstractPriceListener):
         """
         Fill the last available OHLC candle for the symbol.
         """
-        decimal_price = Decimal(price)
-        decimal_volume = Decimal(volume)
 
         self.logger.debug("handle_price_message key %s", key)
         async with self.records_queue_lock:
@@ -112,11 +119,36 @@ class PricesListener(AbstractPriceListener):
 
             await self.handle_price_message(message)
         except Exception as e:
-            self.logger.error('handle_message %s: %s', message_raw, e)
+            self.logger.error('handle_message %s: %s', e, message_raw)
 
     async def listen(self):
-        url = "wss://ws.eodhistoricaldata.com/ws/us?api_token=%s" % (
-            self.api_token)
+        listen_us_task = asyncio.create_task(self.listen_us())
+        listen_crypto_task = asyncio.create_task(self.listen_crypto())
+
+        await listen_us_task
+        await listen_crypto_task
+
+    async def listen_us(self):
+        symbols = filter(lambda symbol: re.search(r'\.CC$', symbol) is None,
+                         self.symbols)
+        symbols = list(symbols)
+        await self._base_listen('us', symbols)
+
+    async def listen_crypto(self):
+        symbols = list(
+            filter(lambda symbol: re.search(r'\.CC$', symbol) is not None,
+                   self.symbols))
+
+        self._rev_transform_mapping = {}
+        for symbol in symbols:
+            self._rev_transform_mapping[self.transform_symbol(symbol)] = symbol
+
+        symbols = list(
+            map(lambda symbol: self.transform_symbol(symbol), symbols))
+        await self._base_listen('crypto', symbols)
+
+    async def _base_listen(self, endpoint, symbols):
+        url = f"wss://ws.eodhistoricaldata.com/ws/{endpoint}?api_token={self.api_token}"
         first_attempt = True
 
         while True:
@@ -129,13 +161,14 @@ class PricesListener(AbstractPriceListener):
             try:
                 async for websocket in websockets.connect(url):
                     self.websocket = websocket
-                    self.logger.info("connected to websocket for symbols: %s",
-                                     ",".join(self.symbols))
+                    self.logger.info(
+                        f"connected to websocket '{endpoint}' for symbols: {','.join(symbols)}"
+                    )
                     try:
                         await websocket.send(
                             json.dumps({
                                 "action": "subscribe",
-                                "symbols": ",".join(self.symbols)
+                                "symbols": ",".join(symbols)
                             }))
                         async for message in websocket:
                             await self.handle_message(message)
@@ -157,6 +190,15 @@ class PricesListener(AbstractPriceListener):
         self.logger.error("reached the end of start func")
 
         return True
+
+    def transform_symbol(self, symbol):
+        return re.sub(r'\.CC$', '-USD', symbol)
+
+    def rev_transform_symbol(self, symbol):
+        if symbol in self._rev_transform_mapping:
+            return self._rev_transform_mapping[symbol]
+
+        return symbol
 
 
 if __name__ == "__main__":

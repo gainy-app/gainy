@@ -18,6 +18,18 @@ class PricesListener(AbstractPriceListener):
         self.api_token = POLYGON_API_TOKEN
         self.host = POLYGON_REALTIME_STREAMING_HOST
 
+    def get_symbols(self):
+        with self.db_connect() as db_conn:
+            query = """SELECT symbol FROM base_tickers
+            where symbol is not null
+              and type in ('fund', 'etf', 'mutual fund', 'preferred stock', 'common stock')"""
+
+            with db_conn.cursor() as cursor:
+                cursor.execute(query)
+                tickers = cursor.fetchall()
+
+        return set([ticker[0] for ticker in tickers])
+
     async def handle_price_message(self, message):
         # { "ev": "AM", "sym": "GTE", "v": 4110, "av": 9470157, "op": 0.4372, "vw": 0.4488, "o": 0.4488, "c": 0.4486, "h": 0.4489, "l": 0.4486, "a": 0.4352, "z": 685, "s": 1610144640000, "e": 1610144700000 }
         symbol = message["sym"]
@@ -55,7 +67,7 @@ class PricesListener(AbstractPriceListener):
 
             await self.handle_price_message(message)
         except Exception as e:
-            self.logger.error('handle_message %s: %s', message, e)
+            self.logger.error('handle_message %s: %s', e, message)
 
     async def listen(self):
         stream_client = polygon.AsyncStreamClient(self.api_token,
