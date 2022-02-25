@@ -62,8 +62,8 @@ def clean_schemas(db_conn):
             cursor.execute(query)
 
             cursor.execute(
-                "update deployment.public_schemas set deleted_at = now() where schema_name = %(schema_name)s",
-                {"schema_name": schema_name})
+                "update deployment.public_schemas set deleted_at = now() where schema_name = %(schema)s",
+                {"schema": schema})
 
 
 def clean_realtime_data(db_conn):
