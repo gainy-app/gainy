@@ -129,14 +129,14 @@ class PricesListener(AbstractPriceListener):
         await listen_crypto_task
 
     async def listen_us(self):
-        symbols = filter(lambda symbol: re.search(r'.CC$', symbol) is None,
+        symbols = filter(lambda symbol: re.search(r'\.CC$', symbol) is None,
                          self.symbols)
         symbols = list(symbols)
         await self._base_listen('us', symbols)
 
     async def listen_crypto(self):
         symbols = list(
-            filter(lambda symbol: re.search(r'.CC$', symbol) is not None,
+            filter(lambda symbol: re.search(r'\.CC$', symbol) is not None,
                    self.symbols))
 
         self._rev_transform_mapping = {}
@@ -192,7 +192,7 @@ class PricesListener(AbstractPriceListener):
         return True
 
     def transform_symbol(self, symbol):
-        return re.sub(r'.CC$', '-USD', symbol)
+        return re.sub(r'\.CC$', '-USD', symbol)
 
     def rev_transform_symbol(self, symbol):
         if symbol in self._rev_transform_mapping:
