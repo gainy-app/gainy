@@ -56,6 +56,9 @@ class GetMatchScoreByTickerList(AbstractMatchScoreAction):
         profile_id = input_params["profile_id"]
         tickers = input_params["symbols"]
 
+        if len(tickers) == 0:
+            return []
+
         return super().read_match_scores(RecommendationRepository(db_conn),
                                          profile_id, tickers)
 
