@@ -28,7 +28,7 @@ with latest_open_trading_session as (
                       and latest_open_trading_session.date = historical_prices_aggregated.datetime::date
     where period = '3min'
       and (historical_prices_aggregated.datetime between latest_open_trading_session.open_at and latest_open_trading_session.close_at
-        or base_tickers.type = 'Crypto')
+        or base_tickers.type = 'crypto')
 )
 
 union all
@@ -55,7 +55,7 @@ union all
                       and week_trading_sessions.date = historical_prices_aggregated.datetime::date
     where period = '15min'
       and (historical_prices_aggregated.datetime between week_trading_sessions.open_at and week_trading_sessions.close_at
-        or base_tickers.type = 'Crypto')
+        or base_tickers.type = 'crypto')
 )
 
 union all

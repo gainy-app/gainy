@@ -22,7 +22,7 @@ class PricesListener(AbstractPriceListener):
         with self.db_connect() as db_conn:
             query = """SELECT symbol FROM base_tickers
             where symbol is not null
-              and type in ('FUND', 'ETF', 'Preferred Stock', 'Common Stock')"""
+              and type in ('fund', 'etf', 'mutual fund', 'preferred stock', 'common stock')"""
 
             with db_conn.cursor() as cursor:
                 cursor.execute(query)
