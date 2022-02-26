@@ -8,6 +8,11 @@ resource "random_password" "rds" {
   special = false
 }
 
+resource "random_password" "rds_analytics" {
+  length  = 32
+  special = true
+}
+
 resource "aws_db_parameter_group" "default" {
   family = "postgres12"
 
@@ -80,6 +85,43 @@ resource "aws_db_instance" "db_replica" {
   tags = {
     Environment = var.env
     Replica     = "true"
+  }
+}
+
+resource "aws_db_instance" "db_analytics" {
+  count                   = var.env == "production" ? 0 : 1 # todo change to production
+  identifier              = "${var.name}-analytics-${var.env}"
+  engine                  = "postgres"
+  engine_version          = "12"
+  instance_class          = "db.t4g.small"
+  allocated_storage       = 100
+  max_allocated_storage   = 1000
+  backup_retention_period = 0
+  storage_type            = "gp2"
+  deletion_protection     = true
+  parameter_group_name    = aws_db_parameter_group.default.name
+
+  publicly_accessible = true
+
+  name     = "${var.name}_analytics"
+  username = var.name
+  port     = "5432"
+
+  password = random_password.rds_analytics.result
+
+  db_subnet_group_name      = var.db_subnet_group_name
+  vpc_security_group_ids    = [var.vpc_default_sg_id]
+  skip_final_snapshot       = true
+  final_snapshot_identifier = "${var.name}-${var.env}-final"
+
+  storage_encrypted = true
+  apply_immediately = true
+
+  performance_insights_enabled    = true
+  enabled_cloudwatch_logs_exports = ["postgresql"]
+
+  tags = {
+    Environment = var.env
   }
 }
 

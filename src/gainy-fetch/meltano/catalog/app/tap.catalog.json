@@ -1,0 +1,41 @@
+{
+  "streams": [
+    {
+      "table_name": "profiles",
+      "stream": "profiles",
+      "metadata": [
+        {
+          "breadcrumb": [],
+          "metadata": {
+            "replication-key": "id",
+            "replication-method": "INCREMENTAL",
+            "table-key-properties": [ "id" ],
+            "schema-name": "app",
+            "database-name": "gainy",
+            "inclusion": "available",
+            "selected": true,
+            "selected-by-default": false
+          }
+        },
+        {
+          "breadcrumb": [ "properties", "first_name" ],
+          "metadata": { "inclusion": "available", "selected": false }
+        },
+        {
+          "breadcrumb": [ "properties", "user_id" ],
+          "metadata": { "inclusion": "available", "selected": true }
+        }
+      ],
+      "tap_stream_id": "app-profiles",
+      "schema": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "user_id": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  ]
+}

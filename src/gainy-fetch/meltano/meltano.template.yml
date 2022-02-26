@@ -22,6 +22,7 @@ plugins:
         - name: symbols_type
         - name: split_id
         - name: split_num
+
     - name: tap-polygon
       namespace: tap_polygon
       pip_url: /tap-polygon
@@ -32,6 +33,7 @@ plugins:
         - state
       settings:
         - name: api_key
+
     - name: tap-csv
       config:
         files:
@@ -56,46 +58,65 @@ plugins:
           - entity: exchanges
             path: data/exchanges.csv
             keys: [ "name" ]
-    - name: tap-postgres--sync
+
+    # sync taps
+    - name: tap-postgres-sync
       inherit_from: tap-postgres
-      catalog: configs/raw-sync/tap.catalog.json
+      catalog: catalog/raw-sync/tap.catalog.json
       config:
         itersize: 10000
-    - name: tap-postgres--sync-fundamentals
+    - name: tap-postgres-sync-fundamentals
       inherit_from: tap-postgres
-      catalog: configs/raw-sync/tap.catalog.fundamentals.json
+      catalog: catalog/raw-sync/tap.catalog.fundamentals.json
       config:
         itersize: 1
-    - name: tap-postgres--sync-options
+    - name: tap-postgres-sync-options
       inherit_from: tap-postgres
-      catalog: configs/raw-sync/tap.catalog.options.json
+      catalog: catalog/raw-sync/tap.catalog.options.json
       config:
         itersize: 10
-    - name: tap-postgres--search
+
+    # Algolia tap
+    - name: tap-postgres-search
       inherit_from: tap-postgres
-      catalog: configs/search/tap.catalog.json
+      catalog: catalog/search/tap.catalog.json
+
+    # Analytics tap
+    - name: tap-postgres-analytics
+      inherit_from: tap-postgres
+      catalog: catalog/app/tap.catalog.json
+
   loaders:
     - name: target-postgres
       variant: transferwise
       pip_url: pipelinewise-target-postgres
+
     - name: target-postgres-small-batch
       inherit_from: target-postgres
       config:
         batch_size_rows: 100
         parallelism: 5
+
     - name: target-algolia
       namespace: target-algolia
       pip_url: /target-algolia
       config:
         app_id: $ALGOLIA_APP_ID
         api_key: $ALGOLIA_INDEXING_API_KEY
-        index_mapping_file: configs/search/search.mapping.yml
+        index_mapping_file: catalog/search/search.mapping.yml
+
+    - name: target-postgres-analytics
+      inherit_from: target-postgres
+      config:
+        default_target_schema: $TARGET_POSTGRES_ANALYTICS_SCHEMA
+
   transformers:
     - name: dbt
       pip_url: dbt-postgres==1.0.2
       config:
         target: postgres
         models: '*'
+
   orchestrators:
     - name: airflow
       pip_url: psycopg2-binary==2.9.1 apache-airflow==2.1.2 --constraint https://raw.githubusercontent.com/apache/airflow/constraints-2.1.2/constraints-${MELTANO__PYTHON_VERSION}.txt
@@ -103,6 +124,7 @@ plugins:
         core:
           sql_alchemy_conn: $AIRFLOW_DATABASE_URI
           executor: LocalExecutor
+
 schedules:
   - name: csv-to-postgres
     extractor: tap-csv
@@ -120,33 +142,6 @@ schedules:
     env:
       TARGET_ENVS: '["production","local"]'
 
-  - name: prod-to-postgres-fundamentals
-    extractor: tap-postgres--sync-fundamentals
-    loader: target-postgres-small-batch
-    transform: skip
-    interval: '@daily'
-    start_date: 2021-09-03 13:52:48.598227
-    env:
-      TARGET_ENVS: '["test"]'
-
-  - name: prod-to-postgres-options
-    extractor: tap-postgres--sync-options
-    loader: target-postgres-small-batch
-    transform: skip
-    interval: '@daily'
-    start_date: 2021-09-03 13:52:48.598227
-    env:
-      TARGET_ENVS: '["test"]'
-
-  - name: prod-to-postgres
-    extractor: tap-postgres--sync
-    loader: target-postgres
-    transform: skip
-    interval: '@daily'
-    start_date: 2021-09-03 13:52:48.598227
-    env:
-      TARGET_ENVS: '["test"]'
-
   - name: eodhistoricaldata-to-postgres-0
     extractor: tap-eodhistoricaldata
     loader: target-postgres-small-batch
@@ -156,8 +151,10 @@ schedules:
     env:
       TARGET_ENVS: '["production","local"]'
 
+  # Algolia
+
   - name: postgres-to-search
-    extractor: tap-postgres--search
+    extractor: tap-postgres-search
     loader: target-algolia
     transform: skip
     interval: '@daily'
@@ -165,3 +162,43 @@ schedules:
     env:
       TARGET_ENVS: '["production","test"]'
       INTEGRATION: 'DOWNSTREAM'
+
+  # Analytics
+
+  - name: postgres-to-analytics
+    extractor: tap-postgres-analytics
+    loader: target-postgres-analytics
+    transform: skip
+    interval: '@daily'
+    start_date: 2021-11-15 00:00:00.000000
+    env:
+      TARGET_ENVS: '[]'
+
+  # sync test db
+
+  - name: prod-to-postgres-fundamentals
+    extractor: tap-postgres-sync-fundamentals
+    loader: target-postgres-small-batch
+    transform: skip
+    interval: '@daily'
+    start_date: 2021-09-03 13:52:48.598227
+    env:
+      TARGET_ENVS: '["test"]'
+
+  - name: prod-to-postgres-options
+    extractor: tap-postgres-sync-options
+    loader: target-postgres-small-batch
+    transform: skip
+    interval: '@daily'
+    start_date: 2021-09-03 13:52:48.598227
+    env:
+      TARGET_ENVS: '["test"]'
+
+  - name: prod-to-postgres
+    extractor: tap-postgres-sync
+    loader: target-postgres
+    transform: skip
+    interval: '@daily'
+    start_date: 2021-09-03 13:52:48.598227
+    env:
+      TARGET_ENVS: '["test"]'
