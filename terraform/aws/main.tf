@@ -139,6 +139,12 @@ module "ecs-service" {
   pg_production_internal_sync_username = var.pg_production_internal_sync_username
   pg_production_internal_sync_password = var.pg_production_internal_sync_password
 
+  pg_analytics_host     = length(module.rds.db_analytics) > 0 ? module.rds.db_analytics[0].address : null
+  pg_analytics_port     = length(module.rds.db_analytics) > 0 ? module.rds.db_analytics[0].port : null
+  pg_analytics_username = length(module.rds.db_analytics) > 0 ? module.rds.db_analytics[0].username : null
+  pg_analytics_password = length(module.rds.db_analytics) > 0 ? module.rds.db_analytics[0].password : null
+  pg_analytics_dbname   = length(module.rds.db_analytics) > 0 ? module.rds.db_analytics[0].name : null
+
   eodhistoricaldata_jobs_count = local.meltano_eodhistoricaldata_jobs_count
   scheduler_cpu_credits        = local.meltano_scheduler_cpu_credits
   scheduler_memory_credits     = local.meltano_scheduler_memory_credits

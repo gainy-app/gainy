@@ -59,6 +59,8 @@ plugins:
             path: data/exchanges.csv
             keys: [ "name" ]
 
+    - name: tap-postgres
+
     # sync taps
     - name: tap-postgres-sync
       inherit_from: tap-postgres
@@ -66,12 +68,12 @@ plugins:
       config:
         itersize: 10000
     - name: tap-postgres-sync-fundamentals
-      inherit_from: tap-postgres
+      inherit_from: tap-postgres-sync
       catalog: catalog/raw-sync/tap.catalog.fundamentals.json
       config:
         itersize: 1
     - name: tap-postgres-sync-options
-      inherit_from: tap-postgres
+      inherit_from: tap-postgres-sync
       catalog: catalog/raw-sync/tap.catalog.options.json
       config:
         itersize: 10

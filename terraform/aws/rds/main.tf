@@ -131,3 +131,6 @@ output "db_instance" {
 output "db_replica" {
   value = aws_db_instance.db_replica
 }
+output "db_analytics" {
+  value = aws_db_instance.db_analytics
+}
