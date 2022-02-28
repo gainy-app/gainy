@@ -9,8 +9,9 @@ resource "random_password" "rds" {
 }
 
 resource "random_password" "rds_analytics" {
-  length  = 32
-  special = true
+  length           = 32
+  special          = true
+  override_special = "/@\" "
 }
 
 resource "aws_db_parameter_group" "default" {
