@@ -87,6 +87,8 @@ plugins:
     - name: tap-postgres-analytics
       inherit_from: tap-postgres
       catalog: catalog/app/tap.catalog.json
+      config:
+        filter_schemas: app
 
   loaders:
     - name: target-postgres
