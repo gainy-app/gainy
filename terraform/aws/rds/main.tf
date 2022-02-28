@@ -48,7 +48,7 @@ resource "aws_db_instance" "db_instance" {
 
   password = random_password.rds.result
 
-  private_subnet_group_name = var.private_subnet_group_name
+  db_subnet_group_name      = var.private_subnet_group_name
   vpc_security_group_ids    = [var.vpc_default_sg_id]
   skip_final_snapshot       = var.env == "production" ? false : true
   final_snapshot_identifier = "${var.name}-${var.env}-final"
@@ -110,7 +110,7 @@ resource "aws_db_instance" "db_analytics" {
 
   password = random_password.rds_analytics.result
 
-  private_subnet_group_name = var.public_subnet_group_name
+  db_subnet_group_name      = var.public_subnet_group_name
   vpc_security_group_ids    = [var.vpc_default_sg_id]
   skip_final_snapshot       = true
   final_snapshot_identifier = "${var.name}-${var.env}-final"
