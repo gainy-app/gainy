@@ -1,6 +1,7 @@
 variable "name" {}
 variable "env" {}
-variable "db_subnet_group_name" {}
+variable "private_subnet_group_name" {}
+variable "public_subnet_group_name" {}
 variable "vpc_default_sg_id" {}
 
 resource "random_password" "rds" {
@@ -47,7 +48,7 @@ resource "aws_db_instance" "db_instance" {
 
   password = random_password.rds.result
 
-  db_subnet_group_name      = var.db_subnet_group_name
+  private_subnet_group_name = var.private_subnet_group_name
   vpc_security_group_ids    = [var.vpc_default_sg_id]
   skip_final_snapshot       = var.env == "production" ? false : true
   final_snapshot_identifier = "${var.name}-${var.env}-final"
@@ -109,7 +110,7 @@ resource "aws_db_instance" "db_analytics" {
 
   password = random_password.rds_analytics.result
 
-  db_subnet_group_name      = var.db_subnet_group_name
+  private_subnet_group_name = var.public_subnet_group_name
   vpc_security_group_ids    = [var.vpc_default_sg_id]
   skip_final_snapshot       = true
   final_snapshot_identifier = "${var.name}-${var.env}-final"

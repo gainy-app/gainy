@@ -62,11 +62,12 @@ module "ecs" {
 }
 
 module "rds" {
-  source               = "./rds"
-  env                  = var.env
-  db_subnet_group_name = module.ecs.db_subnet_group_name
-  name                 = "gainy"
-  vpc_default_sg_id    = module.ecs.vpc_default_sg_id
+  source                    = "./rds"
+  env                       = var.env
+  private_subnet_group_name = module.ecs.private_subnet_group_name
+  public_subnet_group_name  = module.ecs.public_subnet_group_name
+  name                      = "gainy"
+  vpc_default_sg_id         = module.ecs.vpc_default_sg_id
 }
 
 module "elasticache" {

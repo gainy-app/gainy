@@ -7,6 +7,8 @@ mapping = [
     ('random_password.airflow', 'result'),
     ('random_password.hasura', 'result'),
     ('random_password.internal_sync_postgres', 'result'),
+    ('random_password.rds_analytics', 'result'),
+    ('random_integer.rds_analytics_port', 'result'),
     ('tls_private_key.bridge', 'private_key_pem'),
 ]
 

@@ -5,6 +5,11 @@ variable "aws_zones" {
 variable "instance_type" {}
 variable "vpc_index" {}
 
+resource "random_integer" "rds_analytics_port" {
+  min = 10000
+  max = 60000
+}
+
 /*
  * Determine most recent ECS optimized AMI
  */
@@ -218,6 +223,14 @@ resource "aws_security_group_rule" "bridge-elasticache" {
   security_group_id = data.aws_security_group.vpc_default_sg.id
   cidr_blocks       = ["10.0.0.0/8"]
 }
+resource "aws_security_group_rule" "rds-analytics" {
+  type              = "ingress"
+  from_port         = random_integer.rds_analytics_port.result
+  to_port           = 5432
+  protocol          = "tcp"
+  security_group_id = data.aws_security_group.vpc_default_sg.id
+  cidr_blocks       = ["0.0.0.0/0"]
+}
 
 /*
  * Create public and private subnets for each availability zone
@@ -314,6 +327,10 @@ resource "aws_route_table_association" "public_route" {
 resource "aws_db_subnet_group" "db_subnet_group" {
   name       = "db-subnet-${var.env}"
   subnet_ids = aws_subnet.private_subnet.*.id
+}
+resource "aws_db_subnet_group" "public_subnet_group_name" {
+  name       = "public-subnet-${var.env}"
+  subnet_ids = aws_subnet.public_subnet.*.id
 }
 
 /*
@@ -429,8 +446,11 @@ resource "aws_security_group" "public_http" {
 output "aws_zones" {
   value = [var.aws_zones]
 }
-output "db_subnet_group_name" {
+output "private_subnet_group_name" {
   value = aws_db_subnet_group.db_subnet_group.name
+}
+output "public_subnet_group_name" {
+  value = aws_db_subnet_group.public_subnet_group_name.name
 }
 output "aws_cloudwatch_log_group" {
   value = aws_cloudwatch_log_group.this
