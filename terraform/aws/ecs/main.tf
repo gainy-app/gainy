@@ -4,11 +4,7 @@ variable "aws_zones" {
 }
 variable "instance_type" {}
 variable "vpc_index" {}
-
-resource "random_integer" "rds_analytics_port" {
-  min = 10000
-  max = 60000
-}
+variable "db_analytics_port" {}
 
 /*
  * Determine most recent ECS optimized AMI
@@ -225,8 +221,8 @@ resource "aws_security_group_rule" "bridge-elasticache" {
 }
 resource "aws_security_group_rule" "rds-analytics" {
   type              = "ingress"
-  from_port         = random_integer.rds_analytics_port.result
-  to_port           = 5432
+  from_port         = var.db_analytics_port
+  to_port           = var.db_analytics_port
   protocol          = "tcp"
   security_group_id = data.aws_security_group.vpc_default_sg.id
   cidr_blocks       = ["0.0.0.0/0"]

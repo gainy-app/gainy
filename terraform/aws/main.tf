@@ -3,6 +3,11 @@ locals {
   deployment_key = local.timestamp
 }
 
+resource "random_integer" "db_analytics_port" {
+  min = 10000
+  max = 60000
+}
+
 module "s3" {
   source = "./s3"
   env    = var.env
@@ -55,10 +60,11 @@ module "lambda" {
 }
 
 module "ecs" {
-  source        = "./ecs"
-  env           = var.env
-  instance_type = local.ecs_instance_type
-  vpc_index     = index(["production", "test"], var.env)
+  source            = "./ecs"
+  env               = var.env
+  instance_type     = local.ecs_instance_type
+  vpc_index         = index(["production", "test"], var.env)
+  db_analytics_port = random_integer.db_analytics_port.result
 }
 
 module "rds" {
@@ -68,6 +74,7 @@ module "rds" {
   public_subnet_group_name  = module.ecs.public_subnet_group_name
   name                      = "gainy"
   vpc_default_sg_id         = module.ecs.vpc_default_sg_id
+  db_analytics_port         = random_integer.db_analytics_port.result
 }
 
 module "elasticache" {

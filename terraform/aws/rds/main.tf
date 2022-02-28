@@ -3,6 +3,7 @@ variable "env" {}
 variable "private_subnet_group_name" {}
 variable "public_subnet_group_name" {}
 variable "vpc_default_sg_id" {}
+variable "db_analytics_port" {}
 
 resource "random_password" "rds" {
   length  = 16
@@ -106,7 +107,7 @@ resource "aws_db_instance" "db_analytics" {
 
   name     = "${var.name}_analytics"
   username = var.name
-  port     = "5432"
+  port     = var.db_analytics_port
 
   password = random_password.rds_analytics.result
 
