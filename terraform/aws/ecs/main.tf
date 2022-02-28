@@ -177,8 +177,8 @@ resource "aws_vpc" "vpc" {
   tags = {
     Name = "gainy-${var.env}"
   }
-  #  enable_dns_hostnames = true
-  #  enable_dns_support   = true
+  enable_dns_hostnames = true
+  enable_dns_support   = true
 }
 
 /*

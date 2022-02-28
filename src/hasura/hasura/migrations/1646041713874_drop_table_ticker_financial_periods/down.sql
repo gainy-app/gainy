@@ -1,3 +1,1 @@
--- Could not auto-generate a down migration.
--- Please write an appropriate down migration for the SQL below:
--- drop table app.ticker_financial_periods;
+CREATE TABLE "app"."ticker_financial_periods" ("id" serial NOT NULL, "period" varchar NOT NULL, PRIMARY KEY ("id") );
