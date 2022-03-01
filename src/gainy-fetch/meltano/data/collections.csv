@@ -137,7 +137,6 @@ Nuclear energy stocks,1,135,https://gainy-collections-production.s3.amazonaws.co
 Oil ETF,2,136,https://gainy-collections-production.s3.amazonaws.com/oil%20etf.png,,0,0,"where (ct.ttype ilike 'ETF') AND (ct.g_industry ilike any(array['Oil & Gas Producer', 'Oil & Gas Services']))"
 Oil short ETF,1,137,https://gainy-collections-production.s3.amazonaws.com/oil%20short%20etf.png,,0,0,
 Oil stocks,1,138,https://gainy-collections-production.s3.amazonaws.com/oil%20stocks.png,Oil producers,1,0,"where (ct.ttype ilike 'common stock') AND (ct.g_industry ilike any(array['Oil & Gas Producer', 'Oil & Gas Services']))"
-Penny stocks,2,139,https://gainy-collections-production.s3.amazonaws.com/penny%20stocks.png,Best Penny stocks,0,0,where (ct.ttype ilike 'common stock' AND ct.investcat ilike 'Penny')
 Pharmaceuticals,1,140,https://gainy-collections-production.s3.amazonaws.com/pharmaceutical%20stocks.png,Pharmaceutical companies,1,0,"where (ct.ttype ilike 'common stock') AND (ct.g_industry ilike any(array['Health Supplements', 'Medical/Cosmetic Ingredients', 'Pharmaceuticals', 'Pharmacies', 'Nutrition & Health']))"
 Pink sheets stocks,1,141,https://gainy-collections-production.s3.amazonaws.com/pink%20sheets%20stocks.png,,0,0,
 Precious metals stocks,1,142,https://gainy-collections-production.s3.amazonaws.com/precious%20metals%20stocks.png,Precious metals mining companies,1,0,"where (ct.ttype ilike 'common stock') AND (ct.g_industry ilike any(array['Precious Metal Trading', 'Gold & Silver']))"
