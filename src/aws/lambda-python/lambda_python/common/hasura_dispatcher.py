@@ -28,14 +28,13 @@ class HasuraDispatcher(ABC):
         request = self.extract_request(event)
 
         with psycopg2.connect(self.db_conn_string) as db_conn:
-            self._ensure_schema_selected(db_conn)
             try:
                 response = self.apply(db_conn, request, headers)
 
                 return self.format_response(200, response)
             except HasuraActionException as he:
-                print(f"event: {event}")
-                traceback.print_exc()
+                print(f"{he.http_code} {he.message}. event: {event}")
+
                 return self.format_response(he.http_code, {
                     "message": he.message,
                     "code": he.http_code
@@ -99,35 +98,6 @@ class HasuraDispatcher(ABC):
         if user_id != hasura_user_id:
             raise HasuraActionException(
                 401, f"Unauthorized access to profile `{profile_id}`")
-
-    def _ensure_schema_selected(self, db_conn):
-        with db_conn.cursor() as cursor:
-            for extension_name in ['pgcrypto']:
-                query = sql.SQL('''DO
-                     $$
-                         DECLARE
-                         BEGIN
-                             if exists(
-                                     select pg_extension.extname
-                                     from pg_extension
-                                              join pg_namespace on pg_namespace.oid = pg_extension.extnamespace
-                                     where extname = %(extension_name)s
-                                       and pg_namespace.nspname != %(schema_name)s
-                                 ) then
-                                 DROP EXTENSION if exists {extension_name};
-                                 CREATE EXTENSION IF NOT EXISTS {extension_name} WITH SCHEMA {schema_name};
-                             END if;
-                         END
-                     $$''')
-                query = query.format(
-                    schema_name=sql.Identifier(self.public_schema_name),
-                    extension_name=sql.Identifier(extension_name))
-
-                cursor.execute(
-                    query, {
-                        'schema_name': self.public_schema_name,
-                        'extension_name': extension_name
-                    })
 
 
 class HasuraActionDispatcher(HasuraDispatcher):

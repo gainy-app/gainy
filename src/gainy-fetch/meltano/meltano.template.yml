@@ -15,8 +15,11 @@ plugins:
         - name: api_token
         - name: exchanges
           kind: array
+        - name: exchange_symbols_limit
+          kind: integer
         - name: symbols
           kind: array
+        - name: symbols_type
         - name: split_id
         - name: split_num
     - name: tap-polygon
@@ -89,7 +92,7 @@ plugins:
         index_mapping_file: configs/search/search.mapping.yml
   transformers:
     - name: dbt
-      pip_url: dbt==0.21.1
+      pip_url: dbt-postgres==1.0.2
       config:
         target: postgres
         models: '*'

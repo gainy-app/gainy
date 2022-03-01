@@ -1,38 +1,4 @@
-# Prerequisites
+# Flow
 
-1. Install docker and docker-compose
-2. Grab api token for eodhistoricaldata
-
-# Running locally
-
-1. Edit .env file and replace XXX with eodhistoricaldata api token
-
-```bash
-docker-compose build
-docker-compose up
-```
-
-# Executing commands
-
-After this you can visit http://localhost:5000 to see meltano console
-
-To trigger scheduled ETL pipeline via console open separate terminal window and execute
-
-```bash
-docker-compose exec meltano meltano schedule run eodhistoricaldata-to-postgres
-```
-
-To connect to local postgresql database
-
-```
-psql -h localhost -U postgres # and enter postgrespassword
-```
-
-# Running against production (assuming you have access to heroku)
-
-```bash
-cd ../..
-export `heroku config -a gainy-fetch-dev -s`
-docker-compose up meltano -d 
-docker-compose exec meltano meltano schedule run eodhistoricaldata-to-postgres # to run stage 0 of load
-```
+1. scripts/generate_config.py generates config for give env on start up. It takes into account either `symbols.$ENV.json` or `exchanges.$ENV.json`.
+2. Airflow dags are generated based on dag files in the `orchestrate` directory. Airflow schedules and runs the specified dags via its scheduler and is configured via a web interface.

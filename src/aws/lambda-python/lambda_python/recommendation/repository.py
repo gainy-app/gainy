@@ -34,7 +34,8 @@ class RecommendationRepository(Repository):
         vectors = self._query_vectors(_profile_category_vector_query,
                                       {"profile_id": profile_id})
         if not vectors:
-            raise HasuraActionException(400, f"Profile {profile_id} not found")
+            return None
+
         return vectors[0]
 
     def read_profile_interest_vectors(self, profile_id) -> List[DimVector]:

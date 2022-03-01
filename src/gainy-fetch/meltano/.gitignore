@@ -3,3 +3,4 @@
 .env
 /meltano.yml
 /symbols.local.json
+/exchanges.local.json
