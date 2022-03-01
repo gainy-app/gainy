@@ -115,11 +115,9 @@ clean = BashOperator(
     bash_command=f"cd {project_root}; python3 scripts/cleanup.py",
     dag=dag)
 
-recommendation = BashOperator(
-    task_id="update-recommendations",
-    bash_command="gainy_recommendation",
-    dag=dag
-)
+recommendation = BashOperator(task_id="update-recommendations",
+                              bash_command="gainy_recommendation",
+                              dag=dag)
 
 # dependencies
 upstream >> dbt >> downstream >> recommendation

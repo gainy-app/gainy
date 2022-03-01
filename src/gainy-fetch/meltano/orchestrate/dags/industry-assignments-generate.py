@@ -23,21 +23,18 @@ DEFAULT_ARGS = {
 
 dag_id = "industry-assignments-generator"
 tags = ["gainy-compute", "mlflow", "inference"]
-dag = DAG(
-    dag_id,
-    tags=tags,
-    catchup=False,
-    default_args=DEFAULT_ARGS,
-    schedule_interval=None,
-    max_active_runs=1,
-    is_paused_upon_creation=True
-)
+dag = DAG(dag_id,
+          tags=tags,
+          catchup=False,
+          default_args=DEFAULT_ARGS,
+          schedule_interval=None,
+          max_active_runs=1,
+          is_paused_upon_creation=True)
 
 industry_assignments_generator = BashOperator(
     task_id="industry-assignments-generator",
     bash_command="gainy_industry_assignment predict",
-    dag=dag
-)
+    dag=dag)
 
 # register the dag
 globals()[dag_id] = dag
