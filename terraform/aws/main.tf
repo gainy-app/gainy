@@ -1,5 +1,6 @@
 locals {
-  timestamp = formatdate("YYMMDDhhmmss", timestamp())
+  timestamp      = formatdate("YYMMDDhhmmss", timestamp())
+  deployment_key = local.timestamp
 }
 
 module "s3" {
@@ -26,9 +27,11 @@ module "lambda" {
   pg_password                 = module.rds.db_instance.password
   pg_port                     = module.rds.db_instance.port
   pg_username                 = module.rds.db_instance.username
+  public_schema_name          = module.ecs-service.public_schema_name
   container_repository        = aws_ecr_repository.default.name
   vpc_security_group_ids      = [module.ecs.vpc_default_sg_id]
   vpc_subnet_ids              = module.ecs.private_subnet_ids
+  deployment_key              = local.deployment_key
   datadog_api_key             = var.datadog_api_key
   datadog_app_key             = var.datadog_app_key
   hasura_url                  = module.ecs-service.hasura_url
@@ -37,14 +40,18 @@ module "lambda" {
   base_image_registry_address = var.base_image_registry_address
   base_image_version          = var.base_image_version
 
-  plaid_client_id = var.plaid_client_id
-  plaid_secret    = var.plaid_secret
-  plaid_env       = var.plaid_env
+  plaid_client_id          = var.plaid_client_id
+  plaid_secret             = var.plaid_secret
+  plaid_development_secret = var.plaid_development_secret
+  plaid_env                = var.plaid_env
 
   algolia_tickers_index     = var.algolia_tickers_index
   algolia_collections_index = var.algolia_collections_index
   algolia_app_id            = var.algolia_app_id
   algolia_search_key        = var.algolia_search_key
+
+  redis_cache_host = module.elasticache.redis_cache_host
+  redis_cache_port = module.elasticache.redis_cache_port
 
   codeartifact_pipy_url     = var.codeartifact_pipy_url
 }
@@ -63,6 +70,13 @@ module "rds" {
   db_subnet_group_name = module.ecs.db_subnet_group_name
   name                 = "gainy"
   vpc_default_sg_id    = module.ecs.vpc_default_sg_id
+}
+
+module "elasticache" {
+  source             = "./elasticache"
+  env                = var.env
+  vpc_default_sg_id  = module.ecs.vpc_default_sg_id
+  private_subnet_ids = module.ecs.private_subnet_ids
 }
 
 module "vpc_bridge" {
@@ -102,6 +116,7 @@ module "ecs-service" {
   private_subnet_ids   = module.ecs.private_subnet_ids
 
   aws_lambda_api_gateway_endpoint = module.lambda.aws_apigatewayv2_api_endpoint
+  deployment_key                  = local.deployment_key
   hasura_enable_console           = "true"
   hasura_enable_dev_mode          = "true"
   hasura_jwt_secret               = var.hasura_jwt_secret

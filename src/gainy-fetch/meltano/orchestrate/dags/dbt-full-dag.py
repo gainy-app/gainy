@@ -50,7 +50,7 @@ dag = DAG(dag_id,
           max_active_runs=1,
           is_paused_upon_creation=True)
 dbt = BashOperator(
-    task_id="dbt-portfolio",
+    task_id="dbt",
     bash_command=
     f"cd {project_root}; {meltano_bin} invoke dbt run --full-refresh",
     dag=dag,

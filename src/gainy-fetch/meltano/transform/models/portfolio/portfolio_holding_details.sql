@@ -17,8 +17,9 @@ with first_purchase_date as
                    date
              from {{ source('app', 'profile_portfolio_transactions') }}
                       join {{ source('app', 'profile_holdings') }}
-                           on profile_holdings.profile_id = profile_portfolio_transactions.profile_id and
-                              profile_holdings.security_id = profile_portfolio_transactions.security_id
+                           on profile_holdings.profile_id = profile_portfolio_transactions.profile_id
+                               and profile_holdings.security_id = profile_portfolio_transactions.security_id
+                               and profile_holdings.account_id = profile_portfolio_transactions.account_id
              order by profile_holdings.id, date
          ),
      next_earnings_date as
@@ -36,27 +37,29 @@ with first_purchase_date as
              from (
                       select profile_holdings.id                                                                                                             as holding_id,
                              quantity_sign,
-                             datetime,
+                             date,
                              min(cumsum)
-                             over (partition by t.profile_id, t.security_id order by t.quantity_sign, datetime rows between current row and unbounded following) as ltt_quantity_total
+                             over (partition by t.profile_id, t.security_id order by t.quantity_sign, date rows between current row and unbounded following) as ltt_quantity_total
                       from (
                                select portfolio_expanded_transactions.profile_id,
                                       security_id,
-                                      datetime,
+                                      portfolio_expanded_transactions.account_id,
+                                      date,
                                       sign(quantity_norm)                                                                                            as quantity_sign,
                                       sum(quantity_norm)
-                                      over (partition by security_id, portfolio_expanded_transactions.profile_id order by sign(quantity_norm), datetime) as cumsum
+                                      over (partition by security_id, portfolio_expanded_transactions.profile_id order by sign(quantity_norm), date) as cumsum
                                from {{ ref('portfolio_expanded_transactions') }}
                                         join {{ ref('portfolio_securities_normalized') }}
                                              on portfolio_securities_normalized.id = portfolio_expanded_transactions.security_id
                                where portfolio_expanded_transactions.type in ('buy', 'sell')
                            ) t
                                join {{ source('app', 'profile_holdings') }}
-                                    on profile_holdings.profile_id = t.profile_id and
-                                       profile_holdings.security_id = t.security_id
+                                    on profile_holdings.profile_id = t.profile_id
+                                        and profile_holdings.security_id = t.security_id
+                                        and profile_holdings.account_id = t.account_id
                   ) t
-             where datetime < now() - interval '1 year'
-             order by holding_id, quantity_sign desc, datetime desc
+             where date < now() - interval '1 year'
+             order by holding_id, quantity_sign desc, date desc
          )
 select profile_holdings_normalized.holding_id,
        portfolio_securities_normalized.original_ticker_symbol as ticker_symbol,
@@ -65,7 +68,8 @@ select profile_holdings_normalized.holding_id,
        relative_gain_total,
        relative_gain_1d,
        portfolio_holding_gains.value_to_portfolio_value,
-       coalesce(ticker_options.name, base_tickers.name)       as ticker_name,
+       coalesce(ticker_options.name, base_tickers.name,
+                portfolio_securities_normalized.name)         as ticker_name,
        ticker_metrics.market_capitalization,
        next_earnings_date.date::timestamp                     as next_earnings_date,
        portfolio_securities_normalized.type                   as security_type,

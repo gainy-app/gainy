@@ -1,2 +1,2 @@
 /meltano/transform/models/ticker_collections.sql
-/meltano/transform/models/ticker_interests.sql
+/meltano/transform/models/interest_industries.sql

@@ -7,6 +7,7 @@ from common.hasura_exception import HasuraActionException
 
 PLAID_CLIENT_ID = os.getenv('PLAID_CLIENT_ID')
 PLAID_SECRET = os.getenv('PLAID_SECRET')
+PLAID_DEVELOPMENT_SECRET = os.getenv('PLAID_DEVELOPMENT_SECRET')
 PLAID_ENV = os.getenv('PLAID_ENV')
 PLAID_HOSTS = {
     'sandbox': plaid.Environment.Sandbox,
@@ -17,14 +18,19 @@ PLAID_HOSTS = {
 if PLAID_ENV not in PLAID_HOSTS:
     raise Error('Wrong plaid env %s, available options are: %s' %
                 (PLAID_ENV, ",".join(keys(PLAID_HOSTS))))
-PLAID_HOST = PLAID_HOSTS[PLAID_ENV]
 
 
-def get_plaid_client():
-    configuration = plaid.Configuration(host=PLAID_HOST,
+def get_plaid_client(env=None):
+    if env is None:
+        env = PLAID_ENV
+
+    host = PLAID_HOSTS[env]
+    secret = PLAID_DEVELOPMENT_SECRET if env == 'development' and PLAID_DEVELOPMENT_SECRET else PLAID_SECRET
+
+    configuration = plaid.Configuration(host=host,
                                         api_key={
                                             'clientId': PLAID_CLIENT_ID,
-                                            'secret': PLAID_SECRET,
+                                            'secret': secret,
                                         })
 
     api_client = plaid.ApiClient(configuration)

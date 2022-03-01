@@ -5,7 +5,10 @@ Industry Name,Code
 3D Printing,VJET
 3D Printing,XONE
 Advanced Materials,CPSH
+Advanced Materials,HUN
 Advanced Materials,IVAC
+Advanced Materials,MMAT
+Advanced Materials,PYR
 Advanced Materials,RBCN
 Advanced Materials,SGOC
 Aerospace & Defense,ATRO
@@ -14,6 +17,7 @@ Aerospace & Defense,ESLT
 Aerospace & Defense,ISSC
 Aerospace & Defense,MRCY
 Aerospace & Defense,RADA
+Aerospace & Defense,SPCE
 Aerospace & Defense,TATT
 Aerospace & Defense,ULBI
 Aerospace & Defense,VSEC
@@ -39,6 +43,7 @@ Aircraft Leasing,WLFC
 Airlines,AAL
 Airlines,AAWW
 Airlines,ALGT
+Airlines,DAL
 Airlines,HA
 Airlines,JBLU
 Airlines,MESA
@@ -57,6 +62,7 @@ Analytics and AI,LKCO
 Analytics and AI,MARK
 Analytics and AI,MSTR
 Analytics and AI,NUAN
+Analytics and AI,PLTR
 Analytics and AI,SPLK
 Analytics and AI,SUMO
 Analytics and AI,TLND
@@ -71,6 +77,7 @@ Animal health,PAHC
 Animal health,PDCO
 Animal health,SNES
 Animal health,YTEN
+Animal health,ZOM
 Animals Health insurance,TRUP
 Apparel Manufacturing & Retail,CROX
 Apparel Manufacturing & Retail,CTRN
@@ -82,7 +89,9 @@ Apparel Manufacturing & Retail,HIBB
 Apparel Manufacturing & Retail,ICON
 Apparel Manufacturing & Retail,KBSF
 Apparel Manufacturing & Retail,LE
+Apparel Manufacturing & Retail,M
 Apparel Manufacturing & Retail,NAKD
+Apparel Manufacturing & Retail,NKE
 Apparel Manufacturing & Retail,PLCE
 Apparel Manufacturing & Retail,POSH
 Apparel Manufacturing & Retail,RCKY
@@ -108,7 +117,14 @@ Auto Financing,AIHS
 Auto Financing,CACC
 Auto Financing,CPSS
 Auto Financing,NICK
+Auto Manufacturers,F
+Auto Manufacturers,GM
+Auto Manufacturers,HMC
 Auto Manufacturers,PCAR
+Auto Manufacturers,RACE
+Auto Manufacturers,STLA
+Auto Manufacturers,TM
+Auto Manufacturers,TTM
 Auto Marketplace,AUTO
 Auto Marketplace,CARG
 Auto Marketplace,CPRT
@@ -143,6 +159,7 @@ Auto Parts & Services,VC
 Auto Parts & Services,VOXX
 Auto Parts & Services,WPRT
 Auto Parts & Services,XPEL
+Autoimmune disease,ABBV
 Autoimmune disease,AKTX
 Autoimmune disease,AMGN
 Autoimmune disease,BBIO
@@ -173,8 +190,10 @@ Banks,ASRV
 Banks,ATLO
 Banks,AUB
 Banks,AUBN
+Banks,BAC
 Banks,BANF
 Banks,BANR
+Banks,BBD
 Banks,BCBP
 Banks,BCML
 Banks,BCOW
@@ -197,6 +216,7 @@ Banks,BUSE
 Banks,BWB
 Banks,BWFG
 Banks,BYFC
+Banks,C
 Banks,CAC
 Banks,CALB
 Banks,CARE
@@ -315,6 +335,7 @@ Banks,HMST
 Banks,HOMB
 Banks,HONE
 Banks,HOPE
+Banks,HSBC
 Banks,HTBI
 Banks,HTBK
 Banks,HTLF
@@ -330,6 +351,8 @@ Banks,INDB
 Banks,IROQ
 Banks,ISBC
 Banks,ISTR
+Banks,ITUB
+Banks,JPM
 Banks,KFFB
 Banks,KRNY
 Banks,LARK
@@ -414,6 +437,7 @@ Banks,RNDB
 Banks,RNST
 Banks,RRBI
 Banks,RVSB
+Banks,RY
 Banks,SAL
 Banks,SASR
 Banks,SBCF
@@ -445,6 +469,7 @@ Banks,TBNK
 Banks,TCBI
 Banks,TCBK
 Banks,TCFC
+Banks,TD
 Banks,TFSL
 Banks,THFF
 Banks,TOWN
@@ -469,6 +494,7 @@ Banks,VLY
 Banks,WABC
 Banks,WAFD
 Banks,WASH
+Banks,WFC
 Banks,WMPN
 Banks,WNEB
 Banks,WSBC
@@ -551,6 +577,7 @@ Biopharmaceutical,BLCM
 Biopharmaceutical,BLRX
 Biopharmaceutical,BLUE
 Biopharmaceutical,BMRN
+Biopharmaceutical,BMY
 Biopharmaceutical,BNTC
 Biopharmaceutical,BPMC
 Biopharmaceutical,BTAI
@@ -669,6 +696,7 @@ Biopharmaceutical,KURA
 Biopharmaceutical,KZIA
 Biopharmaceutical,KZR
 Biopharmaceutical,LGND
+Biopharmaceutical,LGVN
 Biopharmaceutical,LIFE
 Biopharmaceutical,LIXT
 Biopharmaceutical,LJPC
@@ -713,6 +741,7 @@ Biopharmaceutical,OTLK
 Biopharmaceutical,OVID
 Biopharmaceutical,PBLA
 Biopharmaceutical,PBYI
+Biopharmaceutical,PFE
 Biopharmaceutical,PHAS
 Biopharmaceutical,PHIO
 Biopharmaceutical,PIRS
@@ -830,6 +859,7 @@ Cancer disease,PDSB
 Cancer disease,PHIOW
 Cancer disease,PSTV
 Cancer disease,PULM
+Cancer disease,QLGN
 Cancer disease,SLRX
 Cancer disease,SLS
 Cancer disease,STTK
@@ -948,12 +978,14 @@ Construction Machinery,ASTE
 Construction Machinery,GENC
 Construction Machinery,MNTX
 Construction Machinery,TITN
+Consulting Services,ACN
 Consulting Services,CRAI
 Consulting Services,EXPO
 Consulting Services,FORR
 Consulting Services,HSII
 Consulting Services,HURN
 Consulting Services,ICFI
+Consulting Services,J
 Consulting Services,NVEE
 Consulting Services,RGP
 Consulting Services,TRNS
@@ -1006,6 +1038,7 @@ Cybersecurity,PFPT
 Cybersecurity,QLYS
 Cybersecurity,RDWR
 Cybersecurity,RPD
+Cybersecurity,S
 Cybersecurity,SCWX
 Cybersecurity,SFET
 Cybersecurity,TENB
@@ -1028,6 +1061,7 @@ Debt Collections,LMFA
 Debt Collections,PFMT
 Debt Collections,PRAA
 Dermatology Pharmaceuticals,BBI
+Dermatology Pharmaceuticals,BFRI
 Dermatology Pharmaceuticals,CSTL
 Dermatology Pharmaceuticals,FBIOP
 Dermatology Pharmaceuticals,NOVN
@@ -1047,6 +1081,7 @@ Digital Content Publisher,QTT
 Digital Marketing & Advertising,ANTE
 Digital Marketing & Advertising,APPS
 Digital Marketing & Advertising,ATY
+Digital Marketing & Advertising,BABA
 Digital Marketing & Advertising,BOMN
 Digital Marketing & Advertising,CDLX
 Digital Marketing & Advertising,CNET
@@ -1108,15 +1143,19 @@ E-commerce Platforms,YJ
 Education Services,AACG
 Education Services,AFYA
 Education Services,APEI
+Education Services,EDU
 Education Services,EEIQ
 Education Services,HLG
 Education Services,HMHC
+Education Services,JW-A
 Education Services,LAUR
 Education Services,LINC
 Education Services,LOPE
+Education Services,METX
 Education Services,PRDO
 Education Services,REDU
 Education Services,STRA
+Education Services,TAL
 Education Services,TEDU
 Education Services,TWOU
 Education Services,WAFU
@@ -1125,25 +1164,48 @@ Education Technology,ASPU
 Education Technology,BOXL
 Education Technology,YQ
 Education Technology,ZVO
+Electric Vehicles,ARVL
+Electric Vehicles,AYRO
+Electric Vehicles,CENN
+Electric Vehicles,ELMS
+Electric Vehicles,FFIE
+Electric Vehicles,FSR
 Electric Vehicles,FUV
+Electric Vehicles,GOEV
+Electric Vehicles,GP
+Electric Vehicles,HYZN
+Electric Vehicles,HYZNW
 Electric Vehicles,IDEX
 Electric Vehicles,KNDI
+Electric Vehicles,LCID
 Electric Vehicles,LI
+Electric Vehicles,MULN
+Electric Vehicles,NIO
 Electric Vehicles,NIU
+Electric Vehicles,NKLA
+Electric Vehicles,PTRA
+Electric Vehicles,RIDE
+Electric Vehicles,RIVN
+Electric Vehicles,SEV
 Electric Vehicles,SOLO
 Electric Vehicles,TSLA
+Electric Vehicles,VLCN
 Electric Vehicles,VMAR
 Electric Vehicles,WKHS
+Electric Vehicles,XPEV
 Electric Vehicles charging,BLNK
 Electricity Generation,AEP
+Electricity Generation,D
 Electricity Generation,EXC
 Electricity Generation,FCEL
 Electricity Generation,HNRG
 Electricity Generation,IPLDP
 Electricity Generation,LNT
 Electricity Generation,MGEE
+Electricity Generation,NEE
 Electricity Generation,NWE
 Electricity Generation,OTTR
+Electricity Generation,PCG
 Electricity Generation,SPKE
 Electricity Generation,XEL
 Electronic Components,AMOT
@@ -1178,6 +1240,7 @@ Electronics Manufacturing,PDFS
 Electronics Manufacturing,PLXS
 Electronics Manufacturing,SANM
 Electronics Manufacturing,SGMA
+Electronics Manufacturing,SKYT
 Electronics Manufacturing,SNPS
 Electronics Manufacturing,SONO
 Electronics Manufacturing,SYPR
@@ -1208,6 +1271,7 @@ Enterprise Software and Services,CDW
 Enterprise Software and Services,CNDT
 Enterprise Software and Services,CNXC
 Enterprise Software and Services,CNXN
+Enterprise Software and Services,CRM
 Enterprise Software and Services,CSOD
 Enterprise Software and Services,CTSH
 Enterprise Software and Services,EGAN
@@ -1216,6 +1280,7 @@ Enterprise Software and Services,EVOL
 Enterprise Software and Services,EXLS
 Enterprise Software and Services,FIVN
 Enterprise Software and Services,FORTY
+Enterprise Software and Services,G
 Enterprise Software and Services,GTYH
 Enterprise Software and Services,GVP
 Enterprise Software and Services,IBEX
@@ -1229,15 +1294,18 @@ Enterprise Software and Services,MNTV
 Enterprise Software and Services,MTSL
 Enterprise Software and Services,NICE
 Enterprise Software and Services,NSIT
+Enterprise Software and Services,ORCL
 Enterprise Software and Services,OTEX
 Enterprise Software and Services,PAYX
 Enterprise Software and Services,PCTY
 Enterprise Software and Services,PEGA
+Enterprise Software and Services,PHUN
 Enterprise Software and Services,PLUS
 Enterprise Software and Services,PRGS
 Enterprise Software and Services,QADA
 Enterprise Software and Services,QADB
 Enterprise Software and Services,RMNI
+Enterprise Software and Services,SAP
 Enterprise Software and Services,SNCR
 Enterprise Software and Services,SPRT
 Enterprise Software and Services,SRAX
@@ -1249,6 +1317,7 @@ Enterprise Software and Services,SYNC
 Enterprise Software and Services,TSRI
 Enterprise Software and Services,TTEC
 Enterprise Software and Services,TTGT
+Enterprise Software and Services,U
 Enterprise Software and Services,UPLD
 Enterprise Software and Services,VERB
 Enterprise Software and Services,VRNT
@@ -1273,13 +1342,16 @@ Fiber Optics and Laser,LASR
 Fiber Optics and Laser,LITE
 Fiber Optics and Laser,LPTH
 Fiber Optics and Laser,LUNA
+Fiber Optics and Laser,LWLG
 Fiber Optics and Laser,NOVT
+Fiber Optics and Laser,NPTN
 Fiber Optics and Laser,OCC
 Fiber Optics and Laser,RFIL
 Financial and Screening Technologies,GSKY
 Financial and Screening Technologies,NCNO
 Financial Exchanges & Data,CME
 Financial Exchanges & Data,NDAQ
+Food Delivery,GRAB
 Food Delivery,GRUB
 Food Delivery,WTRH
 Fruits & Vegetables,ALCO
@@ -1315,8 +1387,10 @@ Gaming & Esports,HEAR
 Gaming & Esports,INSE
 Gaming & Esports,NGMS
 Gaming & Esports,PLAY
+Gaming & Esports,RBLX
 Gaming & Esports,SCPL
 Gaming & Esports,SGMS
+Gaming & Esports,SKLZ
 Gaming & Esports,SLGG
 Gaming & Esports,TTWO
 Gaming & Esports,YVR
@@ -1326,6 +1400,10 @@ Gastroenterological disease,IRWD
 Gastroenterological disease,JAGX
 Gastroenterological disease,PHAT
 Gastroenterological disease,RDHL
+Gold & Silver,AUY
+Gold & Silver,FCX
+Gold & Silver,GOLD
+Gold & Silver,KGC
 Gold & Silver,PAAS
 Gold & Silver,RGLD
 Gold & Silver,SSRM
@@ -1356,6 +1434,7 @@ Healthcare and COVID services,PRPO
 Healthcare and COVID services,QTNT
 Healthcare and COVID services,TRIB
 Healthcare and COVID services,XAIR
+Healthcare Finance,CLOV
 Healthcare Finance,SWKH
 Healthcare Information technology,ACCD
 Healthcare Information technology,CERN
@@ -1407,6 +1486,7 @@ Healthcare services,CHEK
 Healthcare services,DMTK
 Healthcare services,DXCM
 Healthcare services,FONR
+Healthcare services,FTRP
 Healthcare services,GENE
 Healthcare services,GH
 Healthcare services,GRFS
@@ -1429,9 +1509,11 @@ Healthcare services,RDNT
 Healthcare services,RNLX
 Healthcare services,TECH
 Healthcare services,TMDX
+Healthcare services,UNH
 Healthcare services,VIVO
 Healthcare services,VRAY
 Healthcare services,XGN
+Healthcare services & Equipment,ABT
 Healthcare services & Equipment,AHPI
 Healthcare services & Equipment,ALGN
 Healthcare services & Equipment,APEN
@@ -1496,6 +1578,7 @@ Heavy Machinery & Parts,LAWS
 Heavy Machinery & Parts,ROLL
 Heavy Machinery & Parts,TAYD
 Heavy Machinery & Parts,TPIC
+Home and Furniture retail,BBIG
 Home and Furniture retail,BSET
 Home and Furniture retail,CONN
 Home and Furniture retail,FLXS
@@ -1503,14 +1586,17 @@ Home and Furniture retail,HOFT
 Home and Furniture retail,LOVE
 Home and Furniture retail,NVFY
 Home and Furniture retail,SNBR
+Home and Furniture retail,W
 Home Construction & Maintenance,ANGI
 Home Construction & Maintenance,CVCO
 Home Construction & Maintenance,FTDR
 Home Construction & Maintenance,GRBK
+Home Construction & Maintenance,HD
 Home Construction & Maintenance,HOVNP
 Home Construction & Maintenance,LEGH
 Home Construction & Maintenance,LGIH
 Home Construction & Maintenance,LIVE
+Home Construction & Maintenance,LOW
 Home Construction & Maintenance,POOL
 Home Construction & Maintenance,TBLT
 Home Construction & Maintenance,TTSH
@@ -1522,6 +1608,7 @@ Hospitals,JYNT
 Hospitals,SGRY
 Hospitals,SMED
 Hospitals,TIG
+Hotels,H
 Hotels,HST
 Hotels,HTHT
 Hotels,INTG
@@ -1543,6 +1630,7 @@ Household Products,LCUT
 Household Products,MAT
 Household Products,NWL
 Household Products,OLLI
+Household Products,PG
 Household Products,PRPL
 Household Products,SIC
 Household Products,SUMR
@@ -1580,6 +1668,7 @@ Implants & Equipment,SIEN
 Implants & Equipment,SPNE
 Implants & Equipment,STAA
 Implants & Equipment,TNDM
+Industrial Conglomerates,BRK-B
 Industrial Conglomerates,HON
 Industrial estate investment trust,ILPT
 Industrial estate investment trust,INDT
@@ -1587,8 +1676,11 @@ Industrial estate investment trust,SBAC
 Industrial estate investment trust,SELF
 Industrial estate investment trust,UNIT
 Industrial Metals,AQMS
+Industrial Metals,BBL
+Industrial Metals,BHP
 Industrial Metals,CENX
 Industrial Metals,CHNR
+Industrial Metals,CLF
 Industrial Metals,GLG
 Industrial Metals,GSM
 Industrial Metals,HAYN
@@ -1598,6 +1690,8 @@ Industrial Metals,PLL
 Industrial Metals,SCHN
 Industrial Metals,STLD
 Industrial Metals,USAP
+Industrial Metals,VALE
+Industrial Metals,X
 Industrial Metals,ZEUS
 Industrial Metals,ZKIN
 Infrastructure Investment Fund,ATAX
@@ -1640,6 +1734,7 @@ Internet and Cellular Provider,LILAK
 Internet and Cellular Provider,OTEL
 Internet and Cellular Provider,PTNR
 Internet and Cellular Provider,SHEN
+Internet and Cellular Provider,T
 Internet and Cellular Provider,TIGO
 Internet and Cellular Provider,TMUS
 Internet and Cellular Provider,UTSI
@@ -1688,11 +1783,13 @@ IoT,VIOT
 IoT,ZBRA
 Kidney disease,RMTI
 Kidney disease,TCDA
+Laboratory Equipment,A
 Laboratory Equipment,APDN
 Laboratory Equipment,BLFS
 Laboratory Equipment,BNGO
 Laboratory Equipment,BRKR
 Laboratory Equipment,CERS
+Laboratory Equipment,DHR
 Laboratory Equipment,DRRX
 Laboratory Equipment,FLDM
 Laboratory Equipment,HBIO
@@ -1707,6 +1804,7 @@ Laboratory Equipment,QTRX
 Laboratory Equipment,SEER
 Laboratory Equipment,SINT
 Laboratory Equipment,SYNH
+Laboratory Equipment,TMO
 Laboratory Equipment,TXG
 Land & Farm estate investments,LAND
 Land & Farm estate investments,PCH
@@ -1728,6 +1826,7 @@ Lighting Systems,REFR
 Liquified Natural Gas,ALTM
 Liquified Natural Gas,CCLP
 Liquified Natural Gas,CLNE
+Liquified Natural Gas,ET
 Liquified Natural Gas,GLNG
 Liquified Natural Gas,GMLPP
 Liquified Natural Gas,MEOH
@@ -1759,6 +1858,7 @@ Man's health,AYTU
 Man's health,ENDP
 Man's health,LPCN
 Man's health,PRPH
+Maritime Transportation,CCL
 Maritime Transportation,CPLP
 Maritime Transportation,CTRM
 Maritime Transportation,EDRY
@@ -1768,6 +1868,7 @@ Maritime Transportation,GASS
 Maritime Transportation,GLBS
 Maritime Transportation,GOGL
 Maritime Transportation,GRIN
+Maritime Transportation,NCLH
 Maritime Transportation,OMEX
 Maritime Transportation,PANL
 Maritime Transportation,PATI
@@ -1813,10 +1914,15 @@ Modular Office & Storage,WSC
 Mortgage Insurance Company,NMIH
 Mortgage investments,AGNC
 Mortgage investments,LOAN
+Mortgage investments,NLY
 Mortgage investments,NYMT
 Mortgage investments,NYMTO
 Mortgage investments,NYMTP
 Mortgage investments,TRMT
+Motorcycles,BRDS
+Motorcycles,EZGO
+Motorcycles,HOG
+Motorcycles,PII
 Nanotechnology,NVEC
 Network Equipment,AAOI
 Network Equipment,ADTN
@@ -1832,6 +1938,7 @@ Network Equipment,EXFO
 Network Equipment,EXTR
 Network Equipment,INFN
 Network Equipment,JCS
+Network Equipment,NOK
 Network Equipment,NTGR
 Network Equipment,QCOM
 Network Equipment,SILC
@@ -1866,21 +1973,34 @@ Oil & Gas Producer,APA
 Oil & Gas Producer,AXAS
 Oil & Gas Producer,BRY
 Oil & Gas Producer,CDEV
+Oil & Gas Producer,CEI
 Oil & Gas Producer,CHK
+Oil & Gas Producer,CVX
 Oil & Gas Producer,DMLP
+Oil & Gas Producer,E
 Oil & Gas Producer,EPSN
 Oil & Gas Producer,FANG
 Oil & Gas Producer,FLMN
 Oil & Gas Producer,MARPS
+Oil & Gas Producer,MRO
 Oil & Gas Producer,OAS
+Oil & Gas Producer,OXY
+Oil & Gas Producer,PBR
+Oil & Gas Producer,PBR-A
+Oil & Gas Producer,PBRA
 Oil & Gas Producer,PDCE
 Oil & Gas Producer,PFIE
 Oil & Gas Producer,PNRG
 Oil & Gas Producer,PVAC
+Oil & Gas Producer,RDS-A
+Oil & Gas Producer,RDS-B
 Oil & Gas Producer,RTLR
+Oil & Gas Producer,SWN
 Oil & Gas Producer,TGA
+Oil & Gas Producer,TTE
 Oil & Gas Producer,USEG
 Oil & Gas Producer,VNOM
+Oil & Gas Producer,XOM
 Oil & Gas Services,BROG
 Oil & Gas Services,CHX
 Oil & Gas Services,CLIR
@@ -1889,6 +2009,7 @@ Oil & Gas Services,ENG
 Oil & Gas Services,ERII
 Oil & Gas Services,GEOS
 Oil & Gas Services,KLXE
+Oil & Gas Services,KMI
 Oil & Gas Services,MMLP
 Oil & Gas Services,NCSM
 Oil & Gas Services,NESR
@@ -1897,6 +2018,7 @@ Oil & Gas Services,PAGP
 Oil & Gas Services,PRIM
 Oil & Gas Services,PTEN
 Oil & Gas Services,RCON
+Oil & Gas Services,RIG
 Oil & Gas Services,SND
 Oil & Gas Services,TH
 Oil & Gas Services,TUSK
@@ -1945,16 +2067,19 @@ Payment Systems,FISV
 Payment Systems,IIIV
 Payment Systems,IMXI
 Payment Systems,JKHY
+Payment Systems,MA
 Payment Systems,MGI
 Payment Systems,NETE
 Payment Systems,PAYS
 Payment Systems,PRTH
+Payment Systems,PSFE
 Payment Systems,PYPL
 Payment Systems,QIWI
 Payment Systems,RPAY
 Payment Systems,STNE
 Payment Systems,UEPS
 Payment Systems,USIO
+Payment Systems,V
 People care,ADUS
 People care,AHCO
 People care,ALHC
@@ -2005,17 +2130,23 @@ Pharmaceuticals,HEPA
 Pharmaceuticals,HROW
 Pharmaceuticals,ITRM
 Pharmaceuticals,JAN
+Pharmaceuticals,JNJ
 Pharmaceuticals,KALA
+Pharmaceuticals,LLY
 Pharmaceuticals,MBII
 Pharmaceuticals,MDWD
 Pharmaceuticals,MIRM
 Pharmaceuticals,MREO
+Pharmaceuticals,MRK
+Pharmaceuticals,NVO
+Pharmaceuticals,NVS
 Pharmaceuticals,OMER
 Pharmaceuticals,OPK
 Pharmaceuticals,OPNT
 Pharmaceuticals,ORMP
 Pharmaceuticals,OYST
 Pharmaceuticals,PLXP
+Pharmaceuticals,PTPI
 Pharmaceuticals,REPH
 Pharmaceuticals,RPRX
 Pharmaceuticals,RVNC
@@ -2045,6 +2176,7 @@ Pharmaceuticals & Drugs discovery,RETA
 Pharmaceuticals & Drugs discovery,THTX
 Pharmaceuticals & Drugs discovery,XBIOW
 Pharmacies,CJJD
+Pharmacies,CVS
 Pharmacies,WBA
 Pharmacies,YI
 Plastics,CXDC
@@ -2063,6 +2195,7 @@ Power Generation & Distribution,VICR
 Precious Metal Trading,AMRK
 Precision manufacturing,ADSK
 Precision manufacturing,ANSS
+Precision manufacturing,B
 Precision manufacturing,CODA
 Precision manufacturing,ELSE
 Precision manufacturing,MKSI
@@ -2089,6 +2222,7 @@ Property & Casualty Insurance,ICCH
 Property & Casualty Insurance,ITIC
 Property & Casualty Insurance,KINS
 Property & Casualty Insurance,KNSL
+Property & Casualty Insurance,L
 Property & Casualty Insurance,NODK
 Property & Casualty Insurance,PLMR
 Property & Casualty Insurance,PPHI
@@ -2110,11 +2244,20 @@ Publishers,EDUC
 Publishers,LEE
 Publishers,NWS
 Publishers,NWSA
+Publishers,NYT
 Publishers,PLBY
 Publishers,SALM
 Publishers,SCHL
 Publishers,TPCO
+Rail Freight,CNI
+Rail Freight,CP
+Rail Freight,GBX
+Rail Freight,KIQ
+Rail Freight,NSC
 Rail Freight,RAIL
+Rail Freight,TRN
+Rail Freight,UNP
+Rail Freight,WAB
 Rare disease,ACER
 Rare disease,CERC
 Rare disease,CHMA
@@ -2143,6 +2286,7 @@ Real Estate Investment & Development,GYRO
 Real Estate Investment & Development,HGSH
 Real Estate Investment & Development,IRCP
 Real Estate Investment & Development,MDRR
+Real Estate Investment & Development,O
 Real Estate Investment & Development,OBAS
 Real Estate Investment & Development,RDI
 Real Estate Investment & Development,RDIB
@@ -2196,6 +2340,7 @@ Restaurants,JACK
 Restaurants,KRUS
 Restaurants,LK
 Restaurants,LOCO
+Restaurants,MCD
 Restaurants,NATH
 Restaurants,NDLS
 Restaurants,PBPB
@@ -2214,6 +2359,7 @@ Restaurants,WEN
 Restaurants,WING
 Retail Brokerage,FRHC
 Retail Brokerage,FUTU
+Retail Brokerage,HOOD
 Retail Brokerage,IBKR
 Retail Brokerage,JRJC
 Retail Brokerage,MICT
@@ -2287,12 +2433,14 @@ Semiconductor Equipments,DAIO
 Semiconductor Equipments,FORM
 Semiconductor Equipments,ICHR
 Semiconductor Equipments,IMOS
+Semiconductor Equipments,KEYS
 Semiconductor Equipments,KLAC
 Semiconductor Equipments,KLIC
 Semiconductor Equipments,LRCX
 Semiconductor Equipments,MKTY
 Semiconductor Equipments,NVMI
 Semiconductor Equipments,TER
+Semiconductor Equipments,TSM
 Semiconductor Equipments,UCTT
 Semiconductor Equipments,VECO
 Semiconductor Manufacturing,ADI
@@ -2336,7 +2484,9 @@ Semiconductor Materials,CCMP
 Semiconductor Materials,ENTG
 Semiconductor Materials,PLAB
 Sharing Economy,ABNB
+Sharing Economy,DIDI
 Sharing Economy,LYFT
+Sharing Economy,UBER
 Shell company & SPAC,ABGI
 Shell company & SPAC,ACAH
 Shell company & SPAC,ACAHU
@@ -2898,6 +3048,7 @@ Shell company & SPAC,ZWRK
 Shell company & SPAC,ZWRKU
 Sleep disorder,JAZZ
 Snacks & Candy,JJSF
+Snacks & Candy,K
 Snacks & Candy,MDLZ
 Snacks & Candy,RMCF
 Snacks & Candy,SMPL
@@ -2908,13 +3059,17 @@ Social Media,FB
 Social Media,MOMO
 Social Media,MOXC
 Social Media,MTCH
+Social Media,SNAP
+Social Media,TWTR
 Social Media,WB
 Social Media,YY
 Social Media Enterprise Software,SPT
+Soft/Sports Drink,ABEV
 Soft/Sports Drink,CELH
 Soft/Sports Drink,COKE
 Soft/Sports Drink,FIZZ
 Soft/Sports Drink,KDP
+Soft/Sports Drink,KO
 Soft/Sports Drink,MNST
 Soft/Sports Drink,PEP
 Soft/Sports Drink,REED
@@ -2933,6 +3088,7 @@ Specialty Chemicals,CLMT
 Specialty Chemicals,CSWI
 Specialty Chemicals,HDSN
 Specialty Chemicals,IOSP
+Specialty Chemicals,LIN
 Specialty Chemicals,NDSN
 Specialty Chemicals,NTIC
 Specialty Chemicals,SYNL
@@ -2955,6 +3111,7 @@ Streaming,LIVX
 Streaming,LLNW
 Streaming,NFLX
 Streaming,ROKU
+Streaming,TME
 Student Loan,NAVI
 Student Loan,SLM
 Supermarkets,CASY
@@ -2966,9 +3123,11 @@ Supermarkets,PSMT
 Supermarkets,SFM
 Supermarkets,SPTN
 Supermarkets,VLGEA
+Supermarkets,WMT
 Supply Chain Services,DXPE
 Supply Chain Services,EXPD
 Supply Chain Services,PKOH
+Supply Chain Services,UPS
 Supply Chain Technology,AMSWA
 Supply Chain Technology,BOSC
 Supply Chain Technology,COUP
@@ -3002,6 +3161,14 @@ Telecom Infrastructure,IDCC
 Telecom Infrastructure,INSG
 Telecom Infrastructure,PLPC
 Telecom Infrastructure,RBBN
+Tobacco,BTI
+Tobacco,KAVL
+Tobacco,MO
+Tobacco,PM
+Tobacco,RLX
+Tobacco,TPB
+Tobacco,UVV
+Tobacco,VGR
 Traded Growth/Venture Funds,CSWC
 Traded Growth/Venture Funds,HLNE
 Traded Growth/Venture Funds,HRZN
@@ -3059,15 +3226,18 @@ Trucking,LSTR
 Trucking,MRTN
 Trucking,ODFL
 Trucking,PTSI
+Trucking,R
 Trucking,SAIA
 Trucking,ULH
 Trucking,USAK
 Trucking,WERN
 Trucking,YELL
+TV and Radio,AMC
 TV and Radio,AMCX
 TV and Radio,BBGI
 TV and Radio,CIDM
 TV and Radio,CMLS
+TV and Radio,DIS
 TV and Radio,DISCA
 TV and Radio,DISCB
 TV and Radio,DISCK
@@ -3126,9 +3296,11 @@ Water Management,YORW
 Wealth Management,BCOR
 Wealth Management,FOCS
 Wealth Management,JFU
+Wealth Management,MS
 Wealth Management,NTRS
 Wealth Management,PHCF
 Wealth Management,PUYI
+Wealth Management,SCHW
 Wine & Liquor,EAST
 Wine & Liquor,MGPI
 Wine & Liquor,WVVI
@@ -3152,10 +3324,3 @@ Women's health,SCYX
 Women's health,TLGT
 Women's health,TXMD
 Women's health,VIVE
-Motorcycles,HOG
-Motorcycles,PII
-Motorcycles,EZGO
-Motorcycles,BRDS
-Auto Manufacturers,HMC
-Social Media,SNAP
-Auto Manufacturers,F

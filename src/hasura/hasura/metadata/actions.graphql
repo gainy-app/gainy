@@ -2,6 +2,7 @@ type Query {
   create_plaid_link_token(
     profile_id: Int!
     redirect_uri: String!
+    env: String
   ): CreatePlaidLinkTokenOutput
 }
 
@@ -47,6 +48,19 @@ type Query {
 }
 
 type Query {
+  get_portfolio_chart(
+    profile_id: Int!
+    periods: [String]!
+    account_ids: [Int]
+    institution_ids: [Int]
+    interest_ids: [Int]
+    category_ids: [Int]
+    security_types: [String]
+    ltt_only: Boolean
+  ): [ChartDataPoint]
+}
+
+type Query {
   get_portfolio_holdings(
     profile_id: Int!
   ): [PortfolioHolding]
@@ -64,6 +78,7 @@ type Query {
   get_recommended_collections(
     profile_id: Int!
     limit: Int
+    force: Boolean
   ): [Collection]
 }
 
@@ -71,6 +86,7 @@ type Query {
   link_plaid_account(
     profile_id: Int!
     public_token: String!
+    env: String
   ): LinkPlaidAccountOutput
 }
 
@@ -83,7 +99,7 @@ type Mutation {
     new_holdings: Int
     updated_holdings: Int
     new_investments_transactions: Int
-    canceled_investments_transactions: Int
+    cancelled_investments_transactions: Int
   ): PlaidWebhookOutput
 }
 
@@ -109,10 +125,12 @@ input PlaidWebhookError {
 
 type ChartDataPoint {
   datetime: String
+  period: String
   open: Float
   high: Float
   low: Float
   close: Float
+  adjusted_close: Float
   volume: Float
 }
 

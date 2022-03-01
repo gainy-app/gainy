@@ -11,7 +11,7 @@
 }}
 
 with common_stocks as (
-    select * from {{ ref('tickers') }} where type = 'Common Stock'
+    select * from {{ ref('tickers') }} where type = 'common stock'
 ),
 manual_industries as (
     select code as symbol, cast (id as integer) as industry_id_0

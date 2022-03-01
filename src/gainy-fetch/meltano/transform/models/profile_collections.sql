@@ -30,7 +30,8 @@ WITH profile_collections AS (
         )
     WHERE ((c.personalized) :: text = '1' :: text)
 )
-SELECT profile_collections.profile_id,
+SELECT (coalesce(profile_collections.profile_id, 0) || '_' || profile_collections.id)::varchar as uniq_id,
+       profile_collections.profile_id,
        profile_collections.id,
        profile_collections.name,
        profile_collections.description,

@@ -1,10 +1,8 @@
 with profile_industries as (
-    select distinct ap.profile_id, tin.interest_id, tid.industry_id
+    select distinct ap.profile_id, ii.interest_id, ii.industry_id
     from app.profile_interests ap
-             join ticker_interests tin
-                  on ap.interest_id = tin.interest_id
-             join ticker_industries tid
-                  on tid.symbol = tin.symbol
+             join interest_industries ii
+                  on ap.interest_id = ii.interest_id
 ),
      profile_industries_counts as (
          select profile_id, interest_id, industry_id, count(*) as industry_count

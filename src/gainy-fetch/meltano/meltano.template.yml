@@ -15,8 +15,11 @@ plugins:
         - name: api_token
         - name: exchanges
           kind: array
+        - name: exchange_symbols_limit
+          kind: integer
         - name: symbols
           kind: array
+        - name: symbols_type
         - name: split_id
         - name: split_num
     - name: tap-polygon
@@ -57,7 +60,17 @@ plugins:
       inherit_from: tap-postgres
       catalog: configs/raw-sync/tap.catalog.json
       config:
+        itersize: 10000
+    - name: tap-postgres--sync-fundamentals
+      inherit_from: tap-postgres
+      catalog: configs/raw-sync/tap.catalog.fundamentals.json
+      config:
         itersize: 1
+    - name: tap-postgres--sync-options
+      inherit_from: tap-postgres
+      catalog: configs/raw-sync/tap.catalog.options.json
+      config:
+        itersize: 10
     - name: tap-postgres--search
       inherit_from: tap-postgres
       catalog: configs/search/tap.catalog.json
@@ -65,6 +78,8 @@ plugins:
     - name: target-postgres
       variant: transferwise
       pip_url: pipelinewise-target-postgres
+    - name: target-postgres-small-batch
+      inherit_from: target-postgres
       config:
         batch_size_rows: 100
         parallelism: 5
@@ -77,7 +92,7 @@ plugins:
         index_mapping_file: configs/search/search.mapping.yml
   transformers:
     - name: dbt
-      pip_url: dbt==0.21.1
+      pip_url: dbt-postgres==1.0.2
       config:
         target: postgres
         models: '*'
@@ -102,11 +117,31 @@ schedules:
     transform: skip
     interval: '@daily'
     start_date: 2021-09-03 13:52:48.598227
+    env:
+      TARGET_ENVS: '["production","local"]'
+
+  - name: prod-to-postgres-fundamentals
+    extractor: tap-postgres--sync-fundamentals
+    loader: target-postgres-small-batch
+    transform: skip
+    interval: '@daily'
+    start_date: 2021-09-03 13:52:48.598227
+    env:
+      TARGET_ENVS: '["test"]'
+
+  - name: prod-to-postgres-options
+    extractor: tap-postgres--sync-options
+    loader: target-postgres-small-batch
+    transform: skip
+    interval: '@daily'
+    start_date: 2021-09-03 13:52:48.598227
+    env:
+      TARGET_ENVS: '["test"]'
 
   - name: prod-to-postgres
     extractor: tap-postgres--sync
     loader: target-postgres
-    transform: run
+    transform: skip
     interval: '@daily'
     start_date: 2021-09-03 13:52:48.598227
     env:
@@ -114,7 +149,7 @@ schedules:
 
   - name: eodhistoricaldata-to-postgres-0
     extractor: tap-eodhistoricaldata
-    loader: target-postgres
+    loader: target-postgres-small-batch
     transform: skip
     interval: '@daily'
     start_date: 2021-06-17 10:40:58.742133

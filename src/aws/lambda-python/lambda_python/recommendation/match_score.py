@@ -230,11 +230,16 @@ def profile_ticker_similarity(
     category_weight = 1 / 4
     interest_weight = 1 / 2
 
-    risk_similarity = get_risk_similarity(profile_categories,
-                                          ticker_categories, risk_mapping)
-    (category_similarity,
-     category_matches) = get_category_similarity(profile_categories,
-                                                 ticker_categories)
+    if profile_categories is None:
+        risk_similarity = 0
+        category_similarity = 0
+        category_matches = []
+    else:
+        risk_similarity = get_risk_similarity(profile_categories,
+                                              ticker_categories, risk_mapping)
+        (category_similarity,
+         category_matches) = get_category_similarity(profile_categories,
+                                                     ticker_categories)
     (interest_similarity,
      interest_matches) = get_interest_similarity(profile_interests,
                                                  ticker_industries)

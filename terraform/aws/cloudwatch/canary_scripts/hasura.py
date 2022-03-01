@@ -10,6 +10,7 @@ HASURA_URL = os.getenv("HASURA_URL", "${hasura_url}")
 HASURA_ADMIN_SECRET = os.getenv("HASURA_ADMIN_SECRET",
                                 "${hasura_admin_secret}")
 HASURA_GRAPHQL_URL = "%s/v1/graphql" % (HASURA_URL)
+IS_PRODUCTION = HASURA_URL.find('production') > -1
 PROFILE_ID = 1
 USER_ID = 'AO0OQyz0jyL5lNUpvKbpVdAPvlI3'
 
@@ -91,6 +92,12 @@ def get_personalized_collections():
     return data
 
 
+def get_recommended_collections():
+    query = '{ get_recommended_collections(profile_id: %d) { id collection { id name image_url enabled description ticker_collections_aggregate { aggregate { count } } } } }' % (
+        PROFILE_ID)
+    return make_graphql_request(query)['data']['get_recommended_collections']
+
+
 def check_collections():
     query = '{collections(where: {enabled: {_eq: "1"} }) { id name enabled} }'
     data = make_graphql_request(query)['data']['collections']
@@ -104,9 +111,7 @@ def check_collections():
 
 
 def check_recommended_collections():
-    query = '{ get_recommended_collections(profile_id: %d) { id collection { id name image_url enabled description ticker_collections_aggregate { aggregate { count } } } } }' % (
-        PROFILE_ID)
-    data = make_graphql_request(query)['data']['get_recommended_collections']
+    data = get_recommended_collections()
 
     assert len(data) >= MIN_PERSONALIZED_COLLECTIONS_COUNT
 
@@ -114,6 +119,55 @@ def check_recommended_collections():
         [i['id'] for i in get_personalized_collections()])
     collection_ids = set([i['id'] for i in data])
     assert personalized_collection_ids.issubset(collection_ids)
+
+
+def test_favorite_collections():
+    data = get_recommended_collections()
+    collection_id = data[0]['id']
+
+    query = 'mutation InsertProfileFavoriteCollection($profileID: Int!, $collectionID: Int!){ insert_app_profile_favorite_collections(objects: {collection_id: $collectionID, profile_id: $profileID}, on_conflict: { constraint: profile_favorite_collections_pkey, update_columns: []}) { returning { collection_id } } }'
+    make_graphql_request(query, {"profileID": PROFILE_ID, "collectionID": 231})
+
+    query = 'mutation DeleteProfileFavoriteCollection($profileID: Int!, $collectionID: Int!){ delete_app_profile_favorite_collections( where: { collection_id: {_eq: $collectionID}, profile_id: {_eq: $profileID} } ) { returning { collection_id } } }'
+    make_graphql_request(query, {"profileID": PROFILE_ID, "collectionID": 231})
+
+
+def test_collection_metrics():
+    data = get_recommended_collections()
+    personalized_collection_ids = set(
+        [i['id'] for i in get_personalized_collections()])
+    non_personalized_collection_ids = set([
+        i['id'] for i in data if i['id'] not in personalized_collection_ids
+    ][:3])
+    collection_ids = non_personalized_collection_ids.union(
+        personalized_collection_ids)
+
+    for collection_id in collection_ids:
+        query = 'mutation InsertProfileFavoriteCollection($profileID: Int!, $collectionID: Int!){ insert_app_profile_favorite_collections(objects: {collection_id: $collectionID, profile_id: $profileID}, on_conflict: { constraint: profile_favorite_collections_pkey, update_columns: []}) { returning { collection_id } } }'
+        make_graphql_request(query, {
+            "profileID": PROFILE_ID,
+            "collectionID": collection_id
+        })
+
+    query_file = os.path.join(os.path.dirname(__file__),
+                              'queries/GetHomeTabData.graphql')
+    with open(query_file, 'r') as f:
+        query = f.read()
+    data = make_graphql_request(query, {
+        "profileId": PROFILE_ID,
+        "rankedCount": 100
+    })['data']
+    assert len(data['profile_collection_tickers_performance_ranked']) >= 1
+    assert len(data['app_profile_favorite_collections']) >= len(collection_ids)
+    for i in data['app_profile_favorite_collections']:
+        assert i['collection']['metrics']['relative_daily_change'] is not None
+
+    for collection_id in collection_ids:
+        query = 'mutation DeleteProfileFavoriteCollection($profileID: Int!, $collectionID: Int!){ delete_app_profile_favorite_collections( where: { collection_id: {_eq: $collectionID}, profile_id: {_eq: $profileID} } ) { returning { collection_id } } }'
+        make_graphql_request(query, {
+            "profileID": PROFILE_ID,
+            "collectionID": collection_id
+        })
 
 
 def check_interests():
@@ -131,22 +185,18 @@ def check_categories():
 
 
 def check_chart():
-    query = 'query DiscoverCharts($period: String!, $symbol: String!, $dateG: timestamp!, $dateL: timestamp!) { historical_prices_aggregated(where: {symbol: {_eq: $symbol}, period: {_eq: $period}, datetime: {_gte: $dateG, _lte: $dateL}}, order_by: {datetime: asc}) { symbol datetime period open high low close adjusted_close volume } }'
+    query = 'query DiscoverCharts($period: String!, $symbol: String!) { chart(where: {symbol: {_eq: $symbol}, period: {_eq: $period}}, order_by: {datetime: asc}) { symbol datetime period open high low close adjusted_close volume } }'
     datasets = [
-        ("1d", datetime.datetime.now() - datetime.timedelta(days=10), 5),
-        ("1w", datetime.datetime.now() - datetime.timedelta(days=30), 4),
-        ("1m", datetime.datetime.now() - datetime.timedelta(days=200), 6),
+        ("1d", 0),
+        ("1w", 70),
+        ("1m", 20),
     ]
-    now = datetime.datetime.now()
 
-    for (period, date_from, min_count) in datasets:
-        data = make_graphql_request(
-            query, {
-                "period": period,
-                "symbol": "AAPL",
-                "dateG": date_from.isoformat(),
-                "dateL": now.isoformat(),
-            })['data']['historical_prices_aggregated']
+    for (period, min_count) in datasets:
+        data = make_graphql_request(query, {
+            "period": period,
+            "symbol": "AAPL",
+        })['data']['chart']
 
         assert len(data) >= min_count
 
@@ -158,7 +208,6 @@ def check_portfolio():
         query = f.read()
 
     data = make_graphql_request(query, {"profileId": PROFILE_ID})['data']
-    print(data)
     assert data['portfolio_gains'] is not None
     assert data['profile_holding_groups'] is not None
 

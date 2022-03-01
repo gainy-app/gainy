@@ -59,6 +59,20 @@ jobs:
         run: terraform validate -no-color
         working-directory: terraform
 
+      - name: Terraform State Cleanup Prepare
+        id: state-clean-prepare
+        # grep only needed resources
+        # tr to make it a one-liner
+        # sed to filter out :: command, that github apparently adds to step output for some f-cked up reason
+        run: echo "::set-output name=resources::$(terraform state list | grep -P 'aws_apigatewayv2_integration|aws_apigatewayv2_route|aws_lambda_permission' | tr '\n' ' ' | sed 's/::.*//')"
+        working-directory: terraform
+
+      - name: Terraform State Cleanup
+        id: state-clean
+        if: steps.state-clean-prepare.outputs.resources != ''
+        run: terraform state rm ${{ steps.state-clean-prepare.outputs.resources }}
+        working-directory: terraform
+
       - name: Terraform Apply
         id: apply
         run: terraform apply -auto-approve
@@ -87,6 +101,7 @@ jobs:
           TF_VAR_pg_production_internal_sync_password: ${{ secrets.PG_PRODUCTION_INTERNAL_SYNC_PASSWORD }}
           TF_VAR_plaid_client_id: ${{ secrets.PLAID_CLIENT_ID }}
           TF_VAR_plaid_secret: ${{ secrets.PLAID_SECRET }}
+          TF_VAR_plaid_development_secret: ${{ secrets.PLAID_DEVELOPMENT_SECRET }}
           TF_VAR_plaid_env: ${{ secrets.PLAID_ENV }}
           TF_VAR_algolia_app_id: ${{ secrets.ALGOLIA_APP_ID }}
           TF_VAR_algolia_admin_api_key: ${{ secrets.ALGOLIA_ADMIN_API_KEY }}

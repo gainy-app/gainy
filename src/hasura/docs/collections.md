@@ -110,3 +110,27 @@ query  {
     }
 }
 ```
+
+### Home tab
+
+```graphql
+query home_tab($profileId: Int, $rankedCount: Int) {
+    profile_collection_tickers_performance_ranked(where: {profile_id: {_eq: $profileId}, _or: [{gainer_rank: {_lte: $rankedCount}}, {loser_rank: {_lte: $rankedCount}}]}) {
+        gainer_rank
+        loser_rank
+        profile_id
+        relative_daily_change
+        symbol
+        updated_at
+    }
+    app_profile_favorite_collections(where: {profile_id: {_eq: $profileId}}, order_by: {collection: {metrics: {relative_daily_change: desc}}}) {
+        collection{
+            metrics {
+                profile_id
+                relative_daily_change
+                updated_at
+            }
+        }
+    }
+}
+```

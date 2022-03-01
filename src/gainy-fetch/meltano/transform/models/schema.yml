@@ -34,6 +34,7 @@ sources:
     description: Mobile App data, managed by hasura
     schema: app
     tables:
+      - name: profile_favorite_collections
       - name: profile_portfolio_accounts
       - name: profile_portfolio_transactions
       - name: portfolio_securities
@@ -89,44 +90,6 @@ models:
           # - not_null # temporary disabled as not all linked to collections
           - type:
               type: 'integer'
-
-  - name: historical_growth_rate
-    columns:
-      - name: symbol
-        tests:
-          - not_null
-          - type:
-              type: 'character varying'
-      - name: date
-        tests:
-          - not_null
-          - type:
-              type: 'date'
-      - name: growth_rate_1d
-        tests:
-          - exists
-          - type:
-              type: 'double precision'
-      - name: growth_rate_1w
-        tests:
-          - exists
-          - type:
-              type: 'double precision'
-      - name: growth_rate_1m
-        tests:
-          - exists
-          - type:
-              type: 'double precision'
-      - name: growth_rate_3m
-        tests:
-          - exists
-          - type:
-              type: 'double precision'
-      - name: growth_rate_1y
-        tests:
-          - exists
-          - type:
-              type: 'double precision'
 
   - name: historical_prices
     columns:
@@ -193,26 +156,6 @@ models:
           - exists
           - type:
               type: 'double precision'
-      - name: median_growth_rate_1w
-        tests:
-          - exists
-          - type:
-              type: 'double precision'
-      - name: median_growth_rate_1m
-        tests:
-          - exists
-          - type:
-              type: 'double precision'
-      - name: median_growth_rate_3m
-        tests:
-          - exists
-          - type:
-              type: 'double precision'
-      - name: median_growth_rate_1y
-        tests:
-          - exists
-          - type:
-              type: 'double precision'
 
   - name: industry_stats_quarterly
     columns:
@@ -260,6 +203,33 @@ models:
           - exists
           - type:
               type: 'character varying'
+
+  - name: interest_industries
+    columns:
+      - name: id
+        tests:
+          - unique
+          - exists
+          - type:
+              type: 'character varying'
+      - name: interest_id
+        tests:
+          - exists
+          - not_null
+          - type:
+              type: 'integer'
+      - name: industry_id
+        tests:
+          - exists
+          - not_null
+          - type:
+              type: 'integer'
+      - name: updated_at
+        tests:
+          - exists
+          - not_null
+          - type:
+              type: 'timestamp with time zone'
 
   - name: collections
     columns:
@@ -641,42 +611,6 @@ models:
           - type:
               type: 'ARRAY'
 
-  - name: growth_rate_1m
-    columns:
-      - name: symbol
-        tests:
-          - exists
-          - type:
-              type: 'character varying'
-      - name: date
-        tests:
-          - exists
-          - type:
-              type: 'timestamp without time zone'
-      - name: growth_rate
-        tests:
-          - exists
-          - type:
-              type: 'double precision'
-
-  - name: growth_rate_1w
-    columns:
-      - name: symbol
-        tests:
-          - exists
-          - type:
-              type: 'character varying'
-      - name: date
-        tests:
-          - exists
-          - type:
-              type: 'timestamp without time zone'
-      - name: growth_rate
-        tests:
-          - exists
-          - type:
-              type: 'double precision'
-
   - name: historical_prices_aggregated
     columns:
       - name: symbol
@@ -861,34 +795,6 @@ models:
           - exists
           - type:
               type: 'double precision'
-
-  - name: ticker_metrics_transposed
-    columns:
-      - name: symbol
-        tests:
-          - exists
-          - type:
-              type: 'character varying'
-      - name: metric_id
-        tests:
-          - exists
-          - type:
-              type: 'character varying'
-      - name: value_double
-        tests:
-          - exists
-          - type:
-              type: 'double precision'
-      - name: value_string
-        tests:
-          - exists
-          - type:
-              type: 'character varying'
-      - name: value_bigint
-        tests:
-          - exists
-          - type:
-              type: 'bigint'
 
   - name: ticker_metrics
     columns:
@@ -1732,6 +1638,49 @@ models:
           - type:
               type: 'character varying'
 
+  - name: portfolio_transaction_chart
+    columns:
+      - name: transactions_uniq_id
+        tests:
+          - exists
+          - type:
+              type: 'character varying'
+      - name: datetime
+        tests:
+          - exists
+          - type:
+              type: 'timestamp without time zone'
+      - name: period
+        tests:
+          - exists
+          - type:
+              type: 'character varying'
+      - name: open
+        tests:
+          - exists
+          - type:
+              type: 'numeric'
+      - name: high
+        tests:
+          - exists
+          - type:
+              type: 'numeric'
+      - name: low
+        tests:
+          - exists
+          - type:
+              type: 'numeric'
+      - name: close
+        tests:
+          - exists
+          - type:
+              type: 'numeric'
+      - name: adjusted_close
+        tests:
+          - exists
+          - type:
+              type: 'numeric'
+
   - name: ticker_realtime_metrics
     columns:
       - name: symbol
@@ -1764,6 +1713,153 @@ models:
           - exists
           - type:
               type: 'double precision'
+      - name: last_known_price
+        tests:
+          - exists
+          - type:
+              type: 'double precision'
+      - name: last_known_price_datetime
+        tests:
+          - exists
+          - type:
+              type: 'timestamp without time zone'
+      - name: previous_day_close_price
+        tests:
+          - exists
+          - type:
+              type: 'double precision'
+
+  - name: industry_median_chart
+    columns:
+      - name: industry_id
+        tests:
+          - exists
+          - type:
+              type: 'integer'
+      - name: period
+        tests:
+          - exists
+          - type:
+              type: 'character varying'
+      - name: datetime
+        tests:
+          - exists
+          - type:
+              type: 'timestamp without time zone'
+      - name: median_price
+        tests:
+          - exists
+          - type:
+              type: 'double precision'
+
+  - name: profile_collections
+    columns:
+      - name: uniq_id
+        tests:
+          - exists
+          - type:
+              type: 'character varying'
+      - name: profile_id
+        tests:
+          - exists
+          - type:
+              type: 'integer'
+      - name: id
+        tests:
+          - exists
+          - type:
+              type: 'integer'
+      - name: name
+        tests:
+          - exists
+          - type:
+              type: 'character varying'
+      - name: description
+        tests:
+          - exists
+          - type:
+              type: 'character varying'
+      - name: image_url
+        tests:
+          - exists
+          - type:
+              type: 'character varying'
+      - name: enabled
+        tests:
+          - exists
+          - type:
+              type: 'text'
+      - name: personalized
+        tests:
+          - exists
+          - type:
+              type: 'character varying'
+      - name: size
+        tests:
+          - exists
+          - type:
+              type: 'integer'
+
+  - name: collection_metrics
+    columns:
+      - name: profile_id
+        tests:
+          - exists
+          - type:
+              type: 'integer'
+      - name: collection_uniq_id
+        tests:
+          - exists
+          - type:
+              type: 'character varying'
+      - name: absolute_daily_change
+        tests:
+          - exists
+          - type:
+              type: 'double precision'
+      - name: relative_daily_change
+        tests:
+          - exists
+          - type:
+              type: 'double precision'
+      - name: updated_at
+        tests:
+          - exists
+          - type:
+              type: 'timestamp without time zone'
+
+  - name: profile_collection_tickers_performance_ranked
+    columns:
+      - name: profile_id
+        tests:
+          - exists
+          - type:
+              type: 'integer'
+      - name: symbol
+        tests:
+          - exists
+          - type:
+              type: 'character varying'
+      - name: relative_daily_change
+        tests:
+          - exists
+          - type:
+              type: 'double precision'
+      - name: updated_at
+        tests:
+          - exists
+          - type:
+              type: 'timestamp without time zone'
+      - name: gainer_rank
+        tests:
+          - exists
+          - type:
+              type: 'integer'
+      - name: loser_rank
+        tests:
+          - exists
+          - type:
+              type: 'integer'
 
 exposures:
   - name: ticker_search_index

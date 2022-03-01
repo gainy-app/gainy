@@ -12,11 +12,11 @@
 
 with
 {% if is_incremental() %}
-     old_collections as (select * from collections),
+     old_collections as (select * from {{ this }}),
 {% endif %}
      collections as (
          select id::int, name, description, enabled, personalized, image_url
-         from raw_data.gainy_collections
+         from {{ source('gainy', 'gainy_collections') }}
      )
 select c.id,
        c.name,

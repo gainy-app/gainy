@@ -235,6 +235,14 @@ resource "aws_security_group_rule" "bridge-rds" {
   security_group_id = data.aws_security_group.vpc_default_sg.id
   cidr_blocks       = ["10.0.0.0/8"]
 }
+resource "aws_security_group_rule" "bridge-elasticache" {
+  type              = "ingress"
+  from_port         = 6379
+  to_port           = 6379
+  protocol          = "tcp"
+  security_group_id = data.aws_security_group.vpc_default_sg.id
+  cidr_blocks       = ["10.0.0.0/8"]
+}
 
 /*
  * Create public and private subnets for each availability zone

@@ -27,31 +27,6 @@
       "selected": true
     },
     {
-      "table_name": "eod_fundamentals",
-      "stream": "eod_fundamentals",
-      "metadata": [
-        {
-          "breadcrumb": [],
-          "metadata": {
-            "replication-key": "updatedat",
-            "replication-method": "INCREMENTAL",
-            "table-key-properties": [
-              "code"
-            ],
-            "schema-name": "raw_data",
-            "database-name": "gainy",
-            "selected": true
-          }
-        }
-      ],
-      "tap_stream_id": "raw_data-eod_fundamentals",
-      "schema": {
-        "type": "object",
-        "properties": {}
-      },
-      "selected": true
-    },
-    {
       "table_name": "eod_dividends",
       "stream": "eod_dividends",
       "metadata": [
@@ -78,16 +53,17 @@
       "selected": true
     },
     {
-      "table_name": "eod_options",
-      "stream": "eod_options",
+      "table_name": "eod_intraday_prices",
+      "stream": "eod_intraday_prices",
       "metadata": [
         {
           "breadcrumb": [],
           "metadata": {
-            "replication-method": "FULL_TABLE",
+            "replication-key": "time",
+            "replication-method": "INCREMENTAL",
             "table-key-properties": [
-              "code",
-              "expirationdate"
+              "symbol",
+              "time"
             ],
             "schema-name": "raw_data",
             "database-name": "gainy",
@@ -95,7 +71,7 @@
           }
         }
       ],
-      "tap_stream_id": "raw_data-eod_options",
+      "tap_stream_id": "raw_data-eod_intraday_prices",
       "schema": {
         "type": "object",
         "properties": {}

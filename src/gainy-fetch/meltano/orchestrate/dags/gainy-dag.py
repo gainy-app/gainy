@@ -105,10 +105,15 @@ for schedule in schedules:
         upstream.append(operator)
 
 dbt = BashOperator(
-    task_id="dbt-transform",
+    task_id="dbt",
     bash_command=f"cd {project_root}; {meltano_bin} invoke dbt run",
     dag=dag,
     pool="dbt")
+
+clean = BashOperator(
+    task_id="clean",
+    bash_command=f"cd {project_root}; python3 scripts/cleanup.py",
+    dag=dag)
 
 recommendation = BashOperator(
     task_id="update-recommendations",

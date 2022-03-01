@@ -6,6 +6,8 @@
       index(this, 'id', true),
       index(this, 'uniq_id', true),
       'delete from {{this}} where updated_at < (select max(updated_at) from {{this}})',
+      'delete from {{this}} where account_id not in (select id from app.profile_portfolio_accounts)',
+      fk(this, 'account_id', 'app', 'profile_portfolio_accounts', 'id')
     ]
   )
 }}
@@ -66,7 +68,7 @@ with robinhood_options as (
                    expanded_transactions.security_id          as uniq_id,
                    coalesce(ticker_options.last_price, historical_prices.adjusted_close) *
                    abs(rolling_quantity)                      as amount,
-                   null::timestamp                            as datetime,
+                   null::date                                 as date,
                    'ASSUMPTION BOUGHT ' || abs(rolling_quantity) || ' ' ||
                    coalesce(ticker_options.symbol || ' ' || to_char(ticker_options.expiration_date, 'MM/dd/YYYY') ||
                             ' ' ||
@@ -114,9 +116,9 @@ with robinhood_options as (
          )
 
 select t.id,
-       t.uniq_id,
+       t.uniq_id::varchar,
        t.amount,
-       t.datetime,
+       t.date,
        t.name,
        t.price,
        t.quantity / case
@@ -150,7 +152,7 @@ from (
                  ) null::int                                                                    as id,
                    'auto1_' || account_id || '_' || security_id                                 as uniq_id,
                    coalesce(ticker_options.last_price, historical_prices.adjusted_close) * diff as amount,
-                   null::timestamp                                                              as datetime,
+                   null::date                                                                   as date,
                    'ASSUMPTION BOUGHT ' || diff || ' ' ||
                    coalesce(ticker_options.name, t.name) || ' @ ' ||
                    coalesce(ticker_options.last_price, historical_prices.adjusted_close)        as name,
@@ -191,6 +193,7 @@ from (
                       left join {{ ref('ticker_options') }}
                                 on ticker_options.contract_name = portfolio_securities_normalized.original_ticker_symbol
              where diff > 0
+               and portfolio_securities_normalized.type != 'cash'
          )
 
          union all
@@ -198,7 +201,7 @@ from (
          select id,
                 id || '_' || account_id || '_' || security_id as uniq_id,
                 amount,
-                date::timestamp                               as datetime,
+                date                                          as date,
                 name,
                 price,
                 quantity,
@@ -213,6 +216,10 @@ from (
      ) t
          join {{ ref('portfolio_securities_normalized') }}
               on portfolio_securities_normalized.id = t.security_id
+         join {{ ref('profile_holdings_normalized') }}
+              on profile_holdings_normalized.profile_id = t.profile_id
+                  and profile_holdings_normalized.security_id = t.security_id
+                  and profile_holdings_normalized.account_id = t.account_id
          left join {{ source('app', 'profile_portfolio_accounts') }} on profile_portfolio_accounts.id = t.account_id
          left join {{ source('app', 'profile_plaid_access_tokens') }} on profile_plaid_access_tokens.id = profile_portfolio_accounts.plaid_access_token_id
          left join {{ source('app', 'plaid_institutions') }} on plaid_institutions.id = profile_plaid_access_tokens.institution_id
