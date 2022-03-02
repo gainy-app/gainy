@@ -4,10 +4,10 @@ from operator import itemgetter
 from typing import List, Tuple, Dict
 from psycopg2.extras import execute_values
 from gainy.data_access.repository import Repository
+from gainy.recommendation.core import DimVector
 
 from common.hasura_exception import HasuraActionException
-from recommendation.core import DimVector
-from recommendation.match_score import MatchScore
+from gainy.recommendation.match_score import MatchScore
 
 script_dir = os.path.dirname(__file__)
 

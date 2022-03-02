@@ -2,11 +2,6 @@ from abc import ABC, abstractmethod
 from typing import List, Any, Dict
 from data_access.db_lock import ResourceType
 
-class classproperty(property):
-
-    def __get__(self, cls, owner):
-        return classmethod(self.fget).__get__(None, owner)()
-
 
 class ResourceVersion(ABC):
 

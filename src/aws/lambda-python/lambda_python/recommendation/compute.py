@@ -4,8 +4,9 @@ from psycopg2._psycopg import connection
 
 from data_access.optimistic_lock import AbstractOptimisticLockingFunction
 from recommendation import TOP_20_FOR_YOU_COLLECTION_ID
-from recommendation.match_score import MatchScore, profile_ticker_similarity
-from recommendation.models import MatchScoreModel, ProfileRecommendationsMetadata
+from gainy.recommendation.match_score import MatchScore, profile_ticker_similarity
+from gainy.recommendation.models import MatchScoreModel
+from recommendation.models import ProfileRecommendationsMetadata
 from recommendation.repository import RecommendationRepository
 
 
