@@ -17,7 +17,7 @@ upd:
 	docker-compose up -d
 
 build:
-	docker-compose build --parallel
+	docker-compose build --parallel --no-cache
 
 down:
 	docker-compose down
@@ -53,7 +53,7 @@ extract-passwords:
 	cd terraform && terraform state pull | python3 ../extract_passwords.py
 
 test-build:
-	docker-compose -p gainy_test -f docker-compose.test.yml build --progress plain --no-cache
+	docker-compose -p gainy_test -f docker-compose.test.yml build --no-cache
 
 test-init:
 	docker-compose -p gainy_test -f docker-compose.test.yml run test-meltano invoke dbt test
