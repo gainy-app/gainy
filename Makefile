@@ -8,7 +8,6 @@ docker-auth:
 
 configure: docker-auth
 	/bin/bash deployment/scripts/code_artifactory.sh
-	echo ${CODEARTIFACT_PIPY_URL}
 	- if [ ! -f src/gainy-fetch/meltano/exchanges.local.json ]; then cp -n src/gainy-fetch/meltano/symbols.local.json.dist src/gainy-fetch/meltano/symbols.local.json; fi
 
 up: configure
