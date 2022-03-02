@@ -7,6 +7,7 @@ docker-auth:
 	aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin ${BASE_IMAGE_REGISTRY_ADDRESS}
 
 configure: docker-auth
+	deployment/scripts/code_artifactory.sh
 	- if [ ! -f src/gainy-fetch/meltano/exchanges.local.json ]; then cp -n src/gainy-fetch/meltano/symbols.local.json.dist src/gainy-fetch/meltano/symbols.local.json; fi
 
 up: configure
@@ -17,7 +18,7 @@ upd:
 	docker-compose up -d
 
 build:
-	docker-compose build --parallel --no-cache
+	docker-compose build --parallel --no-cache --progress plain
 
 down:
 	docker-compose down
@@ -53,7 +54,7 @@ extract-passwords:
 	cd terraform && terraform state pull | python3 ../extract_passwords.py
 
 test-build:
-	docker-compose -p gainy_test -f docker-compose.test.yml build --no-cache
+	docker-compose -p gainy_test -f docker-compose.test.yml build --no-cache --progress plain
 
 test-init:
 	docker-compose -p gainy_test -f docker-compose.test.yml run test-meltano invoke dbt test
