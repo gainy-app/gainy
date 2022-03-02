@@ -30,9 +30,9 @@ jobs:
       - name: Set up
         run: |
           cp .env.dist .env
-          deployment/scripts/code_artifactory.sh
-          echo "CODEARTIFACT_PIPY_URL=\"$CODEARTIFACT_PIPY_URL/\""
-          echo "CODEARTIFACT_PIPY_URL=\"$CODEARTIFACT_PIPY_URL/\"" >> $GITHUB_ENV
+          source deployment/scripts/code_artifactory.sh
+          echo "CODEARTIFACT_PIPY_URL=\"$CODEARTIFACT_PIPY_URL\""
+          echo "CODEARTIFACT_PIPY_URL=\"$CODEARTIFACT_PIPY_URL\"" >> $GITHUB_ENV
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
