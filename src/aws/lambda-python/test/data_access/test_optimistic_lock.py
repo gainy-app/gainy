@@ -10,11 +10,11 @@ import psycopg2
 from psycopg2._psycopg import connection
 import pytest
 from sqlalchemy.util import classproperty
+from gainy.data_access.models import BaseModel, ResourceVersion
 
 from data_access.db_lock import ResourceType
-from data_access.models import BaseModel, ResourceVersion
 from data_access.optimistic_lock import AbstractOptimisticLockingFunction
-from data_access.repository import Repository
+from gainy.data_access.repository import Repository
 
 
 class DataClass(BaseModel):

@@ -1,7 +1,7 @@
 import json
 
 from data_access.db_lock import ResourceType
-from data_access.models import BaseModel, classproperty, ResourceVersion
+from gainy.data_access.models import BaseModel, classproperty, ResourceVersion
 from recommendation.match_score import MatchScore
 
 

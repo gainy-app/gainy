@@ -2,11 +2,10 @@ import json
 import os
 from operator import itemgetter
 from typing import List, Tuple, Dict
-
 from psycopg2.extras import execute_values
+from gainy.data_access.repository import Repository
 
 from common.hasura_exception import HasuraActionException
-from data_access.repository import Repository
 from recommendation.core import DimVector
 from recommendation.match_score import MatchScore
 
