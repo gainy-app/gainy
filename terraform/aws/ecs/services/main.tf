@@ -170,8 +170,8 @@ resource "aws_ecs_task_definition" "default" {
       polygon_api_token               = var.polygon_api_token
       polygon_realtime_streaming_host = "delayed.polygon.io" # socket.polygon.io for real-time
 
-      mlflow_artifact_location             = "s3://${var.mlflow_artifact_bucket}"
-      pg_mlflow_schema                     = "mlflow"
+      mlflow_artifact_location = "s3://${var.mlflow_artifact_bucket}"
+      pg_mlflow_schema         = "mlflow"
     }
   )
 }

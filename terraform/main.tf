@@ -102,7 +102,7 @@ module "aws" {
   algolia_indexing_key      = module.algolia.algolia_indexing_key
   algolia_search_key        = module.algolia.algolia_search_key
 
-  codeartifact_pipy_url     = var.codeartifact_pipy_url
+  codeartifact_pipy_url = var.codeartifact_pipy_url
 }
 
 module "datadog" {

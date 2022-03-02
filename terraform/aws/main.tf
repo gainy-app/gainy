@@ -53,7 +53,7 @@ module "lambda" {
   redis_cache_host = module.elasticache.redis_cache_host
   redis_cache_port = module.elasticache.redis_cache_port
 
-  codeartifact_pipy_url     = var.codeartifact_pipy_url
+  codeartifact_pipy_url = var.codeartifact_pipy_url
 }
 
 module "ecs" {
