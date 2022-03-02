@@ -26,7 +26,6 @@ resource "aws_s3_bucket" "interests" {
 
 resource "aws_s3_bucket" "mlflow" {
   bucket = "gainy-mlflow-${var.env}"
-  acl    = "private"
 
   tags = {
     Name = "Gainy MLflow"
