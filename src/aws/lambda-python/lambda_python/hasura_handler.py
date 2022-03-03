@@ -7,8 +7,6 @@ from recommendation.recommendation_action import GetRecommendedCollections
 from portfolio.plaid.actions import *
 from portfolio.actions import *
 from portfolio.triggers import *
-
-# DB CONNECTION
 from search.algolia_search import SearchTickers, SearchCollections
 from search.news_search import SearchNews
 from trigger.set_recommendations import SetRecommendations
@@ -16,16 +14,6 @@ from trigger.set_user_categories import SetUserCategories
 from trigger.on_user_created import OnUserCreated
 
 ENV = os.environ['ENV']
-PUBLIC_SCHEMA_NAME = os.environ['PUBLIC_SCHEMA_NAME']
-
-HOST = os.environ['pg_host']
-PORT = os.environ['pg_port']
-DB_NAME = os.environ['pg_dbname']
-USERNAME = os.environ['pg_username']
-PASSWORD = os.environ['pg_password']
-
-# TODO: refactor to not use search_path as it's not allowed to use pycrypto extension for multiple schemas
-DB_CONN_STRING = f"postgresql://{USERNAME}:{PASSWORD}@{HOST}:{PORT}/{DB_NAME}?options=-csearch_path%3D{PUBLIC_SCHEMA_NAME}"
 
 ALGOLIA_APP_ID = os.getenv("ALGOLIA_APP_ID")
 ALGOLIA_TICKERS_INDEX = os.getenv("ALGOLIA_TICKERS_INDEX")
@@ -61,9 +49,7 @@ ACTIONS = [
     SearchNews(GNEWS_API_TOKEN, REDIS_CACHE_HOST, REDIS_CACHE_PORT)
 ]
 
-action_dispatcher = HasuraActionDispatcher(DB_CONN_STRING, ACTIONS,
-                                           PUBLIC_SCHEMA_NAME,
-                                           API_GATEWAY_PROXY_INTEGRATION)
+action_dispatcher = HasuraActionDispatcher(ACTIONS, API_GATEWAY_PROXY_INTEGRATION)
 
 
 def handle_action(event, context):
@@ -77,9 +63,7 @@ TRIGGERS = [
     OnPlaidAccessTokenCreated(),
 ]
 
-trigger_dispatcher = HasuraTriggerDispatcher(DB_CONN_STRING, TRIGGERS,
-                                             PUBLIC_SCHEMA_NAME,
-                                             API_GATEWAY_PROXY_INTEGRATION)
+trigger_dispatcher = HasuraTriggerDispatcher(TRIGGERS, API_GATEWAY_PROXY_INTEGRATION)
 
 
 def handle_trigger(event, context):

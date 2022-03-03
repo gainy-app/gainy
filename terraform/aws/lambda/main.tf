@@ -28,6 +28,7 @@ variable "redis_cache_host" {}
 variable "redis_cache_port" {}
 variable "public_schema_name" {}
 variable "codeartifact_pipy_url" {}
+variable "gainy_compute_version" {}
 
 output "aws_apigatewayv2_api_endpoint" {
   value = "${aws_apigatewayv2_api.lambda.api_endpoint}/${aws_apigatewayv2_stage.lambda.name}"
@@ -206,6 +207,7 @@ resource "docker_registry_image" "lambda_python" {
       BASE_IMAGE_REGISTRY_ADDRESS = var.base_image_registry_address
       BASE_IMAGE_VERSION          = var.base_image_version
       CODEARTIFACT_PIPY_URL       = var.codeartifact_pipy_url
+      GAINY_COMPUTE_VERSION       = var.gainy_compute_version
     }
 
     auth_config {

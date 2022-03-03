@@ -52,3 +52,4 @@ variable "health_check_grace_period_seconds" {}
 variable "private_subnet_ids" {}
 variable "mlflow_artifact_bucket" {}
 variable "codeartifact_pipy_url" {}
+variable "gainy_compute_version" {}

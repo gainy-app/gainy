@@ -103,6 +103,7 @@ module "aws" {
   algolia_search_key        = module.algolia.algolia_search_key
 
   codeartifact_pipy_url = var.codeartifact_pipy_url
+  gainy_compute_version = var.gainy_compute_version
 }
 
 module "datadog" {

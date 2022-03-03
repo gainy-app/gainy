@@ -33,6 +33,7 @@ variable "algolia_indexing_key" {}
 variable "algolia_search_key" {}
 
 variable "codeartifact_pipy_url" {}
+variable "gainy_compute_version" {}
 
 # https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task-cpu-memory-error.html
 locals {

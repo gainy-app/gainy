@@ -5,7 +5,7 @@ from typing import List
 
 import psycopg2
 from psycopg2 import sql
-
+from gainy.utils import db_connect
 from common.hasura_exception import HasuraActionException
 from common.hasura_function import HasuraAction, HasuraTrigger
 from common.hasura_response import base_response
@@ -14,20 +14,16 @@ from common.hasura_response import base_response
 class HasuraDispatcher(ABC):
 
     def __init__(self,
-                 db_conn_string,
                  functions,
-                 public_schema_name,
                  is_gateway_proxy=True):
-        self.db_conn_string = db_conn_string
         self.functions = functions
-        self.public_schema_name = public_schema_name
         self.is_gateway_proxy = is_gateway_proxy
 
     def handle(self, event, context):
         headers = event['headers'] if 'headers' in event else {}
         request = self.extract_request(event)
 
-        with psycopg2.connect(self.db_conn_string) as db_conn:
+        with db_connect() as db_conn:
             try:
                 response = self.apply(db_conn, request, headers)
 
@@ -103,12 +99,9 @@ class HasuraDispatcher(ABC):
 class HasuraActionDispatcher(HasuraDispatcher):
 
     def __init__(self,
-                 db_conn_string: str,
                  actions: List[HasuraAction],
-                 public_schema_name: str,
                  is_gateway_proxy: bool = True):
-        super().__init__(db_conn_string, actions, public_schema_name,
-                         is_gateway_proxy)
+        super().__init__(actions, is_gateway_proxy)
 
     def apply(self, db_conn, request, headers):
         action = self.choose_function_by_name(request["action"]["name"])
@@ -127,12 +120,9 @@ class HasuraActionDispatcher(HasuraDispatcher):
 class HasuraTriggerDispatcher(HasuraDispatcher):
 
     def __init__(self,
-                 db_conn_string: str,
                  triggers: List[HasuraTrigger],
-                 public_schema_name: str,
                  is_gateway_proxy: bool = True):
-        super().__init__(db_conn_string, triggers, public_schema_name,
-                         is_gateway_proxy)
+        super().__init__(triggers, is_gateway_proxy)
 
     def apply(self, db_conn, request, headers):
         trigger = self.choose_function_by_name(request["trigger"]["name"])

@@ -54,6 +54,7 @@ module "lambda" {
   redis_cache_port = module.elasticache.redis_cache_port
 
   codeartifact_pipy_url = var.codeartifact_pipy_url
+  gainy_compute_version = var.gainy_compute_version
 }
 
 module "ecs" {
@@ -164,6 +165,7 @@ module "ecs-service" {
 
   mlflow_artifact_bucket = module.s3.mlflow_artifact_bucket
   codeartifact_pipy_url  = var.codeartifact_pipy_url
+  gainy_compute_version  = var.gainy_compute_version
 }
 
 

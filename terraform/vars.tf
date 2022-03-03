@@ -37,6 +37,9 @@ variable "aws_secret_key" {
 variable "codeartifact_pipy_url" {
   type = string
 }
+variable "gainy_compute_version" {
+  type = string
+}
 
 #################################### Google Cloud & Firebase ####################################
 

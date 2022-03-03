@@ -30,6 +30,7 @@ jobs:
           echo "TF_VAR_base_image_registry_address=$BASE_IMAGE_REGISTRY_ADDRESS" >> $GITHUB_ENV
           echo "TF_VAR_base_image_version=$BASE_IMAGE_VERSION" >> $GITHUB_ENV
           echo "TF_VAR_codeartifact_pipy_url=\"$CODEARTIFACT_PIPY_URL\"" >> $GITHUB_ENV
+          echo "TF_VAR_gainy_compute_version=\"$GAINY_COMPUTE_VERSION\"" >> $GITHUB_ENV
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
