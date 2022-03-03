@@ -13,9 +13,7 @@ from common.hasura_response import base_response
 
 class HasuraDispatcher(ABC):
 
-    def __init__(self,
-                 functions,
-                 is_gateway_proxy=True):
+    def __init__(self, functions, is_gateway_proxy=True):
         self.functions = functions
         self.is_gateway_proxy = is_gateway_proxy
 

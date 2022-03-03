@@ -49,7 +49,8 @@ ACTIONS = [
     SearchNews(GNEWS_API_TOKEN, REDIS_CACHE_HOST, REDIS_CACHE_PORT)
 ]
 
-action_dispatcher = HasuraActionDispatcher(ACTIONS, API_GATEWAY_PROXY_INTEGRATION)
+action_dispatcher = HasuraActionDispatcher(ACTIONS,
+                                           API_GATEWAY_PROXY_INTEGRATION)
 
 
 def handle_action(event, context):
@@ -63,7 +64,8 @@ TRIGGERS = [
     OnPlaidAccessTokenCreated(),
 ]
 
-trigger_dispatcher = HasuraTriggerDispatcher(TRIGGERS, API_GATEWAY_PROXY_INTEGRATION)
+trigger_dispatcher = HasuraTriggerDispatcher(TRIGGERS,
+                                             API_GATEWAY_PROXY_INTEGRATION)
 
 
 def handle_trigger(event, context):
