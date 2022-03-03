@@ -38,7 +38,9 @@ jobs:
         id: test
         shell: bash
         continue-on-error: true
-        run: make test 2>&1
+        run: |
+          source deployment/scripts/code_artifactory.sh
+          make test 2>&1
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
