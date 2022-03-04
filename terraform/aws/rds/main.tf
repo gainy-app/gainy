@@ -3,7 +3,7 @@ variable "env" {}
 variable "private_subnet_group_name" {}
 variable "public_subnet_group_name" {}
 variable "vpc_default_sg_id" {}
-variable "db_analytics_port" {}
+variable "db_external_access_port" {}
 
 resource "random_password" "rds" {
   length  = 16
@@ -90,7 +90,7 @@ resource "aws_db_instance" "db_replica" {
   }
 }
 
-resource "aws_db_instance" "db_analytics" {
+resource "aws_db_instance" "db_external_access" {
   count                   = var.env == "production" ? 0 : 1 # todo change to production
   identifier              = "${var.name}-analytics-${var.env}"
   engine                  = "postgres"
@@ -107,7 +107,7 @@ resource "aws_db_instance" "db_analytics" {
 
   name     = "${var.name}_analytics"
   username = var.name
-  port     = var.db_analytics_port
+  port     = var.db_external_access_port
 
   password = random_password.rds_analytics.result
 
@@ -133,6 +133,6 @@ output "db_instance" {
 output "db_replica" {
   value = aws_db_instance.db_replica
 }
-output "db_analytics" {
-  value = aws_db_instance.db_analytics
+output "db_external_access" {
+  value = aws_db_instance.db_external_access
 }

@@ -55,3 +55,4 @@ variable "pg_analytics_port" {}
 variable "pg_analytics_username" {}
 variable "pg_analytics_password" {}
 variable "pg_analytics_dbname" {}
+variable "pg_analytics_schema" {}

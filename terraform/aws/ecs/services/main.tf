@@ -168,7 +168,7 @@ resource "aws_ecs_task_definition" "default" {
       pg_analytics_username = var.pg_analytics_username
       pg_analytics_password = var.pg_analytics_password
       pg_analytics_dbname   = var.pg_analytics_dbname
-      pg_analytics_schema   = "public"
+      pg_analytics_schema   = var.pg_analytics_schema
 
       datadog_api_key = var.datadog_api_key
       datadog_app_key = var.datadog_app_key
