@@ -1,0 +1,253 @@
+{
+  "streams": [
+    {
+      "table_name": "analytics_profiles",
+      "stream": "analytics_profiles",
+      "metadata": [
+        {
+          "breadcrumb": [],
+          "metadata": {
+            "replication-key": "id",
+            "replication-method": "INCREMENTAL",
+            "view-key-properties": [ "id" ],
+            "schema-name": "app",
+            "database-name": "gainy",
+            "selected": true,
+            "is-view": true
+          }
+        }
+      ],
+      "tap_stream_id": "app-analytics_profiles",
+      "schema": { "type": "object" }
+    },
+    {
+      "table_name": "analytics_profile_plaid_access_tokens",
+      "stream": "analytics_profile_plaid_access_tokens",
+      "metadata": [
+        {
+          "breadcrumb": [],
+          "metadata": {
+            "replication-key": "id",
+            "replication-method": "FULL_TABLE",
+            "view-key-properties": [ "id" ],
+            "schema-name": "app",
+            "database-name": "gainy",
+            "selected": true,
+            "is-view": true
+          }
+        }
+      ],
+      "tap_stream_id": "app-analytics_profile_plaid_access_tokens",
+      "schema": { "type": "object" }
+    },
+    {
+      "table_name": "profile_categories",
+      "stream": "profile_categories",
+      "metadata": [
+        {
+          "breadcrumb": [],
+          "metadata": {
+            "replication-key": "id",
+            "replication-method": "FULL_TABLE",
+            "table-key-properties": [ "id" ],
+            "schema-name": "app",
+            "database-name": "gainy",
+            "selected": true
+          }
+        }
+      ],
+      "tap_stream_id": "app-profile_categories",
+      "schema": { "type": "object" }
+    },
+    {
+      "table_name": "profile_interests",
+      "stream": "profile_interests",
+      "metadata": [
+        {
+          "breadcrumb": [],
+          "metadata": {
+            "replication-key": "id",
+            "replication-method": "FULL_TABLE",
+            "table-key-properties": [ "id" ],
+            "schema-name": "app",
+            "database-name": "gainy",
+            "selected": true
+          }
+        }
+      ],
+      "tap_stream_id": "app-profile_interests",
+      "schema": { "type": "object" }
+    },
+    {
+      "table_name": "profile_favorite_collections",
+      "stream": "profile_favorite_collections",
+      "metadata": [
+        {
+          "breadcrumb": [],
+          "metadata": {
+            "replication-key": "id",
+            "replication-method": "FULL_TABLE",
+            "table-key-properties": [ "id" ],
+            "schema-name": "app",
+            "database-name": "gainy",
+            "selected": true
+          }
+        }
+      ],
+      "tap_stream_id": "app-profile_favorite_collections",
+      "schema": { "type": "object" }
+    },
+    {
+      "table_name": "profile_scoring_settings",
+      "stream": "profile_scoring_settings",
+      "metadata": [
+        {
+          "breadcrumb": [],
+          "metadata": {
+            "replication-key": "id",
+            "replication-method": "FULL_TABLE",
+            "table-key-properties": [ "id" ],
+            "schema-name": "app",
+            "database-name": "gainy",
+            "selected": true
+          }
+        }
+      ],
+      "tap_stream_id": "app-profile_scoring_settings",
+      "schema": { "type": "object" }
+    },
+    {
+      "table_name": "profile_watchlist_tickers",
+      "stream": "profile_watchlist_tickers",
+      "metadata": [
+        {
+          "breadcrumb": [],
+          "metadata": {
+            "replication-key": "id",
+            "replication-method": "FULL_TABLE",
+            "table-key-properties": [ "id" ],
+            "schema-name": "app",
+            "database-name": "gainy",
+            "selected": true
+          }
+        }
+      ],
+      "tap_stream_id": "app-profile_watchlist_tickers",
+      "schema": { "type": "object" }
+    },
+    {
+      "table_name": "profile_ticker_metrics_settings",
+      "stream": "profile_ticker_metrics_settings",
+      "metadata": [
+        {
+          "breadcrumb": [],
+          "metadata": {
+            "replication-key": "id",
+            "replication-method": "FULL_TABLE",
+            "table-key-properties": [ "id" ],
+            "schema-name": "app",
+            "database-name": "gainy",
+            "selected": true
+          }
+        }
+      ],
+      "tap_stream_id": "app-profile_ticker_metrics_settings",
+      "schema": { "type": "object" }
+    },
+    {
+      "table_name": "profile_ticker_match_score",
+      "stream": "profile_ticker_match_score",
+      "metadata": [
+        {
+          "breadcrumb": [],
+          "metadata": {
+            "replication-key": "id",
+            "replication-method": "FULL_TABLE",
+            "table-key-properties": [ "id" ],
+            "schema-name": "app",
+            "database-name": "gainy",
+            "selected": true
+          }
+        }
+      ],
+      "tap_stream_id": "app-profile_ticker_match_score",
+      "schema": { "type": "object" }
+    },
+    {
+      "table_name": "plaid_institutions",
+      "stream": "plaid_institutions",
+      "metadata": [
+        {
+          "breadcrumb": [],
+          "metadata": {
+            "replication-key": "id",
+            "replication-method": "FULL_TABLE",
+            "table-key-properties": [ "id" ],
+            "schema-name": "app",
+            "database-name": "gainy",
+            "selected": true
+          }
+        }
+      ],
+      "tap_stream_id": "app-plaid_institutions",
+      "schema": { "type": "object" }
+    },
+    {
+      "table_name": "profile_portfolio_accounts",
+      "stream": "profile_portfolio_accounts",
+      "metadata": [
+        {
+          "breadcrumb": [],
+          "metadata": {
+            "replication-key": "id",
+            "replication-method": "FULL_TABLE",
+            "table-key-properties": [ "id" ],
+            "schema-name": "app",
+            "database-name": "gainy",
+            "selected": true
+          }
+        }
+      ],
+      "tap_stream_id": "app-profile_portfolio_accounts",
+      "schema": { "type": "object" }
+    },
+    {
+      "table_name": "profile_holdings",
+      "stream": "profile_holdings",
+      "metadata": [
+        {
+          "breadcrumb": [],
+          "metadata": {
+            "replication-key": "id",
+            "replication-method": "FULL_TABLE",
+            "table-key-properties": [ "id" ],
+            "schema-name": "app",
+            "database-name": "gainy",
+            "selected": true
+          }
+        }
+      ],
+      "tap_stream_id": "app-profile_holdings",
+      "schema": { "type": "object" }
+    },
+    {
+      "table_name": "profile_portfolio_transactions",
+      "stream": "profile_portfolio_transactions",
+      "metadata": [
+        {
+          "breadcrumb": [],
+          "metadata": {
+            "replication-key": "id",
+            "replication-method": "FULL_TABLE",
+            "table-key-properties": [ "id" ],
+            "schema-name": "app",
+            "database-name": "gainy",
+            "selected": true
+          }
+        }
+      ],
+      "tap_stream_id": "app-profile_portfolio_transactions",
+      "schema": { "type": "object" }
+    }
+  ]
+}

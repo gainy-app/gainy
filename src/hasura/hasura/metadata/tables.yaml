@@ -743,16 +743,6 @@
       timeout_sec: 60
     webhook: '{{AWS_LAMBDA_API_GATEWAY_ENDPOINT}}/hasuraTrigger'
 - table:
-    schema: app
-    name: ticker_financial_periods
-  select_permissions:
-  - role: user
-    permission:
-      columns:
-      - id
-      - period
-      filter: {}
-- table:
     schema: public
     name: analyst_ratings
   select_permissions:

@@ -51,14 +51,15 @@ schedules = json.loads(result.stdout)
 
 # Process schedule parameters
 for schedule in schedules:
-    if 'env' in schedule and 'TARGET_ENVS' in schedule['env']:
-        target_envs = json.loads(schedule['env']['TARGET_ENVS'])
+    env = schedule.get('env', {})
+
+    if 'TARGET_ENVS' in env:
+        target_envs = json.loads(env['TARGET_ENVS'])
         schedule['skipped'] = ENV not in target_envs
     else:
         schedule['skipped'] = False
 
-    schedule['downstream'] = "DOWNSTREAM" == schedule.get('env', {}).get(
-        'INTEGRATION', 'UPSTREAM')
+    schedule['downstream'] = "DOWNSTREAM" == env.get('INTEGRATION', 'UPSTREAM')
 
 # Tags
 tags = {'dbt'}

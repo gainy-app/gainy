@@ -1,0 +1,1 @@
+drop view app.analytics_profile_plaid_access_tokens
