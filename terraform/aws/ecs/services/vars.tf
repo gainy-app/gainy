@@ -50,6 +50,12 @@ variable "datadog_app_key" {}
 variable "polygon_api_token" {}
 variable "health_check_grace_period_seconds" {}
 variable "private_subnet_ids" {}
+variable "pg_analytics_host" {}
+variable "pg_analytics_port" {}
+variable "pg_analytics_username" {}
+variable "pg_analytics_password" {}
+variable "pg_analytics_dbname" {}
+variable "pg_analytics_schema" {}
 variable "mlflow_artifact_bucket" {}
 variable "codeartifact_pipy_url" {}
 variable "gainy_compute_version" {}

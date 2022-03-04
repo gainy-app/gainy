@@ -1,7 +1,7 @@
 id,name,icon_url,risk_score,enabled
 1,Defensive,https://gainy-categories-production.s3.amazonaws.com/Defensive%403x.png,1,1
 2,Speculation,https://gainy-categories-production.s3.amazonaws.com/Speculation%403x.png,3,1
-3,ETF,https://gainy-categories-production.s3.amazonaws.com/ETF%403x.png,,0
+3,ETF,https://gainy-categories-production.s3.amazonaws.com/ETF%403x.png,1,0
 4,Cryptocurrency,https://gainy-categories-production.s3.amazonaws.com/Cryptocurrency%403x.png,3,0
 5,Penny,https://gainy-categories-production.s3.amazonaws.com/Penny%403x.png,3,1
 6,Dividend,https://gainy-categories-production.s3.amazonaws.com/Dividend%403x.png,2,1

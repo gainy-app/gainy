@@ -3,6 +3,11 @@ locals {
   deployment_key = local.timestamp
 }
 
+resource "random_integer" "db_external_access_port" {
+  min = 10000
+  max = 60000
+}
+
 module "s3" {
   source = "./s3"
   env    = var.env
@@ -58,19 +63,22 @@ module "lambda" {
 }
 
 module "ecs" {
-  source                 = "./ecs"
-  env                    = var.env
-  instance_type          = local.ecs_instance_type
-  vpc_index              = index(["production", "test"], var.env)
-  mlflow_artifact_bucket = module.s3.mlflow_artifact_bucket
+  source                  = "./ecs"
+  env                     = var.env
+  instance_type           = local.ecs_instance_type
+  vpc_index               = index(["production", "test"], var.env)
+  db_external_access_port = random_integer.db_external_access_port.result
+  mlflow_artifact_bucket  = module.s3.mlflow_artifact_bucket
 }
 
 module "rds" {
-  source               = "./rds"
-  env                  = var.env
-  db_subnet_group_name = module.ecs.db_subnet_group_name
-  name                 = "gainy"
-  vpc_default_sg_id    = module.ecs.vpc_default_sg_id
+  source                    = "./rds"
+  env                       = var.env
+  private_subnet_group_name = module.ecs.private_subnet_group_name
+  public_subnet_group_name  = module.ecs.public_subnet_group_name
+  name                      = "gainy"
+  vpc_default_sg_id         = module.ecs.vpc_default_sg_id
+  db_external_access_port   = random_integer.db_external_access_port.result
 }
 
 module "elasticache" {
@@ -142,6 +150,13 @@ module "ecs-service" {
   pg_production_port                   = var.pg_production_port
   pg_production_internal_sync_username = var.pg_production_internal_sync_username
   pg_production_internal_sync_password = var.pg_production_internal_sync_password
+
+  pg_analytics_host     = length(module.rds.db_external_access) > 0 ? module.rds.db_external_access[0].address : ""
+  pg_analytics_port     = length(module.rds.db_external_access) > 0 ? module.rds.db_external_access[0].port : ""
+  pg_analytics_username = length(module.rds.db_external_access) > 0 ? module.rds.db_external_access[0].username : ""
+  pg_analytics_password = length(module.rds.db_external_access) > 0 ? module.rds.db_external_access[0].password : ""
+  pg_analytics_dbname   = length(module.rds.db_external_access) > 0 ? module.rds.db_external_access[0].name : ""
+  pg_analytics_schema   = var.pg_analytics_schema
 
   eodhistoricaldata_jobs_count = local.meltano_eodhistoricaldata_jobs_count
   scheduler_cpu_credits        = local.meltano_scheduler_cpu_credits

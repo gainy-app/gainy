@@ -20,6 +20,9 @@ variable "pg_production_host" {}
 variable "pg_production_port" {}
 variable "pg_production_internal_sync_username" {}
 variable "pg_production_internal_sync_password" {}
+variable "pg_analytics_schema" {
+  default = "gainy_analytics"
+}
 
 variable "plaid_client_id" {}
 variable "plaid_secret" {}

@@ -91,18 +91,18 @@ with open("meltano.yml", "w") as f:
 if DBT_TARGET_SCHEMA != 'public':
     ### Algolia search mapping ###
 
-    with open("configs/search/search.mapping.yml", "r") as f:
+    with open("catalog/search/search.mapping.yml", "r") as f:
         config = f.read()
 
     config = re.sub(r'schema: public\w*', f'schema: {DBT_TARGET_SCHEMA}',
                     config)
 
-    with open("configs/search/search.mapping.yml", "w") as f:
+    with open("catalog/search/search.mapping.yml", "w") as f:
         f.write(config)
 
     ### Algolia tap catalog ###
 
-    with open("configs/search/tap.catalog.json", "r") as f:
+    with open("catalog/search/tap.catalog.json", "r") as f:
         config = json.load(f)
 
     for stream in config['streams']:
@@ -114,5 +114,5 @@ if DBT_TARGET_SCHEMA != 'public':
             metadata['metadata']['schema-name'] = DBT_TARGET_SCHEMA
         stream['tap_stream_id'] = f"{DBT_TARGET_SCHEMA}-{stream['stream']}"
 
-    with open("configs/search/tap.catalog.json", "w") as f:
+    with open("catalog/search/tap.catalog.json", "w") as f:
         json.dump(config, f)
