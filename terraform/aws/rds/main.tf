@@ -105,7 +105,7 @@ resource "aws_db_instance" "db_external_access" {
 
   publicly_accessible = true
 
-  name     = "${var.name}_analytics"
+  name     = "${var.name}_external_access"
   username = var.name
   port     = var.db_external_access_port
 
