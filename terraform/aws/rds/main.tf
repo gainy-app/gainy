@@ -10,7 +10,7 @@ resource "random_password" "rds" {
   special = false
 }
 
-resource "random_password" "rds_analytics" {
+resource "random_password" "rds_external_access" {
   length  = 32
   special = false
 }
@@ -109,7 +109,7 @@ resource "aws_db_instance" "db_external_access" {
   username = var.name
   port     = var.db_external_access_port
 
-  password = random_password.rds_analytics.result
+  password = random_password.rds_external_access.result
 
   db_subnet_group_name      = var.public_subnet_group_name
   vpc_security_group_ids    = [var.vpc_default_sg_id]
