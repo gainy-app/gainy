@@ -219,7 +219,7 @@ resource "aws_security_group_rule" "bridge-elasticache" {
   security_group_id = data.aws_security_group.vpc_default_sg.id
   cidr_blocks       = ["10.0.0.0/8"]
 }
-resource "aws_security_group_rule" "rds-analytics" {
+resource "aws_security_group_rule" "rds-external-access" {
   type              = "ingress"
   from_port         = var.db_external_access_port
   to_port           = var.db_external_access_port
