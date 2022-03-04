@@ -2,7 +2,7 @@
     name: !ENV ${ALGOLIA_TICKERS_INDEX}
     source:
       table:
-        schema: public_test
+        schema: public
         name: ticker_search
       attributes:
         - symbol
@@ -28,7 +28,7 @@
     name: !ENV ${ALGOLIA_COLLECTIONS_INDEX}
     source:
       table:
-        schema: public_test
+        schema: public
         name: collection_search
       attributes:
         - id

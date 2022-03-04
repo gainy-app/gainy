@@ -236,3 +236,7 @@ services:
 volumes:
   db_data:
   meltano_data:
+
+networks:
+  default:
+    name: gainy-default

@@ -36,7 +36,6 @@ jobs:
 
       - name: Run tests
         id: test
-        shell: bash
         continue-on-error: true
         run: |
           source deployment/scripts/code_artifactory.sh

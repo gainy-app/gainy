@@ -9,6 +9,7 @@ docker-auth:
 configure: docker-auth
 	deployment/scripts/code_artifactory.sh
 	- if [ ! -f src/gainy-fetch/meltano/exchanges.local.json ]; then cp -n src/gainy-fetch/meltano/symbols.local.json.dist src/gainy-fetch/meltano/symbols.local.json; fi
+	- docker network create gainy-default
 
 up: configure
 	- docker-compose pull --include-deps
