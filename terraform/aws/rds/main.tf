@@ -91,8 +91,8 @@ resource "aws_db_instance" "db_replica" {
 }
 
 resource "aws_db_instance" "db_external_access" {
-  count                   = var.env == "production" ? 0 : 1 # todo change to production
-  identifier              = "${var.name}-analytics-${var.env}"
+  count                   = var.env == "production" ? 1 : 0
+  identifier              = "${var.name}-external-access-${var.env}"
   engine                  = "postgres"
   engine_version          = "12"
   instance_class          = "db.t4g.small"
