@@ -34,6 +34,7 @@ dag = DAG(dag_id,
 industry_assignments_generator = BashOperator(
     task_id="industry-assignments-generator",
     bash_command="gainy_industry_assignment predict",
+    skip_exit_code=-9,
     dag=dag)
 
 # register the dag
