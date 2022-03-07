@@ -145,9 +145,9 @@
     "dockerSecurityOptions": null,
     "environment": [
       { "name": "ENV",                                   "value": "${env}" },
-      { "name": "AWS_ACCESS_KEY_ID",                     "value": "${aws_region}" },
-      { "name": "AWS_SECRET_ACCESS_KEY",                 "value": "${aws_access_key}" },
-      { "name": "AWS_DEFAULT_REGION",                    "value": "${aws_secret_key}" },
+      { "name": "AWS_ACCESS_KEY_ID",                     "value": "${aws_access_key}" },
+      { "name": "AWS_SECRET_ACCESS_KEY",                 "value": "${aws_secret_key}" },
+      { "name": "AWS_DEFAULT_REGION",                    "value": "${aws_region}" },
       { "name": "PG_DATABASE",                           "value": "${pg_dbname}" },
       { "name": "PG_ADDRESS",                            "value": "${pg_host}" },
       { "name": "PG_PASSWORD",                           "value": "${pg_password}" },
