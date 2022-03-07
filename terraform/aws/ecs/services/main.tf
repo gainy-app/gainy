@@ -183,6 +183,9 @@ resource "aws_ecs_task_definition" "default" {
       websockets_image                  = docker_registry_image.websockets.name
 
       env                                  = var.env
+      aws_region                           = var.aws_region
+      aws_access_key                       = var.aws_access_key
+      aws_secret_key                       = var.aws_secret_key
       eodhistoricaldata_api_token          = var.eodhistoricaldata_api_token
       eodhistoricaldata_exchanges          = jsonencode(["US", "CC", "INDX"])
       pg_host                              = var.pg_host

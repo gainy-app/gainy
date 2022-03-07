@@ -109,6 +109,9 @@ module "vpc_bridge" {
 module "ecs-service" {
   source               = "./ecs/services"
   env                  = var.env
+  aws_region           = var.aws_region
+  aws_access_key       = var.aws_access_key
+  aws_secret_key       = var.aws_secret_key
   ecr_address          = local.ecr_address
   repository_name      = aws_ecr_repository.default.name
   aws_log_group_name   = module.ecs.aws_cloudwatch_log_group.name

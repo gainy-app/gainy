@@ -56,6 +56,9 @@ variable "pg_analytics_username" {}
 variable "pg_analytics_password" {}
 variable "pg_analytics_dbname" {}
 variable "pg_analytics_schema" {}
+variable "aws_region" {}
+variable "aws_access_key" {}
+variable "aws_secret_key" {}
 variable "mlflow_artifact_bucket" {}
 variable "codeartifact_pipy_url" {}
 variable "gainy_compute_version" {}
