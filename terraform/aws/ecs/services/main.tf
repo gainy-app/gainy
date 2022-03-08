@@ -6,10 +6,11 @@ locals {
     BASE_IMAGE_VERSION          = var.base_image_version
     CODEARTIFACT_PIPY_URL       = var.codeartifact_pipy_url
     GAINY_COMPUTE_VERSION       = var.gainy_compute_version
+    MELTANO_SOURCE_MD5          = data.archive_file.meltano_source.output_md5
   }
 
   meltano_root_dir       = abspath("${path.cwd}/../src/gainy-fetch")
-  meltano_image_tag      = format("meltano-%s-%s-%s", var.env, var.base_image_version, md5(jsonencode(local.meltano_build_args) + data.archive_file.meltano_source.output_md5))
+  meltano_image_tag      = format("meltano-%s-%s-%s", var.env, var.base_image_version, md5(jsonencode(local.meltano_build_args)))
   meltano_ecr_image_name = format("%v/%v:%v", var.ecr_address, local.ecr_repo, local.meltano_image_tag)
 
   hasura_root_dir       = abspath("${path.cwd}/../src/hasura")
