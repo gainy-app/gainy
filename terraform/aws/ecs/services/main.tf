@@ -9,11 +9,11 @@ locals {
   }
 
   meltano_root_dir       = abspath("${path.cwd}/../src/gainy-fetch")
-  meltano_image_tag      = format("meltano-%s-%s-%s", var.env, md5(local.meltano_build_args), data.archive_file.meltano_source.output_md5)
+  meltano_image_tag      = format("meltano-%s-%s-%s", var.env, var.base_image_version, md5(json_encode(local.meltano_build_args) + data.archive_file.meltano_source.output_md5))
   meltano_ecr_image_name = format("%v/%v:%v", var.ecr_address, local.ecr_repo, local.meltano_image_tag)
 
   hasura_root_dir       = abspath("${path.cwd}/../src/hasura")
-  hasura_image_tag      = format("hasura-%s-%s-%s", var.env, md5(var.base_image_version), data.archive_file.hasura_source.output_md5)
+  hasura_image_tag      = format("hasura-%s-%s-%s", var.env, var.base_image_version, data.archive_file.hasura_source.output_md5)
   hasura_ecr_image_name = format("%v/%v:%v", var.ecr_address, local.ecr_repo, local.hasura_image_tag)
 
   websockets_root_dir       = abspath("${path.cwd}/../src/websockets")
