@@ -105,6 +105,28 @@ resource "docker_registry_image" "websockets" {
  * Create task definition
  */
 
+resource "aws_iam_role" "gainy_task_role" {
+  name               = "gainy-task-${var.env}"
+  assume_role_policy = <<EOF
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "",
+      "Effect": "Allow",
+      "Principal": {
+        "Service": "ecs-tasks.amazonaws.com"
+      },
+      "Action": "sts:AssumeRole"
+    }
+  ]
+}
+EOF
+}
+resource "aws_iam_role_policy_attachment" "iam_role_policy_attachment_gainy_task_role_default" {
+  role       = aws_iam_role.gainy_task_role.name
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy"
+}
 resource "random_password" "airflow" {
   length           = 16
   special          = true
@@ -118,6 +140,7 @@ resource "aws_ecs_task_definition" "default" {
   volume {
     name = "meltano-data"
   }
+  task_role_arn = aws_iam_role.gainy_task_role.arn
 
   container_definitions = templatefile(
     "${path.module}/container-definitions.json",
