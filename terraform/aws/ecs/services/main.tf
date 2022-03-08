@@ -1,12 +1,19 @@
 locals {
   ecr_repo = var.repository_name
 
+  meltano_build_args = {
+    BASE_IMAGE_REGISTRY_ADDRESS = var.base_image_registry_address
+    BASE_IMAGE_VERSION          = var.base_image_version
+    CODEARTIFACT_PIPY_URL       = var.codeartifact_pipy_url
+    GAINY_COMPUTE_VERSION       = var.gainy_compute_version
+  }
+
   meltano_root_dir       = abspath("${path.cwd}/../src/gainy-fetch")
-  meltano_image_tag      = format("meltano-%s-%s-%s", var.env, var.base_image_version, data.archive_file.meltano_source.output_md5)
+  meltano_image_tag      = format("meltano-%s-%s-%s", var.env, md5(local.meltano_build_args), data.archive_file.meltano_source.output_md5)
   meltano_ecr_image_name = format("%v/%v:%v", var.ecr_address, local.ecr_repo, local.meltano_image_tag)
 
   hasura_root_dir       = abspath("${path.cwd}/../src/hasura")
-  hasura_image_tag      = format("hasura-%s-%s-%s", var.env, var.base_image_version, data.archive_file.hasura_source.output_md5)
+  hasura_image_tag      = format("hasura-%s-%s-%s", var.env, md5(var.base_image_version), data.archive_file.hasura_source.output_md5)
   hasura_ecr_image_name = format("%v/%v:%v", var.ecr_address, local.ecr_repo, local.hasura_image_tag)
 
   websockets_root_dir       = abspath("${path.cwd}/../src/websockets")
@@ -47,12 +54,7 @@ resource "docker_registry_image" "meltano" {
   build {
     context    = local.meltano_root_dir
     dockerfile = "Dockerfile"
-    build_args = {
-      BASE_IMAGE_REGISTRY_ADDRESS = var.base_image_registry_address
-      BASE_IMAGE_VERSION          = var.base_image_version
-      CODEARTIFACT_PIPY_URL       = var.codeartifact_pipy_url
-      GAINY_COMPUTE_VERSION       = var.gainy_compute_version
-    }
+    build_args = local.meltano_build_args
 
     auth_config {
       host_name = var.ecr_address
