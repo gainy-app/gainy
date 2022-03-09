@@ -44,6 +44,12 @@ sources:
       - name: profile_plaid_access_tokens
       - name: plaid_institutions
 
+  - name: website
+    description: Website data, managed by webflow integrations at gainy.app
+    schema: raw_data
+    tables:
+      - name: blogs
+
 models:
   - name: categories
     columns:
@@ -1860,6 +1866,64 @@ models:
           - exists
           - type:
               type: 'integer'
+
+  - name: website_blog_articles
+    columns:
+      - name: id
+        tests:
+          - exists
+          - type:
+              type: 'character varying'
+      - name: title
+        tests:
+          - exists
+          - type:
+              type: 'character varying'
+      - name: post_summary
+        tests:
+          - exists
+          - type:
+              type: 'character varying'
+      - name: main_image
+        tests:
+          - exists
+          - type:
+              type: 'character varying'
+      - name: category_link
+        tests:
+          - exists
+          - type:
+              type: 'character varying'
+      - name: category_name
+        tests:
+          - exists
+          - type:
+              type: 'character varying'
+      - name: published_on
+        tests:
+          - exists
+          - type:
+              type: 'timestamp without time zone'
+      - name: rate_rating
+        tests:
+          - exists
+          - type:
+              type: 'double precision'
+      - name: rate_votes
+        tests:
+          - exists
+          - type:
+              type: 'integer'
+      - name: url
+        tests:
+          - exists
+          - type:
+              type: 'character varying'
+      - name: updated_on
+        tests:
+          - exists
+          - type:
+              type: 'timestamp without time zone'
 
 exposures:
   - name: ticker_search_index

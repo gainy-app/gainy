@@ -2040,3 +2040,37 @@
       - country_name
       - updated_at
       filter: {}
+- table:
+    schema: public
+    name: website_blog_articles
+  select_permissions:
+  - role: anonymous
+    permission:
+      columns:
+      - category_link
+      - category_name
+      - id
+      - main_image
+      - post_summary
+      - title
+      - url
+      - rate_rating
+      - rate_votes
+      - published_on
+      - updated_on
+      filter: {}
+  - role: user
+    permission:
+      columns:
+      - id
+      - title
+      - post_summary
+      - main_image
+      - category_link
+      - category_name
+      - published_on
+      - rate_rating
+      - rate_votes
+      - url
+      - updated_on
+      filter: {}

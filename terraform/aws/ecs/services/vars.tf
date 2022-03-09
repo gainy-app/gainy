@@ -50,9 +50,10 @@ variable "datadog_app_key" {}
 variable "polygon_api_token" {}
 variable "health_check_grace_period_seconds" {}
 variable "private_subnet_ids" {}
-variable "pg_analytics_host" {}
-variable "pg_analytics_port" {}
-variable "pg_analytics_username" {}
-variable "pg_analytics_password" {}
-variable "pg_analytics_dbname" {}
+variable "pg_external_access_host" {}
+variable "pg_external_access_port" {}
+variable "pg_external_access_username" {}
+variable "pg_external_access_password" {}
+variable "pg_external_access_dbname" {}
 variable "pg_analytics_schema" {}
+variable "pg_website_schema" {}
