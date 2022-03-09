@@ -155,25 +155,6 @@
       "schema": { "type": "object" }
     },
     {
-      "table_name": "profile_ticker_match_score",
-      "stream": "profile_ticker_match_score",
-      "metadata": [
-        {
-          "breadcrumb": [],
-          "metadata": {
-            "replication-key": "id",
-            "replication-method": "FULL_TABLE",
-            "table-key-properties": [ "id" ],
-            "schema-name": "app",
-            "database-name": "gainy",
-            "selected": true
-          }
-        }
-      ],
-      "tap_stream_id": "app-profile_ticker_match_score",
-      "schema": { "type": "object" }
-    },
-    {
       "table_name": "plaid_institutions",
       "stream": "plaid_institutions",
       "metadata": [
