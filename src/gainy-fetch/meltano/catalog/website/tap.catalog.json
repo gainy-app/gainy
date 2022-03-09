@@ -1,0 +1,23 @@
+{
+  "streams": [
+    {
+      "table_name": "blogs",
+      "stream": "blogs",
+      "metadata": [
+        {
+          "breadcrumb": [],
+          "metadata": {
+            "replication-key": "updated_on",
+            "replication-method": "INCREMENTAL",
+            "table-key-properties": [ "id" ],
+            "schema-name": "website",
+            "database-name": "gainy",
+            "selected": true
+          }
+        }
+      ],
+      "tap_stream_id": "website-blogs",
+      "schema": { "type": "object" }
+    }
+  ]
+}

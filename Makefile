@@ -38,7 +38,7 @@ tf-apply:
 	cd terraform && source .env && terraform apply -auto-approve $(PARAMS)
 
 hasura-console:
-	docker-compose exec -T hasura hasura console --address 0.0.0.0 --api-host http://0.0.0.0 --endpoint http://0.0.0.0:8080 --no-browser
+	docker-compose exec -T hasura hasura console --address 0.0.0.0 --api-host http://0.0.0.0 --endpoint http://0.0.0.0:8080 --no-browser --skip-update-check
 
 hasura-seed:
 	docker-compose exec -T hasura hasura seed apply

@@ -90,6 +90,13 @@ plugins:
       config:
         filter_schemas: app
 
+    # Website tap
+    - name: tap-postgres-website
+      inherit_from: tap-postgres
+      catalog: catalog/website/tap.catalog.json
+      config:
+        filter_schemas: website
+
   loaders:
     - name: target-postgres
       variant: transferwise
@@ -178,6 +185,17 @@ schedules:
     env:
       TARGET_ENVS: '["production"]'
       INTEGRATION: 'DOWNSTREAM'
+
+  # Website
+
+  - name: website-to-postgres
+    extractor: tap-postgres-website
+    loader: target-postgres-small-batch
+    transform: skip
+    interval: '@daily'
+    start_date: 2021-11-15 00:00:00.000000
+    env:
+      TARGET_ENVS: '["production"]'
 
   # sync test db
 

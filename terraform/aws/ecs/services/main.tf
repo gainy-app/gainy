@@ -163,12 +163,13 @@ resource "aws_ecs_task_definition" "default" {
       algolia_app_id                       = var.algolia_app_id
       algolia_indexing_key                 = var.algolia_indexing_key
 
-      pg_analytics_host     = var.pg_analytics_host
-      pg_analytics_port     = var.pg_analytics_port
-      pg_analytics_username = var.pg_analytics_username
-      pg_analytics_password = var.pg_analytics_password
-      pg_analytics_dbname   = var.pg_analytics_dbname
-      pg_analytics_schema   = var.pg_analytics_schema
+      pg_external_access_host     = var.pg_external_access_host
+      pg_external_access_port     = var.pg_external_access_port
+      pg_external_access_username = var.pg_external_access_username
+      pg_external_access_password = var.pg_external_access_password
+      pg_external_access_dbname   = var.pg_external_access_dbname
+      pg_analytics_schema         = var.pg_analytics_schema
+      pg_website_schema           = var.pg_website_schema
 
       datadog_api_key = var.datadog_api_key
       datadog_app_key = var.datadog_app_key

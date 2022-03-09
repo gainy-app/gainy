@@ -147,12 +147,13 @@ module "ecs-service" {
   pg_production_internal_sync_username = var.pg_production_internal_sync_username
   pg_production_internal_sync_password = var.pg_production_internal_sync_password
 
-  pg_analytics_host     = length(module.rds.db_external_access) > 0 ? module.rds.db_external_access[0].address : ""
-  pg_analytics_port     = length(module.rds.db_external_access) > 0 ? module.rds.db_external_access[0].port : ""
-  pg_analytics_username = length(module.rds.db_external_access) > 0 ? module.rds.db_external_access[0].username : ""
-  pg_analytics_password = length(module.rds.db_external_access) > 0 ? module.rds.db_external_access[0].password : ""
-  pg_analytics_dbname   = length(module.rds.db_external_access) > 0 ? module.rds.db_external_access[0].name : ""
-  pg_analytics_schema   = var.pg_analytics_schema
+  pg_external_access_host     = length(module.rds.db_external_access) > 0 ? module.rds.db_external_access[0].address : ""
+  pg_external_access_port     = length(module.rds.db_external_access) > 0 ? module.rds.db_external_access[0].port : ""
+  pg_external_access_username = length(module.rds.db_external_access) > 0 ? module.rds.db_external_access[0].username : ""
+  pg_external_access_password = length(module.rds.db_external_access) > 0 ? module.rds.db_external_access[0].password : ""
+  pg_external_access_dbname   = length(module.rds.db_external_access) > 0 ? module.rds.db_external_access[0].name : ""
+  pg_analytics_schema         = var.pg_analytics_schema
+  pg_website_schema           = var.pg_website_schema
 
   eodhistoricaldata_jobs_count = local.meltano_eodhistoricaldata_jobs_count
   scheduler_cpu_credits        = local.meltano_scheduler_cpu_credits
