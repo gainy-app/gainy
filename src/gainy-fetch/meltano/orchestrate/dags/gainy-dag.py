@@ -39,38 +39,50 @@ if not Path(project_root).joinpath(meltano_bin).exists():
     )
     meltano_bin = "meltano"
 
-# Schedules
-result = subprocess.run(
-    [meltano_bin, "schedule", "list", "--format=json"],
-    cwd=project_root,
-    stdout=subprocess.PIPE,
-    universal_newlines=True,
-    check=True,
-)
-schedules = json.loads(result.stdout)
 
-# Process schedule parameters
-for schedule in schedules:
-    env = schedule.get('env', {})
+def create_downstream_operators(dag):
+    industry_assignment = BashOperator(
+        task_id="industry-assignments-generator",
+        bash_command="gainy_industry_assignment predict",
+        dag=dag)
+    recommendation = BashOperator(task_id="update-recommendations",
+                                  bash_command="gainy_recommendation",
+                                  dag=dag)
+    industry_assignment >> recommendation
+    return [industry_assignment]
 
-    if 'TARGET_ENVS' in env:
-        target_envs = json.loads(env['TARGET_ENVS'])
-        schedule['skipped'] = ENV not in target_envs
-    else:
-        schedule['skipped'] = False
 
-    schedule['downstream'] = "DOWNSTREAM" == env.get('INTEGRATION', 'UPSTREAM')
+def get_schedules():
+    result = subprocess.run(
+        [meltano_bin, "schedule", "list", "--format=json"],
+        cwd=project_root,
+        stdout=subprocess.PIPE,
+        universal_newlines=True,
+        check=True,
+    )
+    schedules = json.loads(result.stdout)
 
-# Tags
-tags = {'dbt'}
-for schedule in schedules:
-    if schedule['skipped']:
-        continue
+    # Process schedule parameters
+    for schedule in schedules:
+        env = schedule.get('env', {})
 
-    if schedule['downstream']:
-        tags.add(schedule['loader'])
-    else:
-        tags.add(schedule['extractor'])
+        if 'TARGET_ENVS' in env:
+            target_envs = json.loads(env['TARGET_ENVS'])
+            schedule['skipped'] = ENV not in target_envs
+        else:
+            schedule['skipped'] = False
+
+        schedule['downstream'] = "DOWNSTREAM" == env.get(
+            'INTEGRATION', 'UPSTREAM')
+
+    return list(filter(lambda schedule: not schedule['skipped'], schedules))
+
+
+schedules = get_schedules()
+tags = {
+    schedule['loader'] if schedule['downstream'] else schedule['extractor']
+    for schedule in schedules
+}
 
 # DAG
 dag_id = "gainy-dag"
@@ -88,9 +100,6 @@ upstream = []
 downstream = []
 
 for schedule in schedules:
-    if schedule['skipped']:
-        continue
-
     logger.info(f"Considering schedule '{schedule['name']}")
     operator = BashOperator(
         task_id=f"{schedule['name']}",
@@ -116,12 +125,10 @@ clean = BashOperator(
     bash_command=f"cd {project_root}; python3 scripts/cleanup.py",
     dag=dag)
 
-recommendation = BashOperator(task_id="update-recommendations",
-                              bash_command="gainy_recommendation",
-                              dag=dag)
+downstream += create_downstream_operators(dag)
 
 # dependencies
-upstream >> dbt >> downstream >> recommendation
+upstream >> dbt >> downstream
 
 # register the dag
 globals()[dag_id] = dag

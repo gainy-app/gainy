@@ -28,7 +28,7 @@ DEFAULT_ARGS = {
     "concurrency": 1,
 }
 
-DEFAULT_TAGS = ["meltano", "deprecated"]
+DEFAULT_TAGS = ["meltano", "debug"]
 
 project_root = os.getenv("MELTANO_PROJECT_ROOT", os.getcwd())
 
@@ -62,7 +62,7 @@ for schedule in schedules:
     if schedule["start_date"]:
         args["start_date"] = schedule["start_date"]
 
-    dag_id = f"meltano-{schedule['name']}"
+    dag_id = f"debug-{schedule['name']}"
 
     tags = DEFAULT_TAGS.copy()
     if schedule["extractor"]:

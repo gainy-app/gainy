@@ -104,25 +104,3 @@ jobs:
           TF_VAR_algolia_admin_api_key: ${{ secrets.ALGOLIA_ADMIN_API_KEY }}
           TF_VAR_hubspot_api_key: ${{ secrets.HUBSPOT_API_KEY }}
           TF_VAR_polygon_api_token: ${{ secrets.POLYGON_API_TOKEN }}
-
-      - uses: actions/github-script@0.9.0
-        if: github.event_name == 'pull_request'
-        env:
-          PLAN: "terraform\n${{ steps.plan.outputs.stdout }}"
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          script: |
-            const output = `Deploy to test:
-            #### Terraform Plan 📖\`${{ steps.plan.outcome }}\`
-            <details><summary>Show Plan</summary>
-            <pre>
-            ${process.env.PLAN}
-            </pre>
-            </details>
-            *Pusher: @${{ github.actor }}, Action: \`${{ github.event_name }}\`*`;
-            github.issues.createComment({
-              issue_number: context.issue.number,
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              body: output
-            })
