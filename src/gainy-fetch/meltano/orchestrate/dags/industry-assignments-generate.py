@@ -1,7 +1,7 @@
 from airflow.operators.bash import BashOperator
 from common import create_dag
 
-dag_id = "industry-assignments-generator"
+dag_id = "debug-industry-assignments-generator"
 tags = ["gainy-compute", "mlflow", "inference", "debug"]
 dag = create_dag(dag_id, tags=tags)
 
