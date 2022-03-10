@@ -284,6 +284,25 @@ resource "aws_iam_role_policy_attachment" "iam_role_policy_attachment_custom" {
   policy_arn = aws_iam_policy.fargate_execution.arn
 }
 
+resource "aws_iam_role" "task" {
+  name               = "ecs-gainy-task-role-${var.env}"
+  assume_role_policy = <<EOF
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "",
+      "Effect": "Allow",
+      "Principal": {
+        "Service": "ecs-tasks.amazonaws.com"
+      },
+      "Action": "sts:AssumeRole"
+    }
+  ]
+}
+EOF
+}
+
 ###### Create task definitions ######
 
 resource "aws_ecs_task_definition" "default" {
@@ -293,6 +312,7 @@ resource "aws_ecs_task_definition" "default" {
   cpu                      = var.main_cpu_credits
   memory                   = var.main_memory_credits
   tags                     = {}
+  task_role_arn            = aws_iam_role.task.arn
   execution_role_arn       = aws_iam_role.execution.arn
 
   volume {
@@ -313,6 +333,7 @@ resource "aws_ecs_task_definition" "hasura" {
   cpu                      = var.hasura_cpu_credits
   memory                   = var.hasura_memory_credits
   tags                     = {}
+  task_role_arn            = aws_iam_role.task.arn
   execution_role_arn       = aws_iam_role.execution.arn
 
   container_definitions = jsonencode([
