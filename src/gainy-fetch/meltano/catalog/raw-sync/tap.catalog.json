@@ -77,6 +77,25 @@
         "properties": {}
       },
       "selected": true
+    },
+    {
+      "table_name": "blogs",
+      "stream": "blogs",
+      "metadata": [
+        {
+          "breadcrumb": [],
+          "metadata": {
+            "replication-key": "updated_on",
+            "replication-method": "INCREMENTAL",
+            "table-key-properties": [ "id" ],
+            "schema-name": "raw_data",
+            "database-name": "gainy",
+            "selected": true
+          }
+        }
+      ],
+      "tap_stream_id": "raw_data-blogs",
+      "schema": { "type": "object" }
     }
   ]
 }
