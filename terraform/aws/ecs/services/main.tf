@@ -22,6 +22,40 @@ locals {
   websockets_ecr_image_name = format("%v/%v:%v", var.ecr_address, local.ecr_repo, local.websockets_image_tag)
 
   public_schema_name = "public_${var.versioned_schema_suffix}"
+
+  hasura_default_params = {
+    hasura_enable_console           = var.hasura_enable_console
+    hasura_enable_dev_mode          = var.hasura_enable_dev_mode
+    hasura_admin_secret             = random_password.hasura.result
+    hasura_jwt_secret               = var.hasura_jwt_secret
+    aws_lambda_api_gateway_endpoint = "${var.aws_lambda_api_gateway_endpoint}/${var.deployment_key}"
+    hasura_image                    = docker_registry_image.hasura.name
+    hasura_memory_credits           = var.hasura_memory_credits
+    hasura_cpu_credits              = var.hasura_cpu_credits
+    hasura_healthcheck_interval     = var.hasura_healthcheck_interval
+    hasura_healthcheck_retries      = var.hasura_healthcheck_retries
+
+    pg_host             = var.pg_host
+    pg_password         = var.pg_password
+    pg_port             = var.pg_port
+    pg_username         = var.pg_username
+    pg_dbname           = var.pg_dbname
+    pg_replica_uris     = var.pg_replica_uris
+    pg_transform_schema = local.public_schema_name
+    aws_log_group_name  = var.aws_log_group_name
+    aws_log_region      = var.aws_log_region
+  }
+  hasura_task_description = jsondecode(templatefile(
+    "${path.module}/hasura.json",
+    hasura_default_params
+  ))
+  hasura_replica_task_description = jsondecode(templatefile(
+    "${path.module}/hasura.json",
+    merge(hasura_default_params, {
+      hasura_healthcheck_interval = 30
+      hasura_healthcheck_retries  = 2
+    })
+  ))
 }
 
 resource "random_password" "hasura" {
@@ -281,31 +315,9 @@ resource "aws_ecs_task_definition" "hasura" {
   #    cpu_architecture        = "X86_64"
   #  }
 
-  container_definitions = templatefile(
-    "${path.module}/container-definitions-hasura.json",
-    {
-      hasura_enable_console           = var.hasura_enable_console
-      hasura_enable_dev_mode          = var.hasura_enable_dev_mode
-      hasura_admin_secret             = random_password.hasura.result
-      hasura_jwt_secret               = var.hasura_jwt_secret
-      aws_lambda_api_gateway_endpoint = "${var.aws_lambda_api_gateway_endpoint}/${var.deployment_key}"
-      hasura_image                    = docker_registry_image.hasura.name
-      hasura_memory_credits           = var.hasura_memory_credits
-      hasura_cpu_credits              = var.hasura_cpu_credits
-      hasura_healthcheck_interval     = 30
-      hasura_healthcheck_retries      = 2
-
-      pg_host             = var.pg_host
-      pg_password         = var.pg_password
-      pg_port             = var.pg_port
-      pg_username         = var.pg_username
-      pg_dbname           = var.pg_dbname
-      pg_replica_uris     = var.pg_replica_uris
-      pg_transform_schema = local.public_schema_name
-      aws_log_group_name  = var.aws_log_group_name
-      aws_log_region      = var.aws_log_region
-    }
-  )
+  container_definitions = jsonencode([
+    local.hasura_replica_task_description
+  ])
 }
 
 module "meltano-elb" {
