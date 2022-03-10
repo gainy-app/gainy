@@ -22,7 +22,10 @@ class PricesListener(AbstractPriceListener):
         self.granularity = 60000  # 60 seconds
         self.api_token = EOD_API_TOKEN
         self._first_filled_key = None
-        self._rev_transform_mapping = {}
+        self._rev_transform_mapping = {
+            self.transform_symbol(symbol): symbol
+            for symbol in self.symbols
+        }
 
     def get_symbols(self):
         with self.db_connect() as db_conn:
@@ -122,32 +125,20 @@ class PricesListener(AbstractPriceListener):
             self.logger.error('handle_message %s: %s', e, message_raw)
 
     async def listen(self):
-        listen_us_task = asyncio.create_task(self.listen_us())
-        listen_crypto_task = asyncio.create_task(self.listen_crypto())
+        tasks = [
+            asyncio.create_task(self._base_listen(endpoint))
+            for endpoint in ['us', 'crypto', 'index']
+        ]
 
-        await listen_us_task
-        await listen_crypto_task
+        for task in tasks:
+            await task
 
-    async def listen_us(self):
-        symbols = filter(lambda symbol: re.search(r'\.CC$', symbol) is None,
-                         self.symbols)
-        symbols = list(symbols)
-        await self._base_listen('us', symbols)
+    async def _base_listen(self, endpoint):
+        symbols = [
+            self.transform_symbol(symbol) for symbol in self.symbols
+            if self._get_eod_endpoint(symbol) == endpoint
+        ]
 
-    async def listen_crypto(self):
-        symbols = list(
-            filter(lambda symbol: re.search(r'\.CC$', symbol) is not None,
-                   self.symbols))
-
-        self._rev_transform_mapping = {}
-        for symbol in symbols:
-            self._rev_transform_mapping[self.transform_symbol(symbol)] = symbol
-
-        symbols = list(
-            map(lambda symbol: self.transform_symbol(symbol), symbols))
-        await self._base_listen('crypto', symbols)
-
-    async def _base_listen(self, endpoint, symbols):
         url = f"wss://ws.eodhistoricaldata.com/ws/{endpoint}?api_token={self.api_token}"
         first_attempt = True
 
@@ -199,6 +190,13 @@ class PricesListener(AbstractPriceListener):
             return self._rev_transform_mapping[symbol]
 
         return symbol
+
+    def _get_eod_endpoint(self, symbol):
+        if re.search(r'\.CC$', symbol) is not None:
+            return 'crypto'
+        if re.search(r'\.INDX$', symbol) is not None:
+            return 'index'
+        return 'us'
 
 
 if __name__ == "__main__":
