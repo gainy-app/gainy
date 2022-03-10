@@ -1,67 +1,11 @@
-# Based on https://gitlab.com/meltano/files-airflow
-# Deprecated and will be removed in the future
-
-import os
-import logging
-import subprocess
-import json
-
-from airflow import DAG
-try:
-    from airflow.operators.bash_operator import BashOperator
-except ImportError:
-    from airflow.operators.bash import BashOperator
-
-from datetime import timedelta
-from pathlib import Path
-
-logger = logging.getLogger(__name__)
-
-DEFAULT_ARGS = {
-    "owner": "gainy",
-    "depends_on_past": False,
-    "email_on_failure": False,
-    "email_on_retry": False,
-    "catchup": False,
-    "retries": 1,
-    "retry_delay": timedelta(minutes=5),
-    "concurrency": 1,
-}
+from airflow.operators.bash import BashOperator
+from common import create_dag, get_meltano_command, get_schedules
 
 DEFAULT_TAGS = ["meltano", "debug"]
 
-project_root = os.getenv("MELTANO_PROJECT_ROOT", os.getcwd())
-
-meltano_bin = ".meltano/run/bin"
-
-if not Path(project_root).joinpath(meltano_bin).exists():
-    logger.warning(
-        f"A symlink to the 'meltano' executable could not be found at '{meltano_bin}'. Falling back on expecting it to be in the PATH instead."
-    )
-    meltano_bin = "meltano"
-
-result = subprocess.run(
-    [meltano_bin, "schedule", "list", "--format=json"],
-    cwd=project_root,
-    stdout=subprocess.PIPE,
-    universal_newlines=True,
-    check=True,
-)
-schedules = json.loads(result.stdout)
+schedules = get_schedules()
 
 for schedule in schedules:
-    logger.info(f"Considering schedule '{schedule['name']}': {schedule}")
-
-    if not schedule["cron_interval"]:
-        logger.info(
-            f"No DAG created for schedule '{schedule['name']}' because its interval is set to `@once`."
-        )
-        continue
-
-    args = DEFAULT_ARGS.copy()
-    if schedule["start_date"]:
-        args["start_date"] = schedule["start_date"]
-
     dag_id = f"debug-{schedule['name']}"
 
     tags = DEFAULT_TAGS.copy()
@@ -74,29 +18,10 @@ for schedule in schedules:
     elif schedule["transform"] == "only":
         tags.append("dbt-only")
 
-    # from https://airflow.apache.org/docs/stable/scheduler.html#backfill-and-catchup
-    #
-    # It is crucial to set `catchup` to False so that Airflow only create a single job
-    # at the tail end of date window we want to extract data.
-    #
-    # Because our extractors do not support date-window extraction, it serves no
-    # purpose to enqueue date-chunked jobs for complete extraction window.
-    dag = DAG(dag_id,
-              tags=tags,
-              catchup=False,
-              default_args=args,
-              schedule_interval=schedule["interval"],
-              max_active_runs=1,
-              is_paused_upon_creation=True)
+    dag = create_dag(dag_id, tags=tags)
 
     elt = BashOperator(
-        task_id="extract_load",
-        bash_command=
-        f"cd {project_root}; {meltano_bin} schedule run {schedule['name']}",
+        task_id=schedule['name'],
+        bash_command=get_meltano_command(f"schedule run {schedule['name']}"),
         dag=dag,
     )
-
-    # register the dag
-    globals()[dag_id] = dag
-
-    logger.info(f"DAG created for schedule '{schedule['name']}'")

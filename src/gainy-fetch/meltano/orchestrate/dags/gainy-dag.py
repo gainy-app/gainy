@@ -1,43 +1,8 @@
 import os
-import logging
-import subprocess
-import json
+from airflow.operators.bash import BashOperator
+from common import create_dag, get_meltano_command, get_schedules, MELTANO_PROJECT_ROOT, ENV
 
-from airflow import DAG
-try:
-    from airflow.operators.bash_operator import BashOperator
-except ImportError:
-    from airflow.operators.bash import BashOperator
-
-from datetime import datetime, timedelta
-from pathlib import Path
-
-logger = logging.getLogger(__name__)
-
-project_root = os.getenv("MELTANO_PROJECT_ROOT", os.getcwd())
-concurrency = int(os.getenv("EODHISTORICALDATA_JOBS_COUNT", 1))
-
-ENV = os.getenv("ENV")
-DEFAULT_ARGS = {
-    "owner": "gainy",
-    "depends_on_past": False,
-    "email_on_failure": False,
-    "email_on_retry": False,
-    "catchup": False,
-    "retries": 1,
-    "retry_delay": timedelta(minutes=5),
-    "concurrency": concurrency,
-    "start_date": datetime(2021, 9, 1)
-}
-
-# Meltano
-meltano_bin = ".meltano/run/bin"
-
-if not Path(project_root).joinpath(meltano_bin).exists():
-    logger.warning(
-        f"A symlink to the 'meltano' executable could not be found at '{meltano_bin}'. Falling back on expecting it to be in the PATH instead."
-    )
-    meltano_bin = "meltano"
+CONCURRENCY = int(os.getenv("EODHISTORICALDATA_JOBS_COUNT", 1))
 
 
 def create_downstream_operators(dag):
@@ -52,32 +17,6 @@ def create_downstream_operators(dag):
     return [industry_assignment]
 
 
-def get_schedules():
-    result = subprocess.run(
-        [meltano_bin, "schedule", "list", "--format=json"],
-        cwd=project_root,
-        stdout=subprocess.PIPE,
-        universal_newlines=True,
-        check=True,
-    )
-    schedules = json.loads(result.stdout)
-
-    # Process schedule parameters
-    for schedule in schedules:
-        env = schedule.get('env', {})
-
-        if 'TARGET_ENVS' in env:
-            target_envs = json.loads(env['TARGET_ENVS'])
-            schedule['skipped'] = ENV not in target_envs
-        else:
-            schedule['skipped'] = False
-
-        schedule['downstream'] = "DOWNSTREAM" == env.get(
-            'INTEGRATION', 'UPSTREAM')
-
-    return list(filter(lambda schedule: not schedule['skipped'], schedules))
-
-
 schedules = get_schedules()
 tags = {
     schedule['loader'] if schedule['downstream'] else schedule['extractor']
@@ -86,51 +25,41 @@ tags = {
 
 # DAG
 dag_id = "gainy-dag"
-dag = DAG(
+dag = create_dag(
     dag_id,
     tags=list(tags),
-    catchup=False,
-    default_args=DEFAULT_ARGS,
     schedule_interval="0 23 * * *" if ENV == "production" else "0 0 * * 1-5",
-    max_active_runs=1,
-    is_paused_upon_creation=True)
+    is_paused_upon_creation=False)
 
 # Operators
 upstream = []
 downstream = []
 
 for schedule in schedules:
-    logger.info(f"Considering schedule '{schedule['name']}")
     operator = BashOperator(
-        task_id=f"{schedule['name']}",
-        bash_command=
-        f"cd {project_root}; {meltano_bin} schedule run {schedule['name']} --transform=skip",
+        task_id=schedule['name'],
+        bash_command=get_meltano_command(
+            f"schedule run {schedule['name']} --transform=skip"),
         dag=dag,
-        task_concurrency=concurrency,
-        pool_slots=concurrency)
+        task_concurrency=CONCURRENCY,
+        pool_slots=CONCURRENCY)
 
     if schedule['downstream']:
         downstream.append(operator)
     else:
         upstream.append(operator)
 
-dbt = BashOperator(
-    task_id="dbt",
-    bash_command=f"cd {project_root}; {meltano_bin} invoke dbt run",
-    dag=dag,
-    pool="dbt")
+dbt = BashOperator(task_id="dbt",
+                   bash_command=get_meltano_command("invoke dbt run"),
+                   dag=dag,
+                   pool="dbt")
 
 clean = BashOperator(
     task_id="clean",
-    bash_command=f"cd {project_root}; python3 scripts/cleanup.py",
+    bash_command=f"cd {MELTANO_PROJECT_ROOT}; python3 scripts/cleanup.py",
     dag=dag)
 
 downstream += create_downstream_operators(dag)
 
 # dependencies
 upstream >> dbt >> downstream
-
-# register the dag
-globals()[dag_id] = dag
-
-logger.info(f"DAG '{dag_id}' created")
