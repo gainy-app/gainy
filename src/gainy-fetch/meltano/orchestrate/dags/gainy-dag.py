@@ -56,7 +56,7 @@ dbt = BashOperator(task_id="dbt",
 
 clean = BashOperator(
     task_id="clean",
-    bash_command=f"cd {MELTANO_PROJECT_ROOT}; python3 scripts/cleanup.py",
+    bash_command=f"cd {MELTANO_PROJECT_ROOT}; /usr/local/bin/python scripts/cleanup.py",
     dag=dag)
 
 downstream += create_downstream_operators(dag)
