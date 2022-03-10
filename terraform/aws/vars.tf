@@ -8,6 +8,10 @@ variable "cloudflare_zone_id" {}
 variable "hasura_jwt_secret" {}
 variable "hubspot_api_key" {}
 
+variable "aws_region" {}
+variable "aws_access_key" {}
+variable "aws_secret_key" {}
+
 variable "base_image_registry_address" {}
 variable "base_image_version" {}
 
@@ -38,6 +42,9 @@ variable "algolia_app_id" {}
 variable "algolia_indexing_key" {}
 variable "algolia_search_key" {}
 
+variable "codeartifact_pipy_url" {}
+variable "gainy_compute_version" {}
+
 # https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task-cpu-memory-error.html
 locals {
   ecs_instance_type                    = var.env == "production" ? "c5.2xlarge" : "m6i.xlarge"
@@ -55,7 +62,7 @@ locals {
 
   hasura_memory_credits            = var.env == "production" ? 2048 : 2048
   meltano_ui_memory_credits        = var.env == "production" ? 1024 : 1024
-  meltano_scheduler_memory_credits = var.env == "production" ? 3072 : 3072
+  meltano_scheduler_memory_credits = var.env == "production" ? 3072 : 4096
 
   main_cpu_credits    = local.hasura_cpu_credits + local.meltano_scheduler_cpu_credits
   main_memory_credits = local.hasura_memory_credits + local.meltano_ui_memory_credits + local.meltano_scheduler_memory_credits
