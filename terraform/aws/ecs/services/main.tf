@@ -46,12 +46,12 @@ locals {
     aws_log_region      = var.aws_log_region
   }
   hasura_task_description = jsondecode(templatefile(
-    "${path.module}/hasura.json",
-    hasura_default_params
+    "${path.module}/task_definitions/hasura.json",
+    local.hasura_default_params
   ))
   hasura_replica_task_description = jsondecode(templatefile(
-    "${path.module}/hasura.json",
-    merge(hasura_default_params, {
+    "${path.module}/task_definitions/hasura.json",
+    merge(local.hasura_default_params, {
       hasura_healthcheck_interval = 30
       hasura_healthcheck_retries  = 2
     })
