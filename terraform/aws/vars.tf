@@ -41,10 +41,7 @@ variable "algolia_search_key" {}
 # https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task-cpu-memory-error.html
 locals {
   ecs_instance_type                    = var.env == "production" ? "c5.2xlarge" : "m6i.xlarge"
-  meltano_eodhistoricaldata_jobs_count = var.env == "production" ? 3 : 1
-
-  hasura_cpu_credits            = var.env == "production" ? 1024 : 512
-  meltano_scheduler_cpu_credits = var.env == "production" ? 3072 : 1024
+  meltano_eodhistoricaldata_jobs_count = var.env == "production" ? 4 : 1
 
   hasura_healthcheck_interval       = var.env == "production" ? 60 : 60
   hasura_healthcheck_retries        = var.env == "production" ? 3 : 3
@@ -53,7 +50,13 @@ locals {
   eod_websockets_memory_credits     = var.env == "production" ? 512 : 128
   polygon_websockets_memory_credits = var.env == "production" ? 768 : 128
 
-  hasura_memory_credits            = var.env == "production" ? 2048 : 1024
+  hasura_cpu_credits            = var.env == "production" ? 1024 : 512
+  meltano_scheduler_cpu_credits = var.env == "production" ? 3072 : 1024
+
+  hasura_memory_credits            = var.env == "production" ? 2048 : 2048
   meltano_ui_memory_credits        = var.env == "production" ? 1024 : 1024
   meltano_scheduler_memory_credits = var.env == "production" ? 3072 : 3072
+
+  main_cpu_credits    = local.hasura_cpu_credits + local.meltano_scheduler_cpu_credits
+  main_memory_credits = local.hasura_memory_credits + local.meltano_ui_memory_credits + local.meltano_scheduler_memory_credits
 }

@@ -107,7 +107,9 @@ resource "random_password" "airflow" {
 resource "aws_ecs_task_definition" "default" {
   family                   = "gainy-${var.env}"
   network_mode             = "awsvpc"
-  requires_compatibilities = []
+  requires_compatibilities = ["FARGATE"]
+  cpu                      = var.main_cpu_credits
+  memory                   = var.main_memory_credits
   tags                     = {}
   volume {
     name = "meltano-data"
@@ -313,12 +315,8 @@ resource "aws_ecs_service" "service" {
   desired_count                      = 1
   deployment_maximum_percent         = 200
   deployment_minimum_healthy_percent = 100
+  launch_type                        = "FARGATE"
   health_check_grace_period_seconds  = var.health_check_grace_period_seconds
-
-  ordered_placement_strategy {
-    type  = "spread"
-    field = "instanceId"
-  }
 
   load_balancer {
     target_group_arn = module.meltano-elb.aws_alb_target_group.arn

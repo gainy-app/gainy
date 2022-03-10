@@ -57,3 +57,5 @@ variable "pg_external_access_password" {}
 variable "pg_external_access_dbname" {}
 variable "pg_analytics_schema" {}
 variable "pg_website_schema" {}
+variable "main_cpu_credits" {}
+variable "main_memory_credits" {}

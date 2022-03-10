@@ -159,6 +159,8 @@ module "ecs-service" {
   scheduler_cpu_credits        = local.meltano_scheduler_cpu_credits
   scheduler_memory_credits     = local.meltano_scheduler_memory_credits
   ui_memory_credits            = local.meltano_ui_memory_credits
+  main_cpu_credits             = local.main_cpu_credits
+  main_memory_credits          = local.main_memory_credits
 
   base_image_registry_address = var.base_image_registry_address
   base_image_version          = var.base_image_version
