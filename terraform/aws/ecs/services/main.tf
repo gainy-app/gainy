@@ -285,6 +285,7 @@ resource "aws_iam_role_policy_attachment" "iam_role_policy_attachment_custom" {
 }
 
 ###### Create task definitions ######
+
 resource "aws_ecs_task_definition" "default" {
   family                   = "gainy-${var.env}"
   network_mode             = "awsvpc"
@@ -318,6 +319,8 @@ resource "aws_ecs_task_definition" "hasura" {
     local.hasura_replica_task_description
   ])
 }
+
+###### Create ALB ######
 
 module "meltano-elb" {
   source                           = "./elb"
@@ -354,7 +357,7 @@ module "hasura-elb" {
 }
 
 /*
- * Create ECS Service
+ * Create the main service
  */
 resource "aws_ecs_service" "service" {
   name                               = "gainy-${var.env}"
@@ -444,6 +447,8 @@ resource "aws_appautoscaling_policy" "ecs_policy" {
     }
   }
 }
+
+###### Output ######
 
 output "meltano_url" {
   value = module.meltano-elb.url

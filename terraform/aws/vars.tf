@@ -58,7 +58,7 @@ locals {
   polygon_websockets_memory_credits = var.env == "production" ? 768 : 128
 
   hasura_cpu_credits            = var.env == "production" ? 1024 : 512
-  meltano_scheduler_cpu_credits = var.env == "production" ? 3072 : 1024
+  meltano_scheduler_cpu_credits = var.env == "production" ? 3072 : 1536
 
   hasura_memory_credits            = var.env == "production" ? 2048 : 2048
   meltano_ui_memory_credits        = var.env == "production" ? 1024 : 1024
