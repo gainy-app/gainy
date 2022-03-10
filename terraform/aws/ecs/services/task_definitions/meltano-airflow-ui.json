@@ -1,0 +1,66 @@
+{
+  "name": "meltano-airflow-ui",
+  "memory": ${airflow_ui_memory_credits},
+  "extraHosts": null,
+  "dnsServers": null,
+  "disableNetworking": null,
+  "dnsSearchDomains": null,
+  "portMappings": [
+    {
+      "hostPort": ${airflow_port},
+      "containerPort": ${airflow_port},
+      "protocol": "tcp"
+    }
+  ],
+  "hostname": null,
+  "essential": true,
+  "entryPoint": ["/wait.sh"],
+  "mountPoints": [
+    {
+      "containerPath" : "/project/.meltano/run/airflow",
+      "sourceVolume" : "meltano-data"
+    }
+  ],
+  "ulimits": null,
+  "dockerSecurityOptions": null,
+  "environment": [
+    { "name": "ENV",                          "value": "${env}" },
+    { "name": "PG_DATABASE",                  "value": "${pg_dbname}" },
+    { "name": "PG_ADDRESS",                   "value": "${pg_host}" },
+    { "name": "PG_PASSWORD",                  "value": "${pg_password}" },
+    { "name": "PG_PORT",                      "value": "${pg_port}" },
+    { "name": "PG_USERNAME",                  "value": "${pg_username}" },
+    { "name": "MELTANO_DATABASE_URI",         "value": "postgresql://${pg_username}:${pg_password}@${pg_host}:${pg_port}/${pg_dbname}?options=-csearch_path=${pg_meltano_schema}" },
+    { "name": "AIRFLOW_PASSWORD",             "value": "${airflow_password}" },
+    { "name": "AIRFLOW_UI_PORT",              "value": "${airflow_port}" },
+    { "name": "AIRFLOW_DATABASE_URI",         "value": "postgresql://${pg_username}:${pg_password}@${pg_host}:${pg_port}/${pg_dbname}?options=-csearch_path=${pg_airflow_schema}" },
+    { "name": "EODHISTORICALDATA_JOBS_COUNT", "value": "${eodhistoricaldata_jobs_count}" },
+    { "name": "DBT_TARGET_SCHEMA",            "value": "${pg_transform_schema}" }
+  ],
+  "links": [],
+  "workingDirectory": null,
+  "readonlyRootFilesystem": null,
+  "image": "${meltano_image}",
+  "command": ["invoke", "airflow", "webserver", "-p", "${airflow_port}"],
+  "user": null,
+  "dockerLabels": null,
+  "cpu": null,
+  "privileged": null,
+  "memoryReservation": null,
+  "dependsOn": [
+    { "condition": "HEALTHY", "containerName": "meltano-airflow-scheduler" }
+  ],
+  "healthCheck": {
+    "command": [ "CMD-SHELL", "! curl http://localhost:5001/health | grep unhealthy" ],
+    "interval": 10,
+    "retries": 2
+  },
+  "logConfiguration": {
+    "logDriver": "awslogs",
+    "options": {
+      "awslogs-group": "${aws_log_group_name}",
+      "awslogs-region": "${aws_log_region}",
+      "awslogs-stream-prefix": "meltano"
+    }
+  }
+}
