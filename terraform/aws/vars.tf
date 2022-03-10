@@ -47,7 +47,6 @@ variable "gainy_compute_version" {}
 
 # https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task-cpu-memory-error.html
 locals {
-  ecs_instance_type                    = var.env == "production" ? "c5.2xlarge" : "m6i.xlarge"
   meltano_eodhistoricaldata_jobs_count = var.env == "production" ? 4 : 1
 
   hasura_healthcheck_interval       = var.env == "production" ? 60 : 60

@@ -65,7 +65,6 @@ module "lambda" {
 module "ecs" {
   source                  = "./ecs"
   env                     = var.env
-  instance_type           = local.ecs_instance_type
   vpc_index               = index(["production", "test"], var.env)
   db_external_access_port = random_integer.db_external_access_port.result
   mlflow_artifact_bucket  = module.s3.mlflow_artifact_bucket
@@ -122,7 +121,6 @@ module "ecs-service" {
   public_http_sg_id    = module.ecs.public_http_sg_id
   public_subnet_ids    = module.ecs.public_subnet_ids
   ecs_cluster_name     = module.ecs.ecs_cluster.name
-  ecs_service_role_arn = module.ecs.ecs_service_role_arn
   cloudflare_zone_id   = var.cloudflare_zone_id
   domain               = var.domain
   private_subnet_ids   = module.ecs.private_subnet_ids

@@ -354,7 +354,6 @@ module "meltano-elb" {
   public_http_sg_id                = var.public_http_sg_id
   public_subnet_ids                = var.public_subnet_ids
   ecs_cluster_name                 = var.ecs_cluster_name
-  ecs_service_role_arn             = var.ecs_service_role_arn
   cloudflare_zone_id               = var.cloudflare_zone_id
   aws_ecs_task_definition_family   = aws_ecs_task_definition.default.family
   aws_ecs_task_definition_revision = aws_ecs_task_definition.default.revision
@@ -371,7 +370,6 @@ module "hasura-elb" {
   public_http_sg_id                = var.public_http_sg_id
   public_subnet_ids                = var.public_subnet_ids
   ecs_cluster_name                 = var.ecs_cluster_name
-  ecs_service_role_arn             = var.ecs_service_role_arn
   cloudflare_zone_id               = var.cloudflare_zone_id
   aws_ecs_task_definition_family   = aws_ecs_task_definition.default.family
   aws_ecs_task_definition_revision = aws_ecs_task_definition.default.revision

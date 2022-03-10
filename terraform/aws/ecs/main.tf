@@ -2,22 +2,10 @@ variable "env" {}
 variable "aws_zones" {
   default = ["us-east-1a", "us-east-1b"]
 }
-variable "instance_type" {}
 variable "vpc_index" {}
 variable "db_external_access_port" {}
 variable "mlflow_artifact_bucket" {}
 
-/*
- * Determine most recent ECS optimized AMI
- */
-data "aws_ami" "ecs_ami" {
-  most_recent = true
-  owners      = ["amazon"]
-  filter {
-    name   = "name"
-    values = ["amzn-ami-*-amazon-ecs-optimized"]
-  }
-}
 /*
  * Create ECS cluster
  */
@@ -49,150 +37,6 @@ resource "aws_ecs_cluster" "ecs_cluster" {
       }
     }
   }
-}
-/*
- * Create ECS IAM Instance Role and Policy
- * Use random id in naming of roles to prevent collisions
- * should other ECS clusters be created in same AWS account
- * using this same code.
- */
-resource "random_id" "code" {
-  byte_length = 4
-}
-resource "aws_iam_role" "ecsInstanceRole" {
-  name               = "ecsInstanceRole-${random_id.code.hex}"
-  assume_role_policy = <<EOF
-{
- "Version": "2008-10-17",
- "Statement": [
-   {
-     "Sid": "",
-     "Effect": "Allow",
-     "Principal": {
-       "Service": "ec2.amazonaws.com"
-     },
-     "Action": "sts:AssumeRole"
-   }
- ]
-}
-EOF
-}
-resource "aws_iam_role_policy" "ecsInstanceRolePolicy" {
-  name   = "ecsInstanceRolePolicy-${random_id.code.hex}"
-  role   = aws_iam_role.ecsInstanceRole.id
-  policy = <<EOF
-{
- "Version": "2012-10-17",
- "Statement": [
-   {
-     "Effect": "Allow",
-     "Action": [
-       "ecs:CreateCluster",
-       "ecs:DeregisterContainerInstance",
-       "ecs:DiscoverPollEndpoint",
-       "ecs:Poll",
-       "ecs:RegisterContainerInstance",
-       "ecs:StartTelemetrySession",
-       "ecs:Submit*",
-       "ecr:GetAuthorizationToken",
-       "ecr:BatchCheckLayerAvailability",
-       "ecr:GetDownloadUrlForLayer",
-       "ecr:BatchGetImage",
-       "logs:CreateLogGroup",
-       "logs:CreateLogStream",
-       "logs:PutLogEvents",
-       "logs:DescribeLogStreams"
-     ],
-     "Resource": "*"
-   },
-   {
-     "Effect": "Allow",
-     "Action": [
-       "logs:CreateLogGroup",
-       "logs:CreateLogStream",
-       "logs:PutLogEvents",
-       "logs:DescribeLogStreams"
-     ],
-     "Resource": [
-       "arn:aws:logs:*:*:*"
-     ]
-   },
-   {
-     "Effect": "Allow",
-     "Action": [
-       "s3:*"
-     ],
-     "Resource": "arn:aws:s3:::*"
-   },
-   {
-     "Effect": "Allow",
-     "Action": [
-                "codeartifact:GetAuthorizationToken",
-                "codeartifact:DescribePackageVersion",
-                "codeartifact:DescribeRepository",
-                "codeartifact:GetPackageVersionReadme",
-                "codeartifact:GetRepositoryEndpoint",
-                "codeartifact:ListPackages",
-                "codeartifact:ListPackageVersions",
-                "codeartifact:ListPackageVersionAssets",
-                "codeartifact:ListPackageVersionDependencies",
-                "codeartifact:ReadFromRepository",
-                "sts:GetServiceBearerToken"
-            ],
-      "Resource": "*"
-   }
- ]
-}
-EOF
-}
-/*
- * Create ECS IAM Service Role and Policy
- */
-resource "aws_iam_role" "ecsServiceRole" {
-  name               = "ecsServiceRole-${random_id.code.hex}"
-  assume_role_policy = <<EOF
-{
- "Version": "2008-10-17",
- "Statement": [
-   {
-     "Sid": "",
-     "Effect": "Allow",
-     "Principal": {
-       "Service": "ecs.amazonaws.com"
-     },
-     "Action": "sts:AssumeRole"
-   }
- ]
-}
-EOF
-}
-resource "aws_iam_role_policy" "ecsServiceRolePolicy" {
-  name   = "ecsServiceRolePolicy-${random_id.code.hex}"
-  role   = aws_iam_role.ecsServiceRole.id
-  policy = <<EOF
-{
- "Version": "2012-10-17",
- "Statement": [
-   {
-     "Effect": "Allow",
-     "Action": [
-       "ec2:AuthorizeSecurityGroupIngress",
-       "ec2:Describe*",
-       "elasticloadbalancing:DeregisterInstancesFromLoadBalancer",
-       "elasticloadbalancing:DeregisterTargets",
-       "elasticloadbalancing:Describe*",
-       "elasticloadbalancing:RegisterInstancesWithLoadBalancer",
-       "elasticloadbalancing:RegisterTargets"
-     ],
-     "Resource": "*"
-   }
- ]
-}
-EOF
-}
-resource "aws_iam_instance_profile" "ecsInstanceProfile" {
-  name = "ecsInstanceProfile-${random_id.code.hex}"
-  role = aws_iam_role.ecsInstanceRole.name
 }
 
 /*
@@ -355,86 +199,8 @@ resource "aws_db_subnet_group" "public_subnet_group_name" {
 }
 
 /*
- * Generate user_data from template file
+ * Create Security Groups
  */
-data "template_file" "user_data" {
-  template = file("${path.module}/data/user-data.sh")
-  vars = {
-    ecs_cluster_name = aws_ecs_cluster.ecs_cluster.name
-  }
-}
-data "template_file" "cloudwatch_agent_configuration" {
-  template = file("${path.module}/data/cloudwatch_agent_configuration_advanced.json")
-
-  vars = {
-    aggregation_dimensions = jsonencode([
-      ["InstanceId"],
-      ["AutoScalingGroupName"],
-    ])
-    cpu_resources               = "\"resources\": [\"*\"],"
-    disk_resources              = jsonencode(["/"])
-    metrics_collection_interval = 60
-  }
-}
-data "template_file" "cloud_init_cloudwatch_agent" {
-  template = file("${path.module}/data/cloud_init.yaml")
-
-  vars = {
-    cloudwatch_agent_configuration = base64encode(data.template_file.cloudwatch_agent_configuration.rendered)
-  }
-}
-
-data "template_cloudinit_config" "cloud_init_merged" {
-  gzip          = true
-  base64_encode = true
-
-  part {
-    filename     = "userdata_part_cloudwatch.cfg"
-    content      = data.template_file.cloud_init_cloudwatch_agent.rendered
-    content_type = "text/cloud-config"
-  }
-
-  part {
-    content      = data.template_file.user_data.rendered
-    content_type = "text/x-shellscript"
-  }
-}
-/*
- * Create Launch Configuration
- */
-resource "aws_launch_configuration" "as_conf" {
-  image_id             = data.aws_ami.ecs_ami.id
-  instance_type        = var.instance_type
-  security_groups      = [data.aws_security_group.vpc_default_sg.id]
-  iam_instance_profile = aws_iam_instance_profile.ecsInstanceProfile.id
-  root_block_device {
-    volume_size = "20"
-  }
-  user_data_base64 = data.template_cloudinit_config.cloud_init_merged.rendered
-  lifecycle {
-    create_before_destroy = true
-  }
-}
-/*
- * Create Auto Scaling Group
- */
-resource "aws_autoscaling_group" "asg" {
-  name = "asg-gainy-${var.env}"
-  //  availability_zones        = var.aws_zones
-  vpc_zone_identifier       = aws_subnet.private_subnet.*.id
-  min_size                  = "1"
-  max_size                  = "2"
-  desired_capacity          = "1"
-  launch_configuration      = aws_launch_configuration.as_conf.id
-  health_check_type         = "EC2"
-  health_check_grace_period = "120"
-  default_cooldown          = "30"
-  lifecycle {
-    create_before_destroy = true
-  }
-}
-
-
 resource "aws_security_group" "public_https" {
   name        = "public-https"
   description = "Allow HTTPS traffic from public"
@@ -478,9 +244,6 @@ output "aws_cloudwatch_log_group" {
 }
 output "ecs_cluster" {
   value = aws_ecs_cluster.ecs_cluster
-}
-output "ecs_service_role_arn" {
-  value = aws_iam_role.ecsServiceRole.arn
 }
 output "private_subnet_ids" {
   value = aws_subnet.private_subnet.*.id

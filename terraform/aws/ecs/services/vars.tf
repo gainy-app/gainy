@@ -20,7 +20,6 @@ variable "public_https_sg_id" {}
 variable "public_http_sg_id" {}
 variable "public_subnet_ids" {}
 variable "ecs_cluster_name" {}
-variable "ecs_service_role_arn" {}
 variable "cloudflare_zone_id" {}
 variable "domain" {}
 variable "eodhistoricaldata_jobs_count" {}
