@@ -60,8 +60,8 @@ locals {
   meltano_scheduler_cpu_credits = var.env == "production" ? 3072 : 1536
 
   hasura_memory_credits            = var.env == "production" ? 2048 : 2048
-  meltano_ui_memory_credits        = var.env == "production" ? 1024 : 1024
-  meltano_scheduler_memory_credits = var.env == "production" ? 3072 : 3072
+  meltano_ui_memory_credits        = var.env == "production" ? 1024 : 1536
+  meltano_scheduler_memory_credits = var.env == "production" ? 3072 : 3584
 
   main_cpu_credits    = local.hasura_cpu_credits + local.meltano_scheduler_cpu_credits
   main_memory_credits = local.hasura_memory_credits + local.meltano_ui_memory_credits + local.meltano_scheduler_memory_credits
