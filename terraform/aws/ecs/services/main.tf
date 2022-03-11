@@ -321,11 +321,19 @@ resource "aws_ecs_task_definition" "default" {
     name = "meltano-data"
   }
 
-  container_definitions = jsonencode([
-    local.hasura_task_description,
-    local.meltano_airflow_ui_task_description,
-    local.meltano_airflow_scheduler_description,
-  ])
+  container_definitions = jsonencode(
+    concat(
+      [
+        local.hasura_task_description,
+        local.meltano_airflow_ui_task_description,
+        local.meltano_airflow_scheduler_description,
+      ],
+      var.env == "production" ? [
+        local.websockets_eod_task_description,
+        local.websockets_polygon_task_description,
+      ] : []
+    )
+  )
 }
 
 resource "aws_ecs_task_definition" "hasura" {
