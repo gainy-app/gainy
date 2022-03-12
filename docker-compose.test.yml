@@ -74,9 +74,6 @@ services:
       - ./src/aws/lambda-python/lambda_python:/var/task
     environment:
       PG_HOST: "test-postgres"
-#      ALGOLIA_APP_ID: "test"
-#      ALGOLIA_API_KEY: "test"
-#      PLAID_ENV: "sandbox"
       PUBLIC_SCHEMA_NAME: public_test
     command: [ "hasura_handler.handle_trigger" ]
 
@@ -95,8 +92,5 @@ services:
       - ./src/aws/lambda-python/pyproject.toml:/var/pyproject.toml
     environment:
       PG_HOST: "test-postgres"
-#      ALGOLIA_APP_ID: "test"
-#      ALGOLIA_API_KEY: "test"
-#      PLAID_ENV: "sandbox"
       PUBLIC_SCHEMA_NAME: public_test
     command: [ "hasura_handler.handle_action" ]
