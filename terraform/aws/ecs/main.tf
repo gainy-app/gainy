@@ -5,7 +5,6 @@ variable "aws_zones" {
 variable "instance_type" {}
 variable "vpc_index" {}
 variable "db_external_access_port" {}
-variable "mlflow_artifact_bucket" {}
 
 /*
  * Determine most recent ECS optimized AMI
@@ -116,30 +115,6 @@ resource "aws_iam_role_policy" "ecsInstanceRolePolicy" {
      "Resource": [
        "arn:aws:logs:*:*:*"
      ]
-   },
-   {
-     "Effect": "Allow",
-     "Action": [
-       "s3:*"
-     ],
-     "Resource": "arn:aws:s3:::*"
-   },
-   {
-     "Effect": "Allow",
-     "Action": [
-                "codeartifact:GetAuthorizationToken",
-                "codeartifact:DescribePackageVersion",
-                "codeartifact:DescribeRepository",
-                "codeartifact:GetPackageVersionReadme",
-                "codeartifact:GetRepositoryEndpoint",
-                "codeartifact:ListPackages",
-                "codeartifact:ListPackageVersions",
-                "codeartifact:ListPackageVersionAssets",
-                "codeartifact:ListPackageVersionDependencies",
-                "codeartifact:ReadFromRepository",
-                "sts:GetServiceBearerToken"
-            ],
-      "Resource": "*"
    }
  ]
 }
@@ -479,7 +454,7 @@ output "aws_cloudwatch_log_group" {
 output "ecs_cluster" {
   value = aws_ecs_cluster.ecs_cluster
 }
-output "ecs_service_role_arn" {
+output "ecsServiceRole_arn" {
   value = aws_iam_role.ecsServiceRole.arn
 }
 output "private_subnet_ids" {

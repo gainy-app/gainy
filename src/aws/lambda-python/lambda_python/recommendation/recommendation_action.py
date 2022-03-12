@@ -2,9 +2,9 @@ import json
 from operator import itemgetter
 
 from common.hasura_function import HasuraAction
-from gainy.recommendation import TOP_20_FOR_YOU_COLLECTION_ID
-from gainy.recommendation.compute import ComputeRecommendationsAndPersist
-from gainy.recommendation.repository import RecommendationRepository
+from recommendation import TOP_20_FOR_YOU_COLLECTION_ID
+from recommendation.compute import ComputeRecommendationsAndPersist
+from recommendation.repository import RecommendationRepository
 
 
 class GetRecommendedCollections(HasuraAction):

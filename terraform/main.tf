@@ -86,10 +86,6 @@ module "aws" {
   hubspot_api_key             = var.hubspot_api_key
   polygon_api_token           = var.polygon_api_token
 
-  aws_region     = var.aws_region
-  aws_access_key = var.aws_access_key
-  aws_secret_key = var.aws_secret_key
-
   pg_production_host                   = var.pg_production_host
   pg_production_port                   = var.pg_production_port
   pg_production_internal_sync_username = var.pg_production_internal_sync_username
@@ -105,9 +101,6 @@ module "aws" {
   algolia_app_id            = var.algolia_app_id
   algolia_indexing_key      = module.algolia.algolia_indexing_key
   algolia_search_key        = module.algolia.algolia_search_key
-
-  codeartifact_pipy_url = var.codeartifact_pipy_url
-  gainy_compute_version = var.gainy_compute_version
 }
 
 module "datadog" {

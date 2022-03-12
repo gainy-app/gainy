@@ -1,16 +1,8 @@
 locals {
   ecr_repo = var.repository_name
 
-  meltano_build_args = {
-    BASE_IMAGE_REGISTRY_ADDRESS = var.base_image_registry_address
-    BASE_IMAGE_VERSION          = var.base_image_version
-    CODEARTIFACT_PIPY_URL       = var.codeartifact_pipy_url
-    GAINY_COMPUTE_VERSION       = var.gainy_compute_version
-    MELTANO_SOURCE_MD5          = data.archive_file.meltano_source.output_md5
-  }
-
   meltano_root_dir       = abspath("${path.cwd}/../src/gainy-fetch")
-  meltano_image_tag      = format("meltano-%s-%s-%s", var.env, var.base_image_version, md5(jsonencode(local.meltano_build_args)))
+  meltano_image_tag      = format("meltano-%s-%s-%s", var.env, var.base_image_version, data.archive_file.meltano_source.output_md5)
   meltano_ecr_image_name = format("%v/%v:%v", var.ecr_address, local.ecr_repo, local.meltano_image_tag)
 
   hasura_root_dir       = abspath("${path.cwd}/../src/hasura")
@@ -55,7 +47,10 @@ resource "docker_registry_image" "meltano" {
   build {
     context    = local.meltano_root_dir
     dockerfile = "Dockerfile"
-    build_args = local.meltano_build_args
+    build_args = {
+      BASE_IMAGE_REGISTRY_ADDRESS = var.base_image_registry_address
+      BASE_IMAGE_VERSION          = var.base_image_version
+    }
 
     auth_config {
       host_name = var.ecr_address
@@ -104,29 +99,6 @@ resource "docker_registry_image" "websockets" {
 /*
  * Create task definition
  */
-
-resource "aws_iam_role" "gainy_task_role" {
-  name               = "gainy-task-${var.env}"
-  assume_role_policy = <<EOF
-{
-  "Version": "2012-10-17",
-  "Statement": [
-    {
-      "Sid": "",
-      "Effect": "Allow",
-      "Principal": {
-        "Service": "ecs-tasks.amazonaws.com"
-      },
-      "Action": "sts:AssumeRole"
-    }
-  ]
-}
-EOF
-}
-resource "aws_iam_role_policy_attachment" "iam_role_policy_attachment_gainy_task_role_default" {
-  role       = aws_iam_role.gainy_task_role.name
-  policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy"
-}
 resource "random_password" "airflow" {
   length           = 16
   special          = true
@@ -140,7 +112,6 @@ resource "aws_ecs_task_definition" "default" {
   volume {
     name = "meltano-data"
   }
-  task_role_arn = aws_iam_role.gainy_task_role.arn
 
   container_definitions = templatefile(
     "${path.module}/container-definitions.json",
@@ -205,13 +176,6 @@ resource "aws_ecs_task_definition" "default" {
 
       polygon_api_token               = var.polygon_api_token
       polygon_realtime_streaming_host = "delayed.polygon.io" # socket.polygon.io for real-time
-
-      # mlflow
-      aws_region               = var.aws_region
-      aws_access_key           = var.aws_access_key
-      aws_secret_key           = var.aws_secret_key
-      mlflow_artifact_location = "s3://${var.mlflow_artifact_bucket}"
-      pg_mlflow_schema         = "mlflow"
     }
   )
 }
@@ -350,7 +314,6 @@ resource "aws_ecs_service" "service" {
   deployment_maximum_percent         = 200
   deployment_minimum_healthy_percent = 100
   health_check_grace_period_seconds  = var.health_check_grace_period_seconds
-  enable_execute_command             = true
 
   ordered_placement_strategy {
     type  = "spread"
