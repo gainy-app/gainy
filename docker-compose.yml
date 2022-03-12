@@ -2,8 +2,6 @@ version: '3.6'
 services:
   meltano-airflow-scheduler:
     restart: always
-    env_file:
-      - .env
     build:
       context: ./src/gainy-fetch
       args:
@@ -12,24 +10,24 @@ services:
         CODEARTIFACT_PIPY_URL: ${CODEARTIFACT_PIPY_URL}
         GAINY_COMPUTE_VERSION: ${GAINY_COMPUTE_VERSION}
     volumes:
-      - ./src/gainy-fetch/meltano/scripts:/project/scripts:delegated
-      - ./src/gainy-fetch/meltano/meltano.template.yml:/project/meltano.template.yml:delegated
-      - ./src/gainy-fetch/meltano/transform:/project/transform:delegated
-      - ./src/gainy-fetch/meltano/data:/project/data:delegated
-      - ./src/gainy-fetch/meltano/orchestrate:/project/orchestrate:delegated
-      - ./src/gainy-fetch/meltano/seed:/project/seed:delegated
-      - ./src/gainy-fetch/meltano/catalog:/project/catalog:delegated
+      - ./src/gainy-fetch/meltano/scripts:/project/scripts
+      - ./src/gainy-fetch/meltano/meltano.template.yml:/project/meltano.template.yml
+      - ./src/gainy-fetch/meltano/transform:/project/transform
+      - ./src/gainy-fetch/meltano/data:/project/data
+      - ./src/gainy-fetch/meltano/orchestrate:/project/orchestrate
+      - ./src/gainy-fetch/meltano/seed:/project/seed
+      - ./src/gainy-fetch/meltano/catalog:/project/catalog
       - meltano_data:/project/.meltano
     depends_on:
       - postgres
       - hasura
     entrypoint: "/init.sh"
     command: "invoke airflow scheduler"
+    env_file:
+      - .dockerenv
 
   meltano-airflow-ui:
     restart: always
-    env_file:
-      - .env
     build:
       context: ./src/gainy-fetch
       args:
@@ -40,18 +38,18 @@ services:
     ports:
       - "5001:5001"
     volumes:
-      - ./src/gainy-fetch/meltano/orchestrate:/project/orchestrate:delegated
+      - ./src/gainy-fetch/meltano/orchestrate:/project/orchestrate
       - meltano_data:/project/.meltano
     depends_on:
       - postgres
       - meltano-airflow-scheduler
     entrypoint: "/wait.sh"
     command: "invoke airflow webserver -p 5001"
+    env_file:
+      - .dockerenv
 
   meltano-dbt-docs:
     restart: always
-    env_file:
-      - .env
     build:
       context: ./src/gainy-fetch
       args:
@@ -62,15 +60,17 @@ services:
     ports:
       - "5002:5002"
     volumes:
-      - ./src/gainy-fetch/meltano/scripts:/project/scripts:delegated
-      - ./src/gainy-fetch/meltano/meltano.template.yml:/project/meltano.template.yml:delegated
-      - ./src/gainy-fetch/meltano/transform:/project/transform:delegated
+      - ./src/gainy-fetch/meltano/scripts:/project/scripts
+      - ./src/gainy-fetch/meltano/meltano.template.yml:/project/meltano.template.yml
+      - ./src/gainy-fetch/meltano/transform:/project/transform
       - meltano_data:/project/.meltano
     depends_on:
       - postgres
       - meltano-airflow-scheduler
     entrypoint: "/wait.sh"
     command: "invoke dbt docs serve --port 5002"
+    env_file:
+      - .dockerenv
 
   postgres:
     image: postgres:12
@@ -98,19 +98,7 @@ services:
       - postgres
     restart: always
     env_file:
-      - .env
-
-  firebase:
-    image: ${BASE_IMAGE_REGISTRY_ADDRESS}/gainy-firebase:${BASE_IMAGE_VERSION}
-    restart: always
-    volumes:
-      - ./src/firebase:/var/www:delegated
-    ports:
-      - "8081:5000" # for auth demo hosting
-    env_file:
-      - .env
-    deploy:
-      replicas: 0
+      - .dockerenv
 
   lambda-router:
     build:
@@ -134,9 +122,9 @@ services:
     restart: always
     volumes:
       - ./src/aws/lambda-python/lambda_python:/var/task
-    env_file:
-      - .env
     command: [ "hasura_handler.handle_trigger" ]
+    env_file:
+      - .dockerenv
 
   lambda-python-action:
     build:
@@ -149,9 +137,9 @@ services:
     restart: always
     volumes:
       - ./src/aws/lambda-python/lambda_python:/var/task
-    env_file:
-      - .env
     command: [ "hasura_handler.handle_action" ]
+    env_file:
+      - .dockerenv
 
   websockets_eod:
     build:
@@ -160,6 +148,8 @@ services:
     volumes:
       - ./src/websockets:/srv
     command: ["client_eod.py"]
+    env_file:
+      - .dockerenv
     deploy:
       replicas: 0
 
@@ -170,6 +160,8 @@ services:
     volumes:
       - ./src/websockets:/srv
     command: ["client_polygon.py"]
+    env_file:
+      - .dockerenv
     deploy:
       replicas: 0
 
