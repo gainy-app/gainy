@@ -2,11 +2,11 @@ init_config:
 
 instances:
   - dbm: true
-    host: ${pg_host}
-    port: ${pg_port}
+    host: ${PG_HOST}
+    port: ${PG_PORT}
     username: datadog
     password: ${pg_datadog_password}
-    dbname: ${pg_dbname}
+    dbname: ${PG_DBNAME}
     disable_generic_tags: true
     custom_queries:
       - metric_prefix: app
