@@ -17,6 +17,7 @@ on:
         default: true
         required: true
     secrets:
+      TF_API_TOKEN: { required: true }
       AWS_ACCESS_KEY_ID: { required: true }
       AWS_SECRET_ACCESS_KEY: { required: true }
       TF_VAR_EODHISTORICALDATA_API_TOKEN: { required: true }
@@ -47,7 +48,11 @@ on:
       POLYGON_API_TOKEN: { required: true }
 
 env:
+  AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+  AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+  AWS_DEFAULT_REGION: us-east-1
   TF_VAR_env: ${{ inputs.env }}
+  TF_API_TOKEN: ${{ secrets.TF_API_TOKEN }}
   TF_VAR_aws_access_key: ${{ secrets.AWS_ACCESS_KEY_ID }}
   TF_VAR_aws_secret_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
   TF_VAR_eodhistoricaldata_api_token: ${{ secrets.TF_VAR_EODHISTORICALDATA_API_TOKEN }}
@@ -77,7 +82,6 @@ env:
   TF_VAR_hubspot_api_key: ${{ secrets.HUBSPOT_API_KEY }}
   TF_VAR_polygon_api_token: ${{ secrets.POLYGON_API_TOKEN }}
 
-# A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
   deploy:
     name: "Terraform"
@@ -85,12 +89,6 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2
-
-      - name: Configure AWS
-        run: |
-          echo "AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }}" >> $GITHUB_ENV
-          echo "AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }}" >> $GITHUB_ENV
-          echo "AWS_DEFAULT_REGION=us-east-1" >> $GITHUB_ENV
 
       - name: Set Terraform Environment Variables
         run: |
