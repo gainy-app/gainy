@@ -62,6 +62,7 @@ jobs:
           echo "AWS_DEFAULT_REGION=us-east-1" >> $GITHUB_ENV
 
       - name: Set Terraform Environment Variables
+        run: |
           source .env.make
           source deployment/scripts/code_artifactory.sh
           echo "TF_VAR_base_image_registry_address=$BASE_IMAGE_REGISTRY_ADDRESS" >> $GITHUB_ENV
