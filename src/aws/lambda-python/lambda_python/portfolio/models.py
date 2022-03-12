@@ -1,4 +1,4 @@
-from gainy.data_access.models import BaseModel
+from data_access.models import BaseModel
 
 from abc import ABC
 import datetime

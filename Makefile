@@ -3,16 +3,11 @@ export PARAMS ?= $(filter-out $@,$(MAKECMDGOALS))
 -include .env.make
 -include .env
 
-# workaround for setting env vars from script
-_ := $(shell bash -c "source deployment/scripts/code_artifactory.sh; env | sed 's/=/:=/' | sed 's/^/export /' > .makeenv")
-include .makeenv
-
 docker-auth:
 	aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin ${BASE_IMAGE_REGISTRY_ADDRESS}
 
 configure: docker-auth
 	- if [ ! -f src/gainy-fetch/meltano/exchanges.local.json ]; then cp -n src/gainy-fetch/meltano/symbols.local.json.dist src/gainy-fetch/meltano/symbols.local.json; fi
-	- docker network create gainy-default
 
 up: configure
 	- docker-compose pull --include-deps
@@ -22,7 +17,7 @@ upd:
 	docker-compose up -d
 
 build:
-	docker-compose build --parallel --no-cache --progress plain
+	docker-compose build --parallel
 
 down:
 	docker-compose down
@@ -58,7 +53,7 @@ extract-passwords:
 	cd terraform && terraform state pull | python3 ../extract_passwords.py
 
 test-build:
-	docker-compose -p gainy_test -f docker-compose.test.yml build --no-cache --progress plain
+	docker-compose -p gainy_test -f docker-compose.test.yml build
 
 test-init:
 	docker-compose -p gainy_test -f docker-compose.test.yml run test-meltano invoke dbt test

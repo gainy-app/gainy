@@ -4,7 +4,15 @@ import os
 import re
 import psycopg2
 from operator import itemgetter
-from gainy.utils import db_connect
+
+PG_ADDRESS = os.getenv("PG_ADDRESS")
+PG_PORT = os.getenv("PG_PORT")
+PG_USERNAME = os.getenv("PG_USERNAME")
+PG_PASSWORD = os.getenv("PG_PASSWORD")
+PG_DATABASE = os.getenv("PG_DATABASE")
+DBT_TARGET_SCHEMA = os.getenv("DBT_TARGET_SCHEMA")
+
+DB_CONN_STRING = f"postgresql://{PG_USERNAME}:{PG_PASSWORD}@{PG_ADDRESS}:{PG_PORT}/{PG_DATABASE}?options=-csearch_path%3D{DBT_TARGET_SCHEMA}"
 
 logging.basicConfig()
 logger = logging.getLogger(__name__)
@@ -65,6 +73,6 @@ def clean_realtime_data(db_conn):
         cursor.execute(query)
 
 
-with db_connect() as db_conn:
+with psycopg2.connect(DB_CONN_STRING) as db_conn:
     clean_schemas(db_conn)
     clean_realtime_data(db_conn)

@@ -1,7 +1,7 @@
 from abc import ABC
 
 from common.hasura_function import HasuraAction
-from gainy.recommendation.repository import RecommendationRepository
+from recommendation.repository import RecommendationRepository
 
 
 class AbstractMatchScoreAction(HasuraAction, ABC):
