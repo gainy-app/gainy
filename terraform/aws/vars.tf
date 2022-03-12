@@ -8,6 +8,10 @@ variable "cloudflare_zone_id" {}
 variable "hasura_jwt_secret" {}
 variable "hubspot_api_key" {}
 
+variable "aws_region" {}
+variable "aws_access_key" {}
+variable "aws_secret_key" {}
+
 variable "base_image_registry_address" {}
 variable "base_image_version" {}
 
@@ -37,6 +41,9 @@ variable "algolia_collections_index" {}
 variable "algolia_app_id" {}
 variable "algolia_indexing_key" {}
 variable "algolia_search_key" {}
+
+variable "codeartifact_pipy_url" {}
+variable "gainy_compute_version" {}
 
 # https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task-cpu-memory-error.html
 locals {

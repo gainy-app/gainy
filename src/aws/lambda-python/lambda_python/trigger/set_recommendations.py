@@ -1,5 +1,5 @@
 from common.hasura_function import HasuraTrigger
-from recommendation.compute import ComputeRecommendationsAndPersist
+from gainy.recommendation.compute import ComputeRecommendationsAndPersist
 
 
 class SetRecommendations(HasuraTrigger):

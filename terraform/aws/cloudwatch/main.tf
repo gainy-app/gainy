@@ -45,10 +45,6 @@ resource "aws_s3_bucket" "artifacts" {
     Name = "Gainy CloudWatch Synthetics Canary Artifacts"
   }
 }
-#resource "aws_s3_bucket_acl" "artifacts" {
-#  bucket = aws_s3_bucket.artifacts.id
-#  acl    = "private"
-#}
 
 resource "aws_iam_role" "canary_exec" {
   name               = "synthetics_canary_${var.env}"
