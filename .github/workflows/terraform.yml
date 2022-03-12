@@ -16,6 +16,35 @@ on:
         type: boolean
         default: true
         required: true
+    secrets:
+      AWS_ACCESS_KEY_ID: { required: true }
+      AWS_SECRET_ACCESS_KEY: { required: true }
+      TF_VAR_EODHISTORICALDATA_API_TOKEN: { required: true }
+      TF_VAR_GNEWS_API_TOKEN: { required: true }
+      GOOGLE_CREDENTIALS: { required: true }
+      GOOGLE_USER: { required: true }
+      GOOGLE_PROJECT_ID: { required: true }
+      GOOGLE_ORGANIZATION_ID: { required: true }
+      GOOGLE_REGION: { required: true }
+      GOOGLE_BILLING_ID: { required: true }
+      CLOUDFLARE_EMAIL: { required: true }
+      CLOUDFLARE_API_KEY: { required: true }
+      CLOUDFLARE_ZONE_ID: { required: true }
+      DATADOG_API_KEY: { required: true }
+      DATADOG_API_URL: { required: true }
+      DATADOG_APP_KEY: { required: true }
+      PG_PRODUCTION_HOST: { required: true }
+      PG_PRODUCTION_PORT: { required: true }
+      PG_PRODUCTION_INTERNAL_SYNC_USERNAME: { required: true }
+      PG_PRODUCTION_INTERNAL_SYNC_PASSWORD: { required: true }
+      PLAID_CLIENT_ID: { required: true }
+      PLAID_SECRET: { required: true }
+      PLAID_DEVELOPMENT_SECRET: { required: true }
+      PLAID_ENV: { required: true }
+      ALGOLIA_APP_ID: { required: true }
+      ALGOLIA_ADMIN_API_KEY: { required: true }
+      HUBSPOT_API_KEY: { required: true }
+      POLYGON_API_TOKEN: { required: true }
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
