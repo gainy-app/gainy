@@ -8,6 +8,10 @@ _ := $(shell bash -c "(set -a; . .env; set +a; env) | sed 's/=/:=/' | sed 's/^/e
 _ := $(shell bash -c "(set -a; . .env.local; set +a; env) | sed 's/=/:=/' | sed 's/^/export /' >> .makeenv")
 include .makeenv
 
+# workaround for setting env vars from script
+_ := $(shell bash -c "source deployment/scripts/code_artifactory.sh; env | sed 's/=/:=/' | sed 's/^/export /' > .makeenv")
+include .makeenv
+
 docker-auth:
 	aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin ${BASE_IMAGE_REGISTRY_ADDRESS}
 
