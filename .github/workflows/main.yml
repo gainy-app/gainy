@@ -58,7 +58,7 @@ jobs:
 
   terraform:
     name: "Terraform"
-    uses: gainy-app/gainy/.github/workflows/terraform.yml@HEAD
+    uses: ./.github/workflows/terraform.yml
     with:
       env: production
       only_plan: true
