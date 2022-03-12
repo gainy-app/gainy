@@ -18,12 +18,9 @@ services:
       - ./src/gainy-fetch/meltano/seed:/project/seed
       - ./src/gainy-fetch/meltano/catalog:/project/catalog
       - ./tests:/project/tests
-    environment:
-      PG_HOST: test-postgres
-      TARGET_POSTGRES_HOST: test-postgres
-      MELTANO_DATABASE_URI: "postgresql://postgres:postgrespassword@test-postgres:5432/postgres?options=-csearch_path%3Dmeltano"
-      NO_AIRFLOW: "true"
-      DBT_TARGET_SCHEMA: public_test
+    env_file:
+      - .env
+      - .env.test
     depends_on:
       - test-postgres
       - test-hasura
@@ -45,11 +42,9 @@ services:
       - test-postgres
       - test-lambda-router
     restart: always
-    environment:
-      HASURA_GRAPHQL_METADATA_DATABASE_URL: "postgres://postgres:postgrespassword@test-postgres:5432/postgres"
-      HASURA_GRAPHQL_DATABASE_URL: "postgres://postgres:postgrespassword@test-postgres:5432/postgres"
-      HASURA_GRAPHQL_PUBLIC_SCHEMA_NAME: public_test
-      AWS_LAMBDA_API_GATEWAY_ENDPOINT: http://test-lambda-router:5000
+    env_file:
+      - .env
+      - .env.test
 
   test-lambda-router:
     build:
@@ -74,9 +69,9 @@ services:
     restart: always
     volumes:
       - ./src/aws/lambda-python/lambda_python:/var/task
-    environment:
-      PG_HOST: "test-postgres"
-      PUBLIC_SCHEMA_NAME: public_test
+    env_file:
+      - .env
+      - .env.test
     command: [ "hasura_handler.handle_trigger" ]
 
   test-lambda-python-action:
@@ -92,7 +87,7 @@ services:
       - ./src/aws/lambda-python/lambda_python:/var/task
       - ./src/aws/lambda-python/poetry.lock:/var/poetry.lock
       - ./src/aws/lambda-python/pyproject.toml:/var/pyproject.toml
-    environment:
-      PG_HOST: "test-postgres"
-      PUBLIC_SCHEMA_NAME: public_test
+    env_file:
+      - .env
+      - .env.test
     command: [ "hasura_handler.handle_action" ]
