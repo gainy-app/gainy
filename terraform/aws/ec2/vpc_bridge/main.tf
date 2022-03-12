@@ -18,11 +18,11 @@ locals {
   provision_script_content = templatefile(
     "${path.module}/templates/provision.sh",
     {
-      pg_host                   = var.pg_host
-      pg_password               = var.pg_password
-      pg_port                   = var.pg_port
-      pg_username               = var.pg_username
-      pg_dbname                 = var.pg_dbname
+      PG_HOST                   = var.pg_host
+      PG_PASSWORD               = var.pg_password
+      PG_PORT                   = var.pg_port
+      PG_USERNAME               = var.pg_username
+      PG_DBNAME                 = var.pg_dbname
       pg_datadog_password       = random_password.datadog_postgres.result
       pg_internal_sync_username = var.pg_production_internal_sync_username
       pg_internal_sync_password = random_password.internal_sync_postgres.result
@@ -33,9 +33,9 @@ locals {
   datadog_config_content = templatefile(
     "${path.module}/templates/datadog.postgres.yaml",
     {
-      pg_host             = var.pg_host
-      pg_port             = var.pg_port
-      pg_dbname           = var.pg_dbname
+      PG_HOST             = var.pg_host
+      PG_PORT             = var.pg_port
+      PG_DBNAME           = var.pg_dbname
       pg_datadog_password = random_password.datadog_postgres.result
       env                 = var.env
     }

@@ -18,7 +18,7 @@ jobs:
         run: pip3 install yapf toml
 
       - name: YAPF
-        run: yapf --diff -r src/aws/lambda-python/ src/aws/router src/websockets src/gainy-fetch/meltano/orchestrate/dags src/hasura src/gainy-fetch terraform > /dev/null
+        run: make style-check
 
   test:
     name: "Run tests"
@@ -26,13 +26,6 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2
-
-      - name: Set up
-        run: cp .env.dist .env
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          AWS_DEFAULT_REGION: us-east-1
 
       - name: Run tests
         id: test
@@ -59,143 +52,43 @@ jobs:
               body: output
             })
 
-      - name: Tests Status
+      - name: Clean
         if: steps.test.outcome == 'failure'
         run: make test-clean && exit 1
 
   terraform:
     name: "Terraform"
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v2
-
-      - name: Set Docker Build Environment Variables
-        run: |
-          source .env.make
-          source deployment/scripts/code_artifactory.sh
-          echo "TF_VAR_base_image_registry_address=$BASE_IMAGE_REGISTRY_ADDRESS" >> $GITHUB_ENV
-          echo "TF_VAR_base_image_version=$BASE_IMAGE_VERSION" >> $GITHUB_ENV
-          echo "TF_VAR_codeartifact_pipy_url=$CODEARTIFACT_PIPY_URL" >> $GITHUB_ENV
-          echo "TF_VAR_gainy_compute_version=$GAINY_COMPUTE_VERSION" >> $GITHUB_ENV
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          AWS_DEFAULT_REGION: us-east-1
-
-      - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v1
-        with:
-          cli_config_credentials_token: ${{ secrets.TF_API_TOKEN }}
-
-      - name: Terraform Format
-        id: fmt
-        run: terraform fmt -check -recursive
-        working-directory: terraform
-
-      - name: Terraform Init
-        id: init
-        run: terraform init -backend-config=backend-production.hcl -reconfigure
-        working-directory: terraform
-
-      - name: Terraform Validate
-        id: validate
-        run: terraform validate -no-color
-        working-directory: terraform
-
-      - name: Terraform State Cleanup Prepare
-        id: state-clean-prepare
-        # grep only needed resources
-        # tr to make it a one-liner
-        # sed to filter out :: command, that github apparently adds to step output for some f-cked up reason
-        run: echo "::set-output name=resources::$(terraform state list | grep -P 'aws_apigatewayv2_integration|aws_apigatewayv2_route|aws_lambda_permission' | tr '\n' ' ' | sed 's/::.*//')"
-        working-directory: terraform
-
-      - name: Terraform State Cleanup
-        id: state-clean
-        if: steps.state-clean-prepare.outputs.resources != ''
-        run: terraform state rm ${{ steps.state-clean-prepare.outputs.resources }}
-        working-directory: terraform
-
-      - name: Terraform Plan
-        id: plan
-        if: github.event_name == 'pull_request'
-        run: terraform plan -no-color -lock=false
-        continue-on-error: true
-        working-directory: terraform
-        env:
-          TF_VAR_env: production
-          TF_VAR_aws_access_key: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          TF_VAR_aws_secret_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          TF_VAR_eodhistoricaldata_api_token: ${{ secrets.TF_VAR_EODHISTORICALDATA_API_TOKEN }}
-          TF_VAR_gnews_api_token: ${{ secrets.TF_VAR_GNEWS_API_TOKEN }}
-          TF_VAR_google_credentials: ${{ secrets.GOOGLE_CREDENTIALS }}
-          TF_VAR_google_user: ${{ secrets.GOOGLE_USER }}
-          TF_VAR_google_project_id: ${{ secrets.GOOGLE_PROJECT_ID }}
-          TF_VAR_google_organization_id: ${{ secrets.GOOGLE_ORGANIZATION_ID }}
-          TF_VAR_google_region: ${{ secrets.GOOGLE_REGION }}
-          TF_VAR_google_billing_id: ${{ secrets.GOOGLE_BILLING_ID }}
-          TF_VAR_cloudflare_email: ${{ secrets.CLOUDFLARE_EMAIL }}
-          TF_VAR_cloudflare_api_key: ${{ secrets.CLOUDFLARE_API_KEY }}
-          TF_VAR_cloudflare_zone_id: ${{ secrets.CLOUDFLARE_ZONE_ID }}
-          TF_VAR_datadog_api_key: ${{ secrets.DATADOG_API_KEY }}
-          TF_VAR_datadog_api_url: ${{ secrets.DATADOG_API_URL }}
-          TF_VAR_datadog_app_key: ${{ secrets.DATADOG_APP_KEY }}
-          TF_VAR_pg_production_host: ${{ secrets.PG_PRODUCTION_HOST }}
-          TF_VAR_pg_production_port: ${{ secrets.PG_PRODUCTION_PORT }}
-          TF_VAR_pg_production_internal_sync_username: ${{ secrets.PG_PRODUCTION_INTERNAL_SYNC_USERNAME }}
-          TF_VAR_pg_production_internal_sync_password: ${{ secrets.PG_PRODUCTION_INTERNAL_SYNC_PASSWORD }}
-          TF_VAR_plaid_client_id: ${{ secrets.PLAID_CLIENT_ID }}
-          TF_VAR_plaid_secret: ${{ secrets.PLAID_SECRET }}
-          TF_VAR_plaid_development_secret: ${{ secrets.PLAID_DEVELOPMENT_SECRET }}
-          TF_VAR_plaid_env: ${{ secrets.PLAID_ENV }}
-          TF_VAR_algolia_app_id: ${{ secrets.ALGOLIA_APP_ID }}
-          TF_VAR_algolia_admin_api_key: ${{ secrets.ALGOLIA_ADMIN_API_KEY }}
-          TF_VAR_hubspot_api_key: ${{ secrets.HUBSPOT_API_KEY }}
-          TF_VAR_polygon_api_token: ${{ secrets.POLYGON_API_TOKEN }}
-
-      - name: Terraform Plan Status
-        if: steps.plan.outcome == 'failure'
-        run: exit 1
-
-      - name: Docker Registry Auth
-        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-        run: aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 217303665077.dkr.ecr.us-east-1.amazonaws.com
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-
-      - name: Terraform Apply
-        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-        run: terraform apply -auto-approve
-        working-directory: terraform
-        env:
-          TF_VAR_env: production
-          TF_VAR_aws_access_key: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          TF_VAR_aws_secret_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          TF_VAR_eodhistoricaldata_api_token: ${{ secrets.TF_VAR_EODHISTORICALDATA_API_TOKEN }}
-          TF_VAR_gnews_api_token: ${{ secrets.TF_VAR_GNEWS_API_TOKEN }}
-          TF_VAR_google_credentials: ${{ secrets.GOOGLE_CREDENTIALS }}
-          TF_VAR_google_user: ${{ secrets.GOOGLE_USER }}
-          TF_VAR_google_project_id: ${{ secrets.GOOGLE_PROJECT_ID }}
-          TF_VAR_google_organization_id: ${{ secrets.GOOGLE_ORGANIZATION_ID }}
-          TF_VAR_google_region: ${{ secrets.GOOGLE_REGION }}
-          TF_VAR_google_billing_id: ${{ secrets.GOOGLE_BILLING_ID }}
-          TF_VAR_cloudflare_email: ${{ secrets.CLOUDFLARE_EMAIL }}
-          TF_VAR_cloudflare_api_key: ${{ secrets.CLOUDFLARE_API_KEY }}
-          TF_VAR_cloudflare_zone_id: ${{ secrets.CLOUDFLARE_ZONE_ID }}
-          TF_VAR_datadog_api_key: ${{ secrets.DATADOG_API_KEY }}
-          TF_VAR_datadog_api_url: ${{ secrets.DATADOG_API_URL }}
-          TF_VAR_datadog_app_key: ${{ secrets.DATADOG_APP_KEY }}
-          TF_VAR_pg_production_host: ${{ secrets.PG_PRODUCTION_HOST }}
-          TF_VAR_pg_production_port: ${{ secrets.PG_PRODUCTION_PORT }}
-          TF_VAR_pg_production_internal_sync_username: ${{ secrets.PG_PRODUCTION_INTERNAL_SYNC_USERNAME }}
-          TF_VAR_pg_production_internal_sync_password: ${{ secrets.PG_PRODUCTION_INTERNAL_SYNC_PASSWORD }}
-          TF_VAR_plaid_client_id: ${{ secrets.PLAID_CLIENT_ID }}
-          TF_VAR_plaid_secret: ${{ secrets.PLAID_SECRET }}
-          TF_VAR_plaid_development_secret: ${{ secrets.PLAID_DEVELOPMENT_SECRET }}
-          TF_VAR_plaid_env: ${{ secrets.PLAID_ENV }}
-          TF_VAR_algolia_app_id: ${{ secrets.ALGOLIA_APP_ID }}
-          TF_VAR_algolia_admin_api_key: ${{ secrets.ALGOLIA_ADMIN_API_KEY }}
-          TF_VAR_hubspot_api_key: ${{ secrets.HUBSPOT_API_KEY }}
-          TF_VAR_polygon_api_token: ${{ secrets.POLYGON_API_TOKEN }}
+    uses: ./.github/workflows/terraform.yml
+    with:
+      env: production
+      only_plan: true
+    secrets:
+      TF_API_TOKEN: ${{ secrets.TF_API_TOKEN }}
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      TF_VAR_EODHISTORICALDATA_API_TOKEN: ${{ secrets.TF_VAR_EODHISTORICALDATA_API_TOKEN }}
+      TF_VAR_GNEWS_API_TOKEN: ${{ secrets.TF_VAR_GNEWS_API_TOKEN }}
+      GOOGLE_CREDENTIALS: ${{ secrets.GOOGLE_CREDENTIALS }}
+      GOOGLE_USER: ${{ secrets.GOOGLE_USER }}
+      GOOGLE_PROJECT_ID: ${{ secrets.GOOGLE_PROJECT_ID }}
+      GOOGLE_ORGANIZATION_ID: ${{ secrets.GOOGLE_ORGANIZATION_ID }}
+      GOOGLE_REGION: ${{ secrets.GOOGLE_REGION }}
+      GOOGLE_BILLING_ID: ${{ secrets.GOOGLE_BILLING_ID }}
+      CLOUDFLARE_EMAIL: ${{ secrets.CLOUDFLARE_EMAIL }}
+      CLOUDFLARE_API_KEY: ${{ secrets.CLOUDFLARE_API_KEY }}
+      CLOUDFLARE_ZONE_ID: ${{ secrets.CLOUDFLARE_ZONE_ID }}
+      DATADOG_API_KEY: ${{ secrets.DATADOG_API_KEY }}
+      DATADOG_API_URL: ${{ secrets.DATADOG_API_URL }}
+      DATADOG_APP_KEY: ${{ secrets.DATADOG_APP_KEY }}
+      PG_PRODUCTION_HOST: ${{ secrets.PG_PRODUCTION_HOST }}
+      PG_PRODUCTION_PORT: ${{ secrets.PG_PRODUCTION_PORT }}
+      PG_PRODUCTION_INTERNAL_SYNC_USERNAME: ${{ secrets.PG_PRODUCTION_INTERNAL_SYNC_USERNAME }}
+      PG_PRODUCTION_INTERNAL_SYNC_PASSWORD: ${{ secrets.PG_PRODUCTION_INTERNAL_SYNC_PASSWORD }}
+      PLAID_CLIENT_ID: ${{ secrets.PLAID_CLIENT_ID }}
+      PLAID_SECRET: ${{ secrets.PLAID_SECRET }}
+      PLAID_DEVELOPMENT_SECRET: ${{ secrets.PLAID_DEVELOPMENT_SECRET }}
+      PLAID_ENV: ${{ secrets.PLAID_ENV }}
+      ALGOLIA_APP_ID: ${{ secrets.ALGOLIA_APP_ID }}
+      ALGOLIA_ADMIN_API_KEY: ${{ secrets.ALGOLIA_ADMIN_API_KEY }}
+      HUBSPOT_API_KEY: ${{ secrets.HUBSPOT_API_KEY }}
+      POLYGON_API_TOKEN: ${{ secrets.POLYGON_API_TOKEN }}

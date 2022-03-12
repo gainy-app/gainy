@@ -236,11 +236,11 @@ module "hasuraTrigger" {
   memory_size                               = var.env == "production" ? 512 : 256
 
   env_vars = {
-    pg_host                   = var.pg_host
-    pg_port                   = var.pg_port
-    pg_dbname                 = var.pg_dbname
-    pg_username               = var.pg_username
-    pg_password               = var.pg_password
+    PG_HOST                   = var.pg_host
+    PG_PORT                   = var.pg_port
+    PG_DBNAME                 = var.pg_dbname
+    PG_USERNAME               = var.pg_username
+    PG_PASSWORD               = var.pg_password
     PUBLIC_SCHEMA_NAME        = var.public_schema_name
     DATADOG_API_KEY           = var.datadog_api_key
     DATADOG_APP_KEY           = var.datadog_app_key
@@ -273,11 +273,11 @@ module "hasuraAction" {
   memory_size                               = var.env == "production" ? 256 : 128
 
   env_vars = {
-    pg_host                   = var.pg_host
-    pg_port                   = var.pg_port
-    pg_dbname                 = var.pg_dbname
-    pg_username               = var.pg_username
-    pg_password               = var.pg_password
+    PG_HOST                   = var.pg_host
+    PG_PORT                   = var.pg_port
+    PG_DBNAME                 = var.pg_dbname
+    PG_USERNAME               = var.pg_username
+    PG_PASSWORD               = var.pg_password
     PUBLIC_SCHEMA_NAME        = var.public_schema_name
     DATADOG_API_KEY           = var.datadog_api_key
     DATADOG_APP_KEY           = var.datadog_app_key

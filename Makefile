@@ -1,16 +1,16 @@
 export PARAMS ?= $(filter-out $@,$(MAKECMDGOALS))
 
--include .env.make
--include .env
-
 # workaround for setting env vars from script
 _ := $(shell bash -c "source deployment/scripts/code_artifactory.sh; env | sed 's/=/:=/' | sed 's/^/export /' > .makeenv")
 include .makeenv
+include .env.make
 
 docker-auth:
 	aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin ${BASE_IMAGE_REGISTRY_ADDRESS}
 
 configure: docker-auth
+	touch .env.local
+	bash -c "(set -a; . .env; . .env.local; set +a; env) > .dockerenv"
 	- if [ ! -f src/gainy-fetch/meltano/exchanges.local.json ]; then cp -n src/gainy-fetch/meltano/symbols.local.json.dist src/gainy-fetch/meltano/symbols.local.json; fi
 	- docker network create gainy-default
 

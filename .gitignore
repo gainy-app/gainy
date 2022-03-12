@@ -1,4 +1,4 @@
-/.env
+/.env.local
 .meltano
 .secret-*
 .idea
@@ -7,3 +7,4 @@ terraform/builds
 __pycache__
 .pytest_cache
 /.makeenv
+/.dockerenv

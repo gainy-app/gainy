@@ -2,8 +2,6 @@ version: '3.6'
 services:
   test-meltano:
     restart: always
-    env_file:
-      - .env
     build:
       context: ./src/gainy-fetch
       args:
@@ -20,16 +18,9 @@ services:
       - ./src/gainy-fetch/meltano/seed:/project/seed
       - ./src/gainy-fetch/meltano/catalog:/project/catalog
       - ./tests:/project/tests
-    environment:
-      EODHISTORICALDATA_JOBS_COUNT: 1
-      AIRFLOW_PASSWORD: admin
-      PG_ADDRESS: test-postgres
-      TARGET_POSTGRES_HOST: test-postgres
-      MELTANO_DATABASE_URI: "postgresql://postgres:postgrespassword@test-postgres:5432/postgres?options=-csearch_path%3Dmeltano"
-      NO_AIRFLOW: "true"
-      ENV: "local"
-      DBT_THREADS: 2
-      DBT_TARGET_SCHEMA: public_test
+    env_file:
+      - .env
+      - .env.test
     depends_on:
       - test-postgres
       - test-hasura
@@ -39,7 +30,7 @@ services:
     image: postgres:12
     restart: always
     environment:
-      POSTGRES_PASSWORD: postgrespassword
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
 
   test-hasura:
     build:
@@ -53,11 +44,7 @@ services:
     restart: always
     env_file:
       - .env
-    environment:
-      HASURA_GRAPHQL_METADATA_DATABASE_URL: "postgres://postgres:postgrespassword@test-postgres:5432/postgres"
-      HASURA_GRAPHQL_DATABASE_URL: "postgres://postgres:postgrespassword@test-postgres:5432/postgres"
-      HASURA_GRAPHQL_PUBLIC_SCHEMA_NAME: public_test
-      AWS_LAMBDA_API_GATEWAY_ENDPOINT: http://test-lambda-router:5000
+      - .env.test
 
   test-lambda-router:
     build:
@@ -82,18 +69,9 @@ services:
     restart: always
     volumes:
       - ./src/aws/lambda-python/lambda_python:/var/task
-    environment:
-      pg_host: "test-postgres"
-      pg_port: "5432"
-      pg_dbname: "postgres"
-      pg_username: "postgres"
-      pg_password: "postgrespassword"
-      AWS_LAMBDA_API_GATEWAY_PROXY_INTEGRATION: "false"
-      ALGOLIA_APP_ID: "test"
-      ALGOLIA_API_KEY: "test"
-      ENV: "local"
-      PLAID_ENV: "sandbox"
-      PUBLIC_SCHEMA_NAME: public_test
+    env_file:
+      - .env
+      - .env.test
     command: [ "hasura_handler.handle_trigger" ]
 
   test-lambda-python-action:
@@ -109,17 +87,7 @@ services:
       - ./src/aws/lambda-python/lambda_python:/var/task
       - ./src/aws/lambda-python/poetry.lock:/var/poetry.lock
       - ./src/aws/lambda-python/pyproject.toml:/var/pyproject.toml
-    environment:
-      pg_host: "test-postgres"
-      pg_port: "5432"
-      pg_dbname: "postgres"
-      pg_username: "postgres"
-      pg_password: "postgrespassword"
-      AWS_LAMBDA_API_GATEWAY_PROXY_INTEGRATION: "false"
-      ALGOLIA_APP_ID: "test"
-      ALGOLIA_API_KEY: "test"
-      ENV: "local"
-      PLAID_ENV: "sandbox"
-      PUBLIC_SCHEMA_NAME: public_test
-
+    env_file:
+      - .env
+      - .env.test
     command: [ "hasura_handler.handle_action" ]

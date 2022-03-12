@@ -2,8 +2,6 @@ version: '3.6'
 services:
   meltano-airflow-scheduler:
     restart: always
-    env_file:
-      - .env
     build:
       context: ./src/gainy-fetch
       args:
@@ -12,30 +10,24 @@ services:
         CODEARTIFACT_PIPY_URL: ${CODEARTIFACT_PIPY_URL}
         GAINY_COMPUTE_VERSION: ${GAINY_COMPUTE_VERSION}
     volumes:
-      - ./src/gainy-fetch/meltano/scripts:/project/scripts:delegated
-      - ./src/gainy-fetch/meltano/meltano.template.yml:/project/meltano.template.yml:delegated
-      - ./src/gainy-fetch/meltano/transform:/project/transform:delegated
-      - ./src/gainy-fetch/meltano/data:/project/data:delegated
-      - ./src/gainy-fetch/meltano/orchestrate:/project/orchestrate:delegated
-      - ./src/gainy-fetch/meltano/seed:/project/seed:delegated
-      - ./src/gainy-fetch/meltano/catalog:/project/catalog:delegated
+      - ./src/gainy-fetch/meltano/scripts:/project/scripts
+      - ./src/gainy-fetch/meltano/meltano.template.yml:/project/meltano.template.yml
+      - ./src/gainy-fetch/meltano/transform:/project/transform
+      - ./src/gainy-fetch/meltano/data:/project/data
+      - ./src/gainy-fetch/meltano/orchestrate:/project/orchestrate
+      - ./src/gainy-fetch/meltano/seed:/project/seed
+      - ./src/gainy-fetch/meltano/catalog:/project/catalog
       - meltano_data:/project/.meltano
-    environment:
-      EODHISTORICALDATA_JOBS_COUNT: 1
-      AIRFLOW_PASSWORD: admin
-      DBT_THREADS: 2
-      DBT_TARGET_SCHEMA: "${PUBLIC_SCHEMA_NAME}"
-      TAP_EODHISTORICALDATA_EXCHANGE_SYMBOLS_LIMIT: 10
     depends_on:
       - postgres
       - hasura
     entrypoint: "/init.sh"
     command: "invoke airflow scheduler"
+    env_file:
+      - .dockerenv
 
   meltano-airflow-ui:
     restart: always
-    env_file:
-      - .env
     build:
       context: ./src/gainy-fetch
       args:
@@ -46,20 +38,18 @@ services:
     ports:
       - "5001:5001"
     volumes:
-      - ./src/gainy-fetch/meltano/orchestrate:/project/orchestrate:delegated
+      - ./src/gainy-fetch/meltano/orchestrate:/project/orchestrate
       - meltano_data:/project/.meltano
     depends_on:
       - postgres
       - meltano-airflow-scheduler
     entrypoint: "/wait.sh"
     command: "invoke airflow webserver -p 5001"
+    env_file:
+      - .dockerenv
 
   meltano-dbt-docs:
     restart: always
-    env_file:
-      - .env
-    environment:
-      DBT_THREADS: 1
     build:
       context: ./src/gainy-fetch
       args:
@@ -70,25 +60,27 @@ services:
     ports:
       - "5002:5002"
     volumes:
-      - ./src/gainy-fetch/meltano/scripts:/project/scripts:delegated
-      - ./src/gainy-fetch/meltano/meltano.template.yml:/project/meltano.template.yml:delegated
-      - ./src/gainy-fetch/meltano/transform:/project/transform:delegated
+      - ./src/gainy-fetch/meltano/scripts:/project/scripts
+      - ./src/gainy-fetch/meltano/meltano.template.yml:/project/meltano.template.yml
+      - ./src/gainy-fetch/meltano/transform:/project/transform
       - meltano_data:/project/.meltano
     depends_on:
       - postgres
       - meltano-airflow-scheduler
     entrypoint: "/wait.sh"
     command: "invoke dbt docs serve --port 5002"
+    env_file:
+      - .dockerenv
 
   postgres:
     image: postgres:12
     restart: always
     volumes:
     - db_data:/var/lib/postgresql/data
-    environment:
-      POSTGRES_PASSWORD: postgrespassword
     ports:
       - "5432:5432"
+    environment:
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
 
   hasura:
     build:
@@ -106,24 +98,7 @@ services:
       - postgres
     restart: always
     env_file:
-      - .env
-    environment:
-      AWS_LAMBDA_API_GATEWAY_ENDPOINT: http://lambda-router:5000
-      HASURA_GRAPHQL_PUBLIC_SCHEMA_NAME: "${PUBLIC_SCHEMA_NAME}"
-
-  firebase:
-    image: ${BASE_IMAGE_REGISTRY_ADDRESS}/gainy-firebase:${BASE_IMAGE_VERSION}
-    restart: always
-    volumes:
-      - ./src/firebase:/var/www:delegated
-    ports:
-      - "8081:5000" # for auth demo hosting
-    env_file:
-      - .env
-    environment:
-      GOOGLE_APPLICATION_CREDENTIALS: "/var/www/firebase.key.json"
-    deploy:
-      replicas: 0
+      - .dockerenv
 
   lambda-router:
     build:
@@ -147,19 +122,9 @@ services:
     restart: always
     volumes:
       - ./src/aws/lambda-python/lambda_python:/var/task
-    env_file:
-      - .env
-    environment:
-      pg_host: "${PG_ADDRESS}"
-      pg_port: "${PG_PORT}"
-      pg_dbname: "${PG_DATABASE}"
-      pg_username: "${PG_USERNAME}"
-      pg_password: "${PG_PASSWORD}"
-      AWS_LAMBDA_API_GATEWAY_PROXY_INTEGRATION: "false"
-      ENV: "local"
-      PUBLIC_SCHEMA_NAME: "${PUBLIC_SCHEMA_NAME}"
-
     command: [ "hasura_handler.handle_trigger" ]
+    env_file:
+      - .dockerenv
 
   lambda-python-action:
     build:
@@ -172,23 +137,9 @@ services:
     restart: always
     volumes:
       - ./src/aws/lambda-python/lambda_python:/var/task
-    env_file:
-      - .env
-    environment:
-      pg_host: "${PG_ADDRESS}"
-      pg_port: "${PG_PORT}"
-      pg_dbname: "${PG_DATABASE}"
-      pg_username: "${PG_USERNAME}"
-      pg_password: "${PG_PASSWORD}"
-      AWS_LAMBDA_API_GATEWAY_PROXY_INTEGRATION: "false"
-      ALGOLIA_APP_ID:            ${ALGOLIA_APP_ID}
-      ALGOLIA_TICKERS_INDEX:     ${ALGOLIA_TICKERS_INDEX}
-      ALGOLIA_COLLECTIONS_INDEX: ${ALGOLIA_COLLECTIONS_INDEX}
-      ALGOLIA_SEARCH_API_KEY:    ${ALGOLIA_SEARCH_API_KEY}
-      ENV: "local"
-      PUBLIC_SCHEMA_NAME: "${PUBLIC_SCHEMA_NAME}"
-
     command: [ "hasura_handler.handle_action" ]
+    env_file:
+      - .dockerenv
 
   websockets_eod:
     build:
@@ -196,18 +147,9 @@ services:
     restart: always
     volumes:
       - ./src/websockets:/srv
-    environment:
-      EOD_API_TOKEN: "OeAFFmMliFG5orCUuwAKQ8l4WWFQ67YX"
-      PG_HOST: "${PG_ADDRESS}"
-      PG_PORT: "${PG_PORT}"
-      PG_DBNAME: "${PG_DATABASE}"
-      PG_USERNAME: "${PG_USERNAME}"
-      PG_PASSWORD: "${PG_PASSWORD}"
-      ENV: "local"
-      PUBLIC_SCHEMA_NAME: "${PUBLIC_SCHEMA_NAME}"
-      DD_API_KEY: "${DATADOG_API_KEY}"
-      DD_SITE: "datadoghq.com"
     command: ["client_eod.py"]
+    env_file:
+      - .dockerenv
     deploy:
       replicas: 0
 
@@ -217,19 +159,9 @@ services:
     restart: always
     volumes:
       - ./src/websockets:/srv
-    environment:
-      POLYGON_API_TOKEN: "${POLYGON_API_TOKEN}"
-      POLYGON_REALTIME_STREAMING_HOST: "delayed.polygon.io" # socket.polygon.io for real-time
-      PG_HOST: "${PG_ADDRESS}"
-      PG_PORT: "${PG_PORT}"
-      PG_DBNAME: "${PG_DATABASE}"
-      PG_USERNAME: "${PG_USERNAME}"
-      PG_PASSWORD: "${PG_PASSWORD}"
-      ENV: "local"
-      PUBLIC_SCHEMA_NAME: "${PUBLIC_SCHEMA_NAME}"
-      DD_API_KEY: "${DATADOG_API_KEY}"
-      DD_SITE: "datadoghq.com"
     command: ["client_polygon.py"]
+    env_file:
+      - .dockerenv
     deploy:
       replicas: 0
 

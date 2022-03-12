@@ -1,0 +1,16 @@
+version: '3.6'
+services:
+  firebase:
+    build:
+      context: ./
+    restart: always
+    volumes:
+      - ./:/var/www
+    ports:
+      - "8081:5000" # for auth demo hosting
+    env_file:
+      - .env
+
+networks:
+  default:
+    name: gainy-default
