@@ -57,6 +57,9 @@ module "lambda" {
 
   redis_cache_host = module.elasticache.redis_cache_host
   redis_cache_port = module.elasticache.redis_cache_port
+
+  codeartifact_pipy_url = var.codeartifact_pipy_url
+  gainy_compute_version = var.gainy_compute_version
 }
 
 module "ecs" {
@@ -65,6 +68,7 @@ module "ecs" {
   instance_type           = local.ecs_instance_type
   vpc_index               = index(["production", "test"], var.env)
   db_external_access_port = random_integer.db_external_access_port.result
+  mlflow_artifact_bucket  = module.s3.mlflow_artifact_bucket
 }
 
 module "rds" {
@@ -105,6 +109,9 @@ module "vpc_bridge" {
 module "ecs-service" {
   source               = "./ecs/services"
   env                  = var.env
+  aws_region           = var.aws_region
+  aws_access_key       = var.aws_access_key
+  aws_secret_key       = var.aws_secret_key
   ecr_address          = local.ecr_address
   repository_name      = aws_ecr_repository.default.name
   aws_log_group_name   = module.ecs.aws_cloudwatch_log_group.name
@@ -115,7 +122,7 @@ module "ecs-service" {
   public_http_sg_id    = module.ecs.public_http_sg_id
   public_subnet_ids    = module.ecs.public_subnet_ids
   ecs_cluster_name     = module.ecs.ecs_cluster.name
-  ecs_service_role_arn = module.ecs.ecsServiceRole_arn
+  ecs_service_role_arn = module.ecs.ecs_service_role_arn
   cloudflare_zone_id   = var.cloudflare_zone_id
   domain               = var.domain
   private_subnet_ids   = module.ecs.private_subnet_ids
@@ -174,6 +181,10 @@ module "ecs-service" {
   polygon_api_token = var.polygon_api_token
 
   health_check_grace_period_seconds = local.health_check_grace_period_seconds
+
+  mlflow_artifact_bucket = module.s3.mlflow_artifact_bucket
+  codeartifact_pipy_url  = var.codeartifact_pipy_url
+  gainy_compute_version  = var.gainy_compute_version
 }
 
 
