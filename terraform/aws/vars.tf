@@ -59,7 +59,7 @@ locals {
   eod_websockets_memory_credits     = var.env == "production" ? 512 : 0
   polygon_websockets_memory_credits = var.env == "production" ? 768 : 0
   hasura_memory_credits             = var.env == "production" ? 2048 : 2048
-  meltano_ui_memory_credits         = var.env == "production" ? 2048 : 2048
+  meltano_ui_memory_credits         = var.env == "production" ? 3072 : 3072
   meltano_scheduler_memory_credits  = var.env == "production" ? 4096 : 4096
 
   main_cpu_credits = sum([
