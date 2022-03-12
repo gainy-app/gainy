@@ -20,7 +20,6 @@ variable "public_https_sg_id" {}
 variable "public_http_sg_id" {}
 variable "public_subnet_ids" {}
 variable "ecs_cluster_name" {}
-variable "ecs_service_role_arn" {}
 variable "cloudflare_zone_id" {}
 variable "domain" {}
 variable "eodhistoricaldata_jobs_count" {}
@@ -63,3 +62,5 @@ variable "aws_secret_key" {}
 variable "mlflow_artifact_bucket" {}
 variable "codeartifact_pipy_url" {}
 variable "gainy_compute_version" {}
+variable "main_cpu_credits" {}
+variable "main_memory_credits" {}

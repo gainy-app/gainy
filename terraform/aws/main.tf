@@ -65,7 +65,6 @@ module "lambda" {
 module "ecs" {
   source                  = "./ecs"
   env                     = var.env
-  instance_type           = local.ecs_instance_type
   vpc_index               = index(["production", "test"], var.env)
   db_external_access_port = random_integer.db_external_access_port.result
   mlflow_artifact_bucket  = module.s3.mlflow_artifact_bucket
@@ -107,25 +106,24 @@ module "vpc_bridge" {
 }
 
 module "ecs-service" {
-  source               = "./ecs/services"
-  env                  = var.env
-  aws_region           = var.aws_region
-  aws_access_key       = var.aws_access_key
-  aws_secret_key       = var.aws_secret_key
-  ecr_address          = local.ecr_address
-  repository_name      = aws_ecr_repository.default.name
-  aws_log_group_name   = module.ecs.aws_cloudwatch_log_group.name
-  aws_log_region       = data.aws_region.current.name
-  vpc_id               = module.ecs.vpc_id
-  vpc_default_sg_id    = module.ecs.vpc_default_sg_id
-  public_https_sg_id   = module.ecs.public_https_sg_id
-  public_http_sg_id    = module.ecs.public_http_sg_id
-  public_subnet_ids    = module.ecs.public_subnet_ids
-  ecs_cluster_name     = module.ecs.ecs_cluster.name
-  ecs_service_role_arn = module.ecs.ecs_service_role_arn
-  cloudflare_zone_id   = var.cloudflare_zone_id
-  domain               = var.domain
-  private_subnet_ids   = module.ecs.private_subnet_ids
+  source             = "./ecs/services"
+  env                = var.env
+  aws_region         = var.aws_region
+  aws_access_key     = var.aws_access_key
+  aws_secret_key     = var.aws_secret_key
+  ecr_address        = local.ecr_address
+  repository_name    = aws_ecr_repository.default.name
+  aws_log_group_name = module.ecs.aws_cloudwatch_log_group.name
+  aws_log_region     = data.aws_region.current.name
+  vpc_id             = module.ecs.vpc_id
+  vpc_default_sg_id  = module.ecs.vpc_default_sg_id
+  public_https_sg_id = module.ecs.public_https_sg_id
+  public_http_sg_id  = module.ecs.public_http_sg_id
+  public_subnet_ids  = module.ecs.public_subnet_ids
+  ecs_cluster_name   = module.ecs.ecs_cluster.name
+  cloudflare_zone_id = var.cloudflare_zone_id
+  domain             = var.domain
+  private_subnet_ids = module.ecs.private_subnet_ids
 
   aws_lambda_api_gateway_endpoint = module.lambda.aws_apigatewayv2_api_endpoint
   deployment_key                  = local.deployment_key
@@ -166,6 +164,8 @@ module "ecs-service" {
   scheduler_cpu_credits        = local.meltano_scheduler_cpu_credits
   scheduler_memory_credits     = local.meltano_scheduler_memory_credits
   ui_memory_credits            = local.meltano_ui_memory_credits
+  main_cpu_credits             = local.main_cpu_credits
+  main_memory_credits          = local.main_memory_credits
 
   base_image_registry_address = var.base_image_registry_address
   base_image_version          = var.base_image_version

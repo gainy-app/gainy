@@ -9,5 +9,4 @@ variable "public_subnet_ids" {}
 variable "aws_ecs_task_definition_revision" {}
 variable "aws_ecs_task_definition_family" {}
 variable "ecs_cluster_name" {}
-variable "ecs_service_role_arn" {}
 variable "cloudflare_zone_id" {}
