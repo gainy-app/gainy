@@ -1,7 +1,7 @@
 from psycopg2 import sql
 
-from data_access.models import BaseModel
-from data_access.repository import Repository
+from gainy.data_access.models import BaseModel
+from gainy.data_access.repository import Repository
 
 
 class PortfolioRepository(Repository):
