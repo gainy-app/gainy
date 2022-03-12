@@ -55,11 +55,13 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
 
-      - name: Set Environment Variables
+      - name: Configure AWS
         run: |
           echo "AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }}" >> $GITHUB_ENV
           echo "AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }}" >> $GITHUB_ENV
           echo "AWS_DEFAULT_REGION=us-east-1" >> $GITHUB_ENV
+
+      - name: Set Terraform Environment Variables
           source .env.make
           source deployment/scripts/code_artifactory.sh
           echo "TF_VAR_base_image_registry_address=$BASE_IMAGE_REGISTRY_ADDRESS" >> $GITHUB_ENV
