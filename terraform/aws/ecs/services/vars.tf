@@ -29,7 +29,6 @@ variable "aws_lambda_api_gateway_endpoint" {}
 variable "deployment_key" {}
 variable "base_image_registry_address" {}
 variable "base_image_version" {}
-variable "versioned_schema_suffix" {}
 variable "algolia_tickers_index" {}
 variable "algolia_collections_index" {}
 variable "algolia_app_id" {}

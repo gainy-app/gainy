@@ -1,6 +1,5 @@
 locals {
-  timestamp      = formatdate("YYMMDDhhmmss", timestamp())
-  deployment_key = local.timestamp
+  deployment_key = formatdate("YYMMDDhhmmss", timestamp())
 }
 
 resource "random_integer" "db_external_access_port" {
@@ -138,7 +137,6 @@ module "ecs-service" {
   pg_username                 = module.rds.db_instance.username
   pg_dbname                   = module.rds.db_instance.name
   pg_replica_uris             = sensitive(join(",", [for index, replica in module.rds.db_replica[*] : format("postgres://%s:%s@%s:%d/%s", replica.username, module.rds.db_instance.password, replica.address, replica.port, replica.name)]))
-  versioned_schema_suffix     = local.timestamp
 
   pg_production_host                   = var.pg_production_host
   pg_production_port                   = var.pg_production_port

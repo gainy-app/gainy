@@ -1,5 +1,5 @@
 locals {
-  public_schema_name                = "public_${var.versioned_schema_suffix}"
+  public_schema_name                = "public_${formatdate("YYMMDDhhmmss", timestamp())}"
   hasura_healthcheck_interval       = var.env == "production" ? 60 : 60
   hasura_healthcheck_retries        = var.env == "production" ? 3 : 3
   health_check_grace_period_seconds = var.env == "production" ? 60 * 10 : 60 * 20
