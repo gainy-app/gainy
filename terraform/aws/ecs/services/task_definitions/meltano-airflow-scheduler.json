@@ -1,5 +1,6 @@
 {
   "name": "meltano-airflow-scheduler",
+  "cpu": ${airflow_scheduler_cpu_credits},
   "memory": ${airflow_scheduler_memory_credits},
   "extraHosts": null,
   "dnsServers": null,
@@ -93,7 +94,6 @@
   "command": ["invoke", "airflow", "scheduler"],
   "user": null,
   "dockerLabels": null,
-  "cpu": ${airflow_scheduler_cpu_credits},
   "privileged": null,
   "memoryReservation": null,
   "healthCheck": {

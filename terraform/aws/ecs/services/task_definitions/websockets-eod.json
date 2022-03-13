@@ -1,5 +1,6 @@
 {
   "name": "websockets-eod",
+  "cpu": ${eod_websockets_cpu_credits},
   "memory": ${eod_websockets_memory_credits},
   "extraHosts": null,
   "dnsServers": null,
@@ -31,7 +32,6 @@
   "command": ["client_eod.py"],
   "user": null,
   "dockerLabels": null,
-  "cpu": null,
   "privileged": null,
   "memoryReservation": null,
   "logConfiguration": {
