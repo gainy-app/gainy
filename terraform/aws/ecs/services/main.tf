@@ -1,5 +1,11 @@
+resource "time_static" "meltano_changed" {
+  triggers = {
+    meltano_transform_source_md5 = data.archive_file.meltano_transform_source.output_md5
+  }
+}
+
 locals {
-  public_schema_name                = "public_${formatdate("YYMMDDhhmmss", timestamp())}"
+  public_schema_name                = "public_${formatdate("YYMMDDhhmmss", time_static.meltano_changed.unix)}"
   hasura_healthcheck_interval       = var.env == "production" ? 60 : 60
   hasura_healthcheck_retries        = var.env == "production" ? 3 : 3
   health_check_grace_period_seconds = var.env == "production" ? 60 * 10 : 60 * 20
@@ -24,6 +30,12 @@ data "archive_file" "meltano_source" {
   type        = "zip"
   source_dir  = local.meltano_root_dir
   output_path = "/tmp/meltano-source.zip"
+  excludes    = ["meltano/.meltano"]
+}
+data "archive_file" "meltano_transform_source" {
+  type        = "zip"
+  source_dir  = local.meltano_transform_root_dir
+  output_path = "/tmp/meltano-transform_source.zip"
   excludes    = ["meltano/.meltano"]
 }
 data "archive_file" "hasura_source" {
