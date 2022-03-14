@@ -11,8 +11,8 @@ locals {
     CODEARTIFACT_PIPY_URL       = var.codeartifact_pipy_url
   })
 
-  meltano_root_dir           = abspath("${path.cwd}/../src/gainy-fetch")
-  meltano_transform_root_dir = abspath("${path.cwd}/../src/gainy-fetch/meltano/transform")
+  meltano_root_dir           = abspath("${path.cwd}/../src/meltano")
+  meltano_transform_root_dir = abspath("${path.cwd}/../src/meltano/meltano/transform")
   meltano_image_tag          = format("meltano-%s-%s-%s", var.env, var.base_image_version, md5(jsonencode(local.meltano_build_args_force_build)))
   meltano_ecr_image_name     = format("%v/%v:%v", var.ecr_address, local.ecr_repo, local.meltano_image_tag)
 

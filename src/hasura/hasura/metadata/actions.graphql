@@ -7,19 +7,6 @@ type Query {
 }
 
 type Query {
-  fetchChartData(
-    symbol: String!
-    period: String!
-  ): [ChartDataPoint]
-}
-
-type Query {
-  fetchLivePrices(
-    symbols: [String]
-  ): [LiveStockPriceData]
-}
-
-type Query {
   fetchNewsData(
     symbol: String!
     limit: Int
