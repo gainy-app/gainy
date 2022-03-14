@@ -43,7 +43,7 @@ resource "aws_db_instance" "db_instance" {
 
   publicly_accessible = false
 
-  name     = var.name
+  db_name  = var.name
   username = var.name
   port     = "5432"
 
@@ -105,7 +105,7 @@ resource "aws_db_instance" "db_external_access" {
 
   publicly_accessible = true
 
-  name     = "${var.name}_external_access"
+  db_name  = "${var.name}_external_access"
   username = var.name
   port     = var.db_external_access_port
 

@@ -22,24 +22,23 @@ resource "aws_ecr_repository" "default" {
 }
 
 module "lambda" {
-  source                      = "./lambda"
-  env                         = var.env
-  eodhistoricaldata_api_token = var.eodhistoricaldata_api_token
-  gnews_api_token             = var.gnews_api_token
-  pg_dbname                   = module.rds.db_instance.name
-  pg_host                     = module.rds.db_instance.address
-  pg_password                 = module.rds.db_instance.password
-  pg_port                     = module.rds.db_instance.port
-  pg_username                 = module.rds.db_instance.username
-  public_schema_name          = module.ecs-service.public_schema_name
-  container_repository        = aws_ecr_repository.default.name
-  vpc_security_group_ids      = [module.ecs.vpc_default_sg_id]
-  vpc_subnet_ids              = module.ecs.private_subnet_ids
-  deployment_key              = local.deployment_key
-  datadog_api_key             = var.datadog_api_key
-  datadog_app_key             = var.datadog_app_key
-  hasura_url                  = module.ecs-service.hasura_url
-  hubspot_api_key             = var.hubspot_api_key
+  source                 = "./lambda"
+  env                    = var.env
+  gnews_api_token        = var.gnews_api_token
+  pg_dbname              = module.rds.db_instance.name
+  pg_host                = module.rds.db_instance.address
+  pg_password            = module.rds.db_instance.password
+  pg_port                = module.rds.db_instance.port
+  pg_username            = module.rds.db_instance.username
+  public_schema_name     = module.ecs-service.public_schema_name
+  container_repository   = aws_ecr_repository.default.name
+  vpc_security_group_ids = [module.ecs.vpc_default_sg_id]
+  vpc_subnet_ids         = module.ecs.private_subnet_ids
+  deployment_key         = local.deployment_key
+  datadog_api_key        = var.datadog_api_key
+  datadog_app_key        = var.datadog_app_key
+  hasura_url             = module.ecs-service.hasura_url
+  hubspot_api_key        = var.hubspot_api_key
 
   base_image_registry_address = var.base_image_registry_address
   base_image_version          = var.base_image_version

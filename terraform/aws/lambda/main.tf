@@ -1,5 +1,4 @@
 variable "env" {}
-variable "eodhistoricaldata_api_token" {}
 variable "gnews_api_token" {}
 variable "pg_host" {}
 variable "pg_port" {}
@@ -99,7 +98,6 @@ resource "aws_iam_role_policy_attachment" "lambda_policy" {
 
 locals {
   timestamp       = formatdate("YYMMDDhhmmss", timestamp())
-  nodejs_root_dir = abspath("${path.cwd}/../src/aws/lambda-nodejs")
   python_root_dir = abspath("${path.cwd}/../src/aws/lambda-python")
 }
 
@@ -109,86 +107,8 @@ data "aws_ecr_authorization_token" "token" {}
 locals {
   ecr_address                  = format("%v.dkr.ecr.%v.amazonaws.com", data.aws_caller_identity.this.account_id, data.aws_region.current.name)
   ecr_repo                     = var.container_repository
-  nodejs_lambda_image_tag      = format("lambda-nodejs-%s-%s", var.env, data.archive_file.nodejs_source.output_md5)
-  nodejs_lambda_ecr_image_name = format("%v/%v:%v", local.ecr_address, local.ecr_repo, local.nodejs_lambda_image_tag)
   python_lambda_image_tag      = format("lambda-python-%s-%s-%s", var.env, var.base_image_version, data.archive_file.python_source.output_md5)
   python_lambda_ecr_image_name = format("%v/%v:%v", local.ecr_address, local.ecr_repo, local.python_lambda_image_tag)
-}
-
-#################################### Node.js lambdas ####################################
-
-data "archive_file" "nodejs_source" {
-  type        = "zip"
-  source_dir  = local.nodejs_root_dir
-  output_path = "/tmp/lambda-nodejs.zip"
-}
-resource "docker_registry_image" "lambda_nodejs" {
-  name = local.nodejs_lambda_ecr_image_name
-  build {
-    context    = local.nodejs_root_dir
-    dockerfile = "Dockerfile"
-  }
-
-  lifecycle {
-    ignore_changes = [build["context"]]
-  }
-}
-
-module "fetchChartData" {
-  source                                    = "./type-image"
-  env                                       = var.env
-  function_name                             = "fetchChartData"
-  handler                                   = "index.fetchChartData"
-  timeout                                   = 10
-  url                                       = "/${var.deployment_key}/fetchChartData"
-  aws_apigatewayv2_api_lambda_id            = aws_apigatewayv2_api.lambda.id
-  aws_apigatewayv2_api_lambda_execution_arn = aws_apigatewayv2_api.lambda.execution_arn
-  aws_iam_role_lambda_exec_role             = aws_iam_role.lambda_exec
-  image_uri                                 = docker_registry_image.lambda_nodejs.name
-
-  env_vars = {
-    eodhistoricaldata_api_token = var.eodhistoricaldata_api_token
-  }
-  vpc_security_group_ids = var.vpc_security_group_ids
-  vpc_subnet_ids         = var.vpc_subnet_ids
-}
-
-module "fetchNewsData" {
-  source                                    = "./type-image"
-  env                                       = var.env
-  function_name                             = "fetchNewsData"
-  handler                                   = "index.fetchNewsData"
-  timeout                                   = 10
-  url                                       = "/${var.deployment_key}/fetchNewsData"
-  aws_apigatewayv2_api_lambda_id            = aws_apigatewayv2_api.lambda.id
-  aws_apigatewayv2_api_lambda_execution_arn = aws_apigatewayv2_api.lambda.execution_arn
-  aws_iam_role_lambda_exec_role             = aws_iam_role.lambda_exec
-  image_uri                                 = docker_registry_image.lambda_nodejs.name
-
-  env_vars = {
-    gnews_api_token = var.gnews_api_token
-  }
-  vpc_security_group_ids = var.vpc_security_group_ids
-  vpc_subnet_ids         = var.vpc_subnet_ids
-}
-
-module "fetchLivePrices" {
-  source                                    = "./type-image"
-  env                                       = var.env
-  function_name                             = "fetchLivePrices"
-  handler                                   = "index.fetchLivePrices"
-  timeout                                   = 10
-  url                                       = "/${var.deployment_key}/fetchLivePrices"
-  aws_apigatewayv2_api_lambda_id            = aws_apigatewayv2_api.lambda.id
-  aws_apigatewayv2_api_lambda_execution_arn = aws_apigatewayv2_api.lambda.execution_arn
-  aws_iam_role_lambda_exec_role             = aws_iam_role.lambda_exec
-  image_uri                                 = docker_registry_image.lambda_nodejs.name
-
-  env_vars = {
-    eodhistoricaldata_api_token = var.eodhistoricaldata_api_token
-  }
-  vpc_security_group_ids = var.vpc_security_group_ids
-  vpc_subnet_ids         = var.vpc_subnet_ids
 }
 
 #################################### Python lambdas ####################################

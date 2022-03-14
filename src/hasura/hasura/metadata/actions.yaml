@@ -5,18 +5,6 @@ actions:
     handler: '{{AWS_LAMBDA_API_GATEWAY_ENDPOINT}}/hasuraAction'
   permissions:
   - role: user
-- name: fetchChartData
-  definition:
-    kind: ""
-    handler: '{{AWS_LAMBDA_API_GATEWAY_ENDPOINT}}/fetchChartData'
-  permissions:
-  - role: user
-- name: fetchLivePrices
-  definition:
-    kind: ""
-    handler: '{{AWS_LAMBDA_API_GATEWAY_ENDPOINT}}/fetchLivePrices'
-  permissions:
-  - role: user
 - name: fetchNewsData
   definition:
     kind: ""

@@ -3,20 +3,20 @@ services:
   test-meltano:
     restart: always
     build:
-      context: ./src/gainy-fetch
+      context: ./src/meltano
       args:
         BASE_IMAGE_REGISTRY_ADDRESS: ${BASE_IMAGE_REGISTRY_ADDRESS}
         BASE_IMAGE_VERSION: ${BASE_IMAGE_VERSION}
         CODEARTIFACT_PIPY_URL: ${CODEARTIFACT_PIPY_URL}
         GAINY_COMPUTE_VERSION: ${GAINY_COMPUTE_VERSION}
     volumes:
-      - ./src/gainy-fetch/meltano/meltano.template.yml:/project/meltano.template.yml
-      - ./src/gainy-fetch/meltano/scripts:/project/scripts
-      - ./src/gainy-fetch/meltano/transform:/project/transform
-      - ./src/gainy-fetch/meltano/data:/project/data
-      - ./src/gainy-fetch/meltano/orchestrate:/project/orchestrate
-      - ./src/gainy-fetch/meltano/seed:/project/seed
-      - ./src/gainy-fetch/meltano/catalog:/project/catalog
+      - ./src/meltano/meltano/meltano.template.yml:/project/meltano.template.yml
+      - ./src/meltano/meltano/scripts:/project/scripts
+      - ./src/meltano/meltano/transform:/project/transform
+      - ./src/meltano/meltano/data:/project/data
+      - ./src/meltano/meltano/orchestrate:/project/orchestrate
+      - ./src/meltano/meltano/seed:/project/seed
+      - ./src/meltano/meltano/catalog:/project/catalog
       - ./tests:/project/tests
     env_file:
       - .env
