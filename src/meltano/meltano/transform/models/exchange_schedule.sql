@@ -9,11 +9,17 @@
   )
 }}
 
-SELECT CONCAT(dd::date, '_', exchanges.name)::varchar                                                    as id,
-       dd::date                                                                                          as date,
-       exchanges.name                                                                                    as exchange_name,
-       coalesce(polygon_marketstatus_upcoming.open::timestamptz, dd::date + exchanges.open_at::timetz)   as open_at,
-       coalesce(polygon_marketstatus_upcoming.close::timestamptz, dd::date + exchanges.close_at::timetz) as close_at
+SELECT CONCAT(dd::date, '_', exchanges.name)::varchar as id,
+       dd::date                                       as date,
+       exchanges.name                                 as exchange_name,
+       coalesce(
+               polygon_marketstatus_upcoming.open::timestamptz,
+               (dd::date + exchanges.open_at::time) at time zone exchanges.timezone
+           )                                          as open_at,
+       coalesce(
+               polygon_marketstatus_upcoming.close::timestamptz,
+               (dd::date + exchanges.close_at::time) at time zone exchanges.timezone
+           )                                          as close_at
 FROM generate_series(now() - interval '1 week', now() + interval '1 week', interval '1 day') dd
          join {{ source('gainy', 'exchanges') }} on true
          left join {{ source('polygon', 'polygon_marketstatus_upcoming') }}
