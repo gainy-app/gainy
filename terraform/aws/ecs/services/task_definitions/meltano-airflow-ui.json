@@ -1,5 +1,6 @@
 {
   "name": "meltano-airflow-ui",
+  "cpu": ${airflow_ui_cpu_credits},
   "memory": ${airflow_ui_memory_credits},
   "extraHosts": null,
   "dnsServers": null,
@@ -43,7 +44,6 @@
   "command": ["invoke", "airflow", "webserver", "-p", "${airflow_port}"],
   "user": null,
   "dockerLabels": null,
-  "cpu": null,
   "privileged": null,
   "memoryReservation": null,
   "dependsOn": [

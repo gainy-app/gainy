@@ -1,5 +1,6 @@
 {
   "name": "websockets-polygon",
+  "cpu": ${polygon_websockets_cpu_credits},
   "memory": ${polygon_websockets_memory_credits},
   "extraHosts": null,
   "dnsServers": null,
@@ -32,7 +33,6 @@
   "command": ["client_polygon.py"],
   "user": null,
   "dockerLabels": null,
-  "cpu": null,
   "privileged": null,
   "memoryReservation": null,
   "logConfiguration": {

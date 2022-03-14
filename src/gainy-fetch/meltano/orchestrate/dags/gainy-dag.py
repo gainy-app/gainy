@@ -21,8 +21,8 @@ def create_downstream_operators(dag):
                                   bash_command="gainy_recommendation",
                                   dag=dag)
 
-    industry_assignment >> data_check >> recommendation
-    return [industry_assignment]
+    data_check >> recommendation
+    return industry_assignment, data_check
 
 
 schedules = get_schedules()
@@ -68,7 +68,8 @@ clean = BashOperator(
     f"cd {MELTANO_PROJECT_ROOT}; /usr/local/bin/python scripts/cleanup.py",
     dag=dag)
 
-downstream += create_downstream_operators(dag)
+industry_assignment, data_check = create_downstream_operators(dag)
+downstream.append(data_check)
 
 # dependencies
-upstream >> dbt >> downstream
+upstream >> industry_assignment >> dbt >> downstream

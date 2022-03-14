@@ -26,6 +26,9 @@ create table if not exists raw_data.auto_ticker_industries
 
     primary key (symbol)
 );
+alter table raw_data.auto_ticker_industries add if not exists industry_1_cossim double precision;
+alter table raw_data.auto_ticker_industries add if not exists industry_2_cossim double precision;
+alter table raw_data.auto_ticker_industries add if not exists min_cossim double precision;
 
 create table if not exists deployment.public_schemas
 (

@@ -1,6 +1,5 @@
 locals {
-  timestamp      = formatdate("YYMMDDhhmmss", timestamp())
-  deployment_key = local.timestamp
+  deployment_key = formatdate("YYMMDDhhmmss", timestamp())
 }
 
 resource "random_integer" "db_external_access_port" {
@@ -130,13 +129,6 @@ module "ecs-service" {
   hasura_enable_console           = "true"
   hasura_enable_dev_mode          = "true"
   hasura_jwt_secret               = var.hasura_jwt_secret
-  hasura_cpu_credits              = local.hasura_cpu_credits
-  hasura_memory_credits           = local.hasura_memory_credits
-  hasura_healthcheck_interval     = local.hasura_healthcheck_interval
-  hasura_healthcheck_retries      = local.hasura_healthcheck_retries
-
-  eod_websockets_memory_credits     = local.eod_websockets_memory_credits
-  polygon_websockets_memory_credits = local.polygon_websockets_memory_credits
 
   eodhistoricaldata_api_token = var.eodhistoricaldata_api_token
   pg_host                     = module.rds.db_instance.address
@@ -145,7 +137,6 @@ module "ecs-service" {
   pg_username                 = module.rds.db_instance.username
   pg_dbname                   = module.rds.db_instance.name
   pg_replica_uris             = sensitive(join(",", [for index, replica in module.rds.db_replica[*] : format("postgres://%s:%s@%s:%d/%s", replica.username, module.rds.db_instance.password, replica.address, replica.port, replica.name)]))
-  versioned_schema_suffix     = local.timestamp
 
   pg_production_host                   = var.pg_production_host
   pg_production_port                   = var.pg_production_port
@@ -160,13 +151,6 @@ module "ecs-service" {
   pg_analytics_schema         = var.pg_analytics_schema
   pg_website_schema           = var.pg_website_schema
 
-  eodhistoricaldata_jobs_count = local.meltano_eodhistoricaldata_jobs_count
-  scheduler_cpu_credits        = local.meltano_scheduler_cpu_credits
-  scheduler_memory_credits     = local.meltano_scheduler_memory_credits
-  ui_memory_credits            = local.meltano_ui_memory_credits
-  main_cpu_credits             = local.main_cpu_credits
-  main_memory_credits          = local.main_memory_credits
-
   base_image_registry_address = var.base_image_registry_address
   base_image_version          = var.base_image_version
 
@@ -179,8 +163,6 @@ module "ecs-service" {
   datadog_app_key = var.datadog_app_key
 
   polygon_api_token = var.polygon_api_token
-
-  health_check_grace_period_seconds = local.health_check_grace_period_seconds
 
   mlflow_artifact_bucket = module.s3.mlflow_artifact_bucket
   codeartifact_pipy_url  = var.codeartifact_pipy_url
