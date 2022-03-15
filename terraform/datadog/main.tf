@@ -17,9 +17,9 @@ resource "aws_cloudformation_stack" "datadog" {
   name         = "datadog"
   capabilities = ["CAPABILITY_IAM", "CAPABILITY_NAMED_IAM", "CAPABILITY_AUTO_EXPAND"]
   parameters = {
-    DdApiKey        = var.datadog_api_key
-    DdSite          = "datadoghq.com"
-    DdAwsExternalId = var.datadog_aws_external_id
+    DdApiKey   = var.datadog_api_key
+    DdSite     = "datadoghq.com"
+    ExternalId = var.datadog_aws_external_id
   }
   template_url = "https://datadog-cloudformation-template.s3.amazonaws.com/aws/main.yaml"
 }
