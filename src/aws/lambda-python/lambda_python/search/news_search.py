@@ -60,7 +60,7 @@ class SearchNews(HasuraAction):
             } for article in articles]
         except:
             logger.error(
-                "Exception thrown in SearchNews: %s, url: %s, input_params",
+                "Exception thrown in SearchNews: %s, url: %s, input_params: %s",
                 json.dumps(traceback.format_exception()), url,
                 json.dumps(input_params))
 
