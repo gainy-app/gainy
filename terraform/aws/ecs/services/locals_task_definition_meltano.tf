@@ -1,4 +1,4 @@
-resource "aws_cloudwatch_log_group" "this" {
+resource "aws_cloudwatch_log_group" "meltano" {
   name = "/aws/ecs/meltano-${var.env}"
 }
 
@@ -17,7 +17,7 @@ locals {
     eodhistoricaldata_jobs_count = local.eodhistoricaldata_jobs_count
     pg_transform_schema          = local.public_schema_name
     meltano_image                = docker_registry_image.meltano.name
-    aws_log_group_name           = aws_cloudwatch_log_group.this.name
+    aws_log_group_name           = aws_cloudwatch_log_group.meltano.name
     aws_log_region               = var.aws_log_region
   }
   meltano_airflow_ui_task_description = jsondecode(templatefile(

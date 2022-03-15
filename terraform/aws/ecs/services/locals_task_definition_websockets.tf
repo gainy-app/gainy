@@ -1,4 +1,4 @@
-resource "aws_cloudwatch_log_group" "this" {
+resource "aws_cloudwatch_log_group" "websockets" {
   name = "/aws/ecs/websockets-${var.env}"
 }
 
@@ -12,7 +12,7 @@ locals {
     pg_username         = var.pg_username
     pg_transform_schema = local.public_schema_name
     datadog_api_key     = var.datadog_api_key
-    aws_log_group_name  = aws_cloudwatch_log_group.this.name
+    aws_log_group_name  = aws_cloudwatch_log_group.websockets.name
     aws_log_region      = var.aws_log_region
     websockets_image    = docker_registry_image.websockets.name
   }
