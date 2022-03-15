@@ -2,8 +2,10 @@ import os
 import json
 import plaid
 from plaid.api import plaid_api
-
 from common.hasura_exception import HasuraActionException
+from service.logging import get_logger
+
+logger = get_logger(__name__)
 
 PLAID_CLIENT_ID = os.getenv('PLAID_CLIENT_ID')
 PLAID_SECRET = os.getenv('PLAID_SECRET')
@@ -40,7 +42,7 @@ def get_plaid_client(env=None):
 
 
 def handle_error(e):
-    print('Plaid Error: %s' % (e.body))
+    logger.error('Plaid Error: %s' % (e.body))
     error = json.loads(e.body)
 
     raise HasuraActionException(

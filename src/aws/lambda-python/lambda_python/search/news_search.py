@@ -2,14 +2,15 @@ import json
 import time
 from datetime import datetime
 import pytz
-
 import backoff
 import requests
 from backoff import full_jitter
 import traceback
-
 from common.hasura_function import HasuraAction
 from search.cache import CachingLoader, RedisCache
+from service.logging import get_logger
+
+logger = get_logger(__name__)
 
 
 @backoff.on_predicate(backoff.expo,
@@ -25,10 +26,9 @@ def load_url(url: str):
     if response.status_code == 200:
         return response.content
     else:
-        print(
-            f"Url not loaded, http code: {response.status_code}, response: {response.content}"
+        raise Exception(
+            f"Url not loaded with status: {response.status_code}, response: {response.content}"
         )
-        raise Exception(f"Url not loaded with status: {response.status_code}")
 
 
 class SearchNews(HasuraAction):
@@ -59,9 +59,11 @@ class SearchNews(HasuraAction):
                 "sourceUrl": article["source"]["url"]
             } for article in articles]
         except:
-            print(f"Loading error for url: {url}, params: {input_params}")
-            traceback.print_exc()
-            # Temporary workaround to return empty list on any server side exception
+            logger.error(
+                "Exception thrown in SearchNews: %s, url: %s, input_params: %s",
+                json.dumps(traceback.format_exception()), url,
+                json.dumps(input_params))
+
             return []
 
     @staticmethod

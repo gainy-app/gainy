@@ -3,11 +3,11 @@ import json
 import os
 import sys
 from math import trunc
-
 from psycopg2.extras import execute_values
-
 from common.hasura_function import HasuraTrigger
+from service.logging import get_logger
 
+logger = get_logger(__name__)
 script_directory = os.path.dirname(os.path.realpath(__file__))
 sys.path.append(script_directory)
 
@@ -99,14 +99,15 @@ class SetUserCategories(HasuraTrigger):
             categories = [row[0] for row in rows]
 
         profile_id = payload["profile_id"]
-        print('set_user_categories ' + json.dumps({
-            'profile_id': profile_id,
-            'risk_needed': risk_needed,
-            'risk_taking_ability': risk_taking_ability,
-            'loss_tolerance': loss_tolerance,
-            'final_score': final_score,
-            'categories': categories,
-        }))
+        logger.info('set_user_categories ' +
+                    json.dumps({
+                        'profile_id': profile_id,
+                        'risk_needed': risk_needed,
+                        'risk_taking_ability': risk_taking_ability,
+                        'loss_tolerance': loss_tolerance,
+                        'final_score': final_score,
+                        'categories': categories,
+                    }))
 
         with db_conn.cursor() as cursor:
             cursor.execute(

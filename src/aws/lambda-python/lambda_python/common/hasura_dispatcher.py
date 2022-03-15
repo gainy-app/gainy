@@ -2,13 +2,15 @@ import json
 import traceback
 from abc import ABC, abstractmethod
 from typing import List
-
 import psycopg2
 from psycopg2 import sql
 from gainy.utils import db_connect
 from common.hasura_exception import HasuraActionException
 from common.hasura_function import HasuraAction, HasuraTrigger
 from common.hasura_response import base_response
+from service.logging import get_logger
+
+logger = get_logger(__name__)
 
 
 class HasuraDispatcher(ABC):
@@ -27,15 +29,17 @@ class HasuraDispatcher(ABC):
 
                 return self.format_response(200, response)
             except HasuraActionException as he:
-                print(f"{he.http_code} {he.message}. event: {event}")
+                logger.warning(f"{he.http_code} {he.message}. event: {event}")
 
                 return self.format_response(he.http_code, {
                     "message": he.message,
                     "code": he.http_code
                 })
             except Exception as e:
-                print(f"event: {event}")
-                traceback.print_exc()
+                logger.error("Exception thrown: %s, event: %s",
+                             json.dumps(traceback.format_exception()),
+                             json.dumps(event))
+
                 return self.format_response(500, {
                     "message": str(e),
                     "code": 500
@@ -85,7 +89,6 @@ class HasuraDispatcher(ABC):
             user_id = user[0]
             hasura_user_id = session_variables["x-hasura-user-id"]
         except Exception:
-            traceback.print_exc()
             raise HasuraActionException(
                 401, f"Unauthorized access to profile `{profile_id}`")
 

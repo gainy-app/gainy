@@ -85,8 +85,6 @@ services:
     restart: always
     volumes:
       - ./src/aws/lambda-python/lambda_python:/var/task
-      - ./src/aws/lambda-python/poetry.lock:/var/poetry.lock
-      - ./src/aws/lambda-python/pyproject.toml:/var/pyproject.toml
     env_file:
       - .env
       - .env.test

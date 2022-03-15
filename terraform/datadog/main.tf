@@ -10,6 +10,29 @@ resource "datadog_integration_slack_channel" "alerts_channel" {
   }
 }
 
+# Cloud Formation
+# Store Datadog API key in AWS Secrets Manager
+resource "aws_secretsmanager_secret" "dd_api_key" {
+  name        = "datadog_api_key"
+  description = "Encrypted Datadog API Key"
+}
+resource "aws_secretsmanager_secret_version" "dd_api_key" {
+  secret_id     = aws_secretsmanager_secret.dd_api_key.id
+  secret_string = var.datadog_api_key
+}
+# Datadog Forwarder to ship logs from S3 and CloudWatch, as well as observability data from Lambda functions to Datadog.
+# https://github.com/DataDog/datadog-serverless-functions/tree/master/aws/logs_monitoring
+resource "aws_cloudformation_stack" "datadog_forwarder" {
+  name         = "datadog-forwarder"
+  capabilities = ["CAPABILITY_IAM", "CAPABILITY_NAMED_IAM", "CAPABILITY_AUTO_EXPAND"]
+  parameters = {
+    DdApiKeySecretArn = aws_secretsmanager_secret.dd_api_key.arn,
+    DdSite            = "datadoghq.com",
+    FunctionName      = "datadog-forwarder"
+  }
+  template_url = "https://datadog-cloudformation-template.s3.amazonaws.com/aws/forwarder/latest.yaml"
+}
+
 #################################### Billing ####################################
 
 resource "datadog_monitor" "billing_spend" {
@@ -45,7 +68,7 @@ resource "datadog_monitor" "hasura_alb_5xx" {
   message = "Hasura 5xx Errors Monitor triggered. Notify: @slack-${var.slack_channel_name} <!channel>"
   #  escalation_message = "Escalation message @pagerduty"
 
-  query = "avg(last_1h):anomalies(sum:aws.applicationelb.httpcode_target_5xx{name:*-production} by {name}.as_count(), 'basic', 2, direction='above', alert_window='last_15m', interval=300, count_default_zero='true') > 0.01"
+  query = "avg(last_1h):anomalies(sum:aws.applicationelb.httpcode_elb_5xx{name:*-production} by {name}.as_count(), 'basic', 2, direction='above', alert_window='last_15m', interval=300, count_default_zero='true') > 0.01"
 
   monitor_threshold_windows {
     recovery_window = "last_15m"
@@ -99,20 +122,18 @@ resource "datadog_monitor" "ecs_cpu" {
   message = "ECS CPU Utilization Monitor triggered. Notify: @slack-${var.slack_channel_name} <!channel>"
   #  escalation_message = "Escalation message @pagerduty"
 
-  query = "avg(last_1h):avg:aws.ecs.service.cpuutilization{servicename:gainy-production} > 40"
+  query = "avg(last_1h):avg:aws.ecs.service.cpuutilization{servicename:gainy-production} > 80"
 
   monitor_thresholds {
-    warning_recovery  = 10
-    warning           = 20
-    critical_recovery = 30
-    critical          = 40
+    warning  = 60
+    critical = 80
   }
 
   require_full_window = false
   notify_no_data      = true
   renotify_interval   = 15
 
-  tags = ["hasura"]
+  tags = ["ecs"]
 }
 
 resource "datadog_monitor" "hasura_memory" {
@@ -134,7 +155,7 @@ resource "datadog_monitor" "hasura_memory" {
   notify_no_data      = true
   renotify_interval   = 15
 
-  tags = ["hasura"]
+  tags = ["ecs"]
 }
 
 resource "datadog_monitor" "healthy_hosts" {
@@ -153,7 +174,7 @@ resource "datadog_monitor" "healthy_hosts" {
   notify_no_data      = true
   renotify_interval   = 15
 
-  tags = ["hasura"]
+  tags = ["ecs"]
 }
 
 #################################### Lambda ####################################
@@ -164,7 +185,7 @@ resource "datadog_monitor" "lambda_invocations" {
   message = "Lambda Invocations Monitor triggered. Notify: @slack-${var.slack_channel_name} <!channel>"
   #  escalation_message = "Escalation message @pagerduty"
 
-  query = "avg(last_7d):anomalies(sum:aws.lambda.invocations{resource:*_production} by {functionname}.as_count(), 'basic', 2, direction='above', alert_window='last_1d', interval=300, count_default_zero='true') > 1"
+  query = "avg(last_7d):anomalies(sum:aws.lambda.invocations{functionname:*_production} by {functionname}.as_count(), 'basic', 2, direction='above', alert_window='last_1d', interval=300, count_default_zero='true') > 1"
 
   monitor_threshold_windows {
     recovery_window = "last_1d"
@@ -191,7 +212,7 @@ resource "datadog_monitor" "lambda_duration" {
   message = "Lambda Duration Monitor triggered. Notify: @slack-${var.slack_channel_name} <!channel>"
   #  escalation_message = "Escalation message @pagerduty"
 
-  query = "avg(last_7d):anomalies(sum:aws.lambda.duration{resource:*_production} by {functionname}.as_count(), 'basic', 2, direction='above', alert_window='last_2d', interval=300, count_default_zero='true') > 0.7"
+  query = "avg(last_7d):anomalies(sum:aws.lambda.duration{functionname:*_production} by {functionname}.as_count(), 'basic', 2, direction='above', alert_window='last_2d', interval=300, count_default_zero='true') > 0.7"
 
   monitor_threshold_windows {
     recovery_window = "last_2d"
@@ -218,7 +239,7 @@ resource "datadog_monitor" "lambda_errors" {
   message = "Lambda Errors Monitor triggered. Notify: @slack-${var.slack_channel_name} <!channel>"
   #  escalation_message = "Escalation message @pagerduty"
 
-  query             = "avg(last_7d):anomalies(sum:aws.lambda.errors{resource:*_production} by {functionname}.as_count(), 'basic', 2, direction='above', alert_window='last_1h', interval=300, count_default_zero='true') >= 0.01"
+  query             = "avg(last_7d):anomalies(sum:aws.lambda.errors{functionname:*_production} by {functionname}.as_count(), 'basic', 2, direction='above', alert_window='last_1h', interval=300, count_default_zero='true') >= 0.01"
   no_data_timeframe = 120
 
   monitor_threshold_windows {
@@ -424,4 +445,36 @@ resource "datadog_monitor" "cloudwatch_synthetics_duration" {
   renotify_interval   = 240
 
   tags = ["canaries"]
+}
+
+#################################### Logs ####################################
+
+resource "datadog_monitor" "logs" {
+  name    = "Error Logs"
+  type    = "log alert"
+  message = <<-EOT
+  Error Log. Notify: @slack-${var.slack_channel_name} <!channel>
+  {{source.name}}
+  {{host.name}}
+  {{status.name}}
+  {{log.message}}
+  {{log.service}}
+  {{log.status}}
+  {{log.source}}
+  {{log.span_id}}
+  {{log.timestamp}}
+  {{log.trace_id}}
+  {{log.link}}
+EOT
+
+  query = "logs(\"source:lambda service:*_production status:error\").index(\"*\").rollup(\"count\").last(\"5m\") > 0"
+
+  monitor_thresholds {
+    critical = 0
+  }
+
+  require_full_window = false
+  renotify_interval   = 15
+
+  tags = ["logs"]
 }

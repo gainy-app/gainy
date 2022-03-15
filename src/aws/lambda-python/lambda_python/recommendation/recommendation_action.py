@@ -1,10 +1,12 @@
 import json
 from operator import itemgetter
-
 from common.hasura_function import HasuraAction
 from gainy.recommendation import TOP_20_FOR_YOU_COLLECTION_ID
 from gainy.recommendation.compute import ComputeRecommendationsAndPersist
 from gainy.recommendation.repository import RecommendationRepository
+from service.logging import get_logger
+
+logger = get_logger(__name__)
 
 
 class GetRecommendedCollections(HasuraAction):
@@ -35,10 +37,10 @@ class GetRecommendedCollections(HasuraAction):
             sorted_collections_ids = [TOP_20_FOR_YOU_COLLECTION_ID
                                       ] + sorted_collections_ids
 
-        print('get_recommended_collections ' +
-              json.dumps({
-                  'profile_id': profile_id,
-                  'collections': sorted_collections_ids,
-              }))
+        logger.info('get_recommended_collections ' +
+                    json.dumps({
+                        'profile_id': profile_id,
+                        'collections': sorted_collections_ids,
+                    }))
 
         return [{"id": id} for id in sorted_collections_ids]
