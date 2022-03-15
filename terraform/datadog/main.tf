@@ -465,20 +465,13 @@ resource "datadog_monitor" "logs" {
   type    = "log alert"
   message = <<-EOT
   Error Log. Notify: @slack-${var.slack_channel_name} <!channel>
-  {{source.name}}
-  {{host.name}}
-  {{status.name}}
   {{log.message}}
   {{log.service}}
   {{log.status}}
-  {{log.source}}
-  {{log.span_id}}
-  {{log.timestamp}}
-  {{log.trace_id}}
   {{log.link}}
 EOT
 
-  query = "logs(\"source:lambda service:*_production status:error\").index(\"*\").rollup(\"count\").last(\"5m\") > 0"
+  query = "logs(\"status:error host:*production -@type:http-log\").index(\"*\").rollup(\"count\").by(\"host\").last(\"5m\") > 0"
 
   monitor_thresholds {
     critical = 0

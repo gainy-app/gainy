@@ -26,6 +26,7 @@ After the project is running:
 Useful commands:
 - `make hasura-console` will run Hasura development console at [http://0.0.0.0:9695/](http://0.0.0.0:9695/). It's needed to persist schema and configuration changes and create migrations.
 - `make style-fix` to run style-check and change files in-place.
+- `make start-realtime` to run realtime listener.
 
 ## Key parts of the app
 1. ### [Data pipelines](src/meltano)

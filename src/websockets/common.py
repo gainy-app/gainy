@@ -198,6 +198,8 @@ async def run(listener_factory):
                 if sync_task is not None:
                     sync_task.cancel()
 
+                await asyncio.sleep(1)
+
                 listener = listener_factory()
                 listen_task = asyncio.create_task(listener.listen())
                 sync_task = asyncio.create_task(listener.sync())

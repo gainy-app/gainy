@@ -32,6 +32,9 @@ clean:
 hasura-console:
 	docker-compose exec -T hasura hasura console --address 0.0.0.0 --api-host http://0.0.0.0 --endpoint http://0.0.0.0:8080 --no-browser --skip-update-check
 
+start-realtime:
+	@echo -n 'Enter provider (eod, polygon): ' && read provider && docker-compose up websockets_$${provider} --scale websockets_$${provider}=1
+
 style-check:
 	yapf --diff -r src/aws/lambda-python/ src/aws/router src/websockets src/meltano/meltano/orchestrate/dags src/hasura src/meltano terraform
 

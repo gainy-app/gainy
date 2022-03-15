@@ -15,10 +15,9 @@ macro-paths:
 snapshot-paths:
 - snapshots
 target-path: ../.meltano/transformers/dbt/target
-log-path: logs
+log-path: /tmp/dbt-logs
 clean-targets:
 - ../.meltano/transformers/dbt/target
-- logs
 models:
   +on_schema_change: "sync_all_columns"
 vars:

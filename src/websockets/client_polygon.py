@@ -2,6 +2,7 @@ import asyncio
 import polygon
 from polygon.enums import StreamCluster
 import os
+import json
 import datetime
 from decimal import Decimal
 from common import run, AbstractPriceListener, NO_MESSAGES_RECONNECT_TIMEOUT
@@ -74,6 +75,9 @@ class PricesListener(AbstractPriceListener):
                                                   StreamCluster.STOCKS,
                                                   host=self.host)
 
+        await stream_client.change_handler(
+            'status', self.get_status_message_handler(stream_client))
+
         try:
             await stream_client.subscribe_stock_minute_aggregates(
                 [self.transform_symbol(i) for i in self.symbols],
@@ -89,6 +93,20 @@ class PricesListener(AbstractPriceListener):
                     await asyncio.sleep(90)
         finally:
             await stream_client.close_stream()
+
+    def get_status_message_handler(self, stream_client):
+
+        async def _status_message_handler(update):
+            if update['ev'] != 'status':
+                return
+
+            if update['status'] in ['auth_success', 'connected', 'success']:
+                stream_client._attempts = 0
+                return
+
+            self.logger.error(json.dumps(update))
+
+        return _status_message_handler
 
     def transform_symbol(self, symbol):
         return symbol.replace('-', '.')

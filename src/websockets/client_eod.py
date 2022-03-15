@@ -9,7 +9,7 @@ from decimal import Decimal
 from common import run, AbstractPriceListener, NO_MESSAGES_RECONNECT_TIMEOUT
 
 EOD_API_TOKEN = os.environ["EOD_API_TOKEN"]
-SYMBOLS_LIMIT = 11000
+SYMBOLS_LIMIT = 13000
 MANDATORY_SYMBOLS = ['DJI.INDX', 'GSPC.INDX', 'IXIC.INDX', 'BTC.CC']
 
 
@@ -125,19 +125,19 @@ class PricesListener(AbstractPriceListener):
             self.logger.error('handle_message %s: %s', e, message_raw)
 
     async def listen(self):
-        tasks = [
-            asyncio.create_task(self._base_listen(endpoint))
+        coroutines = [
+            self._base_listen(endpoint)
             for endpoint in ['us', 'crypto', 'index']
         ]
-
-        for task in tasks:
-            await task
+        await asyncio.gather(*coroutines)
 
     async def _base_listen(self, endpoint):
         symbols = [
             self.transform_symbol(symbol) for symbol in self.symbols
             if self._get_eod_endpoint(symbol) == endpoint
         ]
+        if not symbols:
+            return
 
         url = f"wss://ws.eodhistoricaldata.com/ws/{endpoint}?api_token={self.api_token}"
         first_attempt = True
@@ -165,22 +165,31 @@ class PricesListener(AbstractPriceListener):
                             await self.handle_message(message)
 
                     except websockets.ConnectionClosed as e:
-                        self.logger.error("ConnectionClosed Error caught: %s",
-                                          e)
+                        self.logger.error(
+                            f"ConnectionClosed Error caught: {e}")
 
-                        continue
+                    finally:
+                        self.logger.info(f"Unsubscribing from {endpoint}")
+                        try:
+                            await websocket.send(
+                                json.dumps({
+                                    "action": "unsubscribe",
+                                    "symbols": ",".join(symbols)
+                                }))
+                        except Exception as e:
+                            self.logger.error(
+                                "%s Error caught while unsubscribing: %s",
+                                type(e).__name__, str(e))
 
-                self.logger.error("reached the end of websockets.connect loop")
+            except asyncio.CancelledError:
+                self.logger.debug(f"listen done for {endpoint}")
+                return
 
             except Exception as e:
                 self.logger.error("%s Error caught in start func: %s",
                                   type(e).__name__, str(e))
 
                 continue
-
-        self.logger.error("reached the end of start func")
-
-        return True
 
     def transform_symbol(self, symbol):
         return re.sub(r'\.CC$', '-USD', symbol)

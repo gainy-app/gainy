@@ -135,6 +135,8 @@ plugins:
         core:
           sql_alchemy_conn: $AIRFLOW_DATABASE_URI
           executor: LocalExecutor
+        logging:
+          logging_level: $AIRFLOW_LOG_LEVEL
 
 schedules:
   - name: csv-to-postgres
