@@ -38,7 +38,7 @@ resource "datadog_integration_aws_lambda_arn" "main_collector" {
   lambda_arn = aws_cloudformation_stack.datadog.outputs["DatadogForwarderArn"]
 }
 resource "aws_cloudwatch_log_subscription_filter" "datadog_log_subscription_filter" {
-  for_each        = var.additional_forwarded_log_groups
+  for_each        = toset(var.additional_forwarded_log_groups)
   name            = "datadog_log_subscription_filter"
   log_group_name  = each.value
   destination_arn = aws_cloudformation_stack.datadog.outputs["DatadogForwarderArn"]
