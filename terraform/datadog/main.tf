@@ -23,6 +23,11 @@ resource "aws_cloudformation_stack" "datadog" {
   }
   template_url = "https://datadog-cloudformation-template.s3.amazonaws.com/aws/main.yaml"
 }
+data "aws_caller_identity" "this" {}
+resource "datadog_integration_aws_lambda_arn" "main_collector" {
+  account_id = data.aws_caller_identity.this.account_id
+  lambda_arn = aws_cloudformation_stack.datadog.outputs["DatadogForwarderArn"]
+}
 
 #################################### Billing ####################################
 
