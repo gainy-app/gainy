@@ -111,12 +111,13 @@ module "aws" {
 }
 
 module "datadog" {
-  count           = var.env == "production" ? 1 : 0
-  source          = "./datadog"
-  datadog_api_key = var.datadog_api_key
-  datadog_api_url = var.datadog_api_url
-  datadog_app_key = var.datadog_app_key
-  env             = var.env
+  count                   = var.env == "production" ? 1 : 0
+  source                  = "./datadog"
+  datadog_api_key         = var.datadog_api_key
+  datadog_api_url         = var.datadog_api_url
+  datadog_app_key         = var.datadog_app_key
+  datadog_aws_external_id = var.datadog_aws_external_id
+  env                     = var.env
 }
 
 #################################### Outputs ####################################

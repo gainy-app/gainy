@@ -11,26 +11,17 @@ resource "datadog_integration_slack_channel" "alerts_channel" {
 }
 
 # Cloud Formation
-# Store Datadog API key in AWS Secrets Manager
-resource "aws_secretsmanager_secret" "dd_api_key" {
-  name        = "datadog_api_key"
-  description = "Encrypted Datadog API Key"
-}
-resource "aws_secretsmanager_secret_version" "dd_api_key" {
-  secret_id     = aws_secretsmanager_secret.dd_api_key.id
-  secret_string = var.datadog_api_key
-}
 # Datadog Forwarder to ship logs from S3 and CloudWatch, as well as observability data from Lambda functions to Datadog.
 # https://github.com/DataDog/datadog-serverless-functions/tree/master/aws/logs_monitoring
-resource "aws_cloudformation_stack" "datadog_forwarder" {
-  name         = "datadog-forwarder"
+resource "aws_cloudformation_stack" "datadog" {
+  name         = "datadog"
   capabilities = ["CAPABILITY_IAM", "CAPABILITY_NAMED_IAM", "CAPABILITY_AUTO_EXPAND"]
   parameters = {
-    DdApiKeySecretArn = aws_secretsmanager_secret.dd_api_key.arn,
-    DdSite            = "datadoghq.com",
-    FunctionName      = "datadog-forwarder"
+    DdApiKey        = var.datadog_api_key
+    DdSite          = "datadoghq.com"
+    DdAwsExternalId = var.datadog_aws_external_id
   }
-  template_url = "https://datadog-cloudformation-template.s3.amazonaws.com/aws/forwarder/latest.yaml"
+  template_url = "https://datadog-cloudformation-template.s3.amazonaws.com/aws/main.yaml"
 }
 
 #################################### Billing ####################################
