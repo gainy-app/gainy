@@ -14,10 +14,9 @@ resource "datadog_integration_slack_channel" "alerts_channel" {
 # Datadog Forwarder to ship logs from S3 and CloudWatch, as well as observability data from Lambda functions to Datadog.
 # https://github.com/DataDog/datadog-serverless-functions/tree/master/aws/logs_monitoring
 resource "aws_secretsmanager_secret" "dd_api_key" {
-  name        = "datadog_api_key"
+  name        = "dd_api_key"
   description = "Encrypted Datadog API Key"
 }
-
 resource "aws_secretsmanager_secret_version" "dd_api_key" {
   secret_id     = aws_secretsmanager_secret.dd_api_key.id
   secret_string = var.datadog_api_key
