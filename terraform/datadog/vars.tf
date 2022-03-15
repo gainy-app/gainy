@@ -1,6 +1,7 @@
 variable "datadog_api_key" {}
 variable "datadog_api_url" {}
 variable "datadog_app_key" {}
+variable "datadog_aws_external_id" {}
 
 variable "slack_account_name" {
   default = "Gainy"
