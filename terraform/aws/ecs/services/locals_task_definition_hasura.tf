@@ -18,7 +18,7 @@ locals {
     pg_dbname           = var.pg_dbname
     pg_replica_uris     = var.pg_replica_uris
     pg_transform_schema = local.public_schema_name
-    aws_log_group_name  = var.aws_log_group_name
+    aws_log_group_name  = "/aws/ecs/hasura-${var.env}"
     aws_log_region      = var.aws_log_region
   }
   hasura_task_description = jsondecode(templatefile(

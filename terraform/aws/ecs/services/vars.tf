@@ -1,7 +1,6 @@
 variable "repository_name" {}
 variable "env" {}
 variable "ecr_address" {}
-variable "aws_log_group_name" {}
 variable "aws_log_region" {}
 variable "eodhistoricaldata_api_token" {}
 variable "pg_host" {}

@@ -111,7 +111,6 @@ module "ecs-service" {
   aws_secret_key     = var.aws_secret_key
   ecr_address        = local.ecr_address
   repository_name    = aws_ecr_repository.default.name
-  aws_log_group_name = module.ecs.aws_cloudwatch_log_group.name
   aws_log_region     = data.aws_region.current.name
   vpc_id             = module.ecs.vpc_id
   vpc_default_sg_id  = module.ecs.vpc_default_sg_id

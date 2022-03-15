@@ -13,7 +13,7 @@ locals {
     eodhistoricaldata_jobs_count = local.eodhistoricaldata_jobs_count
     pg_transform_schema          = local.public_schema_name
     meltano_image                = docker_registry_image.meltano.name
-    aws_log_group_name           = var.aws_log_group_name
+    aws_log_group_name           = "/aws/ecs/meltano-${var.env}"
     aws_log_region               = var.aws_log_region
   }
   meltano_airflow_ui_task_description = jsondecode(templatefile(

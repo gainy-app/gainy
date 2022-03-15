@@ -239,9 +239,6 @@ output "private_subnet_group_name" {
 output "public_subnet_group_name" {
   value = aws_db_subnet_group.public_subnet_group_name.name
 }
-output "aws_cloudwatch_log_group" {
-  value = aws_cloudwatch_log_group.this
-}
 output "ecs_cluster" {
   value = aws_ecs_cluster.ecs_cluster
 }
