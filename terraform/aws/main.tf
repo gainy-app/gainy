@@ -182,12 +182,14 @@ output "bridge_instance_url" {
 output "meltano_url" {
   value = module.ecs-service.meltano_url
 }
-
 output "hasura_url" {
   value = module.ecs-service.hasura_url
 }
 output "ecs_service_name" {
   value = module.ecs-service.name
+}
+output "additional_forwarded_log_groups" {
+  value = module.ecs-service.additional_forwarded_log_groups
 }
 
 output "aws_apigatewayv2_api_endpoint" {

@@ -365,3 +365,11 @@ output "name" {
 output "public_schema_name" {
   value = local.public_schema_name
 }
+
+output "additional_forwarded_log_groups" {
+  value = [
+    aws_cloudwatch_log_group.hasura.name,
+    aws_cloudwatch_log_group.meltano.name,
+    aws_cloudwatch_log_group.websockets.name,
+  ]
+}
