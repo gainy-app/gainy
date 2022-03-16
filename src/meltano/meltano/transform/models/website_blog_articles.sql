@@ -20,7 +20,7 @@ select id::varchar,
        published_on::timestamp,
        rate_rating::double precision,
        rate_votes::int,
-       ('https://www.gainy.app/blog/' || slug)::varchar as url,
+       ('https://www.gainy.app/blog/' || slug || '?app')::varchar as url,
        updated_on::timestamp
 from {{ source('website', 'blogs') }}
 {% if is_incremental() %}

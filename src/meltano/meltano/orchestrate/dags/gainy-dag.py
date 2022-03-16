@@ -48,6 +48,7 @@ for schedule in schedules:
         task_id=schedule['name'],
         bash_command=get_meltano_command(
             f"schedule run {schedule['name']} --transform=skip"),
+        skip_exit_code=1,
         dag=dag,
         task_concurrency=CONCURRENCY,
         pool_slots=CONCURRENCY)
