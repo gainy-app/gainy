@@ -173,6 +173,12 @@ EOF
 
 ###### Create task definitions ######
 
+resource "aws_efs_file_system" "meltano_data" {
+  creation_token = "gainy-meltano-data-${var.env}"
+  lifecycle_policy {
+    transition_to_ia = "AFTER_7_DAYS"
+  }
+}
 resource "aws_ecs_task_definition" "default" {
   family                   = "gainy-${var.env}"
   network_mode             = "awsvpc"
@@ -185,6 +191,9 @@ resource "aws_ecs_task_definition" "default" {
 
   volume {
     name = "meltano-data"
+    efs_volume_configuration {
+      file_system_id = aws_efs_file_system.meltano_data.id
+    }
   }
 
   container_definitions = jsonencode(
