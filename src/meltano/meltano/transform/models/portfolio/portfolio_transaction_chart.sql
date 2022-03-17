@@ -4,7 +4,8 @@
     unique_key = "id",
     post_hook=[
       index(this, 'id', true),
-      'create unique index if not exists {{ get_index_name(this, "transactions_uniq_id__datetime__period") }} (transactions_uniq_id, datetime, period)',
+      'create unique index if not exists "transactions_uniq_id__datetime__period" ON {{ this }} (transactions_uniq_id, datetime, period)',
+      'create unique index if not exists "transactions_uniq_id__period__datetime" ON {{ this }} (transactions_uniq_id, period, datetime)',
       'delete from {{this}} where transactions_uniq_id not in (select uniq_id from {{ ref("portfolio_expanded_transactions") }})',
     ]
   )
@@ -44,22 +45,19 @@ from {{ ref('portfolio_expanded_transactions') }}
               on portfolio_securities_normalized.id = portfolio_expanded_transactions.security_id
          join {{ ref('base_tickers') }}
               on base_tickers.symbol = portfolio_securities_normalized.original_ticker_symbol
-         join {{ ref('chart') }}
-              on chart.symbol = portfolio_securities_normalized.original_ticker_symbol
-                  and (chart.datetime >=
-                       coalesce(portfolio_expanded_transactions.date, first_profile_transaction_date.datetime) or
-                       coalesce(portfolio_expanded_transactions.date,
-                                first_profile_transaction_date.datetime) is null)
 {% if is_incremental() %}
          left join latest_transaction_chart_row
               on latest_transaction_chart_row.transactions_uniq_id = portfolio_expanded_transactions.uniq_id
-                  and latest_transaction_chart_row.period = chart.period
+{% endif %}
+         join {{ ref('chart') }}
+              on chart.symbol = portfolio_securities_normalized.original_ticker_symbol
+                  and (chart.datetime >= portfolio_expanded_transactions.date or portfolio_expanded_transactions.date is null)
+                  and (chart.datetime >= first_profile_transaction_date.datetime or first_profile_transaction_date.profile_id is null)
+{% if is_incremental() %}
+                  and (chart.period = latest_transaction_chart_row.period or latest_transaction_chart_row.transactions_uniq_id is null)
+                  and (chart.datetime >= latest_transaction_chart_row.datetime or latest_transaction_chart_row.transactions_uniq_id is null)
 {% endif %}
 where portfolio_expanded_transactions.type in ('buy', 'sell')
-{% if is_incremental() %}
-  {% if var('realtime') %}
+{% if is_incremental() and var('realtime') %}
   and (chart.period in ('1d', '1w') or latest_transaction_chart_row.datetime is null)
-  {% else %}
-  and (chart.period in ('1d', '1w') or latest_transaction_chart_row.datetime is null or chart.datetime >= latest_transaction_chart_row.datetime)
-  {% endif %}
 {% endif %}

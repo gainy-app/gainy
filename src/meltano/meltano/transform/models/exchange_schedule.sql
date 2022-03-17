@@ -4,7 +4,7 @@
     unique_key = "id",
     post_hook=[
       index(this, 'id', true),
-      'create unique index if not exists {{ get_index_name(this, "date__exchange_name") }} (date, exchange_name)',
+      'create unique index if not exists "date__exchange_name" ON {{ this }} (date, exchange_name)',
     ]
   )
 }}

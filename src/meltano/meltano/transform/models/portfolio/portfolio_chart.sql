@@ -4,7 +4,7 @@
     unique_key = "id",
     post_hook=[
       index(this, 'id', true),
-      'create unique index if not exists {{ get_index_name(this, "profile_id__date__period") }} (profile_id, date, period)',
+      'create unique index if not exists "profile_id__date__period" ON {{ this }} (profile_id, date, period)',
       'delete from {{this}} where updated_at is null or updated_at < (select max(updated_at) from {{this}})',
     ]
   )

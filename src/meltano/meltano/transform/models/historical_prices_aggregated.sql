@@ -4,8 +4,8 @@
     unique_key = "id",
     post_hook=[
       index(this, 'id', true),
-      'create unique index if not exists {{ get_index_name(this, "symbol__period__datetime") }} (symbol, period, datetime)',
-      'create index if not exists {{ get_index_name(this, "period__datetime") }} (period, datetime)',
+      'create unique index if not exists "symbol__period__datetime" ON {{ this }} (symbol, period, datetime)',
+      'create index if not exists "period__datetime" ON {{ this }} (period, datetime)',
     ]
   )
 }}
