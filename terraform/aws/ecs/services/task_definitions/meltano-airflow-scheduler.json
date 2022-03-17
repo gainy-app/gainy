@@ -32,7 +32,7 @@
     { "name": "MELTANO_LOG_LEVEL",                     "value": "warning" },
     { "name": "AIRFLOW_PASSWORD",                      "value": "${airflow_password}" },
     { "name": "AIRFLOW_DATABASE_URI",                  "value": "postgresql://${pg_username}:${pg_password}@${pg_host}:${pg_port}/${pg_dbname}?options=-csearch_path=${pg_airflow_schema}" },
-    { "name": "AIRFLOW_LOG_LEVEL",                     "value": "WARNING" },
+    { "name": "AIRFLOW_LOG_LEVEL",                     "value": "INFO" },
     { "name": "EODHISTORICALDATA_JOBS_COUNT",          "value": "${eodhistoricaldata_jobs_count}" },
     { "name": "TAP_EODHISTORICALDATA_API_TOKEN",       "value": "${eodhistoricaldata_api_token}" },
     { "name": "TAP_EODHISTORICALDATA_EXCHANGES",       "value": ${jsonencode(eodhistoricaldata_exchanges)} },
