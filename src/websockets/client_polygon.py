@@ -33,7 +33,7 @@ class PricesListener(AbstractPriceListener):
 
     async def handle_price_message(self, message):
         # { "ev": "AM", "sym": "GTE", "v": 4110, "av": 9470157, "op": 0.4372, "vw": 0.4488, "o": 0.4488, "c": 0.4486, "h": 0.4489, "l": 0.4486, "a": 0.4352, "z": 685, "s": 1610144640000, "e": 1610144700000 }
-        symbol = message["sym"]
+        symbol = self.rev_transform_symbol(message["sym"])
         timestamp_start = message["s"]
         timestamp_end = message["e"]
         volume = Decimal(message["v"])

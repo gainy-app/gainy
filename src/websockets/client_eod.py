@@ -15,21 +15,32 @@ MANDATORY_SYMBOLS = ['DJI.INDX', 'GSPC.INDX', 'IXIC.INDX', 'BTC.CC']
 
 class PricesListener(AbstractPriceListener):
 
-    def __init__(self):
+    def __init__(self, endpoint=None):
         super().__init__("eod")
 
         self._buckets = {}
         self.granularity = 60000  # 60 seconds
         self.api_token = EOD_API_TOKEN
-        self._first_filled_key = None
-        self._rev_transform_mapping = {
-            self.transform_symbol(symbol): symbol
-            for symbol in self.symbols
-        }
+        self._latest_filled_key = None
+        self.endpoint = endpoint
+        if self.endpoint is None:
+            self.sub_listeners = [
+                PricesListener(endpoint)
+                for endpoint in ['us', 'crypto', 'index']
+            ]
+        else:
+            self.sub_listeners = None
 
     def get_symbols(self):
         with self.db_connect() as db_conn:
-            query = "SELECT symbol FROM base_tickers where symbol is not null and lower(exchange) similar to '(nyse|nasdaq)%'"
+            query = """
+                SELECT base_tickers.symbol, case when type = 'crypto' then 1 else 0 end as priority
+                FROM base_tickers
+                         left join ticker_metrics on ticker_metrics.symbol = base_tickers.symbol
+                where base_tickers.symbol is not null
+                  and (lower(exchange) similar to '(nyse|nasdaq)%' or type = 'crypto')
+                order by priority desc, market_capitalization desc nulls last
+            """
 
             with db_conn.cursor() as cursor:
                 cursor.execute(query)
@@ -48,9 +59,13 @@ class PricesListener(AbstractPriceListener):
         price = message["p"]
         decimal_price = Decimal(price)
 
-        volume = message.get("v") or (Decimal(message.get("q")) *
-                                      decimal_price)
-        decimal_volume = Decimal(volume)
+        volume = decimal_volume = None
+        if "v" in message:
+            volume = message.get("v")
+            decimal_volume = Decimal(volume)
+        elif "q" in message:
+            volume = Decimal(message["q"]) * decimal_price
+            decimal_volume = volume
 
         if symbol not in self._buckets:
             self._buckets[symbol] = {}
@@ -67,7 +82,8 @@ class PricesListener(AbstractPriceListener):
                 self._buckets[symbol][key]["low"] = min(
                     self._buckets[symbol][key]["low"], decimal_price)
                 self._buckets[symbol][key]["close"] = decimal_price
-                self._buckets[symbol][key]["volume"] += decimal_volume
+                if decimal_volume is not None:
+                    self._buckets[symbol][key]["volume"] += decimal_volume
             else:
                 self._buckets[symbol][key] = {
                     "open": decimal_price,
@@ -77,30 +93,40 @@ class PricesListener(AbstractPriceListener):
                     "volume": decimal_volume,
                 }
 
-                prev_key = key - 1
-                prev_key_filled = prev_key in self._buckets[symbol]
-                if prev_key_filled and self._first_filled_key is not None and self._first_filled_key < prev_key:
-                    self.logger.debug("persisting key %d %s", prev_key, symbol)
-                    date = datetime.datetime.fromtimestamp(
-                        prev_key * self.granularity / 1000)
-                    self.records_queue.put_nowait({
-                        **{
-                            "symbol": symbol,
-                            "date": date,
-                            "granularity": self.granularity,
-                        },
-                        **self._buckets[symbol][prev_key]
-                    })
+        self.persist_key(key - 1)
 
-                if self._first_filled_key is None:
-                    self._first_filled_key = prev_key
+    def persist_key(self, key):
+        if self._latest_filled_key is not None and self._latest_filled_key >= key:
+            return
 
-                if prev_key_filled:
-                    del self._buckets[symbol][prev_key]
+        # return in case the key is incomplete (first one to persist)
+        # except for indices - because we don't care about volume
+        if self._latest_filled_key is None and self.endpoint != 'index':
+            self._latest_filled_key = key
+            return
+
+        self._latest_filled_key = key
+
+        date = datetime.datetime.fromtimestamp(key * self.granularity / 1000)
+
+        for symbol, bucket in self._buckets.items():
+            if key not in bucket:
+                continue
+
+            self.logger.debug("persisting key %d %s", key, symbol)
+            self.records_queue.put_nowait({
+                **{
+                    "symbol": self.rev_transform_symbol(symbol),
+                    "date": date,
+                    "granularity": self.granularity,
+                },
+                **bucket[key]
+            })
+            del bucket[key]
 
     async def handle_message(self, message_raw):
         try:
-            self.logger.debug("%s", message_raw)
+            self.logger.debug("%s %s", self.endpoint, message_raw)
             if not message_raw:
                 return
 
@@ -124,22 +150,31 @@ class PricesListener(AbstractPriceListener):
         except Exception as e:
             self.logger.error('handle_message %s: %s', e, message_raw)
 
-    async def listen(self):
-        coroutines = [
-            self._base_listen(endpoint)
-            for endpoint in ['us', 'crypto', 'index']
-        ]
-        await asyncio.gather(*coroutines)
+    async def sync(self):
+        if self.sub_listeners is not None:
+            coroutines = [
+                sub_listener.sync() for sub_listener in self.sub_listeners
+            ]
+            await asyncio.gather(*coroutines)
+        else:
+            await super().sync()
 
-    async def _base_listen(self, endpoint):
+    async def listen(self):
+        if self.endpoint is None:
+            coroutines = [
+                sub_listener.listen() for sub_listener in self.sub_listeners
+            ]
+            await asyncio.gather(*coroutines)
+            return
+
         symbols = [
             self.transform_symbol(symbol) for symbol in self.symbols
-            if self._get_eod_endpoint(symbol) == endpoint
+            if self._get_eod_endpoint(symbol) == self.endpoint
         ]
         if not symbols:
             return
 
-        url = f"wss://ws.eodhistoricaldata.com/ws/{endpoint}?api_token={self.api_token}"
+        url = f"wss://ws.eodhistoricaldata.com/ws/{self.endpoint}?api_token={self.api_token}"
         first_attempt = True
 
         while True:
@@ -153,7 +188,7 @@ class PricesListener(AbstractPriceListener):
                 async for websocket in websockets.connect(url):
                     self.websocket = websocket
                     self.logger.info(
-                        f"connected to websocket '{endpoint}' for symbols: {','.join(symbols)}"
+                        f"connected to websocket '{self.endpoint}' for symbols: {','.join(symbols)}"
                     )
                     try:
                         await websocket.send(
@@ -169,7 +204,7 @@ class PricesListener(AbstractPriceListener):
                             f"ConnectionClosed Error caught: {e}")
 
                     finally:
-                        self.logger.info(f"Unsubscribing from {endpoint}")
+                        self.logger.info(f"Unsubscribing from {self.endpoint}")
                         try:
                             await websocket.send(
                                 json.dumps({
@@ -182,7 +217,7 @@ class PricesListener(AbstractPriceListener):
                                 type(e).__name__, str(e))
 
             except asyncio.CancelledError:
-                self.logger.debug(f"listen done for {endpoint}")
+                self.logger.debug(f"listen done for {self.endpoint}")
                 return
 
             except Exception as e:
@@ -192,11 +227,18 @@ class PricesListener(AbstractPriceListener):
                 continue
 
     def transform_symbol(self, symbol):
-        return re.sub(r'\.CC$', '-USD', symbol)
+        if self.endpoint == 'crypto':
+            return re.sub(r'\.CC$', '-USD', symbol)
+        if self.endpoint == 'index':
+            return re.sub(r'\.INDX$', '', symbol)
+
+        return symbol
 
     def rev_transform_symbol(self, symbol):
-        if symbol in self._rev_transform_mapping:
-            return self._rev_transform_mapping[symbol]
+        if self.endpoint == 'crypto':
+            return re.sub(r'\-USD$', '.CC', symbol)
+        if self.endpoint == 'index':
+            return symbol + '.INDX'
 
         return symbol
 

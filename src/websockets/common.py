@@ -106,12 +106,6 @@ class AbstractPriceListener(ABC):
     async def listen(self):
         pass
 
-    def transform_symbol(self, symbol):
-        return symbol
-
-    def rev_transform_symbol(self, symbol):
-        return symbol
-
     async def sync(self):
         while True:
             current_timestamp = self.get_current_timestamp()
@@ -136,12 +130,6 @@ class AbstractPriceListener(ABC):
                     set([record['symbol'] for record in records]))
                 self.logger.info("__sync_records %d %s", current_timestamp,
                                  ",".join(symbols_with_records))
-
-                for record in records:
-                    symbol = record['symbol']
-                    if symbol not in self.symbols:
-                        symbol = self.rev_transform_symbol(symbol)
-                        record['symbol'] = symbol
 
                 values = [(
                     record['symbol'],
@@ -210,3 +198,4 @@ async def run(listener_factory):
                 should_reconnect = listener.should_reconnect()
         except Exception as e:
             logger.error("run: %s", e)
+            await asyncio.sleep(60)
