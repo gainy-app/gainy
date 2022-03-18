@@ -23,6 +23,7 @@ class PricesListener(AbstractPriceListener):
         self.api_token = EOD_API_TOKEN
         self._latest_filled_key = None
         self.endpoint = endpoint
+        self.no_messages_reconnect_timeout = 60
         if self.endpoint is None:
             self.sub_listeners = [
                 PricesListener(endpoint)
@@ -58,6 +59,12 @@ class PricesListener(AbstractPriceListener):
         timestamp = message["t"]
         price = message["p"]
         decimal_price = Decimal(price)
+
+        # timestamp should be in milliseconds, so check whether we need to multiply by 1000
+        current_timestamp = self.get_current_timestamp() * 1000
+        if abs(current_timestamp - timestamp * 1000) < abs(current_timestamp -
+                                                           timestamp):
+            timestamp *= 1000
 
         volume = decimal_volume = None
         if "v" in message:
@@ -149,6 +156,15 @@ class PricesListener(AbstractPriceListener):
             await self.handle_price_message(message)
         except Exception as e:
             self.logger.error('handle_message %s: %s', e, message_raw)
+
+    def should_reconnect(self):
+        if self.sub_listeners is not None:
+            for sub_listener in self.sub_listeners:
+                if not sub_listener.should_reconnect():
+                    return False
+            return True
+        else:
+            return super().should_reconnect()
 
     async def sync(self):
         if self.sub_listeners is not None:
