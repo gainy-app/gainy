@@ -24,34 +24,15 @@ query {
 query {
     collections {
         id
-        image_url
         name
-        description
-        ticker_collections_aggregate {
-            aggregate {
-                count
-            }
-        }
+        image_url
         enabled
+        description
         size
-        ticker_collections {
-            ticker {
-                symbol
-                name
-                description
-                ticker_financials {
-                    dividend_growth
-                    pe_ratio
-                    market_capitalization
-                    highlight
-                }
-                ticker_industries {
-                    gainy_industry {
-                        id
-                        name
-                    }
-                }
-            }
+        metrics {
+            absolute_daily_change
+            relative_daily_change
+            updated_at
         }
     }
 }

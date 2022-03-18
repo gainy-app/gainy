@@ -1601,33 +1601,6 @@
       filter: {}
 - table:
     schema: public
-    name: ticker_financials
-  select_permissions:
-  - role: anonymous
-    permission:
-      columns:
-      - dividend_growth
-      - symbol
-      filter: {}
-  - role: user
-    permission:
-      columns:
-      - created_at
-      - dividend_growth
-      - enterprise_value_to_sales
-      - highlight
-      - market_capitalization
-      - month_price_performance
-      - net_profit_margin
-      - pe_ratio
-      - quarter_ago_close
-      - quarter_price_performance
-      - quarterly_revenue_growth_yoy
-      - revenue_ttm
-      - symbol
-      filter: {}
-- table:
-    schema: public
     name: ticker_highlights
   object_relationships:
   - name: ticker
@@ -1960,15 +1933,6 @@
         remote_table:
           schema: public
           name: ticker_events
-        insertion_order: null
-        column_mapping:
-          symbol: symbol
-  - name: ticker_financials
-    using:
-      manual_configuration:
-        remote_table:
-          schema: public
-          name: ticker_financials
         insertion_order: null
         column_mapping:
           symbol: symbol

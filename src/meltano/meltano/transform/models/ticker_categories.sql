@@ -123,10 +123,10 @@ UNION
              join last_five_years_dividends lfyd ON lfyd.code = t.symbol
              join last_sixty_months_dividends lsmd ON lsmd.code = t.symbol
              join last_sixty_months_earnings lsme ON lsme.symbol = t.symbol
-             join {{ ref('ticker_financials') }} tf on t.symbol = tf.symbol
+             join {{ ref('ticker_metrics') }} tm on t.symbol = tm.symbol
              join {{ ref('highlights') }} h on t.symbol = h.symbol
     WHERE lfyd.cnt = 5
-      AND tf.market_capitalization > 500000000
+      AND tm.market_capitalization > 500000000
       AND h.dividend_share >= lsmd.avg_value_per_year
       AND lsme.avg_value_per_year / lsmd.avg_value_per_year > 1.67
 )
