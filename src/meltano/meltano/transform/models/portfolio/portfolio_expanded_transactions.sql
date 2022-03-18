@@ -42,13 +42,7 @@ with robinhood_options as (
                     abs(quantity) * case when type = 'sell' then -1 else 1 end as quantity_norm
              from {{ source('app', 'profile_portfolio_transactions') }}
          ),
-     first_trade_date as
-         (
-             select distinct on (code) code,
-                                       first_value(date)
-                                       over (partition by code order by date) as first_trade_date
-             from {{ ref('historical_prices') }}
-         ),
+     first_trade_date as ( select code, min(date) as first_trade_date from {{ ref('historical_prices') }} group by code ),
      mismatched_sell_transactions as
          (
              with expanded_transactions as
