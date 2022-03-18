@@ -67,12 +67,15 @@ with robinhood_options as (
                       ),
                   expanded_transactions_with_price as
                       (
-                          select expanded_transactions.security_id,
-                                 expanded_transactions.account_id,
-                                 expanded_transactions.profile_id,
-                                 expanded_transactions.name,
-                                 expanded_transactions.rolling_quantity,
-                                 historical_prices.adjusted_close
+                          select distinct on (
+                              expanded_transactions.security_id,
+                              expanded_transactions.account_id
+                              ) expanded_transactions.security_id,
+                                expanded_transactions.account_id,
+                                expanded_transactions.profile_id,
+                                expanded_transactions.name,
+                                expanded_transactions.rolling_quantity,
+                                historical_prices.adjusted_close
                           from expanded_transactions
                                    left join {{ ref('portfolio_securities_normalized') }}
                                              on portfolio_securities_normalized.id = expanded_transactions.security_id
@@ -89,30 +92,27 @@ with robinhood_options as (
                           order by expanded_transactions.security_id, expanded_transactions.account_id,
                                    historical_prices.date desc
                       )
-             select distinct on (
-                 expanded_transactions_with_price.security_id,
-                 expanded_transactions_with_price.account_id
-                 ) null::int                                                                            as id,
-                   'auto0_' || expanded_transactions_with_price.account_id || '_' ||
-                   expanded_transactions_with_price.security_id                                         as uniq_id,
-                   coalesce(ticker_options.last_price, expanded_transactions_with_price.adjusted_close) *
-                   abs(rolling_quantity)                                                                as amount,
-                   null::date                                                                           as date,
-                   'ASSUMPTION BOUGHT ' || abs(rolling_quantity) || ' ' ||
-                   coalesce(ticker_options.symbol || ' ' || to_char(ticker_options.expiration_date, 'MM/dd/YYYY') ||
-                            ' ' ||
-                            ticker_options.strike || ' ' || INITCAP(ticker_options.type),
-                            expanded_transactions_with_price.name) ||
-                   ' @ ' ||
-                   coalesce(ticker_options.last_price, expanded_transactions_with_price.adjusted_close) as name,
-                   coalesce(ticker_options.last_price, expanded_transactions_with_price.adjusted_close) as price,
-                   abs(rolling_quantity)                                                                as quantity,
-                   'buy'                                                                                as subtype,
-                   'buy'                                                                                as type,
-                   expanded_transactions_with_price.security_id,
-                   expanded_transactions_with_price.profile_id,
-                   expanded_transactions_with_price.account_id,
-                   abs(rolling_quantity)                                                                as quantity_norm
+             select null::int                                                                            as id,
+                    'auto0_' || expanded_transactions_with_price.account_id || '_' ||
+                    expanded_transactions_with_price.security_id                                         as uniq_id,
+                    coalesce(ticker_options.last_price, expanded_transactions_with_price.adjusted_close) *
+                    abs(rolling_quantity)                                                                as amount,
+                    null::date                                                                           as date,
+                    'ASSUMPTION BOUGHT ' || abs(rolling_quantity) || ' ' ||
+                    coalesce(ticker_options.symbol || ' ' || to_char(ticker_options.expiration_date, 'MM/dd/YYYY') ||
+                             ' ' ||
+                             ticker_options.strike || ' ' || INITCAP(ticker_options.type),
+                             expanded_transactions_with_price.name) ||
+                    ' @ ' ||
+                    coalesce(ticker_options.last_price, expanded_transactions_with_price.adjusted_close) as name,
+                    coalesce(ticker_options.last_price, expanded_transactions_with_price.adjusted_close) as price,
+                    abs(rolling_quantity)                                                                as quantity,
+                    'buy'                                                                                as subtype,
+                    'buy'                                                                                as type,
+                    expanded_transactions_with_price.security_id,
+                    expanded_transactions_with_price.profile_id,
+                    expanded_transactions_with_price.account_id,
+                    abs(rolling_quantity)                                                                as quantity_norm
              from expanded_transactions_with_price
                       left join {{ ref('portfolio_securities_normalized') }}
                                 on portfolio_securities_normalized.id = expanded_transactions_with_price.security_id
