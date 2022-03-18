@@ -4,7 +4,7 @@
     unique_key = "id",
     post_hook=[
       index(this, 'id', true),
-      'create unique index if not exists {{ get_index_name(this, "symbol__interest_id") }} (symbol, interest_id)',
+      'create unique index if not exists "symbol__interest_id" ON {{ this }} (symbol, interest_id)',
       'delete from {{this}} where updated_at < (select max(updated_at) from {{this}})',
     ]
   )
