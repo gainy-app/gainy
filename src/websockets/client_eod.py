@@ -62,7 +62,8 @@ class PricesListener(AbstractPriceListener):
 
         # timestamp should be in milliseconds, so check whether we need to multiply by 1000
         current_timestamp = self.get_current_timestamp() * 1000
-        if abs(current_timestamp - timestamp * 1000) < abs(current_timestamp - timestamp):
+        if abs(current_timestamp - timestamp * 1000) < abs(current_timestamp -
+                                                           timestamp):
             timestamp *= 1000
 
         volume = decimal_volume = None
