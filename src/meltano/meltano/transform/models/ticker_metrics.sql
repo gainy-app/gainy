@@ -497,8 +497,7 @@ select DISTINCT ON
                financials_metrics.total_assets,
                financials_metrics.ebitda,
                financials_metrics.ebitda_ttm,
-               financials_metrics.net_debt,
-
+               financials_metrics.net_debt
 
 from tickers t
          left join highlights on t.symbol = highlights.symbol
