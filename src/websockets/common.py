@@ -90,7 +90,7 @@ class AbstractPriceListener(ABC):
         self.records_queue_lock = asyncio.Lock()
         self.logger = get_logger(source)
         self.max_insert_records_count = MAX_INSERT_RECORDS_COUNT
-        self._no_messages_reconnect_timeout = NO_MESSAGES_RECONNECT_TIMEOUT
+        self.no_messages_reconnect_timeout = NO_MESSAGES_RECONNECT_TIMEOUT
         self._latest_symbol_message = {}
         self.start_timestamp = self.get_current_timestamp()
         self.logger.debug("started at %d for symbols %s", self.start_timestamp,
@@ -149,7 +149,7 @@ class AbstractPriceListener(ABC):
 
     def should_reconnect(self):
         current_timestamp = self.get_current_timestamp()
-        if current_timestamp - self.start_timestamp < self._no_messages_reconnect_timeout:
+        if current_timestamp - self.start_timestamp < self.no_messages_reconnect_timeout:
             return False
 
         if self.symbols != self.get_symbols():
@@ -161,7 +161,7 @@ class AbstractPriceListener(ABC):
         else:
             latest_message_time = 0
 
-        no_messages_reconnect_threshold = current_timestamp - self._no_messages_reconnect_timeout
+        no_messages_reconnect_threshold = current_timestamp - self.no_messages_reconnect_timeout
         if latest_message_time < no_messages_reconnect_threshold:
             self.logger.info("should_reconnect: no messages")
             return True
@@ -176,11 +176,9 @@ async def run(listener_factory):
     sync_task = None
     logger = get_logger(__name__)
 
-    should_run = ENV in ["production", "local"]
-
     while True:
         try:
-            if should_run and should_reconnect:
+            if should_reconnect:
                 if listen_task is not None:
                     listen_task.cancel()
                 if sync_task is not None:
@@ -192,10 +190,9 @@ async def run(listener_factory):
                 listen_task = asyncio.create_task(listener.listen())
                 sync_task = asyncio.create_task(listener.sync())
 
-            await asyncio.sleep(NO_MESSAGES_RECONNECT_TIMEOUT)
+            await asyncio.sleep(listener.no_messages_reconnect_timeout)
 
-            if should_run:
-                should_reconnect = listener.should_reconnect()
+            should_reconnect = listener.should_reconnect()
         except Exception as e:
             logger.error("run: %s", e)
             await asyncio.sleep(60)
