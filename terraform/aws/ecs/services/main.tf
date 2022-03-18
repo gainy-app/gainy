@@ -173,11 +173,11 @@ EOF
 
 ###### Create task definitions ######
 
-resource "aws_efs_file_system" "meltano_data" {
-  creation_token = "gainy-meltano-data-${var.env}"
+resource "aws_efs_file_system" "meltano_logs" {
+  creation_token = "gainy-meltano-logs-${var.env}"
 
   tags = {
-    Name = "gainy-meltano-data-${var.env}"
+    Name = "gainy-meltano-logs-${var.env}"
   }
   lifecycle_policy {
     transition_to_ia = "AFTER_7_DAYS"
@@ -185,7 +185,7 @@ resource "aws_efs_file_system" "meltano_data" {
 }
 resource "aws_efs_mount_target" "meltano_data_private_subnet" {
   for_each       = toset(var.private_subnet_ids)
-  file_system_id = aws_efs_file_system.meltano_data.id
+  file_system_id = aws_efs_file_system.meltano_logs.id
   subnet_id      = each.value
 }
 resource "aws_ecs_task_definition" "default" {
@@ -200,8 +200,11 @@ resource "aws_ecs_task_definition" "default" {
 
   volume {
     name = "meltano-data"
+  }
+  volume {
+    name = "meltano-logs"
     efs_volume_configuration {
-      file_system_id = aws_efs_file_system.meltano_data.id
+      file_system_id = aws_efs_file_system.meltano_logs.id
     }
   }
 
