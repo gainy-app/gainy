@@ -24,7 +24,9 @@ with latest_open_trading_session as (
     from {{ ref('historical_prices_aggregated') }}
              join {{ ref('base_tickers') }} on base_tickers.symbol = historical_prices_aggregated.symbol
              left join latest_open_trading_session
-                  on latest_open_trading_session.exchange_name = (string_to_array(base_tickers.exchange, ' '))[1]
+                       on (latest_open_trading_session.exchange_name = base_tickers.exchange_canonical or
+                           (base_tickers.exchange_canonical is null and
+                            latest_open_trading_session.country_name = base_tickers.country_name))
                       and latest_open_trading_session.date = historical_prices_aggregated.datetime::date
     where period = '3min'
       and (historical_prices_aggregated.datetime between latest_open_trading_session.open_at and latest_open_trading_session.close_at
@@ -51,7 +53,9 @@ union all
     from {{ ref('historical_prices_aggregated') }}
              join {{ ref('base_tickers') }} on base_tickers.symbol = historical_prices_aggregated.symbol
              left join week_trading_sessions
-                  on week_trading_sessions.exchange_name = (string_to_array(base_tickers.exchange, ' '))[1]
+                       on (week_trading_sessions.exchange_name = base_tickers.exchange_canonical or
+                           (base_tickers.exchange_canonical is null and
+                            week_trading_sessions.country_name = base_tickers.country_name))
                       and week_trading_sessions.date = historical_prices_aggregated.datetime::date
     where period = '15min'
       and (historical_prices_aggregated.datetime between week_trading_sessions.open_at and week_trading_sessions.close_at
@@ -73,7 +77,9 @@ union all
     from {{ ref('historical_prices_aggregated') }}
              join {{ ref('base_tickers') }} on base_tickers.symbol = historical_prices_aggregated.symbol
              left join latest_open_trading_session
-                       on latest_open_trading_session.exchange_name = (string_to_array(base_tickers.exchange, ' '))[1]
+                       on (latest_open_trading_session.exchange_name = base_tickers.exchange_canonical or
+                           (base_tickers.exchange_canonical is null and
+                            latest_open_trading_session.country_name = base_tickers.country_name))
     where period = '1d'
       and historical_prices_aggregated.datetime >= coalesce(latest_open_trading_session.date, now()) - interval '1 month'
 )
@@ -93,7 +99,9 @@ union all
     from {{ ref('historical_prices_aggregated') }}
              join {{ ref('base_tickers') }} on base_tickers.symbol = historical_prices_aggregated.symbol
              left join latest_open_trading_session
-                       on latest_open_trading_session.exchange_name = (string_to_array(base_tickers.exchange, ' '))[1]
+                       on (latest_open_trading_session.exchange_name = base_tickers.exchange_canonical or
+                           (base_tickers.exchange_canonical is null and
+                            latest_open_trading_session.country_name = base_tickers.country_name))
     where period = '1d'
       and historical_prices_aggregated.datetime >= coalesce(latest_open_trading_session.date, now()) - interval '3 month'
 )
@@ -113,7 +121,9 @@ union all
     from {{ ref('historical_prices_aggregated') }}
              join {{ ref('base_tickers') }} on base_tickers.symbol = historical_prices_aggregated.symbol
              left join latest_open_trading_session
-                       on latest_open_trading_session.exchange_name = (string_to_array(base_tickers.exchange, ' '))[1]
+                       on (latest_open_trading_session.exchange_name = base_tickers.exchange_canonical or
+                           (base_tickers.exchange_canonical is null and
+                            latest_open_trading_session.country_name = base_tickers.country_name))
     where period = '1d'
       and historical_prices_aggregated.datetime >= coalesce(latest_open_trading_session.date, now()) - interval '1 year'
 )
@@ -133,7 +143,9 @@ union all
     from {{ ref('historical_prices_aggregated') }}
              join {{ ref('base_tickers') }} on base_tickers.symbol = historical_prices_aggregated.symbol
              left join latest_open_trading_session
-                       on latest_open_trading_session.exchange_name = (string_to_array(base_tickers.exchange, ' '))[1]
+                       on (latest_open_trading_session.exchange_name = base_tickers.exchange_canonical or
+                           (base_tickers.exchange_canonical is null and
+                            latest_open_trading_session.country_name = base_tickers.country_name))
     where period = '1w'
       and historical_prices_aggregated.datetime >= coalesce(latest_open_trading_session.date, now()) - interval '5 year'
 )
