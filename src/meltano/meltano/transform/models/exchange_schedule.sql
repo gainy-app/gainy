@@ -46,7 +46,7 @@ from schedule
 union all
 
 select distinct on (
-    country_name
+    date, country_name
     ) (date || '_' || country_name)::varchar as id,
       date,
       null::varchar                          as exchange_name,
