@@ -1,3 +1,3 @@
-name,open_at,close_at,timezone
-NYSE,2022-01-01 09:30:00,2022-01-01 16:00:00,America/New_York
-NASDAQ,2022-01-01 09:30:00,2022-01-01 16:00:00,America/New_York
+name,open_at,close_at,timezone,country_name
+NYSE,2022-01-01 09:30:00,2022-01-01 16:00:00,America/New_York,USA
+NASDAQ,2022-01-01 09:30:00,2022-01-01 16:00:00,America/New_York,USA
