@@ -19,7 +19,6 @@ class SetRecommendations(HasuraTrigger):
 
         try:
             recommendations_func.get_and_persist(db_conn, max_tries=7)
-            break
         except ConcurrentVersionUpdate:
             """
             Sometimes hasura executes triggers in bursts (5-20 executions per 1-2 seconds).
