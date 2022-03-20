@@ -1,4 +1,3 @@
-import time
 from common.hasura_function import HasuraTrigger
 from gainy.recommendation.compute import ComputeRecommendationsAndPersist
 from gainy.data_access.optimistic_lock import ConcurrentVersionUpdate

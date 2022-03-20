@@ -1,6 +1,7 @@
 import json
 from operator import itemgetter
 from common.hasura_function import HasuraAction
+from gainy.data_access.optimistic_lock import ConcurrentVersionUpdate
 from gainy.recommendation import TOP_20_FOR_YOU_COLLECTION_ID
 from gainy.recommendation.compute import ComputeRecommendationsAndPersist
 from gainy.recommendation.repository import RecommendationRepository
