@@ -22,7 +22,10 @@ class GetRecommendedCollections(HasuraAction):
         if force:
             recommendations_func = ComputeRecommendationsAndPersist(
                 db_conn, profile_id)
-            recommendations_func.get_and_persist(db_conn, max_tries=3)
+            try:
+                recommendations_func.get_and_persist(db_conn, max_tries=7)
+            except ConcurrentVersionUpdate:
+                pass
 
         repository = RecommendationRepository(db_conn)
         sorted_collection_match_scores = repository.read_sorted_collection_match_scores(
