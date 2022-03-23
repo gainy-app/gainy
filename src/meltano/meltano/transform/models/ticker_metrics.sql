@@ -9,7 +9,7 @@
 }}
 
 with highlights as (select * from {{ ref('highlights') }}),
-     tickers as (select * from {{ ref('tickers') }}),
+     base_tickers as (select * from {{ ref('base_tickers') }}),
      ticker_realtime_metrics as (select * from {{ ref('ticker_realtime_metrics') }}),
      valuation as (select * from {{ ref('valuation') }}),
      technicals as (select * from {{ ref('technicals') }}),
@@ -21,46 +21,9 @@ with highlights as (select * from {{ ref('highlights') }}),
      earnings_history as (select * from {{ ref('earnings_history') }}),
      earnings_annual as (select * from {{ ref('earnings_annual') }}),
      historical_prices as (select * from {{ ref('historical_prices') }}),
+     historical_prices_marked as (select * from {{ ref('historical_prices_marked') }}),
      raw_eod_options as (SELECT * FROM {{ source('eod', 'eod_options') }}),
      raw_eod_fundamentals as (SELECT * FROM {{ source('eod', 'eod_fundamentals') }}),
-     marked_prices as
-         (
-             select distinct on (
-                 code
-                 ) code,
-                   date                                                                                                           as date_0d,
-                   adjusted_close                                                                                                 as price_0d,
-                   first_value(date)
-                   over (partition by code order by date desc range between interval '1 week' following and unbounded following)  as date_1w,
-                   first_value(adjusted_close)
-                   over (partition by code order by date desc range between interval '1 week' following and unbounded following)  as price_1w,
-                   first_value(date)
-                   over (partition by code order by date desc range between interval '10 days' following and unbounded following) as date_10d,
-                   first_value(adjusted_close)
-                   over (partition by code order by date desc range between interval '10 days' following and unbounded following) as price_10d,
-                   first_value(date)
-                   over (partition by code order by date desc range between interval '1 month' following and unbounded following) as date_1m,
-                   first_value(adjusted_close)
-                   over (partition by code order by date desc range between interval '1 month' following and unbounded following) as price_1m,
-                   first_value(date)
-                   over (partition by code order by date desc range between interval '3 month' following and unbounded following) as date_3m,
-                   first_value(adjusted_close)
-                   over (partition by code order by date desc range between interval '3 month' following and unbounded following) as price_3m,
-                   first_value(date)
-                   over (partition by code order by date desc range between interval '1 year' following and unbounded following)  as date_1y,
-                   first_value(adjusted_close)
-                   over (partition by code order by date desc range between interval '1 year' following and unbounded following)  as price_1y,
-                   first_value(date)
-                   over (partition by code order by date desc range between interval '5 year' following and unbounded following)  as date_5y,
-                   first_value(adjusted_close)
-                   over (partition by code order by date desc range between interval '5 year' following and unbounded following)  as price_5y,
-                   last_value(date)
-                   over (partition by code order by date desc rows between current row and unbounded following)                   as date_all,
-                   last_value(adjusted_close)
-                   over (partition by code order by date desc rows between current row and unbounded following)                   as price_all
-             from {{ ref('historical_prices') }}
-             order by code, date desc
-         ),
      expanded_earnings_history as
          (
              select *,
@@ -185,7 +148,7 @@ with highlights as (select * from {{ ref('highlights') }}),
                     historical_volatility.relative_historical_volatility_adjusted_min_1y,
                     historical_volatility.relative_historical_volatility_adjusted_max_1y,
                     implied_volatility.value               as implied_volatility
-             from tickers t
+             from base_tickers t
                       left join ticker_shares_stats on t.symbol = ticker_shares_stats.symbol
                       left join technicals on t.symbol = technicals.symbol
                       left join avg_volume_10d on t.symbol = avg_volume_10d.code
@@ -225,7 +188,7 @@ with highlights as (select * from {{ ref('highlights') }}),
                       from earnings_annual
                       order by symbol, date desc
                   )
-         select tickers.symbol,
+         select base_tickers.symbol,
                 highlights.quarterly_revenue_growth_yoy::double precision        as revenue_growth_yoy,
                 -- SeekingAlpha: The forward growth rate is a compounded annual growth rate from the most recently completed fiscal year's revenue (FY (-1)) to analysts' consensus revenue estimates for two fiscal years forward (FY 2).
                 case
@@ -253,16 +216,16 @@ with highlights as (select * from {{ ref('highlights') }}),
                                          then earnings_trend_0y.earnings_estimate_avg end /
                                  latest_earnings_annual.eps_actual - 1)
                     end                                                          as eps_growth_fwd
-         from tickers
-                  left join highlights on highlights.symbol = tickers.symbol
-                  left join ebitda_growth_yoy on ebitda_growth_yoy.symbol = tickers.symbol
-                  left join eps_actual_growth_yoy on eps_actual_growth_yoy.symbol = tickers.symbol
-                  left join earnings_trend_0y on earnings_trend_0y.symbol = tickers.symbol
-                  left join earnings_trend_1y on earnings_trend_1y.symbol = tickers.symbol
-                  left join latest_income_statement_yearly on latest_income_statement_yearly.symbol = tickers.symbol
-                  left join latest_earnings_annual on latest_earnings_annual.symbol = tickers.symbol
+         from base_tickers
+                  left join highlights on highlights.symbol = base_tickers.symbol
+                  left join ebitda_growth_yoy on ebitda_growth_yoy.symbol = base_tickers.symbol
+                  left join eps_actual_growth_yoy on eps_actual_growth_yoy.symbol = base_tickers.symbol
+                  left join earnings_trend_0y on earnings_trend_0y.symbol = base_tickers.symbol
+                  left join earnings_trend_1y on earnings_trend_1y.symbol = base_tickers.symbol
+                  left join latest_income_statement_yearly on latest_income_statement_yearly.symbol = base_tickers.symbol
+                  left join latest_earnings_annual on latest_earnings_annual.symbol = base_tickers.symbol
                   left join latest_expanded_earnings_history_with_eps_actual
-                            on latest_expanded_earnings_history_with_eps_actual.symbol = tickers.symbol
+                            on latest_expanded_earnings_history_with_eps_actual.symbol = base_tickers.symbol
      ),
      general_data as
          (
@@ -276,57 +239,57 @@ with highlights as (select * from {{ ref('highlights') }}),
          ),
      valuation_metrics as
          (
-             select tickers.symbol,
+             select base_tickers.symbol,
                     highlights.market_capitalization::bigint,
                     valuation.enterprise_value_revenue::double precision as enterprise_value_to_sales,
                     highlights.pe_ratio::double precision                as price_to_earnings_ttm,
                     valuation.price_sales_ttm                            as price_to_sales_ttm,
                     case when highlights.book_value > 0 then
-                                 marked_prices.price_0d / highlights.book_value
+                                 historical_prices_marked.price_0d / highlights.book_value
                         end                                              as price_to_book_value,
                     valuation.enterprise_value_ebidta                    as enterprise_value_to_ebitda
-             from tickers
+             from base_tickers
                       left join highlights
-                                on tickers.symbol = highlights.symbol
-                      left join valuation on tickers.symbol = valuation.symbol
-                      left join marked_prices on tickers.symbol = marked_prices.code
+                                on base_tickers.symbol = highlights.symbol
+                      left join valuation on base_tickers.symbol = valuation.symbol
+                      left join historical_prices_marked on base_tickers.symbol = historical_prices_marked.symbol
          ),
      momentum_metrics as
          (
-             select tickers.symbol,
+             select base_tickers.symbol,
                     ticker_realtime_metrics.actual_price /
                     case
-                        when coalesce(marked_prices.price_1w, marked_prices.price_all) > 0
-                            then coalesce(marked_prices.price_1w, marked_prices.price_all)
+                        when coalesce(historical_prices_marked.price_1w, historical_prices_marked.price_all) > 0
+                            then coalesce(historical_prices_marked.price_1w, historical_prices_marked.price_all)
                         end - 1 as price_change_1w,
                     ticker_realtime_metrics.actual_price /
                     case
-                        when coalesce(marked_prices.price_1m, marked_prices.price_all) > 0
-                            then coalesce(marked_prices.price_1m, marked_prices.price_all)
+                        when coalesce(historical_prices_marked.price_1m, historical_prices_marked.price_all) > 0
+                            then coalesce(historical_prices_marked.price_1m, historical_prices_marked.price_all)
                         end - 1 as price_change_1m,
                     ticker_realtime_metrics.actual_price /
                     case
-                        when coalesce(marked_prices.price_3m, marked_prices.price_all) > 0
-                            then coalesce(marked_prices.price_3m, marked_prices.price_all)
+                        when coalesce(historical_prices_marked.price_3m, historical_prices_marked.price_all) > 0
+                            then coalesce(historical_prices_marked.price_3m, historical_prices_marked.price_all)
                         end - 1 as price_change_3m,
                     ticker_realtime_metrics.actual_price /
                     case
-                        when coalesce(marked_prices.price_1y, marked_prices.price_all) > 0
-                            then coalesce(marked_prices.price_1y, marked_prices.price_all)
+                        when coalesce(historical_prices_marked.price_1y, historical_prices_marked.price_all) > 0
+                            then coalesce(historical_prices_marked.price_1y, historical_prices_marked.price_all)
                         end - 1 as price_change_1y,
                     ticker_realtime_metrics.actual_price /
                     case
-                        when coalesce(marked_prices.price_5y, marked_prices.price_all) > 0
-                            then coalesce(marked_prices.price_5y, marked_prices.price_all)
+                        when coalesce(historical_prices_marked.price_5y, historical_prices_marked.price_all) > 0
+                            then coalesce(historical_prices_marked.price_5y, historical_prices_marked.price_all)
                         end - 1 as price_change_5y,
                     ticker_realtime_metrics.actual_price /
                     case
-                        when marked_prices.price_all > 0
-                            then marked_prices.price_all
+                        when historical_prices_marked.price_all > 0
+                            then historical_prices_marked.price_all
                         end - 1 as price_change_all
-             from tickers
-                      join ticker_realtime_metrics on ticker_realtime_metrics.symbol = tickers.symbol
-                      left join marked_prices on marked_prices.code = tickers.symbol
+             from base_tickers
+                      join ticker_realtime_metrics on ticker_realtime_metrics.symbol = base_tickers.symbol
+                      left join historical_prices_marked on historical_prices_marked.symbol = base_tickers.symbol
          ),
      dividend_metrics as
          (
@@ -379,7 +342,7 @@ with highlights as (select * from {{ ref('highlights') }}),
          ),
      earnings_metrics as
          (
-             select tickers.symbol,
+             select base_tickers.symbol,
                     latest_expanded_earnings_history_with_eps_actual.eps_actual_ttm::double precision,
                     latest_expanded_earnings_history_with_eps_actual.eps_actual::double precision,
                     latest_expanded_earnings_history_with_eps_actual.eps_estimate,
@@ -388,11 +351,11 @@ with highlights as (select * from {{ ref('highlights') }}),
                     latest_expanded_earnings_history_with_eps_actual.eps_difference,
                     earnings_trend_0y.revenue_estimate_avg                            as revenue_estimate_avg_0y,
                     highlights.revenue_ttm::double precision
-             from tickers
+             from base_tickers
                       join latest_expanded_earnings_history_with_eps_actual
-                           on latest_expanded_earnings_history_with_eps_actual.symbol = tickers.symbol
-                      join earnings_trend_0y on earnings_trend_0y.symbol = tickers.symbol
-                      join highlights on tickers.symbol = highlights.symbol
+                           on latest_expanded_earnings_history_with_eps_actual.symbol = base_tickers.symbol
+                      join earnings_trend_0y on earnings_trend_0y.symbol = base_tickers.symbol
+                      join highlights on base_tickers.symbol = highlights.symbol
          ),
      financials_metrics as
          (
@@ -400,7 +363,7 @@ with highlights as (select * from {{ ref('highlights') }}),
                       (
                           select distinct on (symbol) * from financials_balance_sheet_quarterly order by symbol, date desc
                       )
-             select tickers.symbol,
+             select base_tickers.symbol,
                     highlights.revenue_per_share_ttm::double precision,
                     latest_income_statement_yearly.net_income,
                     expanded_income_statement_quarterly.net_income_ttm,
@@ -418,11 +381,11 @@ with highlights as (select * from {{ ref('highlights') }}),
                     latest_income_statement_yearly.ebitda,
                     expanded_income_statement_quarterly.ebitda_ttm,
                     latest_balance_sheet_quarterly.net_debt
-             from tickers
-                      join highlights on tickers.symbol = highlights.symbol
-                      join latest_income_statement_yearly on latest_income_statement_yearly.symbol = tickers.symbol
-                      join latest_balance_sheet_quarterly on latest_balance_sheet_quarterly.symbol = tickers.symbol
-                      join expanded_income_statement_quarterly on expanded_income_statement_quarterly.symbol = tickers.symbol
+             from base_tickers
+                      join highlights on base_tickers.symbol = highlights.symbol
+                      join latest_income_statement_yearly on latest_income_statement_yearly.symbol = base_tickers.symbol
+                      join latest_balance_sheet_quarterly on latest_balance_sheet_quarterly.symbol = base_tickers.symbol
+                      join expanded_income_statement_quarterly on expanded_income_statement_quarterly.symbol = base_tickers.symbol
          )
 select DISTINCT ON
     (t.symbol) t.symbol,
@@ -499,7 +462,7 @@ select DISTINCT ON
                financials_metrics.ebitda_ttm,
                financials_metrics.net_debt
 
-from tickers t
+from base_tickers t
          left join highlights on t.symbol = highlights.symbol
          left join trading_metrics on t.symbol = trading_metrics.symbol
          left join growth_metrics on t.symbol = growth_metrics.symbol
