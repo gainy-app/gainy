@@ -40,3 +40,13 @@ create table if not exists deployment.public_schemas
 );
 
 insert into deployment.public_schemas(schema_name, deployed_at) values ('$DBT_TARGET_SCHEMA', now()) on conflict do update set deployed_at = excluded.deployed_at;
+
+create table if not exists deployment.realtime_listener_heartbeat
+(
+    source        varchar   not null,
+    key           varchar   not null,
+    symbols_count int       not null,
+    time          timestamp not null,
+
+    primary key (time, source, key)
+);

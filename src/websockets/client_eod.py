@@ -3,7 +3,9 @@ import websockets
 import json
 import os
 import datetime
+import random
 import re
+import string
 from abc import abstractmethod
 from decimal import Decimal
 from common import run, AbstractPriceListener, NO_MESSAGES_RECONNECT_TIMEOUT
@@ -16,6 +18,10 @@ MANDATORY_SYMBOLS = ['DJI.INDX', 'GSPC.INDX', 'IXIC.INDX', 'BTC.CC']
 class PricesListener(AbstractPriceListener):
 
     def __init__(self, endpoint=None):
+        self.no_messages_reconnect_timeout = 60
+        self.key = ''.join(
+            random.choice(string.ascii_lowercase) for i in range(10))
+
         super().__init__("eod")
 
         self._buckets = {}
@@ -23,7 +29,7 @@ class PricesListener(AbstractPriceListener):
         self.api_token = EOD_API_TOKEN
         self._latest_filled_key = None
         self.endpoint = endpoint
-        self.no_messages_reconnect_timeout = 60
+
         if self.endpoint is None:
             self.sub_listeners = [
                 PricesListener(endpoint)
@@ -34,17 +40,21 @@ class PricesListener(AbstractPriceListener):
 
     def get_symbols(self):
         with self.db_connect() as db_conn:
+            count = int(0.95 *
+                        (SYMBOLS_LIMIT -
+                         self.get_active_listeners_symbols_count(db_conn)))
             query = """
                 SELECT base_tickers.symbol, case when type = 'crypto' then 1 else 0 end as priority
                 FROM base_tickers
                          left join ticker_metrics on ticker_metrics.symbol = base_tickers.symbol
                 where base_tickers.symbol is not null
-                  and (lower(exchange) similar to '(nyse|nasdaq)%' or type = 'crypto')
+                  and (lower(exchange) similar to '(nyse|nasdaq)%%' or type = 'crypto')
                 order by priority desc, market_capitalization desc nulls last
+                limit %(count)s
             """
 
             with db_conn.cursor() as cursor:
-                cursor.execute(query)
+                cursor.execute(query, {"count": count})
                 tickers = cursor.fetchall()
 
         symbols = [ticker[0] for ticker in tickers]
@@ -52,6 +62,32 @@ class PricesListener(AbstractPriceListener):
         symbols.sort()
         return set(MANDATORY_SYMBOLS +
                    symbols[:SYMBOLS_LIMIT - len(MANDATORY_SYMBOLS)])
+
+    def get_active_listeners_symbols_count(self, db_conn):
+        query = """
+            SELECT sum(symbols_count)
+            FROM (
+                SELECT distinct on (key) symbols_count
+                FROM deployment.realtime_listener_heartbeat
+                where time > %(from_time)s and key != %(key)s
+                order by key, time desc
+            ) t
+        """
+
+        with db_conn.cursor() as cursor:
+            cursor.execute(
+                query, {
+                    "from_time":
+                    datetime.datetime.now(tz=datetime.timezone.utc) -
+                    datetime.timedelta(
+                        seconds=self.no_messages_reconnect_timeout),
+                    "key":
+                    self.key,
+                })
+            result = cursor.fetchone()[0] or 0
+
+            self.logger.info("active_listeners_symbols_count %d", result)
+            return result
 
     async def handle_price_message(self, message):
         # Message format: {"s":"AAPL","p":161.14,"c":[12,37],"v":1,"dp":false,"t":1637573639704}
@@ -166,14 +202,36 @@ class PricesListener(AbstractPriceListener):
         else:
             return super().should_reconnect()
 
+    async def save_heartbeat(self):
+        try:
+            query = """
+                insert into deployment.realtime_listener_heartbeat(source, key, symbols_count, time)
+                values (%(source)s, %(key)s, %(symbols_count)s, now())
+            """
+            while True:
+                with self.db_connect() as db_conn:
+                    with db_conn.cursor() as cursor:
+                        cursor.execute(
+                            query, {
+                                "source": self.source,
+                                "key": self.key,
+                                "symbols_count": len(self.symbols),
+                            })
+                await asyncio.sleep(10)
+        except Exception as e:
+            self.logger.error(e, exc_info=True)
+
     async def sync(self):
-        if self.sub_listeners is not None:
-            coroutines = [
-                sub_listener.sync() for sub_listener in self.sub_listeners
-            ]
-            await asyncio.gather(*coroutines)
-        else:
-            await super().sync()
+        try:
+            if self.sub_listeners is not None:
+                coroutines = [
+                    sub_listener.sync() for sub_listener in self.sub_listeners
+                ] + [self.save_heartbeat()]
+                await asyncio.gather(*coroutines)
+            else:
+                await super().sync()
+        except Exception as e:
+            self.logger.error(e, exc_info=True)
 
     async def listen(self):
         if self.endpoint is None:

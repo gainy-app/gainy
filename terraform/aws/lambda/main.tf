@@ -105,9 +105,19 @@ data "aws_region" "current" {}
 data "aws_caller_identity" "this" {}
 data "aws_ecr_authorization_token" "token" {}
 locals {
-  ecr_address                  = format("%v.dkr.ecr.%v.amazonaws.com", data.aws_caller_identity.this.account_id, data.aws_region.current.name)
-  ecr_repo                     = var.container_repository
-  python_lambda_image_tag      = format("lambda-python-%s-%s-%s", var.env, var.base_image_version, data.archive_file.python_source.output_md5)
+  ecr_address = format("%v.dkr.ecr.%v.amazonaws.com", data.aws_caller_identity.this.account_id, data.aws_region.current.name)
+  ecr_repo    = var.container_repository
+
+  python_lambda_build_args_force_build = {
+    BASE_IMAGE_VERSION       = var.base_image_version
+    GAINY_COMPUTE_VERSION    = var.gainy_compute_version
+    PYTHON_LAMBDA_SOURCE_MD5 = data.archive_file.python_source.output_md5
+  }
+  python_lambda_build_args = merge(local.python_lambda_build_args_force_build, {
+    BASE_IMAGE_REGISTRY_ADDRESS = var.base_image_registry_address
+    CODEARTIFACT_PIPY_URL       = var.codeartifact_pipy_url
+  })
+  python_lambda_image_tag      = format("lambda-python-%s-%s-%s", var.env, var.base_image_version, md5(jsonencode(local.python_lambda_build_args_force_build)))
   python_lambda_ecr_image_name = format("%v/%v:%v", local.ecr_address, local.ecr_repo, local.python_lambda_image_tag)
 }
 
@@ -123,12 +133,7 @@ resource "docker_registry_image" "lambda_python" {
   build {
     context    = local.python_root_dir
     dockerfile = "Dockerfile"
-    build_args = {
-      BASE_IMAGE_REGISTRY_ADDRESS = var.base_image_registry_address
-      BASE_IMAGE_VERSION          = var.base_image_version
-      CODEARTIFACT_PIPY_URL       = var.codeartifact_pipy_url
-      GAINY_COMPUTE_VERSION       = var.gainy_compute_version
-    }
+    build_args = local.python_lambda_build_args
 
     auth_config {
       host_name = local.ecr_address

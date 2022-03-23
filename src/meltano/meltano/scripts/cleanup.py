@@ -63,6 +63,9 @@ def clean_realtime_data(db_conn):
         query = "delete from raw_data.eod_intraday_prices where time < now() - interval '2 weeks'"
         logger.warning(query)
         cursor.execute(query)
+        query = "delete from deployment.realtime_listener_heartbeat where time < now() - interval '1 hour'"
+        logger.warning(query)
+        cursor.execute(query)
 
 
 with db_connect() as db_conn:

@@ -84,11 +84,11 @@ def submit_dd_metric(metric_name, value, tags=[]):
 class AbstractPriceListener(ABC):
 
     def __init__(self, source):
+        self.logger = get_logger(source)
         self.symbols = self.get_symbols()
         self.source = source
         self.records_queue = asyncio.Queue()
         self.records_queue_lock = asyncio.Lock()
-        self.logger = get_logger(source)
         self.max_insert_records_count = MAX_INSERT_RECORDS_COUNT
         self.no_messages_reconnect_timeout = NO_MESSAGES_RECONNECT_TIMEOUT
         self._latest_symbol_message = {}
@@ -194,5 +194,5 @@ async def run(listener_factory):
 
             should_reconnect = listener.should_reconnect()
         except Exception as e:
-            logger.error("run: %s", e)
+            logger.error(e, exc_info=True)
             await asyncio.sleep(60)

@@ -24,7 +24,7 @@ class GetRecommendedCollections(HasuraAction):
             recommendations_func = ComputeRecommendationsAndPersist(
                 db_conn, profile_id)
             try:
-                recommendations_func.get_and_persist(db_conn, max_tries=7)
+                recommendations_func.get_and_persist(db_conn, max_tries=5)
             except ConcurrentVersionUpdate:
                 pass
 

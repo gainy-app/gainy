@@ -14,27 +14,41 @@ instances:
           with dags (dag_id) as (values ('gainy-dag'), ('realtime-dbt-dag')),
                expanded_dag_runs as
                    (
-                       select distinct on (dag_id) *,
-                                                   case
-                                                       when extract(isodow from start_date) < 5
-                                                           then start_date + interval '1 day'
-                                                       else date_trunc('week', start_date) +
-                                                            interval '7 days' +
-                                                            (start_date -
-                                                             date_trunc('day', start_date))
-                                                       end next_run_date
+                       select distinct on (
+                           dag_id
+                           ) *,
+                             case
+                                 when extract(isodow from start_date) < 5
+                                     then start_date + interval '1 day'
+                                 else date_trunc('week', start_date) + interval '7 days' +
+                                      (start_date - date_trunc('day', start_date))
+                                 end next_run_date
                        from airflow.dag_run
-                       where state = 'success'
+                       where state in ('success', 'running')
                        order by dag_id, end_date desc
+                   ),
+               dag_runs_metrics as
+                   (
+                       select dag_id,
+                              case
+                                  when state = 'running'
+                                      then 0
+                                  else
+                                      greatest(0, ceil(
+                                              extract(epoch from now() - next_run_date) / 60 / 60 / 24
+                                          ))
+                                  end as days_from_latest_dag_run
+                       from expanded_dag_runs
                    ),
                successful_dag_runs_metrics as
                    (
-                       select dag_id,
-                              GREATEST(0, FLOOR(
-                                      extract(hours from now() - next_run_date + interval '22 hours') / 24
-                                  ))                                      as days_from_latest_dag_run,
-                              extract(minutes from end_date - start_date) as latest_dag_run_duration_minutes
-                       from expanded_dag_runs
+                       select distinct on (
+                           dag_id
+                           ) dag_id,
+                             extract(epoch from end_date - start_date) / 60 as latest_dag_run_duration_minutes
+                       from airflow.dag_run
+                       where state = 'success'
+                       order by dag_id, start_date desc
                    ),
                failed_dag_runs_metrics as
                    (
@@ -56,11 +70,12 @@ instances:
                        group by dag_id
                    )
           select dags.dag_id,
-                 successful_dag_runs_metrics.days_from_latest_dag_run,
+                 dag_runs_metrics.days_from_latest_dag_run,
                  successful_dag_runs_metrics.latest_dag_run_duration_minutes,
                  coalesce(failed_dag_runs_metrics.failed_dag_runs, 0) as failed_dag_runs,
                  coalesce(failed_tasks_metrics.failed_tasks, 0)       as failed_tasks
           from dags
+                   left join dag_runs_metrics on dag_runs_metrics.dag_id = dags.dag_id
                    left join successful_dag_runs_metrics on successful_dag_runs_metrics.dag_id = dags.dag_id
                    left join failed_dag_runs_metrics on failed_dag_runs_metrics.dag_id = dags.dag_id
                    left join failed_tasks_metrics on failed_tasks_metrics.dag_id = dags.dag_id
