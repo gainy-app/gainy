@@ -565,5 +565,4 @@ union
                  left join specul_sim_dif on specul_sim_dif.symbol = t.symbol
         where specul_sim_dif.symbol is null
     )
-
 )
