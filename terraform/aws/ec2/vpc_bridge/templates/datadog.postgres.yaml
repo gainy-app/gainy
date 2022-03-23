@@ -25,7 +25,7 @@ instances:
                                  end next_run_date
                        from airflow.dag_run
                        where state in ('success', 'running')
-                       order by dag_id, end_date desc
+                       order by dag_id, start_date desc
                    ),
                dag_runs_metrics as
                    (
@@ -48,7 +48,7 @@ instances:
                              extract(epoch from end_date - start_date) / 60 as latest_dag_run_duration_minutes
                        from airflow.dag_run
                        where state = 'success'
-                       order by dag_id, start_date desc
+                       order by dag_id, end_date desc
                    ),
                failed_dag_runs_metrics as
                    (
