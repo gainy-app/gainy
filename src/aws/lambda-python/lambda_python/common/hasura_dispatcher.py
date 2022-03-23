@@ -37,8 +37,9 @@ class HasuraDispatcher(ABC):
                 })
             except Exception as e:
                 logger.error("Exception thrown: %s, event: %s",
-                             json.dumps(traceback.format_exception()),
-                             json.dumps(event))
+                             e,
+                             event,
+                             exc_info=True)
 
                 return self.format_response(500, {
                     "message": str(e),
