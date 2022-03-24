@@ -16,15 +16,6 @@ schema_activity_min_datetime = datetime.datetime.now(
     tz=datetime.timezone.utc) - datetime.timedelta(days=7)
 
 AWS_LAMBDA_API_GATEWAY_ENDPOINT = os.getenv("AWS_LAMBDA_API_GATEWAY_ENDPOINT")
-if AWS_LAMBDA_API_GATEWAY_ENDPOINT is None:
-    API_ID = ENV = VERSION = None
-else:
-    res = re.search(r"https://([^.]+)\..*_(\w+)/([^/]+)$",
-                    AWS_LAMBDA_API_GATEWAY_ENDPOINT)
-    API_ID = res[1]
-    ENV = res[2]
-    VERSION = res[3]
-    print(API_ID, ENV, VERSION)
 
 
 def clean_api_gateway():
@@ -177,5 +168,14 @@ with db_connect() as db_conn:
     clean_schemas(db_conn)
     clean_realtime_data(db_conn)
 
-clean_api_gateway()
-clean_lambda()
+
+if AWS_LAMBDA_API_GATEWAY_ENDPOINT is not None:
+    res = re.search(r"https://([^.]+)\..*_(\w+)/([^/]+)$",
+                    AWS_LAMBDA_API_GATEWAY_ENDPOINT)
+    API_ID = res[1]
+    ENV = res[2]
+    VERSION = res[3]
+    logger.info(API_ID, ENV, VERSION)
+
+    clean_api_gateway()
+    clean_lambda()
