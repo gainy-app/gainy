@@ -25,7 +25,6 @@ variable "hasura_enable_console" {}
 variable "hasura_enable_dev_mode" {}
 variable "hasura_jwt_secret" {}
 variable "aws_lambda_api_gateway_endpoint" {}
-variable "deployment_key" {}
 variable "base_image_registry_address" {}
 variable "base_image_version" {}
 variable "algolia_tickers_index" {}

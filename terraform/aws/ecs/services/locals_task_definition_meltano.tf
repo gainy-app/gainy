@@ -44,6 +44,7 @@ locals {
       algolia_collections_index            = var.algolia_collections_index
       algolia_app_id                       = var.algolia_app_id
       algolia_indexing_key                 = var.algolia_indexing_key
+      aws_lambda_api_gateway_endpoint      = var.aws_lambda_api_gateway_endpoint
 
       pg_external_access_host     = var.pg_external_access_host
       pg_external_access_port     = var.pg_external_access_port
