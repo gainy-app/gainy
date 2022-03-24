@@ -35,7 +35,7 @@ with common_stocks as
      ticker_manual_industries as (
          select rgti.code  as symbol,
                 gi.id::int as industry_id,
-                1.::float  as sim,              -- we completely sure about manual marked industries, sim=1.
+                1.1::float  as sim,              -- we completely sure about manual marked industries, sim=1.1
                 0::int     as industry_preorder -- sim theoretically could be equal, so lets presave logical order to sort final industry order by this field
          from {{ source('gainy', 'gainy_ticker_industries') }} rgti -- 1 row
                   join {{ ref('gainy_industries') }} gi on gi."name" = rgti."industry name"
@@ -95,7 +95,7 @@ with common_stocks as
 select concat(tiu.symbol, '_', industry_id)::varchar                                  as id,
        tiu.symbol,
        tiu.industry_id,
-       (tiu.sim - tmms.sim_min) / (1e-30 + tmms.sim_max - tmms.sim_min)               as similarity,
+       (1e-30 + tiu.sim - tmms.sim_min) / (1e-30 + tmms.sim_max - tmms.sim_min)               as similarity, -- 1e-30 epsilon in both numerator and denominator
        row_number() over (partition by tiu.symbol order by tiu.industry_preorder asc) as industry_order,
        now()                                                                          as updated_at
 from ticker_industries_union tiu
