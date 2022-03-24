@@ -168,7 +168,6 @@ with db_connect() as db_conn:
     clean_schemas(db_conn)
     clean_realtime_data(db_conn)
 
-
 if AWS_LAMBDA_API_GATEWAY_ENDPOINT is not None:
     res = re.search(r"https://([^.]+)\..*_(\w+)/([^/]+)$",
                     AWS_LAMBDA_API_GATEWAY_ENDPOINT)
