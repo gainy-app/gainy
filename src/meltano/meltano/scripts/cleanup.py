@@ -18,7 +18,7 @@ schema_activity_min_datetime = datetime.datetime.now(
 AWS_LAMBDA_API_GATEWAY_ENDPOINT = os.getenv("AWS_LAMBDA_API_GATEWAY_ENDPOINT")
 
 
-def clean_api_gateway():
+def clean_api_gateway(api_id, version):
 
     def get_route_version(route):
         m = re.search(r" /(\d+)/", route)
@@ -31,42 +31,42 @@ def clean_api_gateway():
 
     integration_ids_to_preserve = []
     paginator = client.get_paginator('get_routes')
-    for response in paginator.paginate(ApiId=API_ID):
+    for response in paginator.paginate(ApiId=api_id):
         routes = response['Items']
         for route in routes:
             route_version = get_route_version(route['RouteKey'])
 
-            if route_version is None or route_version >= VERSION:
+            if route_version is None or route_version >= version:
                 integration_id = re.search(r"/(\w+)$", route['Target'])[1]
                 integration_ids_to_preserve.append(integration_id)
                 continue
 
             route_id = route['RouteId']
-            client.delete_route(ApiId=API_ID, RouteId=route_id)
+            client.delete_route(ApiId=api_id, RouteId=route_id)
             logger.info(f"Removed route {route_id} {route['RouteKey']}")
 
     paginator = client.get_paginator('get_integrations')
-    for response in paginator.paginate(ApiId=API_ID):
+    for response in paginator.paginate(ApiId=api_id):
         for integration in response['Items']:
             integration_id = integration['IntegrationId']
             if integration_id in integration_ids_to_preserve:
                 continue
 
             try:
-                client.delete_integration(ApiId=API_ID,
+                client.delete_integration(ApiId=api_id,
                                           IntegrationId=integration_id)
                 logger.info(f"Removed integration {integration_id}")
             except client.exceptions.ConflictException as e:
                 pass
 
 
-def clean_lambda():
+def clean_lambda(api_id, env):
 
     def get_existing_routes():
         client = boto3.client("apigatewayv2")
         paginator = client.get_paginator('get_routes')
         res = []
-        for response in paginator.paginate(ApiId=API_ID):
+        for response in paginator.paginate(ApiId=api_id):
             routes = response['Items']
             res += [re.sub(r'^\w* ', '', i['RouteKey']) for i in routes]
 
@@ -77,7 +77,7 @@ def clean_lambda():
 
     functions = client.list_functions()['Functions']
     for function in functions:
-        if not re.search(f'_{ENV}$', function['FunctionName']):
+        if not re.search(f'_{env}$', function['FunctionName']):
             continue
 
         for version in client.list_versions_by_function(
@@ -172,10 +172,10 @@ with db_connect() as db_conn:
 if AWS_LAMBDA_API_GATEWAY_ENDPOINT is not None:
     res = re.search(r"https://([^.]+)\..*_(\w+)/([^/]+)$",
                     AWS_LAMBDA_API_GATEWAY_ENDPOINT)
-    API_ID = res[1]
-    ENV = res[2]
-    VERSION = res[3]
-    logger.info(API_ID, ENV, VERSION)
+    api_id = res[1]
+    env = res[2]
+    version = res[3]
+    logger.info(api_id, env, version)
 
-    clean_api_gateway()
-    clean_lambda()
+    clean_api_gateway(api_id, version)
+    clean_lambda(api_id, env)
