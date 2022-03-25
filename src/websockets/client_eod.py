@@ -3,9 +3,7 @@ import websockets
 import json
 import os
 import datetime
-import random
 import re
-import string
 from abc import abstractmethod
 from decimal import Decimal
 from common import run, AbstractPriceListener, NO_MESSAGES_RECONNECT_TIMEOUT
