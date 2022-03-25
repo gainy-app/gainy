@@ -8,9 +8,6 @@ endif
 include .makeenv
 include .env.make
 
-q:
-	ls -la .makeenv
-
 docker-auth:
 	aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin ${BASE_IMAGE_REGISTRY_ADDRESS}
 
