@@ -13,8 +13,8 @@ POLYGON_REALTIME_STREAMING_HOST = os.environ["POLYGON_REALTIME_STREAMING_HOST"]
 
 class PricesListener(AbstractPriceListener):
 
-    def __init__(self):
-        super().__init__("polygon")
+    def __init__(self, instance_key):
+        super().__init__(instance_key, "polygon")
 
         self.api_token = POLYGON_API_TOKEN
         self.host = POLYGON_REALTIME_STREAMING_HOST
@@ -116,4 +116,4 @@ class PricesListener(AbstractPriceListener):
 
 
 if __name__ == "__main__":
-    asyncio.run(run(lambda: PricesListener()))
+    asyncio.run(run(lambda key: PricesListener(key)))
