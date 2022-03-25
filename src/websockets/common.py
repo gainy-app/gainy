@@ -1,7 +1,9 @@
-import os
+import asyncio
 import datetime
 import logging
-import asyncio
+import os
+import random
+import string
 from abc import ABC, abstractmethod
 import psycopg2
 from psycopg2 import sql
@@ -83,7 +85,8 @@ def submit_dd_metric(metric_name, value, tags=[]):
 
 class AbstractPriceListener(ABC):
 
-    def __init__(self, source):
+    def __init__(self, instance_key, source):
+        self.instance_key = instance_key
         self.logger = get_logger(source)
         self.symbols = self.get_symbols()
         self.source = source
@@ -152,7 +155,7 @@ class AbstractPriceListener(ABC):
         if current_timestamp - self.start_timestamp < self.no_messages_reconnect_timeout:
             return False
 
-        if self.symbols != self.get_symbols():
+        if not self.get_symbols().issubset(self.symbols):
             self.logger.info("should_reconnect: symbols changed")
             return True
 
@@ -175,6 +178,8 @@ async def run(listener_factory):
     listen_task = None
     sync_task = None
     logger = get_logger(__name__)
+    instance_key = ''.join(
+        random.choice(string.ascii_lowercase) for i in range(10))
 
     while True:
         try:
@@ -186,7 +191,7 @@ async def run(listener_factory):
 
                 await asyncio.sleep(1)
 
-                listener = listener_factory()
+                listener = listener_factory(instance_key)
                 listen_task = asyncio.create_task(listener.listen())
                 sync_task = asyncio.create_task(listener.sync())
 

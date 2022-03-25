@@ -11,18 +11,16 @@ from decimal import Decimal
 from common import run, AbstractPriceListener, NO_MESSAGES_RECONNECT_TIMEOUT
 
 EOD_API_TOKEN = os.environ["EOD_API_TOKEN"]
-SYMBOLS_LIMIT = 13000
+SYMBOLS_LIMIT = 14000
 MANDATORY_SYMBOLS = ['DJI.INDX', 'GSPC.INDX', 'IXIC.INDX', 'BTC.CC']
 
 
 class PricesListener(AbstractPriceListener):
 
-    def __init__(self, endpoint=None):
+    def __init__(self, instance_key, endpoint=None):
         self.no_messages_reconnect_timeout = 60
-        self.key = ''.join(
-            random.choice(string.ascii_lowercase) for i in range(10))
 
-        super().__init__("eod")
+        super().__init__(instance_key, "eod")
 
         self._buckets = {}
         self.granularity = 60000  # 60 seconds
@@ -32,7 +30,7 @@ class PricesListener(AbstractPriceListener):
 
         if self.endpoint is None:
             self.sub_listeners = [
-                PricesListener(endpoint)
+                PricesListener(instance_key, endpoint)
                 for endpoint in ['us', 'crypto', 'index']
             ]
         else:
@@ -82,7 +80,7 @@ class PricesListener(AbstractPriceListener):
                     datetime.timedelta(
                         seconds=self.no_messages_reconnect_timeout),
                     "key":
-                    self.key,
+                    self.instance_key,
                 })
             result = cursor.fetchone()[0] or 0
 
@@ -214,7 +212,7 @@ class PricesListener(AbstractPriceListener):
                         cursor.execute(
                             query, {
                                 "source": self.source,
-                                "key": self.key,
+                                "key": self.instance_key,
                                 "symbols_count": len(self.symbols),
                             })
                 await asyncio.sleep(10)
@@ -325,4 +323,4 @@ class PricesListener(AbstractPriceListener):
 
 
 if __name__ == "__main__":
-    asyncio.run(run(lambda: PricesListener()))
+    asyncio.run(run(lambda key: PricesListener(key)))
