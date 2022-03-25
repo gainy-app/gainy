@@ -45,7 +45,8 @@ ENV = os.environ['ENV']
 
 if 'EODHISTORICALDATA_JOBS_COUNT' not in os.environ:
     raise Exception('env var EODHISTORICALDATA_JOBS_COUNT must be set')
-EODHISTORICALDATA_JOBS_COUNT = json.loads(os.environ['EODHISTORICALDATA_JOBS_COUNT'])
+EODHISTORICALDATA_JOBS_COUNT = json.loads(
+    os.environ['EODHISTORICALDATA_JOBS_COUNT'])
 
 if 'DBT_TARGET_SCHEMA' not in os.environ:
     raise Exception('env var DBT_TARGET_SCHEMA must be set')
