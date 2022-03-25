@@ -5,6 +5,7 @@
     post_hook=[
       index(this, 'contract_name', true),
       index(this, 'symbol', false),
+      'delete from {{this}} where expiration_date < now()',
     ]
   )
 }}
@@ -66,6 +67,7 @@ from expanded
          left join max_updated_at on expanded.symbol = max_updated_at.symbol
 {% endif %}
 where (value ->> 'contractName')::varchar != '' and (value ->> 'contractName')::varchar is not null
+  and (value ->> 'expirationDate')::date >= now()
 {% if is_incremental() %}
   and ((value ->> 'updatedAt')::timestamp >= max_updated_at.max_date or max_updated_at.max_date is null)
 {% endif %}
