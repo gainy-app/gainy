@@ -126,8 +126,6 @@ services:
     restart: always
     volumes:
       - ./src/aws/lambda-python/lambda_python:/var/task
-      - ./src/aws/lambda-python/lambda_python:/var/lambda_python
-      - ./src/aws/lambda-python/tests:/var/tests
     command: [ "hasura_handler.handle_trigger" ]
     env_file:
       - .env
@@ -144,8 +142,6 @@ services:
     restart: always
     volumes:
       - ./src/aws/lambda-python/lambda_python:/var/task
-      - ./src/aws/lambda-python/lambda_python:/var/lambda_python
-      - ./src/aws/lambda-python/tests:/var/tests
     command: [ "hasura_handler.handle_action" ]
     env_file:
       - .env
