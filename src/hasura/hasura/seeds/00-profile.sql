@@ -1,7 +1,7 @@
 with inserted_profile as
          (INSERT INTO app.profiles (email, first_name, last_name, gender, created_at, user_id, avatar_url,
                                     legal_address)
-             VALUES ('test@example.com', 'fn', 'ln', 0, '2021-10-18 11:46:18.851570 +00:00',
+             VALUES ('test@gainy.app', 'fn', 'ln', 0, '2021-10-18 11:46:18.851570 +00:00',
                      'AO0OQyz0jyL5lNUpvKbpVdAPvlI3', '',
                      'legal_address')
              RETURNING id)

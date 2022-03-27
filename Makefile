@@ -64,7 +64,10 @@ test-realtime:
 test-hasura:
 	docker-compose -p gainy_test -f docker-compose.test.yml exec -T test-hasura pytest
 
-test: configure test-build test-init test-images test-realtime test-hasura test-clean
+test-lambda:
+	docker-compose -p gainy_test -f docker-compose.test.yml exec -T test-lambda-python-action pytest
+
+test: configure test-build test-init test-images test-realtime test-hasura test-lambda test-clean
 
 test-clean:
 	docker-compose -p gainy_test -f docker-compose.test.yml down --rmi local -v
