@@ -31,6 +31,7 @@ variable "gainy_compute_version" {}
 
 output "aws_apigatewayv2_api_endpoint" {
   value = "${aws_apigatewayv2_api.lambda.api_endpoint}/${aws_apigatewayv2_stage.lambda.name}"
+  depends_on = [module.hasuraAction, module.hasuraTrigger]
 }
 
 # gateway
