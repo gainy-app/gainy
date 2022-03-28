@@ -33,7 +33,7 @@ values  (9, 28.17, '2021-11-17 00:00:00.000000', 'USD', 'Cambiar International E
         (21, 29.71, '2021-11-17 00:00:00.000000', 'USD', 'iShares MSCI Brazil Index', 'wmDB8ZBW3aUVPnxMbgarinRK7eKzMbfAJJDEJ', 'EWZ', 'etf', '2021-11-12 14:06:51.602102 +00:00', '2021-11-18 05:41:28.397620 +00:00'),
         (22, null, null, 'USD', 'AAPL 01/14/22 142.00 PUT', 'wmDB8ZBW3aUVPnxMbgarinRK7eKzMbfAJJDEI', 'AAPL220114P00142000', 'derivative', '2021-11-12 14:06:51.602102 +00:00', '2021-11-18 05:41:28.397620 +00:00'),
         (16, 4.75, '2021-11-17 00:00:00.000000', 'USD', 'NH Hotel Group S.A.', 'gWwemqe4pntelG7JlBA7tmJVjlVpNoujWQra1', 'NHHEF', 'equity', '2021-11-12 14:06:51.602102 +00:00', '2021-11-19 10:45:21.634671 +00:00'),
-        (14, 150, '2021-11-17 00:00:00.000000', 'USD', 'Apple Inc.', 'WDwEPnEmJjt5lp75wl65t1rBmpBZvAHogp7WZ', 'AAPL', 'equity', '2021-11-12 14:06:51.602102 +00:00', '2021-11-19 10:45:21.634671 +00:00');
+        (14, 150, '2021-11-17 00:00:00.000000', 'USD', 'Apple Inc.', 'WDwEPnEmJjt5lp75wl65t1rBmpBZvAHogp7WY', 'AAPL', 'equity', '2021-11-12 14:06:51.602102 +00:00', '2021-11-19 10:45:21.634671 +00:00');
 ALTER SEQUENCE app.portfolio_securities_id_seq RESTART WITH 23;
 
 insert into app.profile_holdings (id, plaid_access_token_id, iso_currency_code, quantity, security_id, profile_id, account_id, ref_id, created_at, updated_at)
