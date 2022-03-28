@@ -3,7 +3,7 @@ values (1, 'E*TRADE Financial', 'ins_129473', '2022-01-17 13:01:58.770740 +00:00
 ALTER SEQUENCE app.plaid_institutions_id_seq RESTART WITH 2;
 
 INSERT INTO app.profile_plaid_access_tokens (id, profile_id, access_token, item_id, institution_id)
-             VALUES (1, (SELECT id FROM app.profiles limit 1), 'access-sandbox-1b188d63-fea5-433e-aee9-30ba19cebda6', 'Rbe7Mk36yxsZamjZLMGrtnpv3W6zx7uRwBdga', 1);
+             VALUES (1, (SELECT id FROM app.profiles limit 1), 'foo', 'bar', 1);
 ALTER SEQUENCE app.profile_plaid_access_tokens_id_seq RESTART WITH 2;
 
 insert into app.profile_portfolio_accounts (id, plaid_access_token_id, ref_id, balance_available, balance_current, balance_iso_currency_code, balance_limit, mask, name, official_name, subtype, type, profile_id, created_at, updated_at)
