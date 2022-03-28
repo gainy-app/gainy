@@ -67,10 +67,6 @@ clean = BashOperator(
     task_id="clean",
     bash_command=
     f"cd {MELTANO_PROJECT_ROOT}; /usr/local/bin/python scripts/cleanup.py",
-    env={
-        "AWS_LAMBDA_API_GATEWAY_ENDPOINT":
-        os.getenv("AWS_LAMBDA_API_GATEWAY_ENDPOINT")
-    },
     dag=dag)
 
 industry_assignment, data_check = create_downstream_operators(dag)
