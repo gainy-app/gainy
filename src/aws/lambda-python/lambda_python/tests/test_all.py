@@ -111,3 +111,28 @@ def test_on_plaid_access_token_created():
     assert "code" not in response
     assert "holdings_count" in response
     assert "transactions_count" in response
+
+
+# Plaid Actions
+def test_get_portfolio_chart():
+    event = get_action_event("get_portfolio_holdings",
+                             {"profile_id": PROFILE_ID}, USER_ID)
+    response = action_dispatcher.handle(event)
+    assert "code" not in response
+    assert isinstance(response, list)
+    assert len(response)
+    assert set({
+        'period', 'datetime', 'open', 'high', 'low', 'close', 'adjusted_close'
+    }).issubset(set(response[0].keys()))
+
+
+def test_get_portfolio_chart():
+    event = get_action_event("get_portfolio_transactions",
+                             {"profile_id": PROFILE_ID}, USER_ID)
+    response = action_dispatcher.handle(event)
+    assert "code" not in response
+    assert isinstance(response, list)
+    assert len(response)
+    assert set({
+        'period', 'datetime', 'open', 'high', 'low', 'close', 'adjusted_close'
+    }).issubset(set(response[0].keys()))

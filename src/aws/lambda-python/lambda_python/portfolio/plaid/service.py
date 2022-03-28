@@ -1,32 +1,42 @@
 import datetime
 from portfolio.plaid import PlaidClient
 from portfolio.models import HoldingData, Security, Account, TransactionData, Institution
+from portfolio.exceptions import AccessTokenApiException, AccessTokenLoginRequiredException
+from service.logging import get_logger
+
+import plaid
 
 
 class PlaidService:
 
     def __init__(self):
         self.plaid_client = PlaidClient()
+        self.logger = get_logger(__name__)
 
     def max_transactions_limit(self):
         return 500
 
     def get_holdings(self, db_conn, plaid_access_token):
-        # InvestmentsHoldingsGetResponse[]
-        response = self.plaid_client.get_investment_holdings(
-            plaid_access_token["access_token"])
+        try:
+            # InvestmentsHoldingsGetResponse[]
+            response = self.plaid_client.get_investment_holdings(
+                plaid_access_token["access_token"])
 
-        holdings = [
-            self.__hydrate_holding_data(holding_data)
-            for holding_data in response.holdings
-        ]
-        securities = [
-            self.__hydrate_security(security)
-            for security in response.securities
-        ]
-        accounts = [
-            self.__hydrate_account(account) for account in response.accounts
-        ]
+            holdings = [
+                self.__hydrate_holding_data(holding_data)
+                for holding_data in response.holdings
+            ]
+            securities = [
+                self.__hydrate_security(security)
+                for security in response.securities
+            ]
+            accounts = [
+                self.__hydrate_account(account)
+                for account in response.accounts
+            ]
+        except plaid.ApiException as e:
+            self._handle_api_exception(e, plaid_access_token)
+
         for i in holdings:
             i.plaid_access_token_id = plaid_access_token["id"]
         for i in accounts:
@@ -43,26 +53,31 @@ class PlaidService:
                          plaid_access_token,
                          count=100,
                          offset=0):
-        # InvestmentsTransactionsGetResponse[]
-        response = self.plaid_client.get_investment_transactions(
-            plaid_access_token["access_token"],
-            count=count,
-            offset=offset,
-            start_date=datetime.date.today() -
-            datetime.timedelta(days=20 * 365),
-            end_date=datetime.date.today())
+        try:
+            # InvestmentsTransactionsGetResponse[]
+            response = self.plaid_client.get_investment_transactions(
+                plaid_access_token["access_token"],
+                count=count,
+                offset=offset,
+                start_date=datetime.date.today() -
+                datetime.timedelta(days=20 * 365),
+                end_date=datetime.date.today())
 
-        transactions = [
-            self.__hydrate_transaction_data(transaction_data)
-            for transaction_data in response.investment_transactions
-        ]
-        securities = [
-            self.__hydrate_security(security)
-            for security in response.securities
-        ]
-        accounts = [
-            self.__hydrate_account(account) for account in response.accounts
-        ]
+            transactions = [
+                self.__hydrate_transaction_data(transaction_data)
+                for transaction_data in response.investment_transactions
+            ]
+            securities = [
+                self.__hydrate_security(security)
+                for security in response.securities
+            ]
+            accounts = [
+                self.__hydrate_account(account)
+                for account in response.accounts
+            ]
+        except plaid.ApiException as e:
+            self._handle_api_exception(e, plaid_access_token)
+
         for i in transactions:
             i.plaid_access_token_id = plaid_access_token["id"]
         for i in accounts:
@@ -156,3 +171,13 @@ class PlaidService:
         model.name = data['name']
 
         return model
+
+    def _handle_api_exception(self, exc: plaid.ApiException,
+                              access_token: dict):
+        if plaid_api_exc.body is not None and isinstance(
+                plaid_api_exc.body, dict
+        ) and "error_code" in plaid_api_exc.body and plaid_api_exc.body[
+                "error_code"] == "ITEM_LOGIN_REQUIRED":
+            raise AccessTokenLoginRequiredException(exc, access_token)
+
+        raise AccessTokenApiException(exc, access_token)

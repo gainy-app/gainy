@@ -301,6 +301,8 @@
       columns:
       - created_at
       - id
+      - institution_id
+      - needs_reauth_since
       - profile_id
       filter:
         profile:

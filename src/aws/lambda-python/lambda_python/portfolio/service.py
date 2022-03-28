@@ -1,4 +1,5 @@
 import os
+from portfolio.exceptions import AccessTokenLoginRequiredException
 from portfolio.plaid import PlaidService
 from portfolio.repository import PortfolioRepository
 from psycopg2 import sql
@@ -22,12 +23,16 @@ class PortfolioService:
         securities = []
         accounts = []
         for access_token in self.__get_access_tokens(db_conn, profile_id):
-            token_data = self.__get_service(
-                access_token['service']).get_holdings(db_conn, access_token)
+            try:
+                token_data = self.__get_service(
+                    access_token['service']).get_holdings(
+                        db_conn, access_token)
 
-            holdings += token_data['holdings']
-            securities += token_data['securities']
-            accounts += token_data['accounts']
+                holdings += token_data['holdings']
+                securities += token_data['securities']
+                accounts += token_data['accounts']
+            except AccessTokenLoginRequiredException as e:
+                self._set_access_token_reauth(db_conn, e.access_token)
 
         self.persist_holding_data(db_conn, profile_id, securities, accounts,
                                   holdings)
@@ -35,14 +40,18 @@ class PortfolioService:
         return holdings
 
     def sync_token_holdings(self, db_conn, access_token):
-        data = self.__get_service(access_token['service']).get_holdings(
-            db_conn, access_token)
-        holdings = data['holdings']
-        self.persist_holding_data(db_conn, access_token['profile_id'],
-                                  data['securities'], data['accounts'],
-                                  holdings)
+        try:
+            data = self.__get_service(access_token['service']).get_holdings(
+                db_conn, access_token)
+            holdings = data['holdings']
+            self.persist_holding_data(db_conn, access_token['profile_id'],
+                                      data['securities'], data['accounts'],
+                                      holdings)
 
-        return len(holdings)
+            return len(holdings)
+        except AccessTokenLoginRequiredException as e:
+            self._set_access_token_reauth(db_conn, e.access_token)
+            return 0
 
     def get_transactions(self, db_conn, profile_id, count=500, offset=0):
         transactions = []
@@ -50,16 +59,19 @@ class PortfolioService:
         accounts = []
 
         for access_token in self.__get_access_tokens(db_conn, profile_id):
-            self.sync_institution(db_conn, access_token)
-            token_service = self.__get_service(access_token['service'])
-            token_data = token_service.get_transactions(db_conn,
-                                                        access_token,
-                                                        count=count,
-                                                        offset=offset)
+            try:
+                self.sync_institution(db_conn, access_token)
+                token_service = self.__get_service(access_token['service'])
+                token_data = token_service.get_transactions(db_conn,
+                                                            access_token,
+                                                            count=count,
+                                                            offset=offset)
 
-            transactions += token_data['transactions']
-            securities += token_data['securities']
-            accounts += token_data['accounts']
+                transactions += token_data['transactions']
+                securities += token_data['securities']
+                accounts += token_data['accounts']
+            except AccessTokenLoginRequiredException as e:
+                self._set_access_token_reauth(db_conn, e.access_token)
 
         self.persist_transaction_data(db_conn, profile_id, securities,
                                       accounts, transactions)
@@ -70,20 +82,24 @@ class PortfolioService:
         transactions_count = 0
         count = self.__get_service(
             access_token['service']).max_transactions_limit()
-        for offset in range(0, 1000000, count):
-            data = self.__get_service(
-                access_token['service']).get_transactions(db_conn,
-                                                          access_token,
-                                                          count=count,
-                                                          offset=offset)
-            transactions = data['transactions']
-            self.persist_transaction_data(db_conn, access_token['profile_id'],
-                                          data['securities'], data['accounts'],
-                                          transactions)
+        try:
+            for offset in range(0, 1000000, count):
+                data = self.__get_service(
+                    access_token['service']).get_transactions(db_conn,
+                                                              access_token,
+                                                              count=count,
+                                                              offset=offset)
+                transactions = data['transactions']
+                self.persist_transaction_data(db_conn,
+                                              access_token['profile_id'],
+                                              data['securities'],
+                                              data['accounts'], transactions)
 
-            transactions_count += len(transactions)
-            if len(transactions) < count:
-                break
+                transactions_count += len(transactions)
+                if len(transactions) < count:
+                    break
+        except AccessTokenLoginRequiredException as e:
+            self._set_access_token_reauth(db_conn, e.access_token)
 
         return transactions_count
 
@@ -423,3 +439,9 @@ class PortfolioService:
                     zip(['id', 'access_token', 'service'],
                         row + (SERVICE_PLAID, ))) for row in access_tokens
             ]
+
+    def _set_access_token_reauth(self, db_conn, access_token):
+        with db_conn.cursor() as cursor:
+            cursor.execute(
+                "update app.profile_plaid_access_tokens set needs_reauth_since = now() where id = %(access_token_id)s",
+                {"access_token_id": access_token['id']})

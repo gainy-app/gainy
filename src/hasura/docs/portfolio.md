@@ -25,7 +25,41 @@
 
 ```graphql
 {
-    link_plaid_account(profile_id: 2, public_token: "public-sandbox-0c02e9cb-ef57-4a82-a4eb-f8d7d99dfb01") {
+    link_plaid_account(profile_id: 2, 
+        public_token: "public-sandbox-0c02e9cb-ef57-4a82-a4eb-f8d7d99dfb01") {
+        result
+    }
+}
+```
+
+### Reauth flow
+
+The app needs to launch the reauth flow when the access token's `needs_reauth_since` field is not null:
+```graphql
+{
+  app_profile_plaid_access_tokens { needs_reauth_since }
+}
+```
+
+Then you need to pass `access_token_id` along with other fields to the `create_plaid_link_token` and `link_plaid_account` endpoints: 
+```graphql
+{
+    create_plaid_link_token(
+        profile_id: 2, 
+        redirect_uri: "https://app.gainy.application.ios",
+        access_token_id: 1
+    ){
+        link_token
+    }
+}
+```
+```graphql
+{
+    link_plaid_account(
+        profile_id: 2,
+        public_token: "public-sandbox-0c02e9cb-ef57-4a82-a4eb-f8d7d99dfb01",
+        access_token_id: 1
+    ) {
         result
     }
 }
