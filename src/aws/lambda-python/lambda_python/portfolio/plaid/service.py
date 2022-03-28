@@ -174,10 +174,8 @@ class PlaidService:
 
     def _handle_api_exception(self, exc: plaid.ApiException,
                               access_token: dict):
-        if plaid_api_exc.body is not None and isinstance(
-                plaid_api_exc.body, dict
-        ) and "error_code" in plaid_api_exc.body and plaid_api_exc.body[
-                "error_code"] == "ITEM_LOGIN_REQUIRED":
+        body = exc.body if exc.body and isinstance(exc.body, dict) else {}
+        if body.get("error_code") == "ITEM_LOGIN_REQUIRED":
             raise AccessTokenLoginRequiredException(exc, access_token)
 
         raise AccessTokenApiException(exc, access_token)

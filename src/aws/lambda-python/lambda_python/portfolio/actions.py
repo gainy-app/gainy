@@ -18,7 +18,7 @@ class GetPortfolioHoldings(HasuraAction):
         try:
             holdings = self.service.get_holdings(db_conn, profile_id)
         except Exception as e:
-            logger.error(e, exc_info=True)
+            logger.exception(e)
             holdings = []
 
         return [i.normalize() for i in holdings]
@@ -42,7 +42,7 @@ class GetPortfolioTransactions(HasuraAction):
                                                          count=count,
                                                          offset=offset)
         except Exception as e:
-            logger.error(e, exc_info=True)
+            logger.exception(e)
             transactions = []
 
         return [i.normalize() for i in transactions]

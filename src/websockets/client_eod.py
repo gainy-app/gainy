@@ -215,7 +215,7 @@ class PricesListener(AbstractPriceListener):
                             })
                 await asyncio.sleep(10)
         except Exception as e:
-            self.logger.error(e, exc_info=True)
+            self.logger.exception(e)
 
     async def sync(self):
         try:
@@ -227,7 +227,7 @@ class PricesListener(AbstractPriceListener):
             else:
                 await super().sync()
         except Exception as e:
-            self.logger.error(e, exc_info=True)
+            self.logger.exception(e)
 
     async def listen(self):
         if self.endpoint is None:
