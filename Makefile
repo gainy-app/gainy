@@ -1,7 +1,10 @@
 export PARAMS ?= $(filter-out $@,$(MAKECMDGOALS))
 
 # workaround for setting env vars from script
-_ := $(shell bash -c "source deployment/scripts/code_artifactory.sh; env | sed 's/=/:=/' | sed 's/^/export /' > .makeenv")
+_ := $(shell find .makeenv -mtime +30 -delete)
+ifeq ($(shell test -e .makeenv && echo -n yes),)
+	_ := $(shell source deployment/scripts/code_artifactory.sh; env | sed 's/=/:=/' | sed 's/^/export /' > .makeenv)
+endif
 include .makeenv
 include .env.make
 
@@ -61,7 +64,10 @@ test-realtime:
 test-hasura:
 	docker-compose -p gainy_test -f docker-compose.test.yml exec -T test-hasura pytest
 
-test: configure test-build test-init test-images test-realtime test-hasura test-clean
+test-lambda:
+	docker-compose -p gainy_test -f docker-compose.test.yml exec -T test-lambda-python-action pytest
+
+test: configure test-build test-init test-images test-realtime test-hasura test-lambda test-clean
 
 test-clean:
 	docker-compose -p gainy_test -f docker-compose.test.yml down --rmi local -v

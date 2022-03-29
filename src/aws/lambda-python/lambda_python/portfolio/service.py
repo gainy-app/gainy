@@ -149,7 +149,10 @@ class PortfolioService:
         ]
         join_clause = []
 
-        if filter.periods is not None and len(filter.periods):
+        if filter.periods is not None:
+            if not len(filter.periods):
+                return []
+
             where_clause.append(
                 sql.SQL("portfolio_transaction_chart.period in %(periods)s"))
             params['periods'] = tuple(filter.periods)
@@ -160,15 +163,20 @@ class PortfolioService:
                     "join app.profile_portfolio_accounts on profile_portfolio_accounts.id = portfolio_expanded_transactions.account_id"
                 ))
 
-            if filter.account_ids is not None and len(filter.account_ids):
+            if filter.account_ids is not None:
+                if not len(filter.account_ids):
+                    return []
+
                 where_clause.append(
                     sql.SQL(
                         "portfolio_expanded_transactions.account_id in %(account_ids)s"
                     ))
                 params['account_ids'] = tuple(filter.account_ids)
 
-            if filter.institution_ids is not None and len(
-                    filter.institution_ids):
+            if filter.institution_ids is not None:
+                if not len(filter.institution_ids):
+                    return []
+
                 join_clause.append(
                     sql.SQL(
                         "join app.profile_plaid_access_tokens on profile_plaid_access_tokens.id = profile_portfolio_accounts.plaid_access_token_id"
@@ -185,7 +193,10 @@ class PortfolioService:
                     "join portfolio_securities_normalized on portfolio_securities_normalized.id = portfolio_expanded_transactions.security_id"
                 ))
 
-            if filter.interest_ids is not None and len(filter.interest_ids):
+            if filter.interest_ids is not None:
+                if not len(filter.interest_ids):
+                    return []
+
                 join_clause.append(
                     sql.SQL(
                         "join ticker_interests on ticker_interests.symbol = portfolio_securities_normalized.ticker_symbol"
@@ -193,7 +204,10 @@ class PortfolioService:
                 where_clause.append(sql.SQL("interest_id in %(interest_ids)s"))
                 params['interest_ids'] = tuple(filter.interest_ids)
 
-            if filter.category_ids is not None and len(filter.category_ids):
+            if filter.category_ids is not None:
+                if not len(filter.category_ids):
+                    return []
+
                 join_clause.append(
                     sql.SQL(
                         "join ticker_categories on ticker_categories.symbol = portfolio_securities_normalized.ticker_symbol"
@@ -201,8 +215,10 @@ class PortfolioService:
                 where_clause.append(sql.SQL("category_id in %(category_ids)s"))
                 params['category_ids'] = tuple(filter.category_ids)
 
-            if filter.security_types is not None and len(
-                    filter.security_types):
+            if filter.security_types is not None:
+                if not len(filter.security_types):
+                    return []
+
                 where_clause.append(
                     sql.SQL(
                         "portfolio_securities_normalized.type in %(security_types)s"

@@ -19,7 +19,7 @@ class HasuraDispatcher(ABC):
         self.functions = functions
         self.is_gateway_proxy = is_gateway_proxy
 
-    def handle(self, event, context):
+    def handle(self, event, context=None):
         headers = event['headers'] if 'headers' in event else {}
         request = self.extract_request(event)
 

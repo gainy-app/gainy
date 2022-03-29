@@ -32,7 +32,7 @@ locals {
     "${path.module}/task_definitions/meltano-airflow-scheduler.json",
     merge(local.meltano_default_params, {
       eodhistoricaldata_api_token          = var.eodhistoricaldata_api_token
-      eodhistoricaldata_exchanges          = jsonencode(["US", "CC", "INDX"])
+      eodhistoricaldata_exchanges          = jsonencode(["NASDAQ", "NYSE", "CC", "INDX"])
       pg_load_schema                       = "raw_data"
       dbt_threads                          = var.env == "production" ? 4 : 4
       pg_production_host                   = var.pg_production_host
