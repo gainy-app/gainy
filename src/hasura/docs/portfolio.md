@@ -199,16 +199,38 @@ mutation{
 
 ### Chart
 
-periods: 15min, 1d, 1w, 1m
+periods: 1d, 1w, 1m, 3m, 1y, 5y, all
 
 ```GraphQL
-{
-    portfolio_chart(where: {profile_id: {_eq: 16}, period: {_eq: "1d"}, datetime: {_gte: "2021-11-02T06:00:00"}}, order_by: {datetime: asc}) {
+query GetPortfolioChart(
+    $profileId: Int!,
+    $periods: [String]!,
+    $interestIds: [Int],
+    $accountIds: [Int],
+    $categoryIds: [Int],
+    $institutionIds: [Int],
+    $lttOnly: Boolean,
+    $securityTypes: [String]
+) {
+    get_portfolio_chart(
+        profile_id: $profileId,
+        periods: $periods,
+        interest_ids: $interestIds,
+        account_ids: $accountIds,
+        category_ids: $categoryIds,
+        institution_ids: $institutionIds,
+        ltt_only: $lttOnly,
+        security_types: $securityTypes
+    ) {
         datetime
         period
-        value
+        open
+        high
+        low
+        close
     }
 }
+
 ```
 
 ### Sorting / Filtering
