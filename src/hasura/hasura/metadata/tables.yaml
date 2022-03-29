@@ -363,6 +363,52 @@
             _eq: X-Hasura-User-Id
 - table:
     schema: app
+    name: profile_portfolio_transactions
+  object_relationships:
+  - name: account
+    using:
+      foreign_key_constraint_on: account_id
+  - name: portfolio_transaction_gains
+    using:
+      manual_configuration:
+        remote_table:
+          schema: public
+          name: portfolio_transaction_gains
+        insertion_order: null
+        column_mapping:
+          id: transaction_id
+  - name: profile
+    using:
+      foreign_key_constraint_on: profile_id
+  - name: security
+    using:
+      foreign_key_constraint_on: security_id
+  select_permissions:
+  - role: user
+    permission:
+      columns:
+      - id
+      - amount
+      - date
+      - fees
+      - iso_currency_code
+      - name
+      - price
+      - quantity
+      - subtype
+      - type
+      - ref_id
+      - security_id
+      - profile_id
+      - account_id
+      - created_at
+      - updated_at
+      filter:
+        profile:
+          user_id:
+            _eq: X-Hasura-User-Id
+- table:
+    schema: app
     name: profile_scoring_settings
   object_relationships:
   - name: profile
