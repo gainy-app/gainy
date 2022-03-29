@@ -368,15 +368,6 @@
   - name: account
     using:
       foreign_key_constraint_on: account_id
-  - name: portfolio_transaction_gains
-    using:
-      manual_configuration:
-        remote_table:
-          schema: public
-          name: portfolio_transaction_gains
-        insertion_order: null
-        column_mapping:
-          id: transaction_id
   - name: profile
     using:
       foreign_key_constraint_on: profile_id
