@@ -8,7 +8,7 @@ locals {
     hasura_enable_dev_mode          = var.hasura_enable_dev_mode
     hasura_admin_secret             = random_password.hasura.result
     hasura_jwt_secret               = var.hasura_jwt_secret
-    aws_lambda_api_gateway_endpoint = "${var.aws_lambda_api_gateway_endpoint}/${var.deployment_key}"
+    aws_lambda_api_gateway_endpoint = var.aws_lambda_api_gateway_endpoint
     hasura_image                    = docker_registry_image.hasura.name
     hasura_memory_credits           = local.hasura_memory_credits
     hasura_cpu_credits              = local.hasura_cpu_credits
