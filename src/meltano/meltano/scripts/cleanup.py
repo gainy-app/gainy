@@ -174,7 +174,7 @@ if AWS_LAMBDA_API_GATEWAY_ENDPOINT is not None:
     api_id = res[1]
     env = res[2]
     version = res[3]
-    logger.info(api_id, env, version)
+    logger.info(str([api_id, env, version]))
 
     clean_api_gateway(api_id, version)
     clean_lambda(api_id, env)
