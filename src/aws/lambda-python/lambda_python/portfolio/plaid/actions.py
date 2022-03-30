@@ -77,11 +77,11 @@ class LinkPlaidAccount(HasuraAction):
             "item_id": response['item_id'],
         }
         if access_token_id is None:
-            query = """INSERT INTO app.profile_plaid_access_tokens(profile_id, access_token, item_id) "
-                    "VALUES (%(profile_id)s, %(access_token)s, %(item_id)s) RETURNING id"""
+            query = """INSERT INTO app.profile_plaid_access_tokens(profile_id, access_token, item_id)
+                    VALUES (%(profile_id)s, %(access_token)s, %(item_id)s) RETURNING id"""
         else:
-            query = """update app.profile_plaid_access_tokens set access_token = %(access_token)s, item_id = %(item_id)s, needs_reauth_since = null "
-                    "where profile_id = %(profile_id)s and id = %(access_token_id)s RETURNING id"""
+            query = """update app.profile_plaid_access_tokens set access_token = %(access_token)s, item_id = %(item_id)s, needs_reauth_since = null
+                    where profile_id = %(profile_id)s and id = %(access_token_id)s RETURNING id"""
             parameters["access_token_id"] = access_token_id
 
         with db_conn.cursor() as cursor:
