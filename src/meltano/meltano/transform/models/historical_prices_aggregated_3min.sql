@@ -94,7 +94,7 @@ with latest_open_trading_session as
                              null           as close,
                              null           as volume,
                              time_truncated
-                      from base_tickers
+                      from {{ ref('base_tickers') }}
                                join time_series_3min
                                    on (time_series_3min.type = 'crypto' and base_tickers.type = 'crypto')
                                    or (time_series_3min.type is null and base_tickers.type != 'crypto')

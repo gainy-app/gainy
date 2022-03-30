@@ -93,7 +93,7 @@ with week_trading_sessions as
                              null           as close,
                              null           as volume,
                              time_truncated
-                      from base_tickers
+                      from {{ ref('base_tickers') }}
                                join time_series_15min
                                     on (time_series_15min.type = 'crypto' and base_tickers.type = 'crypto')
                                         or (time_series_15min.type is null and base_tickers.type != 'crypto')
