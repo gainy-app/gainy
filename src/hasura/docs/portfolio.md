@@ -208,24 +208,6 @@ mutation{
         value_to_portfolio_value
         ltt_quantity_total
       }
-      holding_transactions {
-        portfolio_transaction_gains {
-          absolute_gain_1d
-          absolute_gain_1m
-          absolute_gain_1w
-          absolute_gain_1y
-          absolute_gain_3m
-          absolute_gain_5y
-          absolute_gain_total
-          relative_gain_1d
-          relative_gain_1m
-          relative_gain_1w
-          relative_gain_1y
-          relative_gain_3m
-          relative_gain_5y
-          relative_gain_total
-        }
-      }
     }
   }
 }
@@ -233,16 +215,38 @@ mutation{
 
 ### Chart
 
-periods: 15min, 1d, 1w, 1m
+periods: 1d, 1w, 1m, 3m, 1y, 5y, all
 
 ```GraphQL
-{
-    portfolio_chart(where: {profile_id: {_eq: 16}, period: {_eq: "1d"}, datetime: {_gte: "2021-11-02T06:00:00"}}, order_by: {datetime: asc}) {
+query GetPortfolioChart(
+    $profileId: Int!,
+    $periods: [String]!,
+    $interestIds: [Int],
+    $accountIds: [Int],
+    $categoryIds: [Int],
+    $institutionIds: [Int],
+    $lttOnly: Boolean,
+    $securityTypes: [String]
+) {
+    get_portfolio_chart(
+        profile_id: $profileId,
+        periods: $periods,
+        interest_ids: $interestIds,
+        account_ids: $accountIds,
+        category_ids: $categoryIds,
+        institution_ids: $institutionIds,
+        ltt_only: $lttOnly,
+        security_types: $securityTypes
+    ) {
         datetime
         period
-        value
+        open
+        high
+        low
+        close
     }
 }
+
 ```
 
 ### Sorting / Filtering
@@ -367,33 +371,6 @@ periods: 15min, 1d, 1w, 1m
             name
             quantity
             ticker_symbol
-            transactions(order_by: {date: desc}, limit: 10) {
-                amount
-                date
-                fees
-                iso_currency_code
-                name
-                price
-                quantity
-                subtype
-                type
-                portfolio_transaction_gains {
-                    absolute_gain_1d
-                    absolute_gain_1m
-                    absolute_gain_1w
-                    absolute_gain_1y
-                    absolute_gain_3m
-                    absolute_gain_5y
-                    absolute_gain_total
-                    relative_gain_1m
-                    relative_gain_1d
-                    relative_gain_1w
-                    relative_gain_1y
-                    relative_gain_3m
-                    relative_gain_5y
-                    relative_gain_total
-                }
-            }
             holding_details {
                 purchase_date
                 relative_gain_total
