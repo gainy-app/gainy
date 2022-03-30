@@ -108,6 +108,8 @@ query home_tab($profileId: Int, $rankedCount: Int) {
         collection{
             metrics {
                 profile_id
+                actual_price
+                absolute_daily_change
                 relative_daily_change
                 updated_at
             }

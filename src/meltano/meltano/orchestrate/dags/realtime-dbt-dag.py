@@ -9,8 +9,9 @@ dag = create_dag(dag_id,
                  schedule_interval="*/5 * * * *",
                  is_paused_upon_creation=False)
 
-dbt = BashOperator(task_id="dbt-realtime",
-                   bash_command=get_meltano_command(
-                       f"invoke dbt run --vars '{vars}' --select tag:realtime"),
-                   dag=dag,
-                   pool="dbt")
+dbt = BashOperator(
+    task_id="dbt-realtime",
+    bash_command=get_meltano_command(
+        f"invoke dbt run --vars '{vars}' --select tag:realtime"),
+    dag=dag,
+    pool="dbt")
