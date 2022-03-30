@@ -2,6 +2,7 @@
   config(
     materialized = "incremental",
     unique_key = "symbol",
+    tags = ["realtime"],
     post_hook=[
       index(this, 'symbol', true),
     ]
@@ -11,11 +12,11 @@
 with latest_trading_day as
          (
              select chart_open.symbol,
-                    chart_open.open    as open_price,
-                    chart_close.close    as close_price,
-                    t.min_datetime as open_datetime,
-                    t.max_datetime as close_datetime,
-                    t.sum_volume   as volume
+                    chart_open.open   as open_price,
+                    chart_close.close as close_price,
+                    t.min_datetime    as open_datetime,
+                    t.max_datetime    as close_datetime,
+                    t.sum_volume      as volume
              from (
                       select symbol,
                              max(datetime) as max_datetime,

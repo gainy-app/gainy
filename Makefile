@@ -58,7 +58,8 @@ test-images:
 	docker-compose -p gainy_test -f docker-compose.test.yml run --entrypoint python3 test-meltano tests/image_urls.py
 
 test-realtime:
-	docker-compose -p gainy_test -f docker-compose.test.yml run --entrypoint "/wait.sh" test-meltano invoke dbt run --vars '{"realtime": true}' --model historical_prices_aggregated portfolio_gains portfolio_holding_details portfolio_holding_gains portfolio_holding_group_details portfolio_holding_group_gains portfolio_transaction_chart portfolio_expanded_transactions
+	docker-compose -p gainy_test -f docker-compose.test.yml run --entrypoint "/wait.sh" test-meltano invoke dbt run --exclude tag:view
+	docker-compose -p gainy_test -f docker-compose.test.yml run --entrypoint "/wait.sh" test-meltano invoke dbt run --vars '{"realtime": true}' --select tag:realtime
 	docker-compose -p gainy_test -f docker-compose.test.yml run --entrypoint "/wait.sh" test-meltano invoke dbt test
 
 test-hasura:

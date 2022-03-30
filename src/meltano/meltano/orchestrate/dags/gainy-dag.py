@@ -59,7 +59,7 @@ for schedule in schedules:
         upstream.append(operator)
 
 dbt = BashOperator(task_id="dbt",
-                   bash_command=get_meltano_command("invoke dbt run"),
+                   bash_command=get_meltano_command("invoke dbt run --exclude tag:view"),
                    dag=dag,
                    pool="dbt")
 
