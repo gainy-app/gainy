@@ -36,10 +36,8 @@ with week_trading_sessions as
                     interval '1 minute' *
                     mod(extract(minutes from dd)::int, 15) as time_truncated
              FROM generate_series(now()::timestamp - interval '1 week', now()::timestamp, interval '15 minutes') dd
-                      join week_trading_sessions on true
-             where dd between week_trading_sessions.open_at and week_trading_sessions.close_at
 {% if is_incremental() and var('realtime') %}
-               and dd > now() - interval '1 hour'
+             where dd > now() - interval '1 hour'
 {% endif %}
          ),
      expanded_intraday_prices as

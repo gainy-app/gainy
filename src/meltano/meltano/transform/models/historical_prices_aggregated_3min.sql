@@ -31,7 +31,7 @@ with latest_open_trading_session as
                       join latest_open_trading_session on true
              where dd between latest_open_trading_session.open_at and latest_open_trading_session.close_at
 {% if is_incremental() and var('realtime') %}
-             and dd > now() - interval '20 minutes'
+               and dd > now() - interval '20 minutes'
 {% endif %}
              union all
              SELECT 'crypto' as type,
@@ -40,7 +40,7 @@ with latest_open_trading_session as
                     mod(extract(minutes from dd)::int, 3) as time_truncated
              FROM generate_series(now()::timestamp - interval '1 day', now()::timestamp, interval '3 minutes') dd
 {% if is_incremental() and var('realtime') %}
-             and dd > now() - interval '20 minutes'
+             where dd > now() - interval '20 minutes'
 {% endif %}
          ),
      expanded_intraday_prices as
