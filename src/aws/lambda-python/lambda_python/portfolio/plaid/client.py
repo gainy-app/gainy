@@ -24,16 +24,26 @@ class PlaidClient:
         self.client = get_plaid_client()
         self.development_client = get_plaid_client('development')
 
-    def create_link_token(self, profile_id, redirect_uri, env=None):
+    def create_link_token(self,
+                          profile_id,
+                          redirect_uri,
+                          env=None,
+                          access_token=None):
         #TODO when we have verified phone number, we can implement https://plaid.com/docs/link/returning-user/#enabling-the-returning-user-experience
-        request = LinkTokenCreateRequest(products=[Products('investments')],
-                                         client_name="Gainy",
-                                         country_codes=COUNTRY_CODES,
-                                         language='en',
-                                         redirect_uri=redirect_uri,
-                                         webhook=PLAID_WEBHOOK_URL,
-                                         user=LinkTokenCreateRequestUser(
-                                             client_user_id=str(profile_id), ))
+        params = {
+            "products": [Products('investments')],
+            "client_name": "Gainy",
+            "country_codes": COUNTRY_CODES,
+            "language": 'en',
+            "redirect_uri": redirect_uri,
+            "webhook": PLAID_WEBHOOK_URL,
+            "user":
+            LinkTokenCreateRequestUser(client_user_id=str(profile_id), )
+        }
+        if access_token is not None:
+            params[access_token] = access_token
+
+        request = LinkTokenCreateRequest(**params)
         response = self.get_client(env).link_token_create(request)
 
         return response

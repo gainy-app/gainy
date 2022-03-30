@@ -3,8 +3,9 @@ values (1, 'E*TRADE Financial', 'ins_129473', '2022-01-17 13:01:58.770740 +00:00
 ALTER SEQUENCE app.plaid_institutions_id_seq RESTART WITH 2;
 
 INSERT INTO app.profile_plaid_access_tokens (id, profile_id, access_token, item_id, institution_id)
-             VALUES (1, (SELECT id FROM app.profiles limit 1), 'foo', 'bar', 1);
-ALTER SEQUENCE app.profile_plaid_access_tokens_id_seq RESTART WITH 2;
+             VALUES (1, (SELECT id FROM app.profiles where email = 'test@gainy.app'), 'foo', 'bar', 1),
+                    (2, (SELECT id FROM app.profiles where email = 'test2@gainy.app'), 'access-sandbox-1b188d63-fea5-433e-aee9-30ba19cebda6', 'Rbe7Mk36yxsZamjZLMGrtnpv3W6zx7uRwBdga', 1);
+ALTER SEQUENCE app.profile_plaid_access_tokens_id_seq RESTART WITH 3;
 
 insert into app.profile_portfolio_accounts (id, plaid_access_token_id, ref_id, balance_available, balance_current, balance_iso_currency_code, balance_limit, mask, name, official_name, subtype, type, profile_id, created_at, updated_at)
 values  (1, 1, 'LJy8onGroWTK97vkwxMRuXmZyjomzdtP3bv1K', 100, 110, 'USD', null, '0000', 'Plaid Checking', 'Plaid Gold Standard 0% Interest Checking', 'checking', 'depository', 1, '2021-11-12 14:06:51.602102 +00:00', '2021-11-18 05:41:28.397620 +00:00'),
@@ -32,7 +33,7 @@ values  (9, 28.17, '2021-11-17 00:00:00.000000', 'USD', 'Cambiar International E
         (21, 29.71, '2021-11-17 00:00:00.000000', 'USD', 'iShares MSCI Brazil Index', 'wmDB8ZBW3aUVPnxMbgarinRK7eKzMbfAJJDEJ', 'EWZ', 'etf', '2021-11-12 14:06:51.602102 +00:00', '2021-11-18 05:41:28.397620 +00:00'),
         (22, null, null, 'USD', 'AAPL 01/14/22 142.00 PUT', 'wmDB8ZBW3aUVPnxMbgarinRK7eKzMbfAJJDEI', 'AAPL220114P00142000', 'derivative', '2021-11-12 14:06:51.602102 +00:00', '2021-11-18 05:41:28.397620 +00:00'),
         (16, 4.75, '2021-11-17 00:00:00.000000', 'USD', 'NH Hotel Group S.A.', 'gWwemqe4pntelG7JlBA7tmJVjlVpNoujWQra1', 'NHHEF', 'equity', '2021-11-12 14:06:51.602102 +00:00', '2021-11-19 10:45:21.634671 +00:00'),
-        (14, 150, '2021-11-17 00:00:00.000000', 'USD', 'Apple Inc.', 'WDwEPnEmJjt5lp75wl65t1rBmpBZvAHogp7WZ', 'AAPL', 'equity', '2021-11-12 14:06:51.602102 +00:00', '2021-11-19 10:45:21.634671 +00:00');
+        (14, 150, '2021-11-17 00:00:00.000000', 'USD', 'Apple Inc.', 'WDwEPnEmJjt5lp75wl65t1rBmpBZvAHogp7WY', 'AAPL', 'equity', '2021-11-12 14:06:51.602102 +00:00', '2021-11-19 10:45:21.634671 +00:00');
 ALTER SEQUENCE app.portfolio_securities_id_seq RESTART WITH 23;
 
 insert into app.profile_holdings (id, plaid_access_token_id, iso_currency_code, quantity, security_id, profile_id, account_id, ref_id, created_at, updated_at)

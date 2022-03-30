@@ -36,10 +36,7 @@ class HasuraDispatcher(ABC):
                     "code": he.http_code
                 })
             except Exception as e:
-                logger.error("Exception thrown: %s, event: %s",
-                             e,
-                             event,
-                             exc_info=True)
+                logger.exception("Event: %s", event)
 
                 return self.format_response(500, {
                     "message": str(e),

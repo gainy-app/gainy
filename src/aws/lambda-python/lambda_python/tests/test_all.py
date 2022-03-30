@@ -4,7 +4,7 @@ task_dir = os.path.abspath(os.path.join(__file__, '../../'))
 sys.path.append(task_dir)
 
 from hasura_handler import action_dispatcher, trigger_dispatcher
-from _common import get_action_event, get_trigger_event, PROFILE_ID, USER_ID, PLAID_ACCESS_TOKEN, PLAID_ITEM_ID
+from _common import get_action_event, get_trigger_event, PROFILE_ID, PROFILE_ID2, USER_ID, USER_ID2, PLAID_ACCESS_TOKEN, PLAID_ITEM_ID
 
 
 # Actions
@@ -99,7 +99,7 @@ def test_on_plaid_access_token_created():
         "on_plaid_access_token_created", "insert", {
             "old": {},
             "new": {
-                "id": PROFILE_ID,
+                "id": 1,
                 "profile_id": PROFILE_ID,
                 "access_token": PLAID_ACCESS_TOKEN,
                 "item_id": PLAID_ITEM_ID,
@@ -111,3 +111,22 @@ def test_on_plaid_access_token_created():
     assert "code" not in response
     assert "holdings_count" in response
     assert "transactions_count" in response
+
+
+# Plaid Actions
+def test_get_portfolio_holdings():
+    event = get_action_event("get_portfolio_holdings",
+                             {"profile_id": PROFILE_ID2}, USER_ID2)
+    response = action_dispatcher.handle(event)
+    assert "code" not in response
+    assert isinstance(response, list)
+    assert len(response)
+
+
+def test_get_portfolio_transactions():
+    event = get_action_event("get_portfolio_transactions",
+                             {"profile_id": PROFILE_ID2}, USER_ID2)
+    response = action_dispatcher.handle(event)
+    assert "code" not in response
+    assert isinstance(response, list)
+    assert len(response)
