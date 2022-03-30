@@ -33,6 +33,7 @@ def test_portfolio_chart():
 
     full_options_dict = {
         "periods": ["1d"],
+        "accessTokenIds": [None, 1],
         "accountIds": [None, 7],
         "institutionIds": [None, 1],
         "interestIds": [None, 5],

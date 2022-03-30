@@ -174,7 +174,7 @@ class PortfolioService:
                 sql.SQL("portfolio_transaction_chart.period in %(periods)s"))
             params['periods'] = tuple(filter.periods)
 
-        if filter.account_ids is not None or filter.institution_ids is not None:
+        if filter.account_ids is not None or filter.institution_ids is not None or filter.access_token_ids is not None:
             join_clause.append(
                 sql.SQL(
                     "join app.profile_portfolio_accounts on profile_portfolio_accounts.id = portfolio_expanded_transactions.account_id"
@@ -190,19 +190,31 @@ class PortfolioService:
                     ))
                 params['account_ids'] = tuple(filter.account_ids)
 
-            if filter.institution_ids is not None:
-                if not len(filter.institution_ids):
-                    return []
-
+            if filter.institution_ids is not None or filter.access_token_ids is not None:
                 join_clause.append(
                     sql.SQL(
                         "join app.profile_plaid_access_tokens on profile_plaid_access_tokens.id = profile_portfolio_accounts.plaid_access_token_id"
                     ))
+
+            if filter.institution_ids is not None:
+                if not len(filter.institution_ids):
+                    return []
+
                 where_clause.append(
                     sql.SQL(
                         "profile_plaid_access_tokens.institution_id in %(institution_ids)s"
                     ))
                 params['institution_ids'] = tuple(filter.institution_ids)
+
+            if filter.access_token_ids is not None:
+                if not len(filter.access_token_ids):
+                    return []
+
+                where_clause.append(
+                    sql.SQL(
+                        "profile_plaid_access_tokens.id in %(access_token_ids)s"
+                    ))
+                params['access_token_ids'] = tuple(filter.access_token_ids)
 
         if filter.interest_ids is not None or filter.category_ids is not None or filter.security_types is not None:
             join_clause.append(

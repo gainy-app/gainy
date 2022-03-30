@@ -60,6 +60,7 @@ class GetPortfolioChart(HasuraAction):
 
         filter = PortfolioChartFilter()
         filter.periods = input_params.get("periods")
+        filter.access_token_ids = input_params.get("access_token_ids")
         filter.account_ids = input_params.get("account_ids")
         filter.institution_ids = input_params.get("institution_ids")
         filter.interest_ids = input_params.get("interest_ids")
