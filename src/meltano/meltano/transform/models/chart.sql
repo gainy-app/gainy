@@ -13,25 +13,24 @@ with latest_open_trading_session as (
 )
 
 (
-    select historical_prices_aggregated.symbol,
-           historical_prices_aggregated.datetime,
+    select historical_prices_aggregated_3min.symbol,
+           historical_prices_aggregated_3min.datetime,
            '1d'::varchar as period,
-           historical_prices_aggregated.open,
-           historical_prices_aggregated.high,
-           historical_prices_aggregated.low,
-           historical_prices_aggregated.close,
-           historical_prices_aggregated.adjusted_close,
-           historical_prices_aggregated.volume
-    from {{ ref('historical_prices_aggregated') }}
-             join {{ ref('base_tickers') }} on base_tickers.symbol = historical_prices_aggregated.symbol
+           historical_prices_aggregated_3min.open,
+           historical_prices_aggregated_3min.high,
+           historical_prices_aggregated_3min.low,
+           historical_prices_aggregated_3min.close,
+           historical_prices_aggregated_3min.adjusted_close,
+           historical_prices_aggregated_3min.volume
+    from {{ ref('historical_prices_aggregated_3min') }}
+             join {{ ref('base_tickers') }} on base_tickers.symbol = historical_prices_aggregated_3min.symbol
              left join latest_open_trading_session
                        on (latest_open_trading_session.exchange_name = base_tickers.exchange_canonical or
                            (base_tickers.exchange_canonical is null and
                             latest_open_trading_session.country_name = base_tickers.country_name))
-                      and latest_open_trading_session.date = historical_prices_aggregated.datetime::date
-    where period = '3min'
-      and (historical_prices_aggregated.datetime between latest_open_trading_session.open_at and latest_open_trading_session.close_at
-        or (base_tickers.type = 'crypto' and historical_prices_aggregated.datetime > now() - interval '1 day'))
+                      and latest_open_trading_session.date = historical_prices_aggregated_3min.datetime::date
+    where historical_prices_aggregated_3min.datetime between latest_open_trading_session.open_at and latest_open_trading_session.close_at
+       or (base_tickers.type = 'crypto' and historical_prices_aggregated_3min.datetime > now() - interval '1 day')
 )
 
 union all
@@ -42,25 +41,24 @@ union all
         from {{ ref('exchange_schedule') }}
         where open_at between now() - interval '1 week' and now()
     )
-    select historical_prices_aggregated.symbol,
-           historical_prices_aggregated.datetime,
+    select historical_prices_aggregated_15min.symbol,
+           historical_prices_aggregated_15min.datetime,
            '1w'::varchar as period,
-           historical_prices_aggregated.open,
-           historical_prices_aggregated.high,
-           historical_prices_aggregated.low,
-           historical_prices_aggregated.close,
-           historical_prices_aggregated.adjusted_close,
-           historical_prices_aggregated.volume
-    from {{ ref('historical_prices_aggregated') }}
-             join {{ ref('base_tickers') }} on base_tickers.symbol = historical_prices_aggregated.symbol
+           historical_prices_aggregated_15min.open,
+           historical_prices_aggregated_15min.high,
+           historical_prices_aggregated_15min.low,
+           historical_prices_aggregated_15min.close,
+           historical_prices_aggregated_15min.adjusted_close,
+           historical_prices_aggregated_15min.volume
+    from {{ ref('historical_prices_aggregated_15min') }}
+             join {{ ref('base_tickers') }} on base_tickers.symbol = historical_prices_aggregated_15min.symbol
              left join week_trading_sessions
                        on (week_trading_sessions.exchange_name = base_tickers.exchange_canonical or
                            (base_tickers.exchange_canonical is null and
                             week_trading_sessions.country_name = base_tickers.country_name))
-                      and week_trading_sessions.date = historical_prices_aggregated.datetime::date
-    where period = '15min'
-      and (historical_prices_aggregated.datetime between week_trading_sessions.open_at and week_trading_sessions.close_at
-       or (base_tickers.type = 'crypto' and historical_prices_aggregated.datetime > now() - interval '7 days'))
+                      and week_trading_sessions.date = historical_prices_aggregated_15min.datetime::date
+    where historical_prices_aggregated_15min.datetime between week_trading_sessions.open_at and week_trading_sessions.close_at
+       or (base_tickers.type = 'crypto' and historical_prices_aggregated_15min.datetime > now() - interval '7 days')
 )
 
 union all

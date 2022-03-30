@@ -78,38 +78,28 @@ with expanded_holding_groups as
          ),
      expanded_holding_groups_with_gains as
          (
-             select distinct on (
-                 expanded_holding_groups.profile_id,
-                 expanded_holding_groups.ticker_symbol
-                 ) expanded_holding_groups.profile_id,
-                   expanded_holding_groups.ticker_symbol,
-                   expanded_holding_groups.updated_at,
-                   expanded_holding_groups.actual_value,
-                   expanded_holding_groups.value_to_portfolio_value,
-                   expanded_holding_groups.absolute_gain_total,
-                   ticker_realtime_metrics.actual_price,
-                   ticker_realtime_metrics.relative_daily_change                  as relative_gain_1d,
-                   ticker_metrics.price_change_1w                                 as relative_gain_1w,
-                   ticker_metrics.price_change_1m                                 as relative_gain_1m,
-                   ticker_metrics.price_change_3m                                 as relative_gain_3m,
-                   ticker_metrics.price_change_1y                                 as relative_gain_1y,
-                   ticker_metrics.price_change_5y                                 as relative_gain_5y,
-                   ticker_metrics.price_change_all                                as relative_gain_total,
-                   ltt_quantity_total
+             select expanded_holding_groups.profile_id,
+                    expanded_holding_groups.ticker_symbol,
+                    expanded_holding_groups.updated_at,
+                    expanded_holding_groups.actual_value,
+                    expanded_holding_groups.value_to_portfolio_value,
+                    expanded_holding_groups.absolute_gain_total,
+                    ticker_realtime_metrics.actual_price,
+                    ticker_realtime_metrics.relative_daily_change as relative_gain_1d,
+                    ticker_metrics.price_change_1w                as relative_gain_1w,
+                    ticker_metrics.price_change_1m                as relative_gain_1m,
+                    ticker_metrics.price_change_3m                as relative_gain_3m,
+                    ticker_metrics.price_change_1y                as relative_gain_1y,
+                    ticker_metrics.price_change_5y                as relative_gain_5y,
+                    ticker_metrics.price_change_all               as relative_gain_total,
+                    ltt_quantity_total
              from expanded_holding_groups
                       left join {{ ref('tickers') }}
                                 on tickers.symbol = expanded_holding_groups.ticker_symbol
                       left join {{ ref('ticker_metrics') }}
                                 on ticker_metrics.symbol = tickers.symbol
                       left join {{ ref('ticker_realtime_metrics') }}
-                                on ticker_realtime_metrics.symbol = tickers.symbol
-                      left join {{ ref('historical_prices_aggregated') }}
-                                on historical_prices_aggregated.symbol = expanded_holding_groups.ticker_symbol
-                                    and (historical_prices_aggregated.datetime >=
-                                         tickers.ipo_date or tickers.ipo_date is null)
-                                    and historical_prices_aggregated.period = '1d'
-             order by expanded_holding_groups.profile_id, expanded_holding_groups.ticker_symbol,
-                      historical_prices_aggregated.datetime desc
+                                on ticker_realtime_metrics.symbol = base_tickers.symbol
          )
 select concat(profile_id, '_', ticker_symbol)::varchar as id,
        profile_id,
