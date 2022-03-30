@@ -1,3 +1,4 @@
+import json
 import os
 from portfolio.exceptions import AccessTokenLoginRequiredException
 from portfolio.plaid import PlaidService
@@ -257,7 +258,7 @@ class PortfolioService:
         where_clause = sql.SQL('and ') + sql.SQL(' and ').join(where_clause)
         query = sql.SQL(portfolio_chart_query).format(
             where_clause=where_clause, join_clause=join_clause)
-        logger.debug(query.as_string(db_conn))
+        logger.debug(json.dumps(query.as_string(db_conn)))
 
         with db_conn.cursor(cursor_factory=RealDictCursor) as cursor:
             cursor.execute(query, params)
@@ -387,7 +388,7 @@ class PortfolioService:
         where_clause = sql.SQL('and ') + sql.SQL(' and ').join(where_clause)
         query = sql.SQL(portfolio_chart_query).format(
             where_clause=where_clause, join_clause=join_clause)
-        logger.debug(query.as_string(db_conn))
+        logger.debug(json.dumps(query.as_string(db_conn)))
 
         with db_conn.cursor() as cursor:
             cursor.execute(query, params)
