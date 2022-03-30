@@ -94,12 +94,10 @@ with expanded_holding_groups as
                     ticker_metrics.price_change_all               as relative_gain_total,
                     ltt_quantity_total
              from expanded_holding_groups
-                      left join {{ ref('tickers') }}
-                                on tickers.symbol = expanded_holding_groups.ticker_symbol
                       left join {{ ref('ticker_metrics') }}
-                                on ticker_metrics.symbol = tickers.symbol
+                                on ticker_metrics.symbol = expanded_holding_groups.ticker_symbol
                       left join {{ ref('ticker_realtime_metrics') }}
-                                on ticker_realtime_metrics.symbol = base_tickers.symbol
+                                on ticker_realtime_metrics.symbol = expanded_holding_groups.ticker_symbol
          )
 select concat(profile_id, '_', ticker_symbol)::varchar as id,
        profile_id,
