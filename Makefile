@@ -49,7 +49,7 @@ extract-passwords:
 	cd terraform && terraform state pull | python3 ../extract_passwords.py
 
 test-build:
-	docker-compose -p gainy_test -f docker-compose.test.yml build --no-cache --progress plain
+	docker-compose -p gainy_test -f docker-compose.test.yml build --progress plain
 
 test-init:
 	docker-compose -p gainy_test -f docker-compose.test.yml run test-meltano invoke dbt test
