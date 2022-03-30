@@ -53,8 +53,11 @@ with max_date as
                         mod(extract(minutes from eod_intraday_prices.time)::int, 3) as time_truncated
                  from {{ source('eod', 'eod_intraday_prices') }}
                           join latest_open_trading_session on true
-                 where eod_intraday_prices.time between latest_open_trading_session.open_at - interval '1 hour' and latest_open_trading_session.close_at
-                    or (symbol like '%.CC' and time > now() - interval '1 day')
+                 where (eod_intraday_prices.time between latest_open_trading_session.open_at - interval '1 hour' and latest_open_trading_session.close_at
+                    or (symbol like '%.CC' and time > now() - interval '1 day'))
+{% if is_incremental() and var('realtime') %}
+                   and eod_intraday_prices.time > now() - interval '20 minutes'
+{% endif %}
              ),
          combined_intraday_prices as
              (
@@ -86,9 +89,6 @@ with max_date as
                                  volume,
                                  time_truncated
                           from expanded_intraday_prices
-{% if is_incremental() and var('realtime') %}
-                          where time > now() - interval '20 minutes'
-{% endif %}
                           union all
                           select symbol,
                                  time_truncated as time,
@@ -169,7 +169,7 @@ union all
                           join week_trading_sessions on true
                  where dd between week_trading_sessions.open_at and week_trading_sessions.close_at
 {% if is_incremental() and var('realtime') %}
-                   and dd > now() - interval '30 minutes'
+                   and dd > now() - interval '1 hour'
 {% endif %}
              ),
          expanded_intraday_prices as
@@ -180,8 +180,11 @@ union all
                         mod(extract(minutes from eod_intraday_prices.time)::int, 15) as time_truncated
                  from {{ source('eod', 'eod_intraday_prices') }}
                           join week_trading_sessions on true
-                 where eod_intraday_prices.time between week_trading_sessions.open_at - interval '1 hour' and week_trading_sessions.close_at
-                    or (symbol like '%.CC' and time > now() - interval '1 week')
+                 where (eod_intraday_prices.time between week_trading_sessions.open_at - interval '1 hour' and week_trading_sessions.close_at
+                    or (symbol like '%.CC' and time > now() - interval '1 week'))
+{% if is_incremental() and var('realtime') %}
+                   and eod_intraday_prices.time > now() - interval '1 hour'
+{% endif %}
              ),
          combined_intraday_prices as
              (
@@ -213,9 +216,6 @@ union all
                                  volume,
                                  time_truncated
                           from expanded_intraday_prices
-{% if is_incremental() and var('realtime') %}
-                          where time > now() - interval '30 minutes'
-{% endif %}
                           union all
                           select symbol,
                                  time_truncated as time,

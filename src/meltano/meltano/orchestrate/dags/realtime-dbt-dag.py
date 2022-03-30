@@ -14,7 +14,6 @@ models = " ".join([
     'portfolio_holding_group_details',
     'portfolio_holding_group_gains',
     'portfolio_transaction_chart',
-    'portfolio_transaction_gains',
     'ticker_realtime_metrics',
 ])
 

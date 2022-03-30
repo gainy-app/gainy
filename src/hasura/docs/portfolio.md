@@ -174,24 +174,6 @@ mutation{
         value_to_portfolio_value
         ltt_quantity_total
       }
-      holding_transactions {
-        portfolio_transaction_gains {
-          absolute_gain_1d
-          absolute_gain_1m
-          absolute_gain_1w
-          absolute_gain_1y
-          absolute_gain_3m
-          absolute_gain_5y
-          absolute_gain_total
-          relative_gain_1d
-          relative_gain_1m
-          relative_gain_1w
-          relative_gain_1y
-          relative_gain_3m
-          relative_gain_5y
-          relative_gain_total
-        }
-      }
     }
   }
 }
@@ -355,33 +337,6 @@ query GetPortfolioChart(
             name
             quantity
             ticker_symbol
-            transactions(order_by: {date: desc}, limit: 10) {
-                amount
-                date
-                fees
-                iso_currency_code
-                name
-                price
-                quantity
-                subtype
-                type
-                portfolio_transaction_gains {
-                    absolute_gain_1d
-                    absolute_gain_1m
-                    absolute_gain_1w
-                    absolute_gain_1y
-                    absolute_gain_3m
-                    absolute_gain_5y
-                    absolute_gain_total
-                    relative_gain_1m
-                    relative_gain_1d
-                    relative_gain_1w
-                    relative_gain_1y
-                    relative_gain_3m
-                    relative_gain_5y
-                    relative_gain_total
-                }
-            }
             holding_details {
                 purchase_date
                 relative_gain_total

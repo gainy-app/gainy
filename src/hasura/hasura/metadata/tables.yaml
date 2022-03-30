@@ -368,15 +368,6 @@
   - name: account
     using:
       foreign_key_constraint_on: account_id
-  - name: portfolio_transaction_gains
-    using:
-      manual_configuration:
-        remote_table:
-          schema: public
-          name: portfolio_transaction_gains
-        insertion_order: null
-        column_mapping:
-          id: transaction_id
   - name: profile
     using:
       foreign_key_constraint_on: profile_id
@@ -1248,44 +1239,6 @@
         profile:
           user_id:
             _eq: X-Hasura-User-Id
-- table:
-    schema: public
-    name: portfolio_transaction_gains
-  object_relationships:
-  - name: transaction
-    using:
-      manual_configuration:
-        remote_table:
-          schema: app
-          name: profile_portfolio_transactions
-        insertion_order: null
-        column_mapping:
-          transaction_id: id
-  select_permissions:
-  - role: user
-    permission:
-      columns:
-      - absolute_gain_1d
-      - absolute_gain_1m
-      - absolute_gain_1w
-      - absolute_gain_1y
-      - absolute_gain_3m
-      - absolute_gain_5y
-      - absolute_gain_total
-      - relative_gain_1d
-      - relative_gain_1m
-      - relative_gain_1w
-      - relative_gain_1y
-      - relative_gain_3m
-      - relative_gain_5y
-      - relative_gain_total
-      - transaction_id
-      - updated_at
-      filter:
-        transaction:
-          profile:
-            user_id:
-              _eq: X-Hasura-User-Id
 - table:
     schema: public
     name: profile_collection_tickers_performance_ranked
