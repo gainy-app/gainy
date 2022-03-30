@@ -70,4 +70,4 @@ from (
                   join {{ ref('ticker_realtime_metrics') }} using (symbol)
          group by profile_id, collection_id, collection_uniq_id, ticker_interests.interest_id
      ) t
-         join interests on t.interest_id = interests.id
+         join {{ ref('interests') }} on t.interest_id = interests.id
