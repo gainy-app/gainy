@@ -225,7 +225,6 @@ query GetPortfolioChart(
     $accessTokenIds: [Int],
     $accountIds: [Int],
     $categoryIds: [Int],
-    $institutionIds: [Int],
     $lttOnly: Boolean,
     $securityTypes: [String]
 ) {
@@ -236,7 +235,6 @@ query GetPortfolioChart(
         access_token_ids: $accessTokenIds,
         account_ids: $accountIds,
         category_ids: $categoryIds,
-        institution_ids: $institutionIds,
         ltt_only: $lttOnly,
         security_types: $securityTypes
     ) {
@@ -263,7 +261,7 @@ query GetPortfolioChart(
     # app_profile_holdings(order_by: {holding_details: {market_capitalization: asc}})
     # app_profile_holdings(order_by: {holding_details: {next_earnings_date: asc}})
     # app_profile_holdings(where: {holding_details: {account_id: {_eq: 7}}})
-    # app_profile_holdings(where: {access_token: {institution: {id: {_eq: 2}}}})
+    # app_profile_holdings(where: {access_token: {id: {_eq: 1}}})
     # app_profile_holdings(where: {holding_details: {ticker: {ticker_interests: {interest_id: {_in: [5]}}}}})
     # app_profile_holdings(where: {holding_details: {ticker: {ticker_categories: {category_id: {_in: []}}}}}) 
     # app_profile_holdings(where: {holding_details: {security_type: {_in: ["equity"]}}})
@@ -285,7 +283,7 @@ query GetPortfolioChart(
     }
     
     # broker options:
-    app_profile_plaid_access_tokens { institution { id name } }
+    app_profile_plaid_access_tokens { id }
 
     # interests options:
     interests(where: {enabled: {_eq: "1"}}) {
