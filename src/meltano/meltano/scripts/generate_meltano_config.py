@@ -78,7 +78,6 @@ if DBT_TARGET_SCHEMA != 'public':
     ### Taps' catalogs ###
 
     for filename in glob.glob("catalog/**/*.catalog.json", recursive=True):
-        print(filename)
         with open(filename, "r") as f:
             config = json.load(f)
 
