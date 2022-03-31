@@ -1,4 +1,5 @@
 import sys, os, json, yaml, copy, re
+import glob
 from typing import List
 
 
@@ -74,19 +75,23 @@ if DBT_TARGET_SCHEMA != 'public':
     with open("catalog/search/search.mapping.yml", "w") as f:
         f.write(config)
 
-    ### Algolia tap catalog ###
+    ### Taps' catalogs ###
 
-    with open("catalog/search/tap.catalog.json", "r") as f:
-        config = json.load(f)
+    for filename in glob.glob("catalog/**/*.catalog.json", recursive=True):
+        print(filename)
+        with open(filename, "r") as f:
+            config = json.load(f)
 
-    for stream in config['streams']:
-        for metadata in stream['metadata']:
-            if 'metadata' not in metadata:
-                continue
-            if 'schema-name' not in metadata['metadata']:
-                continue
-            metadata['metadata']['schema-name'] = DBT_TARGET_SCHEMA
-        stream['tap_stream_id'] = f"{DBT_TARGET_SCHEMA}-{stream['stream']}"
+        for stream in config['streams']:
+            for metadata in stream['metadata']:
+                if 'metadata' not in metadata:
+                    continue
+                if 'schema-name' not in metadata['metadata']:
+                    continue
+                if metadata['metadata']['schema-name'] != 'public':
+                    continue
+                metadata['metadata']['schema-name'] = DBT_TARGET_SCHEMA
+                stream['tap_stream_id'] = f"{DBT_TARGET_SCHEMA}-{stream['stream']}"
 
-    with open("catalog/search/tap.catalog.json", "w") as f:
-        json.dump(config, f)
+        with open(filename, "w") as f:
+            json.dump(config, f)

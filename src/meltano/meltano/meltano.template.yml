@@ -86,7 +86,7 @@ plugins:
     # Analytics tap
     - name: tap-postgres-analytics
       inherit_from: tap-postgres
-      catalog: catalog/app/tap.catalog.json
+      catalog: catalog/analytics/tap.catalog.json
       config:
         filter_schemas: app
 
