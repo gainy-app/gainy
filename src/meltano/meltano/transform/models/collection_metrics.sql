@@ -19,8 +19,8 @@ with grouped_collections as
          )
 select profile_id,
        collection_uniq_id,
-       actual_price::double precision                                                              as actual_price,
-       absolute_daily_change::double precision                                                     as absolute_daily_change,
-       (actual_price / case when prev_close_price > 0 then prev_close_price end)::double precision as relative_daily_change,
-       time                                                                                        as updated_at
+       actual_price::double precision                                                                  as actual_price,
+       absolute_daily_change::double precision                                                         as absolute_daily_change,
+       (actual_price / case when prev_close_price > 0 then prev_close_price end - 1)::double precision as relative_daily_change,
+       time                                                                                            as updated_at
 from grouped_collections
