@@ -35,19 +35,17 @@ union
     with
         penny_sim_dif as
             (
-                select concat(c.id, '_', t.symbol)::varchar 	as id,
-                       c.id             						as category_id,
+                select concat(c.id, '_', t.symbol)::varchar                 as id,
+                       c.id                                                 as category_id,
                        t.symbol,
                        -- right wing of bell-curve radial funcion (1/(1+x^2))|E(f):[0..1) (shifted down by 0.5 and scaled by x2 so E(f):(-1..1))
                        -- with adjusted koef 1/10 so it gives 0.0 at price 10usd and adjusted pow 1.58496 for |x| so that for 5usd it gives 0.5
-                       2./(1.+(abs(hp.adjusted_close)/10.)^1.58496)-1. 	as sim_dif,
-                       now()::timestamp 						as updated_at -- since we are in 1-dimensional space for Penny (only price is the feature) it's just that one-sided bell-function
+                       2. / (1. + (abs(hpm.price_0d) / 10.) ^ 1.58496) - 1. as sim_dif,
+                       now()::timestamp                                     as updated_at -- since we are in 1-dimensional space for Penny (only price is the feature) it's just that one-sided bell-function
                 from common_stocks t
                          join {{ ref('categories') }} c on c.name = 'Penny'
-                         left join {{ ref('historical_prices') }} hp on t.symbol = hp.code
-                         left join {{ ref('historical_prices') }} hp_next on t.symbol = hp_next.code AND hp_next.date::timestamp > hp.date::timestamp
-                where hp_next.code is null
-                  and hp.adjusted_close > 0 --no nulls or wrong prices (0,-r)
+                         join {{ ref('historical_prices_marked') }} hpm using (symbol)
+                where hpm.price_0d > 0 --no nulls or wrong prices (0,-r)
             )
 
     select * from penny_sim_dif
@@ -161,7 +159,7 @@ union
 ( -- Cat: Dividend
 
     with
-        dividends as (select * from {{ source('eod', 'eod_dividends')}}),
+        dividends as (select * from {{ source('eod', 'eod_dividends') }}),
 
         last_consecutive_dividend_years as (
             select code, sum(consecflagone) as cdy --,dy
@@ -493,7 +491,7 @@ union
                 select code,
                        SUM(callopeninterest)*100  as call_option_shares_deliverable_outstanding  --BusDoc: Call option shares deliverable outstanding exceeds total shares outstanding (OPEN INTEREST = actual options quantity on the market, we focused on Call type)
                        --SUM(callvolume) * 100 as call_option_shares_deliverable_outstanding -- bad idea, it's just transactions counter, non uniq options
-                from {{ source('eod', 'eod_options')}}
+                from {{ source('eod', 'eod_options') }}
                 where expirationdate::timestamp > now()
                 group by code
             ),
@@ -509,7 +507,7 @@ union
                 from common_stocks t
                          left join {{ ref('technicals') }} t2 on t.symbol = t2.symbol
                          left join max_eps on max_eps.symbol = t.symbol
-                         left join {{ source('eod', 'eod_fundamentals')}} f on f.code = t.symbol
+                         left join {{ source('eod', 'eod_fundamentals') }} f on f.code = t.symbol
                          left join options_stats on options_stats.code = t.symbol
             ),
 
