@@ -108,10 +108,39 @@ query home_tab($profileId: Int, $rankedCount: Int) {
         collection{
             metrics {
                 profile_id
+                actual_price
+                absolute_daily_change
                 relative_daily_change
                 updated_at
             }
         }
+    }
+}
+```
+
+### Charts
+
+```graphql
+{
+    collections(where: {id: {_eq: 231}}) {
+        id
+        uniq_id
+    }
+    collection_chart(where: {collection_uniq_id: {_eq: "1_231"}, period: {_eq: "1w"}}) {
+        datetime
+        period
+        adjusted_close
+    }
+    # collection_piechart(where: {collection_uniq_id: {_eq: "1_231"}, entity_type: {_eq: "ticker"}}) {
+    # collection_piechart(where: {collection_uniq_id: {_eq: "1_231"}, entity_type: {_eq: "interest"}}) {
+    collection_piechart(where: {collection_uniq_id: {_eq: "1_231"}, entity_type: {_eq: "category"}) {
+        weight
+        entity_type
+        relative_daily_change
+        entity_name
+        entity_id
+        absolute_value
+        absolute_daily_change
     }
 }
 ```

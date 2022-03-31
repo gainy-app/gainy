@@ -2,6 +2,7 @@
   config(
     materialized = "incremental",
     unique_key = "profile_id",
+    tags = ["realtime"],
     post_hook=[
       index(this, 'profile_id', true),
     ]

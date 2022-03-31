@@ -1665,6 +1665,11 @@ models:
           - exists
           - type:
               type: 'character varying'
+      - name: actual_price
+        tests:
+          - exists
+          - type:
+              type: 'double precision'
       - name: absolute_daily_change
         tests:
           - exists
@@ -1771,6 +1776,112 @@ models:
           - exists
           - type:
               type: 'timestamp without time zone'
+
+  - name: collection_chart
+    columns:
+      - name: profile_id
+        tests:
+          - exists
+          - type:
+              type: 'integer'
+      - name: collection_id
+        tests:
+          - exists
+          - type:
+              type: 'integer'
+      - name: collection_uniq_id
+        tests:
+          - exists
+          - type:
+              type: 'character varying'
+      - name: datetime
+        tests:
+          - exists
+          - type:
+              type: 'timestamp without time zone'
+      - name: period
+        tests:
+          - exists
+          - type:
+              type: 'character varying'
+      - name: open
+        tests:
+          - exists
+          - type:
+              type: 'double precision'
+      - name: high
+        tests:
+          - exists
+          - type:
+              type: 'double precision'
+      - name: low
+        tests:
+          - exists
+          - type:
+              type: 'double precision'
+      - name: close
+        tests:
+          - exists
+          - type:
+              type: 'double precision'
+      - name: adjusted_close
+        tests:
+          - exists
+          - type:
+              type: 'double precision'
+
+  - name: collection_piechart
+    columns:
+      - name: profile_id
+        tests:
+          - exists
+          - type:
+              type: 'integer'
+      - name: collection_id
+        tests:
+          - exists
+          - type:
+              type: 'integer'
+      - name: collection_uniq_id
+        tests:
+          - exists
+          - type:
+              type: 'character varying'
+      - name: weight
+        tests:
+          - exists
+          - type:
+              type: 'double precision'
+      - name: entity_type
+        tests:
+          - exists
+          - type:
+              type: 'character varying'
+      - name: entity_id
+        tests:
+          - exists
+          - type:
+              type: 'character varying'
+      - name: entity_name
+        tests:
+          - exists
+          - type:
+              type: 'character varying'
+      - name: absolute_daily_change
+        tests:
+          - exists
+          - type:
+              type: 'double precision'
+      - name: relative_daily_change
+        tests:
+          - exists
+          - type:
+              type: 'double precision'
+      - name: absolute_value
+        tests:
+          - exists
+          - type:
+              type: 'double precision'
 
 exposures:
   - name: ticker_search_index
