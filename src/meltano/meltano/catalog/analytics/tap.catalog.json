@@ -237,9 +237,8 @@
         {
           "breadcrumb": [],
           "metadata": {
-            "replication-key": "id",
             "replication-method": "FULL_TABLE",
-            "table-key-properties": [ "id" ],
+            "table-key-properties": [ "symbol" ],
             "schema-name": "public",
             "database-name": "gainy",
             "selected": true
@@ -256,7 +255,6 @@
         {
           "breadcrumb": [],
           "metadata": {
-            "replication-key": "id",
             "replication-method": "FULL_TABLE",
             "table-key-properties": [ "id" ],
             "schema-name": "public",
@@ -275,9 +273,8 @@
         {
           "breadcrumb": [],
           "metadata": {
-            "replication-key": "id",
             "replication-method": "FULL_TABLE",
-            "table-key-properties": [ "id" ],
+            "table-key-properties": [ "symbol" ],
             "schema-name": "public",
             "database-name": "gainy",
             "selected": true
@@ -294,7 +291,6 @@
         {
           "breadcrumb": [],
           "metadata": {
-            "replication-key": "id",
             "replication-method": "FULL_TABLE",
             "table-key-properties": [ "id" ],
             "schema-name": "public",
@@ -313,9 +309,8 @@
         {
           "breadcrumb": [],
           "metadata": {
-            "replication-key": "id",
             "replication-method": "FULL_TABLE",
-            "table-key-properties": [ "id" ],
+            "table-key-properties": [ "symbol" ],
             "schema-name": "public",
             "database-name": "gainy",
             "selected": true

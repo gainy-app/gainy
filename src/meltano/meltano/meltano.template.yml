@@ -101,6 +101,8 @@ plugins:
     - name: target-postgres
       variant: transferwise
       pip_url: pipelinewise-target-postgres
+      config:
+        primary_key_required: false
 
     - name: target-postgres-small-batch
       inherit_from: target-postgres
@@ -162,7 +164,7 @@ schedules:
     interval: '@daily'
     start_date: 2021-06-17 10:40:58.742133
     env:
-      TARGET_ENVS: '["production","local"]'
+      TARGET_ENVS: '["production"]'
 
   # Algolia
 
@@ -185,7 +187,7 @@ schedules:
     interval: '@daily'
     start_date: 2021-11-15 00:00:00.000000
     env:
-      TARGET_ENVS: '["production"]'
+      TARGET_ENVS: '["production","local"]'
       INTEGRATION: 'DOWNSTREAM'
 
   # Website

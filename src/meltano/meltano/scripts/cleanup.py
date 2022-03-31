@@ -171,10 +171,11 @@ with db_connect() as db_conn:
 if AWS_LAMBDA_API_GATEWAY_ENDPOINT is not None:
     res = re.search(r"https://([^.]+)\..*_(\w+)/([^/]+)$",
                     AWS_LAMBDA_API_GATEWAY_ENDPOINT)
-    api_id = res[1]
-    env = res[2]
-    version = res[3]
-    logger.info(str([api_id, env, version]))
+    if res is not None:
+        api_id = res[1]
+        env = res[2]
+        version = res[3]
+        logger.info(str([api_id, env, version]))
 
-    clean_api_gateway(api_id, version)
-    clean_lambda(api_id, env)
+        clean_api_gateway(api_id, version)
+        clean_lambda(api_id, env)
