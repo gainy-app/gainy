@@ -825,6 +825,7 @@
       - adjusted_close
       - close
       - collection_id
+      - collection_uniq_id
       - datetime
       - high
       - low
@@ -885,14 +886,15 @@
   - role: user
     permission:
       columns:
-      - collection_id
       - absolute_daily_change
       - absolute_value
+      - collection_id
+      - collection_uniq_id
       - entity_id
       - entity_name
-      - relative_daily_change
       - entity_type
       - profile_id
+      - relative_daily_change
       - weight
       filter:
         _or:
@@ -1407,6 +1409,7 @@
       - image_url
       - name
       - size
+      - uniq_id
       filter:
         _or:
         - profile:

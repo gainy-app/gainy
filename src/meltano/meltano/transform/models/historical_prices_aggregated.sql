@@ -116,37 +116,33 @@ union all
 (
     select DISTINCT ON (
         code,
-        date_truncated
-        ) (code || '_' || date_truncated || '_1w')::varchar as id,
+        date_week
+        ) (code || '_' || date_week || '_1w')::varchar as id,
           code as symbol,
-          date_truncated::timestamp                                                                                     as time,
-          date_truncated::timestamp                                                                                     as datetime,
+          date_week::timestamp                                                                                     as time,
+          date_week::timestamp                                                                                     as datetime,
           '1w'::varchar                                                                                                 as period,
           first_value(open::double precision)
-          OVER (partition by code, date_truncated order by date rows between current row and unbounded following)       as open,
+          OVER (partition by code, date_week order by date rows between current row and unbounded following)       as open,
           max(high::double precision)
-          OVER (partition by code, date_truncated rows between current row and unbounded following)                     as high,
+          OVER (partition by code, date_week rows between current row and unbounded following)                     as high,
           min(low::double precision)
-          OVER (partition by code, date_truncated rows between current row and unbounded following)                     as low,
+          OVER (partition by code, date_week rows between current row and unbounded following)                     as low,
           last_value(close::double precision)
-          OVER (partition by code, date_truncated order by date rows between current row and unbounded following)       as close,
+          OVER (partition by code, date_week order by date rows between current row and unbounded following)       as close,
           last_value(adjusted_close::double precision)
-          OVER (partition by code, date_truncated order by date rows between current row and unbounded following)       as adjusted_close,
+          OVER (partition by code, date_week order by date rows between current row and unbounded following)       as adjusted_close,
           (sum(volume::numeric)
-           OVER (partition by code, date_truncated rows between current row and unbounded following))::double precision as volume
-    from (
-             select historical_prices.*,
-                    date_trunc('week', date) as date_truncated
-             from {{ ref('historical_prices') }}
+           OVER (partition by code, date_week rows between current row and unbounded following))::double precision as volume
+    from {{ ref('historical_prices') }}
 {% if is_incremental() %}
-             left join max_date on max_date.symbol = code and max_date.period = '1w'
-             where (max_date.time is null or date_trunc('week', date) >= max_date.time - interval '1 month')
-               and date >= now() - interval '5 year' - interval '1 week'
+    left join max_date on max_date.symbol = code and max_date.period = '1w'
+    where (max_date.time is null or date_week >= max_date.time - interval '1 month')
+      and date >= now() - interval '5 year' - interval '1 week'
 {% else %}
-             where date >= now() - interval '5 year' - interval '1 week'
+    where date >= now() - interval '5 year' - interval '1 week'
 {% endif %}
-         ) t
-    order by symbol, date_truncated, date
+    order by symbol, date_week, date
 )
 
 union all
@@ -154,32 +150,28 @@ union all
 (
     select DISTINCT ON (
         code,
-        date_truncated
-        ) (code || '_' || date_truncated || '_1m')::varchar as id,
+        date_month
+        ) (code || '_' || date_month || '_1m')::varchar as id,
           code as symbol,
-          date_truncated::timestamp                                                                                     as time,
-          date_truncated::timestamp                                                                                     as datetime,
-          '1m'::varchar                                                                                                 as period,
+          date_month::timestamp                                                                                     as time,
+          date_month::timestamp                                                                                     as datetime,
+          '1m'::varchar                                                                                             as period,
           first_value(open::double precision)
-          OVER (partition by code, date_truncated order by date rows between current row and unbounded following)       as open,
+          OVER (partition by code, date_month order by date rows between current row and unbounded following)       as open,
           max(high::double precision)
-          OVER (partition by code, date_truncated rows between current row and unbounded following)                     as high,
+          OVER (partition by code, date_month rows between current row and unbounded following)                     as high,
           min(low::double precision)
-          OVER (partition by code, date_truncated rows between current row and unbounded following)                     as low,
+          OVER (partition by code, date_month rows between current row and unbounded following)                     as low,
           last_value(close::double precision)
-          OVER (partition by code, date_truncated order by date rows between current row and unbounded following)       as close,
+          OVER (partition by code, date_month order by date rows between current row and unbounded following)       as close,
           last_value(adjusted_close::double precision)
-          OVER (partition by code, date_truncated order by date rows between current row and unbounded following)       as adjusted_close,
+          OVER (partition by code, date_month order by date rows between current row and unbounded following)       as adjusted_close,
           (sum(volume::numeric)
-           OVER (partition by code, date_truncated rows between current row and unbounded following))::double precision as volume
-    from (
-             select historical_prices.*,
-                    date_trunc('month', date) as date_truncated
-             from {{ ref('historical_prices') }}
+           OVER (partition by code, date_month rows between current row and unbounded following))::double precision as volume
+    from {{ ref('historical_prices') }}
 {% if is_incremental() %}
-             left join max_date on max_date.symbol = code and max_date.period = '1m'
-             where (max_date.time is null or date_trunc('month', date) >= max_date.time - interval '3 month')
+    left join max_date on max_date.symbol = code and max_date.period = '1m'
+    where (max_date.time is null or date_month >= max_date.time - interval '3 month')
 {% endif %}
-         ) t
-    order by symbol, date_truncated, date
+    order by symbol, date_month, date
 )
