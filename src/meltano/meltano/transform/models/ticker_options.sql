@@ -18,7 +18,7 @@ expanded as
     (
         select code                                                  as symbol,
                json_array_elements((json_each(options::json)).value) as value,
-               tickers.name                                          as ticker_name
+               base_tickers.name                                     as ticker_name
         from {{ source('eod', 'eod_options') }}
                  join {{ ref('base_tickers') }} on eod_options.code = base_tickers.symbol
         where json_extract_path(options::json, 'CALL') is not null
