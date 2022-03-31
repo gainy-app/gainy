@@ -90,7 +90,8 @@ if DBT_TARGET_SCHEMA != 'public':
                 if metadata['metadata']['schema-name'] != 'public':
                     continue
                 metadata['metadata']['schema-name'] = DBT_TARGET_SCHEMA
-                stream['tap_stream_id'] = f"{DBT_TARGET_SCHEMA}-{stream['stream']}"
+                stream[
+                    'tap_stream_id'] = f"{DBT_TARGET_SCHEMA}-{stream['stream']}"
 
         with open(filename, "w") as f:
             json.dump(config, f)
