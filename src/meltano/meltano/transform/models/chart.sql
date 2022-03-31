@@ -1,6 +1,7 @@
 {{
   config(
     materialized = "view",
+    tags = ["view"],
   )
 }}
 
@@ -30,7 +31,7 @@ with latest_open_trading_session as (
                       and latest_open_trading_session.date = historical_prices_aggregated.datetime::date
     where period = '3min'
       and (historical_prices_aggregated.datetime between latest_open_trading_session.open_at and latest_open_trading_session.close_at
-        or (base_tickers.type = 'crypto' and historical_prices_aggregated.datetime > now() - interval '1 day'))
+       or (base_tickers.type = 'crypto' and historical_prices_aggregated.datetime > now() - interval '1 day'))
 )
 
 union all

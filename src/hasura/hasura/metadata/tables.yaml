@@ -807,6 +807,40 @@
       filter: {}
 - table:
     schema: public
+    name: collection_chart
+  object_relationships:
+  - name: profile
+    using:
+      manual_configuration:
+        remote_table:
+          schema: app
+          name: profiles
+        insertion_order: null
+        column_mapping:
+          profile_id: id
+  select_permissions:
+  - role: user
+    permission:
+      columns:
+      - adjusted_close
+      - close
+      - collection_id
+      - collection_uniq_id
+      - datetime
+      - high
+      - low
+      - open
+      - period
+      - profile_id
+      filter:
+        _or:
+        - profile_id:
+            _is_null: true
+        - profile:
+            user_id:
+              _eq: X-Hasura-User-Id
+- table:
+    schema: public
     name: collection_metrics
   object_relationships:
   - name: profile
@@ -822,11 +856,46 @@
   - role: user
     permission:
       columns:
-      - profile_id
-      - collection_uniq_id
       - absolute_daily_change
+      - actual_price
+      - collection_uniq_id
+      - profile_id
       - relative_daily_change
       - updated_at
+      filter:
+        _or:
+        - profile_id:
+            _is_null: true
+        - profile:
+            user_id:
+              _eq: X-Hasura-User-Id
+- table:
+    schema: public
+    name: collection_piechart
+  object_relationships:
+  - name: profile
+    using:
+      manual_configuration:
+        remote_table:
+          schema: app
+          name: profiles
+        insertion_order: null
+        column_mapping:
+          profile_id: id
+  select_permissions:
+  - role: user
+    permission:
+      columns:
+      - absolute_daily_change
+      - absolute_value
+      - collection_id
+      - collection_uniq_id
+      - entity_id
+      - entity_name
+      - entity_type
+      - profile_id
+      - relative_daily_change
+      - weight
       filter:
         _or:
         - profile_id:
@@ -1334,12 +1403,13 @@
   - role: user
     permission:
       columns:
-      - id
-      - name
-      - image_url
       - description
       - enabled
+      - id
+      - image_url
+      - name
       - size
+      - uniq_id
       filter:
         _or:
         - profile:
