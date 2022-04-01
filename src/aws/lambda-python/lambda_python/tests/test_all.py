@@ -14,7 +14,6 @@ def test_get_recommended_collections():
     response = action_dispatcher.handle(event)
     assert "code" not in response
     assert isinstance(response, list)
-    assert len(response)
 
 
 def test_create_plaid_link_token():

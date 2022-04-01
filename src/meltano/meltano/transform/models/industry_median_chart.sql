@@ -44,8 +44,7 @@ with
                     datetime,
                     median_price,
                     rows_cnt,
-                    max(rows_cnt) over (partition by industry_id, period order by datetime desc) as rolling_rows_cnt_bwd,
-                    max(rows_cnt) over (partition by industry_id, period order by datetime)      as rolling_rows_cnt_fwd
+                    max(rows_cnt) over (partition by industry_id, period order by datetime)      as rolling_rows_cnt
              from chart_raw0
          ),
      chart_raw2 as
@@ -55,12 +54,9 @@ with
                     datetime,
                     median_price,
                     rows_cnt,
-                    rolling_rows_cnt_fwd,
-                    rolling_rows_cnt_bwd,
-                    sum(case when rows_cnt = rolling_rows_cnt_bwd then 1 end)
-                    over (partition by industry_id, period order by datetime desc) as grp_bwd,
-                    sum(case when rows_cnt = rolling_rows_cnt_fwd then 1 end)
-                    over (partition by industry_id, period order by datetime)      as grp_fwd
+                    rolling_rows_cnt,
+                    sum(case when rows_cnt = rolling_rows_cnt then 1 end)
+                    over (partition by industry_id, period order by datetime) as grp
              from chart_raw1
          )
 select (industry_id || '_' || period || '_' || chart_raw2.datetime)::varchar as id,
@@ -68,12 +64,9 @@ select (industry_id || '_' || period || '_' || chart_raw2.datetime)::varchar as 
        period,
        chart_raw2.datetime,
        case
-           when rows_cnt != rolling_rows_cnt_bwd
+           when rows_cnt != rolling_rows_cnt and period in ('1d', '1w')
                then first_value(median_price)
-                    OVER (partition by industry_id, period, grp_bwd order by chart_raw2.datetime desc)
-           when rows_cnt != rolling_rows_cnt_fwd
-               then first_value(median_price)
-                    OVER (partition by industry_id, period, grp_fwd order by chart_raw2.datetime)
+                    OVER (partition by industry_id, period, grp order by chart_raw2.datetime)
            else median_price
            end                                                    as median_price
 from chart_raw2
