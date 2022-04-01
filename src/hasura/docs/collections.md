@@ -147,7 +147,8 @@ query home_tab($profileId: Int, $rankedCount: Int) {
 
 ### Match Score
 
-```graphql{
+```graphql
+{
   collections {
     id
     name
@@ -172,5 +173,4 @@ query home_tab($profileId: Int, $rankedCount: Int) {
     }
   }
 }
-
 ```
