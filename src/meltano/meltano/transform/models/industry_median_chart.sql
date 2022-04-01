@@ -15,30 +15,72 @@
 }}
 
 
+with
 {% if is_incremental() %}
-with max_date as
+     max_date as
          (
              select industry_id,
                     period,
                     max(datetime) as datetime
              from {{ this }}
              group by industry_id, period
-         )
+         ),
 {% endif %}
-select (ti.industry_id || '_' || chart.period || '_' || chart.datetime)::varchar as id,
-       ti.industry_id,
-       chart.period,
-       chart.datetime,
-       percentile_cont(0.5) WITHIN GROUP (ORDER BY adjusted_close)               as median_price
-from {{ ref('chart') }}
-         join {{ ref('ticker_industries') }} ti on chart.symbol = ti.symbol
+     chart_raw0 as
+         (
+             select industry_id,
+                    period,
+                    datetime,
+                    percentile_cont(0.5) WITHIN GROUP (ORDER BY adjusted_close) as median_price,
+                    count(*)                                                    as rows_cnt
+             from {{ ref('chart') }}
+                      join {{ ref('ticker_industries') }} using (symbol)
+             group by industry_id, period, datetime
+         ),
+     chart_raw1 as
+         (
+             select industry_id,
+                    period,
+                    datetime,
+                    median_price,
+                    rows_cnt,
+                    max(rows_cnt) over (partition by industry_id, period order by datetime desc) as rolling_rows_cnt_bwd,
+                    max(rows_cnt) over (partition by industry_id, period order by datetime)      as rolling_rows_cnt_fwd
+             from chart_raw0
+         ),
+     chart_raw2 as
+         (
+             select industry_id,
+                    period,
+                    datetime,
+                    median_price,
+                    rows_cnt,
+                    rolling_rows_cnt_fwd,
+                    rolling_rows_cnt_bwd,
+                    sum(case when rows_cnt = rolling_rows_cnt_bwd then 1 end)
+                    over (partition by industry_id, period order by datetime desc) as grp_bwd,
+                    sum(case when rows_cnt = rolling_rows_cnt_fwd then 1 end)
+                    over (partition by industry_id, period order by datetime)      as grp_fwd
+             from chart_raw1
+         )
+select (industry_id || '_' || period || '_' || chart_raw2.datetime)::varchar as id,
+       industry_id,
+       period,
+       chart_raw2.datetime,
+       case
+           when rows_cnt != rolling_rows_cnt_bwd
+               then first_value(median_price)
+                    OVER (partition by industry_id, period, grp_bwd order by chart_raw2.datetime desc)
+           when rows_cnt != rolling_rows_cnt_fwd
+               then first_value(median_price)
+                    OVER (partition by industry_id, period, grp_fwd order by chart_raw2.datetime)
+           else median_price
+           end                                                    as median_price
+from chart_raw2
 {% if is_incremental() %}
-         left join max_date
-                   on max_date.industry_id = ti.industry_id
-                       and max_date.period = chart.period
-where max_date.datetime is null or chart.datetime >= max_date.datetime - interval '20 minutes'
+         left join max_date using (industry_id, period)
+where max_date.datetime is null or chart_raw2.datetime >= max_date.datetime - interval '20 minutes'
   {% if var('realtime') %}
-  and chart.period in ('1d', '1w')
+  and period in ('1d', '1w')
   {% endif %}
 {% endif %}
-group by ti.industry_id, chart.period, chart.datetime
