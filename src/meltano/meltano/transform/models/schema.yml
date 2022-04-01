@@ -66,7 +66,6 @@ models:
               type: 'text'
       - name: icon_url
         tests:
-          - exists
           - type:
               type: 'text'
       - name: collection_id
@@ -106,12 +105,10 @@ models:
               type: 'character varying'
       - name: adjusted_close
         tests:
-          - exists
           - type:
               type: 'double precision'
       - name: close
         tests:
-          - exists
           - type:
               type: 'double precision'
       - name: date
@@ -121,22 +118,18 @@ models:
               type: 'date'
       - name: high
         tests:
-          - exists
           - type:
               type: 'double precision'
       - name: low
         tests:
-          - exists
           - type:
               type: 'double precision'
       - name: open
         tests:
-          - exists
           - type:
               type: 'double precision'
       - name: volume
         tests:
-          - exists
           - type:
               type: 'numeric'
 
@@ -154,12 +147,10 @@ models:
               type: 'integer'
       - name: median_price
         tests:
-          - exists
           - type:
               type: 'double precision'
       - name: median_growth_rate_1d
         tests:
-          - exists
           - type:
               type: 'double precision'
 
@@ -177,12 +168,10 @@ models:
               type: 'integer'
       - name: median_net_income
         tests:
-          - exists
           - type:
               type: 'double precision'
       - name: median_revenue
         tests:
-          - exists
           - type:
               type: 'double precision'
 
@@ -191,22 +180,18 @@ models:
       - name: id
         tests:
           - unique
-          - exists
           - type:
               type: 'integer'
       - name: enabled
         tests:
-          - exists
           - type:
               type: 'character varying'
       - name: icon_url
         tests:
-          - exists
           - type:
               type: 'character varying'
       - name: name
         tests:
-          - exists
           - type:
               type: 'character varying'
 
@@ -215,24 +200,20 @@ models:
       - name: id
         tests:
           - unique
-          - exists
           - type:
               type: 'character varying'
       - name: interest_id
         tests:
-          - exists
           - not_null
           - type:
               type: 'integer'
       - name: industry_id
         tests:
-          - exists
           - not_null
           - type:
               type: 'integer'
       - name: updated_at
         tests:
-          - exists
           - not_null
           - type:
               type: 'timestamp with time zone'
@@ -242,35 +223,29 @@ models:
       - name: id
         tests:
           - unique
-          - exists
           - type:
               type: 'integer'
       - name: name
         tests:
-          - exists
           - not_null
           - type:
               type: 'character varying'
       - name: description
         tests:
-          - exists
           - type:
               type: 'character varying'
       - name: enabled
         tests:
-          - exists
           - accepted_values:
               values: [ '0', '1' ]
           - type:
               type: 'character varying'
       - name: image_url
         tests:
-          - exists
           - type:
               type: 'character varying'
       - name: size
         tests:
-          - exists
           - type:
               type: 'integer'
 
@@ -278,13 +253,11 @@ models:
     columns:
       - name: category_id
         tests:
-          - exists
           - not_null
           - type:
               type: 'integer'
       - name: symbol
         tests:
-          - exists
           - not_null
           - type:
               type: 'character varying'
@@ -294,13 +267,11 @@ models:
     columns:
       - name: symbol
         tests:
-          - exists
           - not_null
           - type:
               type: 'character varying'
       - name: collection_id
         tests:
-          - exists
           - not_null
           - type:
               type: 'integer'
@@ -309,35 +280,29 @@ models:
     columns:
       - name: symbol
         tests:
-          - exists
           - not_null
           - type:
               type: 'character varying'
       - name: date
         tests:
-          - exists
           - not_null
           - type:
               type: 'date'
       - name: timestamp
         tests:
-          - exists
           - not_null
           - type:
               type: 'timestamp with time zone'
       - name: type
         tests:
-          - exists
           - type:
               type: 'text'
       - name: description
         tests:
-          - exists
           - type:
               type: 'text'
       - name: created_at
         tests:
-          - exists
           - type:
               type: 'timestamp with time zone'
 
@@ -346,17 +311,14 @@ models:
       - name: symbol
         tests:
           - not_null
-          - exists
           - type:
               type: 'character varying'
       - name: highlight
         tests:
-          - exists
           - type:
               type: 'text'
       - name: created_at
         tests:
-          - exists
           - type:
               type: 'timestamp with time zone'
 
@@ -365,13 +327,11 @@ models:
       - name: symbol
         tests:
           - not_null
-          - exists
           - type:
               type: 'character varying'
       - name: industry_id
         tests:
           - not_null
-          - exists
           - type:
               type: 'integer'
 
@@ -380,13 +340,11 @@ models:
       - name: symbol
         tests:
           - not_null
-          - exists
           - type:
               type: 'character varying'
       - name: interest_id
         tests:
           - not_null
-          - exists
           - type:
               type: 'integer'
 
@@ -396,82 +354,66 @@ models:
         tests:
           - not_null
           - unique
-          - exists
           - type:
               type: 'character varying'
       - name: type
         tests:
-          - exists
           - type:
               type: 'character varying'
       - name: name
         tests:
-          - exists
           - type:
               type: 'character varying'
       - name: description
         tests:
-          - exists
           - type:
               type: 'character varying'
       - name: phone
         tests:
-          - exists
           - type:
               type: 'character varying'
       - name: logo_url
         tests:
-          - exists
           - type:
               type: 'character varying'
       - name: web_url
         tests:
-          - exists
           - type:
               type: 'character varying'
       - name: ipo_date
         tests:
-          - exists
           - type:
               type: 'date'
       - name: sector
         tests:
-          - exists
           - type:
               type: 'character varying'
       - name: industry
         tests:
-          - exists
           - type:
               type: 'character varying'
       - name: gic_sector
         tests:
-          - exists
           - type:
               type: 'character varying'
       - name: gic_group
         tests:
-          - exists
           - type:
               type: 'character varying'
       - name: gic_industry
         tests:
-          - exists
           - type:
               type: 'character varying'
       - name: gic_sub_industry
         tests:
-          - exists
           - type:
               type: 'character varying'
       - name: country_name
         tests:
-          - exists
           - type:
               type: 'text'
       - name: updated_at
         tests:
-          - exists
           - type:
               type: 'timestamp without time zone'
 
@@ -482,32 +424,26 @@ models:
         tests:
           - not_null
           - unique
-          - exists
           - type:
               type: 'character varying'
       - name: name
         tests:
-          - exists
           - type:
               type: 'character varying'
       - name: description
         tests:
-          - exists
           - type:
               type: 'character varying'
       - name: tag_1
         tests:
-          - exists
           - type:
               type: 'ARRAY'
       - name: tag_2
         tests:
-          - exists
           - type:
               type: 'ARRAY'
       - name: daily_volume_avg
         tests:
-          - exists
           - not_null
           - type:
               type:  'real'
@@ -518,32 +454,26 @@ models:
         tests:
           - not_null
           - unique
-          - exists
           - type:
               type: 'integer'
       - name: name
         tests:
-          - exists
           - type:
               type: 'character varying'
       - name: description
         tests:
-          - exists
           - type:
               type: 'character varying'
       - name: tag_1
         tests:
-          - exists
           - type:
               type: 'ARRAY'
       - name: tag_2
         tests:
-          - exists
           - type:
               type: 'ARRAY'
       - name: tag_3
         tests:
-          - exists
           - type:
               type: 'ARRAY'
 
@@ -551,47 +481,38 @@ models:
     columns:
       - name: symbol
         tests:
-          - exists
           - type:
               type: 'character varying'
       - name: period
         tests:
-          - exists
           - type:
               type: 'character varying'
       - name: datetime
         tests:
-          - exists
           - type:
               type: 'timestamp without time zone'
       - name: open
         tests:
-          - exists
           - type:
               type: 'double precision'
       - name: high
         tests:
-          - exists
           - type:
               type: 'double precision'
       - name: low
         tests:
-          - exists
           - type:
               type: 'double precision'
       - name: close
         tests:
-          - exists
           - type:
               type: 'double precision'
       - name: adjusted_close
         tests:
-          - exists
           - type:
               type: 'double precision'
       - name: volume
         tests:
-          - exists
           - type:
               type: 'double precision'
 
@@ -599,47 +520,38 @@ models:
     columns:
       - name: symbol
         tests:
-          - exists
           - type:
               type: 'character varying'
       - name: period
         tests:
-          - exists
           - type:
               type: 'character varying'
       - name: datetime
         tests:
-          - exists
           - type:
               type: 'timestamp without time zone'
       - name: open
         tests:
-          - exists
           - type:
               type: 'double precision'
       - name: high
         tests:
-          - exists
           - type:
               type: 'double precision'
       - name: low
         tests:
-          - exists
           - type:
               type: 'double precision'
       - name: close
         tests:
-          - exists
           - type:
               type: 'double precision'
       - name: adjusted_close
         tests:
-          - exists
           - type:
               type: 'double precision'
       - name: volume
         tests:
-          - exists
           - type:
               type: 'double precision'
 
@@ -647,22 +559,18 @@ models:
     columns:
       - name: industry_id
         tests:
-          - exists
           - type:
               type: 'integer'
       - name: date
         tests:
-          - exists
           - type:
               type: 'timestamp without time zone'
       - name: median_growth_rate
         tests:
-          - exists
           - type:
               type: 'double precision'
       - name: median_price
         tests:
-          - exists
           - type:
               type: 'double precision'
 
@@ -670,22 +578,18 @@ models:
     columns:
       - name: industry_id
         tests:
-          - exists
           - type:
               type: 'integer'
       - name: date
         tests:
-          - exists
           - type:
               type: 'timestamp without time zone'
       - name: median_growth_rate
         tests:
-          - exists
           - type:
               type: 'double precision'
       - name: median_price
         tests:
-          - exists
           - type:
               type: 'double precision'
 
@@ -693,42 +597,34 @@ models:
     columns:
       - name: symbol
         tests:
-          - exists
           - type:
               type: 'text'
       - name: buy
         tests:
-          - exists
           - type:
               type: 'integer'
       - name: hold
         tests:
-          - exists
           - type:
               type: 'integer'
       - name: sell
         tests:
-          - exists
           - type:
               type: 'integer'
       - name: rating
         tests:
-          - exists
           - type:
               type: 'double precision'
       - name: strong_buy
         tests:
-          - exists
           - type:
               type: 'integer'
       - name: strong_sell
         tests:
-          - exists
           - type:
               type: 'integer'
       - name: target_price
         tests:
-          - exists
           - type:
               type: 'double precision'
 
@@ -736,310 +632,250 @@ models:
     columns:
       - name: symbol
         tests:
-          - exists
           - type:
               type: 'character varying'
       - name: profit_margin
         tests:
-          - exists
           - type:
               type: 'double precision'
 # trading
       - name: avg_volume_10d
         tests:
-          - exists
           - type:
               type: 'double precision'
       - name: short_percent_outstanding
         tests:
-          - exists
           - type:
               type: 'double precision'
       - name: shares_outstanding
         tests:
-          - exists
           - type:
               type: 'bigint'
       - name: avg_volume_90d
         tests:
-          - exists
           - type:
               type: 'double precision'
       - name: shares_float
         tests:
-          - exists
           - type:
               type: 'bigint'
       - name: short_ratio
         tests:
-          - exists
           - type:
               type: 'double precision'
       - name: short_percent
         tests:
-          - exists
           - type:
               type: 'double precision'
       - name: beta
         tests:
-          - exists
           - type:
               type: 'double precision'
       - name: absolute_historical_volatility_adjusted_current
         tests:
-          - exists
           - type:
               type: 'double precision'
       - name: relative_historical_volatility_adjusted_current
         tests:
-          - exists
           - type:
               type: 'double precision'
       - name: absolute_historical_volatility_adjusted_min_1y
         tests:
-          - exists
           - type:
               type: 'double precision'
       - name: absolute_historical_volatility_adjusted_max_1y
         tests:
-          - exists
           - type:
               type: 'double precision'
       - name: relative_historical_volatility_adjusted_min_1y
         tests:
-          - exists
           - type:
               type: 'double precision'
       - name: relative_historical_volatility_adjusted_max_1y
         tests:
-          - exists
           - type:
               type: 'double precision'
       - name: implied_volatility
         tests:
-          - exists
           - type:
               type: 'double precision'
 # growth
       - name: revenue_growth_yoy
         tests:
-          - exists
           - type:
               type: 'double precision'
       - name: revenue_growth_fwd
         tests:
-          - exists
           - type:
               type: 'double precision'
       - name: ebitda_growth_yoy
         tests:
-          - exists
           - type:
               type: 'double precision'
       - name: eps_growth_yoy
         tests:
-          - exists
           - type:
               type: 'double precision'
       - name: eps_growth_fwd
         tests:
-          - exists
           - type:
               type: 'double precision'
 # general
       - name: address_city
         tests:
-          - exists
           - type:
               type: 'character varying'
       - name: address_state
         tests:
-          - exists
           - type:
               type: 'character varying'
       - name: address_county
         tests:
-          - exists
           - type:
               type: 'character varying'
       - name: address_full
         tests:
-          - exists
           - type:
               type: 'character varying'
       - name: exchange_name
         tests:
-          - exists
           - type:
               type: 'character varying'
 # valuation
       - name: market_capitalization
         tests:
-          - exists
           - type:
               type: 'bigint'
       - name: enterprise_value_to_sales
         tests:
-          - exists
           - type:
               type: 'double precision'
       - name: price_to_earnings_ttm
         tests:
-          - exists
           - type:
               type: 'double precision'
       - name: price_to_sales_ttm
         tests:
-          - exists
           - type:
               type: 'double precision'
       - name: price_to_book_value
         tests:
-          - exists
           - type:
               type: 'double precision'
       - name: enterprise_value_to_ebitda
         tests:
-          - exists
           - type:
               type: 'double precision'
 # momentum
       - name: price_change_1m
         tests:
-          - exists
           - type:
               type: 'double precision'
       - name: price_change_3m
         tests:
-          - exists
           - type:
               type: 'double precision'
       - name: price_change_1y
         tests:
-          - exists
           - type:
               type: 'double precision'
 # dividend
       - name: dividend_yield
         tests:
-          - exists
           - type:
               type: 'double precision'
       - name: dividends_per_share
         tests:
-          - exists
           - type:
               type: 'double precision'
       - name: dividend_payout_ratio
         tests:
-          - exists
           - type:
               type: 'double precision'
       - name: years_of_consecutive_dividend_growth
         tests:
-          - exists
           - type:
               type: 'integer'
       - name: dividend_frequency
         tests:
-          - exists
           - type:
               type: 'character varying'
 # earnings
       - name: eps_ttm
         tests:
-          - exists
           - type:
               type: 'double precision'
       - name: eps_actual
         tests:
-          - exists
           - type:
               type: 'double precision'
       - name: eps_estimate
         tests:
-          - exists
           - type:
               type: 'double precision'
       - name: beaten_quarterly_eps_estimation_count_ttm
         tests:
-          - exists
           - type:
               type: 'integer'
       - name: eps_surprise
         tests:
-          - exists
           - type:
               type: 'double precision'
       - name: eps_difference
         tests:
-          - exists
           - type:
               type: 'double precision'
       - name: revenue_estimate_avg_0y
         tests:
-          - exists
           - type:
               type: 'double precision'
       - name: revenue_actual
         tests:
-          - exists
           - type:
               type: 'double precision'
       # financials
       - name: revenue_ttm
         tests:
-          - exists
           - type:
               type: 'double precision'
       - name: revenue_per_share_ttm
         tests:
-          - exists
           - type:
               type: 'double precision'
       - name: net_income
         tests:
-          - exists
           - type:
               type: 'double precision'
       - name: net_income_ttm
         tests:
-          - exists
           - type:
               type: 'double precision'
       - name: roi
         tests:
-          - exists
           - type:
               type: 'double precision'
       - name: asset_cash_and_equivalents
         tests:
-          - exists
           - type:
               type: 'double precision'
       - name: roa
         tests:
-          - exists
           - type:
               type: 'double precision'
       - name: total_assets
         tests:
-          - exists
           - type:
               type: 'double precision'
       - name: ebitda
         tests:
-          - exists
           - type:
               type: 'double precision'
       - name: ebitda_ttm
         tests:
-          - exists
           - type:
               type: 'double precision'
       - name: net_debt
         tests:
-          - exists
           - type:
               type: 'double precision'
 
@@ -1047,97 +883,78 @@ models:
     columns:
       - name: holding_id
         tests:
-          - exists
           - type:
               type: 'integer'
       - name: updated_at
         tests:
-          - exists
           - type:
               type: 'timestamp without time zone'
       - name: actual_value
         tests:
-          - exists
           - type:
               type: 'double precision'
       - name: value_to_portfolio_value
         tests:
-          - exists
           - type:
               type: 'double precision'
       - name: relative_gain_1d
         tests:
-          - exists
           - type:
               type: 'double precision'
       - name: relative_gain_1w
         tests:
-          - exists
           - type:
               type: 'double precision'
       - name: relative_gain_1m
         tests:
-          - exists
           - type:
               type: 'double precision'
       - name: relative_gain_3m
         tests:
-          - exists
           - type:
               type: 'double precision'
       - name: relative_gain_1y
         tests:
-          - exists
           - type:
               type: 'double precision'
       - name: relative_gain_5y
         tests:
-          - exists
           - type:
               type: 'double precision'
       - name: relative_gain_total
         tests:
-          - exists
           - type:
               type: 'double precision'
       - name: absolute_gain_1d
         tests:
-          - exists
           - type:
               type: 'double precision'
       - name: absolute_gain_1w
         tests:
-          - exists
           - type:
               type: 'double precision'
       - name: absolute_gain_1m
         tests:
-          - exists
           - type:
               type: 'double precision'
       - name: absolute_gain_3m
         tests:
-          - exists
           - type:
               type: 'double precision'
       - name: absolute_gain_1y
         tests:
-          - exists
           - type:
               type: 'double precision'
       - name: absolute_gain_5y
         tests:
-          - exists
           - type:
               type: 'double precision'
       - name: absolute_gain_total
         tests:
-          - exists
           - type:
               type: 'double precision'
       - name: ltt_quantity_total
         tests:
-          - exists
           - type:
               type: 'double precision'
 
@@ -1145,102 +962,82 @@ models:
     columns:
       - name: profile_id
         tests:
-          - exists
           - type:
               type: 'integer'
       - name: ticker_symbol
         tests:
-          - exists
           - type:
               type: 'character varying'
       - name: updated_at
         tests:
-          - exists
           - type:
               type: 'timestamp without time zone'
       - name: actual_value
         tests:
-          - exists
           - type:
               type: 'double precision'
       - name: value_to_portfolio_value
         tests:
-          - exists
           - type:
               type: 'double precision'
       - name: relative_gain_1d
         tests:
-          - exists
           - type:
               type: 'double precision'
       - name: relative_gain_1w
         tests:
-          - exists
           - type:
               type: 'double precision'
       - name: relative_gain_1m
         tests:
-          - exists
           - type:
               type: 'double precision'
       - name: relative_gain_3m
         tests:
-          - exists
           - type:
               type: 'double precision'
       - name: relative_gain_1y
         tests:
-          - exists
           - type:
               type: 'double precision'
       - name: relative_gain_5y
         tests:
-          - exists
           - type:
               type: 'double precision'
       - name: relative_gain_total
         tests:
-          - exists
           - type:
               type: 'double precision'
       - name: absolute_gain_1d
         tests:
-          - exists
           - type:
               type: 'double precision'
       - name: absolute_gain_1w
         tests:
-          - exists
           - type:
               type: 'double precision'
       - name: absolute_gain_1m
         tests:
-          - exists
           - type:
               type: 'double precision'
       - name: absolute_gain_3m
         tests:
-          - exists
           - type:
               type: 'double precision'
       - name: absolute_gain_1y
         tests:
-          - exists
           - type:
               type: 'double precision'
       - name: absolute_gain_5y
         tests:
-          - exists
           - type:
               type: 'double precision'
       - name: absolute_gain_total
         tests:
-          - exists
           - type:
               type: 'double precision'
       - name: ltt_quantity_total
         tests:
-          - exists
           - type:
               type: 'double precision'
 
@@ -1248,77 +1045,62 @@ models:
     columns:
       - name: holding_id
         tests:
-          - exists
           - type:
               type: 'integer'
       - name: ticker_symbol
         tests:
-          - exists
           - type:
               type: 'character varying'
       - name: account_id
         tests:
-          - exists
           - type:
               type: 'integer'
       - name: purchase_date
         tests:
-          - exists
           - type:
               type: 'timestamp without time zone'
       - name: relative_gain_total
         tests:
-          - exists
           - type:
               type: 'double precision'
       - name: relative_gain_1d
         tests:
-          - exists
           - type:
               type: 'double precision'
       - name: value_to_portfolio_value
         tests:
-          - exists
           - type:
               type: 'double precision'
       - name: ticker_name
         tests:
-          - exists
           - type:
               type: 'character varying'
       - name: market_capitalization
         tests:
-          - exists
           - type:
               type: 'bigint'
       - name: next_earnings_date
         tests:
-          - exists
           - type:
               type: 'timestamp without time zone'
       - name: security_type
         tests:
-          - exists
           - type:
               type: 'character varying'
       - name: ltt_quantity_total
         tests:
-          - exists
           - type:
               type: 'double precision'
       - name: name
         tests:
-          - exists
           - type:
               type: 'character varying'
       - name: quantity
         tests:
-          - exists
           - type:
               type: 'double precision'
       - name: avg_cost
         tests:
-          - exists
           - type:
               type: 'double precision'
 
@@ -1326,52 +1108,42 @@ models:
     columns:
       - name: profile_id
         tests:
-          - exists
           - type:
               type: 'integer'
       - name: ticker_symbol
         tests:
-          - exists
           - type:
               type: 'character varying'
       - name: purchase_date
         tests:
-          - exists
           - type:
               type: 'timestamp without time zone'
       - name: relative_gain_total
         tests:
-          - exists
           - type:
               type: 'double precision'
       - name: relative_gain_1d
         tests:
-          - exists
           - type:
               type: 'double precision'
       - name: value_to_portfolio_value
         tests:
-          - exists
           - type:
               type: 'double precision'
       - name: ticker_name
         tests:
-          - exists
           - type:
               type: 'character varying'
       - name: market_capitalization
         tests:
-          - exists
           - type:
               type: 'bigint'
       - name: next_earnings_date
         tests:
-          - exists
           - type:
               type: 'timestamp without time zone'
       - name: ltt_quantity_total
         tests:
-          - exists
           - type:
               type: 'double precision'
 
@@ -1379,87 +1151,70 @@ models:
     columns:
       - name: profile_id
         tests:
-          - exists
           - type:
               type: 'integer'
       - name: actual_value
         tests:
-          - exists
           - type:
               type: 'double precision'
       - name: updated_at
         tests:
-          - exists
           - type:
               type: 'timestamp without time zone'
       - name: relative_gain_1d
         tests:
-          - exists
           - type:
               type: 'double precision'
       - name: relative_gain_1w
         tests:
-          - exists
           - type:
               type: 'double precision'
       - name: relative_gain_1m
         tests:
-          - exists
           - type:
               type: 'double precision'
       - name: relative_gain_3m
         tests:
-          - exists
           - type:
               type: 'double precision'
       - name: relative_gain_1y
         tests:
-          - exists
           - type:
               type: 'double precision'
       - name: relative_gain_5y
         tests:
-          - exists
           - type:
               type: 'double precision'
       - name: relative_gain_total
         tests:
-          - exists
           - type:
               type: 'double precision'
       - name: absolute_gain_1d
         tests:
-          - exists
           - type:
               type: 'double precision'
       - name: absolute_gain_1w
         tests:
-          - exists
           - type:
               type: 'double precision'
       - name: absolute_gain_1m
         tests:
-          - exists
           - type:
               type: 'double precision'
       - name: absolute_gain_3m
         tests:
-          - exists
           - type:
               type: 'double precision'
       - name: absolute_gain_1y
         tests:
-          - exists
           - type:
               type: 'double precision'
       - name: absolute_gain_5y
         tests:
-          - exists
           - type:
               type: 'double precision'
       - name: absolute_gain_total
         tests:
-          - exists
           - type:
               type: 'double precision'
 
@@ -1467,27 +1222,22 @@ models:
     columns:
       - name: profile_id
         tests:
-          - exists
           - type:
               type: 'integer'
       - name: value
         tests:
-          - exists
           - type:
               type: 'double precision'
       - name: date
         tests:
-          - exists
           - type:
               type: 'timestamp without time zone'
       - name: datetime
         tests:
-          - exists
           - type:
               type: 'timestamp without time zone'
       - name: period
         tests:
-          - exists
           - type:
               type: 'character varying'
 
@@ -1495,42 +1245,34 @@ models:
     columns:
       - name: transactions_uniq_id
         tests:
-          - exists
           - type:
               type: 'character varying'
       - name: datetime
         tests:
-          - exists
           - type:
               type: 'timestamp without time zone'
       - name: period
         tests:
-          - exists
           - type:
               type: 'character varying'
       - name: open
         tests:
-          - exists
           - type:
               type: 'numeric'
       - name: high
         tests:
-          - exists
           - type:
               type: 'numeric'
       - name: low
         tests:
-          - exists
           - type:
               type: 'numeric'
       - name: close
         tests:
-          - exists
           - type:
               type: 'numeric'
       - name: adjusted_close
         tests:
-          - exists
           - type:
               type: 'numeric'
 
@@ -1538,47 +1280,38 @@ models:
     columns:
       - name: symbol
         tests:
-          - exists
           - type:
               type: 'character varying'
       - name: time
         tests:
-          - exists
           - type:
               type: 'timestamp without time zone'
       - name: actual_price
         tests:
-          - exists
           - type:
               type: 'double precision'
       - name: absolute_daily_change
         tests:
-          - exists
           - type:
               type: 'double precision'
       - name: relative_daily_change
         tests:
-          - exists
           - type:
               type: 'double precision'
       - name: daily_volume
         tests:
-          - exists
           - type:
               type: 'double precision'
       - name: last_known_price
         tests:
-          - exists
           - type:
               type: 'double precision'
       - name: last_known_price_datetime
         tests:
-          - exists
           - type:
               type: 'timestamp without time zone'
       - name: previous_day_close_price
         tests:
-          - exists
           - type:
               type: 'double precision'
 
@@ -1586,22 +1319,18 @@ models:
     columns:
       - name: industry_id
         tests:
-          - exists
           - type:
               type: 'integer'
       - name: period
         tests:
-          - exists
           - type:
               type: 'character varying'
       - name: datetime
         tests:
-          - exists
           - type:
               type: 'timestamp without time zone'
       - name: median_price
         tests:
-          - exists
           - type:
               type: 'double precision'
 
@@ -1609,47 +1338,38 @@ models:
     columns:
       - name: uniq_id
         tests:
-          - exists
           - type:
               type: 'character varying'
       - name: profile_id
         tests:
-          - exists
           - type:
               type: 'integer'
       - name: id
         tests:
-          - exists
           - type:
               type: 'integer'
       - name: name
         tests:
-          - exists
           - type:
               type: 'character varying'
       - name: description
         tests:
-          - exists
           - type:
               type: 'character varying'
       - name: image_url
         tests:
-          - exists
           - type:
               type: 'character varying'
       - name: enabled
         tests:
-          - exists
           - type:
               type: 'text'
       - name: personalized
         tests:
-          - exists
           - type:
               type: 'character varying'
       - name: size
         tests:
-          - exists
           - type:
               type: 'integer'
 
@@ -1657,32 +1377,26 @@ models:
     columns:
       - name: profile_id
         tests:
-          - exists
           - type:
               type: 'integer'
       - name: collection_uniq_id
         tests:
-          - exists
           - type:
               type: 'character varying'
       - name: actual_price
         tests:
-          - exists
           - type:
               type: 'double precision'
       - name: absolute_daily_change
         tests:
-          - exists
           - type:
               type: 'double precision'
       - name: relative_daily_change
         tests:
-          - exists
           - type:
               type: 'double precision'
       - name: updated_at
         tests:
-          - exists
           - type:
               type: 'timestamp without time zone'
 
@@ -1690,32 +1404,26 @@ models:
     columns:
       - name: profile_id
         tests:
-          - exists
           - type:
               type: 'integer'
       - name: symbol
         tests:
-          - exists
           - type:
               type: 'character varying'
       - name: relative_daily_change
         tests:
-          - exists
           - type:
               type: 'double precision'
       - name: updated_at
         tests:
-          - exists
           - type:
               type: 'timestamp without time zone'
       - name: gainer_rank
         tests:
-          - exists
           - type:
               type: 'integer'
       - name: loser_rank
         tests:
-          - exists
           - type:
               type: 'integer'
 
@@ -1723,57 +1431,46 @@ models:
     columns:
       - name: id
         tests:
-          - exists
           - type:
               type: 'character varying'
       - name: title
         tests:
-          - exists
           - type:
               type: 'character varying'
       - name: post_summary
         tests:
-          - exists
           - type:
               type: 'character varying'
       - name: main_image
         tests:
-          - exists
           - type:
               type: 'character varying'
       - name: category_link
         tests:
-          - exists
           - type:
               type: 'character varying'
       - name: category_name
         tests:
-          - exists
           - type:
               type: 'character varying'
       - name: published_on
         tests:
-          - exists
           - type:
               type: 'timestamp without time zone'
       - name: rate_rating
         tests:
-          - exists
           - type:
               type: 'double precision'
       - name: rate_votes
         tests:
-          - exists
           - type:
               type: 'integer'
       - name: url
         tests:
-          - exists
           - type:
               type: 'character varying'
       - name: updated_on
         tests:
-          - exists
           - type:
               type: 'timestamp without time zone'
 
@@ -1781,52 +1478,42 @@ models:
     columns:
       - name: profile_id
         tests:
-          - exists
           - type:
               type: 'integer'
       - name: collection_id
         tests:
-          - exists
           - type:
               type: 'integer'
       - name: collection_uniq_id
         tests:
-          - exists
           - type:
               type: 'character varying'
       - name: datetime
         tests:
-          - exists
           - type:
               type: 'timestamp without time zone'
       - name: period
         tests:
-          - exists
           - type:
               type: 'character varying'
       - name: open
         tests:
-          - exists
           - type:
               type: 'double precision'
       - name: high
         tests:
-          - exists
           - type:
               type: 'double precision'
       - name: low
         tests:
-          - exists
           - type:
               type: 'double precision'
       - name: close
         tests:
-          - exists
           - type:
               type: 'double precision'
       - name: adjusted_close
         tests:
-          - exists
           - type:
               type: 'double precision'
 
@@ -1834,52 +1521,42 @@ models:
     columns:
       - name: profile_id
         tests:
-          - exists
           - type:
               type: 'integer'
       - name: collection_id
         tests:
-          - exists
           - type:
               type: 'integer'
       - name: collection_uniq_id
         tests:
-          - exists
           - type:
               type: 'character varying'
       - name: weight
         tests:
-          - exists
           - type:
               type: 'double precision'
       - name: entity_type
         tests:
-          - exists
           - type:
               type: 'character varying'
       - name: entity_id
         tests:
-          - exists
           - type:
               type: 'character varying'
       - name: entity_name
         tests:
-          - exists
           - type:
               type: 'character varying'
       - name: absolute_daily_change
         tests:
-          - exists
           - type:
               type: 'double precision'
       - name: relative_daily_change
         tests:
-          - exists
           - type:
               type: 'double precision'
       - name: absolute_value
         tests:
-          - exists
           - type:
               type: 'double precision'
 
