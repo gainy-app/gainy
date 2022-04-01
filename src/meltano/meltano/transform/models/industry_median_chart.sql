@@ -33,8 +33,8 @@ with
                     datetime,
                     percentile_cont(0.5) WITHIN GROUP (ORDER BY adjusted_close) as median_price,
                     count(*)                                                    as rows_cnt
-             from {{ ('chart') }}
-                      join {{ ('ticker_industries') }} using (symbol)
+             from {{ ref('chart') }}
+                      join {{ ref('ticker_industries') }} using (symbol)
              group by industry_id, period, datetime
          ),
      chart_raw1 as
