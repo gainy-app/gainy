@@ -25,7 +25,41 @@
 
 ```graphql
 {
-    link_plaid_account(profile_id: 2, public_token: "public-sandbox-0c02e9cb-ef57-4a82-a4eb-f8d7d99dfb01") {
+    link_plaid_account(profile_id: 2, 
+        public_token: "public-sandbox-0c02e9cb-ef57-4a82-a4eb-f8d7d99dfb01") {
+        result
+    }
+}
+```
+
+### Reauth flow
+
+The app needs to launch the reauth flow when the access token's `needs_reauth_since` field is not null:
+```graphql
+{
+  app_profile_plaid_access_tokens { needs_reauth_since }
+}
+```
+
+Then you need to pass `access_token_id` along with other fields to the `create_plaid_link_token` and `link_plaid_account` endpoints: 
+```graphql
+{
+    create_plaid_link_token(
+        profile_id: 2, 
+        redirect_uri: "https://app.gainy.application.ios",
+        access_token_id: 1
+    ){
+        link_token
+    }
+}
+```
+```graphql
+{
+    link_plaid_account(
+        profile_id: 2,
+        public_token: "public-sandbox-0c02e9cb-ef57-4a82-a4eb-f8d7d99dfb01",
+        access_token_id: 1
+    ) {
         result
     }
 }
@@ -174,24 +208,6 @@ mutation{
         value_to_portfolio_value
         ltt_quantity_total
       }
-      holding_transactions {
-        portfolio_transaction_gains {
-          absolute_gain_1d
-          absolute_gain_1m
-          absolute_gain_1w
-          absolute_gain_1y
-          absolute_gain_3m
-          absolute_gain_5y
-          absolute_gain_total
-          relative_gain_1d
-          relative_gain_1m
-          relative_gain_1w
-          relative_gain_1y
-          relative_gain_3m
-          relative_gain_5y
-          relative_gain_total
-        }
-      }
     }
   }
 }
@@ -199,16 +215,38 @@ mutation{
 
 ### Chart
 
-periods: 15min, 1d, 1w, 1m
+periods: 1d, 1w, 1m, 3m, 1y, 5y, all
 
 ```GraphQL
-{
-    portfolio_chart(where: {profile_id: {_eq: 16}, period: {_eq: "1d"}, datetime: {_gte: "2021-11-02T06:00:00"}}, order_by: {datetime: asc}) {
+query GetPortfolioChart(
+    $profileId: Int!,
+    $periods: [String]!,
+    $interestIds: [Int],
+    $accessTokenIds: [Int],
+    $accountIds: [Int],
+    $categoryIds: [Int],
+    $lttOnly: Boolean,
+    $securityTypes: [String]
+) {
+    get_portfolio_chart(
+        profile_id: $profileId,
+        periods: $periods,
+        interest_ids: $interestIds,
+        access_token_ids: $accessTokenIds,
+        account_ids: $accountIds,
+        category_ids: $categoryIds,
+        ltt_only: $lttOnly,
+        security_types: $securityTypes
+    ) {
         datetime
         period
-        value
+        open
+        high
+        low
+        close
     }
 }
+
 ```
 
 ### Sorting / Filtering
@@ -223,7 +261,7 @@ periods: 15min, 1d, 1w, 1m
     # app_profile_holdings(order_by: {holding_details: {market_capitalization: asc}})
     # app_profile_holdings(order_by: {holding_details: {next_earnings_date: asc}})
     # app_profile_holdings(where: {holding_details: {account_id: {_eq: 7}}})
-    # app_profile_holdings(where: {access_token: {institution: {id: {_eq: 2}}}})
+    # app_profile_holdings(where: {access_token: {id: {_eq: 1}}})
     # app_profile_holdings(where: {holding_details: {ticker: {ticker_interests: {interest_id: {_in: [5]}}}}})
     # app_profile_holdings(where: {holding_details: {ticker: {ticker_categories: {category_id: {_in: []}}}}}) 
     # app_profile_holdings(where: {holding_details: {security_type: {_in: ["equity"]}}})
@@ -245,7 +283,7 @@ periods: 15min, 1d, 1w, 1m
     }
     
     # broker options:
-    app_profile_plaid_access_tokens { institution { id name } }
+    app_profile_plaid_access_tokens { id }
 
     # interests options:
     interests(where: {enabled: {_eq: "1"}}) {
@@ -333,33 +371,6 @@ periods: 15min, 1d, 1w, 1m
             name
             quantity
             ticker_symbol
-            transactions(order_by: {date: desc}, limit: 10) {
-                amount
-                date
-                fees
-                iso_currency_code
-                name
-                price
-                quantity
-                subtype
-                type
-                portfolio_transaction_gains {
-                    absolute_gain_1d
-                    absolute_gain_1m
-                    absolute_gain_1w
-                    absolute_gain_1y
-                    absolute_gain_3m
-                    absolute_gain_5y
-                    absolute_gain_total
-                    relative_gain_1m
-                    relative_gain_1d
-                    relative_gain_1w
-                    relative_gain_1y
-                    relative_gain_3m
-                    relative_gain_5y
-                    relative_gain_total
-                }
-            }
             holding_details {
                 purchase_date
                 relative_gain_total

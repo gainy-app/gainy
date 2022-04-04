@@ -199,5 +199,5 @@ async def run(listener_factory):
 
             should_reconnect = listener.should_reconnect()
         except Exception as e:
-            logger.error(e, exc_info=True)
+            logger.exception(e)
             await asyncio.sleep(60)

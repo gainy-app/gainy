@@ -3,6 +3,7 @@ type Query {
     profile_id: Int!
     redirect_uri: String!
     env: String
+    access_token_id: Int
   ): CreatePlaidLinkTokenOutput
 }
 
@@ -38,6 +39,7 @@ type Query {
   get_portfolio_chart(
     profile_id: Int!
     periods: [String]!
+    access_token_ids: [Int]
     account_ids: [Int]
     institution_ids: [Int]
     interest_ids: [Int]
@@ -74,6 +76,7 @@ type Query {
     profile_id: Int!
     public_token: String!
     env: String
+    access_token_id: Int
   ): LinkPlaidAccountOutput
 }
 

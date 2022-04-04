@@ -28,10 +28,25 @@ class CreatePlaidLinkToken(HasuraAction):
         profile_id = input_params["profile_id"]
         redirect_uri = input_params["redirect_uri"]
         env = input_params.get("env", DEFAULT_ENV)  # default for legacy app
+        access_token_id = input_params.get("access_token_id")
+
+        access_token = None
+        if access_token_id is not None:
+            with db_conn.cursor() as cursor:
+                cursor.execute(
+                    "SELECT access_token FROM app.profile_plaid_access_tokens WHERE id = %(id)s and profile_id = %(profile_id)s",
+                    {
+                        "id": id,
+                        "profile_id": profile_id
+                    })
+
+                row = cursor.fetchone()
+                if row is not None:
+                    access_token = row[0]
 
         try:
             response = self.client.create_link_token(profile_id, redirect_uri,
-                                                     env)
+                                                     env, access_token)
             link_token = response['link_token']
 
             return {'link_token': response['link_token']}
@@ -49,21 +64,28 @@ class LinkPlaidAccount(HasuraAction):
         profile_id = input_params["profile_id"]
         public_token = input_params["public_token"]
         env = input_params.get("env", DEFAULT_ENV)  # default for legacy app
+        access_token_id = input_params.get("access_token_id")
 
         try:
             response = self.client.exchange_link_token(public_token, env)
         except plaid.ApiException as e:
             handle_error(e)
 
+        parameters = {
+            "profile_id": profile_id,
+            "access_token": response['access_token'],
+            "item_id": response['item_id'],
+        }
+        if access_token_id is None:
+            query = """INSERT INTO app.profile_plaid_access_tokens(profile_id, access_token, item_id)
+                    VALUES (%(profile_id)s, %(access_token)s, %(item_id)s) RETURNING id"""
+        else:
+            query = """update app.profile_plaid_access_tokens set access_token = %(access_token)s, item_id = %(item_id)s, needs_reauth_since = null
+                    where profile_id = %(profile_id)s and id = %(access_token_id)s RETURNING id"""
+            parameters["access_token_id"] = access_token_id
+
         with db_conn.cursor() as cursor:
-            cursor.execute(
-                "INSERT INTO app.profile_plaid_access_tokens(profile_id, access_token, item_id) "
-                "VALUES (%(profile_id)s, %(access_token)s, %(item_id)s) RETURNING id",
-                {
-                    "profile_id": profile_id,
-                    "access_token": response['access_token'],
-                    "item_id": response['item_id'],
-                })
+            cursor.execute(query, parameters)
             returned = cursor.fetchall()
             id = returned[0][0]
 

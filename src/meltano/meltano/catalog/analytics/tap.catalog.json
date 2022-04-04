@@ -229,6 +229,96 @@
       ],
       "tap_stream_id": "app-profile_portfolio_transactions",
       "schema": { "type": "object" }
+    },
+    {
+      "table_name": "base_tickers",
+      "stream": "base_tickers",
+      "metadata": [
+        {
+          "breadcrumb": [],
+          "metadata": {
+            "replication-method": "FULL_TABLE",
+            "table-key-properties": [ "symbol" ],
+            "schema-name": "public",
+            "database-name": "gainy",
+            "selected": true
+          }
+        }
+      ],
+      "tap_stream_id": "public-base_tickers",
+      "schema": { "type": "object" }
+    },
+    {
+      "table_name": "collections",
+      "stream": "collections",
+      "metadata": [
+        {
+          "breadcrumb": [],
+          "metadata": {
+            "replication-method": "FULL_TABLE",
+            "table-key-properties": [ "id" ],
+            "schema-name": "public",
+            "database-name": "gainy",
+            "selected": true
+          }
+        }
+      ],
+      "tap_stream_id": "public-collections",
+      "schema": { "type": "object" }
+    },
+    {
+      "table_name": "ticker_metrics",
+      "stream": "ticker_metrics",
+      "metadata": [
+        {
+          "breadcrumb": [],
+          "metadata": {
+            "replication-method": "FULL_TABLE",
+            "table-key-properties": [ "symbol" ],
+            "schema-name": "public",
+            "database-name": "gainy",
+            "selected": true
+          }
+        }
+      ],
+      "tap_stream_id": "public-ticker_metrics",
+      "schema": { "type": "object" }
+    },
+    {
+      "table_name": "ticker_collections",
+      "stream": "ticker_collections",
+      "metadata": [
+        {
+          "breadcrumb": [],
+          "metadata": {
+            "replication-method": "FULL_TABLE",
+            "table-key-properties": [ "id" ],
+            "schema-name": "public",
+            "database-name": "gainy",
+            "selected": true
+          }
+        }
+      ],
+      "tap_stream_id": "public-ticker_collections",
+      "schema": { "type": "object" }
+    },
+    {
+      "table_name": "ticker_realtime_metrics",
+      "stream": "ticker_realtime_metrics",
+      "metadata": [
+        {
+          "breadcrumb": [],
+          "metadata": {
+            "replication-method": "FULL_TABLE",
+            "table-key-properties": [ "symbol" ],
+            "schema-name": "public",
+            "database-name": "gainy",
+            "selected": true
+          }
+        }
+      ],
+      "tap_stream_id": "public-ticker_realtime_metrics",
+      "schema": { "type": "object" }
     }
   ]
 }
