@@ -10,12 +10,8 @@
   )
 }}
 
-with common_stocks as
-         (
-             select *
-             from {{ ref('tickers') }}
-             where "type" = 'common stock'
-         ),
+ -- interests uses predefined per-interest lists of industries, so that tickers in ticker-interests here are in the same scope of ticker types that was enabled for making ticker-industries
+with 
 
      ticker_interest_similarity as (
          select tind.symbol,
@@ -29,11 +25,7 @@ with common_stocks as
      sim_dif as (
          select tis.symbol,
                 tis.interest_id,
-                ((1e-30 + (similarity - (min(similarity) over (partition by tis.interest_id))))
-                     / (1e-30 + (max(similarity) over (partition by tis.interest_id) -
-                                 min(similarity) over (partition by tis.interest_id)))
-                    + 1e-2) /
-                (1. + 1e-2) as sim_dif -- [1e-2 .. [0.. 1-1e-2]] (inside-each-interest "world" normalized + 1e-2)
+                2.*(tis.similarity-0.5) as sim_dif -- [-1..1]
          from ticker_interest_similarity tis
      )
 
@@ -43,4 +35,3 @@ select (sd.symbol || '_' || sd.interest_id)::varchar as id,
        sd.sim_dif,
        now()::timestamp                              as updated_at
 from sim_dif sd
-         join common_stocks using (symbol)
