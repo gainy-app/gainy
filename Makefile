@@ -1,7 +1,7 @@
 export PARAMS ?= $(filter-out $@,$(MAKECMDGOALS))
 
 # workaround for setting env vars from script
-_ := $(shell find .makeenv -mtime +30 -delete)
+_ := $(shell find .makeenv -mtime +1 -delete)
 ifeq ($(shell test -e .makeenv && echo -n yes),)
 	_ := $(shell source deployment/scripts/code_artifactory.sh; env | sed 's/=/:=/' | sed 's/^/export /' > .makeenv)
 endif
@@ -51,13 +51,14 @@ extract-passwords:
 test-build:
 	docker-compose -p gainy_test -f docker-compose.test.yml build --progress plain
 
-test-init:
+test-meltano:
 	docker-compose -p gainy_test -f docker-compose.test.yml run --rm test-meltano invoke dbt test
+	docker-compose -p gainy_test -f docker-compose.test.yml run --rm --entrypoint gainy_recommendation test-meltano
 
 test-images:
 	docker-compose -p gainy_test -f docker-compose.test.yml run --rm --entrypoint python3 test-meltano tests/image_urls.py
 
-test-realtime:
+test-meltano-realtime:
 	docker-compose -p gainy_test -f docker-compose.test.yml run --rm --entrypoint "/wait.sh" test-meltano invoke dbt run --exclude tag:view
 	docker-compose -p gainy_test -f docker-compose.test.yml run --rm --entrypoint "/wait.sh" test-meltano invoke dbt run --vars '{"realtime": true}' --select tag:realtime
 	docker-compose -p gainy_test -f docker-compose.test.yml run --rm --entrypoint "/wait.sh" test-meltano invoke dbt test
@@ -68,7 +69,7 @@ test-hasura:
 test-lambda:
 	docker-compose -p gainy_test -f docker-compose.test.yml exec -T test-lambda-python-action pytest
 
-test: configure test-build test-init test-images test-realtime test-hasura test-lambda test-clean
+test: configure test-build test-meltano test-images test-meltano-realtime test-hasura test-lambda test-clean
 
 test-clean:
 	docker-compose -p gainy_test -f docker-compose.test.yml down --rmi local -v
