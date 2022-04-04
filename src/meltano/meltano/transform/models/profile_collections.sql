@@ -6,8 +6,9 @@
 }}
 
 WITH profile_collections AS (
-    SELECT NULL :: integer AS profile_id,
+    SELECT NULL :: integer                   AS profile_id,
            collections.id,
+           ('0_' || collections.id)::varchar AS uniq_id,
            collections.name,
            collections.description,
            collections.image_url,
@@ -19,6 +20,7 @@ WITH profile_collections AS (
     UNION
     SELECT csp.profile_id,
            c.id,
+           (csp.profile_id || '_' || c.id)::varchar AS uniq_id,
            c.name,
            c.description,
            c.image_url,
@@ -31,7 +33,7 @@ WITH profile_collections AS (
         )
     WHERE ((c.personalized) :: text = '1' :: text)
 )
-SELECT (coalesce(profile_collections.profile_id, 0) || '_' || profile_collections.id)::varchar as uniq_id,
+SELECT uniq_id,
        profile_collections.profile_id,
        profile_collections.id,
        profile_collections.name,
