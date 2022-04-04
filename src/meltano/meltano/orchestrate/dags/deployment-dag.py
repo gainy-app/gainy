@@ -5,8 +5,16 @@ dag_id = "deployment"
 tags = ["meltano", "csv", "postgres", "dbt"]
 dag = create_dag(dag_id, tags=tags, is_paused_upon_creation=False)
 
-dbt = BashOperator(task_id="dbt",
-                   bash_command=get_meltano_command(
-                       "schedule run csv-to-postgres --force --transform run"),
-                   dag=dag,
-                   pool="dbt")
+csv_to_postgres = BashOperator(
+    task_id="csv-to-postgres",
+    bash_command=get_meltano_command(
+        "schedule run csv-to-postgres --force --transform skip"),
+    dag=dag)
+
+dbt = BashOperator(
+    task_id="dbt",
+    bash_command=get_meltano_command("invoke dbt run --exclude tag:view"),
+    dag=dag,
+    pool="dbt")
+
+csv_to_postgres >> dbt
