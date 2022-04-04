@@ -144,3 +144,29 @@ query home_tab($profileId: Int, $rankedCount: Int) {
     }
 }
 ```
+
+### Match Score
+
+```graphql
+query GetCollectionMatchScore($collectionUniqId: String!, $profileId: Int!) {
+    collection_match_score(where: {profile_id: {_eq: $profileId}, collection_uniq_id: {_eq: $collectionUniqId}}) {
+        match_score
+        risk_level
+        risk_similarity
+        interest_level
+        interest_similarity
+        category_level
+        category_similarity
+    }
+    collection_match_score_explanation(where: {profile_id: {_eq: $profileId}, collection_uniq_id: {_eq: $collectionUniqId}}) {
+        interest {
+            id
+            name
+        }
+        category {
+            id
+            name
+        }
+    }
+}
+```

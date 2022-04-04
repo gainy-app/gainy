@@ -841,6 +841,81 @@
               _eq: X-Hasura-User-Id
 - table:
     schema: public
+    name: collection_match_score
+  object_relationships:
+  - name: profile
+    using:
+      manual_configuration:
+        remote_table:
+          schema: app
+          name: profiles
+        insertion_order: null
+        column_mapping:
+          profile_id: id
+  select_permissions:
+  - role: user
+    permission:
+      columns:
+      - category_level
+      - category_similarity
+      - collection_id
+      - collection_uniq_id
+      - interest_level
+      - interest_similarity
+      - match_score
+      - profile_id
+      - risk_level
+      - risk_similarity
+      filter:
+        profile:
+          user_id:
+            _eq: X-Hasura-User-Id
+- table:
+    schema: public
+    name: collection_match_score_explanation
+  object_relationships:
+  - name: category
+    using:
+      manual_configuration:
+        remote_table:
+          schema: public
+          name: categories
+        insertion_order: null
+        column_mapping:
+          category_id: id
+  - name: interest
+    using:
+      manual_configuration:
+        remote_table:
+          schema: public
+          name: interests
+        insertion_order: null
+        column_mapping:
+          interest_id: id
+  - name: profile
+    using:
+      manual_configuration:
+        remote_table:
+          schema: app
+          name: profiles
+        insertion_order: null
+        column_mapping:
+          profile_id: id
+  select_permissions:
+  - role: user
+    permission:
+      columns:
+      - profile_id
+      - collection_id
+      - category_id
+      - interest_id
+      - collection_uniq_id
+      filter:
+        profile:
+          user_id:
+            _eq: X-Hasura-User-Id
+- table:
+    schema: public
     name: collection_metrics
   object_relationships:
   - name: profile
@@ -1354,6 +1429,15 @@
     custom_name: collections
     custom_column_names: {}
   object_relationships:
+  - name: match_score
+    using:
+      manual_configuration:
+        remote_table:
+          schema: public
+          name: collection_match_score
+        insertion_order: null
+        column_mapping:
+          uniq_id: collection_uniq_id
   - name: metrics
     using:
       manual_configuration:
@@ -1373,6 +1457,15 @@
         column_mapping:
           profile_id: id
   array_relationships:
+  - name: match_score_explanation
+    using:
+      manual_configuration:
+        remote_table:
+          schema: public
+          name: collection_match_score_explanation
+        insertion_order: null
+        column_mapping:
+          uniq_id: collection_uniq_id
   - name: ticker_collections
     using:
       manual_configuration:

@@ -43,6 +43,7 @@ sources:
       - name: personalized_ticker_collections
       - name: profile_plaid_access_tokens
       - name: plaid_institutions
+      - name: profile_ticker_match_score
 
   - name: website
     description: Website data, managed by webflow integrations at gainy.app
@@ -1559,6 +1560,72 @@ models:
         tests:
           - type:
               type: 'double precision'
+
+  - name: collection_match_score
+    columns:
+      - name: profile_id
+        tests:
+          - type:
+              type: 'integer'
+      - name: collection_id
+        tests:
+          - type:
+              type: 'integer'
+      - name: collection_uniq_id
+        tests:
+          - type:
+              type: 'character varying'
+      - name: match_score
+        tests:
+          - type:
+              type: 'double precision'
+      - name: risk_level
+        tests:
+          - type:
+              type: 'integer'
+      - name: risk_similarity
+        tests:
+          - type:
+              type: 'double precision'
+      - name: category_level
+        tests:
+          - type:
+              type: 'integer'
+      - name: category_similarity
+        tests:
+          - type:
+              type: 'double precision'
+      - name: interest_level
+        tests:
+          - type:
+              type: 'integer'
+      - name: interest_similarity
+        tests:
+          - type:
+              type: 'double precision'
+
+  - name: collection_match_score_explanation
+    columns:
+      - name: profile_id
+        tests:
+          - type:
+              type: 'integer'
+      - name: collection_id
+        tests:
+          - type:
+              type: 'integer'
+      - name: collection_uniq_id
+        tests:
+          - type:
+              type: 'character varying'
+      - name: category_id
+        tests:
+          - type:
+              type: 'integer'
+      - name: interest_id
+        tests:
+          - type:
+              type: 'integer'
 
 exposures:
   - name: ticker_search_index

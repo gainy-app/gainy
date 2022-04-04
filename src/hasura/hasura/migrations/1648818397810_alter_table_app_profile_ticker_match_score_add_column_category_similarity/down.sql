@@ -1,0 +1,4 @@
+-- Could not auto-generate a down migration.
+-- Please write an appropriate down migration for the SQL below:
+-- alter table "app"."profile_ticker_match_score" add column "category_similarity" float8
+--  null;
