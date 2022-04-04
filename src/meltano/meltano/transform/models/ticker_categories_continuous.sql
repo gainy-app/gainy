@@ -20,13 +20,14 @@ union
 
     ( -- Cat: ETF
         select
-            concat(c.id, '_', t.symbol)::varchar 	as id,
-            c.id 									as category_id,
+            concat(c.id, '_', t.symbol)::varchar  as id,
+            c.id                                  as category_id,
             t.symbol,
-            case when t.type ilike 'ETF' then 1.0 else -1.0 end as sim_dif,
-            now()::timestamp 						as updated_at
+            1.0::float                            as sim_dif,
+            now()::timestamp                      as updated_at
         from {{ ref('tickers') }} t
                  join {{ ref('categories') }} c on c.name = 'ETF'
+        where t."type" ilike 'ETF'
     )
 
 union
@@ -49,18 +50,7 @@ union
             )
 
     select * from penny_sim_dif
-    union
-    ( --add constants for: not "Common Stock"s and if not measurable (has had nulls for some reason)
-        select concat(c.id, '_', t.symbol)::varchar as id,
-               c.id 								as category_id,
-               t.symbol,
-               -1.0 								as sim_dif,
-               now()::timestamp 					as updated_at
-        from {{ ref('tickers') }} t
-                 join {{ ref('categories') }} c on c.name = 'Penny'
-                 left join penny_sim_dif on penny_sim_dif.symbol = t.symbol
-        where penny_sim_dif.symbol is null
-    )
+
 )
 
 union
@@ -139,18 +129,6 @@ union
             )
 
     select * from defensive_sim_dif
-    union
-    ( --add constants for: not "Common Stock"s and not from gic sectors and if not measurable (has had nulls for some reason)
-        select concat(c.id, '_', t.symbol)::varchar as id,
-               c.id 								as category_id,
-               t.symbol,
-               -1.0									as sim_dif,
-               now()::timestamp 					as updated_at
-        from {{ ref('tickers') }} t
-                 join {{ ref('categories') }} c on c.name = 'Defensive'
-                 left join defensive_sim_dif on defensive_sim_dif.symbol = t.symbol
-        where defensive_sim_dif.symbol is null
-    )
 
 )
 
@@ -259,18 +237,6 @@ union
             )
 
     select * from dividend_sim_dif
-    union
-    ( --add constants for: not "Common Stock"s and if it has nulls for some reason
-        select concat(c.id, '_', t.symbol)::varchar as id,
-               c.id 								as category_id,
-               t.symbol,
-               -1.0									as sim_dif,
-               now()::timestamp 					as updated_at
-        from {{ ref('tickers') }} t
-                 join {{ ref('categories') }} c on c.name = 'Dividend'
-                 left join dividend_sim_dif on dividend_sim_dif.symbol = t.symbol
-        where dividend_sim_dif.symbol is null
-    )
 
 )
 
@@ -322,18 +288,6 @@ union
             )
 
     select * from momentum_sim_dif
-    union
-    ( --add constants for: not "Common Stock"s and if it has nulls for some reason
-        select concat(c.id, '_', t.symbol)::varchar as id,
-               c.id 								as category_id,
-               t.symbol,
-               -1.0									as sim_dif,
-               now()::timestamp 					as updated_at
-        from {{ ref('tickers') }} t
-                 join {{ ref('categories') }} c on c.name = 'Momentum'
-                 left join momentum_sim_dif on momentum_sim_dif.symbol = t.symbol
-        where momentum_sim_dif.symbol is null
-    )
 
 )
 
@@ -390,18 +344,6 @@ union
             )
 
     select * from value_sim_dif
-    union
-    ( --add constants for: not "Common Stock"s and if it has nulls for some reason
-        select concat(c.id, '_', t.symbol)::varchar as id,
-               c.id 								as category_id,
-               t.symbol,
-               -1.0									as sim_dif,
-               now()::timestamp 					as updated_at
-        from {{ ref('tickers') }} t
-                 join {{ ref('categories') }} c on c.name = 'Value'
-                 left join value_sim_dif on value_sim_dif.symbol = t.symbol
-        where value_sim_dif.symbol is null
-    )
 
 )
 
@@ -458,18 +400,6 @@ union
             )
 
     select * from growth_sim_dif
-    union
-    ( --add constants for: not "Common Stock"s and if it has nulls for some reason
-        select concat(c.id, '_', t.symbol)::varchar as id,
-               c.id 								as category_id,
-               t.symbol,
-               -1.0									as sim_dif,
-               now()::timestamp 					as updated_at
-        from {{ ref('tickers') }} t
-                 join {{ ref('categories') }} c on c.name = 'Growth'
-                 left join growth_sim_dif on growth_sim_dif.symbol = t.symbol
-        where growth_sim_dif.symbol is null
-    )
 
 )
 
@@ -492,7 +422,7 @@ union
                        SUM(callopeninterest)*100  as call_option_shares_deliverable_outstanding  --BusDoc: Call option shares deliverable outstanding exceeds total shares outstanding (OPEN INTEREST = actual options quantity on the market, we focused on Call type)
                        --SUM(callvolume) * 100 as call_option_shares_deliverable_outstanding -- bad idea, it's just transactions counter, non uniq options
                 from {{ source('eod', 'eod_options') }}
-                where expirationdate::timestamp > now()
+                where expirationdate::timestamp > now()::timestamp
                 group by code
             ),
 
@@ -551,16 +481,5 @@ union
             )
 
     select * from specul_sim_dif
-    union
-    ( --add constants for: not "Common Stock"s and if not measurable (has had nulls for some reason)
-        select concat(c.id, '_', t.symbol)::varchar as id,
-               c.id 								as category_id,
-               t.symbol,
-               -1.0									as sim_dif,
-               now()::timestamp 					as updated_at
-        from {{ ref('tickers') }} t
-                 join {{ ref('categories') }} c on c.name = 'Speculation'
-                 left join specul_sim_dif on specul_sim_dif.symbol = t.symbol
-        where specul_sim_dif.symbol is null
-    )
+
 )
