@@ -431,7 +431,7 @@ union
                 -- so do the left join here and we have that special rule for pre-revenue company: if eps is null then ticker just on the threshold line so we coalesce eps=null to 0.
                 select t.symbol,
                        (t2.beta-3.)       											as beta,      --BusDoc: 3x volatility of QQQ (we don't know for sure how EOD calc industry/market basis for beta.. maybe it's index qqq)
-                       -coalesce(max_eps.value,0.)									as maxeps,    --BusDoc: Pre-revenue stock (earn per share zero or negative or unknown(eq0 still waiting for good product from company))
+                       -coalesce(max_eps.value,1e-30)									as maxeps,    --BusDoc: Pre-revenue stock (earn per share zero or negative or unknown(eq0 still waiting for good product from company))
                        ( options_stats.call_option_shares_deliverable_outstanding
                            - (f.sharesstats ->> 'SharesOutstanding')::bigint)::float 	as opt_vs_shr --BusDoc: Call option shares deliverable outstanding exceeds total shares outstanding
                 from common_stocks t
