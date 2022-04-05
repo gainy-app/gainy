@@ -19,6 +19,7 @@ variable "datadog_api_key" {}
 variable "datadog_app_key" {}
 
 variable "polygon_api_token" {}
+variable "coingecko_api_key" {}
 
 variable "pg_production_host" {}
 variable "pg_production_port" {}

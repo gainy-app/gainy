@@ -34,6 +34,19 @@ plugins:
       settings:
         - name: api_key
 
+    - name: tap-coingecko
+      namespace: tap_coingecko
+      pip_url: /tap-coingecko
+      executable: tap-coingecko
+      settings:
+        - name: api_key
+        - name: split_id
+        - name: split_num
+      capabilities:
+        - discover
+        - catalog
+        - state
+
     - name: tap-csv
       config:
         files:
@@ -165,6 +178,15 @@ schedules:
     start_date: 2021-06-17 10:40:58.742133
     env:
       TARGET_ENVS: '["production"]'
+
+  - name: coingecko-to-postgres
+    extractor: tap-coingecko
+    loader: target-postgres-small-batch
+    transform: skip
+    interval: '@daily'
+    start_date: 2021-06-17 10:40:58.742133
+    env:
+      TARGET_ENVS: '["production","local"]'
 
   # Algolia
 

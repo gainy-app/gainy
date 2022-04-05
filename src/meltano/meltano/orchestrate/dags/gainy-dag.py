@@ -2,8 +2,6 @@ import os
 from airflow.operators.bash import BashOperator
 from common import create_dag, get_meltano_command, get_schedules, MELTANO_PROJECT_ROOT, ENV
 
-CONCURRENCY = int(os.getenv("EODHISTORICALDATA_JOBS_COUNT", 1))
-
 
 def create_downstream_operators(dag):
     industry_assignment = BashOperator(
@@ -37,21 +35,24 @@ dag = create_dag(
     dag_id,
     tags=list(tags),
     schedule_interval="0 1 * * *" if ENV == "production" else "0 2 * * 1-5",
-    is_paused_upon_creation=False)
+    is_paused_upon_creation=True)
 
 # Operators
 upstream = []
 downstream = []
 
 for schedule in schedules:
+    pool = None
+    if not schedule['downstream']:
+        pool = "downstream"
+
     operator = BashOperator(
         task_id=schedule['name'],
         bash_command=get_meltano_command(
             f"schedule run {schedule['name']} --transform=skip"),
         skip_exit_code=1,
         dag=dag,
-        task_concurrency=CONCURRENCY,
-        pool_slots=CONCURRENCY)
+        pool=pool)
 
     if schedule['downstream']:
         downstream.append(operator)

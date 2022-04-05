@@ -97,6 +97,13 @@ variable "polygon_api_token" {
   sensitive = true
 }
 
+#################################### CoinGecko ####################################
+
+variable "coingecko_api_key" {
+  type      = string
+  sensitive = true
+}
+
 #################################### Algolia ####################################
 
 variable "algolia_app_id" {

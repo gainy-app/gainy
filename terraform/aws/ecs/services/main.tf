@@ -9,7 +9,6 @@ locals {
   hasura_healthcheck_interval       = var.env == "production" ? 60 : 60
   hasura_healthcheck_retries        = var.env == "production" ? 3 : 3
   health_check_grace_period_seconds = var.env == "production" ? 60 * 10 : 60 * 20
-  eodhistoricaldata_jobs_count      = var.env == "production" ? 4 : 1
 }
 
 resource "random_password" "hasura" {

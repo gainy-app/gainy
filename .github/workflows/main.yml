@@ -93,3 +93,4 @@ jobs:
       ALGOLIA_ADMIN_API_KEY: ${{ secrets.ALGOLIA_ADMIN_API_KEY }}
       HUBSPOT_API_KEY: ${{ secrets.HUBSPOT_API_KEY }}
       POLYGON_API_TOKEN: ${{ secrets.POLYGON_API_TOKEN }}
+      COINGECKO_API_KEY: ${{ secrets.COINGECKO_API_KEY }}
