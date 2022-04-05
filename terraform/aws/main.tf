@@ -122,8 +122,7 @@ module "ecs-service" {
   domain             = var.domain
   private_subnet_ids = module.ecs.private_subnet_ids
 
-  aws_lambda_api_gateway_endpoint = module.lambda.aws_apigatewayv2_api_endpoint
-  deployment_key                  = local.deployment_key
+  aws_lambda_api_gateway_endpoint = "${module.lambda.aws_apigatewayv2_api_endpoint}/${local.deployment_key}"
   hasura_enable_console           = "true"
   hasura_enable_dev_mode          = "true"
   hasura_jwt_secret               = var.hasura_jwt_secret

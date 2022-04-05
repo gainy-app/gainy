@@ -1,6 +1,9 @@
 from portfolio.service import PortfolioService
 from portfolio.models import PortfolioChartFilter
 from common.hasura_function import HasuraAction
+from service.logging import get_logger
+
+logger = get_logger(__name__)
 
 
 class GetPortfolioHoldings(HasuraAction):
@@ -12,8 +15,11 @@ class GetPortfolioHoldings(HasuraAction):
 
     def apply(self, db_conn, input_params, headers):
         profile_id = input_params["profile_id"]
-
-        holdings = self.service.get_holdings(db_conn, profile_id)
+        try:
+            holdings = self.service.get_holdings(db_conn, profile_id)
+        except Exception as e:
+            logger.exception(e)
+            holdings = []
 
         return [i.normalize() for i in holdings]
 
@@ -30,10 +36,14 @@ class GetPortfolioTransactions(HasuraAction):
         count = input_params.get("count", 500)
         offset = input_params.get("offset", 0)
 
-        transactions = self.service.get_transactions(db_conn,
-                                                     profile_id,
-                                                     count=count,
-                                                     offset=offset)
+        try:
+            transactions = self.service.get_transactions(db_conn,
+                                                         profile_id,
+                                                         count=count,
+                                                         offset=offset)
+        except Exception as e:
+            logger.exception(e)
+            transactions = []
 
         return [i.normalize() for i in transactions]
 
@@ -50,6 +60,7 @@ class GetPortfolioChart(HasuraAction):
 
         filter = PortfolioChartFilter()
         filter.periods = input_params.get("periods")
+        filter.access_token_ids = input_params.get("access_token_ids")
         filter.account_ids = input_params.get("account_ids")
         filter.institution_ids = input_params.get("institution_ids")
         filter.interest_ids = input_params.get("interest_ids")

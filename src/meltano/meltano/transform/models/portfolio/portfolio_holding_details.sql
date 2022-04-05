@@ -2,6 +2,7 @@
   config(
     materialized = "incremental",
     unique_key = "holding_id",
+    tags = ["realtime"],
     post_hook=[
       index(this, 'holding_id', true),
       index(this, 'ticker_symbol'),

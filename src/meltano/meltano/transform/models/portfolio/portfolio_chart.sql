@@ -2,6 +2,7 @@
   config(
     materialized = "incremental",
     unique_key = "id",
+    tags = ["realtime"],
     post_hook=[
       index(this, 'id', true),
       'create unique index if not exists "profile_id__date__period" ON {{ this }} (profile_id, date, period)',

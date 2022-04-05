@@ -196,6 +196,7 @@ class Institution(PortfolioBaseModel):
 
 class PortfolioChartFilter:
     periods = None
+    access_token_ids = None
     account_ids = None
     institution_ids = None
     interest_ids = None
