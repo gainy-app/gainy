@@ -43,7 +43,7 @@
     { "name": "TAP_EODHISTORICALDATA_API_TOKEN",       "value": "${eodhistoricaldata_api_token}" },
     { "name": "TAP_EODHISTORICALDATA_EXCHANGES",       "value": ${jsonencode(eodhistoricaldata_exchanges)} },
     { "name": "TAP_POLYGON_API_KEY",                   "value": "${polygon_api_token}" },
-    { "name": "TAP_COINGECKO_API_KEY",                 "value": "${coingecko_api_token}" },
+    { "name": "TAP_COINGECKO_API_KEY",                 "value": "${coingecko_api_key}" },
     { "name": "AWS_LAMBDA_API_GATEWAY_ENDPOINT",       "value": "${aws_lambda_api_gateway_endpoint}" },
 
     { "name": "TARGET_POSTGRES_HOST",                  "value": "${pg_host}" },

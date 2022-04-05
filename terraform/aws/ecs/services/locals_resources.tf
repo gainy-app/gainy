@@ -7,9 +7,9 @@ locals {
   meltano_scheduler_cpu_credits  = var.env == "production" ? 2048 : 256
   main_cpu_credits               = var.env == "production" ? 4096 : 1024
 
-  downstream_pool_size         = var.env == "production" ? 4 : 1
-  eodhistoricaldata_jobs_count = var.env == "production" ? 4 : 1
-  coingecko_jobs_count         = var.env == "production" ? 8 : 1
+  downstream_pool_size         = var.env == "production" ? 4 : 3
+  eodhistoricaldata_jobs_count = 4
+  coingecko_jobs_count         = 8
 
   eod_websockets_memory_credits     = var.env == "production" ? 512 : 0
   polygon_websockets_memory_credits = var.env == "production" ? 768 : 0
