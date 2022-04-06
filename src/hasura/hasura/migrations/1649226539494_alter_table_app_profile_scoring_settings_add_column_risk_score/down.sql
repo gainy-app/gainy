@@ -1,4 +1,1 @@
--- Could not auto-generate a down migration.
--- Please write an appropriate down migration for the SQL below:
--- alter table "app"."profile_scoring_settings" add column "risk_score" integer
---  null;
+alter table "app"."profile_scoring_settings" drop column "risk_score";
