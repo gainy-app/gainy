@@ -40,7 +40,9 @@
     { "name": "AIRFLOW_PASSWORD",                "value": "${airflow_password}" },
     { "name": "AIRFLOW_DATABASE_URI",            "value": "postgresql://${pg_username}:${pg_password}@${pg_host}:${pg_port}/${pg_dbname}?options=-csearch_path=${pg_airflow_schema}" },
     { "name": "AIRFLOW_LOG_LEVEL",               "value": "WARNING" },
+    { "name": "DOWNSTREAM_POOL_SIZE",            "value": "${downstream_pool_size}" },
     { "name": "EODHISTORICALDATA_JOBS_COUNT",    "value": "${eodhistoricaldata_jobs_count}" },
+    { "name": "COINGECKO_JOBS_COUNT",            "value": "${coingecko_jobs_count}" },
     { "name": "DBT_TARGET_SCHEMA",               "value": "${pg_transform_schema}" },
     { "name": "AWS_LAMBDA_API_GATEWAY_ENDPOINT", "value": "${aws_lambda_api_gateway_endpoint}" }
   ],

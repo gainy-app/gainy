@@ -6,7 +6,7 @@ tags = ["gainy-compute", "mlflow", "train"]
 dag = create_dag(dag_id,
                  tags=tags,
                  schedule_interval="0 1 * * 0",
-                 is_paused_upon_creation=False)
+                 is_paused_upon_creation=True)
 
 industry_assignments_train = BashOperator(
     task_id="industry-assignments-train",
