@@ -469,7 +469,18 @@
       insert:
         columns: '*'
       update:
-        columns: '*'
+        columns:
+        - stock_market_risk_level
+        - trading_experience
+        - unexpected_purchases_source
+        - average_market_return
+        - profile_id
+        - damage_of_failure
+        - if_market_drops_20_i_will_buy
+        - if_market_drops_40_i_will_buy
+        - investment_horizon
+        - risk_level
+        - created_at
     retry_conf:
       num_retries: 1
       interval_sec: 10
