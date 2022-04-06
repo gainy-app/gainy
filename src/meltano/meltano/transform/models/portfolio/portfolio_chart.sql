@@ -45,6 +45,9 @@ with week_trading_sessions as
                            on portfolio_securities_normalized.id = profile_holdings_normalized.security_id
                       left join {{ ref('ticker_options') }}
                                 on ticker_options.contract_name = portfolio_securities_normalized.original_ticker_symbol
+             where (ticker_options.contract_name is not null
+                 or (portfolio_securities_normalized.type = 'cash' and
+                     portfolio_securities_normalized.ticker_symbol = 'CUR:USD'))
              group by profile_id
          ),
      dynamic_values as

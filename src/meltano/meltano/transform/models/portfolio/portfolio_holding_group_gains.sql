@@ -10,7 +10,6 @@
   )
 }}
 
-
 with expanded_holding_groups as
          (
              select profile_id,
