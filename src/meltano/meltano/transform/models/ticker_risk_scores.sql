@@ -102,4 +102,5 @@ select trod.symbol,
        (1. + trod.risk / (case when trod.risk>0 then s.risk_k_u else s.risk_k_d end))/2. 	as risk_score, --[0..1]
        now()::timestamp as updated_at
 from ticker_riskscore_onedimensional_weighted trod
-         join tickers using (symbol) -- ticker_metrics has somehow sometimes more tickers and sometimes less, so filter
+	left join scalekoefs as s on true -- one row
+		join tickers using (symbol) -- ticker_metrics has somehow sometimes more tickers and sometimes less, so filter
