@@ -18,7 +18,7 @@ from {{ source('app', 'portfolio_securities') }}
          left join {{ ref('base_tickers') }}
                    on base_tickers.symbol in (portfolio_securities.ticker_symbol,
                                               regexp_replace(portfolio_securities.ticker_symbol, '\d{6}[CP]\d{8}$', ''),
-                                              regexp_replace(portfolio_securities.ticker_symbol, '^CUR:(\w+)$', '\1.CC')
+                                              regexp_replace(portfolio_securities.ticker_symbol, '^CUR:([^.]+).*$', '\1.CC')
                        )
 where
     (
