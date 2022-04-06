@@ -3,39 +3,46 @@ import glob
 from typing import List
 
 
-def _fill_in_eod_schedule(template, env, split_id, split_num) -> dict:
+def _split_schedule(tap: str, template, env, split_id, split_num) -> dict:
     new_schedule = copy.deepcopy(template)
-    new_schedule["name"] = 'eodhistoricaldata-to-postgres-%02d' % (split_id)
+    new_schedule["name"] = '%s-to-postgres-%02d' % (tap, split_id)
 
     if "env" not in new_schedule:
         new_schedule["env"] = {}
 
     if split_num and split_num > 1:
-        new_schedule["env"]["TAP_EODHISTORICALDATA_SPLIT_ID"] = str(split_id)
-        new_schedule["env"]["TAP_EODHISTORICALDATA_SPLIT_NUM"] = str(split_num)
+        new_schedule["env"][f"TAP_{tap.upper()}_SPLIT_ID"] = str(split_id)
+        new_schedule["env"][f"TAP_{tap.upper()}_SPLIT_NUM"] = str(split_num)
 
     return new_schedule
 
 
-def _generate_schedules(env, split_num):
-    eod_schedules = list(
-        filter(lambda x: x['name'].startswith('eodhistoricaldata-to-postgres'),
-               config['schedules']))
-    non_eod_schedules = list(
-        filter(
-            lambda x: not x['name'].startswith('eodhistoricaldata-to-postgres'
-                                               ), config['schedules']))
+def _generate_schedules(env):
+    schedules = config['schedules']
+    for tap in ['eodhistoricaldata', 'coingecko']:
+        schedules_to_split = list(
+            filter(lambda x: x['name'].startswith(f'{tap}-to-postgres'),
+                   schedules))
+        other_schedules = list(
+            filter(lambda x: not x['name'].startswith(f'{tap}-to-postgres'),
+                   schedules))
 
-    if len(eod_schedules) == 0:
-        raise Exception('no eod schedules found')
+        if not schedules_to_split:
+            continue
 
-    eod_schedule_template = eod_schedules[0]
-    new_eod_schedules = [
-        _fill_in_eod_schedule(eod_schedule_template, env, k, split_num)
-        for k in range(0, split_num)
-    ]
+        split_num_env_var_name = f'{tap.upper()}_JOBS_COUNT'
+        if split_num_env_var_name not in os.environ:
+            continue
+        split_num = int(os.environ[split_num_env_var_name])
 
-    return non_eod_schedules + new_eod_schedules
+        schedule_split_template = schedules_to_split[0]
+        new_split_schedules = [
+            _split_schedule(tap, schedule_split_template, env, k, split_num)
+            for k in range(0, split_num)
+        ]
+
+        schedules = other_schedules + new_split_schedules
+    return schedules
 
 
 #####   Configure and run   #####
@@ -43,11 +50,6 @@ def _generate_schedules(env, split_num):
 if 'ENV' not in os.environ:
     raise Exception('env var ENV must be set')
 ENV = os.environ['ENV']
-
-if 'EODHISTORICALDATA_JOBS_COUNT' not in os.environ:
-    raise Exception('env var EODHISTORICALDATA_JOBS_COUNT must be set')
-EODHISTORICALDATA_JOBS_COUNT = json.loads(
-    os.environ['EODHISTORICALDATA_JOBS_COUNT'])
 
 if 'DBT_TARGET_SCHEMA' not in os.environ:
     raise Exception('env var DBT_TARGET_SCHEMA must be set')
@@ -58,7 +60,7 @@ DBT_TARGET_SCHEMA = os.environ['DBT_TARGET_SCHEMA']
 with open("meltano.template.yml", "r") as f:
     config = yaml.safe_load(f)
 
-config['schedules'] = _generate_schedules(ENV, EODHISTORICALDATA_JOBS_COUNT)
+config['schedules'] = _generate_schedules(ENV)
 
 with open("meltano.yml", "w") as f:
     yaml.dump(config, f)

@@ -85,6 +85,7 @@ module "aws" {
   datadog_app_key             = var.datadog_app_key
   hubspot_api_key             = var.hubspot_api_key
   polygon_api_token           = var.polygon_api_token
+  coingecko_api_key           = var.coingecko_api_key
 
   aws_region     = var.aws_region
   aws_access_key = var.aws_access_key

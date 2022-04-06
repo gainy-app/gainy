@@ -14,7 +14,9 @@ locals {
     pg_airflow_schema               = "airflow"
     airflow_password                = random_password.airflow.result
     airflow_port                    = 5001
+    downstream_pool_size            = local.downstream_pool_size
     eodhistoricaldata_jobs_count    = local.eodhistoricaldata_jobs_count
+    coingecko_jobs_count            = local.coingecko_jobs_count
     pg_transform_schema             = local.public_schema_name
     meltano_image                   = docker_registry_image.meltano.name
     aws_log_group_name              = aws_cloudwatch_log_group.meltano.name
@@ -58,6 +60,7 @@ locals {
       datadog_app_key = var.datadog_app_key
 
       polygon_api_token = var.polygon_api_token
+      coingecko_api_key = var.coingecko_api_key
 
       # mlflow
       aws_region               = var.aws_region
