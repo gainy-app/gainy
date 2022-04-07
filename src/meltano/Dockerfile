@@ -15,4 +15,3 @@ COPY meltano/catalog /project/catalog
 COPY meltano/meltano.template.yml meltano/symbols* meltano/exchanges* /project/
 
 ENV ENV=local
-ENV EODHISTORICALDATA_JOBS_COUNT=1
