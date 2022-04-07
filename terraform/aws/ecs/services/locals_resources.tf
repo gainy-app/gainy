@@ -9,7 +9,7 @@ locals {
 
   downstream_pool_size         = var.env == "production" ? 4 : 3
   eodhistoricaldata_jobs_count = 4
-  coingecko_jobs_count         = 8
+  coingecko_jobs_count         = 2
 
   eod_websockets_memory_credits     = var.env == "production" ? 512 : 0
   polygon_websockets_memory_credits = var.env == "production" ? 768 : 0
