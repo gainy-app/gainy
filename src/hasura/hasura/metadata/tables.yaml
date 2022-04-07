@@ -765,6 +765,51 @@
       filter: {}
 - table:
     schema: public
+    name: base_tickers
+  object_relationships:
+  - name: realtime_metrics
+    using:
+      manual_configuration:
+        remote_table:
+          schema: public
+          name: ticker_realtime_metrics
+        insertion_order: null
+        column_mapping:
+          symbol: symbol
+  - name: ticker_metrics
+    using:
+      manual_configuration:
+        remote_table:
+          schema: public
+          name: ticker_metrics
+        insertion_order: null
+        column_mapping:
+          symbol: symbol
+  select_permissions:
+  - role: user
+    permission:
+      columns:
+      - symbol
+      - type
+      - name
+      - description
+      - phone
+      - logo_url
+      - web_url
+      - ipo_date
+      - sector
+      - industry
+      - gic_sector
+      - gic_group
+      - gic_industry
+      - gic_sub_industry
+      - exchange
+      - exchange_canonical
+      - country_name
+      - updated_at
+      filter: {}
+- table:
+    schema: public
     name: categories
   select_permissions:
   - role: user
@@ -1244,7 +1289,7 @@
       manual_configuration:
         remote_table:
           schema: public
-          name: tickers
+          name: base_tickers
         insertion_order: null
         column_mapping:
           ticker_symbol: symbol
@@ -1549,7 +1594,7 @@
       manual_configuration:
         remote_table:
           schema: public
-          name: tickers
+          name: base_tickers
         insertion_order: null
         column_mapping:
           symbol: symbol
