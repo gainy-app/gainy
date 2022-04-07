@@ -10,7 +10,8 @@ dag = create_dag(dag_id,
 
 coingecko_realtime = BashOperator(
     task_id="coingecko-realtime",
-    bash_command=get_meltano_command("schedule run coingecko-realtime-to-postgres"),
+    bash_command=get_meltano_command(
+        "schedule run coingecko-realtime-to-postgres"),
     dag=dag)
 
 vars = '{"realtime": true}'
