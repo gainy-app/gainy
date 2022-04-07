@@ -1,0 +1,70 @@
+### Crypto
+
+```graphql
+{
+    crypto_metrics {
+        alexa_rank
+        bing_matches
+        asset_platform_id
+        categories
+        coingecko_rank
+        coingecko_score
+        community_facebook_likes
+        community_reddit_accounts_active_48h
+        community_reddit_average_comments_48h
+        community_reddit_average_posts_48h
+        community_reddit_subscribers
+        community_score
+        community_telegram_channel_user_count
+        community_twitter_followers
+        hashing_algorithm
+        development_total_issues
+        development_subscribers
+        development_stars
+        development_score
+        development_pull_requests_merged
+        development_pull_request_contributors
+        development_forks
+        development_commit_count_4_weeks
+        development_code_additions_deletions_4_weeks_deletions
+        development_code_additions_deletions_4_weeks_additions
+        development_closed_issues
+        description
+        country_origin
+        ico_end_date
+        ico_start_date
+        image_large
+        image_small
+        links
+        image_thumb
+        liquidity_score
+        market_cap_rank
+        market_fdv_to_tvl_ratio
+        market_mcap_to_tvl_ratio
+        market_total_value_locked
+        name
+        price_change_1m
+        price_change_1w
+        symbol
+        sentiment_votes_up_percentage
+        sentiment_votes_down_percentage
+        public_interest_score
+        price_change_all
+        price_change_5y
+        price_change_3m
+        price_change_1y
+    }
+    crypto_realtime_metrics {
+        ath
+        atl
+        circulating_supply
+        high_24h
+        low_24h
+        market_capiptalization
+        max_supply
+        symbol
+        total_supply
+        volume_24h
+    }
+}
+```
