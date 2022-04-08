@@ -82,15 +82,25 @@ with ticker_riskscore_categorial_weights_frominvestcats as
                     case
                         when sum(trcw.weight) = 0
                             then 0.5 -- in probably non-existing case if all weights was 0 (0 volatility of adjusted_close from eod's "historical_prices")
-                        else (sum(trcw.risk_category * trcw.weight) / (1e-30 + sum(trcw.weight)) - 1.) /
-                             2. -- [1..3]=>[0..1]
+                        else sum(trcw.risk_category * trcw.weight) / (1e-30 + sum(trcw.weight)) -2. -- [1..3]=>(-1..1)
                         end as risk
              from ticker_riskscore_categorial_weights trcw
              group by trcw.symbol
-         )
+         ),
+
+-- 0=centered medium risk. but because we were used weighting and mixing we don't effectively touch the negative and positive limits [-1] and [+1] 
+-- but we need touch the limits in full scale [-1..1] - to interpret the lowest possible risk ticker and highest possible 
+-- so we now need to renorm negative and positive sides to touch the limits
+
+scalekoefs as
+	(
+		select 1e-30 + coalesce((select MAX(risk) from ticker_riskscore_onedimensional_weighted where risk > 0), 0.) as risk_k_u,
+			   1e-30 + coalesce((select MAX(-risk) from ticker_riskscore_onedimensional_weighted where risk < 0), 0.) as risk_k_d
+	)
 
 select trod.symbol,
-       trod.risk        as risk_score,
+       (1. + trod.risk / (case when trod.risk>0 then s.risk_k_u else s.risk_k_d end))/2. 	as risk_score, --[0..1]
        now()::timestamp as updated_at
 from ticker_riskscore_onedimensional_weighted trod
-         join tickers using (symbol) -- ticker_metrics has somehow sometimes more tickers and sometimes less, so filter
+	left join scalekoefs as s on true -- one row
+		join tickers using (symbol) -- ticker_metrics has somehow sometimes more tickers and sometimes less, so filter
