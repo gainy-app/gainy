@@ -22,7 +22,7 @@ with collection_categories as
                                                collection_id,
                                                json_array_elements_text(category_matches::json)::int as category_match_id
                                         from {{ ref('ticker_collections') }}
-                                                 join {{ source('app', 'profile_ticker_match_score') }} using (symbol)
+                                                 join {{ ref('profile_ticker_match_score') }} using (symbol)
                                     ) t
                                group by profile_id, collection_id, category_match_id
                            ) t
@@ -45,7 +45,7 @@ with collection_categories as
                                                collection_id,
                                                json_array_elements_text(interest_matches::json)::int as interest_match_id
                                         from {{ ref('ticker_collections') }}
-                                                 join {{ source('app', 'profile_ticker_match_score') }} using (symbol)
+                                                 join {{ ref('profile_ticker_match_score') }} using (symbol)
                                     ) t
                                group by profile_id, collection_id, interest_match_id
                            ) t

@@ -17,7 +17,7 @@ from (
                 (sum(risk_similarity * weight) / sum(weight))::double precision     as risk_similarity,
                 (sum(category_similarity * weight) / sum(weight))::double precision as category_similarity,
                 (sum(interest_similarity * weight) / sum(weight))::double precision as interest_similarity
-         from {{ source('app', 'profile_ticker_match_score') }}
+         from {{ ref('profile_ticker_match_score') }}
               join {{ ref('collection_tickers_weighted') }}
                    on collection_tickers_weighted.symbol = profile_ticker_match_score.symbol
                        and (collection_tickers_weighted.profile_id is null or
