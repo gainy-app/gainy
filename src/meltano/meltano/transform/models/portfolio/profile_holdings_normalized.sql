@@ -27,7 +27,8 @@ select profile_holdings.id                                               as hold
                                             plaid_institutions.ref_id = 'ins_54' then 100
                                        else 1 end                        as quantity,
        coalesce(base_tickers.name, portfolio_securities_normalized.name) as name,
-       portfolio_securities_normalized.ticker_symbol,
+       coalesce(portfolio_securities_normalized.ticker_symbol,
+                portfolio_securities_normalized.original_ticker_symbol)  as ticker_symbol,
        portfolio_securities_normalized.type
 from {{ source('app', 'profile_holdings') }}
          join {{ ref('portfolio_securities_normalized') }}
