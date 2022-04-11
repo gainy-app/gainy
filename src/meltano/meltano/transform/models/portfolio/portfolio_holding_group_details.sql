@@ -31,7 +31,7 @@ from {{ ref('portfolio_holding_details') }}
               on portfolio_securities_normalized.id = profile_holdings_normalized.security_id
          join {{ ref('portfolio_holding_group_gains') }}
               on portfolio_holding_group_gains.profile_id = profile_holdings_normalized.profile_id
-                  and portfolio_holding_group_gains.ticker_symbol = portfolio_securities_normalized.ticker_symbol
+                  and portfolio_holding_group_gains.ticker_symbol in (portfolio_securities_normalized.ticker_symbol, portfolio_securities_normalized.original_ticker_symbol)
         left join {{ ref('base_tickers') }} 
               on base_tickers.symbol = portfolio_securities_normalized.ticker_symbol
 group by profile_holdings_normalized.profile_id, portfolio_securities_normalized.ticker_symbol
