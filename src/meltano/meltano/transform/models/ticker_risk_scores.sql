@@ -103,4 +103,4 @@ select trod.symbol,
        now()::timestamp as updated_at
 from ticker_riskscore_onedimensional_weighted trod
 	left join scalekoefs as s on true -- one row
-		join tickers using (symbol) -- ticker_metrics has somehow sometimes more tickers and sometimes less, so filter
+		join {{ ref('tickers') }} using (symbol) -- ticker_metrics has somehow sometimes more tickers and sometimes less, so filter

@@ -6,6 +6,17 @@ sys.path.append(task_dir)
 from hasura_handler import action_dispatcher, trigger_dispatcher
 from _common import get_action_event, get_trigger_event, PROFILE_ID, PROFILE_ID2, USER_ID, USER_ID2, PLAID_ACCESS_TOKEN, PLAID_ITEM_ID
 
+MATCH_SCORE_FIELDS_SET = {
+    'symbol',
+    'match_score',
+    'fits_risk',
+    'risk_similarity',
+    'fits_categories',
+    'fits_interests',
+    'category_matches',
+    'interest_matches',
+    'matches_portfolio',
+}
 
 # Actions
 def test_get_recommended_collections():
@@ -39,6 +50,36 @@ def test_get_portfolio_chart():
     assert set({
         'period', 'datetime', 'open', 'high', 'low', 'close', 'adjusted_close'
     }).issubset(set(response[0].keys()))
+
+
+def test_get_match_score_by_ticker():
+    event = get_action_event("get_match_score_by_ticker", {"profile_id": PROFILE_ID, "symbol": "AAPL"},
+                             USER_ID)
+    response = action_dispatcher.handle(event)
+    assert "code" not in response
+    assert isinstance(response, dict)
+    assert len(response)
+    assert MATCH_SCORE_FIELDS_SET.issubset(set(response.keys()))
+
+
+def test_get_match_scores_by_ticker_list():
+    event = get_action_event("get_match_scores_by_ticker_list", {"profile_id": PROFILE_ID, "symbols": ["AAPL"]},
+                             USER_ID)
+    response = action_dispatcher.handle(event)
+    assert "code" not in response
+    assert isinstance(response, list)
+    assert len(response)
+    assert MATCH_SCORE_FIELDS_SET.issubset(set(response[0].keys()))
+
+
+def test_get_match_scores_by_collection():
+    event = get_action_event("get_match_scores_by_collection", {"profile_id": PROFILE_ID, "collection_id": 83},
+                             USER_ID)
+    response = action_dispatcher.handle(event)
+    assert "code" not in response
+    assert isinstance(response, list)
+    assert len(response)
+    assert MATCH_SCORE_FIELDS_SET.issubset(set(response[0].keys()))
 
 
 # Triggers
