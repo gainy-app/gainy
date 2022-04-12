@@ -894,7 +894,6 @@
       - gic_group
       - gic_industry
       - gic_sub_industry
-      
       - country_name
       - updated_at
       filter: {}
