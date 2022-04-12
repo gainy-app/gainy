@@ -767,6 +767,42 @@
     schema: public
     name: base_tickers
   object_relationships:
+  - name: match_score
+    using:
+      manual_configuration:
+        remote_table:
+          schema: app
+          name: profile_ticker_match_score
+        insertion_order: null
+        column_mapping:
+          symbol: symbol
+  - name: realtime_metrics
+    using:
+      manual_configuration:
+        remote_table:
+          schema: public
+          name: ticker_realtime_metrics
+        insertion_order: null
+        column_mapping:
+          symbol: symbol
+  - name: ticker_analyst_ratings
+    using:
+      manual_configuration:
+        remote_table:
+          schema: public
+          name: analyst_ratings
+        insertion_order: null
+        column_mapping:
+          symbol: symbol
+  - name: ticker_metrics
+    using:
+      manual_configuration:
+        remote_table:
+          schema: public
+          name: ticker_metrics
+        insertion_order: null
+        column_mapping:
+          symbol: symbol
   - name: crypto_metrics
     using:
       manual_configuration:
@@ -785,6 +821,84 @@
         insertion_order: null
         column_mapping:
           symbol: symbol
+  array_relationships:
+  - name: ticker_categories
+    using:
+      manual_configuration:
+        remote_table:
+          schema: public
+          name: ticker_categories
+        insertion_order: null
+        column_mapping:
+          symbol: symbol
+  - name: ticker_collections
+    using:
+      manual_configuration:
+        remote_table:
+          schema: public
+          name: profile_ticker_collections
+        insertion_order: null
+        column_mapping:
+          symbol: symbol
+  - name: ticker_events
+    using:
+      manual_configuration:
+        remote_table:
+          schema: public
+          name: ticker_events
+        insertion_order: null
+        column_mapping:
+          symbol: symbol
+  - name: ticker_highlights
+    using:
+      manual_configuration:
+        remote_table:
+          schema: public
+          name: ticker_highlights
+        insertion_order: null
+        column_mapping:
+          symbol: symbol
+  - name: ticker_industries
+    using:
+      manual_configuration:
+        remote_table:
+          schema: public
+          name: ticker_industries
+        insertion_order: null
+        column_mapping:
+          symbol: symbol
+  - name: ticker_interests
+    using:
+      manual_configuration:
+        remote_table:
+          schema: public
+          name: ticker_interests
+        insertion_order: null
+        column_mapping:
+          symbol: symbol
+  select_permissions:
+  - role: user
+    permission:
+      columns:
+      - symbol
+      - type
+      - name
+      - description
+      - phone
+      - logo_url
+      - web_url
+      - ipo_date
+      - sector
+      - industry
+      - gic_sector
+      - gic_group
+      - gic_industry
+      - gic_sub_industry
+      - exchange
+      - exchange_canonical
+      - country_name
+      - updated_at
+      filter: {}
 - table:
     schema: public
     name: categories
@@ -1410,7 +1524,7 @@
       manual_configuration:
         remote_table:
           schema: public
-          name: tickers
+          name: base_tickers
         insertion_order: null
         column_mapping:
           ticker_symbol: symbol
@@ -1715,7 +1829,7 @@
       manual_configuration:
         remote_table:
           schema: public
-          name: tickers
+          name: base_tickers
         insertion_order: null
         column_mapping:
           symbol: symbol
@@ -2189,6 +2303,24 @@
         remote_table:
           schema: public
           name: ticker_metrics
+        insertion_order: null
+        column_mapping:
+          symbol: symbol
+  - name: crypto_metrics
+    using:
+      manual_configuration:
+        remote_table:
+          schema: public
+          name: crypto_metrics
+        insertion_order: null
+        column_mapping:
+          symbol: symbol
+  - name: crypto_realtime_metrics
+    using:
+      manual_configuration:
+        remote_table:
+          schema: public
+          name: crypto_realtime_metrics
         insertion_order: null
         column_mapping:
           symbol: symbol

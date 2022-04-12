@@ -22,3 +22,5 @@ models:
   +on_schema_change: "sync_all_columns"
 vars:
   realtime: false
+  portfolio_usd_enabled: true
+  portfolio_crypto_enabled: true
