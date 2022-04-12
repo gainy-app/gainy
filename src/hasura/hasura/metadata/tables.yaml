@@ -487,7 +487,7 @@
       timeout_sec: 60
     webhook: '{{AWS_LAMBDA_API_GATEWAY_ENDPOINT}}/hasuraTrigger'
 - table:
-    schema: public
+    schema: app
     name: profile_ticker_match_score
   object_relationships:
   - name: profile
@@ -2171,7 +2171,7 @@
     using:
       manual_configuration:
         remote_table:
-          schema: public
+          schema: app
           name: profile_ticker_match_score
         insertion_order: null
         column_mapping:
