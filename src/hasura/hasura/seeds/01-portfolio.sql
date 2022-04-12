@@ -38,10 +38,8 @@ ALTER SEQUENCE app.portfolio_securities_id_seq RESTART WITH 23;
 
 insert into app.profile_holdings (id, plaid_access_token_id, iso_currency_code, quantity, security_id, profile_id, account_id, ref_id, created_at, updated_at)
 values  (1, 1, 'USD', 100, 14, 1, 7, 'W3grzlw7zdi6vp3obZAecRQJMjqQa1tlBrAnr_WDwEPnEmJjt5lp75wl65t1rBmpBZvAHogp7WZ', '2021-11-12 14:06:51.602102 +00:00', '2021-11-19 10:45:52.978221 +00:00'),
-        (2, 1, 'USD', 3, 22, 1, 7, 'W3grzlw7zdi6vp3obZAecRQJMjqQa1tlBrAnr_wmDB8ZBW3aUVPnxMbgarinRK7eKzMbfAJJDEI', '2021-11-12 14:06:51.602102 +00:00', '2021-11-19 10:45:52.978221 +00:00'),
-        (3, 1, 'USD', 0.1, 10, 1, 7, 'W3grzlw7zdi6vp3obZAecRQJMjqQa1tlBrAnr_7Dv19k16PZtvaeloyBgLCxP95o9ynrFggkRaw', '2021-11-12 14:06:51.602102 +00:00', '2021-11-19 10:45:52.978221 +00:00'),
-        (4, 1, 'USD', 1000, 15, 1, 7, 'W3grzlw7zdi6vp3obZAecRQJMjqQa1tlBrAnr_d6ePmbPxgWCWmMVv66q9iPV94n91vMtov5Are', '2021-11-12 14:06:51.602102 +00:00', '2021-11-19 10:45:52.978221 +00:00');
-ALTER SEQUENCE app.profile_holdings_id_seq RESTART WITH 5;
+        (2, 1, 'USD', 3, 22, 1, 7, 'W3grzlw7zdi6vp3obZAecRQJMjqQa1tlBrAnr_wmDB8ZBW3aUVPnxMbgarinRK7eKzMbfAJJDEI', '2021-11-12 14:06:51.602102 +00:00', '2021-11-19 10:45:52.978221 +00:00');
+ALTER SEQUENCE app.profile_holdings_id_seq RESTART WITH 3;
 
 insert into app.profile_portfolio_transactions (id, plaid_access_token_id, amount, date, fees, iso_currency_code, name, price, quantity, subtype, type, ref_id, security_id, profile_id, account_id, created_at, updated_at)
 values  (1,1,  -8.72, '2021-10-21', 0, 'USD', 'INCOME DIV DIVIDEND RECEIVED', 0, 0, 'dividend', 'cash', '6pNKdxJ3dzHArgvoRMQyiVNovq4NJefgzWMNv', 19, 1, 7, '2021-11-18 05:41:24.917136 +00:00', '2021-11-18 05:41:24.917136 +00:00'),
