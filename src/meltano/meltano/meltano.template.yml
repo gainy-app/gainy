@@ -42,10 +42,16 @@ plugins:
         - name: api_key
         - name: split_id
         - name: split_num
+        - name: realtime
       capabilities:
         - discover
         - catalog
         - state
+
+    - name: tap-coingecko-realtime
+      inherit_from: tap-coingecko
+      config:
+        realtime: true
 
     - name: tap-csv
       config:
@@ -187,6 +193,15 @@ schedules:
     start_date: 2021-06-17 10:40:58.742133
     env:
       TARGET_ENVS: '["production","local"]'
+
+  - name: coingecko-realtime-to-postgres
+    extractor: tap-coingecko-realtime
+    loader: target-postgres-small-batch
+    transform: skip
+    interval: '@daily'
+    start_date: 2021-06-17 10:40:58.742133
+    env:
+      TARGET_ENVS: '[]'
 
   # Algolia
 
