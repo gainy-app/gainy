@@ -18,6 +18,7 @@ MATCH_SCORE_FIELDS_SET = {
     'matches_portfolio',
 }
 
+
 # Actions
 def test_get_recommended_collections():
     event = get_action_event("get_recommended_collections",
@@ -53,8 +54,10 @@ def test_get_portfolio_chart():
 
 
 def test_get_match_score_by_ticker():
-    event = get_action_event("get_match_score_by_ticker", {"profile_id": PROFILE_ID, "symbol": "AAPL"},
-                             USER_ID)
+    event = get_action_event("get_match_score_by_ticker", {
+        "profile_id": PROFILE_ID,
+        "symbol": "AAPL"
+    }, USER_ID)
     response = action_dispatcher.handle(event)
     assert "code" not in response
     assert isinstance(response, dict)
@@ -63,8 +66,10 @@ def test_get_match_score_by_ticker():
 
 
 def test_get_match_scores_by_ticker_list():
-    event = get_action_event("get_match_scores_by_ticker_list", {"profile_id": PROFILE_ID, "symbols": ["AAPL"]},
-                             USER_ID)
+    event = get_action_event("get_match_scores_by_ticker_list", {
+        "profile_id": PROFILE_ID,
+        "symbols": ["AAPL"]
+    }, USER_ID)
     response = action_dispatcher.handle(event)
     assert "code" not in response
     assert isinstance(response, list)
@@ -73,8 +78,10 @@ def test_get_match_scores_by_ticker_list():
 
 
 def test_get_match_scores_by_collection():
-    event = get_action_event("get_match_scores_by_collection", {"profile_id": PROFILE_ID, "collection_id": 83},
-                             USER_ID)
+    event = get_action_event("get_match_scores_by_collection", {
+        "profile_id": PROFILE_ID,
+        "collection_id": 83
+    }, USER_ID)
     response = action_dispatcher.handle(event)
     assert "code" not in response
     assert isinstance(response, list)
