@@ -16,7 +16,10 @@ with raw_data as
                                 on ticker_options.contract_name =
                                    portfolio_securities_normalized.original_ticker_symbol
                       {join_clause}
-             where true {where_clause}
+             where (ticker_options.contract_name is not null
+                 or (portfolio_securities_normalized.type = 'cash'
+                     and portfolio_securities_normalized.ticker_symbol = 'CUR:USD'))
+                 {where_clause}
          )
 select sum(value) as value
 from raw_data
