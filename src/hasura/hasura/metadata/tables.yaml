@@ -894,8 +894,7 @@
       - gic_group
       - gic_industry
       - gic_sub_industry
-      - exchange
-      - exchange_canonical
+      
       - country_name
       - updated_at
       filter: {}
