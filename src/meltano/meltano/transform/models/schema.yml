@@ -356,6 +356,37 @@ models:
           - type:
               type: 'integer'
 
+  - name: ticker_categories_continuous
+    columns:
+      - name: symbol
+        tests:
+          - not_null
+          - type:
+              type: 'character varying'
+      - name: category_id
+        tests:
+          - not_null
+          - type:
+              type: 'integer'
+      - name: sim_dif
+        tests:
+          - not_null
+          - type:
+              type: 'double precision'
+
+  - name: ticker_risk_scores
+    columns:
+      - name: symbol
+        tests:
+          - not_null
+          - type:
+              type: 'character varying'
+      - name: risk_score
+        tests:
+          - not_null
+          - type:
+              type: 'double precision'
+
   - name: tickers
     columns:
       - name: symbol

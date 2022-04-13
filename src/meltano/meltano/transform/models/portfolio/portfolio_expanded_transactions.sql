@@ -14,7 +14,6 @@
 }}
 
 /* plaid transaction are very inaccurate, probably we don't need this at all */
-/* todo make incremental with post_hook 'delete from {{ this }} where uniq_id in (select uniq_id from {{ this }} left join {{ source('app', 'profile_portfolio_accounts') }} on profile_portfolio_accounts.id = portfolio_expanded_transactions.account_id where profile_portfolio_accounts.id is null)' */
 
 with robinhood_options as (
     select profile_portfolio_transactions.profile_id,

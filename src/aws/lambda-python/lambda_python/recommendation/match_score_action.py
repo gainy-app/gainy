@@ -13,15 +13,8 @@ class AbstractMatchScoreAction(HasuraAction, ABC):
         result = []
         for row in repository.read_ticker_match_scores(profile_id, symbols):
             result.append({
-                "symbol": row[0],
+                **row,
                 "is_match": True,  # Deprecated, will be removed
-                "match_score": row[1],
-                "fits_risk": row[2],
-                "risk_similarity": row[3],
-                "fits_categories": row[4],
-                "category_matches": row[5],
-                "fits_interests": row[6],
-                "interest_matches": row[7]
             })
 
         return result
@@ -76,5 +69,9 @@ class GetMatchScoreByCollection(AbstractMatchScoreAction):
         repository = RecommendationRepository(db_conn)
         collection_tickers = repository.read_collection_tickers(
             profile_id, collection_id)
+
+        if len(collection_tickers) == 0:
+            return []
+
         return super().read_match_scores(repository, profile_id,
                                          collection_tickers)

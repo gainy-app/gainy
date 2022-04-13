@@ -1,7 +1,7 @@
 export PARAMS ?= $(filter-out $@,$(MAKECMDGOALS))
 
 # workaround for setting env vars from script
-_ := $(shell find .makeenv -mtime +1 -delete)
+_ := $(shell find .makeenv -mtime +12h -delete)
 ifeq ($(shell test -e .makeenv && echo -n yes),)
 	_ := $(shell source deployment/scripts/code_artifactory.sh; env | sed 's/=/:=/' | sed 's/^/export /' > .makeenv)
 endif
