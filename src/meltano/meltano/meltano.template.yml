@@ -13,6 +13,8 @@ plugins:
         - state
       settings:
         - name: api_token
+        - name: streams
+          kind: array
         - name: exchanges
           kind: array
         - name: exchange_symbols_limit
@@ -22,6 +24,17 @@ plugins:
         - name: symbols_type
         - name: split_id
         - name: split_num
+      config:
+        streams:
+          - eod_fundamentals
+          - eod_dividends
+          - eod_options
+
+    - name: tap-eodhistoricaldata-prices
+      inherit_from: tap-eodhistoricaldata
+      config:
+        streams:
+          - eod_historical_prices
 
     - name: tap-polygon
       namespace: tap_polygon
@@ -179,6 +192,15 @@ schedules:
   - name: eodhistoricaldata-to-postgres-0
     extractor: tap-eodhistoricaldata
     loader: target-postgres-small-batch
+    transform: skip
+    interval: '@daily'
+    start_date: 2021-06-17 10:40:58.742133
+    env:
+      TARGET_ENVS: '["production"]'
+
+  - name: eodhistoricaldata-prices-to-postgres-0
+    extractor: tap-eodhistoricaldata-prices
+    loader: target-postgres
     transform: skip
     interval: '@daily'
     start_date: 2021-06-17 10:40:58.742133
