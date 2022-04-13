@@ -7,4 +7,5 @@ dag = create_dag(dag_id, tags=tags)
 
 industry_assignments_train = BashOperator(task_id="update-recommendations",
                                           bash_command="gainy_recommendation",
-                                          dag=dag)
+                                          dag=dag,
+                                          pool="gainy_recommendation")

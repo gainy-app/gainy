@@ -13,9 +13,10 @@ locals {
     local.meltano_scheduler_cpu_credits,
   ]) / 1024) * 1024
 
-  downstream_pool_size         = var.env == "production" ? 4 : 3
-  eodhistoricaldata_jobs_count = 4
-  coingecko_jobs_count         = 2
+  downstream_pool_size                = var.env == "production" ? 4 : 3
+  eodhistoricaldata_jobs_count        = 2
+  eodhistoricaldata_prices_jobs_count = 2
+  coingecko_jobs_count                = 2
 
   eod_websockets_memory_credits     = var.env == "production" ? 512 : 0
   polygon_websockets_memory_credits = var.env == "production" ? 768 : 0
