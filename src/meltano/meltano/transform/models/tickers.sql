@@ -37,6 +37,7 @@ select t.symbol,
        t.gic_industry,
        t.gic_sub_industry,
        t.exchange,
+       t.exchange_canonical,
        t.country_name,
        now()::timestamp as updated_at
 from {{ ref('base_tickers') }} t

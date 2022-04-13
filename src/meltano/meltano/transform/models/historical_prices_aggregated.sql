@@ -37,14 +37,18 @@ with max_date as
          time_series_3min as
              (
                  SELECT null as type,
-                        date_trunc('minute', dd) -
-                        interval '1 minute' *
-                        mod(extract(minutes from dd)::int, 3) as time_truncated
-                 FROM generate_series(now()::timestamp - interval '1 week', now()::timestamp, interval '3 minutes') dd
+                        time_truncated
+                 FROM (
+                          SELECT null as type,
+                                 date_trunc('minute', dd) -
+                                 interval '1 minute' *
+                                 mod(extract(minutes from dd)::int, 3) as time_truncated
+                          FROM generate_series(now()::timestamp - interval '1 week', now()::timestamp, interval '3 minutes') dd
+                          ) t
                           join latest_open_trading_session on true
-                 where dd between latest_open_trading_session.open_at and latest_open_trading_session.close_at
+                 where time_truncated between latest_open_trading_session.open_at and latest_open_trading_session.close_at
 {% if is_incremental() and var('realtime') %}
-                   and dd > now() - interval '20 minutes'
+                   and time_truncated > now() - interval '20 minutes'
 {% endif %}
                  union all
                  SELECT 'crypto' as type,
@@ -174,14 +178,18 @@ union all
          time_series_15min as
              (
                  SELECT null as type,
-                        date_trunc('minute', dd) -
-                        interval '1 minute' *
-                        mod(extract(minutes from dd)::int, 15) as time_truncated
-                 FROM generate_series(now()::timestamp - interval '1 week', now()::timestamp, interval '15 minutes') dd
+                        time_truncated
+                 FROM (
+                          SELECT null as type,
+                                 date_trunc('minute', dd) -
+                                 interval '1 minute' *
+                                 mod(extract(minutes from dd)::int, 15) as time_truncated
+                          FROM generate_series(now()::timestamp - interval '1 week', now()::timestamp, interval '15 minutes') dd
+                          ) t
                           join week_trading_sessions on true
-                 where dd between week_trading_sessions.open_at and week_trading_sessions.close_at
+                 where time_truncated between week_trading_sessions.open_at and week_trading_sessions.close_at
 {% if is_incremental() and var('realtime') %}
-                   and dd > now() - interval '1 hour'
+                   and time_truncated > now() - interval '1 hour'
 {% endif %}
                  union all
                  SELECT 'crypto' as type,
