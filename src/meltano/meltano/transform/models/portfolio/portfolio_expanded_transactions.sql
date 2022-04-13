@@ -14,7 +14,6 @@
 }}
 
 /* plaid transaction are very inaccurate, probably we don't need this at all */
-/* todo make incremental with post_hook 'delete from {{ this }} where uniq_id in (select uniq_id from {{ this }} left join {{ source('app', 'profile_portfolio_accounts') }} on profile_portfolio_accounts.id = portfolio_expanded_transactions.account_id where profile_portfolio_accounts.id is null)' */
 
 with robinhood_options as (
     select profile_portfolio_transactions.profile_id,
@@ -128,6 +127,8 @@ with robinhood_options as (
              select *,
                     sum(quantity_norm)
                     over (partition by account_id, security_id order by date, type rows between unbounded preceding and current row) as rolling_quantity,
+                    row_number()
+                    over (partition by account_id, security_id order by date, type rows between unbounded preceding and current row) as row_num,
                     first_value(date)
                     over (partition by profile_id order by date)                                                                     as profile_first_transaction_date
              from (
@@ -206,7 +207,7 @@ from (
                                          on profile_holdings_normalized.account_id = expanded_transactions.account_id and
                                             profile_holdings_normalized.security_id = expanded_transactions.security_id
                       order by profile_holdings_normalized.account_id, profile_holdings_normalized.security_id,
-                               expanded_transactions.date desc
+                          expanded_transactions.row_num desc
                   ) t
                       left join first_trade_date on first_trade_date.code = ticker_symbol
                       left join {{ ref('historical_prices') }}
