@@ -90,7 +90,15 @@ class SetUserCategories(HasuraTrigger):
                         'Loss Tolerance'] == loss_tolerance:
                 final_score = i['Hard code matrix']
 
+        profile_id = payload["profile_id"]
         with db_conn.cursor() as cursor:
+            cursor.execute(
+                "update app.profile_scoring_settings set risk_score = %(risk_score)s where profile_id = %(profile_id)s",
+                {
+                    'risk_score': final_score,
+                    "profile_id": profile_id
+                })
+
             cursor.execute(
                 "select id from categories where risk_score = %(risk_score)s",
                 {'risk_score': final_score})
@@ -98,7 +106,6 @@ class SetUserCategories(HasuraTrigger):
             rows = cursor.fetchall()
             categories = [row[0] for row in rows]
 
-        profile_id = payload["profile_id"]
         logger.info('set_user_categories ' +
                     json.dumps({
                         'profile_id': profile_id,
