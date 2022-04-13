@@ -128,6 +128,8 @@ with robinhood_options as (
              select *,
                     sum(quantity_norm)
                     over (partition by account_id, security_id order by date, type rows between unbounded preceding and current row) as rolling_quantity,
+                    row_number()
+                    over (partition by account_id, security_id order by date, type rows between unbounded preceding and current row) as row_num,
                     first_value(date)
                     over (partition by profile_id order by date)                                                                     as profile_first_transaction_date
              from (
@@ -206,7 +208,7 @@ from (
                                          on profile_holdings_normalized.account_id = expanded_transactions.account_id and
                                             profile_holdings_normalized.security_id = expanded_transactions.security_id
                       order by profile_holdings_normalized.account_id, profile_holdings_normalized.security_id,
-                               expanded_transactions.date desc
+                          expanded_transactions.row_num desc
                   ) t
                       left join first_trade_date on first_trade_date.code = ticker_symbol
                       left join {{ ref('historical_prices') }}
