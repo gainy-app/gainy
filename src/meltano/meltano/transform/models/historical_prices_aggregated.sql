@@ -338,7 +338,7 @@ union all
                  select DISTINCT ON (
                      symbol,
                      date
-                     )
+                     ) *
                  from (
                          (
                              select code as symbol,
