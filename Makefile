@@ -17,14 +17,13 @@ configure: clean docker-auth
 	- docker network create gainy-default
 
 up:
-	- docker-compose pull --include-deps
-	docker-compose up
+	docker-compose up --build
 
 upd:
-	docker-compose up -d
+	docker-compose up --build -d
 
 build:
-	docker-compose build --parallel --no-cache --progress plain
+	docker-compose build
 
 down:
 	docker-compose down
