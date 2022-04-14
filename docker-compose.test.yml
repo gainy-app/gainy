@@ -1,7 +1,6 @@
 version: '3.6'
 services:
   test-meltano:
-    restart: always
     build:
       context: ./src/meltano
       args:
@@ -9,6 +8,10 @@ services:
         BASE_IMAGE_VERSION: ${BASE_IMAGE_VERSION}
         CODEARTIFACT_PIPY_URL: ${CODEARTIFACT_PIPY_URL}
         GAINY_COMPUTE_VERSION: ${GAINY_COMPUTE_VERSION}
+      cache_from:
+        - type=gha
+      cache_to:
+        - type=gha
     volumes:
       - ./src/meltano/meltano/meltano.template.yml:/project/meltano.template.yml
       - ./src/meltano/meltano/scripts:/project/scripts
@@ -24,8 +27,9 @@ services:
     depends_on:
       - test-postgres
       - test-hasura
-    entrypoint: "/init.sh"
+    restart: always
 
+    entrypoint: "/init.sh"
   test-postgres:
     image: postgres:12
     restart: always
