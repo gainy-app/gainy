@@ -25,7 +25,7 @@ upd:
 	docker-compose up -d
 
 build:
-	docker-compose build
+	docker buildx bake --pull
 
 down:
 	docker-compose down
@@ -50,7 +50,7 @@ extract-passwords:
 	cd terraform && terraform state pull | python3 ../extract_passwords.py
 
 test-build:
-	docker-compose -p gainy_test -f docker-compose.test.yml build --progress plain
+	docker buildx bake --progress plain --pull -f docker-compose.test.yml --cache-from=type=gha --cache-to=type=gha
 
 test-meltano:
 	docker-compose -p gainy_test -f docker-compose.test.yml run --rm test-meltano invoke dbt test
