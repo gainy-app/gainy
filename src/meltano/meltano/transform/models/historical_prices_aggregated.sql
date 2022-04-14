@@ -100,7 +100,8 @@ with max_date as
                                  low,
                                  close,
                                  volume,
-                                 time_truncated
+                                 time_truncated,
+                                 0 as priority
                           from expanded_intraday_prices
                           union all
                           select symbol,
@@ -110,17 +111,14 @@ with max_date as
                                  null           as low,
                                  null           as close,
                                  null           as volume,
-                                 time_truncated
+                                 time_truncated,
+                                 1 as priority
                           from {{ ref('base_tickers') }}
                                    join time_series_3min
                                        on (time_series_3min.type = 'crypto' and base_tickers.type = 'crypto')
                                            or (time_series_3min.type is null and base_tickers.type != 'crypto')
-                          where not exists(select 1
-                                           from expanded_intraday_prices
-                                           where expanded_intraday_prices.symbol = base_tickers.symbol
-                                             and expanded_intraday_prices.time_truncated = time_series_3min.time_truncated)
                       ) t
-                 order by symbol, time_truncated, time
+                 order by symbol, time_truncated, time, priority
              )
     select * from (
                       select (symbol || '_' || datetime || '_3min')::varchar as id,
@@ -241,7 +239,8 @@ union all
                                  low,
                                  close,
                                  volume,
-                                 time_truncated
+                                 time_truncated,
+                                 0 as priority
                           from expanded_intraday_prices
                           union all
                           select symbol,
@@ -251,19 +250,32 @@ union all
                                  null           as low,
                                  null           as close,
                                  null           as volume,
-                                 time_truncated
+                                 time_truncated,
+                                 1 as priority
                           from {{ ref('base_tickers') }}
                                    join time_series_15min
                                         on (time_series_15min.type = 'crypto' and base_tickers.type = 'crypto')
                                             or (time_series_15min.type is null and base_tickers.type != 'crypto')
-                          where not exists(select 1
-                                           from expanded_intraday_prices
-                                           where expanded_intraday_prices.symbol = base_tickers.symbol
-                                             and expanded_intraday_prices.time_truncated = time_series_15min.time_truncated)
                       ) t
-                 order by symbol, time_truncated, time
+                 order by symbol, time_truncated, time, priority
              )
-    select *
+    select id,
+           symbol,
+           time,
+           datetime,
+           period,
+           open,
+           high,
+           low,
+           close,
+           (case
+                when adjustment_rate = adjustment_rate2 or abs(daily_adjusted_close / close - adjustment_rate) <
+                                                           abs(daily_adjusted_close / close - adjustment_rate2)
+                    then adjustment_rate
+                else adjustment_rate2
+                end * adjusted_close
+               )::double precision as adjusted_close,
+           volume
     from (
              select (symbol || '_' || datetime || '_15min')::varchar as id,
                     symbol,
@@ -295,12 +307,21 @@ union all
                             first_value(close)
                             OVER (partition by symbol, grp order by datetime)
                         )::double precision                          as adjusted_close,
-                    coalesce(volume, 0)                              as volume
+                    coalesce(volume, 0)                              as volume,
+                    adjustment_rate,
+                    first_value(adjustment_rate)
+                    OVER (partition by symbol order by datetime)     as adjustment_rate2,
+                    daily_adjusted_close
              from (
-                      select *,
-                             sum(case when close is not null then 1 end)
-                             over (partition by symbol order by datetime) as grp
+                      select combined_intraday_prices.*,
+                             sum(case when combined_intraday_prices.close is not null then 1 end)
+                             over (partition by combined_intraday_prices.symbol order by datetime)        as grp,
+                             historical_prices.adjusted_close::numeric / historical_prices.close::numeric as adjustment_rate,
+                             historical_prices.adjusted_close::numeric as daily_adjusted_close
                       from combined_intraday_prices
+                               left join {{ ref('historical_prices') }}
+                                   on historical_prices.code = combined_intraday_prices.symbol
+                                    and historical_prices.date = combined_intraday_prices.datetime::date
                   ) t
          ) t2
     where t2.close is not null
@@ -313,41 +334,49 @@ union all
 (
     with combined_daily_prices as
              (
-                 (
-                     select code as symbol,
-                            date,
-                            open,
-                            high,
-                            low,
-                            close,
-                            adjusted_close,
-                            volume
-                     from {{ ref('historical_prices') }}
-                     where date >= now() - interval '1 year' - interval '1 week'
-                 )
-                 union
-                 (
-                     with time_series_1d as
-                              (
-                                  SELECT distinct date
-                                  FROM {{ ref('historical_prices') }}
-                                  where date >= now() - interval '1 year' - interval '1 week'
-                              )
-                     select code                   as symbol,
-                            time_series_1d.date,
-                            null::double precision as open,
-                            null::double precision as high,
-                            null::double precision as low,
-                            null::double precision as close,
-                            null::double precision as volume,
-                            null::double precision as adjusted_close
-                     from (select distinct code from {{ ref('historical_prices') }}) t1
-                              join time_series_1d on true
-                     where not exists(select 1
-                                      from {{ ref('historical_prices') }}
-                                      where historical_prices.code = t1.code
-                                        and historical_prices.date = time_series_1d.date)
-                 )
+
+                 select DISTINCT ON (
+                     symbol,
+                     date
+                     )
+                 from (
+                         (
+                             select code as symbol,
+                                    date,
+                                    open,
+                                    high,
+                                    low,
+                                    close,
+                                    adjusted_close,
+                                    volume,
+                                    0 as priority
+                             from {{ ref('historical_prices') }}
+                             where date >= now() - interval '1 year' - interval '1 week'
+                         )
+                         union all
+                         (
+                             with time_series_1d as
+                                      (
+                                          SELECT distinct exchange, date
+                                          FROM {{ ref('historical_prices') }}
+                                          join {{ ref('base_tickers') }} on base_tickers.symbol = historical_prices.code
+                                          where date >= now() - interval '1 year' - interval '1 week'
+                                      )
+                             select symbol,
+                                    time_series_1d.date,
+                                    null::double precision as open,
+                                    null::double precision as high,
+                                    null::double precision as low,
+                                    null::double precision as close,
+                                    null::double precision as volume,
+                                    null::double precision as adjusted_close,
+                                    1 as priority
+                             from (select symbol, exchange from {{ ref('base_tickers') }}) t1
+                                      join time_series_1d using (exchange)
+                         )
+                     ) t
+                 order by symbol, date, priority
+
              )
     select *
     from (
@@ -380,8 +409,8 @@ union all
                             OVER (partition by symbol, grp order by date)
                         )::double precision                       as close,
                     coalesce(
-                            close,
-                            first_value(close)
+                            adjusted_close,
+                            first_value(adjusted_close)
                             OVER (partition by symbol, grp order by date)
                         )::double precision                       as adjusted_close,
                     coalesce(volume, 0)::double precision         as volume
