@@ -11,16 +11,16 @@ include .env.make
 docker-auth:
 	aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin ${BASE_IMAGE_REGISTRY_ADDRESS}
 
-configure: clean docker-auth
+configure: clean docker-auth build
 	touch .env.local
 	- if [ ! -f src/meltano/meltano/exchanges.local.json ]; then cp -n src/meltano/meltano/symbols.local.json.dist src/meltano/meltano/symbols.local.json; fi
 	- docker network create gainy-default
 
 up:
-	docker-compose up --build
+	docker-compose up
 
 upd:
-	docker-compose up --build -d
+	docker-compose up -d
 
 build:
 	docker-compose build
