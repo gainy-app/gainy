@@ -19,7 +19,7 @@ def _split_schedule(tap: str, template, env, split_id, split_num) -> dict:
 
 def _generate_schedules(env):
     schedules = config['schedules']
-    for tap in ['eodhistoricaldata', 'coingecko']:
+    for tap in ['eodhistoricaldata', 'eodhistoricaldata-prices', 'coingecko']:
         schedules_to_split = list(
             filter(lambda x: x['name'].startswith(f'{tap}-to-postgres'),
                    schedules))
@@ -30,7 +30,8 @@ def _generate_schedules(env):
         if not schedules_to_split:
             continue
 
-        split_num_env_var_name = f'{tap.upper()}_JOBS_COUNT'
+        tap_canonical = re.sub(r'\W', '-_', tap)
+        split_num_env_var_name = f'{tap_canonical.upper()}_JOBS_COUNT'
         if split_num_env_var_name not in os.environ:
             continue
         split_num = int(os.environ[split_num_env_var_name])

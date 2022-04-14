@@ -60,7 +60,7 @@ with relative_data as
                       join {{ ref('portfolio_securities_normalized') }}
                            on portfolio_securities_normalized.id = profile_holdings_normalized.security_id
                       left join {{ ref('base_tickers') }}
-                                on base_tickers.symbol = portfolio_securities_normalized.ticker_symbol
+                                on base_tickers.symbol = portfolio_securities_normalized.original_ticker_symbol
                       left join {{ ref('ticker_metrics') }}
                                 on ticker_metrics.symbol = base_tickers.symbol
                       left join {{ ref('ticker_realtime_metrics') }}

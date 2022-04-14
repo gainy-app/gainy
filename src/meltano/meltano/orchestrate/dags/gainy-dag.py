@@ -11,7 +11,8 @@ def create_downstream_operators(dag):
 
     recommendation = BashOperator(task_id="update-recommendations",
                                   bash_command="gainy_recommendation",
-                                  dag=dag)
+                                  dag=dag,
+                                  pool="gainy_recommendation")
 
     return industry_assignment, recommendation
 

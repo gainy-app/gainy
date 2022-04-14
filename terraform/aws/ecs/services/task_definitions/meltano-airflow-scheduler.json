@@ -39,6 +39,7 @@
     { "name": "AIRFLOW_LOG_LEVEL",                     "value": "INFO" },
     { "name": "DOWNSTREAM_POOL_SIZE",                  "value": "${downstream_pool_size}" },
     { "name": "EODHISTORICALDATA_JOBS_COUNT",          "value": "${eodhistoricaldata_jobs_count}" },
+    { "name": "EODHISTORICALDATA_PRICES_JOBS_COUNT",   "value": "${eodhistoricaldata_prices_jobs_count}" },
     { "name": "COINGECKO_JOBS_COUNT",                  "value": "${coingecko_jobs_count}" },
     { "name": "TAP_EODHISTORICALDATA_API_TOKEN",       "value": "${eodhistoricaldata_api_token}" },
     { "name": "TAP_EODHISTORICALDATA_EXCHANGES",       "value": ${jsonencode(eodhistoricaldata_exchanges)} },

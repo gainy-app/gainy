@@ -9,6 +9,7 @@ services:
         BASE_IMAGE_VERSION: ${BASE_IMAGE_VERSION}
         CODEARTIFACT_PIPY_URL: ${CODEARTIFACT_PIPY_URL}
         GAINY_COMPUTE_VERSION: ${GAINY_COMPUTE_VERSION}
+    image: gainy-meltano:latest
     volumes:
       - ./src/meltano/meltano/scripts:/project/scripts
       - ./src/meltano/meltano/meltano.template.yml:/project/meltano.template.yml
@@ -29,13 +30,7 @@ services:
 
   meltano-airflow-ui:
     restart: always
-    build:
-      context: ./src/meltano
-      args:
-        BASE_IMAGE_REGISTRY_ADDRESS: ${BASE_IMAGE_REGISTRY_ADDRESS}
-        BASE_IMAGE_VERSION: ${BASE_IMAGE_VERSION}
-        CODEARTIFACT_PIPY_URL: ${CODEARTIFACT_PIPY_URL}
-        GAINY_COMPUTE_VERSION: ${GAINY_COMPUTE_VERSION}
+    image: gainy-meltano:latest
     ports:
       - "5001:5001"
     volumes:
@@ -52,13 +47,7 @@ services:
 
   meltano-dbt-docs:
     restart: always
-    build:
-      context: ./src/meltano
-      args:
-        BASE_IMAGE_REGISTRY_ADDRESS: ${BASE_IMAGE_REGISTRY_ADDRESS}
-        BASE_IMAGE_VERSION: ${BASE_IMAGE_VERSION}
-        CODEARTIFACT_PIPY_URL: ${CODEARTIFACT_PIPY_URL}
-        GAINY_COMPUTE_VERSION: ${GAINY_COMPUTE_VERSION}
+    image: gainy-meltano:latest
     ports:
       - "5002:5002"
     volumes:
@@ -123,6 +112,7 @@ services:
         BASE_IMAGE_VERSION: ${BASE_IMAGE_VERSION}
         CODEARTIFACT_PIPY_URL: ${CODEARTIFACT_PIPY_URL}
         GAINY_COMPUTE_VERSION: ${GAINY_COMPUTE_VERSION}
+    image: gainy-lambda-python:latest
     restart: always
     volumes:
       - ./src/aws/lambda-python/lambda_python:/var/task
@@ -132,13 +122,9 @@ services:
       - .env.local
 
   lambda-python-action:
-    build:
-      context: ./src/aws/lambda-python
-      args:
-        BASE_IMAGE_REGISTRY_ADDRESS: ${BASE_IMAGE_REGISTRY_ADDRESS}
-        BASE_IMAGE_VERSION: ${BASE_IMAGE_VERSION}
-        CODEARTIFACT_PIPY_URL: ${CODEARTIFACT_PIPY_URL}
-        GAINY_COMPUTE_VERSION: ${GAINY_COMPUTE_VERSION}
+    image: gainy-lambda-python:latest
+    depends_on:
+      - lambda-python-trigger
     restart: always
     volumes:
       - ./src/aws/lambda-python/lambda_python:/var/task
@@ -147,9 +133,10 @@ services:
       - .env
       - .env.local
 
-  websockets_eod:
+  websockets-eod:
     build:
       context: ./src/websockets
+    image: gainy-websockets:latest
     restart: always
     volumes:
       - ./src/websockets:/srv
@@ -160,9 +147,10 @@ services:
     deploy:
       replicas: 0
 
-  websockets_polygon:
-    build:
-      context: ./src/websockets
+  websockets-polygon:
+    image: gainy-websockets:latest
+    depends_on:
+      - websockets-eod
     restart: always
     volumes:
       - ./src/websockets:/srv
