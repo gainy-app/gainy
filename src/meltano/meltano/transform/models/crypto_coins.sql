@@ -8,6 +8,6 @@
   )
 }}
 
-select distinct on (symbol) *
+select distinct on (lower(symbol)) *
 from {{ source('coingecko', 'coingecko_coin') }}
-order by symbol, coingecko_rank
+order by lower(symbol), coingecko_rank
