@@ -12,7 +12,7 @@ select code::character varying                           as symbol,
        lower(general ->> 'Type')::character varying      as type,
        (general ->> 'Name')::character varying           as name,
        coalesce(general -> 'Description',
-                coingecko_coin.description -> 'en'
+                crypto_coins.description -> 'en'
            )::varchar                                    as description,
        (general ->> 'Phone')::character varying          as phone,
        (general ->> 'LogoURL')::character varying        as logo_url,
@@ -42,5 +42,5 @@ select code::character varying                           as symbol,
            )                                             as country_name,
        (general ->> 'UpdatedAt')::timestamp              as updated_at
 from {{ source('eod', 'eod_fundamentals') }}
-left join {{ source('coingecko', 'coingecko_coin') }} on coingecko_coin.symbol ilike regexp_replace(eod_fundamentals.code, '\.CC$', '')
+left join {{ ref('crypto_coins') }} on crypto_coins.symbol ilike regexp_replace(eod_fundamentals.code, '\.CC$', '')
 where ((general ->> 'IsDelisted') is null or (general ->> 'IsDelisted')::bool = false)
