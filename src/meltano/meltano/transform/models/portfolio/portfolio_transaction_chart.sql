@@ -7,7 +7,11 @@
       index(this, 'id', true),
       'create unique index if not exists "transactions_uniq_id__datetime__period" ON {{ this }} (transactions_uniq_id, datetime, period)',
       'create unique index if not exists "transactions_uniq_id__period__datetime" ON {{ this }} (transactions_uniq_id, period, datetime)',
-      'delete from {{this}} where transactions_uniq_id not in (select uniq_id from {{ ref("portfolio_expanded_transactions") }})',
+      'delete from {{this}}
+        using {{this}} ptc
+        left join {{ ref("portfolio_expanded_transactions") }} on portfolio_expanded_transactions.uniq_id = ptc.transactions_uniq_id
+        where ptc.transactions_uniq_id = portfolio_transaction_chart.transactions_uniq_id
+        and portfolio_expanded_transactions.uniq_id is null',
     ]
   )
 }}

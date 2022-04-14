@@ -30,7 +30,8 @@ def _generate_schedules(env):
         if not schedules_to_split:
             continue
 
-        split_num_env_var_name = f'{tap.upper()}_JOBS_COUNT'
+        tap_canonical = re.sub(r'\W', '-_', tap)
+        split_num_env_var_name = f'{tap_canonical.upper()}_JOBS_COUNT'
         if split_num_env_var_name not in os.environ:
             continue
         split_num = int(os.environ[split_num_env_var_name])

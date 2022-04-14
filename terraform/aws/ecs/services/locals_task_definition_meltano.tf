@@ -4,24 +4,25 @@ resource "aws_cloudwatch_log_group" "meltano" {
 
 locals {
   meltano_default_params = {
-    env                             = var.env
-    pg_host                         = var.pg_host
-    pg_dbname                       = var.pg_dbname
-    pg_password                     = var.pg_password
-    pg_port                         = var.pg_port
-    pg_username                     = var.pg_username
-    pg_meltano_schema               = "meltano"
-    pg_airflow_schema               = "airflow"
-    airflow_password                = random_password.airflow.result
-    airflow_port                    = 5001
-    downstream_pool_size            = local.downstream_pool_size
-    eodhistoricaldata_jobs_count    = local.eodhistoricaldata_jobs_count
-    coingecko_jobs_count            = local.coingecko_jobs_count
-    pg_transform_schema             = local.public_schema_name
-    meltano_image                   = docker_registry_image.meltano.name
-    aws_log_group_name              = aws_cloudwatch_log_group.meltano.name
-    aws_log_region                  = var.aws_log_region
-    aws_lambda_api_gateway_endpoint = var.aws_lambda_api_gateway_endpoint
+    env                                 = var.env
+    pg_host                             = var.pg_host
+    pg_dbname                           = var.pg_dbname
+    pg_password                         = var.pg_password
+    pg_port                             = var.pg_port
+    pg_username                         = var.pg_username
+    pg_meltano_schema                   = "meltano"
+    pg_airflow_schema                   = "airflow"
+    airflow_password                    = random_password.airflow.result
+    airflow_port                        = 5001
+    downstream_pool_size                = local.downstream_pool_size
+    eodhistoricaldata_jobs_count        = local.eodhistoricaldata_jobs_count
+    eodhistoricaldata_prices_jobs_count = local.eodhistoricaldata_prices_jobs_count
+    coingecko_jobs_count                = local.coingecko_jobs_count
+    pg_transform_schema                 = local.public_schema_name
+    meltano_image                       = docker_registry_image.meltano.name
+    aws_log_group_name                  = aws_cloudwatch_log_group.meltano.name
+    aws_log_region                      = var.aws_log_region
+    aws_lambda_api_gateway_endpoint     = var.aws_lambda_api_gateway_endpoint
   }
   meltano_airflow_ui_task_description = jsondecode(templatefile(
     "${path.module}/task_definitions/meltano-airflow-ui.json",
