@@ -3,7 +3,7 @@ export PARAMS ?= $(filter-out $@,$(MAKECMDGOALS))
 # workaround for setting env vars from script
 _ := $(shell find .makeenv -mtime +12h -delete)
 ifeq ($(shell test -e .makeenv && echo -n yes),)
-	_ := $(shell source deployment/scripts/code_artifactory.sh; env | sed 's/=/:=/' | sed 's/^/export /' > .makeenv)
+	_ := $(shell . deployment/scripts/code_artifactory.sh; env | sed 's/=/:=/' | sed 's/^/export /' > .makeenv)
 endif
 include .makeenv
 include .env.make
@@ -11,9 +11,11 @@ include .env.make
 docker-auth:
 	aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin ${BASE_IMAGE_REGISTRY_ADDRESS}
 
-configure: clean docker-auth build
+env:
 	touch .env.local
 	- if [ ! -f src/meltano/meltano/exchanges.local.json ]; then cp -n src/meltano/meltano/symbols.local.json.dist src/meltano/meltano/symbols.local.json; fi
+
+configure: clean docker-auth env build
 	- docker network create gainy-default
 
 up:
@@ -68,7 +70,9 @@ test-hasura:
 test-lambda:
 	docker-compose -p gainy_test -f docker-compose.test.yml exec -T test-lambda-python-action pytest
 
-test: configure test-build test-meltano test-images test-meltano-realtime test-hasura test-lambda test-clean
+test-configure: test-clean docker-auth env test-build
+
+test: test-configure test-meltano test-images test-meltano-realtime test-hasura test-lambda test-clean
 
 test-clean:
 	docker-compose -p gainy_test -f docker-compose.test.yml down --rmi local -v
