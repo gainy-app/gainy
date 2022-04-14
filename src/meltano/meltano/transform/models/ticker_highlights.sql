@@ -44,5 +44,5 @@ select concat(tickers.symbol, '_upcoming_earnings')::varchar as id,
        ' of 4 last quarters.' as highlight,
        now()                  as created_at
 from tickers
-         left join highlights on highlights.symbol = tickers.symbol
+         join highlights on highlights.symbol = tickers.symbol
          left join upcoming_report_date on tickers.symbol = upcoming_report_date.symbol

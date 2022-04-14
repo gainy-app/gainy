@@ -8,7 +8,7 @@
   )
 }}
 
-with tickers as (select * from {{ ref('tickers') }}),
+with tickers as (select * from {{ ref('tickers') }} where type != 'crypto'),
      eod_fundamentals as (select * from {{ source('eod', 'eod_fundamentals') }})
 select f.code                                             as symbol,
        (sharesstats ->> 'ShortRatio')::float              as short_ratio,

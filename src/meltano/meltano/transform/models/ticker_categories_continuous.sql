@@ -414,6 +414,7 @@ union
                        MAX(eh.eps_actual) as value
                 from {{ ref('tickers') }} t
                          join {{ ref('earnings_history') }} eh on t.symbol = eh.symbol
+                where t.type !=' crypto'
                 group by t.symbol
             ),
         options_stats as

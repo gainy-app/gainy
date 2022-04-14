@@ -8,7 +8,7 @@
   )
 }}
 
-with tickers as (select * from {{ ref('tickers') }}),
+with tickers as (select * from {{ ref('tickers') }} where type !=' crypto'),
      settings (local_risk_free_rate) as (values (0.001)),
      weekly_prices as
          (
