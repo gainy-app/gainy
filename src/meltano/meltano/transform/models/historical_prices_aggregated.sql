@@ -269,11 +269,13 @@ union all
            low,
            close,
            (case
+                when adjustment_rate is null or adjustment_rate2 is null or abs(close) < 1e-3
+                    then 1
                 when adjustment_rate = adjustment_rate2 or abs(daily_adjusted_close / close - adjustment_rate) <
                                                            abs(daily_adjusted_close / close - adjustment_rate2)
                     then adjustment_rate
                 else adjustment_rate2
-                end * adjusted_close
+                end * close
                )::double precision as adjusted_close,
            volume
     from (
@@ -302,11 +304,6 @@ union all
                             first_value(close)
                             OVER (partition by symbol, grp order by datetime)
                         )::double precision                          as close,
-                    coalesce(
-                            close,
-                            first_value(close)
-                            OVER (partition by symbol, grp order by datetime)
-                        )::double precision                          as adjusted_close,
                     coalesce(volume, 0)                              as volume,
                     adjustment_rate,
                     first_value(adjustment_rate)
@@ -316,7 +313,10 @@ union all
                       select combined_intraday_prices.*,
                              sum(case when combined_intraday_prices.close is not null then 1 end)
                              over (partition by combined_intraday_prices.symbol order by datetime)        as grp,
-                             historical_prices.adjusted_close::numeric / historical_prices.close::numeric as adjustment_rate,
+                             case
+                                 when historical_prices.close > 0
+                                     then historical_prices.adjusted_close::numeric / historical_prices.close::numeric
+                             end as adjustment_rate,
                              historical_prices.adjusted_close::numeric as daily_adjusted_close
                       from combined_intraday_prices
                                left join {{ ref('historical_prices') }}
