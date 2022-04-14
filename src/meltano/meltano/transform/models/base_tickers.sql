@@ -8,7 +8,7 @@
   )
 }}
 
-select code::character varying                           as symbol,
+select upper(eod_fundamentals.code)::varchar             as symbol,
        lower(general ->> 'Type')::character varying      as type,
        (general ->> 'Name')::character varying           as name,
        coalesce(general -> 'Description',
@@ -42,5 +42,5 @@ select code::character varying                           as symbol,
            )                                             as country_name,
        (general ->> 'UpdatedAt')::timestamp              as updated_at
 from {{ source('eod', 'eod_fundamentals') }}
-left join {{ ref('crypto_coins') }} on (crypto_coins.symbol || '.CC') ilike eod_fundamentals.code
+left join {{ ref('crypto_coins') }} on crypto_coins.symbol = upper(eod_fundamentals.code)
 where ((general ->> 'IsDelisted') is null or (general ->> 'IsDelisted')::bool = false)

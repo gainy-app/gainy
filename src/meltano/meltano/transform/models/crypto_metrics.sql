@@ -78,6 +78,6 @@ select base_tickers.symbol,
        ticker_metrics.price_change_5y,
        ticker_metrics.price_change_all
 from {{ ref('crypto_coins') }}
-         join {{ ref('base_tickers') }} on base_tickers.symbol ilike (crypto_coins.symbol || '.CC')
+         join {{ ref('base_tickers') }} using(symbol)
          left join {{ ref('ticker_metrics') }} on ticker_metrics.symbol = base_tickers.symbol
 where base_tickers.type = 'crypto'
