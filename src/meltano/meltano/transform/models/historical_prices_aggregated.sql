@@ -22,6 +22,8 @@ with max_date as
       )
 {% endif %}
 
+-- 3min
+-- Execution Time: 18457.714 ms on test
 (
     with latest_open_trading_session as
              (
@@ -164,6 +166,8 @@ with max_date as
 
 union all
 
+-- 15min
+-- Execution Time: 314494.955 ms on test
 (
     with week_trading_sessions as
              (
@@ -331,10 +335,11 @@ union all
 
 union all
 
+-- 1d
+-- Execution Time: 90778.395 ms on test
 (
     with combined_daily_prices as
              (
-
                  select DISTINCT ON (
                      symbol,
                      date
@@ -376,7 +381,6 @@ union all
                          )
                      ) t
                  order by symbol, date, priority
-
              )
     select *
     from (
@@ -431,6 +435,8 @@ union all
 
 union all
 
+-- 1w
+-- Execution Time: 132505.948 ms on test
 (
     select DISTINCT ON (
         code,
@@ -469,6 +475,8 @@ union all
 
 union all
 
+-- 1m
+-- Execution Time: 350440.336 ms
 (
     select DISTINCT ON (
         code,
