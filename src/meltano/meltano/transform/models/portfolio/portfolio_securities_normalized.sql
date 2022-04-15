@@ -9,7 +9,11 @@ select portfolio_securities.id,
        portfolio_securities.name,
        coalesce(base_tickers.symbol, 
                 portfolio_securities.ticker_symbol) as ticker_symbol,
-       portfolio_securities.ticker_symbol           as original_ticker_symbol,
+       case
+           when base_tickers.type = 'crypto'
+               then base_tickers.symbol
+           else portfolio_securities.ticker_symbol
+           end                                      as original_ticker_symbol,
        case
            when base_tickers.type = 'crypto'
                then base_tickers.type
