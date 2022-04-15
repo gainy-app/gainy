@@ -241,10 +241,6 @@ from (
      ) t
          join {{ ref('portfolio_securities_normalized') }}
               on portfolio_securities_normalized.id = t.security_id
-         join {{ ref('profile_holdings_normalized') }}
-              on profile_holdings_normalized.profile_id = t.profile_id
-                  and profile_holdings_normalized.security_id = t.security_id
-                  and profile_holdings_normalized.account_id = t.account_id
          left join {{ source('app', 'profile_portfolio_accounts') }} on profile_portfolio_accounts.id = t.account_id
          left join {{ source('app', 'profile_plaid_access_tokens') }} on profile_plaid_access_tokens.id = profile_portfolio_accounts.plaid_access_token_id
          left join {{ source('app', 'plaid_institutions') }} on plaid_institutions.id = profile_plaid_access_tokens.institution_id
