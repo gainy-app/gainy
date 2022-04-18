@@ -43,15 +43,20 @@ with robinhood_options as (
              from {{ source('app', 'profile_portfolio_transactions') }}
          ),
      first_trade_date as ( select code, min(date) as first_trade_date from {{ ref('historical_prices') }} group by code ),
+     first_transaction_date as
+         (
+             select profile_id,
+                    min(date) as profile_first_transaction_date
+             from normalized_transactions
+             group by profile_id
+         ),
      mismatched_sell_transactions as
          (
              with expanded_transactions0 as
                       (
                           select *,
                                  sum(quantity_norm)
-                                 over (partition by account_id, security_id order by date, type rows between unbounded preceding and current row) as rolling_quantity,
-                                 first_value(date)
-                                 over (partition by profile_id order by date)                                                                     as profile_first_transaction_date
+                                 over (partition by account_id, security_id order by date, type rows between unbounded preceding and current row) as rolling_quantity
                           from normalized_transactions
                       ),
                   expanded_transactions as
@@ -60,7 +65,6 @@ with robinhood_options as (
                                  account_id,
                                  min(profile_id)                     as profile_id,
                                  min(name)                           as name,
-                                 min(profile_first_transaction_date) as profile_first_transaction_date,
                                  min(rolling_quantity)               as rolling_quantity
                           from expanded_transactions0
                           group by security_id, account_id
@@ -75,18 +79,17 @@ with robinhood_options as (
                                 expanded_transactions.profile_id,
                                 expanded_transactions.name,
                                 expanded_transactions.rolling_quantity,
+                                historical_prices.date,
                                 historical_prices.adjusted_close
                           from expanded_transactions
                                    left join {{ ref('portfolio_securities_normalized') }}
                                              on portfolio_securities_normalized.id = expanded_transactions.security_id
                                    left join first_trade_date
                                              on first_trade_date.code = portfolio_securities_normalized.ticker_symbol
+                                   left join first_transaction_date using (profile_id)
                                    left join {{ ref('historical_prices') }}
-                                             on historical_prices.code =
-                                                portfolio_securities_normalized.ticker_symbol
-                                                 and
-                                                (historical_prices.date between expanded_transactions.profile_first_transaction_date - interval '1 week'
-                                                     and expanded_transactions.profile_first_transaction_date
+                                             on historical_prices.code = portfolio_securities_normalized.ticker_symbol
+                                                 and (historical_prices.date between first_transaction_date.profile_first_transaction_date - interval '1 week' and first_transaction_date.profile_first_transaction_date
                                                     or historical_prices.date = first_trade_date.first_trade_date)
                           where rolling_quantity < 0
                           order by expanded_transactions.security_id, expanded_transactions.account_id,
@@ -97,7 +100,7 @@ with robinhood_options as (
                     expanded_transactions_with_price.security_id                                         as uniq_id,
                     coalesce(ticker_options.last_price, expanded_transactions_with_price.adjusted_close) *
                     abs(rolling_quantity)                                                                as amount,
-                    null::date                                                                           as date,
+                    expanded_transactions_with_price.date::date                                          as date,
                     'ASSUMPTION BOUGHT ' || abs(rolling_quantity) || ' ' ||
                     coalesce(ticker_options.symbol || ' ' || to_char(ticker_options.expiration_date, 'MM/dd/YYYY') ||
                              ' ' ||
@@ -122,15 +125,126 @@ with robinhood_options as (
                and (ticker_options.contract_name is not null or
                     expanded_transactions_with_price.adjusted_close is not null)
          ),
+     mismatched_buy_transactions as
+         (
+             -- union all buy transactions
+             with expanded_transactions0 as
+                      (
+                          select *,
+                                 sum(quantity_norm)
+                                 over (partition by account_id, security_id order by date, type rows between unbounded preceding and current row) as rolling_quantity
+                          from (select *,
+                                       id || '_' || account_id || '_' || security_id as uniq_id
+                                from normalized_transactions
+                                union all
+                                select id,
+                                       amount,
+                                       date,
+                                       name,
+                                       price,
+                                       quantity,
+                                       subtype,
+                                       type,
+                                       security_id,
+                                       profile_id,
+                                       account_id,
+                                       quantity_norm,
+                                       uniq_id
+                                from mismatched_sell_transactions) t
+                      ),
+                  -- match each buy transaction with appropriate sell transaction
+                  -- so that total sum equals to holding quantity
+                  expanded_transactions as
+                      (
+                          select id as uniq_id,
+                                 date,
+                                 name,
+                                 price,
+                                 least(
+                                         quantity,
+                                         t.rolling_quantity -
+                                         coalesce(sum(least(quantity,
+                                                            t.rolling_quantity))
+                                                  over (partition by security_id, account_id order by date rows between unbounded preceding and 1 preceding),
+                                                  0)
+                                     ) as rolling_quantity,
+                                 security_id,
+                                 profile_id,
+                                 account_id
+                          from normalized_transactions
+                                   join (
+                              select distinct on (
+                                  security_id,
+                                  account_id
+                                  ) security_id,
+                                    account_id,
+                                    rolling_quantity as rolling_quantity
+                              from expanded_transactions0
+                              order by security_id, account_id, date desc, type desc
+                          ) t using (security_id, account_id)
+                          where type = 'buy'
+                      ),
+                  expanded_transactions_with_price as
+                      (
+                          select distinct on (
+                              expanded_transactions.uniq_id
+                              ) uniq_id,
+                                expanded_transactions.security_id,
+                                expanded_transactions.account_id,
+                                expanded_transactions.profile_id,
+                                expanded_transactions.name,
+                                expanded_transactions.rolling_quantity - coalesce(profile_holdings_normalized.quantity, 0) as rolling_quantity,
+                                expanded_transactions.date,
+                                historical_prices.adjusted_close
+                          from expanded_transactions
+                                   left join {{ ref('profile_holdings_normalized') }} using (security_id, account_id, profile_id)
+                                   left join {{ ref('portfolio_securities_normalized') }}
+                                             on portfolio_securities_normalized.id = expanded_transactions.security_id
+                                   left join first_trade_date
+                                             on first_trade_date.code = portfolio_securities_normalized.ticker_symbol
+                                   left join first_transaction_date using (profile_id)
+                                   left join {{ ref('historical_prices') }}
+                                             on historical_prices.code = portfolio_securities_normalized.ticker_symbol
+                                                 and (historical_prices.date between expanded_transactions.date - interval '1 week' and expanded_transactions.date)
+                          where rolling_quantity > 0
+                          order by expanded_transactions.uniq_id, historical_prices.date
+                      )
+             select null::int                                                                            as id,
+                    'auto2_' || expanded_transactions_with_price.uniq_id                                 as uniq_id,
+                    coalesce(ticker_options.last_price, expanded_transactions_with_price.adjusted_close) *
+                    abs(rolling_quantity)                                                                as amount,
+                    expanded_transactions_with_price.date::date                                          as date,
+                    'ASSUMPTION SOLD ' || abs(rolling_quantity) || ' ' ||
+                    coalesce(ticker_options.symbol || ' ' || to_char(ticker_options.expiration_date, 'MM/dd/YYYY') ||
+                             ' ' ||
+                             ticker_options.strike || ' ' || INITCAP(ticker_options.type),
+                             expanded_transactions_with_price.name) ||
+                    ' @ ' ||
+                    coalesce(ticker_options.last_price, expanded_transactions_with_price.adjusted_close) as name,
+                    coalesce(ticker_options.last_price, expanded_transactions_with_price.adjusted_close) as price,
+                    abs(rolling_quantity)                                                                as quantity,
+                    'sell'                                                                               as subtype,
+                    'sell'                                                                               as type,
+                    expanded_transactions_with_price.security_id,
+                    expanded_transactions_with_price.profile_id,
+                    expanded_transactions_with_price.account_id,
+                    -abs(rolling_quantity)                                                               as quantity_norm
+             from expanded_transactions_with_price
+                      left join portfolio_securities_normalized
+                                on portfolio_securities_normalized.id = expanded_transactions_with_price.security_id
+                      left join {{ ref('ticker_options') }}
+                                on ticker_options.contract_name = portfolio_securities_normalized.original_ticker_symbol
+             where rolling_quantity > 0
+               and (ticker_options.contract_name is not null or
+                    expanded_transactions_with_price.adjusted_close is not null)
+         ),
      expanded_transactions as
          (
              select *,
                     sum(quantity_norm)
                     over (partition by account_id, security_id order by date, type rows between unbounded preceding and current row) as rolling_quantity,
                     row_number()
-                    over (partition by account_id, security_id order by date, type rows between unbounded preceding and current row) as row_num,
-                    first_value(date)
-                    over (partition by profile_id order by date)                                                                     as profile_first_transaction_date
+                    over (partition by account_id, security_id order by date, type rows between unbounded preceding and current row) as row_num
              from (
                       select account_id, security_id, date, quantity_norm, type, profile_id
                       from normalized_transactions
@@ -169,6 +283,12 @@ from (
 
          union all
 
+         select *,
+                now() as updated_at
+         from mismatched_buy_transactions
+
+         union all
+
          -- mismatched holdings
          (
              select distinct on (
@@ -177,7 +297,7 @@ from (
                  ) null::int                                                                    as id,
                    'auto1_' || account_id || '_' || security_id                                 as uniq_id,
                    coalesce(ticker_options.last_price, historical_prices.adjusted_close) * diff as amount,
-                   null::date                                                                   as date,
+                   historical_prices.date::date                                                 as date,
                    'ASSUMPTION BOUGHT ' || diff || ' ' ||
                    coalesce(ticker_options.name, t.name) || ' @ ' ||
                    coalesce(ticker_options.last_price, historical_prices.adjusted_close)        as name,
@@ -203,6 +323,7 @@ from (
                             profile_holdings_normalized.quantity -
                             coalesce(expanded_transactions.rolling_quantity, 0) as diff
                       from {{ ref('profile_holdings_normalized') }}
+                               left join first_transaction_date using (profile_id)
                                left join expanded_transactions
                                          on profile_holdings_normalized.account_id = expanded_transactions.account_id and
                                             profile_holdings_normalized.security_id = expanded_transactions.security_id
@@ -219,6 +340,7 @@ from (
                                 on ticker_options.contract_name = portfolio_securities_normalized.original_ticker_symbol
              where diff > 0
                and portfolio_securities_normalized.type != 'cash'
+             order by security_id, account_id, historical_prices.date desc
          )
 
          union all
