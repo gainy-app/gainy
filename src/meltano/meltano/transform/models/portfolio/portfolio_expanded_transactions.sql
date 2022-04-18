@@ -230,7 +230,7 @@ with robinhood_options as (
                     expanded_transactions_with_price.account_id,
                     -abs(rolling_quantity)                                                               as quantity_norm
              from expanded_transactions_with_price
-                      left join portfolio_securities_normalized
+                      left join {{ ref('portfolio_securities_normalized') }}
                                 on portfolio_securities_normalized.id = expanded_transactions_with_price.security_id
                       left join {{ ref('ticker_options') }}
                                 on ticker_options.contract_name = portfolio_securities_normalized.original_ticker_symbol
