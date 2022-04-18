@@ -73,7 +73,7 @@ test-lambda:
 test-configure: test-clean docker-auth env test-build
 
 test: test-configure test-meltano test-images
-	sleep 10
+	sleep 60
 	make test-meltano-realtime
 	make test-hasura
 	make test-lambda
