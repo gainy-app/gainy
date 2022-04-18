@@ -1,3 +1,3 @@
 export BASE_IMAGE_REGISTRY_ADDRESS=217303665077.dkr.ecr.us-east-1.amazonaws.com
 export BASE_IMAGE_VERSION=20220418-hasura-fixtures-fix
-export GAINY_COMPUTE_VERSION=v0.3
+export GAINY_COMPUTE_VERSION=v0.3.1
