@@ -52,7 +52,6 @@ with first_purchase_date as
                                from {{ ref('portfolio_expanded_transactions') }}
                                         join {{ ref('portfolio_securities_normalized') }}
                                              on portfolio_securities_normalized.id = portfolio_expanded_transactions.security_id
-                               where portfolio_expanded_transactions.type in ('buy', 'sell')
                            ) t
                                join {{ source('app', 'profile_holdings') }}
                                     on profile_holdings.profile_id = t.profile_id

@@ -31,8 +31,6 @@ with robinhood_options as (
                     date,
                     name,
                     price,
-                    quantity,
-                    subtype,
                     type,
                     security_id,
                     profile_id,
@@ -99,16 +97,7 @@ with robinhood_options as (
                     coalesce(ticker_options.last_price, expanded_transactions_with_price.adjusted_close) *
                     abs(rolling_quantity)                                                                as amount,
                     expanded_transactions_with_price.date::date                                          as date,
-                    'ASSUMPTION BOUGHT ' || abs(rolling_quantity) || ' ' ||
-                    coalesce(ticker_options.symbol || ' ' || to_char(ticker_options.expiration_date, 'MM/dd/YYYY') ||
-                             ' ' ||
-                             ticker_options.strike || ' ' || INITCAP(ticker_options.type),
-                             expanded_transactions_with_price.name) ||
-                    ' @ ' ||
-                    coalesce(ticker_options.last_price, expanded_transactions_with_price.adjusted_close) as name,
                     coalesce(ticker_options.last_price, expanded_transactions_with_price.adjusted_close) as price,
-                    abs(rolling_quantity)                                                                as quantity,
-                    'buy'                                                                                as subtype,
                     'buy'                                                                                as type,
                     expanded_transactions_with_price.security_id,
                     expanded_transactions_with_price.profile_id,
@@ -131,16 +120,21 @@ with robinhood_options as (
                           select *,
                                  sum(quantity_norm)
                                  over (partition by account_id, security_id order by date, type rows between unbounded preceding and current row) as rolling_quantity
-                          from (select *
+                          from (select id,
+                                       amount,
+                                       date,
+                                       price,
+                                       type,
+                                       security_id,
+                                       profile_id,
+                                       account_id,
+                                       quantity_norm
                                 from normalized_transactions
                                 union all
                                 select id,
                                        amount,
                                        date,
-                                       name,
                                        price,
-                                       quantity,
-                                       subtype,
                                        type,
                                        security_id,
                                        profile_id,
@@ -157,9 +151,9 @@ with robinhood_options as (
                                  name,
                                  price,
                                  least(
-                                         quantity,
+                                         quantity_norm,
                                          t.rolling_quantity -
-                                         coalesce(sum(least(quantity,
+                                         coalesce(sum(least(quantity_norm,
                                                             t.rolling_quantity))
                                                   over (partition by security_id, account_id order by date rows between unbounded preceding and 1 preceding),
                                                   0)
@@ -210,16 +204,7 @@ with robinhood_options as (
                     coalesce(ticker_options.last_price, expanded_transactions_with_price.adjusted_close) *
                     abs(sell_quantity)                                                                   as amount,
                     expanded_transactions_with_price.date::date                                          as date,
-                    'ASSUMPTION SOLD ' || abs(sell_quantity) || ' ' ||
-                    coalesce(ticker_options.symbol || ' ' || to_char(ticker_options.expiration_date, 'MM/dd/YYYY') ||
-                             ' ' ||
-                             ticker_options.strike || ' ' || INITCAP(ticker_options.type),
-                             expanded_transactions_with_price.name) ||
-                    ' @ ' ||
-                    coalesce(ticker_options.last_price, expanded_transactions_with_price.adjusted_close) as name,
                     coalesce(ticker_options.last_price, expanded_transactions_with_price.adjusted_close) as price,
-                    abs(sell_quantity)                                                                   as quantity,
-                    'sell'                                                                               as subtype,
                     'sell'                                                                               as type,
                     expanded_transactions_with_price.security_id,
                     expanded_transactions_with_price.profile_id,
@@ -250,37 +235,32 @@ with robinhood_options as (
                   ) t
          )
 
-select t.id,
-       t.uniq_id::varchar,
-       t.amount,
-       t.date,
-       t.name,
-       t.price,
-       t.quantity / case
-                        when robinhood_options.quantity_module_sum = 0 and
-                             portfolio_securities_normalized.type = 'derivative' and
-                             plaid_institutions.ref_id = 'ins_54' then 100
-                        else 1 end as quantity,
-       t.subtype,
-       t.type,
+select sum(quantity_norm) * sum(abs(quantity_norm) * price) /
+       sum(abs(quantity_norm))                                   as amount,
+       sum(abs(quantity_norm) * price) / sum(abs(quantity_norm)) as price,
+       sum(quantity_norm / case
+                                when robinhood_options.quantity_module_sum = 0 and
+                                     portfolio_securities_normalized.type = 'derivative' and
+                                     plaid_institutions.ref_id = 'ins_54' then 100
+                                else 1 end)                      as quantity,
        t.security_id,
        t.profile_id,
        t.account_id,
-       t.quantity_norm / case
-                             when robinhood_options.quantity_module_sum = 0 and
-                                  portfolio_securities_normalized.type = 'derivative' and
-                                  plaid_institutions.ref_id = 'ins_54' then 100
-                             else 1 end as quantity_norm,
-       t.updated_at
+       sum(quantity_norm / case
+                                when robinhood_options.quantity_module_sum = 0 and
+                                     portfolio_securities_normalized.type = 'derivative' and
+                                     plaid_institutions.ref_id = 'ins_54' then 100
+                                else 1 end)                      as quantity_norm,
+       now()                                                     as updated_at,
+       max(uniq_id)::varchar                                     as uniq_id,
+       t.date
 from (
-         select *,
-                now() as updated_at
+         select *
          from mismatched_sell_transactions
 
          union all
 
-         select *,
-                now() as updated_at
+         select *
          from mismatched_buy_transactions
 
          union all
@@ -294,18 +274,12 @@ from (
                    'auto1_' || account_id || '_' || security_id                                 as uniq_id,
                    coalesce(ticker_options.last_price, historical_prices.adjusted_close) * diff as amount,
                    historical_prices.date::date                                                 as date,
-                   'ASSUMPTION BOUGHT ' || diff || ' ' ||
-                   coalesce(ticker_options.name, t.name) || ' @ ' ||
-                   coalesce(ticker_options.last_price, historical_prices.adjusted_close)        as name,
                    coalesce(ticker_options.last_price, historical_prices.adjusted_close)        as price,
-                   diff                                                                         as quantity,
-                   'buy'                                                                        as subtype,
                    'buy'                                                                        as type,
                    security_id,
                    profile_id,
                    account_id,
-                   diff                                                                         as quantity_norm,
-                   now() as updated_at
+                   diff                                                                         as quantity_norm
              from (
                       select distinct on (
                           profile_holdings_normalized.account_id, profile_holdings_normalized.security_id
@@ -344,17 +318,13 @@ from (
          select id,
                 id || '_' || account_id || '_' || security_id as uniq_id,
                 amount,
-                date                                          as date,
-                name,
+                date,
                 price,
-                quantity,
-                subtype,
                 type,
                 security_id,
                 profile_id,
                 account_id,
-                quantity_norm,
-                now() as updated_at
+                quantity_norm
          from normalized_transactions
      ) t
          join {{ ref('portfolio_securities_normalized') }}
@@ -363,3 +333,6 @@ from (
          left join {{ source('app', 'profile_plaid_access_tokens') }} on profile_plaid_access_tokens.id = profile_portfolio_accounts.plaid_access_token_id
          left join {{ source('app', 'plaid_institutions') }} on plaid_institutions.id = profile_plaid_access_tokens.institution_id
          left join robinhood_options on robinhood_options.profile_id = t.profile_id
+where t.type in ('buy', 'sell')
+group by t.date, t.security_id, t.account_id, t.profile_id
+having sum(abs(quantity_norm)) > 0
