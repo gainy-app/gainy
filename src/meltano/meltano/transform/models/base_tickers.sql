@@ -8,10 +8,12 @@
   )
 }}
 
-select code::character varying                           as symbol,
+select upper(eod_fundamentals.code)::varchar             as symbol,
        lower(general ->> 'Type')::character varying      as type,
        (general ->> 'Name')::character varying           as name,
-       (general -> 'Description')::character varying     as description,
+       coalesce(general -> 'Description',
+                crypto_coins.description -> 'en'
+           )::varchar                                    as description,
        (general ->> 'Phone')::character varying          as phone,
        (general ->> 'LogoURL')::character varying        as logo_url,
        (general ->> 'WebURL')::character varying         as web_url,
@@ -40,4 +42,5 @@ select code::character varying                           as symbol,
            )                                             as country_name,
        (general ->> 'UpdatedAt')::timestamp              as updated_at
 from {{ source('eod', 'eod_fundamentals') }}
+left join {{ ref('crypto_coins') }} on crypto_coins.symbol = upper(eod_fundamentals.code)
 where ((general ->> 'IsDelisted') is null or (general ->> 'IsDelisted')::bool = false)

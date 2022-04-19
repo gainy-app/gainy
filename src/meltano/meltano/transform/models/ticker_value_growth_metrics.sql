@@ -10,7 +10,7 @@
 
 /* EGRSF https://www.msci.com/eqb/methodology/meth_docs/MSCI_Feb13_Fundamental_Data.pdf */
 
-with tickers as (select * from {{ ref('tickers') }}),
+with tickers as (select * from {{ ref('tickers') }} where type != 'crypto'),
      earnings_trend as (select * from {{ ref('earnings_trend') }}),
      earnings_annual as (select * from {{ ref('earnings_annual') }}),
      highlights as (select * from {{ ref('highlights') }}),
