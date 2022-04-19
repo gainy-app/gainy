@@ -4,10 +4,8 @@
     unique_key = "uniq_id",
     tags = ["realtime"],
     post_hook=[
-      index(this, 'id', true),
       index(this, 'uniq_id', true),
       'delete from {{this}} where updated_at < (select max(updated_at) from {{this}})',
-      'delete from {{this}} where account_id not in (select id from app.profile_portfolio_accounts)',
       fk(this, 'account_id', 'app', 'profile_portfolio_accounts', 'id')
     ]
   )
@@ -133,8 +131,7 @@ with robinhood_options as (
                           select *,
                                  sum(quantity_norm)
                                  over (partition by account_id, security_id order by date, type rows between unbounded preceding and current row) as rolling_quantity
-                          from (select *,
-                                       id || '_' || account_id || '_' || security_id as uniq_id
+                          from (select *
                                 from normalized_transactions
                                 union all
                                 select id,
@@ -148,15 +145,14 @@ with robinhood_options as (
                                        security_id,
                                        profile_id,
                                        account_id,
-                                       quantity_norm,
-                                       uniq_id
+                                       quantity_norm
                                 from mismatched_sell_transactions) t
                       ),
                   -- match each buy transaction with appropriate sell transaction
                   -- so that total sum equals to holding quantity
                   expanded_transactions as
                       (
-                          select id as uniq_id,
+                          select normalized_transactions.id,
                                  date,
                                  name,
                                  price,
@@ -187,8 +183,8 @@ with robinhood_options as (
                   expanded_transactions_with_price as
                       (
                           select distinct on (
-                              expanded_transactions.uniq_id
-                              ) uniq_id,
+                              expanded_transactions.id
+                              ) expanded_transactions.id,
                                 expanded_transactions.security_id,
                                 expanded_transactions.account_id,
                                 expanded_transactions.profile_id,
@@ -205,12 +201,12 @@ with robinhood_options as (
                                    left join first_transaction_date using (profile_id)
                                    left join {{ ref('historical_prices') }}
                                              on historical_prices.code = portfolio_securities_normalized.ticker_symbol
-                                                 and (historical_prices.date between expanded_transactions.date - interval '1 week' and expanded_transactions.date)
-                          where rolling_quantity > 0
+                                                 and historical_prices.date = expanded_transactions.date
+                          where rolling_quantity > coalesce(profile_holdings_normalized.quantity, 0)
                           order by expanded_transactions.uniq_id, historical_prices.date
                       )
              select null::int                                                                            as id,
-                    'auto2_' || expanded_transactions_with_price.uniq_id                                 as uniq_id,
+                    'auto2_' || expanded_transactions_with_price.id                                      as uniq_id,
                     coalesce(ticker_options.last_price, expanded_transactions_with_price.adjusted_close) *
                     abs(rolling_quantity)                                                                as amount,
                     expanded_transactions_with_price.date::date                                          as date,
