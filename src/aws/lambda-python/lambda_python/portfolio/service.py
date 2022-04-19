@@ -315,7 +315,6 @@ class PortfolioService:
                 prev_period = prev_row['period']
                 should_skip_other_periods = period == prev_period and transaction_count < prev_transaction_count
                 if period != '1d' and should_skip_other_periods:
-                    prev_row = row
                     continue
 
             prev_row = row

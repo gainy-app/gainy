@@ -13,7 +13,7 @@ logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
 schema_activity_min_datetime = datetime.datetime.now(
-    tz=datetime.timezone.utc) - datetime.timedelta(days=7)
+    tz=datetime.timezone.utc) - datetime.timedelta(days=3)
 
 AWS_LAMBDA_API_GATEWAY_ENDPOINT = os.getenv("AWS_LAMBDA_API_GATEWAY_ENDPOINT")
 
