@@ -72,11 +72,7 @@ test-lambda:
 
 test-configure: test-clean docker-auth env test-build
 
-test: test-configure test-meltano test-images
-	make test-meltano-realtime
-	make test-hasura
-	make test-lambda
-	make test-clean
+test: test-configure test-meltano test-images test-meltano-realtime test-hasura test-lambda test-clean
 
 test-clean:
 	docker-compose -p gainy_test -f docker-compose.test.yml down --rmi local -v
