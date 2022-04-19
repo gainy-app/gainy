@@ -250,28 +250,26 @@ with robinhood_options as (
                   ) t
          )
 
-select t.id,
-       t.uniq_id::varchar,
-       t.amount,
-       t.date,
-       t.name,
-       t.price,
-       t.quantity / case
-                        when robinhood_options.quantity_module_sum = 0 and
-                             portfolio_securities_normalized.type = 'derivative' and
-                             plaid_institutions.ref_id = 'ins_54' then 100
-                        else 1 end as quantity,
-       t.subtype,
-       t.type,
-       t.security_id,
-       t.profile_id,
-       t.account_id,
-       t.quantity_norm / case
-                             when robinhood_options.quantity_module_sum = 0 and
-                                  portfolio_securities_normalized.type = 'derivative' and
-                                  plaid_institutions.ref_id = 'ins_54' then 100
-                             else 1 end as quantity_norm,
-       t.updated_at
+select min(id),
+       sum(quantity_norm) * sum(abs(quantity_norm) * price) /
+       sum(abs(quantity_norm))                                   as amount,
+       sum(abs(quantity_norm) * price) / sum(abs(quantity_norm)) as price,
+       sum(quantity_norm) / case
+                               when robinhood_options.quantity_module_sum = 0 and
+                                    portfolio_securities_normalized.type = 'derivative' and
+                                    plaid_institutions.ref_id = 'ins_54' then 100
+                               else 1 end                                        as quantity,
+       security_id,
+       profile_id,
+       account_id,
+       sum(quantity_norm) / case
+                                when robinhood_options.quantity_module_sum = 0 and
+                                     portfolio_securities_normalized.type = 'derivative' and
+                                     plaid_institutions.ref_id = 'ins_54' then 100
+                                else 1 end                                        as quantity_norm,
+       now()                                                     as updated_at,
+       max(uniq_id),
+       date
 from (
          select *,
                 now() as updated_at
@@ -363,3 +361,5 @@ from (
          left join {{ source('app', 'profile_plaid_access_tokens') }} on profile_plaid_access_tokens.id = profile_portfolio_accounts.plaid_access_token_id
          left join {{ source('app', 'plaid_institutions') }} on plaid_institutions.id = profile_plaid_access_tokens.institution_id
          left join robinhood_options on robinhood_options.profile_id = t.profile_id
+group by date, security_id, account_id, profile_id
+having sum(abs(quantity_norm)) > 0
