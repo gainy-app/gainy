@@ -26,6 +26,5 @@ query GetPortfolioChart(
         high
         low
         close
-        adjusted_close
     }
 }
