@@ -8,7 +8,7 @@
   )
 }}
 
-with tickers as (select * from {{ ref('tickers') }}),
+with tickers as (select * from {{ ref('tickers') }} where type != 'crypto'),
      ticker_momentum_metrics as (select * from {{ ref('ticker_momentum_metrics') }}),
      ticker_value_growth_metrics as (select * from {{ ref('ticker_value_growth_metrics') }}),
      settings as

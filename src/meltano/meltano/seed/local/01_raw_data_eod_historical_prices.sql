@@ -15,4 +15,5 @@ select latest_historical_prices.code as code,
        latest_historical_prices.volume * (random() + 0.5) as volume
 FROM generate_series((select min(date) from latest_historical_prices)::date + interval '1 day', now() - interval '1 day', interval '1 day') dd
          join latest_historical_prices on true
-where extract(isodow from dd) < 6;
+where extract(isodow from dd) < 6
+on conflict do nothing;

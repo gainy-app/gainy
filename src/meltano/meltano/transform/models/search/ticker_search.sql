@@ -38,3 +38,6 @@ from {{ ref('tickers') }} t
                    on t.symbol = ti.symbol
          left join ticker_categories tc
                    on t.symbol = tc.symbol
+{% if not var('search_crypto_enabled') %}
+where t.type != 'crypto'
+{% endif %}
