@@ -62,7 +62,6 @@ from {{ ref('portfolio_expanded_transactions') }}
                   and (chart.period = latest_transaction_chart_row.period or latest_transaction_chart_row.transactions_uniq_id is null)
                   and (chart.datetime >= latest_transaction_chart_row.datetime or latest_transaction_chart_row.transactions_uniq_id is null)
 {% endif %}
-where portfolio_expanded_transactions.type in ('buy', 'sell')
 {% if is_incremental() and var('realtime') %}
-  and (chart.period in ('1d', '1w') or latest_transaction_chart_row.datetime is null)
+where (chart.period in ('1d', '1w') or latest_transaction_chart_row.datetime is null)
 {% endif %}

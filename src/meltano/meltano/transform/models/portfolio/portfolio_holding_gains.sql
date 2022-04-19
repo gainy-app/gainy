@@ -87,8 +87,7 @@ with relative_data as
                                       sum(quantity_norm)
                                       over (partition by security_id, portfolio_expanded_transactions.profile_id order by sign(quantity_norm), date) as cumsum
                                from {{ ref('portfolio_expanded_transactions') }}
-                               where portfolio_expanded_transactions.type in ('buy', 'sell')
-                                 and portfolio_expanded_transactions.id is not null
+                               where portfolio_expanded_transactions.profile_id is not null
                            ) t
                                join {{ ref('profile_holdings_normalized') }}
                                     on profile_holdings_normalized.profile_id = t.profile_id
