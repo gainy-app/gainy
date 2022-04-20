@@ -1257,29 +1257,6 @@ models:
           - type:
               type: 'double precision'
 
-  - name: portfolio_chart
-    columns:
-      - name: profile_id
-        tests:
-          - type:
-              type: 'integer'
-      - name: value
-        tests:
-          - type:
-              type: 'double precision'
-      - name: date
-        tests:
-          - type:
-              type: 'timestamp without time zone'
-      - name: datetime
-        tests:
-          - type:
-              type: 'timestamp without time zone'
-      - name: period
-        tests:
-          - type:
-              type: 'character varying'
-
   - name: portfolio_transaction_chart
     columns:
       - name: transactions_uniq_id

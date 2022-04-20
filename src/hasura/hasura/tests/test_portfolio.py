@@ -7,7 +7,7 @@ from common import make_graphql_request, permute_params, PROFILE_ID, MIN_PORTFOL
 PROFILES = make_graphql_request("{app_profiles{id, user_id}}",
                                 user_id=None)['data']['app_profiles']
 PROFILE_IDS = {profile['user_id']: profile['id'] for profile in PROFILES}
-
+PRICE_EPS = 1e-3
 
 def test_portfolio():
     query_file = os.path.join(os.path.dirname(__file__),
@@ -21,22 +21,7 @@ def test_portfolio():
     assert len(
         data['profile_holding_groups']) >= MIN_PORTFOLIO_HOLDING_GROUPS_COUNT
 
-    for holding_group in data['profile_holding_groups']:
-        assert holding_group['details'] is not None
-        assert holding_group['gains'] is not None
-        assert holding_group['holdings'] is not None
-        assert len(holding_group['holdings']) > 0
-        for holding in holding_group['holdings']:
-            assert holding['holding_details'] is not None
-            assert holding['gains'] is not None
-
-
-def test_portfolio_chart():
-    query_file = os.path.join(os.path.dirname(__file__),
-                              'queries/GetPortfolioChart.graphql')
-    with open(query_file, 'r') as f:
-        query = f.read()
-
+def get_test_portfolio_chart_filters_data():
     full_options_dict = {
         "periods": ["1d"],
         "accessTokenIds": [None, 1],
@@ -47,28 +32,30 @@ def test_portfolio_chart():
         "securityTypes": [None, "equity"],
         "lttOnly": [None, True],
     }
-    test_sets = permute_params(full_options_dict)
 
-    for params in test_sets:
-        if "lttOnly" in params:
-            params["lttOnly"] = params["lttOnly"][0]
-
-        data = make_graphql_request(query, {
-            **{
-                "profileId": PROFILE_ID
-            },
-            **params
-        })['data']
-        if "lttOnly" not in params:
-            assert len(data['get_portfolio_chart']) > 0, json.dumps(params)
+    for params in permute_params(full_options_dict):
+        yield params
 
     periods = ["1d", "1w", "1m", "3m", "1y", "5y", "all"]
     for period in periods:
-        data = make_graphql_request(query, {
-            "profileId": PROFILE_ID,
-            "periods": [period]
-        })['data']
-        assert len(data['get_portfolio_chart']) > 0, {"periods": [period]}
+        yield {"periods": [period]}
+
+@pytest.mark.parametrize("params", get_test_portfolio_chart_filters_data())
+def test_portfolio_chart_filters(params):
+    query_file = os.path.join(os.path.dirname(__file__),
+                              'queries/GetPortfolioChart.graphql')
+    with open(query_file, 'r') as f:
+        query = f.read()
+
+    if "lttOnly" in params:
+        params["lttOnly"] = params["lttOnly"][0]
+
+    data = make_graphql_request(query, {
+        "profileId": PROFILE_ID,
+        **params
+    })['data']
+    if "lttOnly" not in params:
+        assert len(data['get_portfolio_chart']) > 0, json.dumps(params)
 
 
 def verify_portfolio_chart(portfolio_chart,
@@ -116,12 +103,12 @@ def verify_portfolio_chart(portfolio_chart,
                 'datetime']:
             assert abs(
                 portfolio_chart_row['adjusted_close'] - expected_value
-            ) < 1e-3, f"{assert_message_prefix}: wrong value on {datetime}: {portfolio_chart_row['adjusted_close'] }, expected {expected_value}"
+            ) < PRICE_EPS, f"{assert_message_prefix}: wrong value on {datetime}: {portfolio_chart_row['adjusted_close'] }, expected {expected_value}"
             portfolio_chart_index += 1
         else:
             assert abs(
                 expected_value
-            ) < 1e-3, f"{assert_message_prefix}: no value on {datetime}, expected {expected_value}"
+            ) < PRICE_EPS, f"{assert_message_prefix}: no value on {datetime}, expected {expected_value}"
 
 
 def verify_profile(user_id,
@@ -143,7 +130,7 @@ def verify_profile(user_id,
             charts[period], quantities, quantities_override, user_id)
 
 
-def get_test_portfolio_data():
+def get_test_portfolio_data(only_with_holdings=False):
     transaction_stats_query = "query transaction_stats($profileId: Int!) {app_profile_portfolio_transactions_aggregate(where: {profile_id: {_eq: $profileId}}) {aggregate{min{date} max{date}}}}"
     quantities = {"AAPL": 100}
 
@@ -310,6 +297,9 @@ def get_test_portfolio_data():
     ]
     yield (user_id, quantities, quantities_override)
 
+    if only_with_holdings:
+        return
+
     quantities = {"AAPL": 0}
 
     # -- profile 14 without holdings without transactions at all
@@ -345,8 +335,8 @@ def get_test_portfolio_data():
 
 @pytest.mark.parametrize("user_id,quantities,quantities_override",
                          get_test_portfolio_data())
-def test_portfolio_data(user_id, quantities, quantities_override):
-    periods = ["1w", "1m"]
+def test_portfolio_chart_data(user_id, quantities, quantities_override):
+    periods = ["1d", "1w", "1m", "3m"]
 
     query = 'query chart($period: String!, $symbol: String!) { chart(where: {symbol: {_eq: $symbol}, period: {_eq: $period}}, order_by: {datetime: asc}) { symbol datetime period open high low close adjusted_close volume } }'
     charts = {
@@ -367,3 +357,98 @@ def test_portfolio_data(user_id, quantities, quantities_override):
 
     verify_profile(user_id, periods, chart_query, PROFILE_IDS, charts,
                    quantities, quantities_override)
+
+@pytest.mark.parametrize("user_id,quantities,quantities_override",
+                         get_test_portfolio_data(only_with_holdings=True))
+def test_portfolio_holdings_data(user_id, quantities, quantities_override):
+    query = 'query ticker_metrics($symbol: String!) { ticker_metrics(where: {symbol: {_eq: $symbol}}) { price_change_1m price_change_1w price_change_1y price_change_3m price_change_5y price_change_all } ticker_realtime_metrics(where: {symbol: {_eq: $symbol}}) { actual_price relative_daily_change } }'
+    metrics = {
+        "AAPL":
+        make_graphql_request(query, {
+            "symbol": "AAPL"
+        })['data'],
+    }
+    # flatten metrics dict
+    metrics = {k: {**i['ticker_realtime_metrics'][0], **i['ticker_metrics'][0]} for k,i in metrics.items()}
+
+    query_file = os.path.join(os.path.dirname(__file__),
+                              'queries/GetPortfolioHoldings.graphql')
+    with open(query_file, 'r') as f:
+        query = f.read()
+
+    profile_id = PROFILE_IDS[user_id]
+    data = make_graphql_request(query, {"profileId": profile_id}, user_id=user_id)['data']
+    portfolio_gains = data['portfolio_gains'][0]
+    profile_holding_groups = data['profile_holding_groups']
+    profile_chart_latest_point = data['get_portfolio_chart'][-1]
+
+    periods_mapping = {
+        "gain_1d": "relative_daily_change",
+        "gain_1w": "price_change_1w",
+        "gain_1m": "price_change_1m",
+        "gain_3m": "price_change_3m",
+        "gain_1y": "price_change_1y",
+        "gain_5y": "price_change_5y",
+        "gain_total": "price_change_all"
+    }
+
+    actual_portfolio_value = 0
+    for symbol, quantity in quantities.items():
+        actual_portfolio_value += metrics[symbol]['actual_price'] * quantity
+    assert abs(portfolio_gains['actual_value'] - actual_portfolio_value) < PRICE_EPS
+    assert abs(profile_chart_latest_point['adjusted_close'] - actual_portfolio_value) < PRICE_EPS
+
+    for portfolio_key,metrics_key in periods_mapping.items():
+        relative_portfolio_key = f'relative_{portfolio_key}'
+        absolute_portfolio_key = f'absolute_{portfolio_key}'
+        absolute_symbol_price_change = {
+            symbol: symbol_metrics['actual_price'] * (1 - 1 / (1 + symbol_metrics[metrics_key]))
+            for symbol, symbol_metrics in metrics.items()
+        }
+
+        expected_absolute_gain = 0
+        period_start_portfolio_value = 0
+        for symbol, value in absolute_symbol_price_change.items():
+            expected_absolute_gain += value * quantities[symbol]
+            period_start_portfolio_value += (metrics[symbol]['actual_price'] - value) * quantities[symbol]
+        expected_relative_gain = actual_portfolio_value / period_start_portfolio_value - 1
+
+        assert abs(portfolio_gains[relative_portfolio_key] - expected_relative_gain) < PRICE_EPS
+        assert abs(portfolio_gains[absolute_portfolio_key] - expected_absolute_gain) < PRICE_EPS
+
+        for holding_group in profile_holding_groups:
+            symbol = holding_group['details']['ticker_symbol']
+            gains = holding_group['gains']
+
+            if relative_portfolio_key in ['relative_gain_1d', 'relative_gain_total']:
+                assert abs(holding_group['details'][relative_portfolio_key] - metrics[symbol][metrics_key]) < PRICE_EPS
+            assert abs(gains[relative_portfolio_key] - metrics[symbol][metrics_key]) < PRICE_EPS
+            assert abs(gains[absolute_portfolio_key] - absolute_symbol_price_change[symbol]) < PRICE_EPS
+
+            for holding in holding_group['holdings']:
+                holding_type = holding['type']
+                assert holding_type in ['equity'], f'{holding_type} holdings are not supported'
+                gains = holding['gains']
+
+                if relative_portfolio_key in ['relative_gain_1d', 'relative_gain_total']:
+                    assert abs(holding['holding_details'][relative_portfolio_key] - metrics[symbol][metrics_key]) < PRICE_EPS
+                assert abs(gains[relative_portfolio_key] - metrics[symbol][metrics_key]) < PRICE_EPS
+                assert abs(gains[absolute_portfolio_key] - absolute_symbol_price_change[symbol]) < PRICE_EPS
+
+    seen_symbols = set()
+    for holding_group in profile_holding_groups:
+        seen_symbols.add(symbol)
+
+        symbol = holding_group['details']['ticker_symbol']
+        holding_group_value = metrics[symbol]['actual_price'] * quantities[symbol]
+        assert abs(gains['actual_value'] - holding_group_value) < PRICE_EPS
+        assert abs(gains['value_to_portfolio_value'] - holding_group_value / actual_portfolio_value) < PRICE_EPS
+
+        for holding in holding_group['holdings']:
+            holding_type = holding['type']
+            assert holding_type in ['equity'], f'{holding_type} holdings are not supported'
+            holding_value = metrics[symbol]['actual_price'] * quantities[symbol]
+            assert abs(gains['actual_value'] - holding_value) < PRICE_EPS
+            assert abs(gains['value_to_portfolio_value'] - holding_value / actual_portfolio_value) < PRICE_EPS
+
+    assert seen_symbols <= set(metrics.keys())
