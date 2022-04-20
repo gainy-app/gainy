@@ -1319,32 +1319,6 @@
       filter: {}
 - table:
     schema: public
-    name: portfolio_chart
-  object_relationships:
-  - name: profile
-    using:
-      manual_configuration:
-        remote_table:
-          schema: app
-          name: profiles
-        insertion_order: null
-        column_mapping:
-          profile_id: id
-  select_permissions:
-  - role: user
-    permission:
-      columns:
-      - date
-      - datetime
-      - period
-      - profile_id
-      - value
-      filter:
-        profile:
-          user_id:
-            _eq: X-Hasura-User-Id
-- table:
-    schema: public
     name: portfolio_gains
   object_relationships:
   - name: profile

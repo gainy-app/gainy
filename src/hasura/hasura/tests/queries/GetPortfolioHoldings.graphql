@@ -1,4 +1,7 @@
 query GetPortfolioHoldings($profileId: Int!) {
+    get_portfolio_chart(profile_id: $profileId, periods: ["1d"]) {
+        adjusted_close
+    }
     portfolio_gains (where:{profile_id: {_eq: $profileId}}) {
         absolute_gain_1d
         absolute_gain_1m
