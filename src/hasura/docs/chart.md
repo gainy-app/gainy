@@ -43,28 +43,3 @@ periods: 1d, 1w, 1m, 3m, 1y, 5y, all
     }
 }
 ```
-
-## Queries below are deprecated
-### Quarterly Net Income and Revenue with industry median
-
-```graphql
-query {
-    tickers(where: {symbol: {_eq: "AAPL"}}) {
-        financials_income_statement_quarterlies(where: {date: {_gte: "2021-01-01"}}) {
-            date
-            net_income
-            total_revenue
-        }
-        ticker_industries {
-            gainy_industry {
-                industry_stats_quarterlies (where: {date: {_gte: "2021-01-01"}}) {
-                    date
-                    median_net_income
-                    median_revenue
-                }
-            }
-        }
-    }
-}
-```
-
