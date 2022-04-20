@@ -341,9 +341,9 @@ union all
     with combined_daily_prices as
              (
                  select DISTINCT ON (
-                     symbol,
-                     date
-                     ) *
+                     t.symbol,
+                     t.date
+                     ) t.*
                  from (
                          (
                              select code as symbol,
