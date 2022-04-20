@@ -40,7 +40,8 @@ def get_personalized_collections():
 
 
 def make_request(method, url, post_data=None, headers={}):
-    logger.info("%s %s '%s'" % (method, url, re.sub(r"\s+", " ", post_data['query'])))
+    logger.info("%s %s '%s'" %
+                (method, url, re.sub(r"\s+", " ", post_data['query'])))
     response = requests.request(method, url, json=post_data, headers=headers)
 
     try:

@@ -9,6 +9,7 @@ PROFILES = make_graphql_request("{app_profiles{id, user_id}}",
 PROFILE_IDS = {profile['user_id']: profile['id'] for profile in PROFILES}
 PRICE_EPS = 1e-3
 
+
 def test_portfolio():
     query_file = os.path.join(os.path.dirname(__file__),
                               'queries/GetPortfolioHoldings.graphql')
@@ -20,6 +21,7 @@ def test_portfolio():
     assert data['profile_holding_groups'] is not None
     assert len(
         data['profile_holding_groups']) >= MIN_PORTFOLIO_HOLDING_GROUPS_COUNT
+
 
 def get_test_portfolio_chart_filters_data():
     full_options_dict = {
@@ -39,6 +41,7 @@ def get_test_portfolio_chart_filters_data():
     periods = ["1d", "1w", "1m", "3m", "1y", "5y", "all"]
     for period in periods:
         yield {"periods": [period]}
+
 
 @pytest.mark.parametrize("params", get_test_portfolio_chart_filters_data())
 def test_portfolio_chart_filters(params):
@@ -358,18 +361,22 @@ def test_portfolio_chart_data(user_id, quantities, quantities_override):
     verify_profile(user_id, periods, chart_query, PROFILE_IDS, charts,
                    quantities, quantities_override)
 
+
 @pytest.mark.parametrize("user_id,quantities,quantities_override",
                          get_test_portfolio_data(only_with_holdings=True))
 def test_portfolio_holdings_data(user_id, quantities, quantities_override):
     query = 'query ticker_metrics($symbol: String!) { ticker_metrics(where: {symbol: {_eq: $symbol}}) { price_change_1m price_change_1w price_change_1y price_change_3m price_change_5y price_change_all } ticker_realtime_metrics(where: {symbol: {_eq: $symbol}}) { actual_price relative_daily_change } }'
     metrics = {
-        "AAPL":
-        make_graphql_request(query, {
-            "symbol": "AAPL"
-        })['data'],
+        "AAPL": make_graphql_request(query, {"symbol": "AAPL"})['data'],
     }
     # flatten metrics dict
-    metrics = {k: {**i['ticker_realtime_metrics'][0], **i['ticker_metrics'][0]} for k,i in metrics.items()}
+    metrics = {
+        k: {
+            **i['ticker_realtime_metrics'][0],
+            **i['ticker_metrics'][0]
+        }
+        for k, i in metrics.items()
+    }
 
     query_file = os.path.join(os.path.dirname(__file__),
                               'queries/GetPortfolioHoldings.graphql')
@@ -377,7 +384,8 @@ def test_portfolio_holdings_data(user_id, quantities, quantities_override):
         query = f.read()
 
     profile_id = PROFILE_IDS[user_id]
-    data = make_graphql_request(query, {"profileId": profile_id}, user_id=user_id)['data']
+    data = make_graphql_request(query, {"profileId": profile_id},
+                                user_id=user_id)['data']
     portfolio_gains = data['portfolio_gains'][0]
     profile_holding_groups = data['profile_holding_groups']
     profile_chart_latest_point = data['get_portfolio_chart'][-1]
@@ -395,14 +403,17 @@ def test_portfolio_holdings_data(user_id, quantities, quantities_override):
     actual_portfolio_value = 0
     for symbol, quantity in quantities.items():
         actual_portfolio_value += metrics[symbol]['actual_price'] * quantity
-    assert abs(portfolio_gains['actual_value'] - actual_portfolio_value) < PRICE_EPS
-    assert abs(profile_chart_latest_point['adjusted_close'] - actual_portfolio_value) < PRICE_EPS
+    assert abs(portfolio_gains['actual_value'] -
+               actual_portfolio_value) < PRICE_EPS
+    assert abs(profile_chart_latest_point['adjusted_close'] -
+               actual_portfolio_value) < PRICE_EPS
 
-    for portfolio_key,metrics_key in periods_mapping.items():
+    for portfolio_key, metrics_key in periods_mapping.items():
         relative_portfolio_key = f'relative_{portfolio_key}'
         absolute_portfolio_key = f'absolute_{portfolio_key}'
         absolute_symbol_price_change = {
-            symbol: symbol_metrics['actual_price'] * (1 - 1 / (1 + symbol_metrics[metrics_key]))
+            symbol: symbol_metrics['actual_price'] *
+            (1 - 1 / (1 + symbol_metrics[metrics_key]))
             for symbol, symbol_metrics in metrics.items()
         }
 
@@ -410,45 +421,66 @@ def test_portfolio_holdings_data(user_id, quantities, quantities_override):
         period_start_portfolio_value = 0
         for symbol, value in absolute_symbol_price_change.items():
             expected_absolute_gain += value * quantities[symbol]
-            period_start_portfolio_value += (metrics[symbol]['actual_price'] - value) * quantities[symbol]
+            period_start_portfolio_value += (metrics[symbol]['actual_price'] -
+                                             value) * quantities[symbol]
         expected_relative_gain = actual_portfolio_value / period_start_portfolio_value - 1
 
-        assert abs(portfolio_gains[relative_portfolio_key] - expected_relative_gain) < PRICE_EPS
-        assert abs(portfolio_gains[absolute_portfolio_key] - expected_absolute_gain) < PRICE_EPS
+        assert abs(portfolio_gains[relative_portfolio_key] -
+                   expected_relative_gain) < PRICE_EPS
+        assert abs(portfolio_gains[absolute_portfolio_key] -
+                   expected_absolute_gain) < PRICE_EPS
 
         for holding_group in profile_holding_groups:
             symbol = holding_group['details']['ticker_symbol']
             gains = holding_group['gains']
 
-            if relative_portfolio_key in ['relative_gain_1d', 'relative_gain_total']:
-                assert abs(holding_group['details'][relative_portfolio_key] - metrics[symbol][metrics_key]) < PRICE_EPS
-            assert abs(gains[relative_portfolio_key] - metrics[symbol][metrics_key]) < PRICE_EPS
-            assert abs(gains[absolute_portfolio_key] - absolute_symbol_price_change[symbol]) < PRICE_EPS
+            if relative_portfolio_key in [
+                    'relative_gain_1d', 'relative_gain_total'
+            ]:
+                assert abs(holding_group['details'][relative_portfolio_key] -
+                           metrics[symbol][metrics_key]) < PRICE_EPS
+            assert abs(gains[relative_portfolio_key] -
+                       metrics[symbol][metrics_key]) < PRICE_EPS
+            assert abs(gains[absolute_portfolio_key] -
+                       absolute_symbol_price_change[symbol]) < PRICE_EPS
 
             for holding in holding_group['holdings']:
                 holding_type = holding['type']
-                assert holding_type in ['equity'], f'{holding_type} holdings are not supported'
+                assert holding_type in [
+                    'equity'
+                ], f'{holding_type} holdings are not supported'
                 gains = holding['gains']
 
-                if relative_portfolio_key in ['relative_gain_1d', 'relative_gain_total']:
-                    assert abs(holding['holding_details'][relative_portfolio_key] - metrics[symbol][metrics_key]) < PRICE_EPS
-                assert abs(gains[relative_portfolio_key] - metrics[symbol][metrics_key]) < PRICE_EPS
-                assert abs(gains[absolute_portfolio_key] - absolute_symbol_price_change[symbol]) < PRICE_EPS
+                if relative_portfolio_key in [
+                        'relative_gain_1d', 'relative_gain_total'
+                ]:
+                    assert abs(
+                        holding['holding_details'][relative_portfolio_key] -
+                        metrics[symbol][metrics_key]) < PRICE_EPS
+                assert abs(gains[relative_portfolio_key] -
+                           metrics[symbol][metrics_key]) < PRICE_EPS
+                assert abs(gains[absolute_portfolio_key] -
+                           absolute_symbol_price_change[symbol]) < PRICE_EPS
 
     seen_symbols = set()
     for holding_group in profile_holding_groups:
         seen_symbols.add(symbol)
 
         symbol = holding_group['details']['ticker_symbol']
-        holding_group_value = metrics[symbol]['actual_price'] * quantities[symbol]
+        holding_group_value = metrics[symbol]['actual_price'] * quantities[
+            symbol]
         assert abs(gains['actual_value'] - holding_group_value) < PRICE_EPS
-        assert abs(gains['value_to_portfolio_value'] - holding_group_value / actual_portfolio_value) < PRICE_EPS
+        assert abs(gains['value_to_portfolio_value'] -
+                   holding_group_value / actual_portfolio_value) < PRICE_EPS
 
         for holding in holding_group['holdings']:
             holding_type = holding['type']
-            assert holding_type in ['equity'], f'{holding_type} holdings are not supported'
+            assert holding_type in [
+                'equity'
+            ], f'{holding_type} holdings are not supported'
             holding_value = metrics[symbol]['actual_price'] * quantities[symbol]
             assert abs(gains['actual_value'] - holding_value) < PRICE_EPS
-            assert abs(gains['value_to_portfolio_value'] - holding_value / actual_portfolio_value) < PRICE_EPS
+            assert abs(gains['value_to_portfolio_value'] -
+                       holding_value / actual_portfolio_value) < PRICE_EPS
 
     assert seen_symbols <= set(metrics.keys())
