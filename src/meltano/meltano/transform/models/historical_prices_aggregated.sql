@@ -380,7 +380,13 @@ union all
                                       join time_series_1d using (exchange)
                          )
                      ) t
-                 order by symbol, date, priority
+                 join {{ ref('base_tickers') }} using (symbol)
+                 left join {{ ref('exchange_holidays') }}
+                           on (exchange_holidays.exchange_name = base_tickers.exchange_canonical or
+                               (base_tickers.exchange_canonical is null and exchange_holidays.country_name = base_tickers.country_name))
+                                and exchange_holidays.date = t.date
+                 where exchange_holidays.date is null
+                 order by t.symbol, t.date, priority
              )
     select *
     from (

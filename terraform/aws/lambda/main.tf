@@ -190,7 +190,7 @@ module "hasuraAction" {
   env                                       = var.env
   function_name                             = "hasuraAction"
   handler                                   = "hasura_handler.handle_action"
-  timeout                                   = 30
+  timeout                                   = 60
   url                                       = "/${var.deployment_key}/hasuraAction"
   aws_apigatewayv2_api_lambda_id            = aws_apigatewayv2_api.lambda.id
   aws_apigatewayv2_api_lambda_execution_arn = aws_apigatewayv2_api.lambda.execution_arn
