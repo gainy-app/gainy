@@ -31,15 +31,15 @@ select upper(eod_fundamentals.code)::varchar             as symbol,
            end                                           as exchange_canonical,
        -- TODO while this is good enough for Europe, China and LatAm - other countries should be rechecked.
        --  For instance "South Korea" is not the official name, as well as "United States"
-       coalesce(
-               TRIM(general -> 'AddressData' ->> 'Country'), -- it's good but there are 65 tickets without it set
+       trim(coalesce(
+               general -> 'AddressData' ->> 'Country', -- it's good but there are 65 tickets without it set
                case
                    when TRIM(both reverse(split_part(reverse(general ->> 'Address'), ',', 1))) ~ '[0-9]'
                        then TRIM(both reverse(split_part(reverse(general ->> 'Address'), ',', 2)))
                    else TRIM(both reverse(split_part(reverse(general ->> 'Address'), ',', 1)))
                    end, -- fallback if previous one is null
-               TRIM(general ->> 'CountryName') -- it's USA for all companies in EOD
-           )                                             as country_name,
+               general ->> 'CountryName' -- it's USA for all companies in EOD
+           ))                                            as country_name,
        (general ->> 'UpdatedAt')::timestamp              as updated_at
 from {{ source('eod', 'eod_fundamentals') }}
 left join {{ ref('crypto_coins') }} on crypto_coins.symbol = upper(eod_fundamentals.code)

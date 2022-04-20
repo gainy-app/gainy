@@ -362,10 +362,13 @@ union all
                          (
                              with time_series_1d as
                                       (
-                                          SELECT distinct exchange, date
+                                          SELECT distinct exchange_canonical, country_name, date
                                           FROM {{ ref('historical_prices') }}
-                                          join {{ ref('base_tickers') }} on base_tickers.symbol = historical_prices.code
+                                                   join {{ ref('base_tickers') }} on base_tickers.symbol = historical_prices.code
                                           where date >= now() - interval '1 year' - interval '1 week'
+                                              and (exchange_canonical is not null
+                                                       or (exchange_canonical is null and country_name in ('USA'))
+                                                       or (country_name is null))
                                       )
                              select symbol,
                                     time_series_1d.date,
@@ -376,15 +379,15 @@ union all
                                     null::double precision as volume,
                                     null::double precision as adjusted_close,
                                     1 as priority
-                             from (select symbol, exchange from {{ ref('base_tickers') }}) t1
-                                      join time_series_1d using (exchange)
+                             from (select symbol, exchange_canonical, country_name from {{ ref('base_tickers') }}) t1
+                                      join time_series_1d using (exchange_canonical, country_name)
                          )
                      ) t
                  join {{ ref('base_tickers') }} using (symbol)
                  left join {{ ref('exchange_holidays') }}
                            on (exchange_holidays.exchange_name = base_tickers.exchange_canonical or
                                (base_tickers.exchange_canonical is null and exchange_holidays.country_name = base_tickers.country_name))
-                                and exchange_holidays.date = t.date
+                               and exchange_holidays.date = t.date
                  where exchange_holidays.date is null
                  order by t.symbol, t.date, priority
              )
