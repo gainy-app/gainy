@@ -129,10 +129,14 @@ def clean_schemas(db_conn):
 
         schema_last_activity_at = {}
         for schema in schemas:
-            cursor.execute(
-                f"SELECT last_activity_at FROM {schema}.deployment_metadata")
-            last_activity_at = cursor.fetchone()[0]
-            schema_last_activity_at[schema] = last_activity_at
+            try:
+                cursor.execute(
+                    f"SELECT last_activity_at FROM {schema}.deployment_metadata"
+                )
+                last_activity_at = cursor.fetchone()[0]
+                schema_last_activity_at[schema] = last_activity_at
+            except psycopg2.errors.UndefinedTable:
+                pass
 
         max_last_activity_at = max(schema_last_activity_at.values())
 
@@ -147,7 +151,10 @@ def clean_schemas(db_conn):
 
             query = f"drop schema {schema} cascade"
             logger.warning(query)
-            cursor.execute(query)
+            try:
+                cursor.execute(query)
+            except psycopg2.errors.UndefinedTable:
+                pass
 
             cursor.execute(
                 "update deployment.public_schemas set deleted_at = now() where schema_name = %(schema)s",

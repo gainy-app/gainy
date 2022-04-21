@@ -1,6 +1,10 @@
 from common.hasura_function import HasuraTrigger
 from gainy.recommendation.compute import ComputeRecommendationsAndPersist
 from gainy.data_access.optimistic_lock import ConcurrentVersionUpdate
+from gainy.data_access.db_lock import LockAcquisitionTimeout
+from service.logging import get_logger
+
+logger = get_logger(__name__)
 
 
 class SetRecommendations(HasuraTrigger):
@@ -16,10 +20,15 @@ class SetRecommendations(HasuraTrigger):
 
         recommendations_func = ComputeRecommendationsAndPersist(
             db_conn, profile_id)
+        old_version = recommendations_func.load_version(db_conn)
 
         try:
             recommendations_func.get_and_persist(db_conn, max_tries=5)
-        except ConcurrentVersionUpdate:
+            new_version = recommendations_func.load_version(db_conn)
+            logger.info(
+                f'Calculated Match Scores for user {profile_id}, version {old_version.recommendations_version} => {new_version.recommendations_version}'
+            )
+        except (LockAcquisitionTimeout, ConcurrentVersionUpdate):
             """
             Sometimes hasura executes triggers in bursts (5-20 executions per 1-2 seconds).
             In this case the first execution, that acquires the lock, updates recommendations,
