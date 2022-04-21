@@ -277,6 +277,9 @@ class PortfolioService:
             rows = cursor.fetchall()
 
         rows = list(self._filter_chart_by_transaction_count(rows))
+        if not rows:
+            return []
+
         rows = self._add_static_values_to_chart(db_conn, profile_id, filter,
                                                 rows)
 
