@@ -277,9 +277,16 @@ class PortfolioService:
             rows = cursor.fetchall()
 
         rows = list(self._filter_chart_by_transaction_count(rows))
+        if not rows:
+            return []
 
-        return self._add_static_values_to_chart(db_conn, profile_id, filter,
+        rows = self._add_static_values_to_chart(db_conn, profile_id, filter,
                                                 rows)
+
+        if max(row['adjusted_close'] for row in rows) < 1e-3:
+            return []
+
+        return rows
 
     def _filter_chart_by_transaction_count(self, rows):
         transaction_counts_1d = {}
