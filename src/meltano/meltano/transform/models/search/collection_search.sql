@@ -48,7 +48,8 @@ collection_tags as (
         collection_id
 )
 select c.id, c."name", c.description, tag_1, tag_2, tag_3
-from {{ ref('collections') }} c
+from {{ ref('profile_collections') }} c
          join collection_tags ct
               on c.id = ct.collection_id
 where c.enabled = '1'
+  and c.personalized = '0'

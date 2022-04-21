@@ -16,7 +16,7 @@ WITH profile_collections AS (
            collections.personalized,
            collections.size
     FROM {{ ref('collections') }}
-    WHERE ((collections.personalized) :: text = '0' :: text)
+    WHERE collections.personalized = '0'
     UNION
     SELECT csp.profile_id,
            c.id,
@@ -31,7 +31,7 @@ WITH profile_collections AS (
              {{ ref('collections') }} c
              JOIN {{ source('app', 'personalized_collection_sizes') }} csp ON ((c.id = csp.collection_id))
         )
-    WHERE ((c.personalized) :: text = '1' :: text)
+    WHERE c.personalized = '1'
 )
 SELECT uniq_id,
        profile_collections.profile_id,
