@@ -60,7 +60,8 @@ def test_get_portfolio_chart_previous_period_close():
     assert "code" not in response
     assert isinstance(response, dict)
     assert set({
-        'prev_close_1d', 'prev_close_1w', 'prev_close_1m', 'prev_close_3m', 'prev_close_1y', 'prev_close_5y'
+        'prev_close_1d', 'prev_close_1w', 'prev_close_1m', 'prev_close_3m',
+        'prev_close_1y', 'prev_close_5y'
     }).issubset(set(response.keys()))
 
 
