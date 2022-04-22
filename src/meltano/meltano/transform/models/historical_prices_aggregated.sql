@@ -341,9 +341,9 @@ union all
     with combined_daily_prices as
              (
                  select DISTINCT ON (
-                     symbol,
-                     date
-                     ) *
+                     t.symbol,
+                     t.date
+                     ) t.*
                  from (
                          (
                              select code as symbol,
@@ -360,13 +360,17 @@ union all
                          )
                          union all
                          (
-                             with time_series_1d as
-                                      (
-                                          SELECT distinct exchange, date
-                                          FROM {{ ref('historical_prices') }}
-                                          join {{ ref('base_tickers') }} on base_tickers.symbol = historical_prices.code
-                                          where date >= now() - interval '1 year' - interval '1 week'
-                                      )
+                             with filtered_base_tickers as
+                                  (
+                                      select symbol, exchange_canonical from {{ ref('base_tickers') }} where exchange_canonical is not null
+                                  ),
+                                  time_series_1d as
+                                       (
+                                           SELECT distinct exchange_canonical, date
+                                           FROM {{ ref('historical_prices') }}
+                                                    join filtered_base_tickers on filtered_base_tickers.symbol = historical_prices.code
+                                           where date >= now() - interval '1 year' - interval '1 week'
+                                       )
                              select symbol,
                                     time_series_1d.date,
                                     null::double precision as open,
@@ -375,12 +379,46 @@ union all
                                     null::double precision as close,
                                     null::double precision as volume,
                                     null::double precision as adjusted_close,
-                                    1 as priority
-                             from (select symbol, exchange from {{ ref('base_tickers') }}) t1
-                                      join time_series_1d using (exchange)
+                                    1                      as priority
+                             from filtered_base_tickers
+                                      join time_series_1d using (exchange_canonical)
                          )
+                         union all
+                         (
+                             with filtered_base_tickers as
+                                       (
+                                          select symbol, country_name
+                                           from {{ ref('base_tickers') }}
+                                           where exchange_canonical is null
+                                             and (country_name in ('USA') or country_name is null)
+                                       ),
+                                  time_series_1d as
+                                       (
+                                           SELECT distinct country_name, date
+                                            FROM {{ ref('historical_prices') }}
+                                                     join filtered_base_tickers on filtered_base_tickers.symbol = historical_prices.code
+                                               where date >= now() - interval '1 year' - interval '1 week'
+                                       )
+                             select symbol,
+                                    time_series_1d.date,
+                                    null::double precision as open,
+                                    null::double precision as high,
+                                    null::double precision as low,
+                                    null::double precision as close,
+                                    null::double precision as volume,
+                                    null::double precision as adjusted_close,
+                                    1                      as priority
+                             from filtered_base_tickers
+                                      join time_series_1d using (country_name)
+                          )
                      ) t
-                 order by symbol, date, priority
+                 join {{ ref('base_tickers') }} using (symbol)
+                 left join {{ ref('exchange_holidays') }}
+                           on (exchange_holidays.exchange_name = base_tickers.exchange_canonical or
+                               (base_tickers.exchange_canonical is null and exchange_holidays.country_name = base_tickers.country_name))
+                               and exchange_holidays.date = t.date
+                 where exchange_holidays.date is null
+                 order by t.symbol, t.date, priority
              )
     select *
     from (
