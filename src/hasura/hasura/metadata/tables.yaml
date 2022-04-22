@@ -1137,48 +1137,12 @@
     schema: public
     name: gainy_industries
   array_relationships:
-    - name: industry_stats_dailies
-      using:
-        manual_configuration:
-          remote_table:
-            schema: public
-            name: industry_stats_daily
-          insertion_order: null
-          column_mapping:
-            id: industry_id
-    - name: industry_stats_quarterlies
-      using:
-        manual_configuration:
-          remote_table:
-            schema: public
-            name: industry_stats_quarterly
-          insertion_order: null
-          column_mapping:
-            id: industry_id
     - name: ticker_industries
       using:
         manual_configuration:
           remote_table:
             schema: public
             name: ticker_industries
-          insertion_order: null
-          column_mapping:
-            id: industry_id
-    - name: ticker_industry_median_1m
-      using:
-        manual_configuration:
-          remote_table:
-            schema: public
-            name: industry_median_1m
-          insertion_order: null
-          column_mapping:
-            id: industry_id
-    - name: ticker_industry_median_1w
-      using:
-        manual_configuration:
-          remote_table:
-            schema: public
-            name: industry_median_1w
           insertion_order: null
           column_mapping:
             id: industry_id
@@ -1229,30 +1193,6 @@
         filter: {}
 - table:
     schema: public
-    name: industry_median_1m
-  select_permissions:
-    - role: user
-      permission:
-        columns:
-          - industry_id
-          - date
-          - median_growth_rate
-          - median_price
-        filter: {}
-- table:
-    schema: public
-    name: industry_median_1w
-  select_permissions:
-    - role: user
-      permission:
-        columns:
-          - industry_id
-          - date
-          - median_growth_rate
-          - median_price
-        filter: {}
-- table:
-    schema: public
     name: industry_median_chart
   select_permissions:
     - role: user
@@ -1262,30 +1202,6 @@
           - industry_id
           - median_price
           - period
-        filter: {}
-- table:
-    schema: public
-    name: industry_stats_daily
-  select_permissions:
-    - role: user
-      permission:
-        columns:
-          - date
-          - industry_id
-          - median_price
-          - median_growth_rate_1d
-        filter: {}
-- table:
-    schema: public
-    name: industry_stats_quarterly
-  select_permissions:
-    - role: user
-      permission:
-        columns:
-          - date
-          - industry_id
-          - median_net_income
-          - median_revenue
         filter: {}
 - table:
     schema: public

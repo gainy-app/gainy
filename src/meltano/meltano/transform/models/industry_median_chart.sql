@@ -64,7 +64,7 @@ select (industry_id || '_' || period || '_' || chart_raw2.datetime)::varchar as 
        period,
        chart_raw2.datetime,
        case
-           when rows_cnt != rolling_rows_cnt and period in ('1d', '1w')
+           when rows_cnt != rolling_rows_cnt
                then first_value(median_price)
                     OVER (partition by industry_id, period, grp order by chart_raw2.datetime)
            else median_price
