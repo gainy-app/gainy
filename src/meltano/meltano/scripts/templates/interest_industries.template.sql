@@ -20,7 +20,7 @@ with
          (
 -- __SELECT__ --
          )
-SELECT distinct (tii.interest_id, '_', tii.industry_id)::varchar as id,
+SELECT distinct concat(tii.interest_id, '_', tii.industry_id)::varchar as id,
         tii.interest_id,
         tii.industry_id,
         now() as updated_at
