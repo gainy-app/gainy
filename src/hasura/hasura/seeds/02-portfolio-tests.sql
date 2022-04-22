@@ -84,7 +84,7 @@ from app.profile_portfolio_accounts
                where ticker_symbol = 'AAPL') t
               on true
          join historical_prices
-              on code = ticker_symbol and date between now() - interval '7 days' and now() - interval '5 days'
+              on code = ticker_symbol and date between now() - interval '7 days' and now() - interval '4 days'
 where email in ('portfolio-test-2@gainy.app', 'portfolio-test-15@gainy.app')
   and profile_portfolio_accounts.type = 'primary'
 order by profile_id, historical_prices.date desc
@@ -118,7 +118,7 @@ from app.profile_portfolio_accounts
                where ticker_symbol = 'AAPL') t
               on true
          join historical_prices
-              on code = ticker_symbol and date between now() - interval '7 days' and now() - interval '5 days'
+              on code = ticker_symbol and date between now() - interval '7 days' and now() - interval '4 days'
 where email in ('portfolio-test-3@gainy.app', 'portfolio-test-16@gainy.app')
   and profile_portfolio_accounts.type = 'primary'
 order by profile_id, historical_prices.date desc
@@ -152,7 +152,7 @@ from app.profile_portfolio_accounts
                where ticker_symbol = 'AAPL') t
               on true
          join historical_prices
-              on code = ticker_symbol and date between now() - interval '7 days' and now() - interval '5 days'
+              on code = ticker_symbol and date between now() - interval '7 days' and now() - interval '4 days'
 where email in ('portfolio-test-4@gainy.app', 'portfolio-test-17@gainy.app')
   and profile_portfolio_accounts.type = 'secondary'
 order by profile_id, historical_prices.date desc
@@ -186,7 +186,7 @@ from app.profile_portfolio_accounts
                where ticker_symbol = 'AAPL') t
               on true
          join historical_prices
-              on code = ticker_symbol and date between now() - interval '7 days' and now() - interval '5 days'
+              on code = ticker_symbol and date between now() - interval '7 days' and now() - interval '4 days'
 where email in ('portfolio-test-5@gainy.app', 'portfolio-test-18@gainy.app')
   and profile_portfolio_accounts.type = 'secondary'
 order by profile_id, historical_prices.date desc
@@ -220,7 +220,7 @@ from app.profile_portfolio_accounts
                where ticker_symbol = 'AAPL') t
               on true
          join historical_prices
-              on code = ticker_symbol and date between now() - interval '7 days' and now() - interval '6 days'
+              on code = ticker_symbol and date between now() - interval '7 days' and now() - interval '4 days'
 where email in ('portfolio-test-6@gainy.app', 'portfolio-test-19@gainy.app')
   and profile_portfolio_accounts.type = 'primary'
 order by profile_id, historical_prices.date desc
@@ -289,7 +289,7 @@ from app.profile_portfolio_accounts
                where ticker_symbol = 'AAPL') t
               on true
          join historical_prices
-              on code = ticker_symbol and date between now() - interval '7 days' and now() - interval '6 days'
+              on code = ticker_symbol and date between now() - interval '7 days' and now() - interval '4 days'
 where email in ('portfolio-test-7@gainy.app', 'portfolio-test-20@gainy.app')
   and profile_portfolio_accounts.type = 'primary'
 order by profile_id, historical_prices.date desc
@@ -358,7 +358,7 @@ from app.profile_portfolio_accounts
                where ticker_symbol = 'AAPL') t
               on true
          join historical_prices
-              on code = ticker_symbol and date between now() - interval '7 days' and now() - interval '6 days'
+              on code = ticker_symbol and date between now() - interval '7 days' and now() - interval '4 days'
 where email in ('portfolio-test-8@gainy.app', 'portfolio-test-21@gainy.app')
   and profile_portfolio_accounts.type = 'secondary'
 order by profile_id, historical_prices.date desc
@@ -427,7 +427,7 @@ from app.profile_portfolio_accounts
                where ticker_symbol = 'AAPL') t
               on true
          join historical_prices
-              on code = ticker_symbol and date between now() - interval '7 days' and now() - interval '6 days'
+              on code = ticker_symbol and date between now() - interval '7 days' and now() - interval '4 days'
          join (select * from (values (0, 1)) t ("index")) t2
               on true
 where email in ('portfolio-test-9@gainy.app', 'portfolio-test-22@gainy.app')
@@ -498,7 +498,7 @@ from app.profile_portfolio_accounts
                where ticker_symbol = 'AAPL') t
               on true
          join historical_prices
-              on code = ticker_symbol and date between now() - interval '7 days' and now() - interval '6 days'
+              on code = ticker_symbol and date between now() - interval '7 days' and now() - interval '4 days'
 where email in ('portfolio-test-10@gainy.app', 'portfolio-test-23@gainy.app')
   and profile_portfolio_accounts.type = 'primary'
 order by profile_id, historical_prices.date desc
@@ -567,7 +567,7 @@ from app.profile_portfolio_accounts
                where ticker_symbol = 'AAPL') t
               on true
          join historical_prices
-              on code = ticker_symbol and date between now() - interval '7 days' and now() - interval '6 days'
+              on code = ticker_symbol and date between now() - interval '7 days' and now() - interval '4 days'
 where email in ('portfolio-test-11@gainy.app', 'portfolio-test-24@gainy.app')
   and profile_portfolio_accounts.type = 'primary'
 order by profile_id, historical_prices.date desc
@@ -636,7 +636,7 @@ from app.profile_portfolio_accounts
                where ticker_symbol = 'AAPL') t
               on true
          join historical_prices
-              on code = ticker_symbol and date between now() - interval '7 days' and now() - interval '6 days'
+              on code = ticker_symbol and date between now() - interval '7 days' and now() - interval '4 days'
 where email in ('portfolio-test-12@gainy.app', 'portfolio-test-25@gainy.app')
   and profile_portfolio_accounts.type = 'secondary'
 order by profile_id, historical_prices.date desc
@@ -705,7 +705,7 @@ from app.profile_portfolio_accounts
                where ticker_symbol = 'AAPL') t
               on true
          join historical_prices
-              on code = ticker_symbol and date between now() - interval '7 days' and now() - interval '6 days'
+              on code = ticker_symbol and date between now() - interval '7 days' and now() - interval '4 days'
 where email in ('portfolio-test-13@gainy.app', 'portfolio-test-26@gainy.app')
   and profile_portfolio_accounts.type = 'secondary'
 order by profile_id, historical_prices.date desc

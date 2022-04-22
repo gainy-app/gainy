@@ -124,7 +124,6 @@ def verify_portfolio_chart(portfolio_chart,
 
 def verify_portfolio_chart_previous_period_close(period,
                                                  previous_period_close,
-                                                 quantities,
                                                  quantities_override,
                                                  portfolio_chart_1y,
                                                  assert_message_prefix=""):
@@ -198,9 +197,11 @@ def verify_profile(user_id,
         previous_period_close = portfolio_data[
             'get_portfolio_chart_previous_period_close'][
                 f"prev_close_{period}"]
-        verify_portfolio_chart_previous_period_close(
-            period, previous_period_close, quantities, quantities_override,
-            portfolio_chart_1y, user_id)
+        verify_portfolio_chart_previous_period_close(period,
+                                                     previous_period_close,
+                                                     quantities_override,
+                                                     portfolio_chart_1y,
+                                                     user_id)
 
     for period in periods:
         verify_portfolio_chart(
@@ -210,7 +211,7 @@ def verify_profile(user_id,
                     "periods": [period]
                 },
                 user_id=user_id)['data']['get_portfolio_chart'],
-            charts[period], quantities, quantities_override, user_id)
+            charts[period], quantities, quantities_override, period)
 
 
 def get_test_portfolio_data(only_with_holdings=False):
