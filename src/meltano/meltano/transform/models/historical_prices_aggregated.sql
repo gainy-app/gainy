@@ -167,7 +167,7 @@ with max_date as
 union all
 
 -- 15min
--- Execution Time: 314494.955 ms on test
+-- Execution Time: 226004.752 ms on test
 (
     with week_trading_sessions as
              (
@@ -222,19 +222,19 @@ union all
                  select DISTINCT ON (
                      symbol,
                      time_truncated
-                     ) symbol                                                                                                          as symbol,
-                       time_truncated::timestamp                                                                                       as datetime,
-                       '15min'::varchar                                                                                                as period,
-                       first_value(open::double precision)
-                       OVER (partition by symbol, time_truncated order by time rows between current row and unbounded following)       as open,
-                       max(high::double precision)
-                       OVER (partition by symbol, time_truncated rows between current row and unbounded following)                     as high,
-                       min(low::double precision)
-                       OVER (partition by symbol, time_truncated rows between current row and unbounded following)                     as low,
-                       last_value(close::double precision)
-                       OVER (partition by symbol, time_truncated order by time rows between current row and unbounded following)       as close,
-                       (sum(volume::numeric)
-                        OVER (partition by symbol, time_truncated rows between current row and unbounded following))::double precision as volume
+                     ) symbol                                                                                                    as symbol,
+                       time_truncated::timestamp                                                                                 as datetime,
+                       '15min'::varchar                                                                                          as period,
+                       first_value(open)
+                       OVER (partition by symbol, time_truncated order by time rows between current row and unbounded following) as open,
+                       max(high)
+                       OVER (partition by symbol, time_truncated rows between current row and unbounded following)               as high,
+                       min(low)
+                       OVER (partition by symbol, time_truncated rows between current row and unbounded following)               as low,
+                       last_value(close)
+                       OVER (partition by symbol, time_truncated order by time rows between current row and unbounded following) as close,
+                       sum(volume)
+                       OVER (partition by symbol, time_truncated rows between current row and unbounded following)               as volume
                  from (
                           select symbol,
                                  time,
@@ -280,7 +280,7 @@ union all
                     then adjustment_rate
                 else adjustment_rate2
                 end * close
-               )::double precision as adjusted_close,
+               ) as adjusted_close,
            volume
     from (
              select (symbol || '_' || datetime || '_15min')::varchar as id,
@@ -292,23 +292,23 @@ union all
                             open,
                             first_value(close)
                             OVER (partition by symbol, grp order by datetime)
-                        )::double precision                          as open,
+                        )                                            as open,
                     coalesce(
                             high,
                             first_value(close)
                             OVER (partition by symbol, grp order by datetime)
-                        )::double precision                          as high,
+                        )                                            as high,
                     coalesce(
                             low,
                             first_value(close)
                             OVER (partition by symbol, grp order by datetime)
-                        )::double precision                          as low,
+                        )                                            as low,
                     coalesce(
                             close,
                             first_value(close)
                             OVER (partition by symbol, grp order by datetime)
-                        )::double precision                          as close,
-                    coalesce(volume, 0)                              as volume,
+                        )                                            as close,
+                    coalesce(volume, 0.0)                            as volume,
                     adjustment_rate,
                     first_value(adjustment_rate)
                     OVER (partition by symbol order by datetime)     as adjustment_rate2,
@@ -319,9 +319,9 @@ union all
                              over (partition by combined_intraday_prices.symbol order by datetime)        as grp,
                              case
                                  when historical_prices.close > 0
-                                     then historical_prices.adjusted_close::numeric / historical_prices.close::numeric
+                                     then historical_prices.adjusted_close / historical_prices.close
                              end as adjustment_rate,
-                             historical_prices.adjusted_close::numeric as daily_adjusted_close
+                             historical_prices.adjusted_close as daily_adjusted_close
                       from combined_intraday_prices
                                left join {{ ref('historical_prices') }}
                                    on historical_prices.code = combined_intraday_prices.symbol
@@ -336,7 +336,7 @@ union all
 union all
 
 -- 1d
--- Execution Time: 90778.395 ms on test
+-- Execution Time: 113840.404 ms on test
 (
     with combined_daily_prices as
              (
@@ -429,33 +429,33 @@ union all
                     symbol,
                     date::timestamp                           as time,
                     date::timestamp                           as datetime,
-                    '1d'::varchar                                 as period,
+                    '1d'::varchar                             as period,
                     coalesce(
                             open,
                             first_value(close)
                             OVER (partition by symbol, grp order by date)
-                        )::double precision                       as open,
+                        )                                     as open,
                     coalesce(
                             high,
                             first_value(close)
                             OVER (partition by symbol, grp order by date)
-                        )::double precision                       as high,
+                        )                                     as high,
                     coalesce(
                             low,
                             first_value(close)
                             OVER (partition by symbol, grp order by date)
-                        )::double precision                       as low,
+                        )                                     as low,
                     coalesce(
                             close,
                             first_value(close)
                             OVER (partition by symbol, grp order by date)
-                        )::double precision                       as close,
+                        )                                     as close,
                     coalesce(
                             adjusted_close,
                             first_value(adjusted_close)
                             OVER (partition by symbol, grp order by date)
-                        )::double precision                       as adjusted_close,
-                    coalesce(volume, 0)::double precision         as volume
+                        )                                     as adjusted_close,
+                    coalesce(volume, 0.0)                     as volume
              from (
                       select combined_daily_prices.*,
                              sum(case when close is not null then 1 end)
@@ -474,28 +474,28 @@ union all
 union all
 
 -- 1w
--- Execution Time: 132505.948 ms on test
+-- Execution Time: 107630.229 ms on test
 (
     select DISTINCT ON (
         code,
         date_truncated
-        ) (code || '_' || date_truncated || '_1w')::varchar as id,
+        ) (code || '_' || date_truncated || '_1w')::varchar                                                       as id,
           code as symbol,
-          date_truncated::timestamp                                                                                     as time,
-          date_truncated::timestamp                                                                                     as datetime,
-          '1w'::varchar                                                                                                 as period,
-          first_value(open::double precision)
-          OVER (partition by code, date_truncated order by date rows between current row and unbounded following)       as open,
-          max(high::double precision)
-          OVER (partition by code, date_truncated rows between current row and unbounded following)                     as high,
-          min(low::double precision)
-          OVER (partition by code, date_truncated rows between current row and unbounded following)                     as low,
-          last_value(close::double precision)
-          OVER (partition by code, date_truncated order by date rows between current row and unbounded following)       as close,
-          last_value(adjusted_close::double precision)
-          OVER (partition by code, date_truncated order by date rows between current row and unbounded following)       as adjusted_close,
-          (sum(volume::numeric)
-           OVER (partition by code, date_truncated rows between current row and unbounded following))::double precision as volume
+          date_truncated::timestamp                                                                               as time,
+          date_truncated::timestamp                                                                               as datetime,
+          '1w'::varchar                                                                                           as period,
+          first_value(open)
+          OVER (partition by code, date_truncated order by date rows between current row and unbounded following) as open,
+          max(high)
+          OVER (partition by code, date_truncated rows between current row and unbounded following)               as high,
+          min(low)
+          OVER (partition by code, date_truncated rows between current row and unbounded following)               as low,
+          last_value(close)
+          OVER (partition by code, date_truncated order by date rows between current row and unbounded following) as close,
+          last_value(adjusted_close)
+          OVER (partition by code, date_truncated order by date rows between current row and unbounded following) as adjusted_close,
+          sum(volume)
+          OVER (partition by code, date_truncated rows between current row and unbounded following)               as volume
     from (
              select historical_prices.*,
                     date_trunc('week', date) as date_truncated
@@ -514,33 +514,37 @@ union all
 union all
 
 -- 1m
--- Execution Time: 350440.336 ms
+-- Execution Time: 111014.110 ms on test
 (
     select DISTINCT ON (
         code,
         date_month
-        ) (code || '_' || date_month || '_1m')::varchar                                                          as id,
-        code                                                                                                     as symbol,
-        date_month                                                                                               as time,
-        date_month                                                                                               as datetime,
-        '1m'::varchar                                                                                            as period,
-        first_value(open::double precision)
-        OVER (partition by code, date_month order by date rows between current row and unbounded following)      as open,
-        max(high::double precision)
-        OVER (partition by code, date_month rows between current row and unbounded following)                    as high,
-        min(low::double precision)
-        OVER (partition by code, date_month rows between current row and unbounded following)                    as low,
-        last_value(close::double precision)
-        OVER (partition by code, date_month order by date rows between current row and unbounded following)      as close,
-        last_value(adjusted_close::double precision)
-        OVER (partition by code, date_month order by date rows between current row and unbounded following)      as adjusted_close,
-        (sum(volume::numeric)
-        OVER (partition by code, date_month rows between current row and unbounded following))::double precision as volume
+        ) (code || '_' || date_month || '_1m')::varchar                                                       as id,
+          code                                                                                                as symbol,
+          date_month                                                                                          as time,
+          date_month                                                                                          as datetime,
+          '1m'::varchar                                                                                       as period,
+          first_value(open)
+          OVER (partition by code, date_month order by date rows between current row and unbounded following) as open,
+          t.high,
+          t.low,
+          last_value(close)
+          OVER (partition by code, date_month order by date rows between current row and unbounded following) as close,
+          last_value(adjusted_close)
+          OVER (partition by code, date_month order by date rows between current row and unbounded following) as adjusted_close,
+          t.volume
     from {{ ref('historical_prices') }}
+             join (select code,
+                          date_month,
+                          max(high)   as high,
+                          min(low)    as low,
+                          sum(volume) as volume
+                   from {{ ref('historical_prices') }}
+                   group by code, date_month) t using (code, date_month)
 {% if is_incremental() %}
     left join max_date on max_date.symbol = code and max_date.period = '1m'
     where (max_date.time is null or date_month >= max_date.time - interval '3 month')
 {% endif %}
-    order by symbol, date_month, date
+    order by code, date_month, date
 )
 {% endif %}
