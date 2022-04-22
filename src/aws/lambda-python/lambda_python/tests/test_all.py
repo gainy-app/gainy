@@ -54,8 +54,8 @@ def test_get_portfolio_chart():
 
 
 def test_get_portfolio_chart_previous_period_close():
-    event = get_action_event("get_portfolio_chart_previous_period_close", {"profile_id": PROFILE_ID},
-                             USER_ID)
+    event = get_action_event("get_portfolio_chart_previous_period_close",
+                             {"profile_id": PROFILE_ID}, USER_ID)
     response = action_dispatcher.handle(event)
     assert "code" not in response
     assert isinstance(response, list)

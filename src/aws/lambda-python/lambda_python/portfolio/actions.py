@@ -79,7 +79,8 @@ class GetPortfolioChart(HasuraAction):
 class GetPortfolioChartPreviousPeriodClose(HasuraAction):
 
     def __init__(self):
-        super().__init__("get_portfolio_chart_previous_period_close", "profile_id")
+        super().__init__("get_portfolio_chart_previous_period_close",
+                         "profile_id")
 
         self.service = PortfolioChartService()
 
@@ -96,4 +97,5 @@ class GetPortfolioChartPreviousPeriodClose(HasuraAction):
         filter.security_types = input_params.get("security_types")
         filter.ltt_only = input_params.get("ltt_only")
 
-        return self.service.get_portfolio_chart_previous_period_close(db_conn, profile_id, filter)
+        return self.service.get_portfolio_chart_previous_period_close(
+            db_conn, profile_id, filter)
