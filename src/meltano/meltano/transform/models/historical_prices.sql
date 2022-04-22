@@ -16,7 +16,7 @@ with
 {% endif %}
 SELECT code,
        (code || '_' || date)::varchar as id,
-       substr(date, 0, 8),
+       substr(date, 0, 8) date_month,
 --        date_trunc('week', date::date),
        adjusted_close,
        close,
