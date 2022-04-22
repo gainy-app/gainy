@@ -1,4 +1,5 @@
 from portfolio.service import PortfolioService
+from portfolio.service.chart import PortfolioChartService
 from portfolio.models import PortfolioChartFilter
 from common.hasura_function import HasuraAction
 from service.logging import get_logger
@@ -53,7 +54,7 @@ class GetPortfolioChart(HasuraAction):
     def __init__(self):
         super().__init__("get_portfolio_chart", "profile_id")
 
-        self.service = PortfolioService()
+        self.service = PortfolioChartService()
 
     def apply(self, db_conn, input_params, headers):
         profile_id = input_params["profile_id"]
@@ -73,3 +74,26 @@ class GetPortfolioChart(HasuraAction):
             row['datetime'] = row['datetime'].isoformat()
 
         return chart
+
+
+class GetPortfolioChartPreviousPeriodClose(HasuraAction):
+
+    def __init__(self):
+        super().__init__("get_portfolio_chart_previous_period_close", "profile_id")
+
+        self.service = PortfolioChartService()
+
+    def apply(self, db_conn, input_params, headers):
+        profile_id = input_params["profile_id"]
+
+        filter = PortfolioChartFilter()
+        filter.periods = input_params.get("periods")
+        filter.access_token_ids = input_params.get("access_token_ids")
+        filter.account_ids = input_params.get("account_ids")
+        filter.institution_ids = input_params.get("institution_ids")
+        filter.interest_ids = input_params.get("interest_ids")
+        filter.category_ids = input_params.get("category_ids")
+        filter.security_types = input_params.get("security_types")
+        filter.ltt_only = input_params.get("ltt_only")
+
+        return self.service.get_portfolio_chart_previous_period_close(db_conn, profile_id, filter)

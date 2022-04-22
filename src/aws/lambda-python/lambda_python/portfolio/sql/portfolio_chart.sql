@@ -31,6 +31,10 @@ with week_trading_sessions as
                       left join week_trading_sessions
                                 on portfolio_transaction_chart.datetime between week_trading_sessions.open_at and week_trading_sessions.close_at
                       left join latest_open_trading_session on true
+                      join portfolio_securities_normalized
+                           on portfolio_securities_normalized.id = portfolio_expanded_transactions.security_id
+                      join app.profile_portfolio_accounts on profile_portfolio_accounts.id = portfolio_expanded_transactions.account_id
+                      join app.profile_plaid_access_tokens on profile_plaid_access_tokens.id = profile_portfolio_accounts.plaid_access_token_id
                       {join_clause}
              where ((period = '1d' and week_trading_sessions.idx = 1)
                  or (period = '1w' and week_trading_sessions.idx is not null)
@@ -39,7 +43,7 @@ with week_trading_sessions as
                  or (period = '1y' and portfolio_transaction_chart.datetime >= latest_open_trading_session.date - interval '1 year')
                  or (period = '5y' and portfolio_transaction_chart.datetime >= latest_open_trading_session.date - interval '5 years')
                  or (period = 'all'))
-                 {where_clause}
+               and {where_clause}
          )
 select period,
        datetime,

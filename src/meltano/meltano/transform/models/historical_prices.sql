@@ -14,17 +14,19 @@
 with
      max_updated_at as (select code, max(date) as max_date from {{ this }} group by code)
 {% endif %}
-SELECT rhp.code,
-       CONCAT(rhp.code, '_', rhp.date)::varchar as id,
-       rhp.adjusted_close,
-       rhp.close,
-       rhp.date::date,
-       rhp.high,
-       rhp.low,
-       rhp.open,
-       rhp.volume
-from {{ source('eod', 'eod_historical_prices') }} rhp
+SELECT code,
+       (code || '_' || date)::varchar as id,
+       substr(date, 0, 8),
+--        date_trunc('week', date::date),
+       adjusted_close,
+       close,
+       date::date,
+       high,
+       low,
+       open,
+       volume
+from {{ source('eod', 'eod_historical_prices') }}
 {% if is_incremental() %}
-    left join max_updated_at on rhp.code = max_updated_at.code
-    where rhp.date::date >= max_updated_at.max_date or max_updated_at.max_date is null
+    left join max_updated_at using (code)
+    where date::date >= max_updated_at.max_date or max_updated_at.max_date is null
 {% endif %}

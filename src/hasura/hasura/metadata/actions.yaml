@@ -1,200 +1,208 @@
 actions:
-- name: create_plaid_link_token
-  definition:
-    kind: ""
-    handler: '{{AWS_LAMBDA_API_GATEWAY_ENDPOINT}}/hasuraAction'
-  permissions:
-  - role: user
-- name: fetchNewsData
-  definition:
-    kind: ""
-    handler: '{{AWS_LAMBDA_API_GATEWAY_ENDPOINT}}/hasuraAction'
-  permissions:
-  - role: user
-- name: get_match_score_by_ticker
-  definition:
-    kind: ""
-    handler: '{{AWS_LAMBDA_API_GATEWAY_ENDPOINT}}/hasuraAction'
-  permissions:
-  - role: user
-- name: get_match_scores_by_collection
-  definition:
-    kind: ""
-    handler: '{{AWS_LAMBDA_API_GATEWAY_ENDPOINT}}/hasuraAction'
-  permissions:
-  - role: user
-- name: get_match_scores_by_ticker_list
-  definition:
-    kind: ""
-    handler: '{{AWS_LAMBDA_API_GATEWAY_ENDPOINT}}/hasuraAction'
-  permissions:
-  - role: user
-- name: get_portfolio_chart
-  definition:
-    kind: ""
-    handler: '{{AWS_LAMBDA_API_GATEWAY_ENDPOINT}}/hasuraAction'
-  permissions:
-  - role: user
-  comment: get_portfolio_chart
-- name: get_portfolio_holdings
-  definition:
-    kind: ""
-    handler: '{{AWS_LAMBDA_API_GATEWAY_ENDPOINT}}/hasuraAction'
-  permissions:
-  - role: user
-- name: get_portfolio_transactions
-  definition:
-    kind: ""
-    handler: '{{AWS_LAMBDA_API_GATEWAY_ENDPOINT}}/hasuraAction'
-  permissions:
-  - role: user
-- name: get_recommended_collections
-  definition:
-    kind: ""
-    handler: '{{AWS_LAMBDA_API_GATEWAY_ENDPOINT}}/hasuraAction'
-  permissions:
-  - role: user
-- name: link_plaid_account
-  definition:
-    kind: ""
-    handler: '{{AWS_LAMBDA_API_GATEWAY_ENDPOINT}}/hasuraAction'
-  permissions:
-  - role: user
-- name: plaid_webhook
-  definition:
-    kind: synchronous
-    handler: '{{AWS_LAMBDA_API_GATEWAY_ENDPOINT}}/hasuraAction'
-    forward_client_headers: true
-  permissions:
-  - role: anonymous
-- name: search_collections
-  definition:
-    kind: ""
-    handler: '{{AWS_LAMBDA_API_GATEWAY_ENDPOINT}}/hasuraAction'
-  permissions:
-  - role: user
-- name: search_tickers
-  definition:
-    kind: ""
-    handler: '{{AWS_LAMBDA_API_GATEWAY_ENDPOINT}}/hasuraAction'
-  permissions:
-  - role: user
+  - name: create_plaid_link_token
+    definition:
+      kind: ""
+      handler: '{{AWS_LAMBDA_API_GATEWAY_ENDPOINT}}/hasuraAction'
+    permissions:
+      - role: user
+  - name: fetchNewsData
+    definition:
+      kind: ""
+      handler: '{{AWS_LAMBDA_API_GATEWAY_ENDPOINT}}/hasuraAction'
+    permissions:
+      - role: user
+  - name: get_match_score_by_ticker
+    definition:
+      kind: ""
+      handler: '{{AWS_LAMBDA_API_GATEWAY_ENDPOINT}}/hasuraAction'
+    permissions:
+      - role: user
+  - name: get_match_scores_by_collection
+    definition:
+      kind: ""
+      handler: '{{AWS_LAMBDA_API_GATEWAY_ENDPOINT}}/hasuraAction'
+    permissions:
+      - role: user
+  - name: get_match_scores_by_ticker_list
+    definition:
+      kind: ""
+      handler: '{{AWS_LAMBDA_API_GATEWAY_ENDPOINT}}/hasuraAction'
+    permissions:
+      - role: user
+  - name: get_portfolio_chart
+    definition:
+      kind: ""
+      handler: '{{AWS_LAMBDA_API_GATEWAY_ENDPOINT}}/hasuraAction'
+    permissions:
+      - role: user
+    comment: get_portfolio_chart
+  - name: get_portfolio_chart_previous_period_close
+    definition:
+      kind: ""
+      handler: '{{AWS_LAMBDA_API_GATEWAY_ENDPOINT}}/hasuraAction'
+    permissions:
+      - role: user
+    comment: get_portfolio_chart_previous_period_close
+  - name: get_portfolio_holdings
+    definition:
+      kind: ""
+      handler: '{{AWS_LAMBDA_API_GATEWAY_ENDPOINT}}/hasuraAction'
+    permissions:
+      - role: user
+  - name: get_portfolio_transactions
+    definition:
+      kind: ""
+      handler: '{{AWS_LAMBDA_API_GATEWAY_ENDPOINT}}/hasuraAction'
+    permissions:
+      - role: user
+  - name: get_recommended_collections
+    definition:
+      kind: ""
+      handler: '{{AWS_LAMBDA_API_GATEWAY_ENDPOINT}}/hasuraAction'
+    permissions:
+      - role: user
+  - name: link_plaid_account
+    definition:
+      kind: ""
+      handler: '{{AWS_LAMBDA_API_GATEWAY_ENDPOINT}}/hasuraAction'
+    permissions:
+      - role: user
+  - name: plaid_webhook
+    definition:
+      kind: synchronous
+      handler: '{{AWS_LAMBDA_API_GATEWAY_ENDPOINT}}/hasuraAction'
+      forward_client_headers: true
+    permissions:
+      - role: anonymous
+  - name: search_collections
+    definition:
+      kind: ""
+      handler: '{{AWS_LAMBDA_API_GATEWAY_ENDPOINT}}/hasuraAction'
+    permissions:
+      - role: user
+  - name: search_tickers
+    definition:
+      kind: ""
+      handler: '{{AWS_LAMBDA_API_GATEWAY_ENDPOINT}}/hasuraAction'
+    permissions:
+      - role: user
 custom_types:
   enums: []
   input_objects:
-  - name: PlaidWebhookError
+    - name: PlaidWebhookError
   objects:
-  - name: ChartDataPoint
-  - name: NewsDataPoint
-  - name: LivePriceData
-  - name: LiveStockPriceData
-  - name: Ticker
-    relationships:
-    - remote_table:
-        schema: public
-        name: tickers
-      name: ticker
-      source: default
-      type: object
-      field_mapping:
-        symbol: symbol
-  - name: Collection
-    relationships:
-    - remote_table:
-        schema: public
-        name: profile_collections
-      name: collection
-      source: default
-      type: object
-      field_mapping:
-        id: id
-  - name: MatchScore
-    relationships:
-    - remote_table:
-        schema: public
-        name: tickers
-      name: ticker
-      source: default
-      type: object
-      field_mapping:
-        symbol: symbol
-  - name: LinkPlaidAccountOutput
-  - name: PortfolioHolding
-    relationships:
-    - remote_table:
-        schema: app
-        name: profiles
-      name: profile
-      source: default
-      type: object
-      field_mapping:
-        profile_id: id
-    - remote_table:
-        schema: app
-        name: portfolio_securities
-      name: security
-      source: default
-      type: array
-      field_mapping:
-        security_id: id
-    - remote_table:
-        schema: app
-        name: profile_portfolio_accounts
-      name: account
-      source: default
-      type: object
-      field_mapping:
-        account_id: id
-    - remote_table:
-        schema: public
-        name: portfolio_holding_details
-      name: holding_details
-      source: default
-      type: object
-      field_mapping:
-        id: holding_id
-    - remote_table:
-        schema: app
-        name: profile_holdings
-      name: holding
-      source: default
-      type: object
-      field_mapping:
-        id: id
-  - name: PortfolioTransaction
-    relationships:
-    - remote_table:
-        schema: app
-        name: profiles
-      name: profile
-      source: default
-      type: object
-      field_mapping:
-        profile_id: id
-    - remote_table:
-        schema: app
-        name: profile_portfolio_accounts
-      name: account
-      source: default
-      type: object
-      field_mapping:
-        account_id: id
-    - remote_table:
-        schema: app
-        name: portfolio_securities
-      name: security
-      source: default
-      type: object
-      field_mapping:
-        security_id: id
-    - remote_table:
-        schema: app
-        name: profile_portfolio_transactions
-      name: transaction
-      source: default
-      type: object
-      field_mapping:
-        id: id
-  - name: CreatePlaidLinkTokenOutput
-  - name: PlaidWebhookOutput
+    - name: ChartDataPoint
+    - name: PortfolioChartPreviousPeriodClose
+    - name: NewsDataPoint
+    - name: LivePriceData
+    - name: LiveStockPriceData
+    - name: Ticker
+      relationships:
+        - remote_table:
+            schema: public
+            name: tickers
+          name: ticker
+          source: default
+          type: object
+          field_mapping:
+            symbol: symbol
+    - name: Collection
+      relationships:
+        - remote_table:
+            schema: public
+            name: profile_collections
+          name: collection
+          source: default
+          type: object
+          field_mapping:
+            id: id
+    - name: MatchScore
+      relationships:
+        - remote_table:
+            schema: public
+            name: tickers
+          name: ticker
+          source: default
+          type: object
+          field_mapping:
+            symbol: symbol
+    - name: LinkPlaidAccountOutput
+    - name: PortfolioHolding
+      relationships:
+        - remote_table:
+            schema: app
+            name: profiles
+          name: profile
+          source: default
+          type: object
+          field_mapping:
+            profile_id: id
+        - remote_table:
+            schema: app
+            name: portfolio_securities
+          name: security
+          source: default
+          type: array
+          field_mapping:
+            security_id: id
+        - remote_table:
+            schema: app
+            name: profile_portfolio_accounts
+          name: account
+          source: default
+          type: object
+          field_mapping:
+            account_id: id
+        - remote_table:
+            schema: public
+            name: portfolio_holding_details
+          name: holding_details
+          source: default
+          type: object
+          field_mapping:
+            id: holding_id
+        - remote_table:
+            schema: app
+            name: profile_holdings
+          name: holding
+          source: default
+          type: object
+          field_mapping:
+            id: id
+    - name: PortfolioTransaction
+      relationships:
+        - remote_table:
+            schema: app
+            name: profiles
+          name: profile
+          source: default
+          type: object
+          field_mapping:
+            profile_id: id
+        - remote_table:
+            schema: app
+            name: profile_portfolio_accounts
+          name: account
+          source: default
+          type: object
+          field_mapping:
+            account_id: id
+        - remote_table:
+            schema: app
+            name: portfolio_securities
+          name: security
+          source: default
+          type: object
+          field_mapping:
+            security_id: id
+        - remote_table:
+            schema: app
+            name: profile_portfolio_transactions
+          name: transaction
+          source: default
+          type: object
+          field_mapping:
+            id: id
+    - name: CreatePlaidLinkTokenOutput
+    - name: PlaidWebhookOutput
   scalars: []

@@ -1,3 +1,5 @@
+import datetime
+import dateutil.relativedelta
 import json
 import numbers
 import os
@@ -59,6 +61,9 @@ def test_portfolio_chart_filters(params):
     })['data']
     if "lttOnly" not in params:
         assert len(data['get_portfolio_chart']) > 0, json.dumps(params)
+        for period in ['1d', '1w', '1m', '3m', '1y', '5y']:
+            assert f'prev_close_{period}' in data['get_portfolio_chart_previous_period_close'], json.dumps(params)
+            assert data['get_portfolio_chart_previous_period_close'][f'prev_close_{period}'] > 0, json.dumps(params)
 
 
 def verify_portfolio_chart(portfolio_chart,
@@ -113,6 +118,46 @@ def verify_portfolio_chart(portfolio_chart,
                 expected_value
             ) < PRICE_EPS, f"{assert_message_prefix}: no value on {datetime}, expected {expected_value}"
 
+def verify_portfolio_chart_previous_period_close(period, previous_period_close, quantities, quantities_override,
+                           portfolio_chart_1y,
+                           assert_message_prefix=""):
+
+    if not portfolio_chart_1y:
+        assert not previous_period_close, f"{assert_message_prefix}: wrong previous_period_close on {datetime}, expected 0"
+        return
+
+    if period == '1d':
+        threshold_datetime = datetime.datetime.now()
+    elif period == '1w':
+        threshold_datetime = datetime.datetime.now() - datetime.timedelta(days=7)
+    elif period == '1m':
+        threshold_datetime = datetime.datetime.now() - dateutil.relativedelta.relativedelta(months=1)
+    elif period == '3m':
+        threshold_datetime = datetime.datetime.now() - dateutil.relativedelta.relativedelta(months=3)
+    else:
+        raise Exception(f'{period} is not supported')
+    threshold_datetime = threshold_datetime.replace(hour=0, minute=0, second=0, microsecond=0)
+
+    expected_value = portfolio_chart_1y[0]['adjusted_close']
+    row_datetime = datetime.datetime.strptime(portfolio_chart_1y[0]['datetime'], "%Y-%m-%dT%H:%M:%S")
+    for row in reversed(portfolio_chart_1y):
+        row_datetime = datetime.datetime.strptime(row['datetime'], "%Y-%m-%dT%H:%M:%S")
+        if row_datetime >= threshold_datetime:
+            continue
+
+        expected_value = row['adjusted_close']
+        break
+
+    for start_date, end_date, _quantities in quantities_override:
+        if start_date is not None and start_date > row_datetime.strftime("%Y-%m-%dT%H:%M:%S"):
+            continue
+        if end_date is not None and end_date < row_datetime.strftime("%Y-%m-%dT%H:%M:%S"):
+            continue
+
+        return # TODO test complex cases
+
+    assert abs(previous_period_close - expected_value) < PRICE_EPS, f"{assert_message_prefix}: wrong previous_period_close for period {period}, expected {expected_value}"
+
 
 def verify_profile(user_id,
                    periods,
@@ -122,6 +167,19 @@ def verify_profile(user_id,
                    quantities,
                    quantities_override=[]):
     profile_id = PROFILE_IDS[user_id]
+
+    portfolio_data = make_graphql_request(
+        chart_query, {
+            "profileId": profile_id,
+            "periods": ["1y"]
+        },
+        user_id=user_id)['data']
+    portfolio_chart_1y = portfolio_data['get_portfolio_chart']
+
+    for period in periods:
+        previous_period_close = portfolio_data['get_portfolio_chart_previous_period_close'][f"prev_close_{period}"]
+        verify_portfolio_chart_previous_period_close(period, previous_period_close, quantities, quantities_override, portfolio_chart_1y, user_id)
+
     for period in periods:
         verify_portfolio_chart(
             make_graphql_request(
