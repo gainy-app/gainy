@@ -21,9 +21,10 @@ with tickers as (select * from {{ ref('tickers') }} where type != 'crypto'),
          (
              select distinct on (hp.code) hp.close as quartal_end_price, hsg.*
              from historical_sales_growth hsg
-                      JOIN {{ ref('historical_prices') }} hp ON hp.code = hsg.symbol AND hp.date::date <= hsg.updated_at AND
-                                                   hp.date::date >= hsg.updated_at - interval '1 week'
-             order by hp.code, hp.date::date DESC
+                      JOIN {{ ref('historical_prices') }} hp
+                          ON hp.code = hsg.symbol
+                              AND hp.date between hsg.updated_at - interval '1 week' and hsg.updated_at
+             order by hp.code, hp.date DESC
          ),
      latest_yearly_earning_trend as
          (
@@ -32,7 +33,7 @@ with tickers as (select * from {{ ref('tickers') }} where type != 'crypto'),
              from earnings_trend et
                       LEFT JOIN earnings_trend AS et_next
                                 ON et_next.symbol = et.symbol AND et_next.period = '0y' AND
-                                   et_next.date::timestamp > et.date::timestamp
+                                   et_next.date > et.date
              WHERE et.period = '0y'
                AND et_next.symbol IS NULL
          ),

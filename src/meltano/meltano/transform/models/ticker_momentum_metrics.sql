@@ -12,41 +12,37 @@ with tickers as (select * from {{ ref('tickers') }} where type != 'crypto'),
      settings (local_risk_free_rate) as (values (0.001)),
      weekly_prices as
          (
-             SELECT hp.code, hp.date::timestamp as date, hp.close
-             from {{ ref('historical_prices') }} hp
-                      JOIN tickers t ON t.symbol = hp.code
-                 left join {{ ref('historical_prices') }} hp1 ON hp1.code = hp.code AND
-                 To_char(hp1.date::timestamp, 'IYYY-IW') =
-                 To_char(hp.date::timestamp, 'IYYY-IW') AND
-                 hp1.date::timestamp > hp.date::timestamp
-             where hp.date::timestamp > NOW() - interval '3 years'
-               AND hp1.code IS NULL
+             SELECT symbol, datetime, adjusted_close
+             from {{ ref('historical_prices_aggregated') }}
+             where datetime > NOW() - interval '3 years'
+               and period = '1w'
+         ),
+     weekly_prices2 as
+         (
+             select *,
+                    first_value(adjusted_close) over (partition by symbol order by datetime rows between 1 preceding and 1 preceding) as prev_week_adjusted_close
+             from weekly_prices
          ),
      stddev_3_years as
          (
-             SELECT wp.code,
-                    stddev_pop(wp.close / CASE WHEN wp_prev.close > 0 THEN wp_prev.close END - 1) * pow(52, 0.5) as value
-             from weekly_prices wp
-                      JOIN weekly_prices wp_prev
-                           ON wp.code = wp_prev.code AND wp_prev.date = wp.date - interval '1 week'
-             group by wp.code
-             having bool_and(wp_prev.close > 0)
+             SELECT symbol                                                 as code,
+                    stddev_pop(adjusted_close / prev_week_adjusted_close - 1) * pow(52, 0.5) as value
+             from weekly_prices2
+             where prev_week_adjusted_close > 0
+             group by code
          ),
      momentum as
          (
-             SELECT distinct on (f.code) f.code,
+             SELECT f.code,
                     t.gic_sector,
-                    case when hp1.close > 0 THEN hp0.close / hp1.close - 1 - settings.local_risk_free_rate END AS MOM2,
-                    case when hp2.close > 0 THEN hp0.close / hp2.close - 1 - settings.local_risk_free_rate END AS MOM12
+                    case when hpm.price_2m > 0 THEN hpm.price_1m / hpm.price_2m - 1 - settings.local_risk_free_rate END   AS MOM2,
+                    case when hpm.price_13m > 0 THEN hpm.price_1m / hpm.price_13m - 1 - settings.local_risk_free_rate END AS MOM12
              from {{ source('eod', 'eod_fundamentals') }} f
                       join settings ON true
-                      join {{ ref('historical_prices') }} hp0 on hp0.code = f.code AND hp0.date::timestamp < NOW() - interval '1 month' AND hp0.date::timestamp > NOW() - interval '1 month' - interval '1 week'
-                      join {{ ref('historical_prices') }} hp1 on hp1.code = f.code AND hp1.date::timestamp < NOW() - interval '2 month' AND hp1.date::timestamp > NOW() - interval '2 month' - interval '1 week'
-                      join {{ ref('historical_prices') }} hp2 on hp2.code = f.code AND hp2.date::timestamp < NOW() - interval '13 month' AND hp2.date::timestamp > NOW() - interval '13 month' - interval '1 week'
-                      inner join tickers as t on f.code = t.symbol
-             order by f.code, hp0.date DESC, hp1.date DESC, hp2.date DESC
+                      join tickers as t on f.code = t.symbol
+                      join {{ ref('historical_prices_marked') }} hpm using (symbol)
          ),
-                      momentum_risk_adj as
+     momentum_risk_adj as
          (
              SELECT m.code,
                     m.gic_sector,
