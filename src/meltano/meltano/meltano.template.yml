@@ -140,6 +140,7 @@ plugins:
       variant: transferwise
       pip_url: pipelinewise-target-postgres
       config:
+        batch_size_rows: 10000
         primary_key_required: false
         add_metadata_columns: true
 
