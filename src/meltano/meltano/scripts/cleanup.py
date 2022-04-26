@@ -161,19 +161,21 @@ def clean_schemas(db_conn):
                 {"schema": schema})
 
 
-def clean_realtime_data(db_conn):
-    with db_conn.cursor() as cursor:
-        query = "delete from raw_data.eod_intraday_prices where time < now() - interval '2 weeks'"
-        logger.warning(query)
-        cursor.execute(query)
-        query = "delete from deployment.realtime_listener_heartbeat where time < now() - interval '1 hour'"
-        logger.warning(query)
-        cursor.execute(query)
+def clean_obsolete_data(db_conn):
+    queries = [
+        "delete from raw_data.eod_intraday_prices where time < now() - interval '2 weeks'",
+        "delete from deployment.realtime_listener_heartbeat where time < now() - interval '1 hour'",
+    ]
+
+    for query in queries:
+        with db_conn.cursor() as cursor:
+            logger.warning(query)
+            cursor.execute(query)
 
 
 with db_connect() as db_conn:
     clean_schemas(db_conn)
-    clean_realtime_data(db_conn)
+    clean_obsolete_data(db_conn)
 
 if AWS_LAMBDA_API_GATEWAY_ENDPOINT is not None:
     res = re.search(r"https://([^.]+)\..*_(\w+)/([^/]+)$",

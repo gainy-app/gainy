@@ -22,8 +22,10 @@ with historical_prices as (select * from {{ ref('historical_prices') }}),
      gainy_industries as (select * from {{ ref('gainy_industries') }}),
      ticker_categories as (select * from {{ ref('ticker_categories') }}),
      categories as (select * from {{ ref('categories') }}),
-     collections as (select id::int, name from {{ source('gainy', 'gainy_collections') }} where personalized = '0'),
-     countries as (select * from {{ source('gainy', 'gainy_countries') }}),
+     collections as (select id::int, name from {{ ref('collections') }} where personalized = '0'),
+     countries as (select *
+                   from {{ source('gainy', 'gainy_countries') }}
+                   where _sdc_extracted_at > (select max(_sdc_extracted_at) from {{ source('gainy', 'gainy_countries') }}) - interval '1 minute'),
      ticker_metrics as (select * from {{ ref('ticker_metrics') }}),
      latest_price AS
          (

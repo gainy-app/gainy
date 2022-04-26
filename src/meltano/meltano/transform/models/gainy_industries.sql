@@ -13,6 +13,7 @@
 WITH gainy_industries_with_collection_id AS (
     SELECT id::int, name::character varying, (20000 + id::int) as collection_id
     FROM {{ source('gainy', 'gainy_industries') }}
+    where _sdc_extracted_at > (select max(_sdc_extracted_at) from {{ source('gainy', 'gainy_industries') }}) - interval '1 minute'
 )
 SELECT gi.id,
        gi.name,

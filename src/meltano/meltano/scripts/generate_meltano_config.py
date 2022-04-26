@@ -46,6 +46,51 @@ def _generate_schedules(env):
     return schedules
 
 
+def _generate_analytics_tap_catalog():
+    with open("scripts/templates/analytics_tap_catalog_schemas.template.json",
+              "r") as f:
+        schemas = json.load(f)
+
+    streams = {
+        'default': [],
+        'small-batch': [],
+    }
+
+    for schema_name, tables in schemas.items():
+        for table_name, table_config in tables.items():
+            if table_config.get('isSmallBatch'):
+                stream_type = 'small-batch'
+            else:
+                stream_type = 'default'
+
+            streams[stream_type].append({
+                "table_name":
+                table_name,
+                "stream":
+                table_name,
+                "metadata": [{
+                    "breadcrumb": [],
+                    "metadata": {
+                        "replication-method": "FULL_TABLE",
+                        "schema-name": schema_name,
+                        "database-name": "gainy",
+                        "selected": True,
+                        **table_config['metadata']
+                    }
+                }],
+                "tap_stream_id":
+                f"{schema_name}-{table_name}",
+                "schema": {
+                    "type": "object"
+                }
+            })
+
+    with open("catalog/analytics/tap.catalog.json", "w") as f:
+        json.dump({"streams": streams['default']}, f)
+    with open("catalog/analytics/tap-small-batch.catalog.json", "w") as f:
+        json.dump({"streams": streams['small-batch']}, f)
+
+
 #####   Configure and run   #####
 
 if 'ENV' not in os.environ:
@@ -65,6 +110,8 @@ config['schedules'] = _generate_schedules(ENV)
 
 with open("meltano.yml", "w") as f:
     yaml.dump(config, f)
+
+_generate_analytics_tap_catalog()
 
 if DBT_TARGET_SCHEMA != 'public':
     ### Algolia search mapping ###
