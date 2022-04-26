@@ -123,6 +123,8 @@ plugins:
     - name: tap-postgres-analytics-small-batch
       inherit_from: tap-postgres-analytics
       catalog: catalog/analytics/tap-small-batch.catalog.json
+      config:
+        itersize: 1
 
     # Website tap
     - name: tap-postgres-website
