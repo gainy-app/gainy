@@ -119,6 +119,8 @@ plugins:
     - name: tap-postgres-analytics
       inherit_from: tap-postgres
       catalog: catalog/analytics/tap.catalog.json
+      config:
+        itersize: 10000
 
     - name: tap-postgres-analytics-small-batch
       inherit_from: tap-postgres-analytics
