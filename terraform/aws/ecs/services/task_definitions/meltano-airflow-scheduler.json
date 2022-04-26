@@ -83,7 +83,7 @@
     { "name": "TAP_POSTGRES_SYNC_DBNAME",              "value": "${pg_dbname}" },
     { "name": "TAP_POSTGRES_SYNC_FILTER_SCHEMAS",      "value": "${pg_load_schema}" },
 
-    { "name": "TAP_POSTGRES_ANALYTICS_FILTER_SCHEMAS", "value": "app,${pg_transform_schema}" },
+    { "name": "TAP_POSTGRES_ANALYTICS_FILTER_SCHEMAS", "value": "app,raw_data,${pg_transform_schema}" },
 
     { "name": "DBT_THREADS",                           "value": "${dbt_threads}" },
     { "name": "DBT_TARGET_SCHEMA",                     "value": "${pg_transform_schema}" },

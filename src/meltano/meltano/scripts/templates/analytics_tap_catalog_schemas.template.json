@@ -1,0 +1,247 @@
+{
+  "app": {
+    "analytics_profiles": {
+      "metadata": {
+        "view-key-properties": [
+          "id"
+        ],
+        "is-view": true
+      }
+    },
+    "analytics_profile_plaid_access_tokens": {
+      "metadata": {
+        "view-key-properties": [
+          "id"
+        ],
+        "is-view": true
+      }
+    },
+    "profile_categories": {
+      "metadata": {
+        "table-key-properties": [
+          "id"
+        ]
+      }
+    },
+    "profile_interests": {
+      "metadata": {
+        "table-key-properties": [
+          "id"
+        ]
+      }
+    },
+    "profile_favorite_collections": {
+      "metadata": {
+        "table-key-properties": [
+          "id"
+        ]
+      }
+    },
+    "profile_scoring_settings": {
+      "metadata": {
+        "table-key-properties": [
+          "id"
+        ]
+      }
+    },
+    "profile_watchlist_tickers": {
+      "metadata": {
+        "table-key-properties": [
+          "id"
+        ]
+      }
+    },
+    "profile_ticker_metrics_settings": {
+      "metadata": {
+        "table-key-properties": [
+          "id"
+        ]
+      }
+    },
+    "plaid_institutions": {
+      "metadata": {
+        "table-key-properties": [
+          "id"
+        ]
+      }
+    },
+    "profile_portfolio_accounts": {
+      "metadata": {
+        "table-key-properties": [
+          "id"
+        ]
+      }
+    },
+    "profile_holdings": {
+      "metadata": {
+        "table-key-properties": [
+          "id"
+        ]
+      }
+    },
+    "profile_portfolio_transactions": {
+      "metadata": {
+        "table-key-properties": [
+          "id"
+        ]
+      }
+    }
+  },
+  "public": {
+    "base_tickers": {
+      "metadata": {
+        "table-key-properties": [
+          "symbol"
+        ]
+      }
+    },
+    "categories": {
+      "metadata": {
+        "table-key-properties": [
+          "id"
+        ]
+      }
+    },
+    "collections": {
+      "metadata": {
+        "table-key-properties": [
+          "id"
+        ]
+      }
+    },
+    "crypto_metrics": {
+      "metadata": {
+        "table-key-properties": [
+          "symbol"
+        ]
+      }
+    },
+    "crypto_realtime_metrics": {
+      "metadata": {
+        "table-key-properties": [
+          "symbol"
+        ]
+      }
+    },
+    "ticker_categories_continuous": {
+      "metadata": {
+        "table-key-properties": [
+          "symbol"
+        ]
+      }
+    },
+    "ticker_collections": {
+      "metadata": {
+        "table-key-properties": [
+          "id"
+        ]
+      }
+    },
+    "ticker_industries": {
+      "metadata": {
+        "table-key-properties": [
+          "symbol"
+        ]
+      }
+    },
+    "ticker_interests": {
+      "metadata": {
+        "table-key-properties": [
+          "symbol"
+        ]
+      }
+    },
+    "ticker_metrics": {
+      "metadata": {
+        "table-key-properties": [
+          "symbol"
+        ]
+      }
+    },
+    "ticker_realtime_metrics": {
+      "metadata": {
+        "table-key-properties": [
+          "symbol"
+        ]
+      }
+    }
+  },
+  "raw_data": {
+    "coingecko_coin": {
+      "metadata": {
+        "table-key-properties": [
+          "id"
+        ]
+      }
+    },
+    "coingecko_market_realtime": {
+      "metadata": {
+        "table-key-properties": [
+          "id"
+        ]
+      }
+    },
+    "eod_dividends": {
+      "metadata": {
+        "table-key-properties": [
+          "code",
+          "date"
+        ]
+      }
+    },
+    "eod_fundamentals": {
+      "isSmallBatch": true,
+      "metadata": {
+        "table-key-properties": [
+          "code"
+        ]
+      }
+    },
+    "eod_historical_prices": {
+      "metadata": {
+        "table-key-properties": [
+          "code",
+          "date"
+        ]
+      }
+    },
+    "eod_options": {
+      "isSmallBatch": true,
+      "metadata": {
+        "table-key-properties": [
+          "code",
+          "expirationdate"
+        ]
+      }
+    },
+    "gainy_countries": {
+      "metadata": {
+        "table-key-properties": [
+          "alpha-2",
+          "alpha-3"
+        ]
+      }
+    },
+    "gainy_industries": {
+      "metadata": {
+        "table-key-properties": [
+          "id"
+        ]
+      }
+    },
+    "gainy_interests": {
+      "metadata": {
+        "table-key-properties": [
+          "id"
+        ]
+      }
+    },
+    "gainy_ticker_industries": {
+      "metadata": {
+        "table-key-properties": [
+          "code"
+        ]
+      }
+    }
+  }
+}
