@@ -32,7 +32,10 @@ create table raw_data.coingecko_coin
     status_updates                  jsonb,
     symbol                          varchar,
     contract_address                varchar,
-    ico_data                        jsonb
+    ico_data                        jsonb,
+    _sdc_batched_at                 timestamp,
+    _sdc_deleted_at                 varchar,
+    _sdc_extracted_at               timestamp
 );
 
 INSERT INTO raw_data.coingecko_coin (additional_notices, asset_platform_id, block_time_in_minutes, categories, coingecko_rank, coingecko_score, community_data, community_score, country_origin, description, developer_data, developer_score, genesis_date, hashing_algorithm, id, image, last_updated, links, liquidity_score, market_cap_rank, market_data, name, platforms, public_interest_score, public_interest_stats, public_notice, sentiment_votes_down_percentage, sentiment_votes_up_percentage, status_updates, symbol, contract_address, ico_data)

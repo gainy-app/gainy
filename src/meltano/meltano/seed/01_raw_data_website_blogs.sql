@@ -27,7 +27,10 @@ create table if not exists raw_data.blogs
     sta_text                varchar,
     title_tag               varchar,
     updated_by              varchar,
-    updated_on              varchar
+    updated_on              varchar,
+    _sdc_batched_at         timestamp,
+    _sdc_deleted_at         varchar,
+    _sdc_extracted_at       timestamp
 );
 
 insert into raw_data.blogs (alt_text_for_main_image, author_id, category_link, category_name, created_by, created_on, cta_second_text, cta_text_inside_block, date_added, faq_id, first_paragraph, id, main_image, meta_description, name, post_body, post_summary, published_by, published_on, rate_rating, rate_votes, related_articles, slug, sta_text, title_tag, updated_by, updated_on)
