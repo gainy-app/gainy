@@ -92,13 +92,13 @@ plugins:
             keys: [ "name" ]
 
     - name: tap-postgres
+      config:
+        itersize: 20000
 
     # sync taps
     - name: tap-postgres-sync
       inherit_from: tap-postgres
       catalog: catalog/raw-sync/tap.catalog.json
-      config:
-        itersize: 10000
     - name: tap-postgres-sync-fundamentals
       inherit_from: tap-postgres-sync
       catalog: catalog/raw-sync/tap.catalog.fundamentals.json
@@ -119,8 +119,6 @@ plugins:
     - name: tap-postgres-analytics
       inherit_from: tap-postgres
       catalog: catalog/analytics/tap.catalog.json
-      config:
-        itersize: 10000
 
     - name: tap-postgres-analytics-small-batch
       inherit_from: tap-postgres-analytics
@@ -201,7 +199,6 @@ schedules:
     start_date: 2021-09-03 13:52:48.598227
     env:
       TARGET_ENVS: '["production","local"]'
-      TARGET_POSTGRES_ADD_METADATA_COLUMNS: 'false'
 
   - name: eodhistoricaldata-to-postgres-0
     extractor: tap-eodhistoricaldata
@@ -220,7 +217,6 @@ schedules:
     start_date: 2021-06-17 10:40:58.742133
     env:
       TARGET_ENVS: '["production"]'
-      TARGET_POSTGRES_ADD_METADATA_COLUMNS: 'false'
 
   - name: coingecko-to-postgres
     extractor: tap-coingecko

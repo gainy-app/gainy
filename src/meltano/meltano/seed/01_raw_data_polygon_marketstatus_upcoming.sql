@@ -1,11 +1,14 @@
 create table if not exists raw_data.polygon_marketstatus_upcoming
 (
-    close    varchar,
-    date     varchar not null,
-    exchange varchar not null,
-    name     varchar,
-    open     varchar,
-    status   varchar,
+    close             varchar,
+    date              varchar not null,
+    exchange          varchar not null,
+    name              varchar,
+    open              varchar,
+    status            varchar,
+    _sdc_batched_at   timestamp,
+    _sdc_deleted_at   varchar,
+    _sdc_extracted_at timestamp,
     constraint polygon_marketstatus_upcoming_pkey
         primary key (date, exchange)
 );
