@@ -41,10 +41,13 @@ start-realtime:
 
 style-check:
 	yapf --diff -r src/aws/lambda-python/ src/aws/router src/websockets src/meltano/meltano/orchestrate/dags src/hasura src/meltano terraform
+	cd terraform && terraform fmt -recursive -check
+	cd src/meltano/meltano/transform && sqlfluff lint --templater jinja models/{a,b}*.sql
 
 style-fix:
 	yapf -i -r src/aws/lambda-python/ src/aws/router src/websockets src/meltano/meltano/orchestrate/dags src/hasura src/meltano terraform
 	cd terraform && terraform fmt -recursive
+	cd src/meltano/meltano/transform && sqlfluff fix -f --templater jinja models/{a,b}*.sql
 
 extract-passwords:
 	cd terraform && terraform state pull | python3 ../extract_passwords.py

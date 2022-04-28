@@ -14,10 +14,10 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
 
-      - name: YAPF install
-        run: pip3 install yapf toml
+      - name: Install dependencies
+        run: pip3 install yapf toml sqlfluff dbt-postgres sqlfluff-templater-dbt
 
-      - name: YAPF
+      - name: style-check
         run: make style-check
 
   test:
