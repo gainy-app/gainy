@@ -15,6 +15,7 @@ dbt_config = {% macro config() %}{% for k in kwargs %}{% endfor %}{% endmacro %}
 dbt_var = {% macro var(variable, default='') %}item{% endmacro %}
 dbt_is_incremental = {% macro is_incremental() %}True{% endmacro %}
 pk = {% macro pk(columns) %}{% endmacro %}
+index = {% macro index(this, column, unique) %}{% endmacro %}
 
 [sqlfluff:indentation]
 indented_joins = False
