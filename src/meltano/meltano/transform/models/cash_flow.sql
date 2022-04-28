@@ -3,8 +3,8 @@
     materialized = "incremental",
     unique_key = "id",
     post_hook=[
+      pk('symbol, date'),
       index(this, 'id', true),
-      index(this, 'symbol', false),
     ]
   )
 }}

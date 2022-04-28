@@ -11,7 +11,7 @@
                     AND constraint_name = {{ "'" + this.name + "_unique_" + column + "'" }}
             )
             THEN
-                ALTER TABLE {{ this.schema + "." + this.name }} ADD CONSTRAINT {{ this.name + "_unique_" + column }} UNIQUE ({{column}});
+                ALTER TABLE {{ this }} ADD CONSTRAINT {{ this.name + "_unique_" + column }} UNIQUE ({{column}});
             END IF;
         END$$;
     {% else %}

@@ -4,6 +4,7 @@
     unique_key = "id",
     tags = ["realtime"],
     post_hook=[
+      pk('profile_id, ticker_symbol'),
       index(this, 'id', true),
       'create unique index if not exists "profile_id__ticker_symbol" ON {{ this }} (profile_id, ticker_symbol)',
     ]

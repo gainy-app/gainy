@@ -3,8 +3,9 @@
     materialized = "incremental",
     unique_key = "id",
     post_hook=[
-      index(this, 'id', true),
+      pk('id'),
       'create unique index if not exists "date__exchange_name" ON {{ this }} (date, exchange_name)',
+      'create unique index if not exists "date__country_name" ON {{ this }} (date, country_name)',
     ]
   )
 }}

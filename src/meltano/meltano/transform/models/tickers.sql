@@ -5,7 +5,7 @@
     materialized = "incremental",
     unique_key = "symbol",
     post_hook=[
-      index(this, 'symbol', true),
+      pk('symbol'),
       'delete from {{this}} where updated_at < (select max(updated_at) from {{this}})::date',
     ]
   )

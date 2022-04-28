@@ -4,8 +4,8 @@
     unique_key = "id",
     tags = ["realtime"],
     post_hook=[
+      pk('symbol, period, datetime'),
       index(this, 'id', true),
-      'create unique index if not exists "symbol__period__datetime" ON {{ this }} (symbol, period, datetime)',
       'create index if not exists "period__datetime" ON {{ this }} (period, datetime)',
     ]
   )

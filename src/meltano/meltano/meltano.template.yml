@@ -183,6 +183,8 @@ plugins:
           executor: LocalExecutor
         logging:
           logging_level: $AIRFLOW_LOG_LEVEL
+        scheduler:
+          scheduler_health_check_threshold: 120
 
 schedules:
   - name: csv-to-postgres
