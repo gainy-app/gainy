@@ -3,8 +3,8 @@
     materialized = "incremental",
     unique_key = "id",
     post_hook=[
+      pk('symbol, industry_id'),
       index(this, 'id', true),
-      'create unique index if not exists "industry_id__symbol" ON {{ this }} (industry_id, symbol)',
       'delete from {{this}} where updated_at < (select max(updated_at) from {{this}})',
     ]
   )

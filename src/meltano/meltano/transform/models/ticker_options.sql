@@ -3,7 +3,7 @@
     materialized = "incremental",
     unique_key = "contract_name",
     post_hook=[
-      index(this, 'contract_name', true),
+      pk('contract_name'),
       index(this, 'symbol', false),
       'delete from {{this}} where expiration_date < now()::date',
     ]

@@ -12,7 +12,7 @@ resource "algolia_index" "collections_index" {
 #################################### API keys ####################################
 
 resource "algolia_api_key" "indexing_key" {
-  acl         = ["addObject", "deleteObject", "editSettings"]
+  acl         = ["addObject", "deleteObject", "deleteIndex", "editSettings"]
   description = "[${var.env}] API key for data indexing"
   indexes     = [algolia_index.tickers_index.name, algolia_index.collections_index.name]
 }

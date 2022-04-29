@@ -3,7 +3,7 @@
     materialized = "incremental",
     unique_key = "id",
     post_hook=[
-      index(this, 'id', true),
+      pk('id'),
       index(this, 'name', true),
       'delete from {{this}} where updated_at < (select max(updated_at) from {{this}})',
     ]

@@ -155,6 +155,7 @@ plugins:
         app_id: $ALGOLIA_APP_ID
         api_key: $ALGOLIA_INDEXING_API_KEY
         index_mapping_file: catalog/search/search.mapping.yml
+        add_record_metadata: true
 
     - name: target-postgres-analytics
       inherit_from: target-postgres
@@ -182,6 +183,8 @@ plugins:
           executor: LocalExecutor
         logging:
           logging_level: $AIRFLOW_LOG_LEVEL
+        scheduler:
+          scheduler_health_check_threshold: 120
 
 schedules:
   - name: csv-to-postgres

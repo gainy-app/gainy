@@ -3,9 +3,12 @@ import datetime
 import json
 import logging
 import os
-import re
 import psycopg2
+import re
+import time
 from operator import itemgetter
+
+from algoliasearch.search_client import SearchClient
 from gainy.utils import db_connect
 
 logging.basicConfig()
@@ -16,6 +19,28 @@ schema_activity_min_datetime = datetime.datetime.now(
     tz=datetime.timezone.utc) - datetime.timedelta(days=3)
 
 AWS_LAMBDA_API_GATEWAY_ENDPOINT = os.getenv("AWS_LAMBDA_API_GATEWAY_ENDPOINT")
+
+
+def clean_algolia():
+    algolia_app_id = os.getenv("ALGOLIA_APP_ID")
+    algolia_api_key = os.getenv("ALGOLIA_INDEXING_API_KEY")
+    if not algolia_app_id or not algolia_api_key:
+        return
+
+    search_client = SearchClient.create(algolia_app_id, algolia_api_key)
+    index_names = [
+        os.getenv("ALGOLIA_TICKERS_INDEX"),
+        os.getenv("ALGOLIA_COLLECTIONS_INDEX")
+    ]
+    for index_name in index_names:
+        if not index_name:
+            continue
+
+        search_index = search_client.init_index(index_name)
+        search_index.delete_by({
+            'numericFilters':
+            [f'_sdc_extracted_at<={int(time.time()) - 86400}'],
+        })
 
 
 def clean_api_gateway(api_id, version):
@@ -172,6 +197,8 @@ def clean_obsolete_data(db_conn):
             logger.warning(query)
             cursor.execute(query)
 
+
+clean_algolia()
 
 with db_connect() as db_conn:
     clean_schemas(db_conn)

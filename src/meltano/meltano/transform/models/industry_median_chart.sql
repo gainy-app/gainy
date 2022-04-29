@@ -4,8 +4,8 @@
     unique_key = "id",
     tags = ["realtime"],
     post_hook=[
+      pk('industry_id, period, datetime'),
       index(this, 'id', true),
-      'create unique index if not exists "industry_id__period__datetime" ON {{ this }} (industry_id, period, datetime)',
       'with min_date as (select period, min(datetime) as datetime from {{ ref("chart") }} group by period)
        delete from {{ this }}
        using min_date

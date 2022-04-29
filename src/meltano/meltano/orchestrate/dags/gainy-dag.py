@@ -69,4 +69,4 @@ industry_assignment, _downstream = create_downstream_operators(dag)
 downstream.append(_downstream)
 
 # dependencies
-upstream >> industry_assignment >> dbt >> downstream
+upstream >> industry_assignment >> dbt >> downstream >> clean

@@ -85,6 +85,7 @@ def _generate_analytics_tap_catalog():
                 }
             })
 
+    os.makedirs("catalog/analytics", exist_ok=True)
     with open("catalog/analytics/tap.catalog.json", "w") as f:
         json.dump({"streams": streams['default']}, f)
     with open("catalog/analytics/tap-small-batch.catalog.json", "w") as f:
