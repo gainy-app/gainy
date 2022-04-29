@@ -25,7 +25,7 @@ with
          )
 select expanded.symbol,
        key::date                                              as date,
-       CONCAT(expanded.symbol, '_', key::varchar)::varchar    as id,
+       (expanded.symbol || '_' || key)::varchar               as id,
        (value ->> 'ebit')::float                              as ebit,
        (value ->> 'ebitda')::float                            as ebitda,
        (value ->> 'netIncome')::float                         as net_income,

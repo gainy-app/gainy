@@ -50,6 +50,19 @@ type Query {
 }
 
 type Query {
+  get_portfolio_chart_previous_period_close(
+    profile_id: Int!
+    access_token_ids: [Int]
+    account_ids: [Int]
+    institution_ids: [Int]
+    interest_ids: [Int]
+    category_ids: [Int]
+    security_types: [String]
+    ltt_only: Boolean
+  ): PortfolioChartPreviousPeriodClose
+}
+
+type Query {
   get_portfolio_holdings(
     profile_id: Int!
   ): [PortfolioHolding]
@@ -122,6 +135,15 @@ type ChartDataPoint {
   close: Float
   adjusted_close: Float
   volume: Float
+}
+
+type PortfolioChartPreviousPeriodClose {
+  prev_close_1d: Float
+  prev_close_1w: Float
+  prev_close_1m: Float
+  prev_close_3m: Float
+  prev_close_1y: Float
+  prev_close_5y: Float
 }
 
 type NewsDataPoint {

@@ -53,6 +53,18 @@ def test_get_portfolio_chart():
     }).issubset(set(response[0].keys()))
 
 
+def test_get_portfolio_chart_previous_period_close():
+    event = get_action_event("get_portfolio_chart_previous_period_close",
+                             {"profile_id": PROFILE_ID}, USER_ID)
+    response = action_dispatcher.handle(event)
+    assert "code" not in response
+    assert isinstance(response, dict)
+    assert set({
+        'prev_close_1d', 'prev_close_1w', 'prev_close_1m', 'prev_close_3m',
+        'prev_close_1y', 'prev_close_5y'
+    }).issubset(set(response.keys()))
+
+
 def test_get_match_score_by_ticker():
     event = get_action_event("get_match_score_by_ticker", {
         "profile_id": PROFILE_ID,
@@ -61,7 +73,6 @@ def test_get_match_score_by_ticker():
     response = action_dispatcher.handle(event)
     assert "code" not in response
     assert isinstance(response, dict)
-    assert len(response)
     assert MATCH_SCORE_FIELDS_SET.issubset(set(response.keys()))
 
 

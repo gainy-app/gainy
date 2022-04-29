@@ -142,18 +142,19 @@ def clean_schemas(db_conn):
         )
         schemas = map(itemgetter(0), cursor.fetchall())
 
-        # we only select schemas starting with "public" and with some suffix
-        schemas = filter(lambda x: re.match(r'^public.+', x), schemas)
+    # we only select schemas starting with "public" and with some suffix
+    schemas = filter(lambda x: re.match(r'^public.+', x), schemas)
 
-        schemas = list(schemas)
+    schemas = list(schemas)
 
-        if len(schemas) == 0:
-            return
+    if len(schemas) == 0:
+        return
 
-        logger.info('Considering schemas %s', schemas)
+    logger.info('Considering schemas %s', schemas)
 
-        schema_last_activity_at = {}
-        for schema in schemas:
+    schema_last_activity_at = {}
+    for schema in schemas:
+        with db_conn.cursor() as cursor:
             try:
                 cursor.execute(
                     f"SELECT last_activity_at FROM {schema}.deployment_metadata"
@@ -163,24 +164,26 @@ def clean_schemas(db_conn):
             except psycopg2.errors.UndefinedTable:
                 pass
 
-        max_last_activity_at = max(schema_last_activity_at.values())
+    max_last_activity_at = max(schema_last_activity_at.values())
 
-        for schema in schemas:
-            last_activity_at = schema_last_activity_at[schema]
-            if last_activity_at == max_last_activity_at:
-                logger.info('Skipping schema %s: most recent schema', schema)
-                continue
-            if last_activity_at > schema_activity_min_datetime:
-                logger.info('Skipping schema %s: too recent', schema)
-                continue
+    for schema in schemas:
+        last_activity_at = schema_last_activity_at[schema]
+        if last_activity_at == max_last_activity_at:
+            logger.info('Skipping schema %s: most recent schema', schema)
+            continue
+        if last_activity_at > schema_activity_min_datetime:
+            logger.info('Skipping schema %s: too recent', schema)
+            continue
 
-            query = f"drop schema {schema} cascade"
-            logger.warning(query)
+        query = f"drop schema {schema} cascade"
+        logger.warning(query)
+        with db_conn.cursor() as cursor:
             try:
                 cursor.execute(query)
             except psycopg2.errors.UndefinedTable:
                 pass
 
+        with db_conn.cursor() as cursor:
             cursor.execute(
                 "update deployment.public_schemas set deleted_at = now() where schema_name = %(schema)s",
                 {"schema": schema})

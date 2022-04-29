@@ -24,7 +24,7 @@ with
              on f.code = t.symbol
          )
 select expanded.symbol,
-       CONCAT(expanded.symbol, '_', value ->> 'date')::varchar               as id,
+       (expanded.symbol || '_' || (value ->> 'date'))::varchar               as id,
        (value ->> 'accountsPayable')::float                                  as accounts_payable,
        (value ->> 'accumulatedAmortization')::float                          as accumulated_amortization,
        (value ->> 'accumulatedDepreciation')::float                          as accumulated_depreciation,

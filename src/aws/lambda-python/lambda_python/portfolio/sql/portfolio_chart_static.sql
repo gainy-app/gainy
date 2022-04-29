@@ -15,8 +15,10 @@ with raw_data as
                       left join ticker_options
                                 on ticker_options.contract_name =
                                    portfolio_securities_normalized.original_ticker_symbol
+                      join app.profile_portfolio_accounts on profile_portfolio_accounts.id = profile_holdings_normalized.account_id
+                      join app.profile_plaid_access_tokens on profile_plaid_access_tokens.id = profile_portfolio_accounts.plaid_access_token_id
                       {join_clause}
-             where true {where_clause}
+             where {where_clause}
          )
 select sum(value) as value
 from raw_data

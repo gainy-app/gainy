@@ -54,6 +54,6 @@ select distinct code                                                           a
                 beaten_quarterly_eps_estimation_count_ttm.value::int           as beaten_quarterly_eps_estimation_count_ttm
 
 from {{ source('eod', 'eod_fundamentals') }} f
-inner join {{ ref('tickers') }} as t on f.code = t.symbol
+inner join {{ ref('base_tickers') }} as t on f.code = t.symbol
 left join beaten_quarterly_eps_estimation_count_ttm on f.code = beaten_quarterly_eps_estimation_count_ttm.symbol
 where t.type != 'crypto'
