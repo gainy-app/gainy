@@ -3,22 +3,14 @@
     materialized = "incremental",
     unique_key = "id",
     post_hook=[
-      index(this, 'id', true),
+      pk('id'),
       'delete from {{this}} where updated_at < (select max(updated_at) from {{this}})',
     ]
   )
 }}
 
 
-with
-{% if is_incremental() %}
-     old_collections as (select * from {{ this }}),
-{% endif %}
-     collections as (
-         select id::int, name, description, enabled, personalized, image_url
-         from {{ source('gainy', 'gainy_collections') }}
-     )
-select c.id,
+select c.id::int,
        c.name,
        c.description,
        c.enabled,
@@ -30,7 +22,8 @@ select c.id,
        0::integer as size,
 {% endif %}
        now()::timestamp as updated_at
-from collections c
+from {{ source('gainy', 'gainy_collections') }} c
 {% if is_incremental() %}
-         left join old_collections on old_collections.id = c.id
+         left join {{ this }} old_collections on old_collections.id = c.id::int
 {% endif %}
+where c._sdc_extracted_at > (select max(_sdc_extracted_at) from {{ source ('gainy', 'gainy_collections') }}) - interval '1 minute'

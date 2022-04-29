@@ -3,13 +3,19 @@
     materialized = "incremental",
     unique_key = "id",
     post_hook=[
-      index(this, 'id', true),
+      pk('id'),
       'create unique index if not exists "date__exchange_name" ON {{ this }} (date, exchange_name)',
+      'create unique index if not exists "date__country_name" ON {{ this }} (date, country_name)',
     ]
   )
 }}
 
-with schedule as
+with exchanges as
+         (select *
+          from {{ source('gainy', 'exchanges') }}
+          where _sdc_extracted_at >
+                (select max(_sdc_extracted_at) from {{ source('gainy', 'exchanges') }}) - interval '1 minute'),
+     schedule as
          (
              SELECT CONCAT(dd::date, '_', exchanges.name)::varchar as id,
                     dd::date                                       as date,
@@ -24,13 +30,11 @@ with schedule as
                             (dd::date + exchanges.close_at::time) at time zone exchanges.timezone
                         )                                          as close_at
              FROM generate_series(now() - interval '1 week', now() + interval '1 week', interval '1 day') dd
-                      join {{ source('gainy', 'exchanges') }}
-             on true
-                 left join {{ source('polygon', 'polygon_marketstatus_upcoming') }}
-                 ON polygon_marketstatus_upcoming.exchange = exchanges.name
-                 and polygon_marketstatus_upcoming.date::date = dd::date
-             where extract (isodow from dd)
-                 < 6
+                      join exchanges on true
+                      left join {{ source('polygon', 'polygon_marketstatus_upcoming') }}
+                                ON polygon_marketstatus_upcoming.exchange = exchanges.name
+                                    and polygon_marketstatus_upcoming.date::date = dd::date
+             where extract (isodow from dd) < 6
                and (polygon_marketstatus_upcoming.status is null
                 or polygon_marketstatus_upcoming.status != 'closed')
          )

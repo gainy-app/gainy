@@ -11,6 +11,9 @@ create table if not exists raw_data.eod_options
     putopeninterest          numeric,
     putvolume                numeric,
     options                  jsonb,
+    _sdc_batched_at          timestamp,
+    _sdc_deleted_at          varchar,
+    _sdc_extracted_at        timestamp,
     constraint options_pkey
         primary key (code, expirationdate)
 );

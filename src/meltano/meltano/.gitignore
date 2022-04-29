@@ -4,3 +4,4 @@
 /meltano.yml
 /symbols.local.json
 /exchanges.local.json
+/catalog/analytics/

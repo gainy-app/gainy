@@ -3,7 +3,7 @@
     materialized = "incremental",
     unique_key = "id",
     post_hook=[
-      index(this, 'id', true),
+      pk('id'),
       'delete from {{this}} where updated_at < (select max(updated_at) from {{this}})',
     ]
   )
@@ -17,6 +17,7 @@ WITH gainy_categories_with_collection_id AS (
            (10000 + id::int) as collection_id
     from {{ source ('gainy', 'gainy_categories') }}
     where enabled = '1'
+      and _sdc_extracted_at > (select max(_sdc_extracted_at) from {{ source ('gainy', 'gainy_categories') }}) - interval '1 minute'
 )
 SELECT gc.id,
        gc.name,

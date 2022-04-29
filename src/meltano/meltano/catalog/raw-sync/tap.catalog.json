@@ -7,7 +7,7 @@
         {
           "breadcrumb": [],
           "metadata": {
-            "replication-key": "date",
+            "replication-key": "_sdc_extracted_at",
             "replication-method": "INCREMENTAL",
             "table-key-properties": [
               "code",
@@ -33,7 +33,7 @@
         {
           "breadcrumb": [],
           "metadata": {
-            "replication-key": "date",
+            "replication-key": "_sdc_extracted_at",
             "replication-method": "INCREMENTAL",
             "table-key-properties": [
               "code",
@@ -85,7 +85,7 @@
         {
           "breadcrumb": [],
           "metadata": {
-            "replication-key": "updated_on",
+            "replication-key": "_sdc_extracted_at",
             "replication-method": "INCREMENTAL",
             "table-key-properties": [ "id" ],
             "schema-name": "raw_data",

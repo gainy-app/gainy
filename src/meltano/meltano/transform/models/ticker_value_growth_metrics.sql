@@ -2,7 +2,7 @@
   config(
     materialized = "table",
     post_hook=[
-      index(this, 'symbol', true),
+      pk('symbol'),
       fk(this, 'symbol', this.schema, 'tickers', 'symbol')
     ]
   )

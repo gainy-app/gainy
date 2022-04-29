@@ -3,8 +3,8 @@
     materialized = "incremental",
     unique_key = "id",
     post_hook=[
+      pk('symbol, industry_id'),
       index(this, 'id', true),
-      'create unique index if not exists "industry_id__symbol" ON {{ this }} (industry_id, symbol)',
       'delete from {{this}} where updated_at < (select max(updated_at) from {{this}})',
     ]
   )
@@ -48,6 +48,7 @@ with common_stocks as
          from {{ source('gainy', 'gainy_ticker_industries') }} rgti -- 1 row
                   join {{ ref('gainy_industries') }} gi on gi."name" = rgti."industry name" -- 1 row
                   join ticker_auto_industries ai on ai.symbol = rgti.code -- to add (1-max(ai.sim))/2 delta (and inner join coz some manually marked tickers could be delisted and now absent in ai)
+         where _sdc_extracted_at > (select max(_sdc_extracted_at) from {{ source('gainy', 'gainy_ticker_industries') }}) - interval '1 minute'
          group by rgti.code, gi.id::int -- to add (1-max(ai.sim))/2 delta
      ),
 

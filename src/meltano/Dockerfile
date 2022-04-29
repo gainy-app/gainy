@@ -5,6 +5,7 @@ FROM ${BASE_IMAGE_REGISTRY_ADDRESS}/gainy-meltano:${BASE_IMAGE_VERSION}
 ARG CODEARTIFACT_PIPY_URL
 ARG GAINY_COMPUTE_VERSION
 RUN pip install -U --index-url ${CODEARTIFACT_PIPY_URL} gainy-compute==${GAINY_COMPUTE_VERSION}
+RUN pip install -U algoliasearch==2.6.0
 
 COPY meltano/data /project/data
 COPY meltano/orchestrate /project/orchestrate

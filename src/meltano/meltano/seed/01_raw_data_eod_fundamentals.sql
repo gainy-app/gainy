@@ -1,21 +1,25 @@
-CREATE TABLE IF NOT EXISTS raw_data.eod_fundamentals (
-                                     analystratings jsonb,
-                                     code character varying NOT NULL,
-                                     esgscores jsonb,
-                                     earnings jsonb,
-                                     financials jsonb,
-                                     general jsonb,
-                                     highlights jsonb,
-                                     holders jsonb,
-                                     insidertransactions jsonb,
-                                     sharesstats jsonb,
-                                     splitsdividends jsonb,
-                                     technicals jsonb,
-                                     updatedat character varying,
-                                     valuation jsonb,
-                                     outstandingshares jsonb,
-                                     type varchar,
-                                     CONSTRAINT fundamentals_pkey PRIMARY KEY (code)
+CREATE TABLE IF NOT EXISTS raw_data.eod_fundamentals
+(
+    analystratings      jsonb,
+    code                character varying NOT NULL,
+    esgscores           jsonb,
+    earnings            jsonb,
+    financials          jsonb,
+    general             jsonb,
+    highlights          jsonb,
+    holders             jsonb,
+    insidertransactions jsonb,
+    sharesstats         jsonb,
+    splitsdividends     jsonb,
+    technicals          jsonb,
+    updatedat           character varying,
+    valuation           jsonb,
+    outstandingshares   jsonb,
+    type                varchar,
+    _sdc_batched_at     timestamp,
+    _sdc_deleted_at     varchar,
+    _sdc_extracted_at   timestamp,
+    CONSTRAINT fundamentals_pkey PRIMARY KEY (code)
 );
 
 COPY raw_data.eod_fundamentals (analystratings, code, esgscores, earnings, financials, general, highlights, holders, insidertransactions, sharesstats, splitsdividends, technicals, updatedat, valuation, outstandingshares, type) FROM stdin;

@@ -3,7 +3,7 @@
     materialized = "incremental",
     unique_key = "symbol",
     post_hook=[
-      index(this, 'symbol', true),
+      pk('symbol'),
     ]
   )
 }}
@@ -43,4 +43,5 @@ select distinct on (
       contract_address,
       ico_data
 from {{ source('coingecko', 'coingecko_coin') }}
+where symbol is not null
 order by upper(symbol), coingecko_rank

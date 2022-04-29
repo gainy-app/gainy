@@ -3,9 +3,8 @@
     materialized = "incremental",
     unique_key = "id",
     post_hook=[
+      pk('symbol, date'),
       index(this, 'id', true),
-      index(this, 'symbol', false),
-      index(this, 'date', false),
     ]
   )
 }}
@@ -25,7 +24,7 @@ with
              on f.code = t.symbol
          )
 select expanded.symbol,
-       (expanded.symbol || '_' || key)::varchar                              as id,
+       (expanded.symbol || '_' || (value ->> 'date'))::varchar               as id,
        (value ->> 'accountsPayable')::float                                  as accounts_payable,
        (value ->> 'accumulatedAmortization')::float                          as accumulated_amortization,
        (value ->> 'accumulatedDepreciation')::float                          as accumulated_depreciation,

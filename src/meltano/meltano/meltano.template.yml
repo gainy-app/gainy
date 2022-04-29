@@ -27,13 +27,13 @@ plugins:
       config:
         streams:
           - eod_fundamentals
-          - eod_dividends
           - eod_options
 
     - name: tap-eodhistoricaldata-prices
       inherit_from: tap-eodhistoricaldata
       config:
         streams:
+          - eod_dividends
           - eod_historical_prices
 
     - name: tap-polygon
@@ -92,13 +92,13 @@ plugins:
             keys: [ "name" ]
 
     - name: tap-postgres
+      config:
+        itersize: 20000
 
     # sync taps
     - name: tap-postgres-sync
       inherit_from: tap-postgres
       catalog: catalog/raw-sync/tap.catalog.json
-      config:
-        itersize: 10000
     - name: tap-postgres-sync-fundamentals
       inherit_from: tap-postgres-sync
       catalog: catalog/raw-sync/tap.catalog.fundamentals.json
@@ -119,8 +119,12 @@ plugins:
     - name: tap-postgres-analytics
       inherit_from: tap-postgres
       catalog: catalog/analytics/tap.catalog.json
+
+    - name: tap-postgres-analytics-small-batch
+      inherit_from: tap-postgres-analytics
+      catalog: catalog/analytics/tap-small-batch.catalog.json
       config:
-        filter_schemas: app
+        itersize: 1
 
     # Website tap
     - name: tap-postgres-website
@@ -134,7 +138,9 @@ plugins:
       variant: transferwise
       pip_url: pipelinewise-target-postgres
       config:
+        batch_size_rows: 10000
         primary_key_required: false
+        add_metadata_columns: true
 
     - name: target-postgres-small-batch
       inherit_from: target-postgres
@@ -149,9 +155,15 @@ plugins:
         app_id: $ALGOLIA_APP_ID
         api_key: $ALGOLIA_INDEXING_API_KEY
         index_mapping_file: catalog/search/search.mapping.yml
+        add_record_metadata: true
 
     - name: target-postgres-analytics
       inherit_from: target-postgres
+      config:
+        default_target_schema: $TARGET_POSTGRES_ANALYTICS_SCHEMA
+
+    - name: target-postgres-analytics-small-batch
+      inherit_from: target-postgres-small-batch
       config:
         default_target_schema: $TARGET_POSTGRES_ANALYTICS_SCHEMA
 
@@ -171,6 +183,8 @@ plugins:
           executor: LocalExecutor
         logging:
           logging_level: $AIRFLOW_LOG_LEVEL
+        scheduler:
+          scheduler_health_check_threshold: 120
 
 schedules:
   - name: csv-to-postgres
@@ -218,7 +232,7 @@ schedules:
 
   - name: coingecko-realtime-to-postgres
     extractor: tap-coingecko-realtime
-    loader: target-postgres-small-batch
+    loader: target-postgres
     transform: skip
     interval: '@daily'
     start_date: 2021-06-17 10:40:58.742133
@@ -242,6 +256,16 @@ schedules:
   - name: postgres-to-analytics
     extractor: tap-postgres-analytics
     loader: target-postgres-analytics
+    transform: skip
+    interval: '@daily'
+    start_date: 2021-11-15 00:00:00.000000
+    env:
+      TARGET_ENVS: '["production","local"]'
+      INTEGRATION: 'DOWNSTREAM'
+
+  - name: postgres-to-analytics-small-batch
+    extractor: tap-postgres-analytics-small-batch
+    loader: target-postgres-analytics-small-batch
     transform: skip
     interval: '@daily'
     start_date: 2021-11-15 00:00:00.000000
