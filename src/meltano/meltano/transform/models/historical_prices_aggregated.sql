@@ -336,7 +336,7 @@ union all
 union all
 
 -- 1d
--- Execution Time: 113840.404 ms on test
+-- Execution Time: 96290.198 ms
 (
     with combined_daily_prices as
              (
@@ -410,6 +410,33 @@ union all
                                     1                      as priority
                              from filtered_base_tickers
                                       join time_series_1d using (country_name)
+                          )
+                          union all
+                          (
+                              with filtered_base_tickers as
+                                       (
+                                           select symbol, country_name
+                                           from {{ ref('base_tickers') }}
+                                           where type = 'crypto'
+                                       ),
+                                   time_series_1d as
+                                       (
+                                           SELECT distinct date
+                                           FROM {{ ref('historical_prices') }}
+                                               join filtered_base_tickers on filtered_base_tickers.symbol = historical_prices.code
+                                           where date >= now() - interval '1 year' - interval '1 week'
+                                       )
+                              select symbol,
+                                     time_series_1d.date,
+                                     null::double precision as open,
+                                     null::double precision as high,
+                                     null::double precision as low,
+                                     null::double precision as close,
+                                     null::double precision as volume,
+                                     null::double precision as adjusted_close,
+                                     1                      as priority
+                              from filtered_base_tickers
+                                       join time_series_1d on true
                           )
                      ) t
                  join {{ ref('base_tickers') }} using (symbol)
