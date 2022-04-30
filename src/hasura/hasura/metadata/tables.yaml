@@ -1515,7 +1515,7 @@
             name: profile_ticker_collections
           insertion_order: null
           column_mapping:
-            id: collection_id
+            uniq_id: collection_uniq_id
   select_permissions:
     - role: anonymous
       permission:
