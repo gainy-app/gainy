@@ -46,6 +46,7 @@ union all
            (actual_price / weight_sum)                                                                 as absolute_value
     from (
              select profile_id,
+                    user_id,
                     collection_id,
                     collection_uniq_id,
                     category_id,
@@ -54,13 +55,13 @@ union all
                     sum(absolute_daily_change * weight)::double precision as absolute_daily_change,
                     sum((actual_price - absolute_daily_change) * weight)  as prev_close_price
              from {{ ref('collection_tickers_weighted') }}
+                      left join {{ source('app', 'profiles') }} on profiles.id = profile_id
                       join {{ ref('ticker_categories') }} using (symbol)
                       join {{ ref('ticker_realtime_metrics') }} using (symbol)
-             group by profile_id, collection_id, collection_uniq_id, ticker_categories.category_id
+             group by profile_id, user_id, collection_id, collection_uniq_id, ticker_categories.category_id
          ) t
              join {{ ref('categories') }} on t.category_id = categories.id
              join collection_categories_weight_sum using (collection_uniq_id)
-             left join {{ source('app', 'profiles') }} on profiles.id = profile_id
 )
 
 union all
