@@ -33,6 +33,9 @@ class GetRecommendedCollections(HasuraAction):
             profile_id, limit)
         sorted_collections_ids = list(
             map(itemgetter(0), sorted_collection_match_scores))
+        sorted_collections_uniq_ids = [
+            f"0_{i}" for i in sorted_collections_ids
+        ]
 
         # Add `top-20 for you` collection as the top item
         is_top_20_enabled = repository.is_collection_enabled(
@@ -40,6 +43,9 @@ class GetRecommendedCollections(HasuraAction):
         if is_top_20_enabled:
             sorted_collections_ids = [TOP_20_FOR_YOU_COLLECTION_ID
                                       ] + sorted_collections_ids
+            sorted_collections_uniq_ids = [
+                f"{profile_id}_{TOP_20_FOR_YOU_COLLECTION_ID}"
+            ] + sorted_collections_uniq_ids
 
         logger.info('get_recommended_collections ' +
                     json.dumps({
@@ -47,4 +53,8 @@ class GetRecommendedCollections(HasuraAction):
                         'collections': sorted_collections_ids,
                     }))
 
-        return [{"id": id} for id in sorted_collections_ids]
+        return [{
+            "id": id,
+            "uniq_id": uniq_id
+        } for id, uniq_id in zip(sorted_collections_ids,
+                                 sorted_collections_uniq_ids)]

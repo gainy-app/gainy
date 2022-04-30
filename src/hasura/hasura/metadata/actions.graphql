@@ -177,6 +177,7 @@ type Ticker {
 
 type Collection {
   id: Int!
+  uniq_id: String!
 }
 
 type MatchScore {
