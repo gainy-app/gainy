@@ -7,6 +7,7 @@
 
 
 select profile_id,
+       user_id,
        collection_id,
        collection_uniq_id,
        weight::double precision,
@@ -19,6 +20,7 @@ select profile_id,
 from {{ ref('collection_tickers_weighted') }}
          join {{ ref('base_tickers') }} using (symbol)
          join {{ ref('ticker_realtime_metrics') }} using (symbol)
+         left join {{ source('app', 'profiles') }} on profiles.id = profile_id
 
 union all
 
@@ -32,6 +34,7 @@ union all
                  group by collection_uniq_id
              )
     select profile_id,
+           user_id,
            t.collection_id,
            collection_uniq_id,
            (weight / weight_sum)::double precision                                                     as weight,
@@ -57,6 +60,7 @@ union all
          ) t
              join {{ ref('categories') }} on t.category_id = categories.id
              join collection_categories_weight_sum using (collection_uniq_id)
+             left join {{ source('app', 'profiles') }} on profiles.id = profile_id
 )
 
 union all
@@ -71,6 +75,7 @@ union all
                  group by collection_uniq_id
              )
     select profile_id,
+           user_id,
            collection_id,
            collection_uniq_id,
            (weight / weight_sum)::double precision                                                     as weight,
@@ -96,4 +101,5 @@ union all
          ) t
              join {{ ref('interests') }} on t.interest_id = interests.id
              join collection_interests_weight_sum using (collection_uniq_id)
+             left join {{ source('app', 'profiles') }} on profiles.id = profile_id
 )

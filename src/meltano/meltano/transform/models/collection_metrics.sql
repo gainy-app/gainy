@@ -18,9 +18,11 @@ with grouped_collections as
              group by profile_id, collection_uniq_id
          )
 select profile_id,
+       user_id,
        collection_uniq_id,
        actual_price::double precision                                                                  as actual_price,
        absolute_daily_change::double precision                                                         as absolute_daily_change,
        (actual_price / case when prev_close_price > 0 then prev_close_price end - 1)::double precision as relative_daily_change,
        time                                                                                            as updated_at
 from grouped_collections
+     left join {{ source('app', 'profiles') }} on profiles.id = profile_id

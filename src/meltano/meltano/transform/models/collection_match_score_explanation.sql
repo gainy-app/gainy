@@ -53,6 +53,7 @@ with collection_categories as
              where row_num <= 3
          )
 select t.*,
+       user_id,
        uniq_id as collection_uniq_id
 from (
          select profile_id,
@@ -67,6 +68,7 @@ from (
                 interest_match_id::int as interest_id
          from collection_interests
      ) t
+         join {{ source('app', 'profiles') }} on profiles.id = t.profile_id
          join {{ ref('profile_collections') }}
               on (profile_collections.profile_id is null or
                   profile_collections.profile_id = t.profile_id)
