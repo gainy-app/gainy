@@ -853,6 +853,16 @@
 - table:
     schema: public
     name: collection_match_score
+  object_relationships:
+    - name: profile
+      using:
+        manual_configuration:
+          remote_table:
+            schema: app
+            name: profiles
+          insertion_order: null
+          column_mapping:
+            profile_id: id
   select_permissions:
     - role: user
       permission:
@@ -864,6 +874,7 @@
           - interest_level
           - interest_similarity
           - match_score
+          - profile_id
           - risk_level
           - risk_similarity
         filter:
@@ -891,6 +902,15 @@
           insertion_order: null
           column_mapping:
             interest_id: id
+    - name: profile
+      using:
+        manual_configuration:
+          remote_table:
+            schema: app
+            name: profiles
+          insertion_order: null
+          column_mapping:
+            profile_id: id
   select_permissions:
     - role: user
       permission:
@@ -906,6 +926,16 @@
 - table:
     schema: public
     name: collection_metrics
+  object_relationships:
+    - name: profile
+      using:
+        manual_configuration:
+          remote_table:
+            schema: app
+            name: profiles
+          insertion_order: null
+          column_mapping:
+            profile_id: id
   select_permissions:
     - role: user
       permission:
@@ -913,6 +943,7 @@
           - absolute_daily_change
           - actual_price
           - collection_uniq_id
+          - profile_id
           - relative_daily_change
           - updated_at
         filter:
@@ -924,6 +955,16 @@
 - table:
     schema: public
     name: collection_piechart
+  object_relationships:
+    - name: profile
+      using:
+        manual_configuration:
+          remote_table:
+            schema: app
+            name: profiles
+          insertion_order: null
+          column_mapping:
+            profile_id: id
   select_permissions:
     - role: user
       permission:
@@ -935,6 +976,7 @@
           - entity_id
           - entity_name
           - entity_type
+          - profile_id
           - relative_daily_change
           - weight
         filter:
