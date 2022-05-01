@@ -57,6 +57,7 @@ dbt = BashOperator(
     task_id="dbt",
     bash_command=get_meltano_command("invoke dbt run --exclude tag:view"),
     dag=dag,
+    trigger_rule="all_done",
     pool="dbt")
 
 clean = BashOperator(
