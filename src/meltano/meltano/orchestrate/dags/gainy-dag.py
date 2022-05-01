@@ -28,7 +28,7 @@ dag_id = "gainy-dag"
 dag = create_dag(
     dag_id,
     tags=list(tags),
-    schedule_interval="0 1 * * *" if ENV == "production" else "0 2 * * 1-5",
+    schedule_interval="0 1 * * *" if ENV == "production" else "0 2 * * *",
     is_paused_upon_creation=True)
 
 # Operators
@@ -57,6 +57,7 @@ dbt = BashOperator(
     task_id="dbt",
     bash_command=get_meltano_command("invoke dbt run --exclude tag:view"),
     dag=dag,
+    trigger_rule="all_done",
     pool="dbt")
 
 clean = BashOperator(

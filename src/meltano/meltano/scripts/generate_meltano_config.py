@@ -3,7 +3,8 @@ import glob
 from typing import List
 
 
-def _split_schedule(tap: str, template, env, split_id, split_num) -> dict:
+def _split_schedule(tap: str, tap_canonical: str, template, env, split_id,
+                    split_num) -> dict:
     new_schedule = copy.deepcopy(template)
     new_schedule["name"] = '%s-to-postgres-%02d' % (tap, split_id)
 
@@ -11,8 +12,8 @@ def _split_schedule(tap: str, template, env, split_id, split_num) -> dict:
         new_schedule["env"] = {}
 
     if split_num and split_num > 1:
-        new_schedule["env"][f"TAP_{tap.upper()}_SPLIT_ID"] = str(split_id)
-        new_schedule["env"][f"TAP_{tap.upper()}_SPLIT_NUM"] = str(split_num)
+        new_schedule["env"][f"TAP_{tap_canonical}_SPLIT_ID"] = str(split_id)
+        new_schedule["env"][f"TAP_{tap_canonical}_SPLIT_NUM"] = str(split_num)
 
     return new_schedule
 
@@ -30,16 +31,16 @@ def _generate_schedules(env):
         if not schedules_to_split:
             continue
 
-        tap_canonical = re.sub(r'\W', '_', tap)
-        split_num_env_var_name = f'{tap_canonical.upper()}_JOBS_COUNT'
+        tap_canonical = re.sub(r'\W', '_', tap).upper()
+        split_num_env_var_name = f'{tap_canonical}_JOBS_COUNT'
         if split_num_env_var_name not in os.environ:
             continue
         split_num = int(os.environ[split_num_env_var_name])
 
         schedule_split_template = schedules_to_split[0]
         new_split_schedules = [
-            _split_schedule(tap, schedule_split_template, env, k, split_num)
-            for k in range(0, split_num)
+            _split_schedule(tap, tap_canonical, schedule_split_template, env,
+                            k, split_num) for k in range(0, split_num)
         ]
 
         schedules = other_schedules + new_split_schedules

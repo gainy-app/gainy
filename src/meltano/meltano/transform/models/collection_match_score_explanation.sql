@@ -14,17 +14,20 @@ with collection_categories as
                              row_number() over (partition by profile_id, collection_id order by cnt desc) as row_num
                       from (
                                select profile_id,
+                                      user_id,
                                       collection_id,
                                       category_match_id,
                                       count(*) as cnt
                                from (
                                         select profile_id,
+                                               user_id,
                                                collection_id,
                                                json_array_elements_text(category_matches::json)::int as category_match_id
                                         from {{ ref('ticker_collections') }}
                                                  join {{ source('app', 'profile_ticker_match_score') }} using (symbol)
+                                                 join {{ source('app', 'profiles') }} on profiles.id = profile_id
                                     ) t
-                               group by profile_id, collection_id, category_match_id
+                               group by profile_id, user_id, collection_id, category_match_id
                            ) t
                   ) t
              where row_num <= 3
@@ -37,17 +40,20 @@ with collection_categories as
                              row_number() over (partition by profile_id, collection_id order by cnt desc) as row_num
                       from (
                                select profile_id,
+                                      user_id,
                                       collection_id,
                                       interest_match_id,
                                       count(*) as cnt
                                from (
                                         select profile_id,
+                                               user_id,
                                                collection_id,
                                                json_array_elements_text(interest_matches::json)::int as interest_match_id
                                         from {{ ref('ticker_collections') }}
                                                  join {{ source('app', 'profile_ticker_match_score') }} using (symbol)
+                                                 join {{ source('app', 'profiles') }} on profiles.id = profile_id
                                     ) t
-                               group by profile_id, collection_id, interest_match_id
+                               group by profile_id, user_id, collection_id, interest_match_id
                            ) t
                   ) t
              where row_num <= 3
@@ -56,12 +62,14 @@ select t.*,
        uniq_id as collection_uniq_id
 from (
          select profile_id,
+                user_id,
                 collection_id,
                 category_match_id::int as category_id,
                 null                   as interest_id
          from collection_categories
          union all
          select profile_id,
+                user_id,
                 collection_id,
                 null                   as category_id,
                 interest_match_id::int as interest_id

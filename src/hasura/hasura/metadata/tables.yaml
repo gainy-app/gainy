@@ -878,9 +878,8 @@
           - risk_level
           - risk_similarity
         filter:
-          profile:
-            user_id:
-              _eq: X-Hasura-User-Id
+          user_id:
+            _eq: X-Hasura-User-Id
 - table:
     schema: public
     name: collection_match_score_explanation
@@ -922,9 +921,8 @@
           - interest_id
           - collection_uniq_id
         filter:
-          profile:
-            user_id:
-              _eq: X-Hasura-User-Id
+          user_id:
+            _eq: X-Hasura-User-Id
 - table:
     schema: public
     name: collection_metrics
@@ -950,11 +948,10 @@
           - updated_at
         filter:
           _or:
-            - profile_id:
+            - user_id:
                 _is_null: true
-            - profile:
-                user_id:
-                  _eq: X-Hasura-User-Id
+            - user_id:
+                _eq: X-Hasura-User-Id
 - table:
     schema: public
     name: collection_piechart
@@ -984,11 +981,10 @@
           - weight
         filter:
           _or:
-            - profile_id:
+            - user_id:
                 _is_null: true
-            - profile:
-                user_id:
-                  _eq: X-Hasura-User-Id
+            - user_id:
+                _eq: X-Hasura-User-Id
 - table:
     schema: public
     name: crypto_metrics
@@ -1519,7 +1515,7 @@
             name: profile_ticker_collections
           insertion_order: null
           column_mapping:
-            id: collection_id
+            uniq_id: collection_uniq_id
   select_permissions:
     - role: anonymous
       permission:

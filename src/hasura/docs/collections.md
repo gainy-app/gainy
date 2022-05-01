@@ -133,7 +133,7 @@ query home_tab($profileId: Int, $rankedCount: Int) {
     }
     # collection_piechart(where: {collection_uniq_id: {_eq: "1_231"}, entity_type: {_eq: "ticker"}}) {
     # collection_piechart(where: {collection_uniq_id: {_eq: "1_231"}, entity_type: {_eq: "interest"}}) {
-    collection_piechart(where: {collection_uniq_id: {_eq: "1_231"}, entity_type: {_eq: "category"}) {
+    collection_piechart(where: {collection_uniq_id: {_eq: "1_231"}, entity_type: {_eq: "category"}}) {
         weight
         entity_type
         relative_daily_change

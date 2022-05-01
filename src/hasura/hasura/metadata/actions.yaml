@@ -115,7 +115,7 @@ custom_types:
           source: default
           type: object
           field_mapping:
-            id: id
+            uniq_id: uniq_id
     - name: MatchScore
       relationships:
         - remote_table:

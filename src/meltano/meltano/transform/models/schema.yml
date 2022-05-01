@@ -46,6 +46,7 @@ sources:
       - name: profile_portfolio_transactions
       - name: portfolio_securities
       - name: profile_holdings
+      - name: profiles
       - name: personalized_collection_sizes
       - name: personalized_ticker_collections
       - name: profile_plaid_access_tokens
