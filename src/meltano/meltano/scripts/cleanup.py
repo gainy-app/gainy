@@ -162,7 +162,7 @@ def clean_schemas(db_conn):
                 last_activity_at = cursor.fetchone()[0]
                 schema_last_activity_at[schema] = last_activity_at
             except psycopg2.errors.UndefinedTable:
-                pass
+                db_conn.rollback()
 
     max_last_activity_at = max(schema_last_activity_at.values())
 
@@ -181,9 +181,8 @@ def clean_schemas(db_conn):
             try:
                 cursor.execute(query)
             except psycopg2.errors.UndefinedTable:
-                pass
+                db_conn.rollback()
 
-        with db_conn.cursor() as cursor:
             cursor.execute(
                 "update deployment.public_schemas set deleted_at = now() where schema_name = %(schema)s",
                 {"schema": schema})
