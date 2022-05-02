@@ -123,14 +123,14 @@
         ]
       }
     },
-    "industries": {
+    "interest_industries": {
       "metadata": {
         "table-key-properties": [
           "id"
         ]
       }
     },
-    "interest_industries": {
+    "gainy_industries": {
       "metadata": {
         "table-key-properties": [
           "id"
@@ -148,13 +148,6 @@
       "metadata": {
         "table-key-properties": [
           "id"
-        ]
-      }
-    },
-    "ticker_industries": {
-      "metadata": {
-        "table-key-properties": [
-          "symbol"
         ]
       }
     },
