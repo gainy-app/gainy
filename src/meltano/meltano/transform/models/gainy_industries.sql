@@ -35,7 +35,7 @@ with distinct_industries as
              union all
 
              select coalesce(max_id.max_id, 0) + (row_number() over ())::integer as id,
-                    distinct_industries.name
+                    t.name
              from (
                       select *
                       from distinct_industries
