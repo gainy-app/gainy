@@ -189,7 +189,7 @@ def check_chart():
     datasets = [
         ("1d", 0),
         ("1w", 70),
-        ("1m", 20),
+        ("1m", 15),
     ]
 
     for (period, min_count) in datasets:
