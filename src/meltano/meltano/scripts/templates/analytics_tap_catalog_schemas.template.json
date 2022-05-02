@@ -123,6 +123,20 @@
         ]
       }
     },
+    "industries": {
+      "metadata": {
+        "table-key-properties": [
+          "id"
+        ]
+      }
+    },
+    "interest_industries": {
+      "metadata": {
+        "table-key-properties": [
+          "id"
+        ]
+      }
+    },
     "ticker_categories_continuous": {
       "metadata": {
         "table-key-properties": [
@@ -134,6 +148,13 @@
       "metadata": {
         "table-key-properties": [
           "id"
+        ]
+      }
+    },
+    "ticker_industries": {
+      "metadata": {
+        "table-key-properties": [
+          "symbol"
         ]
       }
     },
@@ -234,7 +255,7 @@
         ]
       }
     },
-    "gainy_industries": {
+    "gainy_custom_industries": {
       "metadata": {
         "table-key-properties": [
           "id"
@@ -248,7 +269,7 @@
         ]
       }
     },
-    "gainy_ticker_industries": {
+    "gainy_ticker_custom_industries": {
       "metadata": {
         "table-key-properties": [
           "code"

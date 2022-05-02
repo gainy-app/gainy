@@ -5,8 +5,8 @@ sources:
     description: Gainy in-house datasets such as collections, industries, interests, categories, etc
     schema: raw_data
     tables:
-      - name: gainy_industries
-      - name: gainy_ticker_industries
+      - name: gainy_custom_industries
+      - name: gainy_ticker_custom_industries
       - name: gainy_collections
       - name: gainy_categories
       - name: gainy_interests
@@ -85,7 +85,7 @@ models:
               type: 'integer'
 
 
-  - name: gainy_industries
+  - name: gainy_custom_industries
     columns:
       - name: id
         tests:
@@ -102,6 +102,25 @@ models:
         tests:
           - unique
           # - not_null # temporary disabled as not all linked to collections
+          - type:
+              type: 'integer'
+
+  - name: gainy_industries
+    columns:
+      - name: id
+        tests:
+          - unique
+          - not_null
+          - type:
+              type: 'integer'
+      - name: name
+        tests:
+          - not_null
+          - type:
+              type: 'character varying'
+      - name: collection_id
+        tests:
+          - unique
           - type:
               type: 'integer'
 

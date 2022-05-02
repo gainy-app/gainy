@@ -18,8 +18,8 @@ with historical_prices as (select * from {{ ref('historical_prices') }}),
      tickers as (select * from {{ ref('tickers') }}),
      ticker_interests as (select * from {{ ref('ticker_interests') }}),
      interests as (select * from {{ ref('interests') }}),
-     ticker_industries as (select * from {{ ref('ticker_industries') }}),
-     gainy_industries as (select * from {{ ref('gainy_industries') }}),
+     ticker_custom_industries as (select * from {{ ref('ticker_custom_industries') }}),
+     gainy_custom_industries as (select * from {{ ref('gainy_custom_industries') }}),
      ticker_categories as (select * from {{ ref('ticker_categories') }}),
      categories as (select * from {{ ref('categories') }}),
      collections as (select id::int, name from {{ ref('collections') }} where personalized = '0'),
@@ -60,7 +60,7 @@ with historical_prices as (select * from {{ ref('historical_prices') }}),
                     t.type                                    as ttype,
                     t.gic_sector                              as gics_sector,
                     t.sector                                  as eod_sector,
-                    gainy_industries.name                     as g_industry,
+                    gainy_custom_industries.name                     as g_industry,
                     interests.name                            as g_interest,
                     lower(c.name)                             as investcat,
                     CASE
@@ -71,8 +71,8 @@ with historical_prices as (select * from {{ ref('historical_prices') }}),
                     t_ranks.vol_10d_topintype_order,
                     t_ranks.vol_10d_topintype_percent
              from tickers t
-                      LEFT JOIN ticker_industries on t.symbol = ticker_industries.symbol --here we have N:N relationship, so we must use distinct in the end (we will get duplicates otherwise)
-                      LEFT JOIN gainy_industries on ticker_industries.industry_id = gainy_industries.id
+                      LEFT JOIN ticker_custom_industries on t.symbol = ticker_custom_industries.symbol --here we have N:N relationship, so we must use distinct in the end (we will get duplicates otherwise)
+                      LEFT JOIN gainy_custom_industries on ticker_custom_industries.industry_id = gainy_custom_industries.id
                       LEFT JOIN ticker_interests on t.symbol = ticker_interests.symbol --here we have N:N relationship, so we must use distinct in the end (we will get duplicates otherwise)
                       LEFT JOIN interests on ticker_interests.interest_id = interests.id
                       LEFT JOIN latest_price ON latest_price.code = t.symbol           

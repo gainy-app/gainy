@@ -69,10 +69,10 @@ plugins:
     - name: tap-csv
       config:
         files:
-          - entity: gainy_industries
-            path: data/gainy_industries.csv
+          - entity: gainy_custom_industries
+            path: data/gainy_custom_industries.csv
             keys: [ "id" ]
-          - entity: gainy_ticker_industries
+          - entity: gainy_ticker_custom_industries
             path: data/industry_tickers.csv
             keys: [ "Code" ]
           - entity: gainy_collections

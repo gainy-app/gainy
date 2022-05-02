@@ -38,8 +38,3 @@ generate_dbt_model(
     "ticker_collections", "collections", lambda name, sql:
     "select collections.id as collection_id, ct.ticker_code as symbol from ct join {{ ref('collections') }} on collections.name = '%s' where %s"
     % (name, sql))
-
-generate_dbt_model(
-    "interest_industries", "interests", lambda name, sql:
-    "select interests.id as interest_id, ct.g_industry_id as industry_id from ct join {{ ref ('interests') }} on interests.name = '%s' where %s"
-    % (name, sql))

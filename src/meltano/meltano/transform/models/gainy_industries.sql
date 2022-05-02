@@ -10,16 +10,55 @@
   )
 }}
 
-WITH gainy_industries_with_collection_id AS (
-    SELECT id::int, name::character varying, (20000 + id::int) as collection_id
-    FROM {{ source('gainy', 'gainy_industries') }}
-    where _sdc_extracted_at > (select max(_sdc_extracted_at) from {{ source('gainy', 'gainy_industries') }}) - interval '1 minute'
-)
-SELECT gi.id,
-       gi.name,
-       c.id as collection_id,
-       now()::timestamp as updated_at
-FROM gainy_industries_with_collection_id gi
-    -- The below reference to `collections` table is required for DBT to build correct model dependency graph
-    LEFT JOIN {{ ref('collections') }} c
-        ON gi.collection_id = c.id
+
+with distinct_industries as
+    (
+        select distinct gic_sub_industry as name
+        from {{ ref('base_tickers') }}
+        order by gic_sub_industry
+    ),
+{% if is_incremental() %}
+
+     max_id as
+         (
+             select max(id) as max_id
+             from {{ this }}
+         ),
+     raw_data as
+         (
+
+             select gainy_industries.id,
+                    distinct_industries.name
+             from distinct_industries
+                      join {{ this }} using (name)
+
+             union all
+
+             select coalesce(max_id.max_id, 0) + (row_number() over ())::integer as id,
+                    distinct_industries.name
+             from (
+                      select *
+                      from distinct_industries
+                      left join {{ this }} using (name)
+                      where gainy_industries.id is null
+             ) t
+                      join max_id on true
+         )
+
+{% else %}
+
+     raw_data as
+         (
+             select *,
+                    (row_number() over ())::integer as id
+             from distinct_industries
+         )
+{% endif %}
+
+select distinct raw_data.*,
+                collections.id as collection_id,
+                now()::timestamp as updated_at
+from raw_data
+         -- The below reference to `collections` table is required for DBT to build correct model dependency graph
+         LEFT JOIN {{ ref('collections') }} ON collections.id = 30000 + raw_data.id
+where raw_data.name not ilike '%discontinued%'
