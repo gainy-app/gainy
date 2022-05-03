@@ -15,7 +15,7 @@ with distinct_industries as
     (
         select distinct trim(gic_sub_industry) as name
         from {{ ref('base_tickers') }}
-        order by gic_sub_industry
+        order by trim(gic_sub_industry)
     ),
 {% if is_incremental() %}
 
