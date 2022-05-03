@@ -15,6 +15,9 @@ with distinct_industries as
     (
         select distinct name
         from (
+                 select trim(Industry)::varchar as name
+                 from {{ source('gainy', 'crypto_ticker_industries') }}
+                 union all
                  select trim(gic_sub_industry)::varchar as name
                  from {{ ref('base_tickers') }}
              ) t

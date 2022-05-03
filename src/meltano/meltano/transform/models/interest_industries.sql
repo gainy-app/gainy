@@ -13,33 +13,33 @@
 
 with interest_industries_flatten as
     (
-        select interests.id as interest_id, sub_1_name as gic_sub_industry_name from {{ ref('interests') }}
+        select interests.id as interest_id, sub_1_name as industry_name from {{ ref('interests') }}
         union
-        select interests.id as interest_id, sub_2_name as gic_sub_industry_name from {{ ref('interests') }}
+        select interests.id as interest_id, sub_2_name as industry_name from {{ ref('interests') }}
         union
-        select interests.id as interest_id, sub_3_name as gic_sub_industry_name from {{ ref('interests') }}
+        select interests.id as interest_id, sub_3_name as industry_name from {{ ref('interests') }}
         union
-        select interests.id as interest_id, sub_4_name as gic_sub_industry_name from {{ ref('interests') }}
+        select interests.id as interest_id, sub_4_name as industry_name from {{ ref('interests') }}
         union
-        select interests.id as interest_id, sub_5_name as gic_sub_industry_name from {{ ref('interests') }}
+        select interests.id as interest_id, sub_5_name as industry_name from {{ ref('interests') }}
         union
-        select interests.id as interest_id, sub_6_name as gic_sub_industry_name from {{ ref('interests') }}
+        select interests.id as interest_id, sub_6_name as industry_name from {{ ref('interests') }}
         union
-        select interests.id as interest_id, sub_7_name as gic_sub_industry_name from {{ ref('interests') }}
+        select interests.id as interest_id, sub_7_name as industry_name from {{ ref('interests') }}
         union
-        select interests.id as interest_id, sub_8_name as gic_sub_industry_name from {{ ref('interests') }}
+        select interests.id as interest_id, sub_8_name as industry_name from {{ ref('interests') }}
         union
-        select interests.id as interest_id, sub_9_name as gic_sub_industry_name from {{ ref('interests') }}
+        select interests.id as interest_id, sub_9_name as industry_name from {{ ref('interests') }}
         union
-        select interests.id as interest_id, sub_10_name as gic_sub_industry_name from {{ ref('interests') }}
+        select interests.id as interest_id, sub_10_name as industry_name from {{ ref('interests') }}
         union
-        select interests.id as interest_id, sub_12_name as gic_sub_industry_name from {{ ref('interests') }}
+        select interests.id as interest_id, sub_12_name as industry_name from {{ ref('interests') }}
         union
-        select interests.id as interest_id, sub_13_name as gic_sub_industry_name from {{ ref('interests') }}
+        select interests.id as interest_id, sub_13_name as industry_name from {{ ref('interests') }}
         union
-        select interests.id as interest_id, sub_14_name as gic_sub_industry_name from {{ ref('interests') }}
+        select interests.id as interest_id, sub_14_name as industry_name from {{ ref('interests') }}
         union
-        select interests.id as interest_id, sub_15_name as gic_sub_industry_name from {{ ref('interests') }}
+        select interests.id as interest_id, sub_15_name as industry_name from {{ ref('interests') }}
     )
 
 SELECT distinct (interest_id || '_' || gainy_industries.id)::varchar as id,
@@ -47,4 +47,4 @@ SELECT distinct (interest_id || '_' || gainy_industries.id)::varchar as id,
                 gainy_industries.id as industry_id,
                 now() as updated_at
 from interest_industries_flatten
-         join {{ ref('gainy_industries') }} on gainy_industries.name = interest_industries_flatten.gic_sub_industry_name
+         join {{ ref('gainy_industries') }} on gainy_industries.name = interest_industries_flatten.industry_name

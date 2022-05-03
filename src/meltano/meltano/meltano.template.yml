@@ -90,6 +90,9 @@ plugins:
           - entity: exchanges
             path: data/exchanges.csv
             keys: [ "name" ]
+          - entity: crypto_ticker_industries
+            path: data/crypto_ticker_industries.csv
+            keys: [ "cc_symbol" ]
 
     - name: tap-postgres
       config:
