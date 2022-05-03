@@ -167,7 +167,7 @@ def clean_schemas(db_conn):
     max_last_activity_at = max(schema_last_activity_at.values())
 
     for schema in schemas:
-        last_activity_at = schema_last_activity_at[schema]
+        last_activity_at = schema_last_activity_at.get(schema, 0)
         if last_activity_at == max_last_activity_at:
             logger.info('Skipping schema %s: most recent schema', schema)
             continue

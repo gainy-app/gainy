@@ -13,7 +13,7 @@
 
 with distinct_industries as
     (
-        select distinct gic_sub_industry as name
+        select distinct trim(gic_sub_industry) as name
         from {{ ref('base_tickers') }}
         order by gic_sub_industry
     ),
