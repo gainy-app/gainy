@@ -13,9 +13,12 @@
 
 with distinct_industries as
     (
-        select distinct trim(gic_sub_industry) as name
-        from {{ ref('base_tickers') }}
-        order by trim(gic_sub_industry)
+        select distinct name
+        from (
+                 select trim(gic_sub_industry)::varchar as name
+                 from {{ ref('base_tickers') }}
+             ) t
+        order by name
     ),
 {% if is_incremental() %}
 
