@@ -501,7 +501,7 @@ union all
 union all
 
 -- 1w
--- Execution Time: 107630.229 ms on test
+-- Execution Time: 53649.535 ms on test
 (
     select DISTINCT ON (
         code,
