@@ -60,5 +60,5 @@ select distinct raw_data.*,
                 now()::timestamp as updated_at
 from raw_data
          -- The below reference to `collections` table is required for DBT to build correct model dependency graph
-         LEFT JOIN {{ ref('collections') }} ON collections.id = 30000 + raw_data.id
+         LEFT JOIN {{ ref('collections') }} ON collections.id = 20000 + raw_data.id
 where raw_data.name not ilike '%discontinued%'
