@@ -40,6 +40,7 @@ ACTIONS = [
     GetPortfolioTransactions(),
     GetPortfolioChart(),
     GetPortfolioChartPreviousPeriodClose(),
+    GetPortfolioPieChart(),
     PlaidWebhook(),
 
     # Search

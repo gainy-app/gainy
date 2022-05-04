@@ -18,6 +18,7 @@ with robinhood_options as (
 )
 
 select profile_holdings.id                                               as holding_id,
+       profile_holdings.plaid_access_token_id,
        profile_holdings.security_id,
        profile_holdings.profile_id,
        profile_holdings.account_id,
