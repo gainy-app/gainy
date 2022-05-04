@@ -63,6 +63,13 @@ type Query {
 }
 
 type Query {
+  get_portfolio_piechart(
+    profile_id: Int!
+    access_token_ids: [Int]
+  ): [PieChartDataPoint]
+}
+
+type Query {
   get_portfolio_holdings(
     profile_id: Int!
   ): [PortfolioHolding]
@@ -135,6 +142,16 @@ type ChartDataPoint {
   close: Float
   adjusted_close: Float
   volume: Float
+}
+
+type PieChartDataPoint {
+  weight: Float
+  entity_name: String
+  entity_type: String
+  entity_id: String
+  relative_daily_change: Float
+  absolute_value: Float
+  absolute_daily_change: Float
 }
 
 type PortfolioChartPreviousPeriodClose {
