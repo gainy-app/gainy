@@ -112,7 +112,8 @@ class PortfolioChartService:
         return data
 
     def get_portfolio_piechart(self, db_conn, profile_id, filter):
-        with open(os.path.join(SCRIPT_DIR, "../sql/portfolio_piechart.sql")) as f:
+        with open(os.path.join(SCRIPT_DIR,
+                               "../sql/portfolio_piechart.sql")) as f:
             query = f.read()
 
         params = {}

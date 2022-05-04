@@ -69,6 +69,53 @@ def test_portfolio_chart_filters(params):
                 f'prev_close_{period}'] > 0, json.dumps(params)
 
 
+def get_test_portfolio_piechart_filters_data():
+    full_options_dict = {
+        "accessTokenIds": [None, 1],
+    }
+
+    for params in permute_params(full_options_dict):
+        yield params
+
+
+@pytest.mark.parametrize("params", get_test_portfolio_piechart_filters_data())
+def test_portfolio_piechart_filters(params):
+    query_file = os.path.join(os.path.dirname(__file__),
+                              'queries/GetPortfolioPieChart.graphql')
+    with open(query_file, 'r') as f:
+        query = f.read()
+
+    data = make_graphql_request(query, {
+        "profileId": PROFILE_ID,
+        **params
+    })['data']
+
+    assert len(data['get_portfolio_piechart']) > 0, json.dumps(params)
+
+    piechart_sums = {}
+    for row in data['get_portfolio_piechart']:
+        entity_type = row['entity_type']
+        if entity_type not in piechart_sums:
+            piechart_sums[entity_type] = {}
+
+        expected_relative_daily_change = row['absolute_value'] / (
+            row['absolute_value'] - row['absolute_daily_change']) - 1
+        assert abs(expected_relative_daily_change -
+                   row['relative_daily_change']) < PRICE_EPS
+        for field in ['weight', 'absolute_daily_change', 'absolute_value']:
+            if field not in piechart_sums[entity_type]:
+                piechart_sums[entity_type][field] = 0
+            piechart_sums[entity_type][field] += row[field]
+
+    for entity_type in ['ticker', 'category', 'interest', 'security_type']:
+        assert abs(1 - piechart_sums[entity_type]['weight']) < PRICE_EPS
+        assert abs(
+            piechart_sums['ticker']['absolute_daily_change'] -
+            piechart_sums[entity_type]['absolute_daily_change']) < PRICE_EPS
+        assert abs(piechart_sums['ticker']['absolute_value'] -
+                   piechart_sums[entity_type]['absolute_value']) < PRICE_EPS
+
+
 def verify_portfolio_chart(portfolio_chart,
                            symbol_charts,
                            quantities,
