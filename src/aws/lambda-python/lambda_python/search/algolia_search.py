@@ -3,6 +3,7 @@ from typing import List, Any
 
 from algoliasearch.search_client import SearchClient
 
+from gainy.recommendation import TOP_20_FOR_YOU_COLLECTION_ID
 from common.hasura_function import HasuraAction
 from operator import itemgetter
 
@@ -91,6 +92,22 @@ class SearchCollections(SearchAction):
 
     def table_name(self) -> str:
         return "collections"
+
+    def apply(self, db_conn, input_params, headers):
+        profile_id = self.get_profile_id(input_params)
+
+        result = []
+        for i in super().apply(db_conn, input_params, headers):
+            if i['id'] == TOP_20_FOR_YOU_COLLECTION_ID:
+                if profile_id is None:
+                    continue
+                else:
+                    i['uniq_id'] = f"{profile_id}_{i['id']}"
+            else:
+                i['uniq_id'] = f"0_{i['id']}"
+            result.append(i)
+
+        return result
 
     def _enabled_only(self) -> bool:
         return True

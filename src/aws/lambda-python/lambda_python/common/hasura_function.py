@@ -4,6 +4,7 @@ from common.hasura_exception import HasuraActionException
 
 
 class HasuraAction(ABC):
+    profile_id = None
 
     def __init__(self, name, profile_id_param=None):
         super().__init__()
@@ -11,6 +12,9 @@ class HasuraAction(ABC):
         self.profile_id_param = profile_id_param
 
     def get_profile_id(self, input_params):
+        if self.profile_id is not None:
+            return self.profile_id
+
         if not self.profile_id_param:
             return None
 
