@@ -1683,6 +1683,15 @@
     custom_name: ticker_collections
     custom_column_names: {}
   object_relationships:
+    - name: collection
+      using:
+        manual_configuration:
+          remote_table:
+            schema: public
+            name: profile_collections
+          insertion_order: null
+          column_mapping:
+            collection_uniq_id: uniq_id
     - name: profile
       using:
         manual_configuration:
