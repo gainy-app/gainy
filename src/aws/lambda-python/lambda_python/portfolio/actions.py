@@ -99,3 +99,19 @@ class GetPortfolioChartPreviousPeriodClose(HasuraAction):
 
         return self.service.get_portfolio_chart_previous_period_close(
             db_conn, profile_id, filter)
+
+
+class GetPortfolioPieChart(HasuraAction):
+
+    def __init__(self):
+        super().__init__("get_portfolio_piechart", "profile_id")
+
+        self.service = PortfolioChartService()
+
+    def apply(self, db_conn, input_params, headers):
+        profile_id = input_params["profile_id"]
+
+        filter = PortfolioChartFilter()
+        filter.access_token_ids = input_params.get("access_token_ids")
+
+        return self.service.get_portfolio_piechart(db_conn, profile_id, filter)
