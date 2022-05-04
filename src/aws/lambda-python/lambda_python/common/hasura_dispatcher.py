@@ -68,6 +68,23 @@ class HasuraDispatcher(ABC):
             http_code,
             response_body) if self.is_gateway_proxy else response_body
 
+    def get_profile_id(self, db_conn, session_variables):
+        hasura_role = session_variables["x-hasura-role"]
+
+        if "admin" == hasura_role:
+            return None
+
+        hasura_user_id = session_variables["x-hasura-user-id"]
+        with db_conn.cursor() as cursor:
+            cursor.execute(f"SELECT id FROM app.profiles WHERE user_id = %s",
+                           (hasura_user_id, ))
+
+            user = cursor.fetchone()
+            if user is None:
+                return None
+
+        return user[0]
+
     def check_authorization(self, db_conn, profile_id, session_variables):
         try:
             hasura_role = session_variables["x-hasura-role"]
@@ -75,22 +92,13 @@ class HasuraDispatcher(ABC):
             if "admin" == hasura_role:
                 return
 
-            with db_conn.cursor() as cursor:
-                cursor.execute(
-                    f"SELECT user_id FROM app.profiles WHERE id = %s",
-                    (profile_id, ))
-
-                user = cursor.fetchone()
-                if user is None:
-                    raise Exception('User not found')
-
-            user_id = user[0]
-            hasura_user_id = session_variables["x-hasura-user-id"]
+            session_profile_id = self.get_profile_id(db_conn,
+                                                     session_variables)
         except Exception:
             raise HasuraActionException(
                 401, f"Unauthorized access to profile `{profile_id}`")
 
-        if user_id != hasura_user_id:
+        if profile_id != session_profile_id:
             raise HasuraActionException(
                 401, f"Unauthorized access to profile `{profile_id}`")
 
@@ -112,6 +120,9 @@ class HasuraActionDispatcher(HasuraDispatcher):
             profile_id = action.get_profile_id(input_params)
             self.check_authorization(db_conn, profile_id,
                                      request["session_variables"])
+        else:
+            action.profile_id = self.get_profile_id(
+                db_conn, request["session_variables"])
 
         return action.apply(db_conn, input_params, headers)
 
