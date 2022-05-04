@@ -164,16 +164,20 @@ def clean_schemas(db_conn):
             except psycopg2.errors.UndefinedTable:
                 db_conn.rollback()
 
+    if not len(schema_last_activity_at):
+        raise Exception('No schemas found')
+
     max_last_activity_at = max(schema_last_activity_at.values())
 
     for schema in schemas:
-        last_activity_at = schema_last_activity_at.get(schema, 0)
-        if last_activity_at == max_last_activity_at:
-            logger.info('Skipping schema %s: most recent schema', schema)
-            continue
-        if last_activity_at > schema_activity_min_datetime:
-            logger.info('Skipping schema %s: too recent', schema)
-            continue
+        if schema in schema_last_activity_at:
+            last_activity_at = schema_last_activity_at[schema]
+            if last_activity_at == max_last_activity_at:
+                logger.info('Skipping schema %s: most recent schema', schema)
+                continue
+            if last_activity_at > schema_activity_min_datetime:
+                logger.info('Skipping schema %s: too recent', schema)
+                continue
 
         query = f"drop schema {schema} cascade"
         logger.warning(query)
