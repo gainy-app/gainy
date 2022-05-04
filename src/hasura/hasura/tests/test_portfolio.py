@@ -85,6 +85,12 @@ def test_portfolio_piechart_filters(params):
     with open(query_file, 'r') as f:
         query = f.read()
 
+    portfolio_gains_data = make_graphql_request(
+        "query GetPortfolioHoldings($profileId: Int!) {portfolio_gains (where:{profile_id: {_eq: $profileId}}) { absolute_gain_1d actual_value } }",
+        {
+            "profileId": PROFILE_ID,
+        })['data']['portfolio_gains'][0]
+
     data = make_graphql_request(query, {
         "profileId": PROFILE_ID,
         **params
@@ -110,9 +116,9 @@ def test_portfolio_piechart_filters(params):
     for entity_type in ['ticker', 'category', 'interest', 'security_type']:
         assert abs(1 - piechart_sums[entity_type]['weight']) < PRICE_EPS
         assert abs(
-            piechart_sums['ticker']['absolute_daily_change'] -
+            portfolio_gains_data['absolute_gain_1d'] -
             piechart_sums[entity_type]['absolute_daily_change']) < PRICE_EPS
-        assert abs(piechart_sums['ticker']['absolute_value'] -
+        assert abs(portfolio_gains_data['actual_value'] -
                    piechart_sums[entity_type]['absolute_value']) < PRICE_EPS
 
 
