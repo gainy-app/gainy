@@ -128,6 +128,7 @@ jobs:
 
       - name: Terraform State Cleanup Prepare
         id: state-clean-prepare
+        if: "!inputs.only_plan"
         # grep only needed resources
         # tr to make it a one-liner
         # sed to filter out :: command, that github apparently adds to step output for some f-cked up reason
@@ -136,7 +137,7 @@ jobs:
 
       - name: Terraform State Cleanup
         id: state-clean
-        if: steps.state-clean-prepare.outputs.resources != ''
+        if: steps.state-clean-prepare.outputs.resources != '' and !inputs.only_plan
         run: terraform state rm ${{ steps.state-clean-prepare.outputs.resources }}
         working-directory: terraform
 
