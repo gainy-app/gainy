@@ -1333,6 +1333,10 @@ models:
         tests:
           - type:
               type: 'double precision'
+      - name: previous_day_close_price
+        tests:
+          - type:
+              type: 'double precision'
       - name: updated_at
         tests:
           - type:
