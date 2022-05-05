@@ -247,11 +247,11 @@ union
     with
         momentum_cntrflip as
             (
-                select t.symbol,
-                       t2.combined_momentum_score --center at threshold 0
+                select symbol,
+                       combined_momentum_score --center at threshold 0
                 from common_stocks t
-                         join {{ ref('technicals') }} t2 on t.symbol = t2.symbol
-                where t2.combined_momentum_score is not null
+                         join {{ ref('ticker_momentum_metrics') }} using (symbol)
+                where combined_momentum_score is not null
             ),
 
         momentum_scalekoefs as
@@ -298,13 +298,13 @@ union
     with
         value_cntrflip as
             (
-                select t.symbol,
-                       t2.value_score, --center at threshold 0
-                       -t2.growth_score as growth_score --center at threshold 0 and flip
+                select symbol,
+                       value_score, --center at threshold 0
+                       -growth_score as growth_score --center at threshold 0 and flip
                 from common_stocks t
-                         join {{ ref('technicals') }} t2 on t.symbol = t2.symbol
-                where t2.value_score is not null
-                  and t2.growth_score is not null
+                         join {{ ref('ticker_value_growth_metrics') }} using (symbol)
+                where value_score is not null
+                  and growth_score is not null
             ),
 
         value_scalekoefs as
@@ -355,12 +355,12 @@ union
         growth_cntrflip as
             (
                 select t.symbol,
-                       -t2.value_score as value_score, --center at threshold 0 and flip
-                       t2.growth_score --center at threshold 0
+                       -value_score as value_score, --center at threshold 0 and flip
+                       growth_score --center at threshold 0
                 from common_stocks t
-                         join {{ ref('technicals') }} t2 on t.symbol = t2.symbol
-                where t2.value_score is not null
-                  and t2.growth_score is not null
+                         join {{ ref('ticker_value_growth_metrics') }} using (symbol)
+                where value_score is not null
+                  and growth_score is not null
             ),
 
         growth_scalekoefs as

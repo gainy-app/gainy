@@ -10,7 +10,6 @@
 
 with highlights as (select * from {{ ref('highlights') }}),
      base_tickers as (select * from {{ ref('base_tickers') }}),
-     ticker_realtime_metrics as (select * from {{ ref('ticker_realtime_metrics') }}),
      valuation as (select * from {{ ref('valuation') }}),
      technicals as (select * from {{ ref('technicals') }}),
      ticker_shares_stats as (select * from {{ ref('ticker_shares_stats') }}),
@@ -257,38 +256,37 @@ with highlights as (select * from {{ ref('highlights') }}),
      momentum_metrics as
          (
              select base_tickers.symbol,
-                    ticker_realtime_metrics.actual_price /
+                    historical_prices_marked.price_0d /
                     case
                         when coalesce(historical_prices_marked.price_1w, historical_prices_marked.price_all) > 0
                             then coalesce(historical_prices_marked.price_1w, historical_prices_marked.price_all)
                         end - 1 as price_change_1w,
-                    ticker_realtime_metrics.actual_price /
+                    historical_prices_marked.price_0d /
                     case
                         when coalesce(historical_prices_marked.price_1m, historical_prices_marked.price_all) > 0
                             then coalesce(historical_prices_marked.price_1m, historical_prices_marked.price_all)
                         end - 1 as price_change_1m,
-                    ticker_realtime_metrics.actual_price /
+                    historical_prices_marked.price_0d /
                     case
                         when coalesce(historical_prices_marked.price_3m, historical_prices_marked.price_all) > 0
                             then coalesce(historical_prices_marked.price_3m, historical_prices_marked.price_all)
                         end - 1 as price_change_3m,
-                    ticker_realtime_metrics.actual_price /
+                    historical_prices_marked.price_0d /
                     case
                         when coalesce(historical_prices_marked.price_1y, historical_prices_marked.price_all) > 0
                             then coalesce(historical_prices_marked.price_1y, historical_prices_marked.price_all)
                         end - 1 as price_change_1y,
-                    ticker_realtime_metrics.actual_price /
+                    historical_prices_marked.price_0d /
                     case
                         when coalesce(historical_prices_marked.price_5y, historical_prices_marked.price_all) > 0
                             then coalesce(historical_prices_marked.price_5y, historical_prices_marked.price_all)
                         end - 1 as price_change_5y,
-                    ticker_realtime_metrics.actual_price /
+                    historical_prices_marked.price_0d /
                     case
                         when historical_prices_marked.price_all > 0
                             then historical_prices_marked.price_all
                         end - 1 as price_change_all
              from base_tickers
-                      join ticker_realtime_metrics on ticker_realtime_metrics.symbol = base_tickers.symbol
                       left join historical_prices_marked on historical_prices_marked.symbol = base_tickers.symbol
          ),
      dividend_metrics as
