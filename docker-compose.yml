@@ -149,8 +149,6 @@ services:
 
   websockets-polygon:
     image: gainy-websockets:latest
-    depends_on:
-      - websockets-eod
     restart: always
     volumes:
       - ./src/websockets:/srv

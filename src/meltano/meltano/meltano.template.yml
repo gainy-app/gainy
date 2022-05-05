@@ -46,6 +46,9 @@ plugins:
         - state
       settings:
         - name: api_key
+        - name: option_contract_names
+        - name: split_id
+        - name: split_num
 
     - name: tap-coingecko
       namespace: tap_coingecko

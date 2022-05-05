@@ -1809,6 +1809,13 @@ models:
           - type:
               type: 'double precision'
 
+  - name: ticker_options_monitored
+    columns:
+      - name: contract_name
+        tests:
+          - type:
+              type: 'character varying'
+
 exposures:
   - name: ticker_search_index
     type: application
