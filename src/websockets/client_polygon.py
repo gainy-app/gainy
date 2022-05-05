@@ -109,7 +109,7 @@ class PricesListener(AbstractPriceListener):
                     self.handle_message)
             elif self.cluster == StreamCluster.OPTIONS:
                 await stream_client.subscribe_option_minute_aggregates(
-#                     [self.transform_symbol(i) for i in self.symbols],
+                    #                     [self.transform_symbol(i) for i in self.symbols],
                     None,
                     self.handle_message)
             else:

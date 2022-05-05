@@ -1,6 +1,9 @@
 import sys, os, json, yaml, copy, re
 import glob
 from typing import List
+from operator import itemgetter
+from gainy.utils import db_connect
+import psycopg2
 
 
 def _split_schedule(tap: str, tap_canonical: str, template, env, split_id,
@@ -44,6 +47,24 @@ def _generate_schedules(env):
         ]
 
         schedules = other_schedules + new_split_schedules
+
+    try:
+        with db_connect() as db_conn:
+            with db_conn.cursor() as cursor:
+                cursor.execute(
+                    "SELECT contract_name FROM ticker_options_monitored")
+                option_contract_names = map(itemgetter(0), cursor.fetchall())
+    except psycopg2.errors.UndefinedTable:
+        option_contract_names = []
+
+    for schedule in schedules:
+        if not schedule['name'].startswith('polygon-to-postgres'):
+            continue
+        if "env" not in schedule:
+            schedule["env"] = {}
+        schedule['env']['TAP_POLYGON_OPTION_CONTRACT_NAMES'] = ",".join(
+            option_contract_names)
+
     return schedules
 
 
