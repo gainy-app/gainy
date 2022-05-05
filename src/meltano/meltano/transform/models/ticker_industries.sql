@@ -26,7 +26,7 @@ with common_stocks as
 select concat(common_stocks.symbol, '_', gainy_industries.id)::varchar as id,
        common_stocks.symbol,
        gainy_industries.id as industry_id,
-       1 as similarity,
+       1. as similarity,
        1 as industry_order,
        now()::timestamp as updated_at
 from common_stocks
@@ -37,7 +37,7 @@ union all
 select concat(crypto_stocks.symbol, '_', gainy_industries.id)::varchar as id,
        crypto_stocks.symbol,
        gainy_industries.id as industry_id,
-       1 as similarity,
+       1. as similarity,
        1 as industry_order,
        now()::timestamp as updated_at
 from crypto_stocks
