@@ -363,6 +363,11 @@ union all
                              with filtered_base_tickers as
                                   (
                                       select symbol, exchange_canonical from {{ ref('base_tickers') }} where exchange_canonical is not null
+                                      union all
+                                      select contract_name as symbol, exchange_canonical
+                                      from ticker_options_monitored
+                                      join {{ ref('base_tickers') }} using (symbol)
+                                      where exchange_canonical is not null
                                   ),
                                   time_series_1d as
                                        (
@@ -377,8 +382,8 @@ union all
                                     null::double precision as high,
                                     null::double precision as low,
                                     null::double precision as close,
-                                    null::double precision as volume,
                                     null::double precision as adjusted_close,
+                                    null::double precision as volume,
                                     1                      as priority
                              from filtered_base_tickers
                                       join time_series_1d using (exchange_canonical)
@@ -388,9 +393,15 @@ union all
                              with filtered_base_tickers as
                                        (
                                           select symbol, country_name
-                                           from {{ ref('base_tickers') }}
-                                           where exchange_canonical is null
-                                             and (country_name in ('USA') or country_name is null)
+                                          from {{ ref('base_tickers') }}
+                                          where exchange_canonical is null
+                                            and (country_name in ('USA') or country_name is null)
+                                          union all
+                                          select contract_name as symbol, country_name
+                                          from ticker_options_monitored
+                                          join {{ ref('base_tickers') }} using (symbol)
+                                          where exchange_canonical is null
+                                            and (country_name in ('USA') or country_name is null)
                                        ),
                                   time_series_1d as
                                        (
@@ -405,8 +416,8 @@ union all
                                     null::double precision as high,
                                     null::double precision as low,
                                     null::double precision as close,
-                                    null::double precision as volume,
                                     null::double precision as adjusted_close,
+                                    null::double precision as volume,
                                     1                      as priority
                              from filtered_base_tickers
                                       join time_series_1d using (country_name)
@@ -432,14 +443,15 @@ union all
                                      null::double precision as high,
                                      null::double precision as low,
                                      null::double precision as close,
-                                     null::double precision as volume,
                                      null::double precision as adjusted_close,
+                                     null::double precision as volume,
                                      1                      as priority
                               from filtered_base_tickers
                                        join time_series_1d on true
                           )
                      ) t
-                 join {{ ref('base_tickers') }} using (symbol)
+                 left join {{ ref('ticker_options_monitored') }} on ticker_options_monitored.contract_name = t.symbol
+                 join {{ ref('base_tickers') }} on base_tickers.symbol = ticker_options_monitored.symbol or base_tickers.symbol = t.symbol
                  left join {{ ref('exchange_holidays') }}
                            on (exchange_holidays.exchange_name = base_tickers.exchange_canonical or
                                (base_tickers.exchange_canonical is null and exchange_holidays.country_name = base_tickers.country_name))
@@ -503,35 +515,151 @@ union all
 -- 1w
 -- Execution Time: 53649.535 ms on test
 (
-    select DISTINCT ON (
-        code,
-        date_week
-        ) (code || '_' || date_week || '_1w')::varchar                                                       as id,
-          code as symbol,
-          date_week                                                                                          as time,
-          date_week                                                                                          as datetime,
-          '1w'::varchar                                                                                      as period,
-          first_value(open)
-          OVER (partition by code, date_week order by date rows between current row and unbounded following) as open,
-          max(high)
-          OVER (partition by code, date_week rows between current row and unbounded following)               as high,
-          min(low)
-          OVER (partition by code, date_week rows between current row and unbounded following)               as low,
-          last_value(close)
-          OVER (partition by code, date_week order by date rows between current row and unbounded following) as close,
-          last_value(adjusted_close)
-          OVER (partition by code, date_week order by date rows between current row and unbounded following) as adjusted_close,
-          sum(volume)
-          OVER (partition by code, date_week rows between current row and unbounded following)               as volume
-    from {{ ref('historical_prices') }}
-{% if is_incremental() %}
-    left join max_date on max_date.symbol = code and max_date.period = '1w'
-    where (max_date.time is null or date_trunc('week', date) >= max_date.time - interval '1 month')
-      and date >= now() - interval '5 year' - interval '1 week'
-{% else %}
-    where date >= now() - interval '5 year' - interval '1 week'
-{% endif %}
-    order by symbol, date_week, date
+    with combined_daily_prices as
+             (
+                 select DISTINCT ON (
+                     t.symbol,
+                     t.date
+                     ) t.*
+                 from (
+                          (
+                              select DISTINCT ON (
+                                  code,
+                                  date_week
+                                  ) code as symbol,
+                                    date_week                                                                                          as date,
+                                    first_value(open)
+                                    OVER (partition by code, date_week order by date rows between current row and unbounded following) as open,
+                                    max(high)
+                                    OVER (partition by code, date_week rows between current row and unbounded following)               as high,
+                                    min(low)
+                                    OVER (partition by code, date_week rows between current row and unbounded following)               as low,
+                                    last_value(close)
+                                    OVER (partition by code, date_week order by date rows between current row and unbounded following) as close,
+                                    last_value(adjusted_close)
+                                    OVER (partition by code, date_week order by date rows between current row and unbounded following) as adjusted_close,
+                                    sum(volume)
+                                    OVER (partition by code, date_week rows between current row and unbounded following)               as volume,
+                                    0                                                                                                  as priority
+                              from {{ ref('historical_prices') }}
+                              {% if is_incremental() %}
+                                  left join max_date on max_date.symbol = code and max_date.period = '1w'
+                              where (max_date.time is null or date_week >= max_date.time - interval '1 month')
+                                and date_week >= now() - interval '5 year' - interval '1 week'
+                              {% else %}
+                                  where date_week >= now() - interval '5 year' - interval '1 week'
+                              {% endif %}
+                               order by symbol, date_week, date
+                          )
+                          union all
+                          (
+                              with filtered_base_tickers as
+                                       (
+                                           select contract_name as symbol, exchange_canonical
+                                           from ticker_options_monitored
+                                           join {{ ref('base_tickers') }} using (symbol)
+                                           where exchange_canonical is not null
+                                       ),
+                                   time_series_1w as
+                                       (
+                                           SELECT distinct exchange_canonical, dd as date
+                                           FROM generate_series(
+                                               date_trunc('week', now() - interval '5 year' - interval '1 week')::timestamp,
+                                               date_trunc('week', now())::timestamp,
+                                               interval '1 week') dd
+                                           join filtered_base_tickers on true
+                                       )
+                              select symbol,
+                                     date,
+                                     null::double precision as open,
+                                     null::double precision as high,
+                                     null::double precision as low,
+                                     null::double precision as close,
+                                     null::double precision as adjusted_close,
+                                     null::double precision as volume,
+                                     1                      as priority
+                              from filtered_base_tickers
+                                       join time_series_1w using (exchange_canonical)
+                          )
+                          union all
+                          (
+                              with filtered_base_tickers as
+                                       (
+                                           select contract_name as symbol, country_name
+                                           from ticker_options_monitored
+                                           join {{ ref('base_tickers') }} using (symbol)
+                                           where exchange_canonical is null
+                                             and (country_name in ('USA') or country_name is null)
+                                       ),
+                                   time_series_1w as
+                                       (
+                                           SELECT distinct country_name, dd as date
+                                           FROM generate_series(
+                                                        date_trunc('week', now() - interval '5 year' - interval '1 week')::timestamp,
+                                                        date_trunc('week', now())::timestamp,
+                                                        interval '1 week') dd
+                                                    join filtered_base_tickers on true
+                                       )
+                              select symbol,
+                                     date,
+                                     null::double precision as open,
+                                     null::double precision as high,
+                                     null::double precision as low,
+                                     null::double precision as close,
+                                     null::double precision as adjusted_close,
+                                     null::double precision as volume,
+                                     1                      as priority
+                              from filtered_base_tickers
+                                       join time_series_1w using (country_name)
+                          )
+                      ) t
+                 order by t.symbol, t.date, priority
+             )
+    select *
+    from (
+             select DISTINCT ON (
+                 symbol,
+                 date
+                 ) (symbol || '_' || date || '_1w')::varchar as id,
+                   symbol,
+                   date::timestamp                           as time,
+                   date::timestamp                           as datetime,
+                   '1w'::varchar                             as period,
+                   coalesce(
+                           open,
+                           first_value(close)
+                           OVER (partition by symbol, grp order by date)
+                       )                                     as open,
+                   coalesce(
+                           high,
+                           first_value(close)
+                           OVER (partition by symbol, grp order by date)
+                       )                                     as high,
+                   coalesce(
+                           low,
+                           first_value(close)
+                           OVER (partition by symbol, grp order by date)
+                       )                                     as low,
+                   coalesce(
+                           close,
+                           first_value(close)
+                           OVER (partition by symbol, grp order by date)
+                       )                                     as close,
+                   coalesce(
+                           adjusted_close,
+                           first_value(adjusted_close)
+                           OVER (partition by symbol, grp order by date)
+                       )                                     as adjusted_close,
+                   coalesce(volume, 0.0)                     as volume
+             from (
+                      select combined_daily_prices.*,
+                             sum(case when close is not null then 1 end)
+                             over (partition by combined_daily_prices.symbol order by date) as grp
+                      from combined_daily_prices
+                  ) t
+             order by symbol, date
+         ) t2
+    where t2.close is not null
 )
 
 union all
