@@ -47,4 +47,4 @@ SELECT distinct (interest_id || '_' || gainy_industries.id)::varchar as id,
                 gainy_industries.id as industry_id,
                 now() as updated_at
 from interest_industries_flatten
-         join {{ ref('gainy_industries') }} on gainy_industries.name = interest_industries_flatten.industry_name
+         join {{ ref('gainy_industries') }} on gainy_industries.name = trim(interest_industries_flatten.industry_name)
