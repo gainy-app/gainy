@@ -21,6 +21,7 @@ with distinct_industries as
                  select trim(gic_sub_industry)::varchar as name
                  from {{ ref('base_tickers') }}
              ) t
+        where name is not null --gic_sub_industry often null from EOD
         order by name
     ),
 {% if is_incremental() %}
