@@ -12,7 +12,7 @@
 
 with common_stocks as
          (
-             select symbol, gic_sub_industry
+             select symbol, trim(gic_sub_industry)
              from {{ ref('tickers') }}
              where type = 'common stock'
          ),
@@ -42,4 +42,4 @@ select concat(crypto_stocks.symbol, '_', gainy_industries.id)::varchar as id,
        now()::timestamp as updated_at
 from crypto_stocks
          join {{ source('gainy', 'crypto_ticker_industries') }} on crypto_ticker_industries.cc_symbol = crypto_stocks.symbol
-         join {{ ref('gainy_industries') }} on gainy_industries.name = crypto_ticker_industries.industry
+         join {{ ref('gainy_industries') }} on gainy_industries.name = trim(crypto_ticker_industries.industry)
