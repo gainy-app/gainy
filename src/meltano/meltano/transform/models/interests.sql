@@ -37,7 +37,7 @@ SELECT id::int,
        "ttf 7" as ttf_7_name,
        "ttf 8" as ttf_8_name,
        "ttf 9" as ttf_9_name,
-       "ttf 10" as ttf_1_name0,
+       "ttf 10" as ttf_10_name,
        now()::timestamp as updated_at
 FROM {{ source('gainy', 'gainy_interests') }}
 where _sdc_extracted_at > (select max(_sdc_extracted_at) from {{ source('gainy', 'gainy_interests') }}) - interval '1 minute'
