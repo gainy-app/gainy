@@ -111,6 +111,28 @@ class PortfolioChartService:
 
         return data
 
+    def get_portfolio_piechart(self, db_conn, profile_id, filter):
+        with open(os.path.join(SCRIPT_DIR,
+                               "../sql/portfolio_piechart.sql")) as f:
+            query = f.read()
+
+        params = {}
+        where_clause = []
+        join_clause = []
+
+        if self._should_return_empty_result(filter):
+            return []
+
+        self._filter_query_by_profile_id(params, where_clause, join_clause,
+                                         profile_id)
+        self._filter_query_by_access_token_ids(params, where_clause,
+                                               join_clause, filter)
+
+        rows = self._execute_query(params, where_clause, join_clause, query,
+                                   db_conn)
+
+        return rows
+
     def _filter_chart_by_transaction_count(self, rows):
         transaction_counts_1d = {}
         for row in rows:

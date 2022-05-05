@@ -265,6 +265,30 @@ query GetPortfolioChart(
 
 ```
 
+### Pie Chart
+
+entity_type = ticker | category | interest | security_type
+
+```graphql
+query GetPortfolioPieChart(
+    $profileId: Int!,
+    $accessTokenIds: [Int]
+) {
+    get_portfolio_piechart(
+        profile_id: $profileId,
+        access_token_ids: $accessTokenIds
+    ) {
+        weight
+        entity_type
+        relative_daily_change
+        entity_name
+        entity_id
+        absolute_value
+        absolute_daily_change
+    }
+}
+```
+
 ### Sorting / Filtering
 
 ```GraphQL
@@ -326,8 +350,6 @@ query GetPortfolioChart(
     #    other: Unknown or other investment types
 }
 ```
-
-
 
 ### Full request with grouping
 
