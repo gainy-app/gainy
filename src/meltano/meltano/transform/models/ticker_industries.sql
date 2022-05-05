@@ -12,7 +12,7 @@
 
 with common_stocks as
          (
-             select symbol, trim(gic_sub_industry)
+             select symbol, trim(gic_sub_industry) as gic_sub_industry
              from {{ ref('tickers') }}
              where type = 'common stock'
          ),
