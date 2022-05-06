@@ -1,23 +1,23 @@
 cc_symbol,Industry,alp_symbol
-AAVE.CC,Crypto DeFi Credit Platform,AAVE
-AVAX.CC,Crypto Multi-Chain Smart Contract Platform,AVAX
+AAVE.CC,DeFi Credit Platform,AAVE
+AVAX.CC,Multi-Chain Smart Contract Platform,AVAX
 BAT.CC,Crypto Social Media,BAT
-BTC.CC,Crypto Transparent DeFi Currency,BTC
-BCH.CC,Crypto Transparent DeFi Currency,BCH
-LINK.CC,Crypto Computing Oracle,LINK
-DAI.CC,Crypto Transparent CeFi Currency,DAI
-DOGE.CC,Crypto Transparent DeFi Currency,DOGE
-ETH.CC,Crypto Single-Chain Smart Contract Platform,ETH
-GRT.CC,Crypto Computing Oracle,GRT
-LTC.CC,Crypto Transparent DeFi Currency,LTC
-MKR.CC,Crypto DeFi DAO,MKR
-MATIC.CC,Crypto Single-Chain Smart Contract Platform,MATIC
-PAXG.CC,Crypto DeFi Derivatives,PAXG
-SHIB.CC,Crypto Transparent DeFi Currency,SHIB
-SOL.CC,Crypto Single-Chain Smart Contract Platform,SOL
-SUSHI.CC,Crypto DeFi AMM Exchanges,SUSHI
-USDT.CC,Crypto Transparent CeFi Currency,T
-TRX.CC,Crypto Single-Chain Smart Contract Platform,TRX
-UNI.CC,Crypto DeFi AMM Exchanges,UNI
-WBTC.CC,Crypto Transparent CeFi Currency,WBTC
-YFI.CC,Crypto DeFi Yield Farming,YFI
+BTC.CC,Transparent DeFi Currency,BTC
+BCH.CC,Transparent DeFi Currency,BCH
+LINK.CC,Crypto Oracle,LINK
+DAI.CC,Transparent CeFi Currency,DAI
+DOGE.CC,Transparent DeFi Currency,DOGE
+ETH.CC,Single-Chain Smart Contract Platform,ETH
+GRT.CC,Crypto Oracle,GRT
+LTC.CC,Transparent DeFi Currency,LTC
+MKR.CC,DeFi DAO,MKR
+MATIC.CC,Single-Chain Smart Contract Platform,MATIC
+PAXG.CC,DeFi Derivatives,PAXG
+SHIB.CC,Transparent DeFi Currency,SHIB
+SOL.CC,Single-Chain Smart Contract Platform,SOL
+SUSHI.CC,DeFi AMM Exchanges,SUSHI
+USDT.CC,Transparent CeFi Currency,T
+TRX.CC,Single-Chain Smart Contract Platform,TRX
+UNI.CC,DeFi AMM Exchanges,UNI
+WBTC.CC,Transparent CeFi Currency,WBTC
+YFI.CC,DeFi Yield Farming,YFI
