@@ -556,7 +556,7 @@ union all
                               with filtered_base_tickers as
                                        (
                                            select contract_name as symbol, exchange_canonical
-                                           from ticker_options_monitored
+                                           from {{ ref('ticker_options_monitored') }}
                                            join {{ ref('base_tickers') }} using (symbol)
                                            where exchange_canonical is not null
                                        ),
@@ -586,7 +586,7 @@ union all
                               with filtered_base_tickers as
                                        (
                                            select contract_name as symbol, country_name
-                                           from ticker_options_monitored
+                                           from {{ ref('ticker_options_monitored') }}
                                            join {{ ref('base_tickers') }} using (symbol)
                                            where exchange_canonical is null
                                              and (country_name in ('USA') or country_name is null)
