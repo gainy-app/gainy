@@ -3,7 +3,7 @@
     materialized = "table",
     post_hook=[
       pk('contract_name'),
-      pk('contract_name'),
+      'create unique index if not exists "contract_name__symbol" ON {{ this }} (contract_name, symbol)',
     ]
   )
 }}
