@@ -1,11 +1,11 @@
 with portfolio_tickers as
          (
              select profile_holdings_normalized.profile_id,
-                    portfolio_securities_normalized.ticker_symbol as symbol,
-                    sum(actual_value)                             as weight,
+                    portfolio_securities_normalized.ticker_symbol                as symbol,
+                    sum(actual_value)                                            as weight,
                     sum(ticker_realtime_metrics.absolute_daily_change *
-                        profile_holdings_normalized.quantity)     as absolute_daily_change,
-                    sum(actual_value)                             as absolute_value
+                        profile_holdings_normalized.quantity_norm_for_valuation) as absolute_daily_change,
+                    sum(actual_value)                                            as absolute_value
              from profile_holdings_normalized
                       join portfolio_securities_normalized
                            on portfolio_securities_normalized.id = security_id
@@ -51,10 +51,10 @@ union all
              (
                  select profile_holdings_normalized.profile_id,
                         category_id,
-                        sum(actual_value)                         as weight,
+                        sum(actual_value)                                            as weight,
                         sum(ticker_realtime_metrics.absolute_daily_change *
-                            profile_holdings_normalized.quantity) as absolute_daily_change,
-                        sum(actual_value)                         as absolute_value
+                            profile_holdings_normalized.quantity_norm_for_valuation) as absolute_daily_change,
+                        sum(actual_value)                                            as absolute_value
                  from profile_holdings_normalized
                           join portfolio_securities_normalized
                                on portfolio_securities_normalized.id = security_id
@@ -113,10 +113,10 @@ union all
              (
                  select profile_holdings_normalized.profile_id,
                         interest_id,
-                        sum(actual_value)                         as weight,
+                        sum(actual_value)                                            as weight,
                         sum(ticker_realtime_metrics.absolute_daily_change *
-                            profile_holdings_normalized.quantity) as absolute_daily_change,
-                        sum(actual_value)                         as absolute_value
+                            profile_holdings_normalized.quantity_norm_for_valuation) as absolute_daily_change,
+                        sum(actual_value)                                            as absolute_value
                  from profile_holdings_normalized
                           join portfolio_securities_normalized
                                on portfolio_securities_normalized.id = security_id
@@ -174,11 +174,11 @@ union all
     with portfolio_security_types as
              (
                  select profile_holdings_normalized.profile_id,
-                        portfolio_securities_normalized.type      as security_type,
-                        sum(actual_value)                         as weight,
+                        portfolio_securities_normalized.type                         as security_type,
+                        sum(actual_value)                                            as weight,
                         sum(ticker_realtime_metrics.absolute_daily_change *
-                            profile_holdings_normalized.quantity) as absolute_daily_change,
-                        sum(actual_value)                         as absolute_value
+                            profile_holdings_normalized.quantity_norm_for_valuation) as absolute_daily_change,
+                        sum(actual_value)                                            as absolute_value
                  from profile_holdings_normalized
                           join portfolio_securities_normalized
                                on portfolio_securities_normalized.id = security_id

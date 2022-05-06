@@ -34,15 +34,15 @@ with first_profile_transaction_date as
              group by transactions_uniq_id, period
 {% endif %}
          )
-select (portfolio_expanded_transactions.uniq_id || '_' || chart.datetime || '_' || chart.period)::varchar as id,
-       portfolio_expanded_transactions.uniq_id                                                            as transactions_uniq_id,
+select (portfolio_expanded_transactions.uniq_id || '_' || chart.datetime || '_' || chart.period)::varchar   as id,
+       portfolio_expanded_transactions.uniq_id                                                              as transactions_uniq_id,
        chart.datetime,
        chart.period,
-       portfolio_expanded_transactions.quantity_norm::numeric * chart.open::numeric                       as open,
-       portfolio_expanded_transactions.quantity_norm::numeric * chart.high::numeric                       as high,
-       portfolio_expanded_transactions.quantity_norm::numeric * chart.low::numeric                        as low,
-       portfolio_expanded_transactions.quantity_norm::numeric * chart.close::numeric                      as close,
-       portfolio_expanded_transactions.quantity_norm::numeric * chart.adjusted_close::numeric             as adjusted_close
+       portfolio_expanded_transactions.quantity_norm_for_valuation::numeric * chart.open::numeric           as open,
+       portfolio_expanded_transactions.quantity_norm_for_valuation::numeric * chart.high::numeric           as high,
+       portfolio_expanded_transactions.quantity_norm_for_valuation::numeric * chart.low::numeric            as low,
+       portfolio_expanded_transactions.quantity_norm_for_valuation::numeric * chart.close::numeric          as close,
+       portfolio_expanded_transactions.quantity_norm_for_valuation::numeric * chart.adjusted_close::numeric as adjusted_close
 from {{ ref('portfolio_expanded_transactions') }}
          left join first_profile_transaction_date
                    on first_profile_transaction_date.profile_id = portfolio_expanded_transactions.profile_id

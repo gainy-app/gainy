@@ -9,7 +9,7 @@ include .makeenv
 include .env.make
 
 docker-auth:
-	aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin ${BASE_IMAGE_REGISTRY_ADDRESS}
+	- aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin ${BASE_IMAGE_REGISTRY_ADDRESS}
 
 env:
 	touch .env.local
@@ -19,7 +19,7 @@ configure: clean docker-auth env build
 	- docker network create gainy-default
 
 up:
-	docker-compose up
+	docker-compose up --no-build
 
 upd:
 	docker-compose up -d

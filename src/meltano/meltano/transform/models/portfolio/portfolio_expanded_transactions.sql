@@ -235,10 +235,19 @@ select sum(quantity_norm) * sum(abs(quantity_norm) * price) /
        t.profile_id,
        t.account_id,
        sum(quantity_norm / case
-                                when robinhood_options.quantity_module_sum = 0 and
-                                     portfolio_securities_normalized.type = 'derivative' and
-                                     plaid_institutions.ref_id = 'ins_54' then 100
-                                else 1 end)                      as quantity_norm,
+                               when robinhood_options.quantity_module_sum = 0 and
+                                    portfolio_securities_normalized.type = 'derivative' and
+                                    plaid_institutions.ref_id = 'ins_54' then 100
+                               else 1 end)                       as quantity_norm,
+       sum(quantity_norm / case
+                               when robinhood_options.quantity_module_sum = 0 and
+                                    portfolio_securities_normalized.type = 'derivative' and
+                                    plaid_institutions.ref_id = 'ins_54' then 100
+                               else 1
+           end * case
+                     when portfolio_securities_normalized.type = 'derivative'
+                         then 100
+                     else 1 end)                                 as quantity_norm_for_valuation, -- to multiple by price
        now()                                                     as updated_at,
        max(uniq_id)::varchar                                     as uniq_id,
        t.date

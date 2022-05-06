@@ -11,19 +11,19 @@
 
 with expanded_holdings as
          (
-             select profile_holdings.profile_id,
-                    max(portfolio_holding_gains.updated_at)               as updated_at,
-                    sum(actual_value::numeric)                            as actual_value,
-                    sum(quantity::numeric * absolute_gain_1d::numeric)    as absolute_gain_1d,
-                    sum(quantity::numeric * absolute_gain_1w::numeric)    as absolute_gain_1w,
-                    sum(quantity::numeric * absolute_gain_1m::numeric)    as absolute_gain_1m,
-                    sum(quantity::numeric * absolute_gain_3m::numeric)    as absolute_gain_3m,
-                    sum(quantity::numeric * absolute_gain_1y::numeric)    as absolute_gain_1y,
-                    sum(quantity::numeric * absolute_gain_5y::numeric)    as absolute_gain_5y,
-                    sum(quantity::numeric * absolute_gain_total::numeric) as absolute_gain_total
+             select profile_holdings_normalized.profile_id,
+                    max(portfolio_holding_gains.updated_at)                         as updated_at,
+                    sum(actual_value::numeric)                                      as actual_value,
+                    sum(quantity_norm_for_valuation * absolute_gain_1d::numeric)    as absolute_gain_1d,
+                    sum(quantity_norm_for_valuation * absolute_gain_1w::numeric)    as absolute_gain_1w,
+                    sum(quantity_norm_for_valuation * absolute_gain_1m::numeric)    as absolute_gain_1m,
+                    sum(quantity_norm_for_valuation * absolute_gain_3m::numeric)    as absolute_gain_3m,
+                    sum(quantity_norm_for_valuation * absolute_gain_1y::numeric)    as absolute_gain_1y,
+                    sum(quantity_norm_for_valuation * absolute_gain_5y::numeric)    as absolute_gain_5y,
+                    sum(quantity_norm_for_valuation * absolute_gain_total::numeric) as absolute_gain_total
              from {{ ref('portfolio_holding_gains') }}
-                      join {{ source ('app', 'profile_holdings') }} on profile_holdings.id = portfolio_holding_gains.holding_id
-             group by profile_holdings.profile_id
+                      join {{ ref('profile_holdings_normalized') }} using (holding_id)
+             group by profile_holdings_normalized.profile_id
          )
 select profile_id,
        updated_at,

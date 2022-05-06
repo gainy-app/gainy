@@ -21,9 +21,7 @@ with relative_data as
                         when portfolio_securities_normalized.type = 'cash' and
                              portfolio_securities_normalized.original_ticker_symbol = 'CUR:USD'
                             then quantity
-                        when portfolio_securities_normalized.type = 'derivative'
-                            then ticker_realtime_metrics.actual_price * quantity * 100
-                        else ticker_realtime_metrics.actual_price * quantity
+                        else ticker_realtime_metrics.actual_price * quantity_norm_for_valuation
                         end                                       as actual_value,
                     ticker_realtime_metrics.relative_daily_change as relative_gain_1d,
                     ticker_metrics.price_change_1w                as relative_gain_1w,

@@ -129,13 +129,19 @@ def verify_portfolio_chart(portfolio_chart,
                            quantities,
                            quantities_override=[],
                            assert_message_prefix=""):
-    chart_row_index = 0
+    chart_row_indexes = {}
+    symbol_chart_datetimes = None
     for k, chart in symbol_charts.items():
-        symbol_chart_datetimes = [i['datetime'] for i in chart]
-        break
+        chart_row_indexes[k] = 0
+        new_dates = set([i['datetime'] for i in chart])
+        if symbol_chart_datetimes is None:
+            symbol_chart_datetimes = new_dates
+        else:
+            symbol_chart_datetimes = symbol_chart_datetimes.intersection(new_dates)
+            assert len(new_dates) - len(symbol_chart_datetimes) < 2
 
     portfolio_chart_index = 0
-    for chart_row_index, datetime in enumerate(symbol_chart_datetimes):
+    for datetime in sorted(symbol_chart_datetimes):
         cur_quantities = quantity_override = None
 
         for start_date, end_date, _quantities in quantities_override:
@@ -156,6 +162,11 @@ def verify_portfolio_chart(portfolio_chart,
                 quantity = quantity_override
             if cur_quantities is not None:
                 quantity = cur_quantities[symbol]
+
+            chart_row_index = chart_row_indexes[symbol]
+            while symbol_charts[symbol][chart_row_index]['datetime'] < datetime:
+                chart_row_indexes[symbol] += 1
+                chart_row_index = chart_row_indexes[symbol]
 
             expected_value += symbol_charts[symbol][chart_row_index][
                 'adjusted_close'] * quantity
@@ -247,7 +258,6 @@ def verify_profile(user_id,
     },
                                           user_id=user_id)['data']
     portfolio_chart_1y = portfolio_data['get_portfolio_chart']
-
     for period in periods:
         previous_period_close = portfolio_data[
             'get_portfolio_chart_previous_period_close'][
@@ -259,19 +269,20 @@ def verify_profile(user_id,
                                                      user_id)
 
     for period in periods:
-        verify_portfolio_chart(
-            make_graphql_request(
+        portfolio_chart = make_graphql_request(
                 chart_query, {
                     "profileId": profile_id,
                     "periods": [period]
                 },
-                user_id=user_id)['data']['get_portfolio_chart'],
-            charts[period], quantities, quantities_override, period)
+                user_id=user_id)['data']['get_portfolio_chart']
+        verify_portfolio_chart(portfolio_chart, charts[period], quantities, quantities_override, period)
 
 
 def get_test_portfolio_data(only_with_holdings=False):
     transaction_stats_query = "query transaction_stats($profileId: Int!) {app_profile_portfolio_transactions_aggregate(where: {profile_id: {_eq: $profileId}}) {aggregate{min{date} max{date}}}}"
-    quantities = {"AAPL": 100}
+    quantities = {"AAPL": 100, "AAPL240621C00225000": 200}
+    quantities2 = {"AAPL": 110, "AAPL240621C00225000": 300}
+    quantities3 = {"AAPL": 10, "AAPL240621C00225000": 100}
 
     # -- profile 1 with holdings without transactions at all
     yield ('user_id_portfolio_test_1', quantities, [])
@@ -336,7 +347,7 @@ def get_test_portfolio_data(only_with_holdings=False):
         (transaction_stats['app_profile_portfolio_transactions_aggregate']
          ['aggregate']['min']['date'],
          transaction_stats['app_profile_portfolio_transactions_aggregate']
-         ['aggregate']['max']['date'], 110),
+         ['aggregate']['max']['date'], quantities2),
     ]
     yield (user_id, quantities, quantities_override)
 
@@ -352,7 +363,7 @@ def get_test_portfolio_data(only_with_holdings=False):
         (transaction_stats['app_profile_portfolio_transactions_aggregate']
          ['aggregate']['min']['date'],
          transaction_stats['app_profile_portfolio_transactions_aggregate']
-         ['aggregate']['max']['date'], 110),
+         ['aggregate']['max']['date'], quantities2),
     ]
     yield (user_id, quantities, quantities_override)
 
@@ -368,7 +379,7 @@ def get_test_portfolio_data(only_with_holdings=False):
         (transaction_stats['app_profile_portfolio_transactions_aggregate']
          ['aggregate']['min']['date'],
          transaction_stats['app_profile_portfolio_transactions_aggregate']
-         ['aggregate']['max']['date'], 110),
+         ['aggregate']['max']['date'], quantities2),
     ]
     yield (user_id, quantities, quantities_override)
 
@@ -384,7 +395,7 @@ def get_test_portfolio_data(only_with_holdings=False):
         (transaction_stats['app_profile_portfolio_transactions_aggregate']
          ['aggregate']['min']['date'],
          transaction_stats['app_profile_portfolio_transactions_aggregate']
-         ['aggregate']['max']['date'], 110),
+         ['aggregate']['max']['date'], quantities2),
     ]
     yield (user_id, quantities, quantities_override)
 
@@ -439,7 +450,7 @@ def get_test_portfolio_data(only_with_holdings=False):
     if only_with_holdings:
         return
 
-    quantities = {"AAPL": 0}
+    quantities = {"AAPL": 0, "AAPL240621C00225000": 0}
 
     # -- profile 14 without holdings without transactions at all
     # -- profile 15 without holdings with one buy transaction on the primary account
@@ -466,7 +477,7 @@ def get_test_portfolio_data(only_with_holdings=False):
                     'app_profile_portfolio_transactions_aggregate']
                  ['aggregate']['min']['date'], transaction_stats[
                      'app_profile_portfolio_transactions_aggregate']
-                 ['aggregate']['max']['date'], 10),
+                 ['aggregate']['max']['date'], quantities3),
             ]
             yield ('user_id_portfolio_test_' + str(i), quantities,
                    quantities_override)
@@ -484,6 +495,11 @@ def test_portfolio_chart_data(user_id, quantities, quantities_override):
             make_graphql_request(query, {
                 "period": period,
                 "symbol": "AAPL"
+            })['data']['chart'],
+            "AAPL240621C00225000":
+            make_graphql_request(query, {
+                "period": period,
+                "symbol": "AAPL240621C00225000"
             })['data']['chart'],
         }
         for period in periods
@@ -504,7 +520,9 @@ def test_portfolio_holdings_data(user_id, quantities, quantities_override):
     query = 'query ticker_metrics($symbol: String!) { ticker_metrics(where: {symbol: {_eq: $symbol}}) { price_change_1m price_change_1w price_change_1y price_change_3m price_change_5y price_change_all } ticker_realtime_metrics(where: {symbol: {_eq: $symbol}}) { actual_price relative_daily_change } }'
     metrics = {
         "AAPL": make_graphql_request(query, {"symbol": "AAPL"})['data'],
+        "AAPL240621C00225000": make_graphql_request(query, {"symbol": "AAPL240621C00225000"})['data'],
     }
+
     # flatten metrics dict
     metrics = {
         k: {
@@ -581,9 +599,11 @@ def test_portfolio_holdings_data(user_id, quantities, quantities_override):
                        absolute_symbol_price_change[symbol]) < PRICE_EPS
 
             for holding in holding_group['holdings']:
+                symbol = holding['holding_details']['ticker_symbol']
                 holding_type = holding['type']
                 assert holding_type in [
-                    'equity'
+                    'equity',
+                    'derivative',
                 ], f'{holding_type} holdings are not supported'
                 gains = holding['gains']
 
@@ -592,11 +612,11 @@ def test_portfolio_holdings_data(user_id, quantities, quantities_override):
                 ]:
                     assert abs(
                         holding['holding_details'][relative_portfolio_key] -
-                        metrics[symbol][metrics_key]) < PRICE_EPS
+                        metrics[symbol][metrics_key]) < PRICE_EPS, relative_portfolio_key
                 assert abs(gains[relative_portfolio_key] -
-                           metrics[symbol][metrics_key]) < PRICE_EPS
+                           metrics[symbol][metrics_key]) < PRICE_EPS, relative_portfolio_key
                 assert abs(gains[absolute_portfolio_key] -
-                           absolute_symbol_price_change[symbol]) < PRICE_EPS
+                           absolute_symbol_price_change[symbol]) < PRICE_EPS, absolute_portfolio_key
 
     seen_symbols = set()
     for holding_group in profile_holding_groups:
@@ -612,7 +632,8 @@ def test_portfolio_holdings_data(user_id, quantities, quantities_override):
         for holding in holding_group['holdings']:
             holding_type = holding['type']
             assert holding_type in [
-                'equity'
+                'equity',
+                'derivative',
             ], f'{holding_type} holdings are not supported'
             holding_value = metrics[symbol]['actual_price'] * quantities[symbol]
             assert abs(gains['actual_value'] - holding_value) < PRICE_EPS

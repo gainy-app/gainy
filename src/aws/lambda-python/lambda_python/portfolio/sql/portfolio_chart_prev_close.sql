@@ -3,11 +3,10 @@ with raw_data_1d as
              select distinct on (
                  uniq_id
                  ) uniq_id,
-                   quantity_norm,
-                   portfolio_securities_normalized.original_ticker_symbol as symbol,
-                   portfolio_expanded_transactions.date                   as transaction_date,
-                   quantity_norm::numeric *
-                   historical_prices_marked.price_0d                      as prev_close_1d
+                   quantity_norm_for_valuation                                     as quantity_norm,
+                   portfolio_securities_normalized.original_ticker_symbol          as symbol,
+                   portfolio_expanded_transactions.date                            as transaction_date,
+                   quantity_norm_for_valuation * historical_prices_marked.price_0d as prev_close_1d
              from portfolio_expanded_transactions
                       join portfolio_securities_normalized
                            on portfolio_securities_normalized.id = portfolio_expanded_transactions.security_id
@@ -23,7 +22,7 @@ with raw_data_1d as
              select distinct on (
                  uniq_id
                  ) raw_data_1d.*,
-                   quantity_norm::numeric *
+                   quantity_norm *
                    historical_prices.adjusted_close as prev_close_1w
              from raw_data_1d
                       join historical_prices
@@ -38,7 +37,7 @@ with raw_data_1d as
              select distinct on (
                  uniq_id
                  ) raw_data_1w.*,
-                   quantity_norm::numeric *
+                   quantity_norm *
                    historical_prices.adjusted_close as prev_close_1m
              from raw_data_1w
                       join historical_prices
@@ -53,7 +52,7 @@ with raw_data_1d as
              select distinct on (
                  uniq_id
                  ) raw_data_1m.*,
-                   quantity_norm::numeric *
+                   quantity_norm *
                    historical_prices.adjusted_close as prev_close_3m
              from raw_data_1m
                       join historical_prices
@@ -68,7 +67,7 @@ with raw_data_1d as
              select distinct on (
                  uniq_id
                  ) raw_data_3m.*,
-                   quantity_norm::numeric *
+                   quantity_norm *
                    historical_prices.adjusted_close as prev_close_1y
              from raw_data_3m
                       join historical_prices
@@ -83,7 +82,7 @@ with raw_data_1d as
              select distinct on (
                  uniq_id
                  ) raw_data_1y.*,
-                   quantity_norm::numeric *
+                   quantity_norm *
                    historical_prices.adjusted_close as prev_close_5y
              from raw_data_1y
                       join historical_prices

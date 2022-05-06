@@ -58,6 +58,7 @@ query GetPortfolioHoldings($profileId: Int!) {
             ticker_symbol
             type
             holding_details {
+                ticker_symbol
                 purchase_date
                 relative_gain_total
                 relative_gain_1d
