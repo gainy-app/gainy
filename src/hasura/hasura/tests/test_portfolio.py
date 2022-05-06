@@ -107,7 +107,7 @@ def test_portfolio_piechart_filters(params):
         expected_relative_daily_change = row['absolute_value'] / (
             row['absolute_value'] - row['absolute_daily_change']) - 1
         assert abs(expected_relative_daily_change -
-                   row['relative_daily_change']) < PRICE_EPS
+                   row['relative_daily_change']) < PRICE_EPS, row
         for field in ['weight', 'absolute_daily_change', 'absolute_value']:
             if field not in piechart_sums[entity_type]:
                 piechart_sums[entity_type][field] = 0

@@ -1,12 +1,11 @@
 with portfolio_tickers as
          (
              select profile_holdings_normalized.profile_id,
-                    portfolio_securities_normalized.original_ticker_symbol as symbol,
-                    sum(actual_value)                                      as weight,
+                    portfolio_securities_normalized.ticker_symbol as symbol,
+                    sum(actual_value)                             as weight,
                     sum(ticker_realtime_metrics.absolute_daily_change *
-                        profile_holdings_normalized.quantity)              as absolute_daily_change,
-                    min(ticker_realtime_metrics.relative_daily_change)     as relative_daily_change,
-                    sum(actual_value)                                      as absolute_value
+                        profile_holdings_normalized.quantity)     as absolute_daily_change,
+                    sum(actual_value)                             as absolute_value
              from profile_holdings_normalized
                       join portfolio_securities_normalized
                            on portfolio_securities_normalized.id = security_id
@@ -17,7 +16,7 @@ with portfolio_tickers as
                       join app.profile_plaid_access_tokens
                            on profile_plaid_access_tokens.id = profile_holdings_normalized.plaid_access_token_id
              where {where_clause}
-             group by profile_holdings_normalized.profile_id, portfolio_securities_normalized.original_ticker_symbol
+             group by profile_holdings_normalized.profile_id, portfolio_securities_normalized.ticker_symbol
          ),
      portfolio_tickers_weight_sum as
          (
@@ -33,7 +32,10 @@ select portfolio_tickers.profile_id,
        symbol                             as entity_id,
        ticker_name                        as entity_name,
        coalesce(absolute_daily_change, 0) as absolute_daily_change,
-       coalesce(relative_daily_change, 0) as relative_daily_change,
+       case
+           when abs(absolute_value - absolute_daily_change) > 0
+               then absolute_value / (absolute_value - absolute_daily_change) - 1
+           end                            as relative_daily_change,
        absolute_value
 from portfolio_tickers
          join portfolio_tickers_weight_sum using (profile_id)
