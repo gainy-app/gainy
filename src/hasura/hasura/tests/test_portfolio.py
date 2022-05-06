@@ -114,12 +114,12 @@ def test_portfolio_piechart_filters(params):
             piechart_sums[entity_type][field] += row[field]
 
     for entity_type in ['ticker', 'category', 'interest', 'security_type']:
-        assert abs(1 - piechart_sums[entity_type]['weight']) < PRICE_EPS
+        assert abs(1 - piechart_sums[entity_type]['weight']) < PRICE_EPS, entity_type
         assert abs(
             portfolio_gains_data['absolute_gain_1d'] -
-            piechart_sums[entity_type]['absolute_daily_change']) < PRICE_EPS
+            piechart_sums[entity_type]['absolute_daily_change']) < PRICE_EPS, entity_type
         assert abs(portfolio_gains_data['actual_value'] -
-                   piechart_sums[entity_type]['absolute_value']) < PRICE_EPS
+                   piechart_sums[entity_type]['absolute_value']) < PRICE_EPS, entity_type
 
 
 def verify_portfolio_chart(portfolio_chart,
