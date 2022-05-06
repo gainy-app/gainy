@@ -14,59 +14,32 @@ with relative_data as
          (
              select profile_holdings_normalized.holding_id,
                     profile_holdings_normalized.profile_id,
-                    now()::timestamp                                        as updated_at,
-                    coalesce(ticker_options.last_price,
-                             ticker_realtime_metrics.actual_price)::numeric as actual_price,
+                    now()::timestamp                              as updated_at,
+                    ticker_realtime_metrics.actual_price          as actual_price,
 
                     case
                         when portfolio_securities_normalized.type = 'cash' and
                              portfolio_securities_normalized.original_ticker_symbol = 'CUR:USD'
                             then quantity
-                        else (coalesce(ticker_options.last_price * 100,
-                                       ticker_realtime_metrics.actual_price) *
-                              quantity)::double precision end               as actual_value,
-                    case
-                        when ticker_options.contract_name is null
-                            then ticker_realtime_metrics.relative_daily_change
-                        else 0 end                                          as relative_gain_1d,
-                    case
-                        when ticker_options.contract_name is null
-                            then ticker_metrics.price_change_1w
-                        else 0 end                                          as relative_gain_1w,
-                    case
-                        when ticker_options.contract_name is null
-                            then ticker_metrics.price_change_1m
-                        else 0 end                                          as relative_gain_1m,
-                    case
-                        when ticker_options.contract_name is null
-                            then ticker_metrics.price_change_3m
-                        else 0 end                                          as relative_gain_3m,
-                    case
-                        when ticker_options.contract_name is null
-                            then ticker_metrics.price_change_1y
-                        else 0 end                                          as relative_gain_1y,
-                    case
-                        when ticker_options.contract_name is null
-                            then ticker_metrics.price_change_5y
-                        else 0
-                        end                                                 as relative_gain_5y,
-                    case
-                        when ticker_options.contract_name is null
-                            then ticker_metrics.price_change_all
-                        else 0
-                        end                                                 as relative_gain_total,
+                        when portfolio_securities_normalized.type = 'derivative'
+                            then ticker_realtime_metrics.actual_price * quantity * 100
+                        else ticker_realtime_metrics.actual_price * quantity
+                        end                                       as actual_value,
+                    ticker_realtime_metrics.relative_daily_change as relative_gain_1d,
+                    ticker_metrics.price_change_1w                as relative_gain_1w,
+                    ticker_metrics.price_change_1m                as relative_gain_1m,
+                    ticker_metrics.price_change_3m                as relative_gain_3m,
+                    ticker_metrics.price_change_1y                as relative_gain_1y,
+                    ticker_metrics.price_change_5y                as relative_gain_5y,
+                    ticker_metrics.price_change_all               as relative_gain_total,
                     profile_holdings_normalized.quantity::numeric
              from {{ ref('profile_holdings_normalized') }}
                       join {{ ref('portfolio_securities_normalized') }}
                            on portfolio_securities_normalized.id = profile_holdings_normalized.security_id
-                      left join {{ ref('base_tickers') }}
-                                on base_tickers.symbol = portfolio_securities_normalized.original_ticker_symbol
                       left join {{ ref('ticker_metrics') }}
-                                on ticker_metrics.symbol = base_tickers.symbol
+                                on ticker_metrics.symbol = portfolio_securities_normalized.original_ticker_symbol
                       left join {{ ref('ticker_realtime_metrics') }}
-                                on ticker_realtime_metrics.symbol = base_tickers.symbol
-                      left join {{ ref('ticker_options') }}
-                                on ticker_options.contract_name = portfolio_securities_normalized.original_ticker_symbol
+                                on ticker_realtime_metrics.symbol = portfolio_securities_normalized.original_ticker_symbol
          ),
      long_term_tax_holdings as
          (

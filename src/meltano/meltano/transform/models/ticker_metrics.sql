@@ -9,7 +9,13 @@
 }}
 
 with highlights as (select * from {{ ref('highlights') }}),
-     base_tickers as (select * from {{ ref('base_tickers') }}),
+     base_tickers as (select symbol from {{ ref('base_tickers') }}),
+     all_tickers as
+         (
+             select symbol from {{ ref('base_tickers') }}
+             union all
+             select contract_name as symbol from {{ ref('ticker_options_monitored') }}
+         ),
      valuation as (select * from {{ ref('valuation') }}),
      technicals as (select * from {{ ref('technicals') }}),
      ticker_shares_stats as (select * from {{ ref('ticker_shares_stats') }}),
@@ -255,7 +261,7 @@ with highlights as (select * from {{ ref('highlights') }}),
          ),
      momentum_metrics as
          (
-             select base_tickers.symbol,
+             select all_tickers.symbol,
                     historical_prices_marked.price_0d /
                     case
                         when coalesce(historical_prices_marked.price_1w, historical_prices_marked.price_all) > 0
@@ -286,8 +292,8 @@ with highlights as (select * from {{ ref('highlights') }}),
                         when historical_prices_marked.price_all > 0
                             then historical_prices_marked.price_all
                         end - 1 as price_change_all
-             from base_tickers
-                      left join historical_prices_marked on historical_prices_marked.symbol = base_tickers.symbol
+             from all_tickers
+                      left join historical_prices_marked using (symbol)
          ),
      dividend_metrics as
          (
@@ -460,7 +466,7 @@ select DISTINCT ON
                financials_metrics.ebitda_ttm,
                financials_metrics.net_debt
 
-from base_tickers t
+from all_tickers t
          left join highlights on t.symbol = highlights.symbol
          left join trading_metrics on t.symbol = trading_metrics.symbol
          left join growth_metrics on t.symbol = growth_metrics.symbol

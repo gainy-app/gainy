@@ -40,7 +40,11 @@ with latest_trading_day as
                                    join latest_trading_day
                                         on historical_prices.code = latest_trading_day.symbol and
                                            historical_prices.date < latest_trading_day.open_datetime::date
-                                   join {{ ref('base_tickers') }} on base_tickers.symbol = historical_prices.code
+                          left join {{ ref('ticker_options_monitored') }}
+                               on ticker_options_monitored.contract_name = historical_prices.code
+                          join {{ ref('base_tickers') }}
+                               on base_tickers.symbol = historical_prices.code
+                                   or base_tickers.symbol = ticker_options_monitored.symbol
                           where base_tickers.type != 'crypto'
                           group by historical_prices.code
                       ) t

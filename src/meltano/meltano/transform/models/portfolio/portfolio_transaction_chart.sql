@@ -48,8 +48,6 @@ from {{ ref('portfolio_expanded_transactions') }}
                    on first_profile_transaction_date.profile_id = portfolio_expanded_transactions.profile_id
          join {{ ref('portfolio_securities_normalized') }}
               on portfolio_securities_normalized.id = portfolio_expanded_transactions.security_id
-         join {{ ref('base_tickers') }}
-              on base_tickers.symbol = portfolio_securities_normalized.original_ticker_symbol
 {% if is_incremental() %}
          left join latest_transaction_chart_row
               on latest_transaction_chart_row.transactions_uniq_id = portfolio_expanded_transactions.uniq_id

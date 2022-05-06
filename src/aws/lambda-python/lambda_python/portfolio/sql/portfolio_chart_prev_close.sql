@@ -4,16 +4,15 @@ with raw_data_1d as
                  uniq_id
                  ) uniq_id,
                    quantity_norm,
-                   base_tickers.symbol,
-                   portfolio_expanded_transactions.date as transaction_date,
+                   portfolio_securities_normalized.original_ticker_symbol as symbol,
+                   portfolio_expanded_transactions.date                   as transaction_date,
                    quantity_norm::numeric *
-                   historical_prices_marked.price_0d    as prev_close_1d
+                   historical_prices_marked.price_0d                      as prev_close_1d
              from portfolio_expanded_transactions
                       join portfolio_securities_normalized
                            on portfolio_securities_normalized.id = portfolio_expanded_transactions.security_id
-                      join base_tickers
-                           on base_tickers.symbol = portfolio_securities_normalized.original_ticker_symbol
-                      join historical_prices_marked using (symbol)
+                      join historical_prices_marked
+                           on historical_prices_marked.symbol = portfolio_securities_normalized.original_ticker_symbol
                       join app.profile_portfolio_accounts on profile_portfolio_accounts.id = portfolio_expanded_transactions.account_id
                       join app.profile_plaid_access_tokens on profile_plaid_access_tokens.id = profile_portfolio_accounts.plaid_access_token_id
                  {join_clause}
