@@ -227,10 +227,10 @@ select sum(quantity_norm) * sum(abs(quantity_norm) * price) /
        sum(abs(quantity_norm))                                   as amount,
        sum(abs(quantity_norm) * price) / sum(abs(quantity_norm)) as price,
        sum(quantity_norm / case
-                                when robinhood_options.quantity_module_sum = 0 and
-                                     portfolio_securities_normalized.type = 'derivative' and
-                                     plaid_institutions.ref_id = 'ins_54' then 100
-                                else 1 end)                      as quantity,
+                               when robinhood_options.quantity_module_sum = 0 and
+                                    portfolio_securities_normalized.type = 'derivative' and
+                                    plaid_institutions.ref_id = 'ins_54' then 100
+                               else 1 end)                       as quantity,
        t.security_id,
        t.profile_id,
        t.account_id,

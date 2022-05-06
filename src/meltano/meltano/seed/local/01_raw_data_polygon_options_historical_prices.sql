@@ -1,28 +1,20 @@
-insert into raw_data.eod_historical_prices (code, adjusted_close, close, date, high, low, open, volume)
+insert into raw_data.polygon_options_historical_prices (contract_name, t, o, h, l, c, v)
 with latest_historical_prices as
          (
-             select distinct on (contract_name) contract_name                as code,
-                                                to_timestamp(t / 1000)::date as date,
-                                                o                            as open,
-                                                h                            as high,
-                                                l                            as low,
-                                                c                            as close,
-                                                v                            as volume
+             select distinct on (contract_name) contract_name, t, o, h, l, c, v
              from raw_data.polygon_options_historical_prices
              order by contract_name, t desc
          )
-select latest_historical_prices.code                      as code,
-       latest_historical_prices.close + random() * 10 - 5 as adjusted_close,
-       latest_historical_prices.close + random() * 10 - 5 as close,
-       dd::date                                           as date,
-       latest_historical_prices.high + random() * 10 - 5  as high,
-       latest_historical_prices.low + random() * 10 - 5   as low,
-       latest_historical_prices.open + random() * 10 - 5  as open,
-       latest_historical_prices.volume * (random() + 0.5) as volume
+select latest_historical_prices.contract_name,
+       dd                                             as t,
+       latest_historical_prices.o + random() * 10 - 5 as o,
+       latest_historical_prices.h + random() * 10 - 5 as h,
+       latest_historical_prices.l + random() * 10 - 5 as l,
+       latest_historical_prices.c + random() * 10 - 5 as c,
+       latest_historical_prices.v * (random() + 0.5)  as v
 FROM generate_series((
-                         select min(date)
+                         select min(t)
                          from latest_historical_prices
-                     )::date + interval '1 day', now() - interval '1 day', interval '1 day') dd
+                     ) + 86400 * 1000, extract(epoch from now() - interval '1 day')::numeric * 1000, 86400 * 1000) dd
          join latest_historical_prices on true
-where extract(isodow from dd) < 6
-on conflict do nothing;
+where extract(isodow from to_timestamp(dd / 1000)) < 6;

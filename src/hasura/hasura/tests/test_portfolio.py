@@ -137,7 +137,8 @@ def verify_portfolio_chart(portfolio_chart,
         if symbol_chart_datetimes is None:
             symbol_chart_datetimes = new_dates
         else:
-            symbol_chart_datetimes = symbol_chart_datetimes.intersection(new_dates)
+            symbol_chart_datetimes = symbol_chart_datetimes.intersection(
+                new_dates)
             assert len(new_dates) - len(symbol_chart_datetimes) < 2
 
     portfolio_chart_index = 0
@@ -270,12 +271,13 @@ def verify_profile(user_id,
 
     for period in periods:
         portfolio_chart = make_graphql_request(
-                chart_query, {
-                    "profileId": profile_id,
-                    "periods": [period]
-                },
-                user_id=user_id)['data']['get_portfolio_chart']
-        verify_portfolio_chart(portfolio_chart, charts[period], quantities, quantities_override, period)
+            chart_query, {
+                "profileId": profile_id,
+                "periods": [period]
+            },
+            user_id=user_id)['data']['get_portfolio_chart']
+        verify_portfolio_chart(portfolio_chart, charts[period], quantities,
+                               quantities_override, period)
 
 
 def get_test_portfolio_data(only_with_holdings=False):
@@ -519,8 +521,10 @@ def test_portfolio_chart_data(user_id, quantities, quantities_override):
 def test_portfolio_holdings_data(user_id, quantities, quantities_override):
     query = 'query ticker_metrics($symbol: String!) { ticker_metrics(where: {symbol: {_eq: $symbol}}) { price_change_1m price_change_1w price_change_1y price_change_3m price_change_5y price_change_all } ticker_realtime_metrics(where: {symbol: {_eq: $symbol}}) { actual_price relative_daily_change } }'
     metrics = {
-        "AAPL": make_graphql_request(query, {"symbol": "AAPL"})['data'],
-        "AAPL240621C00225000": make_graphql_request(query, {"symbol": "AAPL240621C00225000"})['data'],
+        "AAPL":
+        make_graphql_request(query, {"symbol": "AAPL"})['data'],
+        "AAPL240621C00225000":
+        make_graphql_request(query, {"symbol": "AAPL240621C00225000"})['data'],
     }
 
     # flatten metrics dict
@@ -612,11 +616,13 @@ def test_portfolio_holdings_data(user_id, quantities, quantities_override):
                 ]:
                     assert abs(
                         holding['holding_details'][relative_portfolio_key] -
-                        metrics[symbol][metrics_key]) < PRICE_EPS, relative_portfolio_key
-                assert abs(gains[relative_portfolio_key] -
-                           metrics[symbol][metrics_key]) < PRICE_EPS, relative_portfolio_key
+                        metrics[symbol][metrics_key]
+                    ) < PRICE_EPS, relative_portfolio_key
+                assert abs(gains[relative_portfolio_key] - metrics[symbol]
+                           [metrics_key]) < PRICE_EPS, relative_portfolio_key
                 assert abs(gains[absolute_portfolio_key] -
-                           absolute_symbol_price_change[symbol]) < PRICE_EPS, absolute_portfolio_key
+                           absolute_symbol_price_change[symbol]
+                           ) < PRICE_EPS, absolute_portfolio_key
 
     seen_symbols = set()
     for holding_group in profile_holding_groups:
