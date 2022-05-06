@@ -53,6 +53,6 @@ SELECT contract_name                                                   as code,
 from {{ source('polygon', 'polygon_options_historical_prices') }}
 join {{ ref('ticker_options_monitored') }} using (contract_name)
 {% if is_incremental() %}
-    left join max_updated_at using (code)
-    where date::date >= max_updated_at.max_date or max_updated_at.max_date is null
+    left join max_updated_at on max_updated_at.code = contract_name
+    where to_timestamp(t / 1000) >= max_updated_at.max_date or max_updated_at.max_date is null
 {% endif %}
