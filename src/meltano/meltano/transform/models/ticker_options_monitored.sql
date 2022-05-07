@@ -1,7 +1,7 @@
 {{
   config(
     materialized = "incremental",
-    unique_key = "uniq_id",
+    unique_key = "contract_name",
     post_hook=[
       pk('contract_name'),
       'create unique index if not exists "contract_name__symbol" ON {{ this }} (contract_name, symbol)',
