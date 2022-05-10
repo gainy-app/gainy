@@ -1221,6 +1221,7 @@
           - icon_url
           - id
           - name
+          - sort_order
         filter: {}
     - role: user
       permission:
@@ -1229,6 +1230,7 @@
           - name
           - icon_url
           - enabled
+          - sort_order
         filter: {}
 - table:
     schema: public
