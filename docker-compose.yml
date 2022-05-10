@@ -75,6 +75,7 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
 
   hasura:
+    image: gainy-hasura:latest
     build:
       context: ./src/hasura
       args:
@@ -94,6 +95,7 @@ services:
       - .env.local
 
   lambda-router:
+    image: gainy-lambda-router:latest
     build:
       context: ./src/aws/router
     volumes:
@@ -149,8 +151,6 @@ services:
 
   websockets-polygon:
     image: gainy-websockets:latest
-    depends_on:
-      - websockets-eod
     restart: always
     volumes:
       - ./src/websockets:/srv
