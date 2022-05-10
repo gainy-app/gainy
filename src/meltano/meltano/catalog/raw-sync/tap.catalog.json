@@ -79,6 +79,58 @@
       "selected": true
     },
     {
+      "table_name": "polygon_marketstatus_upcoming",
+      "stream": "polygon_marketstatus_upcoming",
+      "metadata": [
+        {
+          "breadcrumb": [],
+          "metadata": {
+            "replication-key": "date",
+            "replication-method": "INCREMENTAL",
+            "table-key-properties": [
+              "exchange",
+              "date"
+            ],
+            "schema-name": "raw_data",
+            "database-name": "gainy",
+            "selected": true
+          }
+        }
+      ],
+      "tap_stream_id": "raw_data-polygon_marketstatus_upcoming",
+      "schema": {
+        "type": "object",
+        "properties": {}
+      },
+      "selected": true
+    },
+    {
+      "table_name": "polygon_options_historical_prices",
+      "stream": "polygon_options_historical_prices",
+      "metadata": [
+        {
+          "breadcrumb": [],
+          "metadata": {
+            "replication-key": "t",
+            "replication-method": "INCREMENTAL",
+            "table-key-properties": [
+              "contract_name",
+              "t"
+            ],
+            "schema-name": "raw_data",
+            "database-name": "gainy",
+            "selected": true
+          }
+        }
+      ],
+      "tap_stream_id": "raw_data-polygon_options_historical_prices",
+      "schema": {
+        "type": "object",
+        "properties": {}
+      },
+      "selected": true
+    },
+    {
       "table_name": "blogs",
       "stream": "blogs",
       "metadata": [

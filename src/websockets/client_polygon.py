@@ -13,18 +13,35 @@ POLYGON_REALTIME_STREAMING_HOST = os.environ["POLYGON_REALTIME_STREAMING_HOST"]
 
 class PricesListener(AbstractPriceListener):
 
-    def __init__(self, instance_key):
+    def __init__(self, instance_key, cluster=None):
+        self.cluster = cluster
         super().__init__(instance_key, "polygon")
 
         self.api_token = POLYGON_API_TOKEN
         self.host = POLYGON_REALTIME_STREAMING_HOST
 
+        if self.cluster is None:
+            self.sub_listeners = [
+                PricesListener(instance_key, cluster)
+                for cluster in [StreamCluster.STOCKS, StreamCluster.OPTIONS]
+            ]
+        else:
+            self.sub_listeners = None
+
     def get_symbols(self):
-        with self.db_connect() as db_conn:
+        if self.cluster is None:
+            return set()
+
+        if self.cluster == StreamCluster.STOCKS:
             query = """SELECT symbol FROM base_tickers
             where symbol is not null
               and type in ('fund', 'etf', 'mutual fund', 'preferred stock', 'common stock')"""
+        elif self.cluster == StreamCluster.OPTIONS:
+            query = "SELECT contract_name FROM ticker_options_monitored"
+        else:
+            raise Exception(f"Unknown cluster {self.cluster}")
 
+        with self.db_connect() as db_conn:
             with db_conn.cursor() as cursor:
                 cursor.execute(query)
                 tickers = cursor.fetchall()
@@ -71,17 +88,31 @@ class PricesListener(AbstractPriceListener):
             self.logger.error('handle_message %s: %s', e, message)
 
     async def listen(self):
+        if self.cluster is None:
+            coroutines = [
+                sub_listener.listen() for sub_listener in self.sub_listeners
+            ]
+            await asyncio.gather(*coroutines)
+            return
+
         stream_client = polygon.AsyncStreamClient(self.api_token,
-                                                  StreamCluster.STOCKS,
+                                                  self.cluster,
                                                   host=self.host)
 
         await stream_client.change_handler(
             'status', self.get_status_message_handler(stream_client))
 
         try:
-            await stream_client.subscribe_stock_minute_aggregates(
-                [self.transform_symbol(i) for i in self.symbols],
-                self.handle_message)
+            if self.cluster == StreamCluster.STOCKS:
+                await stream_client.subscribe_stock_minute_aggregates(
+                    [self.transform_symbol(i) for i in self.symbols],
+                    self.handle_message)
+            elif self.cluster == StreamCluster.OPTIONS:
+                await stream_client.subscribe_option_minute_aggregates(
+                    [self.transform_symbol(i) for i in self.symbols],
+                    self.handle_message)
+            else:
+                raise Exception(f"Unknown cluster {self.cluster}")
 
             while 1:
                 try:

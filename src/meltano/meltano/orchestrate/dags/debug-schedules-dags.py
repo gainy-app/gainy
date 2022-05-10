@@ -8,6 +8,7 @@ schedules = get_schedules()
 debug_schedule_patterns = [
     "coingecko-to-postgres",
     "eodhistoricaldata-prices-to-postgres",
+    "polygon-to-postgres",
     "postgres-to-analytics",
     "postgres-to-search",
 ]
@@ -21,11 +22,19 @@ for pattern in debug_schedule_patterns:
         if not schedule['name'].startswith(pattern):
             continue
 
+        generate_meltano_config = BashOperator(
+            task_id="generate_meltano_config",
+            bash_command=
+            f"cd {MELTANO_PROJECT_ROOT}; /usr/local/bin/python scripts/generate_meltano_config.py",
+            dag=dag)
+
         command = BashOperator(
             task_id=schedule['name'],
             bash_command=get_meltano_command(
                 f"schedule run {schedule['name']}"),
             dag=dag,
         )
+
+        generate_meltano_config >> command
 
     globals()[dag_id] = dag
