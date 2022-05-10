@@ -150,6 +150,10 @@ models:
           - unique
           - type:
               type: 'integer'
+      - name: sort_order
+        tests:
+          - type:
+              type: 'integer'
       - name: enabled
         tests:
           - type:
