@@ -19,7 +19,7 @@ def test_collections():
 
 
 def test_interests():
-    query = '{ interests(where: {enabled: {_eq: "1"} }, order_by: {sort_order: ASC} ) { icon_url id name } }'
+    query = '{ interests(where: {enabled: {_eq: "1"} }, order_by: {sort_order: asc} ) { icon_url id name } }'
     data = make_graphql_request(query)['data']['interests']
 
     assert len(data) >= MIN_INTEREST_COUNT
