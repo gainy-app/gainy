@@ -169,6 +169,11 @@ models:
           - unique
           - type:
               type: 'integer'
+      - name: sort_order
+        tests:
+          - unique
+          - type:
+              type: 'integer'
       - name: enabled
         tests:
           - type:

@@ -326,7 +326,7 @@ query GetPortfolioPieChart(
     app_profile_plaid_access_tokens { id }
 
     # interests options:
-    interests(where: {enabled: {_eq: "1"}}) {
+    interests(where: {enabled: {_eq: "1"}}, order_by: {sort_order: ASC}) {
         id
         name
         icon_url
