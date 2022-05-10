@@ -30,6 +30,7 @@ sources:
     schema: raw_data
     tables:
       - name: polygon_marketstatus_upcoming
+      - name: polygon_options_historical_prices
 
   - name: coingecko
     description: Crypto data from https://coingecko.com
@@ -1837,6 +1838,13 @@ models:
         tests:
           - type:
               type: 'double precision'
+
+  - name: ticker_options_monitored
+    columns:
+      - name: contract_name
+        tests:
+          - type:
+              type: 'character varying'
 
 exposures:
   - name: ticker_search_index
