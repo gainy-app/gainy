@@ -1221,6 +1221,7 @@
           - icon_url
           - id
           - name
+          - sort_order
         filter: {}
     - role: user
       permission:

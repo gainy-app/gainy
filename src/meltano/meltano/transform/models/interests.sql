@@ -13,6 +13,7 @@ SELECT id::int,
        name,
        icon_url,
        enabled,
+       0::int as sort_order,
        now()::timestamp as updated_at
 FROM {{ source('gainy', 'gainy_interests') }}
 where _sdc_extracted_at > (select max(_sdc_extracted_at) from {{ source('gainy', 'gainy_interests') }}) - interval '1 minute'
