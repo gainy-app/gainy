@@ -1230,6 +1230,7 @@
           - name
           - icon_url
           - enabled
+          - sort_order
         filter: {}
 - table:
     schema: public
