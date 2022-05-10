@@ -1,4 +1,4 @@
 psycopg2-binary==2.9.2
 websockets==10.1
-polygon==0.9.7
+polygon==1.0.6
 datadog-api-client
