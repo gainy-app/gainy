@@ -48,7 +48,7 @@ with max_date as
                           FROM generate_series(now()::timestamp - interval '1 week', now()::timestamp, interval '3 minutes') dd
                           ) t
                           join latest_open_trading_session on true
-                 where time_truncated between latest_open_trading_session.open_at and latest_open_trading_session.close_at
+                 where time_truncated between latest_open_trading_session.open_at and latest_open_trading_session.close_at - interval '3 minutes'
 {% if is_incremental() and var('realtime') %}
                    and time_truncated > now() - interval '20 minutes'
 {% endif %}
@@ -189,7 +189,7 @@ union all
                           FROM generate_series(now()::timestamp - interval '1 week', now()::timestamp, interval '15 minutes') dd
                           ) t
                           join week_trading_sessions on true
-                 where time_truncated between week_trading_sessions.open_at and week_trading_sessions.close_at
+                 where time_truncated between week_trading_sessions.open_at and week_trading_sessions.close_at - interval '15 minutes'
 {% if is_incremental() and var('realtime') %}
                    and time_truncated > now() - interval '1 hour'
 {% endif %}
