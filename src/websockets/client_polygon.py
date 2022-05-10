@@ -5,7 +5,7 @@ import os
 import json
 import datetime
 from decimal import Decimal
-from common import run, AbstractPriceListener, NO_MESSAGES_RECONNECT_TIMEOUT
+from common import run, AbstractPriceListener
 
 POLYGON_API_TOKEN = os.environ["POLYGON_API_TOKEN"]
 POLYGON_REALTIME_STREAMING_HOST = os.environ["POLYGON_REALTIME_STREAMING_HOST"]
@@ -88,7 +88,7 @@ class PricesListener(AbstractPriceListener):
             self.logger.error('handle_message %s: %s', e, message)
 
     async def listen(self):
-        if self.cluster is None:
+        if self.sub_listeners is not None:
             coroutines = [
                 sub_listener.listen() for sub_listener in self.sub_listeners
             ]
@@ -138,6 +138,27 @@ class PricesListener(AbstractPriceListener):
             self.logger.error(json.dumps(update))
 
         return _status_message_handler
+
+    async def sync(self):
+        try:
+            if self.sub_listeners is not None:
+                coroutines = [
+                    sub_listener.sync() for sub_listener in self.sub_listeners
+                ] + [self.save_heartbeat()]
+                await asyncio.gather(*coroutines)
+            else:
+                await super().sync()
+        except Exception as e:
+            self.logger.exception(e)
+
+    def should_reconnect(self):
+        if self.sub_listeners is not None:
+            for sub_listener in self.sub_listeners:
+                if not sub_listener.should_reconnect():
+                    return False
+            return True
+        else:
+            return super().should_reconnect()
 
     def transform_symbol(self, symbol):
         return symbol.replace('-', '.')
