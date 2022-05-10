@@ -144,7 +144,7 @@ class PricesListener(AbstractPriceListener):
             if self.sub_listeners is not None:
                 coroutines = [
                     sub_listener.sync() for sub_listener in self.sub_listeners
-                ] + [self.save_heartbeat()]
+                ]
                 await asyncio.gather(*coroutines)
             else:
                 await super().sync()
