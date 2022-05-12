@@ -184,7 +184,8 @@ def clean_schemas(db_conn):
         with db_conn.cursor() as cursor:
             try:
                 cursor.execute(query)
-            except psycopg2.errors.UndefinedTable:
+            except (psycopg2.errors.UndefinedTable,
+                    psycopg2.errors.InvalidSchemaName):
                 db_conn.rollback()
 
             cursor.execute(
