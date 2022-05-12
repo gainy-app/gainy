@@ -96,6 +96,9 @@ plugins:
           - entity: crypto_ticker_industries
             path: data/crypto_ticker_industries.csv
             keys: [ "cc_symbol" ]
+          - entity: ticker_collections
+            path: data/ticker_collections.csv
+            keys: [ "ttf_name", "symbol" ]
 
     - name: tap-postgres
       config:
