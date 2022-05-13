@@ -925,6 +925,28 @@
             _eq: X-Hasura-User-Id
 - table:
     schema: public
+    name: collection_median_chart
+  select_permissions:
+    - role: anonymous
+      permission:
+        columns:
+          - id
+          - period
+          - median_price
+          - collection_id
+          - datetime
+        filter: {}
+    - role: user
+      permission:
+        columns:
+          - id
+          - collection_id
+          - period
+          - datetime
+          - median_price
+        filter: {}
+- table:
+    schema: public
     name: collection_metrics
   object_relationships:
     - name: profile
@@ -1471,6 +1493,7 @@
   configuration:
     custom_root_fields: {}
     custom_name: collections
+    column_config: {}
     custom_column_names: {}
   object_relationships:
     - name: match_score
@@ -1684,6 +1707,7 @@
   configuration:
     custom_root_fields: {}
     custom_name: ticker_collections
+    column_config: {}
     custom_column_names: {}
   object_relationships:
     - name: collection
