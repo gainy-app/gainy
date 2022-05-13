@@ -45,3 +45,5 @@ variable "algolia_search_key" {}
 
 variable "codeartifact_pipy_url" {}
 variable "gainy_compute_version" {}
+variable "onesignal_app_id" {}
+variable "onesignal_api_key" {}

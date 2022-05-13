@@ -49,3 +49,5 @@ variable "aws_secret_key" {}
 variable "mlflow_artifact_bucket" {}
 variable "codeartifact_pipy_url" {}
 variable "gainy_compute_version" {}
+variable "onesignal_app_id" {}
+variable "onesignal_api_key" {}

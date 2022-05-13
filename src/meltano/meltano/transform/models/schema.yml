@@ -1825,6 +1825,31 @@ models:
           - type:
               type: 'character varying'
 
+  - name: push_notifications
+    columns:
+      - name: profile_id
+        tests:
+          - type:
+              type: 'integer'
+      - name: uniq_id
+        tests:
+          - unique
+          - not_null
+          - type:
+              type: 'character varying'
+      - name: send_at
+        tests:
+          - type:
+              type: 'timestamp with time zone'
+      - name: text
+        tests:
+          - type:
+              type: 'json'
+      - name: data
+        tests:
+          - type:
+              type: 'json'
+
 exposures:
   - name: ticker_search_index
     type: application
