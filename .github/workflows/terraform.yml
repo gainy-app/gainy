@@ -22,8 +22,6 @@ on:
       AWS_SECRET_ACCESS_KEY: { required: true }
       TF_VAR_EODHISTORICALDATA_API_TOKEN: { required: true }
       TF_VAR_GNEWS_API_TOKEN: { required: true }
-      TF_VAR_ONESIGNAL_APP_ID: { required: true }
-      TF_VAR_ONESIGNAL_API_KEY: { required: true }
       GOOGLE_CREDENTIALS: { required: true }
       GOOGLE_USER: { required: true }
       GOOGLE_PROJECT_ID: { required: true }
@@ -50,6 +48,8 @@ on:
       HUBSPOT_API_KEY: { required: true }
       POLYGON_API_TOKEN: { required: true }
       COINGECKO_API_KEY: { required: true }
+      ONESIGNAL_APP_ID: { required: true }
+      ONESIGNAL_API_KEY: { required: true }
 
 env:
   AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
