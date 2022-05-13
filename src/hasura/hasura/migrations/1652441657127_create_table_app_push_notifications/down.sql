@@ -1,1 +1,1 @@
-DROP TABLE "app"."push_notifications";
+DROP TABLE "app"."notifications";
