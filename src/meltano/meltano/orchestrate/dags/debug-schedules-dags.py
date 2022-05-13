@@ -1,5 +1,5 @@
 from airflow.operators.bash import BashOperator
-from common import create_dag, get_meltano_command, get_schedules
+from common import create_dag, get_meltano_command, get_schedules, MELTANO_PROJECT_ROOT
 
 DEFAULT_TAGS = ["meltano", "debug"]
 
@@ -24,8 +24,8 @@ for pattern in debug_schedule_patterns:
 
         generate_meltano_config = BashOperator(
             task_id="generate_meltano_config",
-            bash_command=get_meltano_command(
-                "/usr/local/bin/python scripts/generate_meltano_config.py"),
+            bash_command=
+            f"cd {MELTANO_PROJECT_ROOT}; /usr/local/bin/python scripts/generate_meltano_config.py",
             dag=dag)
 
         command = BashOperator(
