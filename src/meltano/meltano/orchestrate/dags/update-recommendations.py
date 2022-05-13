@@ -1,5 +1,5 @@
 from airflow.operators.bash import BashOperator
-from common import create_dag
+from common import create_dag, ENV
 
 dag_id = "update-recommendations"
 tags = ["gainy-compute", "debug", "recommendations"]
