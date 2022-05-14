@@ -50,10 +50,8 @@ extract-passwords:
 	cd terraform && terraform state pull | python3 ../extract_passwords.py
 
 test-build-github:
-	echo ${GITHUB_TOKEN} | docker login docker.pkg.github.com -u ${GITHUB_ACTOR} --password-stdin
-	docker pull --disable-content-trust docker.pkg.github.com/${GITHUB_REPOSITORY}/gainy-meltano || true
-	docker build ./src/meltano -t gainy-meltano --cache-from=docker.pkg.github.com/${GITHUB_REPOSITORY}/gainy-meltano --build-arg BASE_IMAGE_REGISTRY_ADDRESS=${BASE_IMAGE_REGISTRY_ADDRESS} --build-arg BASE_IMAGE_VERSION=${BASE_IMAGE_VERSION} --build-arg CODEARTIFACT_PIPY_URL=${CODEARTIFACT_PIPY_URL} --build-arg GAINY_COMPUTE_VERSION=${GAINY_COMPUTE_VERSION}
-	docker tag gainy-meltano docker.pkg.github.com/${GITHUB_REPOSITORY}/gainy-meltano && docker push docker.pkg.github.com/${GITHUB_REPOSITORY}/gainy-meltano || true
+	- docker run -d -p 5000:5000 --restart=always --name registry -v /tmp/docker-registry:/var/lib/registry registry:2 && npx wait-on tcp:5000
+	docker pull localhost:5000/gainy-meltano:${BASE_IMAGE_VERSION} || (docker pull ${BASE_IMAGE_REGISTRY_ADDRESS}/gainy-meltano:${BASE_IMAGE_VERSION} && docker tag ${BASE_IMAGE_REGISTRY_ADDRESS}/gainy-meltano:${BASE_IMAGE_VERSION} localhost:5000/gainy-meltano:${BASE_IMAGE_VERSION} && docker push localhost:5000/gainy-meltano:${BASE_IMAGE_VERSION})
 
 test-meltano:
 	docker-compose -p gainy_test -f docker-compose.test.yml run --rm test-meltano invoke dbt test

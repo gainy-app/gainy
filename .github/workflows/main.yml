@@ -27,6 +27,14 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
 
+      - name: Cache Docker layers
+        uses: actions/cache@v2
+        with:
+          path: /tmp/docker-registry
+          key: ${{ runner.os }}-docker-registry-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-docker-registry-
+
       - name: Build
         run: |
           source deployment/scripts/code_artifactory.sh
