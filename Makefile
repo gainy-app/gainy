@@ -50,10 +50,7 @@ extract-passwords:
 	cd terraform && terraform state pull | python3 ../extract_passwords.py
 
 test-build-github:
-	docker buildx build --cache-from "type=local,src=/tmp/.buildx-cache" --cache-to "type=local,dest=/tmp/.buildx-cache-new" ${BUILD_FLAGS} -t gainy-meltano:latest --build-arg BASE_IMAGE_REGISTRY_ADDRESS=${BASE_IMAGE_REGISTRY_ADDRESS} --build-arg BASE_IMAGE_VERSION=${BASE_IMAGE_VERSION} --build-arg CODEARTIFACT_PIPY_URL=${CODEARTIFACT_PIPY_URL} --build-arg GAINY_COMPUTE_VERSION=${GAINY_COMPUTE_VERSION} ./src/meltano
-
-test-build:
-	docker-compose -p gainy_test -f docker-compose.test.yml build --progress plain
+	docker buildx build --cache-from "type=local,src=/tmp/.buildx-cache" --cache-to "type=local,dest=/tmp/.buildx-cache-new" --push ${BUILD_FLAGS} -t gainy-meltano:latest --build-arg BASE_IMAGE_REGISTRY_ADDRESS=${BASE_IMAGE_REGISTRY_ADDRESS} --build-arg BASE_IMAGE_VERSION=${BASE_IMAGE_VERSION} --build-arg CODEARTIFACT_PIPY_URL=${CODEARTIFACT_PIPY_URL} --build-arg GAINY_COMPUTE_VERSION=${GAINY_COMPUTE_VERSION} ./src/meltano
 
 test-meltano:
 	docker-compose -p gainy_test -f docker-compose.test.yml run --rm test-meltano invoke dbt test
@@ -73,7 +70,7 @@ test-hasura:
 test-lambda:
 	docker-compose -p gainy_test -f docker-compose.test.yml exec -T test-lambda-python-action pytest
 
-test-configure: test-clean docker-auth env test-build
+test-configure: test-clean docker-auth env
 
 test: test-configure test-meltano test-images test-meltano-realtime test-hasura test-lambda test-clean
 
