@@ -28,7 +28,7 @@ build:
 	docker-compose build
 
 pull:
-	docker-compose pull
+	- docker-compose pull --ignore-pull-failures
 
 down:
 	docker-compose down
