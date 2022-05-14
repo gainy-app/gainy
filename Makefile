@@ -7,7 +7,7 @@ ifeq ($(shell test -e .makeenv && echo -n yes),)
 endif
 include .makeenv
 include .env.make
-IMAGE_TAG ?= "local"
+IMAGE_TAG ?= "latest"
 
 docker-auth:
 	- aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin ${BASE_IMAGE_REGISTRY_ADDRESS}
@@ -67,10 +67,20 @@ test-cache-github:
 	docker tag ${BASE_IMAGE_REGISTRY_ADDRESS}/gainy-hasura:${BASE_IMAGE_VERSION} localhost:5123/gainy-hasura:${BASE_IMAGE_VERSION}
 	docker push localhost:5123/gainy-hasura:${BASE_IMAGE_VERSION}
 
+	- docker pull localhost:5123/gainy-hasura:${IMAGE_TAG}
+	docker build ./src/hasura -t gainy-hasura:${IMAGE_TAG} --cache-from=localhost:5123/gainy-hasura:${IMAGE_TAG} --build-arg BASE_IMAGE_REGISTRY_ADDRESS=${BASE_IMAGE_REGISTRY_ADDRESS} --build-arg BASE_IMAGE_VERSION=${BASE_IMAGE_VERSION} --build-arg CODEARTIFACT_PIPY_URL=${CODEARTIFACT_PIPY_URL} --build-arg GAINY_COMPUTE_VERSION=${GAINY_COMPUTE_VERSION}
+	docker tag gainy-hasura:${IMAGE_TAG} localhost:5123/gainy-hasura:${IMAGE_TAG}
+	docker push localhost:5123/gainy-hasura:${IMAGE_TAG}
+
 	- docker pull localhost:5123/gainy-lambda-python:${BASE_IMAGE_VERSION}
 	docker pull ${BASE_IMAGE_REGISTRY_ADDRESS}/gainy-lambda-python:${BASE_IMAGE_VERSION}
 	docker tag ${BASE_IMAGE_REGISTRY_ADDRESS}/gainy-lambda-python:${BASE_IMAGE_VERSION} localhost:5123/gainy-lambda-python:${BASE_IMAGE_VERSION}
 	docker push localhost:5123/gainy-lambda-python:${BASE_IMAGE_VERSION}
+
+	- docker pull localhost:5123/gainy-lambda-python:${IMAGE_TAG}
+	docker build ./src/aws/lambda-python -t gainy-lambda-python:${IMAGE_TAG} --cache-from=localhost:5123/gainy-lambda-python:${IMAGE_TAG} --build-arg BASE_IMAGE_REGISTRY_ADDRESS=${BASE_IMAGE_REGISTRY_ADDRESS} --build-arg BASE_IMAGE_VERSION=${BASE_IMAGE_VERSION} --build-arg CODEARTIFACT_PIPY_URL=${CODEARTIFACT_PIPY_URL} --build-arg GAINY_COMPUTE_VERSION=${GAINY_COMPUTE_VERSION}
+	docker tag gainy-lambda-python:${IMAGE_TAG} localhost:5123/gainy-lambda-python:${IMAGE_TAG}
+	docker push localhost:5123/gainy-lambda-python:${IMAGE_TAG}
 
 test-meltano:
 	docker-compose -p gainy_test -f docker-compose.test.yml run --rm test-meltano invoke dbt test
