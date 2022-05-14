@@ -27,23 +27,33 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
 
-      - name: Cache Docker layers
-        uses: actions/cache@v2
-        with:
-          path: /tmp/docker-registry
-          key: ${{ runner.os }}-docker-registry-${{ github.sha }}
-          restore-keys: |
-            ${{ runner.os }}-docker-registry-
+      - uses: win-t/gh-action-docker-state@v1
 
-      - name: Build
-        run: |
-          source deployment/scripts/code_artifactory.sh
-          make docker-auth test-cache-github
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          AWS_DEFAULT_REGION: us-east-1
+#      - name: Cache Docker layers
+#        uses: actions/cache@v2
+#        with:
+#          path: /tmp/docker-registry
+#          key: ${{ runner.os }}-docker-registry-${{ github.sha }}
+#          restore-keys: |
+#            ${{ runner.os }}-docker-registry-
+
+#      - name: Cache Docker layers
+#        uses: actions/cache@v2
+#        with:
+#          path: /tmp/docker-registry
+#          key: ${{ runner.os }}-docker-registry-${{ github.sha }}
+#          restore-keys: |
+#            ${{ runner.os }}-docker-registry-
+
+#      - name: Build
+#        run: |
+#          source deployment/scripts/code_artifactory.sh
+#          make docker-auth test-cache-github
+#        env:
+#          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+#          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+#          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+#          AWS_DEFAULT_REGION: us-east-1
 
       - name: Run tests
         id: test
