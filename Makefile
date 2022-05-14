@@ -49,10 +49,22 @@ style-fix:
 extract-passwords:
 	cd terraform && terraform state pull | python3 ../extract_passwords.py
 
-test-build-github:
+test-cache-github:
 	- docker run -d -p 5000:5000 --restart=always --name registry -v /tmp/docker-registry:/var/lib/registry registry:2 && npx wait-on tcp:5000
-	docker pull localhost:5000/gainy-meltano:${BASE_IMAGE_VERSION} || (docker pull ${BASE_IMAGE_REGISTRY_ADDRESS}/gainy-meltano:${BASE_IMAGE_VERSION} && docker tag ${BASE_IMAGE_REGISTRY_ADDRESS}/gainy-meltano:${BASE_IMAGE_VERSION} localhost:5000/gainy-meltano:${BASE_IMAGE_VERSION} && docker push localhost:5000/gainy-meltano:${BASE_IMAGE_VERSION})
+	docker pull localhost:5000/gainy-meltano:${BASE_IMAGE_VERSION}
 	docker pull ${BASE_IMAGE_REGISTRY_ADDRESS}/gainy-meltano:${BASE_IMAGE_VERSION}
+	docker tag ${BASE_IMAGE_REGISTRY_ADDRESS}/gainy-meltano:${BASE_IMAGE_VERSION} localhost:5000/gainy-meltano:${BASE_IMAGE_VERSION}
+	docker push localhost:5000/gainy-meltano:${BASE_IMAGE_VERSION}
+
+	docker pull localhost:5000/gainy-hasura:${BASE_IMAGE_VERSION}
+	docker pull ${BASE_IMAGE_REGISTRY_ADDRESS}/gainy-hasura:${BASE_IMAGE_VERSION}
+	docker tag ${BASE_IMAGE_REGISTRY_ADDRESS}/gainy-hasura:${BASE_IMAGE_VERSION} localhost:5000/gainy-hasura:${BASE_IMAGE_VERSION}
+	docker push localhost:5000/gainy-hasura:${BASE_IMAGE_VERSION}
+
+	docker pull localhost:5000/gainy-lambda-python:${BASE_IMAGE_VERSION}
+	docker pull ${BASE_IMAGE_REGISTRY_ADDRESS}/gainy-lambda-python:${BASE_IMAGE_VERSION}
+	docker tag ${BASE_IMAGE_REGISTRY_ADDRESS}/gainy-lambda-python:${BASE_IMAGE_VERSION} localhost:5000/gainy-lambda-python:${BASE_IMAGE_VERSION}
+	docker push localhost:5000/gainy-lambda-python:${BASE_IMAGE_VERSION}
 
 test-meltano:
 	docker-compose -p gainy_test -f docker-compose.test.yml run --rm test-meltano invoke dbt test
