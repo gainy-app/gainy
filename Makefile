@@ -49,6 +49,9 @@ style-fix:
 extract-passwords:
 	cd terraform && terraform state pull | python3 ../extract_passwords.py
 
+test-build-github:
+	docker buildx build --cache-from "type=gha" --cache-to "type=gha" --rm ${BUILD_FLAGS} -t gainy-meltano:latest --build-arg BASE_IMAGE_REGISTRY_ADDRESS=${BASE_IMAGE_REGISTRY_ADDRESS},BASE_IMAGE_VERSION=${BASE_IMAGE_VERSION},CODEARTIFACT_PIPY_URL=${CODEARTIFACT_PIPY_URL},GAINY_COMPUTE_VERSION=${GAINY_COMPUTE_VERSION} ./src/meltano
+
 test-build:
 	docker-compose -p gainy_test -f docker-compose.test.yml build --progress plain
 
