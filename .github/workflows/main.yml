@@ -35,6 +35,10 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-buildx-
 
+      # This is the a separate action that sets up buildx runner
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+        
       - name: Build
         run: |
           source deployment/scripts/code_artifactory.sh
