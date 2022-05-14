@@ -51,7 +51,7 @@ extract-passwords:
 
 test-build-github:
 	echo ${GITHUB_TOKEN} | docker login docker.pkg.github.com -u ${GITHUB_ACTOR} --password-stdin
-	docker pull docker.pkg.github.com/${GITHUB_REPOSITORY}/gainy-meltano || true
+	docker pull --disable-content-trust docker.pkg.github.com/${GITHUB_REPOSITORY}/gainy-meltano || true
 	docker build ./src/meltano -t gainy-meltano --cache-from=docker.pkg.github.com/${GITHUB_REPOSITORY}/gainy-meltano --build-arg BASE_IMAGE_REGISTRY_ADDRESS=${BASE_IMAGE_REGISTRY_ADDRESS} --build-arg BASE_IMAGE_VERSION=${BASE_IMAGE_VERSION} --build-arg CODEARTIFACT_PIPY_URL=${CODEARTIFACT_PIPY_URL} --build-arg GAINY_COMPUTE_VERSION=${GAINY_COMPUTE_VERSION}
 	docker tag gainy-meltano docker.pkg.github.com/${GITHUB_REPOSITORY}/gainy-meltano && docker push docker.pkg.github.com/${GITHUB_REPOSITORY}/gainy-meltano || true
 

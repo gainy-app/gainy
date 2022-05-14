@@ -30,7 +30,7 @@ jobs:
       - name: Build
         run: |
           source deployment/scripts/code_artifactory.sh
-          make test-build-github
+          make docker-auth test-build-github
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
