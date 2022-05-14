@@ -27,28 +27,22 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
 
-      # Pull the latest image to build, and avoid caching pull-only images.
-      # (docker pull is faster than caching in most cases.)
-      - run: |
+      - name: Cache Docker layers
+        uses: actions/cache@v2
+        with:
+          path: /tmp/.buildx-cache
+          key: ${{ runner.os }}-buildx-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-buildx-
+
+      - name: Build
+        run: |
           source deployment/scripts/code_artifactory.sh
-          make env docker-auth pull
+          make docker-auth test-build-github 2>&1
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           AWS_DEFAULT_REGION: us-east-1
-
-      - uses: satackey/action-docker-layer-caching@v0.0.11
-        # Ignore the failure of a step and avoid terminating the job.
-        continue-on-error: true
-
-#      - name: Build
-#        run: |
-#          source deployment/scripts/code_artifactory.sh
-#          make docker-auth test-build-github 2>&1
-#        env:
-#          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-#          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-#          AWS_DEFAULT_REGION: us-east-1
 
       - name: Run tests
         id: test
@@ -78,6 +72,11 @@ jobs:
       - name: Clean
         if: steps.test.outcome == 'failure'
         run: make test-clean && exit 1
+        
+      - name: Move cache
+        run: |
+          rm -rf /tmp/.buildx-cache
+          mv /tmp/.buildx-cache-new /tmp/.buildx-cache
 
   terraform:
     name: "Terraform"
