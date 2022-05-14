@@ -27,10 +27,10 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
 
-      - run: echo ${{ secrets.GITHUB_TOKEN }} | docker login docker.pkg.github.com -u $GITHUB_ACTOR --password-stdin
-      - run: docker pull docker.pkg.github.com/$GITHUB_REPOSITORY/gainy-meltano || true
-      - run: docker build ./src/meltano -t gainy-meltano --cache-from=docker.pkg.github.com/$GITHUB_REPOSITORY/gainy-meltano
-      - run: docker tag gainy-meltano docker.pkg.github.com/$GITHUB_REPOSITORY/gainy-meltano && docker push docker.pkg.github.com/$GITHUB_REPOSITORY/gainy-meltano || true
+      - name: Build
+        run: |
+          source deployment/scripts/code_artifactory.sh
+          make test-build-github
 
       - name: Run tests
         id: test
