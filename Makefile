@@ -27,6 +27,9 @@ upd:
 build:
 	docker-compose build
 
+pull:
+	docker-compose pull
+
 down:
 	docker-compose down
 
