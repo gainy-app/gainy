@@ -36,11 +36,7 @@ jobs:
         with:
           context: ./src/meltano
           builder: ${{ steps.buildx.outputs.name }}
-          build-args:
-            - BASE_IMAGE_REGISTRY_ADDRESS=${BASE_IMAGE_REGISTRY_ADDRESS}
-            - BASE_IMAGE_VERSION=${BASE_IMAGE_VERSION}
-            - CODEARTIFACT_PIPY_URL=${CODEARTIFACT_PIPY_URL}
-            - GAINY_COMPUTE_VERSION=${GAINY_COMPUTE_VERSION}
+          build-args: BASE_IMAGE_REGISTRY_ADDRESS=${BASE_IMAGE_REGISTRY_ADDRESS},BASE_IMAGE_VERSION=${BASE_IMAGE_VERSION},CODEARTIFACT_PIPY_URL=${CODEARTIFACT_PIPY_URL},GAINY_COMPUTE_VERSION=${GAINY_COMPUTE_VERSION}
           push: true
           tags: gainy/gainy-meltano:latest
           cache-from: type=gha
