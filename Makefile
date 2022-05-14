@@ -52,6 +52,7 @@ extract-passwords:
 test-build-github:
 	- docker run -d -p 5000:5000 --restart=always --name registry -v /tmp/docker-registry:/var/lib/registry registry:2 && npx wait-on tcp:5000
 	docker pull localhost:5000/gainy-meltano:${BASE_IMAGE_VERSION} || (docker pull ${BASE_IMAGE_REGISTRY_ADDRESS}/gainy-meltano:${BASE_IMAGE_VERSION} && docker tag ${BASE_IMAGE_REGISTRY_ADDRESS}/gainy-meltano:${BASE_IMAGE_VERSION} localhost:5000/gainy-meltano:${BASE_IMAGE_VERSION} && docker push localhost:5000/gainy-meltano:${BASE_IMAGE_VERSION})
+	docker pull ${BASE_IMAGE_REGISTRY_ADDRESS}/gainy-meltano:${BASE_IMAGE_VERSION}
 
 test-meltano:
 	docker-compose -p gainy_test -f docker-compose.test.yml run --rm test-meltano invoke dbt test
