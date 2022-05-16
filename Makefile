@@ -50,7 +50,7 @@ style-fix:
 extract-passwords:
 	cd terraform && terraform state pull | python3 ../extract_passwords.py
 
-test-cache-github:
+ci-build:
 	- docker run -d -p 5123:5000 --restart=always --name registry -v /tmp/docker-registry:/var/lib/registry registry:2 && npx wait-on tcp:5123
 	- docker pull localhost:5123/gainy-meltano:${BASE_IMAGE_VERSION}
 	docker pull ${BASE_IMAGE_REGISTRY_ADDRESS}/gainy-meltano:${BASE_IMAGE_VERSION}
@@ -100,7 +100,7 @@ test-hasura:
 test-lambda:
 	docker-compose -p gainy_test -f docker-compose.test.yml exec -T test-lambda-python-action pytest
 
-test-configure: test-clean docker-auth env
+test-configure: test-clean docker-auth env ci-build
 
 test: test-configure test-meltano test-images test-meltano-realtime test-hasura test-lambda test-clean
 
