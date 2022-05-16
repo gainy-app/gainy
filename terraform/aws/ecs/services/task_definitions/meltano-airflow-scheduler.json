@@ -94,8 +94,8 @@
     { "name": "ALGOLIA_COLLECTIONS_INDEX",             "value": "${algolia_collections_index}" },
     { "name": "ALGOLIA_INDEXING_API_KEY",              "value": "${algolia_indexing_key}" },
 
-    { "name": "ONESIGNAL_API_KEY",                     "value": "${onesignal_app_id}" },
-    { "name": "ONESIGNAL_APP_ID",                      "value": "${onesignal_api_key}" },
+    { "name": "ONESIGNAL_APP_ID",                      "value": "${onesignal_app_id}" },
+    { "name": "ONESIGNAL_API_KEY",                     "value": "${onesignal_api_key}" },
     { "name": "ONESIGNAL_SEGMENTS",                    "value": ${jsonencode(onesignal_segments)} },
 
     { "name": "DATADOG_API_KEY",                       "value": "${datadog_api_key}" },

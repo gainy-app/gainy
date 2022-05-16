@@ -32,7 +32,7 @@ union all
 
 select profile_id,
        (profile_id || '_top_losers_' || now()::date)::varchar            as uniq_id,
-       min(exchange_schedule.open_at) + interval '2 hours 30 minutes'    as send_at,
+       min(exchange_schedule.open_at) + interval '30 minutes'    as send_at,
        json_build_object('en', 'Top losers: ' || string_agg(text, ', ')) as text,
        json_build_object('t', 0)                                         as data
 from (
