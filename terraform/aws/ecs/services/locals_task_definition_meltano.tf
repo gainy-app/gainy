@@ -48,6 +48,9 @@ locals {
       algolia_collections_index            = var.algolia_collections_index
       algolia_app_id                       = var.algolia_app_id
       algolia_indexing_key                 = var.algolia_indexing_key
+      onesignal_app_id                     = var.onesignal_app_id
+      onesignal_api_key                    = var.onesignal_api_key
+      onesignal_segments                   = jsonencode(var.env == "production" ? ["Subscribed Users"] : ["Testers"])
 
       pg_external_access_host     = var.pg_external_access_host
       pg_external_access_port     = var.pg_external_access_port

@@ -109,6 +109,8 @@ module "aws" {
 
   codeartifact_pipy_url = var.codeartifact_pipy_url
   gainy_compute_version = var.gainy_compute_version
+  onesignal_app_id      = var.onesignal_app_id
+  onesignal_api_key     = var.onesignal_api_key
 }
 
 module "datadog" {
