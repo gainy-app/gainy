@@ -33,6 +33,8 @@ with interest_industries_flatten as
         union
         select interests.id as interest_id, sub_10_name as industry_name from {{ ref('interests') }}
         union
+        select interests.id as interest_id, sub_11_name as industry_name from {{ ref('interests') }}
+        union
         select interests.id as interest_id, sub_12_name as industry_name from {{ ref('interests') }}
         union
         select interests.id as interest_id, sub_13_name as industry_name from {{ ref('interests') }}
