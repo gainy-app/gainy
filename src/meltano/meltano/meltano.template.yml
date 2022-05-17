@@ -99,6 +99,9 @@ plugins:
           - entity: ticker_collections
             path: data/ticker_collections.csv
             keys: [ "ttf_name", "symbol" ]
+          - entity: ticker_gic_override
+            path: data/ticker_gic_override.csv
+            keys: [ "symbol" ]
 
     - name: tap-postgres
       config:

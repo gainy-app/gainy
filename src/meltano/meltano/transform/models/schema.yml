@@ -15,6 +15,7 @@ sources:
       - name: auto_ticker_industries
       - name: exchanges
       - name: ticker_collections
+      - name: ticker_gic_override
 
   - name: eod
     description: Financial data from https://eodhistoricaldata.com/
