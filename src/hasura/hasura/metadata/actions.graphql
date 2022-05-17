@@ -63,16 +63,16 @@ type Query {
 }
 
 type Query {
+  get_portfolio_holdings(
+    profile_id: Int!
+  ): [PortfolioHolding]
+}
+
+type Query {
   get_portfolio_piechart(
     profile_id: Int!
     access_token_ids: [Int]
   ): [PieChartDataPoint]
-}
-
-type Query {
-  get_portfolio_holdings(
-    profile_id: Int!
-  ): [PortfolioHolding]
 }
 
 type Query {

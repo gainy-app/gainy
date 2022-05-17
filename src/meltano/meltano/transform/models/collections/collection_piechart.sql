@@ -37,13 +37,13 @@ union all
            user_id,
            t.collection_id,
            collection_uniq_id,
-           (weight / weight_sum)::double precision                                                     as weight,
-           'category'::varchar                                                                         as entity_type,
-           category_id::varchar                                                                        as entity_id,
-           categories.name                                                                             as entity_name,
-           (absolute_daily_change / weight_sum)                                                        as absolute_daily_change,
-           (actual_price / case when prev_close_price > 0 then prev_close_price end)::double precision as relative_daily_change,
-           (actual_price / weight_sum)                                                                 as absolute_value
+           (weight / weight_sum)::double precision                                                         as weight,
+           'category'::varchar                                                                             as entity_type,
+           category_id::varchar                                                                            as entity_id,
+           categories.name                                                                                 as entity_name,
+           (absolute_daily_change / weight_sum)                                                            as absolute_daily_change,
+           (actual_price / case when prev_close_price > 0 then prev_close_price end - 1)::double precision as relative_daily_change,
+           (actual_price / weight_sum)                                                                     as absolute_value
     from (
              select profile_id,
                     user_id,
@@ -79,13 +79,13 @@ union all
            user_id,
            collection_id,
            collection_uniq_id,
-           (weight / weight_sum)::double precision                                                     as weight,
-           'interest'::varchar                                                                         as entity_type,
-           interest_id::varchar                                                                        as entity_id,
-           interests.name                                                                              as entity_name,
-           (absolute_daily_change / weight_sum)                                                        as absolute_daily_change,
-           (actual_price / case when prev_close_price > 0 then prev_close_price end)::double precision as relative_daily_change,
-           (actual_price / weight_sum)                                                                 as absolute_value
+           (weight / weight_sum)::double precision                                                         as weight,
+           'interest'::varchar                                                                             as entity_type,
+           interest_id::varchar                                                                            as entity_id,
+           interests.name                                                                                  as entity_name,
+           (absolute_daily_change / weight_sum)                                                            as absolute_daily_change,
+           (actual_price / case when prev_close_price > 0 then prev_close_price end - 1)::double precision as relative_daily_change,
+           (actual_price / weight_sum)                                                                     as absolute_value
     from (
              select profile_id,
                     user_id,

@@ -1,5 +1,8 @@
 - table:
     schema: app
+    name: notifications
+- table:
+    schema: app
     name: plaid_institutions
   select_permissions:
     - role: user
@@ -1471,6 +1474,7 @@
   configuration:
     custom_root_fields: {}
     custom_name: collections
+    column_config: {}
     custom_column_names: {}
   object_relationships:
     - name: match_score
@@ -1684,6 +1688,7 @@
   configuration:
     custom_root_fields: {}
     custom_name: ticker_collections
+    column_config: {}
     custom_column_names: {}
   object_relationships:
     - name: collection
