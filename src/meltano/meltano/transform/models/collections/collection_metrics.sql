@@ -29,5 +29,5 @@ select profile_id,
        (actual_price / case when prev_close_price > 0 then prev_close_price end - 1)::double precision as relative_daily_change,
        prev_close_price                                                                                as previous_day_close_price,
        time                                                                                            as updated_at,
-       market_capitalization_sum
+       market_capitalization_sum::bigint
 from grouped_collections
