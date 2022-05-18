@@ -36,7 +36,9 @@ with t_cat_sim_dif as
                                              collection_tickers_weighted.profile_id =
                                              profile_ticker_match_score.profile_id)
                                join t_cat_sim_dif on t_cat_sim_dif.symbol = profile_ticker_match_score.symbol
-                               join {{ source('app', 'profile_categories') }} using (profile_id, category_id)
+                               join {{ source('app', 'profile_categories') }}
+                                    on profile_categories.profile_id = profile_ticker_match_score.profile_id
+                                        and profile_categories.category_id = t_cat_sim_dif.category_id
                       group by profile_ticker_match_score.profile_id,
                                collection_tickers_weighted.collection_id,
                                collection_tickers_weighted.collection_uniq_id,
@@ -69,7 +71,9 @@ with t_cat_sim_dif as
                                              collection_tickers_weighted.profile_id =
                                              profile_ticker_match_score.profile_id)
                                join t_int_sim_dif on t_int_sim_dif.symbol = profile_ticker_match_score.symbol
-                               join {{ source('app', 'profile_interests') }} using (profile_id, interest_id)
+                               join {{ source('app', 'profile_interests') }}
+                                    on profile_interests.profile_id = profile_ticker_match_score.profile_id
+                                        and profile_interests.interest_id = t_int_sim_dif.interest_id
                       group by profile_ticker_match_score.profile_id,
                                collection_tickers_weighted.collection_id,
                                collection_tickers_weighted.collection_uniq_id,
