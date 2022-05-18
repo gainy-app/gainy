@@ -42,7 +42,7 @@ with t_cat_sim_dif as
                       group by profile_ticker_match_score.profile_id,
                                collection_tickers_weighted.collection_id,
                                collection_tickers_weighted.collection_uniq_id,
-                               category_id
+                               t_cat_sim_dif.category_id
                   ) t
                       join {{ ref('collection_piechart') }}
                            on collection_piechart.collection_id = t.collection_id
@@ -77,7 +77,7 @@ with t_cat_sim_dif as
                       group by profile_ticker_match_score.profile_id,
                                collection_tickers_weighted.collection_id,
                                collection_tickers_weighted.collection_uniq_id,
-                               interest_id
+                               t_int_sim_dif.interest_id
                   ) t
                       join {{ ref('collection_piechart') }}
                            on collection_piechart.collection_id = t.collection_id
