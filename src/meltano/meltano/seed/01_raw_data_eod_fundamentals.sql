@@ -16,6 +16,8 @@ CREATE TABLE IF NOT EXISTS raw_data.eod_fundamentals
     valuation           jsonb,
     outstandingshares   jsonb,
     type                varchar,
+    etf_data            jsonb,
+    mutualfund_data     jsonb,
     _sdc_batched_at     timestamp,
     _sdc_deleted_at     varchar,
     _sdc_extracted_at   timestamp,
