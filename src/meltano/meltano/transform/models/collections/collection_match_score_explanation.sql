@@ -114,6 +114,7 @@ select profile_id,
        collection_id,
        collection_uniq_id,
        category_id,
-       interest_id
+       interest_id,
+       user_id
 from profile_collection_matches_ranked
 where row_num <= 5
