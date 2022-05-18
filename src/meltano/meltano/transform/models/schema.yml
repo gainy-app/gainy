@@ -1578,7 +1578,7 @@ models:
       - name: user_id
         tests:
           - type:
-              type: 'character varying'
+              type: 'text'
 
   - name: crypto_metrics
     columns:
