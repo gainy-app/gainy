@@ -131,7 +131,7 @@ with ticker_risk_score_common_stocks as
 --presave it as a table plz, instead of this ugly CTE
      stocks_list_russel3000 as
          (
-             select symbol
+             select symbol::varchar
              from (
                       select (json_each((etf_data -> 'Holdings')::json)).value ->> 'Code' as symbol
                       from {{ source('eod', 'eod_fundamentals') }}
@@ -244,5 +244,5 @@ with ticker_risk_score_common_stocks as
          )
 
 select symbol, risk_score from crypto_riskscore_bynearestneighbors
-union
+union all
 select symbol, risk_score from ticker_risk_score_common_stocks
