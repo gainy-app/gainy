@@ -11,6 +11,14 @@ locals {
     CODEARTIFACT_PIPY_URL       = var.codeartifact_pipy_url
   })
 
+  websockets_build_args_force_build = {
+    WEBSOCKETS_SOURCE_MD5 = data.archive_file.websockets_source.output_md5
+    GAINY_COMPUTE_VERSION = var.gainy_compute_version
+  }
+  websockets_build_args = merge(local.websockets_build_args_force_build, {
+    CODEARTIFACT_PIPY_URL = var.codeartifact_pipy_url
+  })
+
   meltano_root_dir           = abspath("${path.cwd}/../src/meltano")
   meltano_transform_root_dir = abspath("${path.cwd}/../src/meltano/meltano/transform")
   meltano_image_tag          = format("meltano-%s-%s-%s", var.env, var.base_image_version, md5(jsonencode(local.meltano_build_args_force_build)))
@@ -21,6 +29,6 @@ locals {
   hasura_ecr_image_name = format("%v/%v:%v", var.ecr_address, local.ecr_repo, local.hasura_image_tag)
 
   websockets_root_dir       = abspath("${path.cwd}/../src/websockets")
-  websockets_image_tag      = format("websockets-%s-%s", var.env, data.archive_file.websockets_source.output_md5)
+  websockets_image_tag      = format("websockets-%s-%s", var.env, md5(jsonencode(local.websockets_build_args_force_build)))
   websockets_ecr_image_name = format("%v/%v:%v", var.ecr_address, local.ecr_repo, local.websockets_image_tag)
 }
