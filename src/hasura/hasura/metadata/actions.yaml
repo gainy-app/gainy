@@ -36,13 +36,6 @@ actions:
     permissions:
       - role: user
     comment: get_portfolio_chart
-  - name: get_portfolio_piechart
-    definition:
-      kind: ""
-      handler: '{{AWS_LAMBDA_API_GATEWAY_ENDPOINT}}/hasuraAction'
-    permissions:
-      - role: user
-    comment: get_portfolio_piechart
   - name: get_portfolio_chart_previous_period_close
     definition:
       kind: ""
@@ -56,6 +49,13 @@ actions:
       handler: '{{AWS_LAMBDA_API_GATEWAY_ENDPOINT}}/hasuraAction'
     permissions:
       - role: user
+  - name: get_portfolio_piechart
+    definition:
+      kind: ""
+      handler: '{{AWS_LAMBDA_API_GATEWAY_ENDPOINT}}/hasuraAction'
+    permissions:
+      - role: user
+    comment: get_portfolio_piechart
   - name: get_portfolio_transactions
     definition:
       kind: ""
@@ -99,6 +99,7 @@ custom_types:
     - name: PlaidWebhookError
   objects:
     - name: ChartDataPoint
+    - name: PieChartDataPoint
     - name: PortfolioChartPreviousPeriodClose
     - name: NewsDataPoint
     - name: LivePriceData

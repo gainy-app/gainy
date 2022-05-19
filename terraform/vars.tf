@@ -21,6 +21,13 @@ variable "hubspot_api_key" {
   type      = string
   sensitive = true
 }
+variable "onesignal_app_id" {
+  type = string
+}
+variable "onesignal_api_key" {
+  type      = string
+  sensitive = true
+}
 
 #################################### AWS ####################################
 

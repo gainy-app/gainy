@@ -156,6 +156,9 @@ module "ecs-service" {
   algolia_app_id            = var.algolia_app_id
   algolia_indexing_key      = var.algolia_indexing_key
 
+  onesignal_app_id  = var.onesignal_app_id
+  onesignal_api_key = var.onesignal_api_key
+
   datadog_api_key = var.datadog_api_key
   datadog_app_key = var.datadog_app_key
 

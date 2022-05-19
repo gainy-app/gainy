@@ -1,5 +1,5 @@
 from airflow.operators.bash import BashOperator
-from common import create_dag, get_meltano_command, get_schedules
+from common import create_dag, get_meltano_command, get_schedules, MELTANO_PROJECT_ROOT
 
 DEFAULT_TAGS = ["meltano", "debug"]
 
