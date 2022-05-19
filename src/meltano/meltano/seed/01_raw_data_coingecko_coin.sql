@@ -1,4 +1,4 @@
-create table raw_data.coingecko_coin
+create table if not exists raw_data.coingecko_coin
 (
     additional_notices              jsonb,
     asset_platform_id               varchar,

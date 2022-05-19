@@ -59,32 +59,6 @@ class PricesListener(AbstractPriceListener):
         return set(MANDATORY_SYMBOLS +
                    symbols[:SYMBOLS_LIMIT - len(MANDATORY_SYMBOLS)])
 
-    def get_active_listeners_symbols_count(self, db_conn):
-        query = """
-            SELECT sum(symbols_count)
-            FROM (
-                SELECT distinct on (key) symbols_count
-                FROM deployment.realtime_listener_heartbeat
-                where time > %(from_time)s and key != %(key)s
-                order by key, time desc
-            ) t
-        """
-
-        with db_conn.cursor() as cursor:
-            cursor.execute(
-                query, {
-                    "from_time":
-                    datetime.datetime.now(tz=datetime.timezone.utc) -
-                    datetime.timedelta(
-                        seconds=self.no_messages_reconnect_timeout),
-                    "key":
-                    self.instance_key,
-                })
-            result = cursor.fetchone()[0] or 0
-
-            self.logger.info("active_listeners_symbols_count %d", result)
-            return result
-
     async def handle_price_message(self, message):
         # Message format: {"s":"AAPL","p":161.14,"c":[12,37],"v":1,"dp":false,"t":1637573639704}
         symbol = message["s"]
@@ -198,31 +172,12 @@ class PricesListener(AbstractPriceListener):
         else:
             return super().should_reconnect()
 
-    async def save_heartbeat(self):
-        try:
-            query = """
-                insert into deployment.realtime_listener_heartbeat(source, key, symbols_count, time)
-                values (%(source)s, %(key)s, %(symbols_count)s, now())
-            """
-            while True:
-                with self.db_connect() as db_conn:
-                    with db_conn.cursor() as cursor:
-                        cursor.execute(
-                            query, {
-                                "source": self.source,
-                                "key": self.instance_key,
-                                "symbols_count": len(self.symbols),
-                            })
-                await asyncio.sleep(10)
-        except Exception as e:
-            self.logger.exception(e)
-
     async def sync(self):
         try:
             if self.sub_listeners is not None:
                 coroutines = [
                     sub_listener.sync() for sub_listener in self.sub_listeners
-                ] + [self.save_heartbeat()]
+                ]
                 await asyncio.gather(*coroutines)
             else:
                 await super().sync()
