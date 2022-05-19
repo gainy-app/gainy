@@ -48,7 +48,7 @@ def send_all(sender_id):
                 """insert into app.notifications(profile_id, uniq_id, send_at, text, data, sender_id)
                    select profile_id, uniq_id, send_at, text, data, %(sender_id)s
                    from push_notifications
-                   where send_at >= now()
+                   where send_at <= now()
                    on conflict do nothing""", {"sender_id": sender_id})
             cursor.execute(
                 """select profiles.email, uuid, send_at, text, data
