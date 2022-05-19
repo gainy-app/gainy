@@ -22,24 +22,21 @@ with t_cat_sim_dif as
                     t.collection_id,
                     t.collection_uniq_id,
                     t.category_id,
-                    t.match_score * weight as match_score
+                    t.similarity * weight as similarity
              from (
-                      select profile_ticker_match_score.profile_id,
+                      select profile_categories.profile_id,
                              collection_tickers_weighted.collection_id,
                              collection_tickers_weighted.collection_uniq_id,
                              t_cat_sim_dif.category_id,
-                             sum(match_score * sim_dif) as match_score
-                      from {{ source('app', 'profile_ticker_match_score')}}
+                             (sum(sim_dif * weight) / sum(weight))::double precision as similarity
+                      from {{ source('app', 'profile_categories') }}
+                               join t_cat_sim_dif using (category_id)
                                join {{ ref('collection_tickers_weighted') }}
-                                    on collection_tickers_weighted.symbol = profile_ticker_match_score.symbol
+                                    on collection_tickers_weighted.symbol = t_cat_sim_dif.symbol
                                         and (collection_tickers_weighted.profile_id is null or
                                              collection_tickers_weighted.profile_id =
-                                             profile_ticker_match_score.profile_id)
-                               join t_cat_sim_dif on t_cat_sim_dif.symbol = profile_ticker_match_score.symbol
-                               join {{ source('app', 'profile_categories') }}
-                                    on profile_categories.profile_id = profile_ticker_match_score.profile_id
-                                        and profile_categories.category_id = t_cat_sim_dif.category_id
-                      group by profile_ticker_match_score.profile_id,
+                                             profile_categories.profile_id)
+                      group by profile_categories.profile_id,
                                collection_tickers_weighted.collection_id,
                                collection_tickers_weighted.collection_uniq_id,
                                t_cat_sim_dif.category_id
@@ -50,6 +47,7 @@ with t_cat_sim_dif as
                                     collection_piechart.profile_id is null)
                                and collection_piechart.entity_type = 'category'
                                and collection_piechart.entity_id = category_id::varchar
+             where weight > 0.2
          ),
      profile_collection_interests as
          (
@@ -57,24 +55,21 @@ with t_cat_sim_dif as
                     t.collection_id,
                     t.collection_uniq_id,
                     t.interest_id,
-                    t.match_score * weight as match_score
+                    t.similarity * weight as similarity
              from (
-                      select profile_ticker_match_score.profile_id,
+                      select profile_interests.profile_id,
                              collection_tickers_weighted.collection_id,
                              collection_tickers_weighted.collection_uniq_id,
                              t_int_sim_dif.interest_id,
-                             sum(match_score * sim_dif) as match_score
-                      from {{ source('app', 'profile_ticker_match_score')}}
+                             (sum(sim_dif * weight) / sum(weight))::double precision as similarity
+                      from {{ source('app', 'profile_interests') }}
+                               join t_int_sim_dif using (interest_id)
                                join {{ ref('collection_tickers_weighted') }}
-                                    on collection_tickers_weighted.symbol = profile_ticker_match_score.symbol
+                                    on collection_tickers_weighted.symbol = t_int_sim_dif.symbol
                                         and (collection_tickers_weighted.profile_id is null or
                                              collection_tickers_weighted.profile_id =
-                                             profile_ticker_match_score.profile_id)
-                               join t_int_sim_dif on t_int_sim_dif.symbol = profile_ticker_match_score.symbol
-                               join {{ source('app', 'profile_interests') }}
-                                    on profile_interests.profile_id = profile_ticker_match_score.profile_id
-                                        and profile_interests.interest_id = t_int_sim_dif.interest_id
-                      group by profile_ticker_match_score.profile_id,
+                                             profile_interests.profile_id)
+                      group by profile_interests.profile_id,
                                collection_tickers_weighted.collection_id,
                                collection_tickers_weighted.collection_uniq_id,
                                t_int_sim_dif.interest_id
@@ -85,7 +80,7 @@ with t_cat_sim_dif as
                                     collection_piechart.profile_id is null)
                                and collection_piechart.entity_type = 'interest'
                                and collection_piechart.entity_id = interest_id::varchar
---              where weight > 0.2
+             where weight > 0.2
          ),
      profile_collection_matches as
          (
@@ -95,7 +90,7 @@ with t_cat_sim_dif as
                       select profile_id,
                              collection_id,
                              collection_uniq_id,
-                             match_score,
+                             similarity,
                              category_id,
                              null as interest_id
                       from profile_collection_categories
@@ -103,7 +98,7 @@ with t_cat_sim_dif as
                       select profile_id,
                              collection_id,
                              collection_uniq_id,
-                             match_score,
+                             similarity,
                              null as category_id,
                              interest_id
                       from profile_collection_interests
@@ -113,7 +108,7 @@ with t_cat_sim_dif as
      profile_collection_matches_ranked as
          (
              select profile_collection_matches.*,
-                    row_number() over (partition by profile_id, collection_id order by match_score desc) as row_num
+                    row_number() over (partition by profile_id, collection_id order by similarity desc) as row_num
              from profile_collection_matches
          )
 select profile_id,
