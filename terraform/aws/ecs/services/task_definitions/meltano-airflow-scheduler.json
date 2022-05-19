@@ -34,7 +34,7 @@
     { "name": "PG_USERNAME",                           "value": "${pg_username}" },
     { "name": "MELTANO_DATABASE_URI",                  "value": "postgresql://${pg_username}:${pg_password}@${pg_host}:${pg_port}/${pg_dbname}?options=-csearch_path=${pg_meltano_schema}" },
     { "name": "MELTANO_LOG_LEVEL",                     "value": "warning" },
-    { "name": "MELTANO_ELT_BUFFER_SIZE",               "value": "52428800" },
+    { "name": "MELTANO_ELT_BUFFER_SIZE",               "value": "157286400" },
     { "name": "AIRFLOW_PASSWORD",                      "value": "${airflow_password}" },
     { "name": "AIRFLOW_DATABASE_URI",                  "value": "postgresql://${pg_username}:${pg_password}@${pg_host}:${pg_port}/${pg_dbname}?options=-csearch_path=${pg_airflow_schema}" },
     { "name": "AIRFLOW_LOG_LEVEL",                     "value": "INFO" },

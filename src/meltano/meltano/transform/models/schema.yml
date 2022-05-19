@@ -45,17 +45,19 @@ sources:
     description: Mobile App data, managed by hasura
     schema: app
     tables:
-      - name: profile_favorite_collections
-      - name: profile_portfolio_accounts
-      - name: profile_portfolio_transactions
-      - name: portfolio_securities
-      - name: profile_holdings
-      - name: profiles
       - name: personalized_collection_sizes
       - name: personalized_ticker_collections
-      - name: profile_plaid_access_tokens
       - name: plaid_institutions
+      - name: portfolio_securities
+      - name: profile_categories
+      - name: profile_favorite_collections
+      - name: profile_holdings
+      - name: profile_interests
+      - name: profile_plaid_access_tokens
+      - name: profile_portfolio_accounts
+      - name: profile_portfolio_transactions
       - name: profile_ticker_match_score
+      - name: profiles
 
   - name: website
     description: Website data, managed by webflow integrations at gainy.app
@@ -1363,6 +1365,10 @@ models:
         tests:
           - type:
               type: 'double precision'
+      - name: market_capitalization_sum
+        tests:
+          - type:
+              type: 'bigint'
       - name: updated_at
         tests:
           - type:
@@ -1593,6 +1599,10 @@ models:
         tests:
           - type:
               type: 'integer'
+      - name: user_id
+        tests:
+          - type:
+              type: 'text'
 
   - name: crypto_metrics
     columns:

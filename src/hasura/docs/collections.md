@@ -32,6 +32,7 @@ query {
         metrics {
             absolute_daily_change
             relative_daily_change
+            market_capitalization_sum
             updated_at
         }
     }
