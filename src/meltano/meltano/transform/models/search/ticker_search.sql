@@ -13,10 +13,10 @@ with ticker_categories as (
     group by symbol
 ),
 ticker_industries as (
-    select symbol, array_agg(gi.name) as ticker_industries
+    select symbol, array_agg(gainy_industries.name) as ticker_industries
     from {{ ref('ticker_industries') }} ti
-        join {{ ref('gainy_industries') }} gi
-            on ti.industry_id = gi.id
+        join {{ ref('gainy_industries') }}
+            on ti.industry_id = gainy_industries.id
     group by symbol
 ),
 ticker_volumes as (

@@ -1,6 +1,7 @@
 resource "time_static" "meltano_changed" {
   triggers = {
     meltano_transform_source_md5 = data.archive_file.meltano_transform_source.output_md5
+    meltano_seed_source_md5      = data.archive_file.meltano_seed_source.output_md5
   }
 }
 
@@ -35,6 +36,12 @@ data "archive_file" "meltano_transform_source" {
   type        = "zip"
   source_dir  = local.meltano_transform_root_dir
   output_path = "/tmp/meltano-transform_source.zip"
+  excludes    = ["meltano/.meltano"]
+}
+data "archive_file" "meltano_seed_source" {
+  type        = "zip"
+  source_dir  = local.meltano_seed_root_dir
+  output_path = "/tmp/meltano-seed_source.zip"
   excludes    = ["meltano/.meltano"]
 }
 data "archive_file" "hasura_source" {

@@ -72,10 +72,10 @@ plugins:
     - name: tap-csv
       config:
         files:
-          - entity: gainy_industries
-            path: data/gainy_industries.csv
+          - entity: gainy_custom_industries
+            path: data/gainy_custom_industries.csv
             keys: [ "id" ]
-          - entity: gainy_ticker_industries
+          - entity: gainy_ticker_custom_industries
             path: data/industry_tickers.csv
             keys: [ "Code" ]
           - entity: gainy_collections
@@ -93,6 +93,15 @@ plugins:
           - entity: exchanges
             path: data/exchanges.csv
             keys: [ "name" ]
+          - entity: crypto_ticker_industries
+            path: data/crypto_ticker_industries.csv
+            keys: [ "cc_symbol" ]
+          - entity: ticker_collections
+            path: data/ticker_collections.csv
+            keys: [ "ttf_name", "symbol" ]
+          - entity: ticker_gic_override
+            path: data/ticker_gic_override.csv
+            keys: [ "symbol" ]
 
     - name: tap-postgres
       config:
