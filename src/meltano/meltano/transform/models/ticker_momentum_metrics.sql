@@ -8,8 +8,7 @@
   )
 }}
 
-with tickers as (select * from {{ ref('tickers') }} where type != 'crypto'),
-     settings (local_risk_free_rate) as (values (0.001)),
+with settings (local_risk_free_rate) as (values (0.001)),
      weekly_prices as
          (
              SELECT symbol, datetime, adjusted_close
@@ -39,7 +38,7 @@ with tickers as (select * from {{ ref('tickers') }} where type != 'crypto'),
                     case when hpm.price_13m > 0 THEN hpm.price_1m / hpm.price_13m - 1 - settings.local_risk_free_rate END AS MOM12
              from {{ source('eod', 'eod_fundamentals') }} f
                       join settings ON true
-                      join tickers as t on f.code = t.symbol
+                      join {{ ref('tickers') }} as t on f.code = t.symbol
                       join {{ ref('historical_prices_marked') }} hpm using (symbol)
          ),
      momentum_risk_adj as
@@ -81,6 +80,7 @@ with tickers as (select * from {{ ref('tickers') }} where type != 'crypto'),
              from z_score zs
          )
 SELECT m.code as symbol,
+       stddev_3_years.value                                           as stddev_3_years,
        MOM2,
        MOM12,
        Risk_Adj_MOM2,
@@ -94,7 +94,8 @@ SELECT m.code as symbol,
        Windsored_Z_Score_MOM2,
        Windsored_Z_Score_MOM12,
        (wzs.Windsored_Z_Score_MOM2 + wzs.Windsored_Z_Score_MOM12) / 2 as combined_momentum_score
-FROM tickers t
+FROM {{ ref('tickers') }} t
+         join stddev_3_years on stddev_3_years.code = t.symbol
          join momentum m on m.code = t.symbol
     join momentum_risk_adj mra on mra.code = t.symbol
     join windsored_z_score wzs on wzs.code = t.symbol
