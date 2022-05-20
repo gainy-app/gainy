@@ -148,7 +148,7 @@ class AbstractPriceListener(ABC):
                 ) for record in records]
 
                 persist_records(values, self.source)
-                await self.save_heartbeat(len(values))
+                await self.save_heartbeat(len(self.symbols))
 
             except Exception as e:
                 self.logger.error("__sync_records: %s", e)
