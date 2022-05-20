@@ -16,8 +16,10 @@ from datadog_api_client.v1.model.series import Series
 
 METRIC_REALTIME_PRICES_COUNT = 'app.realtime_prices_count'
 
-NO_MESSAGES_RECONNECT_TIMEOUT = 600  # reconnect if no messages for 10 minutes
+NO_MESSAGES_RECONNECT_TIMEOUT = 120  # reconnect if no messages for 2 minutes
 MAX_INSERT_RECORDS_COUNT = 1000
+LOCK_RESOURCE_ID_POLYGON = 0  # 0 - 10
+LOCK_RESOURCE_ID_EOD = 10  # 10 - 20
 
 PG_HOST = os.environ['PG_HOST']
 PG_PORT = os.environ['PG_PORT']
@@ -88,12 +90,12 @@ class AbstractPriceListener(ABC):
     def __init__(self, instance_key, source):
         self.instance_key = instance_key
         self.logger = get_logger(source)
+        self.no_messages_reconnect_timeout = NO_MESSAGES_RECONNECT_TIMEOUT
         self.symbols = self.get_symbols()
         self.source = source
         self.records_queue = asyncio.Queue()
         self.records_queue_lock = asyncio.Lock()
         self.max_insert_records_count = MAX_INSERT_RECORDS_COUNT
-        self.no_messages_reconnect_timeout = NO_MESSAGES_RECONNECT_TIMEOUT
         self._latest_symbol_message = {}
         self.start_timestamp = self.get_current_timestamp()
         self.logger.debug("started at %d for symbols %s", self.start_timestamp,
@@ -146,6 +148,7 @@ class AbstractPriceListener(ABC):
                 ) for record in records]
 
                 persist_records(values, self.source)
+                await self.save_heartbeat(len(values))
 
             except Exception as e:
                 self.logger.error("__sync_records: %s", e)
@@ -170,6 +173,50 @@ class AbstractPriceListener(ABC):
             return True
 
         return False
+
+    async def save_heartbeat(self, symbols_count):
+        try:
+            query = """
+                insert into deployment.realtime_listener_heartbeat(source, key, symbols_count, time)
+                values (%(source)s, %(key)s, %(symbols_count)s, now())
+            """
+            with self.db_connect() as db_conn:
+                with db_conn.cursor() as cursor:
+                    cursor.execute(
+                        query, {
+                            "source": self.source,
+                            "key": self.instance_key,
+                            "symbols_count": symbols_count,
+                        })
+        except Exception as e:
+            self.logger.exception(e)
+
+    def get_active_listeners_symbols_count(self, db_conn):
+        query = """
+            SELECT sum(symbols_count)
+            FROM (
+                SELECT distinct on (key) symbols_count
+                FROM deployment.realtime_listener_heartbeat
+                where time > %(from_time)s and key != %(key)s
+                order by key, time desc
+            ) t
+        """
+
+        with db_conn.cursor() as cursor:
+            cursor.execute(
+                query, {
+                    "from_time":
+                    datetime.datetime.now(tz=datetime.timezone.utc) -
+                    datetime.timedelta(
+                        seconds=self.no_messages_reconnect_timeout),
+                    "key":
+                    self.instance_key,
+                })
+            result = cursor.fetchone()[0] or 0
+
+            self.logger.info("[%s] active_listeners_symbols_count %d",
+                             self.instance_key, result)
+            return result
 
 
 async def run(listener_factory):

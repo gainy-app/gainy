@@ -99,6 +99,7 @@ resource "docker_registry_image" "websockets" {
   build {
     context    = local.websockets_root_dir
     dockerfile = "Dockerfile"
+    build_args = local.websockets_build_args
   }
 
   lifecycle {
