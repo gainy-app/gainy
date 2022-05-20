@@ -99,19 +99,19 @@ class PricesListener(AbstractPriceListener):
             return
 
         try:
+            active_listeners_symbols_count = 0
             with self.db_connect() as db_conn:
-                can_continue = False
-                self.logger.info('Locking')
                 with LockManager.database_lock(db_conn,
                                                ResourceType.WEBSOCKETS,
                                                self.lock_resource_id):
-                    if self.get_active_listeners_symbols_count(db_conn) == 0:
-                        can_continue = True
+                    active_listeners_symbols_count = self.get_active_listeners_symbols_count(
+                        db_conn)
+                    if active_listeners_symbols_count == 0:
                         await self.save_heartbeat(len(self.symbols))
-                self.logger.info('Unlocked')
 
-            if not can_continue:
-                self.logger.info('Active listener found, sleeping')
+            if active_listeners_symbols_count > 0:
+                self.logger.info('Active listener found (%d), sleeping',
+                                 active_listeners_symbols_count)
                 await asyncio.sleep(60)
                 return
         except Exception as e:
@@ -174,14 +174,14 @@ class PricesListener(AbstractPriceListener):
         except Exception as e:
             self.logger.exception(e)
 
-    def should_reconnect(self):
+    def should_reconnect(self, log_prefix=None):
         if self.sub_listeners is not None:
             for sub_listener in self.sub_listeners:
-                if not sub_listener.should_reconnect():
+                if not sub_listener.should_reconnect(self.cluster):
                     return False
             return True
-        else:
-            return super().should_reconnect()
+
+        super().should_reconnect(log_prefix)
 
     def transform_symbol(self, symbol):
         return symbol.replace('-', '.')
