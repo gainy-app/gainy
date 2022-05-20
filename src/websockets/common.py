@@ -89,10 +89,10 @@ class AbstractPriceListener(ABC):
 
     def __init__(self, instance_key, source):
         self.instance_key = instance_key
+        self.source = source
         self.logger = get_logger(source)
         self.no_messages_reconnect_timeout = NO_MESSAGES_RECONNECT_TIMEOUT
         self.symbols = self.get_symbols()
-        self.source = source
         self.records_queue = asyncio.Queue()
         self.records_queue_lock = asyncio.Lock()
         self.max_insert_records_count = MAX_INSERT_RECORDS_COUNT
@@ -153,13 +153,14 @@ class AbstractPriceListener(ABC):
             except Exception as e:
                 self.logger.error("__sync_records: %s", e)
 
-    def should_reconnect(self):
+    def should_reconnect(self, log_prefix=None):
         current_timestamp = self.get_current_timestamp()
         if current_timestamp - self.start_timestamp < self.no_messages_reconnect_timeout:
             return False
 
         if not self.get_symbols().issubset(self.symbols):
-            self.logger.info("should_reconnect: symbols changed")
+            self.logger.info("should_reconnect %s: symbols changed", log_prefix
+                             or "")
             return True
 
         if len(self._latest_symbol_message) > 0:
@@ -169,7 +170,8 @@ class AbstractPriceListener(ABC):
 
         no_messages_reconnect_threshold = current_timestamp - self.no_messages_reconnect_timeout
         if latest_message_time < no_messages_reconnect_threshold:
-            self.logger.info("should_reconnect: no messages")
+            self.logger.info("should_reconnect %s: no messages", log_prefix
+                             or "")
             return True
 
         return False
@@ -197,25 +199,26 @@ class AbstractPriceListener(ABC):
             FROM (
                 SELECT distinct on (key) symbols_count
                 FROM deployment.realtime_listener_heartbeat
-                where time > %(from_time)s and key != %(key)s
+                where time > %(from_time)s and source = %(source)s and key != %(key)s
                 order by key, time desc
             ) t
         """
 
+        from_time = datetime.datetime.now(
+            tz=datetime.timezone.utc) - datetime.timedelta(
+                seconds=self.no_messages_reconnect_timeout)
+
         with db_conn.cursor() as cursor:
             cursor.execute(
                 query, {
-                    "from_time":
-                    datetime.datetime.now(tz=datetime.timezone.utc) -
-                    datetime.timedelta(
-                        seconds=self.no_messages_reconnect_timeout),
-                    "key":
-                    self.instance_key,
+                    "from_time": from_time,
+                    "source": self.source,
+                    "key": self.instance_key,
                 })
             result = cursor.fetchone()[0] or 0
 
-            self.logger.info("[%s] active_listeners_symbols_count %d",
-                             self.instance_key, result)
+            self.logger.debug("[%s] active_listeners_symbols_count %d",
+                              self.instance_key, result)
             return result
 
 

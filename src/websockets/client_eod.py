@@ -163,14 +163,14 @@ class PricesListener(AbstractPriceListener):
         except Exception as e:
             self.logger.error('handle_message %s: %s', e, message_raw)
 
-    def should_reconnect(self):
+    def should_reconnect(self, log_prefix=None):
         if self.sub_listeners is not None:
             for sub_listener in self.sub_listeners:
-                if not sub_listener.should_reconnect():
+                if not sub_listener.should_reconnect(self.endpoint):
                     return False
             return True
-        else:
-            return super().should_reconnect()
+
+        return super().should_reconnect(log_prefix)
 
     async def sync(self):
         try:
