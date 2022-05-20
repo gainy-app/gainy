@@ -19,7 +19,7 @@ locals {
   coingecko_jobs_count                = 2
 
   eod_websockets_memory_credits     = var.env == "production" ? 512 : 0
-  polygon_websockets_memory_credits = var.env == "production" ? 768 : 0
+  polygon_websockets_memory_credits = var.env == "production" ? 1024 : 0
   hasura_memory_credits             = var.env == "production" ? 2048 : 1024
   meltano_ui_memory_credits         = var.env == "production" ? 1024 : 1024
   meltano_scheduler_memory_credits  = var.env == "production" ? 4096 : 3072
