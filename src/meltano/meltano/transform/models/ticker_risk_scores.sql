@@ -81,7 +81,7 @@ with ticker_riskscore_categorial_weights_frominvestcats as
              select trcw.symbol,
                     case
                         when sum(trcw.weight) = 0
-                            then 0.5 -- in probably non-existing case if all weights was 0 (0 volatility of adjusted_close from eod's "historical_prices")
+                            then 0.0 -- in probably non-existing case if all weights was 0 (0 volatility of adjusted_close from eod's "historical_prices")
                         else sum(trcw.risk_category * trcw.weight) / (1e-30 + sum(trcw.weight)) -2. -- [1..3]=>(-1..1)
                         end as risk
              from ticker_riskscore_categorial_weights trcw
