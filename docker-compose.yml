@@ -138,6 +138,9 @@ services:
   websockets-eod:
     build:
       context: ./src/websockets
+      args:
+        CODEARTIFACT_PIPY_URL: ${CODEARTIFACT_PIPY_URL}
+        GAINY_COMPUTE_VERSION: ${GAINY_COMPUTE_VERSION}
     image: gainy-websockets:latest
     restart: always
     volumes:

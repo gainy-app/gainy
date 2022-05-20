@@ -1,6 +1,6 @@
 import datetime
 import logging
-from common import make_graphql_request, get_personalized_collections, PROFILE_ID, MIN_COLLECTIONS_COUNT, MIN_PERSONALIZED_COLLECTIONS_COUNT, MIN_INTEREST_COUNT, MIN_CATEGORIES_COUNT
+from common import make_graphql_request
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
