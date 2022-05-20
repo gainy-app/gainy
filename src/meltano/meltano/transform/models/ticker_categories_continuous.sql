@@ -14,9 +14,9 @@
 with
     common_stocks as (select * from {{ ref('tickers') }} where "type" ilike 'common stock')
 
-/*( -- Cat: Crypto (add here when that cat would be ready) )
-union
-*/
+    /*( -- Cat: Crypto (add here when that cat would be ready) ) 
+    *  no such category. For crypto we are using 2 components: interests and risk
+    */
 
     ( -- Cat: ETF
         select

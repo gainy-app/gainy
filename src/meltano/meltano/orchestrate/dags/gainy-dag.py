@@ -2,21 +2,6 @@ import os
 from airflow.operators.bash import BashOperator
 from common import create_dag, get_meltano_command, get_schedules, MELTANO_PROJECT_ROOT, ENV
 
-
-def create_downstream_operators(dag):
-    industry_assignment = BashOperator(
-        task_id="industry-assignments-generator",
-        bash_command="gainy_industry_assignment predict",
-        dag=dag)
-
-    recommendation = BashOperator(task_id="update-recommendations",
-                                  bash_command="gainy_recommendation",
-                                  dag=dag,
-                                  pool="gainy_recommendation")
-
-    return industry_assignment, recommendation
-
-
 schedules = get_schedules()
 tags = {
     schedule['loader'] if schedule['downstream'] else schedule['extractor']
@@ -72,8 +57,4 @@ generate_meltano_config = BashOperator(
     f"cd {MELTANO_PROJECT_ROOT}; /usr/local/bin/python scripts/generate_meltano_config.py",
     dag=dag)
 
-industry_assignment, _downstream = create_downstream_operators(dag)
-downstream.append(_downstream)
-
-# dependencies
-generate_meltano_config >> upstream >> industry_assignment >> dbt >> downstream >> clean
+generate_meltano_config >> upstream >> dbt >> downstream >> clean

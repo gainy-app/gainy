@@ -1,4 +1,4 @@
-create table raw_data.coingecko_market_realtime
+create table if not exists raw_data.coingecko_market_realtime
 (
     ath                              double precision,
     ath_change_percentage            double precision,

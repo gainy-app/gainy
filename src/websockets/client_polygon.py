@@ -5,7 +5,8 @@ import os
 import json
 import datetime
 from decimal import Decimal
-from common import run, AbstractPriceListener
+from common import run, AbstractPriceListener, LOCK_RESOURCE_ID_POLYGON
+from gainy.data_access.db_lock import LockManager, ResourceType
 
 POLYGON_API_TOKEN = os.environ["POLYGON_API_TOKEN"]
 POLYGON_REALTIME_STREAMING_HOST = os.environ["POLYGON_REALTIME_STREAMING_HOST"]
@@ -13,17 +14,19 @@ POLYGON_REALTIME_STREAMING_HOST = os.environ["POLYGON_REALTIME_STREAMING_HOST"]
 
 class PricesListener(AbstractPriceListener):
 
-    def __init__(self, instance_key, cluster=None):
+    def __init__(self, instance_key, cluster=None, lock_resource_id=None):
         self.cluster = cluster
         super().__init__(instance_key, "polygon")
 
         self.api_token = POLYGON_API_TOKEN
         self.host = POLYGON_REALTIME_STREAMING_HOST
+        self.lock_resource_id = lock_resource_id or LOCK_RESOURCE_ID_POLYGON
 
         if self.cluster is None:
             self.sub_listeners = [
-                PricesListener(instance_key, cluster)
-                for cluster in [StreamCluster.STOCKS, StreamCluster.OPTIONS]
+                PricesListener(instance_key, cluster,
+                               LOCK_RESOURCE_ID_POLYGON + k + 1) for k, cluster
+                in enumerate([StreamCluster.STOCKS, StreamCluster.OPTIONS])
             ]
         else:
             self.sub_listeners = None
@@ -95,6 +98,26 @@ class PricesListener(AbstractPriceListener):
             await asyncio.gather(*coroutines)
             return
 
+        try:
+            active_listeners_symbols_count = 0
+            with self.db_connect() as db_conn:
+                with LockManager.database_lock(db_conn,
+                                               ResourceType.WEBSOCKETS,
+                                               self.lock_resource_id):
+                    active_listeners_symbols_count = self.get_active_listeners_symbols_count(
+                        db_conn)
+                    if active_listeners_symbols_count == 0:
+                        await self.save_heartbeat(len(self.symbols))
+
+            if active_listeners_symbols_count > 0:
+                self.logger.info('Active listener found (%d), sleeping',
+                                 active_listeners_symbols_count)
+                await asyncio.sleep(60)
+                return
+        except Exception as e:
+            self.logger.exception(e)
+            return
+
         stream_client = polygon.AsyncStreamClient(self.api_token,
                                                   self.cluster,
                                                   host=self.host)
@@ -157,8 +180,8 @@ class PricesListener(AbstractPriceListener):
                 if not sub_listener.should_reconnect():
                     return False
             return True
-        else:
-            return super().should_reconnect()
+
+        super().should_reconnect(self.cluster)
 
     def transform_symbol(self, symbol):
         return symbol.replace('-', '.')

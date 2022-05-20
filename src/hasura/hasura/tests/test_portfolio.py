@@ -31,7 +31,7 @@ def get_test_portfolio_chart_filters_data():
         "accessTokenIds": [None, 1],
         "accountIds": [None, 7],
         "institutionIds": [None, 1],
-        "interestIds": [None, 5],
+        "interestIds": [None, 12],
         "categoryIds": [None, 6],
         "securityTypes": [None, "equity"],
         "lttOnly": [None, True],

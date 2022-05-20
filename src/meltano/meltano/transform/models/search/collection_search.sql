@@ -20,7 +20,7 @@ with collection_category_tags as (
 collection_industry_tags as (
     select
         ci.collection_id,
-        gi."name" as tag,
+        gainy_industries.name as tag,
         case
             when industry_grade >= 0.6 then 1
             when industry_grade >= 0.2 then 2
@@ -28,8 +28,8 @@ collection_industry_tags as (
             else 4
         end as priority
         from {{ ref('collection_industries') }} ci
-            join {{ ref('gainy_industries') }} gi
-                on gi.id = ci.industry_id
+            join {{ ref('gainy_industries') }}
+                on ci.industry_id = gainy_industries.id
 ),
 collection_tags as (
     select

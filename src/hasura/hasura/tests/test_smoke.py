@@ -1,5 +1,5 @@
 import logging
-from common import make_graphql_request, get_personalized_collections, PROFILE_ID, MIN_COLLECTIONS_COUNT, MIN_PERSONALIZED_COLLECTIONS_COUNT, MIN_INTEREST_COUNT, MIN_CATEGORIES_COUNT
+from common import make_graphql_request, MIN_COLLECTIONS_COUNT, MIN_INTEREST_COUNT, MIN_CATEGORIES_COUNT
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
@@ -11,11 +11,6 @@ def test_collections():
 
     logger.info('%d %d', len(data), MIN_COLLECTIONS_COUNT)
     assert len(data) >= MIN_COLLECTIONS_COUNT
-
-    personalized_collection_ids = set(
-        [i['id'] for i in get_personalized_collections()])
-    collection_ids = set([i['id'] for i in data])
-    assert personalized_collection_ids.issubset(collection_ids)
 
 
 def test_interests():
