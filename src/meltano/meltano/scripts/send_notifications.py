@@ -29,10 +29,10 @@ def send_push_notification(notification):
 
     if notification['emails']:
         filters = []
-        for k,email in enumerate(notification['emails']):
+        for k, email in enumerate(notification['emails']):
             if k:
                 filters.append({"operator": "OR"})
-            filters.append({ "field": "email", "relation": "=", "value": email})
+            filters.append({"field": "email", "relation": "=", "value": email})
         payload['filters'] = filters
     else:
         payload['included_segments'] = SEGMENTS
