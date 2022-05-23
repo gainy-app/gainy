@@ -100,7 +100,7 @@ select null                                                       as emails,
        ('top_ttf_' || now()::date)::varchar                       as uniq_id,
        exchange_schedule.open_at + interval '2 hours 30 minutes'  as send_at,
        json_build_object('en', 'The most performing TTF today is ' || collection_name || ' +' || round(relative_daily_change * 100) ||
-       '%. Check this out!')                                      as text,
+       '%. Check it out!')                                        as text,
        json_build_object('t', 1, 'ttf_id', collection_id)         as data
 from (
          select collection_uniq_id,

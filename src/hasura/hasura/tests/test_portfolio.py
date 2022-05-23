@@ -139,13 +139,17 @@ def verify_portfolio_chart(portfolio_chart,
             assert len(new_dates) - len(symbol_chart_datetimes) < 2
 
     portfolio_chart_index = 0
-    for datetime in sorted(symbol_chart_datetimes):
+    for date in sorted(symbol_chart_datetimes):
+        print(datetime)
+        if datetime.datetime.now() - datetime.datetime.strptime(
+                date, '%Y-%m-%dT%H:%M:%S') < datetime.timedelta(minutes=30):
+            continue
         cur_quantities = quantity_override = None
 
         for start_date, end_date, _quantities in quantities_override:
-            if start_date is not None and start_date > datetime:
+            if start_date is not None and start_date > date:
                 continue
-            if end_date is not None and end_date < datetime:
+            if end_date is not None and end_date < date:
                 continue
 
             if isinstance(_quantities, numbers.Number):
@@ -163,13 +167,13 @@ def verify_portfolio_chart(portfolio_chart,
 
             chart_row_index = chart_row_indexes[symbol]
             while chart_row_index < len(
-                    symbol_charts[symbol]) and symbol_charts[symbol][
-                        chart_row_index]['datetime'] < datetime:
+                    symbol_charts[symbol]
+            ) and symbol_charts[symbol][chart_row_index]['datetime'] < date:
                 chart_row_indexes[symbol] += 1
                 chart_row_index = chart_row_indexes[symbol]
 
             if chart_row_index < len(symbol_charts[symbol]) and symbol_charts[
-                    symbol][chart_row_index]['datetime'] == datetime:
+                    symbol][chart_row_index]['datetime'] == date:
                 expected_value += symbol_charts[symbol][chart_row_index][
                     'adjusted_close'] * quantity
                 print(symbol, symbol_charts[symbol][chart_row_index], quantity)
@@ -179,17 +183,17 @@ def verify_portfolio_chart(portfolio_chart,
         else:
             portfolio_chart_row = None
 
-        print(portfolio_chart_row, datetime)
-        if portfolio_chart_row is not None and datetime == portfolio_chart_row[
+        print(portfolio_chart_row, date)
+        if portfolio_chart_row is not None and date == portfolio_chart_row[
                 'datetime']:
             assert abs(
                 portfolio_chart_row['adjusted_close'] - expected_value
-            ) < PRICE_EPS, f"{assert_message_prefix}: wrong value on {datetime}: {portfolio_chart_row['adjusted_close'] }, expected {expected_value}"
+            ) < PRICE_EPS, f"{assert_message_prefix}: wrong value on {date}: {portfolio_chart_row['adjusted_close'] }, expected {expected_value}"
             portfolio_chart_index += 1
         else:
             assert abs(
                 expected_value
-            ) < PRICE_EPS, f"{assert_message_prefix}: no value on {datetime}, expected {expected_value}"
+            ) < PRICE_EPS, f"{assert_message_prefix}: no value on {date}, expected {expected_value}"
 
 
 def verify_portfolio_chart_previous_period_close(period,
