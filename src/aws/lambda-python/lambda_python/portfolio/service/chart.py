@@ -107,6 +107,8 @@ class PortfolioChartService:
                                                     filter)
         if static_value:
             for k in data:
+                if data[k] is None:
+                    continue
                 data[k] += static_value
 
         return data

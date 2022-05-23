@@ -16,7 +16,11 @@ select portfolio_securities.id,
            end                                      as original_ticker_symbol,
        case
            when base_tickers.type = 'crypto'
-               then base_tickers.type
+               then 'crypto'
+           when portfolio_securities.type = 'derivative'
+               then 'derivative'
+           when base_tickers.type = 'common stock'
+               then 'equity'
            else portfolio_securities.type
            end                                      as type
 from {{ source('app', 'portfolio_securities') }}
