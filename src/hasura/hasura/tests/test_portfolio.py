@@ -140,7 +140,6 @@ def verify_portfolio_chart(portfolio_chart,
 
     portfolio_chart_index = 0
     for date in sorted(symbol_chart_datetimes):
-        print(datetime)
         if datetime.datetime.now() - datetime.datetime.strptime(
                 date, '%Y-%m-%dT%H:%M:%S') < datetime.timedelta(minutes=30):
             continue
