@@ -23,7 +23,11 @@ with latest_open_trading_session as (
            historical_prices_aggregated.adjusted_close,
            historical_prices_aggregated.volume
     from {{ ref('historical_prices_aggregated') }}
-             join {{ ref('base_tickers') }} on base_tickers.symbol = historical_prices_aggregated.symbol
+             left join {{ ref('ticker_options_monitored') }}
+                  on ticker_options_monitored.contract_name = historical_prices_aggregated.symbol
+             join {{ ref('base_tickers') }}
+                  on base_tickers.symbol = historical_prices_aggregated.symbol
+                      or base_tickers.symbol = ticker_options_monitored.symbol
              left join latest_open_trading_session
                        on (latest_open_trading_session.exchange_name = base_tickers.exchange_canonical or
                            (base_tickers.exchange_canonical is null and
@@ -52,7 +56,11 @@ union all
            historical_prices_aggregated.adjusted_close,
            historical_prices_aggregated.volume
     from {{ ref('historical_prices_aggregated') }}
-             join {{ ref('base_tickers') }} on base_tickers.symbol = historical_prices_aggregated.symbol
+             left join {{ ref('ticker_options_monitored') }}
+                  on ticker_options_monitored.contract_name = historical_prices_aggregated.symbol
+             join {{ ref('base_tickers') }}
+                  on base_tickers.symbol = historical_prices_aggregated.symbol
+                      or base_tickers.symbol = ticker_options_monitored.symbol
              left join week_trading_sessions
                        on (week_trading_sessions.exchange_name = base_tickers.exchange_canonical or
                            (base_tickers.exchange_canonical is null and
@@ -76,7 +84,11 @@ union all
            historical_prices_aggregated.adjusted_close,
            historical_prices_aggregated.volume
     from {{ ref('historical_prices_aggregated') }}
-             join {{ ref('base_tickers') }} on base_tickers.symbol = historical_prices_aggregated.symbol
+             left join {{ ref('ticker_options_monitored') }}
+                  on ticker_options_monitored.contract_name = historical_prices_aggregated.symbol
+             join {{ ref('base_tickers') }}
+                  on base_tickers.symbol = historical_prices_aggregated.symbol
+                      or base_tickers.symbol = ticker_options_monitored.symbol
              left join latest_open_trading_session
                        on (latest_open_trading_session.exchange_name = base_tickers.exchange_canonical or
                            (base_tickers.exchange_canonical is null and
@@ -98,7 +110,11 @@ union all
            historical_prices_aggregated.adjusted_close,
            historical_prices_aggregated.volume
     from {{ ref('historical_prices_aggregated') }}
-             join {{ ref('base_tickers') }} on base_tickers.symbol = historical_prices_aggregated.symbol
+             left join {{ ref('ticker_options_monitored') }}
+                  on ticker_options_monitored.contract_name = historical_prices_aggregated.symbol
+             join {{ ref('base_tickers') }}
+                  on base_tickers.symbol = historical_prices_aggregated.symbol
+                      or base_tickers.symbol = ticker_options_monitored.symbol
              left join latest_open_trading_session
                        on (latest_open_trading_session.exchange_name = base_tickers.exchange_canonical or
                            (base_tickers.exchange_canonical is null and
@@ -120,7 +136,11 @@ union all
            historical_prices_aggregated.adjusted_close,
            historical_prices_aggregated.volume
     from {{ ref('historical_prices_aggregated') }}
-             join {{ ref('base_tickers') }} on base_tickers.symbol = historical_prices_aggregated.symbol
+             left join {{ ref('ticker_options_monitored') }}
+                  on ticker_options_monitored.contract_name = historical_prices_aggregated.symbol
+             join {{ ref('base_tickers') }}
+                  on base_tickers.symbol = historical_prices_aggregated.symbol
+                      or base_tickers.symbol = ticker_options_monitored.symbol
              left join latest_open_trading_session
                        on (latest_open_trading_session.exchange_name = base_tickers.exchange_canonical or
                            (base_tickers.exchange_canonical is null and
@@ -142,7 +162,11 @@ union all
            historical_prices_aggregated.adjusted_close,
            historical_prices_aggregated.volume
     from {{ ref('historical_prices_aggregated') }}
-             join {{ ref('base_tickers') }} on base_tickers.symbol = historical_prices_aggregated.symbol
+             left join {{ ref('ticker_options_monitored') }}
+                  on ticker_options_monitored.contract_name = historical_prices_aggregated.symbol
+             join {{ ref('base_tickers') }}
+                  on base_tickers.symbol = historical_prices_aggregated.symbol
+                      or base_tickers.symbol = ticker_options_monitored.symbol
              left join latest_open_trading_session
                        on (latest_open_trading_session.exchange_name = base_tickers.exchange_canonical or
                            (base_tickers.exchange_canonical is null and

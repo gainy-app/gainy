@@ -1856,6 +1856,100 @@ models:
         tests:
           - type:
               type: 'character varying'
+      - name: symbol
+        tests:
+          - type:
+              type: 'character varying'
+
+  - name: profile_holdings_normalized
+    columns:
+      - name: holding_id
+        tests:
+          - type:
+              type: 'integer'
+      - name: plaid_access_token_id
+        tests:
+          - type:
+              type: 'integer'
+      - name: security_id
+        tests:
+          - type:
+              type: 'integer'
+      - name: profile_id
+        tests:
+          - type:
+              type: 'integer'
+      - name: account_id
+        tests:
+          - type:
+              type: 'integer'
+      - name: quantity
+        tests:
+          - type:
+              type: 'double precision'
+      - name: quantity_norm_for_valuation
+        tests:
+          - type:
+              type: 'double precision'
+      - name: name
+        tests:
+          - type:
+              type: 'character varying'
+      - name: ticker_symbol
+        tests:
+          - type:
+              type: 'character varying'
+      - name: type
+        tests:
+          - type:
+              type: 'character varying'
+
+  - name: portfolio_expanded_transactions
+    columns:
+      - name: amount
+        tests:
+          - type:
+              type: 'double precision'
+      - name: price
+        tests:
+          - type:
+              type: 'double precision'
+      - name: quantity
+        tests:
+          - type:
+              type: 'double precision'
+      - name: security_id
+        tests:
+          - type:
+              type: 'integer'
+      - name: profile_id
+        tests:
+          - type:
+              type: 'integer'
+      - name: account_id
+        tests:
+          - type:
+              type: 'integer'
+      - name: quantity_norm
+        tests:
+          - type:
+              type: 'double precision'
+      - name: quantity_norm_for_valuation
+        tests:
+          - type:
+              type: 'double precision'
+      - name: updated_at
+        tests:
+          - type:
+              type: 'timestamp with time zone'
+      - name: uniq_id
+        tests:
+          - type:
+              type: 'character varying'
+      - name: date
+        tests:
+          - type:
+              type: 'date'
 
   - name: push_notifications
     columns:

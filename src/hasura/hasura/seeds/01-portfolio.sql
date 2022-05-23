@@ -22,7 +22,7 @@ ALTER SEQUENCE app.profile_portfolio_accounts_id_seq RESTART WITH 10;
 insert into app.portfolio_securities (id, close_price, close_price_as_of, iso_currency_code, name, ref_id, ticker_symbol, type, created_at, updated_at)
 values  (9, 28.17, '2021-11-17 00:00:00.000000', 'USD', 'Cambiar International Equity Instl', '3AVe95eyPjHRlGaLdknRsEZ3GM3gq4TGzeM9l', 'CAMYX', 'mutual fund', '2021-11-12 14:06:51.602102 +00:00', '2021-11-18 05:41:28.397620 +00:00'),
         (10, 60585.01953125, '2021-11-18 00:00:00.000000', 'USD', 'Bitcoin', '7Dv19k16PZtvaeloyBgLCxP95o9ynrFggkRaw', 'CUR:BTC', 'cash', '2021-11-12 14:06:51.602102 +00:00', '2021-11-18 05:41:28.397620 +00:00'),
-        (11, 0.011, '2021-11-18 00:00:00.000000', 'USD', 'NFLX 02/01/18 355.00 Call', '8E4L9XLl6MudjEpwPAAgivmdZRdBPJuvMPlPb', 'NFLX180201C00355000', 'derivative', '2021-11-12 14:06:51.602102 +00:00', '2021-11-18 05:41:28.397620 +00:00'),
+        (11, 0.011, '2021-11-18 00:00:00.000000', 'USD', 'AAPL 06/21/24 225.00 Call', '8E4L9XLl6MudjEpwPAAgivmdZRdBPJuvMPlPb', 'AAPL240621C00225000', 'derivative', '2021-11-12 14:06:51.602102 +00:00', '2021-11-18 05:41:28.397620 +00:00'),
         (12, null, '2021-11-18 00:00:00.000000', 'USD', 'Trp Equity Income', '8E4L9XLl6MurjR94Q1zdSvmdZRdBPJuxyXMBg', null, 'mutual fund', '2021-11-12 14:06:51.602102 +00:00', '2021-11-18 05:41:28.397620 +00:00'),
         (13, 10.45, '2021-11-17 00:00:00.000000', 'USD', 'DoubleLine Total Return Bond I', 'AE5rBXra1AuZLE34rkvvIyG8918m3wtRzElnJ', 'DBLTX', 'mutual fund', '2021-11-12 14:06:51.602102 +00:00', '2021-11-18 05:41:28.397620 +00:00'),
         (15, 1, '2021-11-18 00:00:00.000000', 'USD', 'U S Dollar', 'd6ePmbPxgWCWmMVv66q9iPV94n91vMtov5Are', null, 'cash', '2021-11-12 14:06:51.602102 +00:00', '2021-11-18 05:41:28.397620 +00:00'),
@@ -31,7 +31,7 @@ values  (9, 28.17, '2021-11-17 00:00:00.000000', 'USD', 'Cambiar International E
         (19, 43.98, '2021-11-17 00:00:00.000000', 'USD', 'Southside Bancshares Inc.', 'qy5E8kELlrTnL87xGVjpIBRedAenDzt89pa9q', 'SBSI', 'equity', '2021-11-12 14:06:51.602102 +00:00', '2021-11-18 05:41:28.397620 +00:00'),
         (20, 35, '2021-11-17 00:00:00.000000', 'USD', 'Matthews Pacific Tiger Instl', 'rnXlmPlpqzf3p85Ro9kWugkb86bZpeHLEEd7n', 'MIPTX', 'mutual fund', '2021-11-12 14:06:51.602102 +00:00', '2021-11-18 05:41:28.397620 +00:00'),
         (21, 29.71, '2021-11-17 00:00:00.000000', 'USD', 'iShares MSCI Brazil Index', 'wmDB8ZBW3aUVPnxMbgarinRK7eKzMbfAJJDEJ', 'EWZ', 'etf', '2021-11-12 14:06:51.602102 +00:00', '2021-11-18 05:41:28.397620 +00:00'),
-        (22, null, null, 'USD', 'AAPL 01/14/22 142.00 PUT', 'wmDB8ZBW3aUVPnxMbgarinRK7eKzMbfAJJDEI', 'AAPL220114P00142000', 'derivative', '2021-11-12 14:06:51.602102 +00:00', '2021-11-18 05:41:28.397620 +00:00'),
+        (22, null, null, 'USD', 'AAPL 06/21/24 160.00 PUT', 'wmDB8ZBW3aUVPnxMbgarinRK7eKzMbfAJJDEI', 'AAPL240621P00160000', 'derivative', '2021-11-12 14:06:51.602102 +00:00', '2021-11-18 05:41:28.397620 +00:00'),
         (16, 4.75, '2021-11-17 00:00:00.000000', 'USD', 'NH Hotel Group S.A.', 'gWwemqe4pntelG7JlBA7tmJVjlVpNoujWQra1', 'NHHEF', 'equity', '2021-11-12 14:06:51.602102 +00:00', '2021-11-19 10:45:21.634671 +00:00'),
         (14, 150, '2021-11-17 00:00:00.000000', 'USD', 'Apple Inc.', 'WDwEPnEmJjt5lp75wl65t1rBmpBZvAHogp7WY', 'AAPL', 'equity', '2021-11-12 14:06:51.602102 +00:00', '2021-11-19 10:45:21.634671 +00:00');
 ALTER SEQUENCE app.portfolio_securities_id_seq RESTART WITH 23;
@@ -40,8 +40,9 @@ insert into app.profile_holdings (id, plaid_access_token_id, iso_currency_code, 
 values  (1, 1, 'USD', 100, 14, 1, 7, 'W3grzlw7zdi6vp3obZAecRQJMjqQa1tlBrAnr_WDwEPnEmJjt5lp75wl65t1rBmpBZvAHogp7WZ', '2021-11-12 14:06:51.602102 +00:00', '2021-11-19 10:45:52.978221 +00:00'),
         (2, 1, 'USD', 3, 22, 1, 7, 'W3grzlw7zdi6vp3obZAecRQJMjqQa1tlBrAnr_wmDB8ZBW3aUVPnxMbgarinRK7eKzMbfAJJDEI', '2021-11-12 14:06:51.602102 +00:00', '2021-11-19 10:45:52.978221 +00:00'),
         (3, 1, 'USD', 0.1, 10, 1, 7, 'W3grzlw7zdi6vp3obZAecRQJMjqQa1tlBrAnr_7Dv19k16PZtvaeloyBgLCxP95o9ynrFggkRaw', '2021-11-12 14:06:51.602102 +00:00', '2021-11-19 10:45:52.978221 +00:00'),
-        (4, 1, 'USD', 1000, 15, 1, 7, 'W3grzlw7zdi6vp3obZAecRQJMjqQa1tlBrAnr_d6ePmbPxgWCWmMVv66q9iPV94n91vMtov5Are', '2021-11-12 14:06:51.602102 +00:00', '2021-11-19 10:45:52.978221 +00:00');
-ALTER SEQUENCE app.profile_holdings_id_seq RESTART WITH 5;
+        (4, 1, 'USD', 1000, 15, 1, 7, 'W3grzlw7zdi6vp3obZAecRQJMjqQa1tlBrAnr_d6ePmbPxgWCWmMVv66q9iPV94n91vMtov5Are', '2021-11-12 14:06:51.602102 +00:00', '2021-11-19 10:45:52.978221 +00:00'),
+        (5, 1, 'USD', 5, 11, 1, 7, 'W3grzlw7zdi6vp3obZAecRQJMjqQa1tlBrAnr_8E4L9XLl6MudjEpwPAAgivmdZRdBPJuvMPlPb', '2021-11-12 14:06:51.602102 +00:00', '2021-11-19 10:45:52.978221 +00:00');
+ALTER SEQUENCE app.profile_holdings_id_seq RESTART WITH 6;
 
 insert into app.profile_portfolio_transactions (id, plaid_access_token_id, amount, date, fees, iso_currency_code, name, price, quantity, subtype, type, ref_id, security_id, profile_id, account_id, created_at, updated_at)
 values  (1,1,  -8.72, '2021-10-21', 0, 'USD', 'INCOME DIV DIVIDEND RECEIVED', 0, 0, 'dividend', 'cash', '6pNKdxJ3dzHArgvoRMQyiVNovq4NJefgzWMNv', 19, 1, 7, '2021-11-18 05:41:24.917136 +00:00', '2021-11-18 05:41:24.917136 +00:00'),

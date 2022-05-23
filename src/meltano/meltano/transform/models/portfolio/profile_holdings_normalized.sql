@@ -27,6 +27,15 @@ select profile_holdings.id                                               as hold
                                             portfolio_securities_normalized.type = 'derivative' and
                                             plaid_institutions.ref_id = 'ins_54' then 100
                                        else 1 end                        as quantity,
+       profile_holdings.quantity / case
+                                       when robinhood_options.quantity_module_sum = 0 and
+                                            portfolio_securities_normalized.type = 'derivative' and
+                                            plaid_institutions.ref_id = 'ins_54' then 100
+                                       else 1
+           end * case
+                     when portfolio_securities_normalized.type = 'derivative'
+                         then 100
+                     else 1 end                                          as quantity_norm_for_valuation, -- to multiple by price
        coalesce(base_tickers.name, portfolio_securities_normalized.name) as name,
        portfolio_securities_normalized.ticker_symbol,
        portfolio_securities_normalized.type
