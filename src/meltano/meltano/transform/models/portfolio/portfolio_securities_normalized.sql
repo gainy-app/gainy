@@ -14,11 +14,7 @@ select portfolio_securities.id,
                then base_tickers.symbol
            else portfolio_securities.ticker_symbol
            end                                      as original_ticker_symbol,
-       case
-           when base_tickers.type = 'crypto'
-               then base_tickers.type
-           else portfolio_securities.type
-           end                                      as type
+       base_tickers.type
 from {{ source('app', 'portfolio_securities') }}
          left join {{ ref('base_tickers') }}
                    on base_tickers.symbol in (portfolio_securities.ticker_symbol,
