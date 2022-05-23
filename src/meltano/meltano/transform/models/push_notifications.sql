@@ -83,7 +83,7 @@ with individual_notifications as
              from individual_notifications
          )
 select emails,
-       grouped_notifications.uniq_id,
+       grouped_notifications.uniq_id::varchar,
        send_at,
        text,
        data
