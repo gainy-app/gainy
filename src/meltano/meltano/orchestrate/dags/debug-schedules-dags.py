@@ -18,15 +18,15 @@ for pattern in debug_schedule_patterns:
     dag_id = f"debug-{pattern}"
     dag = create_dag(dag_id, tags=tags)
 
+    generate_meltano_config = BashOperator(
+        task_id="generate_meltano_config",
+        bash_command=
+        f"cd {MELTANO_PROJECT_ROOT}; /usr/local/bin/python scripts/generate_meltano_config.py",
+        dag=dag)
+
     for schedule in schedules:
         if not schedule['name'].startswith(pattern):
             continue
-
-        generate_meltano_config = BashOperator(
-            task_id="generate_meltano_config",
-            bash_command=
-            f"cd {MELTANO_PROJECT_ROOT}; /usr/local/bin/python scripts/generate_meltano_config.py",
-            dag=dag)
 
         command = BashOperator(
             task_id=schedule['name'],
