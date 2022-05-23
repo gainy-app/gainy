@@ -217,8 +217,8 @@ class AbstractPriceListener(ABC):
                 })
             result = cursor.fetchone()[0] or 0
 
-            self.logger.debug("[%s] active_listeners_symbols_count %d",
-                              self.instance_key, result)
+            self.logger.debug("[%s, %s]  active_listeners_symbols_count %d",
+                              self.instance_key, self.source, result)
             return result
 
 

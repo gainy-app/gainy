@@ -98,25 +98,23 @@ class PricesListener(AbstractPriceListener):
             await asyncio.gather(*coroutines)
             return
 
-        try:
-            active_listeners_symbols_count = 0
-            with self.db_connect() as db_conn:
-                with LockManager.database_lock(db_conn,
-                                               ResourceType.WEBSOCKETS,
-                                               self.lock_resource_id):
-                    active_listeners_symbols_count = self.get_active_listeners_symbols_count(
-                        db_conn)
-                    if active_listeners_symbols_count == 0:
-                        await self.save_heartbeat(len(self.symbols))
+        while True:
+            try:
+                with self.db_connect() as db_conn:
+                    with LockManager.database_lock(db_conn,
+                                                   ResourceType.WEBSOCKETS,
+                                                   self.lock_resource_id):
+                        active_listeners_symbols_count = self.get_active_listeners_symbols_count(
+                            db_conn)
+                        if active_listeners_symbols_count == 0:
+                            await self.save_heartbeat(len(self.symbols))
+                            break
 
-            if active_listeners_symbols_count > 0:
                 self.logger.info('Active listener found (%d), sleeping',
                                  active_listeners_symbols_count)
-                await asyncio.sleep(60)
-                return
-        except Exception as e:
-            self.logger.exception(e)
-            return
+            except Exception as e:
+                self.logger.exception(e)
+            await asyncio.sleep(60)
 
         stream_client = polygon.AsyncStreamClient(self.api_token,
                                                   self.cluster,
