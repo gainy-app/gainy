@@ -60,32 +60,30 @@ with latest_trading_day as
                  where base_tickers.type = 'crypto'
              )
          ),
-     latest_realtime_datapoint as
+     latest_datapoint as
          (
-             select eod_intraday_prices.symbol,
-                    eod_intraday_prices.close,
-                    eod_intraday_prices.time
-             from (
-                      select symbol,
-                             max(time) as time
-                      from {{ source('eod', 'eod_intraday_prices') }}
-                      group by symbol
-                  ) t
-                      join {{ source('eod', 'eod_intraday_prices') }}
-                           on eod_intraday_prices.symbol = t.symbol and eod_intraday_prices.time = t.time
+             select distinct on (
+                 symbol
+                 ) symbol,
+                   adjusted_close,
+                   datetime
+             from {{ ref('historical_prices_aggregated') }}
+             order by symbol, datetime desc
          )
-select latest_trading_day.symbol,
-       latest_trading_day.close_datetime                                    as time,
-       latest_trading_day.close_price                                       as actual_price,
-       latest_trading_day.close_price - previous_trading_day.adjusted_close as absolute_daily_change,
+select symbol,
+       coalesce(latest_trading_day.close_datetime, latest_datapoint.datetime)              as time,
+       coalesce(latest_datapoint.adjusted_close, latest_trading_day.close_price)           as actual_price,
+       coalesce(latest_trading_day.close_price - previous_trading_day.adjusted_close, 0.0) as absolute_daily_change,
        case
+           when latest_trading_day.close_price is null
+               then 0.0
            when previous_trading_day.adjusted_close > 0
                then (latest_trading_day.close_price / previous_trading_day.adjusted_close) - 1
-           end                                                              as relative_daily_change,
-       latest_trading_day.volume::double precision                          as daily_volume,
-       latest_realtime_datapoint.close::double precision                    as last_known_price,
-       latest_realtime_datapoint.time::timestamp                            as last_known_price_datetime,
-       previous_trading_day.adjusted_close                                  as previous_day_close_price
-from latest_trading_day
-         join previous_trading_day on previous_trading_day.symbol = latest_trading_day.symbol
-         left join latest_realtime_datapoint on latest_realtime_datapoint.symbol = latest_trading_day.symbol
+           end                                                                             as relative_daily_change,
+       coalesce(latest_trading_day.volume, 0.0)::double precision                          as daily_volume,
+       latest_datapoint.adjusted_close                                                     as last_known_price,
+       latest_datapoint.datetime                                                           as last_known_price_datetime,
+       previous_trading_day.adjusted_close                                                 as previous_day_close_price
+from latest_datapoint
+         left join previous_trading_day using (symbol)
+         left join latest_trading_day using (symbol)
