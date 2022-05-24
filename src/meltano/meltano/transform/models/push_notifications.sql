@@ -32,18 +32,18 @@ with individual_notifications as
                   ) t
                       join {{ ref('exchange_schedule') }} on exchange_schedule.country_name = 'USA' and
                                                 exchange_schedule.date = now()::date
--- where now() > exchange_schedule.open_at
+             where now() > exchange_schedule.open_at
              group by email
 
              union all
 
              select email,
                     ('top_losers_' || (string_agg(symbol, '_' order by relative_daily_change, symbol)) ||
-                     '_' || now()::date)::varchar                                                                 as uniq_id,
-                    min(exchange_schedule.open_at) + interval '30 minutes'                                        as send_at,
+                     '_' || now()::date)::varchar                                                            as uniq_id,
+                    min(exchange_schedule.open_at) + interval '30 minutes'                                   as send_at,
                     json_build_object('en', 'Top losers: ' ||
                                             (string_agg(text, ', ' order by relative_daily_change, symbol))) as text,
-                    json_build_object('t', 0)                                                                     as data
+                    json_build_object('t', 0)                                                                as data
              from (
                       select relative_daily_change,
                              email,
@@ -57,7 +57,7 @@ with individual_notifications as
                   ) t
                       join {{ ref('exchange_schedule') }} on exchange_schedule.country_name = 'USA' and
                                                 exchange_schedule.date = now()::date
--- where now() > exchange_schedule.open_at
+             where now() > exchange_schedule.open_at
              group by email
          ),
      grouped_notifications as
