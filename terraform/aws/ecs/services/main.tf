@@ -56,14 +56,14 @@ data "archive_file" "websockets_source" {
 }
 data "aws_ecr_authorization_token" "token" {}
 resource "docker_registry_image" "meltano" {
-  name = local.meltano_ecr_image_name
+  name = local.meltano_image_name
   build {
     context    = local.meltano_root_dir
     dockerfile = "Dockerfile"
     build_args = local.meltano_build_args
 
     auth_config {
-      host_name = var.ecr_address
+      host_name = var.docker_registry_address
       user_name = data.aws_ecr_authorization_token.token.user_name
       password  = data.aws_ecr_authorization_token.token.password
     }
@@ -74,7 +74,7 @@ resource "docker_registry_image" "meltano" {
   }
 }
 resource "docker_registry_image" "hasura" {
-  name = local.hasura_ecr_image_name
+  name = local.hasura_image_name
   build {
     context    = local.hasura_root_dir
     dockerfile = "Dockerfile"
@@ -84,7 +84,7 @@ resource "docker_registry_image" "hasura" {
     }
 
     auth_config {
-      host_name = var.ecr_address
+      host_name = var.docker_registry_address
       user_name = data.aws_ecr_authorization_token.token.user_name
       password  = data.aws_ecr_authorization_token.token.password
     }
@@ -95,7 +95,7 @@ resource "docker_registry_image" "hasura" {
   }
 }
 resource "docker_registry_image" "websockets" {
-  name = local.websockets_ecr_image_name
+  name = local.websockets_image_name
   build {
     context    = local.websockets_root_dir
     dockerfile = "Dockerfile"

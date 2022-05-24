@@ -1,6 +1,6 @@
-variable "repository_name" {}
+variable "docker_repository_name" {}
 variable "env" {}
-variable "ecr_address" {}
+variable "docker_registry_address" {}
 variable "aws_log_region" {}
 variable "eodhistoricaldata_api_token" {}
 variable "pg_host" {}

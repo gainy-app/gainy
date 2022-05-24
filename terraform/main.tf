@@ -8,6 +8,10 @@ terraform {
 
 terraform {
   required_providers {
+    docker = {
+      source  = "kreuzwerker/docker"
+      version = "2.15.0"
+    }
     cloudflare = {
       source  = "cloudflare/cloudflare"
       version = "~> 2.0"
@@ -18,6 +22,22 @@ terraform {
     algolia = {
       source = "philippe-vandermoere/algolia"
     }
+  }
+}
+
+data "aws_region" "current" {}
+data "aws_caller_identity" "this" {}
+data "aws_ecr_authorization_token" "token" {}
+
+locals {
+  docker_registry_address = format("%v.dkr.ecr.%v.amazonaws.com", data.aws_caller_identity.this.account_id, data.aws_region.current.name)
+}
+
+provider "docker" {
+  registry_auth {
+    address  = local.docker_registry_address
+    username = data.aws_ecr_authorization_token.token.user_name
+    password = data.aws_ecr_authorization_token.token.password
   }
 }
 
@@ -87,9 +107,10 @@ module "aws" {
   polygon_api_token           = var.polygon_api_token
   coingecko_api_key           = var.coingecko_api_key
 
-  aws_region     = var.aws_region
-  aws_access_key = var.aws_access_key
-  aws_secret_key = var.aws_secret_key
+  aws_region              = var.aws_region
+  aws_access_key          = var.aws_access_key
+  aws_secret_key          = var.aws_secret_key
+  docker_registry_address = local.docker_registry_address
 
   pg_production_host                   = var.pg_production_host
   pg_production_port                   = var.pg_production_port

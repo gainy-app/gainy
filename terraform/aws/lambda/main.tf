@@ -5,7 +5,7 @@ variable "pg_port" {}
 variable "pg_dbname" {}
 variable "pg_username" {}
 variable "pg_password" {}
-variable "container_repository" {}
+variable "docker_repository_name" {}
 variable "vpc_security_group_ids" {}
 variable "vpc_subnet_ids" {}
 variable "datadog_api_key" {}
@@ -106,8 +106,7 @@ data "aws_region" "current" {}
 data "aws_caller_identity" "this" {}
 data "aws_ecr_authorization_token" "token" {}
 locals {
-  ecr_address = format("%v.dkr.ecr.%v.amazonaws.com", data.aws_caller_identity.this.account_id, data.aws_region.current.name)
-  ecr_repo    = var.container_repository
+  docker_registry_address = format("%v.dkr.ecr.%v.amazonaws.com", data.aws_caller_identity.this.account_id, data.aws_region.current.name)
 
   python_lambda_build_args_force_build = {
     BASE_IMAGE_VERSION       = var.base_image_version
@@ -118,8 +117,8 @@ locals {
     BASE_IMAGE_REGISTRY_ADDRESS = var.base_image_registry_address
     CODEARTIFACT_PIPY_URL       = var.codeartifact_pipy_url
   })
-  python_lambda_image_tag      = format("lambda-python-%s-%s-%s", var.env, var.base_image_version, md5(jsonencode(local.python_lambda_build_args_force_build)))
-  python_lambda_ecr_image_name = format("%v/%v:%v", local.ecr_address, local.ecr_repo, local.python_lambda_image_tag)
+  python_lambda_image_tag  = format("lambda-python-%s-%s-%s", var.env, var.base_image_version, md5(jsonencode(local.python_lambda_build_args_force_build)))
+  python_lambda_image_name = format("%v/%v:%v", local.docker_registry_address, var.docker_repository_name, local.python_lambda_image_tag)
 }
 
 #################################### Python lambdas ####################################
@@ -130,14 +129,14 @@ data "archive_file" "python_source" {
   output_path = "/tmp/lambda-python.zip"
 }
 resource "docker_registry_image" "lambda_python" {
-  name = local.python_lambda_ecr_image_name
+  name = local.python_lambda_image_name
   build {
     context    = local.python_root_dir
     dockerfile = "Dockerfile"
     build_args = local.python_lambda_build_args
 
     auth_config {
-      host_name = local.ecr_address
+      host_name = local.docker_registry_address
       user_name = data.aws_ecr_authorization_token.token.user_name
       password  = data.aws_ecr_authorization_token.token.password
     }
