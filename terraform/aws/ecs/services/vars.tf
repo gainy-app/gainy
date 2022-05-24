@@ -1,4 +1,4 @@
-variable "repository_name" {}
+variable "docker_repository_name" {}
 variable "env" {}
 variable "docker_registry_address" {}
 variable "aws_log_region" {}

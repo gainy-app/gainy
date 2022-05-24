@@ -31,7 +31,7 @@ module "lambda" {
   pg_port                = module.rds.db_instance.port
   pg_username            = module.rds.db_instance.username
   public_schema_name     = module.ecs-service.public_schema_name
-  container_repository   = aws_ecr_repository.default.name
+  docker_repository_name = aws_ecr_repository.default.name
   vpc_security_group_ids = [module.ecs.vpc_default_sg_id]
   vpc_subnet_ids         = module.ecs.private_subnet_ids
   deployment_key         = local.deployment_key
@@ -110,7 +110,7 @@ module "ecs-service" {
   aws_access_key          = var.aws_access_key
   aws_secret_key          = var.aws_secret_key
   docker_registry_address = var.docker_registry_address
-  repository_name         = aws_ecr_repository.default.name
+  docker_repository_name  = aws_ecr_repository.default.name
   aws_log_region          = var.aws_region
   vpc_id                  = module.ecs.vpc_id
   vpc_default_sg_id       = module.ecs.vpc_default_sg_id

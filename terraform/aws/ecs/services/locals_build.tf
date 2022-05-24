@@ -1,6 +1,4 @@
 locals {
-  ecr_repo = var.repository_name
-
   meltano_build_args_force_build = {
     BASE_IMAGE_VERSION    = var.base_image_version
     GAINY_COMPUTE_VERSION = var.gainy_compute_version
@@ -23,13 +21,13 @@ locals {
   meltano_seed_root_dir      = abspath("${path.cwd}/../src/meltano/meltano/data")
   meltano_transform_root_dir = abspath("${path.cwd}/../src/meltano/meltano/transform")
   meltano_image_tag          = format("meltano-%s-%s-%s", var.env, var.base_image_version, md5(jsonencode(local.meltano_build_args_force_build)))
-  meltano_ecr_image_name     = format("%v/%v:%v", var.docker_registry_address, local.ecr_repo, local.meltano_image_tag)
+  meltano_image_name         = format("%v/%v:%v", var.docker_registry_address, var.docker_repository_name, local.meltano_image_tag)
 
-  hasura_root_dir       = abspath("${path.cwd}/../src/hasura")
-  hasura_image_tag      = format("hasura-%s-%s-%s", var.env, var.base_image_version, data.archive_file.hasura_source.output_md5)
-  hasura_ecr_image_name = format("%v/%v:%v", var.docker_registry_address, local.ecr_repo, local.hasura_image_tag)
+  hasura_root_dir   = abspath("${path.cwd}/../src/hasura")
+  hasura_image_tag  = format("hasura-%s-%s-%s", var.env, var.base_image_version, data.archive_file.hasura_source.output_md5)
+  hasura_image_name = format("%v/%v:%v", var.docker_registry_address, var.docker_repository_name, local.hasura_image_tag)
 
-  websockets_root_dir       = abspath("${path.cwd}/../src/websockets")
-  websockets_image_tag      = format("websockets-%s-%s", var.env, md5(jsonencode(local.websockets_build_args_force_build)))
-  websockets_ecr_image_name = format("%v/%v:%v", var.docker_registry_address, local.ecr_repo, local.websockets_image_tag)
+  websockets_root_dir   = abspath("${path.cwd}/../src/websockets")
+  websockets_image_tag  = format("websockets-%s-%s", var.env, md5(jsonencode(local.websockets_build_args_force_build)))
+  websockets_image_name = format("%v/%v:%v", var.docker_registry_address, var.docker_repository_name, local.websockets_image_tag)
 }
