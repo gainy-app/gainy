@@ -104,23 +104,23 @@ module "vpc_bridge" {
 }
 
 module "ecs-service" {
-  source             = "./ecs/services"
-  env                = var.env
-  aws_region         = var.aws_region
-  aws_access_key     = var.aws_access_key
-  aws_secret_key     = var.aws_secret_key
-  ecr_address        = var.ecr_address
-  repository_name    = aws_ecr_repository.default.name
-  aws_log_region     = var.aws_region
-  vpc_id             = module.ecs.vpc_id
-  vpc_default_sg_id  = module.ecs.vpc_default_sg_id
-  public_https_sg_id = module.ecs.public_https_sg_id
-  public_http_sg_id  = module.ecs.public_http_sg_id
-  public_subnet_ids  = module.ecs.public_subnet_ids
-  ecs_cluster_name   = module.ecs.ecs_cluster.name
-  cloudflare_zone_id = var.cloudflare_zone_id
-  domain             = var.domain
-  private_subnet_ids = module.ecs.private_subnet_ids
+  source                  = "./ecs/services"
+  env                     = var.env
+  aws_region              = var.aws_region
+  aws_access_key          = var.aws_access_key
+  aws_secret_key          = var.aws_secret_key
+  docker_registry_address = var.docker_registry_address
+  repository_name         = aws_ecr_repository.default.name
+  aws_log_region          = var.aws_region
+  vpc_id                  = module.ecs.vpc_id
+  vpc_default_sg_id       = module.ecs.vpc_default_sg_id
+  public_https_sg_id      = module.ecs.public_https_sg_id
+  public_http_sg_id       = module.ecs.public_http_sg_id
+  public_subnet_ids       = module.ecs.public_subnet_ids
+  ecs_cluster_name        = module.ecs.ecs_cluster.name
+  cloudflare_zone_id      = var.cloudflare_zone_id
+  domain                  = var.domain
+  private_subnet_ids      = module.ecs.private_subnet_ids
 
   aws_lambda_api_gateway_endpoint = "${module.lambda.aws_apigatewayv2_api_endpoint}/${local.deployment_key}"
   hasura_enable_console           = "true"

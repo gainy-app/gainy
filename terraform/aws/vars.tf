@@ -11,7 +11,7 @@ variable "hubspot_api_key" {}
 variable "aws_region" {}
 variable "aws_access_key" {}
 variable "aws_secret_key" {}
-variable "ecr_address" {}
+variable "docker_registry_address" {}
 
 variable "base_image_registry_address" {}
 variable "base_image_version" {}

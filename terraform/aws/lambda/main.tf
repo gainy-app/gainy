@@ -106,8 +106,8 @@ data "aws_region" "current" {}
 data "aws_caller_identity" "this" {}
 data "aws_ecr_authorization_token" "token" {}
 locals {
-  ecr_address = format("%v.dkr.ecr.%v.amazonaws.com", data.aws_caller_identity.this.account_id, data.aws_region.current.name)
-  ecr_repo    = var.container_repository
+  docker_registry_address = format("%v.dkr.ecr.%v.amazonaws.com", data.aws_caller_identity.this.account_id, data.aws_region.current.name)
+  ecr_repo                = var.container_repository
 
   python_lambda_build_args_force_build = {
     BASE_IMAGE_VERSION       = var.base_image_version
@@ -119,7 +119,7 @@ locals {
     CODEARTIFACT_PIPY_URL       = var.codeartifact_pipy_url
   })
   python_lambda_image_tag      = format("lambda-python-%s-%s-%s", var.env, var.base_image_version, md5(jsonencode(local.python_lambda_build_args_force_build)))
-  python_lambda_ecr_image_name = format("%v/%v:%v", local.ecr_address, local.ecr_repo, local.python_lambda_image_tag)
+  python_lambda_ecr_image_name = format("%v/%v:%v", local.docker_registry_address, local.ecr_repo, local.python_lambda_image_tag)
 }
 
 #################################### Python lambdas ####################################
@@ -137,7 +137,7 @@ resource "docker_registry_image" "lambda_python" {
     build_args = local.python_lambda_build_args
 
     auth_config {
-      host_name = local.ecr_address
+      host_name = local.docker_registry_address
       user_name = data.aws_ecr_authorization_token.token.user_name
       password  = data.aws_ecr_authorization_token.token.password
     }

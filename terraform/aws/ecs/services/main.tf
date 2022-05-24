@@ -63,7 +63,7 @@ resource "docker_registry_image" "meltano" {
     build_args = local.meltano_build_args
 
     auth_config {
-      host_name = var.ecr_address
+      host_name = var.docker_registry_address
       user_name = data.aws_ecr_authorization_token.token.user_name
       password  = data.aws_ecr_authorization_token.token.password
     }
@@ -84,7 +84,7 @@ resource "docker_registry_image" "hasura" {
     }
 
     auth_config {
-      host_name = var.ecr_address
+      host_name = var.docker_registry_address
       user_name = data.aws_ecr_authorization_token.token.user_name
       password  = data.aws_ecr_authorization_token.token.password
     }
