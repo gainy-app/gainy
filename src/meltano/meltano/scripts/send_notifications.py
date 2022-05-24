@@ -27,12 +27,13 @@ def send_push_notification(notification):
         "data": notification['data']
     }
 
-    if notification['email']:
-        payload['filters'] = [{
-            "field": "email",
-            "relation": "=",
-            "value": notification['email']
-        }]
+    if notification['emails']:
+        filters = []
+        for k, email in enumerate(notification['emails']):
+            if k:
+                filters.append({"operator": "OR"})
+            filters.append({"field": "email", "relation": "=", "value": email})
+        payload['filters'] = filters
     else:
         payload['included_segments'] = SEGMENTS
 
@@ -45,15 +46,13 @@ def send_all(sender_id):
     with db_connect() as db_conn:
         with db_conn.cursor(cursor_factory=DictCursor) as cursor:
             cursor.execute(
-                """insert into app.notifications(profile_id, uniq_id, send_at, text, data, sender_id)
-                   select profile_id, uniq_id, send_at, text, data, %(sender_id)s
+                """insert into app.notifications(emails, uniq_id, send_at, text, data, sender_id)
+                   select emails, uniq_id, send_at, text, data, %(sender_id)s
                    from push_notifications
-                   where send_at <= now()
                    on conflict do nothing""", {"sender_id": sender_id})
             cursor.execute(
-                """select profiles.email, uuid, send_at, text, data
+                """select emails, uuid, send_at, text, data
                    from app.notifications
-                   left join app.profiles on profiles.id = notifications.profile_id
                    where sender_id = %(sender_id)s
                      and response is null""", {"sender_id": sender_id})
 
