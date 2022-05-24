@@ -110,6 +110,7 @@ module "aws" {
   aws_region     = var.aws_region
   aws_access_key = var.aws_access_key
   aws_secret_key = var.aws_secret_key
+  ecr_address    = local.ecr_address
 
   pg_production_host                   = var.pg_production_host
   pg_production_port                   = var.pg_production_port

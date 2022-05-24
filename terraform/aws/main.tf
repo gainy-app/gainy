@@ -109,9 +109,9 @@ module "ecs-service" {
   aws_region         = var.aws_region
   aws_access_key     = var.aws_access_key
   aws_secret_key     = var.aws_secret_key
-  ecr_address        = local.ecr_address
+  ecr_address        = var.ecr_address
   repository_name    = aws_ecr_repository.default.name
-  aws_log_region     = data.aws_region.current.name
+  aws_log_region     = var.aws_region
   vpc_id             = module.ecs.vpc_id
   vpc_default_sg_id  = module.ecs.vpc_default_sg_id
   public_https_sg_id = module.ecs.public_https_sg_id
