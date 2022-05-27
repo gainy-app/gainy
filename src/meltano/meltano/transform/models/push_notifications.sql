@@ -17,7 +17,10 @@ select profile_id,
                                string_agg(text, ', ' order by relative_daily_change desc, symbol))                  as text,
        json_build_object('t', 0)                                                                                    as data
 from (
-         select profile_id, email, '+' || round(relative_daily_change * 100) || '% ' || symbol as text
+         select relative_daily_change,
+                profile_id,
+                email,
+                '+' || round(relative_daily_change * 100) || '% ' || symbol as text
          from {{ source('app', 'profiles')}}
                   join {{ ref('profile_collection_tickers_performance_ranked') }}
                        on profile_collection_tickers_performance_ranked.profile_id = profiles.id
@@ -38,7 +41,10 @@ select profile_id,
                                string_agg(text, ', ' order by relative_daily_change, symbol))                       as text,
        json_build_object('t', 0)                                                                                    as data
 from (
-         select profile_id, email, round(relative_daily_change * 100) || '% ' || symbol as text
+         select relative_daily_change,
+                profile_id,
+                email,
+                round(relative_daily_change * 100) || '% ' || symbol as text
          from {{ source('app', 'profiles')}}
                   join {{ ref('profile_collection_tickers_performance_ranked') }}
                        on profile_collection_tickers_performance_ranked.profile_id = profiles.id
