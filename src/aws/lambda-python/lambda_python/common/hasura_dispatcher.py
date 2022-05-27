@@ -97,14 +97,14 @@ class HasuraDispatcher(ABC):
                                                      session_variables)
         except Exception:
             raise HasuraActionException(
-                401, f"Unauthorized access to profile `{profile_id}`")
+                401, f"Unauthorized access to profile `{allowed_profile_ids}`")
 
         if not isinstance(allowed_profile_ids, list):
             allowed_profile_ids = [allowed_profile_ids]
 
         if session_profile_id not in allowed_profile_ids:
             raise HasuraActionException(
-                401, f"Unauthorized access to profile `{profile_id}`")
+                401, f"Unauthorized access to profile `{allowed_profile_ids}`")
 
 
 class HasuraActionDispatcher(HasuraDispatcher):

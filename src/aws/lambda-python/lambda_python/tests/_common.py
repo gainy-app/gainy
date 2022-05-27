@@ -34,6 +34,9 @@ def get_trigger_event(name: str, op: str, data: dict, user_id: str):
         "event": {
             "op": op,
             "data": data,
-            "session_variables": None,
+            "session_variables": {
+                "x-hasura-role": "user",
+                "x-hasura-user-id": user_id
+            },
         },
     }
