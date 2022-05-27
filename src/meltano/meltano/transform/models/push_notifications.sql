@@ -18,6 +18,7 @@ select profile_id,
        json_build_object('t', 0)                                                                                    as data
 from (
          select relative_daily_change,
+                symbol,
                 profile_id,
                 email,
                 '+' || round(relative_daily_change * 100) || '% ' || symbol as text
@@ -42,6 +43,7 @@ select profile_id,
        json_build_object('t', 0)                                                                                    as data
 from (
          select relative_daily_change,
+                symbol,
                 profile_id,
                 email,
                 round(relative_daily_change * 100) || '% ' || symbol as text
