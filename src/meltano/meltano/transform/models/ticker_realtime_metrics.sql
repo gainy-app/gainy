@@ -55,7 +55,7 @@ with latest_trading_day as
                                              on base_tickers.symbol = historical_prices_aggregated.symbol
                           where period = '1d'
                             and (ticker_options_monitored.contract_name is not null
-                              or base_tickers.type != 'crypto')
+                             or base_tickers.type != 'crypto')
                           group by historical_prices_aggregated.symbol, historical_prices_aggregated.period
                       ) t
                           join {{ ref('historical_prices_aggregated') }} using (symbol, datetime, period)
@@ -75,18 +75,19 @@ with latest_trading_day as
                     datetime,
                     adjusted_close
              from (
-                      select symbol,
-                             period,
-                             max(datetime) as datetime
+                      select distinct on (
+                          symbol
+                          ) symbol,
+                            period,
+                            datetime
                       from {{ ref('historical_prices_aggregated') }}
-                      where period = '1d'
-                      group by symbol, period
+                      order by symbol, datetime desc
                   ) t
                       join {{ ref('historical_prices_aggregated') }} using (symbol, period, datetime)
          )
 select symbol,
        coalesce(latest_trading_day.close_datetime, latest_datapoint.datetime)              as time,
-       coalesce(latest_datapoint.adjusted_close, latest_trading_day.close_price)           as actual_price,
+       coalesce(latest_trading_day.close_price, latest_datapoint.adjusted_close)           as actual_price,
        coalesce(latest_trading_day.close_price - previous_trading_day.adjusted_close, 0.0) as absolute_daily_change,
        case
            when latest_trading_day.close_price is null
