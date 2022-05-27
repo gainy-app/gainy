@@ -86,7 +86,7 @@ with latest_trading_day as
          )
 select symbol,
        coalesce(latest_trading_day.close_datetime, latest_datapoint.datetime)              as time,
-       coalesce(latest_datapoint.adjusted_close, latest_trading_day.close_price)           as actual_price,
+       coalesce(latest_trading_day.close_price, latest_datapoint.adjusted_close)           as actual_price,
        coalesce(latest_trading_day.close_price - previous_trading_day.adjusted_close, 0.0) as absolute_daily_change,
        case
            when latest_trading_day.close_price is null

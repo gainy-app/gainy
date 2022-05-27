@@ -65,6 +65,7 @@ test-meltano-realtime:
 	docker-compose -p gainy_test -f docker-compose.test.yml run --rm --entrypoint "/wait.sh" test-meltano invoke dbt test
 
 test-hasura:
+	docker-compose -p gainy_test -f docker-compose.test.yml run --rm --entrypoint "/wait.sh" test-meltano invoke dbt run --select tag:realtime historical_prices ticker_options_monitored ticker_metrics
 	docker-compose -p gainy_test -f docker-compose.test.yml exec -T test-hasura pytest
 
 test-lambda:
