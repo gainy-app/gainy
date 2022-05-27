@@ -11,12 +11,17 @@
 -- Two separate notifications
 -- / Top losers: +3% TSLA, +5% MDB ...
 select profile_id,
-       (profile_id || '_top_gainers_' || now()::date)::varchar                as uniq_id,
-       min(exchange_schedule.open_at) + interval '30 minutes'                 as send_at,
-       json_build_object('en', 'Morning gainers: ' || string_agg(text, ', ')) as text,
-       json_build_object('t', 0)                                              as data
+       (profile_id || '_top_gainers_' || now()::date)::varchar                                                      as uniq_id,
+       min(exchange_schedule.open_at) + interval '30 minutes'                                                       as send_at,
+       json_build_object('en', 'Morning gainers: ' ||
+                               string_agg(text, ', ' order by relative_daily_change desc, symbol))                  as text,
+       json_build_object('t', 0)                                                                                    as data
 from (
-         select profile_id, email, '+' || round(relative_daily_change * 100) || '% ' || symbol as text
+         select relative_daily_change,
+                symbol,
+                profile_id,
+                email,
+                '+' || round(relative_daily_change * 100) || '% ' || symbol as text
          from {{ source('app', 'profiles')}}
                   join {{ ref('profile_collection_tickers_performance_ranked') }}
                        on profile_collection_tickers_performance_ranked.profile_id = profiles.id
@@ -31,12 +36,17 @@ group by profile_id
 union all
 
 select profile_id,
-       (profile_id || '_top_losers_' || now()::date)::varchar                as uniq_id,
-       min(exchange_schedule.open_at) + interval '30 minutes'                as send_at,
-       json_build_object('en', 'Morning losers: ' || string_agg(text, ', ')) as text,
-       json_build_object('t', 0)                                             as data
+       (profile_id || '_top_losers_' || now()::date)::varchar                                                       as uniq_id,
+       min(exchange_schedule.open_at) + interval '30 minutes'                                                       as send_at,
+       json_build_object('en', 'Morning losers: ' ||
+                               string_agg(text, ', ' order by relative_daily_change, symbol))                       as text,
+       json_build_object('t', 0)                                                                                    as data
 from (
-         select profile_id, email, round(relative_daily_change * 100) || '% ' || symbol as text
+         select relative_daily_change,
+                symbol,
+                profile_id,
+                email,
+                round(relative_daily_change * 100) || '% ' || symbol as text
          from {{ source('app', 'profiles')}}
                   join {{ ref('profile_collection_tickers_performance_ranked') }}
                        on profile_collection_tickers_performance_ranked.profile_id = profiles.id
