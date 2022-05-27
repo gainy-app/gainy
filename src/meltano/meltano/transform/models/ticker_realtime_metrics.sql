@@ -27,13 +27,13 @@ with latest_trading_day as
                       group by symbol
                   ) t
                       join {{ ref('historical_prices_aggregated') }} hpa_close
-             on hpa_close.symbol = t.symbol
-                 and hpa_close.period = '3min'
-                 and hpa_close.datetime = t.max_datetime
-                 join {{ ref('historical_prices_aggregated') }} hpa_open
-                 on hpa_open.symbol = t.symbol
-                 and hpa_open.period = '3min'
-                 and hpa_open.datetime = t.min_datetime
+                           on hpa_close.symbol = t.symbol
+                               and hpa_close.period = '3min'
+                               and hpa_close.datetime = t.max_datetime
+                      join {{ ref('historical_prices_aggregated') }} hpa_open
+                           on hpa_open.symbol = t.symbol
+                               and hpa_open.period = '3min'
+                               and hpa_open.datetime = t.min_datetime
          ),
      previous_trading_day as
          (
