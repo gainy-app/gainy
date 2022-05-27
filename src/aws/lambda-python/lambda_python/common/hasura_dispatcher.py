@@ -85,7 +85,8 @@ class HasuraDispatcher(ABC):
 
         return user[0]
 
-    def check_authorization(self, db_conn, profile_id, session_variables):
+    def check_authorization(self, db_conn, allowed_profile_ids,
+                            session_variables):
         try:
             hasura_role = session_variables["x-hasura-role"]
 
@@ -98,7 +99,10 @@ class HasuraDispatcher(ABC):
             raise HasuraActionException(
                 401, f"Unauthorized access to profile `{profile_id}`")
 
-        if profile_id != session_profile_id:
+        if not isinstance(allowed_profile_ids, list):
+            allowed_profile_ids = [allowed_profile_ids]
+
+        if session_profile_id not in allowed_profile_ids:
             raise HasuraActionException(
                 401, f"Unauthorized access to profile `{profile_id}`")
 
@@ -140,11 +144,12 @@ class HasuraTriggerDispatcher(HasuraDispatcher):
         op = request["event"]["op"]
         data = request["event"]["data"]
 
-        profile_id = trigger.get_profile_id(op, data)
+        allowed_profile_ids = trigger.get_allowed_profile_ids(op, data)
 
         session_variables = request["event"]["session_variables"]
         # TODO if trigger is called via db operation directly (not via hasura) - it won't have hasura role
         if session_variables is not None:
-            self.check_authorization(db_conn, profile_id, session_variables)
+            self.check_authorization(db_conn, allowed_profile_ids,
+                                     session_variables)
 
         return trigger.apply(db_conn, op, data)

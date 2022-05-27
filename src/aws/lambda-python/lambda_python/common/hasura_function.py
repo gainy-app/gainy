@@ -47,7 +47,7 @@ class HasuraTrigger(ABC):
         pass
 
     @abstractmethod
-    def get_profile_id(self, op, data):
+    def get_allowed_profile_ids(self, op, data):
         pass
 
     @staticmethod

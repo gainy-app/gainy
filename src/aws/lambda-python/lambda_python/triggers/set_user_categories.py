@@ -24,7 +24,7 @@ class SetUserCategories(HasuraTrigger):
     def __init__(self):
         super().__init__("set_user_categories")
 
-    def get_profile_id(self, op, data):
+    def get_allowed_profile_ids(self, op, data):
         return data["new"]['profile_id']
 
     def apply(self, db_conn, op, data):

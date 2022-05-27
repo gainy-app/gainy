@@ -9,8 +9,8 @@ class OnPlaidAccessTokenCreated(HasuraTrigger):
 
         self.portfolio_service = PortfolioService()
 
-    def get_profile_id(self, op, data):
-        return data["new"]['profile_id']
+    def get_allowed_profile_ids(self, op, data):
+        return [data["new"]['profile_id']]
 
     def apply(self, db_conn, op, data):
         payload = self._extract_payload(data)
