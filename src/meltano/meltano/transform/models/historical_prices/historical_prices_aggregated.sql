@@ -48,7 +48,7 @@ with max_date as
                           FROM generate_series(now()::timestamp - interval '1 week', now()::timestamp, interval '3 minutes') dd
                           ) t
                           join latest_open_trading_session on true
-                 where time_truncated between latest_open_trading_session.open_at and latest_open_trading_session.close_at - interval '3 minutes'
+                 where time_truncated >= latest_open_trading_session.open_at and time_truncated < latest_open_trading_session.close_at
 {% if is_incremental() and var('realtime') %}
                    and time_truncated > now() - interval '20 minutes'
 {% endif %}
@@ -70,7 +70,7 @@ with max_date as
                         mod(extract(minutes from eod_intraday_prices.time)::int, 3) as time_truncated
                  from {{ source('eod', 'eod_intraday_prices') }}
                           join latest_open_trading_session on true
-                 where (eod_intraday_prices.time between latest_open_trading_session.open_at - interval '1 hour' and latest_open_trading_session.close_at
+                 where (eod_intraday_prices.time >= latest_open_trading_session.open_at - interval '1 hour' and eod_intraday_prices.time < latest_open_trading_session.close_at
                     or (symbol like '%.CC' and time > now() - interval '1 day'))
 {% if is_incremental() and var('realtime') %}
                    and eod_intraday_prices.time > now() - interval '20 minutes'
@@ -189,7 +189,7 @@ union all
                           FROM generate_series(now()::timestamp - interval '1 week', now()::timestamp, interval '15 minutes') dd
                           ) t
                           join week_trading_sessions on true
-                 where time_truncated between week_trading_sessions.open_at and week_trading_sessions.close_at - interval '15 minutes'
+                 where time_truncated >= week_trading_sessions.open_at and time_truncated < week_trading_sessions.close_at
 {% if is_incremental() and var('realtime') %}
                    and time_truncated > now() - interval '1 hour'
 {% endif %}
@@ -211,7 +211,7 @@ union all
                         mod(extract(minutes from eod_intraday_prices.time)::int, 15) as time_truncated
                  from {{ source('eod', 'eod_intraday_prices') }}
                           join week_trading_sessions on true
-                 where (eod_intraday_prices.time between week_trading_sessions.open_at - interval '1 hour' and week_trading_sessions.close_at
+                 where (eod_intraday_prices.time >= week_trading_sessions.open_at - interval '1 hour' and eod_intraday_prices.time < week_trading_sessions.close_at
                     or (symbol like '%.CC' and time > now() - interval '1 week'))
 {% if is_incremental() and var('realtime') %}
                    and eod_intraday_prices.time > now() - interval '1 hour'

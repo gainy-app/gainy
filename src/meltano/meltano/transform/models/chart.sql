@@ -34,7 +34,7 @@ with latest_open_trading_session as (
                             latest_open_trading_session.country_name = base_tickers.country_name))
                       and latest_open_trading_session.date = historical_prices_aggregated.datetime::date
     where period = '3min'
-      and (historical_prices_aggregated.datetime between latest_open_trading_session.open_at and latest_open_trading_session.close_at
+      and (historical_prices_aggregated.datetime between latest_open_trading_session.open_at and latest_open_trading_session.close_at - interval '3 minutes'
        or (base_tickers.type = 'crypto' and historical_prices_aggregated.datetime > now() - interval '1 day'))
 )
 
@@ -67,7 +67,7 @@ union all
                             week_trading_sessions.country_name = base_tickers.country_name))
                       and week_trading_sessions.date = historical_prices_aggregated.datetime::date
     where period = '15min'
-      and (historical_prices_aggregated.datetime between week_trading_sessions.open_at and week_trading_sessions.close_at
+      and (historical_prices_aggregated.datetime between week_trading_sessions.open_at and week_trading_sessions.close_at - interval '15 minutes'
        or (base_tickers.type = 'crypto' and historical_prices_aggregated.datetime > now() - interval '7 days'))
 )
 
