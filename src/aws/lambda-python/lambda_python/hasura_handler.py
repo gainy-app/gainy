@@ -10,6 +10,7 @@ from portfolio.triggers import *
 from search.algolia_search import SearchTickers, SearchCollections
 from search.news_search import SearchNews
 from triggers import *
+from actions import *
 
 ENV = os.environ['ENV']
 
