@@ -13,7 +13,7 @@ dag = create_dag(dag_id,
                  schedule_interval="*/5 * * * *",
                  is_paused_upon_creation=False)
 
-dbt = BashOperator(
-    task_id="website-sync",
-    bash_command=get_meltano_command("schedule run website-to-postgres"),
-    dag=dag)
+dbt = BashOperator(task_id="website-sync",
+                   bash_command=get_meltano_command(
+                       "schedule run website-to-postgres --force"),
+                   dag=dag)
