@@ -11,7 +11,7 @@ instances:
     custom_queries:
       - metric_prefix: app
         query: >
-          with dags (dag_id) as (values ('gainy-dag'), ('realtime-dbt-dag')),
+          with dags (dag_id) as (values ('gainy-dag'), ('realtime-dbt-dag'), ('realtime-website-dag'), ('send-notifications'), ('update-recommendations'), ('deployment')),
                expanded_dag_runs as
                    (
                        select distinct on (
@@ -64,9 +64,9 @@ instances:
                    (
                        select dag_id,
                               count(*) as failed_tasks
-                       from airflow.task_fail
-                       where start_date > now() - interval '10 day'
-                         and (dag_id != 'realtime-dbt-dag' or start_date > now() - interval '1 day')
+                       from airflow.task_instance
+                       where state not in ('success', 'removed')
+                         and start_date > now() - interval '1 day'
                        group by dag_id
                    )
           select dags.dag_id,
