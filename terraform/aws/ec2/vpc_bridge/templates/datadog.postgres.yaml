@@ -65,7 +65,7 @@ instances:
                        select dag_id,
                               count(*) as failed_tasks
                        from airflow.task_instance
-                       where state not in ('success', 'removed')
+                       where state not in ('success', 'removed', 'running')
                          and start_date > now() - interval '1 day'
                        group by dag_id
                    )
