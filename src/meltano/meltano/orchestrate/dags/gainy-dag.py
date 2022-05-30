@@ -28,7 +28,7 @@ for schedule in schedules:
     operator = BashOperator(
         task_id=schedule['name'],
         bash_command=get_meltano_command(
-            f"schedule run {schedule['name']} --transform=skip"),
+            f"schedule run {schedule['name']} --transform=skip --force"),
         skip_exit_code=1,
         dag=dag,
         pool=pool)
