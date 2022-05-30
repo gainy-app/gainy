@@ -6,8 +6,9 @@ CREATE TABLE "app"."subscriptions"
     "is_promotion"                bool                 DEFAULT FALSE,
     "created_at"                  timestamptz NOT NULL DEFAULT now(),
     "period"                      interval    NOT NULL,
-    "revenuecat_ref_id"           integer,
+    "revenuecat_ref_id"           varchar,
     "revenuecat_entitlement_data" jsonb,
     PRIMARY KEY ("id"),
-    UNIQUE ("invitation_id")
+    UNIQUE ("invitation_id"),
+    UNIQUE (profile_id, "revenuecat_ref_id")
 );

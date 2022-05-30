@@ -1,7 +1,9 @@
 import os
-from service.logging import get_logger
+from services.logging import get_logger
+
 
 class BillingService:
+
     def recalculate_subscription_status(self, db_conn, profile_id):
         with db_conn.cursor() as cursor:
             cursor.execute(
@@ -23,5 +25,5 @@ class BillingService:
                 from profile_subscription_end_date
                 where profiles.id = profile_subscription_end_date.profile_id
                   and profiles.id = %(profile_id)s""", {
-                    "profile_id": payload['from_profile_id'],
+                    "profile_id": profile_id,
                 })

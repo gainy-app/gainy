@@ -11,7 +11,7 @@ from portfolio.service import PortfolioService, SERVICE_PLAID
 from portfolio.plaid.common import handle_error
 from common.hasura_function import HasuraAction
 from common.hasura_exception import HasuraActionException
-from service.logging import get_logger
+from services.logging import get_logger
 
 logger = get_logger(__name__)
 

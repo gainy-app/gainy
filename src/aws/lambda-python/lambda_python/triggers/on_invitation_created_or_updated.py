@@ -2,7 +2,7 @@ import datetime
 import dateutil.relativedelta
 import logging
 import psycopg2
-from service.billing import BillingService
+from services import BillingService
 from common.hasura_function import HasuraTrigger
 
 logger = logging.getLogger()
@@ -35,4 +35,5 @@ class OnInvitationCreatedOrUpdated(HasuraTrigger):
         except psycopg2.errors.UniqueViolation as e:
             pass
 
-        self.billing_service.recalculate_subscription_status(db_conn, profile_id)
+        self.billing_service.recalculate_subscription_status(
+            db_conn, payload['from_profile_id'])

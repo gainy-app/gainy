@@ -28,6 +28,10 @@ variable "onesignal_api_key" {
   type      = string
   sensitive = true
 }
+variable "revenuecat_api_key" {
+  type      = string
+  sensitive = true
+}
 
 #################################### AWS ####################################
 

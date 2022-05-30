@@ -93,6 +93,13 @@ actions:
       handler: '{{AWS_LAMBDA_API_GATEWAY_ENDPOINT}}/hasuraAction'
     permissions:
       - role: user
+  - name: update_purchases
+    definition:
+      kind: synchronous
+      handler: '{{AWS_LAMBDA_API_GATEWAY_ENDPOINT}}/hasuraAction'
+    permissions:
+      - role: user
+    comment: update_purchases
 custom_types:
   enums: []
   input_objects:
@@ -213,4 +220,5 @@ custom_types:
             id: id
     - name: CreatePlaidLinkTokenOutput
     - name: PlaidWebhookOutput
+    - name: UpdatePurchasesOutput
   scalars: []

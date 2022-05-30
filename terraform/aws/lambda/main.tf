@@ -28,6 +28,7 @@ variable "redis_cache_port" {}
 variable "public_schema_name" {}
 variable "codeartifact_pipy_url" {}
 variable "gainy_compute_version" {}
+variable "revenuecat_api_key" {}
 
 output "aws_apigatewayv2_api_endpoint" {
   value      = "${aws_apigatewayv2_api.lambda.api_endpoint}/${aws_apigatewayv2_stage.lambda.name}"
@@ -179,6 +180,7 @@ module "hasuraTrigger" {
     ALGOLIA_COLLECTIONS_INDEX = var.algolia_collections_index
     ALGOLIA_SEARCH_API_KEY    = var.algolia_search_key
     HUBSPOT_API_KEY           = var.hubspot_api_key
+    REVENUECAT_API_KEY        = var.revenuecat_api_key
   }
   vpc_security_group_ids = var.vpc_security_group_ids
   vpc_subnet_ids         = var.vpc_subnet_ids

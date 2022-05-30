@@ -13,3 +13,15 @@ mutation {
 ```
 
 After the invitation is created, the `profile.subscription_end_date` is updated.
+
+### Purchases
+
+To update profile's purchases from RevenueCat, app must use the following query:
+```graphql
+mutation {
+  update_purchases(profile_id: 1) {
+    subscription_end_date
+  }
+}
+```
+Returning `subscription_end_date` field is the new calculated end date for the profile after purchases are updated.

@@ -8,7 +8,7 @@ from backoff import full_jitter
 import traceback
 from common.hasura_function import HasuraAction
 from search.cache import CachingLoader, RedisCache
-from service.logging import get_logger
+from services.logging import get_logger
 
 logger = get_logger(__name__)
 

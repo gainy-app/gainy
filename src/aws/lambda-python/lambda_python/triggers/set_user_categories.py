@@ -5,7 +5,7 @@ import sys
 from math import trunc
 from psycopg2.extras import execute_values
 from common.hasura_function import HasuraTrigger
-from service.logging import get_logger
+from services.logging import get_logger
 
 logger = get_logger(__name__)
 script_directory = os.path.dirname(os.path.realpath(__file__))

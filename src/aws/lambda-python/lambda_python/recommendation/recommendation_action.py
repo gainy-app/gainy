@@ -5,7 +5,7 @@ from gainy.data_access.optimistic_lock import ConcurrentVersionUpdate
 from gainy.recommendation import TOP_20_FOR_YOU_COLLECTION_ID
 from gainy.recommendation.compute import ComputeRecommendationsAndPersist
 from gainy.recommendation.repository import RecommendationRepository
-from service.logging import get_logger
+from services.logging import get_logger
 
 logger = get_logger(__name__)
 

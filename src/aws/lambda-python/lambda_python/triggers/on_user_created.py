@@ -4,7 +4,7 @@ import sys
 import logging
 import datadog
 from common.hasura_function import HasuraTrigger
-from service.hubspot import HubspotService
+from services import HubspotService
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
