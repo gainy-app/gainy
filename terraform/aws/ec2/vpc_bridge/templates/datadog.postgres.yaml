@@ -11,17 +11,19 @@ instances:
     custom_queries:
       - metric_prefix: app
         query: >
-          with dags (dag_id) as (values ('gainy-dag'), ('realtime-dbt-dag'), ('realtime-website-dag'), ('send-notifications'), ('update-recommendations'), ('deployment')),
+          with dags (dag_id) as (values ('gainy-dag'), ('realtime-dbt-dag'), ('realtime-website-dag'), ('send-notifications'), ('deployment')),
                expanded_dag_runs as
                    (
                        select distinct on (
                            dag_id
                            ) *,
                              case
-                                 when extract(isodow from start_date) < 5
+                                 when dag_id = 'gainy-dag'
                                      then start_date + interval '1 day'
-                                 else date_trunc('week', start_date) + interval '7 days' +
-                                      (start_date - date_trunc('day', start_date))
+                                 when dag_id in ('realtime-dbt-dag', 'realtime-website-dag')
+                                     then start_date + interval '5 minutes'
+                                 when dag_id = 'send-notifications'
+                                     then start_date + interval '1 minutes'
                                  end next_run_date
                        from airflow.dag_run
                        where state in ('success', 'running')
@@ -30,14 +32,14 @@ instances:
                dag_runs_metrics as
                    (
                        select dag_id,
+                              next_run_date,
+                              state,
                               case
                                   when state = 'running'
                                       then 0
                                   else
-                                      greatest(0, ceil(
-                                              extract(epoch from now() - next_run_date) / 60 / 60 / 24
-                                          ))
-                                  end as days_from_latest_dag_run
+                                      greatest(0, extract(epoch from now() - next_run_date - interval '1 minute'))
+                                  end as seconds_from_latest_dag_run
                        from expanded_dag_runs
                    ),
                successful_dag_runs_metrics as
@@ -56,7 +58,7 @@ instances:
                               count(*) as failed_dag_runs
                        from airflow.dag_run
                        where state = 'failed'
-                         and start_date > now() - interval '10 day'
+                         and start_date > now() - interval '1 day'
                          and (dag_id != 'realtime-dbt-dag' or start_date > now() - interval '1 day')
                        group by dag_id
                    ),
@@ -70,7 +72,7 @@ instances:
                        group by dag_id
                    )
           select dags.dag_id,
-                 dag_runs_metrics.days_from_latest_dag_run,
+                 dag_runs_metrics.seconds_from_latest_dag_run,
                  successful_dag_runs_metrics.latest_dag_run_duration_minutes,
                  coalesce(failed_dag_runs_metrics.failed_dag_runs, 0) as failed_dag_runs,
                  coalesce(failed_tasks_metrics.failed_tasks, 0)       as failed_tasks
