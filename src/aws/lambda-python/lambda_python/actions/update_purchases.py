@@ -4,6 +4,7 @@ from common.hasura_function import HasuraAction
 from services import BillingService, RevenueCatService
 from dateutil import parser
 from psycopg2.extras import execute_values
+from gainy.utils import env
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
@@ -19,7 +20,7 @@ class UpdatePurchases(HasuraAction):
     def apply(self, db_conn, input_params, headers):
         profile_id = input_params["profile_id"]
 
-        if ENV in ['production', 'local']:
+        if env() in ['production', 'local']:
             self.sync_revenuecat(db_conn, profile_id)
 
         self.billing_service.recalculate_subscription_status(
