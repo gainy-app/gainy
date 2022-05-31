@@ -18,6 +18,22 @@ class UpdatePurchases(HasuraAction):
 
     def apply(self, db_conn, input_params, headers):
         profile_id = input_params["profile_id"]
+
+        if ENV in ['production', 'local']:
+            self.sync_revenuecat(db_conn, profile_id)
+
+        self.billing_service.recalculate_subscription_status(
+            db_conn, profile_id)
+
+        with db_conn.cursor() as cursor:
+            cursor.execute(
+                "select subscription_end_date from app.profiles where id = %(profile_id)s",
+                {"profile_id": profile_id})
+            subscription_end_date = cursor.fetchone()[0]
+
+        return {"subscription_end_date": subscription_end_date.isoformat()}
+
+    def sync_revenuecat(self, db_conn, profile_id):
         values = []
         existing_revenuecat_ref_ids = []
 
@@ -49,14 +65,3 @@ class UpdatePurchases(HasuraAction):
                 params["revenuecat_ref_ids"] = tuple(
                     existing_revenuecat_ref_ids)
             cursor.execute(query, params)
-
-        self.billing_service.recalculate_subscription_status(
-            db_conn, profile_id)
-
-        with db_conn.cursor() as cursor:
-            cursor.execute(
-                "select subscription_end_date from app.profiles where id = %(profile_id)s",
-                {"profile_id": profile_id})
-            subscription_end_date = cursor.fetchone()[0]
-
-        return {"subscription_end_date": subscription_end_date.isoformat()}
