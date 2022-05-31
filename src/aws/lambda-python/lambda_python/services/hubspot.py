@@ -1,6 +1,6 @@
 import os
 import json
-from service.logging import get_logger
+from services.logging import get_logger
 from hubspot import HubSpot
 from hubspot.crm.contacts import SimplePublicObjectInput
 from hubspot.crm.contacts.exceptions import ApiException

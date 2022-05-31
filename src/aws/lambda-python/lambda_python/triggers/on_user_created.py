@@ -4,7 +4,7 @@ import sys
 import logging
 import datadog
 from common.hasura_function import HasuraTrigger
-from service.hubspot import HubspotService
+from services import HubspotService
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
@@ -22,7 +22,7 @@ class OnUserCreated(HasuraTrigger):
         self.hubspot_service = HubspotService()
         super().__init__("on_user_created")
 
-    def get_profile_id(self, op, data):
+    def get_allowed_profile_ids(self, op, data):
         return data['new']['id']
 
     def apply(self, db_conn, op, data):

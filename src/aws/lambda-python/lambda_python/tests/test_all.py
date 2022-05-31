@@ -171,6 +171,21 @@ def test_on_plaid_access_token_created():
     assert "transactions_count" in response
 
 
+def test_on_invitation_created_or_updated():
+    event = get_trigger_event(
+        "on_invitation_created_or_updated", "insert", {
+            "old": {},
+            "new": {
+                "id": 1,
+                "from_profile_id": PROFILE_ID,
+                "to_profile_id": PROFILE_ID,
+            }
+        }, USER_ID)
+
+    response = trigger_dispatcher.handle(event)
+    assert response is None
+
+
 # Plaid Actions
 def test_get_portfolio_holdings():
     event = get_action_event("get_portfolio_holdings",

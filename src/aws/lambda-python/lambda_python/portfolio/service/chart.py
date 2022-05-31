@@ -2,7 +2,7 @@ import json
 import os
 from psycopg2 import sql
 from psycopg2.extras import RealDictCursor
-from service.logging import get_logger
+from services.logging import get_logger
 
 logger = get_logger(__name__)
 

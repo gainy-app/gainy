@@ -132,6 +132,7 @@ module "aws" {
   gainy_compute_version = var.gainy_compute_version
   onesignal_app_id      = var.onesignal_app_id
   onesignal_api_key     = var.onesignal_api_key
+  revenuecat_api_key    = var.revenuecat_api_key
 }
 
 module "datadog" {

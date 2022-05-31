@@ -9,9 +9,8 @@ from portfolio.actions import *
 from portfolio.triggers import *
 from search.algolia_search import SearchTickers, SearchCollections
 from search.news_search import SearchNews
-from trigger.set_recommendations import SetRecommendations
-from trigger.set_user_categories import SetUserCategories
-from trigger.on_user_created import OnUserCreated
+from triggers import *
+from actions import *
 
 ENV = os.environ['ENV']
 
@@ -32,6 +31,7 @@ ACTIONS = [
     GetMatchScoreByTicker(),
     GetMatchScoreByTickerList(),
     GetMatchScoreByCollection(),
+    UpdatePurchases(),
 
     # Portfolio
     CreatePlaidLinkToken(),
@@ -64,6 +64,7 @@ TRIGGERS = [
     OnUserCreated(ENV),
     SetRecommendations(),
     OnPlaidAccessTokenCreated(),
+    OnInvitationCreatedOrUpdated(),
 ]
 
 trigger_dispatcher = HasuraTriggerDispatcher(TRIGGERS,

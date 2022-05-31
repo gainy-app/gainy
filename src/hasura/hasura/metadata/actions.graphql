@@ -129,6 +129,12 @@ type Query {
   ): [Ticker]
 }
 
+type Mutation {
+  update_purchases(
+    profile_id: Int!
+  ): UpdatePurchasesOutput
+}
+
 input PlaidWebhookError {
   error_code: Int
 }
@@ -253,5 +259,9 @@ type CreatePlaidLinkTokenOutput {
 
 type PlaidWebhookOutput {
   count: Int!
+}
+
+type UpdatePurchasesOutput {
+  subscription_end_date: String
 }
 

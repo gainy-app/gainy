@@ -5,7 +5,7 @@ import sys
 from math import trunc
 from psycopg2.extras import execute_values
 from common.hasura_function import HasuraTrigger
-from service.logging import get_logger
+from services.logging import get_logger
 
 logger = get_logger(__name__)
 script_directory = os.path.dirname(os.path.realpath(__file__))
@@ -24,7 +24,7 @@ class SetUserCategories(HasuraTrigger):
     def __init__(self):
         super().__init__("set_user_categories")
 
-    def get_profile_id(self, op, data):
+    def get_allowed_profile_ids(self, op, data):
         return data["new"]['profile_id']
 
     def apply(self, db_conn, op, data):

@@ -2,7 +2,7 @@ from common.hasura_function import HasuraTrigger
 from gainy.recommendation.compute import ComputeRecommendationsAndPersist
 from gainy.data_access.optimistic_lock import ConcurrentVersionUpdate
 from gainy.data_access.db_lock import LockAcquisitionTimeout
-from service.logging import get_logger
+from services.logging import get_logger
 
 logger = get_logger(__name__)
 
@@ -16,7 +16,7 @@ class SetRecommendations(HasuraTrigger):
         ])
 
     def apply(self, db_conn, op, data):
-        profile_id = self.get_profile_id(op, data)
+        profile_id = self.get_profile_id(data)
 
         recommendations_func = ComputeRecommendationsAndPersist(
             db_conn, profile_id)
@@ -37,6 +37,9 @@ class SetRecommendations(HasuraTrigger):
             """
             pass
 
-    def get_profile_id(self, op, data):
+    def get_profile_id(self, data):
         payload = self._extract_payload(data)
         return payload["profile_id"]
+
+    def get_allowed_profile_ids(self, op, data):
+        return self.get_profile_id(data)

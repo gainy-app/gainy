@@ -2,7 +2,7 @@ from portfolio.service import PortfolioService
 from portfolio.service.chart import PortfolioChartService
 from portfolio.models import PortfolioChartFilter
 from common.hasura_function import HasuraAction
-from service.logging import get_logger
+from services.logging import get_logger
 
 logger = get_logger(__name__)
 
