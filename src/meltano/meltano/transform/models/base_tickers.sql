@@ -60,3 +60,4 @@ from {{ source('eod', 'eod_fundamentals') }}
 left join {{ ref('crypto_coins') }} on crypto_coins.symbol = upper(eod_fundamentals.code)
 left join ticker_gic_override on ticker_gic_override.symbol = upper(eod_fundamentals.code)
 where ((general ->> 'IsDelisted') is null or (general ->> 'IsDelisted')::bool = false)
+  and eod_fundamentals.code not in ('ZWZZT', 'ZVZZT')
