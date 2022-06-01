@@ -60,4 +60,4 @@ from {{ source('eod', 'eod_fundamentals') }}
 left join {{ ref('crypto_coins') }} on crypto_coins.symbol = upper(eod_fundamentals.code)
 left join ticker_gic_override on ticker_gic_override.symbol = upper(eod_fundamentals.code)
 where ((general ->> 'IsDelisted') is null or (general ->> 'IsDelisted')::bool = false)
-  and eod_fundamentals.code not in ('ZWZZT', 'ZVZZT')
+  and eod_fundamentals.code not in ('NTEST', 'NTEST-M', 'PTEST', 'MTEST', 'PTEST-W', 'PTEST-X', 'ATEST-A', 'ATEST-G', 'ATEST-C', 'ZZZ', 'ZJZZT', 'ATEST-H', 'ZVV', 'NTEST-G', 'NTEST-J', 'NTEST-K', 'ZXYZ-A', 'NTEST-Y', 'NTEST-H', 'NTEST-I', 'NTEST-O', 'NTEST-Z', 'CTEST', 'CBX', 'IGZ', 'NTEST-L', 'NTEST-Q', 'CBO', 'ZWZZT', 'ZVZZT') -- test stocks
