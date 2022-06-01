@@ -1976,6 +1976,21 @@ models:
           - type:
               type: 'json'
 
+  - name: data_checks
+    columns:
+      - name: symbols
+        tests:
+          - type:
+              type: 'json'
+      - name: code
+        tests:
+          - type:
+              type: 'character varying'
+      - name: message
+        tests:
+          - type:
+              type: 'text'
+
 exposures:
   - name: ticker_search_index
     type: application
