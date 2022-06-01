@@ -9,123 +9,71 @@
 }}
 
 
-with ticker_risk_score_common_stocks as
-         (
-             with ticker_riskscore_categorial_weights_frominvestcats as
-                      (
-                          select tcc.symbol,
-                                 cat.risk_score               as risk_category,
-                                 (1. + max(tcc.sim_dif)) / 2. as weight
-                          from {{ ref('ticker_categories_continuous') }} tcc
-                                   join {{ ref('categories') }} cat
-                          on cat.id = tcc.category_id
-                          group by tcc.symbol, cat.risk_score
-                      ),
-
-                  ticker_riskscore_categorial_weights_fromvolatility as
-                      (
-                          with ticker_volatility_nrmlzd as
-                                   (
-                                       select symbol,
-                                              (tm.absolute_historical_volatility_adjusted_current - maxmin.v_min) /
-                                              (1e-30 + (maxmin.v_max - maxmin.v_min)) as val
-                                       from {{ ref('ticker_metrics') }} tm
-                                                left join (
-                                                    select max(absolute_historical_volatility_adjusted_current) as v_max,
-                                                           min(absolute_historical_volatility_adjusted_current) as v_min
-                                                    from {{ ref('ticker_metrics') }} tm
-                                                    where tm.absolute_historical_volatility_adjusted_current is not null
-                                                    ) as maxmin
-                                       on true
-                                       where tm.absolute_historical_volatility_adjusted_current is not null
-                                   )
-                               -- using parameterized bell function - place 3 sensory bells to measure proximity for each risk category (1,2,3) in one dimension
-                               -- latex: \frac{1}{1+\left(s_{r}+\left(s_{c}-s_{r}\right)\cdot\frac{\left|a-0.5\right|}{0.5}\right)^{d}\cdot\left|a-x\right|^{d}},\ s_{r}=8.3,\ s_{c}=4,\ d=3.8,\ s_{c}\le s_{r},\ 0.\le a\le1.
-                               -- desmos: https://www.desmos.com/calculator/olnm6cthlt ("a" stands for the coord, so move it around and look at black graph - it's the sensor region)
-                              (
-                                  select symbol, -- risk = 1, bell-sensor coord={0.0}
-                                         1::int                                                 as risk_category,
-                                         1. / (1. + abs(0.0 - tvn.val) ^ 3.8
-                                             * (8.3 + (4. - 8.3) * abs(0.0 - 0.5) / 0.5) ^ 3.8) as weight
-                                  from ticker_volatility_nrmlzd tvn
-                              )
-                          union
-                          (
-                              select symbol, -- risk = 2 , bell-sensor coord={0.5}
-                                     2::int                                                 as risk_category,
-                                     1. / (1. + abs(0.5 - tvn.val) ^ 3.8
-                                         * (8.3 + (4. - 8.3) * abs(0.5 - 0.5) / 0.5) ^ 3.8) as weight
-                              from ticker_volatility_nrmlzd tvn
-                          )
-                          union
-                          (
-                              select symbol, -- risk = 3 , bell-sensor coord={1.0}
-                                     3::int                                                 as risk_category,
-                                     1. / (1. + abs(1.0 - tvn.val) ^ 3.8
-                                         * (8.3 + (4. - 8.3) * abs(1.0 - 0.5) / 0.5) ^ 3.8) as weight
-                              from ticker_volatility_nrmlzd tvn
-                          )
-                      ),
-
-                  ticker_riskscore_categorial_weights as
-                      (
-                          select -- in case when we don't have enought risk information from ours invest.categories - we mix with volatility information
-                                 coalesce(trsc.symbol, trsv.symbol)               as symbol,
-                                 coalesce(trsc.risk_category, trsv.risk_category) as risk_category,
-                                 case
-                                     when coalesce(trsc.weight, 0.) = 0
-                                         then trsv.weight
-                                     else trsc.weight
-                                     end                                          as weight
-                          from ticker_riskscore_categorial_weights_frominvestcats trsc
-                                   full outer join ticker_riskscore_categorial_weights_fromvolatility trsv
-                                                   on trsv.symbol = trsc.symbol and trsv.risk_category = trsc.risk_category
-                      ),
-
-
-                  ticker_riskscore_onedimensional_weighted as
-                      (
-                          select trcw.symbol,
-                                 case
-                                     when sum(trcw.weight) = 0
-                                         then 0.0 -- in probably non-existing case if all weights was 0 (0 volatility of adjusted_close from eod's "historical_prices")
-                                     else sum(trcw.risk_category * trcw.weight) / (1e-30 + sum(trcw.weight)) - 2. -- [1..3]=>(-1..1)
-                                     end as risk
-                          from ticker_riskscore_categorial_weights trcw
-                          group by trcw.symbol
-                      ),
-
-                  -- 0=centered medium risk. but because we were used weighting and mixing we don't effectively touch the negative and positive limits [-1] and [+1]
-                  -- but we need touch the limits in full scale [-1..1] - to interpret the lowest possible risk ticker and highest possible
-                  -- so we now need to renorm negative and positive sides to touch the limits
-
-                  scalekoefs as
-                      (
-                          select 1e-30 + coalesce((
-                                                      select MAX(risk)
-                                                      from ticker_riskscore_onedimensional_weighted
-                                                      where risk > 0
-                                                  ), 0.) as risk_k_u,
-                                 1e-30 + coalesce((
-                                                      select MAX(-risk)
-                                                      from ticker_riskscore_onedimensional_weighted
-                                                      where risk < 0
-                                                  ), 0.) as risk_k_d
-                      )
-
-             select trod.symbol,
-                    (1. + trod.risk / (case when trod.risk > 0 then s.risk_k_u else s.risk_k_d end)) /
-                    2.               as risk_score --[0..1]
-             from ticker_riskscore_onedimensional_weighted trod
-                      left join scalekoefs as s on true -- one row
-                      join {{ ref('tickers') }} using (symbol) -- ticker_metrics has somehow sometimes more tickers and sometimes less, so filter
-         ),
-     common_stocks as
+with 
+common_stocks as
          (
              select *
              from {{ ref('tickers') }}
              where "type" = 'common stock'
          ),
+         
+ticker_risk_score_common_stocks as
+         (	with
+            return_volatility as 
+              (
+                select 
+                  cs.symbol,
+                  tmm.stddev_3_years	as retvolat
+                from common_stocks cs
+                  join {{ ref('ticker_momentum_metrics') }} tmm using (symbol)
+              ),
+            volat_cntr as 
+              (
+                select percentile_cont(0.5) within group (order by retvolat asc) as val 
+                from return_volatility
+              ),
+            volat_centered as
+              (
+                select symbol, retvolat - cntr.val as retvolat
+                from return_volatility
+                  left join volat_cntr cntr on true
+              ),
+            volat_scale_coefs as 
+              (
+                select 
+                  1e-30 + coalesce((select percentile_cont(0.5) within group(order by retvolat asc) from volat_centered where retvolat > 0), 0.) as retvolat_u,
+                  1e-30 + coalesce((select percentile_cont(0.5) within group(order by -retvolat asc) from volat_centered where retvolat < 0), 0.) as retvolat_d
+              ),
+            volat_cdf_c as
+              (
+                select
+                  symbol,
+                  2.*pnorm(retvolat/(case when retvolat>0 then s.retvolat_u else s.retvolat_d end)) -1. as retvolat
+                from
+                  volat_centered
+                  left join volat_scale_coefs s on true
+              ),
+            volat_cdf_c_scale_coefs as
+              (
+                select 
+                  1e-30 + coalesce((select MAX(retvolat) from volat_cdf_c where retvolat > 0), 0.) as cdf_c_u,
+                  1e-30 + coalesce((select MAX(-retvolat) from volat_cdf_c where retvolat < 0), 0.) as cdf_c_d
+              ),
+            ticker_risk as
+              (
+                select
+                  symbol,
+                  (1.+retvolat/(case when retvolat>0 then s.cdf_c_u else s.cdf_c_d end))/2. as risk_score
+                from
+                  volat_cdf_c
+                  left join volat_cdf_c_scale_coefs s on true
+              )
+            select * from ticker_risk
+         ),
+         
+
+
+--CRYPTO--
 
 --loong list of today's known common stocks in the russel3000 index (grabbed from ishares etf)
 --presave it as a table plz, instead of this ugly CTE
