@@ -5,7 +5,7 @@
   )
 }}
 
-with collection_distinct_tickers as
+     collection_distinct_tickers as
          (
              select distinct symbol
              from {{ ref('ticker_collections') }}
@@ -20,10 +20,52 @@ with collection_distinct_tickers as
              where open_at < now()
              order by exchange_name, country_name, date desc
          ),
+     old_historical_prices as
+         (
+             select symbol
+             from (
+                      select tickers.symbol,
+                             max(historical_prices.date) as date
+                      from {{ ref('tickers') }}
+                               left join {{ ref('historical_prices') }} on historical_prices.code = tickers.symbol
+                      where volume > 0
+                      group by tickers.symbol
+                  ) t
+                      join {{ ref('tickers') }} using (symbol)
+                      join latest_trading_day
+                           on (latest_trading_day.exchange_name = tickers.exchange_canonical
+                               or (tickers.exchange_canonical is null
+                                   and latest_trading_day.country_name = tickers.country_name))
+             where t.date is null
+                or latest_trading_day.date - t.date > (now() < latest_trading_day.date::timestamp + interval '28 hours')::int
+-- US markets typically close at 20:00. Fetching starts at 2:00. We expect prices to be present in 2 hours after start.
+         ),
+     old_realtime_prices as
+         (
+             select symbol
+             from (
+                      select tickers.symbol,
+                             max(eod_intraday_prices.time) as time
+                      from {{ ref('tickers') }}
+                               left join {{ source('raw_data', 'eod_intraday_prices') }}
+                                         on eod_intraday_prices.symbol = tickers.symbol
+                      group by tickers.symbol
+                  ) t
+                      left join old_historical_prices using (symbol)
+                      join {{ ref('tickers') }} using (symbol)
+                      join latest_trading_day
+                           on (latest_trading_day.exchange_name = tickers.exchange_canonical
+                               or (tickers.exchange_canonical is null
+                                   and latest_trading_day.country_name = tickers.country_name))
+             where old_historical_prices.symbol is null
+               and (t.time is null or least(now(), latest_trading_day.close_at) - t.time > interval '16 minutes')
+-- Polygon delay is 15 minutes
+         ),
      errors as
          (
              select symbol,
-                    'ttf_ticker_no_interest' as code
+                    'ttf_ticker_no_interest' as code,
+                    now()::date::varchar     as idempotency_key
              from collection_distinct_tickers
                       left join {{ ref('ticker_interests') }} using (symbol)
                       left join {{ ref('interests') }} on interests.id = ticker_interests.interest_id
@@ -32,7 +74,8 @@ with collection_distinct_tickers as
              union all
 
              select symbol,
-                    'ttf_ticker_no_industry' as code
+                    'ttf_ticker_no_industry' as code,
+                    now()::date::varchar     as idempotency_key
              from collection_distinct_tickers
                       left join {{ ref('ticker_industries') }} using (symbol)
                       left join {{ ref('gainy_industries') }} on gainy_industries.id = ticker_industries.industry_id
@@ -41,7 +84,8 @@ with collection_distinct_tickers as
              union all
 
              select collection_distinct_tickers.symbol,
-                    'ttf_ticker_hidden' as code
+                    'ttf_ticker_hidden'  as code,
+                    now()::date::varchar as idempotency_key
              from collection_distinct_tickers
                       left join {{ ref('tickers') }} on tickers.symbol = collection_distinct_tickers.symbol
              where tickers.symbol is null
@@ -49,7 +93,8 @@ with collection_distinct_tickers as
              union all
 
              select tickers.symbol,
-                    'old_realtime_metrics' as code
+                    'old_realtime_metrics'              as code,
+                    date_trunc('hours', now())::varchar as idempotency_key
              from {{ ref('tickers') }}
                       join latest_trading_day
                            on (latest_trading_day.exchange_name = tickers.exchange_canonical
@@ -62,7 +107,8 @@ with collection_distinct_tickers as
              union all
 
              select symbol,
-                    'old_realtime_chart' as code
+                    'old_realtime_chart'                as code,
+                    date_trunc('hours', now())::varchar as idempotency_key
              from (
                       select tickers.symbol,
                              max(chart.datetime) as datetime
@@ -72,55 +118,34 @@ with collection_distinct_tickers as
                                              and chart.period = '1d'
                       group by tickers.symbol
                   ) t
+                      left join old_historical_prices using (symbol)
+                      left join old_realtime_prices using (symbol)
                       join {{ ref('tickers') }} using (symbol)
                       join latest_trading_day
                            on (latest_trading_day.exchange_name = tickers.exchange_canonical
                                or (tickers.exchange_canonical is null
                                    and latest_trading_day.country_name = tickers.country_name))
-             where datetime is null
-                or least(now(), latest_trading_day.close_at) - datetime > interval '30 minutes'
+             where old_historical_prices.symbol is null
+               and old_realtime_prices.symbol is null
+               and (datetime is null or least(now(), latest_trading_day.close_at) - datetime > interval '30 minutes')
 
              union all
 
              select symbol,
-                    'old_historical_prices' as code
-             from (
-                      select tickers.symbol,
-                             max(historical_prices.date) as date
-                      from {{ ref('tickers') }}
-                               left join {{ ref('historical_prices') }} on historical_prices.code = tickers.symbol
-                      group by tickers.symbol
-                  ) t
-                      join {{ ref('tickers') }} using (symbol)
-                      join latest_trading_day
-                           on (latest_trading_day.exchange_name = tickers.exchange_canonical
-                               or (tickers.exchange_canonical is null
-                                   and latest_trading_day.country_name = tickers.country_name))
-             where t.date is null
-                or latest_trading_day.date - t.date > (now() < latest_trading_day.date::timestamp + interval '28 hours')::int
--- US markets typically close at 20:00. Fetching starts at 2:00. We expect prices to be present in 2 hours after start.
+                    'old_historical_prices' as code,
+                    now()::date::varchar    as idempotency_key
+             from old_historical_prices
+
              union all
 
              select symbol,
-                    'old_realtime_prices' as code
-             from (
-                      select tickers.symbol,
-                             max(eod_intraday_prices.time) as time
-                      from {{ ref('tickers') }}
-                               left join {{ source('eod', 'eod_intraday_prices') }} on eod_intraday_prices.symbol = tickers.symbol
-                      group by tickers.symbol
-                  ) t
-                      join {{ ref('tickers') }} using (symbol)
-                      join latest_trading_day
-                           on (latest_trading_day.exchange_name = tickers.exchange_canonical
-                               or (tickers.exchange_canonical is null
-                                   and latest_trading_day.country_name = tickers.country_name))
-             where t.time is null
-                or least(now(), latest_trading_day.close_at) - t.time > interval '16 minutes'
--- Polygon delay is 15 minutes
+                    'old_realtime_prices' as code,
+                    now()::date::varchar  as idempotency_key
+             from old_realtime_prices
          )
 select symbols,
-       code::varchar,
+       code,
+       (code || '_' || idempotency_key)::varchar as idempotency_key,
        case
            when code = 'ttf_ticker_no_interest'
                then 'TTF tickers ' || symbols || ' is not linked to any interest.'
@@ -133,13 +158,14 @@ select symbols,
            when code = 'old_realtime_chart'
                then 'Tickers ' || symbols || ' has old realtime chart.'
            when code = 'old_historical_prices'
-               then 'Tickers ' || symbols || ' has old realtime prices.'
-           when code = 'old_realtime_prices'
                then 'Tickers ' || symbols || ' has old historical prices.'
-           end as message
+           when code = 'old_realtime_prices'
+               then 'Tickers ' || symbols || ' has old realtime prices.'
+           end                 as message
 from (
          select json_agg(symbol) as symbols,
-                code
+                code,
+                idempotency_key
          from errors
-         group by code
+         group by code, idempotency_key
      ) t

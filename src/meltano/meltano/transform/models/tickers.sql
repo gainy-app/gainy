@@ -1,4 +1,4 @@
-{% set min_daily_volume = 100000 %}
+{% set min_daily_volume = 1000000 %}
 
 {{
   config(
@@ -11,42 +11,71 @@
   )
 }}
 
-with volumes as (
-    select code as symbol, avg(volume) as avg_volume
-    from {{ source('eod', 'eod_historical_prices') }}
-    where "date"::date >= NOW() - interval '30 days'
-    group by code
-),
-     latest_price as (
-         select code as symbol, max(date) as date
-         from {{ source('eod', 'eod_historical_prices') }}
-         group by code
-     )
-select t.symbol,
-       t.type,
-       t.name,
-       t.description,
-       t.phone,
-       t.logo_url,
-       t.web_url,
-       t.ipo_date,
-       t.sector,
-       t.industry,
-       t.gic_sector,
-       t.gic_group,
-       t.gic_industry,
-       t.gic_sub_industry,
-       t.exchange,
-       t.exchange_canonical,
-       t.country_name,
+with exchange_month_trading_sessions_count as
+         (
+             select exchange_name, count(date) as count
+             from exchange_schedule
+             where open_at between now() - interval '1 month' and now()
+             group by exchange_name
+         ),
+     country_month_trading_sessions_count as
+         (
+             select country_name, count(date) as count
+             from exchange_schedule
+             where open_at between now() - interval '1 month' and now()
+             group by country_name
+         ),
+     volumes as
+         (
+             select symbol,
+                    month_volume_sum / coalesce(exchange_month_trading_sessions_count.count,
+                                                country_month_trading_sessions_count.count) as avg_volume
+             from (
+                      select code                         as symbol,
+                             sum(volume * adjusted_close) as month_volume_sum
+                      from raw_data.eod_historical_prices
+                      where "date"::date >= NOW() - interval '30 days'
+                      group by code
+                  ) t
+                      join base_tickers using (symbol)
+                      left join exchange_month_trading_sessions_count
+                                on exchange_month_trading_sessions_count.exchange_name =
+                                   base_tickers.exchange_canonical
+                      left join country_month_trading_sessions_count
+                                on country_month_trading_sessions_count.country_name =
+                                   base_tickers.country_name
+         ),
+     latest_price as
+         (
+             select code as symbol, max(date) as date
+             from raw_data.eod_historical_prices
+             group by code
+         )
+select base_tickers.symbol,
+       base_tickers.type,
+       base_tickers.name,
+       base_tickers.description,
+       base_tickers.phone,
+       base_tickers.logo_url,
+       base_tickers.web_url,
+       base_tickers.ipo_date,
+       base_tickers.sector,
+       base_tickers.industry,
+       base_tickers.gic_sector,
+       base_tickers.gic_group,
+       base_tickers.gic_industry,
+       base_tickers.gic_sub_industry,
+       base_tickers.exchange,
+       base_tickers.exchange_canonical,
+       base_tickers.country_name,
        now()::timestamp as updated_at
-from {{ ref('base_tickers') }} t
-    join volumes v on t.symbol = v.symbol
-    join latest_price on t.symbol = latest_price.symbol
-where v.avg_volume is not null
-  and v.avg_volume >= {{ min_daily_volume }}
-  and t.description is not null
-  and length (t.description) >= 5
+from base_tickers
+         join volumes on base_tickers.symbol = v.symbol
+         join latest_price on base_tickers.symbol = latest_price.symbol
+where volumes.avg_volume is not null
+  and volumes.avg_volume >= {{ min_daily_volume }}
+  and base_tickers.description is not null
+  and length(base_tickers.description) >= 5
   and latest_price.date is not null
   and latest_price.date::date >= now() - interval '7 days'
   and type in ('fund', 'etf', 'mutual fund', 'preferred stock', 'common stock', 'crypto')
