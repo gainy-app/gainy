@@ -248,6 +248,9 @@ async def run(listener_factory):
             await asyncio.sleep(listener.no_messages_reconnect_timeout)
 
             should_reconnect = listener.should_reconnect()
+        except psycopg2.errors.UndefinedTable:
+            pass
         except Exception as e:
             logger.exception(e)
-            await asyncio.sleep(60)
+
+        await asyncio.sleep(60)

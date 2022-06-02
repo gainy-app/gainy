@@ -54,7 +54,6 @@ class PricesListener(AbstractPriceListener):
                 tickers = cursor.fetchall()
 
         symbols = [ticker[0] for ticker in tickers]
-        symbols = list(filter(lambda symbol: symbol.find('-') == -1, symbols))
         symbols.sort()
         return set(MANDATORY_SYMBOLS +
                    symbols[:SYMBOLS_LIMIT - len(MANDATORY_SYMBOLS)])
