@@ -63,12 +63,12 @@ union all
 -- Most performing TTF daily in all TTFs
 -- 1) MIN 3% diff for TTF to change 2) #1 TTF
 -- Notify with the performance of the top TTF on the platform  [better do it aftermarket opens and trades a bit ~12pm EST]
-select null                                               as profile_id,
-       ('top_ttf_' || now()::date)::varchar               as uniq_id,
-       exchange_schedule.close_at - interval '2 hours'    as send_at,
+select null                                            as profile_id,
+       ('top_ttf_' || now()::date)::varchar            as uniq_id,
+       exchange_schedule.close_at - interval '2 hours' as send_at,
        json_build_object('en', 'The most performing TTF today is ' || collection_name || ' +' || round(relative_daily_change * 100) ||
-       '%. Check this out!')                              as text,
-       json_build_object('t', 1, 'ttf_id', collection_id) as data
+       '%. Check this out!')                           as text,
+       json_build_object('t', 1, 'id', collection_id)  as data
 from (
          select collection_uniq_id,
                 profile_collections.id as collection_id,
