@@ -24,9 +24,9 @@ ticker_risk_score_common_stocks as
               (
                 select 
                   cs.symbol,
-                  tmm.stddev_3_years	as retvolat
+                  ticker_metrics.stddev_3_years	as retvolat
                 from common_stocks cs
-                  join {{ ref('ticker_momentum_metrics') }} tmm using (symbol)
+                  join {{ ref('ticker_metrics') }} using (symbol)
               ),
             volat_cntr as 
               (
@@ -152,9 +152,9 @@ ticker_risk_score_common_stocks as
          (
              select tml.symbol,
                     tml."type",
-                    ticker_momentum_metrics.stddev_3_years as std_dev
+                    ticker_metrics.stddev_3_years as std_dev
              from tickers_measuring_list tml
-                      join {{ ref('ticker_momentum_metrics') }} using (symbol)
+                      join {{ ref('ticker_metrics') }} using (symbol)
          ),
 
      crypto_nearest_stocks_by_return_volatility as
