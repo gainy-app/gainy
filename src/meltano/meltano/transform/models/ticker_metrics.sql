@@ -265,7 +265,7 @@ with highlights as (select * from {{ ref('highlights') }}),
                       (
                           SELECT symbol, datetime, adjusted_close
                           from {{ ref('historical_prices_aggregated') }}
-                          where date > NOW() - interval '3 years'
+                          where datetime > NOW() - interval '3 years'
                             and period = '1w'
                       ),
                   weekly_prices2 as
