@@ -461,6 +461,7 @@ select DISTINCT ON
                momentum_metrics.price_change_1y,
                momentum_metrics.price_change_5y,
                momentum_metrics.price_change_all,
+               momentum_metrics.stddev_3_years,
 
                dividend_metrics.dividend_yield,
                dividend_metrics.dividends_per_share,
