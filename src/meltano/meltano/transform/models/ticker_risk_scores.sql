@@ -18,7 +18,8 @@ common_stocks as
          ),
          
 ticker_risk_score_common_stocks as
-         (	with
+         (	
+            with
             return_volatility as 
               (
                 select 
