@@ -188,10 +188,14 @@ class PricesListener(AbstractPriceListener):
         return super().should_reconnect(self.cluster)
 
     def transform_symbol(self, symbol):
-        return symbol.replace('-', '.')
+        symbol = symbol.replace('-P', 'p')
+        symbol = symbol.replace('-', '.')
+        return symbol
 
     def rev_transform_symbol(self, symbol):
-        return symbol.replace('.', '-')
+        symbol = symbol.replace('p', '-P')
+        symbol = symbol.replace('.', '-')
+        return symbol
 
 
 if __name__ == "__main__":
