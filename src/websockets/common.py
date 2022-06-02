@@ -253,4 +253,4 @@ async def run(listener_factory):
         except Exception as e:
             logger.exception(e)
 
-        await asyncio.sleep(60)
+        await asyncio.sleep(30)

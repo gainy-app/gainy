@@ -116,39 +116,41 @@ class PricesListener(AbstractPriceListener):
                 self.logger.exception(e)
             await asyncio.sleep(60)
 
-        stream_client = polygon.AsyncStreamClient(self.api_token,
-                                                  self.cluster,
-                                                  host=self.host)
+        while 1:
+            stream_client = polygon.AsyncStreamClient(self.api_token,
+                                                      self.cluster,
+                                                      host=self.host)
 
-        await stream_client.change_handler(
-            'status', self.get_status_message_handler(stream_client))
+            await stream_client.change_handler(
+                'status', self.get_status_message_handler(stream_client))
 
-        try:
-            if self.cluster == StreamCluster.STOCKS:
-                await stream_client.subscribe_stock_minute_aggregates(
-                    [self.transform_symbol(i) for i in self.symbols],
-                    self.handle_message)
-            elif self.cluster == StreamCluster.OPTIONS:
-                await stream_client.subscribe_option_minute_aggregates(
-                    [self.transform_symbol(i) for i in self.symbols],
-                    self.handle_message)
-            else:
-                raise Exception(f"Unknown cluster {self.cluster}")
+            try:
+                if self.cluster == StreamCluster.STOCKS:
+                    await stream_client.subscribe_stock_minute_aggregates(
+                        [self.transform_symbol(i) for i in self.symbols],
+                        self.handle_message)
+                elif self.cluster == StreamCluster.OPTIONS:
+                    await stream_client.subscribe_option_minute_aggregates(
+                        [self.transform_symbol(i) for i in self.symbols],
+                        self.handle_message)
+                else:
+                    raise Exception(f"Unknown cluster {self.cluster}")
 
-            self.logger.info(
-                f"connected to websocket '{self.cluster}' for symbols: {','.join(self.symbols)}"
-            )
-
-            while 1:
+                while 1:
+                    try:
+                        await stream_client.handle_messages()
+                    except Exception as e:
+                        self.logger.error(
+                            "Error caught in handle_messages func: %s %s",
+                            type(e).__name__, str(e))
+                        break
+            finally:
                 try:
-                    await stream_client.handle_messages(
-                        reconnect=True, max_reconnection_attempts=100)
-                except Exception as e:
-                    self.logger.error("%s Error caught in start func: %s",
-                                      type(e).__name__, str(e))
-                    await asyncio.sleep(90)
-        finally:
-            await stream_client.close_stream()
+                    await stream_client.close_stream()
+                except:
+                    pass
+
+            await asyncio.sleep(10)
 
     def get_status_message_handler(self, stream_client):
 
@@ -183,7 +185,7 @@ class PricesListener(AbstractPriceListener):
                     return False
             return True
 
-        super().should_reconnect(self.cluster)
+        return super().should_reconnect(self.cluster)
 
     def transform_symbol(self, symbol):
         return symbol.replace('-', '.')
