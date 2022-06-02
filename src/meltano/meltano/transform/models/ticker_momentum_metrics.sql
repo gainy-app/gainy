@@ -27,7 +27,7 @@ with settings (local_risk_free_rate) as (values (0.001)),
                     CASE WHEN ABS(ticker_metrics.stddev_3_years) > 0 THEN m.MOM2 / ticker_metrics.stddev_3_years END  as Risk_Adj_MOM2,
                     CASE WHEN ABS(ticker_metrics.stddev_3_years) > 0 THEN m.MOM12 / ticker_metrics.stddev_3_years END as Risk_Adj_MOM12
              from momentum m
-                      JOIN ticker_metrics ON ticker_metrics.symbol = m.code
+                      JOIN {{ ref('ticker_metrics') }} ON ticker_metrics.symbol = m.code
          ),
      momentum_risk_adj_stats as
          (
