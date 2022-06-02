@@ -263,15 +263,15 @@ with highlights as (select * from {{ ref('highlights') }}),
          (
              with weekly_prices as
                       (
-                          SELECT code as symbol, date, adjusted_close
-                          from {{ ref('historical_prices') }}
+                          SELECT symbol, datetime, adjusted_close
+                          from {{ ref('historical_prices_aggregated') }}
                           where date > NOW() - interval '3 years'
                             and period = '1w'
                       ),
                   weekly_prices2 as
                       (
                           select *,
-                                 first_value(adjusted_close) over (partition by symbol order by date rows between 1 preceding and 1 preceding) as prev_week_adjusted_close
+                                 first_value(adjusted_close) over (partition by symbol order by datetime rows between 1 preceding and 1 preceding) as prev_week_adjusted_close
                           from weekly_prices
                       ),
                   stddev_3_years as
