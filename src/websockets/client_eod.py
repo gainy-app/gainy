@@ -72,7 +72,8 @@ class PricesListener(AbstractPriceListener):
                                                            timestamp):
             timestamp *= 1000
 
-        volume = decimal_volume = None
+        volume = 0
+        decimal_volume = Decimal(0)
         if "v" in message:
             volume = message.get("v")
             decimal_volume = Decimal(volume)
