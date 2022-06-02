@@ -261,39 +261,62 @@ with highlights as (select * from {{ ref('highlights') }}),
          ),
      momentum_metrics as
          (
+             with weekly_prices as
+                      (
+                          SELECT symbol, datetime, adjusted_close
+                          from {{ ref('historical_prices') }}
+                          where datetime > NOW() - interval '3 years'
+                            and period = '1w'
+                      ),
+                  weekly_prices2 as
+                      (
+                          select *,
+                                 first_value(adjusted_close) over (partition by symbol order by datetime rows between 1 preceding and 1 preceding) as prev_week_adjusted_close
+                          from weekly_prices
+                      ),
+                  stddev_3_years as
+                      (
+                          SELECT symbol,
+                                 stddev_pop(adjusted_close / prev_week_adjusted_close - 1) * pow(52, 0.5) as value
+                          from weekly_prices2
+                          where prev_week_adjusted_close > 0
+                          group by symbol
+                      )
              select all_tickers.symbol,
                     historical_prices_marked.price_0d /
                     case
                         when coalesce(historical_prices_marked.price_1w, historical_prices_marked.price_all) > 0
                             then coalesce(historical_prices_marked.price_1w, historical_prices_marked.price_all)
-                        end - 1 as price_change_1w,
+                        end - 1          as price_change_1w,
                     historical_prices_marked.price_0d /
                     case
                         when coalesce(historical_prices_marked.price_1m, historical_prices_marked.price_all) > 0
                             then coalesce(historical_prices_marked.price_1m, historical_prices_marked.price_all)
-                        end - 1 as price_change_1m,
+                        end - 1          as price_change_1m,
                     historical_prices_marked.price_0d /
                     case
                         when coalesce(historical_prices_marked.price_3m, historical_prices_marked.price_all) > 0
                             then coalesce(historical_prices_marked.price_3m, historical_prices_marked.price_all)
-                        end - 1 as price_change_3m,
+                        end - 1          as price_change_3m,
                     historical_prices_marked.price_0d /
                     case
                         when coalesce(historical_prices_marked.price_1y, historical_prices_marked.price_all) > 0
                             then coalesce(historical_prices_marked.price_1y, historical_prices_marked.price_all)
-                        end - 1 as price_change_1y,
+                        end - 1          as price_change_1y,
                     historical_prices_marked.price_0d /
                     case
                         when coalesce(historical_prices_marked.price_5y, historical_prices_marked.price_all) > 0
                             then coalesce(historical_prices_marked.price_5y, historical_prices_marked.price_all)
-                        end - 1 as price_change_5y,
+                        end - 1          as price_change_5y,
                     historical_prices_marked.price_0d /
                     case
                         when historical_prices_marked.price_all > 0
                             then historical_prices_marked.price_all
-                        end - 1 as price_change_all
+                        end - 1          as price_change_all,
+                    stddev_3_years.value as stddev_3_years
              from all_tickers
                       left join historical_prices_marked using (symbol)
+                      left join stddev_3_years using (symbol)
          ),
      dividend_metrics as
          (

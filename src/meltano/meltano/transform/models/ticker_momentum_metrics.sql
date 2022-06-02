@@ -9,27 +9,6 @@
 }}
 
 with settings (local_risk_free_rate) as (values (0.001)),
-     weekly_prices as
-         (
-             SELECT symbol, datetime, adjusted_close
-             from {{ ref('historical_prices_aggregated') }}
-             where datetime > NOW() - interval '3 years'
-               and period = '1w'
-         ),
-     weekly_prices2 as
-         (
-             select *,
-                    first_value(adjusted_close) over (partition by symbol order by datetime rows between 1 preceding and 1 preceding) as prev_week_adjusted_close
-             from weekly_prices
-         ),
-     stddev_3_years as
-         (
-             SELECT symbol                                                 as code,
-                    stddev_pop(adjusted_close / prev_week_adjusted_close - 1) * pow(52, 0.5) as value
-             from weekly_prices2
-             where prev_week_adjusted_close > 0
-             group by code
-         ),
      momentum as
          (
              SELECT f.code,
@@ -45,10 +24,10 @@ with settings (local_risk_free_rate) as (values (0.001)),
          (
              SELECT m.code,
                     m.gic_sector,
-                    CASE WHEN ABS(s3y.value) > 0 THEN m.MOM2 / s3y.value END  as Risk_Adj_MOM2,
-                    CASE WHEN ABS(s3y.value) > 0 THEN m.MOM12 / s3y.value END as Risk_Adj_MOM12
+                    CASE WHEN ABS(ticker_metrics.stddev_3_years) > 0 THEN m.MOM2 / ticker_metrics.stddev_3_years END  as Risk_Adj_MOM2,
+                    CASE WHEN ABS(ticker_metrics.stddev_3_years) > 0 THEN m.MOM12 / ticker_metrics.stddev_3_years END as Risk_Adj_MOM12
              from momentum m
-                      JOIN stddev_3_years s3y ON s3y.code = m.code
+                      JOIN ticker_metrics ON ticker_metrics.symbol = m.code
          ),
      momentum_risk_adj_stats as
          (
@@ -80,7 +59,6 @@ with settings (local_risk_free_rate) as (values (0.001)),
              from z_score zs
          )
 SELECT m.code as symbol,
-       stddev_3_years.value                                           as stddev_3_years,
        MOM2,
        MOM12,
        Risk_Adj_MOM2,
@@ -95,8 +73,7 @@ SELECT m.code as symbol,
        Windsored_Z_Score_MOM12,
        (wzs.Windsored_Z_Score_MOM2 + wzs.Windsored_Z_Score_MOM12) / 2 as combined_momentum_score
 FROM {{ ref('tickers') }} t
-         join stddev_3_years on stddev_3_years.code = t.symbol
-         join momentum m on m.code = t.symbol
+    join momentum m on m.code = t.symbol
     join momentum_risk_adj mra on mra.code = t.symbol
     join windsored_z_score wzs on wzs.code = t.symbol
     join z_score ON z_score.code = wzs.code
