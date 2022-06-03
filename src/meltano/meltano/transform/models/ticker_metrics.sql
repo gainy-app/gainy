@@ -271,7 +271,7 @@ with highlights as (select * from {{ ref('highlights') }}),
                   weekly_prices2 as
                       (
                           select *,
-                                 first_value(adjusted_close) over (partition by symbol order by datetime rows between 1 preceding and 1 preceding) as prev_week_adjusted_close
+                                 first_value(adjusted_close) over (partition by symbol order by datetime rows between 1 preceding and 0 preceding) as prev_week_adjusted_close
                           from weekly_prices
                       ),
                   stddev_3_years as
