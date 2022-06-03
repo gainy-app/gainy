@@ -140,7 +140,7 @@ with collection_distinct_tickers as
              from old_realtime_prices
          )
 select symbol,
-       code,
+       code::varchar,
        case
            when code = 'ttf_ticker_no_interest'
                then 'TTF tickers ' || symbol || ' is not linked to any interest.'
