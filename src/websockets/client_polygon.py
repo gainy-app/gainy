@@ -136,6 +136,10 @@ class PricesListener(AbstractPriceListener):
                 else:
                     raise Exception(f"Unknown cluster {self.cluster}")
 
+                self.logger.info(
+                    f"connected to websocket '{self.cluster}' for symbols: {','.join(self.symbols)}"
+                )
+
                 while 1:
                     try:
                         await stream_client.handle_messages()
@@ -188,10 +192,15 @@ class PricesListener(AbstractPriceListener):
         return super().should_reconnect(self.cluster)
 
     def transform_symbol(self, symbol):
-        return symbol.replace('-', '.')
+        symbol = symbol.replace('-P', 'p')
+        symbol = symbol.replace('-', '.')
+        return symbol
 
     def rev_transform_symbol(self, symbol):
-        return symbol.replace('.', '-')
+        symbol = symbol.replace('O:', '')
+        symbol = symbol.replace('p', '-P')
+        symbol = symbol.replace('.', '-')
+        return symbol
 
 
 if __name__ == "__main__":

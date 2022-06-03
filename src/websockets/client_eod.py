@@ -43,7 +43,7 @@ class PricesListener(AbstractPriceListener):
                 SELECT base_tickers.symbol, case when type = 'crypto' then 1 else 0 end as priority
                 FROM base_tickers
                          left join ticker_metrics on ticker_metrics.symbol = base_tickers.symbol
-                where base_tickers.symbol is not null
+                where base_tickers.symbol not like '%-%'
                   and (lower(exchange) similar to '(nyse|nasdaq)%%' or type = 'crypto')
                 order by priority desc, market_capitalization desc nulls last
                 limit %(count)s
@@ -54,7 +54,6 @@ class PricesListener(AbstractPriceListener):
                 tickers = cursor.fetchall()
 
         symbols = [ticker[0] for ticker in tickers]
-        symbols = list(filter(lambda symbol: symbol.find('-') == -1, symbols))
         symbols.sort()
         return set(MANDATORY_SYMBOLS +
                    symbols[:SYMBOLS_LIMIT - len(MANDATORY_SYMBOLS)])
@@ -72,7 +71,8 @@ class PricesListener(AbstractPriceListener):
                                                            timestamp):
             timestamp *= 1000
 
-        volume = decimal_volume = None
+        volume = 0
+        decimal_volume = Decimal(0)
         if "v" in message:
             volume = message.get("v")
             decimal_volume = Decimal(volume)

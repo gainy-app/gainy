@@ -51,6 +51,9 @@ def send_all(sender_id):
                    where send_at <= now()
                    on conflict do nothing""", {"sender_id": sender_id})
             cursor.execute(
+                "update app.notifications set sender_id = %(sender_id)s where sender_id is null",
+                {"sender_id": sender_id})
+            cursor.execute(
                 """select profiles.email, uuid, send_at, text, data
                    from app.notifications
                    left join app.profiles on profiles.id = notifications.profile_id
