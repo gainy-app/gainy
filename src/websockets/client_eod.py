@@ -237,7 +237,7 @@ class PricesListener(AbstractPriceListener):
                                     "symbols": ",".join(symbols)
                                 }))
                         except Exception as e:
-                            self.logger.error(
+                            self.logger.warning(
                                 "%s Error caught while unsubscribing: %s",
                                 type(e).__name__, str(e))
 
