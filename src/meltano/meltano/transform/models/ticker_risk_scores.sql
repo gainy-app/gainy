@@ -33,7 +33,7 @@ ticker_risk_score_common_stocks as
                 select percentile_cont(0.5) within group (order by retvolat asc) as val 
                 from return_volatility
               ),
-            volat_centered as
+            volat_centered as --half of tickers on the left and half on the right
               (
                 select symbol, retvolat - cntr.val as retvolat
                 from return_volatility
@@ -48,8 +48,9 @@ ticker_risk_score_common_stocks as
             volat_cdf_c as
               (
                 select
-                  symbol,
-                  2.*pnorm(retvolat/(case when retvolat>0 then s.retvolat_u else s.retvolat_d end)) -1. as retvolat
+                  symbol, 
+                  2.*pnorm((retvolat/(case when retvolat>0 then s.retvolat_u else s.retvolat_d end)) *0.67449) -1. as retvolat
+                  -- *0.67449 sigma rescaling so that the median(equalized to 1sigma) appears precicely on the quartiles 0.25 and 0.75 of the CDF output
                 from
                   volat_centered
                   left join volat_scale_coefs s on true
