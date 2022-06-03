@@ -36,7 +36,6 @@ class PricesListener(AbstractPriceListener):
             return set()
 
         if self.cluster == StreamCluster.STOCKS:
-
             query = """SELECT symbol FROM base_tickers
             where symbol is not null
               and type in ('fund', 'etf', 'mutual fund', 'preferred stock', 'common stock')"""
