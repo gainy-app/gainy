@@ -98,33 +98,6 @@ resource "datadog_monitor" "hasura_alb_5xx" {
   tags = ["hasura"]
 }
 
-resource "datadog_monitor" "hasura_alb_active_connections" {
-  name    = "Hasura Active Connections"
-  type    = "query alert"
-  message = "Hasura Active Connections Monitor triggered. Notify: @slack-${var.slack_channel_name} <!channel>"
-  #  escalation_message = "Escalation message @pagerduty"
-
-  query = "avg(last_7d):anomalies(sum:aws.applicationelb.active_connection_count{name:*-production}.as_count(), 'basic', 2, direction='both', alert_window='last_1d', interval=300, count_default_zero='true') > 0.8"
-
-  monitor_threshold_windows {
-    recovery_window = "last_1d"
-    trigger_window  = "last_1d"
-  }
-
-  monitor_thresholds {
-    critical          = "0.8"
-    critical_recovery = "0.7"
-    warning           = "0.5"
-    warning_recovery  = "0.4"
-  }
-
-  require_full_window = true
-  notify_no_data      = false
-  renotify_interval   = 240
-
-  tags = ["hasura"]
-}
-
 #################################### ECS ####################################
 
 resource "datadog_monitor" "ecs_cpu" {
@@ -387,12 +360,12 @@ resource "datadog_monitor" "meltano_dag_run_duration" {
   tags = ["meltano"]
 }
 
-resource "datadog_monitor" "meltano_failed_dag_runs" {
-  name    = "Airflow Meltano Failed Dag Runs"
+resource "datadog_monitor" "meltano_failed_tasks" {
+  name    = "Airflow Meltano Failed Tasks"
   type    = "query alert"
-  message = "Airflow Meltano Failed Dag Runs triggered. Notify: @slack-${var.slack_channel_name} <!channel>"
+  message = "Airflow Meltano Failed Tasks triggered. Notify: @slack-${var.slack_channel_name} <!channel>"
 
-  query = "avg(last_1d):anomalies(max:app.failed_dag_runs{postgres_env:production} by {dag_id}.as_count(), 'basic', 2, direction='above', alert_window='last_1h', interval=300, count_default_zero='true') > 0.2"
+  query = "avg(last_1d):anomalies(max:app.failed_tasks{postgres_env:production} by {dag_id}.as_count(), 'basic', 2, direction='above', alert_window='last_1h', interval=300, count_default_zero='true') > 0.2"
 
   monitor_threshold_windows {
     recovery_window = "last_1h"
@@ -406,17 +379,19 @@ resource "datadog_monitor" "meltano_failed_dag_runs" {
 
   require_full_window = false
   notify_no_data      = true
-  renotify_interval   = 240
+  renotify_interval   = 1440
 
   tags = ["meltano"]
 }
 
-resource "datadog_monitor" "meltano_failed_tasks" {
-  name    = "Airflow Meltano Failed Tasks"
-  type    = "query alert"
-  message = "Airflow Meltano Failed Tasks triggered. Notify: @slack-${var.slack_channel_name} <!channel>"
+#################################### App ####################################
 
-  query = "avg(last_1d):anomalies(max:app.failed_tasks{postgres_env:production} by {dag_id}.as_count(), 'basic', 2, direction='above', alert_window='last_1h', interval=300, count_default_zero='true') > 0.2"
+resource "datadog_monitor" "data_errors_count" {
+  name    = "Data errors"
+  type    = "query alert"
+  message = "Data errors triggered. Notify: @slack-${var.slack_channel_name} <!channel>"
+
+  query = "avg(last_1d):anomalies(max:app.data_errors_count{postgres_env:production} by {code}.as_count(), 'basic', 2, direction='above', alert_window='last_1h', interval=300, count_default_zero='true') > 0.2"
 
   monitor_threshold_windows {
     recovery_window = "last_1h"
@@ -446,7 +421,7 @@ resource "datadog_monitor" "cloudwatch_synthetics_success_percent" {
 
   monitor_thresholds {
     warning_recovery  = 100
-    warning           = 95
+    warning           = 90
     critical_recovery = 85
     critical          = 80
   }
@@ -495,7 +470,7 @@ resource "datadog_monitor" "logs" {
   {{log.link}}
 EOT
 
-  query = "logs(\"status:error host:*production -@type:http-log\").index(\"*\").rollup(\"count\").by(\"host\").last(\"5m\") > 0"
+  query = "logs(\"(error\\:*\\:* OR status:error) host:*production -@type:http-log\").index(\"*\").rollup(\"count\").by(\"host\").last(\"5m\") > 0"
 
   monitor_thresholds {
     critical = 0
