@@ -32,15 +32,14 @@ instances:
                dag_runs_metrics as
                    (
                        select dag_id,
-                              next_run_date,
-                              state,
                               case
                                   when state = 'running'
                                       then 0
                                   else
-                                      greatest(0, extract(epoch from now() - next_run_date - interval '1 minute'))
+                                      greatest(0, extract(epoch from now() - next_run_date - interval '5 minutes'))
                                   end as seconds_from_latest_dag_run
                        from expanded_dag_runs
+                       where dag_id in ('gainy-dag', 'realtime-dbt-dag', 'realtime-website-dag', 'send-notifications')
                    ),
                successful_dag_runs_metrics as
                    (
@@ -50,6 +49,7 @@ instances:
                              extract(epoch from end_date - start_date) / 60 as latest_dag_run_duration_minutes
                        from airflow.dag_run
                        where state = 'success'
+                         and end_date - start_date >= interval '1 minute'
                        order by dag_id, end_date desc
                    ),
                failed_dag_runs_metrics as
@@ -72,10 +72,10 @@ instances:
                        group by dag_id
                    )
           select dags.dag_id,
-                 dag_runs_metrics.seconds_from_latest_dag_run,
+                 coalesce(dag_runs_metrics.seconds_from_latest_dag_run, 0) as seconds_from_latest_dag_run,
                  successful_dag_runs_metrics.latest_dag_run_duration_minutes,
-                 coalesce(failed_dag_runs_metrics.failed_dag_runs, 0) as failed_dag_runs,
-                 coalesce(failed_tasks_metrics.failed_tasks, 0)       as failed_tasks
+                 coalesce(failed_dag_runs_metrics.failed_dag_runs, 0)      as failed_dag_runs,
+                 coalesce(failed_tasks_metrics.failed_tasks, 0)            as failed_tasks
           from dags
                    left join dag_runs_metrics on dag_runs_metrics.dag_id = dags.dag_id
                    left join successful_dag_runs_metrics on successful_dag_runs_metrics.dag_id = dags.dag_id
@@ -91,6 +91,19 @@ instances:
           - name: failed_dag_runs
             type: gauge
           - name: failed_tasks
+            type: gauge
+        tags:
+          - env:${env}
+      - metric_prefix: app
+        query: >
+          select code,
+                 count(*) as data_errors_count
+          from data_checks
+          group by code
+        columns:
+          - name: code
+            type: tag
+          - name: data_errors_count
             type: gauge
         tags:
           - env:${env}
