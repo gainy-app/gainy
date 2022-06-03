@@ -156,7 +156,7 @@ class PricesListener(AbstractPriceListener):
 
             if status is not None:
                 if status != 200:
-                    self.logger.error("%s", message)
+                    self.logger.error("Bad status: %s %s", status, message_raw)
                 return
 
             await self.handle_price_message(message)
@@ -225,7 +225,7 @@ class PricesListener(AbstractPriceListener):
                             await self.handle_message(message)
 
                     except websockets.ConnectionClosed as e:
-                        self.logger.error(
+                        self.logger.warning(
                             f"ConnectionClosed Error caught: {e}")
 
                     finally:
@@ -237,7 +237,7 @@ class PricesListener(AbstractPriceListener):
                                     "symbols": ",".join(symbols)
                                 }))
                         except Exception as e:
-                            self.logger.error(
+                            self.logger.warning(
                                 "%s Error caught while unsubscribing: %s",
                                 type(e).__name__, str(e))
 

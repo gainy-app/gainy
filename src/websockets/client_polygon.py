@@ -145,7 +145,7 @@ class PricesListener(AbstractPriceListener):
                         await stream_client.handle_messages()
                     except Exception as e:
                         self.logger.error(
-                            "Error caught in handle_messages func: %s %s",
+                            "Error caught in handle_messages: %s %s",
                             type(e).__name__, str(e))
                         break
             finally:
