@@ -43,7 +43,7 @@ class PricesListener(AbstractPriceListener):
                 SELECT base_tickers.symbol, case when type = 'crypto' then 1 else 0 end as priority
                 FROM base_tickers
                          left join ticker_metrics on ticker_metrics.symbol = base_tickers.symbol
-                where base_tickers.symbol not like '%-%'
+                where base_tickers.symbol not like '%%-%%'
                   and (lower(exchange) similar to '(nyse|nasdaq)%%' or type = 'crypto')
                 order by priority desc, market_capitalization desc nulls last
                 limit %(count)s

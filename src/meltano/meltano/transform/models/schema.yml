@@ -1978,10 +1978,10 @@ models:
 
   - name: data_checks
     columns:
-      - name: symbols
+      - name: symbol
         tests:
           - type:
-              type: 'json'
+              type: 'character varying'
       - name: code
         tests:
           - type:

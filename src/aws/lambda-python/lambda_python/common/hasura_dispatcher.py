@@ -71,10 +71,13 @@ class HasuraDispatcher(ABC):
     def get_profile_id(self, db_conn, session_variables):
         hasura_role = session_variables["x-hasura-role"]
 
-        if "admin" == hasura_role:
+        if hasura_role in ["admin", "anonymous"]:
             return None
 
-        hasura_user_id = session_variables["x-hasura-user-id"]
+        hasura_user_id = session_variables.get("x-hasura-user-id")
+        if hasura_user_id is None:
+            return None
+
         with db_conn.cursor() as cursor:
             cursor.execute(f"SELECT id FROM app.profiles WHERE user_id = %s",
                            (hasura_user_id, ))

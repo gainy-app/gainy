@@ -1,4 +1,4 @@
-{% set min_daily_volume = 1000000 %}
+{% set min_daily_volume = 500000 %}
 
 {{
   config(
@@ -14,14 +14,14 @@
 with exchange_month_trading_sessions_count as
          (
              select exchange_name, count(date) as count
-             from exchange_schedule
+             from {{ ref('exchange_schedule') }}
              where open_at between now() - interval '1 month' and now()
              group by exchange_name
          ),
      country_month_trading_sessions_count as
          (
              select country_name, count(date) as count
-             from exchange_schedule
+             from {{ ref('exchange_schedule') }}
              where open_at between now() - interval '1 month' and now()
              group by country_name
          ),
@@ -37,18 +37,16 @@ with exchange_month_trading_sessions_count as
                       where "date"::date >= NOW() - interval '30 days'
                       group by code
                   ) t
-                      join base_tickers using (symbol)
+                      join {{ ref('base_tickers') }} using (symbol)
                       left join exchange_month_trading_sessions_count
-                                on exchange_month_trading_sessions_count.exchange_name =
-                                   base_tickers.exchange_canonical
+                                on exchange_month_trading_sessions_count.exchange_name = base_tickers.exchange_canonical
                       left join country_month_trading_sessions_count
-                                on country_month_trading_sessions_count.country_name =
-                                   base_tickers.country_name
+                                on country_month_trading_sessions_count.country_name = base_tickers.country_name
          ),
      latest_price as
          (
              select code as symbol, max(date) as date
-             from raw_data.eod_historical_prices
+             from {{ source('eod', 'eod_historical_prices') }}
              group by code
          )
 select base_tickers.symbol,
@@ -69,9 +67,9 @@ select base_tickers.symbol,
        base_tickers.exchange_canonical,
        base_tickers.country_name,
        now()::timestamp as updated_at
-from base_tickers
-         join volumes on base_tickers.symbol = v.symbol
-         join latest_price on base_tickers.symbol = latest_price.symbol
+from {{ ref('base_tickers') }}
+         join volumes using (symbol)
+         join latest_price using (symbol)
 where volumes.avg_volume is not null
   and volumes.avg_volume >= {{ min_daily_volume }}
   and base_tickers.description is not null
