@@ -100,7 +100,7 @@ with collection_distinct_tickers as
                     'ttf_ticker_no_risk_score' as code
              from collection_distinct_tickers
                       left join {{ ref('tickers_risk_scores') }} using (symbol)
-             where tickers.symbol is null
+             where tickers_risk_scores.symbol is null
 
              union all
 
