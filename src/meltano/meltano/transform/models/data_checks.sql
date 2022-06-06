@@ -93,6 +93,14 @@ with collection_distinct_tickers as
              from collection_distinct_tickers
                       left join {{ ref('tickers') }} using (symbol)
              where tickers.symbol is null
+           
+             union all
+           
+             select collection_distinct_tickers.symbol,
+                    'ttf_ticker_no_risk_score' as code
+             from collection_distinct_tickers
+                      left join {{ ref('tickers_risk_scores') }} using (symbol)
+             where tickers.symbol is null
 
              union all
 
@@ -148,6 +156,8 @@ select symbol,
                then 'TTF tickers ' || symbol || ' is not linked to any industry.'
            when code = 'ttf_ticker_hidden'
                then 'TTF tickers ' || symbol || ' not present in the tickers table.'
+           when code = 'ttf_ticker_no_risk_score'
+               then 'TTF tickers ' || symbol || ' not present in the ticker_risk_scores table.'
            when code = 'old_realtime_metrics'
                then 'Tickers ' || symbol || ' has old realtime metrics.'
            when code = 'old_realtime_chart'
