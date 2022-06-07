@@ -300,7 +300,13 @@ def get_test_portfolio_data(only_with_holdings=False):
     quantities3 = {"AAPL": 10, "AAPL240621C00225000": 100}
 
     # -- profile 1 with holdings without transactions at all
-    yield ('user_id_portfolio_test_1', quantities, [])
+    quantities_override = [
+        (None, "2022-03-10T00:00:00", {
+            "AAPL": 100,
+            "AAPL240621C00225000": 0
+        }),
+    ]
+    yield ('user_id_portfolio_test_1', quantities, quantities_override)
 
     # -- profile 2 with holdings with one buy transaction on the primary account
     user_id = 'user_id_portfolio_test_2'
