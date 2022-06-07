@@ -78,16 +78,16 @@ class UpdatePurchases(HasuraAction):
                 continue
 
             duration_measure = match[1]
-            duration_count = match[2]
+            duration_count = int(match[2])
             if duration_measure == 'd':
-                return datetime.timedelta(days=int(duration_count))
+                return datetime.timedelta(days=duration_count)
             elif duration_measure == 'w':
-                return datetime.timedelta(days=int(duration_count) * 7)
+                return datetime.timedelta(days=duration_count * 7)
             elif duration_measure == 'm':
                 return dateutil.relativedelta.relativedelta(
-                    months=int(duration_count))
+                    months=duration_count)
             elif duration_measure == 'y':
                 return dateutil.relativedelta.relativedelta(
-                    years=int(duration_count))
+                    years=duration_count)
 
         raise Exception('Product Identifier not recognized')
