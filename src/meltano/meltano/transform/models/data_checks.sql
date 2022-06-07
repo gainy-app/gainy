@@ -122,7 +122,9 @@ with collection_distinct_tickers as
                     'ttf_ticker_no_matchscore' as code
              from collection_distinct_tickers
                       left join matchscore_distinct_tickers using (symbol)
+                               left join {{ ref('tickers') }} using (symbol)
              where matchscore_distinct_tickers.symbol is null
+             and tickers.type <> 'crypto'
 
              union all
 
