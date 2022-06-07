@@ -149,7 +149,7 @@ with robinhood_options as (
                                 profile_id,
                                 rolling_quantity - profile_holdings_normalized.quantity as quantity
                           from expanded_transactions0
-                                   left join profile_holdings_normalized using (security_id, account_id, profile_id)
+                                   left join {{ ref('profile_holdings_normalized') }} using (security_id, account_id, profile_id)
                           order by security_id, account_id, profile_id, row_number desc
                       ),
                   -- match each buy transaction with appropriate sell transaction
@@ -186,7 +186,7 @@ with robinhood_options as (
                                             order by security_id, account_id, date desc, type desc, rolling_quantity
                                         ) t using (security_id, account_id)
                                    join total_amount_to_sell using (security_id, account_id, profile_id)
-                                   join portfolio_securities_normalized
+                                   join {{ ref('portfolio_securities_normalized') }}
                                         on portfolio_securities_normalized.id =
                                            normalized_transactions.security_id
                           where normalized_transactions.type = 'buy'
@@ -202,7 +202,7 @@ with robinhood_options as (
                     expanded_transactions.account_id,
                     -abs(sell_quantity)                                   as quantity_norm
              from expanded_transactions
-                      join historical_prices
+                      join {{ ref('historical_prices') }}
                            on historical_prices.code = expanded_transactions.original_ticker_symbol
                                and historical_prices.date = expanded_transactions.date
              where sell_quantity > 0
