@@ -222,6 +222,7 @@ module "hasuraAction" {
     REDIS_CACHE_HOST          = var.redis_cache_host
     REDIS_CACHE_PORT          = var.redis_cache_port
     PLAID_WEBHOOK_URL         = "https://${var.hasura_url}/api/rest/plaid_webhook"
+    REVENUECAT_API_KEY        = var.revenuecat_api_key
   }
   vpc_security_group_ids = var.vpc_security_group_ids
   vpc_subnet_ids         = var.vpc_subnet_ids
