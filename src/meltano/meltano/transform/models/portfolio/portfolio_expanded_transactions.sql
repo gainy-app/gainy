@@ -116,29 +116,27 @@ with robinhood_options as (
                                  over (partition by account_id, security_id order by date, type rows between unbounded preceding and current row) as rolling_quantity,
                                  row_number()
                                  over (partition by account_id, security_id order by date, type)                                                  as row_number
-                          from (
-                                   select id,
-                                          amount,
-                                          date,
-                                          price,
-                                          type,
-                                          security_id,
-                                          profile_id,
-                                          account_id,
-                                          quantity_norm
-                                   from normalized_transactions
-                                   union all
-                                   select id,
-                                          amount,
-                                          date,
-                                          price,
-                                          type,
-                                          security_id,
-                                          profile_id,
-                                          account_id,
-                                          quantity_norm
-                                   from mismatched_sell_transactions
-                               ) t
+                          from (select id,
+                                       amount,
+                                       date,
+                                       price,
+                                       type,
+                                       security_id,
+                                       profile_id,
+                                       account_id,
+                                       quantity_norm
+                                from normalized_transactions
+                                union all
+                                select id,
+                                       amount,
+                                       date,
+                                       price,
+                                       type,
+                                       security_id,
+                                       profile_id,
+                                       account_id,
+                                       quantity_norm
+                                from mismatched_sell_transactions) t
                       ),
                   total_amount_to_sell as
                       (
@@ -158,9 +156,8 @@ with robinhood_options as (
                       (
                           select normalized_transactions.id,
                                  date,
-                                 normalized_transactions.name,
+                                 name,
                                  price,
-                                 total_amount_to_sell.quantity,
                                  least(
                                          quantity_norm,
                                          t.rolling_quantity,
@@ -170,21 +167,21 @@ with robinhood_options as (
                                                   over (partition by security_id, account_id order by date rows between unbounded preceding and 1 preceding),
                                                   0)
                                      ) as sell_quantity,
+                                 original_ticker_symbol,
                                  security_id,
                                  profile_id,
-                                 account_id,
-                                 original_ticker_symbol
+                                 account_id
                           from normalized_transactions
                                    join (
-                                            select distinct on (
-                                                security_id,
-                                                account_id
-                                                ) security_id,
-                                                  account_id,
-                                                  rolling_quantity
-                                            from expanded_transactions0
-                                            order by security_id, account_id, date desc, type desc, rolling_quantity
-                                        ) t using (security_id, account_id)
+                              select distinct on (
+                                  security_id,
+                                  account_id
+                                  ) security_id,
+                                    account_id,
+                                    rolling_quantity
+                              from expanded_transactions0
+                              order by security_id, account_id, date desc, type desc, rolling_quantity
+                          ) t using (security_id, account_id)
                                    join total_amount_to_sell using (security_id, account_id, profile_id)
                                    join {{ ref('portfolio_securities_normalized') }}
                                         on portfolio_securities_normalized.id =
