@@ -1,8 +1,10 @@
 import json
 import logging
+import re
 from common.hasura_function import HasuraAction
 from services import BillingService, RevenueCatService
-from dateutil import parser
+import datetime
+import dateutil
 from psycopg2.extras import execute_values
 from gainy.utils import env
 
@@ -41,11 +43,11 @@ class UpdatePurchases(HasuraAction):
         subscriber_data = self.revenue_cat_service.get_subscriber(profile_id)
         for entitlement_id, entitlement in subscriber_data[
                 'entitlements'].items():
-            purchase_date = parser.parse(entitlement['purchase_date'])
-            expires_date = parser.parse(entitlement['expires_date'])
-            values.append(
-                (profile_id, False, expires_date - purchase_date,
-                 entitlement_id, json.dumps(entitlement), purchase_date))
+            duration = self.get_duration(entitlement['product_identifier'])
+
+            purchase_date = dateutil.parser.parse(entitlement['purchase_date'])
+            values.append((profile_id, False, duration, entitlement_id,
+                           json.dumps(entitlement), purchase_date))
             existing_revenuecat_ref_ids.append(entitlement_id)
 
         with db_conn.cursor() as cursor:
@@ -66,3 +68,26 @@ class UpdatePurchases(HasuraAction):
                 params["revenuecat_ref_ids"] = tuple(
                     existing_revenuecat_ref_ids)
             cursor.execute(query, params)
+
+    def get_duration(self, product_identifier):
+        product_identifier = product_identifier.lower()
+        parts = product_identifier.split('_')
+        for part in parts:
+            match = re.match(r'^([dwmy])(\d+)$', part)
+            if match is None:
+                continue
+
+            duration_measure = match[1]
+            duration_count = int(match[2])
+            if duration_measure == 'd':
+                return datetime.timedelta(days=duration_count)
+            elif duration_measure == 'w':
+                return datetime.timedelta(days=duration_count * 7)
+            elif duration_measure == 'm':
+                return dateutil.relativedelta.relativedelta(
+                    months=duration_count)
+            elif duration_measure == 'y':
+                return dateutil.relativedelta.relativedelta(
+                    years=duration_count)
+
+        raise Exception('Product Identifier not recognized')
