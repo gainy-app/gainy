@@ -554,7 +554,7 @@ union all
                       where (max_date.time is null or combined_daily_prices.date >= max_date.time - interval '1 week')
 {% endif %}
                   ) t
-                      left join historical_prices_marked using (symbol)
+                      left join {{ ref('historical_prices_marked') }} using (symbol)
              order by symbol, date
          ) t2
     where t2.close is not null

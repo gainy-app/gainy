@@ -156,7 +156,6 @@ with robinhood_options as (
                       (
                           select normalized_transactions.id,
                                  date,
-                                 name,
                                  price,
                                  least(
                                          quantity_norm,
