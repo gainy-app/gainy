@@ -129,7 +129,7 @@ with max_date as
                                  null           as volume,
                                  time_truncated,
                                  1              as priority
-                          from {{ ('ticker_options_monitored') }}
+                          from {{ ref('ticker_options_monitored') }}
                                    join time_series_3min on time_series_3min.type is null
                       ) t
                  order by symbol, time_truncated, time, priority
@@ -288,7 +288,7 @@ union all
                                  null           as volume,
                                  time_truncated,
                                  1              as priority
-                          from {{ ('ticker_options_monitored') }}
+                          from {{ ref('ticker_options_monitored') }}
                                    join time_series_15min on time_series_15min.type is null
                       ) t
                  order by symbol, time_truncated, time, priority
