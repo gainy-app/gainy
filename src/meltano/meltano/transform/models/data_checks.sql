@@ -70,6 +70,12 @@ with collection_distinct_tickers as
                and (t.time is null or least(now(), latest_trading_day.close_at) - t.time > interval '16 minutes')
 -- Polygon delay is 15 minutes
          ),
+     matchscore_distinct_tickers as
+         (
+             select symbol
+             from {{ source('app', 'profile_ticker_match_score') }}
+             group by symbol
+         ),
      errors as
          (
              select symbol, 'ttf_ticker_no_interest' as code
@@ -109,6 +115,14 @@ with collection_distinct_tickers as
              from collection_distinct_tickers
                       left join {{ ref('ticker_categories_continuous') }} using (symbol)
              where ticker_categories_continuous.symbol is null
+
+             union all
+           
+             select collection_distinct_tickers.symbol,
+                    'ttf_ticker_no_matchscore' as code
+             from collection_distinct_tickers
+                      left join matchscore_distinct_tickers using (symbol)
+             where matchscore_distinct_tickers.symbol is null
 
              union all
 
@@ -168,6 +182,8 @@ select symbol,
                then 'TTF tickers ' || symbol || ' not present in the ticker_risk_scores table.'
            when code = 'ttf_ticker_no_category_continuous'
                then 'TTF tickers ' || symbol || ' not present in the ticker_categories_continuous table.'
+           when code = 'ttf_ticker_no_matchscore'
+               then 'TTF tickers ' || symbol || ' not present in the app.profile_ticker_match_score table.'
            when code = 'old_realtime_metrics'
                then 'Tickers ' || symbol || ' has old realtime metrics.'
            when code = 'old_realtime_chart'
