@@ -119,6 +119,18 @@ with max_date as
                                    join time_series_3min
                                        on (time_series_3min.type = 'crypto' and base_tickers.type = 'crypto')
                                            or (time_series_3min.type is null and base_tickers.type != 'crypto')
+                          union all
+                          select contract_name,
+                                 time_truncated as time,
+                                 null           as open,
+                                 null           as high,
+                                 null           as low,
+                                 null           as close,
+                                 null           as volume,
+                                 time_truncated,
+                                 1              as priority
+                          from {{ ref('ticker_options_monitored') }}
+                                   join time_series_3min on time_series_3min.type is null
                       ) t
                  order by symbol, time_truncated, time, priority
              )
@@ -131,36 +143,42 @@ with max_date as
                              coalesce(
                                      open,
                                      first_value(close)
-                                     OVER (partition by symbol, grp order by datetime)
+                                     OVER (partition by symbol, grp order by datetime),
+                                     historical_prices_marked.price_0d
                                  )::double precision                         as open,
                              coalesce(
                                      high,
                                      first_value(close)
-                                     OVER (partition by symbol, grp order by datetime)
+                                     OVER (partition by symbol, grp order by datetime),
+                                     historical_prices_marked.price_0d
                                  )::double precision                         as high,
                              coalesce(
                                      low,
                                      first_value(close)
-                                     OVER (partition by symbol, grp order by datetime)
+                                     OVER (partition by symbol, grp order by datetime),
+                                     historical_prices_marked.price_0d
                                  )::double precision                         as low,
                              coalesce(
                                      close,
                                      first_value(close)
-                                     OVER (partition by symbol, grp order by datetime)
+                                     OVER (partition by symbol, grp order by datetime),
+                                     historical_prices_marked.price_0d
                                  )::double precision                         as close,
                              coalesce(
                                      close,
                                      first_value(close)
-                                     OVER (partition by symbol, grp order by datetime)
+                                     OVER (partition by symbol, grp order by datetime),
+                                     historical_prices_marked.price_0d
                                  )::double precision                         as adjusted_close,
                              coalesce(volume, 0)                             as volume
                       from (
                                select *,
-                                      sum(case when close is not null then 1 end)
-                                      over (partition by symbol order by datetime) as grp
+                                      coalesce(sum(case when close is not null then 1 end)
+                                               over (partition by symbol order by datetime), 0) as grp
                                from combined_intraday_prices
                            ) t
-                  ) t2
+                               left join {{ ref('historical_prices_marked') }} using (symbol)
+                ) t2
     where t2.close is not null
 )
 
@@ -260,6 +278,18 @@ union all
                                    join time_series_15min
                                         on (time_series_15min.type = 'crypto' and base_tickers.type = 'crypto')
                                             or (time_series_15min.type is null and base_tickers.type != 'crypto')
+                          union all
+                          select contract_name,
+                                 time_truncated as time,
+                                 null           as open,
+                                 null           as high,
+                                 null           as low,
+                                 null           as close,
+                                 null           as volume,
+                                 time_truncated,
+                                 1              as priority
+                          from {{ ref('ticker_options_monitored') }}
+                                   join time_series_15min on time_series_15min.type is null
                       ) t
                  order by symbol, time_truncated, time, priority
              )
@@ -291,22 +321,30 @@ union all
                     coalesce(
                             open,
                             first_value(close)
-                            OVER (partition by symbol, grp order by datetime)
+                            OVER (partition by symbol, grp order by datetime),
+                            historical_prices_marked.price_1w,
+                            historical_prices_marked.price_all
                         )                                            as open,
                     coalesce(
                             high,
                             first_value(close)
-                            OVER (partition by symbol, grp order by datetime)
+                            OVER (partition by symbol, grp order by datetime),
+                            historical_prices_marked.price_1w,
+                            historical_prices_marked.price_all
                         )                                            as high,
                     coalesce(
                             low,
                             first_value(close)
-                            OVER (partition by symbol, grp order by datetime)
+                            OVER (partition by symbol, grp order by datetime),
+                            historical_prices_marked.price_1w,
+                            historical_prices_marked.price_all
                         )                                            as low,
                     coalesce(
                             close,
                             first_value(close)
-                            OVER (partition by symbol, grp order by datetime)
+                            OVER (partition by symbol, grp order by datetime),
+                            historical_prices_marked.price_1w,
+                            historical_prices_marked.price_all
                         )                                            as close,
                     coalesce(volume, 0.0)                            as volume,
                     adjustment_rate,
@@ -315,18 +353,19 @@ union all
                     daily_adjusted_close
              from (
                       select combined_intraday_prices.*,
-                             sum(case when combined_intraday_prices.close is not null then 1 end)
-                             over (partition by combined_intraday_prices.symbol order by datetime)        as grp,
+                             coalesce(sum(case when combined_intraday_prices.close is not null then 1 end)
+                                      over (partition by combined_intraday_prices.symbol order by datetime), 0) as grp,
                              case
                                  when historical_prices.close > 0
                                      then historical_prices.adjusted_close / historical_prices.close
-                             end as adjustment_rate,
-                             historical_prices.adjusted_close as daily_adjusted_close
+                             end                                                                                as adjustment_rate,
+                             historical_prices.adjusted_close                                                   as daily_adjusted_close
                       from combined_intraday_prices
                                left join {{ ref('historical_prices') }}
                                    on historical_prices.code = combined_intraday_prices.symbol
                                     and historical_prices.date = combined_intraday_prices.datetime::date
                   ) t
+                      left join {{ ref('historical_prices_marked') }} using (symbol)
          ) t2
     where t2.close is not null
 )
@@ -472,27 +511,37 @@ union all
                     coalesce(
                             open,
                             first_value(close)
-                            OVER (partition by symbol, grp order by date)
+                            OVER (partition by symbol, grp order by date),
+                            historical_prices_marked.price_1y,
+                            historical_prices_marked.price_all
                         )                                     as open,
                     coalesce(
                             high,
                             first_value(close)
-                            OVER (partition by symbol, grp order by date)
+                            OVER (partition by symbol, grp order by date),
+                            historical_prices_marked.price_1y,
+                            historical_prices_marked.price_all
                         )                                     as high,
                     coalesce(
                             low,
                             first_value(close)
-                            OVER (partition by symbol, grp order by date)
+                            OVER (partition by symbol, grp order by date),
+                            historical_prices_marked.price_1y,
+                            historical_prices_marked.price_all
                         )                                     as low,
                     coalesce(
                             close,
                             first_value(close)
-                            OVER (partition by symbol, grp order by date)
+                            OVER (partition by symbol, grp order by date),
+                            historical_prices_marked.price_1y,
+                            historical_prices_marked.price_all
                         )                                     as close,
                     coalesce(
                             adjusted_close,
                             first_value(adjusted_close)
-                            OVER (partition by symbol, grp order by date)
+                            OVER (partition by symbol, grp order by date),
+                            historical_prices_marked.price_1y,
+                            historical_prices_marked.price_all
                         )                                     as adjusted_close,
                     coalesce(volume, 0.0)                     as volume
              from (
@@ -505,6 +554,7 @@ union all
                       where (max_date.time is null or combined_daily_prices.date >= max_date.time - interval '1 week')
 {% endif %}
                   ) t
+                      left join {{ ref('historical_prices_marked') }} using (symbol)
              order by symbol, date
          ) t2
     where t2.close is not null
