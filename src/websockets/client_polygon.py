@@ -4,6 +4,7 @@ from polygon.enums import StreamCluster
 import os
 import json
 import datetime
+import websockets
 from decimal import Decimal
 from common import run, AbstractPriceListener, LOCK_RESOURCE_ID_POLYGON
 from gainy.data_access.db_lock import LockManager, ResourceType
@@ -143,6 +144,8 @@ class PricesListener(AbstractPriceListener):
                 while 1:
                     try:
                         await stream_client.handle_messages()
+                    except websockets.ConnectionClosedError as e:
+                        break
                     except Exception as e:
                         self.logger.error(
                             "Error caught in handle_messages: %s %s",
