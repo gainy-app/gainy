@@ -13,6 +13,7 @@ variable "pg_username" {}
 variable "pg_password" {}
 variable "pg_dbname" {}
 variable "pg_production_internal_sync_username" {}
+variable "public_schema_name" {}
 
 locals {
   provision_script_content = templatefile(
@@ -36,8 +37,9 @@ locals {
       PG_HOST             = var.pg_host
       PG_PORT             = var.pg_port
       PG_DBNAME           = var.pg_dbname
-      pg_datadog_password = random_password.datadog_postgres.result
-      env                 = var.env
+      PUBLIC_SCHEMA_NAME  = var.public_schema_name
+      PG_DATADOG_PASSWORD = random_password.datadog_postgres.result
+      ENV                 = var.env
     }
   )
 }

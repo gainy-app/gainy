@@ -5,7 +5,7 @@ instances:
     host: ${PG_HOST}
     port: ${PG_PORT}
     username: datadog
-    password: ${pg_datadog_password}
+    password: ${PG_DATADOG_PASSWORD}
     dbname: ${PG_DBNAME}
     disable_generic_tags: true
     custom_queries:
@@ -93,12 +93,12 @@ instances:
           - name: failed_tasks
             type: gauge
         tags:
-          - env:${env}
+          - env:${ENV}
       - metric_prefix: app
         query: >
           select code,
                  count(*) as data_errors_count
-          from data_checks
+          from ${PUBLIC_SCHEMA_NAME}.data_checks
           group by code
         columns:
           - name: code
@@ -106,4 +106,4 @@ instances:
           - name: data_errors_count
             type: gauge
         tags:
-          - env:${env}
+          - env:${ENV}
