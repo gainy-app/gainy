@@ -322,25 +322,29 @@ union all
                             open,
                             first_value(close)
                             OVER (partition by symbol, grp order by datetime),
-                            historical_prices_marked.price_0d
+                            historical_prices_marked.price_1w,
+                            historical_prices_marked.price_all
                         )                                            as open,
                     coalesce(
                             high,
                             first_value(close)
                             OVER (partition by symbol, grp order by datetime),
-                            historical_prices_marked.price_0d
+                            historical_prices_marked.price_1w,
+                            historical_prices_marked.price_all
                         )                                            as high,
                     coalesce(
                             low,
                             first_value(close)
                             OVER (partition by symbol, grp order by datetime),
-                            historical_prices_marked.price_0d
+                            historical_prices_marked.price_1w,
+                            historical_prices_marked.price_all
                         )                                            as low,
                     coalesce(
                             close,
                             first_value(close)
                             OVER (partition by symbol, grp order by datetime),
-                            historical_prices_marked.price_0d
+                            historical_prices_marked.price_1w,
+                            historical_prices_marked.price_all
                         )                                            as close,
                     coalesce(volume, 0.0)                            as volume,
                     adjustment_rate,
@@ -507,27 +511,37 @@ union all
                     coalesce(
                             open,
                             first_value(close)
-                            OVER (partition by symbol, grp order by date)
+                            OVER (partition by symbol, grp order by date),
+                            historical_prices_marked.price_1y,
+                            historical_prices_marked.price_all
                         )                                     as open,
                     coalesce(
                             high,
                             first_value(close)
-                            OVER (partition by symbol, grp order by date)
+                            OVER (partition by symbol, grp order by date),
+                            historical_prices_marked.price_1y,
+                            historical_prices_marked.price_all
                         )                                     as high,
                     coalesce(
                             low,
                             first_value(close)
-                            OVER (partition by symbol, grp order by date)
+                            OVER (partition by symbol, grp order by date),
+                            historical_prices_marked.price_1y,
+                            historical_prices_marked.price_all
                         )                                     as low,
                     coalesce(
                             close,
                             first_value(close)
-                            OVER (partition by symbol, grp order by date)
+                            OVER (partition by symbol, grp order by date),
+                            historical_prices_marked.price_1y,
+                            historical_prices_marked.price_all
                         )                                     as close,
                     coalesce(
                             adjusted_close,
                             first_value(adjusted_close)
-                            OVER (partition by symbol, grp order by date)
+                            OVER (partition by symbol, grp order by date),
+                            historical_prices_marked.price_1y,
+                            historical_prices_marked.price_all
                         )                                     as adjusted_close,
                     coalesce(volume, 0.0)                     as volume
              from (
@@ -540,6 +554,7 @@ union all
                       where (max_date.time is null or combined_daily_prices.date >= max_date.time - interval '1 week')
 {% endif %}
                   ) t
+                      left join {{ ref('historical_prices_marked') }} using (symbol)
              order by symbol, date
          ) t2
     where t2.close is not null

@@ -7,30 +7,35 @@
   )
 }}
 
-with raw_data_1d as
+with raw_data_0d as
          (
-             select distinct on (
-                 code
-                 ) code,
-                   historical_prices.date           as date_0d,
-                   historical_prices.adjusted_close as price_0d
+             select code,
+                    historical_prices.date           as date_0d,
+                    historical_prices.adjusted_close as price_0d
              from {{ ref('historical_prices') }}
-             where date > now()::date - interval '1 week'
-             order by code, date desc
+                      join (
+                               select code,
+                                      max(historical_prices.date) as date
+                               from {{ ref('historical_prices') }}
+                               group by code
+                           ) t
+                           using (code, date)
          ),
      raw_data_1w as
          (
-             select distinct on (
-                 raw_data_1d.code
-                 ) raw_data_1d.*,
-                   historical_prices.date           as date_1w,
-                   historical_prices.adjusted_close as price_1w
-             from raw_data_1d
-                      left join {{ ref('historical_prices') }}
-                                on historical_prices.code = raw_data_1d.code
-                                    and date < now()::date - interval '1 week'
-                                    and date > now()::date - interval '2 week'
-             order by code, date desc
+             select raw_data_0d.*,
+                    historical_prices.date           as date_1w,
+                    historical_prices.adjusted_close as price_1w
+             from raw_data_0d
+                      left join (
+                                    select code,
+                                           max(historical_prices.date) as date
+                                    from {{ ref('historical_prices') }}
+                                    where date < now()::date - interval '1 week'
+                                    group by code
+                                ) t
+                                using (code)
+                      left join {{ ref('historical_prices') }} using (code, date)
          ),
      raw_data_10d as
          (
@@ -90,17 +95,18 @@ with raw_data_1d as
          ),
      raw_data_1y as
          (
-             select distinct on (
-                 raw_data_3m.code
-                 ) raw_data_3m.*,
+             select raw_data_3m.*,
                    historical_prices.date           as date_1y,
                    historical_prices.adjusted_close as price_1y
              from raw_data_3m
-                      left join {{ ref('historical_prices') }}
-                                on historical_prices.code = raw_data_3m.code
-                                    and date < now()::date - interval '1 year'
-                                    and date > now()::date - interval '1 year' - interval '1 week'
-             order by code, date desc
+                      left join (
+                               select code,
+                                      max(historical_prices.date) as date
+                               from {{ ref('historical_prices') }}
+                               where date < now()::date - interval '1 year'
+                               group by code
+                           ) t using (code)
+                      left join {{ ref('historical_prices') }} using (code, date)
          ),
      raw_data_13m as
          (
@@ -132,14 +138,18 @@ with raw_data_1d as
          ),
      raw_data_all as
          (
-             select distinct on (
-                 code
-                 ) raw_data_5y.*,
-                   historical_prices.date           as date_all,
-                   historical_prices.adjusted_close as price_all
+             select raw_data_5y.*,
+                    historical_prices.date           as date_all,
+                    historical_prices.adjusted_close as price_all
              from raw_data_5y
-                      join {{ ref('historical_prices') }} using (code)
-             order by code, date
+                      join (
+                               select code,
+                                      min(historical_prices.date) as date
+                               from {{ ref('historical_prices') }}
+                               group by code
+                           ) t
+                           using (code)
+                      join {{ ref('historical_prices') }} using (code, date)
          )
 select code as symbol,
        date_0d,
