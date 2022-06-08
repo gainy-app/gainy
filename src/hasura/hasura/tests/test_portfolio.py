@@ -138,6 +138,7 @@ def verify_portfolio_chart(portfolio_chart,
             symbol_chart_datetimes = symbol_chart_datetimes.union(new_dates)
             assert len(new_dates) - len(symbol_chart_datetimes) < 2
 
+    print(quantities, quantities_override)
     portfolio_chart_index = 0
     for date in sorted(symbol_chart_datetimes):
         if datetime.datetime.now() - datetime.datetime.strptime(
@@ -175,14 +176,15 @@ def verify_portfolio_chart(portfolio_chart,
                     symbol][chart_row_index]['datetime'] == date:
                 expected_value += symbol_charts[symbol][chart_row_index][
                     'adjusted_close'] * quantity
-                print(symbol, symbol_charts[symbol][chart_row_index], quantity)
+                print(quantity, symbol_charts[symbol][chart_row_index])
 
         if portfolio_chart_index < len(portfolio_chart):
             portfolio_chart_row = portfolio_chart[portfolio_chart_index]
         else:
             portfolio_chart_row = None
 
-        print(portfolio_chart_row, date)
+        print(portfolio_chart_row)
+        print()
         if portfolio_chart_row is not None and date == portfolio_chart_row[
                 'datetime']:
             assert abs(

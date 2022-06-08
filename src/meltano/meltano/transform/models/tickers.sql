@@ -29,11 +29,12 @@ with exchange_month_trading_sessions_count as
          (
              select symbol,
                     month_volume_sum / coalesce(exchange_month_trading_sessions_count.count,
-                                                country_month_trading_sessions_count.count) as avg_volume
+                                                country_month_trading_sessions_count.count, 
+                                                30) as avg_volume -- crypto dont has any country nor exchange, so let it be interval '30 days' as in month_volume_sum
              from (
                       select code                         as symbol,
                              sum(volume * adjusted_close) as month_volume_sum
-                      from raw_data.eod_historical_prices
+                      from {{ source('eod', 'eod_historical_prices') }}
                       where "date"::date >= NOW() - interval '30 days'
                       group by code
                   ) t
