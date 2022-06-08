@@ -154,8 +154,8 @@ with collection_distinct_tickers as
              union all
 {% endif %}
              select tickers_and_options.symbol,
-                 'old_realtime_metrics' as code,
-                 'realtime' as period
+                    'old_realtime_metrics' as code,
+                    'realtime' as period
              from tickers_and_options
                       join latest_trading_day
                            on (latest_trading_day.exchange_name = tickers_and_options.exchange_canonical
