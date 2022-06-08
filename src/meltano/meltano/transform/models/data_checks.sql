@@ -14,7 +14,6 @@
 }}
 
 
-
 with collection_distinct_tickers as
          (
              select distinct symbol
