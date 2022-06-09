@@ -26,12 +26,13 @@ with first_profile_transaction_date as
              group by profile_id
 {% if is_incremental() %}
          ),
-    max_updated_at as
+    old_model_stats as
          (
-             select transactions_uniq_id,
-                    max(updated_at) as max_updated_at
+             select transactions_uniq_id, period,
+                    max(updated_at) as max_updated_at,
+                    max(datetime) as max_datetime
              from {{ this }}
-             group by transactions_uniq_id
+             group by transactions_uniq_id, period
 {% endif %}
          )
 
@@ -51,15 +52,16 @@ from {{ ref('portfolio_expanded_transactions') }}
          join {{ ref('portfolio_securities_normalized') }}
               on portfolio_securities_normalized.id = portfolio_expanded_transactions.security_id
 {% if is_incremental() %}
-         left join max_updated_at
-                   on max_updated_at.transactions_uniq_id = portfolio_expanded_transactions.uniq_id
+         left join old_model_stats
+                   on old_model_stats.transactions_uniq_id = portfolio_expanded_transactions.uniq_id
 {% endif %}
          join {{ ref('chart') }}
               on chart.symbol = portfolio_securities_normalized.original_ticker_symbol
                   and (chart.datetime >= portfolio_expanded_transactions.date or portfolio_expanded_transactions.date is null)
                   and (chart.datetime >= first_profile_transaction_date.datetime or first_profile_transaction_date.profile_id is null)
 {% if is_incremental() %}
-                  and (max_updated_at.transactions_uniq_id is null
-                      or (portfolio_expanded_transactions.updated_at > max_updated_at.max_updated_at -- new / updated transaction - recalc all
-                              or chart.datetime > max_updated_at.max_updated_at)) -- old transaction - recalc only new
+                  and (old_model_stats.transactions_uniq_id is null
+                      or (chart.period = old_model_stats.period
+                          and (portfolio_expanded_transactions.updated_at > old_model_stats.max_updated_at -- new / updated transaction - recalc all
+                              or chart.datetime > old_model_stats.max_datetime))) -- old transaction - recalc only new
 {% endif %}
