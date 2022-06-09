@@ -52,7 +52,7 @@ with max_period_date as
 {% endif %}
                  where time_truncated >= latest_open_trading_session.open_at and time_truncated < latest_open_trading_session.close_at
 {% if is_incremental() and var('realtime') %}
-                   and time_truncated > max_period_date.datetime
+                   and time_truncated > max_period_date.datetime - interval '20 minutes'
 {% endif %}
                  union all
                  SELECT 'crypto' as type,
@@ -62,7 +62,7 @@ with max_period_date as
                  FROM generate_series(now()::timestamp - interval '1 day', now()::timestamp, interval '3 minutes') dd
 {% if is_incremental() and var('realtime') %}
                           join max_period_date on max_period_date.period = '3min'
-                 where dd > max_period_date.datetime
+                 where dd > max_period_date.datetime - interval '20 minutes'
 {% endif %}
              ),
          expanded_intraday_prices as
@@ -79,7 +79,7 @@ with max_period_date as
                  where (eod_intraday_prices.time >= latest_open_trading_session.open_at - interval '1 hour' and eod_intraday_prices.time < latest_open_trading_session.close_at
                     or (symbol like '%.CC' and time > now() - interval '1 day'))
 {% if is_incremental() and var('realtime') %}
-                   and eod_intraday_prices.time > max_period_date.datetime
+                   and eod_intraday_prices.time > max_period_date.datetime - interval '20 minutes'
 {% endif %}
              ),
          combined_intraday_prices as
@@ -218,7 +218,7 @@ union all
 {% endif %}
                  where time_truncated >= week_trading_sessions.open_at and time_truncated < week_trading_sessions.close_at
 {% if is_incremental() and var('realtime') %}
-                   and time_truncated > max_period_date.datetime
+                   and time_truncated > max_period_date.datetime - interval '20 minutes'
 {% endif %}
                  union all
                  SELECT 'crypto' as type,
@@ -228,7 +228,7 @@ union all
                  FROM generate_series(now()::timestamp - interval '1 week', now()::timestamp, interval '15 minutes') dd
 {% if is_incremental() and var('realtime') %}
                           join max_period_date on max_period_date.period = '15min'
-                 where dd > max_period_date.datetime
+                 where dd > max_period_date.datetime - interval '20 minutes'
 {% endif %}
              ),
          expanded_intraday_prices as
@@ -245,7 +245,7 @@ union all
                  where (eod_intraday_prices.time >= week_trading_sessions.open_at - interval '1 hour' and eod_intraday_prices.time < week_trading_sessions.close_at
                     or (symbol like '%.CC' and time > now() - interval '1 week'))
 {% if is_incremental() and var('realtime') %}
-                   and eod_intraday_prices.time > max_period_date.datetime
+                   and eod_intraday_prices.time > max_period_date.datetime - interval '20 minutes'
 {% endif %}
              ),
          combined_intraday_prices as
