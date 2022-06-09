@@ -8,6 +8,7 @@ instances:
     password: ${PG_DATADOG_PASSWORD}
     dbname: ${PG_DBNAME}
     disable_generic_tags: true
+    query_timeout: 120000
     custom_queries:
       - metric_prefix: app
         query: >

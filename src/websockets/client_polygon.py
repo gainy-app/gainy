@@ -4,6 +4,7 @@ from polygon.enums import StreamCluster
 import os
 import json
 import datetime
+import websockets
 from decimal import Decimal
 from common import run, AbstractPriceListener, LOCK_RESOURCE_ID_POLYGON
 from gainy.data_access.db_lock import LockManager, ResourceType
@@ -15,6 +16,7 @@ POLYGON_REALTIME_STREAMING_HOST = os.environ["POLYGON_REALTIME_STREAMING_HOST"]
 class PricesListener(AbstractPriceListener):
 
     def __init__(self, instance_key, cluster=None, lock_resource_id=None):
+        self.rev_transform_mapping = {}
         self.cluster = cluster
         super().__init__(instance_key, "polygon")
 
@@ -126,13 +128,25 @@ class PricesListener(AbstractPriceListener):
 
             try:
                 if self.cluster == StreamCluster.STOCKS:
+                    _prefix = 'AM.'
+                    symbols_normalized = ','.join([
+                        _prefix + self.transform_symbol(i)
+                        for i in self.symbols
+                    ])
+                    self.logger.debug('Subscribing to tickers (%s)',
+                                      symbols_normalized)
                     await stream_client.subscribe_stock_minute_aggregates(
-                        [self.transform_symbol(i) for i in self.symbols],
-                        self.handle_message)
+                        symbols_normalized, self.handle_message)
                 elif self.cluster == StreamCluster.OPTIONS:
+                    _prefix = 'AM.'
+                    symbols_normalized = ','.join([
+                        _prefix + self.transform_symbol(i)
+                        for i in self.symbols
+                    ])
+                    self.logger.debug('Subscribing to tickers (%s)',
+                                      symbols_normalized)
                     await stream_client.subscribe_option_minute_aggregates(
-                        [self.transform_symbol(i) for i in self.symbols],
-                        self.handle_message)
+                        symbols_normalized, self.handle_message)
                 else:
                     raise Exception(f"Unknown cluster {self.cluster}")
 
@@ -143,6 +157,8 @@ class PricesListener(AbstractPriceListener):
                 while 1:
                     try:
                         await stream_client.handle_messages()
+                    except websockets.ConnectionClosedError as e:
+                        break
                     except Exception as e:
                         self.logger.error(
                             "Error caught in handle_messages: %s %s",
@@ -192,13 +208,22 @@ class PricesListener(AbstractPriceListener):
         return super().should_reconnect(self.cluster)
 
     def transform_symbol(self, symbol):
-        symbol = symbol.replace('-P', 'p')
+        if symbol.find('-P'):
+            original_symbol = symbol
+            symbol = symbol.replace('-P', 'p')
+            symbol = symbol.replace('-', '')
+            self.rev_transform_mapping[symbol] = original_symbol
+
+            return symbol
+
         symbol = symbol.replace('-', '.')
         return symbol
 
     def rev_transform_symbol(self, symbol):
+        if symbol in self.rev_transform_mapping:
+            return self.rev_transform_mapping[symbol]
+
         symbol = symbol.replace('O:', '')
-        symbol = symbol.replace('p', '-P')
         symbol = symbol.replace('.', '-')
         return symbol
 
