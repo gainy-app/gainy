@@ -224,11 +224,6 @@ with robinhood_options as (
              select sum(quantity_norm) * sum(abs(quantity_norm) * price) /
                     sum(abs(quantity_norm))                                   as amount,
                     sum(abs(quantity_norm) * price) / sum(abs(quantity_norm)) as price,
-                    sum(quantity_norm / case
-                                            when robinhood_options.quantity_module_sum = 0 and
-                                                 portfolio_securities_normalized.type = 'derivative' and
-                                                 plaid_institutions.ref_id = 'ins_54' then 100
-                                            else 1 end)                       as quantity,
                     t.security_id,
                     t.profile_id,
                     t.account_id,
@@ -332,7 +327,7 @@ with robinhood_options as (
          )
 select groupped_expanded_transactions.amount,
        groupped_expanded_transactions.price,
-       groupped_expanded_transactions.quantity,
+       groupped_expanded_transactions.quantity_norm as quantity,
        groupped_expanded_transactions.security_id,
        groupped_expanded_transactions.profile_id,
        groupped_expanded_transactions.account_id,
@@ -340,16 +335,11 @@ select groupped_expanded_transactions.amount,
        groupped_expanded_transactions.quantity_norm_for_valuation,
        groupped_expanded_transactions.uniq_id,
        groupped_expanded_transactions.date,
-{% if is_incremental() %}
-       case
-           when old_portfolio_expanded_transactions.quantity = groupped_expanded_transactions.quantity
-               then old_portfolio_expanded_transactions.updated_at
-           else now()
-           end as updated_at
-{% else %}
        now() as updated_at
-{% endif %}
 from groupped_expanded_transactions
 {% if is_incremental() %}
          left join {{ this }} old_portfolio_expanded_transactions using (uniq_id)
+where old_portfolio_expanded_transactions.uniq_id is null
+   or old_portfolio_expanded_transactions.quantity_norm != groupped_expanded_transactions.quantity_norm
+   or old_portfolio_expanded_transactions.date != groupped_expanded_transactions.date
 {% endif %}
