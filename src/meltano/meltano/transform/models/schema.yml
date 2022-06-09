@@ -1281,25 +1281,6 @@ models:
           - type:
               type: 'double precision'
 
-  - name: industry_median_chart
-    columns:
-      - name: industry_id
-        tests:
-          - type:
-              type: 'integer'
-      - name: period
-        tests:
-          - type:
-              type: 'character varying'
-      - name: datetime
-        tests:
-          - type:
-              type: 'timestamp without time zone'
-      - name: median_price
-        tests:
-          - type:
-              type: 'double precision'
-
   - name: profile_collections
     columns:
       - name: uniq_id

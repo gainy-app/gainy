@@ -1250,18 +1250,6 @@
         filter: {}
 - table:
     schema: public
-    name: industry_median_chart
-  select_permissions:
-    - role: user
-      permission:
-        columns:
-          - datetime
-          - industry_id
-          - median_price
-          - period
-        filter: {}
-- table:
-    schema: public
     name: interests
   array_relationships:
     - name: ticker_interests
