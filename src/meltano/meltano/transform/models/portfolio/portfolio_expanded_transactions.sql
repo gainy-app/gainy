@@ -338,7 +338,7 @@ select groupped_expanded_transactions.amount,
 {% if is_incremental() %}
        case
            when old_portfolio_expanded_transactions.quantity_norm = groupped_expanded_transactions.quantity_norm
-            and old_portfolio_expanded_transactions.date = groupped_expanded_transactions.date
+            and (old_portfolio_expanded_transactions.date = groupped_expanded_transactions.date or (old_portfolio_expanded_transactions.date is null and groupped_expanded_transactions.date is null))
                then old_portfolio_expanded_transactions.updated_at
            else now()
            end as updated_at,
