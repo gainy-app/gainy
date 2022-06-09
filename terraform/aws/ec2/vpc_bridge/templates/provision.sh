@@ -1,13 +1,13 @@
 #!/bin/bash
 
-DD_AGENT_MAJOR_VERSION=7 DD_API_KEY="${datadog_api_key}" DD_SITE="datadoghq.com" bash -c "$(curl -L https://s3.amazonaws.com/dd-agent/scripts/install_script.sh)"
+DD_AGENT_MAJOR_VERSION=7 DD_API_KEY="${DATADOG_API_KEY}" DD_SITE="datadoghq.com" bash -c "$(curl -L https://s3.amazonaws.com/dd-agent/scripts/install_script.sh)"
 apt install -y postgresql-client
 PGPASSWORD="${PG_PASSWORD}" psql -h "${PG_HOST}" -p "${PG_PORT}" -U "${PG_USERNAME}" "${PG_DBNAME}" -P pager -c "REVOKE SELECT ON ALL TABLES IN SCHEMA airflow FROM datadog; REVOKE USAGE ON SCHEMA airflow FROM datadog; drop user if exists datadog" 2> /dev/null
-PGPASSWORD="${PG_PASSWORD}" psql -h "${PG_HOST}" -p "${PG_PORT}" -U "${PG_USERNAME}" "${PG_DBNAME}" -P pager -c "create user datadog with password '${pg_datadog_password}'; grant pg_monitor to datadog; grant SELECT ON pg_stat_database to datadog; GRANT USAGE ON SCHEMA airflow TO datadog;GRANT SELECT ON ALL TABLES IN SCHEMA airflow TO datadog;"
-PGPASSWORD="${PG_PASSWORD}" psql -h "${PG_HOST}" -p "${PG_PORT}" -U "${PG_USERNAME}" "${PG_DBNAME}" -P pager -c "GRANT SELECT ON TABLE public_220607120849.data_checks TO datadog; GRANT USAGE ON SCHEMA public_220607120849 TO datadog;"
+PGPASSWORD="${PG_PASSWORD}" psql -h "${PG_HOST}" -p "${PG_PORT}" -U "${PG_USERNAME}" "${PG_DBNAME}" -P pager -c "create user datadog with password '${PG_DATADOG_PASSWORD}'; grant pg_monitor to datadog; grant SELECT ON pg_stat_database to datadog; GRANT USAGE ON SCHEMA airflow TO datadog;GRANT SELECT ON ALL TABLES IN SCHEMA airflow TO datadog;"
+PGPASSWORD="${PG_PASSWORD}" psql -h "${PG_HOST}" -p "${PG_PORT}" -U "${PG_USERNAME}" "${PG_DBNAME}" -P pager -c "GRANT SELECT ON TABLE ${PUBLIC_SCHEMA_NAME}.data_checks TO datadog; GRANT USAGE ON SCHEMA ${PUBLIC_SCHEMA_NAME} TO datadog;"
 
-PGPASSWORD="${PG_PASSWORD}" psql -h "${PG_HOST}" -p "${PG_PORT}" -U "${PG_USERNAME}" "${PG_DBNAME}" -P pager -c "REVOKE SELECT ON ALL TABLES IN SCHEMA raw_data FROM ${pg_internal_sync_username}; REVOKE USAGE ON SCHEMA raw_data FROM ${pg_internal_sync_username}; drop user if exists ${pg_internal_sync_username}" 2> /dev/null
-PGPASSWORD="${PG_PASSWORD}" psql -h "${PG_HOST}" -p "${PG_PORT}" -U "${PG_USERNAME}" "${PG_DBNAME}" -P pager -c "create user ${pg_internal_sync_username} with password '${pg_internal_sync_password}'; GRANT USAGE ON SCHEMA raw_data TO ${pg_internal_sync_username}; GRANT SELECT ON ALL TABLES IN SCHEMA raw_data TO ${pg_internal_sync_username};"
+PGPASSWORD="${PG_PASSWORD}" psql -h "${PG_HOST}" -p "${PG_PORT}" -U "${PG_USERNAME}" "${PG_DBNAME}" -P pager -c "REVOKE SELECT ON ALL TABLES IN SCHEMA raw_data FROM ${PG_INTERNAL_SYNC_USERNAME}; REVOKE USAGE ON SCHEMA raw_data FROM ${PG_INTERNAL_SYNC_USERNAME}; drop user if exists ${PG_INTERNAL_SYNC_USERNAME}" 2> /dev/null
+PGPASSWORD="${PG_PASSWORD}" psql -h "${PG_HOST}" -p "${PG_PORT}" -U "${PG_USERNAME}" "${PG_DBNAME}" -P pager -c "create user ${PG_INTERNAL_SYNC_USERNAME} with password '${PG_INTERNAL_SYNC_PASSWORD}'; GRANT USAGE ON SCHEMA raw_data TO ${PG_INTERNAL_SYNC_USERNAME}; GRANT SELECT ON ALL TABLES IN SCHEMA raw_data TO ${PG_INTERNAL_SYNC_USERNAME};"
 
 PGPASSWORD="${PG_PASSWORD}" psql -h "${PG_HOST}" -p "${PG_PORT}" -U "${PG_USERNAME}" "${PG_DBNAME}" -P pager -c "create extension if not exists pg_stat_statements;"
 
