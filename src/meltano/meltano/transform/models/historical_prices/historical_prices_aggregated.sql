@@ -12,14 +12,13 @@
 }}
 
 {% if is_incremental() %}
-with max_date as
+with max_period_date as
          (
-             select symbol,
-                    period,
-                    max(time) as time
+             select period,
+                    max(datetime) as datetime
              from {{ this }}
-             group by symbol, period
-      )
+             group by period
+         )
 {% endif %}
 
 -- 3min
@@ -48,9 +47,12 @@ with max_date as
                           FROM generate_series(now()::timestamp - interval '1 week', now()::timestamp, interval '3 minutes') dd
                           ) t
                           join latest_open_trading_session on true
+{% if is_incremental() and var('realtime') %}
+                          join max_period_date on max_period_date.period = '3min'
+{% endif %}
                  where time_truncated >= latest_open_trading_session.open_at and time_truncated < latest_open_trading_session.close_at
 {% if is_incremental() and var('realtime') %}
-                   and time_truncated > now() - interval '20 minutes'
+                   and time_truncated > max_period_date.datetime
 {% endif %}
                  union all
                  SELECT 'crypto' as type,
@@ -59,7 +61,8 @@ with max_date as
                         mod(extract(minutes from dd)::int, 3) as time_truncated
                  FROM generate_series(now()::timestamp - interval '1 day', now()::timestamp, interval '3 minutes') dd
 {% if is_incremental() and var('realtime') %}
-                 where dd > now() - interval '20 minutes'
+                          join max_period_date on max_period_date.period = '3min'
+                 where dd > max_period_date.datetime
 {% endif %}
              ),
          expanded_intraday_prices as
@@ -70,10 +73,13 @@ with max_date as
                         mod(extract(minutes from eod_intraday_prices.time)::int, 3) as time_truncated
                  from {{ source('eod', 'eod_intraday_prices') }}
                           join latest_open_trading_session on true
+{% if is_incremental() and var('realtime') %}
+                          join max_period_date on max_period_date.period = '3min'
+{% endif %}
                  where (eod_intraday_prices.time >= latest_open_trading_session.open_at - interval '1 hour' and eod_intraday_prices.time < latest_open_trading_session.close_at
                     or (symbol like '%.CC' and time > now() - interval '1 day'))
 {% if is_incremental() and var('realtime') %}
-                   and eod_intraday_prices.time > now() - interval '20 minutes'
+                   and eod_intraday_prices.time > max_period_date.datetime
 {% endif %}
              ),
          combined_intraday_prices as
@@ -207,9 +213,12 @@ union all
                           FROM generate_series(now()::timestamp - interval '1 week', now()::timestamp, interval '15 minutes') dd
                           ) t
                           join week_trading_sessions on true
+{% if is_incremental() and var('realtime') %}
+                          join max_period_date on max_period_date.period = '15min'
+{% endif %}
                  where time_truncated >= week_trading_sessions.open_at and time_truncated < week_trading_sessions.close_at
 {% if is_incremental() and var('realtime') %}
-                   and time_truncated > now() - interval '1 hour'
+                   and time_truncated > max_period_date.datetime
 {% endif %}
                  union all
                  SELECT 'crypto' as type,
@@ -218,7 +227,8 @@ union all
                         mod(extract(minutes from dd)::int, 15) as time_truncated
                  FROM generate_series(now()::timestamp - interval '1 week', now()::timestamp, interval '15 minutes') dd
 {% if is_incremental() and var('realtime') %}
-                 where dd > now() - interval '1 hour'
+                          join max_period_date on max_period_date.period = '15min'
+                 where dd > max_period_date.datetime
 {% endif %}
              ),
          expanded_intraday_prices as
@@ -229,10 +239,13 @@ union all
                         mod(extract(minutes from eod_intraday_prices.time)::int, 15) as time_truncated
                  from {{ source('eod', 'eod_intraday_prices') }}
                           join week_trading_sessions on true
+{% if is_incremental() and var('realtime') %}
+                          join max_period_date on max_period_date.period = '15min'
+{% endif %}
                  where (eod_intraday_prices.time >= week_trading_sessions.open_at - interval '1 hour' and eod_intraday_prices.time < week_trading_sessions.close_at
                     or (symbol like '%.CC' and time > now() - interval '1 week'))
 {% if is_incremental() and var('realtime') %}
-                   and eod_intraday_prices.time > now() - interval '1 hour'
+                   and eod_intraday_prices.time > max_period_date.datetime
 {% endif %}
              ),
          combined_intraday_prices as
@@ -549,10 +562,6 @@ union all
                              sum(case when close is not null then 1 end)
                              over (partition by combined_daily_prices.symbol order by date) as grp
                       from combined_daily_prices
-{% if is_incremental() %}
-                      left join max_date on max_date.symbol = combined_daily_prices.symbol and max_date.period = '1d'
-                      where (max_date.time is null or combined_daily_prices.date >= max_date.time - interval '1 week')
-{% endif %}
                   ) t
                       left join {{ ref('historical_prices_marked') }} using (symbol)
              order by symbol, date
@@ -592,14 +601,8 @@ union all
                                     OVER (partition by code, date_week rows between current row and unbounded following)               as volume,
                                     0                                                                                                  as priority
                               from {{ ref('historical_prices') }}
-                              {% if is_incremental() %}
-                                  left join max_date on max_date.symbol = code and max_date.period = '1w'
-                              where (max_date.time is null or date_week >= max_date.time - interval '1 month')
-                                and date_week >= now() - interval '5 year' - interval '1 week'
-                              {% else %}
-                                  where date_week >= now() - interval '5 year' - interval '1 week'
-                              {% endif %}
-                               order by symbol, date_week, date
+                              where date_week >= now() - interval '5 year' - interval '1 week'
+                              order by symbol, date_week, date
                           )
                           union all
                           (
@@ -742,10 +745,6 @@ union all
                           sum(volume) as volume
                    from {{ ref('historical_prices') }}
                    group by code, date_month) t using (code, date_month)
-{% if is_incremental() %}
-    left join max_date on max_date.symbol = code and max_date.period = '1m'
-    where (max_date.time is null or date_month >= max_date.time - interval '3 month')
-{% endif %}
     order by code, date_month, date
 )
 {% endif %}

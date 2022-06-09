@@ -405,7 +405,7 @@ resource "datadog_monitor" "data_errors_count" {
 
   require_full_window = false
   notify_no_data      = true
-  renotify_interval   = 86400
+  renotify_interval   = 1440
 
   tags = ["meltano"]
 }
@@ -478,6 +478,23 @@ EOT
 
   require_full_window = false
   renotify_interval   = 15
+
+  tags = ["logs"]
+}
+
+resource "datadog_monitor" "logs_count" {
+  name    = "Logs count"
+  type    = "query alert"
+  message = "Logs count triggered. Notify: @slack-${var.slack_channel_name} <!channel>"
+
+  query = "sum(last_1h):outliers(sum:aws.logs.forwarded_log_events{*} by {loggroupname}.as_count(), 'DBSCAN', 3) > 0"
+
+  monitor_thresholds {
+    critical = 0
+  }
+
+  require_full_window = false
+  renotify_interval   = 360
 
   tags = ["logs"]
 }

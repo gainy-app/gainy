@@ -15,8 +15,7 @@
 
 -- Execution Time: 61540.802 ms
 {% if is_incremental() %}
-with
-     max_updated_at as (select code, max(date) as max_date from {{ this }} group by code)
+with max_updated_at as (select code, max(date) as max_date from {{ this }} group by code)
 {% endif %}
 SELECT code,
        (code || '_' || date)::varchar            as id,
@@ -33,7 +32,7 @@ SELECT code,
 from {{ source('eod', 'eod_historical_prices') }}
 {% if is_incremental() %}
     left join max_updated_at using (code)
-    where date::date >= max_updated_at.max_date or max_updated_at.max_date is null
+    where _sdc_batched_at >= max_updated_at.max_date or max_updated_at.max_date is null
 {% endif %}
 
 union all
@@ -54,5 +53,5 @@ from {{ source('polygon', 'polygon_options_historical_prices') }}
 join {{ ref('ticker_options_monitored') }} using (contract_name)
 {% if is_incremental() %}
     left join max_updated_at on max_updated_at.code = contract_name
-    where to_timestamp(t / 1000) >= max_updated_at.max_date or max_updated_at.max_date is null
+    where _sdc_batched_at >= max_updated_at.max_date or max_updated_at.max_date is null
 {% endif %}

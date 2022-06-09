@@ -5,7 +5,7 @@
     tags = ["realtime"],
     post_hook=[
       index(this, 'uniq_id', true),
-      'delete from {{this}} where updated_at < (select max(updated_at) from {{this}})',
+      'delete from {{this}} where last_seen_at < (select max(last_seen_at) from {{this}})',
       fk(this, 'account_id', 'app', 'profile_portfolio_accounts', 'id')
     ]
   )
@@ -218,114 +218,135 @@ with robinhood_options as (
                       select account_id, security_id, null as date, quantity_norm, type, profile_id
                       from mismatched_sell_transactions
                   ) t
-         )
-
-select sum(quantity_norm) * sum(abs(quantity_norm) * price) /
-       sum(abs(quantity_norm))                                   as amount,
-       sum(abs(quantity_norm) * price) / sum(abs(quantity_norm)) as price,
-       sum(quantity_norm / case
-                               when robinhood_options.quantity_module_sum = 0 and
-                                    portfolio_securities_normalized.type = 'derivative' and
-                                    plaid_institutions.ref_id = 'ins_54' then 100
-                               else 1 end)                       as quantity,
-       t.security_id,
-       t.profile_id,
-       t.account_id,
-       sum(quantity_norm / case
-                               when robinhood_options.quantity_module_sum = 0 and
-                                    portfolio_securities_normalized.type = 'derivative' and
-                                    plaid_institutions.ref_id = 'ins_54' then 100
-                               else 1 end)                       as quantity_norm,
-       sum(quantity_norm / case
-                               when robinhood_options.quantity_module_sum = 0 and
-                                    portfolio_securities_normalized.type = 'derivative' and
-                                    plaid_institutions.ref_id = 'ins_54' then 100
-                               else 1
-           end * case
-                     when portfolio_securities_normalized.type = 'derivative'
-                         then 100
-                     else 1 end)                                 as quantity_norm_for_valuation, -- to multiple by price
-       now()                                                     as updated_at,
-       max(uniq_id)::varchar                                     as uniq_id,
-       t.date
-from (
-         select *
-         from mismatched_sell_transactions
-
-         union all
-
-         select *
-         from mismatched_buy_transactions
-
-         union all
-
-         -- mismatched holdings
+         ),
+     groupped_expanded_transactions as
          (
-             select distinct on (
-                 security_id,
-                 account_id
-                 ) null::int                                    as id,
-                   'auto1_' || account_id || '_' || security_id as uniq_id,
-                   historical_prices.adjusted_close * diff      as amount,
-                   historical_prices.date::date                 as date,
-                   historical_prices.adjusted_close             as price,
-                   'buy'                                        as type,
-                   security_id,
-                   profile_id,
-                   account_id,
-                   diff                                         as quantity_norm
+             select sum(quantity_norm) * sum(abs(quantity_norm) * price) /
+                    sum(abs(quantity_norm))                                   as amount,
+                    sum(abs(quantity_norm) * price) / sum(abs(quantity_norm)) as price,
+                    t.security_id,
+                    t.profile_id,
+                    t.account_id,
+                    sum(quantity_norm / case
+                                            when robinhood_options.quantity_module_sum = 0 and
+                                                 portfolio_securities_normalized.type = 'derivative' and
+                                                 plaid_institutions.ref_id = 'ins_54' then 100
+                                            else 1 end)                       as quantity_norm,
+                    sum(quantity_norm / case
+                                            when robinhood_options.quantity_module_sum = 0 and
+                                                 portfolio_securities_normalized.type = 'derivative' and
+                                                 plaid_institutions.ref_id = 'ins_54' then 100
+                                            else 1
+                        end * case
+                                  when portfolio_securities_normalized.type = 'derivative'
+                                      then 100
+                                  else 1 end)                                 as quantity_norm_for_valuation, -- to multiple by price
+                    max(uniq_id)::varchar                                     as uniq_id,
+                    t.date
              from (
-                      select distinct on (
-                          profile_holdings_normalized.account_id, profile_holdings_normalized.security_id
-                          ) profile_holdings_normalized.quantity,
-                            profile_holdings_normalized.name,
-                            portfolio_securities_normalized.original_ticker_symbol,
-                            profile_holdings_normalized.security_id,
-                            profile_holdings_normalized.profile_id,
-                            profile_holdings_normalized.account_id,
-                            profile_first_transaction_date,
-                            profile_holdings_normalized.quantity -
-                            coalesce(expanded_transactions.rolling_quantity, 0) as diff
-                      from {{ ref('profile_holdings_normalized') }}
-                               join {{ ref('portfolio_securities_normalized') }}
-                                    on portfolio_securities_normalized.id = profile_holdings_normalized.security_id
-                               left join first_transaction_date using (profile_id)
-                               left join expanded_transactions
-                                         on profile_holdings_normalized.account_id = expanded_transactions.account_id and
-                                            profile_holdings_normalized.security_id = expanded_transactions.security_id
-                      where portfolio_securities_normalized.type != 'cash'
-                      order by profile_holdings_normalized.account_id, profile_holdings_normalized.security_id,
-                          expanded_transactions.row_num desc
+                      select *
+                      from mismatched_sell_transactions
+
+                      union all
+
+                      select *
+                      from mismatched_buy_transactions
+
+                      union all
+
+                      -- mismatched holdings
+                      (
+                          select distinct on (
+                              security_id,
+                              account_id
+                              ) null::int                                    as id,
+                                'auto1_' || account_id || '_' || security_id as uniq_id,
+                                historical_prices.adjusted_close * diff      as amount,
+                                historical_prices.date::date                 as date,
+                                historical_prices.adjusted_close             as price,
+                                'buy'                                        as type,
+                                security_id,
+                                profile_id,
+                                account_id,
+                                diff                                         as quantity_norm
+                          from (
+                                   select distinct on (
+                                       profile_holdings_normalized.account_id, profile_holdings_normalized.security_id
+                                       ) profile_holdings_normalized.quantity,
+                                         profile_holdings_normalized.name,
+                                         portfolio_securities_normalized.original_ticker_symbol,
+                                         profile_holdings_normalized.security_id,
+                                         profile_holdings_normalized.profile_id,
+                                         profile_holdings_normalized.account_id,
+                                         profile_first_transaction_date,
+                                         profile_holdings_normalized.quantity -
+                                         coalesce(expanded_transactions.rolling_quantity, 0) as diff
+                                   from {{ ref('profile_holdings_normalized') }}
+                                            join {{ ref('portfolio_securities_normalized') }}
+                                                 on portfolio_securities_normalized.id = profile_holdings_normalized.security_id
+                                            left join first_transaction_date using (profile_id)
+                                            left join expanded_transactions
+                                                      on profile_holdings_normalized.account_id = expanded_transactions.account_id and
+                                                         profile_holdings_normalized.security_id = expanded_transactions.security_id
+                                   where portfolio_securities_normalized.type != 'cash'
+                                   order by profile_holdings_normalized.account_id, profile_holdings_normalized.security_id,
+                                       expanded_transactions.row_num desc
+                               ) t
+                                   left join first_trade_date on first_trade_date.code = original_ticker_symbol
+                                   left join {{ ref('historical_prices') }}
+                                             on historical_prices.code = original_ticker_symbol and
+                                                (historical_prices.date between profile_first_transaction_date - interval '1 week' and profile_first_transaction_date or
+                                                 historical_prices.date = first_trade_date.first_trade_date)
+                          where diff > 0
+                          order by security_id, account_id, historical_prices.date desc
+                      )
+
+                      union all
+
+                      select id,
+                             id || '_' || account_id || '_' || security_id as uniq_id,
+                             amount,
+                             date,
+                             price,
+                             type,
+                             security_id,
+                             profile_id,
+                             account_id,
+                             quantity_norm
+                      from normalized_transactions
                   ) t
-                      left join first_trade_date on first_trade_date.code = original_ticker_symbol
-                      left join {{ ref('historical_prices') }}
-                                on historical_prices.code = original_ticker_symbol and
-                                   (historical_prices.date between profile_first_transaction_date - interval '1 week' and profile_first_transaction_date or
-                                    historical_prices.date = first_trade_date.first_trade_date)
-             where diff > 0
-             order by security_id, account_id, historical_prices.date desc
+                      join {{ ref('portfolio_securities_normalized') }}
+                           on portfolio_securities_normalized.id = t.security_id
+                      left join {{ source('app', 'profile_portfolio_accounts') }} on profile_portfolio_accounts.id = t.account_id
+                      left join {{ source('app', 'profile_plaid_access_tokens') }} on profile_plaid_access_tokens.id = profile_portfolio_accounts.plaid_access_token_id
+                      left join {{ source('app', 'plaid_institutions') }} on plaid_institutions.id = profile_plaid_access_tokens.institution_id
+                      left join robinhood_options on robinhood_options.profile_id = t.profile_id
+             where t.type in ('buy', 'sell')
+             group by t.date, t.security_id, t.account_id, t.profile_id
+             having sum(abs(quantity_norm)) > 0
          )
-
-         union all
-
-         select id,
-                id || '_' || account_id || '_' || security_id as uniq_id,
-                amount,
-                date,
-                price,
-                type,
-                security_id,
-                profile_id,
-                account_id,
-                quantity_norm
-         from normalized_transactions
-     ) t
-         join {{ ref('portfolio_securities_normalized') }}
-              on portfolio_securities_normalized.id = t.security_id
-         left join {{ source('app', 'profile_portfolio_accounts') }} on profile_portfolio_accounts.id = t.account_id
-         left join {{ source('app', 'profile_plaid_access_tokens') }} on profile_plaid_access_tokens.id = profile_portfolio_accounts.plaid_access_token_id
-         left join {{ source('app', 'plaid_institutions') }} on plaid_institutions.id = profile_plaid_access_tokens.institution_id
-         left join robinhood_options on robinhood_options.profile_id = t.profile_id
-where t.type in ('buy', 'sell')
-group by t.date, t.security_id, t.account_id, t.profile_id
-having sum(abs(quantity_norm)) > 0
+select groupped_expanded_transactions.amount,
+       groupped_expanded_transactions.price,
+       groupped_expanded_transactions.quantity_norm as quantity,
+       groupped_expanded_transactions.security_id,
+       groupped_expanded_transactions.profile_id,
+       groupped_expanded_transactions.account_id,
+       groupped_expanded_transactions.quantity_norm,
+       groupped_expanded_transactions.quantity_norm_for_valuation,
+       groupped_expanded_transactions.uniq_id,
+       groupped_expanded_transactions.date,
+{% if is_incremental() %}
+       case
+           when old_portfolio_expanded_transactions.quantity_norm = groupped_expanded_transactions.quantity_norm
+            and (old_portfolio_expanded_transactions.date = groupped_expanded_transactions.date or (old_portfolio_expanded_transactions.date is null and groupped_expanded_transactions.date is null))
+               then old_portfolio_expanded_transactions.updated_at
+           else now()
+           end as updated_at,
+{% else %}
+       now() as updated_at,
+{% endif %}
+       now() as last_seen_at
+from groupped_expanded_transactions
+{% if is_incremental() %}
+         left join {{ this }} old_portfolio_expanded_transactions using (uniq_id)
+{% endif %}

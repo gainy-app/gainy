@@ -1,14 +1,13 @@
 init_config:
 
 instances:
-  - dbm: true
+  - dbm: ${DBM_ENABLED}
     host: ${PG_HOST}
     port: ${PG_PORT}
     username: datadog
     password: ${PG_DATADOG_PASSWORD}
     dbname: ${PG_DBNAME}
     disable_generic_tags: true
-    query_timeout: 120000
     custom_queries:
       - metric_prefix: app
         query: >

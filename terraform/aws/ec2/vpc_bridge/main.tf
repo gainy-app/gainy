@@ -41,6 +41,7 @@ locals {
       PUBLIC_SCHEMA_NAME  = var.public_schema_name
       PG_DATADOG_PASSWORD = random_password.datadog_postgres.result
       ENV                 = var.env
+      DBM_ENABLED         = var.env == "production"
     }
   )
 }

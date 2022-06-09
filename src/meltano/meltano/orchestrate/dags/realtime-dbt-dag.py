@@ -1,12 +1,13 @@
 from airflow.operators.bash import BashOperator
-from common import create_dag, get_meltano_command, MELTANO_PROJECT_ROOT
+from common import create_dag, get_meltano_command, MELTANO_PROJECT_ROOT, ENV
 
 dag_id = "realtime-dbt-dag"
 tags = ["meltano", "dbt"]
-dag = create_dag(dag_id,
-                 tags=tags,
-                 schedule_interval="*/5 * * * *",
-                 is_paused_upon_creation=False)
+dag = create_dag(
+    dag_id,
+    tags=tags,
+    schedule_interval="*/5 * * * *" if ENV == "production" else "0 * * * *",
+    is_paused_upon_creation=False)
 
 clean = BashOperator(
     task_id="clean",
