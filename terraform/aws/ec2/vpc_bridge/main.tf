@@ -24,10 +24,11 @@ locals {
       PG_PORT                   = var.pg_port
       PG_USERNAME               = var.pg_username
       PG_DBNAME                 = var.pg_dbname
-      pg_datadog_password       = random_password.datadog_postgres.result
-      pg_internal_sync_username = var.pg_production_internal_sync_username
-      pg_internal_sync_password = random_password.internal_sync_postgres.result
-      datadog_api_key           = var.datadog_api_key
+      PUBLIC_SCHEMA_NAME        = var.public_schema_name
+      PG_DATADOG_PASSWORD       = random_password.datadog_postgres.result
+      PG_INTERNAL_SYNC_USERNAME = var.pg_production_internal_sync_username
+      PG_INTERNAL_SYNC_PASSWORD = random_password.internal_sync_postgres.result
+      DATADOG_API_KEY           = var.datadog_api_key
     }
   )
 
