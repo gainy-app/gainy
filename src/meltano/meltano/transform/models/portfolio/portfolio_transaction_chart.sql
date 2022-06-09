@@ -29,7 +29,7 @@ with first_profile_transaction_date as
     old_model_stats as
          (
              select transactions_uniq_id, period,
-                    max(updated_at) as max_updated_at,
+                    max(transactions_updated_at) as max_transactions_updated_at,
                     max(datetime) as max_datetime
              from {{ this }}
              group by transactions_uniq_id, period
@@ -45,7 +45,7 @@ select (portfolio_expanded_transactions.uniq_id || '_' || chart.datetime || '_' 
        portfolio_expanded_transactions.quantity_norm_for_valuation::numeric * chart.low::numeric            as low,
        portfolio_expanded_transactions.quantity_norm_for_valuation::numeric * chart.close::numeric          as close,
        portfolio_expanded_transactions.quantity_norm_for_valuation::numeric * chart.adjusted_close::numeric as adjusted_close,
-       portfolio_expanded_transactions.updated_at
+       portfolio_expanded_transactions.updated_at                                                           as transactions_updated_at
 from {{ ref('portfolio_expanded_transactions') }}
          left join first_profile_transaction_date
                    on first_profile_transaction_date.profile_id = portfolio_expanded_transactions.profile_id
@@ -62,6 +62,6 @@ from {{ ref('portfolio_expanded_transactions') }}
 {% if is_incremental() %}
                   and (old_model_stats.transactions_uniq_id is null
                       or (chart.period = old_model_stats.period
-                          and (portfolio_expanded_transactions.updated_at > old_model_stats.max_updated_at -- new / updated transaction - recalc all
+                          and (portfolio_expanded_transactions.updated_at > old_model_stats.max_transactions_updated_at -- new / updated transaction - recalc all
                               or chart.datetime > old_model_stats.max_datetime))) -- old transaction - recalc only new
 {% endif %}
