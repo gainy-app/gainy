@@ -1,7 +1,15 @@
 {{
   config(
-    materialized = "view",
-    tags = ["view"],
+    materialized = "incremental",
+    unique_key = "id",
+    tags = ["realtime"],
+    post_hook=[
+      pk('id'),
+      'delete from {{this}}
+        using (select period, max(updated_at) as max_updated_at from {{this}} group by period) dc_stats
+        where dc_stats.period = data_checks.period
+        and data_checks.updated_at < dc_stats.max_updated_at',
+    ]
   )
 }}
 
@@ -70,9 +78,18 @@ with collection_distinct_tickers as
                and (t.time is null or least(now(), latest_trading_day.close_at) - t.time > interval '16 minutes')
 -- Polygon delay is 15 minutes
          ),
+     matchscore_distinct_tickers as
+         (
+             select symbol
+             from {{ source('app', 'profile_ticker_match_score') }}
+             group by symbol
+         ),
      errors as
          (
-             select symbol, 'ttf_ticker_no_interest' as code
+{% if not var('realtime') %}
+             select symbol,
+                    'ttf_ticker_no_interest' as code,
+                    'daily' as period
              from collection_distinct_tickers
                       left join {{ ref('ticker_interests') }} using (symbol)
                       left join {{ ref('interests') }} on interests.id = ticker_interests.interest_id
@@ -80,7 +97,9 @@ with collection_distinct_tickers as
 
              union all
 
-             select symbol, 'ttf_ticker_no_industry' as code
+             select symbol,
+                   'ttf_ticker_no_industry' as code,
+                   'daily' as period
              from collection_distinct_tickers
                       left join {{ ref('ticker_industries') }} using (symbol)
                       left join {{ ref('gainy_industries') }} on gainy_industries.id = ticker_industries.industry_id
@@ -89,14 +108,53 @@ with collection_distinct_tickers as
              union all
 
              select collection_distinct_tickers.symbol,
-                    'ttf_ticker_hidden' as code
+                    'ttf_ticker_hidden' as code,
+                    'daily' as period
              from collection_distinct_tickers
                       left join {{ ref('tickers') }} using (symbol)
              where tickers.symbol is null
+           
+             union all
+           
+             select collection_distinct_tickers.symbol,
+                    'ttf_ticker_no_risk_score' as code,
+                    'daily' as period
+             from collection_distinct_tickers
+                      left join {{ ref('ticker_risk_scores') }} using (symbol)
+             where ticker_risk_scores.symbol is null
+           
+             union all
+           
+             select collection_distinct_tickers.symbol,
+                    'ttf_ticker_no_category_continuous' as code,
+                    'daily' as period
+             from collection_distinct_tickers
+                      left join {{ ref('ticker_categories_continuous') }} using (symbol)
+             where ticker_categories_continuous.symbol is null
+
+             union all
+           
+             select collection_distinct_tickers.symbol,
+                    'ttf_ticker_no_matchscore' as code,
+                    'daily' as period
+             from collection_distinct_tickers
+                      left join matchscore_distinct_tickers using (symbol)
+                               left join {{ ref('tickers') }} using (symbol)
+             where matchscore_distinct_tickers.symbol is null
+             and tickers.type <> 'crypto'
 
              union all
 
-             select tickers_and_options.symbol, 'old_realtime_metrics' as code
+             select symbol,
+                    'old_historical_prices' as code,
+                    'daily' as period
+             from old_historical_prices
+
+             union all
+{% endif %}
+             select tickers_and_options.symbol,
+                    'old_realtime_metrics' as code,
+                    'realtime' as period
              from tickers_and_options
                       join latest_trading_day
                            on (latest_trading_day.exchange_name = tickers_and_options.exchange_canonical
@@ -108,7 +166,9 @@ with collection_distinct_tickers as
 
              union all
 
-             select symbol, 'old_realtime_chart' as code
+             select symbol,
+                    'old_realtime_chart' as code,
+                    'realtime' as period
              from (
                       select tickers_and_options.symbol,
                              max(chart.datetime) as datetime
@@ -131,16 +191,15 @@ with collection_distinct_tickers as
 
              union all
 
-             select symbol, 'old_historical_prices' as code
-             from old_historical_prices
-
-             union all
-
-             select symbol, 'old_realtime_prices' as code
+             select symbol,
+                    'old_realtime_prices' as code,
+                    'realtime' as period
              from old_realtime_prices
          )
-select symbol,
+select (code || '_' || symbol)::varchar as id,
+       symbol,
        code::varchar,
+       period::varchar,
        case
            when code = 'ttf_ticker_no_interest'
                then 'TTF tickers ' || symbol || ' is not linked to any interest.'
@@ -148,6 +207,12 @@ select symbol,
                then 'TTF tickers ' || symbol || ' is not linked to any industry.'
            when code = 'ttf_ticker_hidden'
                then 'TTF tickers ' || symbol || ' not present in the tickers table.'
+           when code = 'ttf_ticker_no_risk_score'
+               then 'TTF tickers ' || symbol || ' not present in the ticker_risk_scores table.'
+           when code = 'ttf_ticker_no_category_continuous'
+               then 'TTF tickers ' || symbol || ' not present in the ticker_categories_continuous table.'
+           when code = 'ttf_ticker_no_matchscore'
+               then 'TTF tickers ' || symbol || ' not present in the app.profile_ticker_match_score table.'
            when code = 'old_realtime_metrics'
                then 'Tickers ' || symbol || ' has old realtime metrics.'
            when code = 'old_realtime_chart'
@@ -156,5 +221,6 @@ select symbol,
                then 'Tickers ' || symbol || ' has old historical prices.'
            when code = 'old_realtime_prices'
                then 'Tickers ' || symbol || ' has old realtime prices.'
-           end as message
+           end as message,
+       now() as updated_at
 from errors
