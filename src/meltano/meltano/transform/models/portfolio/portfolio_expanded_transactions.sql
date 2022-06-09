@@ -5,7 +5,7 @@
     tags = ["realtime"],
     post_hook=[
       index(this, 'uniq_id', true),
-      'delete from {{this}} where updated_at < (select max(updated_at) from {{this}})',
+      'delete from {{this}} where last_seen_at < (select max(last_seen_at) from {{this}})',
       fk(this, 'account_id', 'app', 'profile_portfolio_accounts', 'id')
     ]
   )
@@ -335,11 +335,18 @@ select groupped_expanded_transactions.amount,
        groupped_expanded_transactions.quantity_norm_for_valuation,
        groupped_expanded_transactions.uniq_id,
        groupped_expanded_transactions.date,
-       now() as updated_at
+{% if is_incremental() %}
+       case
+           when old_portfolio_expanded_transactions.quantity_norm = groupped_expanded_transactions.quantity_norm
+            and old_portfolio_expanded_transactions.date = groupped_expanded_transactions.date
+               then old_portfolio_expanded_transactions.updated_at
+           else now()
+           end as updated_at,
+{% else %}
+       now() as updated_at,
+{% endif %}
+       now() as last_seen_at
 from groupped_expanded_transactions
 {% if is_incremental() %}
          left join {{ this }} old_portfolio_expanded_transactions using (uniq_id)
-where old_portfolio_expanded_transactions.uniq_id is null
-   or old_portfolio_expanded_transactions.quantity_norm != groupped_expanded_transactions.quantity_norm
-   or old_portfolio_expanded_transactions.date != groupped_expanded_transactions.date
 {% endif %}
