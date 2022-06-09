@@ -2,7 +2,6 @@
   config(
     materialized = "incremental",
     unique_key = "id",
-    tags = ["realtime"],
     post_hook=[
       pk('industry_id, period, datetime'),
       index(this, 'id', true),
