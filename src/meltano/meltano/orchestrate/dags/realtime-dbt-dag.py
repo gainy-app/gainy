@@ -1,5 +1,5 @@
 from airflow.operators.bash import BashOperator
-from common import create_dag, get_meltano_command, MELTANO_PROJECT_ROOT
+from common import create_dag, get_meltano_command, MELTANO_PROJECT_ROOT, ENV
 
 dag_id = "realtime-dbt-dag"
 tags = ["meltano", "dbt"]

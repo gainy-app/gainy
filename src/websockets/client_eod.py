@@ -44,7 +44,7 @@ class PricesListener(AbstractPriceListener):
                 FROM base_tickers
                          left join ticker_metrics on ticker_metrics.symbol = base_tickers.symbol
                 where base_tickers.symbol not like '%%-%%'
-                  and (lower(exchange) similar to '(nyse|nasdaq)%%' or type = 'crypto')
+                  and (lower(exchange) similar to '(nyse|nasdaq)%%')
                 order by priority desc, market_capitalization desc nulls last
                 limit %(count)s
             """
