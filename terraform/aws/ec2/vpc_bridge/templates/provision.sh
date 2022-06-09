@@ -17,4 +17,5 @@ cp /tmp/datadog.postgres.yaml /etc/datadog-agent/conf.d/postgres.d/conf.yaml
 service datadog-agent restart
 
 # delete self
-shred -u provision.sh
+SCRIPTPATH="$( cd "$(dirname "$0")" >/dev/null 2>&1 ; pwd -P )"
+shred -u $SCRIPTPATH
