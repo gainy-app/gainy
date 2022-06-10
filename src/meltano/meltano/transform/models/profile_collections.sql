@@ -14,6 +14,7 @@ WITH profile_collections AS (
            collections.image_url,
            collections.enabled,
            collections.personalized,
+           collections.influencer_name,
            collections.size
     FROM {{ ref('collections') }}
     WHERE collections.personalized = '0'
@@ -26,6 +27,7 @@ WITH profile_collections AS (
            c.image_url,
            c.enabled,
            c.personalized,
+           null as influencer_name,
            csp.size
     FROM (
              {{ ref('collections') }} c
@@ -45,5 +47,6 @@ SELECT uniq_id,
            ELSE '1' :: text
            END                               AS enabled,
        profile_collections.personalized,
+       profile_collections.influencer_name,
        COALESCE(profile_collections.size, 0) AS size
 FROM profile_collections

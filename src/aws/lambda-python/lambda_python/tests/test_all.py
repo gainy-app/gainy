@@ -100,6 +100,15 @@ def test_get_match_scores_by_collection():
     assert MATCH_SCORE_FIELDS_SET.issubset(set(response[0].keys()))
 
 
+def test_get_promocode():
+    event = get_action_event("get_promocode", {"code": 'test'}, USER_ID)
+    response = action_dispatcher.handle(event)
+    assert "code" not in response
+    assert isinstance(response, dict)
+    assert set({'id', 'name', 'description',
+                'config'}).issubset(set(response.keys()))
+
+
 # Triggers
 def test_set_user_categories():
     event = get_trigger_event(

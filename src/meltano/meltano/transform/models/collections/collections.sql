@@ -16,6 +16,7 @@ select c.id::int,
        c.enabled,
        c.personalized,
        c.image_url,
+       influencers.name as influencer_name,
 {% if is_incremental() %}
        coalesce(old_collections.size, 0::integer) as size,
 {% else %}
@@ -23,6 +24,7 @@ select c.id::int,
 {% endif %}
        now()::timestamp as updated_at
 from {{ source('gainy', 'gainy_collections') }} c
+        left join {{ source('app', 'influencers') }} on influencers.id = c.influencer_id
 {% if is_incremental() %}
          left join {{ this }} old_collections on old_collections.id = c.id::int
 {% endif %}
