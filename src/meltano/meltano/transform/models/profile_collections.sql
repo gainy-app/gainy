@@ -14,9 +14,10 @@ WITH profile_collections AS (
            collections.image_url,
            collections.enabled,
            collections.personalized,
-           collections.influencer_name,
+           influencers.name as influencer_name,
            collections.size
     FROM {{ ref('collections') }}
+             left join {{ source('app', 'influencers') }} on influencers.id = collections.influencer_id
     WHERE collections.personalized = '0'
     UNION
     SELECT csp.profile_id,
