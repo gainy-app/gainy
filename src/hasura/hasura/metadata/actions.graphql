@@ -84,6 +84,12 @@ type Query {
 }
 
 type Query {
+  get_promocode(
+    code: String!
+  ): Promocode
+}
+
+type Query {
   get_recommended_collections(
     profile_id: Int!
     limit: Int
@@ -263,5 +269,12 @@ type PlaidWebhookOutput {
 
 type UpdatePurchasesOutput {
   subscription_end_date: String
+}
+
+type Promocode {
+  id: Int!
+  description: String
+  name: String
+  config: String!
 }
 

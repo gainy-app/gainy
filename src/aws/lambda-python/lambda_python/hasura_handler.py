@@ -32,6 +32,7 @@ ACTIONS = [
     GetMatchScoreByTickerList(),
     GetMatchScoreByCollection(),
     UpdatePurchases(),
+    GetPromocode(),
 
     # Portfolio
     CreatePlaidLinkToken(),

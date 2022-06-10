@@ -45,6 +45,7 @@ sources:
     description: Mobile App data, managed by hasura
     schema: app
     tables:
+      - name: influencers
       - name: personalized_collection_sizes
       - name: personalized_ticker_collections
       - name: plaid_institutions

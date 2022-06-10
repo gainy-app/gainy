@@ -16,6 +16,7 @@ select c.id::int,
        c.enabled,
        c.personalized,
        c.image_url,
+       c.influencer_id::int,
 {% if is_incremental() %}
        coalesce(old_collections.size, 0::integer) as size,
 {% else %}

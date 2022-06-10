@@ -1575,6 +1575,7 @@
           - description
           - id
           - image_url
+          - influencer_name
           - name
           - profile_id
           - size
@@ -1593,6 +1594,7 @@
           - enabled
           - id
           - image_url
+          - influencer_name
           - name
           - size
           - uniq_id

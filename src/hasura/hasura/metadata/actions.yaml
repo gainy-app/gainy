@@ -62,6 +62,13 @@ actions:
       handler: '{{AWS_LAMBDA_API_GATEWAY_ENDPOINT}}/hasuraAction'
     permissions:
       - role: user
+  - name: get_promocode
+    definition:
+      kind: ""
+      handler: '{{AWS_LAMBDA_API_GATEWAY_ENDPOINT}}/hasuraAction'
+    permissions:
+      - role: user
+    comment: get_promocode
   - name: get_recommended_collections
     definition:
       kind: ""
@@ -221,4 +228,5 @@ custom_types:
     - name: CreatePlaidLinkTokenOutput
     - name: PlaidWebhookOutput
     - name: UpdatePurchasesOutput
+    - name: Promocode
   scalars: []

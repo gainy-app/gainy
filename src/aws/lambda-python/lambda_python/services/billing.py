@@ -17,6 +17,15 @@ class BillingService:
                                              created_at +
                                              sum(period) over (partition by profile_id order by created_at desc) as end_date
                                       from app.subscriptions
+
+                                      union all
+
+                                      select profiles.id,
+                                             null as end_date
+                                      from app.profiles
+                                               left join app.subscriptions on subscriptions.profile_id = profiles.id
+                                      where profiles.subscription_end_date is not null
+                                        and subscriptions.id is null
                                   ) t
                              group by profile_id
                          )
