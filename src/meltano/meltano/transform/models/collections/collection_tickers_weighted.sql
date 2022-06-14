@@ -35,5 +35,5 @@ select all_ticker_collections.profile_id,
            end as weight
 from all_ticker_collections
          join {{ ref('ticker_metrics') }} using (symbol)
-         join {{ ref('weighted_ticker_collections') }} using (collection_id)
+         join weighted_ticker_collections using (collection_id)
 where ticker_metrics.market_capitalization is not null
