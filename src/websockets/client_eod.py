@@ -10,7 +10,10 @@ from common import run, AbstractPriceListener, NO_MESSAGES_RECONNECT_TIMEOUT
 
 EOD_API_TOKEN = os.environ["EOD_API_TOKEN"]
 SYMBOLS_LIMIT = 14000
-MANDATORY_SYMBOLS = ['DJI.INDX', 'GSPC.INDX', 'IXIC.INDX', 'BTC.CC']
+MANDATORY_SYMBOLS = [
+    'DJI.INDX', 'GSPC.INDX', 'IXIC.INDX', 'BTC.CC', 'ETH.CC', 'USDT.CC',
+    'DOGE.CC', 'BNB.CC', 'XRP.CC', 'DOT.CC', 'SOL.CC', 'ADA.CC'
+]
 
 
 class PricesListener(AbstractPriceListener):
@@ -36,16 +39,18 @@ class PricesListener(AbstractPriceListener):
 
     def get_symbols(self):
         with self.db_connect() as db_conn:
-            count = int(0.95 *
-                        (SYMBOLS_LIMIT -
-                         self.get_active_listeners_symbols_count(db_conn)))
+            max_symbols_count = SYMBOLS_LIMIT - self.get_active_listeners_symbols_count(
+                db_conn)
+            count = int(0.95 * max_symbols_count)
+
             query = """
-                SELECT base_tickers.symbol, case when type = 'crypto' then 1 else 0 end as priority
+                SELECT base_tickers.symbol
                 FROM base_tickers
-                         left join ticker_metrics on ticker_metrics.symbol = base_tickers.symbol
+                         left join ticker_metrics using (symbol)
+                         left join crypto_realtime_metrics using (symbol)
                 where base_tickers.symbol not like '%%-%%'
                   and (lower(exchange) similar to '(nyse|nasdaq)%%')
-                order by priority desc, market_capitalization desc nulls last
+                order by coalesce(ticker_metrics.market_capitalization, crypto_realtime_metrics.market_capiptalization) desc nulls last
                 limit %(count)s
             """
 
