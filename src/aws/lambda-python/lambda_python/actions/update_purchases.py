@@ -71,6 +71,10 @@ class UpdatePurchases(HasuraAction):
 
     def get_duration(self, product_identifier):
         product_identifier = product_identifier.lower()
+
+        if product_identifier.find("lifetime") > -1:
+            return datetime.timedelta(days=100 * 365)
+
         parts = product_identifier.split('_')
         for part in parts:
             match = re.match(r'^([dwmy])(\d+)$', part)
