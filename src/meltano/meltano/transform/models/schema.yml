@@ -1973,6 +1973,26 @@ models:
           - type:
               type: 'text'
 
+  - name: collection_tickers_weighted
+    columns:
+      - name: collection_id
+        tests:
+          - type:
+              type: 'integer'
+      - name: collection_uniq_id
+        tests:
+          - type:
+              type: 'character varying'
+      - name: symbol
+        tests:
+          - type:
+              type: 'character varying'
+      - name: weight
+        tests:
+          - not_null
+          - type:
+              type: 'double precision'
+
 exposures:
   - name: ticker_search_index
     type: application

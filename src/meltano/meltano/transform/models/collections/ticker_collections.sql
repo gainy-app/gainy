@@ -15,6 +15,7 @@
 SELECT distinct (ticker_collections.symbol || '_' || collections.id::varchar)::varchar as id,
                 tickers.symbol,
                 collections.id as collection_id,
+                ticker_collections.weight::float,
                 NOW() as updated_at
 from {{ source('gainy', 'ticker_collections') }}
          join {{ ref('tickers') }} on tickers.symbol = ticker_collections.symbol
