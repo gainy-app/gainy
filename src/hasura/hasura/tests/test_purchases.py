@@ -36,7 +36,7 @@ def test_invitations():
 def test_promocodes():
     query = "query GetPromocode($code: String!) { get_promocode(code: $code) { id name description config } }"
     data = make_graphql_request(query, {
-        "code": "test",
+        "code": "TEST",
     })['data']['get_promocode']
     assert data is not None
     assert data['id'] is not None
