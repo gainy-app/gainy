@@ -101,7 +101,7 @@ def test_get_match_scores_by_collection():
 
 
 def test_get_promocode():
-    event = get_action_event("get_promocode", {"code": 'test'}, USER_ID)
+    event = get_action_event("get_promocode", {"code": 'TEST'}, USER_ID)
     response = action_dispatcher.handle(event)
     assert "code" not in response
     assert isinstance(response, dict)

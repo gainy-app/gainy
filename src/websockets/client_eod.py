@@ -10,7 +10,10 @@ from common import run, AbstractPriceListener, NO_MESSAGES_RECONNECT_TIMEOUT
 
 EOD_API_TOKEN = os.environ["EOD_API_TOKEN"]
 SYMBOLS_LIMIT = 14000
-MANDATORY_SYMBOLS = ['DJI.INDX', 'GSPC.INDX', 'IXIC.INDX', 'BTC.CC']
+MANDATORY_SYMBOLS = [
+    'DJI.INDX', 'GSPC.INDX', 'IXIC.INDX', 'BTC.CC', 'ETH.CC', 'USDT.CC',
+    'DOGE.CC', 'BNB.CC', 'XRP.CC', 'DOT.CC', 'SOL.CC', 'ADA.CC'
+]
 
 
 class PricesListener(AbstractPriceListener):
