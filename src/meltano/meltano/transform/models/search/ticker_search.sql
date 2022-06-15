@@ -27,6 +27,7 @@ ticker_volumes as (
 )
 select t.symbol,
        t.name,
+       ticker_search_alternative_names.name as alternative_name,
        t.description,
        ti.ticker_industries as tag_1,
        tc.ticker_categories as tag_2,
@@ -38,6 +39,9 @@ from {{ ref('tickers') }} t
                    on t.symbol = ti.symbol
          left join ticker_categories tc
                    on t.symbol = tc.symbol
+         left join {{ source('gainy', 'ticker_search_alternative_names') }}
+                   on ticker_search_alternative_names.symbol = t.symbol
+                       and (select max(_sdc_batched_at) from {{ source('gainy', 'ticker_search_alternative_names') }}) - ticker_search_alternative_names._sdc_batched_at < interval '1 minute'
 {% if not var('search_crypto_enabled') %}
 where t.type != 'crypto'
 {% endif %}

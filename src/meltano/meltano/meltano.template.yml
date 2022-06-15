@@ -102,6 +102,9 @@ plugins:
           - entity: ticker_gic_override
             path: data/ticker_gic_override.csv
             keys: [ "symbol" ]
+          - entity: ticker_search_alternative_names
+            path: data/ticker_search_alternative_names.csv
+            keys: [ "symbol" ]
 
     - name: tap-postgres
       config:
