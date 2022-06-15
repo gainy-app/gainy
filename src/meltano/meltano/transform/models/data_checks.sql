@@ -230,25 +230,26 @@ from errors
 {% if not var('realtime') %}
 
 union all
-  (
+	(
 		with
-		check_params(table_name, depth_stddev_days, depth_check_days, allowable_sigma_dev_adjclose_percchange, allowable_sigma_dev_volume_dif) as
+		check_params(table_name, depth_stddev, depth_check, allowable_sigma_dev_adjclose_percchange, allowable_sigma_dev_volume_dif) as
 			(
-				values ('eod_historical_prices', 250, 7*2, 3., 3.)
+				values ('raw_data.eod_historical_prices', make_interval(0,0,0,250), make_interval(0,0,0,7*2), 3., 3.)
 			),
 		tickers_lag as
 			(
 				select 
-					code 							as symbol, 
-					to_date("date",'YYYY-MM-DD') 	as date_cur,
-					adjusted_close 					as adjusted_close_cur,
-					volume 							as volume_cur,
-					lag("date",1,"date") over (partition by code order by "date") as date_pre,
-					lag(adjusted_close,1,adjusted_close) over (partition by code order by "date") as adjusted_close_pre,
-					lag(volume,1,volume) over (partition by code order by "date") as volume_pre
+					code 										as symbol, 
+					to_date("date",'YYYY-MM-DD') 							as date_cur,
+					adjusted_close 									as adjusted_close_cur,
+					volume 										as volume_cur,
+					lag("date",1,"date") over (partition by code order by "date") 			as date_pre,
+					lag(adjusted_close,1,adjusted_close) over (partition by code order by "date") 	as adjusted_close_pre,
+					lag(volume,1,volume) over (partition by code order by "date") 			as volume_pre
 				from {{ source('eod', 'eod_historical_prices') }} ehp
 				join {{ ref('tickers') }} t on t.symbol = ehp.code
-				where to_date("date",'YYYY-MM-DD') >= now() - make_interval(0,0,0,(select depth_stddev_days from check_params))
+				left join check_params on true 
+				where to_date("date",'YYYY-MM-DD') >= now() - check_params.depth_stddev
 			),
 		tickers_difs as
 			(
@@ -256,8 +257,8 @@ union all
 					*,
 					adjusted_close_cur - adjusted_close_pre 	as adjusted_close_dif,
 					(adjusted_close_cur - adjusted_close_pre)
-						/(1e-30 + adjusted_close_pre) 			as adjusted_close_perc_change,
-					volume_cur - volume_pre 					as volume_dif
+						/(1e-30 + adjusted_close_pre) 		as adjusted_close_perc_change,
+					volume_cur - volume_pre 			as volume_dif
 				from tickers_lag
 			),
 		tickers_stddevs_means_devs as
@@ -265,13 +266,13 @@ union all
 				select 
 					*,
 					stddev_pop(adjusted_close_perc_change) over (partition by symbol) 	as stddev_adjusted_close_perc_change,
-					avg(adjusted_close_perc_change) over (partition by symbol) 			as mean_adjusted_close_perc_change,
+					avg(adjusted_close_perc_change) over (partition by symbol) 		as mean_adjusted_close_perc_change,
 					abs(adjusted_close_perc_change 
 						- avg(adjusted_close_perc_change) over (partition by symbol)) 	as dev_adjusted_close_perc_change,
-					stddev_pop(volume_dif) over (partition by symbol) 					as stddev_volume_dif,
-					avg(volume_dif) over (partition by symbol) 							as mean_volume_dif,
+					stddev_pop(volume_dif) over (partition by symbol) 			as stddev_volume_dif,
+					avg(volume_dif) over (partition by symbol) 				as mean_volume_dif,
 					abs(volume_dif 
-						- avg(volume_dif) over (partition by symbol)) 					as dev_volume_dif
+						- avg(volume_dif) over (partition by symbol)) 			as dev_volume_dif
 				from tickers_difs
 			),
 		tickers_checks as -- I have left all the source fields here, so someone could see them closer by check this cte
@@ -279,17 +280,17 @@ union all
 				select 
 					*,
 					case when dev_adjusted_close_perc_change > 
-						stddev_adjusted_close_perc_change * (select allowable_sigma_dev_adjclose_percchange from check_params)
-							then 1 else 0 end 																			as iserror_adjusted_close_perc_change_dev,
+						stddev_adjusted_close_perc_change * check_params.allowable_sigma_dev_adjclose_percchange
+													then 1 else 0 end 	as iserror_adjusted_close_perc_change_dev,
 					case when dev_volume_dif > 
-						stddev_volume_dif * (select allowable_sigma_dev_volume_dif from check_params)
-							then 1 else 0 end 																			as iserror_volume_dif_dev,
-					case when adjusted_close_cur = adjusted_close_pre then 1 else 0 end 								as iserror_adjusted_close_twice_same,
-					case when volume_cur = 0 and volume_pre = 0 then 1 else 0 end 										as iserror_volume_twice_zero,
-					case when adjusted_close_cur is null then 1 else 0 end 												as iserror_adjusted_close_is_null,
-					case when volume_cur is null then 1 else 0 end 														as iserror_volume_is_null
+						stddev_volume_dif * check_params.allowable_sigma_dev_volume_dif
+													then 1 else 0 end 	as iserror_volume_dif_dev,
+					case when adjusted_close_cur = adjusted_close_pre 		then 1 else 0 end 	as iserror_adjusted_close_twice_same,
+					case when volume_cur in (0,null) and volume_pre in (0,null) 	then 1 else 0 end 	as iserror_volume_twice_zero_or_null,
+					case when adjusted_close_cur is null 				then 1 else 0 end 	as iserror_adjusted_close_is_null
 				from tickers_stddevs_means_devs
-				where date_cur >= now() - make_interval(0,0,0,(select depth_check_days from check_params))
+				left join check_params on true
+				where date_cur >= now() - check_params.depth_check
 			),
 		tickers_checks_union as
 			(
@@ -300,82 +301,85 @@ union all
 							symbol,
 							mean_adjusted_close_perc_change,
 							stddev_adjusted_close_perc_change,
-							max(dev_adjusted_close_perc_change) 			as max_dev_adjusted_close_perc_change,
+							max(dev_adjusted_close_perc_change) 		as max_dev_adjusted_close_perc_change,
 							mean_volume_dif,
 							stddev_volume_dif,
-							max(dev_volume_dif) 							as max_dev_volume_dif,
+							max(dev_volume_dif) 				as max_dev_volume_dif,
 							sum(iserror_adjusted_close_perc_change_dev) 	as iserror_adjusted_close_perc_change_dev,
-							sum(iserror_volume_dif_dev) 					as iserror_volume_dif_dev,
-							sum(iserror_adjusted_close_twice_same) 			as iserror_adjusted_close_twice_same,
-							sum(iserror_volume_twice_zero) 					as iserror_volume_twice_zero,
-							sum(iserror_adjusted_close_is_null) 			as iserror_adjusted_close_is_null,
-							sum(iserror_volume_is_null) 					as iserror_volume_is_null
+							sum(iserror_volume_dif_dev) 			as iserror_volume_dif_dev,
+							sum(iserror_adjusted_close_twice_same) 		as iserror_adjusted_close_twice_same,
+							sum(iserror_volume_twice_zero_or_null) 		as iserror_volume_twice_zero_or_null,
+							sum(iserror_adjusted_close_is_null) 		as iserror_adjusted_close_is_null
 						from tickers_checks
 						group by symbol, 
 							mean_adjusted_close_perc_change, stddev_adjusted_close_perc_change, mean_volume_dif, stddev_volume_dif
 					)
 				(
-					select ((select table_name from check_params)||'_adjusted_close_perc_change_dev' || '_' || symbol)::varchar as id,
+					select 
+						check_params.table_name || '__adjusted_close_perc_change_dev' || '__' || symbol as id,
 						symbol, 
-						(select table_name from check_params)||'_adjusted_close_perc_change_dev' as code,
+						check_params.table_name || '__adjusted_close_perc_change_dev' as code,
 						'daily' as "period",
-						'Tickers '||symbol||' in table '||(select table_name from check_params)||' has '||iserror_adjusted_close_perc_change_dev||' rows with adjusted_close_perc_change_dev exceeded allowed stddev='||(select allowable_sigma_dev_adjclose_percchange from check_params)*stddev_adjusted_close_perc_change||' from mu, while ticker''s (mu,stddev)=('||mean_adjusted_close_perc_change||','||stddev_adjusted_close_perc_change||'), max_dev='||max_dev_adjusted_close_perc_change||', %of exceeding above stddev '||(max_dev_adjusted_close_perc_change-stddev_adjusted_close_perc_change)/(1e-30+stddev_adjusted_close_perc_change)*100||'%' as message,
+						'Tickers '||symbol||' in table '||check_params.table_name||' has '||iserror_adjusted_close_perc_change_dev||' rows with adjusted_close_perc_change_dev exceeded allowed stddev='||check_params.allowable_sigma_dev_adjclose_percchange*stddev_adjusted_close_perc_change||' from mu, while ticker''s (mu,stddev)=('||mean_adjusted_close_perc_change||','||stddev_adjusted_close_perc_change||'), max_dev='||max_dev_adjusted_close_perc_change||', %of exceeding above stddev '||(max_dev_adjusted_close_perc_change-stddev_adjusted_close_perc_change)/(1e-30+stddev_adjusted_close_perc_change)*100||'%' as message,
 						now() as updated_at
-					from q_agg where iserror_adjusted_close_perc_change_dev > 0
+					from q_agg 
+					left join check_params on true
+					where iserror_adjusted_close_perc_change_dev > 0
 				)
-				union
+				union all
 				(
-					select ((select table_name from check_params)||'_volume_dif_dev' || '_' || symbol)::varchar as id,
+					select 
+						check_params.table_name || '__volume_dif_dev' || '__' || symbol as id,
 						symbol, 
-						(select table_name from check_params)||'_volume_dif_dev' as code,
+						check_params.table_name || '__volume_dif_dev' as code,
 						'daily' as "period",
-						'Tickers '||symbol||' in table '||(select table_name from check_params)||' has '||iserror_volume_dif_dev||' rows with volume_dif_dev exceeded allowed stddev='||(select allowable_sigma_dev_volume_dif from check_params)*stddev_volume_dif||' from mu, while ticker''s (mu,stddev)=('||mean_volume_dif||','||stddev_volume_dif||'), max_dev='||max_dev_volume_dif||', %of exceeding above stddev '||(max_dev_volume_dif-stddev_volume_dif)/(1e-30+stddev_volume_dif)*100||'%' as message,
+						'Tickers '||symbol||' in table '||check_params.table_name||' has '||iserror_volume_dif_dev||' rows with volume_dif_dev exceeded allowed stddev='||check_params.allowable_sigma_dev_volume_dif*stddev_volume_dif||' from mu, while ticker''s (mu,stddev)=('||mean_volume_dif||','||stddev_volume_dif||'), max_dev='||max_dev_volume_dif||', %of exceeding above stddev '||(max_dev_volume_dif-stddev_volume_dif)/(1e-30+stddev_volume_dif)*100||'%' as message,
 						now() as updated_at
-					from q_agg where iserror_volume_dif_dev > 0
+					from q_agg 
+					left join check_params on true
+					where iserror_volume_dif_dev > 0
 				)
-				union
+				union all
 				(
-					select ((select table_name from check_params)||'_adjusted_close_twice_same' || '_' || symbol)::varchar as id,
+					select 
+						check_params.table_name || '__adjusted_close_twice_same' || '__' || symbol as id,
 						symbol, 
-						(select table_name from check_params)||'_adjusted_close_twice_same' as code,
+						check_params.table_name || '__adjusted_close_twice_same' as code,
 						'daily' as "period",
-						'Tickers '||symbol||' in table '||(select table_name from check_params)||' has '||iserror_adjusted_close_twice_same||' pairs of consecutive rows with same price'  as message,
+						'Tickers '||symbol||' in table '||check_params.table_name||' has '||iserror_adjusted_close_twice_same||' pairs of consecutive rows with same price' as message,
 						now() as updated_at
-					from q_agg where iserror_adjusted_close_twice_same > 0
+					from q_agg 
+					left join check_params on true
+					where iserror_adjusted_close_twice_same > 0
 				)
-				union
+				union all
 				(
-					select ((select table_name from check_params)||'_volume_twice_zero' || '_' || symbol)::varchar as id,
+					select 
+						check_params.table_name || '__volume_twice_zero_or_null' || '__' || symbol as id,
 						symbol, 
-						(select table_name from check_params)||'_volume_twice_zero' as code,
+						check_params.table_name || '__volume_twice_zero_or_null' as code,
 						'daily' as "period",
-						'Tickers '||symbol||' in table '||(select table_name from check_params)||' has '||iserror_volume_twice_zero||' pairs of consecutive rows with 0 volume'  as message,
+						'Tickers '||symbol||' in table '||check_params.table_name||' has '||iserror_volume_twice_zero_or_null||' pairs of consecutive rows with 0/null volume' as message,
 						now() as updated_at
-					from q_agg where iserror_volume_twice_zero > 0
+					from q_agg 
+					left join check_params on true
+					where iserror_volume_twice_zero_or_null > 0
 				)
-				union
+				union all
 				(
-					select ((select table_name from check_params)||'_adjusted_close_is_null' || '_' || symbol)::varchar as id,
+					select 
+						check_params.table_name || '__adjusted_close_is_null' || '__' || symbol as id,
 						symbol, 
-						(select table_name from check_params)||'_adjusted_close_is_null' as code,
+						check_params.table_name || '__adjusted_close_is_null' as code,
 						'daily' as "period",
-						'Tickers '||symbol||' in table '||(select table_name from check_params)||' has '||iserror_adjusted_close_is_null||' rows with NULL adjusted_close'  as message,
+						'Tickers '||symbol||' in table '||check_params.table_name||' has '||iserror_adjusted_close_is_null||' rows with NULL adjusted_close' as message,
 						now() as updated_at
-					from q_agg where iserror_adjusted_close_is_null > 0
+					from q_agg 
+					left join check_params on true
+					where iserror_adjusted_close_is_null > 0
 				)
-				union
-				(
-					select ((select table_name from check_params)||'_volume_is_null' || '_' || symbol)::varchar as id,
-						symbol, 
-						(select table_name from check_params)||'_volume_is_null' as code,
-						'daily' as "period",
-						'Tickers '||symbol||' in table '||(select table_name from check_params)||' has '||iserror_volume_is_null||' rows with NULL volume'  as message,
-						now() as updated_at
-					from q_agg where iserror_volume_is_null > 0
-				)
-				
 			)
 		select * from tickers_checks_union
-  )
+	)
 
 {% endif %}
