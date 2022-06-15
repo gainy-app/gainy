@@ -246,8 +246,8 @@ union all
 					lag("date",1,"date") over (partition by code order by "date") as date_pre,
 					lag(adjusted_close,1,adjusted_close) over (partition by code order by "date") as adjusted_close_pre,
 					lag(volume,1,volume) over (partition by code order by "date") as volume_pre
-				from {{ source('eod', 'eod_historical_prices') }} ehp
-				join {{ ref('tickers') }} t on t.symbol = ehp.code
+				from raw_data.eod_historical_prices ehp
+				join tickers t on t.symbol = ehp.code
 				where to_date("date",'YYYY-MM-DD') >= now() - make_interval(0,0,0,(select depth_stddev_days from check_params))
 			),
 		tickers_difs as
@@ -315,52 +315,58 @@ union all
 							mean_adjusted_close_perc_change, stddev_adjusted_close_perc_change, mean_volume_dif, stddev_volume_dif
 					)
 				(
-					select symbol, 
+					select ((select table_name from check_params)||'_adjusted_close_perc_change_dev' || '_' || symbol)::varchar as id,
+						symbol, 
 						(select table_name from check_params)||'_adjusted_close_perc_change_dev' as code,
 						'daily' as "period",
 						'Tickers '||symbol||' in table '||(select table_name from check_params)||' has '||iserror_adjusted_close_perc_change_dev||' rows with adjusted_close_perc_change_dev exceeded allowed stddev='||(select allowable_sigma_dev_adjclose_percchange from check_params)*stddev_adjusted_close_perc_change||' from mu, while ticker''s (mu,stddev)=('||mean_adjusted_close_perc_change||','||stddev_adjusted_close_perc_change||'), max_dev='||max_dev_adjusted_close_perc_change as message,
 						now() as updated_at
 					from q_agg where iserror_adjusted_close_perc_change_dev > 0
 				)
-				union all
+				union
 				(
-					select symbol, 
+					select ((select table_name from check_params)||'_volume_dif_dev' || '_' || symbol)::varchar as id,
+						symbol, 
 						(select table_name from check_params)||'_volume_dif_dev' as code,
 						'daily' as "period",
 						'Tickers '||symbol||' in table '||(select table_name from check_params)||' has '||iserror_volume_dif_dev||' rows with volume_dif_dev exceeded allowed stddev='||(select allowable_sigma_dev_volume_dif from check_params)*stddev_volume_dif||' from mu, while ticker''s (mu,stddev)=('||mean_volume_dif||','||stddev_volume_dif||'), max_dev='||max_dev_volume_dif as message,
 						now() as updated_at
 					from q_agg where iserror_volume_dif_dev > 0
 				)
-				union all
+				union
 				(
-					select symbol, 
+					select ((select table_name from check_params)||'_adjusted_close_twice_same' || '_' || symbol)::varchar as id,
+						symbol, 
 						(select table_name from check_params)||'_adjusted_close_twice_same' as code,
 						'daily' as "period",
 						'Tickers '||symbol||' in table '||(select table_name from check_params)||' has '||iserror_adjusted_close_twice_same||' pairs of consecutive rows with same price'  as message,
 						now() as updated_at
 					from q_agg where iserror_adjusted_close_twice_same > 0
 				)
-				union all
+				union
 				(
-					select symbol, 
+					select ((select table_name from check_params)||'_volume_twice_zero' || '_' || symbol)::varchar as id,
+						symbol, 
 						(select table_name from check_params)||'_volume_twice_zero' as code,
 						'daily' as "period",
 						'Tickers '||symbol||' in table '||(select table_name from check_params)||' has '||iserror_volume_twice_zero||' pairs of consecutive rows with 0 volume'  as message,
 						now() as updated_at
 					from q_agg where iserror_volume_twice_zero > 0
 				)
-				union all
+				union
 				(
-					select symbol, 
+					select ((select table_name from check_params)||'_adjusted_close_is_null' || '_' || symbol)::varchar as id,
+						symbol, 
 						(select table_name from check_params)||'_adjusted_close_is_null' as code,
 						'daily' as "period",
 						'Tickers '||symbol||' in table '||(select table_name from check_params)||' has '||iserror_adjusted_close_is_null||' rows with NULL adjusted_close'  as message,
 						now() as updated_at
 					from q_agg where iserror_adjusted_close_is_null > 0
 				)
-				union all
+				union
 				(
-					select symbol, 
+					select ((select table_name from check_params)||'_volume_is_null' || '_' || symbol)::varchar as id,
+						symbol, 
 						(select table_name from check_params)||'_volume_is_null' as code,
 						'daily' as "period",
 						'Tickers '||symbol||' in table '||(select table_name from check_params)||' has '||iserror_volume_is_null||' rows with NULL volume'  as message,
