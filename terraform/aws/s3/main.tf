@@ -32,6 +32,18 @@ resource "aws_s3_bucket" "mlflow" {
   }
 }
 
+resource "aws_s3_bucket" "gainy_history" {
+  bucket = "gainy-history-${var.env}"
+
+  tags = {
+    Name = "Gainy History"
+  }
+}
+
 output "mlflow_artifact_bucket" {
   value = aws_s3_bucket.mlflow.bucket
+}
+
+output "gainy_history_bucket" {
+  value = aws_s3_bucket.gainy_history.bucket
 }

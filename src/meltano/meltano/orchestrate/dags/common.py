@@ -70,7 +70,7 @@ def get_schedules():
         universal_newlines=True,
         check=True,
     )
-    schedules = json.loads(result.stdout)
+    schedules = json.loads(result.stdout)['schedules']['elt']
 
     # Process schedule parameters
     for schedule in schedules:

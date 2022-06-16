@@ -47,6 +47,7 @@
     { "name": "TAP_POLYGON_API_KEY",                   "value": "${polygon_api_token}" },
     { "name": "TAP_COINGECKO_API_KEY",                 "value": "${coingecko_api_key}" },
     { "name": "AWS_LAMBDA_API_GATEWAY_ENDPOINT",       "value": "${aws_lambda_api_gateway_endpoint}" },
+    { "name": "TARGET_S3_CSV_HISTORY_S3_BUCKET",       "value": "${gainy_history_s3_bucket}" },
 
     { "name": "TARGET_POSTGRES_HOST",                  "value": "${pg_host}" },
     { "name": "TARGET_POSTGRES_PORT",                  "value": "${pg_port}" },
@@ -84,6 +85,7 @@
     { "name": "TAP_POSTGRES_SYNC_FILTER_SCHEMAS",      "value": "${pg_load_schema}" },
 
     { "name": "TAP_POSTGRES_ANALYTICS_FILTER_SCHEMAS", "value": "app,raw_data,${pg_transform_schema}" },
+    { "name": "TAP_POSTGRES_HISTORY_FILTER_SCHEMAS",   "value": "app,${pg_transform_schema}" },
 
     { "name": "DBT_THREADS",                           "value": "${dbt_threads}" },
     { "name": "DBT_TARGET_SCHEMA",                     "value": "${pg_transform_schema}" },

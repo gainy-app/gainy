@@ -1978,6 +1978,33 @@ models:
           - type:
               type: 'text'
 
+  - name: collection_tickers_weighted
+    columns:
+      - name: date
+        tests:
+          - type:
+              type: 'date'
+      - name: profile_id
+        tests:
+          - type:
+              type: 'int'
+      - name: collection_id
+        tests:
+          - type:
+              type: 'int'
+      - name: collection_uniq_id
+        tests:
+          - type:
+              type: 'character varying'
+      - name: symbol
+        tests:
+          - type:
+              type: 'character varying'
+      - name: weight
+        tests:
+          - type:
+              type: 'float'
+
 exposures:
   - name: ticker_search_index
     type: application
