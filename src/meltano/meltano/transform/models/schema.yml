@@ -1987,11 +1987,11 @@ models:
       - name: profile_id
         tests:
           - type:
-              type: 'int'
+              type: 'integer'
       - name: collection_id
         tests:
           - type:
-              type: 'int'
+              type: 'integer'
       - name: collection_uniq_id
         tests:
           - type:
@@ -2000,10 +2000,6 @@ models:
         tests:
           - type:
               type: 'character varying'
-      - name: weight
-        tests:
-          - type:
-              type: 'float'
 
 exposures:
   - name: ticker_search_index
