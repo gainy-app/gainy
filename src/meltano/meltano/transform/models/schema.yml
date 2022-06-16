@@ -16,6 +16,7 @@ sources:
       - name: exchanges
       - name: ticker_collections
       - name: ticker_gic_override
+      - name: ticker_search_alternative_names
 
   - name: eod
     description: Financial data from https://eodhistoricaldata.com/
@@ -455,6 +456,10 @@ models:
           - type:
               type: 'character varying'
       - name: name
+        tests:
+          - type:
+              type: 'character varying'
+      - name: alternative_name
         tests:
           - type:
               type: 'character varying'
@@ -1975,6 +1980,14 @@ models:
 
   - name: collection_tickers_weighted
     columns:
+      - name: date
+        tests:
+          - type:
+              type: 'date'
+      - name: profile_id
+        tests:
+          - type:
+              type: 'integer'
       - name: collection_id
         tests:
           - type:
@@ -1987,11 +2000,6 @@ models:
         tests:
           - type:
               type: 'character varying'
-      - name: weight
-        tests:
-          - not_null
-          - type:
-              type: 'double precision'
 
 exposures:
   - name: ticker_search_index

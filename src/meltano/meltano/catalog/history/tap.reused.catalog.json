@@ -1,0 +1,31 @@
+{
+  "streams": [
+    {
+      "table_name": "collection_tickers_weighted",
+      "stream": "collection_tickers_weighted",
+      "metadata": [
+        {
+          "breadcrumb": [],
+          "metadata": {
+            "replication-key": "date",
+            "replication-method": "INCREMENTAL",
+            "view-key-properties": [
+              "date",
+              "collection_uniq_id",
+              "symbol"
+            ],
+            "schema-name": "public",
+            "database-name": "gainy",
+            "selected": true
+          }
+        }
+      ],
+      "tap_stream_id": "public-collection_tickers_weighted",
+      "schema": {
+        "type": "object",
+        "properties": {}
+      },
+      "selected": true
+    }
+  ]
+}

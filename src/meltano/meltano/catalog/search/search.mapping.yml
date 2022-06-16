@@ -7,6 +7,7 @@
       attributes:
         - symbol
         - name
+        - alternative_name
         - description
         - tag_1
         - tag_2
@@ -18,6 +19,7 @@
       searchableAttributes:
         - symbol
         - name
+        - alternative_name
         - tag_1
         - tag_2
         - unordered(description)

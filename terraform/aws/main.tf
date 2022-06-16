@@ -167,9 +167,10 @@ module "ecs-service" {
   polygon_api_token = var.polygon_api_token
   coingecko_api_key = var.coingecko_api_key
 
-  mlflow_artifact_bucket = module.s3.mlflow_artifact_bucket
-  codeartifact_pipy_url  = var.codeartifact_pipy_url
-  gainy_compute_version  = var.gainy_compute_version
+  mlflow_artifact_bucket  = module.s3.mlflow_artifact_bucket
+  codeartifact_pipy_url   = var.codeartifact_pipy_url
+  gainy_compute_version   = var.gainy_compute_version
+  gainy_history_s3_bucket = module.s3.gainy_history_bucket
 }
 
 

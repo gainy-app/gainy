@@ -20,7 +20,8 @@ with all_ticker_collections as
              from {{ ref('ticker_collections') }}
              group by collection_id
          )
-select all_ticker_collections.profile_id,
+select now()::date                            as date,
+       all_ticker_collections.profile_id,
        all_ticker_collections.collection_id,
        collection_uniq_id,
        symbol,
