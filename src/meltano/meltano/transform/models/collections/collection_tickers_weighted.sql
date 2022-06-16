@@ -14,12 +14,13 @@ with all_ticker_collections as
              select null, collection_id, ('0_' || collection_id)::varchar AS collection_uniq_id, symbol
              from {{ ref('ticker_collections') }}
          )
-select all_ticker_collections.profile_id,
+select now()::date                            as date,
+       all_ticker_collections.profile_id,
        all_ticker_collections.collection_id,
        collection_uniq_id,
        symbol,
-       ticker_metrics.market_capitalization::numeric /
-       sum(ticker_metrics.market_capitalization::numeric)
+       ticker_metrics.market_capitalization /
+       sum(ticker_metrics.market_capitalization)
        over (partition by collection_uniq_id) as weight
 from all_ticker_collections
          join {{ ref('ticker_metrics') }} using (symbol)

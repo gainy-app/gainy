@@ -148,6 +148,22 @@ plugins:
       config:
         filter_schemas: website
 
+    # history taps
+    - name: tap-postgres-history
+      inherit_from: tap-postgres
+
+    - name: tap-postgres-history-reused
+      inherit_from: tap-postgres-history
+      catalog: catalog/history/tap.reused.catalog.json
+
+    - name: tap-postgres-history-daily
+      inherit_from: tap-postgres-history
+      catalog: catalog/history/tap.daily.catalog.json
+
+    - name: tap-postgres-history-weekly
+      inherit_from: tap-postgres-history
+      catalog: catalog/history/tap.weekly.catalog.json
+
   loaders:
     - name: target-postgres
       variant: transferwise
@@ -162,6 +178,12 @@ plugins:
       config:
         batch_size_rows: 100
         parallelism: 5
+
+    - name: target-postgres-history
+      inherit_from: target-postgres
+      config:
+        primary_key_required: true
+        default_target_schema: gainy_history
 
     - name: target-algolia
       namespace: target-algolia
@@ -182,16 +204,29 @@ plugins:
       config:
         default_target_schema: $TARGET_POSTGRES_ANALYTICS_SCHEMA
 
+    - name: target-s3-csv
+      pip_url: pipelinewise-target-s3-csv
+      namespace: pipelinewise-target-s3-csv
+      executable: target-s3-csv
+      settings: # https://github.com/transferwise/pipelinewise-target-s3-csv#configuration-settings
+        - name: s3_bucket
+
+    - name: target-s3-csv-history
+      inherit_from: target-s3-csv
+      config:
+        naming_convention: "{stream}/{timestamp}.csv"
+        compression: gzip
+
   transformers:
     - name: dbt
-      pip_url: dbt-postgres==1.1.0
+      pip_url: dbt-postgres==1.1.1
       config:
         target: postgres
         models: '*'
 
   orchestrators:
     - name: airflow
-      pip_url: psycopg2-binary==2.9.3 apache-airflow==2.2.5 --constraint https://raw.githubusercontent.com/apache/airflow/constraints-2.2.5/constraints-${MELTANO__PYTHON_VERSION}.txt
+      pip_url: psycopg2-binary==2.9.3 apache-airflow==2.3.2 --constraint https://raw.githubusercontent.com/apache/airflow/constraints-2.3.2/constraints-${MELTANO__PYTHON_VERSION}.txt
       config:
         core:
           sql_alchemy_conn: $AIRFLOW_DATABASE_URI
@@ -248,6 +283,35 @@ schedules:
   - name: coingecko-realtime-to-postgres
     extractor: tap-coingecko-realtime
     loader: target-postgres
+    transform: skip
+    interval: '@daily'
+    start_date: 2021-06-17 10:40:58.742133
+    env:
+      TARGET_ENVS: '[]'
+
+  - name: postgres-history-reused-to-postgres
+    extractor: tap-postgres-history-reused
+    loader: target-postgres-history
+    transform: skip
+    interval: '@daily'
+    start_date: 2021-06-17 10:40:58.742133
+    env:
+      TARGET_ENVS: '["production","local"]'
+      INTEGRATION: 'DOWNSTREAM'
+
+  - name: postgres-history-daily-to-s3
+    extractor: tap-postgres-history-daily
+    loader: target-s3-csv-history
+    transform: skip
+    interval: '@daily'
+    start_date: 2021-06-17 10:40:58.742133
+    env:
+      TARGET_ENVS: '["production","local"]'
+      INTEGRATION: 'DOWNSTREAM'
+
+  - name: postgres-history-weekly-to-s3
+    extractor: tap-postgres-history-weekly
+    loader: target-s3-csv-history
     transform: skip
     interval: '@daily'
     start_date: 2021-06-17 10:40:58.742133
