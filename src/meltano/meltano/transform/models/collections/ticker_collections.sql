@@ -18,8 +18,7 @@ with raw_ticker_collections as
              SELECT distinct (ticker_collections.symbol || '_' || collections.id::varchar)::varchar as id,
                              tickers.symbol,
                              collections.id as collection_id,
-                             ticker_collections.weight::double precision,
-                             NOW() as updated_at
+                             ticker_collections.weight::double precision
              from {{ source('gainy', 'ticker_collections') }}
                       join {{ ref('tickers') }} on tickers.symbol = ticker_collections.symbol
                       join {{ ref('collections') }} on collections.name = trim(ticker_collections.ttf_name)
