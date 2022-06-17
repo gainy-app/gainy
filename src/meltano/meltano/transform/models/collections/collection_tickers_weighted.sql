@@ -12,7 +12,7 @@ select now()::date           as date,
        '0_' || collection_id as collection_uniq_id,
        symbol,
        weight
-from {{ ref('static_collection_tickers_weighted') }}
+from {{ ref('ticker_collections') }}
 
 union all
 
