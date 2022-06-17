@@ -68,6 +68,7 @@ resource "cloudflare_record" "service" {
   type    = "CNAME"
   proxied = true
   zone_id = var.cloudflare_zone_id
+
 }
 
 output "url" {
