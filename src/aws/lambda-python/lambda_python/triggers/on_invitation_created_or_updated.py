@@ -39,5 +39,7 @@ class OnInvitationCreatedOrUpdated(HasuraTrigger):
 
             self.billing_service.recalculate_subscription_status(
                 db_conn, payload['from_profile_id'])
+            self.billing_service.recalculate_subscription_status(
+                db_conn, payload['to_profile_id'])
         except psycopg2.errors.UniqueViolation as e:
             pass
