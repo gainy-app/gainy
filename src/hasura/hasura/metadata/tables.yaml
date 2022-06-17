@@ -555,6 +555,25 @@
           column_mapping:
             profile_id: id
   select_permissions:
+    - role: anonymous
+      permission:
+        columns:
+          - profile_id
+          - symbol
+          - match_score
+          - fits_risk
+          - risk_similarity
+          - fits_categories
+          - fits_interests
+          - category_matches
+          - interest_matches
+          - updated_at
+          - category_similarity
+          - interest_similarity
+          - matches_portfolio
+        filter:
+          profile_id:
+            _is_null: true
     - role: user
       permission:
         columns:
@@ -923,6 +942,23 @@
           column_mapping:
             profile_id: id
   select_permissions:
+    - role: anonymous
+      permission:
+        columns:
+          - collection_uniq_id
+          - category_similarity
+          - interest_similarity
+          - match_score
+          - risk_similarity
+          - category_level
+          - collection_id
+          - interest_level
+          - profile_id
+          - risk_level
+          - user_id
+        filter:
+          profile_id:
+            _is_null: true
     - role: user
       permission:
         columns:
@@ -996,6 +1032,19 @@
           column_mapping:
             profile_id: id
   select_permissions:
+    - role: anonymous
+      permission:
+        columns:
+          - market_capitalization_sum
+          - collection_uniq_id
+          - absolute_daily_change
+          - actual_price
+          - previous_day_close_price
+          - relative_daily_change
+          - profile_id
+          - user_id
+          - updated_at
+        filter: {}
     - role: user
       permission:
         columns:
@@ -1573,12 +1622,14 @@
       permission:
         columns:
           - description
+          - enabled
           - id
           - image_url
           - influencer_name
           - name
           - profile_id
           - size
+          - uniq_id
         filter:
           _and:
             - profile_id:
@@ -1933,66 +1984,69 @@
     - role: anonymous
       permission:
         columns:
-          - symbol
-          - profit_margin
-          - avg_volume_10d
-          - short_percent
-          - short_percent_outstanding
-          - shares_outstanding
-          - avg_volume_90d
-          - shares_float
-          - short_ratio
-          - beta
           - absolute_historical_volatility_adjusted_current
-          - relative_historical_volatility_adjusted_current
-          - absolute_historical_volatility_adjusted_min_1y
           - absolute_historical_volatility_adjusted_max_1y
-          - relative_historical_volatility_adjusted_min_1y
-          - relative_historical_volatility_adjusted_max_1y
-          - implied_volatility
-          - revenue_growth_yoy
-          - revenue_growth_fwd
-          - ebitda_growth_yoy
-          - eps_growth_yoy
-          - eps_growth_fwd
+          - absolute_historical_volatility_adjusted_min_1y
           - address_city
-          - address_state
           - address_county
           - address_full
-          - exchange_name
-          - market_capitalization
-          - enterprise_value_to_sales
-          - price_to_earnings_ttm
-          - price_to_sales_ttm
-          - price_to_book_value
-          - enterprise_value_to_ebitda
-          - price_change_1m
-          - price_change_3m
-          - price_change_1y
+          - address_state
+          - asset_cash_and_equivalents
+          - avg_volume_10d
+          - avg_volume_90d
+          - beaten_quarterly_eps_estimation_count_ttm
+          - beta
+          - dividend_frequency
+          - dividend_payout_ratio
           - dividend_yield
           - dividends_per_share
-          - dividend_payout_ratio
-          - years_of_consecutive_dividend_growth
-          - dividend_frequency
-          - eps_ttm
+          - ebitda
+          - ebitda_growth_yoy
+          - ebitda_ttm
+          - enterprise_value_to_ebitda
+          - enterprise_value_to_sales
           - eps_actual
-          - eps_estimate
-          - beaten_quarterly_eps_estimation_count_ttm
-          - eps_surprise
           - eps_difference
-          - revenue_estimate_avg_0y
-          - revenue_actual
-          - revenue_ttm
-          - revenue_per_share_ttm
+          - eps_estimate
+          - eps_growth_fwd
+          - eps_growth_yoy
+          - eps_surprise
+          - eps_ttm
+          - exchange_name
+          - implied_volatility
+          - market_capitalization
+          - net_debt
           - net_income
           - net_income_ttm
-          - roi
-          - asset_cash_and_equivalents
+          - price_change_1m
+          - price_change_1w
+          - price_change_1y
+          - price_change_3m
+          - price_change_5y
+          - price_change_all
+          - price_to_book_value
+          - price_to_earnings_ttm
+          - price_to_sales_ttm
+          - profit_margin
+          - relative_historical_volatility_adjusted_current
+          - relative_historical_volatility_adjusted_max_1y
+          - relative_historical_volatility_adjusted_min_1y
+          - revenue_actual
+          - revenue_estimate_avg_0y
+          - revenue_growth_fwd
+          - revenue_growth_yoy
+          - revenue_per_share_ttm
+          - revenue_ttm
           - roa
+          - roi
+          - shares_float
+          - shares_outstanding
+          - short_percent
+          - short_percent_outstanding
+          - short_ratio
+          - symbol
           - total_assets
-          - ebitda
-          - ebitda_ttm
-          - net_debt
+          - years_of_consecutive_dividend_growth
         filter: {}
     - role: user
       permission:
