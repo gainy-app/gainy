@@ -1,0 +1,1 @@
+drop view app.reporting_profile_ticker_match_score;
