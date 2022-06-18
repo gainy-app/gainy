@@ -1,7 +1,6 @@
 resource "aws_cloudwatch_log_group" "meltano" {
   name = "/aws/ecs/meltano-${var.env}"
 }
-
 locals {
   meltano_default_params = {
     env                                 = var.env
@@ -51,6 +50,7 @@ locals {
       onesignal_app_id                     = var.onesignal_app_id
       onesignal_api_key                    = var.onesignal_api_key
       onesignal_segments                   = jsonencode(var.env == "production" ? ["Subscribed Users"] : ["Testers"])
+      gainy_history_s3_bucket              = var.gainy_history_s3_bucket
 
       pg_external_access_host     = var.pg_external_access_host
       pg_external_access_port     = var.pg_external_access_port

@@ -11,6 +11,7 @@ debug_schedule_patterns = [
     "polygon-to-postgres",
     "postgres-to-analytics",
     "postgres-to-search",
+    "postgres-history-daily-to-s3",
 ]
 
 for pattern in debug_schedule_patterns:
@@ -31,7 +32,7 @@ for pattern in debug_schedule_patterns:
         command = BashOperator(
             task_id=schedule['name'],
             bash_command=get_meltano_command(
-                f"schedule run {schedule['name']}"),
+                f"schedule run {schedule['name']} --transform=skip --force"),
             dag=dag,
         )
 

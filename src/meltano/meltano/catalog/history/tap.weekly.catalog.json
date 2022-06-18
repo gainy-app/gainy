@@ -1,0 +1,29 @@
+{
+  "streams": [
+    {
+      "table_name": "reporting_profile_ticker_match_score",
+      "stream": "reporting_profile_ticker_match_score",
+      "metadata": [
+        {
+          "breadcrumb": [],
+          "metadata": {
+            "replication-method": "FULL_TABLE",
+            "table-key-properties": [
+              "profile_id",
+              "symbol"
+            ],
+            "schema-name": "app",
+            "database-name": "gainy",
+            "selected": true
+          }
+        }
+      ],
+      "tap_stream_id": "app-reporting_profile_ticker_match_score",
+      "schema": {
+        "type": "object",
+        "properties": {}
+      },
+      "selected": true
+    }
+  ]
+}
