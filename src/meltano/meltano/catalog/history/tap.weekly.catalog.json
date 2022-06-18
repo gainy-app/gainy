@@ -1,8 +1,8 @@
 {
   "streams": [
     {
-      "table_name": "profile_ticker_match_score",
-      "stream": "profile_ticker_match_score",
+      "table_name": "reporting_profile_ticker_match_score",
+      "stream": "reporting_profile_ticker_match_score",
       "metadata": [
         {
           "breadcrumb": [],
@@ -18,7 +18,7 @@
           }
         }
       ],
-      "tap_stream_id": "app-profile_ticker_match_score",
+      "tap_stream_id": "app-reporting_profile_ticker_match_score",
       "schema": {
         "type": "object",
         "properties": {}

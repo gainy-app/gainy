@@ -1335,7 +1335,7 @@ models:
       - name: collection_uniq_id
         tests:
           - type:
-              type: 'character varying'
+              type: 'text'
       - name: actual_price
         tests:
           - type:
@@ -1448,7 +1448,7 @@ models:
       - name: collection_uniq_id
         tests:
           - type:
-              type: 'character varying'
+              type: 'text'
       - name: datetime
         tests:
           - type:
@@ -1491,7 +1491,7 @@ models:
       - name: collection_uniq_id
         tests:
           - type:
-              type: 'character varying'
+              type: 'text'
       - name: weight
         tests:
           - type:
@@ -1534,7 +1534,7 @@ models:
       - name: collection_uniq_id
         tests:
           - type:
-              type: 'character varying'
+              type: 'text'
       - name: match_score
         tests:
           - type:
@@ -1577,7 +1577,7 @@ models:
       - name: collection_uniq_id
         tests:
           - type:
-              type: 'character varying'
+              type: 'text'
       - name: category_id
         tests:
           - type:
@@ -1995,7 +1995,7 @@ models:
       - name: collection_uniq_id
         tests:
           - type:
-              type: 'character varying'
+              type: 'text'
       - name: symbol
         tests:
           - type:
