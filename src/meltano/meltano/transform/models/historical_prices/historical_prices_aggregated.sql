@@ -400,7 +400,8 @@ union all
                               (
                                   select symbol, exchange_canonical
                                   from {{ ref('base_tickers') }}
-                                  where exchange_canonical is not null
+                                  where type != 'crypto'
+                                    and exchange_canonical is not null
                                   union all
                                   select contract_name as symbol, exchange_canonical
                                   from {{ ref('ticker_options_monitored') }}
@@ -425,7 +426,8 @@ union all
                               (
                                   select symbol, country_name
                                   from {{ ref('base_tickers') }}
-                                  where exchange_canonical is null
+                                  where type != 'crypto'
+                                    and exchange_canonical is null
                                     and (country_name in ('USA') or country_name is null)
                                   union all
                                   select contract_name as symbol, country_name
