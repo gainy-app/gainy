@@ -11,7 +11,8 @@ dag = create_dag(
 
 gainy_recommendation = BashOperator(
     task_id="update-recommendations",
-    bash_command="gainy_recommendation --batch_size=100",
+    bash_command=
+    "gainy_recommendation --batch_size=15",  # 15 gives the best performance
     dag=dag,
     pool="gainy_recommendation")
 
