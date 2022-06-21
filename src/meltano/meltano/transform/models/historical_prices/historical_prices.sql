@@ -3,11 +3,11 @@
     materialized = "incremental",
     unique_key = "id",
     post_hook=[
-      pk('code, date'),
+      pk('date, code'),
       index(this, 'id', true),
       'create unique index if not exists "code__date_year__date" ON {{ this }} (code, date_year, date)',
       'create unique index if not exists "code__date_month__date" ON {{ this }} (code, date_month, date)',
-      'create unique index if not exists "code__date_week__date" ON {{ this }} (code, date_week, date)',
+      'create unique index if not exists "date_week__code__date" ON {{ this }} (date_week, code, date)',
     ]
   )
 }}
