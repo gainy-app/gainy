@@ -12,9 +12,6 @@
 }}
 
 
--- 3min
--- Execution Time: 18457.714 ms on test
--- OK created incremental model historical_prices_aggregated_3min SELECT 3397613 in 71.67s
 with
 {% if is_incremental() %}
      max_date as
@@ -182,3 +179,7 @@ select * from (
                            left join {{ ref('historical_prices_marked') }} using (symbol)
             ) t2
 where t2.close is not null
+
+-- Execution Time: 18457.714 ms on test
+-- OK created incremental model historical_prices_aggregated_3min SELECT 3397613 in 71.67s
+-- OK created incremental model historical_prices_aggregated_3min SELECT 3397613 in 127.68s

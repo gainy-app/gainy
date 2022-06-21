@@ -35,6 +35,7 @@ from (
          join {{ ref('historical_prices') }} hp_close on hp_close.code = t.code and hp_close.date = t.close_date
 
 -- OK created incremental model historical_prices_aggregated_1m  SELECT 1914573 in 225.34s
+-- OK created incremental model historical_prices_aggregated_1m  SELECT 1914573 in 367.38s
 
 -- Hash Join  (cost=3753167.56..9119469.03 rows=832881 width=61) (actual time=41939.432..100542.734 rows=1914573 loops=1)
 --   Hash Cond: (((hp_open.code)::text = (hp_close.code)::text) AND (t.close_date = hp_close.date))

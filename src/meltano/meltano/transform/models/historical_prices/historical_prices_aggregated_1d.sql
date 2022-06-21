@@ -11,9 +11,6 @@
 }}
 
 
--- 1d
--- Execution Time: 96290.198 ms
--- OK created incremental model historical_prices_aggregated_1d SELECT 4385623 in 152.88s
 with uniq_tickers as
          (
              select code as symbol, min(date) as min_date
@@ -106,3 +103,7 @@ from tickers_dates_skeleton tds
          left join {{ ref('historical_prices') }} hp using (code, "date")
     window
         lookback as (partition by tds.code order by tds."date" asc)
+
+-- Execution Time: 96290.198 ms
+-- OK created incremental model historical_prices_aggregated_1d SELECT 4385623 in 152.88s
+-- OK created incremental model historical_prices_aggregated_1d SELECT 4385623 in 143.39s

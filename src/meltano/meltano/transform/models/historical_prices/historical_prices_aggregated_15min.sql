@@ -174,3 +174,4 @@ select symbol || '_' || datetime as id,
 from prices
 
 -- OK created incremental model historical_prices_aggregated_15min SELECT 3705058 in 183.20s
+-- OK created incremental model historical_prices_aggregated_15min SELECT 3705058 in 186.82s

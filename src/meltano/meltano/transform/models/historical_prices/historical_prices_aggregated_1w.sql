@@ -150,6 +150,7 @@ from (
 where t2.close is not null
 
 -- OK created incremental model historical_prices_aggregated_1w  SELECT 2980681 in 90.61s
+-- OK created incremental model historical_prices_aggregated_1w  SELECT 2980681 in 156.91s
 
 -- Subquery Scan on t2  (cost=4395692.77..4396032.77 rows=3980 width=93) (actual time=59127.299..60958.233 rows=2980681 loops=1)
 --   Filter: (t2.close IS NOT NULL)
