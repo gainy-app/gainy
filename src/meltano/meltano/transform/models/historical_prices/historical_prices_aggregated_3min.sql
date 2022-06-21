@@ -14,6 +14,7 @@
 
 -- 3min
 -- Execution Time: 18457.714 ms on test
+-- OK created incremental model historical_prices_aggregated_3min SELECT 3397613 in 71.67s
 with
 {% if is_incremental() %}
      max_date as
