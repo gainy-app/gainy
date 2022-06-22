@@ -30,10 +30,16 @@ class OnInvitationCreatedOrUpdated(HasuraTrigger):
                     insert into app.subscriptions(profile_id, invitation_id, is_promotion, period)
                     select from_profile_id, id, true, interval '1 month'
                     from app.invitations
+                    where invitations.id = %(invitation_id)s
+                    union all
+                    select to_profile_id, id, true, interval '1 month'
+                    from app.invitations
                     where invitations.id = %(invitation_id)s""",
                     {"invitation_id": invitation_id})
 
             self.billing_service.recalculate_subscription_status(
                 db_conn, payload['from_profile_id'])
+            self.billing_service.recalculate_subscription_status(
+                db_conn, payload['to_profile_id'])
         except psycopg2.errors.UniqueViolation as e:
             pass

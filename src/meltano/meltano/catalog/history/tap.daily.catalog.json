@@ -1,8 +1,8 @@
 {
   "streams": [
     {
-      "table_name": "collection_tickers_weighted",
-      "stream": "collection_tickers_weighted",
+      "table_name": "reporting_collection_tickers_weighted",
+      "stream": "reporting_collection_tickers_weighted",
       "metadata": [
         {
           "breadcrumb": [],
@@ -19,7 +19,7 @@
           }
         }
       ],
-      "tap_stream_id": "public-collection_tickers_weighted",
+      "tap_stream_id": "public-reporting_collection_tickers_weighted",
       "schema": {
         "type": "object",
         "properties": {}
