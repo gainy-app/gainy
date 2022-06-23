@@ -335,29 +335,25 @@ union all
                             open,
                             first_value(close)
                             OVER (partition by symbol, grp order by datetime),
-                            historical_prices_marked.price_1w,
-                            historical_prices_marked.price_all
+                            historical_prices_marked.price_1w
                         )                                            as open,
                     coalesce(
                             high,
                             first_value(close)
                             OVER (partition by symbol, grp order by datetime),
-                            historical_prices_marked.price_1w,
-                            historical_prices_marked.price_all
+                            historical_prices_marked.price_1w
                         )                                            as high,
                     coalesce(
                             low,
                             first_value(close)
                             OVER (partition by symbol, grp order by datetime),
-                            historical_prices_marked.price_1w,
-                            historical_prices_marked.price_all
+                            historical_prices_marked.price_1w
                         )                                            as low,
                     coalesce(
                             close,
                             first_value(close)
                             OVER (partition by symbol, grp order by datetime),
-                            historical_prices_marked.price_1w,
-                            historical_prices_marked.price_all
+                            historical_prices_marked.price_1w
                         )                                            as close,
                     coalesce(volume, 0.0)                            as volume,
                     adjustment_rate,
@@ -525,36 +521,31 @@ union all
                             open,
                             first_value(close)
                             OVER (partition by symbol, grp order by date),
-                            historical_prices_marked.price_1y,
-                            historical_prices_marked.price_all
+                            historical_prices_marked.price_1y
                         )                                     as open,
                     coalesce(
                             high,
                             first_value(close)
                             OVER (partition by symbol, grp order by date),
-                            historical_prices_marked.price_1y,
-                            historical_prices_marked.price_all
+                            historical_prices_marked.price_1y
                         )                                     as high,
                     coalesce(
                             low,
                             first_value(close)
                             OVER (partition by symbol, grp order by date),
-                            historical_prices_marked.price_1y,
-                            historical_prices_marked.price_all
+                            historical_prices_marked.price_1y
                         )                                     as low,
                     coalesce(
                             close,
                             first_value(close)
                             OVER (partition by symbol, grp order by date),
-                            historical_prices_marked.price_1y,
-                            historical_prices_marked.price_all
+                            historical_prices_marked.price_1y
                         )                                     as close,
                     coalesce(
                             adjusted_close,
                             first_value(adjusted_close)
                             OVER (partition by symbol, grp order by date),
-                            historical_prices_marked.price_1y,
-                            historical_prices_marked.price_all
+                            historical_prices_marked.price_1y
                         )                                     as adjusted_close,
                     coalesce(volume, 0.0)                     as volume
              from (
