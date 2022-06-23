@@ -96,19 +96,19 @@ with latest_trading_day as
                             hpa_15min.adjusted_close,
                             hpa_1d.adjusted_close
                         ) as adjusted_close
-             from base_tickers
+             from {{ ref('base_tickers') }}
                       left join max_3min on max_3min.symbol = base_tickers.symbol
-                      left join historical_prices_aggregated_3min hpa_3min
+                      left join {{ ref('historical_prices_aggregated_3min') }} hpa_3min
                                 on hpa_3min.symbol = max_3min.symbol
                                     and hpa_3min.datetime = max_3min.datetime
 
                       left join max_15min on max_15min.symbol = base_tickers.symbol
-                      left join historical_prices_aggregated_15min hpa_15min
+                      left join {{ ref('historical_prices_aggregated_15min') }} hpa_15min
                                 on hpa_15min.symbol = max_15min.symbol
                                     and hpa_15min.datetime = max_15min.datetime
 
                       left join max_1d on max_1d.symbol = base_tickers.symbol
-                      left join historical_prices_aggregated_1d hpa_1d
+                      left join {{ ref('historical_prices_aggregated_1d') }} hpa_1d
                                 on hpa_1d.symbol = max_1d.symbol
                                     and hpa_1d.datetime = max_1d.datetime
          )
