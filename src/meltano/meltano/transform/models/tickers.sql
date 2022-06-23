@@ -1,5 +1,3 @@
-{% set min_daily_volume = 500000 %}
-
 {{
   config(
     materialized = "incremental",
@@ -11,40 +9,7 @@
   )
 }}
 
-with exchange_month_trading_sessions_count as
-         (
-             select exchange_name, count(date) as count
-             from {{ ref('exchange_schedule') }}
-             where open_at between now() - interval '1 month' and now()
-             group by exchange_name
-         ),
-     country_month_trading_sessions_count as
-         (
-             select country_name, count(date) as count
-             from {{ ref('exchange_schedule') }}
-             where open_at between now() - interval '1 month' and now()
-             group by country_name
-         ),
-     volumes as
-         (
-             select symbol,
-                    month_volume_sum / coalesce(exchange_month_trading_sessions_count.count,
-                                                country_month_trading_sessions_count.count, 
-                                                30) as avg_volume -- crypto dont has any country nor exchange, so let it be interval '30 days' as in month_volume_sum
-             from (
-                      select code                         as symbol,
-                             sum(volume * adjusted_close) as month_volume_sum
-                      from {{ source('eod', 'eod_historical_prices') }}
-                      where "date"::date >= NOW() - interval '30 days'
-                      group by code
-                  ) t
-                      join {{ ref('base_tickers') }} using (symbol)
-                      left join exchange_month_trading_sessions_count
-                                on exchange_month_trading_sessions_count.exchange_name = base_tickers.exchange_canonical
-                      left join country_month_trading_sessions_count
-                                on country_month_trading_sessions_count.country_name = base_tickers.country_name
-         ),
-     latest_price as
+with latest_price as
          (
              select code as symbol, max(date) as date
              from {{ source('eod', 'eod_historical_prices') }}
@@ -69,11 +34,8 @@ select base_tickers.symbol,
        base_tickers.country_name,
        now()::timestamp as updated_at
 from {{ ref('base_tickers') }}
-         join volumes using (symbol)
          join latest_price using (symbol)
-where volumes.avg_volume is not null
-  and volumes.avg_volume >= {{ min_daily_volume }}
-  and base_tickers.description is not null
+where base_tickers.description is not null
   and length(base_tickers.description) >= 5
   and latest_price.date is not null
   and latest_price.date::date >= now() - interval '7 days'
