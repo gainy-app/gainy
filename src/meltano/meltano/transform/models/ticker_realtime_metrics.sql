@@ -26,39 +26,35 @@ with latest_trading_day as
                       where period = '1d'
                       group by symbol
                   ) t
-                      join {{ ref('historical_prices_aggregated') }} hpa_close
+                      join {{ ref('historical_prices_aggregated_3min') }} hpa_close
                            on hpa_close.symbol = t.symbol
-                               and hpa_close.period = '3min'
                                and hpa_close.datetime = t.max_datetime
-                      join {{ ref('historical_prices_aggregated') }} hpa_open
+                      join {{ ref('historical_prices_aggregated_3min') }} hpa_open
                            on hpa_open.symbol = t.symbol
-                               and hpa_open.period = '3min'
                                and hpa_open.datetime = t.min_datetime
          ),
      previous_trading_day as
          (
              (
-                 select historical_prices_aggregated.symbol,
-                        historical_prices_aggregated.adjusted_close
+                 select historical_prices_aggregated_1d.symbol,
+                        historical_prices_aggregated_1d.adjusted_close
                  from (
-                          select historical_prices_aggregated.symbol,
-                                 period,
-                                 max(historical_prices_aggregated.datetime) as datetime
-                          from {{ ref('historical_prices_aggregated') }}
+                          select historical_prices_aggregated_1d.symbol,
+                                 max(historical_prices_aggregated_1d.datetime) as datetime
+                          from {{ ref('historical_prices_aggregated_1d') }}
                                    join latest_trading_day
-                                        on historical_prices_aggregated.symbol = latest_trading_day.symbol
-                                            and historical_prices_aggregated.datetime < latest_trading_day.open_datetime::date
-                                            and historical_prices_aggregated.datetime >= latest_trading_day.open_datetime::date - interval '1 week'
+                                        on historical_prices_aggregated_1d.symbol = latest_trading_day.symbol
+                                            and historical_prices_aggregated_1d.datetime < latest_trading_day.open_datetime::date
+                                            and historical_prices_aggregated_1d.datetime >= latest_trading_day.open_datetime::date - interval '1 week'
                                    left join {{ ref('ticker_options_monitored') }}
-                                             on ticker_options_monitored.contract_name = historical_prices_aggregated.symbol
+                                             on ticker_options_monitored.contract_name = historical_prices_aggregated_1d.symbol
                                    left join {{ ref('base_tickers') }}
-                                             on base_tickers.symbol = historical_prices_aggregated.symbol
-                          where period = '1d'
-                            and (ticker_options_monitored.contract_name is not null
-                             or base_tickers.type != 'crypto')
-                          group by historical_prices_aggregated.symbol, historical_prices_aggregated.period
+                                             on base_tickers.symbol = historical_prices_aggregated_1d.symbol
+                          where ticker_options_monitored.contract_name is not null
+                             or base_tickers.type != 'crypto'
+                          group by historical_prices_aggregated_1d.symbol
                       ) t
-                          join {{ ref('historical_prices_aggregated') }} using (symbol, datetime, period)
+                          join {{ ref('historical_prices_aggregated_1d') }} using (symbol, datetime)
              )
              union all
              (
@@ -71,24 +67,50 @@ with latest_trading_day as
          ),
      latest_datapoint as
          (
-             select distinct on (
-                 symbol
-                 ) symbol,
-                   datetime + case
-                                  when period = '3min'
-                                      then interval '3 min'
-                                  when period = '15min'
-                                      then interval '15 min'
-                                  when period = '1d'
-                                      then interval '1 day'
-                                  when period = '1w'
-                                      then interval '1 week'
-                                  when period = '1m'
-                                      then interval '1 month'
-                       end as datetime,
-                   adjusted_close
-             from {{ ref('historical_prices_aggregated') }}
-             order by symbol, historical_prices_aggregated.datetime desc
+             with max_3min as
+                      (
+                          select symbol, max(datetime) as datetime, interval '3 minutes' as period_interval
+                          from {{ ref('historical_prices_aggregated_3min') }}
+                          group by symbol
+                      ),
+                  max_15min as
+                      (
+                          select symbol, max(datetime) as datetime, interval '15 minutes' as period_interval
+                          from {{ ref('historical_prices_aggregated_15min') }}
+                          group by symbol
+                      ),
+                  max_1d as
+                      (
+                          select symbol, max(datetime) as datetime, interval '1 day' as period_interval
+                          from {{ ref('historical_prices_aggregated_1d') }}
+                          group by symbol
+                      )
+             select base_tickers.symbol,
+                    coalesce(
+                                max_3min.datetime + max_3min.period_interval,
+                                max_15min.datetime + max_15min.period_interval,
+                                max_1d.datetime + max_1d.period_interval
+                        ) as datetime,
+                    coalesce(
+                            hpa_3min.adjusted_close,
+                            hpa_15min.adjusted_close,
+                            hpa_1d.adjusted_close
+                        ) as adjusted_close
+             from base_tickers
+                      left join max_3min on max_3min.symbol = base_tickers.symbol
+                      left join historical_prices_aggregated_3min hpa_3min
+                                on hpa_3min.symbol = max_3min.symbol
+                                    and hpa_3min.datetime = max_3min.datetime
+
+                      left join max_15min on max_15min.symbol = base_tickers.symbol
+                      left join historical_prices_aggregated_15min hpa_15min
+                                on hpa_15min.symbol = max_15min.symbol
+                                    and hpa_15min.datetime = max_15min.datetime
+
+                      left join max_1d on max_1d.symbol = base_tickers.symbol
+                      left join historical_prices_aggregated_1d hpa_1d
+                                on hpa_1d.symbol = max_1d.symbol
+                                    and hpa_1d.datetime = max_1d.datetime
          )
 select symbol,
        coalesce(latest_trading_day.close_datetime, latest_datapoint.datetime)              as time,
