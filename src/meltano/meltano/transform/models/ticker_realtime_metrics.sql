@@ -67,7 +67,15 @@ with latest_trading_day as
          ),
      latest_datapoint as
          (
-             with max_3min as
+             with chart_symbols as
+                      (
+                         select symbol
+                         from {{ ref('base_tickers') }}
+                         union all
+                         select contract_name as symbol
+                         from {{ ref('ticker_options_monitored') }}
+                      ),
+                  max_3min as
                       (
                           select symbol, max(datetime) as datetime, interval '3 minutes' as period_interval
                           from {{ ref('historical_prices_aggregated_3min') }}
@@ -85,7 +93,7 @@ with latest_trading_day as
                           from {{ ref('historical_prices_aggregated_1d') }}
                           group by symbol
                       )
-             select base_tickers.symbol,
+             select chart_symbols.symbol,
                     coalesce(
                                 max_3min.datetime + max_3min.period_interval,
                                 max_15min.datetime + max_15min.period_interval,
@@ -96,18 +104,18 @@ with latest_trading_day as
                             hpa_15min.adjusted_close,
                             hpa_1d.adjusted_close
                         ) as adjusted_close
-             from {{ ref('base_tickers') }}
-                      left join max_3min on max_3min.symbol = base_tickers.symbol
+             from chart_symbols
+                      left join max_3min on max_3min.symbol = chart_symbols.symbol
                       left join {{ ref('historical_prices_aggregated_3min') }} hpa_3min
                                 on hpa_3min.symbol = max_3min.symbol
                                     and hpa_3min.datetime = max_3min.datetime
 
-                      left join max_15min on max_15min.symbol = base_tickers.symbol
+                      left join max_15min on max_15min.symbol = chart_symbols.symbol
                       left join {{ ref('historical_prices_aggregated_15min') }} hpa_15min
                                 on hpa_15min.symbol = max_15min.symbol
                                     and hpa_15min.datetime = max_15min.datetime
 
-                      left join max_1d on max_1d.symbol = base_tickers.symbol
+                      left join max_1d on max_1d.symbol = chart_symbols.symbol
                       left join {{ ref('historical_prices_aggregated_1d') }} hpa_1d
                                 on hpa_1d.symbol = max_1d.symbol
                                     and hpa_1d.datetime = max_1d.datetime
