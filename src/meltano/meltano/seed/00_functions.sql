@@ -11,3 +11,33 @@ SELECT CASE -- calculation by erf-function expansion to series (error= +/-2e-7, 
            END;
 $$ LANGUAGE SQL IMMUTABLE
                 STRICT;
+
+-- Create a function that always returns the last non-NULL value:
+CREATE OR REPLACE FUNCTION last_agg(anyelement, anyelement)
+    RETURNS anyelement
+    LANGUAGE sql
+    IMMUTABLE STRICT PARALLEL SAFE AS
+$$
+SELECT $2;
+$$;
+
+-- Then wrap an aggregate around it:
+CREATE OR REPLACE AGGREGATE LAST_VALUE_IGNORENULLS
+	(
+		SFUNC    = last_agg,
+		BASETYPE = anyelement,
+		STYPE    = anyelement
+	);
+    
+-- Linear Interpolation function
+CREATE OR REPLACE FUNCTION linear_interpolate(
+    x_i DOUBLE PRECISION,
+    x_0 DOUBLE PRECISION,
+    y_0 DOUBLE PRECISION,
+    x_1 DOUBLE PRECISION,
+    y_1 DOUBLE precision
+)
+    RETURNS DOUBLE PRECISION AS
+$$
+SELECT (($5 - $3) / ($4 - $2)) * ($1 - $2) + $3;
+$$ LANGUAGE SQL;
