@@ -24,17 +24,16 @@ with latest_open_trading_session as (
            sum(low * weight)            as low,
            sum(close * weight)          as close,
            sum(adjusted_close * weight) as adjusted_close
-    from {{ ref('historical_prices_aggregated') }}
+    from {{ ref('historical_prices_aggregated_3min') }}
              join {{ ref('collection_tickers_weighted') }} using (symbol)
-             join {{ ref('base_tickers') }} on base_tickers.symbol = historical_prices_aggregated.symbol
+             join {{ ref('base_tickers') }} on base_tickers.symbol = historical_prices_aggregated_3min.symbol
              left join latest_open_trading_session
                        on (latest_open_trading_session.exchange_name = base_tickers.exchange_canonical or
                            (base_tickers.exchange_canonical is null and
                             latest_open_trading_session.country_name = base_tickers.country_name))
-                      and latest_open_trading_session.date = historical_prices_aggregated.datetime::date
-    where period = '3min'
-      and (historical_prices_aggregated.datetime between latest_open_trading_session.open_at and latest_open_trading_session.close_at
-       or (base_tickers.type = 'crypto' and historical_prices_aggregated.datetime > now() - interval '1 day'))
+                      and latest_open_trading_session.date = historical_prices_aggregated_3min.datetime::date
+    where (historical_prices_aggregated_3min.datetime between latest_open_trading_session.open_at and latest_open_trading_session.close_at
+       or (base_tickers.type = 'crypto' and historical_prices_aggregated_3min.datetime > now() - interval '1 day'))
     group by profile_id, collection_id, collection_uniq_id, datetime, period
 )
 
@@ -56,17 +55,16 @@ union all
            sum(low * weight)            as low,
            sum(close * weight)          as close,
            sum(adjusted_close * weight) as adjusted_close
-    from {{ ref('historical_prices_aggregated') }}
+    from {{ ref('historical_prices_aggregated_15min') }}
              join {{ ref('collection_tickers_weighted') }} using (symbol)
-             join {{ ref('base_tickers') }} on base_tickers.symbol = historical_prices_aggregated.symbol
+             join {{ ref('base_tickers') }} on base_tickers.symbol = historical_prices_aggregated_15min.symbol
              left join week_trading_sessions
                        on (week_trading_sessions.exchange_name = base_tickers.exchange_canonical or
                            (base_tickers.exchange_canonical is null and
                             week_trading_sessions.country_name = base_tickers.country_name))
-                      and week_trading_sessions.date = historical_prices_aggregated.datetime::date
-    where period = '15min'
-      and (historical_prices_aggregated.datetime between week_trading_sessions.open_at and week_trading_sessions.close_at
-       or (base_tickers.type = 'crypto' and historical_prices_aggregated.datetime > now() - interval '7 days'))
+                      and week_trading_sessions.date = historical_prices_aggregated_15min.datetime::date
+    where (historical_prices_aggregated_15min.datetime between week_trading_sessions.open_at and week_trading_sessions.close_at
+       or (base_tickers.type = 'crypto' and historical_prices_aggregated_15min.datetime > now() - interval '7 days'))
     group by profile_id, collection_id, collection_uniq_id, datetime, period
 )
 
@@ -83,15 +81,14 @@ union all
            sum(low * weight)            as low,
            sum(close * weight)          as close,
            sum(adjusted_close * weight) as adjusted_close
-    from {{ ref('historical_prices_aggregated') }}
+    from {{ ref('historical_prices_aggregated_1d') }}
              join {{ ref('collection_tickers_weighted') }} using (symbol)
-             join {{ ref('base_tickers') }} on base_tickers.symbol = historical_prices_aggregated.symbol
+             join {{ ref('base_tickers') }} on base_tickers.symbol = historical_prices_aggregated_1d.symbol
              left join latest_open_trading_session
                        on (latest_open_trading_session.exchange_name = base_tickers.exchange_canonical or
                            (base_tickers.exchange_canonical is null and
                             latest_open_trading_session.country_name = base_tickers.country_name))
-    where period = '1d'
-      and historical_prices_aggregated.datetime >= coalesce(latest_open_trading_session.date, now()) - interval '1 month'
+    where historical_prices_aggregated_1d.datetime >= coalesce(latest_open_trading_session.date, now()) - interval '1 month'
     group by profile_id, collection_id, collection_uniq_id, datetime, period
 )
 
@@ -108,15 +105,14 @@ union all
            sum(low * weight)            as low,
            sum(close * weight)          as close,
            sum(adjusted_close * weight) as adjusted_close
-    from {{ ref('historical_prices_aggregated') }}
+    from {{ ref('historical_prices_aggregated_1d') }}
              join {{ ref('collection_tickers_weighted') }} using (symbol)
-             join {{ ref('base_tickers') }} on base_tickers.symbol = historical_prices_aggregated.symbol
+             join {{ ref('base_tickers') }} on base_tickers.symbol = historical_prices_aggregated_1d.symbol
              left join latest_open_trading_session
                        on (latest_open_trading_session.exchange_name = base_tickers.exchange_canonical or
                            (base_tickers.exchange_canonical is null and
                             latest_open_trading_session.country_name = base_tickers.country_name))
-    where period = '1d'
-      and historical_prices_aggregated.datetime >= coalesce(latest_open_trading_session.date, now()) - interval '3 month'
+    where historical_prices_aggregated_1d.datetime >= coalesce(latest_open_trading_session.date, now()) - interval '3 month'
     group by profile_id, collection_id, collection_uniq_id, datetime, period
 )
 
@@ -133,15 +129,14 @@ union all
            sum(low * weight)            as low,
            sum(close * weight)          as close,
            sum(adjusted_close * weight) as adjusted_close
-    from {{ ref('historical_prices_aggregated') }}
+    from {{ ref('historical_prices_aggregated_1d') }}
              join {{ ref('collection_tickers_weighted') }} using (symbol)
-             join {{ ref('base_tickers') }} on base_tickers.symbol = historical_prices_aggregated.symbol
+             join {{ ref('base_tickers') }} on base_tickers.symbol = historical_prices_aggregated_1d.symbol
              left join latest_open_trading_session
                        on (latest_open_trading_session.exchange_name = base_tickers.exchange_canonical or
                            (base_tickers.exchange_canonical is null and
                             latest_open_trading_session.country_name = base_tickers.country_name))
-    where period = '1d'
-      and historical_prices_aggregated.datetime >= coalesce(latest_open_trading_session.date, now()) - interval '1 year'
+    where historical_prices_aggregated_1d.datetime >= coalesce(latest_open_trading_session.date, now()) - interval '1 year'
     group by profile_id, collection_id, collection_uniq_id, datetime, period
 )
 
@@ -158,15 +153,14 @@ union all
            sum(low * weight)            as low,
            sum(close * weight)          as close,
            sum(adjusted_close * weight) as adjusted_close
-    from {{ ref('historical_prices_aggregated') }}
+    from {{ ref('historical_prices_aggregated_1w') }}
              join {{ ref('collection_tickers_weighted') }} using (symbol)
-             join {{ ref('base_tickers') }} on base_tickers.symbol = historical_prices_aggregated.symbol
+             join {{ ref('base_tickers') }} on base_tickers.symbol = historical_prices_aggregated_1w.symbol
              left join latest_open_trading_session
                        on (latest_open_trading_session.exchange_name = base_tickers.exchange_canonical or
                            (base_tickers.exchange_canonical is null and
                             latest_open_trading_session.country_name = base_tickers.country_name))
-    where period = '1w'
-      and historical_prices_aggregated.datetime >= coalesce(latest_open_trading_session.date, now()) - interval '5 year'
+    where historical_prices_aggregated_1w.datetime >= coalesce(latest_open_trading_session.date, now()) - interval '5 year'
     group by profile_id, collection_id, collection_uniq_id, datetime, period
 )
 
@@ -183,8 +177,7 @@ union all
            sum(low * weight)            as low,
            sum(close * weight)          as close,
            sum(adjusted_close * weight) as adjusted_close
-    from {{ ref('historical_prices_aggregated') }}
+    from {{ ref('historical_prices_aggregated_1m') }}
              join {{ ref('collection_tickers_weighted') }} using (symbol)
-    where period = '1m'
     group by profile_id, collection_id, collection_uniq_id, datetime, period
 )
