@@ -34,7 +34,11 @@ class UpdatePurchases(HasuraAction):
                 {"profile_id": profile_id})
             subscription_end_date = cursor.fetchone()[0]
 
-        return {"subscription_end_date": subscription_end_date.isoformat()}
+        return {
+            "subscription_end_date":
+            subscription_end_date.isoformat()
+            if subscription_end_date else None
+        }
 
     def sync_revenuecat(self, db_conn, profile_id):
         values = []
