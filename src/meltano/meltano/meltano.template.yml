@@ -47,6 +47,8 @@ plugins:
       settings:
         - name: api_key
         - name: option_contract_names
+        - name: crypto_symbols
+        - name: stock_symbols
         - name: split_id
         - name: split_num
 

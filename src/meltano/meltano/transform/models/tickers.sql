@@ -9,11 +9,20 @@
   )
 }}
 
+
 with latest_price as
          (
-             select code as symbol, max(date) as date
+             select code as symbol
              from {{ source('eod', 'eod_historical_prices') }}
+             where date::date >= now() - interval '7 days'
              group by code
+         ),
+     latest_crypto_price as
+         (
+             select regexp_replace(symbol, 'USD$', '.CC') as symbol
+             from {{ source('polygon', 'polygon_crypto_historical_prices') }}
+             where t >= extract(epoch from now() - interval '7 days') * 1000
+             group by symbol
          )
 select base_tickers.symbol,
        base_tickers.type,
@@ -34,9 +43,9 @@ select base_tickers.symbol,
        base_tickers.country_name,
        now()::timestamp as updated_at
 from {{ ref('base_tickers') }}
-         join latest_price using (symbol)
+         left join latest_price using (symbol)
+         left join latest_crypto_price using (symbol)
 where base_tickers.description is not null
   and length(base_tickers.description) >= 5
-  and latest_price.date is not null
-  and latest_price.date::date >= now() - interval '7 days'
+  and (latest_price.symbol is not null or latest_crypto_price.symbol is not null)
   and type in ('fund', 'etf', 'mutual fund', 'preferred stock', 'common stock', 'crypto')

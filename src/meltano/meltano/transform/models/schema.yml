@@ -34,6 +34,8 @@ sources:
     tables:
       - name: polygon_marketstatus_upcoming
       - name: polygon_options_historical_prices
+      - name: polygon_crypto_historical_prices
+      - name: polygon_stocks_historical_prices
 
   - name: coingecko
     description: Crypto data from https://coingecko.com
