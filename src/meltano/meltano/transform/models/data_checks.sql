@@ -550,7 +550,7 @@ union all
 						select 	code as intrpl_symbol_asmarket,
 							"date"::timestamp as dt,
 							adjusted_close
-						from {{ ref(‘historical_prices’) }} ehp
+						from {{ ref('historical_prices') }} ehp
 						join check_params cp on true
 						where code = any(array[cp.symbol_asmarket_other, cp.symbol_asmarket_crypto])
 					) as t using(intrpl_symbol_asmarket, dt)
@@ -568,7 +568,7 @@ union all
 					volume,
 					case 	when t."type" = 'crypto' then cp.symbol_asmarket_crypto 
 						else cp.symbol_asmarket_other end					as intrpl_symbol_asmarket
-				from {{ ref(‘historical_prices’) }} ehp
+				from {{ ref('historical_prices') }} ehp
 				join {{ ref('tickers') }} t on t.symbol = ehp.code -- we are interested in all tickers that are available in the app, so tickers table
 				left join check_params cp on true 
 				where to_timestamp("date",'YYYY-MM-DD')::timestamp >= now()::timestamp - cp.depth_stddev
