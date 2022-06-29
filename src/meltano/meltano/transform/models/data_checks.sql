@@ -292,7 +292,7 @@ union all
 				left join 
 					(
 						select 	code as intrpl_symbol_asmarket,
-							"date"::timestamp as dt,
+							to_timestamp("date",'YYYY-MM-DD')::timestamp as dt,
 							adjusted_close
 						from {{ source('eod', 'eod_historical_prices') }} ehp
 						join check_params cp on true
@@ -563,7 +563,7 @@ union all
 			(
 				select 
 					code 										as symbol, 
-					to_timestamp("date",'YYYY-MM-DD')::timestamp 					as dt,
+					"date"::timestamp 								as dt,
 					adjusted_close,
 					volume,
 					case 	when t."type" = 'crypto' then cp.symbol_asmarket_crypto 
@@ -571,7 +571,7 @@ union all
 				from {{ ref('historical_prices') }} ehp
 				join {{ ref('tickers') }} t on t.symbol = ehp.code -- we are interested in all tickers that are available in the app, so tickers table
 				left join check_params cp on true 
-				where to_timestamp("date",'YYYY-MM-DD')::timestamp >= now()::timestamp - cp.depth_stddev
+				where "date"::timestamp >= now()::timestamp - cp.depth_stddev
 			),
 		tickers_lag as
 			(
