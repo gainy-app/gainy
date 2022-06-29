@@ -239,7 +239,7 @@ union all
 			(
 				values 	('raw_data.eod_historical_prices', 	interval '1 day', 
 					interval '1 year', 			interval '1 year', 
-					3., 					3., 
+					5., 					10., 
 					'BTC.CC', 				'SPY')
 			),
 		
