@@ -57,13 +57,34 @@ def _generate_schedules(env):
     except psycopg2.errors.UndefinedTable:
         option_contract_names = []
 
+    try:
+        with db_connect() as db_conn:
+            with db_conn.cursor() as cursor:
+                cursor.execute("""
+                    select code
+                    from raw_data.eod_historical_prices
+                    join base_tickers on base_tickers.symbol = eod_historical_prices.code
+                    where adjusted_close < 0 and base_tickers.type != 'crypto'
+                    group by code
+                    """)
+                full_refresh_symbols = list(
+                    map(itemgetter(0), cursor.fetchall()))
+    except psycopg2.errors.UndefinedTable:
+        full_refresh_symbols = []
+
     for schedule in schedules:
-        if not schedule['name'].startswith('polygon-to-postgres'):
-            continue
-        if "env" not in schedule:
-            schedule["env"] = {}
-        schedule['env']['TAP_POLYGON_OPTION_CONTRACT_NAMES'] = ",".join(
-            option_contract_names)
+        if schedule['name'].startswith('polygon-to-postgres'):
+            if "env" not in schedule:
+                schedule["env"] = {}
+            schedule['env']['TAP_POLYGON_OPTION_CONTRACT_NAMES'] = ",".join(
+                option_contract_names)
+
+        if schedule['extractor'].startswith('tap-eodhistoricaldata'):
+            if "env" not in schedule:
+                schedule["env"] = {}
+            schedule['env'][
+                'TAP_EODHISTORICALDATA_FULL_REFRESH_SYMBOLS'] = ",".join(
+                    full_refresh_symbols)
 
     return schedules
 

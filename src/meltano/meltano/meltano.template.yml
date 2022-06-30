@@ -24,6 +24,7 @@ plugins:
         - name: symbols_type
         - name: split_id
         - name: split_num
+        - name: full_refresh_symbols
       config:
         streams:
           - eod_fundamentals
