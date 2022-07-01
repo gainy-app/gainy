@@ -1,4 +1,3 @@
-version: '3.6'
 services:
   meltano-airflow-scheduler:
     build:
@@ -24,7 +23,7 @@ services:
     entrypoint: "/init.sh"
     command: "invoke airflow scheduler"
     env_file:
-      - .env
+      - .env.global
       - .env.local
 
   meltano-airflow-ui:
@@ -40,7 +39,7 @@ services:
     entrypoint: "/wait.sh"
     command: "invoke airflow webserver -p 5001"
     env_file:
-      - .env
+      - .env.global
       - .env.local
 
   meltano-dbt-docs:
@@ -58,7 +57,7 @@ services:
     entrypoint: "/wait.sh"
     command: "invoke dbt docs serve --port 5002"
     env_file:
-      - .env
+      - .env.global
       - .env.local
 
   postgres:
@@ -67,8 +66,9 @@ services:
     - db_data:/var/lib/postgresql/data
     ports:
       - "5432:5432"
-    environment:
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    env_file:
+      - .env.global
+      - .env.local
 
   hasura:
     image: gainy-hasura:latest
@@ -86,7 +86,7 @@ services:
     depends_on:
       - postgres
     env_file:
-      - .env
+      - .env.global
       - .env.local
 
   lambda-router:
@@ -114,7 +114,7 @@ services:
       - ./src/aws/lambda-python/lambda_python:/var/task
     command: [ "hasura_handler.handle_trigger" ]
     env_file:
-      - .env
+      - .env.global
       - .env.local
 
   lambda-python-action:
@@ -125,7 +125,7 @@ services:
       - ./src/aws/lambda-python/lambda_python:/var/task
     command: [ "hasura_handler.handle_action" ]
     env_file:
-      - .env
+      - .env.global
       - .env.local
 
   websockets-eod:
@@ -139,7 +139,7 @@ services:
       - ./src/websockets:/srv
     command: ["client_eod.py"]
     env_file:
-      - .env
+      - .env.global
       - .env.local
     deploy:
       replicas: 0
@@ -150,7 +150,7 @@ services:
       - ./src/websockets:/srv
     command: ["client_polygon.py"]
     env_file:
-      - .env
+      - .env.global
       - .env.local
     deploy:
       replicas: 0

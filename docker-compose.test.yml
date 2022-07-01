@@ -18,7 +18,7 @@ services:
       - ./src/meltano/meltano/catalog:/project/catalog
       - ./tests:/project/tests
     env_file:
-      - .env
+      - .env.global
       - .env.test
     depends_on:
       - test-postgres
@@ -29,9 +29,10 @@ services:
   test-postgres:
     image: postgres:12
     restart: always
-    environment:
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-
+    env_file:
+      - .env.global
+      - .env.test
+      
   test-hasura:
     build:
       context: ./src/hasura
@@ -43,7 +44,7 @@ services:
       - test-lambda-router
     restart: always
     env_file:
-      - .env
+      - .env.global
       - .env.test
 
   test-lambda-router:
@@ -71,7 +72,7 @@ services:
     volumes:
       - ./src/aws/lambda-python/lambda_python:/var/task
     env_file:
-      - .env
+      - .env.global
       - .env.test
     command: [ "hasura_handler.handle_trigger" ]
 
@@ -83,6 +84,6 @@ services:
     volumes:
       - ./src/aws/lambda-python/lambda_python:/var/task
     env_file:
-      - .env
+      - .env.global
       - .env.test
     command: [ "hasura_handler.handle_action" ]
