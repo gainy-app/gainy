@@ -23,7 +23,7 @@ def _split_schedule(tap: str, tap_canonical: str, template, env, split_id,
 
 def _generate_schedules(env):
     schedules = config['schedules']
-    for tap in ['eodhistoricaldata', 'eodhistoricaldata-prices', 'coingecko']:
+    for tap in ['eodhistoricaldata', 'eodhistoricaldata-prices', 'coingecko', 'polygon']:
         schedules_to_split = list(
             filter(lambda x: x['name'].startswith(f'{tap}-to-postgres'),
                    schedules))
