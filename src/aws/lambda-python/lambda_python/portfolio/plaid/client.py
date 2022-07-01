@@ -31,7 +31,6 @@ class PlaidClient:
                           access_token=None):
         #TODO when we have verified phone number, we can implement https://plaid.com/docs/link/returning-user/#enabling-the-returning-user-experience
         params = {
-            "products": [Products('investments')],
             "client_name": "Gainy",
             "country_codes": COUNTRY_CODES,
             "language": 'en',
@@ -40,7 +39,9 @@ class PlaidClient:
             "user":
             LinkTokenCreateRequestUser(client_user_id=str(profile_id), )
         }
-        if access_token is not None:
+        if access_token is None:
+            params['products'] = [Products('investments')]
+        else:
             params['access_token'] = access_token
 
         request = LinkTokenCreateRequest(**params)
