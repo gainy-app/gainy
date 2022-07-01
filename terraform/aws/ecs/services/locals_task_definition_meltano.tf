@@ -17,6 +17,7 @@ locals {
     eodhistoricaldata_jobs_count        = local.eodhistoricaldata_jobs_count
     eodhistoricaldata_prices_jobs_count = local.eodhistoricaldata_prices_jobs_count
     coingecko_jobs_count                = local.coingecko_jobs_count
+    polygon_jobs_count                  = local.polygon_jobs_count
     pg_transform_schema                 = local.public_schema_name
     meltano_image                       = docker_registry_image.meltano.name
     aws_log_group_name                  = aws_cloudwatch_log_group.meltano.name

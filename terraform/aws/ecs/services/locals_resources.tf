@@ -17,6 +17,7 @@ locals {
   eodhistoricaldata_jobs_count        = 4
   eodhistoricaldata_prices_jobs_count = 2
   coingecko_jobs_count                = 2
+  polygon_jobs_count                  = 4
 
   eod_websockets_memory_credits     = var.env == "production" ? 512 : 0
   polygon_websockets_memory_credits = var.env == "production" ? 1024 : 0

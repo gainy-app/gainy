@@ -44,6 +44,7 @@
     { "name": "EODHISTORICALDATA_JOBS_COUNT",        "value": "${eodhistoricaldata_jobs_count}" },
     { "name": "EODHISTORICALDATA_PRICES_JOBS_COUNT", "value": "${eodhistoricaldata_prices_jobs_count}" },
     { "name": "COINGECKO_JOBS_COUNT",                "value": "${coingecko_jobs_count}" },
+    { "name": "POLYGON_JOBS_COUNT",                  "value": "${polygon_jobs_count}" },
     { "name": "DBT_TARGET_SCHEMA",                   "value": "${pg_transform_schema}" },
     { "name": "AWS_LAMBDA_API_GATEWAY_ENDPOINT",     "value": "${aws_lambda_api_gateway_endpoint}" }
   ],
