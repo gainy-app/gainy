@@ -7,7 +7,7 @@
 
 select portfolio_securities.id,
        portfolio_securities.name,
-       coalesce(base_tickers.symbol, 
+       coalesce(base_tickers.symbol,
                 portfolio_securities.ticker_symbol) as ticker_symbol,
        case
            when base_tickers.type = 'crypto'
@@ -26,9 +26,9 @@ select portfolio_securities.id,
 from {{ source('app', 'portfolio_securities') }}
          left join {{ ref('base_tickers') }}
                    on base_tickers.symbol in (portfolio_securities.ticker_symbol,
-                                              regexp_replace(portfolio_securities.ticker_symbol, '\d{6}[CP]\d{8}$', ''),
-                                              regexp_replace(portfolio_securities.ticker_symbol, '^CUR:([^.]+).*$', '\1.CC')
-                       )
+                                              regexp_replace(portfolio_securities.ticker_symbol, '\d{6}[CP]\d{8}$', ''))
+                        or (base_tickers.symbol = regexp_replace(portfolio_securities.ticker_symbol, '^CUR:([^.]+).*$', '\1.CC')
+                            and portfolio_securities.type != 'cash')
 where
     (
         base_tickers.symbol is not null
