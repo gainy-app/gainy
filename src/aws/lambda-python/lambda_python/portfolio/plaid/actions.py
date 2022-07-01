@@ -36,7 +36,7 @@ class CreatePlaidLinkToken(HasuraAction):
                 cursor.execute(
                     "SELECT access_token FROM app.profile_plaid_access_tokens WHERE id = %(id)s and profile_id = %(profile_id)s",
                     {
-                        "id": id,
+                        "id": access_token_id,
                         "profile_id": profile_id
                     })
 
