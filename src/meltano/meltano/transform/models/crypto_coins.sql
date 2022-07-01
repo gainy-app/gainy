@@ -4,6 +4,7 @@
     unique_key = "symbol",
     post_hook=[
       pk('symbol'),
+      'delete from {{this}} where updated_at < (select max(updated_at) from {{this}})',
     ]
   )
 }}
@@ -41,7 +42,8 @@ select distinct on (
       status_updates,
       (upper(symbol) || '.CC')::varchar as symbol,
       contract_address,
-      ico_data
+      ico_data,
+      now()                             as updated_at
 from {{ source('coingecko', 'coingecko_coin') }}
 where symbol is not null
 order by upper(symbol), coingecko_rank
