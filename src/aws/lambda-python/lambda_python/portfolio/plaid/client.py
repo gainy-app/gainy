@@ -41,7 +41,7 @@ class PlaidClient:
             LinkTokenCreateRequestUser(client_user_id=str(profile_id), )
         }
         if access_token is not None:
-            params[access_token] = access_token
+            params['access_token'] = access_token
 
         request = LinkTokenCreateRequest(**params)
         response = self.get_client(env).link_token_create(request)
