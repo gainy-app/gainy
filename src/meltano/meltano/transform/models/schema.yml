@@ -49,6 +49,7 @@ sources:
     schema: app
     tables:
       - name: influencers
+      - name: invitations
       - name: personalized_collection_sizes
       - name: personalized_ticker_collections
       - name: plaid_institutions
@@ -1964,6 +1965,14 @@ models:
         tests:
           - type:
               type: 'json'
+      - name: is_test
+        tests:
+          - type:
+              type: 'boolean'
+      - name: template_id
+        tests:
+          - type:
+              type: 'text'
 
   - name: data_checks
     columns:
