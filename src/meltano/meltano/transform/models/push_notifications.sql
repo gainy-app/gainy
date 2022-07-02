@@ -13,7 +13,7 @@ with all_push_notifications as
             -- Two separate notifications
             -- / Top losers: +3% TSLA, +5% MDB ...
             select profile_id,
-                   (profile_id || '_top_gainers_' || now()::date)::varchar                                     as uniq_id,
+                   (profile_id || '_top_gainers_' || now()::date)                                              as uniq_id,
                    min(exchange_schedule.open_at) + interval '30 minutes'                                      as send_at,
                    json_build_object('en', 'Morning gainers: ' ||
                                            string_agg(text, ', ' order by relative_daily_change desc, symbol)) as text,
@@ -40,7 +40,7 @@ with all_push_notifications as
             union all
 
             select profile_id,
-                   (profile_id || '_top_losers_' || now()::date)::varchar                                 as uniq_id,
+                   (profile_id || '_top_losers_' || now()::date)                                          as uniq_id,
                    min(exchange_schedule.open_at) + interval '30 minutes'                                 as send_at,
                    json_build_object('en', 'Morning losers: ' ||
                                            string_agg(text, ', ' order by relative_daily_change, symbol)) as text,
@@ -70,7 +70,7 @@ with all_push_notifications as
             -- 1) MIN 3% diff for TTF to change 2) #1 TTF
             -- Notify with the performance of the top TTF on the platform  [better do it aftermarket opens and trades a bit ~12pm EST]
             select null                                            as profile_id,
-                   ('top_ttf_' || now()::date)::varchar            as uniq_id,
+                   ('top_ttf_' || now()::date)                     as uniq_id,
                    exchange_schedule.close_at - interval '2 hours' as send_at,
                    json_build_object('en', 'The most performing TTF today is ' || collection_name || ' +' ||
                                            round(relative_daily_change * 100) ||

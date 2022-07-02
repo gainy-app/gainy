@@ -1952,7 +1952,7 @@ models:
           - unique
           - not_null
           - type:
-              type: 'character varying'
+              type: 'text'
       - name: send_at
         tests:
           - type:
