@@ -23,7 +23,7 @@ locals {
   polygon_websockets_memory_credits = var.env == "production" ? 1024 : 0
   hasura_memory_credits             = var.env == "production" ? 2048 : 1024
   meltano_ui_memory_credits         = var.env == "production" ? 1024 : 1024
-  meltano_scheduler_memory_credits  = var.env == "production" ? 4096 : 3072
+  meltano_scheduler_memory_credits  = var.env == "production" ? 5120 : 3072
   main_memory_credits = ceil(sum([
     local.hasura_memory_credits,
     local.meltano_ui_memory_credits,
