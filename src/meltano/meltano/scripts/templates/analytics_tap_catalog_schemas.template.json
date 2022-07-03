@@ -88,10 +88,25 @@
     }
   },
   "public": {
+    "analyst_ratings": {
+      "metadata": {
+        "table-key-properties": [
+          "symbol"
+        ]
+      }
+    },
     "base_tickers": {
       "metadata": {
         "table-key-properties": [
           "symbol"
+        ]
+      }
+    },
+    "cash_flow": {
+      "metadata": {
+        "table-key-properties": [
+          "symbol",
+          "date"
         ]
       }
     },
@@ -109,6 +124,13 @@
         ]
       }
     },
+    "crypto_coins": {
+      "metadata": {
+        "table-key-properties": [
+          "symbol"
+        ]
+      }
+    },
     "crypto_metrics": {
       "metadata": {
         "table-key-properties": [
@@ -123,10 +145,51 @@
         ]
       }
     },
-    "interest_industries": {
+    "earnings_annual": {
       "metadata": {
         "table-key-properties": [
-          "id"
+          "symbol",
+          "date"
+        ]
+      }
+    },
+    "earnings_history": {
+      "metadata": {
+        "table-key-properties": [
+          "symbol",
+          "date"
+        ]
+      }
+    },
+    "earnings_trend": {
+      "metadata": {
+        "table-key-properties": [
+          "symbol",
+          "date"
+        ]
+      }
+    },
+    "financials_balance_sheet_quarterly": {
+      "metadata": {
+        "table-key-properties": [
+          "symbol",
+          "date"
+        ]
+      }
+    },
+    "financials_income_statement_quarterly": {
+      "metadata": {
+        "table-key-properties": [
+          "symbol",
+          "date"
+        ]
+      }
+    },
+    "financials_income_statement_yearly": {
+      "metadata": {
+        "table-key-properties": [
+          "symbol",
+          "date"
         ]
       }
     },
@@ -134,6 +197,34 @@
       "metadata": {
         "table-key-properties": [
           "id"
+        ]
+      }
+    },
+    "highlights": {
+      "metadata": {
+        "table-key-properties": [
+          "symbol"
+        ]
+      }
+    },
+    "historical_prices_marked": {
+      "metadata": {
+        "table-key-properties": [
+          "symbol"
+        ]
+      }
+    },
+    "interest_industries": {
+      "metadata": {
+        "table-key-properties": [
+          "id"
+        ]
+      }
+    },
+    "technicals": {
+      "metadata": {
+        "table-key-properties": [
+          "symbol"
         ]
       }
     },
@@ -148,6 +239,14 @@
       "metadata": {
         "table-key-properties": [
           "id"
+        ]
+      }
+    },
+    "ticker_events": {
+      "metadata": {
+        "table-key-properties": [
+          "symbol",
+          "date"
         ]
       }
     },
@@ -173,6 +272,20 @@
       }
     },
     "ticker_realtime_metrics": {
+      "metadata": {
+        "table-key-properties": [
+          "symbol"
+        ]
+      }
+    },
+    "ticker_shares_stats": {
+      "metadata": {
+        "table-key-properties": [
+          "symbol"
+        ]
+      }
+    },
+    "valuation": {
       "metadata": {
         "table-key-properties": [
           "symbol"

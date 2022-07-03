@@ -2,15 +2,14 @@
   config(
     materialized = "table",
     post_hook=[
-      index(this, 'symbol'),
-      index(this, 'updated_at'),
+      pk('symbol'),
     ]
   )
 }}
 
 SELECT eh0.symbol,
        eh0.date::date as updated_at,
-       CASE WHEN ABS(eh1.eps_actual) > 0 THEN cbrt(eh0.eps_actual / eh1.eps_actual) - 1 END as value
+       CASE WHEN ABS(eh1.eps_actual) > 0 THEN cbrt(eh0.eps_actual / eh1.eps_actual) - 1 END as eps_growth_3y_yoy
 from {{ ref('earnings_history') }} eh0
          LEFT JOIN {{ ref('earnings_history') }} eh0_next
                    ON eh0_next.symbol = eh0.symbol AND
