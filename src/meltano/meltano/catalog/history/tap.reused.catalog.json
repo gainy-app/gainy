@@ -10,9 +10,9 @@
             "replication-key": "date",
             "replication-method": "INCREMENTAL",
             "view-key-properties": [
-              "date",
               "collection_uniq_id",
-              "symbol"
+              "symbol",
+              "date"
             ],
             "schema-name": "public",
             "database-name": "gainy",

@@ -56,8 +56,8 @@ with tickers as (select * from {{ ref('tickers') }} where type != 'crypto'),
                             THEN (h.diluted_eps_ttm / h.book_value) *
                                  (1 - (f.splitsdividends ->> 'PayoutRatio')::float)
                         END                                                                           as cur_internal_growth_rate,
-                    heg.value                                                                         as hist_eps_growth,
-                    hsg.value                                                                         as hist_sales_growth,
+                    heg.eps_growth_3y_yoy                                                             as hist_eps_growth,
+                    hsg.total_revenue_growth_3y_yoy                                                   as hist_sales_growth,
                  /* value */
                     CASE WHEN hsg.quartal_end_price > 0 THEN h.book_value / hsg.quartal_end_price END as bvp,
                     CASE
