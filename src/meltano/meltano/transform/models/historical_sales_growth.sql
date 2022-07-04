@@ -2,15 +2,14 @@
   config(
     materialized = "table",
     post_hook=[
-      index(this, 'symbol'),
-      index(this, 'updated_at'),
+      pk('symbol'),
     ]
   )
 }}
 
 SELECT fisq0.symbol,
        fisq0.date::timestamp                                                                               as updated_at,
-       CASE WHEN ABS(fisq1.total_revenue) > 0 THEN cbrt(fisq0.total_revenue / fisq1.total_revenue) - 1 END as value
+       CASE WHEN ABS(fisq1.total_revenue) > 0 THEN cbrt(fisq0.total_revenue / fisq1.total_revenue) - 1 END as total_revenue_growth_3y_yoy
 from {{ ref('financials_income_statement_quarterly') }} fisq0
          LEFT JOIN {{ ref('financials_income_statement_quarterly') }} fisq0_next
                    ON fisq0_next.symbol = fisq0.symbol AND

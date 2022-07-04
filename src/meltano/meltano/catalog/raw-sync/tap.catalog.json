@@ -114,8 +114,8 @@
             "replication-key": "t",
             "replication-method": "INCREMENTAL",
             "table-key-properties": [
-              "t",
-              "symbol"
+              "symbol",
+              "t"
             ],
             "schema-name": "raw_data",
             "database-name": "gainy",
@@ -140,8 +140,8 @@
             "replication-key": "t",
             "replication-method": "INCREMENTAL",
             "table-key-properties": [
-              "t",
-              "contract_name"
+              "contract_name",
+              "t"
             ],
             "schema-name": "raw_data",
             "database-name": "gainy",
@@ -166,8 +166,8 @@
             "replication-key": "t",
             "replication-method": "INCREMENTAL",
             "table-key-properties": [
-              "t",
-              "symbol"
+              "symbol",
+              "t"
             ],
             "schema-name": "raw_data",
             "database-name": "gainy",
