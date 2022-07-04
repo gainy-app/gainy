@@ -10,12 +10,15 @@ PGPASSWORD=$PG_PASSWORD psql -h $PG_HOST -p $PG_PORT -U $PG_USERNAME $PG_DBNAME 
 
 if [ $(PGPASSWORD=$PG_PASSWORD psql -h $PG_HOST -p $PG_PORT -U $PG_USERNAME $PG_DBNAME -c "select count(*) from deployment.public_schemas where schema_name = '$DBT_TARGET_SCHEMA' and deployed_at is not null" -t --csv) == "0" ]; then
   echo 'Running csv-to-postgres' && meltano schedule run csv-to-postgres --force
-else
-  nohup bash -c "meltano schedule run postgres-to-search --force" &> /dev/null &
+#else
 #  RUNNING_DEPLOYMENT_JOBS_COUNT=$(meltano invoke airflow dags list-runs -d deployment --state running | wc -l)
 #  if (( RUNNING_DEPLOYMENT_JOBS_COUNT < 2 )); then
 #    nohup bash -c "meltano invoke airflow dags trigger deployment" &> /dev/null &
 #  fi
+fi
+
+if [ "$ENV" != "local" ]; then
+  nohup bash -c "meltano schedule run postgres-to-search --force" &> /dev/null &
 fi
 
 PGPASSWORD=$PG_PASSWORD psql -h $PG_HOST -p $PG_PORT -U $PG_USERNAME $PG_DBNAME -c \
