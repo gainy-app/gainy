@@ -50,7 +50,8 @@ locals {
       algolia_indexing_key                 = var.algolia_indexing_key
       onesignal_app_id                     = var.onesignal_app_id
       onesignal_api_key                    = var.onesignal_api_key
-      onesignal_segments                   = jsonencode(var.env == "production" ? ["Subscribed Users"] : ["Testers"])
+      onesignal_segments_production        = jsonencode(["Subscribed Users"])
+      onesignal_segments_test              = jsonencode(["Testers"])
       gainy_history_s3_bucket              = var.gainy_history_s3_bucket
 
       pg_external_access_host     = var.pg_external_access_host

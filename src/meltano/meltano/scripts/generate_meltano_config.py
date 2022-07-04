@@ -66,8 +66,7 @@ def _generate_schedules(env):
                 cursor.execute("""
                     select code
                     from raw_data.eod_historical_prices
-                    join base_tickers on base_tickers.symbol = eod_historical_prices.code
-                    where adjusted_close < 0 and base_tickers.type != 'crypto'
+                    where adjusted_close < 0
                     group by code
                     """)
                 full_refresh_symbols = list(

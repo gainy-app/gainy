@@ -100,7 +100,8 @@
 
     { "name": "ONESIGNAL_APP_ID",                      "value": "${onesignal_app_id}" },
     { "name": "ONESIGNAL_API_KEY",                     "value": "${onesignal_api_key}" },
-    { "name": "ONESIGNAL_SEGMENTS",                    "value": ${jsonencode(onesignal_segments)} },
+    { "name": "ONESIGNAL_SEGMENTS_PRODUCTION",         "value": ${jsonencode(onesignal_segments_production)} },
+    { "name": "ONESIGNAL_SEGMENTS_TEST",               "value": ${jsonencode(onesignal_segments_test)} },
 
     { "name": "DATADOG_API_KEY",                       "value": "${datadog_api_key}" },
     { "name": "DATADOG_APP_KEY",                       "value": "${datadog_app_key}" },
