@@ -17,6 +17,10 @@ if [ $(PGPASSWORD=$PG_PASSWORD psql -h $PG_HOST -p $PG_PORT -U $PG_USERNAME $PG_
 #  fi
 fi
 
+if [ "$ENV" != "local" ]; then
+  nohup bash -c "meltano schedule run postgres-to-search --force" &> /dev/null &
+fi
+
 PGPASSWORD=$PG_PASSWORD psql -h $PG_HOST -p $PG_PORT -U $PG_USERNAME $PG_DBNAME -c \
   "update deployment.public_schemas set deployed_at = now() where schema_name = '$DBT_TARGET_SCHEMA';"
 
