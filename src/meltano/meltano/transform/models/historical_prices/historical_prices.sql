@@ -52,7 +52,7 @@ next_trading_session as
 prices_with_split_rates as
     (
         SELECT eod_historical_prices.code,
-               eod_historical_prices.date::date,
+               eod_historical_prices.date,
                case when close > 0 then adjusted_close / close end as split_rate,
                polygon_stock_splits.split_to::numeric /
                polygon_stock_splits.split_from::numeric            as split_rate_next_day,
@@ -84,10 +84,10 @@ prev_split as
         where abs(split_rate - next_split_rate) > 1e-6
     )
 SELECT prices_with_split_rates.code,
-       (prices_with_split_rates.code || '_' || prices_with_split_rates.date)::varchar            as id,
-       substr(prices_with_split_rates.date, 0, 5)                        as date_year,
-       (substr(prices_with_split_rates.date, 0, 8) || '-01')::timestamp  as date_month,
-       date_trunc('week', prices_with_split_rates.date::date)::timestamp as date_week,
+       (prices_with_split_rates.code || '_' || prices_with_split_rates.date)::varchar as id,
+       substr(prices_with_split_rates.date, 0, 5)                                     as date_year,
+       (substr(prices_with_split_rates.date, 0, 8) || '-01')::timestamp               as date_month,
+       date_trunc('week', prices_with_split_rates.date::date)::timestamp              as date_week,
        case
            -- if there is no split tomorrow - just use the data from eod
            when split_rate_next_day is null
@@ -96,7 +96,7 @@ SELECT prices_with_split_rates.code,
            when prices_with_split_rates.date > prev_split.date
                then coalesce(prev_split.next_split_rate, 1.0) * split_rate_next_day * close
            else prices_with_split_rates.split_rate * split_rate_next_day * close
-           end as adjusted_close,
+           end                                                                        as adjusted_close,
        prices_with_split_rates.close,
        prices_with_split_rates.date::date,
        prices_with_split_rates.high,
