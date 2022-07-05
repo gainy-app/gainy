@@ -29,3 +29,5 @@ COPY raw_data.eod_fundamentals (analystratings, code, esgscores, earnings, finan
 \.
 
 insert into raw_data.eod_fundamentals (analystratings, code, esgscores, earnings, financials, general, highlights, holders, insidertransactions, sharesstats, splitsdividends, technicals, updatedat, valuation, outstandingshares, type) values ('{}', 'BTC.CC', null, '{}', '{}', '{"Name": "Bitcoin", "Type": "Crypto", "WebURL": "https://bitcoin.org/", "Category": "coin"}', '{}', null, null, '{}', '{}', '{}', '{}', '{}', null, 'Currency') on conflict do nothing;
+
+update raw_data.eod_fundamentals set _sdc_extracted_at = now();
