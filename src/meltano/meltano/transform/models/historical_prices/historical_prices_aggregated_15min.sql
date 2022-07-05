@@ -70,6 +70,7 @@ with
                     t.high,
                     t.low,
                     ip_close.close,
+                    ip_close.adjusted_close,
                     t.volume
              from (
                       select symbol,
@@ -124,56 +125,24 @@ with
                     date
              from {{ ref('ticker_options_monitored') }}
                       join time_series_15min on time_series_15min.type is null
-         ),
-     prices as
-         (
-             select *,
-                    first_value(adjustment_rate)
-                    OVER (partition by symbol order by datetime) as adjustment_rate2
-             from (
-                      select tds.symbol,
-                             tds.time_15min::timestamp                    as datetime,
-                             expanded_intraday_prices.open,
-                             expanded_intraday_prices.high,
-                             expanded_intraday_prices.low,
-                             coalesce(expanded_intraday_prices.close,
-                                      LAST_VALUE_IGNORENULLS(expanded_intraday_prices.close) over (lookback),
-                                      historical_prices_marked.price_1w
-                                 )                                        as close,
-                             coalesce(expanded_intraday_prices.volume, 0) as volume,
-                             case
-                                 when historical_prices.close > 0
-                                     then historical_prices.adjusted_close / historical_prices.close
-                                 end                                      as adjustment_rate,
-                             historical_prices.adjusted_close             as daily_adjusted_close
-                      from tickers_dates_skeleton tds
-                               left join expanded_intraday_prices using (symbol, time_15min)
-                               left join {{ ref('historical_prices_marked') }} using (symbol)
-                               left join {{ ref('historical_prices') }}
-                                         on historical_prices.code = tds.symbol
-                                             and historical_prices.date = tds.date
-                          window
-                              lookback as (partition by tds.symbol order by tds.time_15min asc)
-                  ) t
          )
-select symbol || '_' || datetime as id,
-       symbol,
-       datetime,
-       open,
-       high,
-       low,
-       close,
-       (case
-            when adjustment_rate is null or adjustment_rate2 is null or abs(close) < 1e-3
-                then 1
-            when adjustment_rate = adjustment_rate2 or abs(daily_adjusted_close / close - adjustment_rate) <
-                                                       abs(daily_adjusted_close / close - adjustment_rate2)
-                then adjustment_rate
-            else adjustment_rate2
-            end * close
-           )                     as adjusted_close,
-       volume
-from prices
+select symbol || '_' || datetime                    as id,
+       tds.symbol,
+       tds.time_15min::timestamp                    as datetime,
+       expanded_intraday_prices.open,
+       expanded_intraday_prices.high,
+       expanded_intraday_prices.low,
+       expanded_intraday_prices.close,
+       coalesce(expanded_intraday_prices.adjusted_close,
+                LAST_VALUE_IGNORENULLS(expanded_intraday_prices.adjusted_close) over (lookback),
+                historical_prices_marked.price_1w
+           )                                        as adjusted_close,
+       coalesce(expanded_intraday_prices.volume, 0) as volume
+from tickers_dates_skeleton tds
+         left join expanded_intraday_prices using (symbol, time_15min)
+         left join {{ ref('historical_prices_marked') }} using (symbol)
+    window
+        lookback as (partition by tds.symbol order by tds.time_15min asc)
 
 -- OK created incremental model historical_prices_aggregated_15min SELECT 3705058 in 183.20s
 -- OK created incremental model historical_prices_aggregated_15min SELECT 3705058 in 186.82s
