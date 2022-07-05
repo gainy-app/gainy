@@ -27,27 +27,16 @@ polygon_crypto_tickers as
     ),
 next_trading_session as
     (
-        (
-            select distinct on (
-                exchange_name
-                ) exchange_name,
-                  null as country_name,
-                  date
-            from {{ ref('exchange_schedule') }}
-            where open_at > now()
-            order by exchange_name, date
-        )
-        union all
-        (
-            select distinct on (
-                country_name
-                ) null as exchange_name,
-                  country_name,
-                  date
-            from {{ ref('exchange_schedule') }}
-            where open_at > now()
-            order by country_name, date
-        )
+        select distinct on (symbol) symbol, exchange_schedule.date
+        from latest_stock_price_date
+                 join {{ ref('base_tickers') }} using (symbol)
+                 left join {{ ref('exchange_schedule') }}
+                           on (exchange_schedule.exchange_name =
+                               base_tickers.exchange_canonical or
+                               (base_tickers.exchange_canonical is null and
+                                exchange_schedule.country_name = base_tickers.country_name))
+        where exchange_schedule.date > latest_stock_price_date.date
+        order by symbol, exchange_schedule.date
     ),
 stocks_with_split as
     (
@@ -55,13 +44,11 @@ stocks_with_split as
                split_to,
                split_from
         from {{ ref('base_tickers') }}
-                 left join next_trading_session
-                      on (next_trading_session.exchange_name = base_tickers.exchange_canonical or
-                          (base_tickers.exchange_canonical is null and
-                           next_trading_session.country_name = base_tickers.country_name))
+                 left join next_trading_session using (symbol)
                  left join {{ source('polygon', 'polygon_stock_splits') }}
-                      on polygon_stock_splits.execution_date::date = next_trading_session.date
-                          and polygon_stock_splits.ticker = base_tickers.symbol
+                           on polygon_stock_splits.execution_date::date =
+                              next_trading_session.date
+                               and polygon_stock_splits.ticker = base_tickers.symbol
     ),
 prices_with_split_rates as
     (
