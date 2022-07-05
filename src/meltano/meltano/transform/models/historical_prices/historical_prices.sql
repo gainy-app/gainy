@@ -3,7 +3,7 @@
     materialized = "incremental",
     unique_key = "id",
     post_hook=[
-      pk('date, code'),
+      pk('code, date'),
       index(this, 'id', true),
       'create unique index if not exists "code__date_year__date" ON {{ this }} (code, date_year, date)',
       'create unique index if not exists "code__date_month__date" ON {{ this }} (code, date_month, date)',
@@ -49,39 +49,42 @@ next_trading_session as
             order by country_name, date
         )
     ),
+stocks_with_split as
+    (
+        select symbol as code,
+               split_to,
+               split_from
+        from {{ ref('base_tickers') }}
+                 left join next_trading_session
+                      on (next_trading_session.exchange_name = base_tickers.exchange_canonical or
+                          (base_tickers.exchange_canonical is null and
+                           next_trading_session.country_name = base_tickers.country_name))
+                 left join {{ source('polygon', 'polygon_stock_splits') }}
+                      on polygon_stock_splits.execution_date::date = next_trading_session.date
+                          and polygon_stock_splits.ticker = base_tickers.symbol
+    ),
 prices_with_split_rates as
     (
         SELECT eod_historical_prices.code,
                eod_historical_prices.date,
                case when close > 0 then adjusted_close / close end as split_rate,
-               polygon_stock_splits.split_to::numeric /
-               polygon_stock_splits.split_from::numeric            as split_rate_next_day,
+               stocks_with_split.split_to::numeric /
+               stocks_with_split.split_from::numeric               as split_rate_next_day,
                eod_historical_prices.open,
                eod_historical_prices.high,
                eod_historical_prices.low,
-               eod_historical_prices.close,
                eod_historical_prices.adjusted_close,
+               eod_historical_prices.close,
                eod_historical_prices.volume
         from {{ source('eod', 'eod_historical_prices') }}
-                 join {{ ref('base_tickers') }} on base_tickers.symbol = eod_historical_prices.code
-                 left join next_trading_session
-                           on (next_trading_session.exchange_name = base_tickers.exchange_canonical or
-                               (base_tickers.exchange_canonical is null and
-                                next_trading_session.country_name = base_tickers.country_name))
-                 left join {{ source('polygon', 'polygon_stock_splits') }}
-                           on polygon_stock_splits.execution_date::date = next_trading_session.date
-                               and polygon_stock_splits.ticker = eod_historical_prices.code
-        order by code, date desc
+                 left join stocks_with_split using (code)
     ),
 prev_split as
     (
-        select distinct on (code) code, date, split_rate, next_split_rate
-        from (
-                 select *,
-                        lag(split_rate) over (partition by code order by date desc) as next_split_rate
-                 from prices_with_split_rates
-             ) t
-        where abs(split_rate - next_split_rate) > 1e-6
+        select code, max(date) as date
+        from {{ source('eod', 'eod_historical_prices') }}
+        where abs(close - eod_historical_prices.adjusted_close) > 1e-3
+        group by code
     )
 SELECT prices_with_split_rates.code,
        (prices_with_split_rates.code || '_' || prices_with_split_rates.date)::varchar as id,
@@ -92,9 +95,9 @@ SELECT prices_with_split_rates.code,
            -- if there is no split tomorrow - just use the data from eod
            when split_rate_next_day is null
                then adjusted_close
-           -- latest split period, so we ignore split_rate and use prev_split.next_split_rate
+           -- latest split period, so we ignore split_rate and use 1.0
            when prices_with_split_rates.date > prev_split.date
-               then coalesce(prev_split.next_split_rate, 1.0) * split_rate_next_day * close
+               then split_rate_next_day * close
            else prices_with_split_rates.split_rate * split_rate_next_day * close
            end                                                                        as adjusted_close,
        prices_with_split_rates.close,
