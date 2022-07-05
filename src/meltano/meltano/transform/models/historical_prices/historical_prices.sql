@@ -25,6 +25,12 @@ polygon_crypto_tickers as
         left join {{ source('eod', 'eod_historical_prices') }} on eod_historical_prices.code = tickers.symbol
         where eod_historical_prices.code is null
     ),
+latest_stock_price_date as
+    (
+        SELECT code as symbol, max(date)::date as date
+        from {{ source('eod', 'eod_historical_prices') }}
+        group by code
+    ),
 next_trading_session as
     (
         select distinct on (symbol) symbol, exchange_schedule.date
