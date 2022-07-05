@@ -1812,7 +1812,7 @@ models:
         tests:
           - type:
               type: 'double precision'
-      - name: market_capiptalization
+      - name: market_capitalization
         tests:
           - type:
               type: 'double precision'

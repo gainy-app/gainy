@@ -2,19 +2,18 @@
   config(
     materialized = "incremental",
     unique_key = "id",
+    tags = ["realtime"],
     post_hook=[
       pk('symbol, time'),
       index(this, 'id', true),
+      'create index if not exists "symbol__time_3min" ON {{ this }} (symbol, time_3min)',
+      'create index if not exists "symbol__time_15min" ON {{ this }} (symbol, time_15min)',
     ]
   )
 }}
 
 
-with
-{% if is_incremental() %}
-max_updated_at as (select code, max(date) as max_date from {{ this }} group by code),
-{% endif %}
-     week_trading_sessions as
+with week_trading_sessions as
          (
              select exchange_name,
                     null          as country_name,
@@ -41,10 +40,13 @@ max_updated_at as (select code, max(date) as max_date from {{ this }} group by c
              select symbol,
                     date,
                     time,
+                    (date_trunc('minute', time) - interval '1 minute' * mod(extract(minutes from time)::int, 3))::timestamp  as time_3min,
+                    (date_trunc('minute', time) - interval '1 minute' * mod(extract(minutes from time)::int, 15))::timestamp as time_15min,
                     open,
                     high,
                     low,
-                    close
+                    close,
+                    volume
              from {{ source('eod', 'eod_intraday_prices') }}
                       join {{ ref('base_tickers') }} using (symbol)
                       join week_trading_sessions
@@ -54,6 +56,14 @@ max_updated_at as (select code, max(date) as max_date from {{ this }} group by c
              where time >= week_trading_sessions.open_at
                and time < week_trading_sessions.close_at
          ),
+{% if is_incremental() %}
+     old_model_stats as
+         (
+             select symbol, max(time) as max_time
+             from historical_intraday_prices
+             group by symbol
+         )
+{% else %}
      daily_close_prices as
          (
              select symbol,
@@ -72,22 +82,38 @@ max_updated_at as (select code, max(date) as max_date from {{ this }} group by c
                                 abs(eod_intraday_prices.close - historical_prices.adjusted_close)
                             and abs(historical_prices.adjusted_close / historical_prices.close - 1) > 1e-2
                             then historical_prices.adjusted_close / historical_prices.close
-                        else 1.0
+                        else 1.0 -- TODO verify todays intraday prices after split are adjusted?
                         end as split_rate
              from daily_close_prices
-                      join {{ ref('historical_prices') }}
-                           on historical_prices.code = daily_close_prices.symbol
-                               and historical_prices.date = daily_close_prices.date
+                      left join {{ ref('historical_prices') }}
+                                on historical_prices.code = daily_close_prices.symbol
+                                    and historical_prices.date = daily_close_prices.date
                       join {{ source('eod', 'eod_intraday_prices') }} using (symbol, time)
          )
+{% endif %}
 select symbol,
        date,
        time,
+       time_3min,
+       time_15min,
        open,
        high,
        low,
        close,
-       close * split_rate      as adjusted_close,
+       volume,
+
+{% if is_incremental() %}
+       close as adjusted_close,
+{% else %}
+       close * split_rate as adjusted_close,
+{% endif %}
+
        (symbol || '_' || time) as id
 from raw_intraday_prices
+
+{% if is_incremental() %}
+left join old_model_stats using (symbol)
+where old_model_stats.max_time is null or raw_intraday_prices.time > max_time
+{% else %}
          left join daily_adjustment_rate using (symbol, date)
+{% endif %}

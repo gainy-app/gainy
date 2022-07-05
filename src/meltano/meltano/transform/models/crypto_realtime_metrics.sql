@@ -39,7 +39,7 @@ select distinct on (
               then coingecko_market_realtime.market_cap
           else ticker_realtime_metrics.actual_price *
                (coingecko_coin.market_data ->> 'circulating_supply')::double precision
-          end            as market_capiptalization,
+          end            as market_capitalization,
 
       case
           when coingecko_market_realtime.last_updated::timestamp > coingecko_coin.last_updated::timestamp

@@ -75,50 +75,37 @@ with latest_trading_day as
                          select contract_name as symbol
                          from {{ ref('ticker_options_monitored') }}
                       ),
-                  max_3min as
+                  max_intraday as
                       (
-                          select symbol, max(datetime) as datetime, interval '3 minutes' as period_interval
-                          from {{ ref('historical_prices_aggregated_3min') }}
+                          select symbol, max(time) as time, interval '1 minute' as period_interval
+                          from {{ ref('historical_intraday_prices') }}
                           group by symbol
                       ),
-                  max_15min as
+                  max_historical as
                       (
-                          select symbol, max(datetime) as datetime, interval '15 minutes' as period_interval
-                          from {{ ref('historical_prices_aggregated_15min') }}
-                          group by symbol
-                      ),
-                  max_1d as
-                      (
-                          select symbol, max(datetime) as datetime, interval '1 day' as period_interval
-                          from {{ ref('historical_prices_aggregated_1d') }}
-                          group by symbol
+                          select code, max(date) as date, interval '1 day' as period_interval
+                          from {{ ref('historical_prices') }}
+                          group by code
                       )
              select chart_symbols.symbol,
                     coalesce(
-                                max_3min.datetime + max_3min.period_interval,
-                                max_15min.datetime + max_15min.period_interval,
-                                max_1d.datetime + max_1d.period_interval
+                                max_intraday.time + max_intraday.period_interval,
+                                max_historical.date + max_historical.period_interval
                         ) as datetime,
                     coalesce(
-                            hpa_3min.adjusted_close,
-                            hpa_15min.adjusted_close,
-                            hpa_1d.adjusted_close
+                            historical_intraday_prices.adjusted_close,
+                            historical_prices.adjusted_close
                         ) as adjusted_close
              from chart_symbols
-                      left join max_3min on max_3min.symbol = chart_symbols.symbol
-                      left join {{ ref('historical_prices_aggregated_3min') }} hpa_3min
-                                on hpa_3min.symbol = max_3min.symbol
-                                    and hpa_3min.datetime = max_3min.datetime
+                      left join max_intraday on max_intraday.symbol = chart_symbols.symbol
+                      left join {{ ref('historical_intraday_prices') }}
+                                on historical_intraday_prices.symbol = max_intraday.symbol
+                                    and historical_intraday_prices.time = max_intraday.time
 
-                      left join max_15min on max_15min.symbol = chart_symbols.symbol
-                      left join {{ ref('historical_prices_aggregated_15min') }} hpa_15min
-                                on hpa_15min.symbol = max_15min.symbol
-                                    and hpa_15min.datetime = max_15min.datetime
-
-                      left join max_1d on max_1d.symbol = chart_symbols.symbol
-                      left join {{ ref('historical_prices_aggregated_1d') }} hpa_1d
-                                on hpa_1d.symbol = max_1d.symbol
-                                    and hpa_1d.datetime = max_1d.datetime
+                      left join max_historical on max_historical.code = chart_symbols.symbol
+                      left join {{ ref('historical_prices') }}
+                                on historical_prices.code = max_historical.code
+                                    and historical_prices.date = max_historical.date
          )
 select symbol,
        coalesce(latest_trading_day.close_datetime, latest_datapoint.datetime)              as time,
