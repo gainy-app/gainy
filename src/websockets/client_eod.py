@@ -172,8 +172,8 @@ class PricesListener(AbstractPriceListener):
         if self.sub_listeners is not None:
             for sub_listener in self.sub_listeners:
                 if not sub_listener.should_reconnect():
-                    return False
-            return True
+                    return True
+            return False
 
         return super().should_reconnect(self.endpoint)
 
