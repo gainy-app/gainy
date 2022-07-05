@@ -60,7 +60,7 @@ with week_trading_sessions as
      old_model_stats as
          (
              select symbol, max(time) as max_time
-             from historical_intraday_prices
+             from {{ this }}
              group by symbol
          )
 {% else %}
