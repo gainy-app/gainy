@@ -183,6 +183,32 @@
       "selected": true
     },
     {
+      "table_name": "polygon_stock_splits",
+      "stream": "polygon_stock_splits",
+      "metadata": [
+        {
+          "breadcrumb": [],
+          "metadata": {
+            "replication-key": "t",
+            "replication-method": "INCREMENTAL",
+            "table-key-properties": [
+              "ticker",
+              "execution_date"
+            ],
+            "schema-name": "raw_data",
+            "database-name": "gainy",
+            "selected": true
+          }
+        }
+      ],
+      "tap_stream_id": "raw_data-polygon_stock_splits",
+      "schema": {
+        "type": "object",
+        "properties": {}
+      },
+      "selected": true
+    },
+    {
       "table_name": "blogs",
       "stream": "blogs",
       "metadata": [

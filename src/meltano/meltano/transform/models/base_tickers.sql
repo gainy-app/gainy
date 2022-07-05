@@ -4,6 +4,7 @@
     unique_key = "symbol",
     post_hook=[
       pk('symbol'),
+      'delete from {{this}} where updated_at < (select max(updated_at) from {{this}})',
     ]
   )
 }}
@@ -71,6 +72,7 @@ with ticker_gic_override as
                       left join ticker_gic_override
                                 on ticker_gic_override.symbol = upper(eod_fundamentals.code)
              where ((general ->> 'IsDelisted') is null or (general ->> 'IsDelisted')::bool = false)
+               and _sdc_extracted_at > (select max(_sdc_extracted_at)::date from {{ source('eod', 'eod_fundamentals')}}) - interval '1 day'
                and eod_fundamentals.code not in
                    ('NTEST', 'NTEST-M', 'PTEST', 'MTEST', 'PTEST-W', 'PTEST-X', 'ATEST-A', 'ATEST-G',
                     'ATEST-C', 'ZZZ', 'ZJZZT', 'ATEST-H', 'ZVV', 'NTEST-G', 'NTEST-J', 'NTEST-K', 'ZXYZ-A',
@@ -117,7 +119,8 @@ from (
                 gic_sub_industry,
                 country_name,
                 exchange,
-                exchange_canonical
+                exchange_canonical,
+                now() as updated_at
          from eod_tickers
 
          union all
@@ -138,6 +141,7 @@ from (
                 gic_sub_industry,
                 country_name,
                 exchange,
-                exchange_canonical
+                exchange_canonical,
+                now() as updated_at
          from coingecko_tickers
      ) t
