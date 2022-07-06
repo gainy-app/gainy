@@ -13,7 +13,7 @@ with latest_trading_day as
          (
              select t.symbol,
                     hpa_open.open                     as open_price,
-                    hpa_close.close                   as close_price,
+                    hpa_close.adjusted_close          as close_price,
                     t.min_datetime                    as open_datetime,
                     t.max_datetime + interval '3 min' as close_datetime,
                     t.sum_volume                      as volume
