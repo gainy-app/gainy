@@ -126,7 +126,7 @@ with
              from {{ ref('ticker_options_monitored') }}
                       join time_series_15min on time_series_15min.type is null
          )
-select symbol || '_' || datetime                    as id,
+select symbol || '_' || tds.time_15min              as id,
        tds.symbol,
        tds.time_15min::timestamp                    as datetime,
        expanded_intraday_prices.open,
