@@ -20,7 +20,7 @@ locals {
   polygon_jobs_count                  = 4
 
   eod_symbols_limit                 = var.env == "production" ? 14000 : 20
-  eod_websockets_memory_credits     = var.env == "production" ? 512 : 0
+  eod_websockets_memory_credits     = var.env == "production" ? 512 : 256
   polygon_websockets_memory_credits = var.env == "production" ? 1024 : 0
   hasura_memory_credits             = var.env == "production" ? 2048 : 1024
   meltano_ui_memory_credits         = var.env == "production" ? 1024 : 1024
