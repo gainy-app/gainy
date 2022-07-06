@@ -163,7 +163,8 @@ with all_push_notifications as
             select profile_id,
                    ('portfolio_stock_falls_sharp' || profile_id || '_' ||
                         date_trunc('week', now()::date))                             as uniq_id,
-                   exchange_schedule.open_at + interval '1 hour'                     as send_at,
+--                    exchange_schedule.open_at + interval '1 hour'                     as send_at,
+                   now()                     as send_at,
                    json_build_object('en', original_ticker_symbol || ' is ' || (relative_daily_change * 100)::int ||
                             '% today. You have already made ' ||
                             (relative_position_gain * 100)::int || '%. Maybe sell?') as text,
@@ -224,8 +225,9 @@ with all_push_notifications as
                              )
                      select distinct on (profile_id) *
                      from positions_with_profit
-                     where relative_position_gain > 0.30
-                       and relative_daily_change < -0.05
+                     where relative_position_gain > 0.15
+                       and relative_daily_change < 0
+                       and abs(relative_position_gain / relative_daily_change) > 3
                      order by profile_id, relative_daily_change
                 ) t
                      join {{ ref('exchange_schedule') }} on exchange_schedule.country_name = 'USA' and exchange_schedule.date = now()::date
