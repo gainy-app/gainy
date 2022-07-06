@@ -265,8 +265,14 @@ async def run(listener_factory):
     instance_key = ''.join(
         random.choice(string.ascii_lowercase) for i in range(10))
 
-    listener = listener_factory(instance_key)
-    listener.connect()
+    for i in range(30):
+        try:
+            listener = listener_factory(instance_key)
+            listener.connect()
+            break
+        except psycopg2.errors.UndefinedTable:
+            await asyncio.sleep(60)
+            pass
 
     while True:
         try:
