@@ -272,7 +272,6 @@ async def run(listener_factory):
             break
         except psycopg2.errors.UndefinedTable:
             await asyncio.sleep(60)
-            pass
 
     while True:
         try:
