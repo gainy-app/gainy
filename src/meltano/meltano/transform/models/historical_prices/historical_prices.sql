@@ -116,7 +116,12 @@ SELECT prices_with_split_rates.code,
                then split_rate_next_day * close
            else prices_with_split_rates.split_rate * split_rate_next_day * close
            end                                                                        as adjusted_close,
-       prices_with_split_rates.close,
+       case
+           -- latest split period, already adjusted
+           when prices_with_split_rates.date > prev_split.date and wrongfully_adjusted_prices.code is not null
+               then adjusted_close / split_rate_next_day
+           else prices_with_split_rates.close
+           end                                                                        as close,
        prices_with_split_rates.date::date,
        prices_with_split_rates.high,
        prices_with_split_rates.low,
