@@ -221,9 +221,9 @@ resource "aws_ecs_task_definition" "default" {
         local.hasura_task_description,
         local.meltano_airflow_ui_task_description,
         local.meltano_airflow_scheduler_description,
+        local.websockets_eod_task_description,
       ],
       var.env == "production" ? [
-        local.websockets_eod_task_description,
         local.websockets_polygon_task_description,
       ] : []
     )

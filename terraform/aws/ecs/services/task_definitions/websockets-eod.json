@@ -23,7 +23,8 @@
     { "name": "ENV",                "value": "${env}" },
     { "name": "PUBLIC_SCHEMA_NAME", "value": "${pg_transform_schema}" },
     { "name": "DD_API_KEY",         "value": "${datadog_api_key}" },
-    { "name": "DD_SITE",            "value": "datadoghq.com" }
+    { "name": "DD_SITE",            "value": "datadoghq.com" },
+    { "name": "SYMBOLS_LIMIT",      "value": "${symbols_limit}" }
   ],
   "links": [],
   "workingDirectory": null,
