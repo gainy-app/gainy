@@ -6,7 +6,7 @@ tags = ["meltano", "dbt"]
 dag = create_dag(
     dag_id,
     tags=tags,
-    schedule_interval="*/5 * * * *" if ENV == "production" else "0 * * * *",
+    schedule_interval="*/5 * * * *" if ENV == "production" else "*/15 * * * *",
     is_paused_upon_creation=False)
 
 clean = BashOperator(
