@@ -88,7 +88,8 @@ class PortfolioService:
                 self.persist_transaction_data(db_conn,
                                               access_token['profile_id'],
                                               data['securities'],
-                                              data['accounts'], cur_transactions)
+                                              data['accounts'],
+                                              cur_transactions)
 
                 transactions_count += len(cur_transactions)
                 if len(cur_transactions) < count:
