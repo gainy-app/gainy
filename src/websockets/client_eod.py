@@ -9,17 +9,18 @@ from decimal import Decimal
 from common import run, AbstractPriceListener, NO_MESSAGES_RECONNECT_TIMEOUT
 
 EOD_API_TOKEN = os.environ["EOD_API_TOKEN"]
-SYMBOLS_LIMIT = 14000
 MANDATORY_SYMBOLS = [
     'DJI.INDX', 'GSPC.INDX', 'IXIC.INDX', 'BTC.CC', 'ETH.CC', 'USDT.CC',
     'DOGE.CC', 'BNB.CC', 'XRP.CC', 'DOT.CC', 'SOL.CC', 'ADA.CC'
 ]
+SYMBOLS_LIMIT = int(os.getenv('SYMBOLS_LIMIT', len(MANDATORY_SYMBOLS)))
 
 
 class PricesListener(AbstractPriceListener):
 
     def __init__(self, instance_key, endpoint=None):
         self.no_messages_reconnect_timeout = 60
+        self.endpoint = endpoint
 
         super().__init__(instance_key, "eod")
 
@@ -27,39 +28,53 @@ class PricesListener(AbstractPriceListener):
         self.granularity = 60000  # 60 seconds
         self.api_token = EOD_API_TOKEN
         self._latest_filled_key = None
-        self.endpoint = endpoint
 
         if self.endpoint is None:
             self.sub_listeners = [
                 PricesListener(instance_key, endpoint)
                 for endpoint in ['us', 'crypto', 'index']
             ]
+        else:
+            self.logger.debug("[%s] started at %d for symbols %s", endpoint,
+                              self.start_timestamp, self.symbols)
 
     def get_symbols(self):
         with self.db_connect() as db_conn:
-            max_symbols_count = SYMBOLS_LIMIT - self.get_active_listeners_symbols_count(
+            max_symbols_count = SYMBOLS_LIMIT - len(MANDATORY_SYMBOLS)
+            max_symbols_count -= self.get_active_listeners_symbols_count(
                 db_conn)
-            count = int(0.95 * max_symbols_count)
 
-            query = """
-                SELECT base_tickers.symbol
-                FROM base_tickers
-                         left join ticker_metrics using (symbol)
-                         left join crypto_realtime_metrics using (symbol)
-                where base_tickers.symbol not like '%%-%%'
-                  and (lower(exchange) similar to '(nyse|nasdaq)%%')
-                order by coalesce(ticker_metrics.market_capitalization, crypto_realtime_metrics.market_capiptalization) desc nulls last
-                limit %(count)s
-            """
+            count_to_fetch = int(0.99 * max_symbols_count)
 
-            with db_conn.cursor() as cursor:
-                cursor.execute(query, {"count": count})
-                tickers = cursor.fetchall()
+            if count_to_fetch > 0:
+                query = """
+                    SELECT base_tickers.symbol
+                    FROM base_tickers
+                             left join ticker_metrics using (symbol)
+                             left join crypto_realtime_metrics using (symbol)
+                    where base_tickers.symbol not like '%%-%%'
+                      and (lower(exchange) similar to '(nyse|nasdaq)%%')
+                    order by coalesce(ticker_metrics.market_capitalization, crypto_realtime_metrics.market_capitalization) desc nulls last
+                    limit %(count)s
+                """
 
-        symbols = [ticker[0] for ticker in tickers]
-        symbols.sort()
-        return set(MANDATORY_SYMBOLS +
-                   symbols[:SYMBOLS_LIMIT - len(MANDATORY_SYMBOLS)])
+                with db_conn.cursor() as cursor:
+                    cursor.execute(query, {"count": count_to_fetch})
+                    tickers = cursor.fetchall()
+
+                symbols = [ticker[0] for ticker in tickers]
+                symbols.sort()
+            else:
+                symbols = []
+
+        symbols += MANDATORY_SYMBOLS
+
+        if self.endpoint is not None:
+            symbols = filter(
+                lambda symbol: self._get_eod_endpoint(symbol) == self.endpoint,
+                symbols)
+
+        return set(symbols)
 
     async def handle_price_message(self, message):
         # Message format: {"s":"AAPL","p":161.14,"c":[12,37],"v":1,"dp":false,"t":1637573639704}
@@ -189,10 +204,7 @@ class PricesListener(AbstractPriceListener):
             await asyncio.gather(*coroutines)
             return
 
-        symbols = [
-            self.transform_symbol(symbol) for symbol in self.symbols
-            if self._get_eod_endpoint(symbol) == self.endpoint
-        ]
+        symbols = [self.transform_symbol(symbol) for symbol in self.symbols]
         if not symbols:
             return
 

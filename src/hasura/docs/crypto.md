@@ -60,7 +60,7 @@
         circulating_supply
         high_24h
         low_24h
-        market_capiptalization
+        market_capitalization
         max_supply
         symbol
         total_supply

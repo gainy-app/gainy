@@ -113,7 +113,7 @@ with all_push_notifications as
                    ('invited_user_joined_' || id || '_sender') as uniq_id,
                    now()                                       as send_at,
                    json_build_object('en',
-                       'A user that you have invited has just joined the app. ' ||
+                       'Your friend has just joined the app via your invitation. ' ||
                        'Free month granted!')                  as text,
                    json_build_object('t', 5)                   as data,
                    true                                        as is_test,

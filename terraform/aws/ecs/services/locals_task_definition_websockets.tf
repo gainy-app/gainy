@@ -22,6 +22,7 @@ locals {
       eodhistoricaldata_api_token   = var.eodhistoricaldata_api_token
       eod_websockets_cpu_credits    = local.eod_websockets_cpu_credits
       eod_websockets_memory_credits = local.eod_websockets_memory_credits
+      symbols_limit                 = local.eod_symbols_limit
     })
   ))
   websockets_polygon_task_description = jsondecode(templatefile(

@@ -101,8 +101,6 @@ class AbstractPriceListener(ABC):
         self.max_insert_records_count = MAX_INSERT_RECORDS_COUNT
         self._latest_symbol_message = {}
         self.start_timestamp = self.get_current_timestamp()
-        self.logger.debug("started at %d for symbols %s", self.start_timestamp,
-                          self.symbols)
 
     def db_connect(self):
         return psycopg2.connect(DB_CONN_STRING)
@@ -265,8 +263,13 @@ async def run(listener_factory):
     instance_key = ''.join(
         random.choice(string.ascii_lowercase) for i in range(10))
 
-    listener = listener_factory(instance_key)
-    listener.connect()
+    for i in range(30):
+        try:
+            listener = listener_factory(instance_key)
+            listener.connect()
+            break
+        except psycopg2.errors.UndefinedTable:
+            await asyncio.sleep(60)
 
     while True:
         try:
