@@ -9,11 +9,11 @@ from decimal import Decimal
 from common import run, AbstractPriceListener, NO_MESSAGES_RECONNECT_TIMEOUT
 
 EOD_API_TOKEN = os.environ["EOD_API_TOKEN"]
-SYMBOLS_LIMIT = 14000
 MANDATORY_SYMBOLS = [
     'DJI.INDX', 'GSPC.INDX', 'IXIC.INDX', 'BTC.CC', 'ETH.CC', 'USDT.CC',
     'DOGE.CC', 'BNB.CC', 'XRP.CC', 'DOT.CC', 'SOL.CC', 'ADA.CC'
 ]
+SYMBOLS_LIMIT = int(os.getenv('SYMBOLS_LIMIT', len(MANDATORY_SYMBOLS)))
 
 
 class PricesListener(AbstractPriceListener):
@@ -37,29 +37,34 @@ class PricesListener(AbstractPriceListener):
 
     def get_symbols(self):
         with self.db_connect() as db_conn:
-            max_symbols_count = SYMBOLS_LIMIT - self.get_active_listeners_symbols_count(
+            max_symbols_count = SYMBOLS_LIMIT - len(MANDATORY_SYMBOLS)
+            max_symbols_count -= self.get_active_listeners_symbols_count(
                 db_conn)
-            count = int(0.95 * max_symbols_count)
 
-            query = """
-                SELECT base_tickers.symbol
-                FROM base_tickers
-                         left join ticker_metrics using (symbol)
-                         left join crypto_realtime_metrics using (symbol)
-                where base_tickers.symbol not like '%%-%%'
-                  and (lower(exchange) similar to '(nyse|nasdaq)%%')
-                order by coalesce(ticker_metrics.market_capitalization, crypto_realtime_metrics.market_capitalization) desc nulls last
-                limit %(count)s
-            """
+            count_to_fetch = int(0.99 * max_symbols_count)
 
-            with db_conn.cursor() as cursor:
-                cursor.execute(query, {"count": count})
-                tickers = cursor.fetchall()
+            if count_to_fetch > 0:
+                query = """
+                    SELECT base_tickers.symbol
+                    FROM base_tickers
+                             left join ticker_metrics using (symbol)
+                             left join crypto_realtime_metrics using (symbol)
+                    where base_tickers.symbol not like '%%-%%'
+                      and (lower(exchange) similar to '(nyse|nasdaq)%%')
+                    order by coalesce(ticker_metrics.market_capitalization, crypto_realtime_metrics.market_capitalization) desc nulls last
+                    limit %(count)s
+                """
 
-        symbols = [ticker[0] for ticker in tickers]
-        symbols.sort()
-        return set(MANDATORY_SYMBOLS +
-                   symbols[:SYMBOLS_LIMIT - len(MANDATORY_SYMBOLS)])
+                with db_conn.cursor() as cursor:
+                    cursor.execute(query, {"count": count})
+                    tickers = cursor.fetchall()
+
+                symbols = [ticker[0] for ticker in tickers]
+                symbols.sort()
+            else:
+                symbols = []
+
+        return set(MANDATORY_SYMBOLS + symbols)
 
     async def handle_price_message(self, message):
         # Message format: {"s":"AAPL","p":161.14,"c":[12,37],"v":1,"dp":false,"t":1637573639704}
