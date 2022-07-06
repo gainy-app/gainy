@@ -34,8 +34,6 @@ class PricesListener(AbstractPriceListener):
                 PricesListener(instance_key, endpoint)
                 for endpoint in ['us', 'crypto', 'index']
             ]
-        else:
-            self.sub_listeners = None
 
     def get_symbols(self):
         with self.db_connect() as db_conn:
@@ -169,12 +167,6 @@ class PricesListener(AbstractPriceListener):
             self.logger.error('handle_message %s: %s', e, message_raw)
 
     def should_reconnect(self):
-        if self.sub_listeners is not None:
-            for sub_listener in self.sub_listeners:
-                if not sub_listener.should_reconnect():
-                    return True
-            return False
-
         return super().should_reconnect(self.endpoint)
 
     async def sync(self):
