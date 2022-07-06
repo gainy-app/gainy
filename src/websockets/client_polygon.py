@@ -32,6 +32,8 @@ class PricesListener(AbstractPriceListener):
             ]
         else:
             self.sub_listeners = None
+            self.logger.debug("[%s] started at %d for symbols %s", cluster,
+                              self.start_timestamp, self.symbols)
 
     def get_symbols(self):
         if self.cluster is None:

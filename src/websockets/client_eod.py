@@ -20,6 +20,7 @@ class PricesListener(AbstractPriceListener):
 
     def __init__(self, instance_key, endpoint=None):
         self.no_messages_reconnect_timeout = 60
+        self.endpoint = endpoint
 
         super().__init__(instance_key, "eod")
 
@@ -27,13 +28,15 @@ class PricesListener(AbstractPriceListener):
         self.granularity = 60000  # 60 seconds
         self.api_token = EOD_API_TOKEN
         self._latest_filled_key = None
-        self.endpoint = endpoint
 
         if self.endpoint is None:
             self.sub_listeners = [
                 PricesListener(instance_key, endpoint)
                 for endpoint in ['us', 'crypto', 'index']
             ]
+        else:
+            self.logger.debug("[%s] started at %d for symbols %s", endpoint,
+                              self.start_timestamp, self.symbols)
 
     def get_symbols(self):
         with self.db_connect() as db_conn:
@@ -64,7 +67,14 @@ class PricesListener(AbstractPriceListener):
             else:
                 symbols = []
 
-        return set(MANDATORY_SYMBOLS + symbols)
+        symbols += MANDATORY_SYMBOLS
+
+        if self.endpoint is not None:
+            symbols = filter(
+                lambda symbol: self._get_eod_endpoint(symbol) == self.endpoint,
+                symbols)
+
+        return set(symbols)
 
     async def handle_price_message(self, message):
         # Message format: {"s":"AAPL","p":161.14,"c":[12,37],"v":1,"dp":false,"t":1637573639704}
@@ -194,10 +204,7 @@ class PricesListener(AbstractPriceListener):
             await asyncio.gather(*coroutines)
             return
 
-        symbols = [
-            self.transform_symbol(symbol) for symbol in self.symbols
-            if self._get_eod_endpoint(symbol) == self.endpoint
-        ]
+        symbols = [self.transform_symbol(symbol) for symbol in self.symbols]
         if not symbols:
             return
 
