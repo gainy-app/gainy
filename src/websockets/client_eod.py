@@ -56,7 +56,7 @@ class PricesListener(AbstractPriceListener):
                 """
 
                 with db_conn.cursor() as cursor:
-                    cursor.execute(query, {"count": count})
+                    cursor.execute(query, {"count": count_to_fetch})
                     tickers = cursor.fetchall()
 
                 symbols = [ticker[0] for ticker in tickers]
