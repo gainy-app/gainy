@@ -61,8 +61,8 @@ prices_with_split_rates as
         SELECT eod_historical_prices.code,
                eod_historical_prices.date,
                case when close > 0 then adjusted_close / close end as split_rate,
-               stocks_with_split.split_to::numeric /
-               stocks_with_split.split_from::numeric               as split_rate_next_day,
+               stocks_with_split.split_from::numeric /
+               stocks_with_split.split_to::numeric                 as split_rate_next_day,
                eod_historical_prices.open,
                eod_historical_prices.high,
                eod_historical_prices.low,
@@ -78,6 +78,26 @@ prev_split as
         from {{ source('eod', 'eod_historical_prices') }}
         where abs(close - eod_historical_prices.adjusted_close) > 1e-3
         group by code
+    ),
+wrongfully_adjusted_prices as
+    (
+        -- in case we get partially adjusted prices:
+        -- 8.45	8.45
+        -- 0.173	0.173
+        -- 0.1908	0.1908
+        -- in this case we need to adjust the rows from this subquery twice
+        select code, date
+        from (
+                 select code,
+                        date,
+                        adjusted_close,
+                        lag(adjusted_close) over (partition by code order by date) as prev_adjusted_close
+                 from {{ source('eod', 'eod_historical_prices') }}
+                 where date::date > now() - interval '1 week'
+             ) t
+        where adjusted_close > 0
+          and prev_adjusted_close > 0
+          and (adjusted_close / prev_adjusted_close > 2 or prev_adjusted_close / adjusted_close > 2)
     )
 SELECT prices_with_split_rates.code,
        (prices_with_split_rates.code || '_' || prices_with_split_rates.date)::varchar as id,
@@ -88,8 +108,11 @@ SELECT prices_with_split_rates.code,
            -- if there is no split tomorrow - just use the data from eod
            when split_rate_next_day is null
                then adjusted_close
+           -- latest split period, already adjusted
+           when prices_with_split_rates.date > prev_split.date and wrongfully_adjusted_prices.code is not null
+               then adjusted_close
            -- latest split period, so we ignore split_rate and use 1.0
-           when prices_with_split_rates.date > prev_split.date
+           when prices_with_split_rates.date > prev_split.date and wrongfully_adjusted_prices.code is null
                then split_rate_next_day * close
            else prices_with_split_rates.split_rate * split_rate_next_day * close
            end                                                                        as adjusted_close,
@@ -101,6 +124,9 @@ SELECT prices_with_split_rates.code,
        prices_with_split_rates.volume
 from prices_with_split_rates
          left join prev_split using (code)
+         left join wrongfully_adjusted_prices
+                   on wrongfully_adjusted_prices.code = prices_with_split_rates.code
+                       and wrongfully_adjusted_prices.date = prices_with_split_rates.date
 
 union all
 
