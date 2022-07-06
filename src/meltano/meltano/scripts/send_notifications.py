@@ -98,27 +98,38 @@ def send_all(sender_id):
                      and response is null""", {"sender_id": sender_id})
 
             for row in cursor:
-                response = send_push_notification(row)
-                if response is None:
-                    continue
+                response = None
+                try:
+                    response = send_push_notification(row)
 
-                response_serialized = {
-                    "status_code": response.status_code,
-                    "data": response.json()
-                }
-                if response.status_code == 200:
-                    logger.debug("Onesignal response: %s", response_serialized)
-                else:
-                    logger.error("Failed to send notification: %s",
-                                 response_serialized)
+                    if response is None:
+                        continue
 
-                with db_conn.cursor() as update_cursor:
-                    update_cursor.execute(
-                        """update app.notifications set response = %(response)s
-                           where uuid = %(notification_uuid)s""", {
-                            "response": json.dumps(response_serialized),
-                            "notification_uuid": row["uuid"]
-                        })
+                    response_serialized = {
+                        "status_code": response.status_code,
+                        "data": response.json()
+                    }
+                    if response.status_code == 200:
+                        logger.debug("Onesignal response: %s",
+                                     response_serialized)
+                    else:
+                        logger.error("Failed to send notification: %s",
+                                     response_serialized)
+
+                    with db_conn.cursor() as update_cursor:
+                        update_cursor.execute(
+                            """update app.notifications set response = %(response)s
+                               where uuid = %(notification_uuid)s""", {
+                                "response": json.dumps(response_serialized),
+                                "notification_uuid": row["uuid"]
+                            })
+                except Exception as e:
+                    if response is not None:
+                        logger.error(
+                            "OneSignal send_push_notification error: %d %s",
+                            response.status_code, response.text)
+
+                    logger.exception(e)
 
 
 send_all(uuid.uuid4())

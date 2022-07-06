@@ -263,13 +263,17 @@ async def run(listener_factory):
     instance_key = ''.join(
         random.choice(string.ascii_lowercase) for i in range(10))
 
-    for i in range(30):
+    listener = None
+    for i in range(60):
         try:
             listener = listener_factory(instance_key)
             listener.connect()
             break
         except psycopg2.errors.UndefinedTable:
             await asyncio.sleep(60)
+
+    if listener is None:
+        raise Exception('Failed to initialize listener')
 
     while True:
         try:
