@@ -52,9 +52,9 @@ stocks_with_split as
         from {{ ref('base_tickers') }}
                  left join next_trading_session using (symbol)
                  left join {{ source('polygon', 'polygon_stock_splits') }}
-                           on polygon_stock_splits.execution_date::date =
-                              next_trading_session.date
+                           on polygon_stock_splits.execution_date::date = next_trading_session.date
                                and polygon_stock_splits.ticker = base_tickers.symbol
+                               and polygon_stock_splits._sdc_extracted_at > (select max(_sdc_extracted_at) from {{ source('polygon', 'polygon_stock_splits') }}) - interval '1 minute'
     ),
 prices_with_split_rates as
     (
