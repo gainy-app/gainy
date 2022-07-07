@@ -13,32 +13,10 @@
 }}
 
 
-with week_trading_sessions as
+with raw_intraday_prices as
          (
-             select exchange_name,
-                    null          as country_name,
-                    date,
-                    min(open_at)  as open_at,
-                    max(close_at) as close_at
-             from {{ ref('exchange_schedule') }}
-             where open_at between now() - interval '1 week' and now()
-             group by exchange_name, date
-
-             union all
-
-             select null          as exchange_name,
-                    country_name,
-                    date,
-                    min(open_at)  as open_at,
-                    max(close_at) as close_at
-             from {{ ref('exchange_schedule') }}
-             where open_at between now() - interval '1 week' and now()
-             group by country_name, date
-         ),
-     raw_intraday_prices as
-         (
-             select symbol,
-                    date,
+             select eod_intraday_prices.symbol,
+                    eod_intraday_prices.time::date as date,
                     time,
                     (date_trunc('minute', time) - interval '1 minute' * mod(extract(minutes from time)::int, 3))::timestamp  as time_3min,
                     (date_trunc('minute', time) - interval '1 minute' * mod(extract(minutes from time)::int, 15))::timestamp as time_15min,
@@ -48,13 +26,11 @@ with week_trading_sessions as
                     close,
                     volume
              from {{ source('eod', 'eod_intraday_prices') }}
-                      join {{ ref('base_tickers') }} using (symbol)
-                      join week_trading_sessions
-                           on (week_trading_sessions.exchange_name = base_tickers.exchange_canonical or
-                               (base_tickers.exchange_canonical is null and
-                                week_trading_sessions.country_name = base_tickers.country_name))
-             where time >= week_trading_sessions.open_at
-               and time < week_trading_sessions.close_at
+                      join {{ ref('week_trading_sessions') }}
+                           on week_trading_sessions.symbol = eod_intraday_prices.symbol
+                               and week_trading_sessions.date = eod_intraday_prices.time::date
+             where (time >= week_trading_sessions.open_at and time < week_trading_sessions.close_at)
+                or week_trading_sessions is null
          ),
 {% if is_incremental() %}
      old_model_stats as
