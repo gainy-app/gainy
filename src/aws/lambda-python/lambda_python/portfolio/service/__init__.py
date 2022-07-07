@@ -94,6 +94,8 @@ class PortfolioService:
                 transactions_count += len(cur_transactions)
                 if len(cur_transactions) < count:
                     break
+        except AccessTokenApiException as e:
+            pass
         except AccessTokenLoginRequiredException as e:
             self._set_access_token_reauth(db_conn, e.access_token)
 
