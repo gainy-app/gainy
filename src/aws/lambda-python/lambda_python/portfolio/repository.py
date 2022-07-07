@@ -26,7 +26,7 @@ class PortfolioRepository(Repository):
                 ).format(schema_name=sql.Identifier(schema_name),
                          table_name=sql.Identifier(table_name))
                 params = {
-                     'plaid_access_token_ids': tuple(plaid_access_token_ids),
+                    'plaid_access_token_ids': tuple(plaid_access_token_ids),
                 }
 
                 if excluded_ids:
