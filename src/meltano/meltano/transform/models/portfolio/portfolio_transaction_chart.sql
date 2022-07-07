@@ -4,14 +4,9 @@
     unique_key = "id",
     tags = ["realtime"],
     post_hook=[
-      pk('transactions_uniq_id, datetime, period'),
+      pk('transactions_uniq_id, period, datetime'),
       index(this, 'id', true),
-      'create unique index if not exists "transactions_uniq_id__period__datetime" ON {{ this }} (transactions_uniq_id, period, datetime)',
-      'delete from {{this}}
-        using {{this}} ptc
-        left join {{ ref("portfolio_expanded_transactions") }} on portfolio_expanded_transactions.uniq_id = ptc.transactions_uniq_id
-        where ptc.transactions_uniq_id = portfolio_transaction_chart.transactions_uniq_id
-        and portfolio_expanded_transactions.uniq_id is null',
+      fk(this, 'transactions_uniq_id', this.schema, 'portfolio_expanded_transactions', 'uniq_id'),
     ]
   )
 }}
@@ -36,16 +31,16 @@ with first_profile_transaction_date as
 {% endif %}
          )
 
-select (portfolio_expanded_transactions.uniq_id || '_' || chart.datetime || '_' || chart.period)::varchar   as id,
-       portfolio_expanded_transactions.uniq_id                                                              as transactions_uniq_id,
+select (portfolio_expanded_transactions.uniq_id || '_' || chart.period || '_' || chart.datetime) as id,
+       portfolio_expanded_transactions.uniq_id                                                   as transactions_uniq_id,
        chart.datetime,
        chart.period,
-       portfolio_expanded_transactions.quantity_norm_for_valuation::numeric * chart.open::numeric           as open,
-       portfolio_expanded_transactions.quantity_norm_for_valuation::numeric * chart.high::numeric           as high,
-       portfolio_expanded_transactions.quantity_norm_for_valuation::numeric * chart.low::numeric            as low,
-       portfolio_expanded_transactions.quantity_norm_for_valuation::numeric * chart.close::numeric          as close,
-       portfolio_expanded_transactions.quantity_norm_for_valuation::numeric * chart.adjusted_close::numeric as adjusted_close,
-       portfolio_expanded_transactions.updated_at                                                           as transactions_updated_at
+       portfolio_expanded_transactions.quantity_norm_for_valuation * chart.open                  as open,
+       portfolio_expanded_transactions.quantity_norm_for_valuation * chart.high                  as high,
+       portfolio_expanded_transactions.quantity_norm_for_valuation * chart.low                   as low,
+       portfolio_expanded_transactions.quantity_norm_for_valuation * chart.close                 as close,
+       portfolio_expanded_transactions.quantity_norm_for_valuation * chart.adjusted_close        as adjusted_close,
+       portfolio_expanded_transactions.updated_at                                                as transactions_updated_at
 from {{ ref('portfolio_expanded_transactions') }}
          left join first_profile_transaction_date
                    on first_profile_transaction_date.profile_id = portfolio_expanded_transactions.profile_id

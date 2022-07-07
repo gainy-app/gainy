@@ -1234,23 +1234,23 @@ models:
       - name: open
         tests:
           - type:
-              type: 'numeric'
+              type: 'double precision'
       - name: high
         tests:
           - type:
-              type: 'numeric'
+              type: 'double precision'
       - name: low
         tests:
           - type:
-              type: 'numeric'
+              type: 'double precision'
       - name: close
         tests:
           - type:
-              type: 'numeric'
+              type: 'double precision'
       - name: adjusted_close
         tests:
           - type:
-              type: 'numeric'
+              type: 'double precision'
 
   - name: ticker_realtime_metrics
     columns:

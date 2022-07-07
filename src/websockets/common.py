@@ -255,6 +255,8 @@ class AbstractPriceListener(ABC):
             task.cancel()
         time.sleep(1)
 
+        self.symbols = self.get_symbols()
+
         return self.connect()
 
 
