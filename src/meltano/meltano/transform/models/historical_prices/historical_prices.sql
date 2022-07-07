@@ -3,7 +3,7 @@
     materialized = "incremental",
     unique_key = "id",
     post_hook=[
-      pk('date, code'),
+      pk('code, date'),
       index(this, 'id', true),
       'create unique index if not exists "code__date_year__date" ON {{ this }} (code, date_year, date)',
       'create unique index if not exists "code__date_month__date" ON {{ this }} (code, date_month, date)',
@@ -13,7 +13,7 @@
 }}
 
 
--- Execution Time: 61540.802 ms
+-- Execution Time: 152932.965 ms
 with
 {% if is_incremental() %}
 max_updated_at as (select code, max(date) as max_date from {{ this }} group by code),
@@ -24,24 +24,114 @@ polygon_crypto_tickers as
         from {{ ref('tickers') }}
         left join {{ source('eod', 'eod_historical_prices') }} on eod_historical_prices.code = tickers.symbol
         where eod_historical_prices.code is null
+    ),
+latest_stock_price_date as
+    (
+        SELECT code as symbol, max(date)::date as date
+        from {{ source('eod', 'eod_historical_prices') }}
+        group by code
+    ),
+next_trading_session as
+    (
+        select distinct on (symbol) symbol, exchange_schedule.date
+        from latest_stock_price_date
+                 join {{ ref('base_tickers') }} using (symbol)
+                 left join {{ ref('exchange_schedule') }}
+                           on (exchange_schedule.exchange_name =
+                               base_tickers.exchange_canonical or
+                               (base_tickers.exchange_canonical is null and
+                                exchange_schedule.country_name = base_tickers.country_name))
+        where exchange_schedule.date > latest_stock_price_date.date
+        order by symbol, exchange_schedule.date
+    ),
+stocks_with_split as
+    (
+        select symbol as code,
+               split_to,
+               split_from
+        from {{ ref('base_tickers') }}
+                 left join next_trading_session using (symbol)
+                 left join {{ source('polygon', 'polygon_stock_splits') }}
+                           on polygon_stock_splits.execution_date::date =
+                              next_trading_session.date
+                               and polygon_stock_splits.ticker = base_tickers.symbol
+    ),
+prices_with_split_rates as
+    (
+        SELECT eod_historical_prices.code,
+               eod_historical_prices.date,
+               case when close > 0 then adjusted_close / close end as split_rate,
+               stocks_with_split.split_from::numeric /
+               stocks_with_split.split_to::numeric                 as split_rate_next_day,
+               eod_historical_prices.open,
+               eod_historical_prices.high,
+               eod_historical_prices.low,
+               eod_historical_prices.adjusted_close,
+               eod_historical_prices.close,
+               eod_historical_prices.volume
+        from {{ source('eod', 'eod_historical_prices') }}
+                 left join stocks_with_split using (code)
+    ),
+prev_split as
+    (
+        select code, max(date) as date
+        from {{ source('eod', 'eod_historical_prices') }}
+        where abs(close - eod_historical_prices.adjusted_close) > 1e-3
+        group by code
+    ),
+wrongfully_adjusted_prices as
+    (
+        -- in case we get partially adjusted prices:
+        -- 8.45	8.45
+        -- 0.173	0.173
+        -- 0.1908	0.1908
+        -- in this case we need to adjust the rows from this subquery twice
+        select code, date
+        from (
+                 select code,
+                        date,
+                        adjusted_close,
+                        lag(adjusted_close) over (partition by code order by date) as prev_adjusted_close
+                 from {{ source('eod', 'eod_historical_prices') }}
+                 where date::date > now() - interval '1 week'
+             ) t
+        where adjusted_close > 0
+          and prev_adjusted_close > 0
+          and (adjusted_close / prev_adjusted_close > 2 or prev_adjusted_close / adjusted_close > 2)
     )
-SELECT code,
-       (code || '_' || date)::varchar            as id,
-       substr(date, 0, 5)                        as date_year,
-       (substr(date, 0, 8) || '-01')::timestamp  as date_month,
-       date_trunc('week', date::date)::timestamp as date_week,
-       adjusted_close,
-       close,
-       date::date,
-       high,
-       low,
-       open,
-       volume
-from {{ source('eod', 'eod_historical_prices') }}
-{% if is_incremental() %}
-    left join max_updated_at using (code)
-    where _sdc_batched_at >= max_updated_at.max_date or max_updated_at.max_date is null
-{% endif %}
+SELECT prices_with_split_rates.code,
+       (prices_with_split_rates.code || '_' || prices_with_split_rates.date)::varchar as id,
+       substr(prices_with_split_rates.date, 0, 5)                                     as date_year,
+       (substr(prices_with_split_rates.date, 0, 8) || '-01')::timestamp               as date_month,
+       date_trunc('week', prices_with_split_rates.date::date)::timestamp              as date_week,
+       case
+           -- if there is no split tomorrow - just use the data from eod
+           when split_rate_next_day is null
+               then adjusted_close
+           -- latest split period, already adjusted
+           when prices_with_split_rates.date > prev_split.date and wrongfully_adjusted_prices.code is not null
+               then adjusted_close
+           -- latest split period, so we ignore split_rate and use 1.0
+           when prices_with_split_rates.date > prev_split.date and wrongfully_adjusted_prices.code is null
+               then split_rate_next_day * close
+           else prices_with_split_rates.split_rate * split_rate_next_day * close
+           end                                                                        as adjusted_close,
+       case
+           -- latest split period, already adjusted
+           when prices_with_split_rates.date > prev_split.date and wrongfully_adjusted_prices.code is not null
+               then adjusted_close / split_rate_next_day
+           else prices_with_split_rates.close
+           end                                                                        as close,
+       prices_with_split_rates.date::date,
+       prices_with_split_rates.high,
+       prices_with_split_rates.low,
+       prices_with_split_rates.open,
+       prices_with_split_rates.volume
+from prices_with_split_rates
+         left join prev_split using (code)
+         left join wrongfully_adjusted_prices
+                   on wrongfully_adjusted_prices.code = prices_with_split_rates.code
+                       and wrongfully_adjusted_prices.date = prices_with_split_rates.date
 
 union all
 
