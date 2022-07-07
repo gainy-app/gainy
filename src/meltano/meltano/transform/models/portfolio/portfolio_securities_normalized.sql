@@ -50,7 +50,7 @@ from (
      ) t
 
 {% if is_incremental() %}
-         left join portfolio_securities_normalized old_portfolio_securities_normalized
+         left join {{ this }} old_portfolio_securities_normalized
                    using (id, name, ticker_symbol, original_ticker_symbol, type)
 where old_portfolio_securities_normalized is null
 {% endif %}
