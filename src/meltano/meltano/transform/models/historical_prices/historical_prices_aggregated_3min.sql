@@ -34,27 +34,27 @@ with
      time_series_3min as
          (
              SELECT null as type,
-                    time_truncated
+                    time_3min
              FROM (
                       SELECT null as type,
                              date_trunc('minute', dd) -
                              interval '1 minute' *
-                             mod(extract(minutes from dd)::int, 3) as time_truncated
+                             mod(extract(minutes from dd)::int, 3) as time_3min
                       FROM generate_series(now()::timestamp - interval '1 week', now()::timestamp, interval '3 minutes') dd
                       ) t
                       join latest_open_trading_session on true
 {% if is_incremental() and var('realtime') %}
                       join max_date on true
 {% endif %}
-             where time_truncated >= latest_open_trading_session.open_at and time_truncated < latest_open_trading_session.close_at
+             where time_3min >= latest_open_trading_session.open_at and time_3min < latest_open_trading_session.close_at
 {% if is_incremental() and var('realtime') %}
-               and time_truncated > max_date.datetime - interval '20 minutes'
+               and time_3min > max_date.datetime - interval '20 minutes'
 {% endif %}
              union all
              SELECT 'crypto' as type,
                     date_trunc('minute', dd) -
                     interval '1 minute' *
-                    mod(extract(minutes from dd)::int, 3) as time_truncated
+                    mod(extract(minutes from dd)::int, 3) as time_3min
              FROM generate_series(now()::timestamp - interval '1 day', now()::timestamp, interval '3 minutes') dd
 {% if is_incremental() and var('realtime') %}
                       join max_date on true
@@ -63,38 +63,37 @@ with
          ),
      expanded_intraday_prices as
          (
-             select eod_intraday_prices.*,
-                    date_trunc('minute', eod_intraday_prices.time) -
-                    interval '1 minute' *
-                    mod(extract(minutes from eod_intraday_prices.time)::int, 3) as time_truncated
-             from {{ source('eod', 'eod_intraday_prices') }}
+             select historical_intraday_prices.*
+             from {{ ref('historical_intraday_prices') }}
                       join latest_open_trading_session on true
 {% if is_incremental() and var('realtime') %}
                       join max_date on true
 {% endif %}
-             where (eod_intraday_prices.time >= latest_open_trading_session.open_at - interval '1 hour' and eod_intraday_prices.time < latest_open_trading_session.close_at
+             where (historical_intraday_prices.time_3min >= latest_open_trading_session.open_at - interval '1 hour' and historical_intraday_prices.time_3min < latest_open_trading_session.close_at
                 or (symbol like '%.CC' and time > now() - interval '1 day'))
 {% if is_incremental() and var('realtime') %}
-               and eod_intraday_prices.time > max_date.datetime - interval '20 minutes'
+               and historical_intraday_prices.time_3min > max_date.datetime - interval '20 minutes'
 {% endif %}
          ),
      combined_intraday_prices as
          (
              select DISTINCT ON (
                  symbol,
-                 time_truncated
-                 ) symbol                                                                                                          as symbol,
-                   time_truncated::timestamp                                                                                       as datetime,
+                 time_3min
+                 ) symbol                                                                                                     as symbol,
+                   time_3min::timestamp                                                                                       as datetime,
                    first_value(open::double precision)
-                   OVER (partition by symbol, time_truncated order by time rows between current row and unbounded following)       as open,
+                   OVER (partition by symbol, time_3min order by time rows between current row and unbounded following)       as open,
                    max(high::double precision)
-                   OVER (partition by symbol, time_truncated rows between current row and unbounded following)                     as high,
+                   OVER (partition by symbol, time_3min rows between current row and unbounded following)                     as high,
                    min(low::double precision)
-                   OVER (partition by symbol, time_truncated rows between current row and unbounded following)                     as low,
+                   OVER (partition by symbol, time_3min rows between current row and unbounded following)                     as low,
                    last_value(close::double precision)
-                   OVER (partition by symbol, time_truncated order by time rows between current row and unbounded following)       as close,
+                   OVER (partition by symbol, time_3min order by time rows between current row and unbounded following)       as close,
+                   last_value(adjusted_close::double precision)
+                   OVER (partition by symbol, time_3min order by time rows between current row and unbounded following)       as adjusted_close,
                    (sum(volume::numeric)
-                    OVER (partition by symbol, time_truncated rows between current row and unbounded following))::double precision as volume
+                    OVER (partition by symbol, time_3min rows between current row and unbounded following))::double precision as volume
              from (
                       select symbol,
                              time,
@@ -102,19 +101,21 @@ with
                              high,
                              low,
                              close,
+                             adjusted_close,
                              volume,
-                             time_truncated,
+                             time_3min,
                              0 as priority
                       from expanded_intraday_prices
                       union all
                       select symbol,
-                             time_truncated as time,
+                             time_3min as time,
                              null           as open,
                              null           as high,
                              null           as low,
                              null           as close,
+                             null           as adjusted_close,
                              null           as volume,
-                             time_truncated,
+                             time_3min,
                              1 as priority
                       from {{ ref('base_tickers') }}
                                join time_series_3min
@@ -122,18 +123,19 @@ with
                                        or (time_series_3min.type is null and base_tickers.type != 'crypto')
                       union all
                       select contract_name,
-                             time_truncated as time,
+                             time_3min as time,
                              null           as open,
                              null           as high,
                              null           as low,
                              null           as close,
+                             null           as adjusted_close,
                              null           as volume,
-                             time_truncated,
+                             time_3min,
                              1              as priority
                       from {{ ref('ticker_options_monitored') }}
                                join time_series_3min on time_series_3min.type is null
                   ) t
-             order by symbol, time_truncated, time, priority
+             order by symbol, time_3min, time, priority
          )
 select * from (
                   select symbol || '_' || datetime as id,
@@ -164,21 +166,21 @@ select * from (
                                  historical_prices_marked.price_0d
                              )::double precision   as close,
                          coalesce(
-                                 close,
-                                 first_value(close)
+                                 adjusted_close,
+                                 first_value(adjusted_close)
                                  OVER (partition by symbol, grp order by datetime),
                                  historical_prices_marked.price_0d
                              )::double precision   as adjusted_close,
                          coalesce(volume, 0)       as volume
                   from (
                            select *,
-                                  coalesce(sum(case when close is not null then 1 end)
+                                  coalesce(sum(case when adjusted_close is not null then 1 end)
                                            over (partition by symbol order by datetime), 0) as grp
                            from combined_intraday_prices
                        ) t
                            left join {{ ref('historical_prices_marked') }} using (symbol)
             ) t2
-where t2.close is not null
+where t2.adjusted_close is not null
 
 -- Execution Time: 18457.714 ms on test
 -- OK created incremental model historical_prices_aggregated_3min SELECT 3397613 in 71.67s
