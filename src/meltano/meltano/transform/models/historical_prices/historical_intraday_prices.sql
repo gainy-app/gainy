@@ -26,9 +26,9 @@ with raw_intraday_prices as
                     close,
                     volume
              from {{ source('eod', 'eod_intraday_prices') }}
-                      join {{ ref('week_trading_sessions') }}
-                           on week_trading_sessions.symbol = eod_intraday_prices.symbol
-                               and week_trading_sessions.date = eod_intraday_prices.time::date
+                      left join {{ ref('week_trading_sessions') }}
+                                on week_trading_sessions.symbol = eod_intraday_prices.symbol
+                                    and week_trading_sessions.date = eod_intraday_prices.time::date
              where (time >= week_trading_sessions.open_at and time < week_trading_sessions.close_at)
                 or week_trading_sessions is null
          ),
