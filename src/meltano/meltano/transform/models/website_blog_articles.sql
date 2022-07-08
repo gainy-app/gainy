@@ -25,7 +25,7 @@ select id::varchar,
 from {{ source('website', 'blogs') }}
 {% if is_incremental() %}
 left join max_updated_at on true
-where max_updated_at.max_date is null or updated_on::timestamp > max_updated_at.max_date
+where (max_updated_at.max_date is null or updated_on::timestamp > max_updated_at.max_date)
 and
 {% else %}
 where
