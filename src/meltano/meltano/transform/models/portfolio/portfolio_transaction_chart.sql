@@ -52,7 +52,6 @@ from (
                        on chart.symbol = portfolio_securities_normalized.original_ticker_symbol
                            and (chart.datetime >= portfolio_expanded_transactions.date or portfolio_expanded_transactions.date is null)
                            and (chart.datetime >= first_profile_transaction_date.datetime or first_profile_transaction_date.profile_id is null)
-         {% endif %}
      ) t
 
 {% if is_incremental() %}
