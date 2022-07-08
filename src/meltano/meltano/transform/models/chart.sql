@@ -19,10 +19,9 @@
     from {{ ref('historical_prices_aggregated_3min') }}
              left join {{ ref('week_trading_sessions') }}
                        on week_trading_sessions.symbol = historical_prices_aggregated_3min.symbol
-                           and week_trading_sessions.date = historical_prices_aggregated_3min.datetime::date
-                           and week_trading_sessions.index = 0
     where (historical_prices_aggregated_3min.datetime between week_trading_sessions.open_at and week_trading_sessions.close_at - interval '3 minutes'
        or (week_trading_sessions is null and historical_prices_aggregated_3min.datetime > now() - interval '1 day'))
+      and (week_trading_sessions is null or (week_trading_sessions.date = historical_prices_aggregated_3min.datetime::date and week_trading_sessions.index = 0))
 )
 
 union all
@@ -40,9 +39,9 @@ union all
     from {{ ref('historical_prices_aggregated_15min') }}
              left join {{ ref('week_trading_sessions') }}
                        on week_trading_sessions.symbol = historical_prices_aggregated_15min.symbol
-                           and week_trading_sessions.date = historical_prices_aggregated_15min.datetime::date
     where (historical_prices_aggregated_15min.datetime between week_trading_sessions.open_at and week_trading_sessions.close_at - interval '15 minutes'
        or (week_trading_sessions is null and historical_prices_aggregated_15min.datetime > now() - interval '7 days'))
+      and (week_trading_sessions is null or week_trading_sessions.date = historical_prices_aggregated_15min.datetime::date)
 )
 
 union all

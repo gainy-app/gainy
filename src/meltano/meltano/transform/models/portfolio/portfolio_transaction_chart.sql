@@ -6,7 +6,11 @@
     post_hook=[
       pk('transactions_uniq_id, period, datetime'),
       index(this, 'id', true),
-      fk(this, 'transactions_uniq_id', this.schema, 'portfolio_expanded_transactions', 'uniq_id'),
+      'delete from {{this}}
+        using {{this}} ptc
+        left join {{ ref("portfolio_expanded_transactions") }} on portfolio_expanded_transactions.uniq_id = ptc.transactions_uniq_id
+        where ptc.transactions_uniq_id = portfolio_transaction_chart.transactions_uniq_id
+        and portfolio_expanded_transactions.uniq_id is null',
     ]
   )
 }}
