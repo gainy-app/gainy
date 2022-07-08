@@ -110,6 +110,7 @@ union all
 
 (
     select historical_prices_aggregated_1w.symbol,
+           historical_prices_aggregated_1w.datetime,
            historical_prices_aggregated_1w.datetime + interval '1 week' as close_datetime,
            '5y'::varchar as period,
            historical_prices_aggregated_1w.open,
