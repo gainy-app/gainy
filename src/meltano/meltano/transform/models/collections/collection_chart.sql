@@ -21,10 +21,9 @@
              join {{ ref('collection_tickers_weighted') }} using (symbol)
              left join {{ ref('week_trading_sessions') }}
                        on week_trading_sessions.symbol = historical_prices_aggregated_3min.symbol
-                           and week_trading_sessions.date = historical_prices_aggregated_3min.datetime::date
-                           and week_trading_sessions.index = 0
     where (historical_prices_aggregated_3min.datetime between week_trading_sessions.open_at and week_trading_sessions.close_at
        or (week_trading_sessions is null and historical_prices_aggregated_3min.datetime > now() - interval '1 day'))
+      and (week_trading_sessions is null or (week_trading_sessions.date = historical_prices_aggregated_3min.datetime::date and week_trading_sessions.index = 0))
     group by profile_id, collection_id, collection_uniq_id, datetime, period
 )
 
@@ -45,9 +44,9 @@ union all
              join {{ ref('collection_tickers_weighted') }} using (symbol)
              left join {{ ref('week_trading_sessions') }}
                        on week_trading_sessions.symbol = historical_prices_aggregated_15min.symbol
-                           and week_trading_sessions.date = historical_prices_aggregated_15min.datetime::date
     where (historical_prices_aggregated_15min.datetime between week_trading_sessions.open_at and week_trading_sessions.close_at
        or (week_trading_sessions is null and historical_prices_aggregated_15min.datetime > now() - interval '7 days'))
+      and (week_trading_sessions is null or week_trading_sessions.date = historical_prices_aggregated_15min.datetime::date)
     group by profile_id, collection_id, collection_uniq_id, datetime, period
 )
 
