@@ -28,9 +28,8 @@ with raw_intraday_prices as
              from {{ source('eod', 'eod_intraday_prices') }}
                       left join {{ ref('week_trading_sessions') }}
                                 on week_trading_sessions.symbol = eod_intraday_prices.symbol
-                                    and week_trading_sessions.date = eod_intraday_prices.time::date
-             where (time >= week_trading_sessions.open_at and time < week_trading_sessions.close_at)
-                or week_trading_sessions is null
+             where week_trading_sessions is null
+                or (week_trading_sessions.date = eod_intraday_prices.time::date and time >= week_trading_sessions.open_at and time < week_trading_sessions.close_at)
          ),
 {% if is_incremental() and var('realtime') %}
      old_model_stats as

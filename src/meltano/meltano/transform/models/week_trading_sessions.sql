@@ -4,6 +4,7 @@
   config(
     materialized = "incremental",
     unique_key = "id",
+    tags = ["realtime"],
     post_hook=[
       pk('symbol, date'),
       index(this, 'id', true),
@@ -18,15 +19,15 @@ with week_trading_sessions as (
     from {{ ref('exchange_schedule') }}
     where open_at between now() - interval '1 week' and now()
 )
-select t.*
+select t.*,
+       now() as updated_at
 from (
          select (base_tickers.symbol || '_' || week_trading_sessions.date) as id,
                 base_tickers.symbol,
                 week_trading_sessions.date,
                 week_trading_sessions.index,
                 week_trading_sessions.open_at,
-                week_trading_sessions.close_at,
-                now()                                                      as updated_at
+                week_trading_sessions.close_at
          from {{ ref('base_tickers') }}
                   join week_trading_sessions
                        on (week_trading_sessions.exchange_name = base_tickers.exchange_canonical or
@@ -40,8 +41,7 @@ from (
                 week_trading_sessions.date,
                 week_trading_sessions.index,
                 week_trading_sessions.open_at,
-                week_trading_sessions.close_at,
-                now()                                                                         as updated_at
+                week_trading_sessions.close_at
          from {{ ref('ticker_options_monitored') }}
                   join {{ ref('base_tickers') }} using (symbol)
                   join week_trading_sessions
