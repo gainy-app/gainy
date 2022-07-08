@@ -53,7 +53,7 @@ class PricesListener(AbstractPriceListener):
                              left join ticker_metrics using (symbol)
                              left join crypto_realtime_metrics using (symbol)
                     where base_tickers.symbol not like '%%-%%'
-                      and (lower(exchange) similar to '(nyse|nasdaq)%%')
+                      and (lower(exchange) similar to '(nyse|nasdaq)%%' or type = 'crypto')
                     order by coalesce(ticker_metrics.market_capitalization, crypto_realtime_metrics.market_capitalization) desc nulls last
                     limit %(count)s
                 """
