@@ -32,7 +32,7 @@ with raw_intraday_prices as
              where (time >= week_trading_sessions.open_at and time < week_trading_sessions.close_at)
                 or week_trading_sessions is null
          ),
-{% if is_incremental() %}
+{% if is_incremental() and var('realtime') %}
      old_model_stats as
          (
              select symbol, max(time) as max_time
@@ -78,7 +78,7 @@ select symbol,
        close,
        volume,
 
-{% if is_incremental() %}
+{% if is_incremental() and var('realtime') %}
        close as adjusted_close,
 {% else %}
        close * split_rate as adjusted_close,
@@ -87,7 +87,7 @@ select symbol,
        (symbol || '_' || time) as id
 from raw_intraday_prices
 
-{% if is_incremental() %}
+{% if is_incremental() and var('realtime') %}
 left join old_model_stats using (symbol)
 where old_model_stats.max_time is null or raw_intraday_prices.time > max_time
 {% else %}
