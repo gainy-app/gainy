@@ -9,6 +9,7 @@
 (
     select historical_prices_aggregated_3min.symbol,
            historical_prices_aggregated_3min.datetime,
+           historical_prices_aggregated_3min.datetime + interval '3 minutes' as close_datetime,
            '1d'::varchar as period,
            historical_prices_aggregated_3min.open,
            historical_prices_aggregated_3min.high,
@@ -29,6 +30,7 @@ union all
 (
     select historical_prices_aggregated_15min.symbol,
            historical_prices_aggregated_15min.datetime,
+           historical_prices_aggregated_15min.datetime + interval '15 minutes' as close_datetime,
            '1w'::varchar as period,
            historical_prices_aggregated_15min.open,
            historical_prices_aggregated_15min.high,
@@ -49,6 +51,7 @@ union all
 (
     select historical_prices_aggregated_1d.symbol,
            historical_prices_aggregated_1d.datetime,
+           historical_prices_aggregated_1d.datetime + interval '1 day' as close_datetime,
            '1m'::varchar as period,
            historical_prices_aggregated_1d.open,
            historical_prices_aggregated_1d.high,
@@ -68,6 +71,7 @@ union all
 (
     select historical_prices_aggregated_1d.symbol,
            historical_prices_aggregated_1d.datetime,
+           historical_prices_aggregated_1d.datetime + interval '1 day' as close_datetime,
            '3m'::varchar as period,
            historical_prices_aggregated_1d.open,
            historical_prices_aggregated_1d.high,
@@ -87,6 +91,7 @@ union all
 (
     select historical_prices_aggregated_1d.symbol,
            historical_prices_aggregated_1d.datetime,
+           historical_prices_aggregated_1d.datetime + interval '1 day' as close_datetime,
            '1y'::varchar as period,
            historical_prices_aggregated_1d.open,
            historical_prices_aggregated_1d.high,
@@ -106,6 +111,7 @@ union all
 (
     select historical_prices_aggregated_1w.symbol,
            historical_prices_aggregated_1w.datetime,
+           historical_prices_aggregated_1w.datetime + interval '1 week' as close_datetime,
            '5y'::varchar as period,
            historical_prices_aggregated_1w.open,
            historical_prices_aggregated_1w.high,
@@ -125,7 +131,8 @@ union all
 (
     select symbol,
            datetime,
-           'all'::varchar as period,
+           datetime + interval '1 month' as close_datetime,
+           'all'::varchar                as period,
            open,
            high,
            low,

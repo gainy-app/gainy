@@ -54,8 +54,8 @@ from (
                        on portfolio_securities_normalized.id = portfolio_expanded_transactions.security_id
                   join {{ ref('chart') }}
                        on chart.symbol = portfolio_securities_normalized.original_ticker_symbol
-                           and (chart.datetime >= portfolio_expanded_transactions.date or portfolio_expanded_transactions.date is null)
-                           and (chart.datetime >= first_profile_transaction_date.datetime or first_profile_transaction_date.profile_id is null)
+                           and (chart.close_datetime > portfolio_expanded_transactions.date or portfolio_expanded_transactions.date is null)
+                           and (chart.close_datetime > first_profile_transaction_date.datetime or first_profile_transaction_date.profile_id is null)
      ) t
 
 {% if is_incremental() %}
