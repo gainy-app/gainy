@@ -85,6 +85,13 @@
           "id"
         ]
       }
+    },
+    "subscriptions": {
+      "metadata": {
+        "table-key-properties": [
+          "id"
+        ]
+      }
     }
   },
   "public": {
