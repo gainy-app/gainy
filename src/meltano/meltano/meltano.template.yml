@@ -251,7 +251,7 @@ schedules:
 
   - name: polygon-to-postgres
     extractor: tap-polygon
-    loader: target-postgres
+    loader: target-postgres-small-batch
     transform: skip
     interval: '@daily'
     start_date: 2021-09-03 13:52:48.598227
