@@ -24,6 +24,8 @@ for schedule in schedules:
     pool = None
     if not schedule['downstream']:
         pool = "downstream"
+    if schedule['name'] == "polygon-to-postgres":
+        pool = "polygon-to-postgres"
 
     operator = BashOperator(
         task_id=schedule['name'],
