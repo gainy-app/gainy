@@ -14,7 +14,7 @@ locals {
   ]) / 1024) * 1024
 
   downstream_pool_size                = var.env == "production" ? 4 : 3
-  polygon_to_postgres_pool_size       = 4
+  polygon_to_postgres_pool_size       = 3
   eodhistoricaldata_jobs_count        = 4
   eodhistoricaldata_prices_jobs_count = 2
   coingecko_jobs_count                = 2
