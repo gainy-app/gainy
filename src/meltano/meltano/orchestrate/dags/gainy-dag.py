@@ -24,7 +24,7 @@ for schedule in schedules:
     pool = None
     if not schedule['downstream']:
         pool = "downstream"
-    if schedule['name'] == "polygon-to-postgres":
+    if schedule['name'].startswith("polygon-to-postgres"):
         pool = "polygon-to-postgres"
 
     operator = BashOperator(
