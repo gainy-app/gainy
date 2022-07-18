@@ -104,7 +104,6 @@ resource "datadog_monitor" "ecs_cpu" {
   name    = "ECS CPU Utilization"
   type    = "metric alert"
   message = "ECS CPU Utilization Monitor triggered. Notify: @slack-${var.slack_channel_name} <!channel>"
-  #  escalation_message = "Escalation message @pagerduty"
 
   query = "avg(last_1h):avg:aws.ecs.service.cpuutilization{servicename:gainy-production} > 80"
 
@@ -115,7 +114,7 @@ resource "datadog_monitor" "ecs_cpu" {
 
   require_full_window = false
   notify_no_data      = true
-  renotify_interval   = 15
+  renotify_interval   = 60
 
   tags = ["ecs"]
 }
@@ -137,7 +136,7 @@ resource "datadog_monitor" "hasura_memory" {
 
   require_full_window = false
   notify_no_data      = true
-  renotify_interval   = 15
+  renotify_interval   = 60
 
   tags = ["ecs"]
 }
