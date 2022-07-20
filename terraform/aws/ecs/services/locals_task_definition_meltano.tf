@@ -13,8 +13,7 @@ locals {
     pg_airflow_schema                   = "airflow"
     airflow_password                    = random_password.airflow.result
     airflow_port                        = 5001
-    downstream_pool_size                = local.downstream_pool_size
-    polygon_to_postgres_pool_size       = local.polygon_to_postgres_pool_size
+    upstream_pool_size                  = local.upstream_pool_size
     eodhistoricaldata_jobs_count        = local.eodhistoricaldata_jobs_count
     eodhistoricaldata_prices_jobs_count = local.eodhistoricaldata_prices_jobs_count
     coingecko_jobs_count                = local.coingecko_jobs_count
