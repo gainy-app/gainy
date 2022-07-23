@@ -128,7 +128,7 @@ all_rows as
                    then _sdc_batched_at
                else now()
                end                                                                        as _sdc_batched_at,
-           prices_with_split_rates.date::date,
+           prices_with_split_rates.date,
            prices_with_split_rates.high,
            prices_with_split_rates.low,
            prices_with_split_rates.open,
