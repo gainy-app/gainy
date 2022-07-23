@@ -68,7 +68,8 @@ prices_with_split_rates as
                eod_historical_prices.low,
                eod_historical_prices.adjusted_close,
                eod_historical_prices.close,
-               eod_historical_prices.volume
+               eod_historical_prices.volume,
+               eod_historical_prices._sdc_batched_at
         from {{ source('eod', 'eod_historical_prices') }}
                  left join stocks_with_split using (code)
     ),
@@ -98,40 +99,63 @@ wrongfully_adjusted_prices as
         where adjusted_close > 0
           and prev_adjusted_close > 0
           and (adjusted_close / prev_adjusted_close > 2 or prev_adjusted_close / adjusted_close > 2)
-    )
-SELECT prices_with_split_rates.code,
-       (prices_with_split_rates.code || '_' || prices_with_split_rates.date)::varchar as id,
-       substr(prices_with_split_rates.date, 0, 5)                                     as date_year,
-       (substr(prices_with_split_rates.date, 0, 8) || '-01')::timestamp               as date_month,
-       date_trunc('week', prices_with_split_rates.date::date)::timestamp              as date_week,
-       case
-           -- if there is no split tomorrow - just use the data from eod
-           when split_rate_next_day is null
-               then adjusted_close
-           -- latest split period, already adjusted
-           when prices_with_split_rates.date > prev_split.date and wrongfully_adjusted_prices.code is not null
-               then adjusted_close
-           -- latest split period, so we ignore split_rate and use 1.0
-           when prices_with_split_rates.date > prev_split.date and wrongfully_adjusted_prices.code is null
-               then split_rate_next_day * close
-           else prices_with_split_rates.split_rate * split_rate_next_day * close
-           end                                                                        as adjusted_close,
-       case
-           -- latest split period, already adjusted
-           when prices_with_split_rates.date > prev_split.date and wrongfully_adjusted_prices.code is not null
-               then adjusted_close / split_rate_next_day
-           else prices_with_split_rates.close
-           end                                                                        as close,
-       prices_with_split_rates.date::date,
-       prices_with_split_rates.high,
-       prices_with_split_rates.low,
-       prices_with_split_rates.open,
-       prices_with_split_rates.volume
-from prices_with_split_rates
-         left join prev_split using (code)
-         left join wrongfully_adjusted_prices
-                   on wrongfully_adjusted_prices.code = prices_with_split_rates.code
-                       and wrongfully_adjusted_prices.date = prices_with_split_rates.date
+    ),
+all_rows as
+    (
+    SELECT prices_with_split_rates.code,
+           case
+               -- if there is no split tomorrow - just use the data from eod
+               when split_rate_next_day is null
+                   then adjusted_close
+               -- latest split period, already adjusted
+               when prices_with_split_rates.date > prev_split.date and wrongfully_adjusted_prices.code is not null
+                   then adjusted_close
+               -- latest split period, so we ignore split_rate and use 1.0
+               when prices_with_split_rates.date > prev_split.date and wrongfully_adjusted_prices.code is null
+                   then split_rate_next_day * close
+               else prices_with_split_rates.split_rate * split_rate_next_day * close
+               end                                                                        as adjusted_close,
+           case
+               -- latest split period, already adjusted
+               when prices_with_split_rates.date > prev_split.date and wrongfully_adjusted_prices.code is not null
+                   then adjusted_close / split_rate_next_day
+               else prices_with_split_rates.close
+               end                                                                        as close,
+           case
+               when split_rate_next_day is null
+                   then _sdc_batched_at
+               when prices_with_split_rates.date > prev_split.date and wrongfully_adjusted_prices.code is not null
+                   then _sdc_batched_at
+               else now()
+               end                                                                        as _sdc_batched_at,
+           prices_with_split_rates.date,
+           prices_with_split_rates.high,
+           prices_with_split_rates.low,
+           prices_with_split_rates.open,
+           prices_with_split_rates.volume
+    from prices_with_split_rates
+             left join prev_split using (code)
+             left join wrongfully_adjusted_prices
+                       on wrongfully_adjusted_prices.code = prices_with_split_rates.code
+                           and wrongfully_adjusted_prices.date = prices_with_split_rates.date
+)
+select code,
+       (code || '_' || date)                     as id,
+       substr(date, 0, 5)                        as date_year,
+       (substr(date, 0, 8) || '-01')::timestamp  as date_month,
+       date_trunc('week', date::date)::timestamp as date_week,
+       adjusted_close,
+       close,
+       date::date,
+       high,
+       low,
+       open,
+       volume
+from all_rows
+{% if is_incremental() %}
+    left join max_updated_at using (code)
+    where _sdc_batched_at >= max_updated_at.max_date or max_updated_at.max_date is null
+{% endif %}
 
 union all
 
