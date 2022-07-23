@@ -1,3 +1,4 @@
+import json
 import datetime
 from portfolio.plaid import PlaidClient
 from portfolio.models import HoldingData, Security, Account, TransactionData, Institution
@@ -174,7 +175,14 @@ class PlaidService:
 
     def _handle_api_exception(self, exc: plaid.ApiException,
                               access_token: dict):
-        body = exc.body if exc.body and isinstance(exc.body, dict) else {}
+
+        if exc.body and isinstance(exc.body, dict):
+            body = exc.body
+        elif exc.body and isinstance(exc.body, str):
+            body = json.loads(exc.body)
+        else:
+            body = {}
+
         if body.get("error_code") == "ITEM_LOGIN_REQUIRED":
             raise AccessTokenLoginRequiredException(exc, access_token)
 

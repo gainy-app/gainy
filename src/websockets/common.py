@@ -4,6 +4,7 @@ import logging
 import os
 import random
 import string
+import time
 from abc import ABC, abstractmethod
 import psycopg2
 from psycopg2 import sql
@@ -88,6 +89,8 @@ def submit_dd_metric(metric_name, value, tags=[]):
 class AbstractPriceListener(ABC):
 
     def __init__(self, instance_key, source):
+        self.sub_listeners = None
+        self.active_tasks = []
         self.instance_key = instance_key
         self.source = source
         self.logger = get_logger(source)
@@ -98,8 +101,6 @@ class AbstractPriceListener(ABC):
         self.max_insert_records_count = MAX_INSERT_RECORDS_COUNT
         self._latest_symbol_message = {}
         self.start_timestamp = self.get_current_timestamp()
-        self.logger.debug("started at %d for symbols %s", self.start_timestamp,
-                          self.symbols)
 
     def db_connect(self):
         return psycopg2.connect(DB_CONN_STRING)
@@ -154,6 +155,12 @@ class AbstractPriceListener(ABC):
                 self.logger.error("__sync_records: %s", e)
 
     def should_reconnect(self, log_prefix=None):
+        if self.sub_listeners is not None:
+            for sub_listener in self.sub_listeners:
+                if sub_listener.should_reconnect():
+                    return True
+            return False
+
         current_timestamp = self.get_current_timestamp()
         if current_timestamp - self.start_timestamp < self.no_messages_reconnect_timeout:
             return False
@@ -221,33 +228,60 @@ class AbstractPriceListener(ABC):
                               self.instance_key, self.source, result)
             return result
 
+    def connect(self):
+        if self.sub_listeners is not None:
+            tasks = []
+            for sub_listener in self.sub_listeners:
+                tasks += sub_listener.connect()
+            return tasks
+
+        self.active_tasks = [
+            asyncio.create_task(self.listen()),
+            asyncio.create_task(self.sync())
+        ]
+        return self.active_tasks
+
+    def check_reconnect(self):
+        if self.sub_listeners is not None:
+            tasks = []
+            for sub_listener in self.sub_listeners:
+                tasks += sub_listener.check_reconnect()
+            return tasks
+
+        if not self.should_reconnect():
+            return self.active_tasks
+
+        for task in self.active_tasks:
+            task.cancel()
+        time.sleep(1)
+
+        self.symbols = self.get_symbols()
+
+        return self.connect()
+
 
 async def run(listener_factory):
-    task = None
-    should_reconnect = True
-    listen_task = None
-    sync_task = None
     logger = get_logger(__name__)
     instance_key = ''.join(
         random.choice(string.ascii_lowercase) for i in range(10))
 
+    listener = None
+    for i in range(60):
+        try:
+            listener = listener_factory(instance_key)
+            listener.connect()
+            break
+        except psycopg2.errors.UndefinedTable:
+            await asyncio.sleep(60)
+
+    if listener is None:
+        raise Exception('Failed to initialize listener')
+
     while True:
         try:
-            if should_reconnect:
-                if listen_task is not None:
-                    listen_task.cancel()
-                if sync_task is not None:
-                    sync_task.cancel()
-
-                await asyncio.sleep(1)
-
-                listener = listener_factory(instance_key)
-                listen_task = asyncio.create_task(listener.listen())
-                sync_task = asyncio.create_task(listener.sync())
+            listener.check_reconnect()
 
             await asyncio.sleep(listener.no_messages_reconnect_timeout)
-
-            should_reconnect = listener.should_reconnect()
         except psycopg2.errors.UndefinedTable:
             pass
         except Exception as e:

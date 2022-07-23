@@ -13,16 +13,18 @@ locals {
     local.meltano_scheduler_cpu_credits,
   ]) / 1024) * 1024
 
-  downstream_pool_size                = var.env == "production" ? 4 : 3
+  upstream_pool_size                  = var.env == "production" ? 4 : 3
   eodhistoricaldata_jobs_count        = 4
   eodhistoricaldata_prices_jobs_count = 2
   coingecko_jobs_count                = 2
+  polygon_jobs_count                  = 8
 
-  eod_websockets_memory_credits     = var.env == "production" ? 512 : 0
+  eod_symbols_limit                 = var.env == "production" ? 14000 : 20
+  eod_websockets_memory_credits     = var.env == "production" ? 512 : 256
   polygon_websockets_memory_credits = var.env == "production" ? 1024 : 0
   hasura_memory_credits             = var.env == "production" ? 2048 : 1024
   meltano_ui_memory_credits         = var.env == "production" ? 1024 : 1024
-  meltano_scheduler_memory_credits  = var.env == "production" ? 4096 : 3072
+  meltano_scheduler_memory_credits  = var.env == "production" ? 5120 : 3072
   main_memory_credits = ceil(sum([
     local.hasura_memory_credits,
     local.meltano_ui_memory_credits,

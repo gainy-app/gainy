@@ -7,7 +7,7 @@
         {
           "breadcrumb": [],
           "metadata": {
-            "replication-key": "updated_on",
+            "replication-key": "updated_at",
             "replication-method": "INCREMENTAL",
             "table-key-properties": [ "id" ],
             "schema-name": "website",

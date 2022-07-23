@@ -25,10 +25,12 @@ class PortfolioRepository(Repository):
                     "DELETE FROM {schema_name}.{table_name} WHERE plaid_access_token_id IN %(plaid_access_token_ids)s AND id NOT IN %(excluded_ids)s"
                 ).format(schema_name=sql.Identifier(schema_name),
                          table_name=sql.Identifier(table_name))
+                params = {
+                    'plaid_access_token_ids': tuple(plaid_access_token_ids),
+                }
 
-                cursor.execute(
-                    sql_string, {
-                        'plaid_access_token_ids':
-                        tuple(plaid_access_token_ids),
-                        'excluded_ids': tuple(excluded_ids)
-                    })
+                if excluded_ids:
+                    sql_string += sql.SQL(" AND id NOT IN %(excluded_ids)s")
+                    params['excluded_ids'] = tuple(excluded_ids)
+
+                cursor.execute(sql_string, params)

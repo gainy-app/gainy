@@ -72,6 +72,7 @@ class PortfolioService:
         return transactions
 
     def sync_token_transactions(self, db_conn, access_token):
+        all_transactions = []
         transactions_count = 0
         count = self.__get_service(
             access_token['service']).max_transactions_limit()
@@ -82,17 +83,25 @@ class PortfolioService:
                                                               access_token,
                                                               count=count,
                                                               offset=offset)
-                transactions = data['transactions']
+                cur_transactions = data['transactions']
+                all_transactions += cur_transactions
                 self.persist_transaction_data(db_conn,
                                               access_token['profile_id'],
                                               data['securities'],
-                                              data['accounts'], transactions)
+                                              data['accounts'],
+                                              cur_transactions)
 
-                transactions_count += len(transactions)
-                if len(transactions) < count:
+                transactions_count += len(cur_transactions)
+                if len(cur_transactions) < count:
                     break
+        except AccessTokenApiException as e:
+            pass
         except AccessTokenLoginRequiredException as e:
             self._set_access_token_reauth(db_conn, e.access_token)
+
+        # cleanup
+        self.portfolio_repository.remove_other_by_access_token(
+            db_conn, all_transactions)
 
         return transactions_count
 

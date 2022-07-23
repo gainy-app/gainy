@@ -34,6 +34,9 @@ sources:
     tables:
       - name: polygon_marketstatus_upcoming
       - name: polygon_options_historical_prices
+      - name: polygon_crypto_historical_prices
+      - name: polygon_stock_splits
+      - name: polygon_stocks_historical_prices
 
   - name: coingecko
     description: Crypto data from https://coingecko.com
@@ -47,6 +50,7 @@ sources:
     schema: app
     tables:
       - name: influencers
+      - name: invitations
       - name: personalized_collection_sizes
       - name: personalized_ticker_collections
       - name: plaid_institutions
@@ -1230,23 +1234,23 @@ models:
       - name: open
         tests:
           - type:
-              type: 'numeric'
+              type: 'double precision'
       - name: high
         tests:
           - type:
-              type: 'numeric'
+              type: 'double precision'
       - name: low
         tests:
           - type:
-              type: 'numeric'
+              type: 'double precision'
       - name: close
         tests:
           - type:
-              type: 'numeric'
+              type: 'double precision'
       - name: adjusted_close
         tests:
           - type:
-              type: 'numeric'
+              type: 'double precision'
 
   - name: ticker_realtime_metrics
     columns:
@@ -1808,7 +1812,7 @@ models:
         tests:
           - type:
               type: 'double precision'
-      - name: market_capiptalization
+      - name: market_capitalization
         tests:
           - type:
               type: 'double precision'
@@ -1949,7 +1953,7 @@ models:
           - unique
           - not_null
           - type:
-              type: 'character varying'
+              type: 'text'
       - name: send_at
         tests:
           - type:
@@ -1962,6 +1966,14 @@ models:
         tests:
           - type:
               type: 'json'
+      - name: is_test
+        tests:
+          - type:
+              type: 'boolean'
+      - name: template_id
+        tests:
+          - type:
+              type: 'text'
 
   - name: data_checks
     columns:

@@ -52,11 +52,16 @@ class PortfolioChartService:
                                                     filter)
         if static_value:
             for i in rows:
-                i['open'] += static_value
-                i['high'] += static_value
-                i['low'] += static_value
-                i['close'] += static_value
-                i['adjusted_close'] += static_value
+                if i['open'] is not None:
+                    i['open'] += static_value
+                if i['high'] is not None:
+                    i['high'] += static_value
+                if i['low'] is not None:
+                    i['low'] += static_value
+                if i['close'] is not None:
+                    i['close'] += static_value
+                if i['adjusted_close'] is not None:
+                    i['adjusted_close'] += static_value
 
         if max(row['adjusted_close'] for row in rows) < 1e-3:
             return []

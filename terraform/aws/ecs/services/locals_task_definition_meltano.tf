@@ -13,10 +13,11 @@ locals {
     pg_airflow_schema                   = "airflow"
     airflow_password                    = random_password.airflow.result
     airflow_port                        = 5001
-    downstream_pool_size                = local.downstream_pool_size
+    upstream_pool_size                  = local.upstream_pool_size
     eodhistoricaldata_jobs_count        = local.eodhistoricaldata_jobs_count
     eodhistoricaldata_prices_jobs_count = local.eodhistoricaldata_prices_jobs_count
     coingecko_jobs_count                = local.coingecko_jobs_count
+    polygon_jobs_count                  = local.polygon_jobs_count
     pg_transform_schema                 = local.public_schema_name
     meltano_image                       = docker_registry_image.meltano.name
     aws_log_group_name                  = aws_cloudwatch_log_group.meltano.name
@@ -49,7 +50,8 @@ locals {
       algolia_indexing_key                 = var.algolia_indexing_key
       onesignal_app_id                     = var.onesignal_app_id
       onesignal_api_key                    = var.onesignal_api_key
-      onesignal_segments                   = jsonencode(var.env == "production" ? ["Subscribed Users"] : ["Testers"])
+      onesignal_segments_production        = jsonencode(["Subscribed Users"])
+      onesignal_segments_test              = jsonencode(["Testers"])
       gainy_history_s3_bucket              = var.gainy_history_s3_bucket
 
       pg_external_access_host     = var.pg_external_access_host

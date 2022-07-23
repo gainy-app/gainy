@@ -24,6 +24,7 @@ plugins:
         - name: symbols_type
         - name: split_id
         - name: split_num
+        - name: full_refresh_symbols
       config:
         streams:
           - eod_fundamentals
@@ -47,6 +48,8 @@ plugins:
       settings:
         - name: api_key
         - name: option_contract_names
+        - name: crypto_symbols
+        - name: stock_symbols
         - name: split_id
         - name: split_num
 

@@ -105,6 +105,32 @@
       "selected": true
     },
     {
+      "table_name": "polygon_stocks_historical_prices",
+      "stream": "polygon_stocks_historical_prices",
+      "metadata": [
+        {
+          "breadcrumb": [],
+          "metadata": {
+            "replication-key": "t",
+            "replication-method": "INCREMENTAL",
+            "table-key-properties": [
+              "symbol",
+              "t"
+            ],
+            "schema-name": "raw_data",
+            "database-name": "gainy",
+            "selected": true
+          }
+        }
+      ],
+      "tap_stream_id": "raw_data-polygon_stocks_historical_prices",
+      "schema": {
+        "type": "object",
+        "properties": {}
+      },
+      "selected": true
+    },
+    {
       "table_name": "polygon_options_historical_prices",
       "stream": "polygon_options_historical_prices",
       "metadata": [
@@ -124,6 +150,58 @@
         }
       ],
       "tap_stream_id": "raw_data-polygon_options_historical_prices",
+      "schema": {
+        "type": "object",
+        "properties": {}
+      },
+      "selected": true
+    },
+    {
+      "table_name": "polygon_crypto_historical_prices",
+      "stream": "polygon_crypto_historical_prices",
+      "metadata": [
+        {
+          "breadcrumb": [],
+          "metadata": {
+            "replication-key": "t",
+            "replication-method": "INCREMENTAL",
+            "table-key-properties": [
+              "symbol",
+              "t"
+            ],
+            "schema-name": "raw_data",
+            "database-name": "gainy",
+            "selected": true
+          }
+        }
+      ],
+      "tap_stream_id": "raw_data-polygon_crypto_historical_prices",
+      "schema": {
+        "type": "object",
+        "properties": {}
+      },
+      "selected": true
+    },
+    {
+      "table_name": "polygon_stock_splits",
+      "stream": "polygon_stock_splits",
+      "metadata": [
+        {
+          "breadcrumb": [],
+          "metadata": {
+            "replication-key": "t",
+            "replication-method": "INCREMENTAL",
+            "table-key-properties": [
+              "ticker",
+              "execution_date"
+            ],
+            "schema-name": "raw_data",
+            "database-name": "gainy",
+            "selected": true
+          }
+        }
+      ],
+      "tap_stream_id": "raw_data-polygon_stock_splits",
       "schema": {
         "type": "object",
         "properties": {}

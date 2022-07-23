@@ -23,7 +23,7 @@ downstream = []
 for schedule in schedules:
     pool = None
     if not schedule['downstream']:
-        pool = "downstream"
+        pool = "upstream"
 
     operator = BashOperator(
         task_id=schedule['name'],

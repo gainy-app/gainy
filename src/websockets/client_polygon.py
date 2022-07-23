@@ -32,6 +32,8 @@ class PricesListener(AbstractPriceListener):
             ]
         else:
             self.sub_listeners = None
+            self.logger.debug("[%s] started at %d for symbols %s", cluster,
+                              self.start_timestamp, self.symbols)
 
     def get_symbols(self):
         if self.cluster is None:
@@ -199,12 +201,6 @@ class PricesListener(AbstractPriceListener):
             self.logger.exception(e)
 
     def should_reconnect(self):
-        if self.sub_listeners is not None:
-            for sub_listener in self.sub_listeners:
-                if not sub_listener.should_reconnect():
-                    return False
-            return True
-
         return super().should_reconnect(self.cluster)
 
     def transform_symbol(self, symbol):
