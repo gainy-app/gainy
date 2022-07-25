@@ -31,14 +31,15 @@ with raw_intraday_prices as
              where week_trading_sessions is null
                 or (week_trading_sessions.date = eod_intraday_prices.time::date and time >= week_trading_sessions.open_at and time < week_trading_sessions.close_at)
          ),
-{% if is_incremental() and var('realtime') %}
+{% if is_incremental() %}
      old_model_stats as
          (
              select symbol, max(time) as max_time
              from {{ this }}
              group by symbol
-         )
-{% else %}
+         ),
+{% endif %}
+{% if not var('realtime') %}
      daily_close_prices as
          (
              select symbol,
@@ -65,7 +66,6 @@ with raw_intraday_prices as
                                     and historical_prices.date = daily_close_prices.date
                       join {{ source('eod', 'eod_intraday_prices') }} using (symbol, time)
          )
-{% endif %}
 select symbol,
        date,
        time,
@@ -77,18 +77,25 @@ select symbol,
        close,
        volume,
 
-{% if is_incremental() and var('realtime') %}
-       close as adjusted_close,
+{% if not var('realtime') %}
+       close * split_rate as adjusted_close
 {% else %}
-       close * split_rate as adjusted_close,
+       close as adjusted_close
 {% endif %}
 
-       (symbol || '_' || time) as id
 from raw_intraday_prices
 
-{% if is_incremental() and var('realtime') %}
-left join old_model_stats using (symbol)
-where old_model_stats.max_time is null or raw_intraday_prices.time > max_time
-{% else %}
+{% if is_incremental() %}
+         left join old_model_stats using (symbol)
+{% endif %}
+
+{% if not var('realtime') %}
          left join daily_adjustment_rate using (symbol, date)
+{% endif %}
+
+{% if is_incremental() %}
+where old_model_stats.max_time is null or raw_intraday_prices.time > max_time
+{% if not var('realtime') %}
+   or abs(split_rate - 1) > 1e-3
+{% endif %}
 {% endif %}
