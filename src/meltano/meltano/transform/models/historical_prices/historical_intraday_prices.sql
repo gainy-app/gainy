@@ -95,7 +95,7 @@ from raw_intraday_prices
 
 {% if is_incremental() %}
 where old_model_stats.max_time is null or raw_intraday_prices.time > max_time
-{% if not var('realtime') %}
-   or abs(split_rate - 1) > 1e-3
 {% endif %}
+{% if is_incremental() and not var('realtime') %}
+   or abs(split_rate - 1) > 1e-3
 {% endif %}
