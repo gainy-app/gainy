@@ -150,7 +150,8 @@ select code,
        high,
        low,
        open,
-       volume
+       volume,
+       _sdc_batched_at                           as updated_at
 from all_rows
 {% if is_incremental() %}
     left join max_updated_at using (code)
@@ -170,7 +171,8 @@ SELECT contract_name                                                   as code,
        h                                                               as high,
        l                                                               as low,
        o                                                               as open,
-       v                                                               as volume
+       v                                                               as volume,
+       _sdc_batched_at                                                 as updated_at
 from {{ source('polygon', 'polygon_options_historical_prices') }}
 join {{ ref('ticker_options_monitored') }} using (contract_name)
 {% if is_incremental() %}
@@ -191,7 +193,8 @@ SELECT polygon_crypto_tickers.symbol                                          as
        h                                                                      as high,
        l                                                                      as low,
        o                                                                      as open,
-       v                                                                      as volume
+       v                                                                      as volume,
+       _sdc_batched_at                                                        as updated_at
 from polygon_crypto_tickers
          join {{ source('polygon', 'polygon_crypto_historical_prices') }}
               on polygon_crypto_historical_prices.symbol = regexp_replace(polygon_crypto_tickers.symbol, '.CC$', 'USD')

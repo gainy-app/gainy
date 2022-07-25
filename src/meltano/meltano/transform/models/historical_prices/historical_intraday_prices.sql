@@ -30,16 +30,16 @@ with raw_intraday_prices as
                                 on week_trading_sessions.symbol = eod_intraday_prices.symbol
              where week_trading_sessions is null
                 or (week_trading_sessions.date = eod_intraday_prices.time::date and time >= week_trading_sessions.open_at and time < week_trading_sessions.close_at)
-         ),
 {% if is_incremental() %}
+         ),
      old_model_stats as
          (
              select symbol, max(time) as max_time
              from {{ this }}
              group by symbol
-         ),
 {% endif %}
 {% if not var('realtime') %}
+         ),
      daily_close_prices as
          (
              select symbol,
@@ -65,6 +65,7 @@ with raw_intraday_prices as
                                 on historical_prices.code = daily_close_prices.symbol
                                     and historical_prices.date = daily_close_prices.date
                       join {{ source('eod', 'eod_intraday_prices') }} using (symbol, time)
+{% endif %}
          )
 select symbol,
        date,
@@ -78,11 +79,13 @@ select symbol,
        volume,
 
 {% if not var('realtime') %}
-       close * split_rate as adjusted_close
+       close * split_rate as adjusted_close,
 {% else %}
-       close as adjusted_close
+       close as adjusted_close,
 {% endif %}
 
+       now() as updated_at,
+       (symbol || '_' || time) as id
 from raw_intraday_prices
 
 {% if is_incremental() %}
