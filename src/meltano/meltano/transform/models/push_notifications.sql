@@ -101,7 +101,7 @@ with all_push_notifications as
                    now()                                     as send_at,
                    json_build_object('en', 'Read ' || title) as text,
                    json_build_object('t', 4, 'id', id)       as data,
-                   true                                      as is_test,
+                   false                                     as is_test,
                    '07b00e92-a1ae-44ea-bde0-c0715a991f2f'    as template_id
             from {{ ref('website_blog_articles') }}
             where published_on > '2022-07-01'
@@ -116,7 +116,7 @@ with all_push_notifications as
                        'Your friend has just joined the app via your invitation. ' ||
                        'Free month granted!')                  as text,
                    json_build_object('t', 5)                   as data,
-                   true                                        as is_test,
+                   false                                       as is_test,
                    'ed86815f-3391-498c-875a-ea974342dc46'      as template_id
             from {{ source('app', 'invitations') }}
             where created_at > '2022-07-01'
@@ -128,7 +128,7 @@ with all_push_notifications as
                        'Thanks for accepting the invitation. ' ||
                        'Free month granted!')                  as text,
                    json_build_object('t', 5)                   as data,
-                   true                                        as is_test,
+                   false                                       as is_test,
                    '3c5f6ae0-1c69-4dbe-bb73-0d7f07595c95'      as template_id
             from {{ source('app', 'invitations') }}
             where created_at > '2022-07-01'
@@ -142,7 +142,7 @@ with all_push_notifications as
                    now()                                                                as send_at,
                    json_build_object('en', 'What’s the worst stock in your portfolio?') as text,
                    json_build_object('t', 6, 's', symbol)                               as data,
-                   true                                                                 as is_test,
+                   false                                                                as is_test,
                    'f4c2e5bb-5cff-4776-8abf-dd320f91800b'                               as template_id
             from (
                      select distinct on (
@@ -168,7 +168,7 @@ with all_push_notifications as
                             '% today. You have already made ' ||
                             (relative_position_gain * 100)::int || '%. Maybe sell?') as text,
                    json_build_object('t', 7, 's', original_ticker_symbol)            as data,
-                   true                                                              as is_test,
+                   false                                                             as is_test,
                    '11dc7a5a-aa96-4835-893a-cea11581ab6c'                            as template_id
             from (
                      with raw_positions as
