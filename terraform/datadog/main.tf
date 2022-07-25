@@ -342,11 +342,6 @@ resource "datadog_monitor" "meltano_dag_run_duration" {
 
   query = "avg(last_1h):outliers(sum:app.latest_dag_run_duration_minutes{postgres_env:production} by {dag_id}.as_count(), 'DBSCAN', 3) > 0"
 
-  monitor_threshold_windows {
-    recovery_window = "last_3h"
-    trigger_window  = "last_3h"
-  }
-
   monitor_thresholds {
     critical = "0"
   }
