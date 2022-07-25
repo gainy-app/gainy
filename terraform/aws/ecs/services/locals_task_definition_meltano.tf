@@ -37,7 +37,7 @@ locals {
       eodhistoricaldata_api_token          = var.eodhistoricaldata_api_token
       eodhistoricaldata_exchanges          = jsonencode(["NASDAQ", "NYSE", "CC", "INDX"])
       pg_load_schema                       = "raw_data"
-      dbt_threads                          = var.env == "production" ? 4 : 4
+      dbt_threads                          = 3
       pg_production_host                   = var.pg_production_host
       pg_production_port                   = var.pg_production_port
       pg_production_internal_sync_username = var.pg_production_internal_sync_username
