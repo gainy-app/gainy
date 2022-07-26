@@ -2013,6 +2013,33 @@ models:
           - type:
               type: 'character varying'
 
+  - name: portfolio_holding_group_tags
+    columns:
+      - name: profile_id
+        tests:
+          - type:
+              type: 'integer'
+      - name: symbol
+        tests:
+          - type:
+              type: 'character varying'
+      - name: collection_id
+        tests:
+          - type:
+              type: 'integer'
+      - name: collection_uniq_id
+        tests:
+          - type:
+              type: 'text'
+      - name: category_id
+        tests:
+          - type:
+              type: 'integer'
+      - name: interest_id
+        tests:
+          - type:
+              type: 'integer'
+
 exposures:
   - name: ticker_search_index
     type: application
