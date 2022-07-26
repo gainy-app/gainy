@@ -7,7 +7,7 @@ dag = create_dag(
     dag_id,
     tags=tags,
     is_paused_upon_creation=(ENV != 'production'),
-    schedule_interval="0 6 * * 0" if ENV == "production" else "0 7 * * 0")
+    schedule_interval="0 7 * * 0" if ENV == "production" else "0 8 * * 0")
 
 gainy_recommendation = BashOperator(
     task_id="update-recommendations",
