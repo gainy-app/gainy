@@ -83,14 +83,14 @@ with ticker_selected_collection as
              where holding_group_collection_tags.collection_id is null
                and row_num <= 5
          )
-select *,
-       now()                      as updated_at,
-       (profile_id || '_' ||
-        symbol || '_' ||
-        coalesce(collection_id, 0) || '_' ||
-        coalesce(category_id, 0) || '_' ||
-        coalesce(interest_id, 0)) as id,
-       {{ var('realtime') }}      as is_realtime
+select all_rows.*,
+       now()                               as updated_at,
+       (all_rows.profile_id || '_' ||
+        all_rows.symbol || '_' ||
+        coalesce(all_rows.collection_id, 0) || '_' ||
+        coalesce(all_rows.category_id, 0) || '_' ||
+        coalesce(all_rows.interest_id, 0)) as id,
+       {{ var('realtime') }}               as is_realtime
 from all_rows
 {% if is_incremental() and var('realtime') %}
          left join {{ this }} old_data using (profile_id, symbol)
