@@ -18,4 +18,8 @@ query home_tab($profileId: Int, $rankedCount: Int) {
             }
         }
     }
+    ticker_realtime_metrics(where: {symbol: {_in: ["DJI.INDX", "GSPC.INDX", "IXIC.INDX", "BTC.CC"]}}) {
+        actual_price
+        relative_daily_change
+    }
 }
