@@ -1434,7 +1434,7 @@ models:
       - name: url
         tests:
           - type:
-              type: 'character varying'
+              type: 'text'
       - name: updated_on
         tests:
           - type:
