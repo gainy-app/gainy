@@ -7,3 +7,12 @@
     - POST
   name: plaid_webhook
   comment:
+- definition:
+    query:
+      collection_name: allowed-queries
+      query_name: stripe_webhook
+  url: stripe_webhook
+  methods:
+    - POST
+  name: stripe_webhook
+  comment:

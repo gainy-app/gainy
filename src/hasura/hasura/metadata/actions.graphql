@@ -135,6 +135,28 @@ type Query {
   ): [Ticker]
 }
 
+type Query {
+  stripe_get_checkout_url(
+    price_id: String!
+    success_url: String!
+    cancel_url: String!
+  ): StripeGetCheckoutUrl
+}
+
+type Mutation {
+  stripe_webhook(
+    id: String
+    object: String
+    api_version: String
+    created: Int
+    data: jsonb
+    livemode: Boolean
+    pending_webhooks: Int
+    request: jsonb
+    type: String
+  ): StripeWebhookOutput
+}
+
 type Mutation {
   update_purchases(
     profile_id: Int!
@@ -265,6 +287,14 @@ type CreatePlaidLinkTokenOutput {
 
 type PlaidWebhookOutput {
   count: Int!
+}
+
+type StripeGetCheckoutUrl {
+  url: String!
+}
+
+type StripeWebhookOutput {
+  success: Boolean!
 }
 
 type UpdatePurchasesOutput {
