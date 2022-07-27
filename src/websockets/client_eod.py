@@ -12,7 +12,8 @@ EOD_API_TOKEN = os.environ["EOD_API_TOKEN"]
 MANDATORY_SYMBOLS = [
     'DJI.INDX', 'GSPC.INDX', 'IXIC.INDX', 'BTC.CC', 'ETH.CC', 'USDT.CC',
     'DOGE.CC', 'BNB.CC', 'XRP.CC', 'DOT.CC', 'SOL.CC', 'ADA.CC', 'LINK.CC',
-    'ATOM.CC'
+    'ATOM.CC', 'CRV.CC', 'MATIC.CC', 'DAI.CC', 'SHIB.CC', 'STEPN.CC', 'TRX.CC', 
+    'UNI.CC', 'USDC.CC',
 ]
 SYMBOLS_LIMIT = int(os.getenv('SYMBOLS_LIMIT', len(MANDATORY_SYMBOLS)))
 
