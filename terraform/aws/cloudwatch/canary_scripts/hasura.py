@@ -169,7 +169,7 @@ def test_collection_metrics():
             continue
         observed_realtime_metrics_symbols.add(i['symbol'])
         assert i['actual_price'] is not None
-        assert abs(i['actual_price']) > 1e-3
+        assert i['actual_price'] > 1e-3
         assert i['relative_daily_change'] is not None
         assert abs(i['relative_daily_change']) > 1e-3
     assert len(observed_realtime_metrics_symbols) == len(home_tab_symbols)
