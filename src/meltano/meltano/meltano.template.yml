@@ -108,6 +108,9 @@ plugins:
           - entity: ticker_search_alternative_names
             path: data/ticker_search_alternative_names.csv
             keys: [ "symbol" ]
+          - entity: blog_article_priority
+            path: data/article_priority.csv
+            keys: [ "id" ]
 
     - name: tap-postgres
       config:

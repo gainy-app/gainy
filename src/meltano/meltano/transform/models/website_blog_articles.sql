@@ -11,8 +11,8 @@
 {% if is_incremental() %}
 with max_updated_at as (select max(updated_on) as max_date from {{ this }})
 {% endif %}
-select id::varchar,
-       name::varchar as title,
+select blogs.id::varchar,
+       blogs.name::varchar                               as title,
        post_summary::varchar,
        main_image::varchar,
        category_link::varchar,
@@ -20,14 +20,18 @@ select id::varchar,
        published_on::timestamp,
        rate_rating::double precision,
        rate_votes::int,
-       ('https://www.gainy.app/blog/' || slug || '?app')::varchar as url,
-       updated_on::timestamp
+       ('https://www.gainy.app/blog/' || slug || '?app') as url,
+       updated_on::timestamp,
+       coalesce(priority::int, 0)                        as priority
 from {{ source('website', 'blogs') }}
+         left join {{ source('gainy', 'blog_article_priority') }} using (id)
+
 {% if is_incremental() %}
 left join max_updated_at on true
-where (max_updated_at.max_date is null or updated_on::timestamp > max_updated_at.max_date)
-and
-{% else %}
-where
 {% endif %}
-    updated_at > (select max(updated_at) from {{ source('website', 'blogs') }}) - interval '1 minute'
+
+where updated_at > (select max(updated_at) from {{ source('website', 'blogs') }}) - interval '1 minute'
+
+{% if is_incremental() %}
+  and (max_updated_at.max_date is null or updated_on::timestamp > max_updated_at.max_date)
+{% endif %}
