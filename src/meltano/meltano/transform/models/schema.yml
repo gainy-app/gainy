@@ -5,6 +5,7 @@ sources:
     description: Gainy in-house datasets such as collections, industries, interests, categories, etc
     schema: raw_data
     tables:
+      - name: blog_article_priority
       - name: crypto_ticker_industries
       - name: gainy_custom_industries
       - name: gainy_ticker_custom_industries
@@ -1438,6 +1439,10 @@ models:
         tests:
           - type:
               type: 'timestamp without time zone'
+      - name: priority
+        tests:
+          - type:
+              type: 'integer'
 
   - name: collection_chart
     columns:

@@ -2321,25 +2321,27 @@
           - id
           - main_image
           - post_summary
-          - title
-          - url
+          - priority
+          - published_on
           - rate_rating
           - rate_votes
-          - published_on
+          - title
           - updated_on
+          - url
         filter: {}
     - role: user
       permission:
         columns:
-          - id
-          - title
-          - post_summary
-          - main_image
           - category_link
           - category_name
+          - id
+          - main_image
+          - post_summary
+          - priority
           - published_on
           - rate_rating
           - rate_votes
-          - url
+          - title
           - updated_on
+          - url
         filter: {}
