@@ -10,13 +10,13 @@ from services.logging import get_logger
 logger = get_logger(__name__)
 
 stripe.api_key = os.getenv('STRIPE_API_KEY')
-stripe_webhook_secret = os.getenv('STRIPE_WEBHOOK_SECRET')
 
 
 def handle_error(e):
     logger.exception('Stripe Error: %s' % (e))
 
     raise HasuraActionException(400, "Stripe error: %s" % (e))
+
 
 class StripeGetCheckoutUrl(HasuraAction):
 
@@ -65,7 +65,8 @@ class StripeWebhook(HasuraAction):
         if event.type == 'payment_intent.succeeded':
             payment_intent = event.data.object
             try:
-                refund = stripe.Refund.create(payment_intent=payment_intent['id'])
+                refund = stripe.Refund.create(
+                    payment_intent=payment_intent['id'])
                 logger.info('[STRIPE_WEBHOOK] refund %s', json.dumps(refund))
             except Exception as e:
                 logger.info('[STRIPE_WEBHOOK] error while refund %s', e)
