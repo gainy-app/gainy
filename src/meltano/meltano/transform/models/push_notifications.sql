@@ -95,29 +95,31 @@ with all_push_notifications as
 
             union all
 
-            -- New article
-            select null::int                                      as profile_id,
-                   ('new_article_' || blogs.slug)                 as uniq_id,
-                   now()::date + interval '17 hours'              as send_at,
-                   json_build_object('en', 'Read ' || blogs.name) as text,
-                   json_build_object('t', 4, 'id', blogs.id)      as data,
-                   true                                           as is_test,
-                   '07b00e92-a1ae-44ea-bde0-c0715a991f2f'         as template_id
-            from {{ source('website', 'blogs') }}
-                     left join {{ source('website', 'blogs') }} article_duplicate
-                               on (article_duplicate.id = blogs.id or article_duplicate.name = blogs.name or article_duplicate.slug = blogs.slug)
-                                   and (article_duplicate.id != blogs.id or article_duplicate.name != blogs.name or article_duplicate.slug != blogs.slug)
-                     left join {{ source('app', 'notifications') }} this_article_notifications
-                               on this_article_notifications.uniq_id = 'new_article_' || blogs.id
-                                   or this_article_notifications.uniq_id = 'new_article_' || blogs.slug
-                     left join {{ source('app', 'notifications') }} all_article_notifications
-                               on all_article_notifications.uniq_id like 'new_article_%'
-                                   and all_article_notifications.created_at > now() - interval '1 week'
-             where article_duplicate is null -- the article has no duplicates
-               and this_article_notifications is null -- this article has not been sent
-               and all_article_notifications is null -- previous article notification was sent more than a week ago
-             order by blogs.published_on desc
-             limit 1
+            (
+                -- New article
+                select null::int                                      as profile_id,
+                       ('new_article_' || blogs.slug)                 as uniq_id,
+                       now()::date + interval '17 hours'              as send_at,
+                       json_build_object('en', 'Read ' || blogs.name) as text,
+                       json_build_object('t', 4, 'id', blogs.id)      as data,
+                       true                                           as is_test,
+                       '07b00e92-a1ae-44ea-bde0-c0715a991f2f'         as template_id
+                from {{ source('website', 'blogs') }}
+                         left join {{ source('website', 'blogs') }} article_duplicate
+                                   on (article_duplicate.id = blogs.id or article_duplicate.name = blogs.name or article_duplicate.slug = blogs.slug)
+                                       and (article_duplicate.id != blogs.id or article_duplicate.name != blogs.name or article_duplicate.slug != blogs.slug)
+                         left join {{ source('app', 'notifications') }} this_article_notifications
+                                   on this_article_notifications.uniq_id = 'new_article_' || blogs.id
+                                       or this_article_notifications.uniq_id = 'new_article_' || blogs.slug
+                         left join {{ source('app', 'notifications') }} all_article_notifications
+                                   on all_article_notifications.uniq_id like 'new_article_%'
+                                       and all_article_notifications.updated_at > now() - interval '1 week'
+                 where article_duplicate is null -- the article has no duplicates
+                   and this_article_notifications is null -- this article has not been sent
+                   and all_article_notifications is null -- previous article notification was sent more than a week ago
+                 order by blogs.published_on desc
+                 limit 1
+            )
 
             union all
 
