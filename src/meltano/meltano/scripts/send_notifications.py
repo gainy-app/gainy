@@ -80,7 +80,7 @@ def send_push_notification(notification):
                          data=json.dumps(payload))
 
 
-def send_one(notification):
+def send_one(db_conn, notification):
     response = None
     try:
         response = send_push_notification(notification)
@@ -141,7 +141,7 @@ def check_malfunctioning_notifications(notifications_to_send):
 
             notification_stats[target_type][target][template_id] += 1
 
-            cnt = notification_stats[target_type][email][template_id]
+            cnt = notification_stats[target_type][target][template_id]
 
             if cnt > MAX_NOTIFICATIONS_PER_TEMPLATE:
                 raise Exception('Malfunctioning notifications encountered %s',
@@ -172,7 +172,7 @@ def send_all(sender_id):
             check_malfunctioning_notifications(notifications_to_send)
 
             for row in notifications_to_send:
-                send_one(row)
+                send_one(db_conn, row)
 
 
 send_all(uuid.uuid4())
