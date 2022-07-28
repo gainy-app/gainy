@@ -14,20 +14,22 @@ logger.setLevel(logging.INFO)
 
 class UpdatePurchases(HasuraAction):
 
-    def __init__(self):
-        super().__init__("update_purchases", "profile_id")
+    def __init__(self, action_name="update_purchases"):
+        super().__init__(action_name, "profile_id")
         self.revenue_cat_service = RevenueCatService()
         self.billing_service = BillingService()
 
     def apply(self, db_conn, input_params, headers):
         profile_id = input_params["profile_id"]
 
-        if env() in ['production', 'local']:
-            self.sync_revenuecat(db_conn, profile_id)
+        self.sync_revenuecat(db_conn, profile_id)
 
         self.billing_service.recalculate_subscription_status(
             db_conn, profile_id)
 
+        return self.get_response(db_conn)
+
+    def get_response(self, db_conn)
         with db_conn.cursor() as cursor:
             cursor.execute(
                 "select subscription_end_date from app.profiles where id = %(profile_id)s",
@@ -41,6 +43,9 @@ class UpdatePurchases(HasuraAction):
         }
 
     def sync_revenuecat(self, db_conn, profile_id):
+        if env() not in ['production', 'local']:
+            return
+
         values = []
         existing_revenuecat_ref_ids = []
 
