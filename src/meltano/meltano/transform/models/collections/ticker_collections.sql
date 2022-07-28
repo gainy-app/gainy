@@ -30,20 +30,25 @@ with raw_ticker_collections as
              select collection_id, sum(weight) as weight_sum
              from raw_ticker_collections
              group by collection_id
+         ),
+     data as
+         (
+             select collection_id || '_' || symbol as id,
+                    collection_id,
+                    symbol,
+                    (case
+                         when collection_weight_sum.weight_sum is null or collection_weight_sum.weight_sum < 1e-3
+                             then
+                                 ticker_metrics.market_capitalization /
+                                 sum(ticker_metrics.market_capitalization) over (partition by collection_id)
+                         else
+                             weight / collection_weight_sum.weight_sum
+                        end)::double precision     as weight,
+                    now()                          as updated_at
+             from raw_ticker_collections
+                      left join {{ ref('ticker_metrics') }} using (symbol)
+                      left join collection_weight_sum using (collection_id)
          )
-select collection_id || '_' || symbol as id,
-       collection_id,
-       symbol,
-       (case
-            when collection_weight_sum.weight_sum is null or collection_weight_sum.weight_sum < 1e-3
-                then
-                    ticker_metrics.market_capitalization /
-                    sum(ticker_metrics.market_capitalization) over (partition by collection_id)
-            else
-                weight / collection_weight_sum.weight_sum
-           end)::double precision     as weight,
-       now()                          as updated_at
-from raw_ticker_collections
-         join {{ ref('ticker_metrics') }} using (symbol)
-         join collection_weight_sum using (collection_id)
-where ticker_metrics.market_capitalization is not null
+select *
+from data
+where weight is not null
