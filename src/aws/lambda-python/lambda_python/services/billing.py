@@ -17,6 +17,7 @@ class BillingService:
                                              created_at +
                                              sum(period) over (partition by profile_id order by created_at desc) as end_date
                                       from app.subscriptions
+                                      where subscriptions.expired_at is null
 
                                       union all
 

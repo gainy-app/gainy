@@ -1,4 +1,10 @@
 actions:
+  - name: apply_promocode
+    definition:
+      kind: synchronous
+      handler: '{{AWS_LAMBDA_API_GATEWAY_ENDPOINT}}/hasuraAction'
+    permissions:
+      - role: user
   - name: create_plaid_link_token
     definition:
       kind: ""
@@ -120,6 +126,7 @@ custom_types:
   enums: []
   input_objects:
     - name: PlaidWebhookError
+    - name: SampleInput
   objects:
     - name: ChartDataPoint
     - name: PieChartDataPoint
@@ -240,4 +247,5 @@ custom_types:
     - name: StripeWebhookOutput
     - name: UpdatePurchasesOutput
     - name: Promocode
+    - name: SampleOutput
   scalars: []

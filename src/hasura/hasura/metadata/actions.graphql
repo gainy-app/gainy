@@ -1,3 +1,11 @@
+type Mutation {
+  apply_promocode(
+    profile_id: Int!
+    promocode: String!
+    tariff: String!
+  ): UpdatePurchasesOutput
+}
+
 type Query {
   create_plaid_link_token(
     profile_id: Int!
@@ -167,6 +175,11 @@ input PlaidWebhookError {
   error_code: Int
 }
 
+input SampleInput {
+  username: String!
+  password: String!
+}
+
 type ChartDataPoint {
   datetime: String
   period: String
@@ -306,5 +319,9 @@ type Promocode {
   description: String
   name: String
   config: String!
+}
+
+type SampleOutput {
+  accessToken: String!
 }
 

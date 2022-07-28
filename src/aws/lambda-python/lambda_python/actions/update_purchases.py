@@ -27,9 +27,9 @@ class UpdatePurchases(HasuraAction):
         self.billing_service.recalculate_subscription_status(
             db_conn, profile_id)
 
-        return self.get_response(db_conn)
+        return self.get_response(db_conn, profile_id)
 
-    def get_response(self, db_conn)
+    def get_response(self, db_conn, profile_id):
         with db_conn.cursor() as cursor:
             cursor.execute(
                 "select subscription_end_date from app.profiles where id = %(profile_id)s",
@@ -47,35 +47,38 @@ class UpdatePurchases(HasuraAction):
             return
 
         values = []
-        existing_revenuecat_ref_ids = []
+        existing_ref_ids = []
 
         subscriber_data = self.revenue_cat_service.get_subscriber(profile_id)
-        for entitlement_id, entitlement in subscriber_data[
-                'entitlements'].items():
-            duration = self.get_duration(entitlement['product_identifier'])
+        for product_id, entitlement in subscriber_data['entitlements'].items():
+            tariff = entitlement['product_identifier']
+            ref_id = tariff + "_" + entitlement["purchase_date"]
+            duration = self.get_duration(tariff)
 
             purchase_date = dateutil.parser.parse(entitlement['purchase_date'])
-            values.append((profile_id, False, duration, entitlement_id,
-                           json.dumps(entitlement), purchase_date))
-            existing_revenuecat_ref_ids.append(entitlement_id)
+            values.append(
+                (profile_id, False, duration, ref_id, product_id, tariff,
+                 json.dumps(entitlement), purchase_date))
+            existing_ref_ids.append(ref_id)
 
         with db_conn.cursor() as cursor:
             query = """
-            INSERT INTO "app"."subscriptions" ("profile_id", "is_promotion", "period", "revenuecat_ref_id", "revenuecat_entitlement_data", "created_at")
+            INSERT INTO "app"."subscriptions" ("profile_id", "is_promotion", "period", "ref_id", "product_id", "tariff", "revenuecat_entitlement_data", "created_at")
             VALUES %s
-            ON CONFLICT (profile_id, revenuecat_ref_id)
+            ON CONFLICT (profile_id, ref_id)
                 DO UPDATE SET "period"                      = excluded."period",
+                              "product_id"                  = excluded."product_id",
+                              "tariff"                      = excluded."tariff",
                               "revenuecat_entitlement_data" = excluded."revenuecat_entitlement_data",
                               "created_at"                  = excluded."created_at"
             """
             execute_values(cursor, query, values)
 
-            query = "delete from app.subscriptions where profile_id = %(profile_id)s and revenuecat_ref_id is not null"
+            query = "update app.subscriptions set expired_at = now() where profile_id = %(profile_id)s and ref_id is not null"
             params = {"profile_id": profile_id}
-            if existing_revenuecat_ref_ids:
-                query += " and revenuecat_ref_id not in %(revenuecat_ref_ids)s"
-                params["revenuecat_ref_ids"] = tuple(
-                    existing_revenuecat_ref_ids)
+            if existing_ref_ids:
+                query += " and ref_id not in %(ref_ids)s"
+                params["ref_ids"] = tuple(existing_ref_ids)
             cursor.execute(query, params)
 
     def get_duration(self, product_identifier):
