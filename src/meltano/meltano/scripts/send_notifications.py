@@ -18,6 +18,7 @@ SEGMENTS = {
     'local': [],
 }
 EMAILS_LOCAL = json.loads(os.environ.get('ONESIGNAL_EMAILS_LOCAL', '[]'))
+MAX_NOTIFICATIONS_PER_TEMPLATE = 1
 
 logger = get_logger(__name__)
 
@@ -72,10 +73,79 @@ def send_push_notification(notification):
         payload['included_segments'] = segments
     else:
         logger.error("Empty target for notification %s", notification['uuid'])
+        return None
 
     return requests.post("https://onesignal.com/api/v1/notifications",
                          headers=header,
                          data=json.dumps(payload))
+
+
+def send_one(notification):
+    response = None
+    try:
+        response = send_push_notification(notification)
+
+        if response is None:
+            return
+
+        response_serialized = {
+            "status_code": response.status_code,
+            "data": response.json()
+        }
+        if response.status_code == 200:
+            logger.debug("Onesignal response: %s", response_serialized)
+        else:
+            logger.error("Failed to send notification: %s",
+                         response_serialized)
+
+        with db_conn.cursor() as update_cursor:
+            update_cursor.execute(
+                """update app.notifications set response = %(response)s
+                   where uuid = %(notification_uuid)s""", {
+                    "response": json.dumps(response_serialized),
+                    "notification_uuid": notification["uuid"]
+                })
+    except Exception as e:
+        if response is not None:
+            logger.error("OneSignal send_push_notification error: %d %s",
+                         response.status_code, response.text)
+
+        logger.exception(e)
+
+
+def check_malfunctioning_notifications(notifications_to_send):
+    notification_stats = {
+        'email': {},
+        'segments': {},
+    }
+
+    for notification in notifications_to_send:
+        (emails, segments) = pick_target(notification)
+        template_id = notification['template_id']
+
+        if emails:
+            targets = emails
+            target_type = 'email'
+        elif segments:
+            targets = emails
+            target_type = 'segments'
+        else:
+            logger.error("Empty target for notification %s", notification)
+            continue
+
+        for target in targets:
+            if target not in notification_stats[target_type]:
+                notification_stats[target_type][target] = {}
+            if template_id not in notification_stats[target_type][target]:
+                notification_stats[target_type][target][template_id] = 0
+
+            notification_stats[target_type][target][template_id] += 1
+
+            cnt = notification_stats[target_type][email][template_id]
+
+            if cnt > MAX_NOTIFICATIONS_PER_TEMPLATE:
+                raise Exception('Malfunctioning notifications encountered %s',
+                                (target_type, target, template_id))
 
 
 def send_all(sender_id):
@@ -97,39 +167,12 @@ def send_all(sender_id):
                    where sender_id = %(sender_id)s
                      and response is null""", {"sender_id": sender_id})
 
-            for row in cursor:
-                response = None
-                try:
-                    response = send_push_notification(row)
+            notifications_to_send = list(cursor.fetchall())
 
-                    if response is None:
-                        continue
+            check_malfunctioning_notifications(notifications_to_send)
 
-                    response_serialized = {
-                        "status_code": response.status_code,
-                        "data": response.json()
-                    }
-                    if response.status_code == 200:
-                        logger.debug("Onesignal response: %s",
-                                     response_serialized)
-                    else:
-                        logger.error("Failed to send notification: %s",
-                                     response_serialized)
-
-                    with db_conn.cursor() as update_cursor:
-                        update_cursor.execute(
-                            """update app.notifications set response = %(response)s
-                               where uuid = %(notification_uuid)s""", {
-                                "response": json.dumps(response_serialized),
-                                "notification_uuid": row["uuid"]
-                            })
-                except Exception as e:
-                    if response is not None:
-                        logger.error(
-                            "OneSignal send_push_notification error: %d %s",
-                            response.status_code, response.text)
-
-                    logger.exception(e)
+            for row in notifications_to_send:
+                send_one(row)
 
 
 send_all(uuid.uuid4())
