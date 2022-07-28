@@ -34,7 +34,7 @@ with all_push_notifications as
                      order by relative_daily_change desc
                  ) t
                      join {{ ref('exchange_schedule') }} on exchange_schedule.country_name = 'USA' and exchange_schedule.date = now()::date
-            where now() > exchange_schedule.open_at
+            where now() between exchange_schedule.open_at and exchange_schedule.close_at
             group by profile_id
 
             union all
@@ -61,7 +61,7 @@ with all_push_notifications as
                      order by relative_daily_change desc
                  ) t
                      join {{ ref('exchange_schedule') }} on exchange_schedule.country_name = 'USA' and exchange_schedule.date = now()::date
-            where now() > exchange_schedule.open_at
+            where now() between exchange_schedule.open_at and exchange_schedule.close_at
             group by profile_id
 
             union all
@@ -91,20 +91,35 @@ with all_push_notifications as
                      limit 1
                  ) t
                      join {{ ref('exchange_schedule') }} on exchange_schedule.country_name = 'USA' and exchange_schedule.date = now()::date
-            where now() > exchange_schedule.open_at
+            where now() between exchange_schedule.open_at and exchange_schedule.close_at
 
             union all
 
-            -- New article
-            select null                                      as profile_id,
-                   ('new_article_' || id)                    as uniq_id,
-                   now()                                     as send_at,
-                   json_build_object('en', 'Read ' || title) as text,
-                   json_build_object('t', 4, 'id', id)       as data,
-                   false                                     as is_test,
-                   '07b00e92-a1ae-44ea-bde0-c0715a991f2f'    as template_id
-            from {{ ref('website_blog_articles') }}
-            where published_on > '2022-07-01'
+            (
+                -- New article
+                select null::int                                      as profile_id,
+                       ('new_article_' || blogs.slug)                 as uniq_id,
+                       now()::date + interval '17 hours'              as send_at,
+                       json_build_object('en', 'Read ' || blogs.name) as text,
+                       json_build_object('t', 4, 'id', blogs.id)      as data,
+                       true                                           as is_test,
+                       '07b00e92-a1ae-44ea-bde0-c0715a991f2f'         as template_id
+                from {{ source('website', 'blogs') }}
+                         left join {{ source('website', 'blogs') }} article_duplicate
+                                   on (article_duplicate.id = blogs.id or article_duplicate.name = blogs.name or article_duplicate.slug = blogs.slug)
+                                       and (article_duplicate.id != blogs.id or article_duplicate.name != blogs.name or article_duplicate.slug != blogs.slug)
+                         left join {{ source('app', 'notifications') }} this_article_notifications
+                                   on this_article_notifications.uniq_id = 'new_article_' || blogs.id
+                                       or this_article_notifications.uniq_id = 'new_article_' || blogs.slug
+                         left join {{ source('app', 'notifications') }} all_article_notifications
+                                   on all_article_notifications.uniq_id like 'new_article_%'
+                                       and all_article_notifications.updated_at > now() - interval '1 week'
+                 where article_duplicate is null -- the article has no duplicates
+                   and this_article_notifications is null -- this article has not been sent
+                   and all_article_notifications is null -- previous article notification was sent more than a week ago
+                 order by blogs.published_on desc
+                 limit 1
+            )
 
             union all
 
@@ -119,7 +134,7 @@ with all_push_notifications as
                    false                                       as is_test,
                    'ed86815f-3391-498c-875a-ea974342dc46'      as template_id
             from {{ source('app', 'invitations') }}
-            where created_at > '2022-07-01'
+            where created_at > now() - interval '1 hour'
             union all
             select to_profile_id                                 as profile_id,
                    ('invited_user_joined_' || id || '_receiver') as uniq_id,
@@ -131,7 +146,7 @@ with all_push_notifications as
                    false                                       as is_test,
                    '3c5f6ae0-1c69-4dbe-bb73-0d7f07595c95'      as template_id
             from {{ source('app', 'invitations') }}
-            where created_at > '2022-07-01'
+            where created_at > now() - interval '1 hour'
 
             union all
 
@@ -154,8 +169,7 @@ with all_push_notifications as
                      order by profile_id, relative_gain_1m
                 ) t
                      join {{ ref('exchange_schedule') }} on exchange_schedule.country_name = 'USA' and exchange_schedule.date = now()::date
-            where now() > exchange_schedule.open_at + interval '2 hours'
-              and now() < exchange_schedule.close_at
+            where now() between exchange_schedule.open_at + interval '2 hours' and exchange_schedule.close_at
 
             union all
 
@@ -229,8 +243,7 @@ with all_push_notifications as
                      order by profile_id, relative_daily_change
                 ) t
                      join {{ ref('exchange_schedule') }} on exchange_schedule.country_name = 'USA' and exchange_schedule.date = now()::date
-            where now() > exchange_schedule.open_at
-              and now() < exchange_schedule.close_at
+            where now() between exchange_schedule.open_at + interval '2 hours' and exchange_schedule.close_at
         ),
     profiles as
         (
@@ -242,7 +255,7 @@ with all_push_notifications as
             FROM {{ source('app', 'profiles') }}
         )
 select all_push_notifications.profile_id,
-       (all_push_notifications.uniq_id || '_' || all_push_notifications.is_test) as uniq_id,
+       all_push_notifications.uniq_id,
        all_push_notifications.send_at,
        all_push_notifications.text,
        all_push_notifications.data,

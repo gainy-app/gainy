@@ -52,6 +52,7 @@ sources:
     tables:
       - name: influencers
       - name: invitations
+      - name: notifications
       - name: personalized_collection_sizes
       - name: personalized_ticker_collections
       - name: plaid_institutions
