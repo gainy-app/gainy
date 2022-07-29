@@ -309,6 +309,7 @@ type UpdatePurchasesOutput {
   subscription_end_date: String
 }
 
+
 type Promocode {
   id: Int!
   description: String
