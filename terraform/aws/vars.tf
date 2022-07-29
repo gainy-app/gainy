@@ -49,3 +49,6 @@ variable "gainy_compute_version" {}
 variable "onesignal_app_id" {}
 variable "onesignal_api_key" {}
 variable "revenuecat_api_key" {}
+
+variable "bigquery_google_project" {}
+variable "bigquery_credentials" {}

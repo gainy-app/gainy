@@ -89,6 +89,11 @@
     { "name": "TAP_POSTGRES_ANALYTICS_FILTER_SCHEMAS", "value": "app,raw_data,${pg_transform_schema}" },
     { "name": "TAP_POSTGRES_HISTORY_FILTER_SCHEMAS",   "value": "app,${pg_transform_schema}" },
 
+    { "name": "TARGET_BIGQUERY_PROJECT_ID",            "value": "${bigquery_google_project}" },
+    { "name": "TARGET_BIGQUERY_DEFAULT_TARGET_SCHEMA", "value": "${bigquery_target_schema}" },
+    { "name": "TARGET_BIGQUERY_LOCATION",              "value": "${bigquery_location}" },
+    { "name": "BIGQUERY_CREDENTIALS",                  "value": "${bigquery_credentials}" },
+
     { "name": "DBT_THREADS",                           "value": "${dbt_threads}" },
     { "name": "DBT_TARGET_SCHEMA",                     "value": "${pg_transform_schema}" },
     { "name": "DBT_TARGET",                            "value": "postgres" },

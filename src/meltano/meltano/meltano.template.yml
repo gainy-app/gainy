@@ -223,6 +223,13 @@ plugins:
         naming_convention: "{stream}/{timestamp}.csv"
         compression: gzip
 
+    - name: target-bigquery
+      variant: transferwise
+      pip_url: pipelinewise-target-bigquery
+      config:
+        add_metadata_columns: true
+        credentials_path: /project/bigquery-credentials.json
+
   transformers:
     - name: dbt
       pip_url: dbt-postgres==1.1.1
@@ -353,6 +360,26 @@ schedules:
   - name: postgres-to-analytics-small-batch
     extractor: tap-postgres-analytics-small-batch
     loader: target-postgres-analytics-small-batch
+    transform: skip
+    interval: '@daily'
+    start_date: 2021-11-15 00:00:00.000000
+    env:
+      TARGET_ENVS: '["production","local"]'
+      INTEGRATION: 'DOWNSTREAM'
+
+  - name: postgres-to-bigquery
+    extractor: tap-postgres-analytics
+    loader: target-bigquery
+    transform: skip
+    interval: '@daily'
+    start_date: 2021-11-15 00:00:00.000000
+    env:
+      TARGET_ENVS: '["production","local"]'
+      INTEGRATION: 'DOWNSTREAM'
+
+  - name: postgres-to-bigquery-small-batch
+    extractor: tap-postgres-analytics-small-batch
+    loader: target-bigquery
     transform: skip
     interval: '@daily'
     start_date: 2021-11-15 00:00:00.000000
