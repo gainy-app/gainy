@@ -126,7 +126,6 @@ custom_types:
   enums: []
   input_objects:
     - name: PlaidWebhookError
-    - name: SampleInput
   objects:
     - name: ChartDataPoint
     - name: PieChartDataPoint
@@ -247,5 +246,4 @@ custom_types:
     - name: StripeWebhookOutput
     - name: UpdatePurchasesOutput
     - name: Promocode
-    - name: SampleOutput
   scalars: []
