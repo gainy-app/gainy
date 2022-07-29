@@ -1,3 +1,11 @@
+type Mutation {
+  apply_promocode(
+    profile_id: Int!
+    promocode: String!
+    tariff: String!
+  ): UpdatePurchasesOutput
+}
+
 type Query {
   create_plaid_link_token(
     profile_id: Int!
