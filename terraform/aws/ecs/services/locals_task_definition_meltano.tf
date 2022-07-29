@@ -62,6 +62,11 @@ locals {
       pg_analytics_schema         = var.pg_analytics_schema
       pg_website_schema           = var.pg_website_schema
 
+      bigquery_google_project = var.bigquery_google_project
+      bigquery_target_schema  = "gainyapp_integration_${var.env}"
+      bigquery_location       = "US"
+      bigquery_credentials    = var.bigquery_credentials
+
       datadog_api_key = var.datadog_api_key
       datadog_app_key = var.datadog_app_key
 
