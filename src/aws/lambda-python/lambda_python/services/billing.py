@@ -26,7 +26,7 @@ class BillingService:
                                       from app.profiles
                                                left join app.subscriptions on subscriptions.profile_id = profiles.id
                                       where profiles.subscription_end_date is not null
-                                        and subscriptions.id is null
+                                        and (subscriptions.id is null or subscriptions.expired_at is not null)
                                   ) t
                              group by profile_id
                          )
