@@ -5,6 +5,10 @@ select id,
        is_promotion,
        created_at::timestamp,
        extract(epoch FROM "period") as period,
-       revenuecat_ref_id,
+       ref_id
+       product_id,
+       promocode_id,
+       tariff,
+       expired_at,
        revenuecat_entitlement_data::varchar
 from app.subscriptions;
