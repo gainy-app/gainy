@@ -32,6 +32,7 @@ ACTIONS = [
     GetMatchScoreByTicker(),
     GetMatchScoreByTickerList(),
     GetMatchScoreByCollection(),
+    ApplyPromocode(),
     UpdatePurchases(),
     GetPromocode(),
 
