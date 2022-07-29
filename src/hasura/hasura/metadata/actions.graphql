@@ -175,11 +175,6 @@ input PlaidWebhookError {
   error_code: Int
 }
 
-input SampleInput {
-  username: String!
-  password: String!
-}
-
 type ChartDataPoint {
   datetime: String
   period: String
@@ -320,8 +315,3 @@ type Promocode {
   name: String
   config: String!
 }
-
-type SampleOutput {
-  accessToken: String!
-}
-
