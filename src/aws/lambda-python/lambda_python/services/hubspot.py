@@ -1,6 +1,6 @@
 import os
 import json
-from services.logging import get_logger
+from gainy.utils import get_logger
 from hubspot import HubSpot
 from hubspot.crm.contacts import SimplePublicObjectInput
 from hubspot.crm.contacts.exceptions import ApiException
