@@ -178,12 +178,12 @@ plugins:
         batch_size_rows: 1000
         primary_key_required: false
         add_metadata_columns: true
+        parallelism: 1
 
     - name: target-postgres-small-batch
       inherit_from: target-postgres
       config:
         batch_size_rows: 100
-        parallelism: 5
 
     - name: target-postgres-history
       inherit_from: target-postgres
@@ -229,6 +229,12 @@ plugins:
       config:
         add_metadata_columns: true
         credentials_path: /project/bigquery-credentials.json
+
+    - name: target-bigquery-small-batch
+      inherit_from: target-bigquery
+      config:
+        batch_size_rows: 100
+        parallelism: 1
 
   transformers:
     - name: dbt
@@ -379,7 +385,7 @@ schedules:
 
   - name: postgres-to-bigquery-small-batch
     extractor: tap-postgres-analytics-small-batch
-    loader: target-bigquery
+    loader: target-bigquery-small-batch
     transform: skip
     interval: '@daily'
     start_date: 2021-11-15 00:00:00.000000
