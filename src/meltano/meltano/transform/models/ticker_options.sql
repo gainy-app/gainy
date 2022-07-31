@@ -11,20 +11,17 @@
 }}
 
 
-with
-{% if is_incremental() %}
-     max_updated_at as (select symbol, max(updated_at) as max_date from {{ this }} group by symbol),
-{% endif %}
-expanded as
-    (
-        select code                                                  as symbol,
-               json_array_elements((json_each(options::json)).value) as value,
-               base_tickers.name                                     as ticker_name
-        from {{ source('eod', 'eod_options') }}
-                 join {{ ref('base_tickers') }} on eod_options.code = base_tickers.symbol
-        where json_extract_path(options::json, 'CALL') is not null
-           or json_extract_path(options::json, 'PUT') is not null
-    )
+with expanded as
+         (
+             select code                                                  as symbol,
+                    json_array_elements((json_each(options::json)).value) as value,
+                    base_tickers.name                                     as ticker_name,
+                    eod_options._sdc_extracted_at
+             from {{ source('eod', 'eod_options') }}
+                      join {{ ref('base_tickers') }} on eod_options.code = base_tickers.symbol
+             where json_extract_path(options::json, 'CALL') is not null
+                or json_extract_path(options::json, 'PUT') is not null
+         )
 select distinct on (
        (value ->> 'contractName')::varchar
     )  expanded.symbol,
@@ -61,13 +58,11 @@ select distinct on (
        (expanded.symbol || ' ' ||
         to_char((value ->> 'expirationDate')::date, 'MM/dd/YYYY') || ' ' ||
         (value ->> 'strike') || ' ' ||
-        INITCAP((value ->> 'type')))::varchar  as name
+        INITCAP((value ->> 'type')))::varchar  as name,
+       expanded._sdc_extracted_at
 from expanded
-{% if is_incremental() %}
-         left join max_updated_at on expanded.symbol = max_updated_at.symbol
-{% endif %}
 where (value ->> 'contractName')::varchar != '' and (value ->> 'contractName')::varchar is not null
   and (value ->> 'expirationDate')::date >= now()::date
 {% if is_incremental() %}
-  and ((value ->> 'updatedAt')::timestamp >= max_updated_at.max_date or max_updated_at.max_date is null)
+  and expanded._sdc_extracted_at >= (select max(_sdc_extracted_at) as max__sdc_extracted_at from {{ this }})
 {% endif %}
