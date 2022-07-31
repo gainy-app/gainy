@@ -19,7 +19,8 @@ expanded as
     (
         select code                                                  as symbol,
                json_array_elements((json_each(options::json)).value) as value,
-               base_tickers.name                                     as ticker_name
+               base_tickers.name                                     as ticker_name,
+               eod_options._sdc_extracted_at
         from {{ source('eod', 'eod_options') }}
                  join {{ ref('base_tickers') }} on eod_options.code = base_tickers.symbol
         where json_extract_path(options::json, 'CALL') is not null
@@ -61,7 +62,8 @@ select distinct on (
        (expanded.symbol || ' ' ||
         to_char((value ->> 'expirationDate')::date, 'MM/dd/YYYY') || ' ' ||
         (value ->> 'strike') || ' ' ||
-        INITCAP((value ->> 'type')))::varchar  as name
+        INITCAP((value ->> 'type')))::varchar  as name,
+       expanded._sdc_extracted_at
 from expanded
 {% if is_incremental() %}
          left join max_updated_at on expanded.symbol = max_updated_at.symbol
@@ -69,5 +71,5 @@ from expanded
 where (value ->> 'contractName')::varchar != '' and (value ->> 'contractName')::varchar is not null
   and (value ->> 'expirationDate')::date >= now()::date
 {% if is_incremental() %}
-  and _sdc_extracted_at >= max_updated_at.max__sdc_extracted_at
+  and expanded._sdc_extracted_at >= max_updated_at.max__sdc_extracted_at
 {% endif %}
