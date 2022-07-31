@@ -272,6 +272,15 @@
         ]
       }
     },
+    "ticker_options": {
+      "metadata": {
+        "replication-key": "_sdc_extracted_at",
+        "replication-method": "INCREMENTAL",
+        "table-key-properties": [
+          "contract_name"
+        ]
+      }
+    },
     "ticker_realtime_metrics": {
       "metadata": {
         "table-key-properties": [
@@ -322,17 +331,6 @@
         "table-key-properties": [
           "code",
           "date"
-        ]
-      }
-    },
-    "eod_options": {
-      "isSmallBatch": true,
-      "metadata": {
-        "replication-key": "_sdc_extracted_at",
-        "replication-method": "INCREMENTAL",
-        "table-key-properties": [
-          "code",
-          "expirationdate"
         ]
       }
     },
