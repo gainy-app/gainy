@@ -114,7 +114,7 @@ plugins:
 
     - name: tap-postgres
       config:
-        itersize: 20000
+        itersize: 10000
 
     # sync taps
     - name: tap-postgres-sync

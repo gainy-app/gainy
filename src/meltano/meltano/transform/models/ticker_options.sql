@@ -13,7 +13,7 @@
 
 with
 {% if is_incremental() %}
-     max_updated_at as (select symbol, max(updated_at) as max_date from {{ this }} group by symbol),
+     max_updated_at as (select symbol, max(_sdc_extracted_at) as max__sdc_extracted_at from {{ this }}),
 {% endif %}
 expanded as
     (
@@ -69,5 +69,5 @@ from expanded
 where (value ->> 'contractName')::varchar != '' and (value ->> 'contractName')::varchar is not null
   and (value ->> 'expirationDate')::date >= now()::date
 {% if is_incremental() %}
-  and ((value ->> 'updatedAt')::timestamp >= max_updated_at.max_date or max_updated_at.max_date is null)
+  and _sdc_extracted_at >= max_updated_at.max__sdc_extracted_at
 {% endif %}
