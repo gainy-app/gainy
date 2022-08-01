@@ -16,7 +16,7 @@
 -- Execution Time: 152932.965 ms
 with
 {% if is_incremental() %}
-old_model_stats as (select max(_sdc_batched_at) as max_updated_at from {{ this }}),
+old_model_stats as (select max(updated_at) as max_updated_at from {{ this }}),
 {% endif %}
 polygon_crypto_tickers as
     (
