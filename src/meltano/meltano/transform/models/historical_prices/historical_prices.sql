@@ -16,7 +16,7 @@
 -- Execution Time: 152932.965 ms
 with
 {% if is_incremental() %}
-old_model_stats as (select max(_sdc_batched_at) as _sdc_batched_at from {{ this }}),
+old_model_stats as (select max(_sdc_batched_at) as max_updated_at from {{ this }}),
 {% endif %}
 polygon_crypto_tickers as
     (
@@ -151,11 +151,11 @@ select code,
        low,
        open,
        volume,
-       all_rows._sdc_batched_at
+       all_rows._sdc_batched_at                  as updated_at
 from all_rows
 {% if is_incremental() %}
     left join old_model_stats on true
-    where all_rows._sdc_batched_at >= old_model_stats._sdc_batched_at or old_model_stats._sdc_batched_at is null
+    where all_rows._sdc_batched_at >= old_model_stats.max_updated_at or old_model_stats.max_updated_at is null
 {% endif %}
 
 union all
@@ -172,12 +172,12 @@ SELECT contract_name                                                   as code,
        l                                                               as low,
        o                                                               as open,
        v                                                               as volume,
-       polygon_options_historical_prices._sdc_batched_at
+       polygon_options_historical_prices._sdc_batched_at               as updated_at
 from {{ source('polygon', 'polygon_options_historical_prices') }}
 join {{ ref('ticker_options_monitored') }} using (contract_name)
 {% if is_incremental() %}
     left join old_model_stats on true
-    where polygon_options_historical_prices._sdc_batched_at >= old_model_stats._sdc_batched_at or old_model_stats._sdc_batched_at is null
+    where polygon_options_historical_prices._sdc_batched_at >= old_model_stats.max_updated_at or old_model_stats.max_updated_at is null
 {% endif %}
 
 union all
@@ -194,11 +194,11 @@ SELECT polygon_crypto_tickers.symbol                                          as
        l                                                                      as low,
        o                                                                      as open,
        v                                                                      as volume,
-       polygon_crypto_historical_prices._sdc_batched_at
+       polygon_crypto_historical_prices._sdc_batched_at                       as updated_at
 from polygon_crypto_tickers
          join {{ source('polygon', 'polygon_crypto_historical_prices') }}
               on polygon_crypto_historical_prices.symbol = regexp_replace(polygon_crypto_tickers.symbol, '.CC$', 'USD')
 {% if is_incremental() %}
     left join old_model_stats on true
-    where polygon_crypto_historical_prices._sdc_batched_at >= old_model_stats._sdc_batched_at or old_model_stats._sdc_batched_at is null
+    where polygon_crypto_historical_prices._sdc_batched_at >= old_model_stats.max_updated_at or old_model_stats.max_updated_at is null
 {% endif %}
