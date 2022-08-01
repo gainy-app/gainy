@@ -14,6 +14,9 @@ from datadog_api_client.v1.api.metrics_api import MetricsApi
 from datadog_api_client.v1.model.metrics_payload import MetricsPayload
 from datadog_api_client.v1.model.point import Point
 from datadog_api_client.v1.model.series import Series
+from gainy.utils import get_logger, setup_exception_logger_hook
+
+setup_exception_logger_hook()
 
 METRIC_REALTIME_PRICES_COUNT = 'app.realtime_prices_count'
 
@@ -33,14 +36,6 @@ ENV = os.environ['ENV']
 DB_CONN_STRING = f"postgresql://{PG_USERNAME}:{PG_PASSWORD}@{PG_HOST}:{PG_PORT}/{PG_DBNAME}?options=-csearch_path%3D{PUBLIC_SCHEMA_NAME}"
 
 dd_configuration = Configuration()
-
-
-def get_logger(name):
-    logging.basicConfig()
-    logger = logging.getLogger(name)
-    logger.setLevel(logging.DEBUG if ENV == "local" else logging.INFO)
-
-    return logger
 
 
 def persist_records(values, source):
@@ -132,10 +127,9 @@ class AbstractPriceListener(ABC):
                     self._latest_symbol_message[
                         record['symbol']] = current_timestamp
 
-                symbols_with_records = list(
-                    set([record['symbol'] for record in records]))
-                self.logger.info("__sync_records %d %s", current_timestamp,
-                                 ",".join(symbols_with_records))
+                symbols_with_records = set([record['symbol'] for record in records])
+                symbols_with_records = list(sorted(symbols_with_records))
+                self.logger.info("__sync_records %d %s", extra={"timestamp": current_timestamp, "symbols": symbols_with_records})
 
                 values = [(
                     record['symbol'],
@@ -152,9 +146,11 @@ class AbstractPriceListener(ABC):
                 await self.save_heartbeat(len(self.symbols))
 
             except Exception as e:
-                self.logger.error("__sync_records: %s", e)
+                self.logger.exception("__sync_records")
 
     def should_reconnect(self, log_prefix=None):
+        log_prefix = log_prefix or ""
+
         if self.sub_listeners is not None:
             for sub_listener in self.sub_listeners:
                 if sub_listener.should_reconnect():
@@ -166,8 +162,7 @@ class AbstractPriceListener(ABC):
             return False
 
         if not self.get_symbols().issubset(self.symbols):
-            self.logger.info("should_reconnect %s: symbols changed", log_prefix
-                             or "")
+            self.logger.info("should_reconnect: symbols changed", extra={"log_prefix": log_prefix})
             return True
 
         if len(self._latest_symbol_message) > 0:
@@ -177,8 +172,7 @@ class AbstractPriceListener(ABC):
 
         no_messages_reconnect_threshold = current_timestamp - self.no_messages_reconnect_timeout
         if latest_message_time < no_messages_reconnect_threshold:
-            self.logger.info("should_reconnect %s: no messages", log_prefix
-                             or "")
+            self.logger.info("should_reconnect: no messages", extra={"log_prefix": log_prefix})
             return True
 
         return False

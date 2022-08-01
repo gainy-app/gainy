@@ -106,15 +106,14 @@ class SetUserCategories(HasuraTrigger):
             rows = cursor.fetchall()
             categories = [row[0] for row in rows]
 
-        logger.info('set_user_categories ' +
-                    json.dumps({
+        logger.info('set_user_categories ', extra={
                         'profile_id': profile_id,
                         'risk_needed': risk_needed,
                         'risk_taking_ability': risk_taking_ability,
                         'loss_tolerance': loss_tolerance,
                         'final_score': final_score,
                         'categories': categories,
-                    }))
+                    })
 
         with db_conn.cursor() as cursor:
             cursor.execute(
