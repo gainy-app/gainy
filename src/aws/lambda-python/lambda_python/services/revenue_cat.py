@@ -1,5 +1,5 @@
 import os
-from services.logging import get_logger
+from gainy.utils import get_logger
 import requests
 
 logger = get_logger(__name__)

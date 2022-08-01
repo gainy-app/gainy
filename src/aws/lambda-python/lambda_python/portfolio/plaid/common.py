@@ -3,7 +3,7 @@ import json
 import plaid
 from plaid.api import plaid_api
 from common.hasura_exception import HasuraActionException
-from services.logging import get_logger
+from gainy.utils import get_logger
 
 logger = get_logger(__name__)
 

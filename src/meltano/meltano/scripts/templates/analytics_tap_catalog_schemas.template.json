@@ -94,6 +94,13 @@
         ]
       }
     },
+    "promocodes": {
+      "metadata": {
+        "table-key-properties": [
+          "id"
+        ]
+      }
+    },
     "subscriptions": {
       "metadata": {
         "table-key-properties": [
