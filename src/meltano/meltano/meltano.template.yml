@@ -227,8 +227,8 @@ plugins:
       variant: transferwise
       pip_url: pipelinewise-target-bigquery
       config:
-        parallelism: 1
         batch_size_rows: 10000
+        flush_all_streams: true
         add_metadata_columns: true
         credentials_path: /project/bigquery-credentials.json
 
@@ -236,7 +236,6 @@ plugins:
       inherit_from: target-bigquery
       config:
         batch_size_rows: 100
-        parallelism: 1
 
   transformers:
     - name: dbt
