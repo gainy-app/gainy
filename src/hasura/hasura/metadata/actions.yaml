@@ -1,4 +1,10 @@
 actions:
+  - name: apply_promocode
+    definition:
+      kind: synchronous
+      handler: '{{AWS_LAMBDA_API_GATEWAY_ENDPOINT}}/hasuraAction'
+    permissions:
+      - role: user
   - name: create_plaid_link_token
     definition:
       kind: ""
@@ -35,14 +41,12 @@ actions:
       handler: '{{AWS_LAMBDA_API_GATEWAY_ENDPOINT}}/hasuraAction'
     permissions:
       - role: user
-    comment: get_portfolio_chart
   - name: get_portfolio_chart_previous_period_close
     definition:
       kind: ""
       handler: '{{AWS_LAMBDA_API_GATEWAY_ENDPOINT}}/hasuraAction'
     permissions:
       - role: user
-    comment: get_portfolio_chart_previous_period_close
   - name: get_portfolio_holdings
     definition:
       kind: ""
@@ -55,7 +59,6 @@ actions:
       handler: '{{AWS_LAMBDA_API_GATEWAY_ENDPOINT}}/hasuraAction'
     permissions:
       - role: user
-    comment: get_portfolio_piechart
   - name: get_portfolio_transactions
     definition:
       kind: ""
@@ -68,7 +71,6 @@ actions:
       handler: '{{AWS_LAMBDA_API_GATEWAY_ENDPOINT}}/hasuraAction'
     permissions:
       - role: user
-    comment: get_promocode
   - name: get_recommended_collections
     definition:
       kind: ""
@@ -100,13 +102,26 @@ actions:
       handler: '{{AWS_LAMBDA_API_GATEWAY_ENDPOINT}}/hasuraAction'
     permissions:
       - role: user
+  - name: stripe_get_checkout_url
+    definition:
+      kind: ""
+      handler: '{{AWS_LAMBDA_API_GATEWAY_ENDPOINT}}/hasuraAction'
+    permissions:
+      - role: user
+      - role: anonymous
+  - name: stripe_webhook
+    definition:
+      kind: synchronous
+      handler: '{{AWS_LAMBDA_API_GATEWAY_ENDPOINT}}/hasuraAction'
+      forward_client_headers: true
+    permissions:
+      - role: anonymous
   - name: update_purchases
     definition:
       kind: synchronous
       handler: '{{AWS_LAMBDA_API_GATEWAY_ENDPOINT}}/hasuraAction'
     permissions:
       - role: user
-    comment: update_purchases
 custom_types:
   enums: []
   input_objects:
@@ -227,6 +242,8 @@ custom_types:
             id: id
     - name: CreatePlaidLinkTokenOutput
     - name: PlaidWebhookOutput
+    - name: StripeGetCheckoutUrl
+    - name: StripeWebhookOutput
     - name: UpdatePurchasesOutput
     - name: Promocode
   scalars: []

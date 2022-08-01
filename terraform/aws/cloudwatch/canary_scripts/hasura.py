@@ -162,6 +162,18 @@ def test_collection_metrics():
     for i in data['app_profile_favorite_collections']:
         assert i['collection']['metrics']['relative_daily_change'] is not None
 
+    home_tab_symbols = ["DJI.INDX", "GSPC.INDX", "IXIC.INDX", "BTC.CC"]
+    observed_realtime_metrics_symbols = set()
+    for i in data['ticker_realtime_metrics']:
+        if i['symbol'] not in home_tab_symbols:
+            continue
+        observed_realtime_metrics_symbols.add(i['symbol'])
+        assert i['actual_price'] is not None
+        assert i['actual_price'] > 1e-3
+        assert i['relative_daily_change'] is not None
+        assert abs(i['relative_daily_change']) > 1e-3
+    assert len(observed_realtime_metrics_symbols) == len(home_tab_symbols)
+
     for collection_id in collection_ids:
         query = 'mutation DeleteProfileFavoriteCollection($profileID: Int!, $collectionID: Int!){ delete_app_profile_favorite_collections( where: { collection_id: {_eq: $collectionID}, profile_id: {_eq: $profileID} } ) { returning { collection_id } } }'
         make_graphql_request(query, {

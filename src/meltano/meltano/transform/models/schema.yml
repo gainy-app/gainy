@@ -5,6 +5,7 @@ sources:
     description: Gainy in-house datasets such as collections, industries, interests, categories, etc
     schema: raw_data
     tables:
+      - name: blog_article_priority
       - name: crypto_ticker_industries
       - name: gainy_custom_industries
       - name: gainy_ticker_custom_industries
@@ -49,8 +50,10 @@ sources:
     description: Mobile App data, managed by hasura
     schema: app
     tables:
+      - name: analytics_profiles
       - name: influencers
       - name: invitations
+      - name: notifications
       - name: personalized_collection_sizes
       - name: personalized_ticker_collections
       - name: plaid_institutions
@@ -64,6 +67,7 @@ sources:
       - name: profile_portfolio_transactions
       - name: profile_ticker_match_score
       - name: profiles
+      - name: subscriptions
 
   - name: website
     description: Website data, managed by webflow integrations at gainy.app
@@ -1433,11 +1437,15 @@ models:
       - name: url
         tests:
           - type:
-              type: 'character varying'
+              type: 'text'
       - name: updated_on
         tests:
           - type:
               type: 'timestamp without time zone'
+      - name: priority
+        tests:
+          - type:
+              type: 'integer'
 
   - name: collection_chart
     columns:
@@ -2012,6 +2020,33 @@ models:
         tests:
           - type:
               type: 'character varying'
+
+  - name: portfolio_holding_group_tags
+    columns:
+      - name: profile_id
+        tests:
+          - type:
+              type: 'integer'
+      - name: symbol
+        tests:
+          - type:
+              type: 'character varying'
+      - name: collection_id
+        tests:
+          - type:
+              type: 'integer'
+      - name: collection_uniq_id
+        tests:
+          - type:
+              type: 'text'
+      - name: category_id
+        tests:
+          - type:
+              type: 'integer'
+      - name: interest_id
+        tests:
+          - type:
+              type: 'integer'
 
 exposures:
   - name: ticker_search_index

@@ -191,3 +191,6 @@ if DBT_TARGET_SCHEMA != 'public':
 
         with open(filename, "w") as f:
             json.dump(config, f)
+
+with open("/project/bigquery-credentials.json", "w") as f:
+    f.write(os.getenv("BIGQUERY_CREDENTIALS", ""))

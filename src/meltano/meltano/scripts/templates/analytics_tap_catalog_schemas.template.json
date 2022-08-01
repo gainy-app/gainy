@@ -16,6 +16,14 @@
         "is-view": true
       }
     },
+    "analytics_subscriptions": {
+      "metadata": {
+        "view-key-properties": [
+          "id"
+        ],
+        "is-view": true
+      }
+    },
     "profile_categories": {
       "metadata": {
         "table-key-properties": [
@@ -128,27 +136,6 @@
       "metadata": {
         "table-key-properties": [
           "id"
-        ]
-      }
-    },
-    "crypto_coins": {
-      "metadata": {
-        "table-key-properties": [
-          "symbol"
-        ]
-      }
-    },
-    "crypto_metrics": {
-      "metadata": {
-        "table-key-properties": [
-          "symbol"
-        ]
-      }
-    },
-    "crypto_realtime_metrics": {
-      "metadata": {
-        "table-key-properties": [
-          "symbol"
         ]
       }
     },
@@ -278,6 +265,15 @@
         ]
       }
     },
+    "ticker_options": {
+      "metadata": {
+        "replication-key": "_sdc_extracted_at",
+        "replication-method": "INCREMENTAL",
+        "table-key-properties": [
+          "contract_name"
+        ]
+      }
+    },
     "ticker_realtime_metrics": {
       "metadata": {
         "table-key-properties": [
@@ -301,24 +297,6 @@
     }
   },
   "raw_data": {
-    "coingecko_coin": {
-      "metadata": {
-        "replication-key": "_sdc_extracted_at",
-        "replication-method": "INCREMENTAL",
-        "table-key-properties": [
-          "id"
-        ]
-      }
-    },
-    "coingecko_market_realtime": {
-      "metadata": {
-        "replication-key": "_sdc_extracted_at",
-        "replication-method": "INCREMENTAL",
-        "table-key-properties": [
-          "id"
-        ]
-      }
-    },
     "eod_dividends": {
       "metadata": {
         "replication-key": "_sdc_extracted_at",
@@ -346,17 +324,6 @@
         "table-key-properties": [
           "code",
           "date"
-        ]
-      }
-    },
-    "eod_options": {
-      "isSmallBatch": true,
-      "metadata": {
-        "replication-key": "_sdc_extracted_at",
-        "replication-method": "INCREMENTAL",
-        "table-key-properties": [
-          "code",
-          "expirationdate"
         ]
       }
     },

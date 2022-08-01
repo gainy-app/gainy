@@ -64,6 +64,10 @@ variable "google_credentials" {
   type      = string
   sensitive = true
 }
+variable "bigquery_credentials" {
+  type      = string
+  sensitive = true
+}
 variable "google_billing_id" {}
 variable "google_user" {}
 variable "google_organization_id" {}

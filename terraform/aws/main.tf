@@ -171,6 +171,9 @@ module "ecs-service" {
   codeartifact_pipy_url   = var.codeartifact_pipy_url
   gainy_compute_version   = var.gainy_compute_version
   gainy_history_s3_bucket = module.s3.gainy_history_bucket
+
+  bigquery_google_project = var.bigquery_google_project
+  bigquery_credentials    = var.bigquery_credentials
 }
 
 
