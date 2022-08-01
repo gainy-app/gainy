@@ -114,7 +114,7 @@ plugins:
 
     - name: tap-postgres
       config:
-        itersize: 10000
+        itersize: 1000
 
     # sync taps
     - name: tap-postgres-sync
@@ -227,6 +227,8 @@ plugins:
       variant: transferwise
       pip_url: pipelinewise-target-bigquery
       config:
+        parallelism: 1
+        batch_size_rows: 10000
         add_metadata_columns: true
         credentials_path: /project/bigquery-credentials.json
 
