@@ -130,7 +130,7 @@ class AbstractPriceListener(ABC):
                 symbols_with_records = set(
                     [record['symbol'] for record in records])
                 symbols_with_records = list(sorted(symbols_with_records))
-                self.logger.info("__sync_records %d %s",
+                self.logger.info("__sync_records",
                                  extra={
                                      "timestamp": current_timestamp,
                                      "symbols": symbols_with_records
