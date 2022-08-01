@@ -47,7 +47,8 @@ class GetRecommendedCollections(HasuraAction):
                 f"{profile_id}_{TOP_20_FOR_YOU_COLLECTION_ID}"
             ] + sorted_collections_uniq_ids
 
-        logger.info('get_recommended_collections', extra={
+        logger.info('get_recommended_collections',
+                    extra={
                         'profile_id': profile_id,
                         'collections': sorted_collections_ids,
                     })

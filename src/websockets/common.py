@@ -127,9 +127,14 @@ class AbstractPriceListener(ABC):
                     self._latest_symbol_message[
                         record['symbol']] = current_timestamp
 
-                symbols_with_records = set([record['symbol'] for record in records])
+                symbols_with_records = set(
+                    [record['symbol'] for record in records])
                 symbols_with_records = list(sorted(symbols_with_records))
-                self.logger.info("__sync_records %d %s", extra={"timestamp": current_timestamp, "symbols": symbols_with_records})
+                self.logger.info("__sync_records %d %s",
+                                 extra={
+                                     "timestamp": current_timestamp,
+                                     "symbols": symbols_with_records
+                                 })
 
                 values = [(
                     record['symbol'],
@@ -162,7 +167,8 @@ class AbstractPriceListener(ABC):
             return False
 
         if not self.get_symbols().issubset(self.symbols):
-            self.logger.info("should_reconnect: symbols changed", extra={"log_prefix": log_prefix})
+            self.logger.info("should_reconnect: symbols changed",
+                             extra={"log_prefix": log_prefix})
             return True
 
         if len(self._latest_symbol_message) > 0:
@@ -172,7 +178,8 @@ class AbstractPriceListener(ABC):
 
         no_messages_reconnect_threshold = current_timestamp - self.no_messages_reconnect_timeout
         if latest_message_time < no_messages_reconnect_threshold:
-            self.logger.info("should_reconnect: no messages", extra={"log_prefix": log_prefix})
+            self.logger.info("should_reconnect: no messages",
+                             extra={"log_prefix": log_prefix})
             return True
 
         return False

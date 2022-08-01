@@ -106,7 +106,8 @@ class SetUserCategories(HasuraTrigger):
             rows = cursor.fetchall()
             categories = [row[0] for row in rows]
 
-        logger.info('set_user_categories ', extra={
+        logger.info('set_user_categories ',
+                    extra={
                         'profile_id': profile_id,
                         'risk_needed': risk_needed,
                         'risk_taking_ability': risk_taking_ability,
