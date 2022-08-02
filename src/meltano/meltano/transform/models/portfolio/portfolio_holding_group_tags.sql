@@ -77,20 +77,22 @@ with ticker_selected_collection as
                     symbol,
                     collection_id,
                     collection_uniq_id,
-                    null::int as category_id,
-                    null::int as interest_id,
-                    1         as priority
+                    null::int                                           as category_id,
+                    null::int                                           as interest_id,
+                    1                                                   as priority,
+                    row_number() over (partition by profile_id, symbol) as row_num
              from holding_group_collections
 
              union all
 
              select profile_id,
                     symbol,
-                    null::int  as collection_id,
-                    null::text as collection_uniq_id,
+                    null::int                                           as collection_id,
+                    null::text                                          as collection_uniq_id,
                     category_id,
                     interest_id,
-                    0          as priority
+                    0                                                   as priority,
+                    row_number() over (partition by profile_id, symbol) as row_num
              from holding_group_collection_tags
              where holding_group_collection_tags.collection_id is not null
 
@@ -98,24 +100,32 @@ with ticker_selected_collection as
 
              select profile_id,
                     symbol,
-                    null::int  as collection_id,
-                    null::text as collection_uniq_id,
+                    null::int                                           as collection_id,
+                    null::text                                          as collection_uniq_id,
                     ticker_tags_ranked.category_id,
                     ticker_tags_ranked.interest_id,
-                    0          as priority
+                    0                                                   as priority,
+                    row_number() over (partition by profile_id, symbol) as row_num
              from holding_group_collection_tags
                       join ticker_tags_ranked using (symbol)
              where holding_group_collection_tags.collection_id is null
                and row_num <= 5
          )
-select all_rows.*,
-       now()                               as updated_at,
+select all_rows.profile_id,
+       all_rows.symbol,
+       all_rows.collection_id,
+       all_rows.collection_uniq_id,
+       all_rows.category_id,
+       all_rows.interest_id,
+       -row_number()
+        over (partition by all_rows.profile_id, all_rows.symbol order by all_rows.priority desc, all_rows.row_num) as priority,
+       now()                                                                                                       as updated_at,
        (all_rows.profile_id || '_' ||
         all_rows.symbol || '_' ||
         coalesce(all_rows.collection_id, 0) || '_' ||
         coalesce(all_rows.category_id, 0) || '_' ||
-        coalesce(all_rows.interest_id, 0)) as id,
-       {{ var('realtime') }}               as is_realtime
+        coalesce(all_rows.interest_id, 0))                                                                         as id,
+       {{ var('realtime') }}                                                                                       as is_realtime
 from all_rows
 {% if is_incremental() and var('realtime') %}
          left join {{ this }} old_data using (profile_id, symbol)
