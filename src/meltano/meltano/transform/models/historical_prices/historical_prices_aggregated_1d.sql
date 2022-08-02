@@ -87,23 +87,36 @@ with uniq_tickers as
                           join uniq_tickers using (symbol)
                  where date_series::date >= min_date
              )
+         ),
+     all_rows as
+         (
+             select tds.code || '_' || tds.date as id,
+                    tds.code                    as symbol,
+                    tds.date::timestamp         as datetime,
+                    hp.open,
+                    hp.high,
+                    hp.low,
+                    hp.close,
+                    coalesce(hp.adjusted_close,
+                             LAST_VALUE_IGNORENULLS(hp.adjusted_close) over (lookback)
+                             )                           as adjusted_close,
+                    coalesce(hp.updated_at,
+                             LAST_VALUE_IGNORENULLS(hp.updated_at) over (lookback)
+                             )                           as updated_at,
+                    coalesce(volume, 0)                  as volume
+             from tickers_dates_skeleton tds
+                      left join {{ ref('historical_prices') }} hp using (code, "date")
+                 window
+                     lookback as (partition by tds.code order by tds."date" asc)
          )
-select tds.code || '_' || tds.date as id,
-       tds.code                    as symbol,
-       tds.date::timestamp         as datetime,
-       hp.open,
-       hp.high,
-       hp.low,
-       hp.close,
-       coalesce(hp.adjusted_close,
-                LAST_VALUE_IGNORENULLS(hp.adjusted_close) over (lookback)
-                )                           as adjusted_close,
-       coalesce(volume, 0)                  as volume
-from tickers_dates_skeleton tds
-         left join {{ ref('historical_prices') }} hp using (code, "date")
-    window
-        lookback as (partition by tds.code order by tds."date" asc)
-
+select all_rows.*
+from all_rows
+{% if is_incremental() %}
+         left join {{ this }} old_data using (symbol, datetime)
+where old_data.symbol is null -- no old data
+   or (all_rows.updated_at is not null and old_data.updated_at is null) -- old data is null and new is not
+   or all_rows.updated_at > old_data.updated_at -- new data is newer than the old one
+{% endif %}
 -- Execution Time: 96290.198 ms
 -- OK created incremental model historical_prices_aggregated_1d SELECT 4385623 in 152.88s
 -- OK created incremental model historical_prices_aggregated_1d SELECT 4385623 in 143.39s
