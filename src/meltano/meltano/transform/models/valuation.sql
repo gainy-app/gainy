@@ -16,6 +16,10 @@ select code                                                         as symbol,
        (valuation ->> 'EnterpriseValue') :: bigint                  as enterprise_value,
        (valuation ->> 'EnterpriseValueEbitda') :: double precision  as enterprise_value_ebidta,
        (valuation ->> 'EnterpriseValueRevenue') :: double precision as enterprise_value_revenue,
-       updatedat::date                                              as updated_at
+       case
+           when is_date(updatedat)
+               then updatedat::timestamp
+           else _sdc_batched_at
+           end                                                      as updated_at
 from {{ source('eod', 'eod_fundamentals') }}
 inner join {{ ref('tickers') }} as t on eod_fundamentals.code = t.symbol

@@ -16,9 +16,13 @@ with
 {% endif %}
      expanded as
          (
-             select code            as symbol,
+             select code    as symbol,
                     (json_each((financials -> 'Income_Statement' ->> 'yearly')::json)).*,
-                    updatedat::date as updated_at
+                    case
+                        when is_date(updatedat)
+                            then updatedat::timestamp
+                        else _sdc_batched_at
+                        end as updated_at
              from {{ source('eod', 'eod_fundamentals') }} f
              inner join {{ ref('tickers') }} as t
              on f.code = t.symbol

@@ -52,7 +52,11 @@ select distinct code                                                           a
                 (highlights ->> 'QuarterlyRevenueGrowthYOY')::real             as quarterly_revenue_growth_yoy,
                 (highlights ->> 'QuarterlyEarningsGrowthYOY')::real            as quarterly_earnings_growth_yoy,
                 beaten_quarterly_eps_estimation_count_ttm.value::int           as beaten_quarterly_eps_estimation_count_ttm,
-                updatedat::date                                                as updated_at
+                case
+                    when is_date(updatedat)
+                        then updatedat::timestamp
+                    else _sdc_batched_at
+                    end                                                        as updated_at
 from {{ source('eod', 'eod_fundamentals') }} f
 inner join {{ ref('base_tickers') }} as t on f.code = t.symbol
 left join beaten_quarterly_eps_estimation_count_ttm on f.code = beaten_quarterly_eps_estimation_count_ttm.symbol
