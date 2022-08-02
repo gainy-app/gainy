@@ -13,7 +13,7 @@ if [ $(PGPASSWORD=$PG_PASSWORD psql -h $PG_HOST -p $PG_PORT -U $PG_USERNAME $PG_
   if meltano schedule run csv-to-postgres --force; then
     PGPASSWORD=$PG_PASSWORD psql -h $PG_HOST -p $PG_PORT -U $PG_USERNAME $PG_DBNAME -c \
       "update deployment.public_schemas set deployed_at = now() where schema_name = '$DBT_TARGET_SCHEMA';"
-  endif
+  fi
 fi
 
 if [ "$ENV" != "local" ]; then
