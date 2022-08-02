@@ -117,15 +117,15 @@ select all_rows.profile_id,
        all_rows.collection_uniq_id,
        all_rows.category_id,
        all_rows.interest_id,
-       -row_number()
-        over (partition by all_rows.profile_id, all_rows.symbol order by all_rows.priority desc, all_rows.row_num) as priority,
-       now()                                                                                                       as updated_at,
+       -(row_number()
+        over (partition by all_rows.profile_id, all_rows.symbol order by all_rows.priority desc, all_rows.row_num))::int as priority,
+       now()                                                                                                             as updated_at,
        (all_rows.profile_id || '_' ||
         all_rows.symbol || '_' ||
         coalesce(all_rows.collection_id, 0) || '_' ||
         coalesce(all_rows.category_id, 0) || '_' ||
-        coalesce(all_rows.interest_id, 0))                                                                         as id,
-       {{ var('realtime') }}                                                                                       as is_realtime
+        coalesce(all_rows.interest_id, 0))                                                                               as id,
+       {{ var('realtime') }}                                                                                             as is_realtime
 from all_rows
 {% if is_incremental() and var('realtime') %}
          left join {{ this }} old_data using (profile_id, symbol)

@@ -9,19 +9,15 @@ PGPASSWORD=$PG_PASSWORD psql -h $PG_HOST -p $PG_PORT -U $PG_USERNAME $PG_DBNAME 
 PGPASSWORD=$PG_PASSWORD psql -h $PG_HOST -p $PG_PORT -U $PG_USERNAME $PG_DBNAME -c "CREATE SCHEMA IF NOT EXISTS $DBT_TARGET_SCHEMA;"
 
 if [ $(PGPASSWORD=$PG_PASSWORD psql -h $PG_HOST -p $PG_PORT -U $PG_USERNAME $PG_DBNAME -c "select count(*) from deployment.public_schemas where schema_name = '$DBT_TARGET_SCHEMA' and deployed_at is not null" -t --csv) == "0" ]; then
-  echo 'Running csv-to-postgres' && meltano schedule run csv-to-postgres --force
-#else
-#  RUNNING_DEPLOYMENT_JOBS_COUNT=$(meltano invoke airflow dags list-runs -d deployment --state running | wc -l)
-#  if (( RUNNING_DEPLOYMENT_JOBS_COUNT < 2 )); then
-#    nohup bash -c "meltano invoke airflow dags trigger deployment" &> /dev/null &
-#  fi
+  echo 'Running csv-to-postgres'
+  if meltano schedule run csv-to-postgres --force; then
+    PGPASSWORD=$PG_PASSWORD psql -h $PG_HOST -p $PG_PORT -U $PG_USERNAME $PG_DBNAME -c \
+      "update deployment.public_schemas set deployed_at = now() where schema_name = '$DBT_TARGET_SCHEMA';"
+  endif
 fi
 
 if [ "$ENV" != "local" ]; then
   nohup bash -c "meltano schedule run postgres-to-search --force" &> /dev/null &
 fi
-
-PGPASSWORD=$PG_PASSWORD psql -h $PG_HOST -p $PG_PORT -U $PG_USERNAME $PG_DBNAME -c \
-  "update deployment.public_schemas set deployed_at = now() where schema_name = '$DBT_TARGET_SCHEMA';"
 
 echo "Seeding done"
