@@ -2047,6 +2047,10 @@ models:
         tests:
           - type:
               type: 'integer'
+      - name: priority
+        tests:
+          - type:
+              type: 'integer'
 
 exposures:
   - name: ticker_search_index

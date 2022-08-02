@@ -61,7 +61,7 @@ def clean_api_gateway(api_id, version):
         for route in routes:
             route_version = get_route_version(route['RouteKey'])
 
-            if route_version is None or route_version >= version:
+            if route_version is None or route_version >= version - 10:
                 integration_id = re.search(r"/(\w+)$", route['Target'])[1]
                 integration_ids_to_preserve.append(integration_id)
                 continue

@@ -21,6 +21,7 @@ clean-targets:
 models:
   +on_schema_change: "sync_all_columns"
 vars:
+  min_collection_size: "{{ env_var('MIN_COLLECTION_SIZE', 2) }}"
   realtime: false
   portfolio_usd_enabled: true
   portfolio_crypto_enabled: true
