@@ -111,7 +111,10 @@ def test_portfolio_piechart_filters(params):
                 piechart_sums[entity_type][field] = 0
             piechart_sums[entity_type][field] += row[field]
 
-    for entity_type in ['ticker', 'category', 'interest', 'security_type']:
+    entity_types = [
+        'ticker', 'category', 'interest', 'security_type', 'collection'
+    ]
+    for entity_type in entity_types:
         assert abs(
             1 - piechart_sums[entity_type]['weight']) < PRICE_EPS, entity_type
         assert abs(portfolio_gains_data['absolute_gain_1d'] -
