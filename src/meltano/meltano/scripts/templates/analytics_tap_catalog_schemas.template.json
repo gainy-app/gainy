@@ -112,6 +112,8 @@
   "public": {
     "analyst_ratings": {
       "metadata": {
+        "replication-key": "updated_at",
+        "replication-method": "INCREMENTAL",
         "table-key-properties": [
           "symbol"
         ]
@@ -126,6 +128,8 @@
     },
     "cash_flow": {
       "metadata": {
+        "replication-key": "updated_at",
+        "replication-method": "INCREMENTAL",
         "table-key-properties": [
           "symbol",
           "date"
@@ -148,6 +152,8 @@
     },
     "earnings_annual": {
       "metadata": {
+        "replication-key": "updated_at",
+        "replication-method": "INCREMENTAL",
         "table-key-properties": [
           "symbol",
           "date"
@@ -156,6 +162,8 @@
     },
     "earnings_history": {
       "metadata": {
+        "replication-key": "updated_at",
+        "replication-method": "INCREMENTAL",
         "table-key-properties": [
           "symbol",
           "date"
@@ -164,6 +172,8 @@
     },
     "earnings_trend": {
       "metadata": {
+        "replication-key": "updated_at",
+        "replication-method": "INCREMENTAL",
         "table-key-properties": [
           "symbol",
           "date"
@@ -172,6 +182,8 @@
     },
     "financials_balance_sheet_quarterly": {
       "metadata": {
+        "replication-key": "updated_at",
+        "replication-method": "INCREMENTAL",
         "table-key-properties": [
           "symbol",
           "date"
@@ -180,6 +192,8 @@
     },
     "financials_income_statement_quarterly": {
       "metadata": {
+        "replication-key": "updated_at",
+        "replication-method": "INCREMENTAL",
         "table-key-properties": [
           "symbol",
           "date"
@@ -188,6 +202,8 @@
     },
     "financials_income_statement_yearly": {
       "metadata": {
+        "replication-key": "updated_at",
+        "replication-method": "INCREMENTAL",
         "table-key-properties": [
           "symbol",
           "date"
@@ -203,6 +219,8 @@
     },
     "highlights": {
       "metadata": {
+        "replication-key": "updated_at",
+        "replication-method": "INCREMENTAL",
         "table-key-properties": [
           "symbol"
         ]
@@ -290,6 +308,8 @@
     },
     "ticker_shares_stats": {
       "metadata": {
+        "replication-key": "updated_at",
+        "replication-method": "INCREMENTAL",
         "table-key-properties": [
           "symbol"
         ]
@@ -297,6 +317,8 @@
     },
     "valuation": {
       "metadata": {
+        "replication-key": "updated_at",
+        "replication-method": "INCREMENTAL",
         "table-key-properties": [
           "symbol"
         ]

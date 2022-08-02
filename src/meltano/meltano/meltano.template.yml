@@ -176,9 +176,9 @@ plugins:
       pip_url: pipelinewise-target-postgres
       config:
         batch_size_rows: 1000
+        flush_all_streams: true
         primary_key_required: false
         add_metadata_columns: true
-        parallelism: 1
 
     - name: target-postgres-small-batch
       inherit_from: target-postgres
@@ -268,7 +268,7 @@ schedules:
 
   - name: polygon-to-postgres
     extractor: tap-polygon
-    loader: target-postgres
+    loader: target-postgres-small-batch
     transform: skip
     interval: '@daily'
     start_date: 2021-09-03 13:52:48.598227
