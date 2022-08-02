@@ -44,11 +44,11 @@ SELECT uniq_id,
        profile_collections.image_url,
        CASE
            WHEN ((profile_collections.enabled) :: text = '0' :: text) THEN '0' :: text
-           WHEN ((profile_collections.size IS NULL) OR (profile_collections.size < 2)) THEN '0' :: text
+           WHEN ((profile_collections.size IS NULL) OR (profile_collections.size < {{ var('min_collection_size') }})) THEN '0' :: text
            ELSE '1' :: text
            END                               AS enabled,
        profile_collections.personalized,
        profile_collections.influencer_name,
        COALESCE(profile_collections.size, 0) AS size
 FROM profile_collections
-where profile_collections.enabled = '1' and profile_collections.size >= 2
+where profile_collections.enabled = '1' and profile_collections.size >= {{ var('min_collection_size') }}
