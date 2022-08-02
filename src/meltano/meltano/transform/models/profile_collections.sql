@@ -51,3 +51,4 @@ SELECT uniq_id,
        profile_collections.influencer_name,
        COALESCE(profile_collections.size, 0) AS size
 FROM profile_collections
+where profile_collections.enabled = '1' and profile_collections.size >= 2
