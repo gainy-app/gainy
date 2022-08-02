@@ -128,7 +128,8 @@ union all
                                on ticker_interests.symbol = portfolio_securities_normalized.ticker_symbol
                           join app.profile_plaid_access_tokens
                                on profile_plaid_access_tokens.id = profile_holdings_normalized.plaid_access_token_id
-                 where {where_clause}
+                          join interests on interests.id = ticker_interests.interest_id
+                 where interests.enabled = '1' and {where_clause}
                  group by profile_holdings_normalized.profile_id, interest_id
              ),
          portfolio_interests_weight_sum as
@@ -223,6 +224,69 @@ union all
              from portfolio_security_types
                       join portfolio_tickers_weight_sum using (profile_id)
                       join portfolio_security_types_weight_sum using (profile_id)
+             where weight is not null
+         ) t
+)
+
+union all
+
+(
+    with portfolio_collections as
+             (
+                 select profile_holdings_normalized.profile_id,
+                        collection_id,
+                        sum(actual_value)                                            as weight,
+                        sum(ticker_realtime_metrics.absolute_daily_change *
+                            profile_holdings_normalized.quantity_norm_for_valuation) as absolute_daily_change,
+                        sum(actual_value)                                            as absolute_value
+                 from profile_holdings_normalized
+                          join portfolio_securities_normalized
+                               on portfolio_securities_normalized.id = security_id
+                          join portfolio_holding_gains using (holding_id)
+                          left join ticker_realtime_metrics
+                                    on ticker_realtime_metrics.symbol =
+                                       portfolio_securities_normalized.original_ticker_symbol
+                          join ticker_collections
+                               on ticker_collections.symbol = portfolio_securities_normalized.ticker_symbol
+                          join app.profile_plaid_access_tokens
+                               on profile_plaid_access_tokens.id = profile_holdings_normalized.plaid_access_token_id
+                          join collections on collections.id = ticker_collections.collection_id
+                 where collections.enabled = '1' and {where_clause}
+                 group by profile_holdings_normalized.profile_id, collection_id
+             ),
+         portfolio_collections_weight_sum as
+             (
+                 select profile_id,
+                        sum(weight)                as weight_sum,
+                        sum(absolute_daily_change) as absolute_daily_change_sum
+                 from portfolio_collections
+                 group by profile_id
+             )
+    select profile_id,
+           weight,
+           entity_type,
+           entity_id,
+           entity_name,
+           absolute_daily_change,
+           case
+               when abs(absolute_value - absolute_daily_change) > 0
+                   then absolute_value / (absolute_value - absolute_daily_change) - 1
+               end as relative_daily_change,
+           absolute_value
+    from (
+             select portfolio_collections.profile_id,
+                    weight / portfolio_collections_weight_sum.weight_sum                    as weight,
+                    'collection'::varchar                                                   as entity_type,
+                    collection_id::varchar                                                  as entity_id,
+                    collections.name                                                        as entity_name,
+                    coalesce(absolute_daily_change * portfolio_tickers_weight_sum.absolute_daily_change_sum /
+                             portfolio_collections_weight_sum.absolute_daily_change_sum, 0) as absolute_daily_change,
+                    absolute_value * portfolio_tickers_weight_sum.weight_sum /
+                    portfolio_collections_weight_sum.weight_sum                             as absolute_value
+             from portfolio_collections
+                      join portfolio_tickers_weight_sum using (profile_id)
+                      join portfolio_collections_weight_sum using (profile_id)
+                      join collections on portfolio_collections.collection_id = collections.id
              where weight is not null
          ) t
 )
