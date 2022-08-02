@@ -320,11 +320,11 @@ select (code || '_' || symbol)::varchar as id,
        now() as updated_at
 from errors
 
-
-
 {% if not var('realtime') %}
 
 union all
+
+    -- raw_data.eod_historical_prices prices checks
 	(
 		with
 		check_params(		table_name, 				dt_interval, 
@@ -574,13 +574,9 @@ union all
 		from tickers_checks_verbose_union
 	)
 
-{% endif %}
-
-
-
-{% if not var('realtime') %}
-
 union all
+
+    -- public_*.historical_prices prices checks
 	(
 		with
 		check_params(		table_name, 				dt_interval, 
