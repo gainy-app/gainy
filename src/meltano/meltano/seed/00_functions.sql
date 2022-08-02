@@ -41,3 +41,15 @@ CREATE OR REPLACE FUNCTION linear_interpolate(
 $$
 SELECT (($5 - $3) / ($4 - $2)) * ($1 - $2) + $3;
 $$ LANGUAGE SQL;
+
+create or replace function is_date(s varchar) returns boolean as $$
+begin
+    if s is null then
+        return false;
+    end if;
+    perform s::date;
+    return true;
+exception when others then
+    return false;
+end;
+$$ language plpgsql;

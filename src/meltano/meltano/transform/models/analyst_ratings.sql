@@ -15,7 +15,11 @@ select distinct code::text                       as symbol,
        (analystratings ->> 'Rating')::float      as rating,
        (analystratings ->> 'StrongBuy')::int     as strong_buy,
        (analystratings ->> 'StrongSell')::int    as strong_sell,
-       (analystratings ->> 'TargetPrice')::float as target_price
-
+       (analystratings ->> 'TargetPrice')::float as target_price,
+       case
+           when is_date(updatedat)
+               then updatedat::timestamp
+           else _sdc_batched_at
+           end                                   as updated_at
 from {{ source('eod', 'eod_fundamentals') }} f
-inner join {{  ref('tickers') }} as t on f.code = t.symbol
+inner join {{ ref('tickers') }} as t on f.code = t.symbol
