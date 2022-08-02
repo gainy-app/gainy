@@ -444,7 +444,7 @@ query GetPortfolioPieChart(
                 value_to_portfolio_value
             }
         }
-        tags{
+        tags (order_by: {priority: desc}) {
             collection{
                 id
                 name

@@ -23,6 +23,7 @@ with raw_ticker_collections as
                       join {{ ref('tickers') }} on tickers.symbol = ticker_collections.symbol
                       join {{ ref('collections') }} on collections.name = trim(ticker_collections.ttf_name)
              where collections.personalized = '0'
+               and collections.enabled = '1'
                and ticker_collections._sdc_extracted_at > (select max(_sdc_extracted_at) from {{ source ('gainy', 'ticker_collections') }}) - interval '1 minute'
          ),
      collection_weight_sum as
