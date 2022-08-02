@@ -444,6 +444,20 @@ query GetPortfolioPieChart(
                 value_to_portfolio_value
             }
         }
+        tags (order_by: {priority: desc}) {
+            collection{
+                id
+                name
+            }
+            interest{
+                id
+                name
+            }
+            category{
+                id
+                name
+            }
+        }
         quantity
         symbol
     }

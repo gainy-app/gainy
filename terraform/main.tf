@@ -133,6 +133,9 @@ module "aws" {
   onesignal_app_id      = var.onesignal_app_id
   onesignal_api_key     = var.onesignal_api_key
   revenuecat_api_key    = var.revenuecat_api_key
+
+  bigquery_google_project = var.google_project_id
+  bigquery_credentials    = var.bigquery_credentials
 }
 
 module "datadog" {

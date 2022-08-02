@@ -8,4 +8,5 @@
 6. portfolio_securities_normalized - normalized securities with link to tickers
 7. portfolio_transaction_chart - chart records for each transaction (used in mobile app to calculate portfolio chart)
 8. profile_holding_groups - holding groups to show in the app
-9. profile_holdings_normalized - holdings to show in the app
+9. profile_holding_group_tags - holding group tags
+10. profile_holdings_normalized - holdings to show in the app

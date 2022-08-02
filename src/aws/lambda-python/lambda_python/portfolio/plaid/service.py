@@ -3,7 +3,7 @@ import datetime
 from portfolio.plaid import PlaidClient
 from portfolio.models import HoldingData, Security, Account, TransactionData, Institution
 from portfolio.exceptions import AccessTokenApiException, AccessTokenLoginRequiredException
-from services.logging import get_logger
+from gainy.utils import get_logger
 
 import plaid
 

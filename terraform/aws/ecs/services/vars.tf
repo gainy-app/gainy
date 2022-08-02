@@ -52,3 +52,5 @@ variable "gainy_compute_version" {}
 variable "onesignal_app_id" {}
 variable "onesignal_api_key" {}
 variable "gainy_history_s3_bucket" {}
+variable "bigquery_google_project" {}
+variable "bigquery_credentials" {}

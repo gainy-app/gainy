@@ -1,5 +1,7 @@
 import os
 
+from gainy.utils import setup_exception_logger_hook
+
 from common.hasura_dispatcher import HasuraActionDispatcher, HasuraTriggerDispatcher
 from recommendation.match_score_action import GetMatchScoreByCollection, GetMatchScoreByTicker, \
     GetMatchScoreByTickerList
@@ -11,6 +13,9 @@ from search.algolia_search import SearchTickers, SearchCollections
 from search.news_search import SearchNews
 from triggers import *
 from actions import *
+from web import *
+
+setup_exception_logger_hook()
 
 ENV = os.environ['ENV']
 
@@ -31,6 +36,7 @@ ACTIONS = [
     GetMatchScoreByTicker(),
     GetMatchScoreByTickerList(),
     GetMatchScoreByCollection(),
+    ApplyPromocode(),
     UpdatePurchases(),
     GetPromocode(),
 
@@ -43,6 +49,10 @@ ACTIONS = [
     GetPortfolioChartPreviousPeriodClose(),
     GetPortfolioPieChart(),
     PlaidWebhook(),
+
+    # Web
+    StripeGetCheckoutUrl(),
+    StripeWebhook(),
 
     # Search
     SearchTickers(ALGOLIA_APP_ID, ALGOLIA_SEARCH_API_KEY,

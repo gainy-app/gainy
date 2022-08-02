@@ -93,7 +93,8 @@ with
                    last_value(adjusted_close::double precision)
                    OVER (partition by symbol, time_3min order by time rows between current row and unbounded following)       as adjusted_close,
                    (sum(volume::numeric)
-                    OVER (partition by symbol, time_3min rows between current row and unbounded following))::double precision as volume
+                    OVER (partition by symbol, time_3min rows between current row and unbounded following))::double precision as volume,
+                   updated_at
              from (
                       select symbol,
                              time,
@@ -104,19 +105,21 @@ with
                              adjusted_close,
                              volume,
                              time_3min,
+                             updated_at,
                              0 as priority
                       from expanded_intraday_prices
                       union all
                       select symbol,
                              time_3min as time,
-                             null           as open,
-                             null           as high,
-                             null           as low,
-                             null           as close,
-                             null           as adjusted_close,
-                             null           as volume,
+                             null      as open,
+                             null      as high,
+                             null      as low,
+                             null      as close,
+                             null      as adjusted_close,
+                             null      as volume,
                              time_3min,
-                             1 as priority
+                             null      as updated_at,
+                             1         as priority
                       from {{ ref('base_tickers') }}
                                join time_series_3min
                                    on (time_series_3min.type = 'crypto' and base_tickers.type = 'crypto')
@@ -124,63 +127,74 @@ with
                       union all
                       select contract_name,
                              time_3min as time,
-                             null           as open,
-                             null           as high,
-                             null           as low,
-                             null           as close,
-                             null           as adjusted_close,
-                             null           as volume,
+                             null      as open,
+                             null      as high,
+                             null      as low,
+                             null      as close,
+                             null      as adjusted_close,
+                             null      as volume,
                              time_3min,
-                             1              as priority
+                             null      as updated_at,
+                             1         as priority
                       from {{ ref('ticker_options_monitored') }}
                                join time_series_3min on time_series_3min.type is null
                   ) t
              order by symbol, time_3min, time, priority
          )
-select * from (
-                  select symbol || '_' || datetime as id,
-                         symbol,
-                         datetime                  as datetime,
-                         coalesce(
-                                 open,
-                                 first_value(close)
-                                 OVER (partition by symbol, grp order by datetime),
-                                 historical_prices_marked.price_0d
-                             )::double precision   as open,
-                         coalesce(
-                                 high,
-                                 first_value(close)
-                                 OVER (partition by symbol, grp order by datetime),
-                                 historical_prices_marked.price_0d
-                             )::double precision   as high,
-                         coalesce(
-                                 low,
-                                 first_value(close)
-                                 OVER (partition by symbol, grp order by datetime),
-                                 historical_prices_marked.price_0d
-                             )::double precision   as low,
-                         coalesce(
-                                 close,
-                                 first_value(close)
-                                 OVER (partition by symbol, grp order by datetime),
-                                 historical_prices_marked.price_0d
-                             )::double precision   as close,
-                         coalesce(
-                                 adjusted_close,
-                                 first_value(adjusted_close)
-                                 OVER (partition by symbol, grp order by datetime),
-                                 historical_prices_marked.price_0d
-                             )::double precision   as adjusted_close,
-                         coalesce(volume, 0)       as volume
-                  from (
-                           select *,
-                                  coalesce(sum(case when adjusted_close is not null then 1 end)
-                                           over (partition by symbol order by datetime), 0) as grp
-                           from combined_intraday_prices
-                       ) t
-                           left join {{ ref('historical_prices_marked') }} using (symbol)
-            ) t2
+select t2.*
+from (
+          select symbol || '_' || datetime as id,
+                 symbol,
+                 datetime                  as datetime,
+                 coalesce(
+                         open,
+                         first_value(close)
+                         OVER (partition by symbol, grp order by datetime),
+                         historical_prices_marked.price_0d
+                     )::double precision   as open,
+                 coalesce(
+                         high,
+                         first_value(close)
+                         OVER (partition by symbol, grp order by datetime),
+                         historical_prices_marked.price_0d
+                     )::double precision   as high,
+                 coalesce(
+                         low,
+                         first_value(close)
+                         OVER (partition by symbol, grp order by datetime),
+                         historical_prices_marked.price_0d
+                     )::double precision   as low,
+                 coalesce(
+                         close,
+                         first_value(close)
+                         OVER (partition by symbol, grp order by datetime),
+                         historical_prices_marked.price_0d
+                     )::double precision   as close,
+                 coalesce(
+                         adjusted_close,
+                         first_value(adjusted_close)
+                         OVER (partition by symbol, grp order by datetime),
+                         historical_prices_marked.price_0d
+                     )::double precision   as adjusted_close,
+                 coalesce(volume, 0)       as volume,
+                 updated_at
+          from (
+                   select *,
+                          coalesce(sum(case when adjusted_close is not null then 1 end)
+                                   over (partition by symbol order by datetime), 0) as grp
+                   from combined_intraday_prices
+               ) t
+                   left join {{ ref('historical_prices_marked') }} using (symbol)
+     ) t2
+{% if is_incremental() %}
+         left join {{ this }} old_data using (symbol, datetime)
+{% endif %}
 where t2.adjusted_close is not null
+{% if is_incremental() %}
+  and (old_data.symbol is null -- no old data
+   or (t2.updated_at is not null and old_data.updated_at is null) -- old data is null and new is not
+   or t2.updated_at > old_data.updated_at) -- new data is newer than the old one
+{% endif %}
 
 -- Execution Time: 18457.714 ms on test
 -- OK created incremental model historical_prices_aggregated_3min SELECT 3397613 in 71.67s

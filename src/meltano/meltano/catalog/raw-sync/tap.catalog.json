@@ -189,7 +189,7 @@
         {
           "breadcrumb": [],
           "metadata": {
-            "replication-key": "t",
+            "replication-key": "_sdc_batched_at",
             "replication-method": "INCREMENTAL",
             "table-key-properties": [
               "ticker",

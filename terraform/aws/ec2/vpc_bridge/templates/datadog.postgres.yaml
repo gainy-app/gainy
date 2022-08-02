@@ -11,7 +11,7 @@ instances:
     custom_queries:
       - metric_prefix: app
         query: >
-          with dags (dag_id) as (values ('gainy-dag'), ('realtime-dbt-dag'), ('realtime-website-dag'), ('send-notifications'), ('deployment')),
+          with dags (dag_id) as (values ('gainy-dag'), ('realtime-dbt-dag'), ('realtime-website-dag'), ('send-notifications')),
                expanded_dag_runs as
                    (
                        select distinct on (

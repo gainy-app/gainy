@@ -108,10 +108,13 @@ plugins:
           - entity: ticker_search_alternative_names
             path: data/ticker_search_alternative_names.csv
             keys: [ "symbol" ]
+          - entity: blog_article_priority
+            path: data/article_priority.csv
+            keys: [ "id" ]
 
     - name: tap-postgres
       config:
-        itersize: 20000
+        itersize: 1000
 
     # sync taps
     - name: tap-postgres-sync
@@ -173,6 +176,7 @@ plugins:
       pip_url: pipelinewise-target-postgres
       config:
         batch_size_rows: 1000
+        flush_all_streams: true
         primary_key_required: false
         add_metadata_columns: true
 
@@ -180,7 +184,6 @@ plugins:
       inherit_from: target-postgres
       config:
         batch_size_rows: 100
-        parallelism: 5
 
     - name: target-postgres-history
       inherit_from: target-postgres
@@ -220,6 +223,20 @@ plugins:
         naming_convention: "{stream}/{timestamp}.csv"
         compression: gzip
 
+    - name: target-bigquery
+      variant: transferwise
+      pip_url: pipelinewise-target-bigquery
+      config:
+        batch_size_rows: 10000
+        flush_all_streams: true
+        add_metadata_columns: true
+        credentials_path: /project/bigquery-credentials.json
+
+    - name: target-bigquery-small-batch
+      inherit_from: target-bigquery
+      config:
+        batch_size_rows: 100
+
   transformers:
     - name: dbt
       pip_url: dbt-postgres==1.1.1
@@ -251,7 +268,7 @@ schedules:
 
   - name: polygon-to-postgres
     extractor: tap-polygon
-    loader: target-postgres
+    loader: target-postgres-small-batch
     transform: skip
     interval: '@daily'
     start_date: 2021-09-03 13:52:48.598227
@@ -350,6 +367,26 @@ schedules:
   - name: postgres-to-analytics-small-batch
     extractor: tap-postgres-analytics-small-batch
     loader: target-postgres-analytics-small-batch
+    transform: skip
+    interval: '@daily'
+    start_date: 2021-11-15 00:00:00.000000
+    env:
+      TARGET_ENVS: '["production","local"]'
+      INTEGRATION: 'DOWNSTREAM'
+
+  - name: postgres-to-bigquery
+    extractor: tap-postgres-analytics
+    loader: target-bigquery
+    transform: skip
+    interval: '@daily'
+    start_date: 2021-11-15 00:00:00.000000
+    env:
+      TARGET_ENVS: '["production","local"]'
+      INTEGRATION: 'DOWNSTREAM'
+
+  - name: postgres-to-bigquery-small-batch
+    extractor: tap-postgres-analytics-small-batch
+    loader: target-bigquery-small-batch
     transform: skip
     interval: '@daily'
     start_date: 2021-11-15 00:00:00.000000

@@ -19,6 +19,7 @@ select t.code || '_' || t.date_month as id,
        t.low,
        hp_close.close,
        hp_close.adjusted_close,
+       hp_close.updated_at,
        t.volume
 from (
          select code,
@@ -33,6 +34,12 @@ from (
      ) t
          join {{ ref('historical_prices') }} hp_open on hp_open.code = t.code and hp_open.date = t.open_date
          join {{ ref('historical_prices') }} hp_close on hp_close.code = t.code and hp_close.date = t.close_date
+{% if is_incremental() %}
+         left join {{ this }} old_data on old_data.symbol = t.code and old_data.datetime = t.date_month
+where old_data.symbol is null -- no old data
+   or (hp_close.updated_at is not null and old_data.updated_at is null) -- old data is null and new is not
+   or hp_close.updated_at > old_data.updated_at -- new data is newer than the old one
+{% endif %}
 
 -- OK created incremental model historical_prices_aggregated_1m  SELECT 1914573 in 225.34s
 -- OK created incremental model historical_prices_aggregated_1m  SELECT 1914573 in 367.38s

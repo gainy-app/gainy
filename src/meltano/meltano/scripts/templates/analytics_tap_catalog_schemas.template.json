@@ -16,6 +16,14 @@
         "is-view": true
       }
     },
+    "analytics_subscriptions": {
+      "metadata": {
+        "view-key-properties": [
+          "id"
+        ],
+        "is-view": true
+      }
+    },
     "profile_categories": {
       "metadata": {
         "table-key-properties": [
@@ -86,6 +94,13 @@
         ]
       }
     },
+    "promocodes": {
+      "metadata": {
+        "table-key-properties": [
+          "id"
+        ]
+      }
+    },
     "subscriptions": {
       "metadata": {
         "table-key-properties": [
@@ -97,6 +112,8 @@
   "public": {
     "analyst_ratings": {
       "metadata": {
+        "replication-key": "updated_at",
+        "replication-method": "INCREMENTAL",
         "table-key-properties": [
           "symbol"
         ]
@@ -111,6 +128,8 @@
     },
     "cash_flow": {
       "metadata": {
+        "replication-key": "updated_at",
+        "replication-method": "INCREMENTAL",
         "table-key-properties": [
           "symbol",
           "date"
@@ -131,29 +150,10 @@
         ]
       }
     },
-    "crypto_coins": {
-      "metadata": {
-        "table-key-properties": [
-          "symbol"
-        ]
-      }
-    },
-    "crypto_metrics": {
-      "metadata": {
-        "table-key-properties": [
-          "symbol"
-        ]
-      }
-    },
-    "crypto_realtime_metrics": {
-      "metadata": {
-        "table-key-properties": [
-          "symbol"
-        ]
-      }
-    },
     "earnings_annual": {
       "metadata": {
+        "replication-key": "updated_at",
+        "replication-method": "INCREMENTAL",
         "table-key-properties": [
           "symbol",
           "date"
@@ -162,6 +162,8 @@
     },
     "earnings_history": {
       "metadata": {
+        "replication-key": "updated_at",
+        "replication-method": "INCREMENTAL",
         "table-key-properties": [
           "symbol",
           "date"
@@ -170,6 +172,8 @@
     },
     "earnings_trend": {
       "metadata": {
+        "replication-key": "updated_at",
+        "replication-method": "INCREMENTAL",
         "table-key-properties": [
           "symbol",
           "date"
@@ -178,6 +182,8 @@
     },
     "financials_balance_sheet_quarterly": {
       "metadata": {
+        "replication-key": "updated_at",
+        "replication-method": "INCREMENTAL",
         "table-key-properties": [
           "symbol",
           "date"
@@ -186,6 +192,8 @@
     },
     "financials_income_statement_quarterly": {
       "metadata": {
+        "replication-key": "updated_at",
+        "replication-method": "INCREMENTAL",
         "table-key-properties": [
           "symbol",
           "date"
@@ -194,6 +202,8 @@
     },
     "financials_income_statement_yearly": {
       "metadata": {
+        "replication-key": "updated_at",
+        "replication-method": "INCREMENTAL",
         "table-key-properties": [
           "symbol",
           "date"
@@ -209,6 +219,8 @@
     },
     "highlights": {
       "metadata": {
+        "replication-key": "updated_at",
+        "replication-method": "INCREMENTAL",
         "table-key-properties": [
           "symbol"
         ]
@@ -278,6 +290,15 @@
         ]
       }
     },
+    "ticker_options": {
+      "metadata": {
+        "replication-key": "_sdc_extracted_at",
+        "replication-method": "INCREMENTAL",
+        "table-key-properties": [
+          "contract_name"
+        ]
+      }
+    },
     "ticker_realtime_metrics": {
       "metadata": {
         "table-key-properties": [
@@ -287,6 +308,8 @@
     },
     "ticker_shares_stats": {
       "metadata": {
+        "replication-key": "updated_at",
+        "replication-method": "INCREMENTAL",
         "table-key-properties": [
           "symbol"
         ]
@@ -294,6 +317,8 @@
     },
     "valuation": {
       "metadata": {
+        "replication-key": "updated_at",
+        "replication-method": "INCREMENTAL",
         "table-key-properties": [
           "symbol"
         ]
@@ -301,24 +326,6 @@
     }
   },
   "raw_data": {
-    "coingecko_coin": {
-      "metadata": {
-        "replication-key": "_sdc_extracted_at",
-        "replication-method": "INCREMENTAL",
-        "table-key-properties": [
-          "id"
-        ]
-      }
-    },
-    "coingecko_market_realtime": {
-      "metadata": {
-        "replication-key": "_sdc_extracted_at",
-        "replication-method": "INCREMENTAL",
-        "table-key-properties": [
-          "id"
-        ]
-      }
-    },
     "eod_dividends": {
       "metadata": {
         "replication-key": "_sdc_extracted_at",
@@ -346,17 +353,6 @@
         "table-key-properties": [
           "code",
           "date"
-        ]
-      }
-    },
-    "eod_options": {
-      "isSmallBatch": true,
-      "metadata": {
-        "replication-key": "_sdc_extracted_at",
-        "replication-method": "INCREMENTAL",
-        "table-key-properties": [
-          "code",
-          "expirationdate"
         ]
       }
     },

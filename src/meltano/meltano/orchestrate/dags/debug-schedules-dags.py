@@ -9,9 +9,10 @@ debug_schedule_patterns = [
     "coingecko-to-postgres",
     "eodhistoricaldata-prices-to-postgres",
     "polygon-to-postgres",
-    "postgres-to-analytics",
-    "postgres-to-search",
     "postgres-history-daily-to-s3",
+    "postgres-to-analytics",
+    "postgres-to-bigquery",
+    "postgres-to-search",
 ]
 
 for pattern in debug_schedule_patterns:
