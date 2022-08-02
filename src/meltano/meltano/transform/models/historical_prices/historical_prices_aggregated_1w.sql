@@ -36,7 +36,8 @@ with combined_daily_prices as
                                 OVER (partition by date_week, code order by date rows between current row and unbounded following) as adjusted_close,
                                 sum(volume)
                                 OVER (partition by date_week, code order by date rows between current row and unbounded following) as volume,
-                                0                                                                                                  as priority
+                                0                                                                                                  as priority,
+                                updated_at
                           from {{ ref('historical_prices') }}
                           where date_week >= now() - interval '5 year' - interval '1 week'
                           order by date_week, symbol, date
@@ -67,7 +68,8 @@ with combined_daily_prices as
                                  null::double precision as close,
                                  null::double precision as adjusted_close,
                                  null::double precision as volume,
-                                 1                      as priority
+                                 1                      as priority,
+                                 null                   as updated_at
                           from filtered_base_tickers
                                    join time_series_1w using (exchange_canonical)
                       )
@@ -98,14 +100,15 @@ with combined_daily_prices as
                                  null::double precision as close,
                                  null::double precision as adjusted_close,
                                  null::double precision as volume,
-                                 1                      as priority
+                                 1                      as priority,
+                                 null                   as updated_at
                           from filtered_base_tickers
                                    join time_series_1w using (country_name)
                       )
                   ) t
              order by t.symbol, t.date, priority
          )
-select *
+select t2.*
 from (
          select DISTINCT ON (
              symbol,
@@ -138,6 +141,11 @@ from (
                        first_value(adjusted_close)
                        OVER (partition by symbol, grp order by date)
                    )                  as adjusted_close,
+               coalesce(
+                       updated_at,
+                       first_value(updated_at)
+                       OVER (partition by symbol, grp order by date)
+                   )                  as updated_at,
                coalesce(volume, 0.0)  as volume
          from (
                   select combined_daily_prices.*,
@@ -147,7 +155,15 @@ from (
               ) t
          order by symbol, date
      ) t2
-where t2.close is not null
+{% if is_incremental() %}
+         left join {{ this }} old_data using (symbol, datetime)
+{% endif %}
+where t2.adjusted_close is not null
+{% if is_incremental() %}
+  and (old_data.symbol is null -- no old data
+   or (t2.updated_at is not null and old_data.updated_at is null) -- old data is null and new is not
+   or t2.updated_at > old_data.updated_at) -- new data is newer than the old one
+{% endif %}
 
 -- OK created incremental model historical_prices_aggregated_1w  SELECT 2980681 in 90.61s
 -- OK created incremental model historical_prices_aggregated_1w  SELECT 2980681 in 156.91s
