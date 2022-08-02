@@ -19,6 +19,7 @@ select f.code                                             as symbol,
        (sharesstats ->> 'ShortPercentFloat')::float       as short_percent_float,
        (sharesstats ->> 'PercentInstitutions')::float     as percent_institutions,
        (sharesstats ->> 'SharesShortPriorMonth')::float   as shares_short_prior_month,
-       (sharesstats ->> 'ShortPercentOutstanding')::float as short_percent_outstanding
+       (sharesstats ->> 'ShortPercentOutstanding')::float as short_percent_outstanding,
+       updatedat::date                                    as updated_at
 from eod_fundamentals f
          JOIN tickers t ON t.symbol = f.code

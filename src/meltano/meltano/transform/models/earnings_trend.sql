@@ -10,7 +10,8 @@
 
     with expanded_trends as (
         select code as symbol,
-               (json_each((earnings -> 'Trend')::json)).*
+               (json_each((earnings -> 'Trend')::json)).*,
+               updatedat::date as updated_at
         from {{ source('eod', 'eod_fundamentals') }} f
                  inner join {{  ref('tickers') }} as t on f.code = t.symbol
     )
@@ -38,6 +39,7 @@
            (value ->> 'epsRevisionsDownLast30days')::float       as eps_revisions_down_last_30days,
            (value ->> 'epsRevisionsDownLast90days')::float       as eps_revisions_down_last_90days,
            (value ->> 'revenueEstimateNumberOfAnalysts')::float  as revenue_estimate_number_of_analysts,
-           (value ->> 'earningsEstimateNumberOfAnalysts')::float as earnings_estimate_number_of_analysts
+           (value ->> 'earningsEstimateNumberOfAnalysts')::float as earnings_estimate_number_of_analysts,
+           updated_at
     from expanded_trends
     where key != '0000-00-00'

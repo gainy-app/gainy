@@ -15,7 +15,7 @@ select distinct code::text                       as symbol,
        (analystratings ->> 'Rating')::float      as rating,
        (analystratings ->> 'StrongBuy')::int     as strong_buy,
        (analystratings ->> 'StrongSell')::int    as strong_sell,
-       (analystratings ->> 'TargetPrice')::float as target_price
-
+       (analystratings ->> 'TargetPrice')::float as target_price,
+       updatedat::date                           as updated_at
 from {{ source('eod', 'eod_fundamentals') }} f
 inner join {{  ref('tickers') }} as t on f.code = t.symbol

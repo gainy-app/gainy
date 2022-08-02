@@ -17,7 +17,8 @@ with
      expanded_quaterly_cash_flow as
          (
              select code as symbol,
-                    (json_each((financials -> 'Cash_Flow' ->> 'quarterly')::json)).*
+                    (json_each((financials -> 'Cash_Flow' ->> 'quarterly')::json)).*,
+                    updatedat::date as updated_at
              from {{ source('eod', 'eod_fundamentals') }} f
              inner join {{ ref ('tickers') }} as t
              on f.code = t.symbol
@@ -53,7 +54,8 @@ select expanded_quaterly_cash_flow.symbol,
        (value ->> 'totalCashFromOperatingActivities')::float      as total_cash_from_operating_activities,
        (value ->> 'otherCashflowsFromFinancingActivities')::float as other_cashflows_from_financing_activities,
        (value ->> 'otherCashflowsFromInvestingActivities')::float as other_cashflows_from_investing_activities,
-       (value ->> 'totalCashflowsFromInvestingActivities')::float as total_cashflows_from_investing_activities
+       (value ->> 'totalCashflowsFromInvestingActivities')::float as total_cashflows_from_investing_activities,
+       updated_at
 from expanded_quaterly_cash_flow
 {% if is_incremental() %}
     left join max_updated_at on expanded_quaterly_cash_flow.symbol = max_updated_at.symbol

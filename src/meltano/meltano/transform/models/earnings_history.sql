@@ -11,7 +11,8 @@
 
     with expanded as (
         select code as symbol,
-               (json_each((earnings -> 'History')::json)).*
+               (json_each((earnings -> 'History')::json)).*,
+               updatedat::date as updated_at
         from {{ source('eod', 'eod_fundamentals') }} f
                  inner join {{  ref('tickers') }} as t on f.code = t.symbol
     )
@@ -23,6 +24,7 @@
            (value ->> 'epsEstimate')::float      as eps_estimate,
            (value ->> 'epsDifference')::float    as eps_difference,
            (value ->> 'surprisePercent')::float  as surprise_percent,
-           (value ->> 'beforeAfterMarket')::text as before_after_market
+           (value ->> 'beforeAfterMarket')::text as before_after_market,
+           updated_at
     from expanded
     where key != '0000-00-00'
