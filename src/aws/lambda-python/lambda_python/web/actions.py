@@ -5,7 +5,7 @@ import stripe
 
 from common.hasura_function import HasuraAction
 from common.hasura_exception import HasuraActionException
-from services.logging import get_logger
+from gainy.utils import get_logger
 
 logger = get_logger(__name__)
 

@@ -5,7 +5,7 @@ from gainy.data_access.optimistic_lock import ConcurrentVersionUpdate
 from gainy.recommendation import TOP_20_FOR_YOU_COLLECTION_ID
 from gainy.recommendation.compute import ComputeRecommendationsAndPersist
 from gainy.recommendation.repository import RecommendationRepository
-from services.logging import get_logger
+from gainy.utils import get_logger
 
 logger = get_logger(__name__)
 
@@ -47,11 +47,11 @@ class GetRecommendedCollections(HasuraAction):
                 f"{profile_id}_{TOP_20_FOR_YOU_COLLECTION_ID}"
             ] + sorted_collections_uniq_ids
 
-        logger.info('get_recommended_collections ' +
-                    json.dumps({
+        logger.info('get_recommended_collections',
+                    extra={
                         'profile_id': profile_id,
                         'collections': sorted_collections_ids,
-                    }))
+                    })
 
         return [{
             "id": id,

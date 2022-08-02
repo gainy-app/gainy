@@ -2,7 +2,7 @@ from common.hasura_function import HasuraTrigger
 from gainy.recommendation.compute import ComputeRecommendationsAndPersist
 from gainy.data_access.optimistic_lock import ConcurrentVersionUpdate
 from gainy.data_access.db_lock import LockAcquisitionTimeout
-from services.logging import get_logger
+from gainy.utils import get_logger
 
 logger = get_logger(__name__)
 
