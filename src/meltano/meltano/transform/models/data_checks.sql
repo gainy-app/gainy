@@ -104,6 +104,14 @@ with collection_distinct_tickers as
                             and eod_intraday_prices.time between coalesce(open_at, crypto_open_at.datetime) and coalesce(
                                       close_at - interval '1 second', crypto_open_at.datetime + interval '1 day')
                       ),
+                  previous_trading_day_intraday_prices_unique_symbols as
+                      (
+                          select symbol,
+                                 type,
+                                 time
+                          from previous_trading_day_intraday_prices
+                          group by symbol, type, time
+                      ),
                   previous_trading_day_intraday_prices_stats as
                       (
                           select type,
@@ -167,9 +175,9 @@ with collection_distinct_tickers as
                             and previous_trading_day_intraday_prices_stats.cnt > 0
                           order by type, time desc
                       )
-             select previous_trading_day_intraday_prices.symbol
+             select previous_trading_day_intraday_prices_unique_symbols.symbol
              from latest_diff
-                      join previous_trading_day_intraday_prices using (type, time)
+                      join previous_trading_day_intraday_prices_unique_symbols using (type, time)
                       left join latest_trading_day_intraday_prices using (symbol, time)
              where diff < -0.30 and latest_trading_day_intraday_prices is null
          ),
