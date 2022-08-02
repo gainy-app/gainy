@@ -14,7 +14,7 @@ if [ $(PGPASSWORD=$PG_PASSWORD psql -h $PG_HOST -p $PG_PORT -U $PG_USERNAME $PG_
     PGPASSWORD=$PG_PASSWORD psql -h $PG_HOST -p $PG_PORT -U $PG_USERNAME $PG_DBNAME -c \
       "update deployment.public_schemas set deployed_at = now() where schema_name = '$DBT_TARGET_SCHEMA';"
   else
-    echo 'Failed to seed public schema, exitting'
+    echo 'Failed to seed public schema, exiting'
     exit 1
   fi
 fi
