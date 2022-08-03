@@ -1522,6 +1522,7 @@
           - collection_id
           - collection_uniq_id
           - interest_id
+          - priority
           - profile_id
           - symbol
         filter:
