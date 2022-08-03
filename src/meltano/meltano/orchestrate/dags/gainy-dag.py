@@ -13,7 +13,7 @@ dag_id = "gainy-dag"
 dag = create_dag(
     dag_id,
     tags=list(tags),
-    schedule_interval="0 3 * * *" if ENV == "production" else "0 4 * * *",
+    schedule_interval="0 4 * * *" if ENV == "production" else "0 5 * * *",
     is_paused_upon_creation=True)
 
 # Operators

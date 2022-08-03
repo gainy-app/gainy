@@ -29,6 +29,17 @@ with collection_distinct_tickers as
              where open_at < now()
              order by exchange_name, country_name, date desc
          ),
+     previous_trading_day as
+         (
+             select distinct on (exchange_schedule.exchange_name, exchange_schedule.country_name) exchange_schedule.*
+             from {{ ref('exchange_schedule') }}
+                      join latest_trading_day
+                           on (latest_trading_day.exchange_name = exchange_schedule.exchange_name
+                               or (latest_trading_day.exchange_name is null
+                                   and latest_trading_day.country_name = exchange_schedule.country_name))
+             where exchange_schedule.date < latest_trading_day.date
+             order by exchange_schedule.exchange_name, exchange_schedule.country_name, exchange_schedule.date desc
+         ),
      tickers_and_options as
          (
              select symbol, exchange_canonical, country_name
@@ -46,7 +57,6 @@ with collection_distinct_tickers as
                              max(historical_prices.date) as date
                       from {{ ref('tickers') }}
                                left join {{ ref('historical_prices') }} on historical_prices.code = tickers.symbol
-                      where volume > 0
                       group by tickers.symbol
                   ) t
                       join {{ ref('tickers') }} using (symbol)
@@ -54,29 +64,122 @@ with collection_distinct_tickers as
                            on (latest_trading_day.exchange_name = tickers.exchange_canonical
                                or (tickers.exchange_canonical is null
                                    and latest_trading_day.country_name = tickers.country_name))
+                      join previous_trading_day
+                           on (previous_trading_day.exchange_name = tickers.exchange_canonical
+                               or (tickers.exchange_canonical is null
+                                   and previous_trading_day.country_name = tickers.country_name))
              where t.date is null
-                or latest_trading_day.date - t.date > (now() < latest_trading_day.date::timestamp + interval '28 hours')::int
--- US markets typically close at 20:00. Fetching starts at 2:00. We expect prices to be present in 2 hours after start.
+                or (now() > latest_trading_day.date + interval '1 day 6 hours' and t.date < latest_trading_day.date)
+                or (now() > previous_trading_day.date + interval '1 day 6 hours' and t.date < previous_trading_day.date)
          ),
      old_realtime_prices as
          (
-             select symbol
-             from (
-                      select tickers.symbol,
-                             max(eod_intraday_prices.time) as time
-                      from {{ ref('tickers') }}
-                               left join {{ source('eod', 'eod_intraday_prices') }} using (symbol)
-                      group by tickers.symbol
-                  ) t
-                      left join old_historical_prices using (symbol)
-                      join {{ ref('tickers') }} using (symbol)
-                      join latest_trading_day
-                           on (latest_trading_day.exchange_name = tickers.exchange_canonical
-                               or (tickers.exchange_canonical is null
-                                   and latest_trading_day.country_name = tickers.country_name))
-             where old_historical_prices.symbol is null
-               and (t.time is null or least(now(), latest_trading_day.close_at) - t.time > interval '16 minutes')
--- Polygon delay is 15 minutes
+             with previous_trading_day_intraday_prices as
+                      (
+                          with crypto_open_at as
+                                   (
+
+                                       select (
+                                                  values (date_trunc('minute', now() - interval '2 days') -
+                                                          interval '1 minute' *
+                                                          mod(extract(minutes from now() - interval '2 days')::int, 15))
+                                              ) as datetime
+                                   )
+                          select symbol,
+                                 type,
+                                 date_trunc('minute', eod_intraday_prices.time) -
+                                 interval '1 minute' *
+                                 mod(extract(minutes from eod_intraday_prices.time)::int, 15) -
+                                 coalesce(open_at, crypto_open_at.datetime) as time
+                          from {{ ref('base_tickers') }}
+                                   left join previous_trading_day
+                                             on (previous_trading_day.exchange_name = base_tickers.exchange_canonical
+                                                 or (base_tickers.exchange_canonical is null
+                                                     and previous_trading_day.country_name = base_tickers.country_name))
+                                   left join {{ source('eod', 'eod_intraday_prices')}} using (symbol)
+                                   join crypto_open_at on true
+                          where (base_tickers.exchange_canonical in ('NYSE', 'NASDAQ') or
+                                 (base_tickers.exchange_canonical is null and base_tickers.country_name = 'United States') or
+                                 (base_tickers.exchange_canonical is null and base_tickers.country_name is null))
+                            and eod_intraday_prices.time between coalesce(open_at, crypto_open_at.datetime) and coalesce(
+                                      close_at - interval '1 second', crypto_open_at.datetime + interval '1 day')
+                      ),
+                  previous_trading_day_intraday_prices_unique_symbols as
+                      (
+                          select symbol,
+                                 type,
+                                 time
+                          from previous_trading_day_intraday_prices
+                          group by symbol, type, time
+                      ),
+                  previous_trading_day_intraday_prices_stats as
+                      (
+                          select type,
+                                 time,
+                                 count(*) as cnt
+                          from previous_trading_day_intraday_prices
+                          group by type, time
+                      ),
+                  latest_trading_day_intraday_prices as
+                      (
+                          with crypto_open_at as
+                                   (
+
+                                       select (
+                                                  values (date_trunc('minute', now() - interval '1 day') -
+                                                          interval '1 minute' *
+                                                          mod(extract(minutes from now() - interval '1 day')::int, 15))
+                                              ) as datetime
+                                   )
+                          select symbol,
+                                 type,
+                                 date_trunc('minute', eod_intraday_prices.time) -
+                                 interval '1 minute' *
+                                 mod(extract(minutes from eod_intraday_prices.time)::int, 15) -
+                                 coalesce(open_at, crypto_open_at.datetime)                    as time,
+                                 coalesce(latest_trading_day.open_at, crypto_open_at.datetime) as open_at
+                          from {{ ref('base_tickers') }}
+                                   left join latest_trading_day
+                                             on (latest_trading_day.exchange_name = base_tickers.exchange_canonical
+                                                 or (base_tickers.exchange_canonical is null
+                                                     and latest_trading_day.country_name = base_tickers.country_name))
+                                   left join {{ source('eod', 'eod_intraday_prices')}} using (symbol)
+                                   join crypto_open_at on true
+                          where (base_tickers.exchange_canonical in ('NYSE', 'NASDAQ') or
+                                 (base_tickers.exchange_canonical is null and base_tickers.country_name = 'United States') or
+                                 (base_tickers.exchange_canonical is null and base_tickers.country_name is null))
+                            and eod_intraday_prices.time between coalesce(open_at, crypto_open_at.datetime) and coalesce(
+                                      close_at - interval '1 second', crypto_open_at.datetime + interval '1 day')
+                      ),
+                  latest_trading_day_intraday_prices_stats as
+                      (
+                          select type,
+                                 time,
+                                 open_at,
+                                 count(*) as cnt
+                          from latest_trading_day_intraday_prices
+                          group by type, time, open_at
+                      ),
+                  latest_diff as
+                      (
+                          select distinct on (
+                              type
+                              ) type,
+                                time,
+                                (latest_trading_day_intraday_prices_stats.cnt -
+                                 previous_trading_day_intraday_prices_stats.cnt)::float /
+                                previous_trading_day_intraday_prices_stats.cnt as diff
+                          from previous_trading_day_intraday_prices_stats
+                                   left join latest_trading_day_intraday_prices_stats using (type, time)
+                          where latest_trading_day_intraday_prices_stats.open_at + time < now() - interval '30 minutes' -- Polygon delay is 15 minutes
+                            and previous_trading_day_intraday_prices_stats.cnt > 0
+                          order by type, time desc
+                      )
+             select previous_trading_day_intraday_prices_unique_symbols.symbol
+             from latest_diff
+                      join previous_trading_day_intraday_prices_unique_symbols using (type, time)
+                      left join latest_trading_day_intraday_prices using (symbol, time)
+             where diff < -0.30 and latest_trading_day_intraday_prices is null
          ),
      matchscore_distinct_tickers as
          (
@@ -224,3 +327,511 @@ select (code || '_' || symbol)::varchar as id,
            end as message,
        now() as updated_at
 from errors
+
+{% if not var('realtime') %}
+
+union all
+
+    -- raw_data.eod_historical_prices prices checks
+	(
+		with
+		check_params(		table_name, 				dt_interval, 
+					depth_stddev, 				depth_check, -- depth_stddev >= depth_check !!
+					allowable_sigma_dev_adjclose_percchange, 	allowable_sigma_dev_volume_dif, 
+					symbol_asmarket_crypto, 		symbol_asmarket_other) as
+			(
+				values 	('raw_data.eod_historical_prices', 	interval '1 day', 
+					interval '5 year', 			interval '5 year', 
+					5., 					10., 
+					'BTC.CC', 				'SPY')
+			),
+		
+		intrpl_dt_now_wrt_interval as -- generating time frames
+			(	-- now()='2022-06-22 15:15:14' with dt_interval='15 minutes'::interval will give: '2022-06-22 15:15:00' (it drops last not full frame)
+				select 	(to_timestamp(
+							(extract(epoch from now()::timestamp)::int / extract(epoch from cp.dt_interval)::int
+							) * extract(epoch from cp.dt_interval)::int
+						) AT TIME ZONE 'UTC' --to cancel out TZ in to_timestamp(0)='1970-01-01 00:00:00+TZ' (will be shifted by 3 hrs if TZ was +3, ie '1970-01-01 03:00:00+03')
+					)::timestamp as value
+				from check_params cp
+			),
+		
+		intrpl_symbol_asmarket_dt as 
+			(
+				select 	unnest(array[cp.symbol_asmarket_other, cp.symbol_asmarket_crypto]) as intrpl_symbol_asmarket,
+					d.dt::timestamp
+				from check_params cp
+				left join intrpl_dt_now_wrt_interval on true
+				cross join 
+					generate_series(intrpl_dt_now_wrt_interval.value - cp.depth_stddev, 
+							intrpl_dt_now_wrt_interval.value,
+							cp.dt_interval) as d(dt)
+			),
+			
+		/* 
+		 * for cancel natural market price movements in measuring ticker anomaly price movements by "returns" (percentage price change d2d)
+		 * we need to first subtract market returns from ticker returns (and only after that do some stat measurements by stdev of returns)
+		 * so we need to guarantee that market(target) price will be presented in any dt that can occur in any ticker dt 
+		 * and if we haven't row for market price when the ticker has - that mean we lost the market price data row 
+		 * so we need to guarantee some reasonable intermediate value. The linear interpolation trick is all about it.
+		 */
+		intrpl_symbol_asmarket_dt_prices as 
+			(
+				select 	d.intrpl_symbol_asmarket,
+					d.dt, 
+					--t.adjusted_close as adjusted_close_raw, --have left it here if anyone wants to check
+					coalesce(t.adjusted_close, 
+						linear_interpolate(
+							extract(epoch from d.dt),
+							LAST_VALUE_IGNORENULLS(case when t.adjusted_close is not null then extract(epoch from d.dt) else null end) over (lookback),
+							LAST_VALUE_IGNORENULLS(t.adjusted_close) over (lookback),
+							LAST_VALUE_IGNORENULLS(case when t.adjusted_close is not null then extract(epoch from d.dt) else null end) over (lookforward),
+							LAST_VALUE_IGNORENULLS(t.adjusted_close) over (lookforward)
+							),
+						LAST_VALUE_IGNORENULLS(t.adjusted_close) over (lookforward),
+						LAST_VALUE_IGNORENULLS(t.adjusted_close) over (lookback),
+						0) as intrpl_symbol_asmarket_adjusted_close
+				from intrpl_symbol_asmarket_dt as d
+				left join 
+					(
+						select 	code as intrpl_symbol_asmarket,
+							to_timestamp("date",'YYYY-MM-DD')::timestamp as dt,
+							adjusted_close
+						from {{ source('eod', 'eod_historical_prices') }} ehp
+						join check_params cp on true
+						where code = any(array[cp.symbol_asmarket_other, cp.symbol_asmarket_crypto])
+					) as t using(intrpl_symbol_asmarket, dt)
+				window
+					lookback as (partition by d.intrpl_symbol_asmarket order by d.dt asc),
+					lookforward as (partition by d.intrpl_symbol_asmarket order by d.dt desc)
+			),
+		
+		tickers_data as
+			(
+				select 
+					code 										as symbol, 
+					to_timestamp("date",'YYYY-MM-DD')::timestamp 					as dt,
+					adjusted_close,
+					volume,
+					case 	when t."type" = 'crypto' then cp.symbol_asmarket_crypto 
+						else cp.symbol_asmarket_other end					as intrpl_symbol_asmarket
+				from {{ source('eod', 'eod_historical_prices') }} ehp
+				join {{ ref('tickers') }} t on t.symbol = ehp.code -- we are interested in all tickers that are available in the app, so tickers table
+				left join check_params cp on true 
+				where to_timestamp("date",'YYYY-MM-DD')::timestamp >= now()::timestamp - cp.depth_stddev
+			),
+		tickers_lag as
+			(
+				select 
+					t.*, -- symbol, dt, adjusted_close, volume, intrpl_symbol_asmarket
+					lag(t.adjusted_close,1,t.adjusted_close) over (partition by t.symbol order by t.dt asc) 	as adjusted_close_pre,
+					lag(t.volume,1,t.volume) over (partition by t.symbol order by t.dt asc) 			as volume_pre,
+					sam.intrpl_symbol_asmarket_adjusted_close,
+					lag(sam.intrpl_symbol_asmarket_adjusted_close,1,sam.intrpl_symbol_asmarket_adjusted_close) over (partition by t.symbol order by t.dt asc) 	as intrpl_symbol_asmarket_adjusted_close_pre
+				from tickers_data t
+				join intrpl_symbol_asmarket_dt_prices sam using (intrpl_symbol_asmarket, dt)
+			),
+		tickers_difs as
+			(
+				select
+					*,
+					adjusted_close - adjusted_close_pre 		as adjusted_close_dif,
+					(adjusted_close - adjusted_close_pre)
+						/(1e-30 + abs(adjusted_close_pre)) 	as adjusted_close_perc_change,
+					volume - volume_pre 				as volume_dif,
+					intrpl_symbol_asmarket_adjusted_close - intrpl_symbol_asmarket_adjusted_close_pre 	as intrpl_symbol_asmarket_adjusted_close_dif,
+					(intrpl_symbol_asmarket_adjusted_close - intrpl_symbol_asmarket_adjusted_close_pre)
+						/(1e-30 + abs(intrpl_symbol_asmarket_adjusted_close_pre))			as intrpl_symbol_asmarket_adjusted_close_perc_change,
+					(adjusted_close - adjusted_close_pre)
+						/(1e-30 + abs(adjusted_close_pre))
+					- (intrpl_symbol_asmarket_adjusted_close - intrpl_symbol_asmarket_adjusted_close_pre)
+						/(1e-30 + abs(intrpl_symbol_asmarket_adjusted_close_pre))			as adjusted_close_perc_change_wom
+				from tickers_lag 	
+			),
+		tickers_stddevs_means_devs as
+			(
+				select 
+					*,
+					stddev_pop(adjusted_close_perc_change_wom) over (w_s) 	as stddev_adjusted_close_perc_change_wom,
+					avg(adjusted_close_perc_change_wom) over (w_s) 		as mean_adjusted_close_perc_change_wom,
+					abs(adjusted_close_perc_change_wom 
+						- avg(adjusted_close_perc_change_wom) over (w_s)) 	as dev_adjusted_close_perc_change_wom,
+					stddev_pop(volume_dif) over (w_s) 			as stddev_volume_dif,
+					avg(volume_dif) over (w_s) 				as mean_volume_dif,
+					abs(volume_dif 
+						- avg(volume_dif) over (w_s)) 			as dev_volume_dif
+				from tickers_difs
+				window w_s as (partition by symbol)
+			),
+		tickers_checks as 
+			(
+				select 
+					*,
+					case when dev_adjusted_close_perc_change_wom > 
+						stddev_adjusted_close_perc_change_wom * cp.allowable_sigma_dev_adjclose_percchange
+												then 1 else 0 end 	as iserror_adjusted_close_perc_change_dev_wom,
+					case when dev_volume_dif > 
+						stddev_volume_dif * cp.allowable_sigma_dev_volume_dif
+												then 1 else 0 end 	as iserror_volume_dif_dev,
+					case when adjusted_close = adjusted_close_pre 		then 1 else 0 end 	as iserror_adjusted_close_twice_same,
+					case when adjusted_close <= 0 				then 1 else 0 end 	as iserror_adjusted_close_is_notpositive,
+					case when adjusted_close is null 			then 1 else 0 end 	as iserror_adjusted_close_is_null,
+					case when volume is null 				then 1 else 0 end 	as iserror_volume_is_null
+				from tickers_stddevs_means_devs
+				left join check_params cp on true
+				where dt >= now()::timestamp - cp.depth_check
+			),
+		tickers_checks_agg as -- I have left all the fields here, so someone could see them closer (copy and past all code up to here and see the output)
+			(
+				select 
+					*, 
+					sum(iserror_adjusted_close_perc_change_dev_wom) over (w_s) 	as iserror_adjusted_close_perc_change_dev_wom_agg, 	-- agg >0 && distinct on (symbol) -> example case
+					sum(iserror_volume_dif_dev) over (w_s) 				as iserror_volume_dif_dev_agg, 				-- agg >0 && distinct on (symbol) -> example case
+					sum(iserror_adjusted_close_twice_same) over (w_s) 		as iserror_adjusted_close_twice_same_agg, 		-- agg >0 && distinct on (symbol) -> example case
+					sum(iserror_adjusted_close_is_notpositive) over (w_s) 		as iserror_adjusted_close_is_notpositive_agg, 		-- agg >0 && distinct on (symbol) -> example case
+					sum(iserror_adjusted_close_is_null) over (w_s) 			as iserror_adjusted_close_is_null_agg, 			-- agg >0 && distinct on (symbol) -> example case
+					sum(iserror_volume_is_null) over (w_s) 				as iserror_volume_is_null_agg, 				-- agg >0 && distinct on (symbol) -> example case
+					row_number() over (w_s order by dev_adjusted_close_perc_change_wom desc) 	as iserror_adjusted_close_perc_change_dev_wom_rn, 	-- agg >0 && rn=1 -> max case
+					row_number() over (w_s order by dev_volume_dif desc) 				as iserror_volume_dif_dev_rn 				-- agg >0 && rn=1 -> max case
+				from tickers_checks
+				window w_s as (partition by symbol)
+			),
+		tickers_checks_verbose_union as
+			(
+				(
+					select -- symbols that was used as market will give 0 here and will not trigger (until allowable sigma > 0)
+						table_name||'__adjusted_close_perc_change_dev_wom__'||symbol as id,
+						symbol, 
+						table_name||'__adjusted_close_perc_change_dev_wom' as code,
+						'daily' as "period",
+						'Tickers '||symbol||' in table '||table_name||' has '||iserror_adjusted_close_perc_change_dev_wom_agg||' rows with dev_adjusted_close_perc_change_wom exceeded allowed stddev='||allowable_sigma_dev_adjclose_percchange*stddev_adjusted_close_perc_change_wom||' from mu, while ticker''s (mu,stddev)=('||mean_adjusted_close_perc_change_wom||','||stddev_adjusted_close_perc_change_wom||'), max_dev='||dev_adjusted_close_perc_change_wom||', %of exceeding above stddev '||(dev_adjusted_close_perc_change_wom-stddev_adjusted_close_perc_change_wom)/(1e-30+stddev_adjusted_close_perc_change_wom)*100||'%. Example at '||dt as message,
+						now() as updated_at
+					from tickers_checks_agg
+					where 	iserror_adjusted_close_perc_change_dev_wom_agg > 0
+					and 	iserror_adjusted_close_perc_change_dev_wom_rn = 1 -- agg >0 && rn=1 -> max case
+				)
+				union all
+				(
+					select 
+						table_name||'__volume_dif_dev__'||symbol as id,
+						symbol, 
+						table_name||'__volume_dif_dev' as code,
+						'daily' as "period",
+						'Tickers '||symbol||' in table '||table_name||' has '||iserror_volume_dif_dev_agg||' rows with dev_volume_dif exceeded allowed stddev='||allowable_sigma_dev_volume_dif*stddev_volume_dif||' from mu, while ticker''s (mu,stddev)=('||mean_volume_dif||','||stddev_volume_dif||'), max_dev='||dev_volume_dif||', %of exceeding above stddev '||(dev_volume_dif-stddev_volume_dif)/(1e-30+stddev_volume_dif)*100||'%. Example at '||dt as message,
+						now() as updated_at
+					from tickers_checks_agg
+					where 	iserror_volume_dif_dev_agg > 0
+					and 	iserror_volume_dif_dev_rn = 1 -- agg >0 && rn=1 -> max case
+				)
+				union all
+				(
+					select distinct on (symbol) -- agg >0 && distinct on (symbol) -> example case
+						table_name||'__adjusted_close_twice_same__'||symbol as id,
+						symbol, 
+						table_name||'__adjusted_close_twice_same' as code,
+						'daily' as "period",
+						'Tickers '||symbol||' in table '||table_name||' has '||iserror_adjusted_close_twice_same_agg||' pairs of consecutive rows with same price. Example at '||dt as message,
+						now() as updated_at
+					from tickers_checks_agg 
+					where iserror_adjusted_close_twice_same_agg > 0
+				)
+				union all
+				(
+					select distinct on (symbol) -- agg >0 && distinct on (symbol) -> example case
+						table_name||'__adjusted_close_is_notpositive__'||symbol as id,
+						symbol, 
+						table_name||'__adjusted_close_is_notpositive' as code,
+						'daily' as "period",
+						'Tickers '||symbol||' in table '||table_name||' has '||iserror_adjusted_close_is_notpositive_agg||' rows with adjusted_close not positive values (<=0). Example at '||dt as message,
+						now() as updated_at
+					from tickers_checks_agg 
+					where iserror_adjusted_close_is_notpositive_agg > 0
+				)
+				union all
+				(
+					select distinct on (symbol) -- agg >0 && distinct on (symbol) -> example case
+						table_name||'__adjusted_close_is_null__'||symbol as id,
+						symbol, 
+						table_name|| '__adjusted_close_is_null' as code,
+						'daily' as "period",
+						'Tickers '||symbol||' in table '||table_name||' has '||iserror_adjusted_close_is_null_agg||' rows with adjusted_close = NULL values. Example at '||dt as message,
+						now() as updated_at
+					from tickers_checks_agg 
+					where iserror_adjusted_close_is_null_agg > 0
+				)
+				union all
+				(
+					select distinct on (symbol) -- agg >0 && distinct on (symbol) -> example case
+						table_name||'__volume_is_null__'||symbol as id,
+						symbol, 
+						table_name|| '__volume_is_null' as code,
+						'daily' as "period",
+						'Tickers '||symbol||' in table '||table_name||' has '||iserror_volume_is_null_agg||' rows with volume = NULL values. Example at '||dt as message,
+						now() as updated_at
+					from tickers_checks_agg 
+					where iserror_volume_is_null_agg > 0
+				)
+			)
+		select
+			id::varchar,
+			symbol,
+			code::varchar,
+			"period"::varchar,
+			message::varchar,
+			updated_at
+		from tickers_checks_verbose_union
+	)
+
+union all
+
+    -- public_*.historical_prices prices checks
+	(
+		with
+		check_params(		table_name, 				dt_interval, 
+					depth_stddev, 				depth_check, -- depth_stddev >= depth_check !!
+					allowable_sigma_dev_adjclose_percchange, 	allowable_sigma_dev_volume_dif, 
+					symbol_asmarket_crypto, 		symbol_asmarket_other) as
+			(
+				values 	('public_*.historical_prices', 	interval '1 day', 
+					interval '5 year', 			interval '5 year', 
+					5., 					10., 
+					'BTC.CC', 				'SPY')
+			),
+		
+		intrpl_dt_now_wrt_interval as -- generating time frames
+			(	-- now()='2022-06-22 15:15:14' with dt_interval='15 minutes'::interval will give: '2022-06-22 15:15:00' (it drops last not full frame)
+				select 	(to_timestamp(
+							(extract(epoch from now()::timestamp)::int / extract(epoch from cp.dt_interval)::int
+							) * extract(epoch from cp.dt_interval)::int
+						) AT TIME ZONE 'UTC' --to cancel out TZ in to_timestamp(0)='1970-01-01 00:00:00+TZ' (will be shifted by 3 hrs if TZ was +3, ie '1970-01-01 03:00:00+03')
+					)::timestamp as value
+				from check_params cp
+			),
+		
+		intrpl_symbol_asmarket_dt as 
+			(
+				select 	unnest(array[cp.symbol_asmarket_other, cp.symbol_asmarket_crypto]) as intrpl_symbol_asmarket,
+					d.dt::timestamp
+				from check_params cp
+				left join intrpl_dt_now_wrt_interval on true
+				cross join 
+					generate_series(intrpl_dt_now_wrt_interval.value - cp.depth_stddev, 
+							intrpl_dt_now_wrt_interval.value,
+							cp.dt_interval) as d(dt)
+			),
+			
+		/* 
+		 * for cancel natural market price movements in measuring ticker anomaly price movements by "returns" (percentage price change d2d)
+		 * we need to first subtract market returns from ticker returns (and only after that do some stat measurements by stdev of returns)
+		 * so we need to guarantee that market(target) price will be presented in any dt that can occur in any ticker dt 
+		 * and if we haven't row for market price when the ticker has - that mean we lost the market price data row 
+		 * so we need to guarantee some reasonable intermediate value. The linear interpolation trick is all about it.
+		 */
+		intrpl_symbol_asmarket_dt_prices as 
+			(
+				select 	d.intrpl_symbol_asmarket,
+					d.dt, 
+					--t.adjusted_close as adjusted_close_raw, --have left it here if anyone wants to check
+					coalesce(t.adjusted_close, 
+						linear_interpolate(
+							extract(epoch from d.dt),
+							LAST_VALUE_IGNORENULLS(case when t.adjusted_close is not null then extract(epoch from d.dt) else null end) over (lookback),
+							LAST_VALUE_IGNORENULLS(t.adjusted_close) over (lookback),
+							LAST_VALUE_IGNORENULLS(case when t.adjusted_close is not null then extract(epoch from d.dt) else null end) over (lookforward),
+							LAST_VALUE_IGNORENULLS(t.adjusted_close) over (lookforward)
+							),
+						LAST_VALUE_IGNORENULLS(t.adjusted_close) over (lookforward),
+						LAST_VALUE_IGNORENULLS(t.adjusted_close) over (lookback),
+						0) as intrpl_symbol_asmarket_adjusted_close
+				from intrpl_symbol_asmarket_dt as d
+				left join 
+					(
+						select 	code as intrpl_symbol_asmarket,
+							"date"::timestamp as dt,
+							adjusted_close
+						from {{ ref('historical_prices') }} ehp
+						join check_params cp on true
+						where code = any(array[cp.symbol_asmarket_other, cp.symbol_asmarket_crypto])
+					) as t using(intrpl_symbol_asmarket, dt)
+				window
+					lookback as (partition by d.intrpl_symbol_asmarket order by d.dt asc),
+					lookforward as (partition by d.intrpl_symbol_asmarket order by d.dt desc)
+			),
+		
+		tickers_data as
+			(
+				select 
+					code 										as symbol, 
+					"date"::timestamp 								as dt,
+					adjusted_close,
+					volume,
+					case 	when t."type" = 'crypto' then cp.symbol_asmarket_crypto 
+						else cp.symbol_asmarket_other end					as intrpl_symbol_asmarket
+				from {{ ref('historical_prices') }} ehp
+				join {{ ref('tickers') }} t on t.symbol = ehp.code -- we are interested in all tickers that are available in the app, so tickers table
+				left join check_params cp on true 
+				where "date"::timestamp >= now()::timestamp - cp.depth_stddev
+			),
+		tickers_lag as
+			(
+				select 
+					t.*, -- symbol, dt, adjusted_close, volume, intrpl_symbol_asmarket
+					lag(t.adjusted_close,1,t.adjusted_close) over (partition by t.symbol order by t.dt asc) 	as adjusted_close_pre,
+					lag(t.volume,1,t.volume) over (partition by t.symbol order by t.dt asc) 			as volume_pre,
+					sam.intrpl_symbol_asmarket_adjusted_close,
+					lag(sam.intrpl_symbol_asmarket_adjusted_close,1,sam.intrpl_symbol_asmarket_adjusted_close) over (partition by t.symbol order by t.dt asc) 	as intrpl_symbol_asmarket_adjusted_close_pre
+				from tickers_data t
+				join intrpl_symbol_asmarket_dt_prices sam using (intrpl_symbol_asmarket, dt)
+			),
+		tickers_difs as
+			(
+				select
+					*,
+					adjusted_close - adjusted_close_pre 		as adjusted_close_dif,
+					(adjusted_close - adjusted_close_pre)
+						/(1e-30 + abs(adjusted_close_pre)) 	as adjusted_close_perc_change,
+					volume - volume_pre 				as volume_dif,
+					intrpl_symbol_asmarket_adjusted_close - intrpl_symbol_asmarket_adjusted_close_pre 	as intrpl_symbol_asmarket_adjusted_close_dif,
+					(intrpl_symbol_asmarket_adjusted_close - intrpl_symbol_asmarket_adjusted_close_pre)
+						/(1e-30 + abs(intrpl_symbol_asmarket_adjusted_close_pre))			as intrpl_symbol_asmarket_adjusted_close_perc_change,
+					(adjusted_close - adjusted_close_pre)
+						/(1e-30 + abs(adjusted_close_pre))
+					- (intrpl_symbol_asmarket_adjusted_close - intrpl_symbol_asmarket_adjusted_close_pre)
+						/(1e-30 + abs(intrpl_symbol_asmarket_adjusted_close_pre))			as adjusted_close_perc_change_wom
+				from tickers_lag 	
+			),
+		tickers_stddevs_means_devs as
+			(
+				select 
+					*,
+					stddev_pop(adjusted_close_perc_change_wom) over (w_s) 	as stddev_adjusted_close_perc_change_wom,
+					avg(adjusted_close_perc_change_wom) over (w_s) 		as mean_adjusted_close_perc_change_wom,
+					abs(adjusted_close_perc_change_wom 
+						- avg(adjusted_close_perc_change_wom) over (w_s)) 	as dev_adjusted_close_perc_change_wom,
+					stddev_pop(volume_dif) over (w_s) 			as stddev_volume_dif,
+					avg(volume_dif) over (w_s) 				as mean_volume_dif,
+					abs(volume_dif 
+						- avg(volume_dif) over (w_s)) 			as dev_volume_dif
+				from tickers_difs
+				window w_s as (partition by symbol)
+			),
+		tickers_checks as 
+			(
+				select 
+					*,
+					case when dev_adjusted_close_perc_change_wom > 
+						stddev_adjusted_close_perc_change_wom * cp.allowable_sigma_dev_adjclose_percchange
+												then 1 else 0 end 	as iserror_adjusted_close_perc_change_dev_wom,
+					case when dev_volume_dif > 
+						stddev_volume_dif * cp.allowable_sigma_dev_volume_dif
+												then 1 else 0 end 	as iserror_volume_dif_dev,
+					case when adjusted_close = adjusted_close_pre 		then 1 else 0 end 	as iserror_adjusted_close_twice_same,
+					case when adjusted_close <= 0 				then 1 else 0 end 	as iserror_adjusted_close_is_notpositive,
+					case when adjusted_close is null 			then 1 else 0 end 	as iserror_adjusted_close_is_null,
+					case when volume is null 				then 1 else 0 end 	as iserror_volume_is_null
+				from tickers_stddevs_means_devs
+				left join check_params cp on true
+				where dt >= now()::timestamp - cp.depth_check
+			),
+		tickers_checks_agg as -- I have left all the fields here, so someone could see them closer (copy and past all code up to here and see the output)
+			(
+				select 
+					*, 
+					sum(iserror_adjusted_close_perc_change_dev_wom) over (w_s) 	as iserror_adjusted_close_perc_change_dev_wom_agg, 	-- agg >0 && distinct on (symbol) -> example case
+					sum(iserror_volume_dif_dev) over (w_s) 				as iserror_volume_dif_dev_agg, 				-- agg >0 && distinct on (symbol) -> example case
+					sum(iserror_adjusted_close_twice_same) over (w_s) 		as iserror_adjusted_close_twice_same_agg, 		-- agg >0 && distinct on (symbol) -> example case
+					sum(iserror_adjusted_close_is_notpositive) over (w_s) 		as iserror_adjusted_close_is_notpositive_agg, 		-- agg >0 && distinct on (symbol) -> example case
+					sum(iserror_adjusted_close_is_null) over (w_s) 			as iserror_adjusted_close_is_null_agg, 			-- agg >0 && distinct on (symbol) -> example case
+					sum(iserror_volume_is_null) over (w_s) 				as iserror_volume_is_null_agg, 				-- agg >0 && distinct on (symbol) -> example case
+					row_number() over (w_s order by dev_adjusted_close_perc_change_wom desc) 	as iserror_adjusted_close_perc_change_dev_wom_rn, 	-- agg >0 && rn=1 -> max case
+					row_number() over (w_s order by dev_volume_dif desc) 				as iserror_volume_dif_dev_rn 				-- agg >0 && rn=1 -> max case
+				from tickers_checks
+				window w_s as (partition by symbol)
+			),
+		tickers_checks_verbose_union as
+			(
+				(
+					select -- symbols that was used as market will give 0 here and will not trigger (until allowable sigma > 0)
+						table_name||'__adjusted_close_perc_change_dev_wom__'||symbol as id,
+						symbol, 
+						table_name||'__adjusted_close_perc_change_dev_wom' as code,
+						'daily' as "period",
+						'Tickers '||symbol||' in table '||table_name||' has '||iserror_adjusted_close_perc_change_dev_wom_agg||' rows with dev_adjusted_close_perc_change_wom exceeded allowed stddev='||allowable_sigma_dev_adjclose_percchange*stddev_adjusted_close_perc_change_wom||' from mu, while ticker''s (mu,stddev)=('||mean_adjusted_close_perc_change_wom||','||stddev_adjusted_close_perc_change_wom||'), max_dev='||dev_adjusted_close_perc_change_wom||', %of exceeding above stddev '||(dev_adjusted_close_perc_change_wom-stddev_adjusted_close_perc_change_wom)/(1e-30+stddev_adjusted_close_perc_change_wom)*100||'%. Example at '||dt as message,
+						now() as updated_at
+					from tickers_checks_agg
+					where 	iserror_adjusted_close_perc_change_dev_wom_agg > 0
+					and 	iserror_adjusted_close_perc_change_dev_wom_rn = 1 -- agg >0 && rn=1 -> max case
+				)
+				union all
+				(
+					select 
+						table_name||'__volume_dif_dev__'||symbol as id,
+						symbol, 
+						table_name||'__volume_dif_dev' as code,
+						'daily' as "period",
+						'Tickers '||symbol||' in table '||table_name||' has '||iserror_volume_dif_dev_agg||' rows with dev_volume_dif exceeded allowed stddev='||allowable_sigma_dev_volume_dif*stddev_volume_dif||' from mu, while ticker''s (mu,stddev)=('||mean_volume_dif||','||stddev_volume_dif||'), max_dev='||dev_volume_dif||', %of exceeding above stddev '||(dev_volume_dif-stddev_volume_dif)/(1e-30+stddev_volume_dif)*100||'%. Example at '||dt as message,
+						now() as updated_at
+					from tickers_checks_agg
+					where 	iserror_volume_dif_dev_agg > 0
+					and 	iserror_volume_dif_dev_rn = 1 -- agg >0 && rn=1 -> max case
+				)
+				union all
+				(
+					select distinct on (symbol) -- agg >0 && distinct on (symbol) -> example case
+						table_name||'__adjusted_close_twice_same__'||symbol as id,
+						symbol, 
+						table_name||'__adjusted_close_twice_same' as code,
+						'daily' as "period",
+						'Tickers '||symbol||' in table '||table_name||' has '||iserror_adjusted_close_twice_same_agg||' pairs of consecutive rows with same price. Example at '||dt as message,
+						now() as updated_at
+					from tickers_checks_agg 
+					where iserror_adjusted_close_twice_same_agg > 0
+				)
+				union all
+				(
+					select distinct on (symbol) -- agg >0 && distinct on (symbol) -> example case
+						table_name||'__adjusted_close_is_notpositive__'||symbol as id,
+						symbol, 
+						table_name||'__adjusted_close_is_notpositive' as code,
+						'daily' as "period",
+						'Tickers '||symbol||' in table '||table_name||' has '||iserror_adjusted_close_is_notpositive_agg||' rows with adjusted_close not positive values (<=0). Example at '||dt as message,
+						now() as updated_at
+					from tickers_checks_agg 
+					where iserror_adjusted_close_is_notpositive_agg > 0
+				)
+				union all
+				(
+					select distinct on (symbol) -- agg >0 && distinct on (symbol) -> example case
+						table_name||'__adjusted_close_is_null__'||symbol as id,
+						symbol, 
+						table_name|| '__adjusted_close_is_null' as code,
+						'daily' as "period",
+						'Tickers '||symbol||' in table '||table_name||' has '||iserror_adjusted_close_is_null_agg||' rows with adjusted_close = NULL values. Example at '||dt as message,
+						now() as updated_at
+					from tickers_checks_agg 
+					where iserror_adjusted_close_is_null_agg > 0
+				)
+				union all
+				(
+					select distinct on (symbol) -- agg >0 && distinct on (symbol) -> example case
+						table_name||'__volume_is_null__'||symbol as id,
+						symbol, 
+						table_name|| '__volume_is_null' as code,
+						'daily' as "period",
+						'Tickers '||symbol||' in table '||table_name||' has '||iserror_volume_is_null_agg||' rows with volume = NULL values. Example at '||dt as message,
+						now() as updated_at
+					from tickers_checks_agg 
+					where iserror_volume_is_null_agg > 0
+				)
+			)
+		select
+			id::varchar,
+			symbol,
+			code::varchar,
+			"period"::varchar,
+			message::varchar,
+			updated_at
+		from tickers_checks_verbose_union
+	)
+
+{% endif %}

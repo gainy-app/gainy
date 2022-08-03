@@ -12,7 +12,8 @@ SELECT CASE -- calculation by erf-function expansion to series (error= +/-2e-7, 
 $$ LANGUAGE SQL IMMUTABLE
                 STRICT;
 
--- Create a function that always returns the last non-NULL value:
+
+-- Create a function that always returns the LAST non-NULL value:
 CREATE OR REPLACE FUNCTION last_agg(anyelement, anyelement)
     RETURNS anyelement
     LANGUAGE sql
@@ -28,7 +29,26 @@ CREATE OR REPLACE AGGREGATE LAST_VALUE_IGNORENULLS
 		BASETYPE = anyelement,
 		STYPE    = anyelement
 	);
-    
+
+
+-- Create a function that always returns the FIRST non-NULL value:
+CREATE OR REPLACE FUNCTION first_agg(anyelement, anyelement)
+    RETURNS anyelement
+    LANGUAGE sql
+    IMMUTABLE STRICT PARALLEL SAFE AS
+$$
+SELECT $1;
+$$;
+
+-- Then wrap an aggregate around it:
+CREATE OR REPLACE AGGREGATE FIRST_VALUE_IGNORENULLS
+	(
+		SFUNC    = first_agg,
+		BASETYPE = anyelement,
+		STYPE    = anyelement
+	);
+
+
 -- Linear Interpolation function
 CREATE OR REPLACE FUNCTION linear_interpolate(
     x_i DOUBLE PRECISION,
