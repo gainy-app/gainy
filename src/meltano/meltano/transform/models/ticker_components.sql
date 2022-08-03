@@ -55,7 +55,13 @@ select expanded.code                                           as symbol,
        expanded.version,
        expanded.updated_at
 from expanded
+    join {{ ref('tickers') }} on tickers.symbol = (expanded.value ->> 'Code')
 {% if is_incremental() %}
     left join old_version using (code)
-where expanded.version != old_version.version or old_version is null
+{% endif %}
+
+where tickers.name  = (expanded.value ->> 'Name')
+
+{% if is_incremental() %}
+  and expanded.version != old_version.version or old_version is null
 {% endif %}
