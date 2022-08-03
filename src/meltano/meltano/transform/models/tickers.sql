@@ -45,7 +45,6 @@ select base_tickers.symbol,
 from {{ ref('base_tickers') }}
          left join latest_price using (symbol)
          left join latest_crypto_price using (symbol)
-where base_tickers.description is not null
-  and length(base_tickers.description) >= 5
+where ((base_tickers.description is not null and length(base_tickers.description) >= 5) or type = 'index')
   and (latest_price.symbol is not null or latest_crypto_price.symbol is not null)
-  and type in ('fund', 'etf', 'mutual fund', 'preferred stock', 'common stock', 'crypto')
+  and type in ('fund', 'etf', 'mutual fund', 'preferred stock', 'common stock', 'crypto', 'index')
