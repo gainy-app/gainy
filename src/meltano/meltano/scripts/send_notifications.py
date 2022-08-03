@@ -127,7 +127,7 @@ def check_malfunctioning_notifications(notifications_to_send):
             targets = emails
             target_type = 'email'
         elif segments:
-            targets = emails
+            targets = segments
             target_type = 'segments'
         else:
             logger.error("Empty target for notification %s", notification)

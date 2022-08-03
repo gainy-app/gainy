@@ -140,7 +140,7 @@ class PricesListener(AbstractPriceListener):
                     await stream_client.subscribe_stock_minute_aggregates(
                         symbols_normalized, self.handle_message)
                 elif self.cluster == StreamCluster.OPTIONS:
-                    _prefix = 'AM.'
+                    _prefix = 'AM.O:'
                     symbols_normalized = ','.join([
                         _prefix + self.transform_symbol(i)
                         for i in self.symbols
