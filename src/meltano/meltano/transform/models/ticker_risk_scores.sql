@@ -72,6 +72,16 @@ ticker_risk_score_common_stocks as
               )
             select * from ticker_risk
          ),
+     complex_ticker_categories as
+         (
+             select ticker_components.symbol,
+                    sum(ticker_risk_score_common_stocks.risk_score * component_weight) / sum(component_weight) as risk_score
+             from {{ ref('ticker_components') }}
+                      join ticker_risk_score_common_stocks
+                           on ticker_risk_score_common_stocks.symbol = ticker_components.component_symbol
+             group by ticker_components.symbol
+             having sum(component_weight) > 0
+         ),
          
 
 
@@ -81,13 +91,10 @@ ticker_risk_score_common_stocks as
 --presave it as a table plz, instead of this ugly CTE
      stocks_list_russel3000 as
          (
-             select symbol::varchar
-             from (
-                      select (json_each((etf_data -> 'Holdings')::json)).value ->> 'Code' as symbol
-                      from {{ source('eod', 'eod_fundamentals') }}
-                      where code = 'IWV'
-                  ) t
-                      join common_stocks using (symbol)
+             select ticker_components.component_symbol as symbol
+             from {{ ref('ticker_components')}}
+                 join common_stocks on common_stocks.symbol = ticker_components.component_symbol
+             where ticker_components.symbol = 'IWV'
          ),
 
 
@@ -196,3 +203,5 @@ ticker_risk_score_common_stocks as
 select symbol, risk_score from crypto_riskscore_bynearestneighbors
 union all
 select symbol, risk_score from ticker_risk_score_common_stocks
+union all
+select symbol, risk_score from complex_ticker_categories
