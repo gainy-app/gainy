@@ -42,6 +42,10 @@ from {{ ref('tickers') }} t
          left join {{ source('gainy', 'ticker_search_alternative_names') }}
                    on ticker_search_alternative_names.symbol = t.symbol
                        and (select max(_sdc_batched_at) from {{ source('gainy', 'ticker_search_alternative_names') }}) - ticker_search_alternative_names._sdc_batched_at < interval '1 minute'
+where true
 {% if not var('search_crypto_enabled') %}
-where t.type != 'crypto'
+  and t.type != 'crypto'
+{% endif %}
+{% if not var('search_index_enabled') %}
+  and t.type != 'index'
 {% endif %}

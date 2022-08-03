@@ -26,3 +26,4 @@ vars:
   portfolio_usd_enabled: true
   portfolio_crypto_enabled: true
   search_crypto_enabled: false
+  search_index_enabled: false
