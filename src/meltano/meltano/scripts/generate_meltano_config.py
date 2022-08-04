@@ -21,6 +21,51 @@ def _split_schedule(tap: str, tap_canonical: str, template, env, split_id,
     return new_schedule
 
 
+def get_eod_full_refresh_symbols():
+    full_refresh_symbols = set()
+    try:
+        with db_connect() as db_conn:
+            with db_conn.cursor() as cursor:
+                cursor.execute(
+                    "select distinct code from raw_data.eod_historical_prices where adjusted_close < 0"
+                )
+                symbols = map(itemgetter(0), cursor.fetchall())
+                full_refresh_symbols.update(symbols)
+
+                cursor.execute("""
+                    with latest_split as
+                             (
+                                 SELECT code,
+                                        max(date) as date
+                                 from raw_data.eod_historical_prices
+                                 where adjusted_close > close
+                                    or adjusted_close < close
+                                 group by code
+                             ),
+                         latest_complex_ticker_split as
+                             (
+                                 SELECT ticker_components.symbol,
+                                        max(date) as date
+                                 from ticker_components
+                                          join latest_split on ticker_components.component_symbol = latest_split.code
+                                 group by ticker_components.symbol
+                             )
+                    select distinct symbol
+                    from latest_complex_ticker_split
+                             join raw_data.eod_historical_prices
+                                  on eod_historical_prices.code = latest_complex_ticker_split.symbol
+                                      and eod_historical_prices.date < latest_complex_ticker_split.date
+                                      and eod_historical_prices.date > (latest_complex_ticker_split.date::date - interval '1 month')::varchar
+                    where _sdc_extracted_at < latest_complex_ticker_split.date::date
+                """)
+                symbols = map(itemgetter(0), cursor.fetchall())
+                full_refresh_symbols.update(symbols)
+    except psycopg2.errors.UndefinedTable:
+        pass
+
+    return full_refresh_symbols
+
+
 def _generate_schedules(env):
     schedules = config['schedules']
     for tap in [
@@ -60,20 +105,6 @@ def _generate_schedules(env):
     except psycopg2.errors.UndefinedTable:
         option_contract_names = []
 
-    try:
-        with db_connect() as db_conn:
-            with db_conn.cursor() as cursor:
-                cursor.execute("""
-                    select code
-                    from raw_data.eod_historical_prices
-                    where adjusted_close < 0
-                    group by code
-                    """)
-                full_refresh_symbols = list(
-                    map(itemgetter(0), cursor.fetchall()))
-    except psycopg2.errors.UndefinedTable:
-        full_refresh_symbols = []
-
     for schedule in schedules:
         if schedule['name'].startswith('polygon-to-postgres'):
             if "env" not in schedule:
@@ -86,7 +117,7 @@ def _generate_schedules(env):
                 schedule["env"] = {}
             schedule['env'][
                 'TAP_EODHISTORICALDATA_FULL_REFRESH_SYMBOLS'] = ",".join(
-                    full_refresh_symbols)
+                    get_eod_full_refresh_symbols())
 
     return schedules
 
