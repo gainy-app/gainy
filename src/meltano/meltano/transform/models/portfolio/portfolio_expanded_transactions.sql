@@ -165,7 +165,7 @@ with robinhood_options as (
                                                             t.rolling_quantity))
                                                   over (partition by security_id, account_id order by date rows between unbounded preceding and 1 preceding),
                                                   0)
-                                     ) as sell_quantity,
+                                     )::numeric as sell_quantity,
                                  original_ticker_symbol,
                                  security_id,
                                  profile_id,
@@ -279,7 +279,7 @@ with robinhood_options as (
                                          profile_holdings_normalized.profile_id,
                                          profile_holdings_normalized.account_id,
                                          profile_first_transaction_date,
-                                         profile_holdings_normalized.quantity -
+                                         profile_holdings_normalized.quantity::numeric -
                                          coalesce(expanded_transactions.rolling_quantity, 0) as diff
                                    from {{ ref('profile_holdings_normalized') }}
                                             join {{ ref('portfolio_securities_normalized') }}
