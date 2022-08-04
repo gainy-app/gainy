@@ -1936,7 +1936,7 @@ models:
       - name: quantity_norm_for_valuation
         tests:
           - type:
-              type: 'double precision'
+              type: 'numeric'
       - name: updated_at
         tests:
           - type:

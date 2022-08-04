@@ -48,21 +48,6 @@ class PortfolioChartService:
         if not rows:
             return []
 
-        static_value = self._get_chart_static_value(db_conn, profile_id,
-                                                    filter)
-        if static_value:
-            for i in rows:
-                if i['open'] is not None:
-                    i['open'] += static_value
-                if i['high'] is not None:
-                    i['high'] += static_value
-                if i['low'] is not None:
-                    i['low'] += static_value
-                if i['close'] is not None:
-                    i['close'] += static_value
-                if i['adjusted_close'] is not None:
-                    i['adjusted_close'] += static_value
-
         if max(row['adjusted_close'] for row in rows) < 1e-3:
             return []
 
@@ -105,18 +90,16 @@ class PortfolioChartService:
                                    db_conn)
 
         if not data:
-            return {}
-        data = data[0]
+            return {
+                'prev_close_1d': None,
+                'prev_close_1w': None,
+                'prev_close_1m': None,
+                'prev_close_3m': None,
+                'prev_close_1y': None,
+                'prev_close_5y': None,
+            }
 
-        static_value = self._get_chart_static_value(db_conn, profile_id,
-                                                    filter)
-        if static_value:
-            for k in data:
-                if data[k] is None:
-                    continue
-                data[k] += static_value
-
-        return data
+        return data[0]
 
     def get_portfolio_piechart(self, db_conn, profile_id, filter):
         with open(os.path.join(SCRIPT_DIR,
@@ -178,40 +161,6 @@ class PortfolioChartService:
 
             prev_row = row
             yield row
-
-    def _get_chart_static_value(self, db_conn, profile_id, filter):
-        with open(os.path.join(SCRIPT_DIR,
-                               "../sql/portfolio_chart_static.sql")) as f:
-            query = f.read()
-
-        params = {}
-        where_clause = []
-        join_clause = []
-
-        self._filter_query_by_profile_id(params, where_clause, join_clause,
-                                         profile_id)
-        self._filter_query_by_account_ids(params, where_clause, join_clause,
-                                          filter)
-        self._filter_query_by_institution_ids(params, where_clause,
-                                              join_clause, filter)
-        self._filter_query_by_access_token_ids(params, where_clause,
-                                               join_clause, filter)
-        self._filter_query_by_interest_ids(params, where_clause, join_clause,
-                                           filter)
-        self._filter_query_by_category_ids(params, where_clause, join_clause,
-                                           filter)
-        self._filter_query_by_security_types(params, where_clause, join_clause,
-                                             filter)
-        self._filter_query_by_ltt_only(params, where_clause, join_clause,
-                                       filter)
-
-        static_data = self._execute_query(params, where_clause, join_clause,
-                                          query, db_conn)
-
-        if not len(static_data) or static_data[0]['value'] is None:
-            return 0
-
-        return float(static_data[0]['value'])
 
     def _should_return_empty_result(self, filter):
         if filter.periods is not None and not len(filter.periods):

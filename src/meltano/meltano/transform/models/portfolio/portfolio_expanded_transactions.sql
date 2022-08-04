@@ -280,7 +280,7 @@ with robinhood_options as (
                                          profile_holdings_normalized.account_id,
                                          profile_first_transaction_date,
                                          profile_holdings_normalized.quantity -
-                                         coalesce(expanded_transactions.rolling_quantity, 0) as diff
+                                         coalesce(expanded_transactions.rolling_quantity, 0)::numeric as diff
                                    from {{ ref('profile_holdings_normalized') }}
                                             join {{ ref('portfolio_securities_normalized') }}
                                                  on portfolio_securities_normalized.id = profile_holdings_normalized.security_id
