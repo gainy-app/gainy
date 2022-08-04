@@ -340,10 +340,10 @@ resource "datadog_monitor" "meltano_dag_run_duration" {
   type    = "query alert"
   message = "Airflow Meltano Dag Run Duration triggered. Notify: @slack-${var.slack_channel_name} <!channel>"
 
-  query = "avg(last_1h):outliers(sum:app.latest_dag_run_duration_minutes{postgres_env:production} by {dag_id}.as_count(), 'DBSCAN', 3) > 0"
+  query = "pct_change(avg(last_1h),last_1h):avg:app.latest_dag_run_duration_minutes{*} by {dag_id} > 100"
 
   monitor_thresholds {
-    critical = "0"
+    critical = "100"
   }
 
   require_full_window = false
@@ -480,10 +480,10 @@ resource "datadog_monitor" "logs_count" {
   type    = "query alert"
   message = "Logs count triggered. Notify: @slack-${var.slack_channel_name} <!channel>"
 
-  query = "sum(last_1h):outliers(sum:aws.logs.forwarded_log_events{*} by {loggroupname}.as_count(), 'DBSCAN', 3) > 0"
+  query = "pct_change(avg(last_1h),last_1h):sum:aws.logs.forwarded_log_events{*} by {loggroupname} > 100"
 
   monitor_thresholds {
-    critical = 0
+    critical = 100
   }
 
   require_full_window = false
