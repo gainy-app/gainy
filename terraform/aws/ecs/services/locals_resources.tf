@@ -13,7 +13,7 @@ locals {
     local.meltano_scheduler_cpu_credits,
   ]) / 1024) * 1024
 
-  upstream_pool_size                  = 5
+  upstream_pool_size                  = 4
   eodhistoricaldata_jobs_count        = 3
   eodhistoricaldata_prices_jobs_count = 1
   coingecko_jobs_count                = 1
