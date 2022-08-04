@@ -100,47 +100,6 @@ resource "datadog_monitor" "hasura_alb_5xx" {
 
 #################################### ECS ####################################
 
-resource "datadog_monitor" "ecs_cpu" {
-  name    = "ECS CPU Utilization"
-  type    = "metric alert"
-  message = "ECS CPU Utilization Monitor triggered. Notify: @slack-${var.slack_channel_name} <!channel>"
-
-  query = "avg(last_1h):avg:aws.ecs.service.cpuutilization{servicename:gainy-production} > 80"
-
-  monitor_thresholds {
-    warning  = 60
-    critical = 80
-  }
-
-  require_full_window = false
-  notify_no_data      = true
-  renotify_interval   = 60
-
-  tags = ["ecs"]
-}
-
-resource "datadog_monitor" "hasura_memory" {
-  name    = "ECS Memory Utilization"
-  type    = "metric alert"
-  message = "ECS Memory Utilization Monitor triggered. Notify: @slack-${var.slack_channel_name} <!channel>"
-  #  escalation_message = "Escalation message @pagerduty"
-
-  query = "avg(last_1h):avg:aws.ecs.service.memory_utilization{servicename:gainy-production} > 50"
-
-  monitor_thresholds {
-    warning_recovery  = 35
-    warning           = 40
-    critical_recovery = 45
-    critical          = 50
-  }
-
-  require_full_window = false
-  notify_no_data      = true
-  renotify_interval   = 60
-
-  tags = ["ecs"]
-}
-
 resource "datadog_monitor" "healthy_hosts" {
   name    = "ECS Healthy Hosts"
   type    = "metric alert"
@@ -340,10 +299,10 @@ resource "datadog_monitor" "meltano_dag_run_duration" {
   type    = "query alert"
   message = "Airflow Meltano Dag Run Duration triggered. Notify: @slack-${var.slack_channel_name} <!channel>"
 
-  query = "avg(last_1h):outliers(sum:app.latest_dag_run_duration_minutes{postgres_env:production} by {dag_id}.as_count(), 'DBSCAN', 3) > 0"
+  query = "pct_change(avg(last_1h),last_1h):avg:app.latest_dag_run_duration_minutes{*} by {dag_id} > 100"
 
   monitor_thresholds {
-    critical = "0"
+    critical = "100"
   }
 
   require_full_window = false
@@ -480,10 +439,10 @@ resource "datadog_monitor" "logs_count" {
   type    = "query alert"
   message = "Logs count triggered. Notify: @slack-${var.slack_channel_name} <!channel>"
 
-  query = "sum(last_1h):outliers(sum:aws.logs.forwarded_log_events{*} by {loggroupname}.as_count(), 'DBSCAN', 3) > 0"
+  query = "pct_change(avg(last_1h),last_1h):sum:aws.logs.forwarded_log_events{*} by {loggroupname} > 100"
 
   monitor_thresholds {
-    critical = 0
+    critical = 100
   }
 
   require_full_window = false
