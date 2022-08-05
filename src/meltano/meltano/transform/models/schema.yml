@@ -2052,6 +2052,61 @@ models:
           - type:
               type: 'integer'
 
+  - name: historical_intraday_prices
+    columns:
+      - name: symbol
+        tests:
+          - type:
+              type: 'character varying'
+      - name: date
+        tests:
+          - type:
+              type: 'timestamp without timezone'
+      - name: time
+        tests:
+          - type:
+              type: 'timestamp without timezone'
+      - name: time_3min
+        tests:
+          - type:
+              type: 'timestamp without timezone'
+      - name: time_15min
+        tests:
+          - type:
+              type: 'timestamp without timezone'
+      - name: open
+        tests:
+          - type:
+              type: 'double precision'
+      - name: high
+        tests:
+          - type:
+              type: 'double precision'
+      - name: low
+        tests:
+          - type:
+              type: 'double precision'
+      - name: close
+        tests:
+          - type:
+              type: 'double precision'
+      - name: volume
+        tests:
+          - type:
+              type: 'double precision'
+      - name: adjusted_close
+        tests:
+          - type:
+              type: 'double precision'
+      - name: updated_at
+        tests:
+          - type:
+              type: 'timestamp without timezone'
+      - name: id
+        tests:
+          - type:
+              type: 'text'
+
 exposures:
   - name: ticker_search_index
     type: application
