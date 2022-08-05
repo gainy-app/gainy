@@ -80,20 +80,20 @@ with
              select DISTINCT ON (
                  symbol,
                  time_3min
-                 ) symbol                                                                                                     as symbol,
-                   time_3min::timestamp                                                                                       as datetime,
-                   first_value(open::double precision)
-                   OVER (partition by symbol, time_3min order by time rows between current row and unbounded following)       as open,
-                   max(high::double precision)
-                   OVER (partition by symbol, time_3min rows between current row and unbounded following)                     as high,
-                   min(low::double precision)
-                   OVER (partition by symbol, time_3min rows between current row and unbounded following)                     as low,
-                   last_value(close::double precision)
-                   OVER (partition by symbol, time_3min order by time rows between current row and unbounded following)       as close,
-                   last_value(adjusted_close::double precision)
-                   OVER (partition by symbol, time_3min order by time rows between current row and unbounded following)       as adjusted_close,
-                   (sum(volume::numeric)
-                    OVER (partition by symbol, time_3min rows between current row and unbounded following))::double precision as volume,
+                 ) symbol                                                                                                              as symbol,
+                   time_3min::timestamp                                                                                                as datetime,
+                   first_value(open)
+                   OVER (partition by symbol, time_3min order by time, priority desc rows between current row and unbounded following) as open,
+                   max(high)
+                   OVER (partition by symbol, time_3min rows between current row and unbounded following)                              as high,
+                   min(low)
+                   OVER (partition by symbol, time_3min rows between current row and unbounded following)                              as low,
+                   last_value(close)
+                   OVER (partition by symbol, time_3min order by time, priority desc rows between current row and unbounded following) as close,
+                   last_value(adjusted_close)
+                   OVER (partition by symbol, time_3min order by time, priority desc rows between current row and unbounded following) as adjusted_close,
+                   (sum(volume)
+                    OVER (partition by symbol, time_3min rows between current row and unbounded following))::double precision          as volume,
                    updated_at
              from (
                       select symbol,

@@ -21,7 +21,7 @@ def _split_schedule(tap: str, tap_canonical: str, template, env, split_id,
     return new_schedule
 
 
-def get_eod_full_refresh_symbols():
+def get_eod_full_refresh_symbols() -> list:
     full_refresh_symbols = set()
     try:
         with db_connect() as db_conn:
@@ -63,7 +63,7 @@ def get_eod_full_refresh_symbols():
     except psycopg2.errors.UndefinedTable:
         pass
 
-    return full_refresh_symbols
+    return list(full_refresh_symbols)
 
 
 def _generate_schedules(env):
@@ -110,14 +110,14 @@ def _generate_schedules(env):
         if schedule['name'].startswith('polygon-to-postgres'):
             if "env" not in schedule:
                 schedule["env"] = {}
-            schedule['env']['TAP_POLYGON_OPTION_CONTRACT_NAMES'] = ",".join(
+            schedule['env']['TAP_POLYGON_OPTION_CONTRACT_NAMES'] = json.dumps(
                 option_contract_names)
 
         if schedule['extractor'].startswith('tap-eodhistoricaldata'):
             if "env" not in schedule:
                 schedule["env"] = {}
             schedule['env'][
-                'TAP_EODHISTORICALDATA_FULL_REFRESH_SYMBOLS'] = ",".join(
+                'TAP_EODHISTORICALDATA_FULL_REFRESH_SYMBOLS'] = json.dumps(
                     get_eod_full_refresh_symbols())
 
     return schedules
