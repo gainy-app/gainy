@@ -1275,7 +1275,7 @@ models:
       - name: transactions_updated_at
         tests:
           - type:
-              type: 'timestamp without time zone'
+              type: 'timestamp with time zone'
 
   - name: ticker_realtime_metrics
     columns:
@@ -2017,7 +2017,7 @@ models:
       - name: symbol
         tests:
           - type:
-              type: 'text'
+              type: 'character varying'
       - name: code
         tests:
           - type:
@@ -2033,7 +2033,7 @@ models:
       - name: updated_at
         tests:
           - type:
-              type: 'timestamp without timezone'
+              type: 'timestamp with time zone'
 
   - name: collection_tickers_weighted
     columns:
@@ -2091,7 +2091,7 @@ models:
       - name: updated_at
         tests:
           - type:
-              type: 'timestamp without timezone'
+              type: 'timestamp with time zone'
       - name: id
         tests:
           - type:
@@ -2110,19 +2110,19 @@ models:
       - name: date
         tests:
           - type:
-              type: 'timestamp without timezone'
+              type: 'date'
       - name: time
         tests:
           - type:
-              type: 'timestamp without timezone'
+              type: 'timestamp without time zone'
       - name: time_3min
         tests:
           - type:
-              type: 'timestamp without timezone'
+              type: 'timestamp without time zone'
       - name: time_15min
         tests:
           - type:
-              type: 'timestamp without timezone'
+              type: 'timestamp without time zone'
       - name: open
         tests:
           - type:
@@ -2150,7 +2150,7 @@ models:
       - name: updated_at
         tests:
           - type:
-              type: 'timestamp without timezone'
+              type: 'timestamp without time zone'
       - name: id
         tests:
           - type:
@@ -2169,7 +2169,7 @@ models:
       - name: datetime
         tests:
           - type:
-              type: 'timestamp without timezone'
+              type: 'timestamp without time zone'
       - name: open
         tests:
           - type:
@@ -2197,7 +2197,7 @@ models:
       - name: updated_at
         tests:
           - type:
-              type: 'timestamp without timezone'
+              type: 'timestamp without time zone'
 
   - name: historical_prices_aggregated_15min
     columns:
@@ -2212,7 +2212,7 @@ models:
       - name: datetime
         tests:
           - type:
-              type: 'timestamp without timezone'
+              type: 'timestamp without time zone'
       - name: open
         tests:
           - type:
@@ -2240,25 +2240,25 @@ models:
       - name: updated_at
         tests:
           - type:
-              type: 'timestamp without timezone'
+              type: 'timestamp without time zone'
 
   - name: deployment_metadata
     columns:
       - name: id
         tests:
           - type:
-              type: 'int'
+              type: 'integer'
       - name: last_activity_at
         tests:
           - type:
-              type: 'timestamp without timezone'
+              type: 'timestamp with time zone'
 
   - name: week_trading_sessions
     columns:
       - name: updated_at
         tests:
           - type:
-              type: 'timestamp without timezone'
+              type: 'timestamp with time zone'
       - name: id
         tests:
           - type:
@@ -2270,30 +2270,30 @@ models:
       - name: date
         tests:
           - type:
-              type: 'timestamp without timezone'
+              type: 'date'
       - name: index
         tests:
           - type:
-              type: 'int'
+              type: 'integer'
       - name: open_at
         tests:
           - type:
-              type: 'timestamp without timezone'
+              type: 'timestamp with time zone'
       - name: close_at
         tests:
           - type:
-              type: 'timestamp without timezone'
+              type: 'timestamp with time zone'
 
   - name: portfolio_securities_normalized
     columns:
       - name: id
         tests:
           - type:
-              type: 'text'
+              type: 'integer'
       - name: name
         tests:
           - type:
-              type: 'text'
+              type: 'character varying'
       - name: ticker_symbol
         tests:
           - type:
@@ -2305,7 +2305,7 @@ models:
       - name: type
         tests:
           - type:
-              type: 'text'
+              type: 'character varying'
 
 exposures:
   - name: ticker_search_index
