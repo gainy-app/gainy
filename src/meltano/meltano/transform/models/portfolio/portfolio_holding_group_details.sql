@@ -23,7 +23,7 @@ select concat(profile_holdings_normalized.profile_id, '_',
        min(market_capitalization)                                  as market_capitalization,
        min(next_earnings_date)                                     as next_earnings_date,
        sum(portfolio_holding_details.ltt_quantity_total)           as ltt_quantity_total,
-       now()::timestamp                                            as updated_at
+       now()                                                       as updated_at
 from {{ ref('portfolio_holding_details') }}
          join {{ ref('profile_holdings_normalized') }}
               on profile_holdings_normalized.holding_id = portfolio_holding_details.holding_id

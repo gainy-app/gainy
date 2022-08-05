@@ -1156,7 +1156,7 @@ models:
       - name: updated_at
         tests:
           - type:
-              type: 'timestamp without time zone'
+              type: 'timestamp with time zone'
       - name: ltt_quantity_total
         tests:
           - type:
