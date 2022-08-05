@@ -48,7 +48,7 @@ with expanded_holding_groups as
                       left join {{ ref('ticker_realtime_metrics') }}
                                 on ticker_realtime_metrics.symbol = expanded_holding_groups.ticker_symbol
          )
-select concat(profile_id, '_', ticker_symbol)::varchar as id,
+select concat(profile_id, '_', ticker_symbol)                                 as id,
        profile_id,
        ticker_symbol,
        updated_at,
