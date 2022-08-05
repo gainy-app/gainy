@@ -299,10 +299,10 @@ with collection_distinct_tickers as
                     'realtime' as period
              from old_realtime_prices
          )
-select (code || '_' || symbol)::varchar as id,
+select (code || '_' || symbol) as id,
        symbol,
-       code::varchar,
-       period::varchar,
+       code,
+       period,
        case
            when code = 'ttf_ticker_no_interest'
                then 'TTF tickers ' || symbol || ' is not linked to any interest.'

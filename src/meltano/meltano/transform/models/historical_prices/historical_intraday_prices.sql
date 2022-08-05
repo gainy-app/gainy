@@ -72,19 +72,19 @@ select symbol,
        time,
        time_3min,
        time_15min,
-       open,
-       high,
-       low,
-       close,
-       volume,
+       open::double precision,
+       high::double precision,
+       low::double precision,
+       close::double precision,
+       volume::double precision,
 
 {% if not var('realtime') %}
-       close * split_rate as adjusted_close,
+       (close * split_rate)::double precision as adjusted_close,
 {% else %}
-       close as adjusted_close,
+       close::double precision as adjusted_close,
 {% endif %}
 
-       now() as updated_at,
+       now()::timestamp as updated_at,
        (symbol || '_' || time) as id
 from raw_intraday_prices
 
