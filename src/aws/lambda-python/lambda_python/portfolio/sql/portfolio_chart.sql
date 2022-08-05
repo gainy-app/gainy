@@ -17,6 +17,9 @@ with week_trading_sessions as
      raw_chart_data as
          (
              select distinct on (uniq_id, period, portfolio_transaction_chart.datetime)
+                 portfolio_expanded_transactions.profile_id,
+                 original_ticker_symbol,
+                 quantity_norm,
                  period,
                  portfolio_transaction_chart.datetime,
                  uniq_id,
@@ -44,14 +47,97 @@ with week_trading_sessions as
                  or (period = '5y' and portfolio_transaction_chart.datetime >= latest_open_trading_session.date - interval '5 years')
                  or (period = 'all'))
                and {where_clause}
+         ),
+     ticker_chart as
+         (
+             select profile_id,
+                    original_ticker_symbol,
+                    period,
+                    datetime,
+                    sum(quantity_norm)  as quantity,
+                    count(uniq_id)      as transaction_count,
+                    sum(open)           as open,
+                    sum(high)           as high,
+                    sum(low)            as low,
+                    sum(close)          as close,
+                    sum(adjusted_close) as adjusted_close
+             from raw_chart_data
+             group by profile_id, original_ticker_symbol, period, datetime
+         ),
+     ticker_chart_latest_datapoint as
+         (
+             select ticker_chart.*
+             from (
+                      select original_ticker_symbol,
+                             period,
+                             max(datetime) as datetime
+                      from raw_chart_data
+                      group by original_ticker_symbol, period
+                  ) latest_datapoint
+                      join ticker_chart using (original_ticker_symbol, period, datetime)
+         ),
+     ticker_chart_with_cash_adjustment as
+         (
+
+             select ticker_chart.*,
+                    case
+                        when ticker_chart.quantity > 0
+                            then ticker_chart.adjusted_close / ticker_chart.quantity *
+                                 (ticker_chart_latest_datapoint.quantity - ticker_chart.quantity)
+                        else 0
+                        end as cash_adjustment
+             from ticker_chart
+                      join ticker_chart_latest_datapoint using (profile_id, original_ticker_symbol, period)
+         ),
+     static_values as
+         (
+             with raw_data as
+                      (
+                          select distinct on (
+                              profile_holdings_normalized.holding_id
+                              ) profile_holdings_normalized.profile_id,
+                                case
+                                    when portfolio_securities_normalized.type = 'cash'
+                                        and portfolio_securities_normalized.ticker_symbol = 'CUR:USD'
+                                        then profile_holdings_normalized.quantity::numeric
+                                    else 0
+                                    end as value
+                          from profile_holdings_normalized
+                                   join portfolio_securities_normalized
+                                        on portfolio_securities_normalized.id = profile_holdings_normalized.security_id
+                                   join app.profile_portfolio_accounts
+                                        on profile_portfolio_accounts.id = profile_holdings_normalized.account_id
+                                   join app.profile_plaid_access_tokens
+                                        on profile_plaid_access_tokens.id =
+                                           profile_portfolio_accounts.plaid_access_token_id
+                          where portfolio_securities_normalized.type = 'cash'
+                            and portfolio_securities_normalized.ticker_symbol = 'CUR:USD'
+                      )
+             select profile_id,
+                    sum(value) as cash_value
+             from raw_data
+             group by profile_id
          )
 select period,
        datetime,
-       count(uniq_id)::double precision      as transaction_count,
-       sum(open)::double precision           as open,
-       sum(high)::double precision           as high,
-       sum(low)::double precision            as low,
-       sum(close)::double precision          as close,
-       sum(adjusted_close)::double precision as adjusted_close
-from raw_chart_data
-group by period, datetime
+       transaction_count,
+       open + greatest(0, cash_adjustment + coalesce(cash_value, 0))           as open,
+       high + greatest(0, cash_adjustment + coalesce(cash_value, 0))           as high,
+       low + greatest(0, cash_adjustment + coalesce(cash_value, 0))            as low,
+       close + greatest(0, cash_adjustment + coalesce(cash_value, 0))          as close,
+       adjusted_close + greatest(0, cash_adjustment + coalesce(cash_value, 0)) as adjusted_close
+from (
+         select profile_id,
+                period,
+                datetime,
+                sum(transaction_count) as transaction_count,
+                sum(open)              as open,
+                sum(high)              as high,
+                sum(low)               as low,
+                sum(close)             as close,
+                sum(adjusted_close)    as adjusted_close,
+                sum(cash_adjustment)   as cash_adjustment
+         from ticker_chart_with_cash_adjustment
+         group by profile_id, period, datetime
+     ) t
+         left join static_values using (profile_id)

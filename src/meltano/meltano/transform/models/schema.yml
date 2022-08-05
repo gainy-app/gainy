@@ -1937,7 +1937,7 @@ models:
       - name: quantity
         tests:
           - type:
-              type: 'double precision'
+              type: 'numeric'
       - name: security_id
         tests:
           - type:
@@ -1953,11 +1953,11 @@ models:
       - name: quantity_norm
         tests:
           - type:
-              type: 'double precision'
+              type: 'numeric'
       - name: quantity_norm_for_valuation
         tests:
           - type:
-              type: 'double precision'
+              type: 'numeric'
       - name: updated_at
         tests:
           - type:
