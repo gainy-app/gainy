@@ -110,14 +110,14 @@ def _generate_schedules(env):
         if schedule['name'].startswith('polygon-to-postgres'):
             if "env" not in schedule:
                 schedule["env"] = {}
-            schedule['env']['TAP_POLYGON_OPTION_CONTRACT_NAMES'] = ",".join(
+            schedule['env']['TAP_POLYGON_OPTION_CONTRACT_NAMES'] = json.dumps(
                 option_contract_names)
 
         if schedule['extractor'].startswith('tap-eodhistoricaldata'):
             if "env" not in schedule:
                 schedule["env"] = {}
             schedule['env'][
-                'TAP_EODHISTORICALDATA_FULL_REFRESH_SYMBOLS'] = ",".join(
+                'TAP_EODHISTORICALDATA_FULL_REFRESH_SYMBOLS'] = json.dumps(
                     get_eod_full_refresh_symbols())
 
     return schedules
