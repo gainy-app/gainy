@@ -4,7 +4,7 @@ locals {
   polygon_websockets_cpu_credits = var.env == "production" ? 128 : 0
   hasura_cpu_credits             = var.env == "production" ? 1024 : 256
   meltano_ui_cpu_credits         = var.env == "production" ? 256 : 128
-  meltano_scheduler_cpu_credits  = var.env == "production" ? 2048 : 512
+  meltano_scheduler_cpu_credits  = var.env == "production" ? 3096 : 512
   main_cpu_credits = ceil(sum([
     local.eod_websockets_cpu_credits,
     local.polygon_websockets_cpu_credits,
@@ -24,7 +24,7 @@ locals {
   polygon_websockets_memory_credits = var.env == "production" ? 1024 : 0
   hasura_memory_credits             = var.env == "production" ? 2048 : 1024
   meltano_ui_memory_credits         = var.env == "production" ? 1024 : 1024
-  meltano_scheduler_memory_credits  = var.env == "production" ? 3584 : 2816
+  meltano_scheduler_memory_credits  = var.env == "production" ? 4608 : 2816
   main_memory_credits = ceil(sum([
     local.hasura_memory_credits,
     local.meltano_ui_memory_credits,
