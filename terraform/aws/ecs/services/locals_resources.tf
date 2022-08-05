@@ -4,7 +4,7 @@ locals {
   polygon_websockets_cpu_credits = var.env == "production" ? 128 : 0
   hasura_cpu_credits             = var.env == "production" ? 1024 : 256
   meltano_ui_cpu_credits         = var.env == "production" ? 256 : 128
-  meltano_scheduler_cpu_credits  = var.env == "production" ? 3096 : 512
+  meltano_scheduler_cpu_credits  = var.env == "production" ? 2048 : 512
   main_cpu_credits = ceil(sum([
     local.eod_websockets_cpu_credits,
     local.polygon_websockets_cpu_credits,
