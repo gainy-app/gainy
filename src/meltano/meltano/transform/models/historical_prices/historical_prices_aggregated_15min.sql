@@ -128,18 +128,18 @@ with
              from {{ ref('ticker_options_monitored') }}
                       join time_series_15min on time_series_15min.type is null
          )
-select tds.symbol || '_' || tds.time_15min          as id,
+select tds.symbol || '_' || tds.time_15min                            as id,
        tds.symbol,
-       tds.time_15min                               as datetime,
-       expanded_intraday_prices.open,
-       expanded_intraday_prices.high,
-       expanded_intraday_prices.low,
-       expanded_intraday_prices.close,
+       tds.time_15min                                                 as datetime,
+       expanded_intraday_prices.open::double precision,
+       expanded_intraday_prices.high::double precision,
+       expanded_intraday_prices.low::double precision,
+       expanded_intraday_prices.close::double precision,
        coalesce(expanded_intraday_prices.adjusted_close,
                 LAST_VALUE_IGNORENULLS(expanded_intraday_prices.adjusted_close) over (lookback),
                 historical_prices_marked.price_1w
-           )                                        as adjusted_close,
-       coalesce(expanded_intraday_prices.volume, 0) as volume,
+           )::double precision                                        as adjusted_close,
+       coalesce(expanded_intraday_prices.volume, 0)::double precision as volume,
        expanded_intraday_prices.updated_at          as updated_at
 from tickers_dates_skeleton tds
          left join expanded_intraday_prices using (symbol, time_15min)

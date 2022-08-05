@@ -963,6 +963,10 @@ models:
 
   - name: portfolio_holding_group_gains
     columns:
+      - name: id
+        tests:
+          - type:
+              type: 'text'
       - name: profile_id
         tests:
           - type:
@@ -1109,6 +1113,10 @@ models:
 
   - name: portfolio_holding_group_details
     columns:
+      - name: id
+        tests:
+          - type:
+              type: 'text'
       - name: profile_id
         tests:
           - type:
@@ -1136,7 +1144,7 @@ models:
       - name: ticker_name
         tests:
           - type:
-              type: 'character varying'
+              type: 'text'
       - name: market_capitalization
         tests:
           - type:
@@ -1145,10 +1153,15 @@ models:
         tests:
           - type:
               type: 'timestamp without time zone'
+      - name: updated_at
+        tests:
+          - type:
+              type: 'timestamp with time zone'
       - name: ltt_quantity_total
         tests:
           - type:
               type: 'double precision'
+
 
   - name: portfolio_gains
     columns:
@@ -1223,6 +1236,10 @@ models:
 
   - name: portfolio_transaction_chart
     columns:
+      - name: id
+        tests:
+          - type:
+              type: 'text'
       - name: transactions_uniq_id
         tests:
           - type:
@@ -1255,6 +1272,10 @@ models:
         tests:
           - type:
               type: 'double precision'
+      - name: transactions_updated_at
+        tests:
+          - type:
+              type: 'timestamp with time zone'
 
   - name: ticker_realtime_metrics
     columns:
@@ -1941,6 +1962,10 @@ models:
         tests:
           - type:
               type: 'timestamp with time zone'
+      - name: last_seen_at
+        tests:
+          - type:
+              type: 'timestamp with time zone'
       - name: uniq_id
         tests:
           - type:
@@ -1985,6 +2010,10 @@ models:
 
   - name: data_checks
     columns:
+      - name: id
+        tests:
+          - type:
+              type: 'text'
       - name: symbol
         tests:
           - type:
@@ -1992,11 +2021,19 @@ models:
       - name: code
         tests:
           - type:
-              type: 'character varying'
+              type: 'text'
+      - name: period
+        tests:
+          - type:
+              type: 'text'
       - name: message
         tests:
           - type:
               type: 'text'
+      - name: updated_at
+        tests:
+          - type:
+              type: 'timestamp with time zone'
 
   - name: collection_tickers_weighted
     columns:
@@ -2051,6 +2088,224 @@ models:
         tests:
           - type:
               type: 'integer'
+      - name: updated_at
+        tests:
+          - type:
+              type: 'timestamp with time zone'
+      - name: id
+        tests:
+          - type:
+              type: 'text'
+      - name: is_realtime
+        tests:
+          - type:
+              type: 'boolean'
+
+  - name: historical_intraday_prices
+    columns:
+      - name: symbol
+        tests:
+          - type:
+              type: 'character varying'
+      - name: date
+        tests:
+          - type:
+              type: 'date'
+      - name: time
+        tests:
+          - type:
+              type: 'timestamp without time zone'
+      - name: time_3min
+        tests:
+          - type:
+              type: 'timestamp without time zone'
+      - name: time_15min
+        tests:
+          - type:
+              type: 'timestamp without time zone'
+      - name: open
+        tests:
+          - type:
+              type: 'double precision'
+      - name: high
+        tests:
+          - type:
+              type: 'double precision'
+      - name: low
+        tests:
+          - type:
+              type: 'double precision'
+      - name: close
+        tests:
+          - type:
+              type: 'double precision'
+      - name: volume
+        tests:
+          - type:
+              type: 'double precision'
+      - name: adjusted_close
+        tests:
+          - type:
+              type: 'double precision'
+      - name: updated_at
+        tests:
+          - type:
+              type: 'timestamp without time zone'
+      - name: id
+        tests:
+          - type:
+              type: 'text'
+
+  - name: historical_prices_aggregated_3min
+    columns:
+      - name: id
+        tests:
+          - type:
+              type: 'text'
+      - name: symbol
+        tests:
+          - type:
+              type: 'character varying'
+      - name: datetime
+        tests:
+          - type:
+              type: 'timestamp without time zone'
+      - name: open
+        tests:
+          - type:
+              type: 'double precision'
+      - name: high
+        tests:
+          - type:
+              type: 'double precision'
+      - name: low
+        tests:
+          - type:
+              type: 'double precision'
+      - name: close
+        tests:
+          - type:
+              type: 'double precision'
+      - name: volume
+        tests:
+          - type:
+              type: 'double precision'
+      - name: adjusted_close
+        tests:
+          - type:
+              type: 'double precision'
+      - name: updated_at
+        tests:
+          - type:
+              type: 'timestamp without time zone'
+
+  - name: historical_prices_aggregated_15min
+    columns:
+      - name: id
+        tests:
+          - type:
+              type: 'text'
+      - name: symbol
+        tests:
+          - type:
+              type: 'character varying'
+      - name: datetime
+        tests:
+          - type:
+              type: 'timestamp without time zone'
+      - name: open
+        tests:
+          - type:
+              type: 'double precision'
+      - name: high
+        tests:
+          - type:
+              type: 'double precision'
+      - name: low
+        tests:
+          - type:
+              type: 'double precision'
+      - name: close
+        tests:
+          - type:
+              type: 'double precision'
+      - name: volume
+        tests:
+          - type:
+              type: 'double precision'
+      - name: adjusted_close
+        tests:
+          - type:
+              type: 'double precision'
+      - name: updated_at
+        tests:
+          - type:
+              type: 'timestamp without time zone'
+
+  - name: deployment_metadata
+    columns:
+      - name: id
+        tests:
+          - type:
+              type: 'integer'
+      - name: last_activity_at
+        tests:
+          - type:
+              type: 'timestamp with time zone'
+
+  - name: week_trading_sessions
+    columns:
+      - name: updated_at
+        tests:
+          - type:
+              type: 'timestamp with time zone'
+      - name: id
+        tests:
+          - type:
+              type: 'text'
+      - name: symbol
+        tests:
+          - type:
+              type: 'character varying'
+      - name: date
+        tests:
+          - type:
+              type: 'date'
+      - name: index
+        tests:
+          - type:
+              type: 'integer'
+      - name: open_at
+        tests:
+          - type:
+              type: 'timestamp with time zone'
+      - name: close_at
+        tests:
+          - type:
+              type: 'timestamp with time zone'
+
+  - name: portfolio_securities_normalized
+    columns:
+      - name: id
+        tests:
+          - type:
+              type: 'integer'
+      - name: name
+        tests:
+          - type:
+              type: 'character varying'
+      - name: ticker_symbol
+        tests:
+          - type:
+              type: 'character varying'
+      - name: original_ticker_symbol
+        tests:
+          - type:
+              type: 'character varying'
+      - name: type
+        tests:
+          - type:
+              type: 'character varying'
 
 exposures:
   - name: ticker_search_index
