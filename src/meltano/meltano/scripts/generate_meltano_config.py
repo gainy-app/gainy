@@ -101,7 +101,8 @@ def _generate_schedules(env):
             with db_conn.cursor() as cursor:
                 cursor.execute(
                     "SELECT contract_name FROM ticker_options_monitored")
-                option_contract_names = map(itemgetter(0), cursor.fetchall())
+                option_contract_names = list(
+                    map(itemgetter(0), cursor.fetchall()))
     except psycopg2.errors.UndefinedTable:
         option_contract_names = []
 
