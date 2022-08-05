@@ -209,7 +209,7 @@ def verify_portfolio_chart_previous_period_close(period,
     if not portfolio_chart_1y:
         assert previous_period_close is None or abs(
             previous_period_close
-        ) < PRICE_EPS, f"{assert_message_prefix}: wrong previous_period_close on {datetime.isoformat()}, expected 0"
+        ) < PRICE_EPS, f"{assert_message_prefix}: wrong previous_period_close on period {period}, expected 0"
         return
 
     if period == '1d':
