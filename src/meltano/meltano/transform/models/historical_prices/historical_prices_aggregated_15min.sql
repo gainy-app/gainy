@@ -131,6 +131,26 @@ with
 select tds.symbol || '_' || tds.time_15min                            as id,
        tds.symbol,
        tds.time_15min                                                 as datetime,
+{% if is_incremental() %}
+       coalesce(expanded_intraday_prices.open,
+                old_data.open)::double precision                      as open,
+       coalesce(expanded_intraday_prices.high,
+                old_data.high)::double precision                      as high,
+       coalesce(expanded_intraday_prices.low,
+                old_data.low)::double precision                       as low,
+       coalesce(expanded_intraday_prices.close,
+                old_data.close)::double precision                     as close,
+       coalesce(expanded_intraday_prices.adjusted_close,
+                LAST_VALUE_IGNORENULLS(expanded_intraday_prices.adjusted_close) over (lookback),
+                old_data.adjusted_close,
+                historical_prices_marked.price_1w
+           )::double precision                                        as adjusted_close,
+       coalesce(expanded_intraday_prices.volume,
+                old_data.volume,
+                0)::double precision as volume,
+       coalesce(expanded_intraday_prices.updated_at,
+                old_data.updated_at)                                  as updated_at
+{% else %}
        expanded_intraday_prices.open::double precision,
        expanded_intraday_prices.high::double precision,
        expanded_intraday_prices.low::double precision,
@@ -141,6 +161,7 @@ select tds.symbol || '_' || tds.time_15min                            as id,
            )::double precision                                        as adjusted_close,
        coalesce(expanded_intraday_prices.volume, 0)::double precision as volume,
        expanded_intraday_prices.updated_at          as updated_at
+{% endif %}
 from tickers_dates_skeleton tds
          left join expanded_intraday_prices using (symbol, time_15min)
          left join {{ ref('historical_prices_marked') }} using (symbol)
