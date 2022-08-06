@@ -36,6 +36,7 @@ resource "aws_db_instance" "db_instance" {
   allocated_storage       = var.env == "production" ? 100 : 100
   max_allocated_storage   = var.env == "production" ? 1000 : 1000
   backup_retention_period = var.env == "production" ? 7 : 0
+  backup_window           = "10:00-11:00"
   storage_type            = var.env == "production" ? "io1" : "io1"
   iops                    = var.env == "production" ? 1999 : 1000
   deletion_protection     = var.env == "production" ? true : false
