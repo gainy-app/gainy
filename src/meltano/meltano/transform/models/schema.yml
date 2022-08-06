@@ -1454,7 +1454,7 @@ models:
       - name: rate_votes
         tests:
           - type:
-              type: 'integer'
+              type: 'double precision'
       - name: url
         tests:
           - type:

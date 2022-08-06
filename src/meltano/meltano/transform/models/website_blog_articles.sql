@@ -19,7 +19,7 @@ select blogs.id::varchar,
        category_name::varchar,
        published_on::timestamp,
        rate_rating::double precision,
-       rate_votes::float,
+       rate_votes::double precision,
        ('https://www.gainy.app/blog/' || slug || '?app') as url,
        updated_on::timestamp,
        coalesce(priority::int, 0)                        as priority
