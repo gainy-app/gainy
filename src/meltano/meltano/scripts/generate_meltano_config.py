@@ -117,7 +117,7 @@ def _generate_schedules(env):
             if "env" not in schedule:
                 schedule["env"] = {}
             schedule['env'][
-                'TAP_EODHISTORICALDATA_FULL_REFRESH_SYMBOLS'] = json.dumps(
+                'TAP_EODHISTORICALDATA_FULL_REFRESH_SYMBOLS'] = ",".join(
                     get_eod_full_refresh_symbols())
 
     return schedules
