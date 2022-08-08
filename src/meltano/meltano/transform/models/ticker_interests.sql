@@ -32,7 +32,7 @@ with
          (
              select simple_ticker_interests.interest_id,
                     ticker_components.symbol,
-                    sum(simple_ticker_interests.sim_dif * component_weight) / (1e-30 + sum(component_weight)) as sim_dif -- +epsilon, coz no guarantee of sum!=0 in denum (ediv_0)
+                    sum(simple_ticker_interests.sim_dif * component_weight) / sum(component_weight) as sim_dif
              from {{ ref('ticker_components') }}
                       join simple_ticker_interests
                            on simple_ticker_interests.symbol = ticker_components.component_symbol
