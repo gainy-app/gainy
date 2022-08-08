@@ -121,11 +121,11 @@ with week_trading_sessions as
 select period,
        datetime,
        transaction_count,
-       open + greatest(0, cash_adjustment + coalesce(cash_value, 0))           as open,
-       high + greatest(0, cash_adjustment + coalesce(cash_value, 0))           as high,
-       low + greatest(0, cash_adjustment + coalesce(cash_value, 0))            as low,
-       close + greatest(0, cash_adjustment + coalesce(cash_value, 0))          as close,
-       adjusted_close + greatest(0, cash_adjustment + coalesce(cash_value, 0)) as adjusted_close
+       (open + greatest(0, cash_adjustment + coalesce(cash_value, 0)))::double precision           as open,
+       (high + greatest(0, cash_adjustment + coalesce(cash_value, 0)))::double precision           as high,
+       (low + greatest(0, cash_adjustment + coalesce(cash_value, 0)))::double precision            as low,
+       (close + greatest(0, cash_adjustment + coalesce(cash_value, 0)))::double precision          as close,
+       (adjusted_close + greatest(0, cash_adjustment + coalesce(cash_value, 0)))::double precision as adjusted_close
 from (
          select profile_id,
                 period,
