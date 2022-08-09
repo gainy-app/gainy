@@ -87,14 +87,13 @@ ticker_risk_score_common_stocks as
 
 --CRYPTO--
 
---loong list of today's known common stocks in the russel3000 index (grabbed from ishares etf)
---presave it as a table plz, instead of this ugly CTE
+     --loong list of today's known common stocks in the russel3000 index (grabbed from ishares etf)
      stocks_list_russel3000 as
          (
-             select ticker_components_flat.component_symbol as symbol
-             from {{ ref('ticker_components_flat')}}
-                 join common_stocks on common_stocks.symbol = ticker_components_flat.component_symbol
-             where ticker_components_flat.symbol = 'IWV'
+             select ticker_components.component_symbol as symbol
+             from {{ ref('ticker_components')}}
+                 join common_stocks on common_stocks.symbol = ticker_components.component_symbol
+             where ticker_components.symbol = 'IWV'
          ),
 
 
