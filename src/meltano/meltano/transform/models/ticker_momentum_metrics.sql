@@ -11,13 +11,12 @@
 with settings (local_risk_free_rate) as (values (0.001)),
      momentum as
          (
-             SELECT f.code,
-                    t.gic_sector,
+             SELECT symbol,
+                    gic_sector,
                     case when hpm.price_2m > 0 THEN hpm.price_1m / hpm.price_2m - 1 - settings.local_risk_free_rate END   AS MOM2,
                     case when hpm.price_13m > 0 THEN hpm.price_1m / hpm.price_13m - 1 - settings.local_risk_free_rate END AS MOM12
-             from {{ source('eod', 'eod_fundamentals') }} f
+             from {{ ref('tickers') }}
                       join settings ON true
-                      join {{ ref('tickers') }} as t on f.code = t.symbol
                       join {{ ref('historical_prices_marked') }} hpm using (symbol)
          ),
      momentum_risk_adj as

@@ -10,16 +10,16 @@
 
 with tickers as (select * from {{ ref('tickers') }} where type != 'crypto'),
      eod_fundamentals as (select * from {{ source('eod', 'eod_fundamentals') }})
-select f.code                                             as symbol,
-       (sharesstats ->> 'ShortRatio')::float              as short_ratio,
-       (sharesstats ->> 'SharesFloat')::float             as shares_float,
-       (sharesstats ->> 'SharesShort')::float             as shares_short,
-       (sharesstats ->> 'PercentInsiders')::float         as percent_insiders,
-       (sharesstats ->> 'SharesOutstanding')::float       as shares_outstanding,
-       (sharesstats ->> 'ShortPercentFloat')::float       as short_percent_float,
-       (sharesstats ->> 'PercentInstitutions')::float     as percent_institutions,
-       (sharesstats ->> 'SharesShortPriorMonth')::float   as shares_short_prior_month,
-       (sharesstats ->> 'ShortPercentOutstanding')::float as short_percent_outstanding,
+select f.code                                               as symbol,
+       (sharesstats ->> 'ShortRatio')::numeric              as short_ratio,
+       (sharesstats ->> 'SharesFloat')::bigint              as shares_float,
+       (sharesstats ->> 'SharesShort')::bigint              as shares_short,
+       (sharesstats ->> 'PercentInsiders')::numeric         as percent_insiders,
+       (sharesstats ->> 'SharesOutstanding')::bigint        as shares_outstanding,
+       (sharesstats ->> 'ShortPercentFloat')::numeric       as short_percent_float,
+       (sharesstats ->> 'PercentInstitutions')::numeric     as percent_institutions,
+       (sharesstats ->> 'SharesShortPriorMonth')::numeric   as shares_short_prior_month,
+       (sharesstats ->> 'ShortPercentOutstanding')::numeric as short_percent_outstanding,
        case
            when is_date(updatedat)
                then updatedat::timestamp

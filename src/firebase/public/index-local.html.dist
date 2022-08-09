@@ -78,7 +78,6 @@
           <textarea class="mdl-textfield__input" type="text" rows="20" id="demo-query" >query MyQuery {
   financial(limit: 10) {
     balance_sheet
-    cash_flow
     income_statement
     symbol
   }
