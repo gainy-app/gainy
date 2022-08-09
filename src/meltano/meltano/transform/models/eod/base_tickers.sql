@@ -95,10 +95,19 @@ with ticker_override as
              select symbol,
                     'crypto'                            as type,
                     name,
-                    (crypto_coins.description ->> 'en') as description,
+                    regexp_replace(
+                        replace(
+                            crypto_coins.description ->> 'en',
+                            '\r\n',
+                            E'\n'
+                        ),
+                        '<[^<>]*>',
+                        '',
+                        'g'
+                    )                                   as description,
                     null                                as phone,
                     (image ->> 'large')                 as logo_url,
-                    (links -> 'homepage' ->> 0)          as web_url,
+                    (links -> 'homepage' ->> 0)         as web_url,
                     (ico_data ->> 'ico_end_date')::date as ipo_date,
                     null                                as sector,
                     null                                as industry,
