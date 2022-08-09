@@ -186,7 +186,7 @@ with latest_trading_day as
                            on (latest_trading_day.exchange_name = tickers_and_options.exchange_canonical
                                or (tickers_and_options.exchange_canonical is null
                                    and latest_trading_day.country_name = tickers_and_options.country_name))
-                      left join data_checks_historical_prices
+                      left join {{ ref('data_checks_historical_prices') }}
                            on data_checks_historical_prices.symbol = t.symbol
                                and code = 'old_historical_prices'
              where data_checks_historical_prices is null

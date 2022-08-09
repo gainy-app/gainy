@@ -77,6 +77,15 @@ with errors as
          where forward_pe < 0
             or price_sales_ttm < 0
 
+         union all
+
+         select code as symbol,
+                'eod_fundamentals'                                      as code,
+                'daily'                                                 as "period",
+                'Ticker ' || symbol || ' has incorrect splitsdividends' as message
+         from {{ source('eod', 'eod_fundamentals') }}
+         where (splitsdividends ->> 'PayoutRatio')::numeric < 0
+            or (splitsdividends ->> 'ForwardAnnualDividendYield')::numeric < 0
     )
 select (code || '_' || symbol) as id,
        symbol,
