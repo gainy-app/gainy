@@ -378,7 +378,7 @@ models:
         tests:
           - not_null
           - type:
-              type: 'character varying'
+              type: 'text'
       - name: risk_score
         tests:
           - not_null
