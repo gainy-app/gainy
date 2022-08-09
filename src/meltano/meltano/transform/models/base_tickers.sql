@@ -10,17 +10,18 @@
 }}
 
 
-with ticker_gic_override as
+with ticker_override as
          (
              select symbol,
                     trim(gic_sector)       as gic_sector,
                     trim(gic_group)        as gic_group,
                     trim(gic_industry)     as gic_industry,
-                    trim(gic_sub_industry) as gic_sub_industry
-             from {{ source('gainy', 'ticker_gic_override')}}
+                    trim(gic_sub_industry) as gic_sub_industry,
+                    trim(description) as description
+             from {{ source('gainy', 'ticker_override')}}
              where _sdc_extracted_at > (
                                            select max(_sdc_extracted_at)
-                                           from raw_data.ticker_gic_override
+                                           from {{ source('gainy', 'ticker_override')}}
                                        ) - interval '1 minute'
          ),
      eod_tickers as
@@ -28,8 +29,18 @@ with ticker_gic_override as
              select upper(eod_fundamentals.code)::varchar           as symbol,
                     lower(general ->> 'Type')::character varying    as type,
                     (general ->> 'Name')::character varying         as name,
-                    coalesce(general -> 'Description',
-                             crypto_coins.description -> 'en'
+                    coalesce(ticker_override.description,
+                             general ->> 'Description',
+                             regexp_replace(
+                                 replace(
+                                     crypto_coins.description ->> 'en',
+                                     '\r\n',
+                                     E'\n'
+                                 ),
+                                 '<[^<>]*>',
+                                 '',
+                                 'g'
+                             )
                         )::varchar                                  as description,
                     (general ->> 'Phone')::character varying        as phone,
                     (general ->> 'LogoURL')::character varying      as logo_url,
@@ -37,13 +48,13 @@ with ticker_gic_override as
                     (general ->> 'IPODate')::date                   as ipo_date,
                     (general ->> 'Sector')::character varying       as sector,
                     (general ->> 'Industry')::character varying     as industry,
-                    coalesce(ticker_gic_override.gic_sector,
+                    coalesce(ticker_override.gic_sector,
                              general ->> 'GicSector')::varchar      as gic_sector,
-                    coalesce(ticker_gic_override.gic_group,
+                    coalesce(ticker_override.gic_group,
                              general ->> 'GicGroup')::varchar       as gic_group,
-                    coalesce(ticker_gic_override.gic_industry,
+                    coalesce(ticker_override.gic_industry,
                              general ->> 'GicIndustry')::varchar    as gic_industry,
-                    coalesce(ticker_gic_override.gic_sub_industry,
+                    coalesce(ticker_override.gic_sub_industry,
                              general ->> 'GicSubIndustry')::varchar as gic_sub_industry,
                     (general ->> 'Exchange')::character varying     as exchange,
                     case
@@ -69,8 +80,8 @@ with ticker_gic_override as
                     (general ->> 'UpdatedAt')::timestamp            as updated_at
              from {{ source('eod', 'eod_fundamentals')}}
                       left join {{ ref('crypto_coins') }} on crypto_coins.symbol = upper(eod_fundamentals.code)
-                      left join ticker_gic_override
-                                on ticker_gic_override.symbol = upper(eod_fundamentals.code)
+                      left join ticker_override
+                                on ticker_override.symbol = upper(eod_fundamentals.code)
              where ((general ->> 'IsDelisted') is null or (general ->> 'IsDelisted')::bool = false)
                and _sdc_extracted_at > (select max(_sdc_extracted_at)::date from {{ source('eod', 'eod_fundamentals')}}) - interval '1 day'
                and eod_fundamentals.code not in
