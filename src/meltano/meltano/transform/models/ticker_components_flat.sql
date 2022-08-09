@@ -43,8 +43,7 @@ with
                              ticker_components.component_exchange)        as component_exchange,
                     coalesce(component_ticker_components.component_industry,
                              ticker_components.component_industry)        as component_industry,
-                    coalesce(component_ticker_components.version,
-                             ticker_components.version)                   as version,
+                    ticker_components.version,
                     coalesce(component_ticker_components.updated_at,
                              ticker_components.updated_at)                as updated_at
              from {{ ref('ticker_components') }}
@@ -81,8 +80,7 @@ with
                              ticker_components_flat0.component_exchange)        as component_exchange,
                     coalesce(component_ticker_components.component_industry,
                              ticker_components_flat0.component_industry)        as component_industry,
-                    coalesce(component_ticker_components.version,
-                             ticker_components_flat0.version)                   as version,
+                    ticker_components_flat0.version,
                     coalesce(component_ticker_components.updated_at,
                              ticker_components_flat0.updated_at)                as updated_at
              from ticker_components_flat0
@@ -105,7 +103,7 @@ with
                     min(component_exchange)                 as component_exchange,
                     min(component_industry)                 as component_industry,
                     symbol || '_' || component_symbol       as id,
-                    sum(version)                            as version,
+                    min(version)                            as version,
                     min(updated_at)                         as updated_at
              from ticker_components_flat1
              group by symbol, component_symbol
