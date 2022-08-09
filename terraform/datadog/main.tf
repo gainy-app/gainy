@@ -447,6 +447,7 @@ resource "datadog_monitor" "logs_count" {
 
   require_full_window = false
   renotify_interval   = 360
+  evaluation_delay    = 900
 
   tags = ["logs"]
 }
