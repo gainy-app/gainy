@@ -16,7 +16,7 @@ sources:
       - name: auto_ticker_industries
       - name: exchanges
       - name: ticker_collections
-      - name: ticker_gic_override
+      - name: ticker_override
       - name: ticker_search_alternative_names
 
   - name: eod
