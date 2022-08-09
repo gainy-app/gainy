@@ -31,7 +31,7 @@ class SetRecommendations(HasuraTrigger):
                             'old_version': old_version.recommendations_version,
                             'new_version': new_version.recommendations_version,
                         })
-        except (LockAcquisitionTimeout, ConcurrentVersionUpdate):
+        except (LockAcquisitionTimeout, ConcurrentVersionUpdate) as e:
             """
             Sometimes hasura executes triggers in bursts (5-20 executions per 1-2 seconds).
             In this case the first execution, that acquires the lock, updates recommendations,
