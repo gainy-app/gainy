@@ -16,7 +16,7 @@
 
 with
 {% if is_incremental() %}
-     old_version as (select distinct on (symbol) symbol, version from {{ this }} order by code, updated_at desc),
+     old_version as (select distinct on (symbol) symbol, version from {{ this }} order by symbol, updated_at desc),
 {% endif %}
      versioned_data as
          (
