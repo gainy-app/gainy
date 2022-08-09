@@ -82,7 +82,7 @@ with errors as
          select code as symbol,
                 'eod_fundamentals'                                      as code,
                 'daily'                                                 as "period",
-                'Ticker ' || symbol || ' has incorrect splitsdividends' as message
+                'Ticker ' || code || ' has incorrect splitsdividends' as message
          from {{ source('eod', 'eod_fundamentals') }}
          where (splitsdividends ->> 'PayoutRatio')::numeric < 0
             or (splitsdividends ->> 'ForwardAnnualDividendYield')::numeric < 0
