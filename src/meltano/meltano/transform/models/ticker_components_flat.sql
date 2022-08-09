@@ -16,7 +16,7 @@
 
 with
 {% if is_incremental() %}
-     old_version as (select distinct on (symbol) symbol as code, version from {{ this }} order by code, updated_at desc),
+     old_version as (select distinct on (symbol) symbol, version from {{ this }} order by symbol, updated_at desc),
 {% endif %}
      ticker_components_flat0 as
          (
@@ -111,6 +111,6 @@ with
 select data_groupped.*
 from data_groupped
 {% if is_incremental() %}
-         left join old_version using (code)
+         left join old_version using (symbol)
 where data_groupped.version != old_version.version or old_version is null
 {% endif %}
