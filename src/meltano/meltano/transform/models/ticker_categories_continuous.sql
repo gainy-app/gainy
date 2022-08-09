@@ -473,12 +473,12 @@ with
     complex_ticker_categories as
         (
             select simple_ticker_categories.category_id,
-                   ticker_components.symbol,
+                   ticker_components_flat.symbol,
                    sum(simple_ticker_categories.sim_dif * component_weight) / sum(component_weight) as sim_dif
-            from {{ ref('ticker_components') }}
+            from {{ ref('ticker_components_flat') }}
                      join simple_ticker_categories
-                          on simple_ticker_categories.symbol = ticker_components.component_symbol
-            group by simple_ticker_categories.category_id, ticker_components.symbol
+                          on simple_ticker_categories.symbol = ticker_components_flat.component_symbol
+            group by simple_ticker_categories.category_id, ticker_components_flat.symbol
             having sum(component_weight) > 0
         )
 

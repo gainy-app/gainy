@@ -74,12 +74,12 @@ ticker_risk_score_common_stocks as
          ),
      complex_ticker_categories as
          (
-             select ticker_components.symbol,
+             select ticker_components_flat.symbol,
                     sum(ticker_risk_score_common_stocks.risk_score * component_weight) / sum(component_weight) as risk_score
-             from {{ ref('ticker_components') }}
+             from {{ ref('ticker_components_flat') }}
                       join ticker_risk_score_common_stocks
-                           on ticker_risk_score_common_stocks.symbol = ticker_components.component_symbol
-             group by ticker_components.symbol
+                           on ticker_risk_score_common_stocks.symbol = ticker_components_flat.component_symbol
+             group by ticker_components_flat.symbol
              having sum(component_weight) > 0
          ),
          
@@ -91,10 +91,10 @@ ticker_risk_score_common_stocks as
 --presave it as a table plz, instead of this ugly CTE
      stocks_list_russel3000 as
          (
-             select ticker_components.component_symbol as symbol
-             from {{ ref('ticker_components')}}
-                 join common_stocks on common_stocks.symbol = ticker_components.component_symbol
-             where ticker_components.symbol = 'IWV'
+             select ticker_components_flat.component_symbol as symbol
+             from {{ ref('ticker_components_flat')}}
+                 join common_stocks on common_stocks.symbol = ticker_components_flat.component_symbol
+             where ticker_components_flat.symbol = 'IWV'
          ),
 
 
