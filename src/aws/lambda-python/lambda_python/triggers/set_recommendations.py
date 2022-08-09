@@ -25,9 +25,12 @@ class SetRecommendations(HasuraTrigger):
         try:
             recommendations_func.get_and_persist(db_conn, max_tries=5)
             new_version = recommendations_func.load_version(db_conn)
-            logger.info(
-                f'Calculated Match Scores for user {profile_id}, version {old_version.recommendations_version} => {new_version.recommendations_version}'
-            )
+            logger.info('Calculated Match Scores',
+                        extra={
+                            'profile_id': profile_id,
+                            'old_version': old_version.recommendations_version,
+                            'new_version': new_version.recommendations_version,
+                        })
         except (LockAcquisitionTimeout, ConcurrentVersionUpdate):
             """
             Sometimes hasura executes triggers in bursts (5-20 executions per 1-2 seconds).
@@ -35,7 +38,11 @@ class SetRecommendations(HasuraTrigger):
             and all others will fail with this exception. In this case we just need to make sure
             that an update will run with fresh data - we'll allow it to calculate in up to 12 seconds.
             """
-            pass
+            logger.warning('Match Score Calculation failed: %s',
+                           e,
+                           extra={
+                               'profile_id': profile_id,
+                           })
 
     def get_profile_id(self, data):
         payload = self._extract_payload(data)

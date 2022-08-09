@@ -48,8 +48,13 @@ plugins:
       settings:
         - name: api_key
         - name: option_contract_names
+          kind: array
         - name: crypto_symbols
+          kind: array
+        - name: stock_exchanges
+          kind: array
         - name: stock_symbols
+          kind: array
         - name: split_id
         - name: split_num
 
@@ -175,7 +180,7 @@ plugins:
       variant: transferwise
       pip_url: pipelinewise-target-postgres
       config:
-        batch_size_rows: 1000
+        batch_size_rows: 5000
         flush_all_streams: true
         primary_key_required: false
         add_metadata_columns: true

@@ -25,7 +25,7 @@ from (
          select (base_tickers.symbol || '_' || week_trading_sessions.date) as id,
                 base_tickers.symbol,
                 week_trading_sessions.date,
-                week_trading_sessions.index,
+                week_trading_sessions.index::int,
                 week_trading_sessions.open_at,
                 week_trading_sessions.close_at
          from {{ ref('base_tickers') }}
@@ -39,7 +39,7 @@ from (
          select (ticker_options_monitored.contract_name || '_' || week_trading_sessions.date) as id,
                 ticker_options_monitored.contract_name                                        as symbol,
                 week_trading_sessions.date,
-                week_trading_sessions.index,
+                week_trading_sessions.index::int,
                 week_trading_sessions.open_at,
                 week_trading_sessions.close_at
          from {{ ref('ticker_options_monitored') }}

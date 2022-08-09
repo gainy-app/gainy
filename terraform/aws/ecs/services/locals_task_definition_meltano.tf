@@ -36,6 +36,8 @@ locals {
     merge(local.meltano_default_params, {
       eodhistoricaldata_api_token          = var.eodhistoricaldata_api_token
       eodhistoricaldata_exchanges          = jsonencode(["NASDAQ", "NYSE", "CC", "INDX"])
+      polygon_crypto_symbols               = jsonencode(["CRVUSD"])
+      polygon_stock_exchanges              = jsonencode(["XNAS", "XNYS"])
       pg_load_schema                       = "raw_data"
       dbt_threads                          = 3
       pg_production_host                   = var.pg_production_host

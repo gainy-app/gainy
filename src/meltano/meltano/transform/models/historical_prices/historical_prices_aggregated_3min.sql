@@ -80,20 +80,20 @@ with
              select DISTINCT ON (
                  symbol,
                  time_3min
-                 ) symbol                                                                                                     as symbol,
-                   time_3min::timestamp                                                                                       as datetime,
-                   first_value(open::double precision)
-                   OVER (partition by symbol, time_3min order by time rows between current row and unbounded following)       as open,
-                   max(high::double precision)
-                   OVER (partition by symbol, time_3min rows between current row and unbounded following)                     as high,
-                   min(low::double precision)
-                   OVER (partition by symbol, time_3min rows between current row and unbounded following)                     as low,
-                   last_value(close::double precision)
-                   OVER (partition by symbol, time_3min order by time rows between current row and unbounded following)       as close,
-                   last_value(adjusted_close::double precision)
-                   OVER (partition by symbol, time_3min order by time rows between current row and unbounded following)       as adjusted_close,
-                   (sum(volume::numeric)
-                    OVER (partition by symbol, time_3min rows between current row and unbounded following))::double precision as volume,
+                 ) symbol                                                                                                              as symbol,
+                   time_3min::timestamp                                                                                                as datetime,
+                   first_value(open)
+                   OVER (partition by symbol, time_3min order by time, priority desc rows between current row and unbounded following) as open,
+                   max(high)
+                   OVER (partition by symbol, time_3min rows between current row and unbounded following)                              as high,
+                   min(low)
+                   OVER (partition by symbol, time_3min rows between current row and unbounded following)                              as low,
+                   last_value(close)
+                   OVER (partition by symbol, time_3min order by time, priority desc rows between current row and unbounded following) as close,
+                   last_value(adjusted_close)
+                   OVER (partition by symbol, time_3min order by time, priority desc rows between current row and unbounded following) as adjusted_close,
+                   (sum(volume)
+                    OVER (partition by symbol, time_3min rows between current row and unbounded following))::double precision          as volume,
                    updated_at
              from (
                       select symbol,
@@ -141,42 +141,65 @@ with
                   ) t
              order by symbol, time_3min, time, priority
          )
-select t2.*
+select t2.symbol || '_' || t2.datetime                               as id,
+       t2.symbol,
+       t2.datetime,
+{% if is_incremental() %}
+       coalesce(t2.open,
+                old_data.open,
+                historical_prices_marked.price_0d)::double precision as open,
+       coalesce(t2.high,
+                old_data.high,
+                historical_prices_marked.price_0d)::double precision as high,
+       coalesce(t2.low,
+                old_data.low,
+                historical_prices_marked.price_0d)::double precision as low,
+       coalesce(t2.close,
+                old_data.close,
+                historical_prices_marked.price_0d)::double precision as close,
+       coalesce(t2.adjusted_close,
+                old_data.adjusted_close,
+                historical_prices_marked.price_0d)::double precision as adjusted_close,
+       coalesce(t2.volume, old_data.volume, 0)                       as volume,
+       coalesce(t2.updated_at, old_data.updated_at)                  as updated_at
+{% else %}
+       coalesce(t2.open,
+                historical_prices_marked.price_0d)::double precision as open,
+       coalesce(t2.high,
+                historical_prices_marked.price_0d)::double precision as high,
+       coalesce(t2.low,
+                historical_prices_marked.price_0d)::double precision as low,
+       coalesce(t2.close,
+                historical_prices_marked.price_0d)::double precision as close,
+       coalesce(t2.adjusted_close,
+                historical_prices_marked.price_0d)::double precision as adjusted_close,
+       coalesce(t2.volume, 0)                                        as volume,
+       t2.updated_at
+{% endif %}
 from (
-          select symbol || '_' || datetime as id,
-                 symbol,
-                 datetime                  as datetime,
+          select symbol,
+                 datetime,
                  coalesce(
                          open,
                          first_value(close)
-                         OVER (partition by symbol, grp order by datetime),
-                         historical_prices_marked.price_0d
-                     )::double precision   as open,
+                         OVER (partition by symbol, grp order by datetime)) as open,
                  coalesce(
                          high,
                          first_value(close)
-                         OVER (partition by symbol, grp order by datetime),
-                         historical_prices_marked.price_0d
-                     )::double precision   as high,
+                         OVER (partition by symbol, grp order by datetime)) as high,
                  coalesce(
                          low,
                          first_value(close)
-                         OVER (partition by symbol, grp order by datetime),
-                         historical_prices_marked.price_0d
-                     )::double precision   as low,
+                         OVER (partition by symbol, grp order by datetime)) as low,
                  coalesce(
                          close,
                          first_value(close)
-                         OVER (partition by symbol, grp order by datetime),
-                         historical_prices_marked.price_0d
-                     )::double precision   as close,
+                         OVER (partition by symbol, grp order by datetime)) as close,
                  coalesce(
                          adjusted_close,
                          first_value(adjusted_close)
-                         OVER (partition by symbol, grp order by datetime),
-                         historical_prices_marked.price_0d
-                     )::double precision   as adjusted_close,
-                 coalesce(volume, 0)       as volume,
+                         OVER (partition by symbol, grp order by datetime)) as adjusted_close,
+                 volume,
                  updated_at
           from (
                    select *,
@@ -184,8 +207,8 @@ from (
                                    over (partition by symbol order by datetime), 0) as grp
                    from combined_intraday_prices
                ) t
-                   left join {{ ref('historical_prices_marked') }} using (symbol)
      ) t2
+         left join {{ ref('historical_prices_marked') }} using (symbol)
 {% if is_incremental() %}
          left join {{ this }} old_data using (symbol, datetime)
 {% endif %}
