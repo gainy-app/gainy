@@ -33,7 +33,7 @@ with ticker_override as
                              general -> 'Description',
                              regexp_replace(
                                  replace(
-                                     crypto_coins.description -> 'en',
+                                     crypto_coins.description ->> 'en',
                                      '\r\n',
                                      E'\n'
                                  ),
