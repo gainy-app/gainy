@@ -86,6 +86,6 @@ WULF,Financials,Capital Markets,Investment Banking & Brokerage,Diversified Finan
 PSTL,Real Estate,Equity Real Estate Investment Trusts (REITs),Office REITs,Real Estate,
 CAN,Information Technology,"Technology Hardware, Storage & Peripherals","Technology Hardware, Storage & Peripherals",Technology Hardware & Equipment,
 SDIG,Information Technology,"Technology Hardware, Storage & Peripherals","Technology Hardware, Storage & Peripherals",Software & Services,
-DJI.INDX,,,,,The Dow Jones Industrial Average is a stock index that tracks 30 of the largest U.S. companies. Created in 1896
-GSPC.INDX,,,,,The Nasdaq Composite Index or ‘The Nasdaq’ covers more than 3
+DJI.INDX,,,,,"The Dow Jones Industrial Average is a stock index that tracks 30 of the largest U.S. companies. Created in 1896, it is one of the oldest stock indexes, and its performance is widely considered to be a useful indicator of the health of the entire U.S. stock market."
+GSPC.INDX,,,,,"The Nasdaq Composite Index or ‘The Nasdaq’ covers more than 3,000 stocks, all of which are listed on the Nasdaq Stock Market. This includes some of the biggest tech giants like Apple, Microsoft and Meta and the majority of other tech companies."
 IXIC.INDX,,,,,The S&P 500 is one of the most watched stock market indexes in the world today. It tracks stocks of 500 largest companies in the U.S. This index is widely considered a standard benchmark for measuring market performance since it is the best representation of the broad U.S. economy.
