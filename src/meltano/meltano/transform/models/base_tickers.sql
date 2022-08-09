@@ -30,7 +30,7 @@ with ticker_override as
                     lower(general ->> 'Type')::character varying    as type,
                     (general ->> 'Name')::character varying         as name,
                     coalesce(ticker_override.description,
-                             general -> 'Description',
+                             general ->> 'Description',
                              regexp_replace(
                                  replace(
                                      crypto_coins.description ->> 'en',
