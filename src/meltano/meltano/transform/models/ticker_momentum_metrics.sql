@@ -11,23 +11,22 @@
 with settings (local_risk_free_rate) as (values (0.001)),
      momentum as
          (
-             SELECT f.code,
-                    t.gic_sector,
+             SELECT symbol,
+                    gic_sector,
                     case when hpm.price_2m > 0 THEN hpm.price_1m / hpm.price_2m - 1 - settings.local_risk_free_rate END   AS MOM2,
                     case when hpm.price_13m > 0 THEN hpm.price_1m / hpm.price_13m - 1 - settings.local_risk_free_rate END AS MOM12
-             from {{ source('eod', 'eod_fundamentals') }} f
+             from {{ ref('tickers') }}
                       join settings ON true
-                      join {{ ref('tickers') }} as t on f.code = t.symbol
                       join {{ ref('historical_prices_marked') }} hpm using (symbol)
          ),
      momentum_risk_adj as
          (
-             SELECT m.code,
+             SELECT symbol,
                     m.gic_sector,
                     CASE WHEN ABS(ticker_metrics.stddev_3_years) > 0 THEN m.MOM2 / ticker_metrics.stddev_3_years END  as Risk_Adj_MOM2,
                     CASE WHEN ABS(ticker_metrics.stddev_3_years) > 0 THEN m.MOM12 / ticker_metrics.stddev_3_years END as Risk_Adj_MOM12
              from momentum m
-                      JOIN {{ ref('ticker_metrics') }} ON ticker_metrics.symbol = m.code
+                      JOIN {{ ref('ticker_metrics') }} using (symbol)
          ),
      momentum_risk_adj_stats as
          (
@@ -41,7 +40,7 @@ with settings (local_risk_free_rate) as (values (0.001)),
          ),
      z_score as
          (
-             SELECT mra.code,
+             SELECT mra.symbol,
                     case when abs(mras.StdDev_Risk_Adj_MOM2) > 0
                              then (Risk_Adj_MOM2 - mras.AVG_Risk_Adj_MOM2) / mras.StdDev_Risk_Adj_MOM2
                         END as Z_Score_MOM2,
@@ -53,12 +52,12 @@ with settings (local_risk_free_rate) as (values (0.001)),
          ),
      windsored_z_score as
          (
-             SELECT zs.code,
+             SELECT symbol,
                     GREATEST(-3, LEAST(3, Z_Score_MOM2))  as Windsored_Z_Score_MOM2,
                     GREATEST(-3, LEAST(3, Z_Score_MOM12)) as Windsored_Z_Score_MOM12
              from z_score zs
          )
-SELECT m.code as symbol,
+SELECT symbol,
        MOM2,
        MOM12,
        Risk_Adj_MOM2,
@@ -73,8 +72,8 @@ SELECT m.code as symbol,
        Windsored_Z_Score_MOM12,
        (wzs.Windsored_Z_Score_MOM2 + wzs.Windsored_Z_Score_MOM12) / 2 as combined_momentum_score
 FROM {{ ref('tickers') }} t
-    join momentum m on m.code = t.symbol
-    join momentum_risk_adj mra on mra.code = t.symbol
-    join windsored_z_score wzs on wzs.code = t.symbol
-    join z_score ON z_score.code = wzs.code
+    join momentum m using (symbol)
+    join momentum_risk_adj mra using (symbol)
+    join windsored_z_score wzs using (symbol)
+    join z_score using (symbol)
     join momentum_risk_adj_stats ON momentum_risk_adj_stats.gic_sector = t.gic_sector

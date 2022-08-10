@@ -1081,7 +1081,7 @@ models:
       - name: ticker_name
         tests:
           - type:
-              type: 'character varying'
+              type: 'text'
       - name: market_capitalization
         tests:
           - type:

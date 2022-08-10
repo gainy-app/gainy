@@ -61,25 +61,29 @@ with
     data_groupped as
          (
              select symbol,
-                    min(original_component_symbol)          as original_component_symbol,
+                    min(original_component_symbol) as original_component_symbol,
                     component_symbol,
-                    min(component_name)                     as component_name,
-                    min(component_region)                   as component_region,
-                    min(component_sector)                   as component_sector,
-                    min(component_country)                  as component_country,
-                    sum(component_weight)                   as component_weight,
-                    sum(component_weight)::double precision as component_weight_float,
-                    min(component_exchange)                 as component_exchange,
-                    min(component_industry)                 as component_industry,
-                    symbol || '_' || component_symbol       as id,
-                    min(version)                            as version,
-                    min(updated_at)                         as updated_at
+                    min(component_name)            as component_name,
+                    min(component_region)          as component_region,
+                    min(component_sector)          as component_sector,
+                    min(component_country)         as component_country,
+                    sum(component_weight)          as component_weight,
+                    min(component_exchange)        as component_exchange,
+                    min(component_industry)        as component_industry,
+                    min(version)                   as version,
+                    min(updated_at)                as updated_at
              from data
              group by symbol, component_symbol
          )
-select data_groupped.*
+select data_groupped.*,
+       symbol || '_' || component_symbol as id
 from data_groupped
 {% if is_incremental() %}
          left join old_version using (symbol)
-where data_groupped.version != old_version.version or old_version is null
+{% endif %}
+
+where component_weight > 0
+
+{% if is_incremental() %}
+  and data_groupped.version != old_version.version or old_version is null
 {% endif %}

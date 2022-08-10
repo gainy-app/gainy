@@ -418,14 +418,14 @@ with
                         ( -- we have greatest(OR cond OR cond OR cond)-condition-rule for Specul category, that is mean we need at least 1 non-null cond in condition rule for any ticker to do the soft-measure,
                             -- so do the left join here and we have that special rule for pre-revenue company: if eps is null then ticker just on the threshold line so we coalesce eps=null to 0.
                             select t.symbol,
-                                   (t2.beta-3.)       											as beta,      --BusDoc: 3x volatility of QQQ (we don't know for sure how EOD calc industry/market basis for beta.. maybe it's index qqq)
-                                   -coalesce(max_eps.value,1e-30)									as maxeps,    --BusDoc: Pre-revenue stock (earn per share zero or negative or unknown(eq0 still waiting for good product from company))
-                                   ( options_stats.call_option_shares_deliverable_outstanding
-                                       - (f.sharesstats ->> 'SharesOutstanding')::bigint)::float 	as opt_vs_shr --BusDoc: Call option shares deliverable outstanding exceeds total shares outstanding
+                                   (t2.beta-3.)       						as beta,      --BusDoc: 3x volatility of QQQ (we don't know for sure how EOD calc industry/market basis for beta.. maybe it's index qqq)
+                                   -coalesce(max_eps.value,1e-30)			as maxeps,    --BusDoc: Pre-revenue stock (earn per share zero or negative or unknown(eq0 still waiting for good product from company))
+                                   options_stats.call_option_shares_deliverable_outstanding
+                                   - ticker_shares_stats.shares_outstanding as opt_vs_shr --BusDoc: Call option shares deliverable outstanding exceeds total shares outstanding
                             from common_stocks t
-                                     left join {{ ref('technicals') }} t2 on t.symbol = t2.symbol
-                                     left join max_eps on max_eps.symbol = t.symbol
-                                     left join {{ source('eod', 'eod_fundamentals') }} f on f.code = t.symbol
+                                     left join {{ ref('technicals') }} t2 using (symbol)
+                                     left join {{ ref('ticker_shares_stats') }} using (symbol)
+                                     left join max_eps using (symbol)
                                      left join options_stats on options_stats.code = t.symbol
                         ),
 
