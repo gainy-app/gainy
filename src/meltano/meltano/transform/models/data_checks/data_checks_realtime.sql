@@ -166,7 +166,7 @@ with latest_trading_day as
                                       datetime,
                                       adjusted_close,
                                       volume
-                               from historical_prices_aggregated_3min
+                               from {{ ref('historical_prices_aggregated_3min') }}
 
                                union all
 
@@ -177,7 +177,7 @@ with latest_trading_day as
                                       datetime,
                                       adjusted_close,
                                       volume
-                               from historical_prices_aggregated_15min
+                               from {{ ref('historical_prices_aggregated_15min') }}
                            ) t
                   ) t
              where (diff > 0.02 and (volume + prev_volume) > 10000000)
@@ -206,7 +206,7 @@ with latest_trading_day as
                                          datetime::date as date,
                                          datetime,
                                          adjusted_close
-                                   from historical_prices_aggregated_3min
+                                   from {{ ref('historical_prices_aggregated_3min') }}
                                    order by symbol, datetime::date, datetime desc
                                )
                                union all
@@ -218,7 +218,7 @@ with latest_trading_day as
                                          datetime::date as date,
                                          datetime,
                                          adjusted_close
-                                   from historical_prices_aggregated_15min
+                                   from {{ ref('historical_prices_aggregated_15min') }}
                                    order by symbol, datetime::date, datetime desc
                                )
                            ) realtime_daily_close_prices
