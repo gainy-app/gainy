@@ -179,6 +179,8 @@ with latest_trading_day as
                                       volume
                                from {{ ref('historical_prices_aggregated_15min') }}
                            ) t
+                      where adjusted_close > 0
+                        and prev_adjusted_close > 0
                   ) t
              where (diff > 0.02 and (volume + prev_volume) > 10000000)
                 or (diff > 0.2 and (volume + prev_volume) > 1000000)
