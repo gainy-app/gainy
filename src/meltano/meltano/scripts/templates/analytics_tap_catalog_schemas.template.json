@@ -136,16 +136,6 @@
         ]
       }
     },
-    "cash_flow": {
-      "metadata": {
-        "replication-key": "updated_at",
-        "replication-method": "INCREMENTAL",
-        "table-key-properties": [
-          "symbol",
-          "date"
-        ]
-      }
-    },
     "categories": {
       "metadata": {
         "table-key-properties": [

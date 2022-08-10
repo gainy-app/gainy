@@ -436,10 +436,10 @@ select DISTINCT ON
                trading_metrics.implied_volatility,
 
                growth_metrics.revenue_growth_yoy,
-               growth_metrics.revenue_growth_fwd,
-               growth_metrics.ebitda_growth_yoy,
-               growth_metrics.eps_growth_yoy,
-               growth_metrics.eps_growth_fwd,
+               growth_metrics.revenue_growth_fwd::double precision,
+               growth_metrics.ebitda_growth_yoy::double precision,
+               growth_metrics.eps_growth_yoy::double precision,
+               growth_metrics.eps_growth_fwd::double precision,
 
                general_data.address_city,
                general_data.address_state,
@@ -450,9 +450,9 @@ select DISTINCT ON
                valuation_metrics.market_capitalization,
                valuation_metrics.enterprise_value_to_sales,
                valuation_metrics.price_to_earnings_ttm,
-               valuation_metrics.price_to_sales_ttm,
+               valuation_metrics.price_to_sales_ttm::double precision,
                valuation_metrics.price_to_book_value,
-               valuation_metrics.enterprise_value_to_ebitda,
+               valuation_metrics.enterprise_value_to_ebitda::double precision,
 
                momentum_metrics.price_change_1w,
                momentum_metrics.price_change_1m,
@@ -470,24 +470,24 @@ select DISTINCT ON
 
                earnings_metrics.eps_actual_ttm as eps_ttm,
                earnings_metrics.eps_actual,
-               earnings_metrics.eps_estimate,
+               earnings_metrics.eps_estimate::double precision,
                earnings_metrics.beaten_quarterly_eps_estimation_count_ttm,
-               earnings_metrics.eps_surprise,
-               earnings_metrics.eps_difference,
-               earnings_metrics.revenue_estimate_avg_0y,
+               earnings_metrics.eps_surprise::double precision,
+               earnings_metrics.eps_difference::double precision,
+               earnings_metrics.revenue_estimate_avg_0y::double precision,
                earnings_metrics.revenue_ttm as revenue_actual,
 
                earnings_metrics.revenue_ttm,
                financials_metrics.revenue_per_share_ttm,
-               financials_metrics.net_income,
-               financials_metrics.net_income_ttm,
-               financials_metrics.roi,
-               financials_metrics.asset_cash_and_equivalents,
-               financials_metrics.roa,
-               financials_metrics.total_assets,
-               financials_metrics.ebitda,
-               financials_metrics.ebitda_ttm,
-               financials_metrics.net_debt
+               financials_metrics.net_income::double precision,
+               financials_metrics.net_income_ttm::double precision,
+               financials_metrics.roi::double precision,
+               financials_metrics.asset_cash_and_equivalents::double precision,
+               financials_metrics.roa::double precision,
+               financials_metrics.total_assets::double precision,
+               financials_metrics.ebitda::double precision,
+               financials_metrics.ebitda_ttm::double precision,
+               financials_metrics.net_debt::double precision
 
 from all_tickers t
          left join highlights on t.symbol = highlights.symbol

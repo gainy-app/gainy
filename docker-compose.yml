@@ -41,6 +41,8 @@ services:
     env_file:
       - .env.global
       - .env.local
+    deploy:
+      replicas: 0
 
   meltano-dbt-docs:
     image: gainy-meltano:latest
@@ -59,6 +61,8 @@ services:
     env_file:
       - .env.global
       - .env.local
+    deploy:
+      replicas: 0
 
   postgres:
     image: postgres:12

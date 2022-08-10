@@ -16,12 +16,11 @@
                        then updatedat::timestamp
                    else _sdc_batched_at
                    end as updated_at
-        from {{ source('eod', 'eod_fundamentals') }} f
-                 inner join {{  ref('tickers') }} as t on f.code = t.symbol
+        from {{ source('eod', 'eod_fundamentals') }}
     )
     select symbol,
-           key::date                       as date,
-           (value ->> 'epsActual')::float4 as eps_actual,
+           key::date                        as date,
+           (value ->> 'epsActual')::numeric as eps_actual,
            updated_at
     from expanded
     where key != '0000-00-00'
