@@ -11,27 +11,27 @@
 
 with returns AS
          (
-             SELECT code,
+             SELECT symbol,
                     CASE WHEN open > 0 THEN (close - open) / open END as return
              FROM (
                       select distinct on (
-                          code,
+                          symbol,
                           date_year
-                          ) code,
+                          ) symbol,
                             date_year,
-                            first_value(open) over (partition by code, date_year order by date)                                as open,
+                            first_value(open) over (partition by symbol, date_year order by date)                                as open,
                             last_value(close)
-                            over (partition by code, date_year order by date rows between current row and unbounded following) as close
+                            over (partition by symbol, date_year order by date rows between current row and unbounded following) as close
                       from {{ ref('historical_prices') }}
-                      order by code, date_year, date
+                      order by symbol, date_year, date
                   ) t
          ),
      downside_deviation AS
          (
-             SELECT code,
+             SELECT symbol as code,
                     SQRT(SUM(POW(return, 2)) / COUNT(return)) as value
              FROM returns
-             GROUP BY code
+             GROUP BY symbol
              having COUNT(return) > 0
          )
 select symbol,

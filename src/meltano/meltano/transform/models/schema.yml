@@ -142,7 +142,7 @@ models:
 
   - name: historical_prices
     columns:
-      - name: code
+      - name: symbol
         tests:
           - not_null
           - type:

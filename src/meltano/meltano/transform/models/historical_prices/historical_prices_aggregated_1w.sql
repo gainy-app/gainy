@@ -21,21 +21,21 @@ with combined_daily_prices as
                       (
                           select DISTINCT ON (
                               date_week,
-                              code
-                              ) code as symbol,
+                              symbol
+                              ) symbol as symbol,
                                 date_week                                                                                          as date,
                                 first_value(open)
-                                OVER (partition by date_week, code order by date rows between current row and unbounded following) as open,
+                                OVER (partition by date_week, symbol order by date rows between current row and unbounded following) as open,
                                 max(high)
-                                OVER (partition by date_week, code order by date rows between current row and unbounded following) as high,
+                                OVER (partition by date_week, symbol order by date rows between current row and unbounded following) as high,
                                 min(low)
-                                OVER (partition by date_week, code order by date rows between current row and unbounded following) as low,
+                                OVER (partition by date_week, symbol order by date rows between current row and unbounded following) as low,
                                 last_value(close)
-                                OVER (partition by date_week, code order by date rows between current row and unbounded following) as close,
+                                OVER (partition by date_week, symbol order by date rows between current row and unbounded following) as close,
                                 last_value(adjusted_close)
-                                OVER (partition by date_week, code order by date rows between current row and unbounded following) as adjusted_close,
+                                OVER (partition by date_week, symbol order by date rows between current row and unbounded following) as adjusted_close,
                                 sum(volume)
-                                OVER (partition by date_week, code order by date rows between current row and unbounded following) as volume,
+                                OVER (partition by date_week, symbol order by date rows between current row and unbounded following) as volume,
                                 0                                                                                                  as priority,
                                 updated_at
                           from {{ ref('historical_prices') }}
@@ -190,7 +190,7 @@ where t2.adjusted_close is not null
 -- "                                                              ->  Subquery Scan on ""*SELECT* 1""  (cost=0.57..3581967.50 rows=3929291 width=65) (actual time=2.120..38180.533 rows=2980685 loops=1)"
 --                                                                     ->  Unique  (cost=0.57..3542674.59 rows=3929291 width=69) (actual time=2.119..37647.650 rows=2980685 loops=1)
 --                                                                           ->  WindowAgg  (cost=0.57..3466069.82 rows=15320953 width=69) (actual time=2.119..35570.646 rows=15285206 loops=1)
---                                                                                 ->  Index Scan using date_week__code__date on historical_prices  (cost=0.57..2968138.85 rows=15320953 width=65) (actual time=2.095..10767.810 rows=15285206 loops=1)
+--                                                                                 ->  Index Scan using date_week__symbol__date on historical_prices  (cost=0.57..2968138.85 rows=15320953 width=65) (actual time=2.095..10767.810 rows=15285206 loops=1)
 --                                                                                       Index Cond: (date_week >= ((now() - '5 years'::interval) - '7 days'::interval))
 --                                                               ->  Hash Join  (cost=426.69..485.13 rows=144 width=92) (actual time=1.881..2.796 rows=4208 loops=1)
 --                                                                     Hash Cond: ((filtered_base_tickers_1.exchange_canonical)::text = (filtered_base_tickers.exchange_canonical)::text)

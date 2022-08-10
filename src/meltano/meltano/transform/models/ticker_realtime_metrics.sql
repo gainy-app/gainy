@@ -83,9 +83,9 @@ with latest_trading_day as
                       ),
                   max_historical as
                       (
-                          select code, max(date) as date, interval '1 day' as period_interval
+                          select symbol, max(date) as date, interval '1 day' as period_interval
                           from {{ ref('historical_prices') }}
-                          group by code
+                          group by symbol
                       )
              select chart_symbols.symbol,
                     coalesce(
@@ -97,14 +97,14 @@ with latest_trading_day as
                             historical_prices.adjusted_close
                         ) as adjusted_close
              from chart_symbols
-                      left join max_intraday on max_intraday.symbol = chart_symbols.symbol
+                      left join max_intraday using (symbol)
+                      left join max_historical using (symbol)
+
                       left join {{ ref('historical_intraday_prices') }}
                                 on historical_intraday_prices.symbol = max_intraday.symbol
                                     and historical_intraday_prices.time = max_intraday.time
-
-                      left join max_historical on max_historical.code = chart_symbols.symbol
                       left join {{ ref('historical_prices') }}
-                                on historical_prices.code = max_historical.code
+                                on historical_prices.symbol = max_historical.symbol
                                     and historical_prices.date = max_historical.date
          )
 select symbol,

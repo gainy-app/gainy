@@ -20,10 +20,10 @@ ticker_industries as (
     group by symbol
 ),
 ticker_volumes as (
-    select code as symbol, avg(volume) as daily_volume_avg
+    select symbol, avg(volume) as daily_volume_avg
     from {{ ref('historical_prices') }}
     where "date"::date >= NOW() - interval '30 days'
-    group by code
+    group by symbol
 )
 select t.symbol,
        t.name,

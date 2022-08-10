@@ -38,7 +38,7 @@ with robinhood_options as (
                     (abs(quantity) * case when type = 'sell' then -1 else 1 end)::numeric as quantity_norm
              from {{ source('app', 'profile_portfolio_transactions') }}
          ),
-     first_trade_date as ( select code, min(date) as first_trade_date from {{ ref('historical_prices') }} group by code ),
+     first_trade_date as ( select symbol, min(date) as first_trade_date from {{ ref('historical_prices') }} group by symbol ),
      first_transaction_date as
          (
              select profile_id,
@@ -81,10 +81,10 @@ with robinhood_options as (
                                    left join {{ ref('portfolio_securities_normalized') }}
                                              on portfolio_securities_normalized.id = expanded_transactions.security_id
                                    left join first_trade_date
-                                             on first_trade_date.code = portfolio_securities_normalized.original_ticker_symbol
+                                             on first_trade_date.symbol = portfolio_securities_normalized.original_ticker_symbol
                                    left join first_transaction_date using (profile_id)
                                    left join {{ ref('historical_prices') }}
-                                             on historical_prices.code = portfolio_securities_normalized.original_ticker_symbol
+                                             on historical_prices.symbol = portfolio_securities_normalized.original_ticker_symbol
                                                  and (historical_prices.date between first_transaction_date.profile_first_transaction_date - interval '1 week' and first_transaction_date.profile_first_transaction_date
                                                     or historical_prices.date = first_trade_date.first_trade_date)
                           where rolling_quantity < 0
@@ -199,7 +199,7 @@ with robinhood_options as (
                     -abs(sell_quantity)                                   as quantity_norm
              from expanded_transactions
                       join {{ ref('historical_prices') }}
-                           on historical_prices.code = expanded_transactions.original_ticker_symbol
+                           on historical_prices.symbol = expanded_transactions.original_ticker_symbol
                                and historical_prices.date = expanded_transactions.date
              where sell_quantity > 0
                and historical_prices.adjusted_close is not null
@@ -292,9 +292,9 @@ with robinhood_options as (
                                    order by profile_holdings_normalized.account_id, profile_holdings_normalized.security_id,
                                        expanded_transactions.row_num desc
                                ) t
-                                   left join first_trade_date on first_trade_date.code = original_ticker_symbol
+                                   left join first_trade_date on first_trade_date.symbol = original_ticker_symbol
                                    left join {{ ref('historical_prices') }}
-                                             on historical_prices.code = original_ticker_symbol and
+                                             on historical_prices.symbol = original_ticker_symbol and
                                                 (historical_prices.date between profile_first_transaction_date - interval '1 week' and profile_first_transaction_date or
                                                  historical_prices.date = first_trade_date.first_trade_date)
                           where diff > 0

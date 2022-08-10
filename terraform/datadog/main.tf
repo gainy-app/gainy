@@ -299,10 +299,10 @@ resource "datadog_monitor" "meltano_dag_run_duration" {
   type    = "query alert"
   message = "Airflow Meltano Dag Run Duration triggered. Notify: @slack-${var.slack_channel_name} <!channel>"
 
-  query = "pct_change(avg(last_1h),last_1h):avg:app.latest_dag_run_duration_minutes{*} by {dag_id} > 100"
+  query = "sum(last_15m):(avg:app.latest_dag_run_duration_minutes{*} by {dag_id}.as_count().rollup(sum, 900) - hour_before(clamp_min(avg:app.latest_dag_run_duration_minutes{*} by {dag_id}.as_count().rollup(sum, 900), 500))) / hour_before(clamp_min(avg:app.latest_dag_run_duration_minutes{*} by {dag_id}.as_count().rollup(sum, 900), 500)) > 5"
 
   monitor_thresholds {
-    critical = "100"
+    critical = 5
   }
 
   require_full_window = false
@@ -439,10 +439,10 @@ resource "datadog_monitor" "logs_count" {
   type    = "query alert"
   message = "Logs count triggered. Notify: @slack-${var.slack_channel_name} <!channel>"
 
-  query = "pct_change(avg(last_1h),last_1h):sum:aws.logs.forwarded_log_events{*} by {loggroupname} > 100"
+  query = "sum(last_15m):(sum:aws.logs.forwarded_log_events{*} by {loggroupname}.as_count().rollup(sum, 900) - hour_before(clamp_min(sum:aws.logs.forwarded_log_events{*} by {loggroupname}.as_count().rollup(sum, 900), 500))) / hour_before(clamp_min(sum:aws.logs.forwarded_log_events{*} by {loggroupname}.as_count().rollup(sum, 900), 500)) > 5"
 
   monitor_thresholds {
-    critical = 100
+    critical = 5
   }
 
   require_full_window = false

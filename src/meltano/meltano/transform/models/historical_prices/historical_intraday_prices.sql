@@ -61,9 +61,7 @@ with raw_intraday_prices as
                         else 1.0 -- TODO verify todays intraday prices after split are adjusted?
                         end as split_rate
              from daily_close_prices
-                      left join {{ ref('historical_prices') }}
-                                on historical_prices.code = daily_close_prices.symbol
-                                    and historical_prices.date = daily_close_prices.date
+                      left join {{ ref('historical_prices') }} using (symbol, date)
                       join {{ source('eod', 'eod_intraday_prices') }} using (symbol, time)
 {% endif %}
          )

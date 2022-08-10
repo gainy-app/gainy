@@ -32,7 +32,7 @@ from (
                   left join (
                                 SELECT exchange_canonical, date, count(*) as prices_count
                                 FROM {{ ref('historical_prices') }}
-                                         join {{ ref('base_tickers') }} on base_tickers.symbol = historical_prices.code
+                                         join {{ ref('base_tickers') }} using (symbol)
                                 where date >= now() - interval '1 year' - interval '1 week'
                                   and exchange_canonical is not null
                                 group by exchange_canonical, date
@@ -55,7 +55,7 @@ from (
                   left join (
                                 SELECT country_name, date, count(*) as prices_count
                                 FROM {{ ref('historical_prices') }}
-                                         join {{ ref('base_tickers') }} on base_tickers.symbol = historical_prices.code
+                                         join {{ ref('base_tickers') }} using (symbol)
                                 where date >= now() - interval '1 year' - interval '1 week'
                                   and exchange_canonical is null
                                   and country_name is not null

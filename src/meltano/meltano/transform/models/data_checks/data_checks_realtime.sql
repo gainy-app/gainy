@@ -150,6 +150,85 @@ with latest_trading_day as
                       left join latest_trading_day_intraday_prices using (symbol, time)
              where diff < -0.30 and latest_trading_day_intraday_prices is null
          ),
+     realtime_chart_diff_with_prev_point as
+         (
+             select symbol,
+                    'Ticker ' || symbol || ' looks too volatile. '
+                        || json_agg(json_build_array(period, datetime, diff)) as message
+             from (
+                      select *,
+                             abs((adjusted_close - prev_adjusted_close) / least(adjusted_close, prev_adjusted_close)) as diff
+                      from (
+                               select symbol,
+                                      '1d'                                                             as period,
+                                      lag(adjusted_close) over (partition by symbol order by datetime) as prev_adjusted_close,
+                                      lag(volume) over (partition by symbol order by datetime)         as prev_volume,
+                                      datetime,
+                                      adjusted_close,
+                                      volume
+                               from historical_prices_aggregated_3min
+
+                               union all
+
+                               select symbol,
+                                      '1w'                                                             as period,
+                                      lag(adjusted_close) over (partition by symbol order by datetime) as prev_adjusted_close,
+                                      lag(volume) over (partition by symbol order by datetime)         as prev_volume,
+                                      datetime,
+                                      adjusted_close,
+                                      volume
+                               from historical_prices_aggregated_15min
+                           ) t
+                  ) t
+             where (diff > 0.02 and (volume + prev_volume) > 10000000)
+                or (diff > 0.2 and (volume + prev_volume) > 1000000)
+                or (diff > 0.6 and (volume + prev_volume) > 100000)
+                or (diff > 1 and (volume + prev_volume) > 10000)
+                or (diff > 2 and (volume + prev_volume) > 1000)
+             group by symbol
+         ),
+{% if not var('realtime') %}
+     realtime_chart_diff_with_historical as
+         (
+             select symbol,
+                    'Ticker ' || symbol || ' has old realtime chart difference comparing to historical chart. '
+                        || json_agg(json_build_array(period, datetime, diff)) as message
+             from (
+                      select *,
+                             (realtime_daily_close_prices.adjusted_close - historical_prices.adjusted_close) /
+                             historical_prices.adjusted_close as diff
+                      from (
+                               (
+                                   select distinct on (
+                                       symbol, datetime::date
+                                       ) symbol,
+                                         '1d'           as period,
+                                         datetime::date as date,
+                                         datetime,
+                                         adjusted_close
+                                   from historical_prices_aggregated_3min
+                                   order by symbol, datetime::date, datetime desc
+                               )
+                               union all
+                               (
+                                   select distinct on (
+                                       symbol, datetime::date
+                                       ) symbol,
+                                         '1w'           as period,
+                                         datetime::date as date,
+                                         datetime,
+                                         adjusted_close
+                                   from historical_prices_aggregated_15min
+                                   order by symbol, datetime::date, datetime desc
+                               )
+                           ) realtime_daily_close_prices
+                               join historical_prices using (symbol, date)
+                      where historical_prices.adjusted_close > 0
+                  ) t
+             where abs(diff) > 0.1
+             group by symbol
+         ),
+{% endif %}
      errors as
          (
              select tickers_and_options.symbol,
@@ -200,6 +279,24 @@ with latest_trading_day as
                     'realtime' as period,
                     'Ticker ' || symbol || ' has old realtime prices.' as message
              from old_realtime_prices
+
+             union all
+
+             select symbol,
+                    'realtime_chart_diff_with_prev_point' as code,
+                    'realtime' as period,
+                    message
+             from realtime_chart_diff_with_prev_point
+
+{% if not var('realtime') %}
+             union all
+
+             select symbol,
+                    'realtime_chart_diff_with_historical' as code,
+                    'daily' as period,
+                    message
+             from realtime_chart_diff_with_historical
+{% endif %}
          )
 select (code || '_' || symbol) as id,
        symbol,

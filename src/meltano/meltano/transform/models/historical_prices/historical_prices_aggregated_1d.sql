@@ -13,9 +13,9 @@
 
 with uniq_tickers as
          (
-             select code as symbol, min(date) as min_date
+             select symbol, min(date) as min_date
              from {{ ref('historical_prices') }}
-             group by code
+             group by symbol
          ),
      tickers_dates_skeleton as
          (
@@ -33,7 +33,7 @@ with uniq_tickers as
                                        join {{ ref('base_tickers') }} using (symbol)
                               where exchange_canonical is not null
                           )
-                 SELECT symbol as code, date_series::date as date
+                 SELECT symbol, date_series::date as date
                  FROM generate_series(now() - interval '1 year' - interval '1 week', now(), '1 day') date_series
                           join filtered_base_tickers on true
                           join uniq_tickers using (symbol)
@@ -61,7 +61,7 @@ with uniq_tickers as
                               where exchange_canonical is null
                                 and (country_name in ('USA') or country_name is null)
                           )
-                 SELECT symbol as code, date_series::date as date
+                 SELECT symbol, date_series::date as date
                  FROM generate_series(now() - interval '1 year' - interval '1 week', now(), '1 day') date_series
                           join filtered_base_tickers on true
                           join uniq_tickers using (symbol)
@@ -81,7 +81,7 @@ with uniq_tickers as
                               from {{ ref('base_tickers') }}
                               where type = 'crypto'
                           )
-                 SELECT symbol as code, date_series::date as date
+                 SELECT symbol, date_series::date as date
                  FROM generate_series(now() - interval '1 year' - interval '1 week', now(), '1 day') date_series
                           join filtered_base_tickers on true
                           join uniq_tickers using (symbol)
@@ -90,8 +90,8 @@ with uniq_tickers as
          ),
      all_rows as
          (
-             select tds.code || '_' || tds.date as id,
-                    tds.code                    as symbol,
+             select tds.symbol || '_' || tds.date as id,
+                    tds.symbol,
                     tds.date::timestamp         as datetime,
                     hp.open,
                     hp.high,
@@ -105,9 +105,9 @@ with uniq_tickers as
                              )                           as updated_at,
                     coalesce(volume, 0)                  as volume
              from tickers_dates_skeleton tds
-                      left join {{ ref('historical_prices') }} hp using (code, "date")
+                      left join {{ ref('historical_prices') }} hp using (symbol, "date")
                  window
-                     lookback as (partition by tds.code order by tds."date" asc)
+                     lookback as (partition by tds.symbol order by tds."date" asc)
          )
 select all_rows.*
 from all_rows
