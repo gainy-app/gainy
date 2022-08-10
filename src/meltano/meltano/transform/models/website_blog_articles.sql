@@ -31,6 +31,7 @@ left join max_updated_at on true
 {% endif %}
 
 where updated_at > (select max(updated_at) from {{ source('website', 'blogs') }}) - interval '1 minute'
+  and published_on is not null
 
 {% if is_incremental() %}
   and (max_updated_at.max_date is null or updated_on::timestamp > max_updated_at.max_date)
