@@ -222,7 +222,7 @@ with latest_trading_day as
                                    order by symbol, datetime::date, datetime desc
                                )
                            ) realtime_daily_close_prices
-                               join historical_prices using (symbol, date)
+                               join {{ ref('historical_prices') }} using (symbol, date)
                       where historical_prices.adjusted_close > 0
                   ) t
              where abs(diff) > 0.1
