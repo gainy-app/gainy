@@ -1,3 +1,5 @@
+{% set minutes = 15 %}
+
 {{
   config(
     materialized = "incremental",
@@ -12,16 +14,16 @@
 }}
 
 
--- Execution Time: 140877.584 ms
+-- Execution Time: 157857.871 ms
 with
-{% if is_incremental() %}
+{% if is_incremental() and var('realtime') %}
      max_date as
          (
              select max(datetime) as datetime
              from {{ this }}
          ),
 {% endif %}
-     week_trading_sessions as
+     trading_sessions as
          (
              select min(open_at)  as open_at,
                     max(close_at) as close_at
@@ -29,34 +31,31 @@ with
              where open_at between now() - interval '1 week' and now()
              group by date
          ),
-     time_series_15min as
+     time_series as
          (
              SELECT null as type,
-                    time_15min::timestamp,
-                    date
+                    time_truncated
              FROM (
                       SELECT null as type,
                              date_trunc('minute', dd) -
                              interval '1 minute' *
-                             mod(extract(minutes from dd)::int, 15) as time_15min,
-                             dd::date as date
-                      FROM generate_series(now()::timestamp - interval '1 week', now()::timestamp, interval '15 minutes') dd
+                             mod(extract(minutes from dd)::int, {{ minutes }}) as time_truncated
+                      FROM generate_series(now()::timestamp - interval '1 week', now()::timestamp, interval '{{ minutes }} minutes') dd
                       ) t
-                      join week_trading_sessions on true
+                      join trading_sessions on true
 {% if is_incremental() and var('realtime') %}
                       join max_date on true
 {% endif %}
-             where time_15min >= week_trading_sessions.open_at and time_15min < week_trading_sessions.close_at
+             where time_truncated >= trading_sessions.open_at and time_truncated < trading_sessions.close_at
 {% if is_incremental() and var('realtime') %}
-               and time_15min > max_date.datetime - interval '20 minutes'
+               and time_truncated > max_date.datetime - interval '20 minutes'
 {% endif %}
              union all
              SELECT 'crypto' as type,
-                    (date_trunc('minute', dd) -
-                     interval '1 minute' *
-                     mod(extract(minutes from dd)::int, 15))::timestamp as time_15min,
-                    dd::date                                            as date
-             FROM generate_series(now()::timestamp - interval '1 week', now()::timestamp, interval '15 minutes') dd
+                    date_trunc('minute', dd) -
+                    interval '1 minute' *
+                    mod(extract(minutes from dd)::int, {{ minutes }}) as time_truncated
+             FROM generate_series(now()::timestamp - interval '1 day', now()::timestamp, interval '{{ minutes }} minutes') dd
 {% if is_incremental() and var('realtime') %}
                       join max_date on true
              where dd > max_date.datetime - interval '20 minutes'
@@ -64,115 +63,190 @@ with
          ),
      expanded_intraday_prices as
          (
-             select t.symbol,
-                    t.time_15min,
-                    ip_open.open,
-                    t.high,
-                    t.low,
-                    ip_close.close,
-                    ip_close.adjusted_close,
-                    t.volume,
-                    t.updated_at
+             select historical_intraday_prices.*,
+                    historical_intraday_prices.time_{{ minutes }}min as time_truncated
+             from {{ ref('historical_intraday_prices') }}
+                      join trading_sessions on true
+{% if is_incremental() and var('realtime') %}
+                      join max_date on true
+{% endif %}
+             where (historical_intraday_prices.time_{{ minutes }}min >= trading_sessions.open_at - interval '1 hour' and historical_intraday_prices.time_{{ minutes }}min < trading_sessions.close_at
+                or (symbol like '%.CC' and time > now() - interval '1 day'))
+{% if is_incremental() and var('realtime') %}
+               and historical_intraday_prices.time_{{ minutes }}min > max_date.datetime - interval '20 minutes'
+{% endif %}
+         ),
+{% if is_incremental() and var('realtime') %}
+     old_prices as
+         (
+             select {{ this }}.*
+             from {{ this }}
+                      join trading_sessions on true
+                      join max_date on true
+             where ({{ this }}.datetime >= trading_sessions.open_at - interval '1 hour' and {{ this }}.datetime < trading_sessions.close_at
+                or (symbol like '%.CC' and {{ this }}.datetime > now() - interval '1 day'))
+               and {{ this }}.datetime > max_date.datetime - interval '20 minutes'
+         ),
+{% endif %}
+     combined_intraday_prices as
+         (
+             select DISTINCT ON (
+                 symbol,
+                 time_truncated
+                 ) symbol                                                                                                                   as symbol,
+                   time_truncated::timestamp                                                                                                as datetime,
+                   first_value(open)
+                   OVER (partition by symbol, time_truncated order by time, priority desc rows between current row and unbounded following) as open,
+                   max(high)
+                   OVER (partition by symbol, time_truncated rows between current row and unbounded following)                              as high,
+                   min(low)
+                   OVER (partition by symbol, time_truncated rows between current row and unbounded following)                              as low,
+                   last_value(close)
+                   OVER (partition by symbol, time_truncated order by time, priority desc rows between current row and unbounded following) as close,
+                   last_value(adjusted_close)
+                   OVER (partition by symbol, time_truncated order by time, priority desc rows between current row and unbounded following) as adjusted_close,
+                   (sum(volume)
+                    OVER (partition by symbol, time_truncated rows between current row and unbounded following))::double precision          as volume,
+                   min(updated_at)
+                   OVER (partition by symbol, time_truncated rows between current row and unbounded following)                              as updated_at
              from (
                       select symbol,
-                             time_15min,
-                             mode() within group ( order by time )      as open_time,
-                             mode() within group ( order by time desc ) as close_time,
-                             max(high)                                  as high,
-                             min(low)                                   as low,
-                             sum(volume)                                as volume,
-                             max(updated_at)                            as updated_at
-                      from (
-                               select historical_intraday_prices.*
-                               from {{ ref('historical_intraday_prices') }}
-                                        join week_trading_sessions on true
+                             time,
+                             open,
+                             high,
+                             low,
+                             close,
+                             adjusted_close,
+                             volume,
+                             time_truncated,
+                             updated_at,
+                             0 as priority
+                      from expanded_intraday_prices
 {% if is_incremental() and var('realtime') %}
-                                        join max_date on true
+                      union all
+                      select symbol,
+                             datetime as time,
+                             open,
+                             high,
+                             low,
+                             close,
+                             adjusted_close,
+                             volume,
+                             datetime as time_truncated,
+                             updated_at,
+                             1 as priority
+                      from old_prices
 {% endif %}
-                               where (historical_intraday_prices.time_15min >= week_trading_sessions.open_at - interval '1 hour' and historical_intraday_prices.time_15min < week_trading_sessions.close_at
-                                  or (symbol like '%.CC' and time > now() - interval '1 week'))
-{% if is_incremental() and var('realtime') %}
-                                 and historical_intraday_prices.time_15min > max_date.datetime - interval '20 minutes'
-{% endif %}
-                           ) t
-                      group by symbol, time_15min
+                      union all
+                      select symbol,
+                             time_truncated as time,
+                             null      as open,
+                             null      as high,
+                             null      as low,
+                             null      as close,
+                             null      as adjusted_close,
+                             null      as volume,
+                             time_truncated,
+                             null      as updated_at,
+                             2         as priority
+                      from {{ ref('base_tickers') }}
+                               join time_series
+                                   on (time_series.type = 'crypto' and base_tickers.type = 'crypto')
+                                       or (time_series.type is null and base_tickers.type != 'crypto')
+                      union all
+                      select contract_name,
+                             time_truncated as time,
+                             null      as open,
+                             null      as high,
+                             null      as low,
+                             null      as close,
+                             null      as adjusted_close,
+                             null      as volume,
+                             time_truncated,
+                             null      as updated_at,
+                             2         as priority
+                      from {{ ref('ticker_options_monitored') }}
+                               join time_series on time_series.type is null
                   ) t
-                      join {{ ref('historical_intraday_prices') }} ip_open
-                           on ip_open.symbol = t.symbol and ip_open.time = t.open_time
-                      join {{ ref('historical_intraday_prices') }} ip_close
-                           on ip_close.symbol = t.symbol and ip_close.time = t.close_time
-         ),
-     tickers_dates_skeleton as
-         (
-             select symbol,
-                    null as open,
-                    null as high,
-                    null as low,
-                    null as close,
-                    null as volume,
-                    time_15min,
-                    date
-             from {{ ref('base_tickers') }}
-                      join time_series_15min
-                           on (time_series_15min.type = 'crypto' and base_tickers.type = 'crypto')
-                               or (time_series_15min.type is null and base_tickers.type != 'crypto')
-             union all
-             select contract_name,
-                    null as open,
-                    null as high,
-                    null as low,
-                    null as close,
-                    null as volume,
-                    time_15min,
-                    date
-             from {{ ref('ticker_options_monitored') }}
-                      join time_series_15min on time_series_15min.type is null
+             order by symbol, time_truncated, time, priority
          )
-select tds.symbol || '_' || tds.time_15min                            as id,
-       tds.symbol,
-       tds.time_15min                                                 as datetime,
+select t2.symbol || '_' || t2.datetime                               as id,
+       t2.symbol,
+       t2.datetime,
 {% if is_incremental() %}
-       coalesce(expanded_intraday_prices.open,
-                old_data.open)::double precision                      as open,
-       coalesce(expanded_intraday_prices.high,
-                old_data.high)::double precision                      as high,
-       coalesce(expanded_intraday_prices.low,
-                old_data.low)::double precision                       as low,
-       coalesce(expanded_intraday_prices.close,
-                old_data.close)::double precision                     as close,
-       coalesce(expanded_intraday_prices.adjusted_close,
-                LAST_VALUE_IGNORENULLS(expanded_intraday_prices.adjusted_close) over (lookback),
+       coalesce(t2.open,
+                old_data.open,
+                historical_prices_marked.price_0d)::double precision as open,
+       coalesce(t2.high,
+                old_data.high,
+                historical_prices_marked.price_0d)::double precision as high,
+       coalesce(t2.low,
+                old_data.low,
+                historical_prices_marked.price_0d)::double precision as low,
+       coalesce(t2.close,
+                old_data.close,
+                historical_prices_marked.price_0d)::double precision as close,
+       coalesce(t2.adjusted_close,
                 old_data.adjusted_close,
-                historical_prices_marked.price_1w
-           )::double precision                                        as adjusted_close,
-       coalesce(expanded_intraday_prices.volume,
-                old_data.volume,
-                0)::double precision as volume,
-       coalesce(expanded_intraday_prices.updated_at,
-                old_data.updated_at)                                  as updated_at
+                historical_prices_marked.price_0d)::double precision as adjusted_close,
+       coalesce(t2.volume, old_data.volume, 0)                       as volume,
+       coalesce(t2.updated_at, old_data.updated_at)                  as updated_at
 {% else %}
-       expanded_intraday_prices.open::double precision,
-       expanded_intraday_prices.high::double precision,
-       expanded_intraday_prices.low::double precision,
-       expanded_intraday_prices.close::double precision,
-       coalesce(expanded_intraday_prices.adjusted_close,
-                LAST_VALUE_IGNORENULLS(expanded_intraday_prices.adjusted_close) over (lookback),
-                historical_prices_marked.price_1w
-           )::double precision                                        as adjusted_close,
-       coalesce(expanded_intraday_prices.volume, 0)::double precision as volume,
-       expanded_intraday_prices.updated_at          as updated_at
+       coalesce(t2.open,
+                historical_prices_marked.price_0d)::double precision as open,
+       coalesce(t2.high,
+                historical_prices_marked.price_0d)::double precision as high,
+       coalesce(t2.low,
+                historical_prices_marked.price_0d)::double precision as low,
+       coalesce(t2.close,
+                historical_prices_marked.price_0d)::double precision as close,
+       coalesce(t2.adjusted_close,
+                historical_prices_marked.price_0d)::double precision as adjusted_close,
+       coalesce(t2.volume, 0)                                        as volume,
+       t2.updated_at
 {% endif %}
-from tickers_dates_skeleton tds
-         left join expanded_intraday_prices using (symbol, time_15min)
+from (
+          select symbol,
+                 datetime,
+                 coalesce(
+                         open,
+                         first_value(close)
+                         OVER (partition by symbol, grp order by datetime)) as open,
+                 coalesce(
+                         high,
+                         first_value(close)
+                         OVER (partition by symbol, grp order by datetime)) as high,
+                 coalesce(
+                         low,
+                         first_value(close)
+                         OVER (partition by symbol, grp order by datetime)) as low,
+                 coalesce(
+                         close,
+                         first_value(close)
+                         OVER (partition by symbol, grp order by datetime)) as close,
+                 coalesce(
+                         adjusted_close,
+                         first_value(adjusted_close)
+                         OVER (partition by symbol, grp order by datetime)) as adjusted_close,
+                 volume,
+                 coalesce(
+                         updated_at,
+                         first_value(updated_at)
+                         OVER (partition by symbol, grp order by datetime)) as updated_at
+          from (
+                   select *,
+                          coalesce(sum(case when adjusted_close is not null then 1 end)
+                                   over (partition by symbol order by datetime), 0) as grp
+                   from combined_intraday_prices
+               ) t
+     ) t2
          left join {{ ref('historical_prices_marked') }} using (symbol)
 {% if is_incremental() %}
-         left join {{ this }} old_data on old_data.symbol = tds.symbol and old_data.datetime = tds.time_15min
-where old_data.symbol is null -- no old data
-   or (expanded_intraday_prices.updated_at is not null and old_data.updated_at is null) -- old data is null and new is not
-   or expanded_intraday_prices.updated_at > old_data.updated_at -- new data is newer than the old one
+         left join {{ this }} old_data using (symbol, datetime)
 {% endif %}
-    window
-        lookback as (partition by tds.symbol order by tds.time_15min asc)
-
--- OK created incremental model historical_prices_aggregated_15min SELECT 3705058 in 183.20s
--- OK created incremental model historical_prices_aggregated_15min SELECT 3705058 in 186.82s
+where t2.adjusted_close is not null
+{% if is_incremental() %}
+  and (old_data.symbol is null -- no old data
+   or (t2.updated_at is not null and old_data.updated_at is null) -- old data is null and new is not
+   or t2.updated_at > old_data.updated_at) -- new data is newer than the old one
+{% endif %}
