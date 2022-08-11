@@ -223,7 +223,8 @@ with latest_trading_day as
                             and previous_trading_day_intraday_prices_stats.cnt > 0
                           order by type, time desc
                       )
-             select previous_trading_day_intraday_prices_unique_symbols.symbol
+             select previous_trading_day_intraday_prices_unique_symbols.symbol,
+                    previous_trading_day_intraday_prices_unique_symbols.type
              from latest_diff
                       join previous_trading_day_intraday_prices_unique_symbols using (type, time)
                       left join latest_trading_day_intraday_prices using (symbol, time)
@@ -323,7 +324,7 @@ with latest_trading_day as
              select symbol,
                     'old_realtime_prices' as code,
                     'realtime' as period,
-                    'Ticker ' || symbol || ' has old realtime prices.' as message
+                    'Type ' || type || ' has old realtime prices.' as message
              from old_realtime_prices
 
              union all

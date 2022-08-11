@@ -162,6 +162,7 @@ resource "datadog_monitor" "lambda_duration" {
 
   require_full_window = true
   notify_no_data      = false
+  no_data_timeframe   = 30
   renotify_interval   = 720
   evaluation_delay    = 900
 
