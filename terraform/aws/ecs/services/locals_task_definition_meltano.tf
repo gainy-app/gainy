@@ -55,6 +55,9 @@ locals {
       onesignal_segments_production        = jsonencode(["Subscribed Users"])
       onesignal_segments_test              = jsonencode(["Testers"])
       gainy_history_s3_bucket              = var.gainy_history_s3_bucket
+      pg_datadog_password                  = var.pg_datadog_password
+      pg_internal_sync_username            = var.pg_production_internal_sync_username
+      pg_internal_sync_password            = var.pg_internal_sync_password
 
       pg_external_access_host     = var.pg_external_access_host
       pg_external_access_port     = var.pg_external_access_port

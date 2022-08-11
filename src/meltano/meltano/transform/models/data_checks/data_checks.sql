@@ -2,6 +2,9 @@
   config(
     materialized = "view",
     tags = ["view"],
+    post_hook=[
+      'grant select on {{this}} to datadog',
+    ]
   )
 }}
 
