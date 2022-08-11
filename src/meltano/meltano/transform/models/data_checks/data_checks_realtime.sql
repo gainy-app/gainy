@@ -52,7 +52,7 @@ with latest_trading_day as
                                  row_number() over (partition by symbol order by date desc) as idx,
                                  row_number() over (partition by symbol order by date)      as idx_inv
                           from tickers_and_options
-                                   left join exchange_schedule
+                                   left join {{ ref('exchang e_schedule')}}
                                              on (tickers_and_options.exchange_canonical = exchange_schedule.exchange_name
                                                  or (tickers_and_options.exchange_canonical is null and
                                                      tickers_and_options.country_name = exchange_schedule.country_name))
@@ -78,7 +78,7 @@ with latest_trading_day as
                                    select eod_intraday_prices.symbol,
                                           indexed_ticker_schedules.date,
                                           max(eod_intraday_prices.time) as time
-                                   from raw_data.eod_intraday_prices
+                                   from {{ source('eod', 'eod_intraday_prices') }}
                                             join indexed_ticker_schedules
                                                  on indexed_ticker_schedules.symbol = eod_intraday_prices.symbol
                                                      and
@@ -111,7 +111,7 @@ with latest_trading_day as
                                     select symbol,
                                            period,
                                            max(chart.datetime) as datetime
-                                    from chart
+                                    from {{ ref('chart') }}
                                     where chart.period in ('1d', '1w')
                                     group by symbol, period
                                 ) chart_1d_latest using (symbol, period)
