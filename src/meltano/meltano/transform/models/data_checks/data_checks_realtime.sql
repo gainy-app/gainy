@@ -34,12 +34,91 @@ with latest_trading_day as
          ),
      tickers_and_options as
          (
-             select symbol, exchange_canonical, country_name
+             select symbol, exchange_canonical, country_name, type
              from {{ ref('tickers') }}
              union all
-             select contract_name, exchange_canonical, country_name
+             select contract_name, exchange_canonical, country_name, null as type
              from {{ ref('ticker_options_monitored') }}
                       join {{ ref('tickers') }} using (symbol)
+         ),
+     old_realtime_checks as
+         (
+             with indexed_ticker_schedules as
+                      (
+                          select symbol,
+                                 exchange_schedule.date,
+                                 exchange_schedule.open_at,
+                                 exchange_schedule.close_at - interval '1 millisecond'      as close_at,
+                                 row_number() over (partition by symbol order by date desc) as idx,
+                                 row_number() over (partition by symbol order by date)      as idx_inv
+                          from tickers_and_options
+                                   left join exchange_schedule
+                                             on (tickers_and_options.exchange_canonical = exchange_schedule.exchange_name
+                                                 or (tickers_and_options.exchange_canonical is null and
+                                                     tickers_and_options.country_name = exchange_schedule.country_name))
+                          where open_at between now() - interval '1 week' and now()
+                            and type != 'crypto'
+
+                          union all
+
+                          select symbol,
+                                 (dd - interval '1 day')::date                            as date,
+                                 dd - interval '1 day'                                    as open_at,
+                                 dd - interval '1 millisecond'                            as close_at,
+                                 row_number() over (partition by symbol order by dd desc) as idx,
+                                 row_number() over (partition by symbol order by dd)      as idx_inv
+                          from generate_series(now() - interval '6 days', now(), interval '1 day') dd
+                                   join tickers_and_options on type = 'crypto'
+                      ),
+                  latest_trading_day as
+                      (
+                          select t.time,
+                                 indexed_ticker_schedules.*
+                          from (
+                                   select eod_intraday_prices.symbol,
+                                          indexed_ticker_schedules.date,
+                                          max(eod_intraday_prices.time) as time
+                                   from raw_data.eod_intraday_prices
+                                            join indexed_ticker_schedules
+                                                 on indexed_ticker_schedules.symbol = eod_intraday_prices.symbol
+                                                     and
+                                                    eod_intraday_prices.time between indexed_ticker_schedules.open_at and indexed_ticker_schedules.close_at
+                                   group by eod_intraday_prices.symbol, indexed_ticker_schedules.date
+                               ) t
+                                   join indexed_ticker_schedules using (symbol, date)
+                      )
+             select symbol,
+                    'old_realtime_metrics' as code,
+                    'realtime' as period,
+                    'Ticker ' || symbol || ' has old realtime metrics.' as message
+             from tickers_and_options
+                      left join {{ ref('ticker_realtime_metrics') }} using (symbol)
+                      join latest_trading_day using (symbol)
+             where ticker_realtime_metrics.time < least(latest_trading_day.close_at, latest_trading_day.time) - interval '20 minutes'
+                or ticker_realtime_metrics is null
+             group by symbol
+
+             union all
+
+             select symbol,
+                    'old_realtime_chart' as code,
+                    'realtime' as period,
+                    'Ticker ' || symbol || ' has old or no ' || json_agg(period) || ' chart.' as message
+             from tickers_and_options
+                      join latest_trading_day using (symbol)
+                      join (select period from (values ('1d'), ('1w')) t (period)) periods on true
+                      left join (
+                                    select symbol,
+                                           period,
+                                           max(chart.datetime) as datetime
+                                    from chart
+                                    where chart.period in ('1d', '1w')
+                                    group by symbol, period
+                                ) chart_1d_latest using (symbol, period)
+             where chart_1d_latest.datetime < least(latest_trading_day.close_at, latest_trading_day.time) - interval '20 minutes'
+                or (chart_1d_latest is null and period = '1d' and idx = 1)
+                or (chart_1d_latest is null and period = '1w')
+             group by symbol, period
          ),
      old_realtime_prices as
          (
@@ -233,46 +312,11 @@ with latest_trading_day as
 {% endif %}
      errors as
          (
-             select tickers_and_options.symbol,
-                    'old_realtime_metrics' as code,
-                    'realtime' as period,
-                    'Ticker ' || tickers_and_options.symbol || ' has old realtime metrics.' as message
-             from tickers_and_options
-                      join latest_trading_day
-                           on (latest_trading_day.exchange_name = tickers_and_options.exchange_canonical
-                               or (tickers_and_options.exchange_canonical is null
-                                   and latest_trading_day.country_name = tickers_and_options.country_name))
-                      left join {{ ref('ticker_realtime_metrics') }} on ticker_realtime_metrics.symbol = tickers_and_options.symbol
-             where ticker_realtime_metrics.symbol is null
-                or least(now(), latest_trading_day.close_at) - ticker_realtime_metrics.time > interval '30 minutes'
-
-             union all
-
-             select t.symbol,
-                    'old_realtime_chart' as code,
-                    'realtime' as period,
-                    'Ticker ' || t.symbol || ' has old realtime chart.' as message
-             from (
-                      select tickers_and_options.symbol,
-                             max(chart.datetime) as datetime
-                      from tickers_and_options
-                               left join {{ ref('chart') }}
-                                         on chart.symbol = tickers_and_options.symbol
-                                             and chart.period = '1d'
-                      group by tickers_and_options.symbol
-                  ) t
-                      left join old_realtime_prices using (symbol)
-                      join tickers_and_options using (symbol)
-                      join latest_trading_day
-                           on (latest_trading_day.exchange_name = tickers_and_options.exchange_canonical
-                               or (tickers_and_options.exchange_canonical is null
-                                   and latest_trading_day.country_name = tickers_and_options.country_name))
-                      left join {{ ref('data_checks_historical_prices') }}
-                           on data_checks_historical_prices.symbol = t.symbol
-                               and code = 'old_historical_prices'
-             where data_checks_historical_prices is null
-               and old_realtime_prices.symbol is null
-               and (datetime is null or least(now(), latest_trading_day.close_at) - datetime > interval '30 minutes')
+             select symbol,
+                    code,
+                    period,
+                    message
+             from old_realtime_checks
 
              union all
 
