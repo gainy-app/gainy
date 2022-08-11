@@ -52,7 +52,7 @@ with latest_trading_day as
                                  row_number() over (partition by symbol order by date desc) as idx,
                                  row_number() over (partition by symbol order by date)      as idx_inv
                           from tickers_and_options
-                                   left join {{ ref('exchang e_schedule')}}
+                                   left join {{ ref('exchange_schedule')}}
                                              on (tickers_and_options.exchange_canonical = exchange_schedule.exchange_name
                                                  or (tickers_and_options.exchange_canonical is null and
                                                      tickers_and_options.country_name = exchange_schedule.country_name))
