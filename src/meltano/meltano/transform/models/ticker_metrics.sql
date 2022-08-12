@@ -71,57 +71,57 @@ with highlights as (select * from {{ ref('highlights') }}),
          (
              with avg_volume_10d as
                       (
-                          select hp.code,
+                          select symbol,
                                  avg(hp.volume) as value
                           from historical_prices hp
                           where hp.date > now() - interval '10 days'
-                          group by hp.code
+                          group by symbol
                       ),
                   avg_volume_90d as
                       (
-                          select hp.code,
+                          select symbol,
                                  avg(hp.volume) as value
                           from historical_prices hp
                           where hp.date > now() - interval '90 days'
-                          group by hp.code
+                          group by symbol
                       ),
                   historical_volatility as
                       (
                           with volatility as
                                    (
-                                       select code,
+                                       select symbol,
                                               date,
                                               stddev_pop(adjusted_close)
-                                              OVER (partition by code ORDER BY date desc ROWS BETWEEN CURRENT ROW AND 255 FOLLOWING) as absolute_historical_volatility_adjusted,
+                                              OVER (partition by symbol ORDER BY date desc ROWS BETWEEN CURRENT ROW AND 255 FOLLOWING) as absolute_historical_volatility_adjusted,
                                               case
                                                   when adjusted_close > 0 then
                                                                   stddev_pop(adjusted_close)
-                                                                  OVER (partition by code ORDER BY date desc ROWS BETWEEN CURRENT ROW AND 255 FOLLOWING) /
+                                                                  OVER (partition by symbol ORDER BY date desc ROWS BETWEEN CURRENT ROW AND 255 FOLLOWING) /
                                                                   adjusted_close
                                                   end                                                                                as relative_historical_volatility_adjusted
                                        from historical_prices
                                        where date > now() - interval '2 year'
-                                       order by code, date desc
+                                       order by symbol, date desc
                                    ),
                                volatility_current as
                                    (
-                                       select distinct on (code) code,
+                                       select distinct on (symbol) symbol,
                                                                  volatility.absolute_historical_volatility_adjusted as absolute_historical_volatility_adjusted_current,
                                                                  volatility.relative_historical_volatility_adjusted as relative_historical_volatility_adjusted_current
                                        from volatility
                                        where date > now() - interval '1 year'
-                                       order by code, date desc
+                                       order by symbol, date desc
                                    ),
                                volatility_stats as
                                    (
-                                       select code,
+                                       select symbol,
                                               min(volatility.absolute_historical_volatility_adjusted) as absolute_historical_volatility_adjusted_min_1y,
                                               max(volatility.absolute_historical_volatility_adjusted) as absolute_historical_volatility_adjusted_max_1y,
                                               min(volatility.relative_historical_volatility_adjusted) as relative_historical_volatility_adjusted_min_1y,
                                               max(volatility.relative_historical_volatility_adjusted) as relative_historical_volatility_adjusted_max_1y
                                        from volatility
                                        where date > now() - interval '1 year'
-                                       group by volatility.code
+                                       group by volatility.symbol
                                    )
                           select volatility_current.*,
                                  volatility_stats.absolute_historical_volatility_adjusted_min_1y,
@@ -129,11 +129,11 @@ with highlights as (select * from {{ ref('highlights') }}),
                                  volatility_stats.relative_historical_volatility_adjusted_min_1y,
                                  volatility_stats.relative_historical_volatility_adjusted_max_1y
                           from volatility_current
-                                   join volatility_stats on volatility_stats.code = volatility_current.code
+                                   join volatility_stats using (symbol)
                       ),
                   implied_volatility as
                       (
-                          select code,
+                          select code as symbol,
                                  avg(impliedvolatility) as value
                           from raw_eod_options
                           group by code
@@ -154,12 +154,12 @@ with highlights as (select * from {{ ref('highlights') }}),
                     historical_volatility.relative_historical_volatility_adjusted_max_1y,
                     implied_volatility.value               as implied_volatility
              from base_tickers t
-                      left join ticker_shares_stats on t.symbol = ticker_shares_stats.symbol
-                      left join technicals on t.symbol = technicals.symbol
-                      left join avg_volume_10d on t.symbol = avg_volume_10d.code
-                      left join avg_volume_90d on t.symbol = avg_volume_90d.code
-                      left join historical_volatility on t.symbol = historical_volatility.code
-                      left join implied_volatility on t.symbol = implied_volatility.code
+                      left join ticker_shares_stats using (symbol)
+                      left join technicals using (symbol)
+                      left join avg_volume_10d using (symbol)
+                      left join avg_volume_90d using (symbol)
+                      left join historical_volatility using (symbol)
+                      left join implied_volatility using (symbol)
          ),
      growth_metrics as (
          with ebitda_growth_yoy as

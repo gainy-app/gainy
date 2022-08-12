@@ -74,12 +74,12 @@ with
              from intrpl_symbol_asmarket_dt as d
              left join
                  (
-                     select 	code as intrpl_symbol_asmarket,
+                     select symbol as intrpl_symbol_asmarket,
                          "date"::timestamp as dt,
                          adjusted_close
                      from {{ ref('historical_prices') }} ehp
                      join check_params cp on true
-                     where code = any(array[cp.symbol_asmarket_other, cp.symbol_asmarket_crypto])
+                     where symbol = any(array[cp.symbol_asmarket_other, cp.symbol_asmarket_crypto])
                  ) as t using(intrpl_symbol_asmarket, dt)
              window
                  lookback as (partition by d.intrpl_symbol_asmarket order by d.dt asc),
@@ -89,14 +89,14 @@ with
      tickers_data as
          (
              select
-                 code 										as symbol,
+                 symbol,
                  "date"::timestamp 								as dt,
                  adjusted_close,
                  volume,
                  case 	when t."type" = 'crypto' then cp.symbol_asmarket_crypto
                      else cp.symbol_asmarket_other end					as intrpl_symbol_asmarket
              from {{ ref('historical_prices') }} ehp
-             join {{ ref('tickers') }} t on t.symbol = ehp.code -- we are interested in all tickers that are available in the app, so tickers table
+             join {{ ref('tickers') }} t using (symbol) -- we are interested in all tickers that are available in the app, so tickers table
              left join check_params cp on true
              where "date"::timestamp >= now()::timestamp - cp.depth_stddev
          ),
@@ -268,11 +268,11 @@ with
          (
              select symbol
              from (
-                      select tickers.symbol,
+                      select symbol,
                              max(historical_prices.date) as date
                       from {{ ref('tickers') }}
-                               left join {{ ref('historical_prices') }} on historical_prices.code = tickers.symbol
-                      group by tickers.symbol
+                               left join {{ ref('historical_prices') }} using (symbol)
+                      group by symbol
                   ) t
                       join {{ ref('tickers') }} using (symbol)
                       join latest_trading_day

@@ -19,12 +19,12 @@ with tickers as (select * from {{ ref('tickers') }} where type != 'crypto'),
      valuation as (select * from {{ ref('valuation') }}),
      hsg_extended as
          (
-             select distinct on (hp.code) hp.close as quartal_end_price, hsg.*
+             select distinct on (hp.symbol) hp.close as quartal_end_price, hsg.*
              from historical_sales_growth hsg
                       JOIN {{ ref('historical_prices') }} hp
-                          ON hp.code = hsg.symbol
+                          ON hp.symbol = hsg.symbol
                               AND hp.date between hsg.updated_at - interval '1 week' and hsg.updated_at
-             order by hp.code, hp.date DESC
+             order by hp.symbol, hp.date DESC
          ),
      latest_yearly_earning_trend as
          (

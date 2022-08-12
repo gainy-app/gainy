@@ -54,3 +54,6 @@ variable "onesignal_api_key" {}
 variable "gainy_history_s3_bucket" {}
 variable "bigquery_google_project" {}
 variable "bigquery_credentials" {}
+variable "pg_datadog_password" {}
+variable "pg_internal_sync_username" {}
+variable "pg_internal_sync_password" {}

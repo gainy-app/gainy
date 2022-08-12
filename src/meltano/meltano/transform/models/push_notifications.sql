@@ -205,7 +205,7 @@ with all_push_notifications as
                                            join {{ ref('portfolio_securities_normalized') }}
                                                 on portfolio_securities_normalized.id = portfolio_expanded_transactions.security_id
                                            left join {{ ref('historical_prices') }}
-                                                     on historical_prices.code = portfolio_securities_normalized.original_ticker_symbol
+                                                     on historical_prices.symbol = portfolio_securities_normalized.original_ticker_symbol
                                                          and historical_prices.date = portfolio_expanded_transactions.date
                               ),
                           distinct_positions as

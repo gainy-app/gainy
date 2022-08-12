@@ -13,22 +13,19 @@ variable "pg_username" {}
 variable "pg_password" {}
 variable "pg_dbname" {}
 variable "pg_production_internal_sync_username" {}
+variable "pg_datadog_password" {}
 variable "public_schema_name" {}
 
 locals {
   provision_script_content = templatefile(
     "${path.module}/templates/provision.sh",
     {
-      PG_HOST                   = var.pg_host
-      PG_PASSWORD               = var.pg_password
-      PG_PORT                   = var.pg_port
-      PG_USERNAME               = var.pg_username
-      PG_DBNAME                 = var.pg_dbname
-      PUBLIC_SCHEMA_NAME        = var.public_schema_name
-      PG_DATADOG_PASSWORD       = random_password.datadog_postgres.result
-      PG_INTERNAL_SYNC_USERNAME = var.pg_production_internal_sync_username
-      PG_INTERNAL_SYNC_PASSWORD = random_password.internal_sync_postgres.result
-      DATADOG_API_KEY           = var.datadog_api_key
+      PG_HOST         = var.pg_host
+      PG_PASSWORD     = var.pg_password
+      PG_PORT         = var.pg_port
+      PG_USERNAME     = var.pg_username
+      PG_DBNAME       = var.pg_dbname
+      DATADOG_API_KEY = var.datadog_api_key
     }
   )
 
@@ -39,7 +36,7 @@ locals {
       PG_PORT             = var.pg_port
       PG_DBNAME           = var.pg_dbname
       PUBLIC_SCHEMA_NAME  = var.public_schema_name
-      PG_DATADOG_PASSWORD = random_password.datadog_postgres.result
+      PG_DATADOG_PASSWORD = var.pg_datadog_password
       ENV                 = var.env
       DBM_ENABLED         = var.env == "production"
     }
@@ -89,16 +86,6 @@ resource "aws_security_group" "bridge" {
     protocol    = "all"
     cidr_blocks = ["0.0.0.0/0"]
   }
-}
-
-resource "random_password" "datadog_postgres" {
-  length  = 16
-  special = false
-}
-
-resource "random_password" "internal_sync_postgres" {
-  length  = 16
-  special = false
 }
 
 resource "aws_instance" "bridge" {

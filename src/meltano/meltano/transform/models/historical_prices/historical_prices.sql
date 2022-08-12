@@ -3,11 +3,11 @@
     materialized = "incremental",
     unique_key = "id",
     post_hook=[
-      pk('code, date'),
+      pk('symbol, date'),
       index(this, 'id', true),
-      'create unique index if not exists "code__date_year__date" ON {{ this }} (code, date_year, date)',
-      'create unique index if not exists "code__date_month__date" ON {{ this }} (code, date_month, date)',
-      'create unique index if not exists "date_week__code__date" ON {{ this }} (date_week, code, date)',
+      'create unique index if not exists "symbol__date_year__date" ON {{ this }} (symbol, date_year, date)',
+      'create unique index if not exists "symbol__date_month__date" ON {{ this }} (symbol, date_month, date)',
+      'create unique index if not exists "date_week__symbol__date" ON {{ this }} (date_week, symbol, date)',
     ]
   )
 }}
@@ -139,7 +139,7 @@ all_rows as
                        on wrongfully_adjusted_prices.code = prices_with_split_rates.code
                            and wrongfully_adjusted_prices.date = prices_with_split_rates.date
 )
-select code,
+select code                                      as symbol,
        (code || '_' || date)                     as id,
        substr(date, 0, 5)                        as date_year,
        (substr(date, 0, 8) || '-01')::timestamp  as date_month,
