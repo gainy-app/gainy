@@ -101,7 +101,7 @@ with latest_trading_day as
              union all
 
              select symbol,
-                    'old_realtime_chart' as code,
+                    'old_realtime_chart_' || period as code,
                     'realtime' as period,
                     'Ticker ' || symbol || ' has old or no ' || json_agg(period) || ' chart.' as message
              from tickers_and_options
