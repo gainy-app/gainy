@@ -301,6 +301,7 @@ resource "datadog_monitor" "meltano_dag_run_duration" {
 
   require_full_window = false
   notify_no_data      = true
+  no_data_timeframe   = 30
   renotify_interval   = 720
 
   tags = ["meltano"]
@@ -350,7 +351,7 @@ resource "datadog_monitor" "data_errors_count" {
   }
 
   require_full_window = false
-  notify_no_data      = true
+  notify_no_data      = false
   renotify_interval   = 1440
 
   tags = ["meltano"]
