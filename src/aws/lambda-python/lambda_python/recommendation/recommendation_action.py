@@ -26,10 +26,12 @@ class GetRecommendedCollections(HasuraAction):
                 'force': force,
             }
 
-            collections = self.get_recommended_collections(force)
+            collections = self.get_collections(db_conn, profile_id, limit,
+                                               force)
 
             if not len(collections) and not force:
-                collections = self.get_recommended_collections(True)
+                collections = self.get_collections(db_conn, profile_id, limit,
+                                                   True)
 
             if not len(collections):
                 logger.error(
@@ -46,7 +48,8 @@ class GetRecommendedCollections(HasuraAction):
                              e,
                              extra=logging_extra)
 
-    def get_collections(self, force: bool) -> List[Tuple[int, str]]:
+    def get_collections(self, db_conn, profile_id, limit,
+                        force: bool) -> List[Tuple[int, str]]:
         if force:
             recommendations_func = ComputeRecommendationsAndPersist(
                 db_conn, profile_id)
