@@ -350,7 +350,7 @@ resource "datadog_monitor" "data_errors_count" {
   }
 
   require_full_window = false
-  notify_no_data      = true
+  notify_no_data      = false
   renotify_interval   = 1440
 
   tags = ["meltano"]
