@@ -5,47 +5,60 @@
   )
 }}
 
-with ticker_categories as (
-    select symbol, array_agg(c.name) as ticker_categories
-    from {{ ref('ticker_categories') }} tc
-             join {{ ref('categories') }} c
-                  on tc.category_id = c.id
-    group by symbol
-),
-ticker_industries as (
-    select symbol, array_agg(gainy_industries.name) as ticker_industries
-    from {{ ref('ticker_industries') }} ti
-        join {{ ref('gainy_industries') }}
-            on ti.industry_id = gainy_industries.id
-    group by symbol
-),
-ticker_volumes as (
-    select symbol, avg(volume) as daily_volume_avg
-    from {{ ref('historical_prices') }}
-    where "date"::date >= NOW() - interval '30 days'
-    group by symbol
-)
-select t.symbol,
-       t.name,
+with ticker_categories as
+         (
+             select symbol, array_agg(c.name) as ticker_categories
+             from {{ ref('ticker_categories') }} tc
+                      join {{ ref('categories') }} c
+                           on tc.category_id = c.id
+             group by symbol
+         ),
+    ticker_industries as
+         (
+             select symbol, array_agg(gainy_industries.name) as ticker_industries
+             from {{ ref('ticker_industries') }} ti
+                 join {{ ref('gainy_industries') }}
+                     on ti.industry_id = gainy_industries.id
+             group by symbol
+         ),
+    ticker_volumes as
+         (
+             select symbol, avg(volume) as daily_volume_avg
+             from {{ ref('historical_prices') }}
+             where "date"::date >= NOW() - interval '30 days'
+             group by symbol
+         ),
+    tickers_with_realtime_prices as
+         (
+             select symbol
+             from {{ source('eod', 'eod_intraday_prices') }}
+                      join {{ ref('base_tickers') }} using (symbol)
+             where type in ('crypto', 'index')
+             group by symbol
+         ),
+     ticker_search_alternative_names as
+        (
+            select *
+            from{{ source('gainy', 'ticker_search_alternative_names') }}
+            where (select max(_sdc_batched_at) from {{ source('gainy', 'ticker_search_alternative_names') }}) - ticker_search_alternative_names._sdc_batched_at < interval '1 minute'
+        )
+select tickers.symbol,
+       tickers.name,
        ticker_search_alternative_names.name as alternative_name,
-       t.description,
-       ti.ticker_industries as tag_1,
-       tc.ticker_categories as tag_2,
-       tv.daily_volume_avg::real
-from {{ ref('tickers') }} t
-         left join ticker_volumes tv
-                   on t.symbol = tv.symbol
-         left join ticker_industries ti
-                   on t.symbol = ti.symbol
-         left join ticker_categories tc
-                   on t.symbol = tc.symbol
-         left join {{ source('gainy', 'ticker_search_alternative_names') }}
-                   on ticker_search_alternative_names.symbol = t.symbol
-                       and (select max(_sdc_batched_at) from {{ source('gainy', 'ticker_search_alternative_names') }}) - ticker_search_alternative_names._sdc_batched_at < interval '1 minute'
-where true
+       tickers.description,
+       ticker_industries.ticker_industries as tag_1,
+       ticker_categories.ticker_categories as tag_2,
+       ticker_volumes.daily_volume_avg::real
+from {{ ref('tickers') }}
+         left join tickers_with_realtime_prices using (symbol)
+         left join ticker_volumes using (symbol)
+         left join ticker_industries using (symbol)
+         left join ticker_categories using (symbol)
+         left join ticker_search_alternative_names using (symbol)
+where (type not in ('crypto', 'index') or tickers_with_realtime_prices is not null)
 {% if not var('search_crypto_enabled') %}
-  and t.type != 'crypto'
+  and tickers.type != 'crypto'
 {% endif %}
 {% if not var('search_index_enabled') %}
-  and t.type != 'index'
+  and tickers.type != 'index'
 {% endif %}
