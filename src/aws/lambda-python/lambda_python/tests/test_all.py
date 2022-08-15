@@ -24,9 +24,9 @@ def test_set_recommendation_settings():
     event = get_action_event(
         "set_recommendation_settings", {
             "profile_id": PROFILE_ID,
-            interests: [1],
-            categories: [1],
-            recommended_collections_count: 1
+            'interests': [1],
+            'categories': [1],
+            'recommended_collections_count': 1
         }, USER_ID)
     response = action_dispatcher.handle(event)
     assert "code" not in response
