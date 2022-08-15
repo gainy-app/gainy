@@ -75,6 +75,12 @@ sources:
     tables:
       - name: blogs
 
+  - name: gainy_history
+    description: Website data, managed by webflow integrations at gainy.app
+    schema: gainy_history
+    tables:
+      - name: collection_tickers_weighted
+
 models:
   - name: categories
     columns:

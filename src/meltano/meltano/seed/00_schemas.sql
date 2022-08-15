@@ -3,6 +3,7 @@ CREATE SCHEMA IF NOT EXISTS airflow;
 CREATE SCHEMA IF NOT EXISTS mlflow;
 CREATE SCHEMA IF NOT EXISTS raw_data;
 CREATE SCHEMA IF NOT EXISTS deployment;
+CREATE SCHEMA IF NOT EXISTS gainy_history;
 
 create table if not exists raw_data.eod_intraday_prices
 (
@@ -48,4 +49,18 @@ create table if not exists deployment.realtime_listener_heartbeat
     time          timestamp not null,
 
     primary key (time, source, key)
+);
+
+create table gainy_history.collection_tickers_weighted
+(
+    _sdc_batched_at    timestamp,
+    _sdc_deleted_at    varchar,
+    _sdc_extracted_at  timestamp,
+    collection_id      integer,
+    collection_uniq_id varchar   not null,
+    date               timestamp not null,
+    profile_id         integer,
+    symbol             varchar   not null,
+    weight             numeric,
+    primary key (collection_uniq_id, symbol, date)
 );

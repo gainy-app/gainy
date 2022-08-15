@@ -7,39 +7,49 @@
 
 
 with recursive
+    collection_tickers_weighted as materialized
+        (
+            select *
+            from {{ source('gainy_history', 'collection_tickers_weighted') }}
+            where profile_id is null
+        ),
     -- Execution Time: 1118.536 ms
-    collection_daily_weights as
+    collection_daily_weights as materialized
         (
             select collection_uniq_id,
                    date,
                    sum(weight)                                                       as weight_sum,
                    row_number() over (partition by collection_uniq_id order by date) as idx
-            from gainy_history.collection_tickers_weighted
+            from collection_tickers_weighted
+                     join {{ ref('historical_prices') }} using (symbol, date)
+            where profile_id is null
             group by collection_uniq_id, date
-        ),
+        ), --  select * from collection_daily_weights where collection_uniq_id = '0_107';
     -- Execution Time: 11632.348 ms
-    collection_ticker_daily_price as
+    collection_ticker_daily_price as materialized
         (
-            select collection_uniq_id,
-                   date,
-                   symbol,
-                   lag(open)
-                   over (partition by collection_uniq_id, symbol order by date desc) as price -- we trade with open price on the next day,
-            from gainy_history.collection_tickers_weighted
+            select distinct on (
+                collection_uniq_id, symbol, date
+                ) collection_uniq_id,
+                  date,
+                  symbol,
+                  weight,
+                  lag(open)
+                  over (partition by collection_uniq_id, symbol order by date desc) as price -- we trade with open price on the next day,
+            from collection_tickers_weighted
                      join collection_daily_weights using (collection_uniq_id, date)
-                     join historical_prices using (symbol, date)
+                     join {{ ref('historical_prices') }} using (symbol, date)
         ),
-    -- Execution Time: 17894.839 ms
-    collection_daily_prices as
+    -- Execution Time: 35711.127 ms
+    collection_daily_prices as materialized
         (
             select collection_uniq_id,
                    date,
                    sum(weight / weight_sum * price) as weighted_price_sum
-            from gainy_history.collection_tickers_weighted
+            from collection_ticker_daily_price
                      join collection_daily_weights using (collection_uniq_id, date)
-                     join collection_ticker_daily_price using (collection_uniq_id, date, symbol)
             group by collection_uniq_id, date
-        ),
+        ), -- select * from collection_daily_prices;
     -- Execution Time: 20945.303 ms
     collection_daily_amounts as
         (
@@ -49,15 +59,11 @@ with recursive
                    idx,
                    weight / weight_sum                             as weight,
                    weight / weight_sum / weighted_price_sum * 1000 as amount,
-                   coalesce(lag(weight / weight_sum / weighted_price_sum * 1000)
-                            over (partition by collection_uniq_id, symbol order by date),
-                            0)                                     as prev_amount,
                    price
-            from gainy_history.collection_tickers_weighted
+            from collection_ticker_daily_price
                      join collection_daily_weights using (collection_uniq_id, date)
                      join collection_daily_prices using (collection_uniq_id, date)
-                     join collection_ticker_daily_price using (collection_uniq_id, date, symbol)
-        ),
+        ), -- select * from collection_daily_amounts where collection_uniq_id = '0_107';
     -- Execution Time: 22925.672 ms
     initial_data as
         (
