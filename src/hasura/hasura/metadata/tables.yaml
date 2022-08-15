@@ -147,21 +147,6 @@
           profile:
             user_id:
               _eq: X-Hasura-User-Id
-  event_triggers:
-    - name: recommendations__profile_categories
-      definition:
-        enable_manual: false
-        insert:
-          columns: '*'
-        delete:
-          columns: '*'
-        update:
-          columns: '*'
-      retry_conf:
-        num_retries: 1
-        interval_sec: 30
-        timeout_sec: 150
-      webhook: '{{AWS_LAMBDA_API_GATEWAY_ENDPOINT}}/hasuraTrigger'
 - table:
     schema: app
     name: profile_favorite_collections
@@ -325,21 +310,6 @@
           profile:
             user_id:
               _eq: X-Hasura-User-Id
-  event_triggers:
-    - name: recommendations__profile_interests
-      definition:
-        enable_manual: false
-        insert:
-          columns: '*'
-        delete:
-          columns: '*'
-        update:
-          columns: '*'
-      retry_conf:
-        num_retries: 1
-        interval_sec: 30
-        timeout_sec: 150
-      webhook: '{{AWS_LAMBDA_API_GATEWAY_ENDPOINT}}/hasuraTrigger'
 - table:
     schema: app
     name: profile_plaid_access_tokens

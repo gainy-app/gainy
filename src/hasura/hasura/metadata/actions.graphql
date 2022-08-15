@@ -143,6 +143,15 @@ type Query {
   ): [Ticker]
 }
 
+type Mutation {
+  set_recommendation_settings(
+    profile_id: Int!
+    interests: [Int]!
+    categories: [Int]!
+    recommended_collections_count: Int
+  ): SetRecommendationSettingsOutput
+}
+
 type Query {
   stripe_get_checkout_url(
     price_id: String!
@@ -314,5 +323,9 @@ type Promocode {
   description: String
   name: String
   config: String!
+}
+
+type SetRecommendationSettingsOutput {
+  recommended_collections: [Collection]
 }
 

@@ -5,7 +5,7 @@ COLLECTION_IDS = [83]
 
 
 def get_recommended_collections():
-    query = '{ get_recommended_collections(profile_id: %d) { id collection { id name image_url enabled description ticker_collections_aggregate { aggregate { count } } } } }' % (
+    query = '{ get_recommended_collections(profile_id: %d) { id collection { id name image_url enabled description } } }' % (
         PROFILE_ID)
     return make_graphql_request(query)['data']['get_recommended_collections']
 
@@ -19,6 +19,19 @@ def test_recommended_collections():
         [i['id'] for i in get_personalized_collections()])
     collection_ids = set([i['id'] for i in data])
     assert personalized_collection_ids.issubset(collection_ids)
+
+
+def test_set_recommendation_settings():
+    query = 'mutation set_recommendation_settings($profileId: Int!, $interests: [Int]!, $categories: [Int]!, $recommended_collections_count: Int){ set_recommendation_settings(profile_id: $profileId, interests: $interests, categories: $categories, recommended_collections_count: $recommended_collections_count) { recommended_collections { id collection { id name image_url enabled description } } } }'
+    data = make_graphql_request(
+        query, {
+            'profileId': PROFILE_ID,
+            'interests': [12],
+            'categories': [1],
+            'recommended_collections_count': 1,
+        })['data']['set_recommendation_settings']['recommended_collections']
+
+    assert len(data) >= MIN_PERSONALIZED_COLLECTIONS_COUNT
 
 
 def test_favorite_collections():

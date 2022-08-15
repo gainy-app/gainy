@@ -32,6 +32,7 @@ API_GATEWAY_PROXY_INTEGRATION = os.getenv(
     "AWS_LAMBDA_API_GATEWAY_PROXY_INTEGRATION", "True") == "True"
 
 ACTIONS = [
+    SetRecommendationSettings(),
     GetRecommendedCollections(),
     GetMatchScoreByTicker(),
     GetMatchScoreByTickerList(),
@@ -73,7 +74,6 @@ def handle_action(event, context):
 TRIGGERS = [
     SetUserCategories(),
     OnUserCreated(ENV),
-    SetRecommendations(),
     OnPlaidAccessTokenCreated(),
     OnInvitationCreatedOrUpdated(),
 ]
