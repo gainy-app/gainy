@@ -128,8 +128,8 @@
   "privileged": null,
   "memoryReservation": null,
   "healthCheck": {
-    "command": [ "CMD-SHELL", "curl http://localhost:8793/ || exit 1" ],
-    "interval": 10,
+    "command": [ "CMD-SHELL", "meltano invoke airflow jobs check --job-type SchedulerJob --hostname \"$(hostname)\"" ],
+    "interval": 60,
     "retries": 2
   },
   "logConfiguration": {
