@@ -53,32 +53,20 @@ mutation {
 }
 ```
 
-### Update interests
+### Update interests and categories
 
 ```graphql
-mutation {
-    insert_app_profile_interests(
-        objects: [
-            {profile_id: 11, interest_id: 3},
-            {profile_id: 11, interest_id: 4},
-        ],
-        on_conflict: {
-            constraint: profile_interests_pkey,
-            update_columns: []
-        }
-    ) {
-        returning {
-            interest_id
-        }
-    }
-    delete_app_profile_interests(
-        where: {
-            interest_id: {_in: [1,2]},
-            profile_id: {_eq: 11}
-        }
-    ) {
-        returning {
-            interest_id
+mutation set_recommendation_settings($profileId: Int!, $interests: [Int]!, $categories: [Int]!, $recommended_collections_count: Int) {
+    set_recommendation_settings(profile_id: $profileId, interests: $interests, categories: $categories, recommended_collections_count: $recommended_collections_count) {
+        recommended_collections {
+            id
+            collection {
+                id
+                name
+                image_url
+                enabled
+                description
+            }
         }
     }
 }
