@@ -30,7 +30,7 @@ class HubspotService:
             logger.info("Successfully created hubspot contact %s",
                         json.dumps(api_response.to_dict(), default=str))
         except ApiException as e:
-            logger.error("Exception when creating contact: %s", e)
+            logger.warning("Exception when creating contact: %s", e)
 
     def __get_client(self):
         if self.api_client is None:

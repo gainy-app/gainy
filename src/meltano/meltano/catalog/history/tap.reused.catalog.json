@@ -26,6 +26,32 @@
         "properties": {}
       },
       "selected": true
+    },
+    {
+      "table_name": "collection_snapshots",
+      "stream": "collection_snapshots",
+      "metadata": [
+        {
+          "breadcrumb": [],
+          "metadata": {
+            "replication-key": "date",
+            "replication-method": "INCREMENTAL",
+            "view-key-properties": [
+              "collection_uniq_id",
+              "date"
+            ],
+            "schema-name": "public",
+            "database-name": "gainy",
+            "selected": true
+          }
+        }
+      ],
+      "tap_stream_id": "public-collection_snapshots",
+      "schema": {
+        "type": "object",
+        "properties": {}
+      },
+      "selected": true
     }
   ]
 }
