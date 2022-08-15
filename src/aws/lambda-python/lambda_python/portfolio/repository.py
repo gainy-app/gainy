@@ -22,7 +22,7 @@ class PortfolioRepository(Repository):
                     [entity.id for entity in entities if entity.id])
 
                 sql_string = sql.SQL(
-                    "DELETE FROM {schema_name}.{table_name} WHERE plaid_access_token_id IN %(plaid_access_token_ids)s AND id NOT IN %(excluded_ids)s"
+                    "DELETE FROM {schema_name}.{table_name} WHERE plaid_access_token_id IN %(plaid_access_token_ids)s"
                 ).format(schema_name=sql.Identifier(schema_name),
                          table_name=sql.Identifier(table_name))
                 params = {
