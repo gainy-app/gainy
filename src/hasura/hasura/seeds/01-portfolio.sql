@@ -8,10 +8,16 @@ select profiles.id,
        'portfolio_demo_' || profiles.id,
        plaid_institutions.id
 from app.profiles
-         left join app.profile_plaid_access_tokens on profiles.id = profile_plaid_access_tokens.profile_id
          left join app.plaid_institutions on plaid_institutions.ref_id = 'demo'
 where profiles.id = 1
-  and profile_plaid_access_tokens.id is null
+on conflict do nothing;
+
+INSERT INTO app.profile_plaid_access_tokens (profile_id, access_token, item_id)
+select profiles.id,
+       'access-sandbox-1b188d63-fea5-433e-aee9-30ba19cebda6',
+       'Rbe7Mk36yxsZamjZLMGrtnpv3W6zx7uRwBdga'
+from app.profiles
+where profiles.id = 2
 on conflict do nothing;
 
 INSERT INTO app.profile_portfolio_accounts (ref_id, balance_current, balance_iso_currency_code,
