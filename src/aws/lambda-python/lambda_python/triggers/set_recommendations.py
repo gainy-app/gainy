@@ -23,7 +23,11 @@ class SetRecommendations(HasuraTrigger):
         }
 
         payload = self._extract_payload(data)
-        skip_trigger = payload.get("skip_trigger", False)
+        category_id = payload.get("category_id")
+        interest_id = payload.get("interest_id")
+        skip_trigger = self.skip_category_update(
+            db_conn, profile_id, category_id) or self.skip_interest_update(
+                db_conn, profile_id, interest_id)
         if skip_trigger:
             logger.info('Skipped calculating Match Scores',
                         extra=logging_extra)
@@ -52,6 +56,36 @@ class SetRecommendations(HasuraTrigger):
             logger.warning('Match Score Calculation failed: %s',
                            e,
                            extra=logging_extra)
+
+    def skip_category_update(self, db_conn, profile_id, category_id):
+        if category_id is None:
+            return False
+
+        with db_conn.cursor() as cursor:
+            cursor.execute(
+                "select skip_trigger from app.profile_categories where profile_id = %(profile_id)s and category_id = %(category_id)s",
+                {
+                    "profile_id": profile_id,
+                    "category_id": category_id
+                })
+            row = cursor.fetchone()
+
+        return row and row[0]
+
+    def skip_interest_update(self, db_conn, profile_id, interest_id):
+        if interest_id is None:
+            return False
+
+        with db_conn.cursor() as cursor:
+            cursor.execute(
+                "select skip_trigger from app.profile_interests where profile_id = %(profile_id)s and interest_id = %(interest_id)s",
+                {
+                    "profile_id": profile_id,
+                    "interest_id": interest_id
+                })
+            row = cursor.fetchone()
+
+        return row and row[0]
 
     def get_profile_id(self, data):
         payload = self._extract_payload(data)
