@@ -23,20 +23,16 @@ class GetRecommendedCollections(HasuraAction):
             }
 
             if force:
-                recommendations_func = ComputeRecommendationsAndPersist(
-                    db_conn, profile_id)
-                try:
-                    recommendations_func.get_and_persist(db_conn, max_tries=3)
-                except ConcurrentVersionUpdate:
-                    pass
+                self.update_match_scores(db_conn, profile_id)
 
             repository = RecommendationRepository(db_conn)
             collections = repository.get_recommended_collections(
-                profile_id, limit, force)
+                profile_id, limit)
 
             if not len(collections) and not force:
+                self.update_match_scores(db_conn, profile_id)
                 collections = repository.get_recommended_collections(
-                    profile_id, limit, True)
+                    profile_id, limit)
 
             if not len(collections):
                 logger.error(
@@ -52,3 +48,11 @@ class GetRecommendedCollections(HasuraAction):
             logger.exception('get_recommended_collections: error %s',
                              e,
                              extra=logging_extra)
+
+    def update_match_scores(self, db_conn, profile_id):
+        recommendations_func = ComputeRecommendationsAndPersist(
+            db_conn, profile_id)
+        try:
+            recommendations_func.get_and_persist(db_conn, max_tries=2)
+        except ConcurrentVersionUpdate:
+            pass

@@ -159,6 +159,22 @@ def test_on_user_created():
     assert response is None
 
 
+def test_set_recommendations():
+    for trigger_name in [
+            'recommendations__profile_categories',
+            'recommendations__profile_interests'
+    ]:
+        event = get_trigger_event(trigger_name, "insert", {
+            "old": {},
+            "new": {
+                "profile_id": PROFILE_ID,
+            }
+        }, USER_ID)
+
+        response = trigger_dispatcher.handle(event)
+        assert response is None
+
+
 def test_on_plaid_access_token_created():
     event = get_trigger_event(
         "on_plaid_access_token_created", "insert", {

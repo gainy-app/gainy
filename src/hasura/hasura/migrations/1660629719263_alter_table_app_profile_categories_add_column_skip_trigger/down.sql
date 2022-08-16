@@ -1,0 +1,4 @@
+-- Could not auto-generate a down migration.
+-- Please write an appropriate down migration for the SQL below:
+-- alter table "app"."profile_categories" add column "skip_trigger" boolean
+--  not null default 'false';

@@ -74,6 +74,7 @@ def handle_action(event, context):
 TRIGGERS = [
     SetUserCategories(),
     OnUserCreated(ENV),
+    SetRecommendations(),
     OnPlaidAccessTokenCreated(),
     OnInvitationCreatedOrUpdated(),
 ]

@@ -1,3 +1,4 @@
 from triggers.on_invitation_created_or_updated import OnInvitationCreatedOrUpdated
 from triggers.on_user_created import OnUserCreated
+from triggers.set_recommendations import SetRecommendations
 from triggers.set_user_categories import SetUserCategories

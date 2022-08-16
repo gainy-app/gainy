@@ -54,21 +54,30 @@ class SetRecommendationSettings(HasuraAction):
     def set_interests(self, db_conn, profile_id, interests):
         with db_conn.cursor() as cursor:
             cursor.execute(
+                "update app.profile_interests set skip_trigger = true where profile_id = %(profile_id)s",
+                {"profile_id": profile_id})
+
+            cursor.execute(
                 "delete from app.profile_interests where profile_id = %(profile_id)s",
                 {"profile_id": profile_id})
 
             execute_values(
                 cursor,
-                "INSERT INTO app.profile_interests(profile_id, interest_id) VALUES %s",
-                [(profile_id, interest_id) for interest_id in interests])
+                "INSERT INTO app.profile_interests(profile_id, interest_id, skip_trigger) VALUES %s",
+                [(profile_id, interest_id, True) for interest_id in interests])
 
     def set_categories(self, db_conn, profile_id, categories):
         with db_conn.cursor() as cursor:
+            cursor.execute(
+                "update app.profile_categories set skip_trigger = true where profile_id = %(profile_id)s",
+                {"profile_id": profile_id})
+
             cursor.execute(
                 "delete from app.profile_categories where profile_id = %(profile_id)s",
                 {"profile_id": profile_id})
 
             execute_values(
                 cursor,
-                "INSERT INTO app.profile_categories(profile_id, category_id) VALUES %s",
-                [(profile_id, category_id) for category_id in categories])
+                "INSERT INTO app.profile_categories(profile_id, category_id, skip_trigger) VALUES %s",
+                [(profile_id, category_id, True)
+                 for category_id in categories])
