@@ -146,8 +146,8 @@ type Query {
 type Mutation {
   set_recommendation_settings(
     profile_id: Int!
-    interests: [Int]!
-    categories: [Int]!
+    interests: [Int]
+    categories: [Int]
     recommended_collections_count: Int
   ): SetRecommendationSettingsOutput
 }
