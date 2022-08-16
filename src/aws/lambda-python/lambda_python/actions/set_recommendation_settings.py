@@ -18,8 +18,8 @@ class SetRecommendationSettings(HasuraAction):
 
     def apply(self, db_conn, input_params, headers):
         profile_id = input_params["profile_id"]
-        interests = input_params["interests"]
-        categories = input_params["categories"]
+        interests = input_params.get("interests")
+        categories = input_params.get("categories")
         recommended_collections_count = input_params.get(
             "recommended_collections_count", 0)
 
@@ -52,6 +52,9 @@ class SetRecommendationSettings(HasuraAction):
         }
 
     def set_interests(self, db_conn, profile_id, interests):
+        if interests is None:
+            return
+
         with db_conn.cursor() as cursor:
             cursor.execute(
                 "update app.profile_interests set skip_trigger = true where profile_id = %(profile_id)s",
@@ -67,6 +70,9 @@ class SetRecommendationSettings(HasuraAction):
                 [(profile_id, interest_id, True) for interest_id in interests])
 
     def set_categories(self, db_conn, profile_id, categories):
+        if categories is None:
+            return
+
         with db_conn.cursor() as cursor:
             cursor.execute(
                 "update app.profile_categories set skip_trigger = true where profile_id = %(profile_id)s",
