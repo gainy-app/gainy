@@ -25,6 +25,9 @@ class HasuraAction(ABC):
 
         return profile_id
 
+    def get_allowed_profile_ids(self, input_params):
+        return self.get_profile_id(input_params)
+
     def is_applicable(self, name) -> bool:
         return name == self.name
 

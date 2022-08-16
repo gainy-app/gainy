@@ -27,15 +27,15 @@ with portfolio_tickers as
              group by profile_id
          )
 select portfolio_tickers.profile_id,
-       weight / weight_sum                as weight,
-       'ticker'::varchar                  as entity_type,
-       symbol                             as entity_id,
-       ticker_name                        as entity_name,
-       coalesce(absolute_daily_change, 0) as absolute_daily_change,
+       weight / weight_sum                                      as weight,
+       'ticker'::varchar                                        as entity_type,
+       symbol                                                   as entity_id,
+       ticker_name                                              as entity_name,
+       coalesce(absolute_daily_change * weight / weight_sum, 0) as absolute_daily_change,
        case
            when abs(absolute_value - absolute_daily_change) > 0
                then absolute_value / (absolute_value - absolute_daily_change) - 1
-           end                            as relative_daily_change,
+           end                                                  as relative_daily_change,
        absolute_value
 from portfolio_tickers
          join portfolio_tickers_weight_sum using (profile_id)
@@ -43,6 +43,7 @@ from portfolio_tickers
               on portfolio_holding_group_details.ticker_symbol = portfolio_tickers.symbol
                   and portfolio_holding_group_details.profile_id = portfolio_tickers.profile_id
 where weight is not null
+  and weight_sum > 0
 
 union all
 
@@ -72,8 +73,8 @@ union all
          portfolio_categories_weight_sum as
              (
                  select profile_id,
-                        sum(weight)                as weight_sum,
-                        sum(absolute_daily_change) as absolute_daily_change_sum
+                        sum(weight)                     as weight_sum,
+                        sum(abs(absolute_daily_change)) as absolute_daily_change_sum
                  from portfolio_categories
                  group by profile_id
              )
@@ -90,19 +91,20 @@ union all
            absolute_value
     from (
              select portfolio_categories.profile_id,
-                    weight / portfolio_categories_weight_sum.weight_sum                    as weight,
-                    'category'::varchar                                                    as entity_type,
-                    category_id::varchar                                                   as entity_id,
-                    categories.name                                                        as entity_name,
-                    coalesce(absolute_daily_change * portfolio_tickers_weight_sum.absolute_daily_change_sum /
-                             portfolio_categories_weight_sum.absolute_daily_change_sum, 0) as absolute_daily_change,
+                    weight / portfolio_categories_weight_sum.weight_sum                                      as weight,
+                    'category'::varchar                                                                      as entity_type,
+                    category_id::varchar                                                                     as entity_id,
+                    categories.name                                                                          as entity_name,
+                    coalesce(absolute_daily_change * weight / portfolio_categories_weight_sum.weight_sum,
+                             0)                                                                              as absolute_daily_change,
                     absolute_value * portfolio_tickers_weight_sum.weight_sum /
-                    portfolio_categories_weight_sum.weight_sum                             as absolute_value
+                    portfolio_categories_weight_sum.weight_sum                                               as absolute_value
              from portfolio_categories
                       join portfolio_tickers_weight_sum using (profile_id)
                       join portfolio_categories_weight_sum using (profile_id)
                       join categories on portfolio_categories.category_id = categories.id
              where weight is not null
+               and portfolio_categories_weight_sum.weight_sum > 0
          ) t
 )
 
@@ -135,8 +137,8 @@ union all
          portfolio_interests_weight_sum as
              (
                  select profile_id,
-                        sum(weight)                as weight_sum,
-                        sum(absolute_daily_change) as absolute_daily_change_sum
+                        sum(weight)                     as weight_sum,
+                        sum(abs(absolute_daily_change)) as absolute_daily_change_sum
                  from portfolio_interests
                  group by profile_id
              )
@@ -153,19 +155,20 @@ union all
            absolute_value
     from (
              select portfolio_interests.profile_id,
-                    weight / portfolio_interests_weight_sum.weight_sum                    as weight,
-                    'interest'::varchar                                                   as entity_type,
-                    interest_id::varchar                                                  as entity_id,
-                    interests.name                                                        as entity_name,
-                    coalesce(absolute_daily_change * portfolio_tickers_weight_sum.absolute_daily_change_sum /
-                             portfolio_interests_weight_sum.absolute_daily_change_sum, 0) as absolute_daily_change,
+                    weight / portfolio_interests_weight_sum.weight_sum                                      as weight,
+                    'interest'::varchar                                                                     as entity_type,
+                    interest_id::varchar                                                                    as entity_id,
+                    interests.name                                                                          as entity_name,
+                    coalesce(absolute_daily_change * weight / portfolio_interests_weight_sum.weight_sum,
+                             0)                                                                             as absolute_daily_change,
                     absolute_value * portfolio_tickers_weight_sum.weight_sum /
-                    portfolio_interests_weight_sum.weight_sum                             as absolute_value
+                    portfolio_interests_weight_sum.weight_sum                                               as absolute_value
              from portfolio_interests
                       join portfolio_tickers_weight_sum using (profile_id)
                       join portfolio_interests_weight_sum using (profile_id)
                       join interests on portfolio_interests.interest_id = interests.id
              where weight is not null
+               and portfolio_interests_weight_sum.weight_sum > 0
          ) t
 )
 
@@ -195,8 +198,8 @@ union all
          portfolio_security_types_weight_sum as
              (
                  select profile_id,
-                        sum(weight)                as weight_sum,
-                        sum(absolute_daily_change) as absolute_daily_change_sum
+                        sum(weight)                     as weight_sum,
+                        sum(abs(absolute_daily_change)) as absolute_daily_change_sum
                  from portfolio_security_types
                  group by profile_id
              )
@@ -213,18 +216,19 @@ union all
            absolute_value
     from (
              select portfolio_security_types.profile_id,
-                    weight / portfolio_security_types_weight_sum.weight_sum                    as weight,
-                    'security_type'::varchar                                                   as entity_type,
-                    security_type                                                              as entity_id,
-                    security_type                                                              as entity_name,
-                    coalesce(absolute_daily_change * portfolio_tickers_weight_sum.absolute_daily_change_sum /
-                             portfolio_security_types_weight_sum.absolute_daily_change_sum, 0) as absolute_daily_change,
+                    weight / portfolio_security_types_weight_sum.weight_sum                                      as weight,
+                    'security_type'::varchar                                                                     as entity_type,
+                    security_type                                                                                as entity_id,
+                    security_type                                                                                as entity_name,
+                    coalesce(absolute_daily_change * weight / portfolio_security_types_weight_sum.weight_sum,
+                             0)                                                                                  as absolute_daily_change,
                     absolute_value * portfolio_tickers_weight_sum.weight_sum /
-                    portfolio_security_types_weight_sum.weight_sum                             as absolute_value
+                    portfolio_security_types_weight_sum.weight_sum                                               as absolute_value
              from portfolio_security_types
                       join portfolio_tickers_weight_sum using (profile_id)
                       join portfolio_security_types_weight_sum using (profile_id)
              where weight is not null
+               and portfolio_security_types_weight_sum.weight_sum > 0
          ) t
 )
 
@@ -257,8 +261,8 @@ union all
          portfolio_collections_weight_sum as
              (
                  select profile_id,
-                        sum(weight)                as weight_sum,
-                        sum(absolute_daily_change) as absolute_daily_change_sum
+                        sum(weight)                     as weight_sum,
+                        sum(abs(absolute_daily_change)) as absolute_daily_change_sum
                  from portfolio_collections
                  group by profile_id
              )
@@ -275,18 +279,19 @@ union all
            absolute_value
     from (
              select portfolio_collections.profile_id,
-                    weight / portfolio_collections_weight_sum.weight_sum                    as weight,
-                    'collection'::varchar                                                   as entity_type,
-                    collection_id::varchar                                                  as entity_id,
-                    collections.name                                                        as entity_name,
-                    coalesce(absolute_daily_change * portfolio_tickers_weight_sum.absolute_daily_change_sum /
-                             portfolio_collections_weight_sum.absolute_daily_change_sum, 0) as absolute_daily_change,
+                    weight / portfolio_collections_weight_sum.weight_sum                                      as weight,
+                    'collection'::varchar                                                                     as entity_type,
+                    collection_id::varchar                                                                    as entity_id,
+                    collections.name                                                                          as entity_name,
+                    coalesce(absolute_daily_change * weight / portfolio_collections_weight_sum.weight_sum,
+                             0)                                                                               as absolute_daily_change,
                     absolute_value * portfolio_tickers_weight_sum.weight_sum /
-                    portfolio_collections_weight_sum.weight_sum                             as absolute_value
+                    portfolio_collections_weight_sum.weight_sum                                               as absolute_value
              from portfolio_collections
                       join portfolio_tickers_weight_sum using (profile_id)
                       join portfolio_collections_weight_sum using (profile_id)
                       join collections on portfolio_collections.collection_id = collections.id
              where weight is not null
+               and portfolio_collections_weight_sum.weight_sum > 0
          ) t
 )
