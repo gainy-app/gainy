@@ -24,15 +24,30 @@ class SetRecommendationSettings(HasuraAction):
         recommended_collections_count = input_params.get(
             "recommended_collections_count")
 
+        logging_extra = {
+            'function': 'SetRecommendationSettings',
+            'profile_id': profile_id,
+            'interests': interests,
+            'categories': categories,
+        }
+
         self.set_interests(db_conn, profile_id, interests)
         self.set_categories(db_conn, profile_id, categories)
 
         recommendations_func = ComputeRecommendationsAndPersist(
             db_conn, profile_id)
+        old_version = recommendations_func.load_version(db_conn)
         try:
             recommendations_func.get_and_persist(db_conn, max_tries=2)
+            new_version = recommendations_func.load_version(db_conn)
+            logger.info('Calculated Match Scores',
+                        extra={
+                            **logging_extra,
+                            'old_version': old_version.recommendations_version,
+                            'new_version': new_version.recommendations_version,
+                        })
         except (LockAcquisitionTimeout, ConcurrentVersionUpdate) as e:
-            logger.exception(e)
+            logger.exception(e, extra=logging_extra)
             pass
 
         repository = RecommendationRepository(db_conn)
