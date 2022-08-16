@@ -6,6 +6,7 @@ from gainy.utils import get_logger
 
 logger = get_logger(__name__)
 
+
 # Deprecated
 class SetRecommendations(HasuraTrigger):
 
