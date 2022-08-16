@@ -286,13 +286,3 @@ select code || '__' || symbol as id,
        message,
        now()                  as updated_at
 from tickers_checks_verbose_union
-
-union all
-
-select 'old_historical_prices_' || symbol                    as id,
-       symbol,
-       'old_historical_prices'                                as code,
-       'daily'                                                as period,
-       'Ticker ' || symbol || ' has old historical prices.' as message,
-       now()                                                 as updated_at
-from old_historical_prices
