@@ -42,7 +42,7 @@ class SetRecommendationSettings(HasuraAction):
 
         repository = RecommendationRepository(db_conn)
         collections = repository.get_recommended_collections(
-            profile_id, recommended_collections_count, False)
+            profile_id, recommended_collections_count)
 
         return {
             "recommended_collections": [{
