@@ -39,6 +39,7 @@ class SetRecommendationSettings(HasuraAction):
         old_version = recommendations_func.load_version(db_conn)
         try:
             recommendations_func.get_and_persist(db_conn, max_tries=2)
+
             new_version = recommendations_func.load_version(db_conn)
             logger.info('Calculated Match Scores',
                         extra={
@@ -48,7 +49,6 @@ class SetRecommendationSettings(HasuraAction):
                         })
         except (LockAcquisitionTimeout, ConcurrentVersionUpdate) as e:
             logger.exception(e, extra=logging_extra)
-            pass
 
         repository = RecommendationRepository(db_conn)
         if recommended_collections_count is not None:
