@@ -3,11 +3,10 @@ from gainy.recommendation.compute import ComputeRecommendationsAndPersist
 from gainy.data_access.optimistic_lock import ConcurrentVersionUpdate
 from gainy.data_access.db_lock import LockAcquisitionTimeout
 from gainy.utils import get_logger
-import json
 
 logger = get_logger(__name__)
 
-
+# Deprecated
 class SetRecommendations(HasuraTrigger):
 
     def __init__(self):
