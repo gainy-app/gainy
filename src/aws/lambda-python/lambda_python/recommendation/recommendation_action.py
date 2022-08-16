@@ -1,9 +1,5 @@
-from typing import List, Tuple
-import json
-from operator import itemgetter
 from common.hasura_function import HasuraAction
 from gainy.data_access.optimistic_lock import ConcurrentVersionUpdate
-from gainy.recommendation import TOP_20_FOR_YOU_COLLECTION_ID
 from gainy.recommendation.compute import ComputeRecommendationsAndPersist
 from gainy.recommendation.repository import RecommendationRepository
 from gainy.utils import get_logger
@@ -26,12 +22,17 @@ class GetRecommendedCollections(HasuraAction):
                 'force': force,
             }
 
-            collections = self.get_collections(db_conn, profile_id, limit,
-                                               force)
+            if force:
+                self.update_match_scores(db_conn, profile_id)
+
+            repository = RecommendationRepository(db_conn)
+            collections = repository.get_recommended_collections(
+                profile_id, limit)
 
             if not len(collections) and not force:
-                collections = self.get_collections(db_conn, profile_id, limit,
-                                                   True)
+                self.update_match_scores(db_conn, profile_id)
+                collections = repository.get_recommended_collections(
+                    profile_id, limit)
 
             if not len(collections):
                 logger.error(
@@ -48,33 +49,10 @@ class GetRecommendedCollections(HasuraAction):
                              e,
                              extra=logging_extra)
 
-    def get_collections(self, db_conn, profile_id, limit,
-                        force: bool) -> List[Tuple[int, str]]:
-        if force:
-            recommendations_func = ComputeRecommendationsAndPersist(
-                db_conn, profile_id)
-            try:
-                recommendations_func.get_and_persist(db_conn, max_tries=3)
-            except ConcurrentVersionUpdate:
-                pass
-
-        repository = RecommendationRepository(db_conn)
-        sorted_collection_match_scores = repository.read_sorted_collection_match_scores(
-            profile_id, limit)
-        sorted_collections_ids = list(
-            map(itemgetter(0), sorted_collection_match_scores))
-        sorted_collections_uniq_ids = [
-            f"0_{i}" for i in sorted_collections_ids
-        ]
-
-        # Add `top-20 for you` collection as the top item
-        is_top_20_enabled = repository.is_collection_enabled(
-            profile_id, TOP_20_FOR_YOU_COLLECTION_ID)
-        if is_top_20_enabled:
-            sorted_collections_ids = [TOP_20_FOR_YOU_COLLECTION_ID
-                                      ] + sorted_collections_ids
-            sorted_collections_uniq_ids = [
-                f"{profile_id}_{TOP_20_FOR_YOU_COLLECTION_ID}"
-            ] + sorted_collections_uniq_ids
-
-        return list(zip(sorted_collections_ids, sorted_collections_uniq_ids))
+    def update_match_scores(self, db_conn, profile_id):
+        recommendations_func = ComputeRecommendationsAndPersist(
+            db_conn, profile_id)
+        try:
+            recommendations_func.get_and_persist(db_conn, max_tries=2)
+        except ConcurrentVersionUpdate:
+            pass
