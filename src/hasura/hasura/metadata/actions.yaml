@@ -102,6 +102,12 @@ actions:
       handler: '{{AWS_LAMBDA_API_GATEWAY_ENDPOINT}}/hasuraAction'
     permissions:
       - role: user
+  - name: set_recommendation_settings
+    definition:
+      kind: synchronous
+      handler: '{{AWS_LAMBDA_API_GATEWAY_ENDPOINT}}/hasuraAction'
+    permissions:
+      - role: user
   - name: stripe_get_checkout_url
     definition:
       kind: ""
@@ -246,4 +252,5 @@ custom_types:
     - name: StripeWebhookOutput
     - name: UpdatePurchasesOutput
     - name: Promocode
+    - name: SetRecommendationSettingsOutput
   scalars: []
