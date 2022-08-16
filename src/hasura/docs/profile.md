@@ -56,7 +56,7 @@ mutation {
 ### Update interests and categories
 
 ```graphql
-mutation set_recommendation_settings($profileId: Int!, $interests: [Int]!, $categories: [Int]!, $recommended_collections_count: Int) {
+mutation set_recommendation_settings($profileId: Int!, $interests: [Int], $categories: [Int], $recommended_collections_count: Int) {
     set_recommendation_settings(profile_id: $profileId, interests: $interests, categories: $categories, recommended_collections_count: $recommended_collections_count) {
         recommended_collections {
             id

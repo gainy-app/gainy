@@ -22,7 +22,7 @@ def test_recommended_collections():
 
 
 def test_set_recommendation_settings():
-    query = 'mutation set_recommendation_settings($profileId: Int!, $interests: [Int]!, $categories: [Int]!, $recommended_collections_count: Int){ set_recommendation_settings(profile_id: $profileId, interests: $interests, categories: $categories, recommended_collections_count: $recommended_collections_count) { recommended_collections { id collection { id name image_url enabled description } } } }'
+    query = 'mutation set_recommendation_settings($profileId: Int!, $interests: [Int], $categories: [Int], $recommended_collections_count: Int){ set_recommendation_settings(profile_id: $profileId, interests: $interests, categories: $categories, recommended_collections_count: $recommended_collections_count) { recommended_collections { id collection { id name image_url enabled description } } } }'
     data = make_graphql_request(
         query, {
             'profileId': PROFILE_ID,
