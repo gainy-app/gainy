@@ -153,10 +153,6 @@
         enable_manual: false
         insert:
           columns: '*'
-        delete:
-          columns: '*'
-        update:
-          columns: '*'
       retry_conf:
         num_retries: 1
         interval_sec: 30
@@ -330,10 +326,6 @@
       definition:
         enable_manual: false
         insert:
-          columns: '*'
-        delete:
-          columns: '*'
-        update:
           columns: '*'
       retry_conf:
         num_retries: 1

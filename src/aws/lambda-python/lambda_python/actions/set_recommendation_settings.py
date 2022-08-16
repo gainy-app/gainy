@@ -3,6 +3,7 @@ import logging
 from common.hasura_function import HasuraAction
 
 from psycopg2.extras import execute_values
+from gainy.data_access.db_lock import LockAcquisitionTimeout
 from gainy.data_access.optimistic_lock import ConcurrentVersionUpdate
 from gainy.recommendation.compute import ComputeRecommendationsAndPersist
 from gainy.recommendation.repository import RecommendationRepository
@@ -21,14 +22,7 @@ class SetRecommendationSettings(HasuraAction):
         interests = input_params.get("interests")
         categories = input_params.get("categories")
         recommended_collections_count = input_params.get(
-            "recommended_collections_count", 0)
-
-        recommendations_func = ComputeRecommendationsAndPersist(
-            db_conn, profile_id)
-        try:
-            recommendations_func.get_and_persist(db_conn, max_tries=3)
-        except ConcurrentVersionUpdate:
-            pass
+            "recommended_collections_count")
 
         self.set_interests(db_conn, profile_id, interests)
         self.set_categories(db_conn, profile_id, categories)
@@ -36,13 +30,17 @@ class SetRecommendationSettings(HasuraAction):
         recommendations_func = ComputeRecommendationsAndPersist(
             db_conn, profile_id)
         try:
-            recommendations_func.get_and_persist(db_conn, max_tries=3)
-        except ConcurrentVersionUpdate:
+            recommendations_func.get_and_persist(db_conn, max_tries=2)
+        except (LockAcquisitionTimeout, ConcurrentVersionUpdate) as e:
+            logger.exception(e)
             pass
 
         repository = RecommendationRepository(db_conn)
-        collections = repository.get_recommended_collections(
-            profile_id, recommended_collections_count)
+        if recommended_collections_count is not None:
+            collections = repository.get_recommended_collections(
+                profile_id, recommended_collections_count)
+        else:
+            collections = []
 
         return {
             "recommended_collections": [{
@@ -57,10 +55,6 @@ class SetRecommendationSettings(HasuraAction):
 
         with db_conn.cursor() as cursor:
             cursor.execute(
-                "update app.profile_interests set skip_trigger = true where profile_id = %(profile_id)s",
-                {"profile_id": profile_id})
-
-            cursor.execute(
                 "delete from app.profile_interests where profile_id = %(profile_id)s",
                 {"profile_id": profile_id})
 
@@ -74,10 +68,6 @@ class SetRecommendationSettings(HasuraAction):
             return
 
         with db_conn.cursor() as cursor:
-            cursor.execute(
-                "update app.profile_categories set skip_trigger = true where profile_id = %(profile_id)s",
-                {"profile_id": profile_id})
-
             cursor.execute(
                 "delete from app.profile_categories where profile_id = %(profile_id)s",
                 {"profile_id": profile_id})
