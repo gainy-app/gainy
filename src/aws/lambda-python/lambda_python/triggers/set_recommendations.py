@@ -19,6 +19,7 @@ class SetRecommendations(HasuraTrigger):
     def apply(self, db_conn, op, data):
         profile_id = self.get_profile_id(data)
         logging_extra = {
+            'function': 'SetRecommendations',
             'profile_id': profile_id,
         }
 
