@@ -20,6 +20,20 @@ MATCH_SCORE_FIELDS_SET = {
 
 
 # Actions
+def test_set_recommendation_settings():
+    event = get_action_event(
+        "set_recommendation_settings", {
+            "profile_id": PROFILE_ID,
+            'interests': [1],
+            'categories': [1],
+            'recommended_collections_count': 1
+        }, USER_ID)
+    response = action_dispatcher.handle(event)
+    assert "code" not in response
+    assert "recommended_collections" in response
+    assert isinstance(response["recommended_collections"], list)
+
+
 def test_get_recommended_collections():
     event = get_action_event("get_recommended_collections",
                              {"profile_id": PROFILE_ID}, USER_ID)

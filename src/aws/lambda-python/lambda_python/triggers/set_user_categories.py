@@ -6,6 +6,9 @@ from math import trunc
 from psycopg2.extras import execute_values
 from common.hasura_function import HasuraTrigger
 from gainy.utils import get_logger
+from gainy.data_access.db_lock import LockAcquisitionTimeout
+from gainy.data_access.optimistic_lock import ConcurrentVersionUpdate
+from gainy.recommendation.compute import ComputeRecommendationsAndPersist
 
 logger = get_logger(__name__)
 script_directory = os.path.dirname(os.path.realpath(__file__))
@@ -106,15 +109,15 @@ class SetUserCategories(HasuraTrigger):
             rows = cursor.fetchall()
             categories = [row[0] for row in rows]
 
-        logger.info('set_user_categories ',
-                    extra={
-                        'profile_id': profile_id,
-                        'risk_needed': risk_needed,
-                        'risk_taking_ability': risk_taking_ability,
-                        'loss_tolerance': loss_tolerance,
-                        'final_score': final_score,
-                        'categories': categories,
-                    })
+        logging_extra = {
+            'profile_id': profile_id,
+            'risk_needed': risk_needed,
+            'risk_taking_ability': risk_taking_ability,
+            'loss_tolerance': loss_tolerance,
+            'final_score': final_score,
+            'categories': categories,
+        }
+        logger.info('set_user_categories ', extra=logging_extra)
 
         with db_conn.cursor() as cursor:
             cursor.execute(
@@ -123,8 +126,25 @@ class SetUserCategories(HasuraTrigger):
 
             execute_values(
                 cursor,
-                "INSERT INTO app.profile_categories (profile_id, category_id) VALUES %s",
-                [(profile_id, category_id) for category_id in categories])
+                "INSERT INTO app.profile_categories (profile_id, category_id, skip_trigger) VALUES %s",
+                [(profile_id, category_id, True)
+                 for category_id in categories])
+
+        recommendations_func = ComputeRecommendationsAndPersist(
+            db_conn, profile_id)
+        old_version = recommendations_func.load_version(db_conn)
+        try:
+            recommendations_func.get_and_persist(db_conn, max_tries=2)
+
+            new_version = recommendations_func.load_version(db_conn)
+            logger.info('Calculated Match Scores',
+                        extra={
+                            **logging_extra,
+                            'old_version': old_version.recommendations_version,
+                            'new_version': new_version.recommendations_version,
+                        })
+        except (LockAcquisitionTimeout, ConcurrentVersionUpdate) as e:
+            logger.exception(e, extra=logging_extra)
 
     @staticmethod
     def _list_index(value, list_size):

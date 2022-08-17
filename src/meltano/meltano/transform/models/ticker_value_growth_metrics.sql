@@ -17,7 +17,7 @@ with tickers as (select * from {{ ref('tickers') }} where type != 'crypto'),
      historical_eps_growth as (select * from {{ ref('historical_eps_growth') }}),
      historical_sales_growth as (select * from {{ ref('historical_sales_growth') }}),
      valuation as (select * from {{ ref('valuation') }}),
-     hsg_extended as
+     hsg_extended as materialized
          (
              select distinct on (hp.symbol) hp.close as quartal_end_price, hsg.*
              from historical_sales_growth hsg
@@ -26,7 +26,7 @@ with tickers as (select * from {{ ref('tickers') }} where type != 'crypto'),
                               AND hp.date between hsg.updated_at - interval '1 week' and hsg.updated_at
              order by hp.symbol, hp.date DESC
          ),
-     latest_yearly_earning_trend as
+     latest_yearly_earning_trend as materialized
          (
              SELECT et.symbol,
                     et.growth
@@ -37,7 +37,7 @@ with tickers as (select * from {{ ref('tickers') }} where type != 'crypto'),
              WHERE et.period = '0y'
                AND et_next.symbol IS NULL
          ),
-     egrsf as
+     egrsf as materialized
          (
               select distinct on (et.symbol) et.symbol,
                      et.growth as value
@@ -45,7 +45,7 @@ with tickers as (select * from {{ ref('tickers') }} where type != 'crypto'),
               where et.period = '0y'
               order by et.symbol, et.date DESC
          ),
-     vg_metrics as
+     vg_metrics as materialized
          (
              select f.code,
                     t.gic_sector,

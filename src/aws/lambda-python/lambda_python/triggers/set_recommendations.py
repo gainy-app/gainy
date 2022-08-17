@@ -7,6 +7,7 @@ from gainy.utils import get_logger
 logger = get_logger(__name__)
 
 
+# Deprecated
 class SetRecommendations(HasuraTrigger):
 
     def __init__(self):
@@ -17,17 +18,32 @@ class SetRecommendations(HasuraTrigger):
 
     def apply(self, db_conn, op, data):
         profile_id = self.get_profile_id(data)
+        logging_extra = {
+            'function': 'SetRecommendations',
+            'profile_id': profile_id,
+        }
+
+        payload = self._extract_payload(data)
+        category_id = payload.get("category_id")
+        interest_id = payload.get("interest_id")
+        skip_trigger = self.skip_category_update(
+            db_conn, profile_id, category_id) or self.skip_interest_update(
+                db_conn, profile_id, interest_id)
+        if skip_trigger:
+            logger.info('Skipped calculating Match Scores',
+                        extra=logging_extra)
+            return
 
         recommendations_func = ComputeRecommendationsAndPersist(
             db_conn, profile_id)
         old_version = recommendations_func.load_version(db_conn)
 
         try:
-            recommendations_func.get_and_persist(db_conn, max_tries=3)
+            recommendations_func.get_and_persist(db_conn, max_tries=5)
             new_version = recommendations_func.load_version(db_conn)
             logger.info('Calculated Match Scores',
                         extra={
-                            'profile_id': profile_id,
+                            **logging_extra,
                             'old_version': old_version.recommendations_version,
                             'new_version': new_version.recommendations_version,
                         })
@@ -40,9 +56,37 @@ class SetRecommendations(HasuraTrigger):
             """
             logger.warning('Match Score Calculation failed: %s',
                            e,
-                           extra={
-                               'profile_id': profile_id,
-                           })
+                           extra=logging_extra)
+
+    def skip_category_update(self, db_conn, profile_id, category_id):
+        if category_id is None:
+            return False
+
+        with db_conn.cursor() as cursor:
+            cursor.execute(
+                "select skip_trigger from app.profile_categories where profile_id = %(profile_id)s and category_id = %(category_id)s",
+                {
+                    "profile_id": profile_id,
+                    "category_id": category_id
+                })
+            row = cursor.fetchone()
+
+        return row and row[0]
+
+    def skip_interest_update(self, db_conn, profile_id, interest_id):
+        if interest_id is None:
+            return False
+
+        with db_conn.cursor() as cursor:
+            cursor.execute(
+                "select skip_trigger from app.profile_interests where profile_id = %(profile_id)s and interest_id = %(interest_id)s",
+                {
+                    "profile_id": profile_id,
+                    "interest_id": interest_id
+                })
+            row = cursor.fetchone()
+
+        return row and row[0]
 
     def get_profile_id(self, data):
         payload = self._extract_payload(data)

@@ -128,9 +128,10 @@
   "privileged": null,
   "memoryReservation": null,
   "healthCheck": {
-    "command": [ "CMD-SHELL", "curl http://localhost:8793/ || exit 1" ],
-    "interval": 10,
-    "retries": 2
+    "command": [ "CMD-SHELL", "meltano invoke airflow jobs check --job-type SchedulerJob --hostname \"$(hostname)\"" ],
+    "interval": 60,
+    "retries": 3,
+    "timeout": 60
   },
   "logConfiguration": {
     "logDriver": "awslogs",
