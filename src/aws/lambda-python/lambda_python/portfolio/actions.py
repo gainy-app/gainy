@@ -56,6 +56,14 @@ class GetPortfolioChart(HasuraAction):
 
         self.service = PortfolioChartService()
 
+    def get_allowed_profile_ids(self, input_params):
+        profile_id = self.get_profile_id(input_params)
+
+        if profile_id == 1:
+            return None
+
+        return profile_id
+
     def apply(self, db_conn, input_params, headers):
         profile_id = input_params["profile_id"]
 
@@ -84,6 +92,14 @@ class GetPortfolioChartPreviousPeriodClose(HasuraAction):
 
         self.service = PortfolioChartService()
 
+    def get_allowed_profile_ids(self, input_params):
+        profile_id = self.get_profile_id(input_params)
+
+        if profile_id == 1:
+            return None
+
+        return profile_id
+
     def apply(self, db_conn, input_params, headers):
         profile_id = input_params["profile_id"]
 
@@ -107,6 +123,14 @@ class GetPortfolioPieChart(HasuraAction):
         super().__init__("get_portfolio_piechart", "profile_id")
 
         self.service = PortfolioChartService()
+
+    def get_allowed_profile_ids(self, input_params):
+        profile_id = self.get_profile_id(input_params)
+
+        if profile_id == 1:
+            return None
+
+        return profile_id
 
     def apply(self, db_conn, input_params, headers):
         profile_id = input_params["profile_id"]

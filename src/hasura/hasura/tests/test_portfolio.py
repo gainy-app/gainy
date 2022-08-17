@@ -25,12 +25,37 @@ def test_portfolio():
         data['profile_holding_groups']) >= MIN_PORTFOLIO_HOLDING_GROUPS_COUNT
 
 
+def test_demo_portfolio():
+    query_file = os.path.join(os.path.dirname(__file__),
+                              'queries/GetPortfolioHoldings.graphql')
+    with open(query_file, 'r') as f:
+        query = f.read()
+
+    profile_ids = {profile['id']: profile['user_id'] for profile in PROFILES}
+    data = make_graphql_request(query, {"profileId": PROFILE_ID},
+                                profile_ids[2])['data']
+    assert data['portfolio_gains'] is not None
+    assert data['profile_holding_groups'] is not None
+    assert len(
+        data['profile_holding_groups']) >= MIN_PORTFOLIO_HOLDING_GROUPS_COUNT
+
+
 def get_test_portfolio_chart_filters_data():
+    query = """{
+        app_profile_portfolio_accounts { id }
+        app_profile_plaid_access_tokens { id }
+        app_plaid_institutions(where: {name: {_eq: "Demo"}}) {id}
+    }"""
+    data = make_graphql_request(query)['data']
+    account_id = data['app_profile_portfolio_accounts'][0]['id']
+    access_token_id = data['app_profile_plaid_access_tokens'][0]['id']
+    institution_id = data['app_plaid_institutions'][0]['id']
+
     full_options_dict = {
         "periods": ["1d"],
-        "accessTokenIds": [None, 1],
-        "accountIds": [None, 7],
-        "institutionIds": [None, 1],
+        "accessTokenIds": [None, access_token_id],
+        "accountIds": [None, account_id],
+        "institutionIds": [None, institution_id],
         "interestIds": [None, 12],
         "categoryIds": [None, 6],
         "securityTypes": [None, "equity"],
