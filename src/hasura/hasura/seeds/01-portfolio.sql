@@ -88,7 +88,7 @@ select distinct on (
     ticker_symbol
     ) profile_portfolio_accounts.plaid_access_token_id,
       t.amount,
-      t.date,
+      t.date::date,
       0,
       'USD',
       t.name,

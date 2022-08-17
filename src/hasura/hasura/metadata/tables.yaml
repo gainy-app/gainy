@@ -353,8 +353,11 @@
           - profile_id
         filter:
           profile:
-            user_id:
-              _eq: X-Hasura-User-Id
+            _or:
+              - user_id:
+                  _eq: X-Hasura-User-Id
+              - id:
+                  _eq: 1
   delete_permissions:
     - role: user
       permission:
