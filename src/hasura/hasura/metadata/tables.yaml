@@ -353,8 +353,11 @@
           - profile_id
         filter:
           profile:
-            user_id:
-              _eq: X-Hasura-User-Id
+            _or:
+              - user_id:
+                  _eq: X-Hasura-User-Id
+              - id:
+                  _eq: 1
   delete_permissions:
     - role: user
       permission:
@@ -1305,8 +1308,11 @@
           - updated_at
         filter:
           profile:
-            user_id:
-              _eq: X-Hasura-User-Id
+            _or:
+              - user_id:
+                  _eq: X-Hasura-User-Id
+              - id:
+                  _eq: 1
 - table:
     schema: public
     name: portfolio_holding_details
@@ -1351,8 +1357,11 @@
         filter:
           holding:
             profile:
-              user_id:
-                _eq: X-Hasura-User-Id
+              _or:
+                - user_id:
+                    _eq: X-Hasura-User-Id
+                - id:
+                    _eq: 1
 - table:
     schema: public
     name: portfolio_holding_gains
@@ -1392,8 +1401,11 @@
         filter:
           holding:
             profile:
-              user_id:
-                _eq: X-Hasura-User-Id
+              _or:
+                - user_id:
+                    _eq: X-Hasura-User-Id
+                - id:
+                    _eq: 1
 - table:
     schema: public
     name: portfolio_holding_group_details
@@ -1423,8 +1435,11 @@
           - ltt_quantity_total
         filter:
           profile:
-            user_id:
-              _eq: X-Hasura-User-Id
+            _or:
+              - user_id:
+                  _eq: X-Hasura-User-Id
+              - id:
+                  _eq: 1
 - table:
     schema: public
     name: portfolio_holding_group_gains
@@ -1464,8 +1479,11 @@
           - value_to_portfolio_value
         filter:
           profile:
-            user_id:
-              _eq: X-Hasura-User-Id
+            _or:
+              - user_id:
+                  _eq: X-Hasura-User-Id
+              - id:
+                  _eq: 1
 - table:
     schema: public
     name: portfolio_holding_group_tags
@@ -1519,8 +1537,11 @@
           - symbol
         filter:
           profile:
-            user_id:
-              _eq: X-Hasura-User-Id
+            _or:
+              - user_id:
+                  _eq: X-Hasura-User-Id
+              - id:
+                  _eq: 1
 - table:
     schema: public
     name: profile_collection_tickers_performance_ranked
@@ -1722,8 +1743,11 @@
           - quantity
         filter:
           profile:
-            user_id:
-              _eq: X-Hasura-User-Id
+            _or:
+              - user_id:
+                  _eq: X-Hasura-User-Id
+              - id:
+                  _eq: 1
 - table:
     schema: public
     name: profile_holdings_normalized
@@ -1781,8 +1805,11 @@
           - type
         filter:
           profile:
-            user_id:
-              _eq: X-Hasura-User-Id
+            _or:
+              - user_id:
+                  _eq: X-Hasura-User-Id
+              - id:
+                  _eq: 1
 - table:
     schema: public
     name: profile_ticker_collections
