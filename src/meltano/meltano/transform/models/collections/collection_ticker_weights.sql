@@ -54,7 +54,7 @@ with ticker_collections_weights as materialized
      ticker_collections_weights_expanded as materialized
          (
              select *,
-                    latest_rebalance_weight * price / latest_rebalance_price as weight
+                    latest_rebalance_weight::numeric * price::numeric / latest_rebalance_price::numeric as weight
              from ticker_collections_weights_expanded0
              where latest_rebalance_price > 0
          ),
