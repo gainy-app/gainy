@@ -90,6 +90,9 @@ class HasuraDispatcher(ABC):
 
     def check_authorization(self, db_conn, allowed_profile_ids,
                             session_variables):
+        if allowed_profile_ids is None:
+            return
+
         try:
             hasura_role = session_variables["x-hasura-role"]
 
@@ -124,8 +127,8 @@ class HasuraActionDispatcher(HasuraDispatcher):
 
         # public endpoints won't be tied to profile
         if action.profile_id_param is not None:
-            profile_id = action.get_profile_id(input_params)
-            self.check_authorization(db_conn, profile_id,
+            allowed_profile_ids = action.get_allowed_profile_ids(input_params)
+            self.check_authorization(db_conn, allowed_profile_ids,
                                      request["session_variables"])
         else:
             action.profile_id = self.get_profile_id(
