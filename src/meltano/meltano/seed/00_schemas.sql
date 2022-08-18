@@ -50,17 +50,3 @@ create table if not exists deployment.realtime_listener_heartbeat
 
     primary key (time, source, key)
 );
-
-create table gainy_history.collection_tickers_weighted
-(
-    _sdc_batched_at    timestamp,
-    _sdc_deleted_at    varchar,
-    _sdc_extracted_at  timestamp,
-    collection_id      integer,
-    collection_uniq_id varchar   not null,
-    date               timestamp not null,
-    profile_id         integer,
-    symbol             varchar   not null,
-    weight             numeric,
-    primary key (collection_uniq_id, symbol, date)
-);

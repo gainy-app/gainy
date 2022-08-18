@@ -20,9 +20,9 @@ from (
                 (sum(interest_similarity * weight) / sum(weight))::double precision as interest_similarity
          from {{ source('app', 'profile_ticker_match_score') }}
               join {{ source('app', 'profiles') }} on profiles.id = profile_id
-              join {{ ref('collection_tickers_weighted') }}
-                   on collection_tickers_weighted.symbol = profile_ticker_match_score.symbol
-                       and (collection_tickers_weighted.profile_id is null or
-                            collection_tickers_weighted.profile_id = profile_ticker_match_score.profile_id)
+              join {{ ref('collection_ticker_actual_weights') }}
+                   on collection_ticker_actual_weights.symbol = profile_ticker_match_score.symbol
+                       and (collection_ticker_actual_weights.profile_id is null or
+                            collection_ticker_actual_weights.profile_id = profile_ticker_match_score.profile_id)
          group by profile_ticker_match_score.profile_id, user_id, collection_id, collection_uniq_id
      ) t

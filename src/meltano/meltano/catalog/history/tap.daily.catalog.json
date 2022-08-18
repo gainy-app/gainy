@@ -1,8 +1,8 @@
 {
   "streams": [
     {
-      "table_name": "reporting_collection_tickers_weighted",
-      "stream": "reporting_collection_tickers_weighted",
+      "table_name": "collection_ticker_actual_weights",
+      "stream": "collection_ticker_actual_weights",
       "metadata": [
         {
           "breadcrumb": [],
@@ -19,7 +19,7 @@
           }
         }
       ],
-      "tap_stream_id": "public-reporting_collection_tickers_weighted",
+      "tap_stream_id": "public-collection_ticker_actual_weights",
       "schema": {
         "type": "object",
         "properties": {}

@@ -15,7 +15,7 @@ with grouped_collections as
                     sum(actual_price * weight) - sum(absolute_daily_change * weight) as prev_close_price,
                     max(time)                                                        as time,
                     sum(market_capitalization)                                       as market_capitalization_sum
-             from {{ ref('collection_tickers_weighted') }}
+             from {{ ref('collection_ticker_actual_weights') }}
                       left join {{ source('app', 'profiles') }} on profiles.id = profile_id
                       join {{ ref('ticker_realtime_metrics') }} using (symbol)
                       join {{ ref('ticker_metrics') }} using (symbol)
