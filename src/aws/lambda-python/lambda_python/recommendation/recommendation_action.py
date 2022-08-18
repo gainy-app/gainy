@@ -21,16 +21,23 @@ class GetRecommendedCollections(HasuraAction):
                 'profile_id': profile_id,
             }
 
+            logger.info('get_recommended_collections: start',
+                        extra=logging_extra)
+
             repository = RecommendationRepository(db_conn)
             collections = repository.get_recommended_collections(
                 profile_id, limit)
 
             if not len(collections):
+                logger.info('get_recommended_collections: update_match_scores',
+                            extra=logging_extra)
                 self.update_match_scores(db_conn, profile_id)
                 collections = repository.get_recommended_collections(
                     profile_id, limit)
 
             if not len(collections):
+                logger.warning('get_recommended_collections: use top_favorite',
+                               extra=logging_extra)
                 collections = repository.get_recommended_collections(
                     profile_id, limit,
                     RecommendedCollectionAlgorithm.TOP_FAVORITED)

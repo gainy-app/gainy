@@ -18,14 +18,17 @@ class SetRecommendations(HasuraTrigger):
 
     def apply(self, db_conn, op, data):
         profile_id = self.get_profile_id(data)
-        logging_extra = {
-            'function': 'SetRecommendations',
-            'profile_id': profile_id,
-        }
-
         payload = self._extract_payload(data)
         category_id = payload.get("category_id")
         interest_id = payload.get("interest_id")
+
+        logging_extra = {
+            'function': 'SetRecommendations',
+            'profile_id': profile_id,
+            'category_id': category_id,
+            'interest_id': interest_id,
+        }
+
         skip_trigger = self.skip_category_update(
             db_conn, profile_id, category_id) or self.skip_interest_update(
                 db_conn, profile_id, interest_id)

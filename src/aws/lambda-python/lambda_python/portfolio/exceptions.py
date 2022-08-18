@@ -8,7 +8,7 @@ class AccessTokenApiException(Exception):
         self.access_token = access_token
 
     def __str__(self):
-        return json.dumps(self.parent_exc.__dict__)
+        return str(self.parent_exc)
 
 
 class AccessTokenLoginRequiredException(AccessTokenApiException):
