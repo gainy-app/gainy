@@ -75,7 +75,7 @@ with ticker_collections_weights as materialized
                     date,
                     weight / weight_sum as weight,
                     adjusted_close::numeric,
-                    next_open::numeric,
+                    price::numeric,
                     updated_at
              from ticker_collections_weights_expanded
                       join ticker_collections_weights_stats using (collection_uniq_id, date)
@@ -89,7 +89,7 @@ from ticker_collections_weights_normalized
 where old_data is null
    or abs(ticker_collections_weights_normalized.weight - old_data.weight) > 1e-6
    or abs(ticker_collections_weights_normalized.adjusted_close - old_data.adjusted_close) > 1e-3
-   or abs(ticker_collections_weights_normalized.next_open - old_data.next_open) > 1e-3
+   or abs(ticker_collections_weights_normalized.price - old_data.price) > 1e-3
 {% endif %}
 
 -- TODO make it historical for personalized collections
