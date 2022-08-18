@@ -338,17 +338,10 @@ resource "datadog_monitor" "data_errors_count" {
   type    = "query alert"
   message = "Data errors triggered. Notify: @slack-${var.slack_channel_name} <!channel>"
 
-  query = "avg(last_1d):anomalies(max:app.data_errors_count{postgres_env:production} by {code}.as_count(), 'basic', 2, direction='above', alert_window='last_1h', interval=300, count_default_zero='true') > 0.2"
-  query = "sum(last_1d):(max:app.data_errors_count{postgres_env:production} by {code}.as_count().rollup(max, 900) - hour_before(clamp_min(max:app.data_errors_count{postgres_env:production} by {code}.as_count().rollup(max, 900), 10))) / hour_before(clamp_min(max:app.data_errors_count{postgres_env:production} by {code}.as_count().rollup(max, 900), 10)) > 5"
-
-  monitor_threshold_windows {
-    recovery_window = "last_1h"
-    trigger_window  = "last_1h"
-  }
+  query = "sum(last_1d):(max:app.data_errors_count{postgres_env:production} by {code}.as_count().rollup(max, 900) - hour_before(clamp_min(max:app.data_errors_count{postgres_env:production} by {code}.as_count().rollup(max, 900), 10))) / hour_before(clamp_min(max:app.data_errors_count{postgres_env:production} by {code}.as_count().rollup(max, 900), 10)) > 1"
 
   monitor_thresholds {
-    critical          = "0.2"
-    critical_recovery = "0.15"
+    critical = "1"
   }
 
   require_full_window = false
