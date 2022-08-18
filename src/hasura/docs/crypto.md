@@ -29,7 +29,6 @@
         development_code_additions_deletions_4_weeks_deletions
         development_code_additions_deletions_4_weeks_additions
         development_closed_issues
-        description
         country_origin
         ico_end_date
         ico_start_date
@@ -42,7 +41,6 @@
         market_fdv_to_tvl_ratio
         market_mcap_to_tvl_ratio
         market_total_value_locked
-        name
         price_change_1m
         price_change_1w
         symbol

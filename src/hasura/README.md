@@ -7,6 +7,7 @@ This repo contains Gainy's GraphQL API server built with [Hasura](https://hasura
 - [Articles](docs/articles.md)
 - [Chart](docs/chart.md)
 - [Collections](docs/collections.md)
+- [ETF](docs/etf.md)
 - [Match Score](docs/match_score.md)
 - [News](docs/news.md)
 - [Portfolio](docs/portfolio.md)
