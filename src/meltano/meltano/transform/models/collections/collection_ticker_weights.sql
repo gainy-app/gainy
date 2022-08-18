@@ -25,24 +25,38 @@ with ticker_collections_weights as materialized
                                            select max(_sdc_extracted_at) from {{ source('gainy', 'ticker_collections_weights') }}
                                        ) - interval '1 hour'
          ),
-     -- Execution Time: 12525.455 ms
-     ticker_collections_weights_expanded as materialized
+     ticker_collections_weights_expanded0 as materialized
          (
              select profile_id,
                     collection_uniq_id,
                     collection_id,
                     ticker_collections_weights.symbol,
                     historical_prices.date,
-                    ticker_collections_weights.weight,
                     historical_prices.adjusted_close,
-                    lag(historical_prices.open)
-                    over (partition by collection_id, historical_prices.symbol order by historical_prices.date desc) as next_open,
-                    greatest(ticker_collections_weights.updated_at, historical_prices.updated_at)                    as updated_at
+                    historical_prices.open                                               as price,
+                    first_value(open)
+                    over (partition by ticker_collections_weights.collection_id,
+                        ticker_collections_weights.symbol,
+                        ticker_collections_weights.date order by historical_prices.date) as latest_rebalance_price,
+                    first_value(weight)
+                    over (partition by ticker_collections_weights.collection_id,
+                        ticker_collections_weights.symbol,
+                        ticker_collections_weights.date order by historical_prices.date) as latest_rebalance_weight,
+                    greatest(ticker_collections_weights.updated_at,
+                             historical_prices.updated_at)                               as updated_at
              from ticker_collections_weights
                       join {{ ref('historical_prices') }}
                            on historical_prices.symbol = ticker_collections_weights.symbol
                                and historical_prices.date between ticker_collections_weights.date
-                                                              and ticker_collections_weights.date + interval '1 month' - interval '1 day'
+                                  and ticker_collections_weights.date + interval '1 month' - interval '1 day'
+             where historical_prices.open > 0
+         ),
+     ticker_collections_weights_expanded as materialized
+         (
+             select *,
+                    latest_rebalance_weight * price / latest_rebalance_price as weight
+             from ticker_collections_weights_expanded0
+             where latest_rebalance_price > 0
          ),
      ticker_collections_weights_stats as
          (
@@ -59,7 +73,7 @@ with ticker_collections_weights as materialized
                     collection_id,
                     symbol,
                     date,
-                    weight / weight_sum   as weight,
+                    weight / weight_sum as weight,
                     adjusted_close::numeric,
                     next_open::numeric,
                     updated_at

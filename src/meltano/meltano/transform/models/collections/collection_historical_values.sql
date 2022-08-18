@@ -16,9 +16,9 @@ with data0 as
                     collection_id,
                     collection_uniq_id,
                     date,
-                    next_open                                                                   as price,
-                    lag(weight) over (partition by collection_uniq_id, symbol order by date)    as prev_weight,
-                    lag(next_open) over (partition by collection_uniq_id, symbol order by date) as prev_price,
+                    price,
+                    lag(price) over (partition by collection_uniq_id, symbol order by date)  as prev_price,
+                    lag(weight) over (partition by collection_uniq_id, symbol order by date) as prev_weight,
                     updated_at
              from {{ ref('collection_ticker_weights') }}
          ),
@@ -39,7 +39,7 @@ with data0 as
                     collection_uniq_id,
                     date,
                     sum(relative_gain) + 1 as daily_collection_gain,
-                    max(updated_at) as updated_at
+                    max(updated_at)        as updated_at
              from data
              group by profile_id,collection_id,collection_uniq_id, date
          ),
