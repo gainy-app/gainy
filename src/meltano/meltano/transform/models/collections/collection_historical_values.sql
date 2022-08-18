@@ -54,19 +54,19 @@ with data0 as
                     updated_at
              from daily_collection_gain
          )
-select profile_id,
-       collection_id,
+select daily_collection_gain_cumulative.profile_id,
+       daily_collection_gain_cumulative.collection_id,
        collection_uniq_id,
        date,
        date_trunc('week', date)::date              as date_week,
        date_trunc('month', date)::date             as date_month,
        coalesce(cumulative_daily_relative_gain, 1) as value,
        collection_uniq_id || '_' || date           as id,
-       updated_at
+       daily_collection_gain_cumulative.updated_at
 from daily_collection_gain_cumulative
 
 {% if is_incremental() %}
          left join {{ this }} old_data using (collection_uniq_id, date)
 where old_data is null
-   or abs(ticker_collections_weights_normalized.value - old_data.value) > 1e-6
+   or abs(coalesce(cumulative_daily_relative_gain, 1) - old_data.value) > 1e-6
 {% endif %}
