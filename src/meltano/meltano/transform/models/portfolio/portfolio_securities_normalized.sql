@@ -25,6 +25,8 @@ from (
                 case
                     when base_tickers.type = 'crypto'
                         then 'crypto'
+                    when portfolio_securities.type = 'derivative'
+                        then 'derivative'
                     when base_tickers.type = 'common stock'
                         then 'equity'
                     else portfolio_securities.type

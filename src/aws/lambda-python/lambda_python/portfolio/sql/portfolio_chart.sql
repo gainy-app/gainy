@@ -19,7 +19,7 @@ with week_trading_sessions as
              select distinct on (uniq_id, period, portfolio_transaction_chart.datetime)
                  portfolio_expanded_transactions.profile_id,
                  original_ticker_symbol,
-                 quantity_norm,
+                 quantity_norm_for_valuation,
                  period,
                  portfolio_transaction_chart.datetime,
                  uniq_id,
@@ -54,13 +54,13 @@ with week_trading_sessions as
                     original_ticker_symbol,
                     period,
                     datetime,
-                    sum(quantity_norm)  as quantity,
-                    count(uniq_id)      as transaction_count,
-                    sum(open)           as open,
-                    sum(high)           as high,
-                    sum(low)            as low,
-                    sum(close)          as close,
-                    sum(adjusted_close) as adjusted_close
+                    sum(quantity_norm_for_valuation)  as quantity,
+                    count(uniq_id)                    as transaction_count,
+                    sum(open)                         as open,
+                    sum(high)                         as high,
+                    sum(low)                          as low,
+                    sum(close)                        as close,
+                    sum(adjusted_close)               as adjusted_close
              from raw_chart_data
              group by profile_id, original_ticker_symbol, period, datetime
          ),
