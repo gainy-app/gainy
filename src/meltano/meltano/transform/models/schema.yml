@@ -2329,6 +2329,14 @@ models:
         tests:
           - type:
               type: 'double precision'
+      - name: min_annual_return
+        tests:
+          - type:
+              type: 'double precision'
+      - name: max_annual_return
+        tests:
+          - type:
+              type: 'double precision'
 
 exposures:
   - name: ticker_search_index

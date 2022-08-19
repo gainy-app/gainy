@@ -1192,6 +1192,8 @@
           - net_expense_ratio
           - total_assets
           - annualized_return_5y
+          - min_annual_return
+          - max_annual_return
         filter: {}
 - table:
     schema: public
