@@ -1388,7 +1388,7 @@ models:
       - name: updated_at
         tests:
           - type:
-              type: 'timestamp without time zone'
+              type: 'timestamp with time zone'
 
   - name: profile_collection_tickers_performance_ranked
     columns:

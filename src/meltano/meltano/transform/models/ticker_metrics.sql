@@ -487,8 +487,9 @@ select DISTINCT ON
                financials_metrics.total_assets::double precision,
                financials_metrics.ebitda::double precision,
                financials_metrics.ebitda_ttm::double precision,
-               financials_metrics.net_debt::double precision
+               financials_metrics.net_debt::double precision,
 
+               now() as updated_at
 from all_tickers t
          left join highlights on t.symbol = highlights.symbol
          left join trading_metrics on t.symbol = trading_metrics.symbol

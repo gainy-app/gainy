@@ -18,11 +18,12 @@ from (
                 (sum(risk_similarity * weight) / sum(weight))::double precision     as risk_similarity,
                 (sum(category_similarity * weight) / sum(weight))::double precision as category_similarity,
                 (sum(interest_similarity * weight) / sum(weight))::double precision as interest_similarity
-         from {{ source('app', 'profile_ticker_match_score') }}
-              join {{ source('app', 'profiles') }} on profiles.id = profile_id
-              join {{ ref('collection_tickers_weighted') }}
-                   on collection_tickers_weighted.symbol = profile_ticker_match_score.symbol
-                       and (collection_tickers_weighted.profile_id is null or
-                            collection_tickers_weighted.profile_id = profile_ticker_match_score.profile_id)
-         group by profile_ticker_match_score.profile_id, user_id, collection_id, collection_uniq_id
+         from {{ source('app', 'profiles') }}
+                  join {{ ref('collection_tickers_weighted') }}
+                       on (collection_tickers_weighted.profile_id is null or
+                           collection_tickers_weighted.profile_id = profiles.id)
+                  join {{ source('app', 'profile_ticker_match_score') }}
+                       on profile_ticker_match_score.profile_id = profiles.id
+                           and profile_ticker_match_score.symbol = collection_tickers_weighted.symbol
+         group by user_id, collection_uniq_id, profile_ticker_match_score.profile_id, collection_id
      ) t
