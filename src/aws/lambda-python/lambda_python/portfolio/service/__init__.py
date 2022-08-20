@@ -1,6 +1,9 @@
 from portfolio.exceptions import AccessTokenLoginRequiredException
 from portfolio.plaid import PlaidService
 from portfolio.repository import PortfolioRepository
+from gainy.utils import get_logger
+
+logger = get_logger(__name__)
 
 SERVICE_PLAID = 'plaid'
 
@@ -83,7 +86,22 @@ class PortfolioService:
                                                               access_token,
                                                               count=count,
                                                               offset=offset)
+
                 cur_transactions = data['transactions']
+                cur_tx_cnt = len(cur_transactions)
+
+                first_tx = cur_transactions[0] if cur_tx_cnt else None,
+                last_tx = cur_transactions[-1] if cur_tx_cnt else None,
+                logging_extra = {
+                    'profile_id': access_token['profile_id'],
+                    'access_token_id': access_token['id'],
+                    'offset': offset,
+                    'tx_cnt': cur_tx_cnt,
+                    'first_tx': first_tx,
+                    'last_tx': last_tx,
+                }
+                logger.info('sync_token_transactions', extra=logging_extra)
+
                 all_transactions += cur_transactions
                 self.persist_transaction_data(db_conn,
                                               access_token['profile_id'],
@@ -91,8 +109,8 @@ class PortfolioService:
                                               data['accounts'],
                                               cur_transactions)
 
-                transactions_count += len(cur_transactions)
-                if len(cur_transactions) < count:
+                transactions_count += cur_tx_cnt
+                if cur_tx_cnt < count:
                     break
         except AccessTokenApiException as e:
             pass
