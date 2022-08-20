@@ -4,7 +4,7 @@ from datetime import datetime
 import pytz
 import backoff
 import requests
-import urllib
+from urllib.parse import urlencode
 from backoff import full_jitter
 import traceback
 from common.hasura_function import HasuraAction
@@ -80,4 +80,4 @@ class SearchNews(HasuraAction):
             "max": limit,
             "lang": "en"
         }
-        return url + urllib.urlencode(params)
+        return url + urlencode(params)
