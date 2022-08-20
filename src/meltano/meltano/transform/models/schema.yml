@@ -2062,6 +2062,10 @@ models:
         tests:
           - type:
               type: 'numeric'
+      - name: price
+        tests:
+          - type:
+              type: 'numeric'
 
   - name: collection_historical_values
     columns:

@@ -27,35 +27,74 @@ with ticker_collections_weights as materialized
          ),
      ticker_collections_weights_expanded0 as materialized
          (
-             select profile_id,
-                    collection_uniq_id,
-                    collection_id,
-                    ticker_collections_weights.symbol,
-                    historical_prices.date,
-                    historical_prices.adjusted_close,
-                    historical_prices.open                                               as price,
-                    first_value(open)
-                    over (partition by ticker_collections_weights.collection_id,
-                        ticker_collections_weights.symbol,
-                        ticker_collections_weights.date order by historical_prices.date) as latest_rebalance_price,
-                    first_value(weight)
-                    over (partition by ticker_collections_weights.collection_id,
-                        ticker_collections_weights.symbol,
-                        ticker_collections_weights.date order by historical_prices.date) as latest_rebalance_weight,
-                    greatest(ticker_collections_weights.updated_at,
-                             historical_prices.updated_at)                               as updated_at
+             select distinct on (
+                 collection_uniq_id,
+                 ticker_collections_weights.symbol,
+                 historical_prices.date
+                 ) profile_id,
+                   collection_uniq_id,
+                   collection_id,
+                   ticker_collections_weights.symbol,
+                   historical_prices.date,
+                   historical_prices.adjusted_close       as price,
+                   case
+                       when historical_prices.date >= ticker_collections_weights.date
+                           then weight
+                       end                                as weight,
+                   case
+                       when historical_prices.date >= ticker_collections_weights.date
+                           then ticker_collections_weights.date
+                       end                                as period_id,
+                   greatest(ticker_collections_weights.updated_at,
+                            historical_prices.updated_at) as updated_at
              from ticker_collections_weights
                       join {{ ref('historical_prices') }}
                            on historical_prices.symbol = ticker_collections_weights.symbol
-                               and historical_prices.date between ticker_collections_weights.date
+                               and historical_prices.date between ticker_collections_weights.date - interval '1 week'
                                   and ticker_collections_weights.date + interval '1 month' - interval '1 day'
-             where historical_prices.open > 0
+             where historical_prices.adjusted_close > 0
+             order by collection_uniq_id,
+                      ticker_collections_weights.symbol,
+                      historical_prices.date,
+                      ticker_collections_weights.date
+         ),
+     ticker_collections_weights_expanded1 as materialized
+         (
+             select profile_id,
+                    collection_uniq_id,
+                    collection_id,
+                    symbol,
+                    date,
+                    price,
+                    coalesce(lag(weight) over (partition by collection_id,symbol order by date desc),
+                             weight)    as weight,
+                    coalesce(lag(period_id) over (partition by collection_id,symbol order by date desc),
+                             period_id) as period_id,
+                    updated_at
+             from ticker_collections_weights_expanded0
+         ),
+     ticker_collections_weights_expanded2 as materialized
+         (
+             select profile_id,
+                    collection_uniq_id,
+                    collection_id,
+                    symbol,
+                    date,
+                    price,
+                    first_value(price)
+                    over (partition by collection_id, symbol, period_id order by date) as latest_rebalance_price,
+                    first_value(weight)
+                    over (partition by collection_id, symbol, period_id order by date) as latest_rebalance_weight,
+                    updated_at
+             from ticker_collections_weights_expanded1
+             where period_id is not null
+               and weight is not null
          ),
      ticker_collections_weights_expanded as materialized
          (
              select *,
                     latest_rebalance_weight::numeric * price::numeric / latest_rebalance_price::numeric as weight
-             from ticker_collections_weights_expanded0
+             from ticker_collections_weights_expanded2
              where latest_rebalance_price > 0
          ),
      ticker_collections_weights_stats as
@@ -72,9 +111,8 @@ with ticker_collections_weights as materialized
                     collection_uniq_id,
                     collection_id,
                     symbol,
-                    date,
-                    weight / weight_sum as weight,
-                    adjusted_close::numeric,
+                    lag(date) over (partition by collection_id,symbol order by date desc) as date,
+                    weight / weight_sum                                                   as weight,
                     price::numeric,
                     updated_at
              from ticker_collections_weights_expanded
@@ -86,10 +124,14 @@ from ticker_collections_weights_normalized
 
 {% if is_incremental() %}
          left join {{ this }} old_data using (collection_uniq_id, symbol, date)
-where old_data is null
-   or abs(ticker_collections_weights_normalized.weight - old_data.weight) > 1e-6
-   or abs(ticker_collections_weights_normalized.adjusted_close - old_data.adjusted_close) > 1e-3
-   or abs(ticker_collections_weights_normalized.price - old_data.price) > 1e-3
+{% endif %}
+
+where date is not null
+
+{% if is_incremental() %}
+  and (old_data is null
+    or abs(ticker_collections_weights_normalized.weight - old_data.weight) > 1e-6
+    or abs(ticker_collections_weights_normalized.price - old_data.price) > 1e-3)
 {% endif %}
 
 -- TODO make it historical for personalized collections
