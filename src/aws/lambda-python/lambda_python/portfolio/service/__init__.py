@@ -1,6 +1,6 @@
 import time
 
-from portfolio.exceptions import AccessTokenLoginRequiredException
+from portfolio.exceptions import AccessTokenApiException, AccessTokenLoginRequiredException
 from portfolio.plaid import PlaidService
 from portfolio.repository import PortfolioRepository
 from gainy.utils import get_logger
