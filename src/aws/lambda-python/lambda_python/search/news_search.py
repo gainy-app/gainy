@@ -4,6 +4,7 @@ from datetime import datetime
 import pytz
 import backoff
 import requests
+from urllib.parse import urlencode
 from backoff import full_jitter
 import traceback
 from common.hasura_function import HasuraAction
@@ -72,4 +73,11 @@ class SearchNews(HasuraAction):
         return datetime.strftime(parsed_datetime, "%Y-%m-%dT%H:%M:%S%z")
 
     def _build_url(self, query, limit) -> str:
-        return f"https://gnews.io/api/v4/search?token={self.gnews_api_token}&q=\"{query}\"&max={limit}&lang=en"
+        url = "https://gnews.io/api/v4/search?"
+        params = {
+            "token": self.gnews_api_token,
+            "q": query,
+            "max": limit,
+            "lang": "en"
+        }
+        return url + urlencode(params)

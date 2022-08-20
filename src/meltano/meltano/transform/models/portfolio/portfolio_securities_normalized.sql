@@ -33,10 +33,27 @@ from (
                     end                                      as type
          from {{ source('app', 'portfolio_securities') }}
                   left join {{ ref('base_tickers') }}
-                            on base_tickers.symbol in (portfolio_securities.ticker_symbol,
-                                                       regexp_replace(portfolio_securities.ticker_symbol, '\d{6}[CP]\d{8}$', ''))
-                                 or (base_tickers.symbol = regexp_replace(portfolio_securities.ticker_symbol, '^CUR:([^.]+).*$', '\1.CC')
-                                     and portfolio_securities.type != 'cash')
+                            -- crypto
+                            on (portfolio_securities.type in ('crypto', 'cryptocurrency') and
+                                base_tickers.symbol =
+                                case
+                                    when portfolio_securities.ticker_symbol ~ '^CUR:([^.]+).*$'
+                                        then regexp_replace(portfolio_securities.ticker_symbol, '^CUR:([^.]+).*$',
+                                                            '\1.CC')
+                                    else portfolio_securities.ticker_symbol || '.CC'
+                                    end)
+                                -- options
+                                or (portfolio_securities.type = 'derivative' and
+                                    base_tickers.symbol =
+                                    case
+                                        when portfolio_securities.ticker_symbol ~ '\d{6}[CP]\d{8}$'
+                                            then regexp_replace(portfolio_securities.ticker_symbol, '\d{6}[CP]\d{8}$',
+                                                                '')
+                                        else portfolio_securities.ticker_symbol
+                                        end)
+--                                 -- stocks
+                                or (portfolio_securities.type not in ('crypto', 'cryptocurrency', 'derivative') and
+                                    base_tickers.symbol = portfolio_securities.ticker_symbol)
          where
              (
                  base_tickers.symbol is not null

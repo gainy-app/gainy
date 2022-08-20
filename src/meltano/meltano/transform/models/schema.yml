@@ -1389,7 +1389,7 @@ models:
       - name: updated_at
         tests:
           - type:
-              type: 'timestamp without time zone'
+              type: 'timestamp with time zone'
 
   - name: profile_collection_tickers_performance_ranked
     columns:
@@ -1631,14 +1631,6 @@ models:
         tests:
           - type:
               type: 'character varying'
-      - name: name
-        tests:
-          - type:
-              type: 'character varying'
-      - name: description
-        tests:
-          - type:
-              type: 'text'
       - name: country_origin
         tests:
           - type:
@@ -2338,6 +2330,45 @@ models:
         tests:
           - type:
               type: 'character varying'
+
+  - name: etf_metrics
+    columns:
+      - name: symbol
+        tests:
+          - type:
+              type: 'character varying'
+      - name: volatility_1y
+        tests:
+          - type:
+              type: 'double precision'
+      - name: volatility_3y
+        tests:
+          - type:
+              type: 'double precision'
+      - name: dividend_frequency
+        tests:
+          - type:
+              type: 'text'
+      - name: net_expense_ratio
+        tests:
+          - type:
+              type: 'double precision'
+      - name: total_assets
+        tests:
+          - type:
+              type: 'bigint'
+      - name: annualized_return_5y
+        tests:
+          - type:
+              type: 'double precision'
+      - name: min_annual_return
+        tests:
+          - type:
+              type: 'double precision'
+      - name: max_annual_return
+        tests:
+          - type:
+              type: 'double precision'
 
 exposures:
   - name: ticker_search_index

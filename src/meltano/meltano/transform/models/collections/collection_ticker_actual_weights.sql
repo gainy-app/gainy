@@ -18,6 +18,7 @@ select distinct on (
       symbol,
       date,
       weight,
-      collection_uniq_id || '_' || symbol as id
+      collection_uniq_id || '_' || symbol as id,
+      updated_at
 from {{ ref('collection_ticker_weights') }}
 order by collection_uniq_id, symbol, date desc

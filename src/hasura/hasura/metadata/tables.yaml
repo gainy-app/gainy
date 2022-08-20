@@ -1051,7 +1051,6 @@
           - image_large
           - image_small
           - image_thumb
-          - name
           - symbol
           - ico_end_date
           - ico_start_date
@@ -1094,14 +1093,11 @@
           - market_cap_rank
           - categories
           - links
-          - description
         filter: {}
     - role: user
       permission:
         columns:
           - symbol
-          - name
-          - description
           - country_origin
           - categories
           - asset_platform_id
@@ -1181,6 +1177,23 @@
           - volume_24h
           - high_24h
           - low_24h
+        filter: {}
+- table:
+    schema: public
+    name: etf_metrics
+  select_permissions:
+    - role: user
+      permission:
+        columns:
+          - symbol
+          - volatility_1y
+          - volatility_3y
+          - dividend_frequency
+          - net_expense_ratio
+          - total_assets
+          - annualized_return_5y
+          - min_annual_return
+          - max_annual_return
         filter: {}
 - table:
     schema: public
@@ -2191,6 +2204,15 @@
           remote_table:
             schema: public
             name: crypto_realtime_metrics
+          insertion_order: null
+          column_mapping:
+            symbol: symbol
+    - name: etf_metrics
+      using:
+        manual_configuration:
+          remote_table:
+            schema: public
+            name: etf_metrics
           insertion_order: null
           column_mapping:
             symbol: symbol

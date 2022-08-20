@@ -10,8 +10,6 @@
 
 select base_tickers.symbol,
        -- general
-       crypto_coins.name,
-       (crypto_coins.description ->> 'en')::text                                   as description,
        country_origin,
        categories,
        asset_platform_id,
