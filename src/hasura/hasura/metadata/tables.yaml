@@ -960,8 +960,9 @@
           - risk_level
           - risk_similarity
         filter:
-          user_id:
-            _eq: X-Hasura-User-Id
+          profile:
+            user_id:
+              _eq: X-Hasura-User-Id
 - table:
     schema: public
     name: collection_match_score_explanation
