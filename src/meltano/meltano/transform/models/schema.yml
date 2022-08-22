@@ -59,6 +59,7 @@ sources:
       - name: plaid_institutions
       - name: portfolio_securities
       - name: profile_categories
+      - name: profile_collection_match_score
       - name: profile_favorite_collections
       - name: profile_holdings
       - name: profile_interests
