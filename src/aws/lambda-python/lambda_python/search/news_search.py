@@ -3,6 +3,7 @@ import time
 from datetime import datetime
 import pytz
 import backoff
+import re
 import requests
 from urllib.parse import urlencode
 from backoff import full_jitter
@@ -73,10 +74,13 @@ class SearchNews(HasuraAction):
         return datetime.strftime(parsed_datetime, "%Y-%m-%dT%H:%M:%S%z")
 
     def _build_url(self, query, limit) -> str:
+        query = re.sub(r'\.CC$', '', query)
+        query = re.sub(r'\.INDX$', '', query)
+
         url = "https://gnews.io/api/v4/search?"
         params = {
             "token": self.gnews_api_token,
-            "q": query,
+            "q": '"%s"' % (query),
             "max": limit,
             "lang": "en"
         }

@@ -1,4 +1,6 @@
-from portfolio.exceptions import AccessTokenLoginRequiredException
+import time
+
+from portfolio.exceptions import AccessTokenApiException, AccessTokenLoginRequiredException
 from portfolio.plaid import PlaidService
 from portfolio.repository import PortfolioRepository
 from gainy.utils import get_logger
@@ -81,33 +83,39 @@ class PortfolioService:
             access_token['service']).max_transactions_limit()
         try:
             for offset in range(0, 1000000, count):
+                request_start = time.time()
                 data = self.__get_service(
                     access_token['service']).get_transactions(db_conn,
                                                               access_token,
                                                               count=count,
                                                               offset=offset)
+                request_end = time.time()
 
                 cur_transactions = data['transactions']
                 cur_tx_cnt = len(cur_transactions)
 
-                first_tx = cur_transactions[0] if cur_tx_cnt else None,
-                last_tx = cur_transactions[-1] if cur_tx_cnt else None,
-                logging_extra = {
-                    'profile_id': access_token['profile_id'],
-                    'access_token_id': access_token['id'],
-                    'offset': offset,
-                    'tx_cnt': cur_tx_cnt,
-                    'first_tx': first_tx,
-                    'last_tx': last_tx,
-                }
-                logger.info('sync_token_transactions', extra=logging_extra)
-
+                persist_start = time.time()
                 all_transactions += cur_transactions
                 self.persist_transaction_data(db_conn,
                                               access_token['profile_id'],
                                               data['securities'],
                                               data['accounts'],
                                               cur_transactions)
+                persist_end = time.time()
+
+                first_tx = cur_transactions[0] if cur_tx_cnt else None
+                last_tx = cur_transactions[-1] if cur_tx_cnt else None
+                logging_extra = {
+                    'profile_id': access_token['profile_id'],
+                    'access_token_id': access_token['id'],
+                    'offset': offset,
+                    'tx_cnt': cur_tx_cnt,
+                    'request_duration': request_end - request_start,
+                    'persist_duration': persist_end - persist_start,
+                    'first_tx': first_tx.to_dict(),
+                    'last_tx': last_tx.to_dict(),
+                }
+                logger.info('sync_token_transactions', extra=logging_extra)
 
                 transactions_count += cur_tx_cnt
                 if cur_tx_cnt < count:
