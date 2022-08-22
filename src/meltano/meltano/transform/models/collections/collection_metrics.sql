@@ -19,7 +19,6 @@ with grouped_collections as
                     sum(actual_price * weight) - sum(absolute_daily_change * weight) as prev_close_price,
                     max(time)                                                        as time,
                     sum(market_capitalization)                                       as market_capitalization_sum,
-                    -- todo add collection_tickers_weighted.updated_at
                     greatest(max(ticker_realtime_metrics.time),
                         max(ticker_metrics.updated_at),
                         max(collection_ticker_actual_weights.updated_at))            as updated_at
