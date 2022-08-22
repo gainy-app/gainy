@@ -76,7 +76,7 @@ class SearchNews(HasuraAction):
         url = "https://gnews.io/api/v4/search?"
         params = {
             "token": self.gnews_api_token,
-            "q": query,
+            "q": '"%s"' % (query),
             "max": limit,
             "lang": "en"
         }
