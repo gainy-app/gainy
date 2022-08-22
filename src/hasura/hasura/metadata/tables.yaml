@@ -160,6 +160,9 @@
       webhook: '{{AWS_LAMBDA_API_GATEWAY_ENDPOINT}}/hasuraTrigger'
 - table:
     schema: app
+    name: profile_collection_match_score
+- table:
+    schema: app
     name: profile_favorite_collections
   object_relationships:
     - name: collection
