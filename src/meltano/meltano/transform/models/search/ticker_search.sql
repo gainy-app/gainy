@@ -31,7 +31,7 @@ with ticker_categories as
     tickers_with_realtime_prices as
          (
              select symbol
-             from {{ source('eod', 'eod_intraday_prices') }}
+             from {{ ref('historical_intraday_prices') }}
                       join {{ ref('base_tickers') }} using (symbol)
              where type in ('crypto', 'index')
              group by symbol
