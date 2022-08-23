@@ -20,4 +20,4 @@ select symbol,
            else close_at
            end as close_at
 from {{ ref('week_trading_sessions_static') }}
-     join {{ ref('base_tickers') }} using (symbol)
+     left join {{ ref('base_tickers') }} using (symbol)
