@@ -16,18 +16,17 @@
 with polygon_symbols as materialized
          (
              select symbol,
-                    polygon_intraday_prices.time::date as date
+                    week_trading_sessions.date
              from {{ source('polygon', 'polygon_intraday_prices') }}
                       join {{ ref('week_trading_sessions') }} using (symbol)
-             where week_trading_sessions.date = polygon_intraday_prices.time::date
-               and polygon_intraday_prices.time >= week_trading_sessions.open_at
+             where polygon_intraday_prices.time >= week_trading_sessions.open_at
                and polygon_intraday_prices.time < week_trading_sessions.close_at
-             group by symbol, polygon_intraday_prices.time::date
+             group by symbol, week_trading_sessions.date
          ),
      raw_polygon_intraday_prices as
          (
              select polygon_intraday_prices.symbol,
-                    polygon_intraday_prices.time::date as date,
+                    week_trading_sessions.date,
                     time,
                     open,
                     high,
@@ -37,14 +36,13 @@ with polygon_symbols as materialized
              from {{ source('polygon', 'polygon_intraday_prices') }}
                       join {{ ref('week_trading_sessions') }} using (symbol)
                       join polygon_symbols using (symbol, date)
-             where week_trading_sessions.date = polygon_intraday_prices.time::date
-               and time >= week_trading_sessions.open_at
+             where time >= week_trading_sessions.open_at
                and time < week_trading_sessions.close_at
          ),
      raw_eod_intraday_prices as
          (
              select eod_intraday_prices.symbol,
-                    eod_intraday_prices.time::date as date,
+                    week_trading_sessions.date,
                     time,
                     open,
                     high,
@@ -55,7 +53,6 @@ with polygon_symbols as materialized
                       join {{ ref('week_trading_sessions') }} using (symbol)
                       left join polygon_symbols using (symbol, date)
              where polygon_symbols is null
-               and week_trading_sessions.date = eod_intraday_prices.time::date
                and time >= week_trading_sessions.open_at
                and time < week_trading_sessions.close_at
          ),

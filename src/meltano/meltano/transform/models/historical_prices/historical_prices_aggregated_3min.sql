@@ -23,45 +23,26 @@ with
              from {{ this }}
          ),
 {% endif %}
-     trading_sessions as
+     latest_open_trading_session as
          (
-             select min(open_at)::timestamp  as open_at,
-                    max(close_at)::timestamp as close_at
-             from (
-                      select distinct on (exchange_name) *
-                      from {{ ref('exchange_schedule') }}
-                      where open_at <= now()
-                      order by exchange_name, date desc
-                  ) t
+             select *
+             from {{ ref('week_trading_sessions') }}
+             where index = 0
          ),
      time_series as
          (
-             SELECT null as type,
-                    time_truncated
-             FROM (
-                      SELECT null as type,
-                             date_trunc('minute', dd) -
-                             interval '1 minute' *
-                             mod(extract(minutes from dd)::int, {{ minutes }}) as time_truncated
-                      FROM generate_series(now()::timestamp - interval '1 week', now()::timestamp, interval '{{ minutes }} minutes') dd
-                      ) t
-                      join trading_sessions on true
-{% if is_incremental() and var('realtime') %}
-                      join max_date on true
-{% endif %}
-             where time_truncated >= trading_sessions.open_at and time_truncated < trading_sessions.close_at
-{% if is_incremental() and var('realtime') %}
-               and time_truncated > max_date.datetime - interval '20 minutes'
-{% endif %}
-             union all
-             SELECT 'crypto' as type,
+             select symbol,
                     date_trunc('minute', dd) -
                     interval '1 minute' *
                     mod(extract(minutes from dd)::int, {{ minutes }}) as time_truncated
-             FROM generate_series(now()::timestamp - interval '1 day', now()::timestamp, interval '{{ minutes }} minutes') dd
+             from {{ ref('week_trading_sessions') }}
+                      join generate_series(open_at, close_at - interval '1 second', interval '{{ minutes }} minutes') dd on true
 {% if is_incremental() and var('realtime') %}
                       join max_date on true
-             where dd > max_date.datetime - interval '20 minutes'
+{% endif %}
+             where index = 0
+{% if is_incremental() and var('realtime') %}
+               and dd > max_date.datetime - interval '20 minutes'
 {% endif %}
          ),
      expanded_intraday_prices as
@@ -69,12 +50,11 @@ with
              select historical_intraday_prices.*,
                     historical_intraday_prices.time_{{ minutes }}min as time_truncated
              from {{ ref('historical_intraday_prices') }}
-                      join trading_sessions on true
+                      join latest_open_trading_session using (symbol)
 {% if is_incremental() and var('realtime') %}
                       join max_date on true
 {% endif %}
-             where (historical_intraday_prices.time_{{ minutes }}min >= trading_sessions.open_at - interval '1 hour' and historical_intraday_prices.time_{{ minutes }}min < trading_sessions.close_at
-                or (symbol like '%.CC' and time > now() - interval '1 day'))
+             where historical_intraday_prices.time_{{ minutes }}min >= latest_open_trading_session.open_at - interval '1 hour' and historical_intraday_prices.time_{{ minutes }}min < latest_open_trading_session.close_at
 {% if is_incremental() and var('realtime') %}
                and historical_intraday_prices.time_{{ minutes }}min > max_date.datetime - interval '20 minutes'
 {% endif %}
@@ -84,10 +64,9 @@ with
          (
              select {{ this }}.*
              from {{ this }}
-                      join trading_sessions on true
+                      join latest_open_trading_session using (symbol)
                       join max_date on true
-             where ({{ this }}.datetime >= trading_sessions.open_at - interval '1 hour' and {{ this }}.datetime < trading_sessions.close_at
-                or (symbol like '%.CC' and {{ this }}.datetime > now() - interval '1 day'))
+             where {{ this }}.datetime >= latest_open_trading_session.open_at - interval '1 hour' and {{ this }}.datetime < latest_open_trading_session.close_at
                and {{ this }}.datetime > max_date.datetime - interval '20 minutes'
          ),
 {% endif %}
@@ -153,9 +132,7 @@ with
                              null      as updated_at,
                              2         as priority
                       from {{ ref('base_tickers') }}
-                               join time_series
-                                   on (time_series.type = 'crypto' and base_tickers.type = 'crypto')
-                                       or (time_series.type is null and base_tickers.type != 'crypto')
+                               join time_series using (symbol)
                       union all
                       select contract_name,
                              time_truncated as time,
@@ -169,7 +146,7 @@ with
                              null      as updated_at,
                              2         as priority
                       from {{ ref('ticker_options_monitored') }}
-                               join time_series on time_series.type is null
+                               join time_series using (symbol)
                   ) t
              order by symbol, time_truncated, time, priority
          )
