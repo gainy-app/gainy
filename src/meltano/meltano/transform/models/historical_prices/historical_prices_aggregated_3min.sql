@@ -36,7 +36,7 @@ with
                     interval '1 minute' *
                     mod(extract(minutes from dd)::int, {{ minutes }}) as time_truncated
              from {{ ref('week_trading_sessions') }}
-                      join generate_series(open_at, close_at - interval '1 second', interval '{{ minutes }} minutes') dd on true
+                      join generate_series(open_at, least(now(), close_at - interval '1 second'), interval '{{ minutes }} minutes') dd on true
 {% if is_incremental() and var('realtime') %}
                       join max_date on true
 {% endif %}
