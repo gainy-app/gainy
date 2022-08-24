@@ -42,7 +42,7 @@ with
 {% endif %}
              where index = 0
 {% if is_incremental() and var('realtime') %}
-               and dd > max_date.datetime - interval '20 minutes'
+               and dd > max_date.datetime - interval '30 minutes'
 {% endif %}
          ),
      expanded_intraday_prices as
@@ -56,7 +56,7 @@ with
 {% endif %}
              where historical_intraday_prices.time_{{ minutes }}min >= latest_open_trading_session.open_at - interval '1 hour' and historical_intraday_prices.time_{{ minutes }}min < latest_open_trading_session.close_at
 {% if is_incremental() and var('realtime') %}
-               and historical_intraday_prices.time_{{ minutes }}min > max_date.datetime - interval '20 minutes'
+               and historical_intraday_prices.time_{{ minutes }}min > max_date.datetime - interval '30 minutes'
 {% endif %}
          ),
 {% if is_incremental() and var('realtime') %}
@@ -67,7 +67,7 @@ with
                       join latest_open_trading_session using (symbol)
                       join max_date on true
              where {{ this }}.datetime >= latest_open_trading_session.open_at - interval '1 hour' and {{ this }}.datetime < latest_open_trading_session.close_at
-               and {{ this }}.datetime > max_date.datetime - interval '20 minutes'
+               and {{ this }}.datetime > max_date.datetime - interval '30 minutes'
          ),
 {% endif %}
      combined_intraday_prices as
@@ -104,21 +104,6 @@ with
                              updated_at,
                              0 as priority
                       from expanded_intraday_prices
-{% if is_incremental() and var('realtime') %}
-                      union all
-                      select symbol,
-                             datetime as time,
-                             open,
-                             high,
-                             low,
-                             close,
-                             adjusted_close,
-                             volume,
-                             datetime as time_truncated,
-                             updated_at,
-                             1 as priority
-                      from old_prices
-{% endif %}
                       union all
                       select symbol,
                              time_truncated as time,
@@ -130,7 +115,7 @@ with
                              null      as volume,
                              time_truncated,
                              null      as updated_at,
-                             2         as priority
+                             1         as priority
                       from {{ ref('base_tickers') }}
                                join time_series using (symbol)
                       union all
@@ -144,7 +129,7 @@ with
                              null      as volume,
                              time_truncated,
                              null      as updated_at,
-                             2         as priority
+                             1         as priority
                       from {{ ref('ticker_options_monitored') }}
                                join time_series using (symbol)
                   ) t
