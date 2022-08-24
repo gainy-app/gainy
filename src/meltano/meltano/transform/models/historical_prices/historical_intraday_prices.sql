@@ -13,14 +13,14 @@
 }}
 
 
-with polygon_symbols as materialized
+with eod_symbols as materialized
          (
              select symbol,
                     week_trading_sessions.date
-             from {{ source('polygon', 'polygon_intraday_prices') }}
+             from {{ source('eod', 'eod_intraday_prices') }}
                       join {{ ref('week_trading_sessions') }} using (symbol)
-             where polygon_intraday_prices.time >= week_trading_sessions.open_at
-               and polygon_intraday_prices.time < week_trading_sessions.close_at
+             where eod_intraday_prices.time >= week_trading_sessions.open_at
+               and eod_intraday_prices.time < week_trading_sessions.close_at
              group by symbol, week_trading_sessions.date
          ),
      raw_polygon_intraday_prices as
@@ -35,8 +35,9 @@ with polygon_symbols as materialized
                     volume
              from {{ source('polygon', 'polygon_intraday_prices') }}
                       join {{ ref('week_trading_sessions') }} using (symbol)
-                      join polygon_symbols using (symbol, date)
-             where time >= week_trading_sessions.open_at
+                      left join eod_symbols using (symbol, date)
+             where eod_symbols is null
+               and time >= week_trading_sessions.open_at
                and time < week_trading_sessions.close_at
          ),
      raw_eod_intraday_prices as
@@ -51,9 +52,8 @@ with polygon_symbols as materialized
                     volume
              from {{ source('eod', 'eod_intraday_prices') }}
                       join {{ ref('week_trading_sessions') }} using (symbol)
-                      left join polygon_symbols using (symbol, date)
-             where polygon_symbols is null
-               and time >= week_trading_sessions.open_at
+                      join eod_symbols using (symbol, date)
+             where time >= week_trading_sessions.open_at
                and time < week_trading_sessions.close_at
          ),
      raw_intraday_prices as materialized
