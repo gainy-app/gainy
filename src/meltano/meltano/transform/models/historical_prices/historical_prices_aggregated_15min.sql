@@ -23,12 +23,6 @@ with
              from {{ this }}
          ),
 {% endif %}
-     latest_open_trading_session as
-         (
-             select *
-             from {{ ref('week_trading_sessions') }}
-             where index = 0
-         ),
      time_series as
          (
              select symbol,
@@ -40,9 +34,8 @@ with
 {% if is_incremental() and var('realtime') %}
                       join max_date on true
 {% endif %}
-             where index = 0
 {% if is_incremental() and var('realtime') %}
-               and dd > max_date.datetime - interval '30 minutes'
+             where dd > max_date.datetime - interval '30 minutes'
 {% endif %}
          ),
      expanded_intraday_prices as
@@ -50,11 +43,11 @@ with
              select historical_intraday_prices.*,
                     historical_intraday_prices.time_{{ minutes }}min as time_truncated
              from {{ ref('historical_intraday_prices') }}
-                      join latest_open_trading_session using (symbol)
+                      join {{ ref('week_trading_sessions') }} using (symbol)
 {% if is_incremental() and var('realtime') %}
                       join max_date on true
 {% endif %}
-             where historical_intraday_prices.time_{{ minutes }}min >= latest_open_trading_session.open_at - interval '1 hour' and historical_intraday_prices.time_{{ minutes }}min < latest_open_trading_session.close_at
+             where historical_intraday_prices.time_{{ minutes }}min >= week_trading_sessions.open_at - interval '1 hour' and historical_intraday_prices.time_{{ minutes }}min < week_trading_sessions.close_at
 {% if is_incremental() and var('realtime') %}
                and historical_intraday_prices.time_{{ minutes }}min > max_date.datetime - interval '30 minutes'
 {% endif %}
@@ -64,9 +57,9 @@ with
          (
              select {{ this }}.*
              from {{ this }}
-                      join latest_open_trading_session using (symbol)
+                      join {{ ref('week_trading_sessions') }} using (symbol)
                       join max_date on true
-             where {{ this }}.datetime >= latest_open_trading_session.open_at - interval '1 hour' and {{ this }}.datetime < latest_open_trading_session.close_at
+             where {{ this }}.datetime >= week_trading_sessions.open_at - interval '1 hour' and {{ this }}.datetime < week_trading_sessions.close_at
                and {{ this }}.datetime > max_date.datetime - interval '30 minutes'
          ),
 {% endif %}
