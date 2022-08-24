@@ -103,8 +103,10 @@ class PortfolioService:
                                               cur_transactions)
                 persist_end = time.time()
 
-                first_tx = cur_transactions[0].to_dict() if cur_tx_cnt else None
-                last_tx = cur_transactions[-1].to_dict() if cur_tx_cnt else None
+                first_tx = cur_transactions[0].to_dict(
+                ) if cur_tx_cnt else None
+                last_tx = cur_transactions[-1].to_dict(
+                ) if cur_tx_cnt else None
                 logging_extra = {
                     'profile_id': access_token['profile_id'],
                     'access_token_id': access_token['id'],
