@@ -18,11 +18,9 @@
            historical_prices_aggregated_3min.adjusted_close,
            historical_prices_aggregated_3min.volume
     from {{ ref('historical_prices_aggregated_3min') }}
-             left join {{ ref('week_trading_sessions') }}
-                       on week_trading_sessions.symbol = historical_prices_aggregated_3min.symbol
-    where (historical_prices_aggregated_3min.datetime between week_trading_sessions.open_at and week_trading_sessions.close_at - interval '3 minutes'
-       or (week_trading_sessions is null and historical_prices_aggregated_3min.datetime > now() - interval '1 day'))
-      and (week_trading_sessions is null or (week_trading_sessions.date = historical_prices_aggregated_3min.datetime::date and week_trading_sessions.index = 0))
+             join {{ ref('week_trading_sessions') }} using (symbol)
+    where week_trading_sessions.index = 0
+      and historical_prices_aggregated_3min.datetime between week_trading_sessions.open_at and week_trading_sessions.close_at - interval '3 minutes'
 )
 
 union all
@@ -39,16 +37,20 @@ union all
            historical_prices_aggregated_15min.adjusted_close,
            historical_prices_aggregated_15min.volume
     from {{ ref('historical_prices_aggregated_15min') }}
-             left join {{ ref('week_trading_sessions') }}
-                       on week_trading_sessions.symbol = historical_prices_aggregated_15min.symbol
-    where (historical_prices_aggregated_15min.datetime between week_trading_sessions.open_at and week_trading_sessions.close_at - interval '15 minutes'
-       or (week_trading_sessions is null and historical_prices_aggregated_15min.datetime > now() - interval '7 days'))
-      and (week_trading_sessions is null or week_trading_sessions.date = historical_prices_aggregated_15min.datetime::date)
+             join {{ ref('week_trading_sessions') }} using (symbol)
+    where historical_prices_aggregated_15min.datetime between week_trading_sessions.open_at and week_trading_sessions.close_at - interval '15 minutes'
 )
 
 union all
 
 (
+    with latest_open_trading_session as
+             (
+                 select symbol, max(date) as date
+                 from {{ ref('week_trading_sessions') }}
+                 where index = 0
+                 group by symbol
+             )
     select historical_prices_aggregated_1d.symbol,
            historical_prices_aggregated_1d.datetime,
            historical_prices_aggregated_1d.datetime + interval '1 day' as close_datetime,
@@ -60,15 +62,20 @@ union all
            historical_prices_aggregated_1d.adjusted_close,
            historical_prices_aggregated_1d.volume
     from {{ ref('historical_prices_aggregated_1d') }}
-             left join {{ ref('week_trading_sessions') }}
-                       on week_trading_sessions.symbol = historical_prices_aggregated_1d.symbol
-                           and week_trading_sessions.index = 0
-    where historical_prices_aggregated_1d.datetime >= coalesce(week_trading_sessions.date, now()) - interval '1 month'
+             join latest_open_trading_session using (symbol)
+    where historical_prices_aggregated_1d.datetime >= coalesce(latest_open_trading_session.date, now()) - interval '1 month'
 )
 
 union all
 
 (
+    with latest_open_trading_session as
+             (
+                 select symbol, max(date) as date
+                 from {{ ref('week_trading_sessions') }}
+                 where index = 0
+                 group by symbol
+             )
     select historical_prices_aggregated_1d.symbol,
            historical_prices_aggregated_1d.datetime,
            historical_prices_aggregated_1d.datetime + interval '1 day' as close_datetime,
@@ -80,15 +87,20 @@ union all
            historical_prices_aggregated_1d.adjusted_close,
            historical_prices_aggregated_1d.volume
     from {{ ref('historical_prices_aggregated_1d') }}
-             left join {{ ref('week_trading_sessions') }}
-                       on week_trading_sessions.symbol = historical_prices_aggregated_1d.symbol
-                           and week_trading_sessions.index = 0
-    where historical_prices_aggregated_1d.datetime >= coalesce(week_trading_sessions.date, now()) - interval '3 month'
+             join latest_open_trading_session using (symbol)
+    where historical_prices_aggregated_1d.datetime >= coalesce(latest_open_trading_session.date, now()) - interval '3 month'
 )
 
 union all
 
 (
+    with latest_open_trading_session as
+             (
+                 select symbol, max(date) as date
+                 from {{ ref('week_trading_sessions') }}
+                 where index = 0
+                 group by symbol
+             )
     select historical_prices_aggregated_1d.symbol,
            historical_prices_aggregated_1d.datetime,
            historical_prices_aggregated_1d.datetime + interval '1 day' as close_datetime,
@@ -100,15 +112,20 @@ union all
            historical_prices_aggregated_1d.adjusted_close,
            historical_prices_aggregated_1d.volume
     from {{ ref('historical_prices_aggregated_1d') }}
-             left join {{ ref('week_trading_sessions') }}
-                       on week_trading_sessions.symbol = historical_prices_aggregated_1d.symbol
-                           and week_trading_sessions.index = 0
-    where historical_prices_aggregated_1d.datetime >= coalesce(week_trading_sessions.date, now()) - interval '1 year'
+             join latest_open_trading_session using (symbol)
+    where historical_prices_aggregated_1d.datetime >= coalesce(latest_open_trading_session.date, now()) - interval '1 year'
 )
 
 union all
 
 (
+    with latest_open_trading_session as
+             (
+                 select symbol, max(date) as date
+                 from {{ ref('week_trading_sessions') }}
+                 where index = 0
+                 group by symbol
+             )
     select historical_prices_aggregated_1w.symbol,
            historical_prices_aggregated_1w.datetime,
            historical_prices_aggregated_1w.datetime + interval '1 week' as close_datetime,
@@ -120,10 +137,8 @@ union all
            historical_prices_aggregated_1w.adjusted_close,
            historical_prices_aggregated_1w.volume
     from {{ ref('historical_prices_aggregated_1w') }}
-             left join {{ ref('week_trading_sessions') }}
-                       on week_trading_sessions.symbol = historical_prices_aggregated_1w.symbol
-                           and week_trading_sessions.index = 0
-    where historical_prices_aggregated_1w.datetime >= coalesce(week_trading_sessions.date, now()) - interval '5 year'
+             join latest_open_trading_session using (symbol)
+    where historical_prices_aggregated_1w.datetime >= coalesce(latest_open_trading_session.date, now()) - interval '5 year'
 )
 
 union all

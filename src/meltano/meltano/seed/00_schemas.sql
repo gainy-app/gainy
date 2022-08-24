@@ -18,6 +18,19 @@ create table if not exists raw_data.eod_intraday_prices
         primary key (time, symbol)
 );
 
+create table if not exists raw_data.polygon_intraday_prices
+(
+    symbol      varchar,
+    time        timestamp,
+    open        numeric,
+    high        numeric,
+    low         numeric,
+    close       numeric,
+    volume      numeric,
+    granularity int,
+    primary key (time, symbol)
+);
+
 create table if not exists raw_data.auto_ticker_industries
 (
     symbol              varchar,
