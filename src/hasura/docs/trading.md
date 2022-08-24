@@ -1,3 +1,4 @@
+# Trading
 ## **[TODO]** KYC
 - mutation to fill KYC fields
 - action to get KYC form placeholders
