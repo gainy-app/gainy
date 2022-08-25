@@ -49,18 +49,26 @@ https://stripe.com/docs/payments/save-and-reuse
    - payment_methods 
 4. Set active payment method
    - update payment_methods.set_active_at to now()
-5. Background job to charge commissions
-   - TradingService.updateAccountBalance(trading_account)
-   - TradingService.calculateCommission(trading_account)
-   - PaymentService.chargeTradingCommission(profile_id)
-
-6. Handle charging errors
+5. Background job to create invoices
+   - TradingService.update_account_balance(trading_account)
+   - TradingService.calculate_commission(trading_account)
+   - BillingService.create_invoice(profile_id, amount, description)
+     - due date in future
+     - specify period and check there is no invoice for this period
+     - amount = commission * period days / 365
+6. Background job to pay invoices
+   - Get unpaid invoices, invoices with charge errors and changed payment methods 
+   - BillingService.create_payment(invoice)
+     - thread safe 
+     - PaymentService.charge(invoice)
+     - save result
+7. Handle charging errors
    - send an email?
    - add notification?
    - stop trading?
-7. view commissions paid history
+8. view commissions paid history
 
-Data used: payment_methods
+Data used: payment_methods, invoice, invoice_payment
 
 ### **[TODO]** Trading
 1. Reconfigure TTF holdings
@@ -77,6 +85,13 @@ Data used: payment_methods
         }
     }
     ```
+   - CollectionTradingService.get_latest_collection_version(profile_id)
+   - CollectionTradingService.create_new_collection_version(profile_id, $collection_id, $weights)
+   - CollectionTradingService.calculate_operation_set(old_version, new_version)
+     - if no old version - just buy new version amounts
+     - if there is an old version but with no executed trades:
+       - cancel orders
+       - 
 2. Get actual TTF holding weights and amount
 3. Get recommended TTF weights
 
@@ -125,6 +140,23 @@ Data used: payment_methods
   - bankRoutingNumber: string
   - bankAccountType: string
 
+- invoice
+  - id: int
+  - profile_id: int
+  - amount_cents: int
+  - due_date: timestamp
+  - description: string
+  - period_start: date
+  - period_end: date
+  - metadata: json
+
+- invoice_payment
+  - id: int
+  - profile_id: int
+  - invoice_id: int
+  - result: boolean
+  - response: json
+
 ## Questions
 
 KYC:
@@ -135,3 +167,8 @@ KYC:
 Plaid:
 - Which plaid products to use? Possible values: `assets, auth, employment, identity, income_verification, identity_verification, investments, liabilities, payment_initiation, standing_orders, transactions, transfer` 
 - How to send plaid processor_token to Create Bank Account API?
+Deposits:
+- Right approach of funding multiple accounts when using autopilot
+Trading:
+- How to rebalance current position (current position has a number of stocks and we would like to make it up to an amount of money)
+- 

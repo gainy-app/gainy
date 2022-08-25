@@ -427,6 +427,8 @@ address_country:
   - ref_id: string
   - ref_no: string
   - nickname: string
+  - cash_available_for_trade: integer
+  - cash_available_for_withdrawal: integer
   - cash_balance: integer
   - data: json
 
@@ -434,7 +436,9 @@ address_country:
   - id: int
   - profile_id: int
   - name: string
-  - cash_balance: int
+  - cash_available_for_trade: integer
+  - cash_available_for_withdrawal: integer
+  - cash_balance: integer
 
 - drivewealth_kyc_documents
   - drivewealth_user_id: int
