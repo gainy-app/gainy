@@ -73,6 +73,19 @@ prices_with_split_rates as
         from {{ source('eod', 'eod_historical_prices') }}
                  left join stocks_with_split using (code)
     ),
+latest_day_split_rate as
+    (
+        SELECT eod_historical_prices.code,
+               first_value(adjusted_close / close) over (partition by code order by date desc) as latest_day_split_rate
+        from {{ source('eod', 'eod_historical_prices') }}
+                 join (
+                          SELECT eod_historical_prices.code,
+                                 max(eod_historical_prices.date) as date
+                          from {{ source('eod', 'eod_historical_prices') }}
+                          where close > 0
+                          group by code
+                      ) t using (code, date)
+    ),
 prev_split as
     (
         select code, max(date) as date
@@ -113,6 +126,9 @@ all_rows as
                -- latest split period, so we ignore split_rate and use 1.0
                when prices_with_split_rates.date > prev_split.date and wrongfully_adjusted_prices.code is null
                    then split_rate_next_day * close
+               -- if there is split tomorrow, but the prices are already adjusted
+               when abs(latest_day_split_rate - split_rate_next_day) < 1e-3
+                   then adjusted_close
                else prices_with_split_rates.split_rate * split_rate_next_day * close
                end                                                                        as adjusted_close,
            case
@@ -134,6 +150,7 @@ all_rows as
            prices_with_split_rates.open,
            prices_with_split_rates.volume
     from prices_with_split_rates
+             left join latest_day_split_rate using (code)
              left join prev_split using (code)
              left join wrongfully_adjusted_prices
                        on wrongfully_adjusted_prices.code = prices_with_split_rates.code
