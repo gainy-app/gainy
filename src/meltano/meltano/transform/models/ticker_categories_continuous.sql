@@ -474,26 +474,47 @@ with
         (
             select simple_ticker_categories.category_id,
                    ticker_components_flat.symbol,
-                   sum(simple_ticker_categories.sim_dif * component_weight) / sum(component_weight) as sim_dif
+                   sum(simple_ticker_categories.sim_dif * component_weight) as sim_dif,
+                   sum(component_weight)                                    as component_weight_sum
             from {{ ref('ticker_components_flat') }}
                      join simple_ticker_categories
                           on simple_ticker_categories.symbol = ticker_components_flat.component_symbol
             group by simple_ticker_categories.category_id, ticker_components_flat.symbol
-            having sum(component_weight) > 0
+         ),
+    complex_ticker_categories_stats as
+        (
+            select symbol,
+                   sum(sim_dif)              as sim_dif_sum,
+                   sum(component_weight_sum) as component_weight_sum
+            from complex_ticker_categories
+            group by symbol
+        ),
+    complex_ticker_categories_normalized as
+        (
+            select category_id,
+                   symbol,
+                   sim_dif / complex_ticker_categories_stats.component_weight_sum as sim_dif
+            from complex_ticker_categories
+                     join complex_ticker_categories_stats using (symbol)
+            where complex_ticker_categories_stats.component_weight_sum > 0
         )
 
-select (category_id || '_' || symbol) as id,
-       category_id,
+select (simple_ticker_categories.category_id || '_' || symbol)                                       as id,
+       simple_ticker_categories.category_id,
        symbol,
-       sim_dif,
-       now()::timestamp               as updated_at
+       simple_ticker_categories.sim_dif,
+       now()::timestamp                                                                              as updated_at,
+       (row_number() over (partition by symbol order by simple_ticker_categories.sim_dif desc))::int as rank
 from simple_ticker_categories
+         left join complex_ticker_categories using (symbol)
+where complex_ticker_categories.symbol is null
 
 union all
 
-select (category_id || '_' || symbol) as id,
+select (category_id || '_' || symbol)                                       as id,
        category_id,
        symbol,
        sim_dif,
-       now()::timestamp               as updated_at
+       now()::timestamp                                                     as updated_at,
+       (row_number() over (partition by symbol order by sim_dif desc))::int as rank
 from complex_ticker_categories
