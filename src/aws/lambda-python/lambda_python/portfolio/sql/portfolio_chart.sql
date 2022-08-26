@@ -1,18 +1,9 @@
-with week_trading_sessions as
+with latest_open_trading_session as
          (
-             select min(open_at)                           as open_at,
-                    min(close_at)                          as close_at,
-                    min(date)                              as date,
-                    row_number() over (order by date desc) as idx
-             from exchange_schedule
-             where open_at between now() - interval '1 week' and now()
-             group by date
-         ),
-     latest_open_trading_session as
-         (
-             select *
+             select symbol, max(date) as date
              from week_trading_sessions
-             where idx = 1
+             where index = 0
+             group by symbol
          ),
      raw_chart_data as
          (
@@ -31,16 +22,18 @@ with week_trading_sessions as
              from portfolio_transaction_chart
                       join portfolio_expanded_transactions
                            on portfolio_expanded_transactions.uniq_id = portfolio_transaction_chart.transactions_uniq_id
-                      left join week_trading_sessions
-                                on portfolio_transaction_chart.datetime between week_trading_sessions.open_at and week_trading_sessions.close_at
-                      left join latest_open_trading_session on true
                       join portfolio_securities_normalized
                            on portfolio_securities_normalized.id = portfolio_expanded_transactions.security_id
+                      left join week_trading_sessions
+                                on week_trading_sessions.symbol = original_ticker_symbol
+                                    and portfolio_transaction_chart.datetime between week_trading_sessions.open_at and week_trading_sessions.close_at
+                      left join latest_open_trading_session
+                                on latest_open_trading_session.symbol = original_ticker_symbol
                       join app.profile_portfolio_accounts on profile_portfolio_accounts.id = portfolio_expanded_transactions.account_id
                       join app.profile_plaid_access_tokens on profile_plaid_access_tokens.id = profile_portfolio_accounts.plaid_access_token_id
                       {join_clause}
-             where ((period = '1d' and week_trading_sessions.idx = 1)
-                 or (period = '1w' and week_trading_sessions.idx is not null)
+             where ((period = '1d' and week_trading_sessions.index = 0)
+                 or (period = '1w' and week_trading_sessions.index is not null)
                  or (period = '1m' and portfolio_transaction_chart.datetime >= latest_open_trading_session.date - interval '1 month')
                  or (period = '3m' and portfolio_transaction_chart.datetime >= latest_open_trading_session.date - interval '3 months')
                  or (period = '1y' and portfolio_transaction_chart.datetime >= latest_open_trading_session.date - interval '1 year')

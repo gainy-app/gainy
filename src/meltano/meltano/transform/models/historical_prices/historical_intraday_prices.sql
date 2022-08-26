@@ -13,10 +13,53 @@
 }}
 
 
-with raw_intraday_prices as
+with eod_symbols as materialized
+         (
+             select symbol,
+                    week_trading_sessions.date
+             from {{ source('eod', 'eod_intraday_prices') }}
+                      join {{ ref('week_trading_sessions') }} using (symbol)
+             where eod_intraday_prices.time >= week_trading_sessions.open_at
+               and eod_intraday_prices.time < week_trading_sessions.close_at
+             group by symbol, week_trading_sessions.date
+         ),
+     raw_polygon_intraday_prices as
+         (
+             select polygon_intraday_prices.symbol,
+                    week_trading_sessions.date,
+                    time,
+                    open,
+                    high,
+                    low,
+                    close,
+                    volume
+             from {{ source('polygon', 'polygon_intraday_prices') }}
+                      join {{ ref('week_trading_sessions') }} using (symbol)
+                      left join eod_symbols using (symbol, date)
+             where eod_symbols is null
+               and time >= week_trading_sessions.open_at
+               and time < week_trading_sessions.close_at
+         ),
+     raw_eod_intraday_prices as
          (
              select eod_intraday_prices.symbol,
-                    eod_intraday_prices.time::date as date,
+                    week_trading_sessions.date,
+                    time,
+                    open,
+                    high,
+                    low,
+                    close,
+                    volume
+             from {{ source('eod', 'eod_intraday_prices') }}
+                      join {{ ref('week_trading_sessions') }} using (symbol)
+                      join eod_symbols using (symbol, date)
+             where time >= week_trading_sessions.open_at
+               and time < week_trading_sessions.close_at
+         ),
+     raw_intraday_prices as materialized
+         (
+             select symbol,
+                    date,
                     time,
                     (date_trunc('minute', time) - interval '1 minute' * mod(extract(minutes from time)::int, 3))::timestamp  as time_3min,
                     (date_trunc('minute', time) - interval '1 minute' * mod(extract(minutes from time)::int, 15))::timestamp as time_15min,
@@ -25,11 +68,15 @@ with raw_intraday_prices as
                     low,
                     close,
                     volume
-             from {{ source('eod', 'eod_intraday_prices') }}
-                      left join {{ ref('week_trading_sessions') }}
-                                on week_trading_sessions.symbol = eod_intraday_prices.symbol
-             where week_trading_sessions is null
-                or (week_trading_sessions.date = eod_intraday_prices.time::date and time >= week_trading_sessions.open_at and time < week_trading_sessions.close_at)
+             from (
+                     select symbol, date, time, open, high, low, close, volume
+                     from raw_polygon_intraday_prices
+
+                     union all
+
+                     select symbol, date, time, open, high, low, close, volume
+                     from raw_eod_intraday_prices
+                  ) t
 {% if is_incremental() %}
          ),
      old_model_stats as
@@ -53,16 +100,14 @@ with raw_intraday_prices as
              select symbol,
                     daily_close_prices.date,
                     case
-                        when historical_prices.close > 0
-                            and abs(eod_intraday_prices.close - historical_prices.close) <
-                                abs(eod_intraday_prices.close - historical_prices.adjusted_close)
-                            and abs(historical_prices.adjusted_close / historical_prices.close - 1) > 1e-2
-                            then historical_prices.adjusted_close / historical_prices.close
+                        when raw_intraday_prices.close > 0
+                            and abs(historical_prices.adjusted_close / raw_intraday_prices.close - 1) > 1e-2
+                            then historical_prices.adjusted_close / raw_intraday_prices.close
                         else 1.0 -- TODO verify todays intraday prices after split are adjusted?
                         end as split_rate
              from daily_close_prices
                       left join {{ ref('historical_prices') }} using (symbol, date)
-                      join {{ source('eod', 'eod_intraday_prices') }} using (symbol, time)
+                      join raw_intraday_prices using (symbol, time)
 {% endif %}
          )
 select symbol,

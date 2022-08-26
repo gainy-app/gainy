@@ -23,42 +23,18 @@ with
              from {{ this }}
          ),
 {% endif %}
-     trading_sessions as
-         (
-             select min(open_at)  as open_at,
-                    max(close_at) as close_at
-             from {{ ref('exchange_schedule') }}
-             where open_at between now() - interval '1 week' and now()
-             group by date
-         ),
      time_series as
          (
-             SELECT null as type,
-                    time_truncated
-             FROM (
-                      SELECT null as type,
-                             date_trunc('minute', dd) -
-                             interval '1 minute' *
-                             mod(extract(minutes from dd)::int, {{ minutes }}) as time_truncated
-                      FROM generate_series(now()::timestamp - interval '1 week', now()::timestamp, interval '{{ minutes }} minutes') dd
-                      ) t
-                      join trading_sessions on true
-{% if is_incremental() and var('realtime') %}
-                      join max_date on true
-{% endif %}
-             where time_truncated >= trading_sessions.open_at and time_truncated < trading_sessions.close_at
-{% if is_incremental() and var('realtime') %}
-               and time_truncated > max_date.datetime - interval '20 minutes'
-{% endif %}
-             union all
-             SELECT 'crypto' as type,
+             select symbol,
+                    week_trading_sessions.date,
                     date_trunc('minute', dd) -
                     interval '1 minute' *
                     mod(extract(minutes from dd)::int, {{ minutes }}) as time_truncated
-             FROM generate_series(now()::timestamp - interval '1 day', now()::timestamp, interval '{{ minutes }} minutes') dd
+             from {{ ref('week_trading_sessions') }}
+                      join generate_series(open_at, least(now(), close_at - interval '1 second'), interval '{{ minutes }} minutes') dd on true
 {% if is_incremental() and var('realtime') %}
                       join max_date on true
-             where dd > max_date.datetime - interval '20 minutes'
+             where dd > max_date.datetime - interval '30 minutes'
 {% endif %}
          ),
      expanded_intraday_prices as
@@ -66,14 +42,10 @@ with
              select historical_intraday_prices.*,
                     historical_intraday_prices.time_{{ minutes }}min as time_truncated
              from {{ ref('historical_intraday_prices') }}
-                      join trading_sessions on true
+                      join {{ ref('week_trading_sessions') }} using (symbol, date)
 {% if is_incremental() and var('realtime') %}
                       join max_date on true
-{% endif %}
-             where (historical_intraday_prices.time_{{ minutes }}min >= trading_sessions.open_at - interval '1 hour' and historical_intraday_prices.time_{{ minutes }}min < trading_sessions.close_at
-                or (symbol like '%.CC' and time > now() - interval '1 day'))
-{% if is_incremental() and var('realtime') %}
-               and historical_intraday_prices.time_{{ minutes }}min > max_date.datetime - interval '20 minutes'
+             where historical_intraday_prices.time_{{ minutes }}min > max_date.datetime - interval '30 minutes'
 {% endif %}
          ),
 {% if is_incremental() and var('realtime') %}
@@ -81,11 +53,10 @@ with
          (
              select {{ this }}.*
              from {{ this }}
-                      join trading_sessions on true
+                      join {{ ref('week_trading_sessions') }} using (symbol)
                       join max_date on true
-             where ({{ this }}.datetime >= trading_sessions.open_at - interval '1 hour' and {{ this }}.datetime < trading_sessions.close_at
-                or (symbol like '%.CC' and {{ this }}.datetime > now() - interval '1 day'))
-               and {{ this }}.datetime > max_date.datetime - interval '20 minutes'
+             where {{ this }}.datetime >= week_trading_sessions.open_at - interval '1 hour' and {{ this }}.datetime < week_trading_sessions.close_at
+               and {{ this }}.datetime > max_date.datetime - interval '30 minutes'
          ),
 {% endif %}
      combined_intraday_prices as
@@ -93,7 +64,8 @@ with
              select DISTINCT ON (
                  symbol,
                  time_truncated
-                 ) symbol                                                                                                                   as symbol,
+                 ) symbol,
+                   date,
                    time_truncated::timestamp                                                                                                as datetime,
                    first_value(open)
                    OVER (partition by symbol, time_truncated order by time, priority desc rows between current row and unbounded following) as open,
@@ -111,6 +83,7 @@ with
                    OVER (partition by symbol, time_truncated rows between current row and unbounded following)                              as updated_at
              from (
                       select symbol,
+                             date,
                              time,
                              open,
                              high,
@@ -122,23 +95,9 @@ with
                              updated_at,
                              0 as priority
                       from expanded_intraday_prices
-{% if is_incremental() and var('realtime') %}
                       union all
                       select symbol,
-                             datetime as time,
-                             open,
-                             high,
-                             low,
-                             close,
-                             adjusted_close,
-                             volume,
-                             datetime as time_truncated,
-                             updated_at,
-                             1 as priority
-                      from old_prices
-{% endif %}
-                      union all
-                      select symbol,
+                             date,
                              time_truncated as time,
                              null      as open,
                              null      as high,
@@ -148,13 +107,12 @@ with
                              null      as volume,
                              time_truncated,
                              null      as updated_at,
-                             2         as priority
+                             1         as priority
                       from {{ ref('base_tickers') }}
-                               join time_series
-                                   on (time_series.type = 'crypto' and base_tickers.type = 'crypto')
-                                       or (time_series.type is null and base_tickers.type != 'crypto')
+                               join time_series using (symbol)
                       union all
                       select contract_name,
+                             date,
                              time_truncated as time,
                              null      as open,
                              null      as high,
@@ -164,14 +122,15 @@ with
                              null      as volume,
                              time_truncated,
                              null      as updated_at,
-                             2         as priority
+                             1         as priority
                       from {{ ref('ticker_options_monitored') }}
-                               join time_series on time_series.type is null
+                               join time_series using (symbol)
                   ) t
              order by symbol, time_truncated, time, priority
          )
 select t2.symbol || '_' || t2.datetime                               as id,
        t2.symbol,
+       t2.date,
        t2.datetime,
 {% if is_incremental() %}
        coalesce(t2.open,
@@ -207,6 +166,7 @@ select t2.symbol || '_' || t2.datetime                               as id,
 {% endif %}
 from (
           select symbol,
+                 date,
                  datetime,
                  coalesce(
                          open,

@@ -42,8 +42,16 @@ def persist_records(values, source):
     if not len(values):
         return
 
+    table_name = sql.Identifier(f"{source}_intraday_prices")
     id_fields = ['symbol', 'time']
-    data_fields = ['open', 'high', 'low', 'close', 'volume', 'granularity']
+    data_fields = [
+        'open',
+        'high',
+        'low',
+        'close',
+        'volume',
+        'granularity',
+    ]
 
     field_names_formatted = sql.SQL(',').join(
         [sql.Identifier(field_name) for field_name in id_fields + data_fields])
@@ -52,8 +60,10 @@ def persist_records(values, source):
         [sql.Identifier(field_name) for field_name in id_fields])
 
     sql_clause = sql.SQL(
-        "INSERT INTO raw_data.eod_intraday_prices ({field_names}) VALUES %s ON CONFLICT({id_fields}) DO NOTHING"
-    ).format(field_names=field_names_formatted, id_fields=id_fields_formatted)
+        "INSERT INTO raw_data.{table_name} ({field_names}) VALUES %s ON CONFLICT({id_fields}) DO NOTHING"
+    ).format(table_name=table_name,
+             field_names=field_names_formatted,
+             id_fields=id_fields_formatted)
 
     with psycopg2.connect(DB_CONN_STRING) as db_conn:
         with db_conn.cursor() as cursor:
