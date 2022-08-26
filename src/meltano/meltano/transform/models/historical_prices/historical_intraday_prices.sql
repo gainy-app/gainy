@@ -100,11 +100,9 @@ with eod_symbols as materialized
              select symbol,
                     daily_close_prices.date,
                     case
-                        when historical_prices.close > 0
-                            and abs(raw_intraday_prices.close - historical_prices.close) <
-                                abs(raw_intraday_prices.close - historical_prices.adjusted_close)
-                            and abs(historical_prices.adjusted_close / historical_prices.close - 1) > 1e-2
-                            then historical_prices.adjusted_close / historical_prices.close
+                        when raw_intraday_prices.close > 0
+                            and abs(historical_prices.adjusted_close / raw_intraday_prices.close - 1) > 1e-2
+                            then historical_prices.adjusted_close / raw_intraday_prices.close
                         else 1.0 -- TODO verify todays intraday prices after split are adjusted?
                         end as split_rate
              from daily_close_prices
