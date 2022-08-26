@@ -269,6 +269,11 @@ models:
           - not_null
           - type:
               type: 'character varying'
+      - name: rank
+        tests:
+          - not_null
+          - type:
+              type: 'integer'
 
   - name: ticker_collections
     description: Lists of tickers in non-personalized Gainy collections
@@ -351,6 +356,11 @@ models:
           - type:
               type: 'character varying'
       - name: interest_id
+        tests:
+          - not_null
+          - type:
+              type: 'integer'
+      - name: rank
         tests:
           - not_null
           - type:

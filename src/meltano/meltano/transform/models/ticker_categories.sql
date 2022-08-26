@@ -14,6 +14,7 @@
 select (category_id || '_' || symbol)::varchar as id,
        category_id,
        symbol,
+       rank,
        now()::timestamp                        as updated_at
 from {{ ref('ticker_categories_continuous') }}
 WHERE sim_dif > 0

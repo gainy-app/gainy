@@ -1932,6 +1932,7 @@
       permission:
         columns:
           - category_id
+          - rank
           - symbol
         filter: {}
 - table:
@@ -2039,8 +2040,9 @@
     - role: user
       permission:
         columns:
-          - symbol
           - interest_id
+          - rank
+          - symbol
         filter: {}
 - table:
     schema: public
