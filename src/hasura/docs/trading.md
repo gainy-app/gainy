@@ -16,11 +16,11 @@
     }
     ```
     - TradingService.connectBankAccount(profile_id, processorToken)
-    - Create trading_bank_accounts
+    - Create managed_portfolio_bank_accounts
 
 4. **[TODO]** List connected accounts
    - PlaidService.updateAccountBalance(plaid_account_ids)
-   - list trading_bank_accounts
+   - list managed_portfolio_bank_accounts
 
 5. **[TODO]** Deny deleting plaid tokens connected to trading
 
@@ -28,15 +28,26 @@
    - TradingService.disconnectBankAccount(profile_id, trading_bank_account)
    - remove trading_bank_account
 
-Data used: trading_bank_accounts, drivewealth_bank_accounts
+Data used: managed_portfolio_bank_accounts, drivewealth_bank_accounts
 
 ### **[TODO]** Deposits / withdrawals
 1. Deposit funds
    - TradingService.depositFunds(profile_id, trading_account, amount, trading_bank_account)
 2. Withdraw funds
    - TradingService.withdrawFunds(profile_id, trading_account, amount, trading_bank_account)
+3. Rebalance Portfolio in both cases
+   - TradingService.on_deposit(profile_id, amount_cents)
+     - Update Portfolio status
+        - Portfolio will map to `drivewealth_portfolios`
+     - Rebalance Portfolio funds
+       - cash: `target = actual`
 
-Data used: trading_accounts, trading_bank_accounts, drivewealth_bank_accounts
+Data used: 
+- managed_portfolio_trading_accounts 
+- managed_portfolio_bank_accounts
+- drivewealth_bank_accounts 
+- drivewealth_portfolios
+- managed_portfolio_money_flow
 
 ### **[TODO]** Commissions flow
 https://stripe.com/docs/payments/save-and-reuse
@@ -68,10 +79,11 @@ https://stripe.com/docs/payments/save-and-reuse
    - stop trading?
 8. view commissions paid history
 
-Data used: payment_methods, invoice, invoice_payment
+Data used: payment_methods, invoices, invoice_payments
 
 ### **[TODO]** Trading
-1. Reconfigure TTF holdings
+1. Get recommended TTF weights
+2. Reconfigure TTF holdings
 
     Generate the trades to make user's TTF holdings look like input params.
     ```graphql
@@ -79,24 +91,42 @@ Data used: payment_methods, invoice, invoice_payment
         symbol: String!
         weight: Float!    
     }
-    mutation reconfigure_ttf_holdings($profile_id: Int!, $account_id: Int!, $collection_id: Int!, $weights: [TickerWeight], $amount_cents: Int) {
-        reconfigure_ttf_holdings(profile_id: $profile_id, account_id: $account_id, collection_id: $collection_id, weights: $weights, amount_cents: $amount_cents) {
+    mutation reconfigure_ttf_holdings($profile_id: Int!, $account_id: Int!, $collection_id: Int!, $weights: [TickerWeight], $absolute_amount_delta_cents: Int, $relative_amount_delta_percent: Int) {
+        reconfigure_ttf_holdings(profile_id: $profile_id, account_id: $account_id, collection_id: $collection_id, weights: $weights, absolute_amount_delta_cents: $absolute_amount_delta_cents, relative_amount_delta_percent: $relative_amount_delta_percent) {
             result
         }
     }
     ```
-   - TradingService.reconfigure_ttf_holdings(profile_id, $collection_id, $weights)
-     - Find or create Fund
+   - TradingService.reconfigure_ttf_holdings(profile_id, collection_id, weights, absolute_amount_delta_cents, relative_amount_delta_percent)
+     - Create new managed_portfolio_collection_versions, managed_portfolio_collection_contents 
+     - Update account buying power, Portfolio status
+     - Create or update Fund
+     - Calculate `relative_weight_change`
+       - from `absolute_amount_delta_cents` 
+         - Positive: `relative_weight_change = absolute_amount_delta_cents / CASH_RESERVE value` 
+         - Negative: `relative_weight_change = absolute_amount_delta_cents / updated FUND value` 
+       - from `relative_amount_delta_percent`
+         - Positive: `relative_weight_change = relative_amount_delta_percent / 100 * CASH_RESERVE actual weight` 
+         - Negative: `relative_weight_change = relative_amount_delta_percent / 100 * updated FUND actual weight` 
      - Rebalance Portfolio funds
+       - cash: decrease by relative_weight_change
+       - updated Fund: increase by relative_weight_change
      - Create autopilot run
-2. Get actual TTF holding weights and amount
-3. Get recommended TTF weights
+3. Get actual TTF holding weights and amount
+4. Get recommended TTF weights
+
+Data used: 
+- managed_portfolio_collection_versions
+- managed_portfolio_collection_contents
+- drivewealth_portfolios
+- drivewealth_accounts
+- drivewealth_funds
+- drivewealth_autopilot_run
 
 ### **[TODO]** History
-1. Get recommended TTF weights
-2. Get deposits / withdrawals history with actual statuses 
-   
-   Not needed if we do transparent account charges
+1. Get rebalancing history (managed_portfolio_collection_versions with status `complete`) 
+2. Get deposits / withdrawals history with actual statuses (managed_portfolio_money_flow) 
+3. Get commission payment history 
 
 
 ### **[TODO]** Notifications
@@ -120,7 +150,7 @@ Data used: payment_methods, invoice, invoice_payment
   - stripe_ref_id: string
   - set_active_at: datetime
 
-- trading_bank_accounts 
+- managed_portfolio_bank_accounts 
   - id: int
   - profile_id: int
   - plaid_account_id: int
@@ -128,7 +158,6 @@ Data used: payment_methods, invoice, invoice_payment
   - balance: int
 
 - drivewealth_bank_accounts 
-  - id: int
   - ref_id: string
   - drivewealth_user_id: int
   - trading_account_id: int
@@ -137,7 +166,7 @@ Data used: payment_methods, invoice, invoice_payment
   - bankRoutingNumber: string
   - bankAccountType: string
 
-- invoice
+- invoices
   - id: int
   - profile_id: int
   - amount_cents: int
@@ -147,12 +176,58 @@ Data used: payment_methods, invoice, invoice_payment
   - period_end: date
   - metadata: json
 
-- invoice_payment
+- invoice_payments
   - id: int
   - profile_id: int
   - invoice_id: int
   - result: boolean
   - response: json
+
+- managed_portfolio_collection_versions:
+  - id: int
+  - profile_id: int
+  - collection_uniq_id: string
+  - targetAmount: int
+  - actualAmount: int
+  - status: string
+
+- managed_portfolio_collection_contents:
+  - id: int
+  - managed_portfolio_collection_version_id: int
+  - symbol: string
+  - target_weight: numeric
+
+- drivewealth_portfolios
+  - ref_id: string
+  - drivewealth_account_id: int
+  - raw_data: json
+  - cash_target: numeric
+  - cash_actual: numeric
+  - cash_value: numeric
+
+- drivewealth_funds
+  - ref_id: string
+  - managed_portfolio_collection_version_id: int
+  - raw_data: json
+
+- drivewealth_autopilot_run
+  - ref_id: string
+  - managed_portfolio_collection_version_id: int
+  - status: string
+  - drivewealth_account_id: int
+  - raw_data: json
+
+- managed_portfolio_money_flow
+  - id: int
+  - profile_id: int
+  - amount: int
+  - trading_account_id: int
+  - status: string
+
+## SQS
+
+1. Update `managed_portfolio_collection_versions` status on `drivewealth_autopilot_run` execution
+2. Update `managed_portfolio_money_flow` status on deposit / withdrawal execution
 
 ## Questions
 

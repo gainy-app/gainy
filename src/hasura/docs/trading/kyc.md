@@ -415,16 +415,14 @@ address_country:
   uploaded_document_id: int
 
 - drivewealth_users
-  - id: int
-  - profile_id: int
   - ref_id: string
+  - profile_id: int
   - status: string
 
 - drivewealth_accounts
-  - id: int
+  - ref_id: string
   - drivewealth_user_id: int
   - trading_account_id: int
-  - ref_id: string
   - ref_no: string
   - nickname: string
   - cash_available_for_trade: integer
@@ -432,7 +430,7 @@ address_country:
   - cash_balance: integer
   - data: json
 
-- trading_accounts # one to one at this point?
+- managed_portfolio_trading_accounts # one to one at this point?
   - id: int
   - profile_id: int
   - name: string
@@ -441,11 +439,12 @@ address_country:
   - cash_balance: integer
 
 - drivewealth_kyc_documents
-  - drivewealth_user_id: int
   - ref_id: string
+  - drivewealth_user_id: int
   - kyc_document_id: int
 
 - drivewealth_kyc_status
+  - ref_id: string
   - drivewealth_user_id: int
   - status: string # `KYC_NOT_READY | KYC_READY | KYC_PROCESSING | KYC_APPROVED | KYC_INFO_REQUIRED | KYC_DOC_REQUIRED | KYC_MANUAL_REVIEW | KYC_DENIED`
   - is_approved: boolean
