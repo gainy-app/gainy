@@ -140,8 +140,7 @@ class PlaidWebhook(HasuraAction):
 
             webhook_type = input_params['webhook_type']
             for access_token in access_tokens:
-                self.portfolio_service.sync_institution(
-                    db_conn, access_token)
+                self.portfolio_service.sync_institution(db_conn, access_token)
                 if webhook_type == 'HOLDINGS':
                     count += self.portfolio_service.sync_token_holdings(
                         db_conn, access_token)
