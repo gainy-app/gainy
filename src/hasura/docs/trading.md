@@ -85,13 +85,10 @@ Data used: payment_methods, invoice, invoice_payment
         }
     }
     ```
-   - CollectionTradingService.get_latest_collection_version(profile_id)
-   - CollectionTradingService.create_new_collection_version(profile_id, $collection_id, $weights)
-   - CollectionTradingService.calculate_operation_set(old_version, new_version)
-     - if no old version - just buy new version amounts
-     - if there is an old version but with no executed trades:
-       - cancel orders
-       - 
+   - TradingService.reconfigure_ttf_holdings(profile_id, $collection_id, $weights)
+     - Find or create Fund
+     - Rebalance Portfolio funds
+     - Create autopilot run
 2. Get actual TTF holding weights and amount
 3. Get recommended TTF weights
 
@@ -162,7 +159,6 @@ Data used: payment_methods, invoice, invoice_payment
 KYC:
 - What's COMPLIANCE_AML_INFO
 - Can we hide extended hours agreement?
-- We need Links to all disclosures
 - We need Links to all disclosures
 Plaid:
 - Which plaid products to use? Possible values: `assets, auth, employment, identity, income_verification, identity_verification, investments, liabilities, payment_initiation, standing_orders, transactions, transfer` 
