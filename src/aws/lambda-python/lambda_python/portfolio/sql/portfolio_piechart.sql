@@ -306,7 +306,7 @@ union all
                           select distinct on (
                               profile_id, symbol
                               ) profile_id,
-                                weight,
+                                portfolio_tickers.weight,
                                 absolute_daily_change
                           from portfolio_tickers
                                    join ticker_collections using (symbol)
