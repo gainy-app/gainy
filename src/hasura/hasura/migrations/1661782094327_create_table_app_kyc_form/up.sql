@@ -23,17 +23,17 @@ CREATE TABLE "app"."kyc_form"
     "employment_is_director_of_a_public_company"    varchar,
     "investor_profile_experience"                   varchar
         constraint investor_profile_experience
-            check (investor_profile_experience not in ('NONE', 'YRS_1_2', 'YRS_3_5', 'YRS_5_10', 'YRS_10_') or
+            check (investor_profile_experience in ('NONE', 'YRS_1_2', 'YRS_3_5', 'YRS_5_10', 'YRS_10_') or
                    investor_profile_experience is null),
     "investor_profile_annual_income"                bigint,
     "investor_profile_net_worth_total"              bigint,
     "investor_profile_risk_tolerance"               varchar
         constraint investor_profile_risk_tolerance
-            check (investor_profile_risk_tolerance not in ('LOW', 'MODERATE', 'SPECULATION', 'HIGH') or
+            check (investor_profile_risk_tolerance in ('LOW', 'MODERATE', 'SPECULATION', 'HIGH') or
                    investor_profile_risk_tolerance is null),
     "investor_profile_objectives"                   varchar
         constraint investor_profile_objectives
-            check (investor_profile_objectives not in ('LONG_TERM', 'INFREQUENT', 'FREQUENT', 'ACTIVE_DAILY', 'NEW') or
+            check (investor_profile_objectives in ('LONG_TERM', 'INFREQUENT', 'FREQUENT', 'ACTIVE_DAILY', 'NEW') or
                    investor_profile_objectives is null),
     "investor_profile_net_worth_liquid"             bigint,
     "disclosures_drivewealth_terms_of_use"          boolean,
@@ -48,7 +48,7 @@ CREATE TABLE "app"."kyc_form"
     "tax_id_value"                                  varchar,
     "tax_id_type"                                   varchar
         constraint tax_id_type
-            check (tax_id_type not in ('SSN', 'TIN', 'other') or tax_id_type is null),
+            check (tax_id_type in ('SSN', 'TIN', 'other') or tax_id_type is null),
     "citizenship"                                   varchar              default 'USA',
     "is_us_tax_payer"                               boolean,
     "tax_treaty_with_us"                            boolean,
@@ -57,10 +57,10 @@ CREATE TABLE "app"."kyc_form"
     "irs_backup_withholdings_notified"              boolean,
     "gender"                                        varchar
         constraint gender
-            check (gender not in ('Male', 'Female') or gender is null),
+            check (gender in ('Male', 'Female') or gender is null),
     "marital_status"                                varchar
         constraint marital_status
-            check (marital_status not in ('SINGLE', 'DIVORCED', 'MARRIED', 'WIDOWED', 'PARTNER') or
+            check (marital_status in ('SINGLE', 'DIVORCED', 'MARRIED', 'WIDOWED', 'PARTNER') or
                    marital_status is null),
     "address_street1"                               varchar,
     "address_street2"                               varchar,

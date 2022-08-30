@@ -113,7 +113,6 @@ Data used: payment_methods, invoices, invoice_payments
        - updated Fund: increase by relative_weight_change
      - Create autopilot run
 3. Get actual TTF holding weights and amount
-4. Get recommended TTF weights
 
 Data used: 
 - managed_portfolio_collection_versions
