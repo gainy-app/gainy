@@ -78,6 +78,7 @@ resource "docker_registry_image" "hasura" {
   build {
     context    = local.hasura_root_dir
     dockerfile = "Dockerfile"
+    target     = "production"
     build_args = {
       BASE_IMAGE_REGISTRY_ADDRESS = var.base_image_registry_address
       BASE_IMAGE_VERSION          = var.base_image_version

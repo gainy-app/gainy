@@ -14,6 +14,7 @@ from search.news_search import SearchNews
 from triggers import *
 from actions import *
 from web import *
+from managed_portfolio.actions import *
 
 setup_exception_logger_hook()
 
@@ -60,7 +61,12 @@ ACTIONS = [
                   ALGOLIA_TICKERS_INDEX),
     SearchCollections(ALGOLIA_APP_ID, ALGOLIA_SEARCH_API_KEY,
                       ALGOLIA_COLLECTIONS_INDEX),
-    SearchNews(GNEWS_API_TOKEN, REDIS_CACHE_HOST, REDIS_CACHE_PORT)
+    SearchNews(GNEWS_API_TOKEN, REDIS_CACHE_HOST, REDIS_CACHE_PORT),
+
+    # Managed Portfolio
+    GetKycFormConfig(),
+    GetKycStatus(),
+    SendKycForm(),
 ]
 
 action_dispatcher = HasuraActionDispatcher(ACTIONS,

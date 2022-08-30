@@ -6,6 +6,9 @@ import datetime
 import logging
 import itertools
 
+import psycopg2
+from psycopg2._psycopg import connection
+
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
@@ -107,3 +110,20 @@ def permute_params(full_options_dict):
         for j in test_set:
             d.update(j)
         yield d
+
+
+def db_connect() -> connection:
+    import os
+
+    HOST = os.getenv("PG_HOST")
+    PORT = os.getenv("PG_PORT")
+    USERNAME = os.getenv("PG_USERNAME")
+    PASSWORD = os.getenv("PG_PASSWORD")
+    DB_NAME = os.getenv('PG_DBNAME')
+    PUBLIC_SCHEMA_NAME = os.getenv('PUBLIC_SCHEMA_NAME')
+
+    if not PUBLIC_SCHEMA_NAME or not HOST or not PORT or not DB_NAME or not USERNAME or not PASSWORD:
+        raise Exception('Missing db connection env variables')
+
+    DB_CONN_STRING = f"postgresql://{USERNAME}:{PASSWORD}@{HOST}:{PORT}/{DB_NAME}?options=-csearch_path%3D{PUBLIC_SCHEMA_NAME}"
+    return psycopg2.connect(DB_CONN_STRING)

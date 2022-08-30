@@ -33,6 +33,41 @@ variable "revenuecat_api_key" {
   sensitive = true
 }
 
+#################################### DriveWealth ####################################
+
+variable "drivewealth_app_key" {
+  type      = string
+  sensitive = true
+}
+variable "drivewealth_wlp_id" {
+  type      = string
+  sensitive = true
+}
+variable "drivewealth_parent_ibid" {
+  type      = string
+  sensitive = true
+}
+variable "drivewealth_ria_id" {
+  type      = string
+  sensitive = true
+}
+variable "drivewealth_ria_product_id" {
+  type      = string
+  sensitive = true
+}
+variable "drivewealth_api_username" {
+  type      = string
+  sensitive = true
+}
+variable "drivewealth_api_password" {
+  type      = string
+  sensitive = true
+}
+variable "drivewealth_api_url" {
+  type      = string
+  sensitive = true
+}
+
 #################################### AWS ####################################
 
 variable "aws_region" {

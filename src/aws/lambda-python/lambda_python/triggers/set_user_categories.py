@@ -4,6 +4,7 @@ import os
 import sys
 from math import trunc
 from psycopg2.extras import execute_values
+from common.context_container import ContextContainer
 from common.hasura_function import HasuraTrigger
 from gainy.utils import get_logger
 from gainy.data_access.db_lock import LockAcquisitionTimeout
@@ -30,7 +31,8 @@ class SetUserCategories(HasuraTrigger):
     def get_allowed_profile_ids(self, op, data):
         return data["new"]['profile_id']
 
-    def apply(self, db_conn, op, data):
+    def apply(self, op, data, context_container: ContextContainer):
+        db_conn = context_container.db_conn
         payload = self._extract_payload(data)
 
         risk_needed = [1, 2, 2, 3][self._list_index(payload['risk_level'], 4)]

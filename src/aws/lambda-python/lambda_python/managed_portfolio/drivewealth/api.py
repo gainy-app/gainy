@@ -1,0 +1,93 @@
+import os
+import datetime
+import dateutil
+import requests
+from common.exceptions import ApiException
+from gainy.utils import get_logger
+
+logger = get_logger(__name__)
+
+DRIVEWEALTH_APP_KEY = os.getenv("DRIVEWEALTH_APP_KEY")
+DRIVEWEALTH_WLP_ID = os.getenv("DRIVEWEALTH_WLP_ID")
+DRIVEWEALTH_PARENT_IBID = os.getenv("DRIVEWEALTH_PARENT_IBID")
+DRIVEWEALTH_RIA_ID = os.getenv("DRIVEWEALTH_RIA_ID")
+DRIVEWEALTH_RIA_PRODUCT_ID = os.getenv("DRIVEWEALTH_RIA_PRODUCT_ID")
+DRIVEWEALTH_API_USERNAME = os.getenv("DRIVEWEALTH_API_USERNAME")
+DRIVEWEALTH_API_PASSWORD = os.getenv("DRIVEWEALTH_API_PASSWORD")
+DRIVEWEALTH_API_URL = os.getenv("DRIVEWEALTH_API_URL")
+
+
+class DriveWealthApi:
+    _token_data = None
+
+    def create_user(self, documents: list):
+        return self._make_request(
+            "POST", "/users", {
+                "userType": "INDIVIDUAL_TRADER",
+                "wlpID": DRIVEWEALTH_WLP_ID,
+                "parentIBID": DRIVEWEALTH_PARENT_IBID,
+                "documents": documents,
+            })
+
+    def update_user(self, user_id: str, documents: list):
+        return self._make_request("PATCH", f"/users/{user_id}", {
+            "documents": documents,
+        })
+
+    def get_user(self, user_id: str):
+        return self._make_request("GET", f"/users/{user_id}")
+
+    def _get_token(self):
+        if self._token_data is not None and datetime.datetime.now(
+        ) > self._token_data['expiresAt']:
+            return self._token_data["authToken"]
+
+        token_data = self._make_request(
+            "POST", "/auth", {
+                "appTypeID": 4,
+                "username": DRIVEWEALTH_API_USERNAME,
+                "password": DRIVEWEALTH_API_PASSWORD
+            })
+
+        token_data['expiresAt'] = dateutil.parser.parse(
+            token_data['expiresAt'])
+        self._token_data = token_data
+
+        return token_data["authToken"]
+
+    def _make_request(self, method, url, post_data=None):
+        headers = {"dw-client-app-key": DRIVEWEALTH_APP_KEY}
+
+        if url != "/auth":
+            headers["dw-auth-token"] = self._get_token()
+
+        response = requests.request(method,
+                                    DRIVEWEALTH_API_URL + url,
+                                    json=post_data,
+                                    headers=headers)
+
+        try:
+            response_data = response.json()
+        except:
+            response_data = None
+
+        logging_extra = {
+            "post_data": post_data,
+            "status_code": response.status_code,
+            "response_data": response_data,
+        }
+
+        if response_data is None or not response.status_code or response.status_code < 200 or response.status_code > 299:
+            logger.error("[DRIVEWEALTH] %s %s" % (method, url),
+                         extra=logging_extra)
+
+            if response_data is not None and 'message' in response_data:
+                raise ApiException(
+                    "%s: %s" %
+                    (response_data["errorCode"], response_data["message"]))
+            else:
+                raise ApiException("Failed: %d" % response.status_code)
+
+        logger.info("[DRIVEWEALTH] %s %s" % (method, url), extra=logging_extra)
+
+        return response_data

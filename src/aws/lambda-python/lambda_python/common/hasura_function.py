@@ -1,5 +1,6 @@
 from abc import abstractmethod, ABC
 
+from common.context_container import ContextContainer
 from common.hasura_exception import HasuraActionException
 
 
@@ -32,7 +33,7 @@ class HasuraAction(ABC):
         return name == self.name
 
     @abstractmethod
-    def apply(self, db_conn, input_params, headers):
+    def apply(self, input_params, context_container: ContextContainer):
         pass
 
 
@@ -46,7 +47,7 @@ class HasuraTrigger(ABC):
         return name in self.names
 
     @abstractmethod
-    def apply(self, db_conn, op, data):
+    def apply(self, op, data, context_container: ContextContainer):
         pass
 
     @abstractmethod

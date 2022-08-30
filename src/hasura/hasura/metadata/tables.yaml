@@ -52,6 +52,174 @@
       webhook: '{{AWS_LAMBDA_API_GATEWAY_ENDPOINT}}/hasuraTrigger'
 - table:
     schema: app
+    name: kyc_form
+  object_relationships:
+    - name: profile
+      using:
+        foreign_key_constraint_on: profile_id
+  insert_permissions:
+    - role: user
+      permission:
+        check:
+          profile:
+            user_id:
+              _eq: X-Hasura-User-Id
+        columns:
+          - address_city
+          - address_country
+          - address_postal_code
+          - address_province
+          - address_street1
+          - address_street2
+          - birthdate
+          - citizenship
+          - country
+          - disclosures_drivewealth_customer_agreement
+          - disclosures_drivewealth_data_sharing
+          - disclosures_drivewealth_ira_agreement
+          - disclosures_drivewealth_market_data_agreement
+          - disclosures_drivewealth_privacy_policy
+          - disclosures_drivewealth_terms_of_use
+          - disclosures_extended_hours_agreement
+          - disclosures_rule14b
+          - disclosures_signed_by
+          - email_address
+          - employment_affiliated_with_a_broker
+          - employment_company_name
+          - employment_is_director_of_a_public_company
+          - employment_position
+          - employment_status
+          - employment_type
+          - first_name
+          - gender
+          - investor_profile_annual_income
+          - investor_profile_experience
+          - investor_profile_net_worth_liquid
+          - investor_profile_net_worth_total
+          - investor_profile_objectives
+          - investor_profile_risk_tolerance
+          - irs_backup_withholdings_notified
+          - is_us_tax_payer
+          - language
+          - last_name
+          - marital_status
+          - phone_number
+          - politically_exposed_names
+          - profile_id
+          - tax_id_type
+          - tax_id_value
+          - tax_treaty_with_us
+        backend_only: false
+  select_permissions:
+    - role: user
+      permission:
+        columns:
+          - address_city
+          - address_country
+          - address_postal_code
+          - address_province
+          - address_street1
+          - address_street2
+          - birthdate
+          - citizenship
+          - country
+          - created_at
+          - disclosures_drivewealth_customer_agreement
+          - disclosures_drivewealth_data_sharing
+          - disclosures_drivewealth_ira_agreement
+          - disclosures_drivewealth_market_data_agreement
+          - disclosures_drivewealth_privacy_policy
+          - disclosures_drivewealth_terms_of_use
+          - disclosures_extended_hours_agreement
+          - disclosures_rule14b
+          - disclosures_signed_by
+          - email_address
+          - employment_affiliated_with_a_broker
+          - employment_company_name
+          - employment_is_director_of_a_public_company
+          - employment_position
+          - employment_status
+          - employment_type
+          - first_name
+          - gender
+          - investor_profile_annual_income
+          - investor_profile_experience
+          - investor_profile_net_worth_liquid
+          - investor_profile_net_worth_total
+          - investor_profile_objectives
+          - investor_profile_risk_tolerance
+          - irs_backup_withholdings_notified
+          - is_us_tax_payer
+          - language
+          - last_name
+          - marital_status
+          - phone_number
+          - politically_exposed_names
+          - profile_id
+          - status
+          - tax_id_type
+          - tax_id_value
+          - tax_treaty_with_us
+          - updated_at
+        filter:
+          profile:
+            user_id:
+              _eq: X-Hasura-User-Id
+  update_permissions:
+    - role: user
+      permission:
+        columns:
+          - address_city
+          - address_country
+          - address_postal_code
+          - address_province
+          - address_street1
+          - address_street2
+          - birthdate
+          - citizenship
+          - country
+          - disclosures_drivewealth_customer_agreement
+          - disclosures_drivewealth_data_sharing
+          - disclosures_drivewealth_ira_agreement
+          - disclosures_drivewealth_market_data_agreement
+          - disclosures_drivewealth_privacy_policy
+          - disclosures_drivewealth_terms_of_use
+          - disclosures_extended_hours_agreement
+          - disclosures_rule14b
+          - disclosures_signed_by
+          - email_address
+          - employment_affiliated_with_a_broker
+          - employment_company_name
+          - employment_is_director_of_a_public_company
+          - employment_position
+          - employment_status
+          - employment_type
+          - first_name
+          - gender
+          - investor_profile_annual_income
+          - investor_profile_experience
+          - investor_profile_net_worth_liquid
+          - investor_profile_net_worth_total
+          - investor_profile_objectives
+          - investor_profile_risk_tolerance
+          - irs_backup_withholdings_notified
+          - is_us_tax_payer
+          - language
+          - last_name
+          - marital_status
+          - phone_number
+          - politically_exposed_names
+          - profile_id
+          - tax_id_type
+          - tax_id_value
+          - tax_treaty_with_us
+        filter:
+          profile:
+            user_id:
+              _eq: X-Hasura-User-Id
+        check: null
+- table:
+    schema: app
     name: notifications
 - table:
     schema: app

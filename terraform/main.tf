@@ -128,6 +128,15 @@ module "aws" {
   algolia_indexing_key      = module.algolia.algolia_indexing_key
   algolia_search_key        = module.algolia.algolia_search_key
 
+  drivewealth_app_key        = var.drivewealth_app_key
+  drivewealth_wlp_id         = var.drivewealth_wlp_id
+  drivewealth_parent_ibid    = var.drivewealth_parent_ibid
+  drivewealth_ria_id         = var.drivewealth_ria_id
+  drivewealth_ria_product_id = var.drivewealth_ria_product_id
+  drivewealth_api_username   = var.drivewealth_api_username
+  drivewealth_api_password   = var.drivewealth_api_password
+  drivewealth_api_url        = var.drivewealth_api_url
+
   codeartifact_pipy_url = var.codeartifact_pipy_url
   gainy_compute_version = var.gainy_compute_version
   onesignal_app_id      = var.onesignal_app_id

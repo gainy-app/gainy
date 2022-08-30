@@ -1,5 +1,6 @@
 import logging
 
+from common.context_container import ContextContainer
 from common.hasura_function import HasuraAction
 
 from psycopg2.extras import execute_values
@@ -9,7 +10,6 @@ from gainy.recommendation.compute import ComputeRecommendationsAndPersist
 from gainy.recommendation.repository import RecommendationRepository
 
 logger = logging.getLogger()
-logger.setLevel(logging.INFO)
 
 
 class SetRecommendationSettings(HasuraAction):
@@ -17,7 +17,8 @@ class SetRecommendationSettings(HasuraAction):
     def __init__(self):
         super().__init__("set_recommendation_settings", "profile_id")
 
-    def apply(self, db_conn, input_params, headers):
+    def apply(self, input_params, context_container: ContextContainer):
+        db_conn = context_container.db_conn
         profile_id = input_params["profile_id"]
         interests = input_params.get("interests")
         categories = input_params.get("categories")

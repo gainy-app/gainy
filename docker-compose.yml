@@ -78,6 +78,7 @@ services:
     image: gainy-hasura:latest
     build:
       context: ./src/hasura
+      target: test
       args:
         BASE_IMAGE_REGISTRY_ADDRESS: ${BASE_IMAGE_REGISTRY_ADDRESS}
         BASE_IMAGE_VERSION: ${BASE_IMAGE_VERSION}

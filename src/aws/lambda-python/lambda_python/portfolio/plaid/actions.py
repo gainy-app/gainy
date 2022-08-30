@@ -9,6 +9,7 @@ from portfolio.plaid import PlaidClient, PlaidService
 from portfolio.service import PortfolioService, SERVICE_PLAID
 
 from portfolio.plaid.common import handle_error
+from common.context_container import ContextContainer
 from common.hasura_function import HasuraAction
 from common.hasura_exception import HasuraActionException
 from gainy.utils import get_logger
@@ -24,7 +25,8 @@ class CreatePlaidLinkToken(HasuraAction):
         super().__init__("create_plaid_link_token", "profile_id")
         self.client = PlaidClient()
 
-    def apply(self, db_conn, input_params, headers):
+    def apply(self, input_params, context_container: ContextContainer):
+        db_conn = context_container.db_conn
         profile_id = input_params["profile_id"]
         redirect_uri = input_params["redirect_uri"]
         env = input_params.get("env", DEFAULT_ENV)  # default for legacy app
@@ -60,7 +62,8 @@ class LinkPlaidAccount(HasuraAction):
         super().__init__("link_plaid_account", "profile_id")
         self.client = PlaidClient()
 
-    def apply(self, db_conn, input_params, headers):
+    def apply(self, input_params, context_container: ContextContainer):
+        db_conn = context_container.db_conn
         profile_id = input_params["profile_id"]
         public_token = input_params["public_token"]
         env = input_params.get("env", DEFAULT_ENV)  # default for legacy app
@@ -100,7 +103,8 @@ class PlaidWebhook(HasuraAction):
         self.portfolio_service = PortfolioService()
         self.client = PlaidClient()
 
-    def apply(self, db_conn, input_params, headers):
+    def apply(self, input_params, context_container: ContextContainer):
+        db_conn = context_container.db_conn
         logger.info("[PLAID_WEBHOOK] %s", input_params)
 
         try:
@@ -142,7 +146,8 @@ class PlaidWebhook(HasuraAction):
             raise e
 
     def verify(self, body, headers, access_token):
-        signed_jwt = headers.get('Plaid-Verification')
+        signed_jwt = headers.get('Plaid-Verification') or headers.get(
+            'plaid-verification')
         current_key_id = jwt.get_unverified_header(signed_jwt)['kid']
 
         response = self.client.webhook_verification_key_get(

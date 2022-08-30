@@ -1,5 +1,6 @@
 from abc import ABC
 
+from common.context_container import ContextContainer
 from common.hasura_function import HasuraAction
 from gainy.recommendation.repository import RecommendationRepository
 
@@ -26,7 +27,8 @@ class GetMatchScoreByTicker(AbstractMatchScoreAction):
     def __init__(self):
         super().__init__("get_match_score_by_ticker", "profile_id")
 
-    def apply(self, db_conn, input_params, headers):
+    def apply(self, input_params, context_container: ContextContainer):
+        db_conn = context_container.db_conn
         profile_id = input_params["profile_id"]
         ticker = input_params["symbol"]
 
@@ -45,7 +47,8 @@ class GetMatchScoreByTickerList(AbstractMatchScoreAction):
     def __init__(self):
         super().__init__("get_match_scores_by_ticker_list", "profile_id")
 
-    def apply(self, db_conn, input_params, headers):
+    def apply(self, input_params, context_container: ContextContainer):
+        db_conn = context_container.db_conn
         profile_id = input_params["profile_id"]
         tickers = input_params["symbols"]
 
@@ -62,7 +65,8 @@ class GetMatchScoreByCollection(AbstractMatchScoreAction):
     def __init__(self):
         super().__init__("get_match_scores_by_collection", "profile_id")
 
-    def apply(self, db_conn, input_params, headers):
+    def apply(self, input_params, context_container: ContextContainer):
+        db_conn = context_container.db_conn
         profile_id = input_params["profile_id"]
         collection_id = input_params["collection_id"]
 

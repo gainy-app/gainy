@@ -64,6 +64,15 @@ module "lambda" {
   algolia_app_id            = var.algolia_app_id
   algolia_search_key        = var.algolia_search_key
 
+  drivewealth_app_key        = var.drivewealth_app_key
+  drivewealth_wlp_id         = var.drivewealth_wlp_id
+  drivewealth_parent_ibid    = var.drivewealth_parent_ibid
+  drivewealth_ria_id         = var.drivewealth_ria_id
+  drivewealth_ria_product_id = var.drivewealth_ria_product_id
+  drivewealth_api_username   = var.drivewealth_api_username
+  drivewealth_api_password   = var.drivewealth_api_password
+  drivewealth_api_url        = var.drivewealth_api_url
+
   redis_cache_host = module.elasticache.redis_cache_host
   redis_cache_port = module.elasticache.redis_cache_port
 

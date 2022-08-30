@@ -17,6 +17,18 @@ actions:
       handler: '{{AWS_LAMBDA_API_GATEWAY_ENDPOINT}}/hasuraAction'
     permissions:
       - role: user
+  - name: get_kyc_form_config
+    definition:
+      kind: ""
+      handler: '{{AWS_LAMBDA_API_GATEWAY_ENDPOINT}}/hasuraAction'
+    permissions:
+      - role: user
+  - name: get_kyc_status
+    definition:
+      kind: ""
+      handler: '{{AWS_LAMBDA_API_GATEWAY_ENDPOINT}}/hasuraAction'
+    permissions:
+      - role: user
   - name: get_match_score_by_ticker
     definition:
       kind: ""
@@ -88,6 +100,15 @@ actions:
       kind: synchronous
       handler: '{{AWS_LAMBDA_API_GATEWAY_ENDPOINT}}/hasuraAction'
       forward_client_headers: true
+      request_transform:
+        body:
+          action: transform
+          template: |-
+            {
+              "body": {{$body}}
+            }
+        version: 2
+        template_engine: Kriti
     permissions:
       - role: anonymous
   - name: search_collections
@@ -99,6 +120,12 @@ actions:
   - name: search_tickers
     definition:
       kind: ""
+      handler: '{{AWS_LAMBDA_API_GATEWAY_ENDPOINT}}/hasuraAction'
+    permissions:
+      - role: user
+  - name: send_kyc_form
+    definition:
+      kind: synchronous
       handler: '{{AWS_LAMBDA_API_GATEWAY_ENDPOINT}}/hasuraAction'
     permissions:
       - role: user
@@ -253,4 +280,8 @@ custom_types:
     - name: UpdatePurchasesOutput
     - name: Promocode
     - name: SetRecommendationSettingsOutput
+    - name: KycFormConfig
+    - name: KycFormFieldConfig
+    - name: SendKycFormOutput
+    - name: KycStatus
   scalars: []
