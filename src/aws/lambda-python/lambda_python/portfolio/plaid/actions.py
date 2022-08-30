@@ -133,7 +133,9 @@ class PlaidWebhook(HasuraAction):
             try:
                 self.verify(input_params, headers, token)
             except Exception as e:
-                logger.error('[PLAID_WEBHOOK] verify: %s', e, extra=logging_extra)
+                logger.error('[PLAID_WEBHOOK] verify: %s',
+                             e,
+                             extra=logging_extra)
 
             webhook_type = input_params['webhook_type']
             for access_token in access_tokens:
