@@ -28,22 +28,28 @@ union all
     with collection_categories_weight_sum as
              (
                  select collection_uniq_id,
-                        sum(weight) as weight_sum
+                        sum(weight)                         as weight_sum,
+                        sum(absolute_daily_change * weight) as absolute_daily_change_sum
                  from {{ ref('collection_tickers_weighted') }}
                           join {{ ref('ticker_categories') }} using (symbol)
+                          join {{ ref('ticker_realtime_metrics') }} using (symbol)
                  group by collection_uniq_id
              )
-    select profile_id,
-           user_id,
+    select t.profile_id,
+           t.user_id,
            t.collection_id,
            collection_uniq_id,
-           (weight / weight_sum)::double precision                                                         as weight,
-           'category'::varchar                                                                             as entity_type,
-           category_id::varchar                                                                            as entity_id,
-           categories.name                                                                                 as entity_name,
-           (absolute_daily_change / weight_sum)                                                            as absolute_daily_change,
-           (actual_price / case when prev_close_price > 0 then prev_close_price end - 1)::double precision as relative_daily_change,
-           (actual_price / weight_sum)                                                                     as absolute_value
+           (weight / weight_sum)::double precision                                                           as weight,
+           'category'::varchar                                                                               as entity_type,
+           category_id::varchar                                                                              as entity_id,
+           categories.name                                                                                   as entity_name,
+           case
+               when abs(absolute_daily_change_sum) > 0
+                   then collection_metrics.absolute_daily_change / absolute_daily_change_sum
+               else 1
+               end * t.absolute_daily_change                                                                 as absolute_daily_change,
+           (t.actual_price / case when prev_close_price > 0 then prev_close_price end - 1)::double precision as relative_daily_change,
+           (t.actual_price / weight_sum)                                                                     as absolute_value
     from (
              select profile_id,
                     user_id,
@@ -62,6 +68,7 @@ union all
          ) t
              join {{ ref('categories') }} on t.category_id = categories.id
              join collection_categories_weight_sum using (collection_uniq_id)
+             join {{ ref('collection_metrics') }} using (collection_uniq_id)
 )
 
 union all
@@ -70,22 +77,28 @@ union all
     with collection_interests_weight_sum as
              (
                  select collection_uniq_id,
-                        sum(weight) as weight_sum
+                        sum(weight)                         as weight_sum,
+                        sum(absolute_daily_change * weight) as absolute_daily_change_sum
                  from {{ ref('collection_tickers_weighted') }}
                           join {{ ref('ticker_interests') }} using (symbol)
+                          join {{ ref('ticker_realtime_metrics') }} using (symbol)
                  group by collection_uniq_id
              )
-    select profile_id,
-           user_id,
+    select t.profile_id,
+           t.user_id,
            collection_id,
            collection_uniq_id,
-           (weight / weight_sum)::double precision                                                         as weight,
-           'interest'::varchar                                                                             as entity_type,
-           interest_id::varchar                                                                            as entity_id,
-           interests.name                                                                                  as entity_name,
-           (absolute_daily_change / weight_sum)                                                            as absolute_daily_change,
-           (actual_price / case when prev_close_price > 0 then prev_close_price end - 1)::double precision as relative_daily_change,
-           (actual_price / weight_sum)                                                                     as absolute_value
+           (weight / weight_sum)::double precision                                                           as weight,
+           'interest'::varchar                                                                               as entity_type,
+           interest_id::varchar                                                                              as entity_id,
+           interests.name                                                                                    as entity_name,
+           case
+               when abs(absolute_daily_change_sum) > 0
+                   then collection_metrics.absolute_daily_change / absolute_daily_change_sum
+               else 1
+               end * t.absolute_daily_change                                                                 as absolute_daily_change,
+           (t.actual_price / case when prev_close_price > 0 then prev_close_price end - 1)::double precision as relative_daily_change,
+           (t.actual_price / weight_sum)                                                                     as absolute_value
     from (
              select profile_id,
                     user_id,
@@ -104,4 +117,5 @@ union all
          ) t
              join {{ ref('interests') }} on t.interest_id = interests.id
              join collection_interests_weight_sum using (collection_uniq_id)
+             join {{ ref('collection_metrics') }} using (collection_uniq_id)
 )
