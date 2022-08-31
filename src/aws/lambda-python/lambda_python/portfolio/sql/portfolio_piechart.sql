@@ -122,6 +122,7 @@ union all
                         sum(quantity_norm_for_valuation * weight_category_in_symbol * actual_price) as absolute_value
                  from data2
                  group by profile_id, category_id
+                 having sum(weight_symbol_in_portfolio * weight_category_in_symbol) > 0
              )
     select profile_id,
            weight::double precision,
@@ -216,6 +217,7 @@ union all
                         sum(quantity_norm_for_valuation * weight_interest_in_symbol * actual_price) as absolute_value
                  from data2
                  group by profile_id, interest_id
+                 having sum(weight_symbol_in_portfolio * weight_interest_in_symbol) > 0
              )
     select profile_id,
            weight::double precision,
@@ -368,6 +370,7 @@ union all
                         sum(quantity_norm_for_valuation * weight_collection_in_symbol * actual_price) as absolute_value
                  from data2
                  group by profile_id, collection_id
+                 having sum(weight_symbol_in_portfolio * weight_collection_in_symbol) > 0
              )
     select profile_id,
            weight::double precision,

@@ -75,6 +75,7 @@ union all
                  from data
                           join {{ ref('ticker_realtime_metrics') }} using (symbol)
                  group by profile_id, user_id, collection_id, collection_uniq_id, category_id
+                 having sum(weight_symbol_in_collection * weight_category_in_symbol) > 0
              )
     
     select profile_id,
@@ -149,6 +150,7 @@ union all
                  from data
                           join {{ ref('ticker_realtime_metrics') }} using (symbol)
                  group by profile_id, user_id, collection_id, collection_uniq_id, interest_id
+                 having sum(weight_symbol_in_collection * weight_interest_in_symbol) > 0
              )
     
     select profile_id,
