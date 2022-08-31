@@ -58,25 +58,42 @@ union all
                           join {{ ref('ticker_categories_continuous') }} using (symbol)
                  where weight_symbol_in_collection_sum > 0
                    and weight_category_in_symbol_sum > 0
+             ),
+         data2 as 
+             (
+                 select profile_id,
+                        user_id,
+                        data.collection_id,
+                        collection_uniq_id,
+                        sum(weight_symbol_in_collection * weight_category_in_symbol)                         as weight,
+                        category_id,
+                        sum(weight_symbol_in_collection * weight_category_in_symbol * absolute_daily_change) as absolute_daily_change,
+                        sum(weight_symbol_in_collection * weight_category_in_symbol * actual_price)          as actual_price, 
+                        sum(weight_symbol_in_collection * weight_category_in_symbol * 
+                            coalesce(previous_day_close_price, actual_price))                                as previous_day_close_price,
+                        sum(weight_symbol_in_collection * weight_category_in_symbol * actual_price)          as absolute_value
+                 from data
+                          join {{ ref('ticker_realtime_metrics') }} using (symbol)
+                 group by profile_id, user_id, data.collection_id, collection_uniq_id, category_id
              )
+    
     select profile_id,
            user_id,
-           data.collection_id,
+           collection_id,
            collection_uniq_id,
-           sum(weight_symbol_in_collection * weight_category_in_symbol)::double precision                as weight,
-           'category'::varchar                                                                           as entity_type,
-           category_id::varchar                                                                          as entity_id,
-           min(categories.name)                                                                          as entity_name,
-           sum(weight_symbol_in_collection * weight_category_in_symbol *
-               absolute_daily_change)::double precision                                                  as absolute_daily_change,
-           (sum(weight_symbol_in_collection * weight_category_in_symbol * actual_price) /
-            sum(weight_symbol_in_collection * weight_category_in_symbol * coalesce(previous_day_close_price, actual_price)) -
-            1)::double precision                                                                         as relative_daily_change,
-           sum(weight_symbol_in_collection * weight_category_in_symbol * actual_price)::double precision as absolute_value
-    from data
-             join {{ ref('categories') }} on data.category_id = categories.id
-             join {{ ref('ticker_realtime_metrics') }} using (symbol)
-    group by profile_id, user_id, data.collection_id, collection_uniq_id, category_id
+           weight::double precision,
+           'category'::varchar        as entity_type,
+           category_id::varchar       as entity_id,
+           categories.name            as entity_name,
+           absolute_daily_change::double precision,
+           (case 
+               when previous_day_close_price > 0
+                   then actual_price / previous_day_close_price - 1
+               else 0
+               end)::double precision as relative_daily_change,
+           absolute_value::double precision
+    from data2
+             join {{ ref('categories') }} on data2.category_id = categories.id
 )
 
 union all
@@ -115,23 +132,40 @@ union all
                           join {{ ref('ticker_interests') }} using (symbol)
                  where weight_symbol_in_collection_sum > 0
                    and weight_interest_in_symbol_sum > 0
+             ),
+         data2 as 
+             (
+                 select profile_id,
+                        user_id,
+                        data.collection_id,
+                        collection_uniq_id,
+                        sum(weight_symbol_in_collection * weight_interest_in_symbol)                         as weight,
+                        interest_id,
+                        sum(weight_symbol_in_collection * weight_interest_in_symbol * absolute_daily_change) as absolute_daily_change,
+                        sum(weight_symbol_in_collection * weight_interest_in_symbol * actual_price)          as actual_price, 
+                        sum(weight_symbol_in_collection * weight_interest_in_symbol * 
+                            coalesce(previous_day_close_price, actual_price))                                as previous_day_close_price,
+                        sum(weight_symbol_in_collection * weight_interest_in_symbol * actual_price)          as absolute_value
+                 from data
+                          join {{ ref('ticker_realtime_metrics') }} using (symbol)
+                 group by profile_id, user_id, data.collection_id, collection_uniq_id, interest_id
              )
+    
     select profile_id,
            user_id,
-           data.collection_id,
+           data2.collection_id,
            collection_uniq_id,
-           sum(weight_symbol_in_collection * weight_interest_in_symbol)::double precision                as weight,
-           'interest'::varchar                                                                           as entity_type,
-           interest_id::varchar                                                                          as entity_id,
-           min(interests.name)                                                                           as entity_name,
-           sum(weight_symbol_in_collection * weight_interest_in_symbol *
-               absolute_daily_change)::double precision                                                  as absolute_daily_change,
-           (sum(weight_symbol_in_collection * weight_interest_in_symbol * actual_price) /
-            sum(weight_symbol_in_collection * weight_interest_in_symbol * coalesce(previous_day_close_price, actual_price)) -
-            1)::double precision                                                                         as relative_daily_change,
-           sum(weight_symbol_in_collection * weight_interest_in_symbol * actual_price)::double precision as absolute_value
-    from data
-             join {{ ref('interests') }} on data.interest_id = interests.id
-             join {{ ref('ticker_realtime_metrics') }} using (symbol)
-    group by profile_id, user_id, data.collection_id, collection_uniq_id, interest_id
+           weight::double precision,
+           'interest'::varchar        as entity_type,
+           interest_id::varchar       as entity_id,
+           interests.name             as entity_name,
+           absolute_daily_change::double precision,
+           (case 
+               when previous_day_close_price > 0
+                   then actual_price / previous_day_close_price - 1
+               else 0
+               end)::double precision as relative_daily_change,
+           absolute_value::double precision
+    from data2
+             join {{ ref('interests') }} on data2.interest_id = interests.id
 )
