@@ -48,13 +48,14 @@ where weight is not null
 union all
 
 (
-    with portfolio_categories as
+    with data as materialized
              (
                  select profile_holdings_normalized.profile_id,
+                        original_ticker_symbol as symbol,
+                        sim_dif + 1 as weight_category_in_symbol,
                         category_id,
-                        sum(absolute_daily_change *
-                            profile_holdings_normalized.quantity_norm_for_valuation) as absolute_daily_change,
-                        sum(actual_value)                                            as absolute_value
+                        profile_holdings_normalized.quantity_norm_for_valuation,
+                        actual_value
                  from profile_holdings_normalized
                           join portfolio_securities_normalized
                                on portfolio_securities_normalized.id = security_id
@@ -62,80 +63,81 @@ union all
                           left join ticker_realtime_metrics
                                     on ticker_realtime_metrics.symbol =
                                        portfolio_securities_normalized.original_ticker_symbol
-                          join ticker_categories
-                               on ticker_categories.symbol = portfolio_securities_normalized.ticker_symbol
+                          join ticker_categories_continuous
+                               on ticker_categories_continuous.symbol = portfolio_securities_normalized.ticker_symbol
                           join app.profile_plaid_access_tokens
                                on profile_plaid_access_tokens.id = profile_holdings_normalized.plaid_access_token_id
                  where {where_clause}
-                 group by profile_holdings_normalized.profile_id, category_id
              ),
-         portfolio_categories_weight_sum_actual as
+         portfolio_stats as
              (
                  select profile_id,
-                        sum(absolute_value)        as weight_sum,
-                        sum(absolute_daily_change) as absolute_daily_change_sum
-                 from portfolio_categories
-                 group by profile_id
-             ),
-         portfolio_categories_weight_sum_target as
-             (
-                 select profile_id,
-                        sum(weight)                as weight_sum,
-                        sum(absolute_daily_change) as absolute_daily_change_sum
+                        sum(actual_value) as actual_value_sum
                  from (
                           select distinct on (
-                              profile_id, symbol
+                              profile_id,
+                              symbol
                               ) profile_id,
-                                weight,
-                                absolute_daily_change
-                          from portfolio_tickers
-                                   join ticker_categories using (symbol)
+                                symbol,
+                                actual_value
+                          from data
                       ) t
                  group by profile_id
+             ),
+         portfolio_symbol_stats as
+             (
+                 select profile_id,
+                        symbol,
+                        sum(weight_category_in_symbol) as weight_category_in_symbol_sum
+                 from data
+                 group by profile_id, symbol
+             ),
+         data2 as
+             (
+                 select profile_id,
+                        symbol,
+                        actual_value / actual_value_sum                           as weight_symbol_in_portfolio,
+                        weight_category_in_symbol / weight_category_in_symbol_sum as weight_category_in_symbol,
+                        category_id,
+                        categories.name,
+                        quantity_norm_for_valuation,
+                        absolute_daily_change,
+                        actual_price,
+                        previous_day_close_price
+                 from data
+                          join portfolio_stats using (profile_id)
+                          join portfolio_symbol_stats using (profile_id, symbol)
+                          join categories on categories.id = category_id
+                          join ticker_realtime_metrics using (symbol)
+                 where actual_value_sum > 0
+                   and weight_category_in_symbol_sum > 0
              )
     select profile_id,
-           weight,
-           entity_type,
-           entity_id,
-           entity_name,
-           absolute_daily_change,
-           case
-               when abs(absolute_value - absolute_daily_change) > 0
-                   then absolute_value / (absolute_value - absolute_daily_change) - 1
-               end as relative_daily_change,
-           absolute_value
-    from (
-             select portfolio_categories.profile_id,
-                    absolute_value / portfolio_categories_weight_sum_actual.weight_sum as weight,
-                    'category'::varchar                                                as entity_type,
-                    category_id::varchar                                               as entity_id,
-                    categories.name                                                    as entity_name,
-                    case
-                        when abs(portfolio_categories_weight_sum_actual.absolute_daily_change_sum) > 0
-                            then portfolio_categories_weight_sum_target.absolute_daily_change_sum /
-                                 portfolio_categories_weight_sum_actual.absolute_daily_change_sum
-                        else 1
-                        end * absolute_daily_change                                    as absolute_daily_change,
-                    absolute_value * portfolio_categories_weight_sum_target.weight_sum /
-                    portfolio_categories_weight_sum_actual.weight_sum                  as absolute_value
-             from portfolio_categories
-                      join portfolio_categories_weight_sum_actual using (profile_id)
-                      join portfolio_categories_weight_sum_target using (profile_id)
-                      join categories on portfolio_categories.category_id = categories.id
-             where portfolio_categories_weight_sum_actual.weight_sum > 0
-         ) t
+           sum(weight_symbol_in_portfolio * weight_category_in_symbol)::double precision                as weight,
+           'category'::varchar                                                                          as entity_type,
+           category_id::varchar                                                                         as entity_id,
+           min(name)                                                                                    as entity_name,
+           sum(quantity_norm_for_valuation * weight_category_in_symbol *
+               absolute_daily_change)::double precision                                                 as absolute_daily_change,
+           (sum(quantity_norm_for_valuation * weight_category_in_symbol * actual_price) /
+            sum(quantity_norm_for_valuation * weight_category_in_symbol * coalesce(previous_day_close_price, actual_price)) -
+            1)::double precision                                                                        as relative_daily_change,
+           sum(quantity_norm_for_valuation * weight_category_in_symbol * actual_price)::double precision as absolute_value
+    from data2
+    group by profile_id, category_id
 )
 
 union all
 
 (
-    with portfolio_interests as
+    with data as materialized
              (
                  select profile_holdings_normalized.profile_id,
+                        original_ticker_symbol as symbol,
+                        sim_dif + 1 as weight_interest_in_symbol,
                         interest_id,
-                        sum(absolute_daily_change *
-                            profile_holdings_normalized.quantity_norm_for_valuation) as absolute_daily_change,
-                        sum(actual_value)                                            as absolute_value
+                        profile_holdings_normalized.quantity_norm_for_valuation,
+                        actual_value
                  from profile_holdings_normalized
                           join portfolio_securities_normalized
                                on portfolio_securities_normalized.id = security_id
@@ -148,63 +150,63 @@ union all
                           join app.profile_plaid_access_tokens
                                on profile_plaid_access_tokens.id = profile_holdings_normalized.plaid_access_token_id
                  where {where_clause}
-                 group by profile_holdings_normalized.profile_id, interest_id
              ),
-         portfolio_interests_weight_sum_actual as
+         portfolio_stats as
              (
                  select profile_id,
-                        sum(absolute_value)        as weight_sum,
-                        sum(absolute_daily_change) as absolute_daily_change_sum
-                 from portfolio_interests
-                 group by profile_id
-             ),
-         portfolio_interests_weight_sum_target as
-             (
-                 select profile_id,
-                        sum(weight)                as weight_sum,
-                        sum(absolute_daily_change) as absolute_daily_change_sum
+                        sum(actual_value) as actual_value_sum
                  from (
                           select distinct on (
-                              profile_id, symbol
+                              profile_id,
+                              symbol
                               ) profile_id,
-                                weight,
-                                absolute_daily_change
-                          from portfolio_tickers
-                                   join ticker_interests using (symbol)
+                                symbol,
+                                actual_value
+                          from data
                       ) t
                  group by profile_id
+             ),
+         portfolio_symbol_stats as
+             (
+                 select profile_id,
+                        symbol,
+                        sum(weight_interest_in_symbol) as weight_interest_in_symbol_sum
+                 from data
+                 group by profile_id, symbol
+             ),
+         data2 as
+             (
+                 select profile_id,
+                        symbol,
+                        actual_value / actual_value_sum                           as weight_symbol_in_portfolio,
+                        weight_interest_in_symbol / weight_interest_in_symbol_sum as weight_interest_in_symbol,
+                        interest_id,
+                        interests.name,
+                        quantity_norm_for_valuation,
+                        absolute_daily_change,
+                        actual_price,
+                        previous_day_close_price
+                 from data
+                          join portfolio_stats using (profile_id)
+                          join portfolio_symbol_stats using (profile_id, symbol)
+                          join interests on interests.id = interest_id
+                          join ticker_realtime_metrics using (symbol)
+                 where actual_value_sum > 0
+                   and weight_interest_in_symbol_sum > 0
              )
     select profile_id,
-           weight,
-           entity_type,
-           entity_id,
-           entity_name,
-           absolute_daily_change,
-           case
-               when abs(absolute_value - absolute_daily_change) > 0
-                   then absolute_value / (absolute_value - absolute_daily_change) - 1
-               end as relative_daily_change,
-           absolute_value
-    from (
-             select portfolio_interests.profile_id,
-                    absolute_value / portfolio_interests_weight_sum_actual.weight_sum as weight,
-                    'interest'::varchar                                                as entity_type,
-                    interest_id::varchar                                               as entity_id,
-                    interests.name                                                    as entity_name,
-                    case
-                        when abs(portfolio_interests_weight_sum_actual.absolute_daily_change_sum) > 0
-                            then portfolio_interests_weight_sum_target.absolute_daily_change_sum /
-                                 portfolio_interests_weight_sum_actual.absolute_daily_change_sum
-                        else 1
-                        end * absolute_daily_change                                    as absolute_daily_change,
-                    absolute_value * portfolio_interests_weight_sum_target.weight_sum /
-                    portfolio_interests_weight_sum_actual.weight_sum                  as absolute_value
-             from portfolio_interests
-                      join portfolio_interests_weight_sum_actual using (profile_id)
-                      join portfolio_interests_weight_sum_target using (profile_id)
-                      join interests on portfolio_interests.interest_id = interests.id
-             where portfolio_interests_weight_sum_actual.weight_sum > 0
-         ) t
+           sum(weight_symbol_in_portfolio * weight_interest_in_symbol)::double precision                 as weight,
+           'interest'::varchar                                                                           as entity_type,
+           interest_id::varchar                                                                          as entity_id,
+           min(name)                                                                                     as entity_name,
+           sum(quantity_norm_for_valuation * weight_interest_in_symbol *
+               absolute_daily_change)::double precision                                                  as absolute_daily_change,
+           (sum(quantity_norm_for_valuation * weight_interest_in_symbol * actual_price) /
+            sum(quantity_norm_for_valuation * weight_interest_in_symbol * coalesce(previous_day_close_price, actual_price)) -
+            1)::double precision                                                                         as relative_daily_change,
+           sum(quantity_norm_for_valuation * weight_interest_in_symbol * actual_price)::double precision as absolute_value
+    from data2
+    group by profile_id, interest_id
 )
 
 union all
@@ -268,13 +270,14 @@ union all
 union all
 
 (
-    with portfolio_collections as
+    with data as materialized
              (
                  select profile_holdings_normalized.profile_id,
+                        original_ticker_symbol as symbol,
+                        weight                 as weight_collection_in_symbol,
                         collection_id,
-                        sum(absolute_daily_change *
-                            profile_holdings_normalized.quantity_norm_for_valuation) as absolute_daily_change,
-                        sum(actual_value)                                            as absolute_value
+                        profile_holdings_normalized.quantity_norm_for_valuation,
+                        actual_value
                  from profile_holdings_normalized
                           join portfolio_securities_normalized
                                on portfolio_securities_normalized.id = security_id
@@ -287,61 +290,61 @@ union all
                           join app.profile_plaid_access_tokens
                                on profile_plaid_access_tokens.id = profile_holdings_normalized.plaid_access_token_id
                  where {where_clause}
-                 group by profile_holdings_normalized.profile_id, collection_id
              ),
-         portfolio_collections_weight_sum_actual as
+         portfolio_stats as
              (
                  select profile_id,
-                        sum(absolute_value)        as weight_sum,
-                        sum(absolute_daily_change) as absolute_daily_change_sum
-                 from portfolio_collections
-                 group by profile_id
-             ),
-         portfolio_collections_weight_sum_target as
-             (
-                 select profile_id,
-                        sum(weight)                as weight_sum,
-                        sum(absolute_daily_change) as absolute_daily_change_sum
+                        sum(actual_value) as actual_value_sum
                  from (
                           select distinct on (
-                              profile_id, symbol
+                              profile_id,
+                              symbol
                               ) profile_id,
-                                portfolio_tickers.weight,
-                                absolute_daily_change
-                          from portfolio_tickers
-                                   join ticker_collections using (symbol)
+                                symbol,
+                                actual_value
+                          from data
                       ) t
                  group by profile_id
+             ),
+         portfolio_symbol_stats as
+             (
+                 select profile_id,
+                        symbol,
+                        sum(weight_collection_in_symbol) as weight_collection_in_symbol_sum
+                 from data
+                 group by profile_id, symbol
+             ),
+         data2 as
+             (
+                 select profile_id,
+                        symbol,
+                        actual_value / actual_value_sum                           as weight_symbol_in_portfolio,
+                        weight_collection_in_symbol / weight_collection_in_symbol_sum as weight_collection_in_symbol,
+                        collection_id,
+                        collections.name,
+                        quantity_norm_for_valuation,
+                        absolute_daily_change,
+                        actual_price,
+                        previous_day_close_price
+                 from data
+                          join portfolio_stats using (profile_id)
+                          join portfolio_symbol_stats using (profile_id, symbol)
+                          join collections on collections.id = collection_id
+                          join ticker_realtime_metrics using (symbol)
+                 where actual_value_sum > 0
+                   and weight_collection_in_symbol_sum > 0
              )
     select profile_id,
-           weight,
-           entity_type,
-           entity_id,
-           entity_name,
-           absolute_daily_change,
-           case
-               when abs(absolute_value - absolute_daily_change) > 0
-                   then absolute_value / (absolute_value - absolute_daily_change) - 1
-               end as relative_daily_change,
-           absolute_value
-    from (
-             select portfolio_collections.profile_id,
-                    absolute_value / portfolio_collections_weight_sum_actual.weight_sum as weight,
-                    'collection'::varchar                                                as entity_type,
-                    collection_id::varchar                                               as entity_id,
-                    collections.name                                                    as entity_name,
-                    case
-                        when abs(portfolio_collections_weight_sum_actual.absolute_daily_change_sum) > 0
-                            then portfolio_collections_weight_sum_target.absolute_daily_change_sum /
-                                 portfolio_collections_weight_sum_actual.absolute_daily_change_sum
-                        else 1
-                        end * absolute_daily_change                                    as absolute_daily_change,
-                    absolute_value * portfolio_collections_weight_sum_target.weight_sum /
-                    portfolio_collections_weight_sum_actual.weight_sum                  as absolute_value
-             from portfolio_collections
-                      join portfolio_collections_weight_sum_actual using (profile_id)
-                      join portfolio_collections_weight_sum_target using (profile_id)
-                      join collections on portfolio_collections.collection_id = collections.id
-             where portfolio_collections_weight_sum_actual.weight_sum > 0
-         ) t
+           sum(weight_symbol_in_portfolio * weight_collection_in_symbol)::double precision                as weight,
+           'collection'::varchar                                                                          as entity_type,
+           collection_id::varchar                                                                         as entity_id,
+           min(name)                                                                                    as entity_name,
+           sum(quantity_norm_for_valuation * weight_collection_in_symbol *
+               absolute_daily_change)::double precision                                                 as absolute_daily_change,
+           (sum(quantity_norm_for_valuation * weight_collection_in_symbol * actual_price) /
+            sum(quantity_norm_for_valuation * weight_collection_in_symbol * coalesce(previous_day_close_price, actual_price)) -
+            1)::double precision                                                                        as relative_daily_change,
+           sum(quantity_norm_for_valuation * weight_collection_in_symbol * actual_price)::double precision as absolute_value
+    from data2
+    group by profile_id, collection_id
 )
