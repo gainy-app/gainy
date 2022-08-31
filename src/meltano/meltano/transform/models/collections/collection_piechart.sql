@@ -63,7 +63,7 @@ union all
              (
                  select profile_id,
                         user_id,
-                        data.collection_id,
+                        collection_id,
                         collection_uniq_id,
                         sum(weight_symbol_in_collection * weight_category_in_symbol)                         as weight,
                         category_id,
@@ -74,12 +74,12 @@ union all
                         sum(weight_symbol_in_collection * weight_category_in_symbol * actual_price)          as absolute_value
                  from data
                           join {{ ref('ticker_realtime_metrics') }} using (symbol)
-                 group by profile_id, user_id, data.collection_id, collection_uniq_id, category_id
+                 group by profile_id, user_id, collection_id, collection_uniq_id, category_id
              )
     
     select profile_id,
            user_id,
-           collection_id,
+           data2.collection_id,
            collection_uniq_id,
            weight::double precision,
            'category'::varchar        as entity_type,
@@ -137,7 +137,7 @@ union all
              (
                  select profile_id,
                         user_id,
-                        data.collection_id,
+                        collection_id,
                         collection_uniq_id,
                         sum(weight_symbol_in_collection * weight_interest_in_symbol)                         as weight,
                         interest_id,
@@ -148,7 +148,7 @@ union all
                         sum(weight_symbol_in_collection * weight_interest_in_symbol * actual_price)          as absolute_value
                  from data
                           join {{ ref('ticker_realtime_metrics') }} using (symbol)
-                 group by profile_id, user_id, data.collection_id, collection_uniq_id, interest_id
+                 group by profile_id, user_id, collection_id, collection_uniq_id, interest_id
              )
     
     select profile_id,
