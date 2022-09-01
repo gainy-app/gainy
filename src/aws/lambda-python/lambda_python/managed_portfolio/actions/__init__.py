@@ -1,4 +1,5 @@
 from managed_portfolio.actions.add_kyc_document import AddKycDocument
 from managed_portfolio.actions.get_kyc_form_config import GetKycFormConfig
 from managed_portfolio.actions.get_kyc_status import GetKycStatus
+from managed_portfolio.actions.link_managed_trading_bank_account_with_plaid import LinkManagedTradingBankAccountWithPlaid
 from managed_portfolio.actions.send_kyc_form import SendKycForm

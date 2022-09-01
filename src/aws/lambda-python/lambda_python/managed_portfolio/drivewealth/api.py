@@ -66,7 +66,16 @@ class DriveWealthApi:
     def get_user_accounts(self, user_id: str):
         return self._make_request("GET", f"/users/{user_id}/accounts")
 
+    def link_bank_account(self, user_id: str, processor_token: str, name: str):
+        return self._make_request(
+            "POST", "/bank-accounts", {
+                "plaidProcessorToken": processor_token,
+                "userID": user_id,
+                "bankAccountNickname": name,
+            })
+
     def _get_token(self):
+        # TODO redis
         if self._token_data is not None and datetime.datetime.now(
                 tz=datetime.timezone.utc) > self._token_data['expiresAt']:
             return self._token_data["authToken"]

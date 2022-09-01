@@ -2,9 +2,10 @@ import json
 from managed_portfolio.models import KycDocument
 from common.context_container import ContextContainer
 from psycopg2.extras import RealDictCursor
+from gainy.data_access.repository import Repository
 
 
-class ManagedPortfolioRepository:
+class ManagedPortfolioRepository(Repository):
 
     def __init__(self, context_container: ContextContainer):
         self.db_conn = context_container.db_conn

@@ -7,12 +7,36 @@ from gainy.utils import get_logger
 
 import plaid
 
+logger = get_logger(__name__)
+
 
 class PlaidService:
 
     def __init__(self):
         self.plaid_client = PlaidClient()
         self.logger = get_logger(__name__)
+
+    def exchange_public_token(self, public_token, env):
+        try:
+            return self.plaid_client.exchange_public_token(public_token, env)
+        except plaid.ApiException as e:
+            handle_error(e)
+
+    def get_item_accounts(self, access_token):
+        try:
+            return self.plaid_client.get_item_accounts(access_token)
+        except plaid.ApiException as e:
+            handle_error(e)
+
+    def create_processor_token(self, access_token, account_id, processor):
+        try:
+            response = self.plaid_client.create_processor_token(
+                access_token, account_id, processor)
+        except plaid.ApiException as e:
+            handle_error(e)
+
+        logger.info('create_processor_token', extra={"response": response})
+        return response['processor_token']
 
     def max_transactions_limit(self):
         return 500

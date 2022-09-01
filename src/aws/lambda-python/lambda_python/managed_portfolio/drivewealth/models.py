@@ -1,22 +1,19 @@
+import json
 from gainy.data_access.models import BaseModel, classproperty
 
 
-# TODO move to compute
-class BaseModel2(BaseModel):
+class BaseDriveWealthModel(BaseModel):
+    @classproperty
+    def schema_name(self) -> str:
+        return "app"
 
-    def __init__(self, row: dict = None):
-        if row:
-            self.set_from_dict(row)
+    def to_dict(self) -> str:
+        return {
+            **super().to_dict(),
+            "data": json.dumps(self.data),
+        }
 
-    def set_from_dict(self, row: dict = None):
-        if not row:
-            return
-
-        for k, v in row.items():
-            self.__dict__[k] = v
-
-
-class DriveWealthUser(BaseModel2):
+class DriveWealthUser(BaseDriveWealthModel):
     ref_id = None
     kyc_document_id = None
     status = None
@@ -28,17 +25,13 @@ class DriveWealthUser(BaseModel2):
 
     db_excluded_fields = ["created_at", "updated_at"]
     non_persistent_fields = ["created_at", "updated_at"]
-
-    @classproperty
-    def schema_name(self) -> str:
-        return "app"
 
     @classproperty
     def table_name(self) -> str:
         return "drivewealth_users"
 
 
-class DriveWealthDocument(BaseModel2):
+class DriveWealthDocument(BaseDriveWealthModel):
     ref_id = None
     kyc_document_id = None
     status = None
@@ -52,15 +45,11 @@ class DriveWealthDocument(BaseModel2):
     non_persistent_fields = ["created_at", "updated_at"]
 
     @classproperty
-    def schema_name(self) -> str:
-        return "app"
-
-    @classproperty
     def table_name(self) -> str:
         return "drivewealth_documents"
 
 
-class DriveWealthAccount(BaseModel2):
+class DriveWealthAccount(BaseDriveWealthModel):
     ref_id = None
     drivewealth_user_id = None
     trading_account_id = None
@@ -80,9 +69,27 @@ class DriveWealthAccount(BaseModel2):
     non_persistent_fields = ["created_at", "updated_at"]
 
     @classproperty
-    def schema_name(self) -> str:
-        return "app"
+    def table_name(self) -> str:
+        return "drivewealth_accounts"
+
+
+class DriveWealthBankAccount(BaseDriveWealthModel):
+    ref_id = None
+    drivewealth_user_id = None
+    managed_portfolio_funding_account_id = None
+    plaid_access_token_id = None
+    bank_account_nickname = None
+    bank_account_number = None
+    bank_routing_number = None
+    data = None
+    created_at = None
+    updated_at = None
+
+    key_fields = ["ref_id"]
+
+    db_excluded_fields = ["created_at", "updated_at"]
+    non_persistent_fields = ["created_at", "updated_at"]
 
     @classproperty
     def table_name(self) -> str:
-        return "drivewealth_accounts"
+        return "drivewealth_bank_accounts"

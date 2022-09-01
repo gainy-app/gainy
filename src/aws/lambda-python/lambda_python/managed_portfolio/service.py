@@ -1,9 +1,12 @@
 import io
+import plaid
+from portfolio.plaid.common import handle_error
 from services import S3
-from managed_portfolio.models import KycDocument
+from managed_portfolio.models import KycDocument, ManagedPortfolioFundingAccount
 from managed_portfolio.drivewealth import DriveWealthProvider
 from managed_portfolio.repository import ManagedPortfolioRepository
 from gainy.utils import get_logger
+from gainy.data_access.repository import Repository
 
 logger = get_logger(__name__)
 
@@ -42,6 +45,29 @@ class ManagedPortfolioService:
 
         return self.get_provider_service().send_kyc_document(
             context_container, profile_id, document, file_stream)
+
+    def link_bank_account_with_plaid(self, context_container, access_token, account_name,
+                          account_id):
+        try:
+            provider_bank_account = self.get_provider_service(
+            ).link_bank_account_with_plaid(context_container, access_token,
+                                           account_id, account_name)
+        except plaid.ApiException as e:
+            handle_error(e)
+
+        repository = Repository()
+        funding_account = repository.find_one(context_container.db_conn, ManagedPortfolioFundingAccount, {"plaid_access_token_id": access_token['id']})
+        if not funding_account:
+            funding_account = ManagedPortfolioFundingAccount()
+            funding_account.profile_id = access_token['profile_id']
+            funding_account.plaid_access_token_id = access_token['id']
+            funding_account.name = account_name
+
+            repository.persist(context_container.db_conn, funding_account)
+
+        provider_bank_account.managed_portfolio_funding_account_id = funding_account.id
+        logger.info(provider_bank_account.to_dict())
+        repository.persist(context_container.db_conn, provider_bank_account)
 
     def get_provider_service(self):
         return DriveWealthProvider()

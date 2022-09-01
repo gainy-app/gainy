@@ -1,6 +1,6 @@
 import json
 from typing import Any, Iterable, Dict, List
-from managed_portfolio.drivewealth.models import DriveWealthAccount, DriveWealthDocument, DriveWealthUser
+from managed_portfolio.drivewealth.models import DriveWealthAccount, DriveWealthDocument, DriveWealthUser, DriveWealthBankAccount
 from psycopg2.extras import RealDictCursor
 from psycopg2 import sql
 from gainy.data_access.repository import Repository
@@ -14,50 +14,8 @@ class DriveWealthRepository(Repository):
     def __init__(self, context_container):
         self.db_conn = context_container.db_conn
 
-    #######################################################################################
-    #TODO move to base repository
-    def find_one(self, cls, filter_by: Dict[str, Any] = None):
-        with self.db_conn.cursor(cursor_factory=RealDictCursor) as cursor:
-            cursor.execute(self._filter_query(cls, filter_by), filter_by)
-
-            row = cursor.fetchone()
-
-        return cls(row) if row else None
-
-    def iterate_all(self,
-                    cls,
-                    filter_by: Dict[str, Any] = None) -> Iterable[Any]:
-        with self.db_conn.cursor(cursor_factory=RealDictCursor) as cursor:
-            cursor.execute(self._filter_query(cls, filter_by), filter_by)
-
-            for row in cursor:
-                yield cls(row)
-
-    def find_all(self, cls, filter_by: Dict[str, Any] = None) -> List[Any]:
-        return list(self.iterate_all(cls, filter_by))
-
-    def _filter_query(self, cls, filter_by):
-        query = sql.SQL("SELECT * FROM {schema_name}.{table_name}").format(
-            schema_name=sql.Identifier(cls.schema_name),
-            table_name=sql.Identifier(cls.table_name))
-
-        if filter_by:
-            query += self._where_clause_statement(filter_by)
-
-        return query
-
-    @staticmethod
-    def _where_clause_statement(filter_by: Dict[str, Any]):
-        condition = sql.SQL(" AND ").join([
-            sql.SQL(f"{{field}} = %({field})s").format(
-                field=sql.Identifier(field)) for field in filter_by.keys()
-        ])
-        return sql.SQL(" WHERE ") + condition
-
-    #######################################################################################
-
     def get_user(self, profile_id) -> DriveWealthUser:
-        return self.find_one(DriveWealthUser, {"profile_id": profile_id})
+        return self.find_one(self.db_conn, DriveWealthUser, {"profile_id": profile_id})
 
     def upsert_user(self, profile_id, data) -> DriveWealthUser:
         entity = DriveWealthUser()
@@ -79,7 +37,6 @@ class DriveWealthRepository(Repository):
         entity = DriveWealthAccount()
         entity.ref_id = data["id"]
         entity.drivewealth_user_id = drivewealth_user_id
-        #             entity.trading_account_id = data["trading_account_id"]
         entity.status = data["status"]['name']
         entity.ref_no = data["accountNo"]
         entity.nickname = data["nickname"]
@@ -108,6 +65,28 @@ class DriveWealthRepository(Repository):
 
         if kyc_document_id:
             entity.kyc_document_id = kyc_document_id
+
+        self.persist(self.db_conn, entity)
+
+        return entity
+
+    def upsert_bank_account(
+            self,
+            data,
+            plaid_access_token_id: int = None) -> DriveWealthBankAccount:
+        entity = DriveWealthBankAccount()
+        entity.ref_id = data['id']
+        entity.drivewealth_user_id = data["userDetails"]['userID']
+        entity.status = data["status"]
+        entity.bank_account_nickname = data["bankAccountDetails"][
+            'bankAccountNickname']
+        entity.bank_account_number = data["bankAccountDetails"][
+            'bankAccountNumber']
+        entity.bank_routing_number = data["bankAccountDetails"][
+            'bankRoutingNumber']
+        if plaid_access_token_id:
+            entity.plaid_access_token_id = plaid_access_token_id
+        entity.data = json.dumps(data)
 
         self.persist(self.db_conn, entity)
 

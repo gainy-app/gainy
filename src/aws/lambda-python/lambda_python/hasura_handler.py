@@ -69,6 +69,7 @@ ACTIONS = [
     GetKycStatus(),
     SendKycForm(),
     AddKycDocument(),
+    LinkManagedTradingBankAccountWithPlaid(),
 ]
 
 action_dispatcher = HasuraActionDispatcher(ACTIONS,

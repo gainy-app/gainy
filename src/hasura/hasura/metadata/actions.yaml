@@ -101,6 +101,12 @@ actions:
       handler: '{{AWS_LAMBDA_API_GATEWAY_ENDPOINT}}/hasuraAction'
     permissions:
       - role: user
+  - name: link_managed_trading_bank_account_with_plaid
+    definition:
+      kind: synchronous
+      handler: '{{AWS_LAMBDA_API_GATEWAY_ENDPOINT}}/hasuraAction'
+    permissions:
+      - role: user
   - name: link_plaid_account
     definition:
       kind: ""
@@ -298,4 +304,7 @@ custom_types:
     - name: KycStatus
     - name: PreSignedUploadFormOutput
     - name: AddKycDocumentOutput
+    - name: LinkBankAccountWithPlaidOutput
+    - name: AccountInformation
+    - name: LinkManagedTradingBankAccountWithPlaidOutput
   scalars: []

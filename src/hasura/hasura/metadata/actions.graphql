@@ -21,6 +21,7 @@ type Query {
     redirect_uri: String!
     env: String
     access_token_id: Int
+    purpose: String
   ): CreatePlaidLinkTokenOutput
 }
 
@@ -134,12 +135,22 @@ type Query {
   ): [Collection]
 }
 
+type Mutation {
+  link_managed_trading_bank_account_with_plaid(
+    profile_id: Int!
+    account_id: String!
+    account_name: String!
+    access_token_id: Int!
+  ): LinkManagedTradingBankAccountWithPlaidOutput
+}
+
 type Query {
   link_plaid_account(
     profile_id: Int!
     public_token: String!
     env: String
     access_token_id: Int
+    purpose: String
   ): LinkPlaidAccountOutput
 }
 
@@ -298,6 +309,7 @@ type MatchScore {
 type LinkPlaidAccountOutput {
   result: Boolean!
   plaid_access_token_id: Int
+  accounts: [AccountInformation]
 }
 
 type PortfolioHolding {
@@ -420,6 +432,24 @@ type PreSignedUploadFormOutput {
 }
 
 type AddKycDocumentOutput {
+  error_message: String
+}
+
+type LinkBankAccountWithPlaidOutput {
+  errorMessage: String
+}
+
+type AccountInformation {
+  account_id: String!
+  balance_available: Int!
+  balance_current: Int!
+  balance_currency: String!
+  mask: String!
+  name: String!
+  official_name: String!
+}
+
+type LinkManagedTradingBankAccountWithPlaidOutput {
   error_message: String
 }
 

@@ -8,7 +8,7 @@ import plaid
 from portfolio.plaid import PlaidClient, PlaidService
 from portfolio.service import PortfolioService, SERVICE_PLAID
 
-from portfolio.plaid.common import handle_error
+from portfolio.plaid.common import handle_error, PURPOSE_PORTFOLIO, PURPOSE_MANAGED_TRADING
 from common.context_container import ContextContainer
 from common.hasura_function import HasuraAction
 from common.hasura_exception import HasuraActionException
@@ -17,6 +17,22 @@ from gainy.utils import get_logger
 logger = get_logger(__name__)
 
 DEFAULT_ENV = "development"
+
+
+def get_purpose(input_params):
+    purpose = input_params.get("purpose", "portfolio")
+    if purpose not in [PURPOSE_PORTFOLIO, PURPOSE_MANAGED_TRADING]:
+        raise Exception('Wrong purpose')
+    return purpose
+
+
+def get_purpose_products(purpose):
+    if purpose == PURPOSE_PORTFOLIO:
+        products = ['investments']
+    elif purpose == PURPOSE_MANAGED_TRADING:
+        products = ['auth']
+    else:
+        raise Exception('Wrong purpose')
 
 
 class CreatePlaidLinkToken(HasuraAction):
@@ -31,6 +47,9 @@ class CreatePlaidLinkToken(HasuraAction):
         redirect_uri = input_params["redirect_uri"]
         env = input_params.get("env", DEFAULT_ENV)  # default for legacy app
         access_token_id = input_params.get("access_token_id")
+
+        purpose = get_purpose(input_params)
+        products = get_purpose_products(purpose)
 
         access_token = None
         if access_token_id is not None:
@@ -48,7 +67,8 @@ class CreatePlaidLinkToken(HasuraAction):
 
         try:
             response = self.client.create_link_token(profile_id, redirect_uri,
-                                                     env, access_token)
+                                                     products, env,
+                                                     access_token)
             link_token = response['link_token']
 
             return {'link_token': response['link_token']}
@@ -60,7 +80,7 @@ class LinkPlaidAccount(HasuraAction):
 
     def __init__(self):
         super().__init__("link_plaid_account", "profile_id")
-        self.client = PlaidClient()
+        self.service = PlaidService()
 
     def apply(self, input_params, context_container: ContextContainer):
         db_conn = context_container.db_conn
@@ -68,20 +88,20 @@ class LinkPlaidAccount(HasuraAction):
         public_token = input_params["public_token"]
         env = input_params.get("env", DEFAULT_ENV)  # default for legacy app
         access_token_id = input_params.get("access_token_id")
+        purpose = get_purpose(input_params)
 
-        try:
-            response = self.client.exchange_link_token(public_token, env)
-        except plaid.ApiException as e:
-            handle_error(e)
+        response = self.service.exchange_public_token(public_token, env)
+        access_token = response['access_token']
 
         parameters = {
             "profile_id": profile_id,
-            "access_token": response['access_token'],
+            "access_token": access_token,
             "item_id": response['item_id'],
+            "purpose": purpose,
         }
         if access_token_id is None:
-            query = """INSERT INTO app.profile_plaid_access_tokens(profile_id, access_token, item_id)
-                    VALUES (%(profile_id)s, %(access_token)s, %(item_id)s) RETURNING id"""
+            query = """INSERT INTO app.profile_plaid_access_tokens(profile_id, access_token, item_id, purpose)
+                    VALUES (%(profile_id)s, %(access_token)s, %(item_id)s, %(purpose)s) RETURNING id"""
         else:
             query = """update app.profile_plaid_access_tokens set access_token = %(access_token)s, item_id = %(item_id)s, needs_reauth_since = null
                     where profile_id = %(profile_id)s and id = %(access_token_id)s RETURNING id"""
@@ -92,7 +112,25 @@ class LinkPlaidAccount(HasuraAction):
             returned = cursor.fetchall()
             id = returned[0][0]
 
-        return {'result': True, 'plaid_access_token_id': id}
+        accounts = []
+        if purpose == PURPOSE_MANAGED_TRADING:
+            response = self.service.get_item_accounts(access_token)
+            logger.info('accounts', extra={"response": response})
+            accounts = [{
+                "account_id": i["account_id"],
+                "balance_available": i["balances"]["available"],
+                "balance_current": i["balances"]["current"],
+                "balance_currency": i["balances"]["iso_currency_code"],
+                "mask": i["mask"],
+                "name": i["name"],
+                "official_name": i["official_name"],
+            } for i in response]
+
+        return {
+            'result': True,
+            'plaid_access_token_id': id,
+            "accounts": accounts
+        }
 
 
 class PlaidWebhook(HasuraAction):

@@ -11,6 +11,8 @@ from plaid.model.investments_transactions_get_request_options import Investments
 from plaid.model.webhook_verification_key_get_request import WebhookVerificationKeyGetRequest
 from plaid.model.item_get_request import ItemGetRequest
 from plaid.model.institutions_get_by_id_request import InstitutionsGetByIdRequest
+from plaid.model.accounts_get_request import AccountsGetRequest
+from plaid.model.processor_token_create_request import ProcessorTokenCreateRequest
 
 from portfolio.plaid.common import get_plaid_client, handle_error
 
@@ -27,6 +29,7 @@ class PlaidClient:
     def create_link_token(self,
                           profile_id,
                           redirect_uri,
+                          products,
                           env=None,
                           access_token=None):
         #TODO when we have verified phone number, we can implement https://plaid.com/docs/link/returning-user/#enabling-the-returning-user-experience
@@ -40,7 +43,7 @@ class PlaidClient:
             LinkTokenCreateRequestUser(client_user_id=str(profile_id), )
         }
         if access_token is None:
-            params['products'] = [Products('investments')]
+            params['products'] = [Products(i) for i in products]
         else:
             params['access_token'] = access_token
 
@@ -49,18 +52,23 @@ class PlaidClient:
 
         return response
 
-    def exchange_link_token(self, public_token, env=None):
+    def exchange_public_token(self, public_token, env=None):
         request = ItemPublicTokenExchangeRequest(public_token=public_token)
-        response = self.get_client(env).item_public_token_exchange(request)
+        return self.get_client(env).item_public_token_exchange(request)
 
-        return response
+    def create_processor_token(self, access_token, account_id, processor):
+        request = ProcessorTokenCreateRequest(access_token=access_token,
+                                              account_id=account_id,
+                                              processor=processor)
+        return self.get_client(access_token).processor_token_create(request)
 
     def get_investment_holdings(self, access_token):
         request = InvestmentsHoldingsGetRequest(access_token=access_token)
-        response = self.get_client(access_token).investments_holdings_get(
-            request)
+        return self.get_client(access_token).investments_holdings_get(request)
 
-        return response
+    def get_item_accounts(self, access_token):
+        request = AccountsGetRequest(access_token=access_token)
+        return self.get_client(access_token).accounts_get(request)['accounts']
 
     def get_investment_transactions(self,
                                     access_token,

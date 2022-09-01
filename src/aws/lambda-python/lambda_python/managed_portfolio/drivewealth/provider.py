@@ -1,6 +1,8 @@
 import base64
 import io
-from managed_portfolio.models import ProfileKycStatus, KycDocument
+from portfolio.plaid import PlaidService
+from managed_portfolio.models import ProfileKycStatus, KycDocument, ManagedPortfolioTradingAccount
+from managed_portfolio.drivewealth.models import DriveWealthBankAccount, DriveWealthAccount
 from managed_portfolio.drivewealth.api import DriveWealthApi
 from managed_portfolio.drivewealth.repository import DriveWealthRepository
 from gainy.utils import get_logger
@@ -56,7 +58,22 @@ class DriveWealthProvider:
 
         accounts_data = self.api.get_user_accounts(user_ref_id)
         for account_data in accounts_data:
-            repository.upsert_user_account(user_ref_id, account_data)
+            drivewealth_trading_account = repository.upsert_user_account(user_ref_id, account_data)
+            drivewealth_trading_account = repository.find_one(context_container.db_conn, DriveWealthAccount, {"ref_id": drivewealth_trading_account.ref_id})
+
+            if drivewealth_trading_account.trading_account_id is None:
+                trading_account = ManagedPortfolioTradingAccount()
+                trading_account.profile_id = profile_id
+                trading_account.name = drivewealth_trading_account.nickname
+            else:
+                trading_account = repository.find_one(context_container.db_conn, ManagedPortfolioTradingAccount, {"id": drivewealth_trading_account.trading_account_id})
+
+            trading_account.cash_available_for_trade = drivewealth_trading_account.cash_available_for_trade
+            trading_account.cash_available_for_withdrawal = drivewealth_trading_account.cash_available_for_withdrawal
+            trading_account.cash_balance = drivewealth_trading_account.cash_balance
+            repository.persist(context_container.db_conn, trading_account)
+            drivewealth_trading_account.trading_account_id = trading_account.id
+            repository.persist(context_container.db_conn, drivewealth_trading_account)
 
         return ProfileKycStatus(user.status)
 
@@ -71,10 +88,26 @@ class DriveWealthProvider:
         if user is None:
             raise Exception("KYC form has not been sent")
         else:
-            data = self.api.upload_document(user['ref_id'], document,
-                                            file_data)
+            data = self.api.upload_document(user.ref_id, document, file_data)
 
         data = repository.upsert_kyc_document(document.id, data)
+
+    def link_bank_account_with_plaid(
+            self, context_container, access_token: dict, account_id: str,
+            account_name: str) -> DriveWealthBankAccount:
+        repository = DriveWealthRepository(context_container)
+        bank_account = repository.find_one(context_container.db_conn, DriveWealthBankAccount, {"plaid_access_token_id": access_token['id']})
+        if bank_account:
+            return bank_account
+
+        processor_token = PlaidService().create_processor_token(
+            access_token['access_token'], account_id, "drivewealth")
+
+        user = repository.get_user(access_token['profile_id'])
+        data = self.api.link_bank_account(user.ref_id, processor_token,
+                                          account_name)
+
+        return repository.upsert_bank_account(data, access_token['id'])
 
     def _kyc_form_to_documents(self, kyc_form: dict):
         return [

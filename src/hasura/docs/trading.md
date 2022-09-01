@@ -1,34 +1,7 @@
 # Trading
 ## API
-### **[TODO]** [KYC](trading/kyc.md)
-
-### Connect bank account with Plaid
-1. [Generate link token](portfolio.md#create-link-token) with additional param to know it's for trading and not for portfolio
-2. [Link account](portfolio.md#link-account) with additional param to know it's for trading and not for portfolio, make it synchronous, sync investments / return accounts in this case, remove plaid trigger. 
-3. **[TODO]** Link chosen accounts to trading 
-    
-    Obtain and store processor token.
-    ```graphql
-    query link_plaid_account_to_trading($profile_id: Int!, $account_id: Int!) {
-        link_plaid_account_to_trading(profile_id: $profile_id, account_id: $account_id) {
-            result
-        }
-    }
-    ```
-    - TradingService.connectBankAccount(profile_id, processorToken)
-    - Create managed_portfolio_bank_accounts
-
-4. **[TODO]** List connected accounts
-   - PlaidService.updateAccountBalance(plaid_account_ids)
-   - list managed_portfolio_bank_accounts
-
-5. **[TODO]** Deny deleting plaid tokens connected to trading
-
-6. **[TODO]** Disconnect bank account
-   - TradingService.disconnectBankAccount(profile_id, trading_bank_account)
-   - remove trading_bank_account
-
-Data used: managed_portfolio_bank_accounts, drivewealth_bank_accounts
+- [KYC](trading/kyc.md)
+- [Connect bank account](trading/connecting_bank_account.md)
 
 ### **[TODO]** Deposits / withdrawals
 1. Deposit funds
@@ -148,22 +121,6 @@ Data used:
   - name: string
   - stripe_ref_id: string
   - set_active_at: datetime
-
-- managed_portfolio_bank_accounts 
-  - id: int
-  - profile_id: int
-  - plaid_account_id: int
-  - name: string
-  - balance: int
-
-- drivewealth_bank_accounts 
-  - ref_id: string
-  - drivewealth_user_id: int
-  - trading_account_id: int
-  - bankAccountNickname: string
-  - bankAccountNumber: string
-  - bankRoutingNumber: string
-  - bankAccountType: string
 
 - invoices
   - id: int
