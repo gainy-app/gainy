@@ -41,6 +41,7 @@ ACTIONS = [
     ApplyPromocode(),
     UpdatePurchases(),
     GetPromocode(),
+    GetPreSignedUploadForm(),
 
     # Portfolio
     CreatePlaidLinkToken(),
@@ -67,6 +68,7 @@ ACTIONS = [
     GetKycFormConfig(),
     GetKycStatus(),
     SendKycForm(),
+    AddKycDocument(),
 ]
 
 action_dispatcher = HasuraActionDispatcher(ACTIONS,

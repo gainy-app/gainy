@@ -1,6 +1,11 @@
-from managed_portfolio.models import ProfileKycStatus
+import base64
+import io
+from managed_portfolio.models import ProfileKycStatus, KycDocument
 from managed_portfolio.drivewealth.api import DriveWealthApi
 from managed_portfolio.drivewealth.repository import DriveWealthRepository
+from gainy.utils import get_logger
+
+logger = get_logger(__name__)
 
 
 class DriveWealthProvider:
@@ -13,29 +18,63 @@ class DriveWealthProvider:
         profile_id = kyc_form['profile_id']
         documents = self._kyc_form_to_documents(kyc_form)
 
+        # create or update user
         repository = DriveWealthRepository(context_container)
         user = repository.get_user(profile_id)
         if user is None:
             user_data = self.api.create_user(documents)
         else:
-            user_data = self.api.update_user(user['ref_id'], documents)
+            user_data = self.api.update_user(user.ref_id, documents)
 
-        data = repository.upsert_user(profile_id, user_data)
+        user = repository.upsert_user(profile_id, user_data)
+        user_ref_id = user.ref_id
 
-        return ProfileKycStatus(data["status"])
+        # create or update account
+        accounts = repository.get_user_accounts(user_ref_id)
+        if not accounts:
+            account_data = self.api.create_account(user_ref_id)
+            account = repository.upsert_user_account(user_ref_id, account_data)
+
+        return ProfileKycStatus(user.status)
 
     def get_kyc_status(self, context_container,
                        profile_id: int) -> ProfileKycStatus:
+        repository = DriveWealthRepository(context_container)
+
+        user = repository.get_user(profile_id)
+        if user is None:
+            raise Exception("KYC form has not been sent")
+        else:
+            user_data = self.api.get_user(user.ref_id)
+
+        user = repository.upsert_user(profile_id, user_data)
+        user_ref_id = user.ref_id
+
+        documents_data = self.api.get_user_documents(user_ref_id)
+        for document_data in documents_data:
+            repository.upsert_kyc_document(None, document_data)
+
+        accounts_data = self.api.get_user_accounts(user_ref_id)
+        for account_data in accounts_data:
+            repository.upsert_user_account(user_ref_id, account_data)
+
+        return ProfileKycStatus(user.status)
+
+    def send_kyc_document(self, context_container, profile_id: int,
+                          document: KycDocument, file_stream: io.BytesIO):
+        file_base64 = base64.b64encode(file_stream.getvalue())
+
+        file_data = f"data:{document.content_type};base64,{file_base64}"
+
         repository = DriveWealthRepository(context_container)
         user = repository.get_user(profile_id)
         if user is None:
             raise Exception("KYC form has not been sent")
         else:
-            user_data = self.api.get_user(user['ref_id'])
+            data = self.api.upload_document(user['ref_id'], document,
+                                            file_data)
 
-        data = repository.upsert_user(profile_id, user_data)
-
-        return ProfileKycStatus(data["status"])
+        data = repository.upsert_kyc_document(document.id, data)
 
     def _kyc_form_to_documents(self, kyc_form: dict):
         return [

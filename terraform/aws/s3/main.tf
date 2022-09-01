@@ -40,10 +40,22 @@ resource "aws_s3_bucket" "gainy_history" {
   }
 }
 
+resource "aws_s3_bucket" "uploads_kyc" {
+  bucket = "uploads-kyc-${var.env}"
+
+  tags = {
+    Name = "Uploads KYC"
+  }
+}
+
 output "mlflow_artifact_bucket" {
   value = aws_s3_bucket.mlflow.bucket
 }
 
 output "gainy_history_bucket" {
   value = aws_s3_bucket.gainy_history.bucket
+}
+
+output "uploads_kyc_bucket" {
+  value = aws_s3_bucket.uploads_kyc.bucket
 }

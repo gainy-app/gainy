@@ -5,9 +5,8 @@
 - [Action to get KYC form placeholders](#action-to-get-kyc-form-placeholders)
 - [Send KYC data](#send-kyc-data)
 - [Get KYC status](#get-kyc-status)
-- action to generate pre-signed-url https://docs.aws.amazon.com/AmazonS3/latest/userguide/PresignedUrlUploadObject.html (*uploaded_documents*)
-- mutation to set file as uploaded (*uploaded_documents*)
-- mutation to upload a document to KYC (*uploaded_documents, kyc_documents*)
+- [Generate pre-signed-url to upload documents](#generate-pre-signed-url-to-upload-documents)
+- [Add KYC uploaded Document](#add-kyc-uploaded-document)
 - trigger to send kyc_documents to drivewealth (*drivewealth_kyc_documents*)
   - TradingService.uploadKycDocument(profile_id, kyc_document)
 
@@ -207,7 +206,7 @@ mutation UpsertKycForm (
 
 Minimal information:
 ```json
-{"first_name": "Mikhail", "last_name": "Astashkevich", "email_address": "qurazor1@gmail.com", "phone_number": "+1234567890", "birthdate": "1992-11-27", "address_street1": "1 Wall st.", "address_city": "New York", "address_postal_code": "12345", "tax_id_value": "123456789", "tax_id_type": "SSN", "employment_status": "UNEMPLOYED", "investor_profile_annual_income": 123456, "investor_profile_objectives": "LONG_TERM", "investor_profile_experience": "YRS_10_", "investor_profile_net_worth_liquid": 123, "investor_profile_net_worth_total": 1234, "investor_profile_risk_tolerance": "SPECULATION", "disclosures_drivewealth_terms_of_use": true, "disclosures_rule14b": true, "disclosures_drivewealth_customer_agreement": true, "disclosures_drivewealth_privacy_policy": true, "disclosures_drivewealth_market_data_agreement": true, "disclosures_signed_by": "Mikhail Astashkevich"}
+{"profile_id": 1, "first_name": "Mikhail", "last_name": "Astashkevich", "email_address": "qurazor1@gmail.com", "phone_number": "+1234567890", "birthdate": "1992-11-27", "address_street1": "1 Wall st.", "address_city": "New York", "address_postal_code": "12345", "tax_id_value": "123456789", "tax_id_type": "SSN", "employment_status": "UNEMPLOYED", "investor_profile_annual_income": 123456, "investor_profile_objectives": "LONG_TERM", "investor_profile_experience": "YRS_10_", "investor_profile_net_worth_liquid": 123, "investor_profile_net_worth_total": 1234, "investor_profile_risk_tolerance": "SPECULATION", "disclosures_drivewealth_terms_of_use": true, "disclosures_rule14b": true, "disclosures_drivewealth_customer_agreement": true, "disclosures_drivewealth_privacy_policy": true, "disclosures_drivewealth_market_data_agreement": true, "disclosures_signed_by": "Mikhail Astashkevich"}
 ```
 
 ### Get KYC form values
@@ -441,6 +440,44 @@ query GetKycStatus($profile_id: Int!) {
 }
 ```
 
+### Generate pre-signed-url to upload documents
+```graphql
+mutation get_pre_signed_upload_form (
+    $profile_id: Int!
+    $upload_type: String! # must be "kyc"
+    $content_type: String!
+) {
+  get_pre_signed_upload_form(
+    profile_id: $profile_id
+    upload_type: $upload_type
+    content_type: $content_type
+  ){
+    id
+    url
+    method
+  }
+}
+```
+
+### Add KYC uploaded Document 
+```graphql
+mutation AddKycDocument (
+  $profile_id: Int!
+  $uploaded_file_id: Int!
+  $type: String!  # `DRIVER_LICENSE | PASSPORT | NATIONAL_ID_CARD | VOTER_ID | WORK_PERMIT | VISA | RESIDENCE_PERMIT`
+  $side: String! # `FRONT | BACK`. `PASSPORT` and `VISA` types can only have `FRONT` side
+) {
+  add_kyc_document(
+    profile_id: $profile_id
+    uploaded_file_id: $uploaded_file_id
+    type: $type
+    side: $side
+  ){
+    error_message
+  }
+}
+```
+
 ## Data
 
 - kyc_form
@@ -513,43 +550,6 @@ query GetKycStatus($profile_id: Int!) {
   - address_province: string
     > For U.S., use USPS postal abbreviations, outside U.S. use the standard province/territory name
 
-
-- uploaded_documents
-  id: int
-  profile_id: int
-  s3_bucket: string
-  s3_key: string
-  is_uploaded: boolean
-
-- kyc_documents
-  type: string # `DRIVER_LICENSE | PASSPORT | NATIONAL_ID_CARD | VOTER_ID | WORK_PERMIT | VISA | RESIDENCE_PERMIT`
-  side: string # `FRONT | BACK` only available for types `DRIVER_LICENSE | NATIONAL_ID_CARD | VOTER_ID | WORK_PERMIT | RESIDENCE_PERMIT`
-  uploaded_document_id: int
-
-
-- drivewealth_accounts
-  - ref_id: string
-  - drivewealth_user_id: int
-  - trading_account_id: int
-  - ref_no: string
-  - nickname: string
-  - cash_available_for_trade: integer
-  - cash_available_for_withdrawal: integer
-  - cash_balance: integer
-  - data: json
-
-- managed_portfolio_trading_accounts # one to one at this point?
-  - id: int
-  - profile_id: int
-  - name: string
-  - cash_available_for_trade: integer
-  - cash_available_for_withdrawal: integer
-  - cash_balance: integer
-
-- drivewealth_kyc_documents
-  - ref_id: string
-  - drivewealth_user_id: int
-  - kyc_document_id: int
 
 - drivewealth_kyc_status
   - ref_id: string

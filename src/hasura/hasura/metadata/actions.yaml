@@ -1,4 +1,10 @@
 actions:
+  - name: add_kyc_document
+    definition:
+      kind: synchronous
+      handler: '{{AWS_LAMBDA_API_GATEWAY_ENDPOINT}}/hasuraAction'
+    permissions:
+      - role: user
   - name: apply_promocode
     definition:
       kind: synchronous
@@ -74,6 +80,12 @@ actions:
   - name: get_portfolio_transactions
     definition:
       kind: ""
+      handler: '{{AWS_LAMBDA_API_GATEWAY_ENDPOINT}}/hasuraAction'
+    permissions:
+      - role: user
+  - name: get_pre_signed_upload_form
+    definition:
+      kind: synchronous
       handler: '{{AWS_LAMBDA_API_GATEWAY_ENDPOINT}}/hasuraAction'
     permissions:
       - role: user
@@ -284,4 +296,6 @@ custom_types:
     - name: KycFormFieldConfig
     - name: SendKycFormOutput
     - name: KycStatus
+    - name: PreSignedUploadFormOutput
+    - name: AddKycDocumentOutput
   scalars: []

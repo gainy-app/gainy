@@ -1,4 +1,13 @@
 type Mutation {
+  add_kyc_document(
+    profile_id: Int!
+    uploaded_file_id: Int!
+    type: String!
+    side: String!
+  ): AddKycDocumentOutput
+}
+
+type Mutation {
   apply_promocode(
     profile_id: Int!
     promocode: String!
@@ -101,6 +110,14 @@ type Query {
     count: Int
     offset: Int
   ): [PortfolioTransaction]
+}
+
+type Mutation {
+  get_pre_signed_upload_form(
+    profile_id: Int!
+    upload_type: String!
+    content_type: String!
+  ): PreSignedUploadFormOutput
 }
 
 type Query {
@@ -394,5 +411,15 @@ type SendKycFormOutput {
 type KycStatus {
   error_message: String
   status: String
+}
+
+type PreSignedUploadFormOutput {
+  id: Int!
+  url: String!
+  method: String!
+}
+
+type AddKycDocumentOutput {
+  error_message: String
 }
 

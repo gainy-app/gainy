@@ -37,6 +37,10 @@ variable "drivewealth_ria_product_id" {}
 variable "drivewealth_api_username" {}
 variable "drivewealth_api_password" {}
 variable "drivewealth_api_url" {}
+variable "s3_bucket_uploads_kyc" {}
+variable "aws_access_key" {}
+variable "aws_secret_key" {}
+variable "aws_region" {}
 
 output "aws_apigatewayv2_api_endpoint" {
   value      = "${aws_apigatewayv2_api.lambda.api_endpoint}/${aws_apigatewayv2_stage.lambda.name}"
@@ -161,6 +165,11 @@ locals {
     DRIVEWEALTH_API_USERNAME   = var.drivewealth_api_username
     DRIVEWEALTH_API_PASSWORD   = var.drivewealth_api_password
     DRIVEWEALTH_API_URL        = var.drivewealth_api_url
+    S3_BUCKET_UPLOADS_KYC      = var.s3_bucket_uploads_kyc
+    AWS_ACCESS_KEY_ID          = var.aws_access_key
+    AWS_SECRET_ACCESS_KEY      = var.aws_secret_key
+    AWS_DEFAULT_REGION         = var.aws_region
+
   }
 }
 

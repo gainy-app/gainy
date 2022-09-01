@@ -78,6 +78,11 @@ module "lambda" {
 
   codeartifact_pipy_url = var.codeartifact_pipy_url
   gainy_compute_version = var.gainy_compute_version
+
+  s3_bucket_uploads_kyc = module.s3.uploads_kyc_bucket
+  aws_access_key        = var.aws_access_key
+  aws_secret_key        = var.aws_secret_key
+  aws_region            = var.aws_region
 }
 
 module "ecs" {

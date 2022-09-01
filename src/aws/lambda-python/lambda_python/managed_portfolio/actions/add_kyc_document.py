@@ -4,31 +4,31 @@ from common.exceptions import ApiException
 from common.hasura_exception import HasuraActionException
 from common.hasura_function import HasuraAction
 from managed_portfolio import ManagedPortfolioService, ManagedPortfolioRepository
+from managed_portfolio.models import KycDocument
 from psycopg2.extras import RealDictCursor
 
 logger = logging.getLogger()
 
 
-class GetKycStatus(HasuraAction):
+class AddKycDocument(HasuraAction):
 
-    def __init__(self, action_name="get_kyc_status"):
+    def __init__(self, action_name="add_kyc_document"):
         super().__init__(action_name, "profile_id")
         self.service = ManagedPortfolioService()
 
     def apply(self, input_params, context_container: ContextContainer):
-        db_conn = context_container.db_conn
         profile_id = input_params["profile_id"]
 
-        # TODO make async (with SQS)
-
-        repository = ManagedPortfolioRepository(context_container)
+        model = KycDocument(input_params["uploaded_file_id"],
+                            input_params["type"], input_params["side"])
 
         try:
-            kyc_status = self.service.get_kyc_status(context_container,
-                                                     profile_id)
-            repository.update_kyc_form(profile_id, kyc_status.status)
+            kyc_status = self.service.send_kyc_document(
+                context_container, profile_id, model)
             error_message = None
         except ApiException as e:
             error_message = str(e)
 
-        return {"error_message": error_message, "status": kyc_status.status}
+
+#         repository.update_kyc_form(profile_id, kyc_status.status)
+        return {"error_message": error_message}
