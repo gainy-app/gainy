@@ -1,6 +1,0 @@
-mutation SendKycForm($profile_id: Int!) {
-    send_kyc_form(profile_id: $profile_id) {
-        error_message
-        status # PENDING, APPROVED, REVOKED, CLOSED
-    }
-}
