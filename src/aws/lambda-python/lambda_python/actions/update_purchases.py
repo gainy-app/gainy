@@ -1,6 +1,7 @@
 import json
 import logging
 import re
+from common.context_container import ContextContainer
 from common.hasura_function import HasuraAction
 from services import BillingService, RevenueCatService
 import datetime
@@ -9,7 +10,6 @@ from psycopg2.extras import execute_values
 from gainy.utils import env
 
 logger = logging.getLogger()
-logger.setLevel(logging.INFO)
 
 
 class UpdatePurchases(HasuraAction):
@@ -19,7 +19,8 @@ class UpdatePurchases(HasuraAction):
         self.revenue_cat_service = RevenueCatService()
         self.billing_service = BillingService()
 
-    def apply(self, db_conn, input_params, headers):
+    def apply(self, input_params, context_container: ContextContainer):
+        db_conn = context_container.db_conn
         profile_id = input_params["profile_id"]
 
         self.sync_revenuecat(db_conn, profile_id)

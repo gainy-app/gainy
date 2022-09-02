@@ -1,10 +1,10 @@
 import json
 import logging
+from common.context_container import ContextContainer
 from common.hasura_function import HasuraAction
 from psycopg2.extras import RealDictCursor
 
 logger = logging.getLogger()
-logger.setLevel(logging.INFO)
 
 
 class GetPromocode(HasuraAction):
@@ -12,7 +12,8 @@ class GetPromocode(HasuraAction):
     def __init__(self):
         super().__init__("get_promocode")
 
-    def apply(self, db_conn, input_params, headers):
+    def apply(self, input_params, context_container: ContextContainer):
+        db_conn = context_container.db_conn
         code = input_params["code"]
 
         with db_conn.cursor(cursor_factory=RealDictCursor) as cursor:

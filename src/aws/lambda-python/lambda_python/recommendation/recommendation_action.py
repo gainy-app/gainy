@@ -1,3 +1,4 @@
+from common.context_container import ContextContainer
 from common.hasura_function import HasuraAction
 from gainy.data_access.db_lock import LockAcquisitionTimeout
 from gainy.data_access.optimistic_lock import ConcurrentVersionUpdate
@@ -13,7 +14,8 @@ class GetRecommendedCollections(HasuraAction):
     def __init__(self):
         super().__init__("get_recommended_collections", "profile_id")
 
-    def apply(self, db_conn, input_params, headers):
+    def apply(self, input_params, context_container: ContextContainer):
+        db_conn = context_container.db_conn
         try:
             profile_id = input_params["profile_id"]
             limit = input_params.get("limit", 30)

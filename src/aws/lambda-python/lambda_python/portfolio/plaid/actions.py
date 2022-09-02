@@ -9,6 +9,7 @@ from portfolio.plaid import PlaidClient, PlaidService
 from portfolio.service import PortfolioService, SERVICE_PLAID
 
 from portfolio.plaid.common import handle_error
+from common.context_container import ContextContainer
 from common.hasura_function import HasuraAction
 from common.hasura_exception import HasuraActionException
 from gainy.utils import get_logger
@@ -24,7 +25,8 @@ class CreatePlaidLinkToken(HasuraAction):
         super().__init__("create_plaid_link_token", "profile_id")
         self.client = PlaidClient()
 
-    def apply(self, db_conn, input_params, headers):
+    def apply(self, input_params, context_container: ContextContainer):
+        db_conn = context_container.db_conn
         profile_id = input_params["profile_id"]
         redirect_uri = input_params["redirect_uri"]
         env = input_params.get("env", DEFAULT_ENV)  # default for legacy app
@@ -60,7 +62,8 @@ class LinkPlaidAccount(HasuraAction):
         super().__init__("link_plaid_account", "profile_id")
         self.client = PlaidClient()
 
-    def apply(self, db_conn, input_params, headers):
+    def apply(self, input_params, context_container: ContextContainer):
+        db_conn = context_container.db_conn
         profile_id = input_params["profile_id"]
         public_token = input_params["public_token"]
         env = input_params.get("env", DEFAULT_ENV)  # default for legacy app
@@ -100,7 +103,8 @@ class PlaidWebhook(HasuraAction):
         self.portfolio_service = PortfolioService()
         self.client = PlaidClient()
 
-    def apply(self, db_conn, input_params, headers):
+    def apply(self, input_params, context_container: ContextContainer):
+        db_conn = context_container.db_conn
         item_id = input_params['item_id']
         logging_extra = {
             'input_params': input_params,
@@ -133,7 +137,9 @@ class PlaidWebhook(HasuraAction):
             try:
                 self.verify(input_params, headers, token)
             except Exception as e:
-                logger.error('[PLAID_WEBHOOK] verify: %s', e, extra=logging_extra)
+                logger.error('[PLAID_WEBHOOK] verify: %s',
+                             e,
+                             extra=logging_extra)
 
             webhook_type = input_params['webhook_type']
             for access_token in access_tokens:

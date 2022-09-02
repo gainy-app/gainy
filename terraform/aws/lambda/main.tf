@@ -29,6 +29,18 @@ variable "public_schema_name" {}
 variable "codeartifact_pipy_url" {}
 variable "gainy_compute_version" {}
 variable "revenuecat_api_key" {}
+variable "drivewealth_app_key" {}
+variable "drivewealth_wlp_id" {}
+variable "drivewealth_parent_ibid" {}
+variable "drivewealth_ria_id" {}
+variable "drivewealth_ria_product_id" {}
+variable "drivewealth_api_username" {}
+variable "drivewealth_api_password" {}
+variable "drivewealth_api_url" {}
+variable "s3_bucket_uploads_kyc" {}
+variable "aws_access_key" {}
+variable "aws_secret_key" {}
+variable "aws_region" {}
 
 output "aws_apigatewayv2_api_endpoint" {
   value      = "${aws_apigatewayv2_api.lambda.api_endpoint}/${aws_apigatewayv2_stage.lambda.name}"
@@ -120,6 +132,45 @@ locals {
   })
   python_lambda_image_tag  = format("lambda-python-%s-%s-%s", var.env, var.base_image_version, md5(jsonencode(local.python_lambda_build_args_force_build)))
   python_lambda_image_name = format("%v/%v:%v", local.docker_registry_address, var.docker_repository_name, local.python_lambda_image_tag)
+
+  env_vars = {
+    PG_HOST                    = var.pg_host
+    PG_PORT                    = var.pg_port
+    PG_DBNAME                  = var.pg_dbname
+    PG_USERNAME                = var.pg_username
+    PG_PASSWORD                = var.pg_password
+    PUBLIC_SCHEMA_NAME         = var.public_schema_name
+    DATADOG_API_KEY            = var.datadog_api_key
+    DATADOG_APP_KEY            = var.datadog_app_key
+    ENV                        = var.env
+    PLAID_CLIENT_ID            = var.plaid_client_id
+    PLAID_SECRET               = var.plaid_secret
+    PLAID_DEVELOPMENT_SECRET   = var.plaid_development_secret
+    PLAID_ENV                  = var.plaid_env
+    PLAID_WEBHOOK_URL          = "https://${var.hasura_url}/api/rest/plaid_webhook"
+    ALGOLIA_APP_ID             = var.algolia_app_id
+    ALGOLIA_TICKERS_INDEX      = var.algolia_tickers_index
+    ALGOLIA_COLLECTIONS_INDEX  = var.algolia_collections_index
+    ALGOLIA_SEARCH_API_KEY     = var.algolia_search_key
+    HUBSPOT_API_KEY            = var.hubspot_api_key
+    REVENUECAT_API_KEY         = var.revenuecat_api_key
+    GNEWS_API_TOKEN            = var.gnews_api_token
+    REDIS_CACHE_HOST           = var.redis_cache_host
+    REDIS_CACHE_PORT           = var.redis_cache_port
+    DRIVEWEALTH_APP_KEY        = var.drivewealth_app_key
+    DRIVEWEALTH_WLP_ID         = var.drivewealth_wlp_id
+    DRIVEWEALTH_PARENT_IBID    = var.drivewealth_parent_ibid
+    DRIVEWEALTH_RIA_ID         = var.drivewealth_ria_id
+    DRIVEWEALTH_RIA_PRODUCT_ID = var.drivewealth_ria_product_id
+    DRIVEWEALTH_API_USERNAME   = var.drivewealth_api_username
+    DRIVEWEALTH_API_PASSWORD   = var.drivewealth_api_password
+    DRIVEWEALTH_API_URL        = var.drivewealth_api_url
+    S3_BUCKET_UPLOADS_KYC      = var.s3_bucket_uploads_kyc
+    AWS_ACCESS_KEY_ID          = var.aws_access_key
+    AWS_SECRET_ACCESS_KEY      = var.aws_secret_key
+    AWS_DEFAULT_REGION         = var.aws_region
+
+  }
 }
 
 #################################### Python lambdas ####################################
@@ -160,30 +211,9 @@ module "hasuraTrigger" {
   aws_iam_role_lambda_exec_role             = aws_iam_role.lambda_exec
   image_uri                                 = docker_registry_image.lambda_python.name
   memory_size                               = var.env == "production" ? 512 : 256
-
-  env_vars = {
-    PG_HOST                   = var.pg_host
-    PG_PORT                   = var.pg_port
-    PG_DBNAME                 = var.pg_dbname
-    PG_USERNAME               = var.pg_username
-    PG_PASSWORD               = var.pg_password
-    PUBLIC_SCHEMA_NAME        = var.public_schema_name
-    DATADOG_API_KEY           = var.datadog_api_key
-    DATADOG_APP_KEY           = var.datadog_app_key
-    ENV                       = var.env
-    PLAID_CLIENT_ID           = var.plaid_client_id
-    PLAID_SECRET              = var.plaid_secret
-    PLAID_DEVELOPMENT_SECRET  = var.plaid_development_secret
-    PLAID_ENV                 = var.plaid_env
-    ALGOLIA_APP_ID            = var.algolia_app_id
-    ALGOLIA_TICKERS_INDEX     = var.algolia_tickers_index
-    ALGOLIA_COLLECTIONS_INDEX = var.algolia_collections_index
-    ALGOLIA_SEARCH_API_KEY    = var.algolia_search_key
-    HUBSPOT_API_KEY           = var.hubspot_api_key
-    REVENUECAT_API_KEY        = var.revenuecat_api_key
-  }
-  vpc_security_group_ids = var.vpc_security_group_ids
-  vpc_subnet_ids         = var.vpc_subnet_ids
+  env_vars                                  = local.env_vars
+  vpc_security_group_ids                    = var.vpc_security_group_ids
+  vpc_subnet_ids                            = var.vpc_subnet_ids
 }
 
 module "hasuraAction" {
@@ -198,32 +228,7 @@ module "hasuraAction" {
   aws_iam_role_lambda_exec_role             = aws_iam_role.lambda_exec
   image_uri                                 = docker_registry_image.lambda_python.name
   memory_size                               = var.env == "production" ? 256 : 128
-
-  env_vars = {
-    PG_HOST                   = var.pg_host
-    PG_PORT                   = var.pg_port
-    PG_DBNAME                 = var.pg_dbname
-    PG_USERNAME               = var.pg_username
-    PG_PASSWORD               = var.pg_password
-    PUBLIC_SCHEMA_NAME        = var.public_schema_name
-    DATADOG_API_KEY           = var.datadog_api_key
-    DATADOG_APP_KEY           = var.datadog_app_key
-    ENV                       = var.env
-    PLAID_CLIENT_ID           = var.plaid_client_id
-    PLAID_SECRET              = var.plaid_secret
-    PLAID_DEVELOPMENT_SECRET  = var.plaid_development_secret
-    PLAID_ENV                 = var.plaid_env
-    ALGOLIA_APP_ID            = var.algolia_app_id
-    ALGOLIA_TICKERS_INDEX     = var.algolia_tickers_index
-    ALGOLIA_COLLECTIONS_INDEX = var.algolia_collections_index
-    ALGOLIA_SEARCH_API_KEY    = var.algolia_search_key
-    ALGOLIA_SEARCH_API_KEY    = var.algolia_search_key
-    GNEWS_API_TOKEN           = var.gnews_api_token
-    REDIS_CACHE_HOST          = var.redis_cache_host
-    REDIS_CACHE_PORT          = var.redis_cache_port
-    PLAID_WEBHOOK_URL         = "https://${var.hasura_url}/api/rest/plaid_webhook"
-    REVENUECAT_API_KEY        = var.revenuecat_api_key
-  }
-  vpc_security_group_ids = var.vpc_security_group_ids
-  vpc_subnet_ids         = var.vpc_subnet_ids
+  env_vars                                  = local.env_vars
+  vpc_security_group_ids                    = var.vpc_security_group_ids
+  vpc_subnet_ids                            = var.vpc_subnet_ids
 }

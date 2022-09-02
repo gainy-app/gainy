@@ -1,6 +1,7 @@
 from portfolio.service import PortfolioService
 from portfolio.service.chart import PortfolioChartService
 from portfolio.models import PortfolioChartFilter
+from common.context_container import ContextContainer
 from common.hasura_function import HasuraAction
 from gainy.utils import get_logger
 
@@ -14,7 +15,8 @@ class GetPortfolioHoldings(HasuraAction):
 
         self.service = PortfolioService()
 
-    def apply(self, db_conn, input_params, headers):
+    def apply(self, input_params, context_container: ContextContainer):
+        db_conn = context_container.db_conn
         profile_id = input_params["profile_id"]
         try:
             holdings = self.service.get_holdings(db_conn, profile_id)
@@ -32,7 +34,8 @@ class GetPortfolioTransactions(HasuraAction):
 
         self.service = PortfolioService()
 
-    def apply(self, db_conn, input_params, headers):
+    def apply(self, input_params, context_container: ContextContainer):
+        db_conn = context_container.db_conn
         profile_id = input_params["profile_id"]
         count = input_params.get("count", 500)
         offset = input_params.get("offset", 0)
@@ -64,7 +67,8 @@ class GetPortfolioChart(HasuraAction):
 
         return profile_id
 
-    def apply(self, db_conn, input_params, headers):
+    def apply(self, input_params, context_container: ContextContainer):
+        db_conn = context_container.db_conn
         profile_id = input_params["profile_id"]
 
         filter = PortfolioChartFilter()
@@ -100,7 +104,8 @@ class GetPortfolioChartPreviousPeriodClose(HasuraAction):
 
         return profile_id
 
-    def apply(self, db_conn, input_params, headers):
+    def apply(self, input_params, context_container: ContextContainer):
+        db_conn = context_container.db_conn
         profile_id = input_params["profile_id"]
 
         filter = PortfolioChartFilter()
@@ -132,7 +137,8 @@ class GetPortfolioPieChart(HasuraAction):
 
         return profile_id
 
-    def apply(self, db_conn, input_params, headers):
+    def apply(self, input_params, context_container: ContextContainer):
+        db_conn = context_container.db_conn
         profile_id = input_params["profile_id"]
 
         filter = PortfolioChartFilter()

@@ -3,11 +3,11 @@ import re
 import sys
 import logging
 import datadog
+from common.context_container import ContextContainer
 from common.hasura_function import HasuraTrigger
 from services import HubspotService
 
 logger = logging.getLogger()
-logger.setLevel(logging.INFO)
 
 script_directory = os.path.dirname(os.path.realpath(__file__))
 sys.path.append(script_directory)
@@ -25,7 +25,8 @@ class OnUserCreated(HasuraTrigger):
     def get_allowed_profile_ids(self, op, data):
         return data['new']['id']
 
-    def apply(self, db_conn, op, data):
+    def apply(self, op, data, context_container: ContextContainer):
+        db_conn = context_container.db_conn
         payload = self._extract_payload(data)
         profile_id = payload['id']
         email = payload["email"]

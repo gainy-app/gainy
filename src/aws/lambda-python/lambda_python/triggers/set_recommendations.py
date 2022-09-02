@@ -1,3 +1,4 @@
+from common.context_container import ContextContainer
 from common.hasura_function import HasuraTrigger
 from gainy.recommendation.compute import ComputeRecommendationsAndPersist
 from gainy.data_access.optimistic_lock import ConcurrentVersionUpdate
@@ -16,7 +17,8 @@ class SetRecommendations(HasuraTrigger):
             "recommendations__profile_interests"
         ])
 
-    def apply(self, db_conn, op, data):
+    def apply(self, op, data, context_container: ContextContainer):
+        db_conn = context_container.db_conn
         profile_id = self.get_profile_id(data)
         payload = self._extract_payload(data)
         category_id = payload.get("category_id")

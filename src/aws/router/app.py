@@ -1,5 +1,6 @@
 from flask import Flask, Response, request
 import requests
+import json
 import logging
 import threading
 import os
@@ -20,6 +21,23 @@ excluded_headers = [
 app = Flask(__name__)
 
 
+def handle_resp(name, resp):
+    logger.info('%s %d: %s', name, resp.status_code, resp.content)
+
+    status_code = resp.status_code
+    try:
+        data = json.loads(resp.content)
+        if data and 'code' in data:
+            status_code = data['code']
+    except:
+        pass
+
+    headers = [(name, value) for (name, value) in resp.raw.headers.items()
+               if name.lower() not in excluded_headers]
+
+    return Response(resp.content, status_code, headers)
+
+
 @app.route('/hasuraAction', methods=['POST'])
 def proxy_python_hasura_action():
     data = request.get_json()
@@ -36,12 +54,7 @@ def proxy_python_hasura_action():
         logger.error('%s 500: %s', action_name, e)
         raise e
 
-    logger.info('%s %d: %s', action_name, resp.status_code, resp.content)
-
-    headers = [(name, value) for (name, value) in resp.raw.headers.items()
-               if name.lower() not in excluded_headers]
-
-    return Response(resp.content, resp.status_code, headers)
+    return handle_resp(action_name, resp)
 
 
 @app.route('/hasuraTrigger', methods=['POST'])
@@ -60,9 +73,4 @@ def proxy_python_hasura_trigger():
         logger.error('%s 500: %s', trigger_name, e)
         raise e
 
-    logger.info('%s %d: %s', trigger_name, resp.status_code, resp.content)
-
-    headers = [(name, value) for (name, value) in resp.raw.headers.items()
-               if name.lower() not in excluded_headers]
-
-    return Response(resp.content, resp.status_code, headers)
+    return handle_resp(trigger_name, resp)

@@ -7,7 +7,7 @@ import re
 import requests
 from urllib.parse import urlencode
 from backoff import full_jitter
-import traceback
+from common.context_container import ContextContainer
 from common.hasura_function import HasuraAction
 from search.cache import CachingLoader, RedisCache
 from gainy.utils import get_logger
@@ -41,7 +41,8 @@ class SearchNews(HasuraAction):
         self.caching_loader = CachingLoader(
             RedisCache(redis_host, redis_port, ttl_seconds=60 * 60), load_url)
 
-    def apply(self, db_conn, input_params, headers):
+    def apply(self, input_params, context_container: ContextContainer):
+        db_conn = context_container.db_conn
         query = input_params["symbol"]
         limit = input_params.get("limit", 5)
 

@@ -52,3 +52,12 @@ variable "revenuecat_api_key" {}
 
 variable "bigquery_google_project" {}
 variable "bigquery_credentials" {}
+
+variable "drivewealth_app_key" {}
+variable "drivewealth_wlp_id" {}
+variable "drivewealth_parent_ibid" {}
+variable "drivewealth_ria_id" {}
+variable "drivewealth_ria_product_id" {}
+variable "drivewealth_api_username" {}
+variable "drivewealth_api_password" {}
+variable "drivewealth_api_url" {}

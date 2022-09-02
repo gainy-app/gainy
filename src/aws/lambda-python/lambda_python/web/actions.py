@@ -3,6 +3,7 @@ import json
 
 import stripe
 
+from common.context_container import ContextContainer
 from common.hasura_function import HasuraAction
 from common.hasura_exception import HasuraActionException
 from gainy.utils import get_logger
@@ -23,7 +24,8 @@ class StripeGetCheckoutUrl(HasuraAction):
     def __init__(self):
         super().__init__("stripe_get_checkout_url")
 
-    def apply(self, db_conn, input_params, headers):
+    def apply(self, input_params, context_container: ContextContainer):
+        db_conn = context_container.db_conn
         price_id = input_params["price_id"]
         success_url = input_params["success_url"]
         cancel_url = input_params["cancel_url"]
@@ -54,7 +56,8 @@ class StripeWebhook(HasuraAction):
     def __init__(self):
         super().__init__("stripe_webhook")
 
-    def apply(self, db_conn, input_params, headers):
+    def apply(self, input_params, context_container: ContextContainer):
+        db_conn = context_container.db_conn
         logger.info("[STRIPE_WEBHOOK] event pre %s", input_params)
 
         event_id = input_params['id']
