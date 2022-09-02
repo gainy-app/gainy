@@ -74,6 +74,9 @@ class DriveWealthApi:
                 "bankAccountNickname": name,
             })
 
+    def delete_bank_account(self, ref_id: str):
+        return self._make_request("DELETE", f"/bank-accounts/{ref_id}")
+
     def _get_token(self):
         # TODO redis
         if self._token_data is not None and datetime.datetime.now(
@@ -115,7 +118,7 @@ class DriveWealthApi:
             "response_data": response_data,
         }
 
-        if response_data is None or not response.status_code or response.status_code < 200 or response.status_code > 299:
+        if response.status_code is None or response.status_code < 200 or response.status_code > 299:
             logger.error("[DRIVEWEALTH] %s %s" % (method, url),
                          extra=logging_extra)
 

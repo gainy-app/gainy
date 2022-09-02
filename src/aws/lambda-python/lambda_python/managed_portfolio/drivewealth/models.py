@@ -3,6 +3,7 @@ from gainy.data_access.models import BaseModel, classproperty
 
 
 class BaseDriveWealthModel(BaseModel):
+
     @classproperty
     def schema_name(self) -> str:
         return "app"
@@ -12,6 +13,7 @@ class BaseDriveWealthModel(BaseModel):
             **super().to_dict(),
             "data": json.dumps(self.data),
         }
+
 
 class DriveWealthUser(BaseDriveWealthModel):
     ref_id = None

@@ -28,9 +28,9 @@ def get_purpose(input_params):
 
 def get_purpose_products(purpose):
     if purpose == PURPOSE_PORTFOLIO:
-        products = ['investments']
+        return ['investments']
     elif purpose == PURPOSE_MANAGED_TRADING:
-        products = ['auth']
+        return ['auth']
     else:
         raise Exception('Wrong purpose')
 
@@ -80,9 +80,9 @@ class LinkPlaidAccount(HasuraAction):
 
     def __init__(self):
         super().__init__("link_plaid_account", "profile_id")
-        self.service = PlaidService()
 
     def apply(self, input_params, context_container: ContextContainer):
+        service = context_container.plaid_service
         db_conn = context_container.db_conn
         profile_id = input_params["profile_id"]
         public_token = input_params["public_token"]
@@ -90,7 +90,7 @@ class LinkPlaidAccount(HasuraAction):
         access_token_id = input_params.get("access_token_id")
         purpose = get_purpose(input_params)
 
-        response = self.service.exchange_public_token(public_token, env)
+        response = service.exchange_public_token(public_token, env)
         access_token = response['access_token']
 
         parameters = {
@@ -114,17 +114,8 @@ class LinkPlaidAccount(HasuraAction):
 
         accounts = []
         if purpose == PURPOSE_MANAGED_TRADING:
-            response = self.service.get_item_accounts(access_token)
-            logger.info('accounts', extra={"response": response})
-            accounts = [{
-                "account_id": i["account_id"],
-                "balance_available": i["balances"]["available"],
-                "balance_current": i["balances"]["current"],
-                "balance_currency": i["balances"]["iso_currency_code"],
-                "mask": i["mask"],
-                "name": i["name"],
-                "official_name": i["official_name"],
-            } for i in response]
+            response = service.get_item_accounts(access_token)
+            accounts = [i.to_dict() for i in response]
 
         return {
             'result': True,
@@ -138,10 +129,10 @@ class PlaidWebhook(HasuraAction):
     def __init__(self):
         super().__init__("plaid_webhook")
 
-        self.portfolio_service = PortfolioService()
         self.client = PlaidClient()
 
     def apply(self, input_params, context_container: ContextContainer):
+        portfolio_service = context_container.portfolio_service
         db_conn = context_container.db_conn
         item_id = input_params['item_id']
         logging_extra = {
@@ -181,13 +172,13 @@ class PlaidWebhook(HasuraAction):
 
             webhook_type = input_params['webhook_type']
             for access_token in access_tokens:
-                self.portfolio_service.sync_institution(db_conn, access_token)
+                portfolio_service.sync_institution(access_token)
                 if webhook_type == 'HOLDINGS':
-                    count += self.portfolio_service.sync_token_holdings(
-                        db_conn, access_token)
+                    count += portfolio_service.sync_token_holdings(
+                        access_token)
                 elif webhook_type == 'INVESTMENTS_TRANSACTIONS':
-                    count += self.portfolio_service.sync_token_transactions(
-                        db_conn, access_token)
+                    count += portfolio_service.sync_token_transactions(
+                        access_token)
 
             return {'count': count}
         except Exception as e:

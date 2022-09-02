@@ -1,12 +1,12 @@
 import datetime
 import dateutil.relativedelta
-import logging
 import psycopg2
 from services import BillingService
 from common.context_container import ContextContainer
 from common.hasura_function import HasuraTrigger
+from gainy.utils import get_logger
 
-logger = logging.getLogger()
+logger = get_logger(__name__)
 
 
 class OnInvitationCreatedOrUpdated(HasuraTrigger):

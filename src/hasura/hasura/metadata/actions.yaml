@@ -113,6 +113,18 @@ actions:
       handler: '{{AWS_LAMBDA_API_GATEWAY_ENDPOINT}}/hasuraAction'
     permissions:
       - role: user
+  - name: managed_portfolio_delete_funding_account
+    definition:
+      kind: synchronous
+      handler: '{{AWS_LAMBDA_API_GATEWAY_ENDPOINT}}/hasuraAction'
+    permissions:
+      - role: user
+  - name: managed_portfolio_get_funding_accounts
+    definition:
+      kind: ""
+      handler: '{{AWS_LAMBDA_API_GATEWAY_ENDPOINT}}/hasuraAction'
+    permissions:
+      - role: user
   - name: plaid_webhook
     definition:
       kind: synchronous
@@ -307,4 +319,24 @@ custom_types:
     - name: LinkBankAccountWithPlaidOutput
     - name: AccountInformation
     - name: LinkManagedTradingBankAccountWithPlaidOutput
+      relationships:
+        - remote_table:
+            schema: app
+            name: managed_portfolio_funding_accounts
+          name: funding_account
+          source: default
+          type: object
+          field_mapping:
+            id: id
+    - name: ManagedPortfolioFundingAccount
+      relationships:
+        - remote_table:
+            schema: app
+            name: managed_portfolio_funding_accounts
+          name: funding_account
+          source: default
+          type: object
+          field_mapping:
+            id: id
+    - name: ManagedPortfolioDeleteFundingAccountOutput
   scalars: []

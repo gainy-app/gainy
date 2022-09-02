@@ -11,11 +11,8 @@ logger = get_logger(__name__)
 
 class DriveWealthRepository(Repository):
 
-    def __init__(self, context_container):
-        self.db_conn = context_container.db_conn
-
     def get_user(self, profile_id) -> DriveWealthUser:
-        return self.find_one(self.db_conn, DriveWealthUser, {"profile_id": profile_id})
+        return self.find_one(DriveWealthUser, {"profile_id": profile_id})
 
     def upsert_user(self, profile_id, data) -> DriveWealthUser:
         entity = DriveWealthUser()
@@ -24,7 +21,7 @@ class DriveWealthRepository(Repository):
         entity.status = data["status"]["name"]
         entity.data = json.dumps(data)
 
-        self.persist(self.db_conn, entity)
+        self.persist(entity)
         return entity
 
     def get_user_accounts(self,
@@ -47,7 +44,7 @@ class DriveWealthRepository(Repository):
         entity.cash_balance = data["bod"].get("cashBalance", 0)
         entity.data = json.dumps(data)
 
-        self.persist(self.db_conn, entity)
+        self.persist(entity)
 
         return entity
 
@@ -66,14 +63,15 @@ class DriveWealthRepository(Repository):
         if kyc_document_id:
             entity.kyc_document_id = kyc_document_id
 
-        self.persist(self.db_conn, entity)
+        self.persist(entity)
 
         return entity
 
     def upsert_bank_account(
             self,
             data,
-            plaid_access_token_id: int = None) -> DriveWealthBankAccount:
+            plaid_access_token_id: int = None,
+            plaid_account_id: str = None) -> DriveWealthBankAccount:
         entity = DriveWealthBankAccount()
         entity.ref_id = data['id']
         entity.drivewealth_user_id = data["userDetails"]['userID']
@@ -86,8 +84,10 @@ class DriveWealthRepository(Repository):
             'bankRoutingNumber']
         if plaid_access_token_id:
             entity.plaid_access_token_id = plaid_access_token_id
+        if plaid_account_id:
+            entity.plaid_account_id = plaid_account_id
         entity.data = json.dumps(data)
 
-        self.persist(self.db_conn, entity)
+        self.persist(entity)
 
         return entity

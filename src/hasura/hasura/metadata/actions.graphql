@@ -155,6 +155,19 @@ type Query {
 }
 
 type Mutation {
+  managed_portfolio_delete_funding_account(
+    profile_id: Int!
+    funding_account_id: Int!
+  ): ManagedPortfolioDeleteFundingAccountOutput
+}
+
+type Query {
+  managed_portfolio_get_funding_accounts(
+    profile_id: Int!
+  ): [ManagedPortfolioFundingAccount]
+}
+
+type Mutation {
   plaid_webhook(
     webhook_type: String!
     webhook_code: String!
@@ -443,7 +456,7 @@ type AccountInformation {
   account_id: String!
   balance_available: Int!
   balance_current: Int!
-  balance_currency: String!
+  iso_currency_code: String!
   mask: String!
   name: String!
   official_name: String!
@@ -451,5 +464,14 @@ type AccountInformation {
 
 type LinkManagedTradingBankAccountWithPlaidOutput {
   error_message: String
+  id: Int
+}
+
+type ManagedPortfolioFundingAccount {
+  id: Int!
+}
+
+type ManagedPortfolioDeleteFundingAccountOutput {
+  ok: Boolean
 }
 

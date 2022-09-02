@@ -1,9 +1,10 @@
 from common.context_container import ContextContainer
-import logging
 
 from actions.update_purchases import UpdatePurchases
 
-logger = logging.getLogger()
+from gainy.utils import get_logger
+
+logger = get_logger(__name__)
 
 
 class ApplyPromocode(UpdatePurchases):

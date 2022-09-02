@@ -61,8 +61,8 @@ class GetRecommendedCollections(HasuraAction):
 
     def update_match_scores(self, db_conn, profile_id):
         recommendations_func = ComputeRecommendationsAndPersist(
-            db_conn, profile_id)
+            RecommendationRepository(db_conn), profile_id)
         try:
-            recommendations_func.get_and_persist(db_conn, max_tries=2)
+            recommendations_func.get_and_persist(max_tries=2)
         except (LockAcquisitionTimeout, ConcurrentVersionUpdate):
             pass

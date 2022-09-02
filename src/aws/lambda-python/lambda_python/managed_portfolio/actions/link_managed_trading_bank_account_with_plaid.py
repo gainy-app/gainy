@@ -1,13 +1,13 @@
-import logging
 from portfolio.plaid.common import PURPOSE_MANAGED_TRADING
 from common.context_container import ContextContainer
-from common.exceptions import ApiException
+from common.exceptions import ApiException, NotFoundException
 from common.hasura_exception import HasuraActionException
 from common.hasura_function import HasuraAction
 from managed_portfolio import ManagedPortfolioService
 from psycopg2.extras import RealDictCursor
+from gainy.utils import get_logger
 
-logger = logging.getLogger()
+logger = get_logger(__name__)
 
 
 class LinkManagedTradingBankAccountWithPlaid(HasuraAction):
@@ -15,9 +15,9 @@ class LinkManagedTradingBankAccountWithPlaid(HasuraAction):
     def __init__(self):
         super().__init__("link_managed_trading_bank_account_with_plaid",
                          "profile_id")
-        self.managed_portfolio_service = ManagedPortfolioService()
 
     def apply(self, input_params, context_container: ContextContainer):
+        managed_portfolio_service = context_container.managed_portfolio_service
         profile_id = input_params["profile_id"]
         account_id = input_params["account_id"]
         access_token_id = input_params["access_token_id"]
@@ -34,7 +34,13 @@ class LinkManagedTradingBankAccountWithPlaid(HasuraAction):
 
         if not access_token or access_token[
                 'purpose'] != PURPOSE_MANAGED_TRADING:
-            raise Exception('Token not found')
+            raise NotFoundException('Token not found')
 
-        self.managed_portfolio_service.link_bank_account_with_plaid(
-            context_container, access_token, account_name, account_id)
+        error_message = None
+        try:
+            funding_account = managed_portfolio_service.link_bank_account_with_plaid(
+                access_token, account_name, account_id)
+        except Exception as e:
+            error_message = str(e)
+
+        return {"error_message": error_message, 'id': funding_account.id}

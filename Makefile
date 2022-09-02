@@ -24,7 +24,7 @@ up:
 upd:
 	docker-compose up -d
 
-build:
+build: docker-auth
 	docker-compose build
 
 down:

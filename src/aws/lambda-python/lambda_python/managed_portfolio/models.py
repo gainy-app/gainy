@@ -57,6 +57,7 @@ class ManagedPortfolioFundingAccount(BaseModel):
     id = None
     profile_id = None
     plaid_access_token_id = None
+    plaid_account_id = None
     name = None
     created_at = None
     updated_at = None

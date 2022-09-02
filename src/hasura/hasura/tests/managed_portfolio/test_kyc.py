@@ -1,4 +1,8 @@
 import os
+import sys
+
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
+
 from common import make_graphql_request, db_connect
 
 PROFILES = make_graphql_request("{app_profiles{id, user_id}}",
@@ -13,7 +17,7 @@ query_names = [
 ]
 QUERIES = {}
 for query_name in query_names:
-    query_file = os.path.join(os.path.dirname(__file__), 'queries',
+    query_file = os.path.join(os.path.dirname(__file__), 'queries/kyc',
                               query_name + '.graphql')
     with open(query_file, 'r') as f:
         QUERIES[query_name] = f.read()

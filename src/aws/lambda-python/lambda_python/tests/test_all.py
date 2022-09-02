@@ -47,7 +47,8 @@ def test_create_plaid_link_token():
         "create_plaid_link_token", {
             "profile_id": PROFILE_ID,
             "redirect_uri": "https://app.gainy.application.ios",
-            "env": "sandbox"
+            "env": "sandbox",
+            "purpose": "portfolio",
         }, USER_ID)
     response = action_dispatcher.handle(event)
     assert "code" not in response

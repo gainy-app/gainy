@@ -1,10 +1,10 @@
 import json
-import logging
 from common.context_container import ContextContainer
 from common.hasura_function import HasuraAction
 from psycopg2.extras import RealDictCursor
+from gainy.utils import get_logger
 
-logger = logging.getLogger()
+logger = get_logger(__name__)
 
 
 class GetPromocode(HasuraAction):

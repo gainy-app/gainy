@@ -70,6 +70,8 @@ ACTIONS = [
     SendKycForm(),
     AddKycDocument(),
     LinkManagedTradingBankAccountWithPlaid(),
+    ManagedPortfolioGetFundingAccounts(),
+    ManagedPortfolioDeleteFundingAccount(),
 ]
 
 action_dispatcher = HasuraActionDispatcher(ACTIONS,

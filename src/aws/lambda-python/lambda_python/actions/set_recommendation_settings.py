@@ -1,5 +1,3 @@
-import logging
-
 from common.context_container import ContextContainer
 from common.hasura_function import HasuraAction
 
@@ -8,8 +6,9 @@ from gainy.data_access.db_lock import LockAcquisitionTimeout
 from gainy.data_access.optimistic_lock import ConcurrentVersionUpdate
 from gainy.recommendation.compute import ComputeRecommendationsAndPersist
 from gainy.recommendation.repository import RecommendationRepository
+from gainy.utils import get_logger
 
-logger = logging.getLogger()
+logger = get_logger(__name__)
 
 
 class SetRecommendationSettings(HasuraAction):
@@ -36,10 +35,10 @@ class SetRecommendationSettings(HasuraAction):
         self.set_categories(db_conn, profile_id, categories)
 
         recommendations_func = ComputeRecommendationsAndPersist(
-            db_conn, profile_id)
+            RecommendationRepository(db_conn), profile_id)
         old_version = recommendations_func.load_version(db_conn)
         try:
-            recommendations_func.get_and_persist(db_conn, max_tries=2)
+            recommendations_func.get_and_persist(max_tries=2)
 
             new_version = recommendations_func.load_version(db_conn)
             logger.info('Calculated Match Scores',

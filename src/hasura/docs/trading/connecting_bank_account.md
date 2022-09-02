@@ -2,16 +2,11 @@
 
 1. [Generate link token](#generate-link-token)
 2. [Exchange public_token and list accounts](#exchange-public_token-and-list-accounts)
-3. [Link Account to DriveWealth](#link-account-to-drivewealth)
-4. **[TODO]** List connected accounts
-  - PlaidService.updateAccountBalance(plaid_account_ids)
-  - list managed_portfolio_bank_accounts
-
-5. **[TODO]** Deny deleting plaid tokens connected to trading
-
-6. **[TODO]** Disconnect bank account
-  - TradingService.disconnectBankAccount(profile_id, trading_bank_account)
-  - remove trading_bank_account
+3. [Link new funding account](#link-new-funding-account)
+4. [List connected funding accounts](#list-connected-funding-accounts)
+5. Portfolio tab must only work with plaid tokens `(where: {purpose: {_eq: "portfolio"}})`.
+   See updated portfolio [requests](../portfolio.md).
+6. [Delete connected funding account](#delete-connected-funding-account)
 
 
 ### Generate link token
@@ -59,7 +54,7 @@ query LinkPlaidAccount(
       account_id
       balance_available
       balance_current
-      balance_currency
+      iso_currency_code
       mask
       name
       official_name
@@ -68,8 +63,7 @@ query LinkPlaidAccount(
 }
 ```
 
-
-### Link Account to DriveWealth
+### Link new funding account
 ```graphql
 mutation LinkManagedTradingBankAccountWithPlaid(
    $profile_id: Int!
@@ -84,7 +78,52 @@ mutation LinkManagedTradingBankAccountWithPlaid(
       access_token_id: $access_token_id
    ){
       error_message
+      funding_account {
+         id
+         balance
+         name
+      }
    }
 }
+```
 
+### List connected funding accounts
+
+With updated balances
+```graphql
+query ManagedPortfolioGetFundingAccountsWithUpdatedBalance($profile_id: Int!) {
+    managed_portfolio_get_funding_accounts(profile_id: $profile_id) {
+        funding_account {
+            id
+            balance
+            name
+        }
+    }
+}
+```
+With updated balances
+```graphql
+query ManagedPortfolioGetFundingAccounts($profile_id: Int!) {
+    app_managed_portfolio_funding_accounts(where: {profile_id: {_eq: $profile_id}}) {
+        id
+        balance
+        name
+    }
+}
+```
+
+### Delete connected funding account
+
+```graphql
+mutation ManagedPortfolioDeleteFundingAccount(
+   $profile_id: Int!
+   $funding_account_id: Int!
+) {
+   managed_portfolio_delete_funding_account(
+      profile_id: $profile_id
+      funding_account_id: $funding_account_id
+   ) {
+      ok
+   }
+}
 ```

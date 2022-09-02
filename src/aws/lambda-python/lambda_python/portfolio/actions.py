@@ -13,13 +13,11 @@ class GetPortfolioHoldings(HasuraAction):
     def __init__(self):
         super().__init__("get_portfolio_holdings", "profile_id")
 
-        self.service = PortfolioService()
-
     def apply(self, input_params, context_container: ContextContainer):
-        db_conn = context_container.db_conn
+        service = context_container.portfolio_service
         profile_id = input_params["profile_id"]
         try:
-            holdings = self.service.get_holdings(db_conn, profile_id)
+            holdings = service.get_holdings(profile_id)
         except Exception as e:
             logger.exception(e)
             holdings = []
@@ -32,19 +30,18 @@ class GetPortfolioTransactions(HasuraAction):
     def __init__(self):
         super().__init__("get_portfolio_transactions", "profile_id")
 
-        self.service = PortfolioService()
-
     def apply(self, input_params, context_container: ContextContainer):
+        service = context_container.portfolio_service
         db_conn = context_container.db_conn
         profile_id = input_params["profile_id"]
         count = input_params.get("count", 500)
         offset = input_params.get("offset", 0)
 
         try:
-            transactions = self.service.get_transactions(db_conn,
-                                                         profile_id,
-                                                         count=count,
-                                                         offset=offset)
+            transactions = service.get_transactions(db_conn,
+                                                    profile_id,
+                                                    count=count,
+                                                    offset=offset)
         except Exception as e:
             logger.exception(e)
             transactions = []

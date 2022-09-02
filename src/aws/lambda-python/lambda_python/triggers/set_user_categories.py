@@ -133,10 +133,10 @@ class SetUserCategories(HasuraTrigger):
                  for category_id in categories])
 
         recommendations_func = ComputeRecommendationsAndPersist(
-            db_conn, profile_id)
+            RecommendationRepository(db_conn), profile_id)
         old_version = recommendations_func.load_version(db_conn)
         try:
-            recommendations_func.get_and_persist(db_conn, max_tries=2)
+            recommendations_func.get_and_persist(max_tries=2)
 
             new_version = recommendations_func.load_version(db_conn)
             logger.info('Calculated Match Scores',
