@@ -6,6 +6,7 @@ This repo contains Gainy's GraphQL API server built with [Hasura](https://hasura
 
 - [Articles](docs/articles.md)
 - [Chart](docs/chart.md)
+- [Crypto](docs/crypto.md)
 - [Collections](docs/collections.md)
 - [ETF](docs/etf.md)
 - [Match Score](docs/match_score.md)
@@ -15,6 +16,7 @@ This repo contains Gainy's GraphQL API server built with [Hasura](https://hasura
 - [Purchases](docs/purchases.md)
 - [Stocks](docs/stocks.md)
 - [Stripe](docs/stripe.md)
+- [Trading](docs/trading.md)
 
 ## Development
 Note: do not use foreign key relationships - all relationship should be of manual type (otherwise hasura fails during pipeline run).

@@ -28,6 +28,7 @@
     link_plaid_account(profile_id: 2, 
         public_token: "public-sandbox-0c02e9cb-ef57-4a82-a4eb-f8d7d99dfb01") {
         result
+        plaid_access_token_id
     }
 }
 ```
