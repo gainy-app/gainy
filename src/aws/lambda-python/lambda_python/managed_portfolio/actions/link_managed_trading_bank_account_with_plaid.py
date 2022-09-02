@@ -36,11 +36,10 @@ class LinkManagedTradingBankAccountWithPlaid(HasuraAction):
                 'purpose'] != PURPOSE_MANAGED_TRADING:
             raise NotFoundException('Token not found')
 
-        error_message = None
         try:
             funding_account = managed_portfolio_service.link_bank_account_with_plaid(
                 access_token, account_name, account_id)
         except Exception as e:
-            error_message = str(e)
+            return {"error_message": str(e), 'id': None}
 
-        return {"error_message": error_message, 'id': funding_account.id}
+        return {"error_message": None, 'id': funding_account.id}
