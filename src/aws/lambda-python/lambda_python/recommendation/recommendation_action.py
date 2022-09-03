@@ -15,7 +15,6 @@ class GetRecommendedCollections(HasuraAction):
         super().__init__("get_recommended_collections", "profile_id")
 
     def apply(self, input_params, context_container: ContextContainer):
-        db_conn = context_container.db_conn
         try:
             profile_id = input_params["profile_id"]
             limit = input_params.get("limit", 30)
@@ -26,14 +25,14 @@ class GetRecommendedCollections(HasuraAction):
             logger.info('get_recommended_collections: start',
                         extra=logging_extra)
 
-            repository = RecommendationRepository(db_conn)
+            repository = context_container.recommendation_repository
             collections = repository.get_recommended_collections(
                 profile_id, limit)
 
             if not len(collections):
                 logger.info('get_recommended_collections: update_match_scores',
                             extra=logging_extra)
-                self.update_match_scores(db_conn, profile_id)
+                self.update_match_scores(repository, profile_id)
                 collections = repository.get_recommended_collections(
                     profile_id, limit)
 
@@ -59,9 +58,9 @@ class GetRecommendedCollections(HasuraAction):
                              e,
                              extra=logging_extra)
 
-    def update_match_scores(self, db_conn, profile_id):
+    def update_match_scores(self, repository, profile_id):
         recommendations_func = ComputeRecommendationsAndPersist(
-            RecommendationRepository(db_conn), profile_id)
+            repository, profile_id)
         try:
             recommendations_func.get_and_persist(max_tries=2)
         except (LockAcquisitionTimeout, ConcurrentVersionUpdate):

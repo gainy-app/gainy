@@ -20,6 +20,10 @@ class ContextContainer():
 
         return Repository(self.db_conn)
 
+    @cached_property
+    def recommendation_repository(self) -> RecommendationRepository:
+        return RecommendationRepository(self.db_conn)
+
     ## portfolio
     @cached_property
     def portfolio_repository(self) -> PortfolioRepository:

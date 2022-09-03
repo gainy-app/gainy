@@ -34,8 +34,9 @@ class SetRecommendationSettings(HasuraAction):
         self.set_interests(db_conn, profile_id, interests)
         self.set_categories(db_conn, profile_id, categories)
 
+        repository = context_container.recommendation_repository
         recommendations_func = ComputeRecommendationsAndPersist(
-            RecommendationRepository(db_conn), profile_id)
+            repository, profile_id)
         old_version = recommendations_func.load_version()
         try:
             recommendations_func.get_and_persist(max_tries=2)
@@ -50,7 +51,6 @@ class SetRecommendationSettings(HasuraAction):
         except (LockAcquisitionTimeout, ConcurrentVersionUpdate) as e:
             logger.exception(e, extra=logging_extra)
 
-        repository = RecommendationRepository(db_conn)
         if recommended_collections_count is not None:
             collections = repository.get_recommended_collections(
                 profile_id, recommended_collections_count)

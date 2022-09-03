@@ -132,8 +132,9 @@ class SetUserCategories(HasuraTrigger):
                 [(profile_id, category_id, True)
                  for category_id in categories])
 
+        repository = context_container.recommendation_repository
         recommendations_func = ComputeRecommendationsAndPersist(
-            RecommendationRepository(db_conn), profile_id)
+            repository, profile_id)
         old_version = recommendations_func.load_version()
         try:
             recommendations_func.get_and_persist(max_tries=2)

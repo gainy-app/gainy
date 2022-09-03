@@ -39,8 +39,9 @@ class SetRecommendations(HasuraTrigger):
                         extra=logging_extra)
             return
 
+        repository = context_container.recommendation_repository
         recommendations_func = ComputeRecommendationsAndPersist(
-            RecommendationRepository(db_conn), profile_id)
+            repository, profile_id)
         old_version = recommendations_func.load_version()
 
         try:
