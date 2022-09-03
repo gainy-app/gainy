@@ -43,7 +43,7 @@ with raw_ticker_collections as
                                  sum(ticker_metrics.market_capitalization) over (partition by collection_id)
                          else
                              weight / collection_weight_sum.weight_sum
-                        end)::double precision     as weight,
+                        end)::numeric              as weight,
                     now()                          as updated_at
              from raw_ticker_collections
                       left join {{ ref('ticker_metrics') }} using (symbol)

@@ -16,6 +16,7 @@ sources:
       - name: auto_ticker_industries
       - name: exchanges
       - name: ticker_collections
+      - name: ticker_collections_weights
       - name: ticker_override
       - name: ticker_search_alternative_names
 
@@ -1501,7 +1502,7 @@ models:
       - name: period
         tests:
           - type:
-              type: 'character varying'
+              type: 'text'
       - name: open
         tests:
           - type:
@@ -2039,7 +2040,7 @@ models:
           - type:
               type: 'timestamp with time zone'
 
-  - name: collection_tickers_weighted
+  - name: collection_ticker_weights
     columns:
       - name: date
         tests:
@@ -2061,6 +2062,37 @@ models:
         tests:
           - type:
               type: 'character varying'
+      - name: weight
+        tests:
+          - type:
+              type: 'numeric'
+      - name: price
+        tests:
+          - type:
+              type: 'numeric'
+
+  - name: collection_historical_values
+    columns:
+      - name: collection_uniq_id
+        tests:
+          - type:
+              type: 'text'
+      - name: date
+        tests:
+          - type:
+              type: 'date'
+      - name: value
+        tests:
+          - type:
+              type: 'numeric'
+      - name: id
+        tests:
+          - type:
+              type: 'text'
+      - name: updated_at
+        tests:
+          - type:
+              type: 'timestamp with time zone'
 
   - name: portfolio_holding_group_tags
     columns:
