@@ -4,23 +4,7 @@ import sys
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
 
 from common import make_graphql_request, db_connect
-
-PROFILES = make_graphql_request("{app_profiles{id, user_id}}",
-                                user_id=None)['data']['app_profiles']
-
-query_names = [
-    'CreatePlaidLinkToken',
-    'LinkManagedTradingBankAccountWithPlaid',
-    'ManagedPortfolioGetFundingAccountsWithUpdatedBalance',
-    'ManagedPortfolioDeleteFundingAccount',
-]
-QUERIES = {}
-for query_name in query_names:
-    query_file = os.path.join(os.path.dirname(__file__),
-                              'queries/connecting_bank_account',
-                              query_name + '.graphql')
-    with open(query_file, 'r') as f:
-        QUERIES[query_name] = f.read()
+from managed_portfolio.common import fill_kyc_form, send_kyc_form, load_query, PROFILES
 
 
 def test_create_plaid_link_token():
@@ -28,7 +12,7 @@ def test_create_plaid_link_token():
     profile_user_id = PROFILES[0]['user_id']
 
     data = make_graphql_request(
-        QUERIES['CreatePlaidLinkToken'], {
+        load_query('connecting_bank_account', 'CreatePlaidLinkToken'), {
             "profile_id": profile_id,
             "redirect_uri": "https://app.gainy.application.ios",
             "env": "sandbox",
@@ -42,6 +26,9 @@ def test_create_plaid_link_token():
 def test_full_flow():
     profile_id = PROFILES[0]['id']
     profile_user_id = PROFILES[0]['user_id']
+
+    fill_kyc_form(profile_id, profile_user_id)
+    send_kyc_form(profile_id, profile_user_id)
 
     access_token = 'access-sandbox-23e0b768-697b-4c89-ad1a-9ccf0d49f0be'
     item_id = 'XvQARLzQKBh79bJ74n39twjGEGQVZpudxZgw3'
@@ -64,12 +51,13 @@ def test_full_flow():
             access_token_id = cursor.fetchone()[0]
 
     data = make_graphql_request(
-        QUERIES['LinkManagedTradingBankAccountWithPlaid'], {
-            "profile_id": profile_id,
-            "account_id": account_id,
-            "account_name": "test",
-            "access_token_id": access_token_id,
-        }, profile_user_id
+        load_query('connecting_bank_account',
+                   'LinkManagedTradingBankAccountWithPlaid'), {
+                       "profile_id": profile_id,
+                       "account_id": account_id,
+                       "account_name": "test",
+                       "access_token_id": access_token_id,
+                   }, profile_user_id
     )['data']['link_managed_trading_bank_account_with_plaid']
 
     assert "error_message" in data
@@ -80,18 +68,22 @@ def test_full_flow():
     funding_account_id = data["funding_account"]["id"]
 
     data = make_graphql_request(
-        QUERIES['ManagedPortfolioGetFundingAccountsWithUpdatedBalance'], {
-            "profile_id": profile_id,
-        }, profile_user_id)['data']['managed_portfolio_get_funding_accounts']
+        load_query('connecting_bank_account',
+                   'ManagedPortfolioGetFundingAccountsWithUpdatedBalance'), {
+                       "profile_id": profile_id,
+                   },
+        profile_user_id)['data']['managed_portfolio_get_funding_accounts']
 
     funding_account_ids = [i["funding_account"]["id"] for i in data]
     assert funding_account_id in funding_account_ids
 
     data = make_graphql_request(
-        QUERIES['ManagedPortfolioDeleteFundingAccount'], {
-            "profile_id": profile_id,
-            "funding_account_id": funding_account_id,
-        }, profile_user_id)['data']['managed_portfolio_delete_funding_account']
+        load_query('connecting_bank_account',
+                   'ManagedPortfolioDeleteFundingAccount'), {
+                       "profile_id": profile_id,
+                       "funding_account_id": funding_account_id,
+                   },
+        profile_user_id)['data']['managed_portfolio_delete_funding_account']
 
     assert "ok" in data
     assert data["ok"]

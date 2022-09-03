@@ -40,6 +40,7 @@ class LinkManagedTradingBankAccountWithPlaid(HasuraAction):
             funding_account = managed_portfolio_service.link_bank_account_with_plaid(
                 access_token, account_name, account_id)
         except Exception as e:
+            logger.exception(e)
             return {"error_message": str(e), 'id': None}
 
         return {"error_message": None, 'id': funding_account.id}

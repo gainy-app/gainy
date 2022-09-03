@@ -92,10 +92,9 @@ class DriveWealthProvider:
         user = repository.get_user(profile_id)
         if user is None:
             raise Exception("KYC form has not been sent")
-        else:
-            data = self.api.upload_document(user.ref_id, document, file_data)
 
-        data = repository.upsert_kyc_document(document.id, data)
+        data = self.api.upload_document(user.ref_id, document, file_data)
+        repository.upsert_kyc_document(document.id, data)
 
     def link_bank_account_with_plaid(
             self, access_token: dict, account_id: str,
@@ -111,6 +110,9 @@ class DriveWealthProvider:
             access_token['access_token'], account_id, "drivewealth")
 
         user = repository.get_user(access_token['profile_id'])
+        if user is None:
+            raise Exception("KYC form has not been sent")
+
         data = self.api.link_bank_account(user.ref_id, processor_token,
                                           account_name)
 
