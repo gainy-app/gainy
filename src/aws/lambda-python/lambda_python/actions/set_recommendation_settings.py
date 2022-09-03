@@ -5,7 +5,6 @@ from psycopg2.extras import execute_values
 from gainy.data_access.db_lock import LockAcquisitionTimeout
 from gainy.data_access.optimistic_lock import ConcurrentVersionUpdate
 from gainy.recommendation.compute import ComputeRecommendationsAndPersist
-from gainy.recommendation.repository import RecommendationRepository
 from gainy.utils import get_logger
 
 logger = get_logger(__name__)

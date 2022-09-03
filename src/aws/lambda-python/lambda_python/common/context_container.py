@@ -7,6 +7,7 @@ from managed_portfolio import ManagedPortfolioService, ManagedPortfolioRepositor
 from managed_portfolio.drivewealth.provider import DriveWealthProvider
 from managed_portfolio.drivewealth.repository import DriveWealthRepository
 
+from gainy.recommendation.repository import RecommendationRepository
 from gainy.data_access.repository import Repository
 
 
