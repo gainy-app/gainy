@@ -1,5 +1,5 @@
 from common.context_container import ContextContainer
-from common.exceptions import ApiException
+from common.exceptions import ApiException, NotFoundException
 from common.hasura_exception import HasuraActionException
 from common.hasura_function import HasuraAction
 from managed_portfolio import ManagedPortfolioService, ManagedPortfolioRepository
@@ -21,6 +21,9 @@ class SendKycForm(HasuraAction):
 
         repository = context_container.managed_portfolio_repository
         kyc_form = repository.get_kyc_form(profile_id)
+
+        if not kyc_form:
+            raise NotFoundException()
 
         try:
             kyc_status = managed_portfolio_service.send_kyc_form(kyc_form)

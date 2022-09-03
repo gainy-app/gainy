@@ -28,6 +28,8 @@ class ManagedPortfolioService:
         self.plaid_service = plaid_service
 
     def send_kyc_form(self, kyc_form: dict):
+        if not kyc_form:
+            raise Exception('kyc_form is null')
         return self.get_provider_service().send_kyc_form(kyc_form)
 
     def get_kyc_status(self, profile_id: int):
