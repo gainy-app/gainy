@@ -2,6 +2,7 @@ from functools import cached_property, cache
 
 from portfolio.plaid.service import PlaidService
 from portfolio.service import PortfolioService
+from portfolio.service.chart import PortfolioChartService
 from portfolio.repository import PortfolioRepository
 from managed_portfolio import ManagedPortfolioService, ManagedPortfolioRepository
 from managed_portfolio.drivewealth.provider import DriveWealthProvider
@@ -38,6 +39,10 @@ class ContextContainer():
     def portfolio_service(self) -> PortfolioService:
         return PortfolioService(self.db_conn, self.portfolio_repository,
                                 self.plaid_service)
+
+    @cached_property
+    def portfolio_chart_service(self) -> PortfolioChartService:
+        return PortfolioChartService(self.db_conn)
 
     ## drivewealth
     @cached_property
