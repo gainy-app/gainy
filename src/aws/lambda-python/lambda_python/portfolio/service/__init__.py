@@ -197,7 +197,7 @@ class PortfolioService:
         return d.values()
 
     def __get_access_tokens(self, profile_id):
-        with db_conn.cursor() as cursor:
+        with self.db_conn.cursor() as cursor:
             cursor.execute(
                 f"SELECT id, access_token FROM app.profile_plaid_access_tokens WHERE profile_id = %s",
                 (profile_id, ))
@@ -211,7 +211,7 @@ class PortfolioService:
             ]
 
     def _set_access_token_reauth(self, access_token):
-        with db_conn.cursor() as cursor:
+        with self.db_conn.cursor() as cursor:
             cursor.execute(
                 "update app.profile_plaid_access_tokens set needs_reauth_since = now() where id = %(access_token_id)s",
                 {"access_token_id": access_token['id']})
