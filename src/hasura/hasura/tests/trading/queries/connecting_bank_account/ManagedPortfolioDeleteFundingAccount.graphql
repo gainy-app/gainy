@@ -1,4 +1,4 @@
-mutation ManagedPortfolioDeleteFundingAccount(
+mutation TradingDeleteFundingAccount(
     $profile_id: Int!
     $funding_account_id: Int!
 ) {

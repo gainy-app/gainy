@@ -29,7 +29,7 @@ class KycDocument:
         self.side = side
 
 
-class ManagedPortfolioTradingAccount(BaseModel):
+class TradingTradingAccount(BaseModel):
     id = None
     profile_id = None
     name = None
@@ -53,7 +53,7 @@ class ManagedPortfolioTradingAccount(BaseModel):
         return "trading_accounts"
 
 
-class ManagedPortfolioFundingAccount(BaseModel):
+class TradingFundingAccount(BaseModel):
     id = None
     profile_id = None
     plaid_access_token_id = None

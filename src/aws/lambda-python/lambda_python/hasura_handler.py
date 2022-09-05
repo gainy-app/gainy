@@ -65,13 +65,13 @@ ACTIONS = [
     SearchNews(GNEWS_API_TOKEN, REDIS_CACHE_HOST, REDIS_CACHE_PORT),
 
     # Managed Portfolio
-    GetKycFormConfig(),
-    GetKycStatus(),
-    SendKycForm(),
-    AddKycDocument(),
-    LinkManagedTradingBankAccountWithPlaid(),
-    ManagedPortfolioGetFundingAccounts(),
-    ManagedPortfolioDeleteFundingAccount(),
+    KycGetFormConfig(),
+    KycGetStatus(),
+    KycSendForm(),
+    KycAddDocument(),
+    TradingLinkBankAccountWithPlaid(),
+    TradingGetFundingAccounts(),
+    TradingDeleteFundingAccount(),
 ]
 
 action_dispatcher = HasuraActionDispatcher(ACTIONS,

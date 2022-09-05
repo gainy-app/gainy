@@ -7,18 +7,18 @@ from portfolio.plaid import PlaidService
 from portfolio.plaid.common import handle_error
 from services import S3
 from portfolio.plaid.models import PlaidAccessToken
-from trading.models import KycDocument, ManagedPortfolioFundingAccount
+from trading.models import KycDocument, TradingFundingAccount
 from trading.drivewealth import DriveWealthProvider
-from trading.repository import ManagedPortfolioRepository
+from trading.repository import TradingRepository
 from gainy.utils import get_logger
 from gainy.data_access.repository import Repository
 
 logger = get_logger(__name__)
 
 
-class ManagedPortfolioService:
+class TradingService:
 
-    def __init__(self, db_conn, trading_repository: ManagedPortfolioRepository,
+    def __init__(self, db_conn, trading_repository: TradingRepository,
                  drivewealth_provider: DriveWealthProvider,
                  plaid_service: PlaidService):
         self.db_conn = db_conn
@@ -26,13 +26,13 @@ class ManagedPortfolioService:
         self.drivewealth_provider = drivewealth_provider
         self.plaid_service = plaid_service
 
-    def send_kyc_form(self, kyc_form: dict):
+    def kyc_send_form(self, kyc_form: dict):
         if not kyc_form:
             raise Exception('kyc_form is null')
-        return self.get_provider_service().send_kyc_form(kyc_form)
+        return self.get_provider_service().kyc_send_form(kyc_form)
 
-    def get_kyc_status(self, profile_id: int):
-        return self.get_provider_service().get_kyc_status(profile_id)
+    def kyc_get_status(self, profile_id: int):
+        return self.get_provider_service().kyc_get_status(profile_id)
 
     def send_kyc_document(self, profile_id: int, document: KycDocument):
         with self.db_conn.cursor() as cursor:
@@ -57,9 +57,8 @@ class ManagedPortfolioService:
         return self.get_provider_service().send_kyc_document(
             profile_id, document, file_stream)
 
-    def link_bank_account_with_plaid(
-            self, access_token, account_name,
-            account_id) -> ManagedPortfolioFundingAccount:
+    def link_bank_account_with_plaid(self, access_token, account_name,
+                                     account_id) -> TradingFundingAccount:
         try:
             provider_bank_account = self.get_provider_service(
             ).link_bank_account_with_plaid(access_token, account_id,
@@ -69,10 +68,10 @@ class ManagedPortfolioService:
 
         repository = self.trading_repository
         funding_account = repository.find_one(
-            ManagedPortfolioFundingAccount,
+            TradingFundingAccount,
             {"plaid_access_token_id": access_token['id']})
         if not funding_account:
-            funding_account = ManagedPortfolioFundingAccount()
+            funding_account = TradingFundingAccount()
             funding_account.profile_id = access_token['profile_id']
             funding_account.plaid_access_token_id = access_token['id']
             funding_account.plaid_account_id = account_id
@@ -87,7 +86,7 @@ class ManagedPortfolioService:
         return funding_account
 
     def update_funding_accounts_balance(
-            self, funding_accounts: Iterable[ManagedPortfolioFundingAccount]):
+            self, funding_accounts: Iterable[TradingFundingAccount]):
         by_at_id = {}
         for funding_account in funding_accounts:
             if not funding_account.plaid_access_token_id:
@@ -120,8 +119,7 @@ class ManagedPortfolioService:
 
             repository.persist(funding_account)
 
-    def delete_funding_account(
-            self, funding_account: ManagedPortfolioFundingAccount):
+    def delete_funding_account(self, funding_account: TradingFundingAccount):
         self.get_provider_service().delete_funding_account(funding_account.id)
 
         repository = self.trading_repository

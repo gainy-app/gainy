@@ -4,7 +4,7 @@ import sys
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
 
 from common import make_graphql_request, db_connect
-from trading.common import fill_kyc_form, send_kyc_form, load_query, PROFILES
+from trading.common import fill_kyc_form, kyc_send_form, load_query, PROFILES
 
 
 def test_upsert_kyc_form():
@@ -23,14 +23,14 @@ def test_get_kyc_form():
                          profile_user_id)['data']['app_kyc_form_by_pk']
 
 
-def test_send_kyc_form():
+def test_kyc_send_form():
     profile_id = PROFILES[0]['id']
     profile_user_id = PROFILES[0]['user_id']
 
     drivewealth_user_ref_id = None
 
     for i in range(2):
-        send_kyc_form(profile_id, profile_user_id)
+        kyc_send_form(profile_id, profile_user_id)
 
         with db_connect() as db_conn:
             with db_conn.cursor() as cursor:
@@ -47,13 +47,13 @@ def test_send_kyc_form():
                     assert drivewealth_user_ref_id == ref_id
 
 
-def test_get_kyc_status():
+def test_kyc_get_status():
     profile_id = PROFILES[0]['id']
     profile_user_id = PROFILES[0]['user_id']
 
-    response = make_graphql_request(load_query('kyc', 'GetKycStatus'),
+    response = make_graphql_request(load_query('kyc', 'KycGetStatus'),
                                     {"profile_id": profile_id},
-                                    profile_user_id)['data']['get_kyc_status']
+                                    profile_user_id)['data']['kyc_get_status']
 
     assert response.get("error_message") is None
     assert response.get("status") is not None

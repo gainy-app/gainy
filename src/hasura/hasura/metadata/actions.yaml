@@ -1,5 +1,5 @@
 actions:
-  - name: add_kyc_document
+  - name: kyc_add_document
     definition:
       kind: synchronous
       handler: '{{AWS_LAMBDA_API_GATEWAY_ENDPOINT}}/hasuraAction'
@@ -23,13 +23,13 @@ actions:
       handler: '{{AWS_LAMBDA_API_GATEWAY_ENDPOINT}}/hasuraAction'
     permissions:
       - role: user
-  - name: get_kyc_form_config
+  - name: kyc_get_form_config
     definition:
       kind: ""
       handler: '{{AWS_LAMBDA_API_GATEWAY_ENDPOINT}}/hasuraAction'
     permissions:
       - role: user
-  - name: get_kyc_status
+  - name: kyc_get_status
     definition:
       kind: ""
       handler: '{{AWS_LAMBDA_API_GATEWAY_ENDPOINT}}/hasuraAction'
@@ -101,7 +101,7 @@ actions:
       handler: '{{AWS_LAMBDA_API_GATEWAY_ENDPOINT}}/hasuraAction'
     permissions:
       - role: user
-  - name: link_trading_bank_account_with_plaid
+  - name: trading_link_bank_account_with_plaid
     definition:
       kind: synchronous
       handler: '{{AWS_LAMBDA_API_GATEWAY_ENDPOINT}}/hasuraAction'
@@ -153,7 +153,7 @@ actions:
       handler: '{{AWS_LAMBDA_API_GATEWAY_ENDPOINT}}/hasuraAction'
     permissions:
       - role: user
-  - name: send_kyc_form
+  - name: kyc_send_form
     definition:
       kind: synchronous
       handler: '{{AWS_LAMBDA_API_GATEWAY_ENDPOINT}}/hasuraAction'
@@ -312,13 +312,13 @@ custom_types:
     - name: SetRecommendationSettingsOutput
     - name: KycFormConfig
     - name: KycFormFieldConfig
-    - name: SendKycFormOutput
+    - name: KycSendFormOutput
     - name: KycStatus
     - name: PreSignedUploadFormOutput
-    - name: AddKycDocumentOutput
+    - name: KycAddDocumentOutput
     - name: LinkBankAccountWithPlaidOutput
     - name: AccountInformation
-    - name: LinkManagedTradingBankAccountWithPlaidOutput
+    - name: TradingLinkBankAccountWithPlaidOutput
       relationships:
         - remote_table:
             schema: app
@@ -328,7 +328,7 @@ custom_types:
           type: object
           field_mapping:
             id: id
-    - name: ManagedPortfolioFundingAccount
+    - name: TradingFundingAccount
       relationships:
         - remote_table:
             schema: app
@@ -338,5 +338,5 @@ custom_types:
           type: object
           field_mapping:
             id: id
-    - name: ManagedPortfolioDeleteFundingAccountOutput
+    - name: TradingDeleteFundingAccountOutput
   scalars: []

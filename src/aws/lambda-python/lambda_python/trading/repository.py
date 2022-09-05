@@ -4,7 +4,7 @@ from psycopg2.extras import RealDictCursor
 from gainy.data_access.repository import Repository
 
 
-class ManagedPortfolioRepository(Repository):
+class TradingRepository(Repository):
 
     def get_kyc_form(self, profile_id):
         with self.db_conn.cursor(cursor_factory=RealDictCursor) as cursor:

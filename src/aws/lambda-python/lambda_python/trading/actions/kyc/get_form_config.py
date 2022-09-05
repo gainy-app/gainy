@@ -6,9 +6,9 @@ from gainy.utils import get_logger
 logger = get_logger(__name__)
 
 
-class GetKycFormConfig(HasuraAction):
+class KycGetFormConfig(HasuraAction):
 
-    def __init__(self, action_name="get_kyc_form_config"):
+    def __init__(self, action_name="kyc_get_form_config"):
         super().__init__(action_name, "profile_id")
 
     def apply(self, input_params, context_container: ContextContainer):

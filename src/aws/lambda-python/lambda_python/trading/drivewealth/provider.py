@@ -1,7 +1,7 @@
 import base64
 import io
 from portfolio.plaid import PlaidService
-from trading.models import ProfileKycStatus, KycDocument, ManagedPortfolioTradingAccount
+from trading.models import ProfileKycStatus, KycDocument, TradingTradingAccount
 from trading.drivewealth.models import DriveWealthBankAccount, DriveWealthAccount
 from trading.drivewealth.api import DriveWealthApi
 from trading.drivewealth.repository import DriveWealthRepository
@@ -18,7 +18,7 @@ class DriveWealthProvider:
         self.plaid_service = plaid_service
         self.api = DriveWealthApi()
 
-    def send_kyc_form(self, kyc_form: dict) -> ProfileKycStatus:
+    def kyc_send_form(self, kyc_form: dict) -> ProfileKycStatus:
         profile_id = kyc_form['profile_id']
         documents = self._kyc_form_to_documents(kyc_form)
 
@@ -41,7 +41,7 @@ class DriveWealthProvider:
 
         return ProfileKycStatus(user.status)
 
-    def get_kyc_status(self, profile_id: int) -> ProfileKycStatus:
+    def kyc_get_status(self, profile_id: int) -> ProfileKycStatus:
         repository = self.drivewealth_repository
         user = repository.get_user(profile_id)
         if user is None:
@@ -65,12 +65,12 @@ class DriveWealthProvider:
                 {"ref_id": drivewealth_trading_account.ref_id})
 
             if drivewealth_trading_account.trading_account_id is None:
-                trading_account = ManagedPortfolioTradingAccount()
+                trading_account = TradingTradingAccount()
                 trading_account.profile_id = profile_id
                 trading_account.name = drivewealth_trading_account.nickname
             else:
                 trading_account = repository.find_one(
-                    ManagedPortfolioTradingAccount,
+                    TradingTradingAccount,
                     {"id": drivewealth_trading_account.trading_account_id})
 
             trading_account.cash_available_for_trade = drivewealth_trading_account.cash_available_for_trade

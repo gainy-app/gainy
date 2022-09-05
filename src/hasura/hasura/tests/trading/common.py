@@ -20,8 +20,8 @@ def load_query(directory, query_name):
 
 def fill_kyc_form(profile_id, profile_user_id):
     kyc_form_config = make_graphql_request(
-        load_query('kyc', 'GetKycFormConfig'), {"profile_id": profile_id},
-        profile_user_id)['data']['get_kyc_form_config']
+        load_query('kyc', 'KycGetFormConfig'), {"profile_id": profile_id},
+        profile_user_id)['data']['kyc_get_form_config']
 
     signed_by = " ".join([
         kyc_form_config["first_name"]["placeholder"],
@@ -63,10 +63,10 @@ def fill_kyc_form(profile_id, profile_user_id):
         profile_user_id)['data']['insert_app_kyc_form']['returning'][0]
 
 
-def send_kyc_form(profile_id, profile_user_id):
-    response = make_graphql_request(load_query('kyc', 'SendKycForm'),
+def kyc_send_form(profile_id, profile_user_id):
+    response = make_graphql_request(load_query('kyc', 'KycSendForm'),
                                     {"profile_id": profile_id},
-                                    profile_user_id)['data']['send_kyc_form']
+                                    profile_user_id)['data']['kyc_send_form']
 
     assert response.get("error_message") is None
     assert response.get("status") is not None

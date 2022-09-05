@@ -65,13 +65,13 @@ query LinkPlaidAccount(
 
 ### Link new funding account
 ```graphql
-mutation LinkManagedTradingBankAccountWithPlaid(
+mutation TradingLinkBankAccountWithPlaid(
    $profile_id: Int!
    $account_id: String!
    $account_name: String!
    $access_token_id: Int!
 ) {
-   link_trading_bank_account_with_plaid(
+   trading_link_bank_account_with_plaid(
       profile_id: $profile_id
       account_id: $account_id
       account_name: $account_name
@@ -91,7 +91,7 @@ mutation LinkManagedTradingBankAccountWithPlaid(
 
 With updated balances
 ```graphql
-query ManagedPortfolioGetFundingAccountsWithUpdatedBalance($profile_id: Int!) {
+query TradingGetFundingAccountsWithUpdatedBalance($profile_id: Int!) {
     trading_get_funding_accounts(profile_id: $profile_id) {
         funding_account {
             id
@@ -103,7 +103,7 @@ query ManagedPortfolioGetFundingAccountsWithUpdatedBalance($profile_id: Int!) {
 ```
 With updated balances
 ```graphql
-query ManagedPortfolioGetFundingAccounts($profile_id: Int!) {
+query TradingGetFundingAccounts($profile_id: Int!) {
     app_trading_funding_accounts(where: {profile_id: {_eq: $profile_id}}) {
         id
         balance
@@ -115,7 +115,7 @@ query ManagedPortfolioGetFundingAccounts($profile_id: Int!) {
 ### Delete connected funding account
 
 ```graphql
-mutation ManagedPortfolioDeleteFundingAccount(
+mutation TradingDeleteFundingAccount(
    $profile_id: Int!
    $funding_account_id: Int!
 ) {

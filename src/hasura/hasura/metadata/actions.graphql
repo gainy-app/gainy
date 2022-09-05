@@ -1,10 +1,10 @@
 type Mutation {
-  add_kyc_document(
+  kyc_add_document(
     profile_id: Int!
     uploaded_file_id: Int!
     type: String!
     side: String!
-  ): AddKycDocumentOutput
+  ): KycAddDocumentOutput
 }
 
 type Mutation {
@@ -33,13 +33,13 @@ type Query {
 }
 
 type Query {
-  get_kyc_form_config(
+  kyc_get_form_config(
     profile_id: Int!
   ): KycFormConfig
 }
 
 type Query {
-  get_kyc_status(
+  kyc_get_status(
     profile_id: Int!
   ): KycStatus
 }
@@ -136,12 +136,12 @@ type Query {
 }
 
 type Mutation {
-  link_trading_bank_account_with_plaid(
+  trading_link_bank_account_with_plaid(
     profile_id: Int!
     account_id: String!
     account_name: String!
     access_token_id: Int!
-  ): LinkManagedTradingBankAccountWithPlaidOutput
+  ): TradingLinkBankAccountWithPlaidOutput
 }
 
 type Query {
@@ -158,13 +158,13 @@ type Mutation {
   trading_delete_funding_account(
     profile_id: Int!
     funding_account_id: Int!
-  ): ManagedPortfolioDeleteFundingAccountOutput
+  ): TradingDeleteFundingAccountOutput
 }
 
 type Query {
   trading_get_funding_accounts(
     profile_id: Int!
-  ): [ManagedPortfolioFundingAccount]
+  ): [TradingFundingAccount]
 }
 
 type Mutation {
@@ -197,7 +197,7 @@ type Query {
 }
 
 type Mutation {
-  send_kyc_form(
+  kyc_send_form(
     profile_id: Int!
   ): KycStatus
 }
@@ -428,7 +428,7 @@ type KycFormFieldConfig {
   choices: json
 }
 
-type SendKycFormOutput {
+type KycSendFormOutput {
   error_message: String
   status: String
 }
@@ -444,7 +444,7 @@ type PreSignedUploadFormOutput {
   method: String!
 }
 
-type AddKycDocumentOutput {
+type KycAddDocumentOutput {
   error_message: String
 }
 
@@ -462,16 +462,16 @@ type AccountInformation {
   official_name: String!
 }
 
-type LinkManagedTradingBankAccountWithPlaidOutput {
+type TradingLinkBankAccountWithPlaidOutput {
   error_message: String
   id: Int
 }
 
-type ManagedPortfolioFundingAccount {
+type TradingFundingAccount {
   id: Int!
 }
 
-type ManagedPortfolioDeleteFundingAccountOutput {
+type TradingDeleteFundingAccountOutput {
   ok: Boolean
 }
 

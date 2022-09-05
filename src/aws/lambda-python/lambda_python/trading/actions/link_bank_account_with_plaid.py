@@ -3,17 +3,17 @@ from common.context_container import ContextContainer
 from common.exceptions import ApiException, NotFoundException
 from common.hasura_exception import HasuraActionException
 from common.hasura_function import HasuraAction
-from trading import ManagedPortfolioService
+from trading import TradingService
 from psycopg2.extras import RealDictCursor
 from gainy.utils import get_logger
 
 logger = get_logger(__name__)
 
 
-class LinkManagedTradingBankAccountWithPlaid(HasuraAction):
+class TradingLinkBankAccountWithPlaid(HasuraAction):
 
     def __init__(self):
-        super().__init__("link_trading_bank_account_with_plaid", "profile_id")
+        super().__init__("trading_link_bank_account_with_plaid", "profile_id")
 
     def apply(self, input_params, context_container: ContextContainer):
         trading_service = context_container.trading_service

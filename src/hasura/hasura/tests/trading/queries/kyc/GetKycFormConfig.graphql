@@ -1,5 +1,5 @@
-query GetKycFormConfig($profile_id: Int!) {
-    get_kyc_form_config(profile_id: $profile_id) {
+query KycGetFormConfig($profile_id: Int!) {
+    kyc_get_form_config(profile_id: $profile_id) {
         first_name{
             choices
             placeholder

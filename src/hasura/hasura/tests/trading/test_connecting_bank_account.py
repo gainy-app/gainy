@@ -4,7 +4,7 @@ import sys
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
 
 from common import make_graphql_request, db_connect
-from trading.common import fill_kyc_form, send_kyc_form, load_query, PROFILES
+from trading.common import fill_kyc_form, kyc_send_form, load_query, PROFILES
 
 
 def test_create_plaid_link_token():
@@ -28,7 +28,7 @@ def test_full_flow():
     profile_user_id = PROFILES[0]['user_id']
 
     fill_kyc_form(profile_id, profile_user_id)
-    send_kyc_form(profile_id, profile_user_id)
+    kyc_send_form(profile_id, profile_user_id)
 
     access_token = 'access-sandbox-23e0b768-697b-4c89-ad1a-9ccf0d49f0be'
     item_id = 'XvQARLzQKBh79bJ74n39twjGEGQVZpudxZgw3'
@@ -52,13 +52,13 @@ def test_full_flow():
 
     data = make_graphql_request(
         load_query('connecting_bank_account',
-                   'LinkManagedTradingBankAccountWithPlaid'), {
+                   'TradingLinkBankAccountWithPlaid'), {
                        "profile_id": profile_id,
                        "account_id": account_id,
                        "account_name": "test",
                        "access_token_id": access_token_id,
                    },
-        profile_user_id)['data']['link_trading_bank_account_with_plaid']
+        profile_user_id)['data']['trading_link_bank_account_with_plaid']
 
     assert "error_message" in data
     assert data["error_message"] is None
@@ -69,7 +69,7 @@ def test_full_flow():
 
     data = make_graphql_request(
         load_query('connecting_bank_account',
-                   'ManagedPortfolioGetFundingAccountsWithUpdatedBalance'), {
+                   'TradingGetFundingAccountsWithUpdatedBalance'), {
                        "profile_id": profile_id,
                    }, profile_user_id)['data']['trading_get_funding_accounts']
 
@@ -77,12 +77,10 @@ def test_full_flow():
     assert funding_account_id in funding_account_ids
 
     data = make_graphql_request(
-        load_query('connecting_bank_account',
-                   'ManagedPortfolioDeleteFundingAccount'), {
-                       "profile_id": profile_id,
-                       "funding_account_id": funding_account_id,
-                   },
-        profile_user_id)['data']['trading_delete_funding_account']
+        load_query('connecting_bank_account', 'TradingDeleteFundingAccount'), {
+            "profile_id": profile_id,
+            "funding_account_id": funding_account_id,
+        }, profile_user_id)['data']['trading_delete_funding_account']
 
     assert "ok" in data
     assert data["ok"]
