@@ -136,7 +136,7 @@ type Query {
 }
 
 type Mutation {
-  link_managed_trading_bank_account_with_plaid(
+  link_trading_bank_account_with_plaid(
     profile_id: Int!
     account_id: String!
     account_name: String!
@@ -155,14 +155,14 @@ type Query {
 }
 
 type Mutation {
-  managed_portfolio_delete_funding_account(
+  trading_delete_funding_account(
     profile_id: Int!
     funding_account_id: Int!
   ): ManagedPortfolioDeleteFundingAccountOutput
 }
 
 type Query {
-  managed_portfolio_get_funding_accounts(
+  trading_get_funding_accounts(
     profile_id: Int!
   ): [ManagedPortfolioFundingAccount]
 }

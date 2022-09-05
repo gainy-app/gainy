@@ -1,7 +1,7 @@
 from common.context_container import ContextContainer
 from common.exceptions import NotFoundException
 from common.hasura_function import HasuraAction
-from managed_portfolio.models import ManagedPortfolioFundingAccount
+from trading.models import ManagedPortfolioFundingAccount
 from gainy.utils import get_logger
 
 logger = get_logger(__name__)
@@ -9,7 +9,7 @@ logger = get_logger(__name__)
 
 class ManagedPortfolioDeleteFundingAccount(HasuraAction):
 
-    def __init__(self, action_name="managed_portfolio_delete_funding_account"):
+    def __init__(self, action_name="trading_delete_funding_account"):
         super().__init__(action_name, "profile_id")
 
     def apply(self, input_params, context_container: ContextContainer):
@@ -22,7 +22,7 @@ class ManagedPortfolioDeleteFundingAccount(HasuraAction):
         if not funding_account or funding_account.profile_id != profile_id:
             raise NotFoundException()
 
-        context_container.managed_portfolio_service.delete_funding_account(
+        context_container.trading_service.delete_funding_account(
             funding_account)
 
         return {"ok": True}

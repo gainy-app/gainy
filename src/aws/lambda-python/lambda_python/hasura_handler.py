@@ -14,7 +14,7 @@ from search.news_search import SearchNews
 from triggers import *
 from actions import *
 from web import *
-from managed_portfolio.actions import *
+from trading.actions import *
 
 setup_exception_logger_hook()
 

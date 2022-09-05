@@ -10,7 +10,7 @@
 
 
 ### Generate link token
-Same query as it is for connecting a portfolio account. For Trading purposes the purpose must be set to `managed_trading` 
+Same query as it is for connecting a portfolio account. For Trading purposes the purpose must be set to `trading` 
 ```graphql
 query CreatePlaidLinkToken(
     $profile_id: Int!
@@ -32,7 +32,7 @@ query CreatePlaidLinkToken(
 ```
 
 ### Exchange public_token and list accounts
-Same query as it is for connecting a portfolio account. For Trading purposes the purpose must be set to `managed_trading`. If purpose is `managed_trading`, then response will contain a list of accounts for the next step. 
+Same query as it is for connecting a portfolio account. For Trading purposes the purpose must be set to `trading`. If purpose is `trading`, then response will contain a list of accounts for the next step. 
 ```graphql
 query LinkPlaidAccount(
     $profile_id: Int!
@@ -71,7 +71,7 @@ mutation LinkManagedTradingBankAccountWithPlaid(
    $account_name: String!
    $access_token_id: Int!
 ) {
-   link_managed_trading_bank_account_with_plaid(
+   link_trading_bank_account_with_plaid(
       profile_id: $profile_id
       account_id: $account_id
       account_name: $account_name
@@ -92,7 +92,7 @@ mutation LinkManagedTradingBankAccountWithPlaid(
 With updated balances
 ```graphql
 query ManagedPortfolioGetFundingAccountsWithUpdatedBalance($profile_id: Int!) {
-    managed_portfolio_get_funding_accounts(profile_id: $profile_id) {
+    trading_get_funding_accounts(profile_id: $profile_id) {
         funding_account {
             id
             balance
@@ -104,7 +104,7 @@ query ManagedPortfolioGetFundingAccountsWithUpdatedBalance($profile_id: Int!) {
 With updated balances
 ```graphql
 query ManagedPortfolioGetFundingAccounts($profile_id: Int!) {
-    app_managed_portfolio_funding_accounts(where: {profile_id: {_eq: $profile_id}}) {
+    app_trading_funding_accounts(where: {profile_id: {_eq: $profile_id}}) {
         id
         balance
         name
@@ -119,7 +119,7 @@ mutation ManagedPortfolioDeleteFundingAccount(
    $profile_id: Int!
    $funding_account_id: Int!
 ) {
-   managed_portfolio_delete_funding_account(
+   trading_delete_funding_account(
       profile_id: $profile_id
       funding_account_id: $funding_account_id
    ) {

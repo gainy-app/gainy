@@ -1,5 +1,5 @@
 import json
-from managed_portfolio.models import KycDocument
+from trading.models import KycDocument
 from psycopg2.extras import RealDictCursor
 from gainy.data_access.repository import Repository
 

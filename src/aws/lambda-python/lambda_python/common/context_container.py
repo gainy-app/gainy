@@ -4,9 +4,9 @@ from portfolio.plaid.service import PlaidService
 from portfolio.service import PortfolioService
 from portfolio.service.chart import PortfolioChartService
 from portfolio.repository import PortfolioRepository
-from managed_portfolio import ManagedPortfolioService, ManagedPortfolioRepository
-from managed_portfolio.drivewealth.provider import DriveWealthProvider
-from managed_portfolio.drivewealth.repository import DriveWealthRepository
+from trading import ManagedPortfolioService, ManagedPortfolioRepository
+from trading.drivewealth.provider import DriveWealthProvider
+from trading.drivewealth.repository import DriveWealthRepository
 
 from gainy.recommendation.repository import RecommendationRepository
 from gainy.data_access.repository import Repository
@@ -54,14 +54,13 @@ class ContextContainer():
         return DriveWealthProvider(self.drivewealth_repository,
                                    self.plaid_service)
 
-    ## managed_portfolio
+    ## trading
     @cached_property
-    def managed_portfolio_service(self):
-        return ManagedPortfolioService(self.db_conn,
-                                       self.managed_portfolio_repository,
+    def trading_service(self):
+        return ManagedPortfolioService(self.db_conn, self.trading_repository,
                                        self.drivewealth_provider,
                                        self.plaid_service)
 
     @cached_property
-    def managed_portfolio_repository(self):
+    def trading_repository(self):
         return ManagedPortfolioRepository(self.db_conn)

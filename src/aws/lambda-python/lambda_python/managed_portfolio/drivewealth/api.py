@@ -2,7 +2,7 @@ import os
 import datetime
 import dateutil
 import requests
-from managed_portfolio.models import KycDocument
+from trading.models import KycDocument
 from common.exceptions import ApiException
 from gainy.utils import get_logger, env
 

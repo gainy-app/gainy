@@ -3,7 +3,7 @@ from common.context_container import ContextContainer
 from common.exceptions import ApiException, NotFoundException
 from common.hasura_exception import HasuraActionException
 from common.hasura_function import HasuraAction
-from managed_portfolio import ManagedPortfolioService
+from trading import ManagedPortfolioService
 from psycopg2.extras import RealDictCursor
 from gainy.utils import get_logger
 
@@ -13,11 +13,10 @@ logger = get_logger(__name__)
 class LinkManagedTradingBankAccountWithPlaid(HasuraAction):
 
     def __init__(self):
-        super().__init__("link_managed_trading_bank_account_with_plaid",
-                         "profile_id")
+        super().__init__("link_trading_bank_account_with_plaid", "profile_id")
 
     def apply(self, input_params, context_container: ContextContainer):
-        managed_portfolio_service = context_container.managed_portfolio_service
+        trading_service = context_container.trading_service
         profile_id = input_params["profile_id"]
         account_id = input_params["account_id"]
         access_token_id = input_params["access_token_id"]
@@ -37,7 +36,7 @@ class LinkManagedTradingBankAccountWithPlaid(HasuraAction):
             raise NotFoundException('Token not found')
 
         try:
-            funding_account = managed_portfolio_service.link_bank_account_with_plaid(
+            funding_account = trading_service.link_bank_account_with_plaid(
                 access_token, account_name, account_id)
         except Exception as e:
             logger.exception(e)

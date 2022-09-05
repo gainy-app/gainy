@@ -78,7 +78,7 @@ class DriveWealthAccount(BaseDriveWealthModel):
 class DriveWealthBankAccount(BaseDriveWealthModel):
     ref_id = None
     drivewealth_user_id = None
-    managed_portfolio_funding_account_id = None
+    trading_funding_account_id = None
     plaid_access_token_id = None
     bank_account_nickname = None
     bank_account_number = None

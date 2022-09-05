@@ -1,6 +1,6 @@
 import json
 from typing import Any, Iterable, Dict, List
-from managed_portfolio.drivewealth.models import DriveWealthAccount, DriveWealthDocument, DriveWealthUser, DriveWealthBankAccount
+from trading.drivewealth.models import DriveWealthAccount, DriveWealthDocument, DriveWealthUser, DriveWealthBankAccount
 from psycopg2.extras import RealDictCursor
 from psycopg2 import sql
 from gainy.data_access.repository import Repository

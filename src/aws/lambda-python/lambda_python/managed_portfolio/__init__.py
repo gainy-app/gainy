@@ -1,2 +1,2 @@
-from managed_portfolio.service import ManagedPortfolioService
-from managed_portfolio.repository import ManagedPortfolioRepository
+from trading.service import ManagedPortfolioService
+from trading.repository import ManagedPortfolioRepository

@@ -4,7 +4,7 @@ import sys
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
 
 from common import make_graphql_request, db_connect
-from managed_portfolio.common import fill_kyc_form, send_kyc_form, load_query, PROFILES
+from trading.common import fill_kyc_form, send_kyc_form, load_query, PROFILES
 
 
 def test_create_plaid_link_token():
@@ -16,7 +16,7 @@ def test_create_plaid_link_token():
             "profile_id": profile_id,
             "redirect_uri": "https://app.gainy.application.ios",
             "env": "sandbox",
-            "purpose": "managed_trading",
+            "purpose": "trading",
         }, profile_user_id)['data']['create_plaid_link_token']
 
     assert "link_token" in data
@@ -46,7 +46,7 @@ def test_full_flow():
                     "access_token":
                     'access-sandbox-23e0b768-697b-4c89-ad1a-9ccf0d49f0be',
                     "item_id": 'XvQARLzQKBh79bJ74n39twjGEGQVZpudxZgw3',
-                    "purpose": 'managed_trading',
+                    "purpose": 'trading',
                 })
             access_token_id = cursor.fetchone()[0]
 
@@ -57,8 +57,8 @@ def test_full_flow():
                        "account_id": account_id,
                        "account_name": "test",
                        "access_token_id": access_token_id,
-                   }, profile_user_id
-    )['data']['link_managed_trading_bank_account_with_plaid']
+                   },
+        profile_user_id)['data']['link_trading_bank_account_with_plaid']
 
     assert "error_message" in data
     assert data["error_message"] is None
@@ -71,8 +71,7 @@ def test_full_flow():
         load_query('connecting_bank_account',
                    'ManagedPortfolioGetFundingAccountsWithUpdatedBalance'), {
                        "profile_id": profile_id,
-                   },
-        profile_user_id)['data']['managed_portfolio_get_funding_accounts']
+                   }, profile_user_id)['data']['trading_get_funding_accounts']
 
     funding_account_ids = [i["funding_account"]["id"] for i in data]
     assert funding_account_id in funding_account_ids
@@ -83,7 +82,7 @@ def test_full_flow():
                        "profile_id": profile_id,
                        "funding_account_id": funding_account_id,
                    },
-        profile_user_id)['data']['managed_portfolio_delete_funding_account']
+        profile_user_id)['data']['trading_delete_funding_account']
 
     assert "ok" in data
     assert data["ok"]

@@ -4,7 +4,7 @@ mutation LinkManagedTradingBankAccountWithPlaid(
     $account_name: String!
     $access_token_id: Int!
 ) {
-    link_managed_trading_bank_account_with_plaid(
+    link_trading_bank_account_with_plaid(
         profile_id: $profile_id
         account_id: $account_id
         account_name: $account_name

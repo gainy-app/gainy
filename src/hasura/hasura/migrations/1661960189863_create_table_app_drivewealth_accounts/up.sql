@@ -15,7 +15,7 @@ CREATE TABLE "app"."drivewealth_accounts"
     "updated_at"                    timestamptz NOT NULL DEFAULT now(),
     PRIMARY KEY ("ref_id"),
     FOREIGN KEY ("drivewealth_user_id") REFERENCES "app"."drivewealth_users" ("ref_id") ON UPDATE cascade ON DELETE cascade,
-    FOREIGN KEY ("trading_account_id") REFERENCES "app"."managed_portfolio_trading_accounts" ("id") ON UPDATE set null ON DELETE set null
+    FOREIGN KEY ("trading_account_id") REFERENCES "app"."trading_accounts" ("id") ON UPDATE set null ON DELETE set null
 );
 CREATE OR REPLACE FUNCTION "app"."set_current_timestamp_updated_at"()
     RETURNS TRIGGER AS

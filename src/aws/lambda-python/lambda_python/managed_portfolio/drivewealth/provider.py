@@ -1,10 +1,10 @@
 import base64
 import io
 from portfolio.plaid import PlaidService
-from managed_portfolio.models import ProfileKycStatus, KycDocument, ManagedPortfolioTradingAccount
-from managed_portfolio.drivewealth.models import DriveWealthBankAccount, DriveWealthAccount
-from managed_portfolio.drivewealth.api import DriveWealthApi
-from managed_portfolio.drivewealth.repository import DriveWealthRepository
+from trading.models import ProfileKycStatus, KycDocument, ManagedPortfolioTradingAccount
+from trading.drivewealth.models import DriveWealthBankAccount, DriveWealthAccount
+from trading.drivewealth.api import DriveWealthApi
+from trading.drivewealth.repository import DriveWealthRepository
 from gainy.utils import get_logger
 
 logger = get_logger(__name__)
@@ -120,13 +120,10 @@ class DriveWealthProvider:
                                               account_id)
 
     def delete_funding_account(
-            self, managed_portfolio_funding_account_id: int
-    ) -> DriveWealthBankAccount:
+            self, trading_funding_account_id: int) -> DriveWealthBankAccount:
         drivewealth_bank_account = self.drivewealth_repository.find_one(
-            DriveWealthBankAccount, {
-                "managed_portfolio_funding_account_id":
-                managed_portfolio_funding_account_id
-            })
+            DriveWealthBankAccount,
+            {"trading_funding_account_id": trading_funding_account_id})
         self.api.delete_bank_account(drivewealth_bank_account.ref_id)
         self.drivewealth_repository.delete(drivewealth_bank_account)
 

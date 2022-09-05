@@ -16,11 +16,11 @@
        - cash: `target = actual`
 
 Data used: 
-- managed_portfolio_trading_accounts 
-- managed_portfolio_bank_accounts
+- trading_accounts 
+- trading_bank_accounts
 - drivewealth_bank_accounts 
 - drivewealth_portfolios
-- managed_portfolio_money_flow
+- trading_money_flow
 
 ### **[TODO]** Commissions flow
 https://stripe.com/docs/payments/save-and-reuse
@@ -71,7 +71,7 @@ Data used: payment_methods, invoices, invoice_payments
     }
     ```
    - TradingService.reconfigure_ttf_holdings(profile_id, collection_id, weights, absolute_amount_delta_cents, relative_amount_delta_percent)
-     - Create new managed_portfolio_collection_versions, managed_portfolio_collection_contents 
+     - Create new trading_collection_versions, trading_collection_contents 
      - Update account buying power, Portfolio status
      - Create or update Fund
      - Calculate `relative_weight_change`
@@ -88,16 +88,16 @@ Data used: payment_methods, invoices, invoice_payments
 3. Get actual TTF holding weights and amount
 
 Data used: 
-- managed_portfolio_collection_versions
-- managed_portfolio_collection_contents
+- trading_collection_versions
+- trading_collection_contents
 - drivewealth_portfolios
 - drivewealth_accounts
 - drivewealth_funds
 - drivewealth_autopilot_run
 
 ### **[TODO]** History
-1. Get rebalancing history (managed_portfolio_collection_versions with status `complete`) 
-2. Get deposits / withdrawals history with actual statuses (managed_portfolio_money_flow) 
+1. Get rebalancing history (trading_collection_versions with status `complete`) 
+2. Get deposits / withdrawals history with actual statuses (trading_money_flow) 
 3. Get commission payment history 
 
 
@@ -139,7 +139,7 @@ Data used:
   - result: boolean
   - response: json
 
-- managed_portfolio_collection_versions:
+- trading_collection_versions:
   - id: int
   - profile_id: int
   - collection_uniq_id: string
@@ -147,9 +147,9 @@ Data used:
   - actualAmount: int
   - status: string
 
-- managed_portfolio_collection_contents:
+- trading_collection_contents:
   - id: int
-  - managed_portfolio_collection_version_id: int
+  - trading_collection_version_id: int
   - symbol: string
   - target_weight: numeric
 
@@ -163,17 +163,17 @@ Data used:
 
 - drivewealth_funds
   - ref_id: string
-  - managed_portfolio_collection_version_id: int
+  - trading_collection_version_id: int
   - raw_data: json
 
 - drivewealth_autopilot_run
   - ref_id: string
-  - managed_portfolio_collection_version_id: int
+  - trading_collection_version_id: int
   - status: string
   - drivewealth_account_id: int
   - raw_data: json
 
-- managed_portfolio_money_flow
+- trading_money_flow
   - id: int
   - profile_id: int
   - amount: int
@@ -182,8 +182,8 @@ Data used:
 
 ## SQS
 
-1. Update `managed_portfolio_collection_versions` status on `drivewealth_autopilot_run` execution
-2. Update `managed_portfolio_money_flow` status on deposit / withdrawal execution
+1. Update `trading_collection_versions` status on `drivewealth_autopilot_run` execution
+2. Update `trading_money_flow` status on deposit / withdrawal execution
 
 ## Questions
 

@@ -50,7 +50,7 @@ class ManagedPortfolioTradingAccount(BaseModel):
 
     @classproperty
     def table_name(self) -> str:
-        return "managed_portfolio_trading_accounts"
+        return "trading_accounts"
 
 
 class ManagedPortfolioFundingAccount(BaseModel):
@@ -73,4 +73,4 @@ class ManagedPortfolioFundingAccount(BaseModel):
 
     @classproperty
     def table_name(self) -> str:
-        return "managed_portfolio_funding_accounts"
+        return "trading_funding_accounts"

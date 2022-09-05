@@ -101,7 +101,7 @@ actions:
       handler: '{{AWS_LAMBDA_API_GATEWAY_ENDPOINT}}/hasuraAction'
     permissions:
       - role: user
-  - name: link_managed_trading_bank_account_with_plaid
+  - name: link_trading_bank_account_with_plaid
     definition:
       kind: synchronous
       handler: '{{AWS_LAMBDA_API_GATEWAY_ENDPOINT}}/hasuraAction'
@@ -113,13 +113,13 @@ actions:
       handler: '{{AWS_LAMBDA_API_GATEWAY_ENDPOINT}}/hasuraAction'
     permissions:
       - role: user
-  - name: managed_portfolio_delete_funding_account
+  - name: trading_delete_funding_account
     definition:
       kind: synchronous
       handler: '{{AWS_LAMBDA_API_GATEWAY_ENDPOINT}}/hasuraAction'
     permissions:
       - role: user
-  - name: managed_portfolio_get_funding_accounts
+  - name: trading_get_funding_accounts
     definition:
       kind: ""
       handler: '{{AWS_LAMBDA_API_GATEWAY_ENDPOINT}}/hasuraAction'
@@ -322,7 +322,7 @@ custom_types:
       relationships:
         - remote_table:
             schema: app
-            name: managed_portfolio_funding_accounts
+            name: trading_funding_accounts
           name: funding_account
           source: default
           type: object
@@ -332,7 +332,7 @@ custom_types:
       relationships:
         - remote_table:
             schema: app
-            name: managed_portfolio_funding_accounts
+            name: trading_funding_accounts
           name: funding_account
           source: default
           type: object

@@ -220,7 +220,7 @@
         check: null
 - table:
     schema: app
-    name: managed_portfolio_funding_accounts
+    name: trading_funding_accounts
   object_relationships:
     - name: profile
       using:

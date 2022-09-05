@@ -4,7 +4,7 @@ import sys
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
 
 from common import make_graphql_request, db_connect
-from managed_portfolio.common import fill_kyc_form, send_kyc_form, load_query, PROFILES
+from trading.common import fill_kyc_form, send_kyc_form, load_query, PROFILES
 
 
 def test_upsert_kyc_form():

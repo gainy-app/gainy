@@ -2,7 +2,7 @@ CREATE TABLE "app"."drivewealth_bank_accounts"
 (
     "ref_id"                               varchar     NOT NULL,
     "drivewealth_user_id"                  varchar     NOT NULL,
-    "managed_portfolio_funding_account_id" integer unique,
+    "trading_funding_account_id" integer unique,
     "plaid_access_token_id"                integer,
     "plaid_account_id"                     varchar,
     "status"                               varchar,
@@ -16,7 +16,7 @@ CREATE TABLE "app"."drivewealth_bank_accounts"
     PRIMARY KEY ("ref_id"),
     FOREIGN KEY ("drivewealth_user_id") REFERENCES "app"."drivewealth_users" ("ref_id") ON UPDATE cascade ON DELETE cascade,
     FOREIGN KEY ("plaid_access_token_id") REFERENCES "app"."profile_plaid_access_tokens" ("id") ON UPDATE restrict ON DELETE restrict,
-    FOREIGN KEY ("managed_portfolio_funding_account_id") REFERENCES "app"."managed_portfolio_funding_accounts" ("id") ON UPDATE restrict ON DELETE restrict
+    FOREIGN KEY ("trading_funding_account_id") REFERENCES "app"."trading_funding_accounts" ("id") ON UPDATE restrict ON DELETE restrict
 );
 CREATE OR REPLACE FUNCTION "app"."set_current_timestamp_updated_at"()
     RETURNS TRIGGER AS

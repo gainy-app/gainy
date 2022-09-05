@@ -7,9 +7,9 @@ from portfolio.plaid import PlaidService
 from portfolio.plaid.common import handle_error
 from services import S3
 from portfolio.plaid.models import PlaidAccessToken
-from managed_portfolio.models import KycDocument, ManagedPortfolioFundingAccount
-from managed_portfolio.drivewealth import DriveWealthProvider
-from managed_portfolio.repository import ManagedPortfolioRepository
+from trading.models import KycDocument, ManagedPortfolioFundingAccount
+from trading.drivewealth import DriveWealthProvider
+from trading.repository import ManagedPortfolioRepository
 from gainy.utils import get_logger
 from gainy.data_access.repository import Repository
 
@@ -18,12 +18,11 @@ logger = get_logger(__name__)
 
 class ManagedPortfolioService:
 
-    def __init__(self, db_conn,
-                 managed_portfolio_repository: ManagedPortfolioRepository,
+    def __init__(self, db_conn, trading_repository: ManagedPortfolioRepository,
                  drivewealth_provider: DriveWealthProvider,
                  plaid_service: PlaidService):
         self.db_conn = db_conn
-        self.managed_portfolio_repository = managed_portfolio_repository
+        self.trading_repository = trading_repository
         self.drivewealth_provider = drivewealth_provider
         self.plaid_service = plaid_service
 
@@ -50,8 +49,7 @@ class ManagedPortfolioService:
         (s3_bucket, s3_key, content_type) = row
         document.content_type = content_type
 
-        self.managed_portfolio_repository.upsert_kyc_document(
-            profile_id, document)
+        self.trading_repository.upsert_kyc_document(profile_id, document)
 
         file_stream = io.BytesIO()
         S3().download_file(s3_bucket, s3_key, file_stream)
@@ -69,7 +67,7 @@ class ManagedPortfolioService:
         except plaid.ApiException as e:
             handle_error(e)
 
-        repository = self.managed_portfolio_repository
+        repository = self.trading_repository
         funding_account = repository.find_one(
             ManagedPortfolioFundingAccount,
             {"plaid_access_token_id": access_token['id']})
@@ -82,7 +80,7 @@ class ManagedPortfolioService:
 
             repository.persist(funding_account)
 
-        provider_bank_account.managed_portfolio_funding_account_id = funding_account.id
+        provider_bank_account.trading_funding_account_id = funding_account.id
         logger.info(provider_bank_account.to_dict())
         repository.persist(provider_bank_account)
 
@@ -100,7 +98,7 @@ class ManagedPortfolioService:
                 funding_account)
 
         plaid_service = self.plaid_service
-        repository = self.managed_portfolio_repository
+        repository = self.trading_repository
         for plaid_access_token_id, funding_accounts in by_at_id.items():
             access_token = repository.find_one(PlaidAccessToken,
                                                {"id": plaid_access_token_id})
@@ -126,7 +124,7 @@ class ManagedPortfolioService:
             self, funding_account: ManagedPortfolioFundingAccount):
         self.get_provider_service().delete_funding_account(funding_account.id)
 
-        repository = self.managed_portfolio_repository
+        repository = self.trading_repository
         repository.delete(funding_account)
         repository.delete_by(PlaidAccessToken,
                              {"id": funding_account.plaid_access_token_id})

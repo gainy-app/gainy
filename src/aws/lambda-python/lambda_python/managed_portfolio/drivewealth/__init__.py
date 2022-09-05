@@ -1,1 +1,1 @@
-from managed_portfolio.drivewealth.provider import DriveWealthProvider
+from trading.drivewealth.provider import DriveWealthProvider
