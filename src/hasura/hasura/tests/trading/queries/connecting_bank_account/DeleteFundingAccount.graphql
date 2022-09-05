@@ -1,4 +1,4 @@
-mutation TradingDeleteFundingAccount(
+mutation DeleteFundingAccount(
     $profile_id: Int!
     $funding_account_id: Int!
 ) {

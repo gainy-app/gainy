@@ -51,14 +51,12 @@ def test_full_flow():
             access_token_id = cursor.fetchone()[0]
 
     data = make_graphql_request(
-        load_query('connecting_bank_account',
-                   'TradingLinkBankAccountWithPlaid'), {
-                       "profile_id": profile_id,
-                       "account_id": account_id,
-                       "account_name": "test",
-                       "access_token_id": access_token_id,
-                   },
-        profile_user_id)['data']['trading_link_bank_account_with_plaid']
+        load_query('connecting_bank_account', 'LinkBankAccountWithPlaid'), {
+            "profile_id": profile_id,
+            "account_id": account_id,
+            "account_name": "test",
+            "access_token_id": access_token_id,
+        }, profile_user_id)['data']['trading_link_bank_account_with_plaid']
 
     assert "error_message" in data
     assert data["error_message"] is None
@@ -69,7 +67,7 @@ def test_full_flow():
 
     data = make_graphql_request(
         load_query('connecting_bank_account',
-                   'TradingGetFundingAccountsWithUpdatedBalance'), {
+                   'GetFundingAccountsWithUpdatedBalance'), {
                        "profile_id": profile_id,
                    }, profile_user_id)['data']['trading_get_funding_accounts']
 
@@ -77,7 +75,7 @@ def test_full_flow():
     assert funding_account_id in funding_account_ids
 
     data = make_graphql_request(
-        load_query('connecting_bank_account', 'TradingDeleteFundingAccount'), {
+        load_query('connecting_bank_account', 'DeleteFundingAccount'), {
             "profile_id": profile_id,
             "funding_account_id": funding_account_id,
         }, profile_user_id)['data']['trading_delete_funding_account']

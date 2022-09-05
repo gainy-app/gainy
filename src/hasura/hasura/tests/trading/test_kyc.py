@@ -19,7 +19,7 @@ def test_get_kyc_form():
     profile_user_id = PROFILES[0]['user_id']
 
     make_graphql_request(load_query('kyc',
-                                    'GetKycForm'), {"profile_id": profile_id},
+                                    'GetForm'), {"profile_id": profile_id},
                          profile_user_id)['data']['app_kyc_form_by_pk']
 
 
@@ -51,7 +51,7 @@ def test_kyc_get_status():
     profile_id = PROFILES[0]['id']
     profile_user_id = PROFILES[0]['user_id']
 
-    response = make_graphql_request(load_query('kyc', 'KycGetStatus'),
+    response = make_graphql_request(load_query('kyc', 'GetStatus'),
                                     {"profile_id": profile_id},
                                     profile_user_id)['data']['kyc_get_status']
 

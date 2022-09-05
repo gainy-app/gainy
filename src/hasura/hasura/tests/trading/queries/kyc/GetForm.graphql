@@ -1,4 +1,4 @@
-query GetKycForm($profile_id: Int!) {
+query GetForm($profile_id: Int!) {
     app_kyc_form_by_pk(profile_id: $profile_id) {
         address_city
         address_country

@@ -20,7 +20,7 @@ def load_query(directory, query_name):
 
 def fill_kyc_form(profile_id, profile_user_id):
     kyc_form_config = make_graphql_request(
-        load_query('kyc', 'KycGetFormConfig'), {"profile_id": profile_id},
+        load_query('kyc', 'GetFormConfig'), {"profile_id": profile_id},
         profile_user_id)['data']['kyc_get_form_config']
 
     signed_by = " ".join([
@@ -56,15 +56,15 @@ def fill_kyc_form(profile_id, profile_user_id):
     }
 
     make_graphql_request(
-        load_query('kyc', 'UpsertKycForm'), data,
+        load_query('kyc', 'UpsertForm'), data,
         profile_user_id)['data']['insert_app_kyc_form']['returning'][0]
     make_graphql_request(
-        load_query('kyc', 'UpsertKycForm'), data,
+        load_query('kyc', 'UpsertForm'), data,
         profile_user_id)['data']['insert_app_kyc_form']['returning'][0]
 
 
 def kyc_send_form(profile_id, profile_user_id):
-    response = make_graphql_request(load_query('kyc', 'KycSendForm'),
+    response = make_graphql_request(load_query('kyc', 'SendForm'),
                                     {"profile_id": profile_id},
                                     profile_user_id)['data']['kyc_send_form']
 

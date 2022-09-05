@@ -1,4 +1,4 @@
-mutation TradingLinkBankAccountWithPlaid(
+mutation LinkBankAccountWithPlaid(
     $profile_id: Int!
     $account_id: String!
     $account_name: String!

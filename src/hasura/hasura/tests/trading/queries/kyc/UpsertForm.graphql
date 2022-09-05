@@ -1,4 +1,4 @@
-mutation UpsertKycForm (
+mutation UpsertForm (
     $address_city: String
     $address_country: String
     $address_postal_code: String
