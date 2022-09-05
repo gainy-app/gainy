@@ -3,6 +3,7 @@ import datetime
 import dateutil
 import requests
 from trading.models import KycDocument
+from trading.drivewealth.models import DriveWealthAccount, DriveWealthBankAccount
 from common.exceptions import ApiException
 from gainy.utils import get_logger, env
 
@@ -76,6 +77,38 @@ class DriveWealthApi:
 
     def delete_bank_account(self, ref_id: str):
         return self._make_request("DELETE", f"/bank-accounts/{ref_id}")
+
+    def create_deposit(self, amount_cents: int, account: DriveWealthAccount,
+                       bank_account: DriveWealthBankAccount):
+        return self._make_request(
+            "POST", "/funding/deposits", {
+                'accountNo': account.ref_no,
+                'amount': amount_cents / 100,
+                'currency': 'USD',
+                'type': 'INSTANT_FUNDING',
+                'details': {
+                    "accountHolderName": bank_account.holder_name,
+                    "bankAccountType": bank_account.bank_account_type,
+                    "bankAccountNumber": bank_account.bank_account_number,
+                    "bankRoutingNumber": bank_account.bank_routing_number,
+                    "country": "USA"
+                },
+            })
+
+    def create_redemption(self, amount_cents, account, bank_account):
+        return self._make_request(
+            "POST", "/funding/redemptions", {
+                'accountNo': account.ref_no,
+                'amount': amount_cents / 100,
+                'currency': 'USD',
+                'type': 'ACH_MANUAL',
+                'details': {
+                    "beneficiaryName": bank_account.holder_name,
+                    "bankAccountType": bank_account.bank_account_type,
+                    "bankAccountNumber": bank_account.bank_account_number,
+                    "bankRoutingNumber": bank_account.bank_routing_number
+                },
+            })
 
     def _get_token(self):
         # TODO redis

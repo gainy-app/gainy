@@ -7,7 +7,7 @@ from portfolio.plaid import PlaidService
 from portfolio.plaid.common import handle_error
 from services import S3
 from portfolio.plaid.models import PlaidAccessToken
-from trading.models import KycDocument, TradingFundingAccount
+from trading.models import KycDocument, FundingAccount, TradingAccount, TradingMoneyFlow
 from trading.drivewealth import DriveWealthProvider
 from trading.repository import TradingRepository
 from gainy.utils import get_logger
@@ -57,8 +57,9 @@ class TradingService:
         return self.get_provider_service().send_kyc_document(
             profile_id, document, file_stream)
 
-    def link_bank_account_with_plaid(self, access_token, account_name,
-                                     account_id) -> TradingFundingAccount:
+    def link_bank_account_with_plaid(self, access_token: PlaidAccessToken,
+                                     account_name,
+                                     account_id) -> FundingAccount:
         try:
             provider_bank_account = self.get_provider_service(
             ).link_bank_account_with_plaid(access_token, account_id,
@@ -68,25 +69,24 @@ class TradingService:
 
         repository = self.trading_repository
         funding_account = repository.find_one(
-            TradingFundingAccount,
-            {"plaid_access_token_id": access_token['id']})
+            FundingAccount, {"plaid_access_token_id": access_token.id})
         if not funding_account:
-            funding_account = TradingFundingAccount()
-            funding_account.profile_id = access_token['profile_id']
-            funding_account.plaid_access_token_id = access_token['id']
+            funding_account = FundingAccount()
+            funding_account.profile_id = access_token.profile_id
+            funding_account.plaid_access_token_id = access_token.id
             funding_account.plaid_account_id = account_id
             funding_account.name = account_name
 
             repository.persist(funding_account)
 
-        provider_bank_account.trading_funding_account_id = funding_account.id
+        provider_bank_account.funding_account_id = funding_account.id
         logger.info(provider_bank_account.to_dict())
         repository.persist(provider_bank_account)
 
         return funding_account
 
     def update_funding_accounts_balance(
-            self, funding_accounts: Iterable[TradingFundingAccount]):
+            self, funding_accounts: Iterable[FundingAccount]):
         by_at_id = {}
         for funding_account in funding_accounts:
             if not funding_account.plaid_access_token_id:
@@ -119,13 +119,28 @@ class TradingService:
 
             repository.persist(funding_account)
 
-    def delete_funding_account(self, funding_account: TradingFundingAccount):
+    def delete_funding_account(self, funding_account: FundingAccount):
         self.get_provider_service().delete_funding_account(funding_account.id)
 
         repository = self.trading_repository
         repository.delete(funding_account)
         repository.delete_by(PlaidAccessToken,
                              {"id": funding_account.plaid_access_token_id})
+
+    def create_money_flow(self, profile_id: int, amount_cents: int,
+                          trading_account: TradingAccount,
+                          funding_account: FundingAccount):
+        repository = self.trading_repository
+
+        money_flow = TradingMoneyFlow(profile_id, amount_cents,
+                                      trading_account.id, funding_account.id)
+        repository.persist(money_flow)
+
+        self.get_provider_service().transfer_money(money_flow, amount_cents,
+                                                   trading_account.id,
+                                                   funding_account.id)
+
+        return money_flow
 
     def get_provider_service(self):
         return self.drivewealth_provider

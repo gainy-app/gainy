@@ -1,13 +1,4 @@
 type Mutation {
-  kyc_add_document(
-    profile_id: Int!
-    uploaded_file_id: Int!
-    type: String!
-    side: String!
-  ): KycAddDocumentOutput
-}
-
-type Mutation {
   apply_promocode(
     profile_id: Int!
     promocode: String!
@@ -30,18 +21,6 @@ type Query {
     symbol: String!
     limit: Int
   ): [NewsDataPoint]
-}
-
-type Query {
-  kyc_get_form_config(
-    profile_id: Int!
-  ): KycFormConfig
-}
-
-type Query {
-  kyc_get_status(
-    profile_id: Int!
-  ): KycStatus
 }
 
 type Query {
@@ -136,12 +115,30 @@ type Query {
 }
 
 type Mutation {
-  trading_link_bank_account_with_plaid(
+  kyc_add_document(
     profile_id: Int!
-    account_id: String!
-    account_name: String!
-    access_token_id: Int!
-  ): TradingLinkBankAccountWithPlaidOutput
+    uploaded_file_id: Int!
+    type: String!
+    side: String!
+  ): KycAddDocumentOutput
+}
+
+type Query {
+  kyc_get_form_config(
+    profile_id: Int!
+  ): KycFormConfig
+}
+
+type Query {
+  kyc_get_status(
+    profile_id: Int!
+  ): KycStatus
+}
+
+type Mutation {
+  kyc_send_form(
+    profile_id: Int!
+  ): KycStatus
 }
 
 type Query {
@@ -152,19 +149,6 @@ type Query {
     access_token_id: Int
     purpose: String
   ): LinkPlaidAccountOutput
-}
-
-type Mutation {
-  trading_delete_funding_account(
-    profile_id: Int!
-    funding_account_id: Int!
-  ): TradingDeleteFundingAccountOutput
-}
-
-type Query {
-  trading_get_funding_accounts(
-    profile_id: Int!
-  ): [TradingFundingAccount]
 }
 
 type Mutation {
@@ -194,12 +178,6 @@ type Query {
     offset: Int
     limit: Int
   ): [Ticker]
-}
-
-type Mutation {
-  kyc_send_form(
-    profile_id: Int!
-  ): KycStatus
 }
 
 type Mutation {
@@ -234,6 +212,46 @@ type Mutation {
 }
 
 type Mutation {
+  trading_delete_funding_account(
+    profile_id: Int!
+    funding_account_id: Int!
+  ): TradingDeleteFundingAccountOutput
+}
+
+type Mutation {
+  trading_deposit_funds(
+    profile_id: Int!
+    trading_account_id: Int!
+    amount_cents: Int!
+    funding_account_id: Int!
+  ): TradingMoneyFlowOutput
+}
+
+type Query {
+  trading_get_funding_accounts(
+    profile_id: Int!
+  ): [FundingAccount]
+}
+
+type Mutation {
+  trading_link_bank_account_with_plaid(
+    profile_id: Int!
+    account_id: String!
+    account_name: String!
+    access_token_id: Int!
+  ): TradingLinkBankAccountWithPlaidOutput
+}
+
+type Mutation {
+  trading_withdraw_funds(
+    profile_id: Int!
+    trading_account_id: Int!
+    amount_cents: Int!
+    funding_account_id: Int!
+  ): TradingMoneyFlowOutput
+}
+
+type Mutation {
   update_purchases(
     profile_id: Int!
   ): UpdatePurchasesOutput
@@ -241,6 +259,11 @@ type Mutation {
 
 input PlaidWebhookError {
   error_code: Int
+}
+
+input SampleInput {
+  username: String!
+  password: String!
 }
 
 type ChartDataPoint {
@@ -467,11 +490,19 @@ type TradingLinkBankAccountWithPlaidOutput {
   id: Int
 }
 
-type TradingFundingAccount {
+type FundingAccount {
   id: Int!
 }
 
 type TradingDeleteFundingAccountOutput {
   ok: Boolean
+}
+
+type TradingMoneyFlowOutput {
+  trading_money_flow_id: Int!
+}
+
+type SampleOutput {
+  accessToken: String!
 }
 

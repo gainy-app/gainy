@@ -2,25 +2,7 @@
 ## API
 - [KYC](trading/kyc.md)
 - [Connect bank account](trading/connecting_bank_account.md)
-
-### **[TODO]** Deposits / withdrawals
-1. Deposit funds
-   - TradingService.depositFunds(profile_id, trading_account, amount, trading_bank_account)
-2. Withdraw funds
-   - TradingService.withdrawFunds(profile_id, trading_account, amount, trading_bank_account)
-3. Rebalance Portfolio in both cases
-   - TradingService.on_deposit(profile_id, amount_cents)
-     - Update Portfolio status
-        - Portfolio will map to `drivewealth_portfolios`
-     - Rebalance Portfolio funds
-       - cash: `target = actual`
-
-Data used: 
-- trading_accounts 
-- trading_bank_accounts
-- drivewealth_bank_accounts 
-- drivewealth_portfolios
-- trading_money_flow
+- [Deposits / withdrawals](trading/money_flow.md)
 
 ### **[TODO]** Commissions flow
 https://stripe.com/docs/payments/save-and-reuse

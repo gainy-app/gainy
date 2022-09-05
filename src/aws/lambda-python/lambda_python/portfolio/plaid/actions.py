@@ -8,7 +8,7 @@ import plaid
 from portfolio.plaid import PlaidClient, PlaidService
 from portfolio.service import PortfolioService, SERVICE_PLAID
 
-from portfolio.plaid.common import handle_error, PURPOSE_PORTFOLIO, PURPOSE_MANAGED_TRADING
+from portfolio.plaid.common import handle_error, PURPOSE_PORTFOLIO, PURPOSE_TRADING
 from common.context_container import ContextContainer
 from common.hasura_function import HasuraAction
 from common.hasura_exception import HasuraActionException
@@ -21,7 +21,7 @@ DEFAULT_ENV = "development"
 
 def get_purpose(input_params):
     purpose = input_params.get("purpose", "portfolio")
-    if purpose not in [PURPOSE_PORTFOLIO, PURPOSE_MANAGED_TRADING]:
+    if purpose not in [PURPOSE_PORTFOLIO, PURPOSE_TRADING]:
         raise Exception('Wrong purpose')
     return purpose
 
@@ -29,7 +29,7 @@ def get_purpose(input_params):
 def get_purpose_products(purpose):
     if purpose == PURPOSE_PORTFOLIO:
         return ['investments']
-    elif purpose == PURPOSE_MANAGED_TRADING:
+    elif purpose == PURPOSE_TRADING:
         return ['auth']
     else:
         raise Exception('Wrong purpose')
@@ -113,7 +113,7 @@ class LinkPlaidAccount(HasuraAction):
             id = returned[0][0]
 
         accounts = []
-        if purpose == PURPOSE_MANAGED_TRADING:
+        if purpose == PURPOSE_TRADING:
             response = service.get_item_accounts(access_token)
             accounts = [i.to_dict() for i in response]
 

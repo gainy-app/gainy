@@ -1,8 +1,9 @@
 import base64
 import io
 from portfolio.plaid import PlaidService
-from trading.models import ProfileKycStatus, KycDocument, TradingTradingAccount
-from trading.drivewealth.models import DriveWealthBankAccount, DriveWealthAccount
+from portfolio.plaid.models import PlaidAccessToken
+from trading.models import ProfileKycStatus, KycDocument, TradingAccount, TradingMoneyFlow, FundingAccount
+from trading.drivewealth.models import DriveWealthBankAccount, DriveWealthAccount, DriveWealthDeposit, DriveWealthRedemption
 from trading.drivewealth.api import DriveWealthApi
 from trading.drivewealth.repository import DriveWealthRepository
 from gainy.utils import get_logger
@@ -65,12 +66,13 @@ class DriveWealthProvider:
                 {"ref_id": drivewealth_trading_account.ref_id})
 
             if drivewealth_trading_account.trading_account_id is None:
-                trading_account = TradingTradingAccount()
+                # TODO move to somewhere more general
+                trading_account = TradingAccount()
                 trading_account.profile_id = profile_id
                 trading_account.name = drivewealth_trading_account.nickname
             else:
                 trading_account = repository.find_one(
-                    TradingTradingAccount,
+                    TradingAccount,
                     {"id": drivewealth_trading_account.trading_account_id})
 
             trading_account.cash_available_for_trade = drivewealth_trading_account.cash_available_for_trade
@@ -97,35 +99,66 @@ class DriveWealthProvider:
         repository.upsert_kyc_document(document.id, data)
 
     def link_bank_account_with_plaid(
-            self, access_token: dict, account_id: str,
+            self, access_token: PlaidAccessToken, account_id: str,
             account_name: str) -> DriveWealthBankAccount:
         repository = self.drivewealth_repository
         bank_account = repository.find_one(
-            DriveWealthBankAccount,
-            {"plaid_access_token_id": access_token['id']})
+            DriveWealthBankAccount, {"plaid_access_token_id": access_token.id})
         if bank_account:
             return bank_account
 
         processor_token = self.plaid_service.create_processor_token(
-            access_token['access_token'], account_id, "drivewealth")
+            access_token.access_token, account_id, "drivewealth")
 
-        user = repository.get_user(access_token['profile_id'])
+        user = repository.get_user(access_token.profile_id)
         if user is None:
             raise Exception("KYC form has not been sent")
 
         data = self.api.link_bank_account(user.ref_id, processor_token,
                                           account_name)
 
-        return repository.upsert_bank_account(data, access_token['id'],
+        return repository.upsert_bank_account(data, access_token.id,
                                               account_id)
 
-    def delete_funding_account(
-            self, trading_funding_account_id: int) -> DriveWealthBankAccount:
+    def delete_funding_account(self, funding_account_id: int):
         drivewealth_bank_account = self.drivewealth_repository.find_one(
-            DriveWealthBankAccount,
-            {"trading_funding_account_id": trading_funding_account_id})
+            DriveWealthBankAccount, {"funding_account_id": funding_account_id})
         self.api.delete_bank_account(drivewealth_bank_account.ref_id)
         self.drivewealth_repository.delete(drivewealth_bank_account)
+
+    def transfer_money(self, money_flow: TradingMoneyFlow, amount_cents: int,
+                       trading_account_id: int, funding_account_id: int):
+        account = self.drivewealth_repository.find_one(
+            DriveWealthAccount, {"trading_account_id": trading_account_id})
+        bank_account = self.drivewealth_repository.find_one(
+            DriveWealthBankAccount, {"funding_account_id": funding_account_id})
+
+        if amount_cents > 0:
+            response = self.api.create_deposit(amount_cents, account,
+                                               bank_account)
+            entity = DriveWealthDeposit(response)
+        else:
+            response = self.api.create_redemption(amount_cents, account,
+                                                  bank_account)
+            entity = DriveWealthRedemption(response)
+
+        entity.money_flow_id = money_flow.id
+        self._update_money_flow_status(entity, money_flow)
+        self.drivewealth_repository.persist(entity)
+
+        self._on_deposit()
+
+    def _update_money_flow_status(self, entity, money_flow: TradingMoneyFlow):
+        money_flow.status = entity.status
+
+
+#       - Update Portfolio status
+#          - Portfolio will map to `drivewealth_portfolios`
+#       - Rebalance Portfolio funds
+#          - cash: `target = actual`
+
+    def _on_deposit(self):
+        raise Exception('unimplemented')
 
     def _kyc_form_to_documents(self, kyc_form: dict):
         return [

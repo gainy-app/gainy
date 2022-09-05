@@ -82,6 +82,11 @@ class DriveWealthRepository(Repository):
             'bankAccountNumber']
         entity.bank_routing_number = data["bankAccountDetails"][
             'bankRoutingNumber']
+        entity.holder_name = " ".join([
+            data["userDetails"]['firstName'], data["userDetails"]['lastName']
+        ])
+        entity.bank_account_type = data["bankAccountDetails"].get(
+            'bankAccountType')
         if plaid_access_token_id:
             entity.plaid_access_token_id = plaid_access_token_id
         if plaid_account_id:

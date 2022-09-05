@@ -1,7 +1,7 @@
 from common.context_container import ContextContainer
 from common.exceptions import NotFoundException
 from common.hasura_function import HasuraAction
-from trading.models import TradingFundingAccount
+from trading.models import FundingAccount
 from gainy.utils import get_logger
 
 logger = get_logger(__name__)
@@ -17,7 +17,7 @@ class TradingDeleteFundingAccount(HasuraAction):
         profile_id = input_params['profile_id']
 
         repository = context_container.get_repository()
-        funding_account = repository.find_one(TradingFundingAccount,
+        funding_account = repository.find_one(FundingAccount,
                                               {"id": funding_account_id})
         if not funding_account or funding_account.profile_id != profile_id:
             raise NotFoundException()

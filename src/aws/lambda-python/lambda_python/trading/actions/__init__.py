@@ -5,3 +5,5 @@ from trading.actions.kyc.send_form import KycSendForm
 from trading.actions.link_bank_account_with_plaid import TradingLinkBankAccountWithPlaid
 from trading.actions.get_funding_accounts import TradingGetFundingAccounts
 from trading.actions.delete_funding_account import TradingDeleteFundingAccount
+from trading.actions.deposit_funds import TradingDepositFunds
+from trading.actions.withdraw_funds import TradingWithdrawFunds

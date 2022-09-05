@@ -72,6 +72,8 @@ ACTIONS = [
     TradingLinkBankAccountWithPlaid(),
     TradingGetFundingAccounts(),
     TradingDeleteFundingAccount(),
+    TradingDepositFunds(),
+    TradingWithdrawFunds(),
 ]
 
 action_dispatcher = HasuraActionDispatcher(ACTIONS,

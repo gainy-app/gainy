@@ -1,9 +1,10 @@
-from portfolio.plaid.common import PURPOSE_MANAGED_TRADING
+from portfolio.plaid.common import PURPOSE_TRADING
 from common.context_container import ContextContainer
 from common.exceptions import ApiException, NotFoundException
 from common.hasura_exception import HasuraActionException
 from common.hasura_function import HasuraAction
 from trading import TradingService
+from portfolio.plaid.models import PlaidAccessToken
 from psycopg2.extras import RealDictCursor
 from gainy.utils import get_logger
 
@@ -22,17 +23,10 @@ class TradingLinkBankAccountWithPlaid(HasuraAction):
         access_token_id = input_params["access_token_id"]
         account_name = input_params["account_name"]
 
-        query = "select * from app.profile_plaid_access_tokens where id = %(access_token_id)s and profile_id = %(profile_id)s"
-        with context_container.db_conn.cursor(
-                cursor_factory=RealDictCursor) as cursor:
-            cursor.execute(query, {
-                "access_token_id": access_token_id,
-                "profile_id": profile_id,
-            })
-            access_token = cursor.fetchone()
+        access_token = context_container.get_repository().find_one(
+            PlaidAccessToken, {"id": access_token_id})
 
-        if not access_token or access_token[
-                'purpose'] != PURPOSE_MANAGED_TRADING:
+        if not access_token or access_token.purpose != PURPOSE_TRADING or access_token.profile_id != profile_id:
             raise NotFoundException('Token not found')
 
         try:

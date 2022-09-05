@@ -29,7 +29,7 @@ class KycDocument:
         self.side = side
 
 
-class TradingTradingAccount(BaseModel):
+class TradingAccount(BaseModel):
     id = None
     profile_id = None
     name = None
@@ -53,7 +53,7 @@ class TradingTradingAccount(BaseModel):
         return "trading_accounts"
 
 
-class TradingFundingAccount(BaseModel):
+class FundingAccount(BaseModel):
     id = None
     profile_id = None
     plaid_access_token_id = None
@@ -74,3 +74,34 @@ class TradingFundingAccount(BaseModel):
     @classproperty
     def table_name(self) -> str:
         return "trading_funding_accounts"
+
+
+class TradingMoneyFlow(BaseModel):
+    id = None
+    profile_id = None
+    status = None
+    amount_cents = None
+    trading_account_id = None
+    funding_account_id = None
+    created_at = None
+    updated_at = None
+
+    key_fields = ["id"]
+
+    db_excluded_fields = ["created_at", "updated_at"]
+    non_persistent_fields = ["id", "created_at", "updated_at"]
+
+    def __init__(self, profile_id: int, amount_cents: int,
+                 trading_account_id: int, funding_account_id: int):
+        self.profile_id = profile_id
+        self.amount_cents = amount_cents
+        self.trading_account_id = trading_account_id
+        self.funding_account_id = funding_account_id
+
+    @classproperty
+    def schema_name(self) -> str:
+        return "app"
+
+    @classproperty
+    def table_name(self) -> str:
+        return "trading_money_flow"
