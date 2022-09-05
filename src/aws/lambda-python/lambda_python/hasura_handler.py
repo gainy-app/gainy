@@ -14,7 +14,7 @@ from search.news_search import SearchNews
 from triggers import *
 from actions import *
 from web import *
-from managed_portfolio.actions import *
+from trading.actions import *
 
 setup_exception_logger_hook()
 
@@ -65,10 +65,13 @@ ACTIONS = [
     SearchNews(GNEWS_API_TOKEN, REDIS_CACHE_HOST, REDIS_CACHE_PORT),
 
     # Managed Portfolio
-    GetKycFormConfig(),
-    GetKycStatus(),
-    SendKycForm(),
-    AddKycDocument(),
+    KycGetFormConfig(),
+    KycGetStatus(),
+    KycSendForm(),
+    KycAddDocument(),
+    TradingLinkBankAccountWithPlaid(),
+    TradingGetFundingAccounts(),
+    TradingDeleteFundingAccount(),
 ]
 
 action_dispatcher = HasuraActionDispatcher(ACTIONS,

@@ -132,13 +132,14 @@ class SetUserCategories(HasuraTrigger):
                 [(profile_id, category_id, True)
                  for category_id in categories])
 
+        repository = context_container.recommendation_repository
         recommendations_func = ComputeRecommendationsAndPersist(
-            db_conn, profile_id)
-        old_version = recommendations_func.load_version(db_conn)
+            repository, profile_id)
+        old_version = recommendations_func.load_version()
         try:
-            recommendations_func.get_and_persist(db_conn, max_tries=2)
+            recommendations_func.get_and_persist(max_tries=2)
 
-            new_version = recommendations_func.load_version(db_conn)
+            new_version = recommendations_func.load_version()
             logger.info('Calculated Match Scores',
                         extra={
                             **logging_extra,

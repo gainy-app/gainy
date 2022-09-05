@@ -1,10 +1,10 @@
 type Mutation {
-  add_kyc_document(
+  kyc_add_document(
     profile_id: Int!
     uploaded_file_id: Int!
     type: String!
     side: String!
-  ): AddKycDocumentOutput
+  ): KycAddDocumentOutput
 }
 
 type Mutation {
@@ -21,6 +21,7 @@ type Query {
     redirect_uri: String!
     env: String
     access_token_id: Int
+    purpose: String
   ): CreatePlaidLinkTokenOutput
 }
 
@@ -32,13 +33,13 @@ type Query {
 }
 
 type Query {
-  get_kyc_form_config(
+  kyc_get_form_config(
     profile_id: Int!
   ): KycFormConfig
 }
 
 type Query {
-  get_kyc_status(
+  kyc_get_status(
     profile_id: Int!
   ): KycStatus
 }
@@ -134,13 +135,36 @@ type Query {
   ): [Collection]
 }
 
+type Mutation {
+  trading_link_bank_account_with_plaid(
+    profile_id: Int!
+    account_id: String!
+    account_name: String!
+    access_token_id: Int!
+  ): TradingLinkBankAccountWithPlaidOutput
+}
+
 type Query {
   link_plaid_account(
     profile_id: Int!
     public_token: String!
     env: String
     access_token_id: Int
+    purpose: String
   ): LinkPlaidAccountOutput
+}
+
+type Mutation {
+  trading_delete_funding_account(
+    profile_id: Int!
+    funding_account_id: Int!
+  ): TradingDeleteFundingAccountOutput
+}
+
+type Query {
+  trading_get_funding_accounts(
+    profile_id: Int!
+  ): [TradingFundingAccount]
 }
 
 type Mutation {
@@ -173,7 +197,7 @@ type Query {
 }
 
 type Mutation {
-  send_kyc_form(
+  kyc_send_form(
     profile_id: Int!
   ): KycStatus
 }
@@ -298,6 +322,7 @@ type MatchScore {
 type LinkPlaidAccountOutput {
   result: Boolean!
   plaid_access_token_id: Int
+  accounts: [AccountInformation]
 }
 
 type PortfolioHolding {
@@ -403,7 +428,7 @@ type KycFormFieldConfig {
   choices: json
 }
 
-type SendKycFormOutput {
+type KycSendFormOutput {
   error_message: String
   status: String
 }
@@ -419,7 +444,34 @@ type PreSignedUploadFormOutput {
   method: String!
 }
 
-type AddKycDocumentOutput {
+type KycAddDocumentOutput {
   error_message: String
+}
+
+type LinkBankAccountWithPlaidOutput {
+  errorMessage: String
+}
+
+type AccountInformation {
+  account_id: String!
+  balance_available: Int!
+  balance_current: Int!
+  iso_currency_code: String!
+  mask: String!
+  name: String!
+  official_name: String!
+}
+
+type TradingLinkBankAccountWithPlaidOutput {
+  error_message: String
+  id: Int
+}
+
+type TradingFundingAccount {
+  id: Int!
+}
+
+type TradingDeleteFundingAccountOutput {
+  ok: Boolean
 }
 

@@ -1,5 +1,3 @@
-from portfolio.service import PortfolioService
-from portfolio.service.chart import PortfolioChartService
 from portfolio.models import PortfolioChartFilter
 from common.context_container import ContextContainer
 from common.hasura_function import HasuraAction
@@ -13,13 +11,11 @@ class GetPortfolioHoldings(HasuraAction):
     def __init__(self):
         super().__init__("get_portfolio_holdings", "profile_id")
 
-        self.service = PortfolioService()
-
     def apply(self, input_params, context_container: ContextContainer):
-        db_conn = context_container.db_conn
+        service = context_container.portfolio_service
         profile_id = input_params["profile_id"]
         try:
-            holdings = self.service.get_holdings(db_conn, profile_id)
+            holdings = service.get_holdings(profile_id)
         except Exception as e:
             logger.exception(e)
             holdings = []
@@ -32,19 +28,16 @@ class GetPortfolioTransactions(HasuraAction):
     def __init__(self):
         super().__init__("get_portfolio_transactions", "profile_id")
 
-        self.service = PortfolioService()
-
     def apply(self, input_params, context_container: ContextContainer):
-        db_conn = context_container.db_conn
+        service = context_container.portfolio_service
         profile_id = input_params["profile_id"]
         count = input_params.get("count", 500)
         offset = input_params.get("offset", 0)
 
         try:
-            transactions = self.service.get_transactions(db_conn,
-                                                         profile_id,
-                                                         count=count,
-                                                         offset=offset)
+            transactions = service.get_transactions(profile_id,
+                                                    count=count,
+                                                    offset=offset)
         except Exception as e:
             logger.exception(e)
             transactions = []
@@ -57,8 +50,6 @@ class GetPortfolioChart(HasuraAction):
     def __init__(self):
         super().__init__("get_portfolio_chart", "profile_id")
 
-        self.service = PortfolioChartService()
-
     def get_allowed_profile_ids(self, input_params):
         profile_id = self.get_profile_id(input_params)
 
@@ -68,7 +59,6 @@ class GetPortfolioChart(HasuraAction):
         return profile_id
 
     def apply(self, input_params, context_container: ContextContainer):
-        db_conn = context_container.db_conn
         profile_id = input_params["profile_id"]
 
         filter = PortfolioChartFilter()
@@ -81,7 +71,8 @@ class GetPortfolioChart(HasuraAction):
         filter.security_types = input_params.get("security_types")
         filter.ltt_only = input_params.get("ltt_only")
 
-        chart = self.service.get_portfolio_chart(db_conn, profile_id, filter)
+        service = context_container.portfolio_chart_service
+        chart = service.get_portfolio_chart(profile_id, filter)
         for row in chart:
             row['datetime'] = row['datetime'].isoformat()
 
@@ -94,8 +85,6 @@ class GetPortfolioChartPreviousPeriodClose(HasuraAction):
         super().__init__("get_portfolio_chart_previous_period_close",
                          "profile_id")
 
-        self.service = PortfolioChartService()
-
     def get_allowed_profile_ids(self, input_params):
         profile_id = self.get_profile_id(input_params)
 
@@ -105,7 +94,6 @@ class GetPortfolioChartPreviousPeriodClose(HasuraAction):
         return profile_id
 
     def apply(self, input_params, context_container: ContextContainer):
-        db_conn = context_container.db_conn
         profile_id = input_params["profile_id"]
 
         filter = PortfolioChartFilter()
@@ -118,16 +106,15 @@ class GetPortfolioChartPreviousPeriodClose(HasuraAction):
         filter.security_types = input_params.get("security_types")
         filter.ltt_only = input_params.get("ltt_only")
 
-        return self.service.get_portfolio_chart_previous_period_close(
-            db_conn, profile_id, filter)
+        service = context_container.portfolio_chart_service
+        return service.get_portfolio_chart_previous_period_close(
+            profile_id, filter)
 
 
 class GetPortfolioPieChart(HasuraAction):
 
     def __init__(self):
         super().__init__("get_portfolio_piechart", "profile_id")
-
-        self.service = PortfolioChartService()
 
     def get_allowed_profile_ids(self, input_params):
         profile_id = self.get_profile_id(input_params)
@@ -138,10 +125,10 @@ class GetPortfolioPieChart(HasuraAction):
         return profile_id
 
     def apply(self, input_params, context_container: ContextContainer):
-        db_conn = context_container.db_conn
         profile_id = input_params["profile_id"]
 
         filter = PortfolioChartFilter()
         filter.access_token_ids = input_params.get("access_token_ids")
 
-        return self.service.get_portfolio_piechart(db_conn, profile_id, filter)
+        service = context_container.portfolio_chart_service
+        return service.get_portfolio_piechart(profile_id, filter)

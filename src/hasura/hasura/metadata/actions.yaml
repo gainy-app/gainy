@@ -1,5 +1,5 @@
 actions:
-  - name: add_kyc_document
+  - name: kyc_add_document
     definition:
       kind: synchronous
       handler: '{{AWS_LAMBDA_API_GATEWAY_ENDPOINT}}/hasuraAction'
@@ -23,13 +23,13 @@ actions:
       handler: '{{AWS_LAMBDA_API_GATEWAY_ENDPOINT}}/hasuraAction'
     permissions:
       - role: user
-  - name: get_kyc_form_config
+  - name: kyc_get_form_config
     definition:
       kind: ""
       handler: '{{AWS_LAMBDA_API_GATEWAY_ENDPOINT}}/hasuraAction'
     permissions:
       - role: user
-  - name: get_kyc_status
+  - name: kyc_get_status
     definition:
       kind: ""
       handler: '{{AWS_LAMBDA_API_GATEWAY_ENDPOINT}}/hasuraAction'
@@ -101,7 +101,25 @@ actions:
       handler: '{{AWS_LAMBDA_API_GATEWAY_ENDPOINT}}/hasuraAction'
     permissions:
       - role: user
+  - name: trading_link_bank_account_with_plaid
+    definition:
+      kind: synchronous
+      handler: '{{AWS_LAMBDA_API_GATEWAY_ENDPOINT}}/hasuraAction'
+    permissions:
+      - role: user
   - name: link_plaid_account
+    definition:
+      kind: ""
+      handler: '{{AWS_LAMBDA_API_GATEWAY_ENDPOINT}}/hasuraAction'
+    permissions:
+      - role: user
+  - name: trading_delete_funding_account
+    definition:
+      kind: synchronous
+      handler: '{{AWS_LAMBDA_API_GATEWAY_ENDPOINT}}/hasuraAction'
+    permissions:
+      - role: user
+  - name: trading_get_funding_accounts
     definition:
       kind: ""
       handler: '{{AWS_LAMBDA_API_GATEWAY_ENDPOINT}}/hasuraAction'
@@ -135,7 +153,7 @@ actions:
       handler: '{{AWS_LAMBDA_API_GATEWAY_ENDPOINT}}/hasuraAction'
     permissions:
       - role: user
-  - name: send_kyc_form
+  - name: kyc_send_form
     definition:
       kind: synchronous
       handler: '{{AWS_LAMBDA_API_GATEWAY_ENDPOINT}}/hasuraAction'
@@ -294,8 +312,31 @@ custom_types:
     - name: SetRecommendationSettingsOutput
     - name: KycFormConfig
     - name: KycFormFieldConfig
-    - name: SendKycFormOutput
+    - name: KycSendFormOutput
     - name: KycStatus
     - name: PreSignedUploadFormOutput
-    - name: AddKycDocumentOutput
+    - name: KycAddDocumentOutput
+    - name: LinkBankAccountWithPlaidOutput
+    - name: AccountInformation
+    - name: TradingLinkBankAccountWithPlaidOutput
+      relationships:
+        - remote_table:
+            schema: app
+            name: trading_funding_accounts
+          name: funding_account
+          source: default
+          type: object
+          field_mapping:
+            id: id
+    - name: TradingFundingAccount
+      relationships:
+        - remote_table:
+            schema: app
+            name: trading_funding_accounts
+          name: funding_account
+          source: default
+          type: object
+          field_mapping:
+            id: id
+    - name: TradingDeleteFundingAccountOutput
   scalars: []

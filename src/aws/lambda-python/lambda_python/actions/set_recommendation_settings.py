@@ -1,5 +1,3 @@
-import logging
-
 from common.context_container import ContextContainer
 from common.hasura_function import HasuraAction
 
@@ -7,9 +5,9 @@ from psycopg2.extras import execute_values
 from gainy.data_access.db_lock import LockAcquisitionTimeout
 from gainy.data_access.optimistic_lock import ConcurrentVersionUpdate
 from gainy.recommendation.compute import ComputeRecommendationsAndPersist
-from gainy.recommendation.repository import RecommendationRepository
+from gainy.utils import get_logger
 
-logger = logging.getLogger()
+logger = get_logger(__name__)
 
 
 class SetRecommendationSettings(HasuraAction):
@@ -35,13 +33,14 @@ class SetRecommendationSettings(HasuraAction):
         self.set_interests(db_conn, profile_id, interests)
         self.set_categories(db_conn, profile_id, categories)
 
+        repository = context_container.recommendation_repository
         recommendations_func = ComputeRecommendationsAndPersist(
-            db_conn, profile_id)
-        old_version = recommendations_func.load_version(db_conn)
+            repository, profile_id)
+        old_version = recommendations_func.load_version()
         try:
-            recommendations_func.get_and_persist(db_conn, max_tries=2)
+            recommendations_func.get_and_persist(max_tries=2)
 
-            new_version = recommendations_func.load_version(db_conn)
+            new_version = recommendations_func.load_version()
             logger.info('Calculated Match Scores',
                         extra={
                             **logging_extra,
@@ -51,7 +50,6 @@ class SetRecommendationSettings(HasuraAction):
         except (LockAcquisitionTimeout, ConcurrentVersionUpdate) as e:
             logger.exception(e, extra=logging_extra)
 
-        repository = RecommendationRepository(db_conn)
         if recommended_collections_count is not None:
             collections = repository.get_recommended_collections(
                 profile_id, recommended_collections_count)

@@ -220,6 +220,29 @@
         check: null
 - table:
     schema: app
+    name: trading_funding_accounts
+  object_relationships:
+    - name: profile
+      using:
+        foreign_key_constraint_on: profile_id
+  select_permissions:
+    - role: user
+      permission:
+        columns:
+          - id
+          - profile_id
+          - plaid_access_token_id
+          - plaid_account_id
+          - name
+          - balance
+          - created_at
+          - updated_at
+        filter:
+          profile:
+            user_id:
+              _eq: X-Hasura-User-Id
+- table:
+    schema: app
     name: notifications
 - table:
     schema: app
@@ -550,6 +573,7 @@
           - institution_id
           - needs_reauth_since
           - profile_id
+          - purpose
         filter:
           profile:
             _or:
@@ -561,9 +585,12 @@
     - role: user
       permission:
         filter:
-          profile:
-            user_id:
-              _eq: X-Hasura-User-Id
+          _and:
+            - profile:
+                user_id:
+                  _eq: X-Hasura-User-Id
+            - purpose:
+                _eq: portfolio
   event_triggers:
     - name: on_plaid_access_token_created
       definition:

@@ -1,0 +1,6 @@
+mutation SendForm($profile_id: Int!) {
+    kyc_send_form(profile_id: $profile_id) {
+        error_message
+        status # PENDING, APPROVED, REVOKED, CLOSED
+    }
+}

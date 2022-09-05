@@ -7,6 +7,9 @@ from gainy.utils import get_logger
 
 logger = get_logger(__name__)
 
+PURPOSE_PORTFOLIO = "portfolio"
+PURPOSE_MANAGED_TRADING = "trading"
+
 PLAID_CLIENT_ID = os.getenv('PLAID_CLIENT_ID')
 PLAID_SECRET = os.getenv('PLAID_SECRET')
 PLAID_DEVELOPMENT_SECRET = os.getenv('PLAID_DEVELOPMENT_SECRET')

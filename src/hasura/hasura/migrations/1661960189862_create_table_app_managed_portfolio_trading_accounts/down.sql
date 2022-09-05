@@ -1,1 +1,1 @@
-DROP TABLE "app"."managed_portfolio_trading_accounts";
+DROP TABLE "app"."trading_accounts";

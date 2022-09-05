@@ -1,0 +1,6 @@
+query GetStatus($profile_id: Int!) {
+    kyc_get_status(profile_id: $profile_id) {
+        error_message
+        status # PENDING, APPROVED, REVOKED, CLOSED
+    }
+}

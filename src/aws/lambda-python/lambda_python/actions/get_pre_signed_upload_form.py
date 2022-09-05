@@ -1,13 +1,13 @@
 import json
-import logging
 import os
 import uuid
 from common.context_container import ContextContainer
 from common.hasura_function import HasuraAction
 from services import S3
 from psycopg2.extras import RealDictCursor
+from gainy.utils import get_logger
 
-logger = logging.getLogger()
+logger = get_logger(__name__)
 
 BUCKETS = {"kyc": os.getenv('S3_BUCKET_UPLOADS_KYC')}
 

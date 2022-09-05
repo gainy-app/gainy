@@ -1,0 +1,17 @@
+query CreatePlaidLinkToken(
+    $profile_id: Int!
+    $redirect_uri: String!
+    $env: String
+    $access_token_id: Int
+    $purpose: String
+) {
+    create_plaid_link_token(
+        profile_id: $profile_id
+        redirect_uri: $redirect_uri
+        env: $env
+        access_token_id: $access_token_id
+        purpose: $purpose
+    ){
+        link_token
+    }
+}

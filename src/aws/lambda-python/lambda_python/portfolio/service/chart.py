@@ -1,4 +1,3 @@
-import json
 import os
 from psycopg2 import sql
 from psycopg2.extras import RealDictCursor
@@ -11,7 +10,10 @@ SCRIPT_DIR = os.path.dirname(__file__)
 
 class PortfolioChartService:
 
-    def get_portfolio_chart(self, db_conn, profile_id, filter):
+    def __init__(self, db_conn):
+        self.db_conn = db_conn
+
+    def get_portfolio_chart(self, profile_id, filter):
         with open(os.path.join(SCRIPT_DIR, "../sql/portfolio_chart.sql")) as f:
             query = f.read()
 
@@ -41,8 +43,7 @@ class PortfolioChartService:
         self._filter_query_by_ltt_only(params, where_clause, join_clause,
                                        filter)
 
-        rows = self._execute_query(params, where_clause, join_clause, query,
-                                   db_conn)
+        rows = self._execute_query(params, where_clause, join_clause, query)
 
         rows = list(self._filter_chart_by_transaction_count(rows))
         if not rows:
@@ -53,8 +54,7 @@ class PortfolioChartService:
 
         return rows
 
-    def get_portfolio_chart_previous_period_close(self, db_conn, profile_id,
-                                                  filter):
+    def get_portfolio_chart_previous_period_close(self, profile_id, filter):
         with open(
                 os.path.join(SCRIPT_DIR,
                              "../sql/portfolio_chart_prev_close.sql")) as f:
@@ -86,8 +86,7 @@ class PortfolioChartService:
         self._filter_query_by_ltt_only(params, where_clause, join_clause,
                                        filter)
 
-        data = self._execute_query(params, where_clause, join_clause, query,
-                                   db_conn)
+        data = self._execute_query(params, where_clause, join_clause, query)
 
         if not data:
             return {
@@ -101,7 +100,7 @@ class PortfolioChartService:
 
         return data[0]
 
-    def get_portfolio_piechart(self, db_conn, profile_id, filter):
+    def get_portfolio_piechart(self, profile_id, filter):
         with open(os.path.join(SCRIPT_DIR,
                                "../sql/portfolio_piechart.sql")) as f:
             query = f.read()
@@ -118,8 +117,7 @@ class PortfolioChartService:
         self._filter_query_by_access_token_ids(params, where_clause,
                                                join_clause, filter)
 
-        rows = self._execute_query(params, where_clause, join_clause, query,
-                                   db_conn)
+        rows = self._execute_query(params, where_clause, join_clause, query)
 
         return rows
 
@@ -275,14 +273,12 @@ class PortfolioChartService:
         where_clause.append(
             sql.SQL("portfolio_holding_details.ltt_quantity_total > 0"))
 
-    def _execute_query(self, params, where_clause, join_clause, query,
-                       db_conn):
+    def _execute_query(self, params, where_clause, join_clause, query):
         join_clause = sql.SQL("\n").join(join_clause)
         where_clause = sql.SQL(' and ').join(where_clause)
         query = sql.SQL(query).format(where_clause=where_clause,
                                       join_clause=join_clause)
-        logger.debug(json.dumps(query.as_string(db_conn)))
 
-        with db_conn.cursor(cursor_factory=RealDictCursor) as cursor:
+        with self.db_conn.cursor(cursor_factory=RealDictCursor) as cursor:
             cursor.execute(query, params)
             return cursor.fetchall()

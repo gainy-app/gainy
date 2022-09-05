@@ -1,4 +1,4 @@
-CREATE TABLE "app"."managed_portfolio_trading_accounts"
+CREATE TABLE "app"."trading_accounts"
 (
     "id"                            serial      NOT NULL,
     "profile_id"                    integer     NOT NULL unique,
@@ -22,11 +22,11 @@ BEGIN
     RETURN _new;
 END;
 $$ LANGUAGE plpgsql;
-CREATE TRIGGER "set_app_managed_portfolio_trading_accounts_updated_at"
+CREATE TRIGGER "set_app_trading_accounts_updated_at"
     BEFORE UPDATE
-    ON "app"."managed_portfolio_trading_accounts"
+    ON "app"."trading_accounts"
     FOR EACH ROW
 EXECUTE PROCEDURE "app"."set_current_timestamp_updated_at"();
-COMMENT ON TRIGGER "set_app_managed_portfolio_trading_accounts_updated_at" ON "app"."managed_portfolio_trading_accounts"
+COMMENT ON TRIGGER "set_app_trading_accounts_updated_at" ON "app"."trading_accounts"
     IS 'trigger to set value of column "updated_at" to current timestamp on row update';
 

@@ -1,5 +1,4 @@
 import json
-import logging
 import re
 from common.context_container import ContextContainer
 from common.hasura_function import HasuraAction
@@ -7,9 +6,9 @@ from services import BillingService, RevenueCatService
 import datetime
 import dateutil
 from psycopg2.extras import execute_values
-from gainy.utils import env
+from gainy.utils import env, get_logger
 
-logger = logging.getLogger()
+logger = get_logger(__name__)
 
 
 class UpdatePurchases(HasuraAction):

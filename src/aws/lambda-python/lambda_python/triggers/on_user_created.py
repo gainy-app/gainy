@@ -1,13 +1,13 @@
 import os
 import re
 import sys
-import logging
 import datadog
 from common.context_container import ContextContainer
 from common.hasura_function import HasuraTrigger
 from services import HubspotService
+from gainy.utils import get_logger
 
-logger = logging.getLogger()
+logger = get_logger(__name__)
 
 script_directory = os.path.dirname(os.path.realpath(__file__))
 sys.path.append(script_directory)

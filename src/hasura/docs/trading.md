@@ -1,34 +1,7 @@
 # Trading
 ## API
-### **[TODO]** [KYC](trading/kyc.md)
-
-### Connect bank account with Plaid
-1. [Generate link token](portfolio.md#create-link-token) with additional param to know it's for trading and not for portfolio
-2. [Link account](portfolio.md#link-account) with additional param to know it's for trading and not for portfolio, make it synchronous, sync investments / return accounts in this case, remove plaid trigger. 
-3. **[TODO]** Link chosen accounts to trading 
-    
-    Obtain and store processor token.
-    ```graphql
-    query link_plaid_account_to_trading($profile_id: Int!, $account_id: Int!) {
-        link_plaid_account_to_trading(profile_id: $profile_id, account_id: $account_id) {
-            result
-        }
-    }
-    ```
-    - TradingService.connectBankAccount(profile_id, processorToken)
-    - Create managed_portfolio_bank_accounts
-
-4. **[TODO]** List connected accounts
-   - PlaidService.updateAccountBalance(plaid_account_ids)
-   - list managed_portfolio_bank_accounts
-
-5. **[TODO]** Deny deleting plaid tokens connected to trading
-
-6. **[TODO]** Disconnect bank account
-   - TradingService.disconnectBankAccount(profile_id, trading_bank_account)
-   - remove trading_bank_account
-
-Data used: managed_portfolio_bank_accounts, drivewealth_bank_accounts
+- [KYC](trading/kyc.md)
+- [Connect bank account](trading/connecting_bank_account.md)
 
 ### **[TODO]** Deposits / withdrawals
 1. Deposit funds
@@ -43,11 +16,11 @@ Data used: managed_portfolio_bank_accounts, drivewealth_bank_accounts
        - cash: `target = actual`
 
 Data used: 
-- managed_portfolio_trading_accounts 
-- managed_portfolio_bank_accounts
+- trading_accounts 
+- trading_bank_accounts
 - drivewealth_bank_accounts 
 - drivewealth_portfolios
-- managed_portfolio_money_flow
+- trading_money_flow
 
 ### **[TODO]** Commissions flow
 https://stripe.com/docs/payments/save-and-reuse
@@ -98,7 +71,7 @@ Data used: payment_methods, invoices, invoice_payments
     }
     ```
    - TradingService.reconfigure_ttf_holdings(profile_id, collection_id, weights, absolute_amount_delta_cents, relative_amount_delta_percent)
-     - Create new managed_portfolio_collection_versions, managed_portfolio_collection_contents 
+     - Create new trading_collection_versions, trading_collection_contents 
      - Update account buying power, Portfolio status
      - Create or update Fund
      - Calculate `relative_weight_change`
@@ -115,16 +88,16 @@ Data used: payment_methods, invoices, invoice_payments
 3. Get actual TTF holding weights and amount
 
 Data used: 
-- managed_portfolio_collection_versions
-- managed_portfolio_collection_contents
+- trading_collection_versions
+- trading_collection_contents
 - drivewealth_portfolios
 - drivewealth_accounts
 - drivewealth_funds
 - drivewealth_autopilot_run
 
 ### **[TODO]** History
-1. Get rebalancing history (managed_portfolio_collection_versions with status `complete`) 
-2. Get deposits / withdrawals history with actual statuses (managed_portfolio_money_flow) 
+1. Get rebalancing history (trading_collection_versions with status `complete`) 
+2. Get deposits / withdrawals history with actual statuses (trading_money_flow) 
 3. Get commission payment history 
 
 
@@ -149,22 +122,6 @@ Data used:
   - stripe_ref_id: string
   - set_active_at: datetime
 
-- managed_portfolio_bank_accounts 
-  - id: int
-  - profile_id: int
-  - plaid_account_id: int
-  - name: string
-  - balance: int
-
-- drivewealth_bank_accounts 
-  - ref_id: string
-  - drivewealth_user_id: int
-  - trading_account_id: int
-  - bankAccountNickname: string
-  - bankAccountNumber: string
-  - bankRoutingNumber: string
-  - bankAccountType: string
-
 - invoices
   - id: int
   - profile_id: int
@@ -182,7 +139,7 @@ Data used:
   - result: boolean
   - response: json
 
-- managed_portfolio_collection_versions:
+- trading_collection_versions:
   - id: int
   - profile_id: int
   - collection_uniq_id: string
@@ -190,9 +147,9 @@ Data used:
   - actualAmount: int
   - status: string
 
-- managed_portfolio_collection_contents:
+- trading_collection_contents:
   - id: int
-  - managed_portfolio_collection_version_id: int
+  - trading_collection_version_id: int
   - symbol: string
   - target_weight: numeric
 
@@ -206,17 +163,17 @@ Data used:
 
 - drivewealth_funds
   - ref_id: string
-  - managed_portfolio_collection_version_id: int
+  - trading_collection_version_id: int
   - raw_data: json
 
 - drivewealth_autopilot_run
   - ref_id: string
-  - managed_portfolio_collection_version_id: int
+  - trading_collection_version_id: int
   - status: string
   - drivewealth_account_id: int
   - raw_data: json
 
-- managed_portfolio_money_flow
+- trading_money_flow
   - id: int
   - profile_id: int
   - amount: int
@@ -225,8 +182,8 @@ Data used:
 
 ## SQS
 
-1. Update `managed_portfolio_collection_versions` status on `drivewealth_autopilot_run` execution
-2. Update `managed_portfolio_money_flow` status on deposit / withdrawal execution
+1. Update `trading_collection_versions` status on `drivewealth_autopilot_run` execution
+2. Update `trading_money_flow` status on deposit / withdrawal execution
 
 ## Questions
 

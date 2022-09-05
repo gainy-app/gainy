@@ -7,8 +7,6 @@
 - [Get KYC status](#get-kyc-status)
 - [Generate pre-signed-url to upload documents](#generate-pre-signed-url-to-upload-documents)
 - [Add KYC uploaded Document](#add-kyc-uploaded-document)
-- trigger to send kyc_documents to drivewealth (*drivewealth_kyc_documents*)
-  - TradingService.uploadKycDocument(profile_id, kyc_document)
 
 ### Fill KYC fields
 ```graphql
@@ -264,8 +262,8 @@ query GetKycForm($profile_id: Int!) {
 
 ### Action to get KYC form placeholders
 ```graphql
-query GetKycFormConfig($profile_id: Int!) {
-  get_kyc_form_config(profile_id: $profile_id) {
+query KycGetFormConfig($profile_id: Int!) {
+  kyc_get_form_config(profile_id: $profile_id) {
     first_name{
       choices
       placeholder
@@ -422,8 +420,8 @@ query GetKycFormConfig($profile_id: Int!) {
 
 ### Send KYC data
 ```graphql
-mutation SendKycForm($profile_id: Int!) {
-  send_kyc_form(profile_id: $profile_id) {
+mutation KycSendForm($profile_id: Int!) {
+  kyc_send_form(profile_id: $profile_id) {
     error_message
     status # PENDING, APPROVED, REVOKED, CLOSED
   }
@@ -432,8 +430,8 @@ mutation SendKycForm($profile_id: Int!) {
 
 ### Get KYC status
 ```graphql
-query GetKycStatus($profile_id: Int!) {
-  get_kyc_status(profile_id: $profile_id) {
+query KycGetStatus($profile_id: Int!) {
+  kyc_get_status(profile_id: $profile_id) {
     error_message
     status # PENDING, APPROVED, REVOKED, CLOSED
   }
@@ -461,13 +459,13 @@ mutation get_pre_signed_upload_form (
 
 ### Add KYC uploaded Document 
 ```graphql
-mutation AddKycDocument (
+mutation KycAddDocument (
   $profile_id: Int!
   $uploaded_file_id: Int!
   $type: String!  # `DRIVER_LICENSE | PASSPORT | NATIONAL_ID_CARD | VOTER_ID | WORK_PERMIT | VISA | RESIDENCE_PERMIT`
   $side: String! # `FRONT | BACK`. `PASSPORT` and `VISA` types can only have `FRONT` side
 ) {
-  add_kyc_document(
+  kyc_add_document(
     profile_id: $profile_id
     uploaded_file_id: $uploaded_file_id
     type: $type
