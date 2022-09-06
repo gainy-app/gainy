@@ -74,6 +74,7 @@ ACTIONS = [
     TradingDeleteFundingAccount(),
     TradingDepositFunds(),
     TradingWithdrawFunds(),
+    TradingReconfigureCollectionHoldings(),
 ]
 
 action_dispatcher = HasuraActionDispatcher(ACTIONS,

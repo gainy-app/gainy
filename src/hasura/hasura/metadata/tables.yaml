@@ -1039,7 +1039,7 @@
           - trading_account_id
           - funding_account_id
           - status
-          - amount_cents
+          - amount
           - created_at
           - updated_at
         filter:

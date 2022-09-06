@@ -1,3 +1,4 @@
+from decimal import Decimal
 from common.context_container import ContextContainer
 from common.exceptions import NotFoundException, BadRequestException
 from common.hasura_function import HasuraAction
@@ -9,10 +10,10 @@ class MoneyFlowAction(HasuraAction):
     def process_input(self, input_params, context_container: ContextContainer):
         profile_id = input_params["profile_id"]
         trading_account_id = input_params["trading_account_id"]
-        amount_cents = input_params["amount_cents"]
+        amount = Decimal(input_params["amount"])
         funding_account_id = input_params["funding_account_id"]
 
-        if amount_cents <= 0:
+        if amount <= 0:
             raise BadRequestException('Bad amount')
 
         repository = context_container.get_repository()
@@ -27,4 +28,4 @@ class MoneyFlowAction(HasuraAction):
         if not funding_account or funding_account.profile_id != profile_id:
             raise NotFoundException('Funding Account not found')
 
-        return (profile_id, amount_cents, trading_account, funding_account)
+        return (profile_id, amount, trading_account, funding_account)

@@ -1,9 +1,10 @@
+from decimal import Decimal
 import os
 import datetime
 import dateutil
 import requests
 from trading.models import KycDocument
-from trading.drivewealth.models import DriveWealthAccount, DriveWealthBankAccount
+from trading.drivewealth.models import DriveWealthAccount, DriveWealthBankAccount, DriveWealthPortfolio, DriveWealthFund
 from common.exceptions import ApiException
 from gainy.utils import get_logger, env
 
@@ -43,6 +44,12 @@ class DriveWealthApi:
                 "riaProductID": DRIVEWEALTH_RIA_PRODUCT_ID,
             })
 
+    def update_account(self, account_ref_id, portfolio_ref_id):
+        return self._make_request("PATCH", f"/accounts/{account_ref_id}",
+                                  {"ria": {
+                                      "portfolioID": portfolio_ref_id
+                                  }})
+
     def upload_document(self, user_id: str, document: KycDocument,
                         file_base64):
         return self._make_request(
@@ -78,12 +85,12 @@ class DriveWealthApi:
     def delete_bank_account(self, ref_id: str):
         return self._make_request("DELETE", f"/bank-accounts/{ref_id}")
 
-    def create_deposit(self, amount_cents: int, account: DriveWealthAccount,
+    def create_deposit(self, amount: Decimal, account: DriveWealthAccount,
                        bank_account: DriveWealthBankAccount):
         return self._make_request(
             "POST", "/funding/deposits", {
                 'accountNo': account.ref_no,
-                'amount': amount_cents / 100,
+                'amount': amount,
                 'currency': 'USD',
                 'type': 'INSTANT_FUNDING',
                 'details': {
@@ -95,11 +102,11 @@ class DriveWealthApi:
                 },
             })
 
-    def create_redemption(self, amount_cents, account, bank_account):
+    def create_redemption(self, amount: Decimal, account, bank_account):
         return self._make_request(
             "POST", "/funding/redemptions", {
                 'accountNo': account.ref_no,
-                'amount': amount_cents / 100,
+                'amount': amount,
                 'currency': 'USD',
                 'type': 'ACH_MANUAL',
                 'details': {
@@ -108,6 +115,52 @@ class DriveWealthApi:
                     "bankAccountNumber": bank_account.bank_account_number,
                     "bankRoutingNumber": bank_account.bank_routing_number
                 },
+            })
+
+    def create_portfolio(self, user_id, name, client_fund_id, description):
+        return self._make_request(
+            "POST", "/managed/portfolios", {
+                'userID': user_id,
+                'name': name,
+                'clientPortfolioID': client_fund_id,
+                'description': description,
+            })
+
+    def get_portfolio_status(self, portfolio: DriveWealthPortfolio):
+        return self._make_request(
+            "GET", f"/accounts/{portfolio.drivewealth_account_id}/portfolio")
+
+    def get_instrument_details(self, symbol: str):
+        return self._make_request("GET", f"/instruments/{symbol}")
+
+    def create_fund(self, user_id, name, client_fund_id, description,
+                    holdings):
+        return self._make_request(
+            "POST", "/managed/funds", {
+                'userID': user_id,
+                'name': name,
+                'clientFundID': client_fund_id,
+                'description': description,
+                'holdings': holdings,
+            })
+
+    def update_fund(self, fund: DriveWealthFund):
+        return self._make_request("PATCH", f"/managed/funds/{fund.ref_id}", {
+            'holdings': fund.holdings,
+        })
+
+    def update_portfolio(self, portfolio: DriveWealthPortfolio):
+        return self._make_request("PATCH",
+                                  f"/managed/portfolios/{portfolio.ref_id}", {
+                                      'holdings': portfolio.holdings,
+                                  })
+
+    def create_autopilot_run(self, account_ids):
+        return self._make_request(
+            "POST", f"/autopilot/{DRIVEWEALTH_RIA_ID}", {
+                'reviewOnly': False,
+                'forceRebalance': True,
+                'subAccounts': account_ids,
             })
 
     def _get_token(self):
@@ -149,6 +202,7 @@ class DriveWealthApi:
             "post_data": post_data,
             "status_code": response.status_code,
             "response_data": response_data,
+            "requestId": response.headers.get("dw-request-id"),
         }
 
         if response.status_code is None or response.status_code < 200 or response.status_code > 299:

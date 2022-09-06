@@ -1,6 +1,4 @@
 from common.context_container import ContextContainer
-from common.hasura_exception import HasuraActionException
-from common.hasura_function import HasuraAction
 from trading.actions.money_flow import MoneyFlowAction
 from gainy.utils import get_logger
 
@@ -13,12 +11,11 @@ class TradingDepositFunds(MoneyFlowAction):
         super().__init__("trading_deposit_funds", "profile_id")
 
     def apply(self, input_params, context_container: ContextContainer):
-        (profile_id, amount_cents, trading_account,
+        (profile_id, amount, trading_account,
          funding_account) = self.process_input(input_params, context_container)
 
         trading_service = context_container.trading_service
-        money_flow = trading_service.create_money_flow(profile_id,
-                                                       amount_cents,
+        money_flow = trading_service.create_money_flow(profile_id, amount,
                                                        trading_account,
                                                        funding_account)
 

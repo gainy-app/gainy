@@ -5,6 +5,7 @@ from portfolio.service import PortfolioService
 from portfolio.service.chart import PortfolioChartService
 from portfolio.repository import PortfolioRepository
 from trading import TradingService, TradingRepository
+from trading.drivewealth.api import DriveWealthApi
 from trading.drivewealth.provider import DriveWealthProvider
 from trading.drivewealth.repository import DriveWealthRepository
 
@@ -50,9 +51,13 @@ class ContextContainer():
         return DriveWealthRepository(self.db_conn)
 
     @cached_property
+    def drivewealth_api(self):
+        return DriveWealthApi()
+
+    @cached_property
     def drivewealth_provider(self):
         return DriveWealthProvider(self.drivewealth_repository,
-                                   self.plaid_service)
+                                   self.drivewealth_api, self.plaid_service)
 
     ## trading
     @cached_property

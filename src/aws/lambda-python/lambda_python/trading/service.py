@@ -1,6 +1,6 @@
-from typing import Iterable
+from typing import Iterable, Dict
+from decimal import Decimal
 import io
-import plaid
 
 from common.exceptions import NotFoundException
 from portfolio.plaid import PlaidService
@@ -10,6 +10,8 @@ from portfolio.plaid.models import PlaidAccessToken
 from trading.models import KycDocument, FundingAccount, TradingAccount, TradingMoneyFlow
 from trading.drivewealth import DriveWealthProvider
 from trading.repository import TradingRepository
+
+import plaid
 from gainy.utils import get_logger
 from gainy.data_access.repository import Repository
 
@@ -127,20 +129,33 @@ class TradingService:
         repository.delete_by(PlaidAccessToken,
                              {"id": funding_account.plaid_access_token_id})
 
-    def create_money_flow(self, profile_id: int, amount_cents: int,
+    def create_money_flow(self, profile_id: int, amount: Decimal,
                           trading_account: TradingAccount,
                           funding_account: FundingAccount):
         repository = self.trading_repository
 
-        money_flow = TradingMoneyFlow(profile_id, amount_cents,
-                                      trading_account.id, funding_account.id)
+        money_flow = TradingMoneyFlow(profile_id, amount, trading_account.id,
+                                      funding_account.id)
         repository.persist(money_flow)
 
-        self.get_provider_service().transfer_money(money_flow, amount_cents,
+        self.get_provider_service().transfer_money(money_flow, amount,
                                                    trading_account.id,
                                                    funding_account.id)
 
         return money_flow
+
+    def reconfigure_collection_holdings(profile_id: int, collection_id: int,
+                                        weights: Dict[str, Decimal],
+                                        target_amount_delta: Decimal):
+        collection_version = TradingCollectionVersion(profile_id,
+                                                      collection_id, weights,
+                                                      target_amount_delta)
+        self.trading_repository.persist(collection_version)
+
+        self.get_provider_service().reconfigure_collection_holdings(
+            collection_version)
+
+        return collection_version
 
     def get_provider_service(self):
         return self.drivewealth_provider
