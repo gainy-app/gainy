@@ -30,6 +30,6 @@ data "aws_iam_policy_document" "lambda_sqs_policy_document" {
 
 resource "aws_iam_role_policy" "lambda_sqs_policy" {
   name   = "lambda_sqs_policy"
-  role   = var.aws_iam_role_lambda_exec_role.arn
+  role   = var.aws_iam_role_lambda_exec_role.name
   policy = data.aws_iam_policy_document.lambda_sqs_policy_document.json
 }
