@@ -1,6 +1,6 @@
 import json
 from typing import Any, Iterable, Dict, List
-from trading.drivewealth.models import DriveWealthAccount, DriveWealthDocument, DriveWealthUser, DriveWealthBankAccount
+from trading.drivewealth.models import DriveWealthAccount, DriveWealthDocument, DriveWealthUser, DriveWealthBankAccount, DriveWealthFund, DriveWealthPortfolio
 from psycopg2.extras import RealDictCursor
 from psycopg2 import sql
 from gainy.data_access.repository import Repository
@@ -25,9 +25,20 @@ class DriveWealthRepository(Repository):
         return entity
 
     def get_user_accounts(self,
-                          drivewealth_user_id) -> Iterable[DriveWealthAccount]:
+                          drivewealth_user_id) -> List[DriveWealthAccount]:
         return self.find_all(DriveWealthAccount,
                              {"drivewealth_user_id": drivewealth_user_id})
+
+    def get_user_fund(self, user: DriveWealthUser,
+                      collection_id) -> DriveWealthFund:
+        return self.find_one(DriveWealthFund, {
+            "drivewealth_user_id": user.ref_id,
+            "collection_id": collection_id
+        })
+
+    def get_user_portfolio(self, user_ref_id: str) -> DriveWealthPortfolio:
+        return self.find_one(DriveWealthPortfolio,
+                             {"drivewealth_user_id": user_ref_id})
 
     def upsert_user_account(self, drivewealth_user_id,
                             data) -> DriveWealthAccount:

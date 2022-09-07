@@ -173,6 +173,12 @@ actions:
       handler: '{{AWS_LAMBDA_API_GATEWAY_ENDPOINT}}/hasuraAction'
     permissions:
       - role: user
+  - name: trading_get_actual_collection_holdings
+    definition:
+      kind: ""
+      handler: '{{AWS_LAMBDA_API_GATEWAY_ENDPOINT}}/hasuraAction'
+    permissions:
+      - role: user
   - name: trading_get_funding_accounts
     definition:
       kind: ""
@@ -180,6 +186,12 @@ actions:
     permissions:
       - role: user
   - name: trading_link_bank_account_with_plaid
+    definition:
+      kind: synchronous
+      handler: '{{AWS_LAMBDA_API_GATEWAY_ENDPOINT}}/hasuraAction'
+    permissions:
+      - role: user
+  - name: trading_reconfigure_collection_holdings
     definition:
       kind: synchronous
       handler: '{{AWS_LAMBDA_API_GATEWAY_ENDPOINT}}/hasuraAction'
@@ -202,6 +214,7 @@ custom_types:
   input_objects:
     - name: PlaidWebhookError
     - name: SampleInput
+    - name: TickerWeight
   objects:
     - name: ChartDataPoint
     - name: PieChartDataPoint
@@ -354,4 +367,6 @@ custom_types:
     - name: TradingDeleteFundingAccountOutput
     - name: TradingMoneyFlowOutput
     - name: SampleOutput
+    - name: TradingReconfigureCollectionHoldingsOutput
+    - name: ActualCollectionHoldingOutput
   scalars: []

@@ -1,5 +1,5 @@
 import json
-from trading.models import KycDocument
+from trading.models import KycDocument, TradingCollectionVersion
 from psycopg2.extras import RealDictCursor
 from gainy.data_access.repository import Repository
 
@@ -15,7 +15,7 @@ class TradingRepository(Repository):
                 })
             return cursor.fetchone()
 
-    def update_kyc_form(self, profile_id: int, status: str) -> dict:
+    def update_kyc_form(self, profile_id: int, status: str):
         with self.db_conn.cursor() as cursor:
             cursor.execute(
                 "update app.kyc_form set status = %(status)s where profile_id = %(profile_id)s",
@@ -24,8 +24,7 @@ class TradingRepository(Repository):
                     "status": status,
                 })
 
-    def upsert_kyc_document(self, profile_id: int,
-                            document: KycDocument) -> dict:
+    def upsert_kyc_document(self, profile_id: int, document: KycDocument):
         with self.db_conn.cursor() as cursor:
             cursor.execute(
                 """insert into app.kyc_documents (profile_id, uploaded_file_id, content_type, type, side)

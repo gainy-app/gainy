@@ -222,9 +222,16 @@ type Mutation {
   trading_deposit_funds(
     profile_id: Int!
     trading_account_id: Int!
-    amount_cents: Int!
+    amount: Float!
     funding_account_id: Int!
   ): TradingMoneyFlowOutput
+}
+
+type Query {
+  trading_get_actual_collection_holdings(
+    profile_id: Int!
+    collection_id: Int!
+  ): [ActualCollectionHoldingOutput]
 }
 
 type Query {
@@ -243,10 +250,19 @@ type Mutation {
 }
 
 type Mutation {
+  trading_reconfigure_collection_holdings(
+    profile_id: Int!
+    collection_id: Int!
+    weights: [TickerWeight]!
+    target_amount_delta: Float!
+  ): TradingReconfigureCollectionHoldingsOutput
+}
+
+type Mutation {
   trading_withdraw_funds(
     profile_id: Int!
     trading_account_id: Int!
-    amount_cents: Int!
+    amount: Float!
     funding_account_id: Int!
   ): TradingMoneyFlowOutput
 }
@@ -264,6 +280,11 @@ input PlaidWebhookError {
 input SampleInput {
   username: String!
   password: String!
+}
+
+input TickerWeight {
+  symbol: String!
+  weight: Float!
 }
 
 type ChartDataPoint {
@@ -504,5 +525,16 @@ type TradingMoneyFlowOutput {
 
 type SampleOutput {
   accessToken: String!
+}
+
+type TradingReconfigureCollectionHoldingsOutput {
+  ok: Boolean!
+}
+
+type ActualCollectionHoldingOutput {
+  symbol: String!
+  target_weight: Float
+  actual_weight: Float
+  value: Float
 }
 

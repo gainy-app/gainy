@@ -1,4 +1,4 @@
-# Queries
+# Trading / Connecting bank account with plaid
 
 1. [Generate link token](#generate-link-token)
 2. [Exchange public_token and list accounts](#exchange-public_token-and-list-accounts)

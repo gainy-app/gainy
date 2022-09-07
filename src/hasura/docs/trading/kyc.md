@@ -1,4 +1,4 @@
-# Queries
+# Trading / KYC
 
 - [Get KYC form values](#get-kyc-form-values)
 - [Fill KYC fields](#fill-kyc-fields)

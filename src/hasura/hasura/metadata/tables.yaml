@@ -1039,7 +1039,7 @@
           - trading_account_id
           - funding_account_id
           - status
-          - amount_cents
+          - amount
           - created_at
           - updated_at
         filter:
@@ -1288,6 +1288,38 @@
                 _is_null: true
             - user_id:
                 _eq: X-Hasura-User-Id
+- table:
+    schema: public
+    name: collection_ticker_actual_weights
+  object_relationships:
+    - name: profile
+      using:
+        manual_configuration:
+          remote_table:
+            schema: app
+            name: profiles
+          insertion_order: null
+          column_mapping:
+            profile_id: id
+  select_permissions:
+    - role: user
+      permission:
+        columns:
+          - profile_id
+          - collection_id
+          - collection_uniq_id
+          - symbol
+          - date
+          - weight
+          - id
+          - updated_at
+        filter:
+          _or:
+            - profile_id:
+                _is_null: true
+            - profile:
+                user_id:
+                  _eq: X-Hasura-User-Id
 - table:
     schema: public
     name: crypto_metrics

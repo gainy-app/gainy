@@ -3,6 +3,7 @@
 - [KYC](trading/kyc.md)
 - [Connect bank account](trading/connecting_bank_account.md)
 - [Deposits / withdrawals](trading/money_flow.md)
+- [Trading collections](trading/trading_collections.md)
 
 ### **[TODO]** Commissions flow
 https://stripe.com/docs/payments/save-and-reuse
@@ -36,47 +37,6 @@ https://stripe.com/docs/payments/save-and-reuse
 
 Data used: payment_methods, invoices, invoice_payments
 
-### **[TODO]** Trading
-1. Get recommended TTF weights
-2. Reconfigure TTF holdings
-
-    Generate the trades to make user's TTF holdings look like input params.
-    ```graphql
-    input TickerWeight {
-        symbol: String!
-        weight: Float!    
-    }
-    mutation reconfigure_ttf_holdings($profile_id: Int!, $account_id: Int!, $collection_id: Int!, $weights: [TickerWeight], $absolute_amount_delta_cents: Int, $relative_amount_delta_percent: Int) {
-        reconfigure_ttf_holdings(profile_id: $profile_id, account_id: $account_id, collection_id: $collection_id, weights: $weights, absolute_amount_delta_cents: $absolute_amount_delta_cents, relative_amount_delta_percent: $relative_amount_delta_percent) {
-            result
-        }
-    }
-    ```
-   - TradingService.reconfigure_ttf_holdings(profile_id, collection_id, weights, absolute_amount_delta_cents, relative_amount_delta_percent)
-     - Create new trading_collection_versions, trading_collection_contents 
-     - Update account buying power, Portfolio status
-     - Create or update Fund
-     - Calculate `relative_weight_change`
-       - from `absolute_amount_delta_cents` 
-         - Positive: `relative_weight_change = absolute_amount_delta_cents / CASH_RESERVE value` 
-         - Negative: `relative_weight_change = absolute_amount_delta_cents / updated FUND value` 
-       - from `relative_amount_delta_percent`
-         - Positive: `relative_weight_change = relative_amount_delta_percent / 100 * CASH_RESERVE actual weight` 
-         - Negative: `relative_weight_change = relative_amount_delta_percent / 100 * updated FUND actual weight` 
-     - Rebalance Portfolio funds
-       - cash: decrease by relative_weight_change
-       - updated Fund: increase by relative_weight_change
-     - Create autopilot run
-3. Get actual TTF holding weights and amount
-
-Data used: 
-- trading_collection_versions
-- trading_collection_contents
-- drivewealth_portfolios
-- drivewealth_accounts
-- drivewealth_funds
-- drivewealth_autopilot_run
-
 ### **[TODO]** History
 1. Get rebalancing history (trading_collection_versions with status `complete`) 
 2. Get deposits / withdrawals history with actual statuses (trading_money_flow) 
@@ -107,7 +67,7 @@ Data used:
 - invoices
   - id: int
   - profile_id: int
-  - amount_cents: int
+  - amount: int
   - due_date: timestamp
   - description: string
   - period_start: date
@@ -121,47 +81,6 @@ Data used:
   - result: boolean
   - response: json
 
-- trading_collection_versions:
-  - id: int
-  - profile_id: int
-  - collection_uniq_id: string
-  - targetAmount: int
-  - actualAmount: int
-  - status: string
-
-- trading_collection_contents:
-  - id: int
-  - trading_collection_version_id: int
-  - symbol: string
-  - target_weight: numeric
-
-- drivewealth_portfolios
-  - ref_id: string
-  - drivewealth_account_id: int
-  - raw_data: json
-  - cash_target: numeric
-  - cash_actual: numeric
-  - cash_value: numeric
-
-- drivewealth_funds
-  - ref_id: string
-  - trading_collection_version_id: int
-  - raw_data: json
-
-- drivewealth_autopilot_run
-  - ref_id: string
-  - trading_collection_version_id: int
-  - status: string
-  - drivewealth_account_id: int
-  - raw_data: json
-
-- trading_money_flow
-  - id: int
-  - profile_id: int
-  - amount: int
-  - trading_account_id: int
-  - status: string
-
 ## SQS
 
 1. Update `trading_collection_versions` status on `drivewealth_autopilot_run` execution
@@ -171,13 +90,3 @@ Data used:
 
 KYC:
 - What's COMPLIANCE_AML_INFO
-- Can we hide extended hours agreement?
-- We need Links to all disclosures
-Plaid:
-- Which plaid products to use? Possible values: `assets, auth, employment, identity, income_verification, identity_verification, investments, liabilities, payment_initiation, standing_orders, transactions, transfer` 
-- How to send plaid processor_token to Create Bank Account API?
-Deposits:
-- Right approach of funding multiple accounts when using autopilot
-Trading:
-- How to rebalance current position (current position has a number of stocks and we would like to make it up to an amount of money)
-- 

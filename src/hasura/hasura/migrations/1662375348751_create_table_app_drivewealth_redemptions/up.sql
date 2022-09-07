@@ -1,15 +1,14 @@
 CREATE TABLE "app"."drivewealth_redemptions"
 (
     "ref_id"                 varchar     NOT NULL,
-    "drivewealth_user_id"    varchar     NOT NULL,
     "trading_account_ref_id" varchar     NOT NULL,
     "bank_account_ref_id"    varchar     NOT NULL,
     "money_flow_id"          int         not null,
+    "status"                 varchar     NOT NULL,
     "data"                   json,
     "created_at"             timestamptz NOT NULL DEFAULT now(),
     "updated_at"             timestamptz NOT NULL DEFAULT now(),
     PRIMARY KEY ("ref_id"),
-    FOREIGN KEY ("drivewealth_user_id") REFERENCES "app"."drivewealth_users" ("ref_id") ON UPDATE cascade ON DELETE cascade,
     FOREIGN KEY ("trading_account_ref_id") REFERENCES "app"."drivewealth_accounts" ("ref_id") ON UPDATE cascade ON DELETE cascade,
     FOREIGN KEY ("bank_account_ref_id") REFERENCES "app"."drivewealth_bank_accounts" ("ref_id") ON UPDATE cascade ON DELETE cascade,
     FOREIGN KEY ("money_flow_id") REFERENCES "app"."trading_money_flow" ("id") ON UPDATE restrict ON DELETE restrict
