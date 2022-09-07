@@ -222,7 +222,6 @@ module "hasura_trigger_integration" {
   aws_apigatewayv2_api_lambda_execution_arn = aws_apigatewayv2_api.lambda.execution_arn
   aws_lambda_invoke_arn                     = "${module.hasura_trigger.arn}:${module.hasura_trigger.version}"
   aws_iam_role_lambda_exec_role             = aws_iam_role.lambda_exec
-  function_name                             = module.hasura_trigger.function_name
 }
 
 ##################################################################################
@@ -248,7 +247,6 @@ module "hasura_action_integration" {
   aws_apigatewayv2_api_lambda_execution_arn = aws_apigatewayv2_api.lambda.execution_arn
   aws_lambda_invoke_arn                     = "${module.hasura_action.arn}:${module.hasura_action.version}"
   aws_iam_role_lambda_exec_role             = aws_iam_role.lambda_exec
-  function_name                             = module.hasura_action.function_name
 }
 
 ##################################################################################
@@ -273,7 +271,7 @@ module "sqs_listener" {
 module "sqs_listener_integration" {
   source                        = "./sqs-integration"
   aws_iam_role_lambda_exec_role = aws_iam_role.lambda_exec
-  function_name                 = module.sqs_listener.function_name
+  aws_lambda_invoke_arn         = "${module.sqs_listener.arn}:${module.sqs_listener.version}"
 
   sqs_batch_size = 100
   sqs_queue_arns = []
