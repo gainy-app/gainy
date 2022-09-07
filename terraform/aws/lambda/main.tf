@@ -215,7 +215,7 @@ module "hasura_trigger" {
   vpc_subnet_ids         = var.vpc_subnet_ids
 }
 
-module "route_integration" {
+module "hasura_trigger_integration" {
   source                                    = "./route-integration"
   url                                       = "/${var.deployment_key}/hasuraAction"
   aws_apigatewayv2_api_lambda_id            = aws_apigatewayv2_api.lambda.id
@@ -241,7 +241,7 @@ module "hasura_action" {
   vpc_subnet_ids         = var.vpc_subnet_ids
 }
 
-module "route_integration" {
+module "hasura_action_integration" {
   source                                    = "./route-integration"
   url                                       = "/${var.deployment_key}/hasuraAction"
   aws_apigatewayv2_api_lambda_id            = aws_apigatewayv2_api.lambda.id
