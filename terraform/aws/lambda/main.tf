@@ -200,7 +200,7 @@ resource "docker_registry_image" "lambda_python" {
 }
 
 module "hasuraTrigger" {
-  source                                    = "./type-image"
+  source                                    = "./routed"
   env                                       = var.env
   function_name                             = "hasuraTrigger"
   handler                                   = "hasura_handler.handle_trigger"
@@ -217,7 +217,7 @@ module "hasuraTrigger" {
 }
 
 module "hasuraAction" {
-  source                                    = "./type-image"
+  source                                    = "./routed"
   env                                       = var.env
   function_name                             = "hasuraAction"
   handler                                   = "hasura_handler.handle_action"
@@ -231,4 +231,22 @@ module "hasuraAction" {
   env_vars                                  = local.env_vars
   vpc_security_group_ids                    = var.vpc_security_group_ids
   vpc_subnet_ids                            = var.vpc_subnet_ids
+}
+
+
+module "sqsListener" {
+  source                        = "./sqs-listener"
+  env                           = var.env
+  function_name                 = "sqsListener"
+  handler                       = "sqs_listener.handle"
+  timeout                       = 30
+  aws_iam_role_lambda_exec_role = aws_iam_role.lambda_exec
+  image_uri                     = docker_registry_image.lambda_python.name
+  memory_size                   = var.env == "production" ? 256 : 128
+  env_vars                      = local.env_vars
+  vpc_security_group_ids        = var.vpc_security_group_ids
+  vpc_subnet_ids                = var.vpc_subnet_ids
+
+  sqs_batch_size = 100
+  sqs_queue_arns = []
 }

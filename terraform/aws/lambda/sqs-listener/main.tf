@@ -7,9 +7,6 @@ variable "env_vars" {
 variable "timeout" {
   default = 3
 }
-variable "url" {}
-variable "aws_apigatewayv2_api_lambda_id" {}
-variable "aws_apigatewayv2_api_lambda_execution_arn" {}
 variable "aws_iam_role_lambda_exec_role" {}
 variable "image_uri" {}
 variable "vpc_security_group_ids" {}
@@ -50,11 +47,36 @@ resource "aws_lambda_function" "lambda" {
   }
 }
 
-module "route" {
-  source                                    = "../route"
-  aws_apigatewayv2_api_lambda_id            = var.aws_apigatewayv2_api_lambda_id
-  aws_apigatewayv2_api_lambda_execution_arn = var.aws_apigatewayv2_api_lambda_execution_arn
-  aws_iam_role_lambda_exec_role             = var.aws_iam_role_lambda_exec_role
-  aws_lambda_invoke_arn                     = "${aws_lambda_function.lambda.arn}:${aws_lambda_function.lambda.version}"
-  url                                       = var.url
+variable "sqs_batch_size" {}
+variable "sqs_queue_arns" {
+  type = list(string)
+}
+
+resource "aws_lambda_event_source_mapping" "lambda_via_sqs" {
+  for_each = toset(var.sqs_queue_arns)
+
+  batch_size       = var.sqs_batch_size
+  event_source_arn = each.key
+  function_name    = aws_lambda_function.lambda.function_name
+}
+
+data "aws_iam_policy_document" "lambda_sqs_policy_document" {
+  statement {
+    sid = "ProcessSQSMessages"
+
+    actions = [
+      "sqs:ChangeMessageVisibility",
+      "sqs:DeleteMessage",
+      "sqs:GetQueueAttributes",
+      "sqs:ReceiveMessage",
+    ]
+
+    resources = var.sqs_queue_arns
+  }
+}
+
+resource "aws_iam_role_policy" "lambda_sqs_policy" {
+  name   = "lambda_sqs_policy"
+  role   = var.aws_iam_role_lambda_exec_role.arn
+  policy = data.aws_iam_policy_document.lambda_sqs_policy_document.json
 }
