@@ -78,11 +78,13 @@ class DriveWealthAccount(BaseDriveWealthModel):
 class DriveWealthBankAccount(BaseDriveWealthModel):
     ref_id = None
     drivewealth_user_id = None
-    trading_funding_account_id = None
+    funding_account_id = None
     plaid_access_token_id = None
     bank_account_nickname = None
     bank_account_number = None
     bank_routing_number = None
+    holder_name = None
+    bank_account_type = None
     data = None
     created_at = None
     updated_at = None
@@ -95,3 +97,33 @@ class DriveWealthBankAccount(BaseDriveWealthModel):
     @classproperty
     def table_name(self) -> str:
         return "drivewealth_bank_accounts"
+
+
+class BaseDriveWealthMoneyFlowModel(BaseDriveWealthModel):
+    ref_id = None
+    drivewealth_user_id = None
+    trading_account_ref_id = None
+    bank_account_ref_id = None
+    money_flow_id = None
+    data = None
+    created_at = None
+    updated_at = None
+
+    key_fields = ["ref_id"]
+
+    db_excluded_fields = ["created_at", "updated_at"]
+    non_persistent_fields = ["created_at", "updated_at"]
+
+
+class DriveWealthDeposit(BaseDriveWealthMoneyFlowModel):
+
+    @classproperty
+    def table_name(self) -> str:
+        return "drivewealth_deposits"
+
+
+class DriveWealthRedemption(BaseDriveWealthMoneyFlowModel):
+
+    @classproperty
+    def table_name(self) -> str:
+        return "drivewealth_redemptions"

@@ -1,7 +1,7 @@
 from common.context_container import ContextContainer
 from common.hasura_function import HasuraAction
 from trading import TradingService, TradingRepository
-from trading.models import TradingFundingAccount
+from trading.models import FundingAccount
 from gainy.utils import get_logger
 
 logger = get_logger(__name__)
@@ -17,7 +17,7 @@ class TradingGetFundingAccounts(HasuraAction):
         profile_id = input_params["profile_id"]
 
         repository = context_container.trading_repository
-        funding_accounts = repository.find_all(TradingFundingAccount,
+        funding_accounts = repository.find_all(FundingAccount,
                                                {"profile_id": profile_id})
 
         trading_service = context_container.trading_service
