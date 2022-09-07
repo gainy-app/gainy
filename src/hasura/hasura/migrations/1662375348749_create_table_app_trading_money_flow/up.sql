@@ -5,7 +5,7 @@ CREATE TABLE "app"."trading_money_flow"
     "trading_account_id" int         not null,
     "funding_account_id" int         not null,
     "status"             varchar,
-    "amount"       numeric         not null,
+    "amount"             numeric     not null,
     "created_at"         timestamptz NOT NULL DEFAULT now(),
     "updated_at"         timestamptz NOT NULL DEFAULT now(),
     PRIMARY KEY ("id"),

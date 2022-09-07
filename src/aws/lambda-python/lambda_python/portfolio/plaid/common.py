@@ -21,8 +21,8 @@ PLAID_HOSTS = {
 }
 
 if PLAID_ENV not in PLAID_HOSTS:
-    raise Error('Wrong plaid env %s, available options are: %s' %
-                (PLAID_ENV, ",".join(keys(PLAID_HOSTS))))
+    raise Exception('Wrong plaid env %s, available options are: %s' %
+                    (PLAID_ENV, ",".join(PLAID_HOSTS.keys())))
 
 
 def get_plaid_client(env=None):

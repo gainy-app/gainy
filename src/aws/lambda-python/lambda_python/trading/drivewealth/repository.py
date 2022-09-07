@@ -36,10 +36,9 @@ class DriveWealthRepository(Repository):
             "collection_id": collection_id
         })
 
-    def get_user_portfolio(self,
-                           user: DriveWealthUser) -> DriveWealthPortfolio:
+    def get_user_portfolio(self, user_ref_id: str) -> DriveWealthPortfolio:
         return self.find_one(DriveWealthPortfolio,
-                             {"drivewealth_user_id": user.ref_id})
+                             {"drivewealth_user_id": user_ref_id})
 
     def upsert_user_account(self, drivewealth_user_id,
                             data) -> DriveWealthAccount:

@@ -61,7 +61,7 @@ class ContextContainer():
 
     ## trading
     @cached_property
-    def trading_service(self):
+    def trading_service(self) -> TradingService:
         return TradingService(self.db_conn, self.trading_repository,
                               self.drivewealth_provider, self.plaid_service)
 

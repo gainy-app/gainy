@@ -10,7 +10,7 @@ from trading.drivewealth.provider.collection import DriveWealthProviderCollectio
 from trading.models import TradingCollectionVersion
 
 
-def mock_persist(*args, **kwargs):
+def mock_noop(*args, **kwargs):
     pass
 
 
@@ -37,17 +37,38 @@ _PORTFOLIO_STATUS = {
         "actual": 0.1,
         "value": _CASH_VALUE,
     }, {
-        "id": _FUND1_ID,
-        "type": "FUND",
-        "target": _FUND1_TARGET_WEIGHT,
-        "actual": 0.3054,
-        "value": _FUND1_VALUE,
+        "id":
+        _FUND1_ID,
+        "type":
+        "FUND",
+        "target":
+        _FUND1_TARGET_WEIGHT,
+        "actual":
+        0.3054,
+        "value":
+        _FUND1_VALUE,
+        "holdings": [{
+            "instrumentID": "5b85fabb-d57c-44e6-a7f6-a3efc760226c",
+            "symbol": "TSLA",
+            "target": 0.55,
+            "actual": 0.6823,
+            "openQty": 62.5213,
+            "value": 22928.9
+        }, {
+            "instrumentID": "a67422af-8504-43df-9e63-7361eb0bd99e",
+            "symbol": "AAPL",
+            "target": 0.45,
+            "actual": 0.3177,
+            "openQty": 62.4942,
+            "value": 10675.22
+        }]
     }, {
         "id": _FUND2_ID,
         "type": "FUND",
         "target": _FUND2_TARGET_WEIGHT,
         "actual": 0.5947,
         "value": _FUND2_VALUE,
+        "holdings": []
     }]
 }
 
@@ -118,12 +139,66 @@ def _mock_get_instrument_details(monkeypatch, api):
                         mock_get_instrument_details)
 
 
+def test_get_actual_collection_holdings(monkeypatch):
+    profile_id = 1
+    collection_id = 2
+
+    user = DriveWealthUser()
+    monkeypatch.setattr(user, "ref_id", _USER_ID)
+
+    portfolio = DriveWealthPortfolio(_PORTFOLIO)
+    fund = DriveWealthFund()
+    monkeypatch.setattr(fund, "ref_id", _FUND1_ID)
+    monkeypatch.setattr(fund, "drivewealth_user_id", _USER_ID)
+
+    def mock_get_user(_profile_id):
+        assert _profile_id == profile_id
+        return user
+
+    def mock_get_user_portfolio(_user_ref_id):
+        assert _user_ref_id == _USER_ID
+        return portfolio
+
+    def mock_get_user_fund(_user, _collection_id):
+        assert _user == user
+        assert _collection_id == collection_id
+        return fund
+
+    drivewealth_repository = DriveWealthRepository(None)
+    monkeypatch.setattr(drivewealth_repository, "persist", mock_noop)
+    monkeypatch.setattr(drivewealth_repository, "get_user", mock_get_user)
+    monkeypatch.setattr(drivewealth_repository, "get_user_portfolio",
+                        mock_get_user_portfolio)
+    monkeypatch.setattr(drivewealth_repository, "get_user_fund",
+                        mock_get_user_fund)
+
+    api = DriveWealthApi()
+
+    def mock_get_portfolio_status(_portfolio):
+        assert _portfolio == portfolio
+        return _PORTFOLIO_STATUS
+
+    monkeypatch.setattr(api, "get_portfolio_status", mock_get_portfolio_status)
+
+    service = DriveWealthProviderCollection(drivewealth_repository, api)
+    holdings = service.get_actual_collection_holdings(profile_id,
+                                                      collection_id)
+
+    expected_holdings = _PORTFOLIO_STATUS["holdings"][1]["holdings"]
+    for i in range(2):
+        status = holdings[i].get_collection_holding_status()
+        assert status.symbol == expected_holdings[i]["symbol"]
+        assert status.target_weight == expected_holdings[i]["target"]
+        assert status.actual_weight == expected_holdings[i]["actual"]
+        assert status.value == expected_holdings[i]["value"]
+
+
 def test_create_autopilot_run(monkeypatch):
     account = DriveWealthAccount()
     monkeypatch.setattr(account, "ref_id", _ACCOUNT_ID)
 
     drivewealth_repository = DriveWealthRepository(None)
-    monkeypatch.setattr(drivewealth_repository, "persist", mock_persist)
+    monkeypatch.setattr(drivewealth_repository, "persist", mock_noop)
 
     api = DriveWealthApi()
     data = {
@@ -160,12 +235,12 @@ def test_upsert_portfolio(monkeypatch):
         assert _profile_id == profile_id
         return user
 
-    def mock_get_user_portfolio(_user):
-        assert _user == user
+    def mock_get_user_portfolio(_user_ref_id):
+        assert _user_ref_id == _USER_ID
         return None
 
     drivewealth_repository = DriveWealthRepository(None)
-    monkeypatch.setattr(drivewealth_repository, "persist", mock_persist)
+    monkeypatch.setattr(drivewealth_repository, "persist", mock_noop)
     monkeypatch.setattr(drivewealth_repository, "get_user", mock_get_user)
     monkeypatch.setattr(drivewealth_repository, "get_user_portfolio",
                         mock_get_user_portfolio)
@@ -223,7 +298,7 @@ def test_upsert_fund(fund_exists, monkeypatch):
         return fund if fund_exists else None
 
     drivewealth_repository = DriveWealthRepository(None)
-    monkeypatch.setattr(drivewealth_repository, "persist", mock_persist)
+    monkeypatch.setattr(drivewealth_repository, "persist", mock_noop)
     monkeypatch.setattr(drivewealth_repository, "get_user", mock_get_user)
     monkeypatch.setattr(drivewealth_repository, "get_user_fund",
                         mock_get_user_fund)
@@ -290,7 +365,7 @@ def test_generate_new_fund_holdings(monkeypatch):
 
     _mock_get_instrument_details(monkeypatch, api)
 
-    new_holdings = service._generate_new_fund_holdings(fund, _FUND_WEIGHTS)
+    new_holdings = service._generate_new_fund_holdings(_FUND_WEIGHTS, fund)
 
     assert new_holdings == [
         {
@@ -327,7 +402,7 @@ def test_handle_cash_amount_change_ok(amount, monkeypatch):
         return _PORTFOLIO_STATUS
 
     monkeypatch.setattr(api, "get_portfolio_status", mock_get_portfolio_status)
-    monkeypatch.setattr(drivewealth_repository, "persist", mock_persist)
+    monkeypatch.setattr(drivewealth_repository, "persist", mock_noop)
 
     service = DriveWealthProviderCollection(drivewealth_repository, api)
     fund = DriveWealthFund()
@@ -367,7 +442,7 @@ def test_handle_cash_amount_change_ko(amount, monkeypatch):
         return _PORTFOLIO_STATUS
 
     monkeypatch.setattr(api, "get_portfolio_status", mock_get_portfolio_status)
-    monkeypatch.setattr(drivewealth_repository, "persist", mock_persist)
+    monkeypatch.setattr(drivewealth_repository, "persist", mock_noop)
 
     service = DriveWealthProviderCollection(drivewealth_repository, api)
     fund = DriveWealthFund()
@@ -388,11 +463,11 @@ def test_update_portfolio(monkeypatch):
         return _PORTFOLIO_STATUS
 
     monkeypatch.setattr(api, "get_portfolio_status", mock_get_portfolio_status)
-    monkeypatch.setattr(drivewealth_repository, "persist", mock_persist)
+    monkeypatch.setattr(drivewealth_repository, "persist", mock_noop)
 
     service = DriveWealthProviderCollection(drivewealth_repository, api)
 
-    portfolio_status = service._update_portfolio(portfolio)
+    portfolio_status = service._get_portfolio_status(portfolio)
 
     assert portfolio_status
     assert portfolio_status.cash_value == _CASH_VALUE

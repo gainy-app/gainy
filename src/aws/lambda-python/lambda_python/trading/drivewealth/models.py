@@ -1,6 +1,9 @@
 from decimal import Decimal
 import json
+from typing import Dict, Optional, List
+
 from gainy.data_access.models import BaseModel, classproperty
+from trading.models import CollectionHoldingStatus
 
 PRECISION = 1e-3
 
@@ -183,12 +186,47 @@ class DriveWealthFund(BaseDriveWealthModel):
         return "drivewealth_funds"
 
 
+class DriveWealthPortfolioStatusFundHolding:
+
+    def __init__(self, data):
+        self.data = data
+
+    def get_collection_holding_status(self) -> CollectionHoldingStatus:
+        entity = CollectionHoldingStatus()
+        entity.symbol = self.data["symbol"]
+        entity.target_weight = self.data["target"]
+        entity.actual_weight = self.data["actual"]
+        entity.value = self.data["value"]
+        return entity
+
+
+class DriveWealthPortfolioStatusHolding:
+
+    def __init__(self, data):
+        self.data = data
+
+    @property
+    def value(self) -> str:
+        return self.data["value"]
+
+    @property
+    def actual_weight(self) -> str:
+        return self.data["actual"]
+
+    @property
+    def holdings(self) -> List[DriveWealthPortfolioStatusFundHolding]:
+        return [
+            DriveWealthPortfolioStatusFundHolding(i)
+            for i in self.data["holdings"]
+        ]
+
+
 class DriveWealthPortfolioStatus(BaseDriveWealthModel):
     id = None
     drivewealth_portfolio_id = None
     cash_value: Decimal = None
     cash_actual_weight: Decimal = None
-    holdings = None
+    holdings: Dict[str, DriveWealthPortfolioStatusHolding] = None
     data = None
     created_at = None
 
@@ -208,19 +246,26 @@ class DriveWealthPortfolioStatus(BaseDriveWealthModel):
                 self.cash_value = Decimal(i["value"])
                 self.cash_actual_weight = Decimal(i["actual"])
             else:
-                self.holdings[i["id"]] = i
+                self.holdings[i["id"]] = DriveWealthPortfolioStatusHolding(i)
 
     def get_fund_value(self, fund_ref_id) -> Decimal:
         if not self.holdings or fund_ref_id not in self.holdings:
             return Decimal(0)
 
-        return Decimal(self.holdings[fund_ref_id]["value"])
+        return Decimal(self.holdings[fund_ref_id].value)
 
     def get_fund_actual_weight(self, fund_ref_id) -> Decimal:
         if not self.holdings or fund_ref_id not in self.holdings:
             return Decimal(0)
 
-        return Decimal(self.holdings[fund_ref_id]["actual"])
+        return Decimal(self.holdings[fund_ref_id].actual_weight)
+
+    def get_fund(self,
+                 fund_ref_id) -> Optional[DriveWealthPortfolioStatusHolding]:
+        if not self.holdings or fund_ref_id not in self.holdings:
+            return None
+
+        return self.holdings[fund_ref_id]
 
     def get_fund_ref_ids(self) -> list:
         if not self.holdings:

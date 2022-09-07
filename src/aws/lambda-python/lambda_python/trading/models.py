@@ -61,6 +61,7 @@ class FundingAccount(BaseModel):
     plaid_access_token_id = None
     plaid_account_id = None
     name = None
+    balance = None
     created_at = None
     updated_at = None
 
@@ -137,3 +138,18 @@ class TradingCollectionVersion(BaseModel):
     @classproperty
     def table_name(self) -> str:
         return "trading_collection_versions"
+
+
+class CollectionHoldingStatus:
+    symbol = None
+    target_weight = None
+    actual_weight = None
+    value = None
+
+    def to_dict(self) -> dict:
+        return {
+            "symbol": self.symbol,
+            "target_weight": self.target_weight,
+            "actual_weight": self.actual_weight,
+            "value": self.value,
+        }

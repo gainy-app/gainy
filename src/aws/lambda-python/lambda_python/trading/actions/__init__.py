@@ -8,3 +8,4 @@ from trading.actions.delete_funding_account import TradingDeleteFundingAccount
 from trading.actions.deposit_funds import TradingDepositFunds
 from trading.actions.withdraw_funds import TradingWithdrawFunds
 from trading.actions.reconfigure_collection_holdings import TradingReconfigureCollectionHoldings
+from trading.actions.get_actual_collection_holdings import TradingGetActualCollectionHoldings

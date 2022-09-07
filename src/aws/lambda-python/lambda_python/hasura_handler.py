@@ -1,5 +1,3 @@
-import os
-
 from gainy.utils import setup_exception_logger_hook
 
 from common.hasura_dispatcher import HasuraActionDispatcher, HasuraTriggerDispatcher
@@ -75,6 +73,7 @@ ACTIONS = [
     TradingDepositFunds(),
     TradingWithdrawFunds(),
     TradingReconfigureCollectionHoldings(),
+    TradingGetActualCollectionHoldings()
 ]
 
 action_dispatcher = HasuraActionDispatcher(ACTIONS,

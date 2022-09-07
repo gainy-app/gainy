@@ -1,4 +1,4 @@
-from typing import Iterable, Dict
+from typing import Iterable, Dict, List
 from decimal import Decimal
 import io
 
@@ -7,13 +7,13 @@ from portfolio.plaid import PlaidService
 from portfolio.plaid.common import handle_error
 from services import S3
 from portfolio.plaid.models import PlaidAccessToken
-from trading.models import KycDocument, FundingAccount, TradingAccount, TradingMoneyFlow
+from trading.models import KycDocument, FundingAccount, TradingAccount, TradingMoneyFlow, TradingCollectionVersion, \
+    CollectionHoldingStatus
 from trading.drivewealth import DriveWealthProvider
 from trading.repository import TradingRepository
 
 import plaid
 from gainy.utils import get_logger
-from gainy.data_access.repository import Repository
 
 logger = get_logger(__name__)
 
@@ -31,10 +31,10 @@ class TradingService:
     def kyc_send_form(self, kyc_form: dict):
         if not kyc_form:
             raise Exception('kyc_form is null')
-        return self.get_provider_service().kyc_send_form(kyc_form)
+        return self._get_provider_service().kyc_send_form(kyc_form)
 
     def kyc_get_status(self, profile_id: int):
-        return self.get_provider_service().kyc_get_status(profile_id)
+        return self._get_provider_service().kyc_get_status(profile_id)
 
     def send_kyc_document(self, profile_id: int, document: KycDocument):
         with self.db_conn.cursor() as cursor:
@@ -56,14 +56,14 @@ class TradingService:
         file_stream = io.BytesIO()
         S3().download_file(s3_bucket, s3_key, file_stream)
 
-        return self.get_provider_service().send_kyc_document(
+        return self._get_provider_service().send_kyc_document(
             profile_id, document, file_stream)
 
     def link_bank_account_with_plaid(self, access_token: PlaidAccessToken,
                                      account_name,
                                      account_id) -> FundingAccount:
         try:
-            provider_bank_account = self.get_provider_service(
+            provider_bank_account = self._get_provider_service(
             ).link_bank_account_with_plaid(access_token, account_id,
                                            account_name)
         except plaid.ApiException as e:
@@ -103,7 +103,7 @@ class TradingService:
         for plaid_access_token_id, funding_accounts in by_at_id.items():
             access_token = repository.find_one(PlaidAccessToken,
                                                {"id": plaid_access_token_id})
-            funding_accounts_by_account_id = {
+            funding_accounts_by_account_id: Dict[int, FundingAccount] = {
                 funding_account.plaid_account_id: funding_account
                 for funding_account in funding_accounts
                 if funding_account.plaid_account_id
@@ -119,10 +119,10 @@ class TradingService:
                     plaid_account.
                     account_id].balance = plaid_account.balance_available
 
-            repository.persist(funding_account)
+            repository.persist(funding_accounts_by_account_id.values())
 
     def delete_funding_account(self, funding_account: FundingAccount):
-        self.get_provider_service().delete_funding_account(funding_account.id)
+        self._get_provider_service().delete_funding_account(funding_account.id)
 
         repository = self.trading_repository
         repository.delete(funding_account)
@@ -138,13 +138,14 @@ class TradingService:
                                       funding_account.id)
         repository.persist(money_flow)
 
-        self.get_provider_service().transfer_money(money_flow, amount,
-                                                   trading_account.id,
-                                                   funding_account.id)
+        self._get_provider_service().transfer_money(money_flow, amount,
+                                                    trading_account.id,
+                                                    funding_account.id)
 
         return money_flow
 
-    def reconfigure_collection_holdings(profile_id: int, collection_id: int,
+    def reconfigure_collection_holdings(self, profile_id: int,
+                                        collection_id: int,
                                         weights: Dict[str, Decimal],
                                         target_amount_delta: Decimal):
         collection_version = TradingCollectionVersion(profile_id,
@@ -152,10 +153,16 @@ class TradingService:
                                                       target_amount_delta)
         self.trading_repository.persist(collection_version)
 
-        self.get_provider_service().reconfigure_collection_holdings(
+        self._get_provider_service().reconfigure_collection_holdings(
             collection_version)
 
         return collection_version
 
-    def get_provider_service(self):
+    def get_actual_collection_holdings(
+            self, profile_id, collection_id) -> List[CollectionHoldingStatus]:
+        holdings = self._get_provider_service().get_actual_collection_holdings(
+            profile_id, collection_id)
+        return [i.get_collection_holding_status() for i in holdings]
+
+    def _get_provider_service(self):
         return self.drivewealth_provider

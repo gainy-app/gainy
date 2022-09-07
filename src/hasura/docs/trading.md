@@ -81,26 +81,6 @@ Data used: payment_methods, invoices, invoice_payments
   - result: boolean
   - response: json
 
-- drivewealth_portfolios
-  - ref_id: string
-  - drivewealth_account_id: int
-  - raw_data: json
-  - cash_target_weight: numeric
-  - cash_actual_weight: numeric
-  - cash_value: numeric
-
-- drivewealth_funds
-  - ref_id: string
-  - trading_collection_version_id: int
-  - raw_data: json
-
-- drivewealth_autopilot_run
-  - ref_id: string
-  - trading_collection_version_id: int
-  - status: string
-  - drivewealth_account_id: int
-  - raw_data: json
-
 ## SQS
 
 1. Update `trading_collection_versions` status on `drivewealth_autopilot_run` execution
@@ -110,13 +90,3 @@ Data used: payment_methods, invoices, invoice_payments
 
 KYC:
 - What's COMPLIANCE_AML_INFO
-- Can we hide extended hours agreement?
-- We need Links to all disclosures
-Plaid:
-- Which plaid products to use? Possible values: `assets, auth, employment, identity, income_verification, identity_verification, investments, liabilities, payment_initiation, standing_orders, transactions, transfer` 
-- How to send plaid processor_token to Create Bank Account API?
-Deposits:
-- Right approach of funding multiple accounts when using autopilot
-Trading:
-- How to rebalance current position (current position has a number of stocks and we would like to make it up to an amount of money)
-- 
