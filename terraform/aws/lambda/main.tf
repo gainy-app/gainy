@@ -263,9 +263,6 @@ module "sqs_listener" {
   env_vars               = local.env_vars
   vpc_security_group_ids = var.vpc_security_group_ids
   vpc_subnet_ids         = var.vpc_subnet_ids
-
-  sqs_batch_size = 100
-  sqs_queue_arns = []
 }
 
 module "sqs_listener_integration" {
