@@ -52,17 +52,6 @@ with
                and historical_intraday_prices.time_{{ minutes }}min > max_date.datetime - interval '30 minutes'
 {% endif %}
          ),
-{% if is_incremental() and var('realtime') %}
-     old_prices as
-         (
-             select {{ this }}.*
-             from {{ this }}
-                      join {{ ref('week_trading_sessions') }} using (symbol)
-                      join max_date on true
-             where {{ this }}.datetime >= week_trading_sessions.open_at - interval '1 hour' and {{ this }}.datetime < week_trading_sessions.close_at
-               and {{ this }}.datetime > max_date.datetime - interval '30 minutes'
-         ),
-{% endif %}
      combined_intraday_prices as
          (
              select DISTINCT ON (
@@ -201,10 +190,7 @@ from (
          left join {{ ref('historical_prices_marked') }} using (symbol)
 {% if is_incremental() %}
          left join {{ this }} old_data using (symbol, datetime)
-{% endif %}
-where t2.adjusted_close is not null
-{% if is_incremental() %}
-  and (old_data.symbol is null -- no old data
+where (old_data.symbol is null -- no old data
    or (t2.updated_at is not null and old_data.updated_at is null) -- old data is null and new is not
    or t2.updated_at > old_data.updated_at) -- new data is newer than the old one
 {% endif %}
