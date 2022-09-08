@@ -29,6 +29,7 @@ variable "public_schema_name" {}
 variable "codeartifact_pipy_url" {}
 variable "gainy_compute_version" {}
 variable "revenuecat_api_key" {}
+variable "stripe_api_key" {}
 
 output "aws_apigatewayv2_api_endpoint" {
   value      = "${aws_apigatewayv2_api.lambda.api_endpoint}/${aws_apigatewayv2_stage.lambda.name}"
@@ -181,6 +182,7 @@ module "hasuraTrigger" {
     ALGOLIA_SEARCH_API_KEY    = var.algolia_search_key
     HUBSPOT_API_KEY           = var.hubspot_api_key
     REVENUECAT_API_KEY        = var.revenuecat_api_key
+    STRIPE_API_KEY            = var.stripe_api_key
   }
   vpc_security_group_ids = var.vpc_security_group_ids
   vpc_subnet_ids         = var.vpc_subnet_ids
@@ -223,6 +225,7 @@ module "hasuraAction" {
     REDIS_CACHE_PORT          = var.redis_cache_port
     PLAID_WEBHOOK_URL         = "https://${var.hasura_url}/api/rest/plaid_webhook"
     REVENUECAT_API_KEY        = var.revenuecat_api_key
+    STRIPE_API_KEY            = var.stripe_api_key
   }
   vpc_security_group_ids = var.vpc_security_group_ids
   vpc_subnet_ids         = var.vpc_subnet_ids
