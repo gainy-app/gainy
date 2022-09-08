@@ -38,7 +38,7 @@ class SetRecommendationSettings(HasuraAction):
             repository, profile_id)
         old_version = recommendations_func.load_version()
         try:
-            recommendations_func.get_and_persist(max_tries=2)
+            recommendations_func.execute(max_tries=2)
 
             new_version = recommendations_func.load_version()
             logger.info('Calculated Match Scores',
