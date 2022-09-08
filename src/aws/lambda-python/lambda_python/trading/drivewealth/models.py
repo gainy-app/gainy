@@ -3,8 +3,6 @@ from decimal import Decimal
 import json
 from typing import Dict, Optional, List, Any
 
-import dateutil
-
 from gainy.data_access.db_lock import ResourceType
 from gainy.data_access.models import BaseModel, classproperty, ResourceVersion
 from trading.models import CollectionHoldingStatus

@@ -188,8 +188,7 @@ class DriveWealthApi:
     def _refresh_token(self) -> DriveWealthAuthToken:
         func = UpdateDriveWealthAuthToken(self.repository, self)
         try:
-            token = func.execute()
-            return token
+            return func.execute()
         except LockAcquisitionTimeout as e:
             logger.exception(e)
             raise e
