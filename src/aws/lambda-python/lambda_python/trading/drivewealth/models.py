@@ -1,8 +1,10 @@
+import datetime
 from decimal import Decimal
 import json
-from typing import Dict, Optional, List
+from typing import Dict, Optional, List, Any
 
-from gainy.data_access.models import BaseModel, classproperty
+from gainy.data_access.db_lock import ResourceType
+from gainy.data_access.models import BaseModel, classproperty, ResourceVersion
 from trading.models import CollectionHoldingStatus
 
 PRECISION = 1e-3
@@ -17,6 +19,7 @@ class DecimalEncoder(json.JSONEncoder):
 
 
 class BaseDriveWealthModel(BaseModel):
+    data = None
 
     @classproperty
     def schema_name(self) -> str:
@@ -27,6 +30,45 @@ class BaseDriveWealthModel(BaseModel):
             **super().to_dict(),
             "data": json.dumps(self.data, cls=DecimalEncoder),
         }
+
+
+class DriveWealthAuthToken(BaseDriveWealthModel, ResourceVersion):
+    id: int = None
+    auth_token: str = None
+    expires_at: datetime.datetime = None
+    version: int = 0
+    data: Any = None
+    created_at: datetime.datetime = None
+    updated_at: datetime.datetime = None
+
+    key_fields = ["id"]
+    db_excluded_fields = ["created_at", "updated_at"]
+    non_persistent_fields = ["id", "created_at", "updated_at"]
+
+    @property
+    def resource_type(self) -> ResourceType:
+        return ResourceType.DRIVEWEALTH_AUTH_TOKEN
+
+    @property
+    def resource_id(self) -> int:
+        return self.id
+
+    @property
+    def resource_version(self):
+        return self.version
+
+    def update_version(self):
+        self.version = self.version + 1 if self.version else 1
+
+    @classproperty
+    def table_name(self) -> str:
+        return "drivewealth_auth_tokens"
+
+    def is_expired(self):
+        if not self.expires_at:
+            return True
+        return self.expires_at <= datetime.datetime.now(
+            tz=datetime.timezone.utc)
 
 
 class DriveWealthUser(BaseDriveWealthModel):

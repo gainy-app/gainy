@@ -62,7 +62,7 @@ class ContextContainer():
 
     @cached_property
     def drivewealth_api(self):
-        return DriveWealthApi()
+        return DriveWealthApi(self.drivewealth_repository)
 
     @cached_property
     def drivewealth_provider(self):

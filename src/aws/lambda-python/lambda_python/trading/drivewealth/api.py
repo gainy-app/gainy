@@ -1,10 +1,13 @@
 from decimal import Decimal
 import os
-import datetime
-import dateutil
 import requests
+
+from gainy.data_access.db_lock import LockAcquisitionTimeout
+from trading.drivewealth.locking_functions import UpdateDriveWealthAuthToken
+from trading.drivewealth.repository import DriveWealthRepository
 from trading.models import KycDocument
-from trading.drivewealth.models import DriveWealthAccount, DriveWealthBankAccount, DriveWealthPortfolio, DriveWealthFund
+from trading.drivewealth.models import DriveWealthAccount, DriveWealthBankAccount, DriveWealthPortfolio, \
+    DriveWealthFund, DriveWealthAuthToken
 from common.exceptions import ApiException
 from gainy.utils import get_logger, env
 
@@ -22,6 +25,9 @@ DRIVEWEALTH_API_URL = os.getenv("DRIVEWEALTH_API_URL")
 
 class DriveWealthApi:
     _token_data = None
+
+    def __init__(self, repository: DriveWealthRepository):
+        self.repository = repository
 
     def create_user(self, documents: list):
         return self._make_request(
@@ -163,24 +169,29 @@ class DriveWealthApi:
                 'subAccounts': account_ids,
             })
 
-    def _get_token(self):
-        # TODO redis
-        if self._token_data is not None and datetime.datetime.now(
-                tz=datetime.timezone.utc) > self._token_data['expiresAt']:
-            return self._token_data["authToken"]
-
-        token_data = self._make_request(
+    def get_auth_token(self):
+        return self._make_request(
             "POST", "/auth", {
                 "appTypeID": 4,
                 "username": DRIVEWEALTH_API_USERNAME,
                 "password": DRIVEWEALTH_API_PASSWORD
             })
 
-        token_data['expiresAt'] = dateutil.parser.parse(
-            token_data['expiresAt'])
-        self._token_data = token_data
+    def _get_token(self):
+        token = self.repository.get_latest_auth_token()
 
-        return token_data["authToken"]
+        if not token or token.is_expired():
+            token = self._refresh_token()
+
+        return token.auth_token
+
+    def _refresh_token(self) -> DriveWealthAuthToken:
+        func = UpdateDriveWealthAuthToken(self.repository, self)
+        try:
+            return func.execute()
+        except LockAcquisitionTimeout as e:
+            logger.exception(e)
+            raise e
 
     def _make_request(self, method, url, post_data=None):
         headers = {"dw-client-app-key": DRIVEWEALTH_APP_KEY}
