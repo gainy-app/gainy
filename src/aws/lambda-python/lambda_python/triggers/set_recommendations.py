@@ -45,7 +45,7 @@ class SetRecommendations(HasuraTrigger):
         old_version = recommendations_func.load_version()
 
         try:
-            recommendations_func.get_and_persist(max_tries=5)
+            recommendations_func.execute(max_tries=5)
             new_version = recommendations_func.load_version()
             logger.info('Calculated Match Scores',
                         extra={

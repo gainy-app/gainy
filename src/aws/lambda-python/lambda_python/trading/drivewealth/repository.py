@@ -1,6 +1,7 @@
 import json
 from typing import Any, Iterable, Dict, List
-from trading.drivewealth.models import DriveWealthAccount, DriveWealthDocument, DriveWealthUser, DriveWealthBankAccount, DriveWealthFund, DriveWealthPortfolio
+from trading.drivewealth.models import DriveWealthAccount, DriveWealthDocument, DriveWealthUser, DriveWealthBankAccount, \
+    DriveWealthFund, DriveWealthPortfolio, DriveWealthAuthToken
 from psycopg2.extras import RealDictCursor
 from psycopg2 import sql
 from gainy.data_access.repository import Repository
@@ -107,3 +108,6 @@ class DriveWealthRepository(Repository):
         self.persist(entity)
 
         return entity
+
+    def get_latest_auth_token(self):
+        return self.find_one(DriveWealthAuthToken, None, [("version", "desc")])
