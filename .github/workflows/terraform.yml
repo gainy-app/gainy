@@ -52,6 +52,7 @@ on:
       ONESIGNAL_API_KEY: { required: true }
       REVENUECAT_API_KEY: { required: true }
       BIGQUERY_CREDENTIALS: { required: true }
+      STRIPE_API_KEY: { required: true }
       DRIVEWEALTH_APP_KEY: { required: true }
       DRIVEWEALTH_WLP_ID: { required: true }
       DRIVEWEALTH_PARENT_IBID: { required: true }
@@ -101,6 +102,7 @@ env:
   TF_VAR_onesignal_api_key: ${{ secrets.ONESIGNAL_API_KEY }}
   TF_VAR_revenuecat_api_key: ${{ secrets.REVENUECAT_API_KEY }}
   TF_VAR_bigquery_credentials: ${{ secrets.BIGQUERY_CREDENTIALS }}
+  TF_VAR_stripe_api_key: ${{ secrets.STRIPE_API_KEY }}
   TF_VAR_drivewealth_app_key: ${{ secrets.DRIVEWEALTH_APP_KEY }}
   TF_VAR_drivewealth_wlp_id: ${{ secrets.DRIVEWEALTH_WLP_ID }}
   TF_VAR_drivewealth_parent_ibid: ${{ secrets.DRIVEWEALTH_PARENT_IBID }}
@@ -114,6 +116,7 @@ jobs:
   deploy:
     name: "Terraform"
     runs-on: ubuntu-latest
+    environment: ${{ inputs.env }}
     steps:
       - name: Checkout
         uses: actions/checkout@v2
