@@ -1,9 +1,11 @@
 from functools import cached_property, cache
 
+from _stripe.api import StripeApi
 from portfolio.plaid.service import PlaidService
 from portfolio.service import PortfolioService
 from portfolio.service.chart import PortfolioChartService
 from portfolio.repository import PortfolioRepository
+from _stripe.repository import StripeRepository
 from trading import TradingService, TradingRepository
 from trading.drivewealth.api import DriveWealthApi
 from trading.drivewealth.provider import DriveWealthProvider
@@ -22,6 +24,14 @@ class ContextContainer():
             raise Exception('get_repository for a class is not supported')
 
         return Repository(self.db_conn)
+
+    @cached_property
+    def stripe_repository(self) -> StripeRepository:
+        return StripeRepository(self.db_conn)
+
+    @cached_property
+    def stripe_api(self) -> StripeApi:
+        return StripeApi()
 
     @cached_property
     def recommendation_repository(self) -> RecommendationRepository:

@@ -22,7 +22,7 @@ class BaseDriveWealthModel(BaseModel):
     def schema_name(self) -> str:
         return "app"
 
-    def to_dict(self) -> str:
+    def to_dict(self) -> dict:
         return {
             **super().to_dict(),
             "data": json.dumps(self.data, cls=DecimalEncoder),
@@ -382,7 +382,7 @@ class DriveWealthAutopilotRun(BaseDriveWealthModel):
     def table_name(self) -> str:
         return "drivewealth_autopilot_runs"
 
-    def to_dict(self) -> str:
+    def to_dict(self) -> dict:
         return {
             **super().to_dict(),
             "accounts": json.dumps(self.accounts),

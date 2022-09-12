@@ -154,6 +154,12 @@ actions:
     permissions:
       - role: user
       - role: anonymous
+  - name: stripe_get_payment_sheet_data
+    definition:
+      kind: ""
+      handler: '{{AWS_LAMBDA_API_GATEWAY_ENDPOINT}}/hasuraAction'
+    permissions:
+      - role: user
   - name: stripe_webhook
     definition:
       kind: synchronous
@@ -369,4 +375,5 @@ custom_types:
     - name: SampleOutput
     - name: TradingReconfigureCollectionHoldingsOutput
     - name: ActualCollectionHoldingOutput
+    - name: StripeGetPaymentSheetDataOutput
   scalars: []

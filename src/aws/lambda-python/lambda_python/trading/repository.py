@@ -1,5 +1,4 @@
-import json
-from trading.models import KycDocument, TradingCollectionVersion
+from trading.models import KycDocument
 from psycopg2.extras import RealDictCursor
 from gainy.data_access.repository import Repository
 

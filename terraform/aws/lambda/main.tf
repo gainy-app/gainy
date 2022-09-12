@@ -30,6 +30,7 @@ variable "codeartifact_pipy_url" {}
 variable "gainy_compute_version" {}
 variable "revenuecat_api_key" {}
 variable "stripe_api_key" {}
+variable "stripe_publishable_key" {}
 variable "drivewealth_app_key" {}
 variable "drivewealth_wlp_id" {}
 variable "drivewealth_parent_ibid" {}
@@ -171,6 +172,7 @@ locals {
     AWS_SECRET_ACCESS_KEY      = var.aws_secret_key
     AWS_DEFAULT_REGION         = var.aws_region
     STRIPE_API_KEY             = var.stripe_api_key
+    STRIPE_PUBLISHABLE_KEY     = var.stripe_publishable_key
   }
 }
 

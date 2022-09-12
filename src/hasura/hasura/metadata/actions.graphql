@@ -197,6 +197,12 @@ type Query {
   ): StripeGetCheckoutUrl
 }
 
+type Query {
+  stripe_get_payment_sheet_data(
+    profile_id: Int!
+  ): StripeGetPaymentSheetDataOutput
+}
+
 type Mutation {
   stripe_webhook(
     id: String
@@ -536,5 +542,12 @@ type ActualCollectionHoldingOutput {
   target_weight: Float
   actual_weight: Float
   value: Float
+}
+
+type StripeGetPaymentSheetDataOutput {
+  setup_intent_client_secret: String!
+  ephemeral_key: String!
+  customer_id: String!
+  publishable_key: String!
 }
 
