@@ -62,6 +62,6 @@ class GetRecommendedCollections(HasuraAction):
         recommendations_func = ComputeRecommendationsAndPersist(
             repository, profile_id)
         try:
-            recommendations_func.get_and_persist(max_tries=2)
+            recommendations_func.execute(max_tries=2)
         except (LockAcquisitionTimeout, ConcurrentVersionUpdate):
             pass
