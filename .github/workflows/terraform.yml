@@ -117,6 +117,8 @@ env:
 jobs:
   set-environment:
     runs-on: ubuntu-latest
+    outputs:
+      environment: ${{ steps.set-environment.outputs.environment }}
     steps:
       - name: set-environment
         id: set-environment
