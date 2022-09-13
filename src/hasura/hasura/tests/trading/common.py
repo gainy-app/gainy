@@ -52,12 +52,14 @@ def fill_kyc_form(profile_id, profile_user_id):
         "disclosures_signed_by": signed_by
     }
 
-    make_graphql_request(
+    result = make_graphql_request(
         load_query('kyc', 'UpsertForm'), data,
-        profile_user_id)['data']['insert_app_kyc_form']['returning'][0]
-    make_graphql_request(
+        profile_user_id)['data']['insert_app_kyc_form']['returning']
+    assert len(result) > 0
+    result = make_graphql_request(
         load_query('kyc', 'UpsertForm'), data,
-        profile_user_id)['data']['insert_app_kyc_form']['returning'][0]
+        profile_user_id)['data']['insert_app_kyc_form']['returning']
+    assert len(result) > 0
 
 
 def kyc_send_form(profile_id, profile_user_id):
