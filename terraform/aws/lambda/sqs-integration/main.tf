@@ -14,6 +14,7 @@ resource "aws_lambda_event_source_mapping" "lambda_via_sqs" {
 }
 
 data "aws_iam_policy_document" "lambda_sqs_policy_document" {
+  count = length(var.sqs_queue_arns) ? 1 : 0
   statement {
     sid = "ProcessSQSMessages"
 
@@ -29,7 +30,8 @@ data "aws_iam_policy_document" "lambda_sqs_policy_document" {
 }
 
 resource "aws_iam_role_policy" "lambda_sqs_policy" {
+  count  = length(var.sqs_queue_arns) ? 1 : 0
   name   = "lambda_sqs_policy"
   role   = var.aws_iam_role_lambda_exec_role.name
-  policy = data.aws_iam_policy_document.lambda_sqs_policy_document.json
+  policy = data.aws_iam_policy_document.lambda_sqs_policy_document[count.index].json
 }

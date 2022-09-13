@@ -215,7 +215,7 @@ module "hasura_trigger" {
 
 module "hasura_trigger_integration" {
   source                                    = "./route-integration"
-  url                                       = "/${var.deployment_key}/hasuraAction"
+  url                                       = "/${var.deployment_key}/hasuraTrigger"
   aws_apigatewayv2_api_lambda_id            = aws_apigatewayv2_api.lambda.id
   aws_apigatewayv2_api_lambda_execution_arn = aws_apigatewayv2_api.lambda.execution_arn
   aws_lambda_invoke_arn                     = "${module.hasura_trigger.arn}:${module.hasura_trigger.version}"
