@@ -79,6 +79,7 @@ jobs:
   terraform:
     name: "Terraform"
     uses: ./.github/workflows/terraform.yml
+    environment: production
     with:
       env: production
       only_plan: ${{ !(github.ref == 'refs/heads/main' && github.event_name == 'push') }}
