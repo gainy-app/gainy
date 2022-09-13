@@ -119,11 +119,11 @@ jobs:
       - name: set-environment
         id: set-environment
         run: |
-          if [$ONLY_PLAN == '']
+          if [ "$ONLY_PLAN" == "true" ]
           then
-              echo "::set-output name=environment::$ENV"
-          else
               echo "::set-output name=environment::null"
+          else
+              echo "::set-output name=environment::$ENV"
           fi
         env:
           ONLY_PLAN: ${{ inputs.only_plan }}
