@@ -204,7 +204,7 @@ mutation UpsertKycForm (
 
 Minimal information:
 ```json
-{"profile_id": 1, "first_name": "Mikhail", "last_name": "Astashkevich", "email_address": "qurazor1@gmail.com", "phone_number": "+1234567890", "birthdate": "1992-11-27", "address_street1": "1 Wall st.", "address_city": "New York", "address_postal_code": "12345", "tax_id_value": "123456789", "tax_id_type": "SSN", "employment_status": "UNEMPLOYED", "investor_profile_annual_income": 123456, "investor_profile_objectives": "LONG_TERM", "investor_profile_experience": "YRS_10_", "investor_profile_net_worth_liquid": 123, "investor_profile_net_worth_total": 1234, "investor_profile_risk_tolerance": "SPECULATION", "disclosures_drivewealth_terms_of_use": true, "disclosures_rule14b": true, "disclosures_drivewealth_customer_agreement": true, "disclosures_drivewealth_privacy_policy": true, "disclosures_drivewealth_market_data_agreement": true, "disclosures_signed_by": "Mikhail Astashkevich"}
+{"profile_id": 1, "first_name": "Mikhail", "last_name": "Astashkevich", "email_address": "qurazor1@gmail.com", "phone_number": "+1234567890", "birthdate": "1992-11-27", "address_street1": "1 Wall st.", "address_city": "New York", "address_postal_code": "12345", "tax_id_value": "123456789", "tax_id_type": "SSN", "employment_status": "UNEMPLOYED", "investor_profile_annual_income": 123456, "investor_profile_objectives": "LONG_TERM", "investor_profile_experience": "YRS_10_", "investor_profile_net_worth_liquid": 123, "investor_profile_net_worth_total": 1234, "investor_profile_risk_tolerance": "SPECULATION", "disclosures_drivewealth_terms_of_use": true, "disclosures_rule14b": true, "disclosures_drivewealth_customer_agreement": true, "disclosures_drivewealth_privacy_policy": true, "disclosures_drivewealth_market_data_agreement": true, "disclosures_signed_by": "Mikhail Astashkevich", "address_province": "CA", "address_country": "USA", "country": "USA", "citizenship": "USA"}
 ```
 
 ### Get KYC form values
@@ -422,8 +422,8 @@ query KycGetFormConfig($profile_id: Int!) {
 ```graphql
 mutation KycSendForm($profile_id: Int!) {
   kyc_send_form(profile_id: $profile_id) {
-    error_message
-    status # PENDING, APPROVED, REVOKED, CLOSED
+    message
+    status # NOT_READY, READY, PROCESSING, APPROVED, INFO_REQUIRED, DOC_REQUIRED, MANUAL_REVIEW, DENIED
   }
 }
 ```
@@ -432,8 +432,9 @@ mutation KycSendForm($profile_id: Int!) {
 ```graphql
 query KycGetStatus($profile_id: Int!) {
   kyc_get_status(profile_id: $profile_id) {
-    error_message
-    status # PENDING, APPROVED, REVOKED, CLOSED
+    message
+    status # NOT_READY, READY, PROCESSING, APPROVED, INFO_REQUIRED, DOC_REQUIRED, MANUAL_REVIEW, DENIED
+    updated_at
   }
 }
 ```
@@ -471,7 +472,7 @@ mutation KycAddDocument (
     type: $type
     side: $side
   ){
-    error_message
+    ok
   }
 }
 ```

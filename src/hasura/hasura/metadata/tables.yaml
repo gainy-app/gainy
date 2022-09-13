@@ -214,9 +214,12 @@
           - tax_id_value
           - tax_treaty_with_us
         filter:
-          profile:
-            user_id:
-              _eq: X-Hasura-User-Id
+          _and:
+            - profile:
+                user_id:
+                  _eq: X-Hasura-User-Id
+            - status:
+                _neq: APPROVED
         check: null
 - table:
     schema: app

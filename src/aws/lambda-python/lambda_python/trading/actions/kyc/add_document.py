@@ -22,11 +22,6 @@ class KycAddDocument(HasuraAction):
         model = KycDocument(input_params["uploaded_file_id"],
                             input_params["type"], input_params["side"])
 
-        try:
-            kyc_status = trading_service.send_kyc_document(
-                context_container, profile_id, model)
-            error_message = None
-        except ApiException as e:
-            error_message = str(e)
+        trading_service.send_kyc_document(context_container, profile_id, model)
 
-        return {"error_message": error_message}
+        return {"ok": True}

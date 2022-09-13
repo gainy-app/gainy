@@ -7,7 +7,7 @@ from trading.drivewealth.locking_functions import UpdateDriveWealthAuthToken
 from trading.drivewealth.repository import DriveWealthRepository
 from trading.models import KycDocument
 from trading.drivewealth.models import DriveWealthAccount, DriveWealthBankAccount, DriveWealthPortfolio, \
-    DriveWealthFund, DriveWealthAuthToken
+    DriveWealthFund, DriveWealthAuthToken, DriveWealthKycStatus
 from common.exceptions import ApiException
 from gainy.utils import get_logger, env
 
@@ -76,6 +76,10 @@ class DriveWealthApi:
 
     def get_user_documents(self, user_id: str):
         return self._make_request("GET", f"/users/{user_id}/documents")
+
+    def get_kyc_status(self, user_id: str) -> DriveWealthKycStatus:
+        return DriveWealthKycStatus(
+            self._make_request("GET", f"/users/{user_id}/kyc-status"))
 
     def get_user_accounts(self, user_id: str):
         return self._make_request("GET", f"/users/{user_id}/accounts")

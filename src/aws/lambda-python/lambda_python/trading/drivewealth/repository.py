@@ -1,5 +1,5 @@
 import json
-from typing import Any, Iterable, Dict, List
+from typing import Any, Iterable, Dict, List, Optional
 from trading.drivewealth.models import DriveWealthAccount, DriveWealthDocument, DriveWealthUser, DriveWealthBankAccount, \
     DriveWealthFund, DriveWealthPortfolio, DriveWealthAuthToken
 from psycopg2.extras import RealDictCursor
@@ -60,7 +60,7 @@ class DriveWealthRepository(Repository):
 
         return entity
 
-    def upsert_kyc_document(self, kyc_document_id: int,
+    def upsert_kyc_document(self, kyc_document_id: Optional[int],
                             data) -> DriveWealthDocument:
         id = data.get("id") or data.get("documentID")
         if not id:

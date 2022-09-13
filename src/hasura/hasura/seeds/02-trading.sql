@@ -11,19 +11,18 @@ INSERT INTO app.kyc_form (first_name, last_name, country, phone_number, email_ad
                           citizenship, is_us_tax_payer, tax_treaty_with_us, birthdate, politically_exposed_names,
                           irs_backup_withholdings_notified, gender, marital_status, address_street1, address_street2,
                           address_city, address_province, address_postal_code, address_country, status, profile_id)
-VALUES ('Mikhail', 'Astashkevich', null, '+1234567890', 'test@gainy.app', null, 'UNEMPLOYED', null, null, null,
+VALUES ('Mikhail', 'Astashkevich', 'USA', '+1234567890', 'test@gainy.app', null, 'UNEMPLOYED', null, null, null,
         null, null, 'YRS_10_', 123456, 1234, 'SPECULATION', 'LONG_TERM', 123, true, true, null, true, true, true, null,
-        'Mikhail Astashkevich', null, '123456789', 'SSN', null, null, null, '1992-11-27', null, null, null, null,
-        '1 Wall st.', null, 'New York', null, '12345', null, 'PENDING', 2)
+        'Mikhail Astashkevich', null, '123456789', 'SSN', 'USA', null, null, '1992-11-27', null, null, null, null,
+        '1 Wall st.', null, 'New York', 'CA', '12345', 'USA', 'APPROVED', 2)
 on conflict do nothing;
 
 INSERT INTO app.drivewealth_users (ref_id, profile_id, status, data)
-VALUES ('bf98c335-57ad-4337-ae9f-ed1fcfb447af', 2, 'PENDING',
-        '"{\"id\": \"bf98c335-57ad-4337-ae9f-ed1fcfb447af\", \"userType\": {\"name\": \"INDIVIDUAL_TRADER\", \"description\": \"Individual Trader\"}, \"status\": {\"name\": \"PENDING\", \"description\": \"User is pending approval.\"}, \"parentIB\": {\"id\": \"7b746acb-0afa-42c3-9c94-1bc8c16ce7b2\", \"name\": \"Gainy\"}, \"documents\": [{\"type\": \"ADDRESS_INFO\", \"data\": {\"street1\": \"1 Wall st.\", \"city\": \"New York\", \"postalCode\": \"12345\", \"country\": \"USA\"}, \"description\": \"Physical address information\"}, {\"type\": \"BASIC_INFO\", \"data\": {\"firstName\": \"Mikhail\", \"lastName\": \"Astashkevich\", \"displayName\": \"MAstashkevich\", \"emailAddress\": \"qurazor1@gmail.com\", \"phone\": \"+1234567890\", \"country\": \"USA\", \"language\": \"en_US\"}, \"description\": \"Name, email, phone, etc.\"}, {\"type\": \"DISCLOSURES\", \"data\": {\"termsOfUse\": true, \"rule14b\": true, \"customerAgreement\": true, \"findersFee\": false, \"foreignFindersFee\": false, \"marketDataAgreement\": true, \"privacyPolicy\": true, \"dataSharing\": null, \"signedBy\": \"Mikhail Astashkevich\", \"signedWhen\": \"2022-09-05T11:25:43.296Z\", \"iraAgreement\": null, \"extendedHoursAgreement\": false, \"cryptoAgreements\": null}, \"description\": \"Agreement acknowledgements\"}, {\"type\": \"EMPLOYMENT_INFO\", \"data\": {\"status\": \"UNEMPLOYED\", \"broker\": false, \"years\": 0}, \"description\": \"Employer, position, etc.\"}, {\"type\": \"IDENTIFICATION_INFO\", \"data\": {\"value\": \"****6789\", \"type\": \"Social Security Number\", \"citizenship\": \"USA\"}, \"description\": \"ID Number and citizenship\"}, {\"type\": \"INVESTOR_PROFILE_INFO\", \"data\": {\"annualIncomeRange\": \"$100,000 - $199,999\", \"investmentObjectives\": \"LONG_TERM\", \"investmentExperience\": \"YRS_10_\", \"networthLiquidRange\": \"$0 - $4,999\", \"networthTotalRange\": \"$0 - $4,999\", \"riskTolerance\": \"Speculative Risk\"}, \"description\": \"Net worth, income, risk tolerance, experience, etc.\"}, {\"type\": \"PERSONAL_INFO\", \"data\": {\"birthdate\": \"1992-11-27\"}, \"description\": \"Birth date, gender, marital status, etc.\"}, {\"type\": \"TAX_INFO\", \"data\": {\"usTaxpayer\": false, \"taxTreatyWithUS\": false}, \"description\": \"Tax Information\"}], \"wlpID\": \"GAIN\", \"referralCode\": \"78AA48\", \"createdWhen\": \"2022-09-05T11:25:43.363Z\", \"updatedWhen\": \"2022-09-05T11:25:43.363Z\"}"')
+VALUES ('bf98c335-57ad-4337-ae9f-ed1fcfb447af', 2, 'APPROVED',
+        '"{\"id\": \"bf98c335-57ad-4337-ae9f-ed1fcfb447af\", \"ackSignedWhen\": \"2022-09-13T05:29:44.416Z\", \"addressLine1\": \"1 Wall st.\", \"addressLine2\": null, \"city\": \"New York\", \"countryID\": \"USA\", \"displayName\": \"MAstashkevich\", \"dob\": \"1992-11-27\", \"email\": \"qurazor1@gmail.com\", \"firstName\": \"Mikhail\", \"languageID\": \"en_US\", \"lastName\": \"Astashkevich\", \"parentIB\": {\"id\": \"7b746acb-0afa-42c3-9c94-1bc8c16ce7b2\", \"name\": \"Gainy\"}, \"phone\": \"+1234567890\", \"referralCode\": \"78AA48\", \"stateProvince\": \"CA\", \"wlpID\": \"GAIN\", \"zipPostalCode\": \"12345\", \"idNo\": \"****6789\", \"status\": {\"name\": \"APPROVED\", \"description\": \"User approved.\"}, \"userType\": {\"name\": \"INDIVIDUAL_TRADER\", \"description\": \"Individual Trader\"}, \"usCitizen\": false, \"updatedWhen\": \"2022-09-13T05:29:45.795Z\", \"brandAmbassador\": false, \"employmentStatus\": {\"name\": \"UNEMPLOYED\", \"description\": \"Not Employed / In between jobs\"}, \"citizenship\": \"USA\", \"createdWhen\": \"2022-09-05T11:25:43.363Z\", \"approvedWhen\": \"2022-09-13T05:29:45.795Z\", \"approvedBy\": \"KYC SYSTEM\", \"marginDefault\": 0, \"ackCustomerAgreement\": true, \"ackFindersFee\": false, \"ackForeignFindersFee\": false, \"ackJointCustomerAgreement\": false, \"ackJointFindersFee\": false, \"ackJointForeignFindersFee\": false, \"ackJointMarketData\": false, \"ackMarketData\": true, \"ackSignedBy\": \"Mikhail Astashkevich\", \"ackExtendedHoursAgreement\": false, \"termsOfUse\": true, \"badPasswordCount\": 0, \"director\": false, \"employerIsBroker\": false, \"employmentYears\": 0, \"jointEmployerIsBroker\": false, \"investmentObjectives\": {\"name\": \"LONG_TERM\", \"description\": \"Long-term buy & hold investing\"}, \"investmentExperience\": {\"name\": \"YRS_10_\", \"description\": \"10+ yrs\"}, \"fundingSources\": [], \"politicallyExposed\": false, \"riskTolerance\": \"Speculative Risk\", \"userNoteQty\": 0, \"w8received\": \"2022-09-13\", \"w8expires\": \"2025-12-31\", \"taxTreatyWithUS\": false, \"updatedBy\": \"KYC_SYSTEM\", \"avatarURL\": \"https://secure.gravatar.com/avatar/6c2e4e3d706e25a4935f4682bc55c51c.jpg\", \"annualIncomeRange\": \"$100,000 - $199,999\", \"ackDisclosureRule14b\": true, \"ackJointDisclosureRule14b\": false, \"networthLiquidRange\": \"$0 - $4,999\", \"networthTotalRange\": \"$0 - $4,999\"}"')
 on conflict do nothing;
 
-INSERT INTO app.profile_plaid_access_tokens (profile_id, access_token, item_id, institution_id,
-                                             needs_reauth_since, purpose)
+INSERT INTO app.profile_plaid_access_tokens (profile_id, access_token, item_id, purpose)
 select t.profile_id,
        t.access_token,
        t.item_id,
@@ -36,6 +35,18 @@ from (
      ) t
          left join app.profile_plaid_access_tokens using (profile_id, purpose)
 where profile_plaid_access_tokens is null;
+
+INSERT INTO app.trading_funding_accounts (id, profile_id, plaid_access_token_id, plaid_account_id, name, balance)
+select 1,
+       2,
+       profile_plaid_access_tokens.id,
+       'B6XxxGblwRt4BMRZNgg1Ul6wvwzELwFZbKJkb',
+       'Plaid Saving',
+       null
+from app.profile_plaid_access_tokens
+where profile_id = 2
+  and purpose = 'trading'
+on conflict do nothing;
 
 INSERT INTO app.drivewealth_bank_accounts (ref_id, drivewealth_user_id, funding_account_id, plaid_access_token_id,
                                            plaid_account_id, status, bank_account_nickname, bank_account_number,
@@ -56,26 +67,14 @@ from app.profile_plaid_access_tokens
 where profile_id = 2
   and purpose = 'trading';
 
-INSERT INTO app.trading_funding_accounts (id, profile_id, plaid_access_token_id, plaid_account_id, name, balance)
-select 1,
-       2,
-       profile_plaid_access_tokens.id,
-       'B6XxxGblwRt4BMRZNgg1Ul6wvwzELwFZbKJkb',
-       'Plaid Saving',
-       null
-from app.profile_plaid_access_tokens
-where profile_id = 2
-  and purpose = 'trading'
-on conflict do nothing;
-
 
 INSERT INTO app.trading_accounts (id, profile_id, name, cash_available_for_trade, cash_available_for_withdrawal,
                                   cash_balance)
 VALUES (1, 2, 'Mikhail''s Robo Advisor Managed Account', 0, 0, 0);
 
-INSERT INTO app.drivewealth_accounts (ref_id, drivewealth_user_id, trading_account_id, status, ref_no, nickname,
+insert into app.drivewealth_accounts (ref_id, drivewealth_user_id, trading_account_id, status, ref_no, nickname,
                                       cash_available_for_trade, cash_available_for_withdrawal, cash_balance, data)
-VALUES ('bf98c335-57ad-4337-ae9f-ed1fcfb447af.1662377145557', 'bf98c335-57ad-4337-ae9f-ed1fcfb447af', 1, 'PENDING',
+values ('bf98c335-57ad-4337-ae9f-ed1fcfb447af.1662377145557', 'bf98c335-57ad-4337-ae9f-ed1fcfb447af', 1, 'OPEN',
         'GYEK000001', 'Mikhail''s Robo Advisor Managed Account', 0, 0, 0,
-        '"{\"id\": \"bf98c335-57ad-4337-ae9f-ed1fcfb447af.1662377145557\", \"accountNo\": \"GYEK000001\", \"accountType\": {\"name\": \"LIVE\", \"description\": \"Live Account\"}, \"accountMgmtType\": {\"name\": \"RIA_MANAGED\", \"description\": \"Robo Advisor Managed Account\"}, \"status\": {\"name\": \"PENDING\", \"description\": \"Pending\"}, \"tradingType\": {\"name\": \"CASH\", \"description\": \"Cash account\"}, \"leverage\": 1.0, \"nickname\": \"Mikhail''s Robo Advisor Managed Account\", \"parentIB\": {\"id\": \"7b746acb-0afa-42c3-9c94-1bc8c16ce7b2\", \"name\": \"Gainy\"}, \"taxProfile\": {\"taxStatusCode\": \"W-9\", \"taxRecipientCode\": \"INDIVIDUAL\"}, \"commissionID\": \"4dafc263-f73a-4972-bed0-3af9a6ee3d7d\", \"beneficiaries\": false, \"userID\": \"bf98c335-57ad-4337-ae9f-ed1fcfb447af\", \"restricted\": false, \"goodFaithViolations\": 0, \"patternDayTrades\": 0, \"freeTradeBalance\": 0, \"gfvPdtExempt\": false, \"buyingPowerOverride\": false, \"bod\": {}, \"ria\": {\"advisorID\": \"7b746acb-0afa-42c3-9c94-1bc8c16ce7b2.1661277115494\", \"productID\": \"product_e5046072-eefc-47ed-90d4-60654c33cf92\"}, \"sweepInd\": true, \"interestFree\": false, \"openedWhen\": \"2022-09-05T11:25:45Z\", \"ignoreMarketHoursForTest\": true, \"flaggedForACATS\": false}"')
+        '"{\"id\": \"bf98c335-57ad-4337-ae9f-ed1fcfb447af.1662377145557\", \"accountNo\": \"GYEK000001\", \"accountType\": {\"name\": \"LIVE\", \"description\": \"Live Account\"}, \"accountMgmtType\": {\"name\": \"RIA_MANAGED\", \"description\": \"Robo Advisor Managed Account\"}, \"status\": {\"name\": \"OPEN\", \"description\": \"Open\"}, \"tradingType\": {\"name\": \"CASH\", \"description\": \"Cash account\"}, \"leverage\": 1, \"nickname\": \"Mikhail''s Robo Advisor Managed Account\", \"parentIB\": {\"id\": \"7b746acb-0afa-42c3-9c94-1bc8c16ce7b2\", \"name\": \"Gainy\"}, \"taxProfile\": {\"taxStatusCode\": \"W-9\", \"taxRecipientCode\": \"INDIVIDUAL\"}, \"commissionID\": \"4dafc263-f73a-4972-bed0-3af9a6ee3d7d\", \"beneficiaries\": false, \"userID\": \"bf98c335-57ad-4337-ae9f-ed1fcfb447af\", \"restricted\": false, \"goodFaithViolations\": 0, \"patternDayTrades\": 0, \"freeTradeBalance\": 0, \"gfvPdtExempt\": false, \"buyingPowerOverride\": false, \"bod\": {\"moneyMarket\": 0, \"equityValue\": 0, \"cashAvailableForWithdrawal\": 0, \"cashAvailableForTrading\": 0, \"cashBalance\": 0}, \"ria\": {\"advisorID\": \"7b746acb-0afa-42c3-9c94-1bc8c16ce7b2.1661277115494\", \"productID\": \"product_e5046072-eefc-47ed-90d4-60654c33cf92\"}, \"sweepInd\": true, \"interestFree\": false, \"createdWhen\": \"2022-09-05T11:25:45.557Z\", \"openedWhen\": \"2022-09-13T05:29:45.689Z\", \"updatedWhen\": \"2022-09-13T05:29:45.689Z\", \"ignoreMarketHoursForTest\": true, \"flaggedForACATS\": false, \"extendedHoursEnrolled\": false}"')
 on conflict do nothing;

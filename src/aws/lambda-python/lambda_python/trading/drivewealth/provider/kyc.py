@@ -37,9 +37,9 @@ class DriveWealthProviderKYC:
         accounts = repository.get_user_accounts(user_ref_id)
         if not accounts:
             account_data = self.api.create_account(user_ref_id)
-            account = repository.upsert_user_account(user_ref_id, account_data)
+            repository.upsert_user_account(user_ref_id, account_data)
 
-        return ProfileKycStatus(user.status)
+        return self.api.get_kyc_status(user_ref_id).get_profile_kyc_status()
 
     def kyc_get_status(self, profile_id: int) -> ProfileKycStatus:
         repository = self.drivewealth_repository
@@ -51,6 +51,9 @@ class DriveWealthProviderKYC:
 
         user = repository.upsert_user(profile_id, user_data)
         user_ref_id = user.ref_id
+
+        kyc_status = self.api.get_kyc_status(
+            user_ref_id).get_profile_kyc_status()
 
         documents_data = self.api.get_user_documents(user_ref_id)
         for document_data in documents_data:
@@ -81,7 +84,7 @@ class DriveWealthProviderKYC:
             drivewealth_trading_account.trading_account_id = trading_account.id
             repository.persist(drivewealth_trading_account)
 
-        return ProfileKycStatus(user.status)
+        return kyc_status
 
     def send_kyc_document(self, profile_id: int, document: KycDocument,
                           file_stream: io.BytesIO):

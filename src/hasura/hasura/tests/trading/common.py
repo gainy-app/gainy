@@ -1,8 +1,5 @@
 from functools import lru_cache
 import os
-import sys
-
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
 
 from common import make_graphql_request
 
@@ -68,5 +65,4 @@ def kyc_send_form(profile_id, profile_user_id):
                                     {"profile_id": profile_id},
                                     profile_user_id)['data']['kyc_send_form']
 
-    assert response.get("error_message") is None
     assert response.get("status") is not None

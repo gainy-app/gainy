@@ -77,7 +77,6 @@ mutation TradingLinkBankAccountWithPlaid(
       account_name: $account_name
       access_token_id: $access_token_id
    ){
-      error_message
       funding_account {
          id
          balance
