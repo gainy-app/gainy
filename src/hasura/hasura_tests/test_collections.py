@@ -1,5 +1,5 @@
 import os
-from common import make_graphql_request, get_personalized_collections, PROFILE_ID, MIN_PERSONALIZED_COLLECTIONS_COUNT
+from hasura_tests.common import make_graphql_request, get_personalized_collections, PROFILE_ID, MIN_PERSONALIZED_COLLECTIONS_COUNT
 
 COLLECTION_IDS = [83]
 

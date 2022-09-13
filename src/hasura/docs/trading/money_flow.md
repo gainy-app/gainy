@@ -1,4 +1,4 @@
-# Trading / Deposits & withdrawals [_wip_]
+# Trading / Deposits & withdrawals
 
 ### Deposit funds
 Same query as it is for connecting a portfolio account. For Trading purposes the purpose must be set to `trading` 
@@ -6,7 +6,7 @@ Same query as it is for connecting a portfolio account. For Trading purposes the
 mutation TradingDepositFunds(
     $profile_id: Int!
     $trading_account_id: Int!
-    $amount: Int!
+    $amount: Float!
     $funding_account_id: Int!
 ) {
     trading_deposit_funds(
@@ -26,7 +26,7 @@ Same query as it is for connecting a portfolio account. For Trading purposes the
 mutation TradingWithdrawFunds(
     $profile_id: Int!
     $trading_account_id: Int!
-    $amount: Int!
+    $amount: Float!
     $funding_account_id: Int!
 ) {
     trading_withdraw_funds(

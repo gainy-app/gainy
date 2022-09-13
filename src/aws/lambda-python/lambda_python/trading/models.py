@@ -1,25 +1,31 @@
-from typing import Dict
+from typing import Dict, Optional
 from decimal import Decimal
 import enum
 from gainy.data_access.models import BaseModel, classproperty
 
 
 class KycStatus(str, enum.Enum):
-    PENDING = "PENDING"
+    NOT_READY = "NOT_READY"
+    READY = "READY"
+    PROCESSING = "PROCESSING"
     APPROVED = "APPROVED"
-    REVOKED = "REVOKED"
-    CLOSED = "CLOSED"
+    INFO_REQUIRED = "INFO_REQUIRED"
+    DOC_REQUIRED = "DOC_REQUIRED"
+    MANUAL_REVIEW = "MANUAL_REVIEW"
+    DENIED = "DENIED"
 
 
 class ProfileKycStatus:
     status = None
+    message = None
+    updated_at = None
 
-    def __init__(self, status: str):
+    def __init__(self, status: str, message: Optional[str]):
         self.status = KycStatus(status)
+        self.message = message
 
 
 class KycDocument:
-    uploaded_file_id = None
     uploaded_file_id = None
     type = None
     side = None

@@ -71,7 +71,7 @@ CREATE TABLE "app"."kyc_form"
 
     "status"                                        varchar
         constraint status
-            check (status is null or status in ('PENDING', 'APPROVED', 'REVOKED', 'CLOSED')),
+            check (status is null or status in ('NOT_READY', 'READY', 'PROCESSING', 'APPROVED', 'INFO_REQUIRED', 'DOC_REQUIRED', 'MANUAL_REVIEW', 'DENIED')),
     "profile_id"                                    integer     NOT NULL,
     "created_at"                                    timestamptz NOT NULL DEFAULT now(),
     "updated_at"                                    timestamptz NOT NULL DEFAULT now(),

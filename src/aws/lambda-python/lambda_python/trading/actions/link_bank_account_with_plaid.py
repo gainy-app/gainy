@@ -29,11 +29,6 @@ class TradingLinkBankAccountWithPlaid(HasuraAction):
         if not access_token or access_token.purpose != PURPOSE_TRADING or access_token.profile_id != profile_id:
             raise NotFoundException('Token not found')
 
-        try:
-            funding_account = trading_service.link_bank_account_with_plaid(
-                access_token, account_name, account_id)
-        except Exception as e:
-            logger.exception(e)
-            return {"error_message": str(e), 'id': None}
-
-        return {"error_message": None, 'id': funding_account.id}
+        funding_account = trading_service.link_bank_account_with_plaid(
+            access_token, account_name, account_id)
+        return {'id': funding_account.id}

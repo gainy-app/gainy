@@ -7,7 +7,7 @@ from trading.drivewealth.locking_functions import UpdateDriveWealthAuthToken
 from trading.drivewealth.repository import DriveWealthRepository
 from trading.models import KycDocument
 from trading.drivewealth.models import DriveWealthAccount, DriveWealthBankAccount, DriveWealthPortfolio, \
-    DriveWealthFund, DriveWealthAuthToken
+    DriveWealthFund, DriveWealthAuthToken, DriveWealthKycStatus
 from common.exceptions import ApiException
 from gainy.utils import get_logger, env
 
@@ -76,6 +76,10 @@ class DriveWealthApi:
 
     def get_user_documents(self, user_id: str):
         return self._make_request("GET", f"/users/{user_id}/documents")
+
+    def get_kyc_status(self, user_id: str) -> DriveWealthKycStatus:
+        return DriveWealthKycStatus(
+            self._make_request("GET", f"/users/{user_id}/kyc-status"))
 
     def get_user_accounts(self, user_id: str):
         return self._make_request("GET", f"/users/{user_id}/accounts")
@@ -177,27 +181,31 @@ class DriveWealthApi:
                 "password": DRIVEWEALTH_API_PASSWORD
             })
 
-    def _get_token(self):
+    def _get_token(self, force_token_refresh: bool = False):
         token = self.repository.get_latest_auth_token()
 
-        if not token or token.is_expired():
-            token = self._refresh_token()
+        if force_token_refresh or not token or token.is_expired():
+            token = self._refresh_token(force_token_refresh)
 
         return token.auth_token
 
-    def _refresh_token(self) -> DriveWealthAuthToken:
-        func = UpdateDriveWealthAuthToken(self.repository, self)
+    def _refresh_token(self, force: bool) -> DriveWealthAuthToken:
+        func = UpdateDriveWealthAuthToken(self.repository, self, force)
         try:
             return func.execute()
         except LockAcquisitionTimeout as e:
             logger.exception(e)
             raise e
 
-    def _make_request(self, method, url, post_data=None):
+    def _make_request(self,
+                      method,
+                      url,
+                      post_data=None,
+                      force_token_refresh=False):
         headers = {"dw-client-app-key": DRIVEWEALTH_APP_KEY}
 
         if url != "/auth":
-            headers["dw-auth-token"] = self._get_token()
+            headers["dw-auth-token"] = self._get_token(force_token_refresh)
 
         response = requests.request(method,
                                     DRIVEWEALTH_API_URL + url,
@@ -209,14 +217,20 @@ class DriveWealthApi:
         except:
             response_data = None
 
+        status_code = response.status_code
         logging_extra = {
             "post_data": post_data,
-            "status_code": response.status_code,
+            "status_code": status_code,
             "response_data": response_data,
             "requestId": response.headers.get("dw-request-id"),
         }
 
-        if response.status_code is None or response.status_code < 200 or response.status_code > 299:
+        if status_code is None or status_code < 200 or status_code > 299:
+            if status_code == 401 and response_data.get(
+                    "errorCode") == "L075" and not force_token_refresh:
+                logger.info('[DRIVEWEALTH] token expired', extra=logging_extra)
+                return self._make_request(method, url, post_data, True)
+
             logger.error("[DRIVEWEALTH] %s %s" % (method, url),
                          extra=logging_extra)
 
@@ -225,7 +239,7 @@ class DriveWealthApi:
                     "%s: %s" %
                     (response_data["errorCode"], response_data["message"]))
             else:
-                raise ApiException("Failed: %d" % response.status_code)
+                raise ApiException("Failed: %d" % status_code)
 
         logger.info("[DRIVEWEALTH] %s %s" % (method, url), extra=logging_extra)
 

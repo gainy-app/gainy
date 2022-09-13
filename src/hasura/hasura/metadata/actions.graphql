@@ -484,8 +484,9 @@ type KycSendFormOutput {
 }
 
 type KycStatus {
-  error_message: String
+  message: String
   status: String
+  updated_at: String
 }
 
 type PreSignedUploadFormOutput {
@@ -495,7 +496,7 @@ type PreSignedUploadFormOutput {
 }
 
 type KycAddDocumentOutput {
-  error_message: String
+  ok: Boolean!
 }
 
 type LinkBankAccountWithPlaidOutput {
@@ -513,8 +514,7 @@ type AccountInformation {
 }
 
 type TradingLinkBankAccountWithPlaidOutput {
-  error_message: String
-  id: Int
+  id: Int!
 }
 
 type FundingAccount {

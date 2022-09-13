@@ -1,13 +1,11 @@
 from functools import lru_cache
 import os
-import sys
 
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
+from hasura_tests.common import make_graphql_request
 
-from common import make_graphql_request
-
-PROFILES = make_graphql_request("{app_profiles{id, user_id}}",
-                                user_id=None)['data']['app_profiles']
+PROFILES = make_graphql_request(
+    "{app_profiles(order_by:[{id: asc}]){id, user_id}}",
+    user_id=None)['data']['app_profiles']
 
 
 @lru_cache(maxsize=None)
@@ -55,12 +53,14 @@ def fill_kyc_form(profile_id, profile_user_id):
         "disclosures_signed_by": signed_by
     }
 
-    make_graphql_request(
+    result = make_graphql_request(
         load_query('kyc', 'UpsertForm'), data,
-        profile_user_id)['data']['insert_app_kyc_form']['returning'][0]
-    make_graphql_request(
+        profile_user_id)['data']['insert_app_kyc_form']['returning']
+    assert len(result) > 0, (profile_id, profile_user_id, result)
+    result = make_graphql_request(
         load_query('kyc', 'UpsertForm'), data,
-        profile_user_id)['data']['insert_app_kyc_form']['returning'][0]
+        profile_user_id)['data']['insert_app_kyc_form']['returning']
+    assert len(result) > 0, (profile_id, profile_user_id, result)
 
 
 def kyc_send_form(profile_id, profile_user_id):
@@ -68,5 +68,4 @@ def kyc_send_form(profile_id, profile_user_id):
                                     {"profile_id": profile_id},
                                     profile_user_id)['data']['kyc_send_form']
 
-    assert response.get("error_message") is None
     assert response.get("status") is not None
