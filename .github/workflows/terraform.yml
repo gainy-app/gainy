@@ -114,10 +114,10 @@ env:
 
 jobs:
   set-environment:
+    runs-on: ubuntu-latest
     steps:
       - name: set-environment
         id: set-environment
-        runs-on: ubuntu-latest
         run: |
           if [$ONLY_PLAN == '']
           then
