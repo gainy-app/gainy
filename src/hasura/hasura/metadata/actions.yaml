@@ -213,7 +213,6 @@ custom_types:
   enums: []
   input_objects:
     - name: PlaidWebhookError
-    - name: SampleInput
     - name: TickerWeight
   objects:
     - name: ChartDataPoint
