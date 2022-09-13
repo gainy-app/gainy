@@ -115,30 +115,10 @@ env:
   TF_VAR_drivewealth_api_url: ${{ secrets.DRIVEWEALTH_API_URL }}
 
 jobs:
-  set-environment:
+  test:
+    name: "Terraform Test"
     runs-on: ubuntu-latest
-    outputs:
-      environment: ${{ steps.set-environment.outputs.environment }}
-    steps:
-      - name: set-environment
-        id: set-environment
-        run: |
-          if [ "$ONLY_PLAN" == "true" ]
-          then
-              echo "::set-output name=environment::null"
-          else
-              echo "::set-output name=environment::$ENV"
-          fi
-        env:
-          ONLY_PLAN: ${{ inputs.only_plan }}
-          ENV: ${{ inputs.env }}
-
-  deploy:
-    name: "Terraform"
-    runs-on: ubuntu-latest
-    needs: set-environment
-    environment: ${{ needs.set-environment.outputs.environment }}
-#    concurrency: ${{ needs.set-environment.outputs.environment }}
+    if: inputs.only_plan
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -175,9 +155,46 @@ jobs:
         run: terraform validate -no-color
         working-directory: terraform
 
+      - name: Terraform Plan
+        id: plan
+        if: inputs.only_plan
+        run: terraform plan -no-color -lock=false
+        working-directory: terraform
+
+  deploy:
+    name: "Terraform"
+    runs-on: ubuntu-latest
+    if: "!inputs.only_plan"
+    environment: ${{ inputs.env }}
+    concurrency: ${{ inputs.env }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Set Terraform Environment Variables
+        run: |
+          source .env.make
+          source deployment/scripts/code_artifactory.sh
+          echo "TF_VAR_base_image_registry_address=$BASE_IMAGE_REGISTRY_ADDRESS" >> $GITHUB_ENV
+          echo "TF_VAR_base_image_version=$BASE_IMAGE_VERSION" >> $GITHUB_ENV
+          echo "TF_VAR_codeartifact_pipy_url=$CODEARTIFACT_PIPY_URL" >> $GITHUB_ENV
+          echo "TF_VAR_gainy_compute_version=$GAINY_COMPUTE_VERSION" >> $GITHUB_ENV
+
+      - name: Docker Registry Auth
+        run: make docker-auth
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v1
+        with:
+          cli_config_credentials_token: ${{ secrets.TF_API_TOKEN }}
+
+      - name: Terraform Init
+        id: init
+        run: terraform init -backend-config=backend-${{ env.TF_VAR_env }}.hcl -reconfigure
+        working-directory: terraform
+
       - name: Terraform State Cleanup Prepare
         id: state-clean-prepare
-        if: "!inputs.only_plan"
         # grep only needed resources
         # tr to make it a one-liner
         # sed to filter out :: command, that github apparently adds to step output for some f-cked up reason
@@ -186,20 +203,9 @@ jobs:
 
       - name: Terraform State Cleanup
         id: state-clean
-        if: steps.state-clean-prepare.outputs.resources != '' && !inputs.only_plan
+        if: steps.state-clean-prepare.outputs.resources != ''
         run: terraform state rm ${{ steps.state-clean-prepare.outputs.resources }}
         working-directory: terraform
-
-      - name: Terraform Plan
-        id: plan
-        if: inputs.only_plan
-        run: terraform plan -no-color -lock=false
-        continue-on-error: true
-        working-directory: terraform
-
-      - name: Terraform Plan Status
-        if: steps.plan.outcome == 'failure'
-        run: exit 1
 
       - name: Terraform Apply
         id: apply
