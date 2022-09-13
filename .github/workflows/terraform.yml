@@ -1,7 +1,5 @@
 name: Terraform
 
-concurrency: production
-
 on:
   workflow_dispatch:
     inputs:
@@ -115,9 +113,28 @@ env:
   TF_VAR_drivewealth_api_url: ${{ secrets.DRIVEWEALTH_API_URL }}
 
 jobs:
-  prepare:
-    name: "Prepare Terraform"
+  set-environment:
+    steps:
+      - name: set-environment
+        id: set-environment
+        runs-on: ubuntu-latest
+        run: |
+          if [$ONLY_PLAN == '']
+          then
+              echo "::set-output name=environment::$ENV"
+          else
+              echo "::set-output name=environment::null"
+          fi
+        env:
+          ONLY_PLAN: ${{ inputs.only_plan }}
+          ENV: ${{ inputs.env }}
+
+  deploy:
+    name: "Terraform"
     runs-on: ubuntu-latest
+    needs: set-environment
+    environment: ${{ needs.set-environment.outputs.environment }}
+    concurrency: ${{ needs.set-environment.outputs.environment }}
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -154,6 +171,21 @@ jobs:
         run: terraform validate -no-color
         working-directory: terraform
 
+      - name: Terraform State Cleanup Prepare
+        id: state-clean-prepare
+        if: "!inputs.only_plan"
+        # grep only needed resources
+        # tr to make it a one-liner
+        # sed to filter out :: command, that github apparently adds to step output for some f-cked up reason
+        run: echo "::set-output name=resources::$(terraform state list | grep -P 'aws_apigatewayv2_integration|aws_apigatewayv2_route|aws_lambda_permission' | tr '\n' ' ' | sed 's/::.*//')"
+        working-directory: terraform
+
+      - name: Terraform State Cleanup
+        id: state-clean
+        if: steps.state-clean-prepare.outputs.resources != '' && !inputs.only_plan
+        run: terraform state rm ${{ steps.state-clean-prepare.outputs.resources }}
+        working-directory: terraform
+
       - name: Terraform Plan
         id: plan
         if: inputs.only_plan
@@ -165,29 +197,8 @@ jobs:
         if: steps.plan.outcome == 'failure'
         run: exit 1
 
-  deploy:
-    needs: prepare
-    if: "!inputs.only_plan"
-    name: "Deploy"
-    runs-on: ubuntu-latest
-    concurrency: ${{ inputs.env }}
-    environment: ${{ inputs.env }}
-    steps:
-      - name: Terraform State Cleanup Prepare
-        id: state-clean-prepare
-        # grep only needed resources
-        # tr to make it a one-liner
-        # sed to filter out :: command, that github apparently adds to step output for some f-cked up reason
-        run: echo "::set-output name=resources::$(terraform state list | grep -P 'aws_apigatewayv2_integration|aws_apigatewayv2_route|aws_lambda_permission' | tr '\n' ' ' | sed 's/::.*//')"
-        working-directory: terraform
-
-      - name: Terraform State Cleanup
-        id: state-clean
-        if: steps.state-clean-prepare.outputs.resources != ''
-        run: terraform state rm ${{ steps.state-clean-prepare.outputs.resources }}
-        working-directory: terraform
-
       - name: Terraform Apply
         id: apply
+        if: "!inputs.only_plan"
         run: terraform apply -auto-approve
         working-directory: terraform
