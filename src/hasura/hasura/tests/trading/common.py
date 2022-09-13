@@ -55,11 +55,11 @@ def fill_kyc_form(profile_id, profile_user_id):
     result = make_graphql_request(
         load_query('kyc', 'UpsertForm'), data,
         profile_user_id)['data']['insert_app_kyc_form']['returning']
-    assert len(result) > 0
+    assert len(result) > 0, (profile_id, profile_user_id, result)
     result = make_graphql_request(
         load_query('kyc', 'UpsertForm'), data,
         profile_user_id)['data']['insert_app_kyc_form']['returning']
-    assert len(result) > 0
+    assert len(result) > 0, (profile_id, profile_user_id, result)
 
 
 def kyc_send_form(profile_id, profile_user_id):

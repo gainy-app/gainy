@@ -11,10 +11,12 @@ logger = get_logger(__name__)
 class UpdateDriveWealthAuthToken(AbstractPessimisticLockingFunction):
     repo: DriveWealthRepository
     api = None
+    force = None
 
-    def __init__(self, repo: DriveWealthRepository, api):
+    def __init__(self, repo: DriveWealthRepository, api, force: bool = False):
         super().__init__(repo)
         self.api = api
+        self.force = force
 
     def execute(self, max_tries: int = 3) -> DriveWealthAuthToken:
         return super().execute(max_tries)
@@ -28,7 +30,7 @@ class UpdateDriveWealthAuthToken(AbstractPessimisticLockingFunction):
         return entity
 
     def _do(self, token: DriveWealthAuthToken):
-        if not token.is_expired():
+        if not token.is_expired() and not self.force:
             return token
 
         data = self.api.get_auth_token()
