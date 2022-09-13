@@ -116,7 +116,7 @@ env:
 
 jobs:
   test:
-    name: "Terraform Test"
+    name: "Test"
     runs-on: ubuntu-latest
     if: inputs.only_plan
     steps:
@@ -162,7 +162,7 @@ jobs:
         working-directory: terraform
 
   deploy:
-    name: "Terraform"
+    name: "Deploy"
     runs-on: ubuntu-latest
     if: "!inputs.only_plan"
     environment: ${{ inputs.env }}
