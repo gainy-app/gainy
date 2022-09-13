@@ -1,10 +1,11 @@
 from functools import lru_cache
 import os
 
-from common import make_graphql_request
+from hasura_tests.common import make_graphql_request
 
-PROFILES = make_graphql_request("{app_profiles{id, user_id}}",
-                                user_id=None)['data']['app_profiles']
+PROFILES = make_graphql_request(
+    "{app_profiles(order_by:[{id: asc}]){id, user_id}}",
+    user_id=None)['data']['app_profiles']
 
 
 @lru_cache(maxsize=None)

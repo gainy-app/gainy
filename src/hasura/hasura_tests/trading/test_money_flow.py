@@ -1,5 +1,5 @@
-from common import make_graphql_request
-from trading.common import load_query, PROFILES
+from hasura_tests.common import make_graphql_request
+from hasura_tests.trading.common import load_query, PROFILES
 
 profile_id = PROFILES[1]['id']
 profile_user_id = PROFILES[1]['user_id']

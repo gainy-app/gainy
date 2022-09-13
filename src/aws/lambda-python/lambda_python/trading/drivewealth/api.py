@@ -197,7 +197,11 @@ class DriveWealthApi:
             logger.exception(e)
             raise e
 
-    def _make_request(self, method, url, post_data=None, force_token_refresh=False):
+    def _make_request(self,
+                      method,
+                      url,
+                      post_data=None,
+                      force_token_refresh=False):
         headers = {"dw-client-app-key": DRIVEWEALTH_APP_KEY}
 
         if url != "/auth":
@@ -222,7 +226,8 @@ class DriveWealthApi:
         }
 
         if status_code is None or status_code < 200 or status_code > 299:
-            if status_code == 401 and response_data.get("errorCode") == "L075" and not force_token_refresh:
+            if status_code == 401 and response_data.get(
+                    "errorCode") == "L075" and not force_token_refresh:
                 logger.info('[DRIVEWEALTH] token expired', extra=logging_extra)
                 return self._make_request(method, url, post_data, True)
 

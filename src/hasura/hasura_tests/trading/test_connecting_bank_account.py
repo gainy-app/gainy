@@ -1,5 +1,5 @@
-from common import make_graphql_request, db_connect
-from trading.common import fill_kyc_form, kyc_send_form, load_query, PROFILES
+from hasura_tests.common import make_graphql_request, db_connect
+from hasura_tests.trading.common import fill_kyc_form, kyc_send_form, load_query, PROFILES
 
 profile_id = PROFILES[0]['id']
 profile_user_id = PROFILES[0]['user_id']

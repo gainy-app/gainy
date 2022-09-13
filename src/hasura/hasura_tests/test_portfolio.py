@@ -4,7 +4,7 @@ import json
 import numbers
 import os
 import pytest
-from common import make_graphql_request, permute_params, PROFILE_ID, MIN_PORTFOLIO_HOLDING_GROUPS_COUNT
+from hasura_tests.common import make_graphql_request, permute_params, PROFILE_ID, MIN_PORTFOLIO_HOLDING_GROUPS_COUNT
 
 PROFILES = make_graphql_request("{app_profiles{id, user_id}}",
                                 user_id=None)['data']['app_profiles']
