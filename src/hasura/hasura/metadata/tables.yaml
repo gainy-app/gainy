@@ -218,8 +218,11 @@
             - profile:
                 user_id:
                   _eq: X-Hasura-User-Id
-            - status:
-                _neq: APPROVED
+            - _or:
+                - status:
+                    _neq: APPROVED
+                - status:
+                    _is_null: true
         check: null
 - table:
     schema: app

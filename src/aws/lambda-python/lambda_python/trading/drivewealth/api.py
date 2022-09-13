@@ -181,7 +181,7 @@ class DriveWealthApi:
                 "password": DRIVEWEALTH_API_PASSWORD
             })
 
-    def _get_token(self, force_token_refresh: bool):
+    def _get_token(self, force_token_refresh: bool = False):
         token = self.repository.get_latest_auth_token()
 
         if force_token_refresh or not token or token.is_expired():
