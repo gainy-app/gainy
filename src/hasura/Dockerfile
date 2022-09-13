@@ -4,6 +4,7 @@ ARG BASE_IMAGE_REGISTRY_ADDRESS
 FROM ${BASE_IMAGE_REGISTRY_ADDRESS}/gainy-hasura:${BASE_IMAGE_VERSION} as production
 
 COPY hasura /hasura
+COPY hasura_tests /hasura_tests
 
 FROM production as test
 

@@ -8,7 +8,7 @@ from portfolio.plaid.common import handle_error
 from services import S3
 from portfolio.plaid.models import PlaidAccessToken
 from trading.models import KycDocument, FundingAccount, TradingAccount, TradingMoneyFlow, TradingCollectionVersion, \
-    CollectionHoldingStatus
+    CollectionHoldingStatus, ProfileKycStatus
 from trading.drivewealth import DriveWealthProvider
 from trading.repository import TradingRepository
 
@@ -33,7 +33,7 @@ class TradingService:
             raise Exception('kyc_form is null')
         return self._get_provider_service().kyc_send_form(kyc_form)
 
-    def kyc_get_status(self, profile_id: int):
+    def kyc_get_status(self, profile_id: int) -> ProfileKycStatus:
         return self._get_provider_service().kyc_get_status(profile_id)
 
     def send_kyc_document(self, profile_id: int, document: KycDocument):

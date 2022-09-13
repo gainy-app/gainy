@@ -1,9 +1,6 @@
 from common.context_container import ContextContainer
-from common.exceptions import ApiException, NotFoundException
-from common.hasura_exception import HasuraActionException
+from common.exceptions import NotFoundException
 from common.hasura_function import HasuraAction
-from trading import TradingService, TradingRepository
-from psycopg2.extras import RealDictCursor
 from gainy.utils import get_logger
 
 logger = get_logger(__name__)
@@ -16,7 +13,6 @@ class KycSendForm(HasuraAction):
 
     def apply(self, input_params, context_container: ContextContainer):
         trading_service = context_container.trading_service
-        db_conn = context_container.db_conn
         profile_id = input_params["profile_id"]
 
         repository = context_container.trading_repository
@@ -25,11 +21,6 @@ class KycSendForm(HasuraAction):
         if not kyc_form:
             raise NotFoundException()
 
-        try:
-            kyc_status = trading_service.kyc_send_form(kyc_form)
-            error_message = None
-        except ApiException as e:
-            error_message = str(e)
-
+        kyc_status = trading_service.kyc_send_form(kyc_form)
         repository.update_kyc_form(profile_id, kyc_status.status)
-        return {"error_message": error_message, "status": kyc_status.status}
+        return {"status": kyc_status.status}

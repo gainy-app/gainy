@@ -1,6 +1,5 @@
-import datetime
 import logging
-from common import make_graphql_request
+from hasura_tests.common import make_graphql_request
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)

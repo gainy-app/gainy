@@ -1,16 +1,11 @@
-import os
-import sys
+from hasura_tests.common import make_graphql_request, db_connect
+from hasura_tests.trading.common import fill_kyc_form, kyc_send_form, load_query, PROFILES
 
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
-
-from common import make_graphql_request, db_connect
-from trading.common import fill_kyc_form, kyc_send_form, load_query, PROFILES
+profile_id = PROFILES[0]['id']
+profile_user_id = PROFILES[0]['user_id']
 
 
 def test_create_plaid_link_token():
-    profile_id = PROFILES[0]['id']
-    profile_user_id = PROFILES[0]['user_id']
-
     data = make_graphql_request(
         load_query('connecting_bank_account', 'CreatePlaidLinkToken'), {
             "profile_id": profile_id,
@@ -24,9 +19,6 @@ def test_create_plaid_link_token():
 
 
 def test_full_flow():
-    profile_id = PROFILES[0]['id']
-    profile_user_id = PROFILES[0]['user_id']
-
     fill_kyc_form(profile_id, profile_user_id)
     kyc_send_form(profile_id, profile_user_id)
 
@@ -43,9 +35,8 @@ def test_full_flow():
             cursor.execute(
                 query, {
                     "profile_id": profile_id,
-                    "access_token":
-                    'access-sandbox-23e0b768-697b-4c89-ad1a-9ccf0d49f0be',
-                    "item_id": 'XvQARLzQKBh79bJ74n39twjGEGQVZpudxZgw3',
+                    "access_token": access_token,
+                    "item_id": item_id,
                     "purpose": 'trading',
                 })
             access_token_id = cursor.fetchone()[0]
@@ -58,8 +49,6 @@ def test_full_flow():
             "access_token_id": access_token_id,
         }, profile_user_id)['data']['trading_link_bank_account_with_plaid']
 
-    assert "error_message" in data
-    assert data["error_message"] is None
     assert "funding_account" in data
     assert data["funding_account"] is not None
 

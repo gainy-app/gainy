@@ -1,10 +1,5 @@
-import os, sys
-
-task_dir = os.path.abspath(os.path.join(__file__, '../../'))
-sys.path.append(task_dir)
-
 from hasura_handler import action_dispatcher, trigger_dispatcher
-from .common import get_action_event, get_trigger_event, PROFILE_ID, PROFILE_ID2, USER_ID, USER_ID2, PLAID_ACCESS_TOKEN, PLAID_ITEM_ID
+from tests.common import get_action_event, get_trigger_event, PROFILE_ID, PROFILE_ID2, USER_ID, USER_ID2, PLAID_ACCESS_TOKEN, PLAID_ITEM_ID
 
 MATCH_SCORE_FIELDS_SET = {
     'symbol',

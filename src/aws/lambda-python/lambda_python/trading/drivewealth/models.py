@@ -3,9 +3,11 @@ from decimal import Decimal
 import json
 from typing import Dict, Optional, List, Any
 
+import dateutil
+
 from gainy.data_access.db_lock import ResourceType
 from gainy.data_access.models import BaseModel, classproperty, ResourceVersion
-from trading.models import CollectionHoldingStatus
+from trading.models import CollectionHoldingStatus, ProfileKycStatus, KycStatus
 
 PRECISION = 1e-3
 
@@ -429,3 +431,36 @@ class DriveWealthAutopilotRun(BaseDriveWealthModel):
             **super().to_dict(),
             "accounts": json.dumps(self.accounts),
         }
+
+
+class DriveWealthKycStatus():
+    data = None
+
+    def __init__(self, data: dict):
+        self.data = data
+
+    def get_profile_kyc_status(self) -> ProfileKycStatus:
+        kyc = self.data["kyc"]
+        kyc_status = kyc["status"]["name"]
+        if kyc_status == "KYC_NOT_READY":
+            status = KycStatus.NOT_READY
+        elif kyc_status == "KYC_READY":
+            status = KycStatus.READY
+        elif kyc_status == "KYC_PROCESSING":
+            status = KycStatus.PROCESSING
+        elif kyc_status == "KYC_APPROVED":
+            status = KycStatus.APPROVED
+        elif kyc_status == "KYC_INFO_REQUIRED":
+            status = KycStatus.INFO_REQUIRED
+        elif kyc_status == "KYC_DOC_REQUIRED":
+            status = KycStatus.DOC_REQUIRED
+        elif kyc_status == "KYC_MANUAL_REVIEW":
+            status = KycStatus.MANUAL_REVIEW
+        elif kyc_status == "KYC_DENIED":
+            status = KycStatus.DENIED
+        else:
+            raise Exception('Unknown kyc status %s' % kyc_status)
+
+        status = ProfileKycStatus(status, kyc.get("statusComment"))
+        status.updated_at = dateutil.parser.parse(kyc["updated"])
+        return status

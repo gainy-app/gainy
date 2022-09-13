@@ -88,6 +88,7 @@ services:
       - "9695:9695"
     volumes:
       - ./src/hasura/hasura:/hasura
+      - ./src/hasura/hasura_tests:/hasura_tests
     depends_on:
       - postgres
     env_file:
