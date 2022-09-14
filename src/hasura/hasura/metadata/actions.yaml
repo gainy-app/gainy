@@ -161,6 +161,10 @@ actions:
       forward_client_headers: true
     permissions:
       - role: anonymous
+  - name: trading_add_money
+    definition:
+      kind: synchronous
+      handler: '{{AWS_LAMBDA_API_GATEWAY_ENDPOINT}}/hasuraAction'
   - name: trading_delete_funding_account
     definition:
       kind: synchronous
@@ -197,6 +201,10 @@ actions:
       handler: '{{AWS_LAMBDA_API_GATEWAY_ENDPOINT}}/hasuraAction'
     permissions:
       - role: user
+  - name: trading_sync_provider_data
+    definition:
+      kind: synchronous
+      handler: '{{AWS_LAMBDA_API_GATEWAY_ENDPOINT}}/hasuraAction'
   - name: trading_withdraw_funds
     definition:
       kind: synchronous
@@ -340,7 +348,6 @@ custom_types:
     - name: KycSendFormOutput
     - name: KycStatus
     - name: PreSignedUploadFormOutput
-    - name: KycAddDocumentOutput
     - name: LinkBankAccountWithPlaidOutput
     - name: AccountInformation
     - name: TradingLinkBankAccountWithPlaidOutput
@@ -363,9 +370,8 @@ custom_types:
           type: object
           field_mapping:
             id: id
-    - name: TradingDeleteFundingAccountOutput
     - name: TradingMoneyFlowOutput
     - name: SampleOutput
-    - name: TradingReconfigureCollectionHoldingsOutput
     - name: ActualCollectionHoldingOutput
+    - name: OkOutput
   scalars: []

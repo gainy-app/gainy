@@ -5,19 +5,12 @@ from typing import Dict, Optional, List, Any
 
 import dateutil
 
+from common import DecimalEncoder
 from gainy.data_access.db_lock import ResourceType
 from gainy.data_access.models import BaseModel, classproperty, ResourceVersion
 from trading.models import CollectionHoldingStatus, ProfileKycStatus, KycStatus
 
 PRECISION = 1e-3
-
-
-class DecimalEncoder(json.JSONEncoder):
-
-    def default(self, o):
-        if isinstance(o, Decimal):
-            return str(o)
-        return super(DecimalEncoder, self).default(o)
 
 
 class BaseDriveWealthModel(BaseModel):
@@ -75,7 +68,7 @@ class DriveWealthAuthToken(BaseDriveWealthModel, ResourceVersion):
 
 class DriveWealthUser(BaseDriveWealthModel):
     ref_id = None
-    kyc_document_id = None
+    profile_id = None
     status = None
     data = None
     created_at = None
@@ -153,6 +146,24 @@ class DriveWealthBankAccount(BaseDriveWealthModel):
     db_excluded_fields = ["created_at", "updated_at"]
     non_persistent_fields = ["created_at", "updated_at"]
 
+    def set_from_response(self, data=None):
+        self.ref_id = data['id']
+        self.status = data["status"]
+
+        details = data["bankAccountDetails"]
+        self.bank_account_nickname = details['bankAccountNickname']
+        self.bank_account_number = details['bankAccountNumber']
+        self.bank_routing_number = details['bankRoutingNumber']
+        self.bank_account_type = details.get('bankAccountType')
+        self.data = json.dumps(data)
+
+        if "userDetails" in data:
+            self.drivewealth_user_id = data["userDetails"]['userID']
+            self.holder_name = " ".join([
+                data["userDetails"]['firstName'],
+                data["userDetails"]['lastName']
+            ])
+
     @classproperty
     def table_name(self) -> str:
         return "drivewealth_bank_accounts"
@@ -173,13 +184,12 @@ class BaseDriveWealthMoneyFlowModel(BaseDriveWealthModel):
     db_excluded_fields = ["created_at", "updated_at"]
     non_persistent_fields = ["created_at", "updated_at"]
 
-    def __init__(self, data=None):
-        super().__init__()
-
-        if not data:
-            return
-
+    def set_from_response(self, data=None):
         self.ref_id = data["id"]
+        if "accountDetails" in data:
+            self.trading_account_ref_id = data["accountDetails"]["accountID"]
+        elif "accountID" in data:
+            self.trading_account_ref_id = data["accountID"]
         self.status = data["status"]["message"]
         self.data = data
 

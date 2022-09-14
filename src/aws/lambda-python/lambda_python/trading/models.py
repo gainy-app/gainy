@@ -1,6 +1,9 @@
+import json
 from typing import Dict, Optional
 from decimal import Decimal
 import enum
+
+from common import DecimalEncoder
 from gainy.data_access.models import BaseModel, classproperty
 
 
@@ -25,16 +28,26 @@ class ProfileKycStatus:
         self.message = message
 
 
-class KycDocument:
+class KycDocument(BaseModel):
+    id = None
+    profile_id = None
     uploaded_file_id = None
     type = None
     side = None
     content_type = None
 
-    def __init__(self, uploaded_file_id, type, side):
-        self.uploaded_file_id = uploaded_file_id
-        self.type = type
-        self.side = side
+    key_fields = ["id"]
+
+    db_excluded_fields = ["created_at", "updated_at"]
+    non_persistent_fields = ["id", "created_at", "updated_at"]
+
+    @classproperty
+    def schema_name(self) -> str:
+        return "app"
+
+    @classproperty
+    def table_name(self) -> str:
+        return "kyc_documents"
 
 
 class TradingAccount(BaseModel):
@@ -100,13 +113,6 @@ class TradingMoneyFlow(BaseModel):
     db_excluded_fields = ["created_at", "updated_at"]
     non_persistent_fields = ["id", "created_at", "updated_at"]
 
-    def __init__(self, profile_id: int, amount: Decimal,
-                 trading_account_id: int, funding_account_id: int):
-        self.profile_id = profile_id
-        self.amount = amount
-        self.trading_account_id = trading_account_id
-        self.funding_account_id = funding_account_id
-
     @classproperty
     def schema_name(self) -> str:
         return "app"
@@ -144,6 +150,13 @@ class TradingCollectionVersion(BaseModel):
     @classproperty
     def table_name(self) -> str:
         return "trading_collection_versions"
+
+    def to_dict(self) -> dict:
+        return {
+            **super().to_dict(),
+            "weights":
+            json.dumps(self.weights, cls=DecimalEncoder),
+        }
 
 
 class CollectionHoldingStatus:

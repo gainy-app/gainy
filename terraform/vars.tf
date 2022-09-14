@@ -39,6 +39,10 @@ variable "stripe_api_key" {
 
 #################################### DriveWealth ####################################
 
+variable "drivewealth_is_uat" {
+  type    = string
+  default = "true"
+}
 variable "drivewealth_app_key" {
   type      = string
   sensitive = true

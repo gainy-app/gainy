@@ -50,8 +50,9 @@ class TradingService:
             raise NotFoundException('File not Found')
         (s3_bucket, s3_key, content_type) = row
         document.content_type = content_type
+        document.profile_id = profile_id
 
-        self.trading_repository.upsert_kyc_document(profile_id, document)
+        self.trading_repository.persist(document)
 
         file_stream = io.BytesIO()
         S3().download_file(s3_bucket, s3_key, file_stream)
@@ -67,7 +68,7 @@ class TradingService:
             ).link_bank_account_with_plaid(access_token, account_id,
                                            account_name)
         except plaid.ApiException as e:
-            handle_error(e)
+            return handle_error(e)
 
         repository = self.trading_repository
         funding_account = repository.find_one(
@@ -134,8 +135,11 @@ class TradingService:
                           funding_account: FundingAccount):
         repository = self.trading_repository
 
-        money_flow = TradingMoneyFlow(profile_id, amount, trading_account.id,
-                                      funding_account.id)
+        money_flow = TradingMoneyFlow()
+        money_flow.profile_id = profile_id
+        money_flow.amount = amount
+        money_flow.trading_account_id = trading_account.id
+        money_flow.funding_account_id = funding_account.id
         repository.persist(money_flow)
 
         self._get_provider_service().transfer_money(money_flow, amount,
@@ -163,6 +167,22 @@ class TradingService:
         holdings = self._get_provider_service().get_actual_collection_holdings(
             profile_id, collection_id)
         return [i.get_collection_holding_status() for i in holdings]
+
+    def sync_funding_accounts(self, profile_id) -> Iterable[FundingAccount]:
+        repository = self.trading_repository
+        funding_accounts = repository.find_all(FundingAccount,
+                                               {"profile_id": profile_id})
+        self.update_funding_accounts_balance(funding_accounts)
+
+        return funding_accounts
+
+    def sync_provider_data(self, profile_id):
+        self.sync_funding_accounts(profile_id)
+        self._get_provider_service().sync_data(profile_id)
+
+    def debug_add_money(self, trading_account_id, amount):
+        self._get_provider_service().debug_add_money(trading_account_id,
+                                                     amount)
 
     def _get_provider_service(self):
         return self.drivewealth_provider
