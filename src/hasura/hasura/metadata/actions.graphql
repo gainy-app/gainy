@@ -277,11 +277,6 @@ input PlaidWebhookError {
   error_code: Int
 }
 
-input SampleInput {
-  username: String!
-  password: String!
-}
-
 input TickerWeight {
   symbol: String!
   weight: Float!

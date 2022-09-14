@@ -1,7 +1,5 @@
 name: Terraform
 
-concurrency: production
-
 on:
   workflow_dispatch:
     inputs:
@@ -115,9 +113,10 @@ env:
   TF_VAR_drivewealth_api_url: ${{ secrets.DRIVEWEALTH_API_URL }}
 
 jobs:
-  prepare:
-    name: "Prepare Terraform"
+  test:
+    name: "Test"
     runs-on: ubuntu-latest
+    if: inputs.only_plan
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -158,21 +157,40 @@ jobs:
         id: plan
         if: inputs.only_plan
         run: terraform plan -no-color -lock=false
-        continue-on-error: true
         working-directory: terraform
 
-      - name: Terraform Plan Status
-        if: steps.plan.outcome == 'failure'
-        run: exit 1
-
   deploy:
-    needs: prepare
-    if: "!inputs.only_plan"
     name: "Deploy"
     runs-on: ubuntu-latest
-    concurrency: ${{ inputs.env }}
+    if: "!inputs.only_plan"
     environment: ${{ inputs.env }}
+    concurrency: ${{ inputs.env }}
     steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Set Terraform Environment Variables
+        run: |
+          source .env.make
+          source deployment/scripts/code_artifactory.sh
+          echo "TF_VAR_base_image_registry_address=$BASE_IMAGE_REGISTRY_ADDRESS" >> $GITHUB_ENV
+          echo "TF_VAR_base_image_version=$BASE_IMAGE_VERSION" >> $GITHUB_ENV
+          echo "TF_VAR_codeartifact_pipy_url=$CODEARTIFACT_PIPY_URL" >> $GITHUB_ENV
+          echo "TF_VAR_gainy_compute_version=$GAINY_COMPUTE_VERSION" >> $GITHUB_ENV
+
+      - name: Docker Registry Auth
+        run: make docker-auth
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v1
+        with:
+          cli_config_credentials_token: ${{ secrets.TF_API_TOKEN }}
+
+      - name: Terraform Init
+        id: init
+        run: terraform init -backend-config=backend-${{ env.TF_VAR_env }}.hcl -reconfigure
+        working-directory: terraform
+
       - name: Terraform State Cleanup Prepare
         id: state-clean-prepare
         # grep only needed resources
@@ -189,5 +207,6 @@ jobs:
 
       - name: Terraform Apply
         id: apply
+        if: "!inputs.only_plan"
         run: terraform apply -auto-approve
         working-directory: terraform

@@ -167,9 +167,6 @@ locals {
     DRIVEWEALTH_API_PASSWORD   = var.drivewealth_api_password
     DRIVEWEALTH_API_URL        = var.drivewealth_api_url
     S3_BUCKET_UPLOADS_KYC      = var.s3_bucket_uploads_kyc
-    AWS_ACCESS_KEY_ID          = var.aws_access_key
-    AWS_SECRET_ACCESS_KEY      = var.aws_secret_key
-    AWS_DEFAULT_REGION         = var.aws_region
     STRIPE_API_KEY             = var.stripe_api_key
   }
 }
@@ -218,7 +215,7 @@ module "hasura_trigger" {
 
 module "hasura_trigger_integration" {
   source                                    = "./route-integration"
-  url                                       = "/${var.deployment_key}/hasuraAction"
+  url                                       = "/${var.deployment_key}/hasuraTrigger"
   aws_apigatewayv2_api_lambda_id            = aws_apigatewayv2_api.lambda.id
   aws_apigatewayv2_api_lambda_execution_arn = aws_apigatewayv2_api.lambda.execution_arn
   aws_lambda_invoke_arn                     = "${module.hasura_trigger.arn}:${module.hasura_trigger.version}"
