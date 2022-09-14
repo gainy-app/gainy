@@ -84,6 +84,9 @@ class DriveWealthApi:
     def get_user_accounts(self, user_id: str):
         return self._make_request("GET", f"/users/{user_id}/accounts")
 
+    def get_user_bank_accounts(self, user_id: str):
+        return self._make_request("GET", f"/users/{user_id}/bank-accounts")
+
     def link_bank_account(self, user_id: str, processor_token: str, name: str):
         return self._make_request(
             "POST", "/bank-accounts", {
@@ -94,6 +97,9 @@ class DriveWealthApi:
 
     def delete_bank_account(self, ref_id: str):
         return self._make_request("DELETE", f"/bank-accounts/{ref_id}")
+
+    def get_user_deposits(self, user_id):
+        return self._make_request("GET", f"/users/{user_id}/funding/deposits")
 
     def create_deposit(self, amount: Decimal, account: DriveWealthAccount,
                        bank_account: DriveWealthBankAccount):
@@ -127,13 +133,14 @@ class DriveWealthApi:
                 },
             })
 
-    def create_portfolio(self, user_id, name, client_fund_id, description):
+    def create_portfolio(self, user_id, name, client_portfolio_id, description):
         return self._make_request(
             "POST", "/managed/portfolios", {
                 'userID': user_id,
                 'name': name,
-                'clientPortfolioID': client_fund_id,
+                'clientPortfolioID': client_portfolio_id,
                 'description': description,
+                'holdings': [{"type": "CASH_RESERVE", "target": 1}],
             })
 
     def get_portfolio_status(self, portfolio: DriveWealthPortfolio):

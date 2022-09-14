@@ -203,6 +203,10 @@ actions:
       handler: '{{AWS_LAMBDA_API_GATEWAY_ENDPOINT}}/hasuraAction'
     permissions:
       - role: user
+  - name: trading_sync_provider_data
+    definition:
+      kind: synchronous
+      handler: '{{AWS_LAMBDA_API_GATEWAY_ENDPOINT}}/hasuraAction'
   - name: trading_withdraw_funds
     definition:
       kind: synchronous
@@ -375,4 +379,5 @@ custom_types:
     - name: TradingReconfigureCollectionHoldingsOutput
     - name: ActualCollectionHoldingOutput
     - name: StripeGetPaymentSheetDataOutput
+    - name: TradingSyncProviderDataOutput
   scalars: []

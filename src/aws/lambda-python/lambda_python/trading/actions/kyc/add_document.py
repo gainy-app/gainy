@@ -1,10 +1,6 @@
 from common.context_container import ContextContainer
-from common.exceptions import ApiException
-from common.hasura_exception import HasuraActionException
 from common.hasura_function import HasuraAction
-from trading import TradingService, TradingRepository
 from trading.models import KycDocument
-from psycopg2.extras import RealDictCursor
 from gainy.utils import get_logger
 
 logger = get_logger(__name__)
@@ -19,9 +15,11 @@ class KycAddDocument(HasuraAction):
         trading_service = context_container.trading_service
         profile_id = input_params["profile_id"]
 
-        model = KycDocument(input_params["uploaded_file_id"],
-                            input_params["type"], input_params["side"])
+        model = KycDocument()
+        model.uploaded_file_id = input_params["uploaded_file_id"]
+        model.type = input_params["type"]
+        model.side = input_params["side"]
 
-        trading_service.send_kyc_document(context_container, profile_id, model)
+        trading_service.send_kyc_document(profile_id, model)
 
         return {"ok": True}

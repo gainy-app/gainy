@@ -265,6 +265,12 @@ type Mutation {
 }
 
 type Mutation {
+  trading_sync_provider_data(
+    profile_id: Int!
+  ): TradingSyncProviderDataOutput
+}
+
+type Mutation {
   trading_withdraw_funds(
     profile_id: Int!
     trading_account_id: Int!
@@ -544,5 +550,9 @@ type StripeGetPaymentSheetDataOutput {
   ephemeral_key: String!
   customer_id: String!
   publishable_key: String!
+}
+
+type TradingSyncProviderDataOutput {
+  ok: Boolean!
 }
 

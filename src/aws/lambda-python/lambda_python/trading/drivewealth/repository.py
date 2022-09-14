@@ -1,7 +1,7 @@
 import json
 from typing import Any, Iterable, Dict, List, Optional
 from trading.drivewealth.models import DriveWealthAccount, DriveWealthDocument, DriveWealthUser, DriveWealthBankAccount, \
-    DriveWealthFund, DriveWealthPortfolio, DriveWealthAuthToken
+    DriveWealthFund, DriveWealthPortfolio, DriveWealthAuthToken, DriveWealthDeposit
 from psycopg2.extras import RealDictCursor
 from psycopg2 import sql
 from gainy.data_access.repository import Repository
@@ -74,36 +74,6 @@ class DriveWealthRepository(Repository):
 
         if kyc_document_id:
             entity.kyc_document_id = kyc_document_id
-
-        self.persist(entity)
-
-        return entity
-
-    def upsert_bank_account(
-            self,
-            data,
-            plaid_access_token_id: int = None,
-            plaid_account_id: str = None) -> DriveWealthBankAccount:
-        entity = DriveWealthBankAccount()
-        entity.ref_id = data['id']
-        entity.drivewealth_user_id = data["userDetails"]['userID']
-        entity.status = data["status"]
-        entity.bank_account_nickname = data["bankAccountDetails"][
-            'bankAccountNickname']
-        entity.bank_account_number = data["bankAccountDetails"][
-            'bankAccountNumber']
-        entity.bank_routing_number = data["bankAccountDetails"][
-            'bankRoutingNumber']
-        entity.holder_name = " ".join([
-            data["userDetails"]['firstName'], data["userDetails"]['lastName']
-        ])
-        entity.bank_account_type = data["bankAccountDetails"].get(
-            'bankAccountType')
-        if plaid_access_token_id:
-            entity.plaid_access_token_id = plaid_access_token_id
-        if plaid_account_id:
-            entity.plaid_account_id = plaid_account_id
-        entity.data = json.dumps(data)
 
         self.persist(entity)
 

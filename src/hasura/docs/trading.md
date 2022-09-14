@@ -6,6 +6,16 @@
 - [Trading collections](trading/trading_collections.md)
 - [Commissions](trading/commissions.md)
 
+### Debugging
+Sync provider data
+```graphql
+mutation TradingSyncProviderData($profile_id: Int!) {
+  trading_sync_provider_data(profile_id: $profile_id) {
+    ok
+  }
+}
+```
+
 ### **[TODO]** History
 1. Get rebalancing history (trading_collection_versions with status `complete`) 
 2. Get deposits / withdrawals history with actual statuses (trading_money_flow) 

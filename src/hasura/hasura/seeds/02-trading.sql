@@ -28,10 +28,10 @@ select t.profile_id,
        t.item_id,
        t.purpose
 from (
-         select 2                                                     as profile_id,
+         select 2 as                                                     profile_id,
                 'access-sandbox-b7033717-380d-4a40-a0a9-acfee365eaea' as access_token,
-                'lK3VVvnW7ZH9Bdnqe11RI86KLXZDNDiZA6vpy'               as item_id,
-                'trading'                                             as purpose
+                'lK3VVvnW7ZH9Bdnqe11RI86KLXZDNDiZA6vpy' as               item_id,
+                'trading' as                                             purpose
      ) t
          left join app.profile_plaid_access_tokens using (profile_id, purpose)
 where profile_plaid_access_tokens is null;
@@ -82,3 +82,17 @@ values ('bf98c335-57ad-4337-ae9f-ed1fcfb447af.1662377145557', 'bf98c335-57ad-433
         '"{\"id\": \"bf98c335-57ad-4337-ae9f-ed1fcfb447af.1662377145557\", \"accountNo\": \"GYEK000001\", \"accountType\": {\"name\": \"LIVE\", \"description\": \"Live Account\"}, \"accountMgmtType\": {\"name\": \"RIA_MANAGED\", \"description\": \"Robo Advisor Managed Account\"}, \"status\": {\"name\": \"OPEN\", \"description\": \"Open\"}, \"tradingType\": {\"name\": \"CASH\", \"description\": \"Cash account\"}, \"leverage\": 1, \"nickname\": \"Mikhail''s Robo Advisor Managed Account\", \"parentIB\": {\"id\": \"7b746acb-0afa-42c3-9c94-1bc8c16ce7b2\", \"name\": \"Gainy\"}, \"taxProfile\": {\"taxStatusCode\": \"W-9\", \"taxRecipientCode\": \"INDIVIDUAL\"}, \"commissionID\": \"4dafc263-f73a-4972-bed0-3af9a6ee3d7d\", \"beneficiaries\": false, \"userID\": \"bf98c335-57ad-4337-ae9f-ed1fcfb447af\", \"restricted\": false, \"goodFaithViolations\": 0, \"patternDayTrades\": 0, \"freeTradeBalance\": 0, \"gfvPdtExempt\": false, \"buyingPowerOverride\": false, \"bod\": {\"moneyMarket\": 0, \"equityValue\": 0, \"cashAvailableForWithdrawal\": 0, \"cashAvailableForTrading\": 0, \"cashBalance\": 0}, \"ria\": {\"advisorID\": \"7b746acb-0afa-42c3-9c94-1bc8c16ce7b2.1661277115494\", \"productID\": \"product_e5046072-eefc-47ed-90d4-60654c33cf92\"}, \"sweepInd\": true, \"interestFree\": false, \"createdWhen\": \"2022-09-05T11:25:45.557Z\", \"openedWhen\": \"2022-09-13T05:29:45.689Z\", \"updatedWhen\": \"2022-09-13T05:29:45.689Z\", \"ignoreMarketHoursForTest\": true, \"flaggedForACATS\": false, \"extendedHoursEnrolled\": false}"')
 on conflict do nothing;
 ALTER SEQUENCE app.trading_accounts_id_seq RESTART WITH 2;
+
+insert into app.trading_money_flow(id, profile_id, trading_account_id, funding_account_id, status, amount)
+values (1, 2, 1, 1, 'Approved', 10000)
+on conflict do nothing;
+ALTER SEQUENCE app.trading_money_flow_id_seq RESTART WITH 2;
+
+insert into app.drivewealth_deposits(ref_id, trading_account_ref_id, bank_account_ref_id, status, money_flow_id, data)
+values ('GYEK000001-1663061386789-DRGPY', 'bf98c335-57ad-4337-ae9f-ed1fcfb447af.1662377145557', 'bank_2101f3e4-ba8c-431e-bfae-aa8070a14fdd', 'Approved', 1, '{"id": "GYEK000001-1663061386789-DRGPY", "paymentID": "GYEK000001-1663061386789-DRGPY", "type": "INSTANT_FUNDING", "amount": 10000.0, "currency": {"name": "USD", "description": "US Dollar", "symbol": "$"}, "status": {"id": 14, "message": "Approved", "comment": "Valid Instant Funding deposit. Auto-move to Approved. Waiting on net settlement.", "updated": "2022-09-13T09:29:46.912Z"}, "accountDetails": {"accountID": "bf98c335-57ad-4337-ae9f-ed1fcfb447af.1662377145557", "accountNo": "GYEK000001", "accountType": {"name": "LIVE", "description": "Live Account"}, "accountManagementType": {"name": "RIA_MANAGED", "description": "Robo Advisor Managed Account"}}, "wlpFinTranTypeID": "50c2100a-2bf8-4a07-91eb-d0395ed15ca9", "timestamp": "2022-09-13T09:29:46.789Z"}')
+on conflict do nothing;
+
+insert into app.trading_collection_versions (id, profile_id, collection_id, target_amount_delta, weights)
+values  (1, 2, 89, 100, '{"AAPL": "1"}')
+on conflict do nothing;
+ALTER SEQUENCE app.trading_collection_versions_id_seq RESTART WITH 2;
