@@ -101,7 +101,9 @@ class DriveWealthProvider(DriveWealthProviderKYC,
 
         bank_accounts_data = self.api.get_user_bank_accounts(user_ref_id)
         for bank_account_data in bank_accounts_data:
-            entity = repository.find_one(DriveWealthBankAccount, {"ref_id": bank_account_data['id']}) or DriveWealthBankAccount()
+            entity = repository.find_one(DriveWealthBankAccount,
+                                         {"ref_id": bank_account_data['id']
+                                          }) or DriveWealthBankAccount()
             entity.set_from_response(bank_account_data)
             entity.drivewealth_user_id = user_ref_id
             return repository.persist(entity)
@@ -111,13 +113,16 @@ class DriveWealthProvider(DriveWealthProviderKYC,
 
         deposits_data = self.api.get_user_deposits(user_ref_id)
         for deposit_data in deposits_data:
-            entity = repository.find_one(DriveWealthDeposit, {"ref_id": deposit_data['id']}) or DriveWealthDeposit()
+            entity = repository.find_one(
+                DriveWealthDeposit,
+                {"ref_id": deposit_data['id']}) or DriveWealthDeposit()
             entity.set_from_response(deposit_data)
             repository.persist(entity)
 
             if not entity.money_flow_id:
                 continue
-            money_flow = repository.find_one(TradingMoneyFlow, {"id": entity.money_flow_id})
+            money_flow = repository.find_one(TradingMoneyFlow,
+                                             {"id": entity.money_flow_id})
             self._update_money_flow_status(entity, money_flow)
             repository.persist(money_flow)
 

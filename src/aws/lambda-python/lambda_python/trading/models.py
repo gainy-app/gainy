@@ -154,7 +154,8 @@ class TradingCollectionVersion(BaseModel):
     def to_dict(self) -> dict:
         return {
             **super().to_dict(),
-            "weights": json.dumps(self.weights, cls=DecimalEncoder),
+            "weights":
+            json.dumps(self.weights, cls=DecimalEncoder),
         }
 
 
