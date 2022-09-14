@@ -30,6 +30,7 @@ variable "codeartifact_pipy_url" {}
 variable "gainy_compute_version" {}
 variable "revenuecat_api_key" {}
 variable "stripe_api_key" {}
+variable "drivewealth_is_uat" {}
 variable "drivewealth_app_key" {}
 variable "drivewealth_wlp_id" {}
 variable "drivewealth_parent_ibid" {}
@@ -158,6 +159,7 @@ locals {
     GNEWS_API_TOKEN            = var.gnews_api_token
     REDIS_CACHE_HOST           = var.redis_cache_host
     REDIS_CACHE_PORT           = var.redis_cache_port
+    DRIVEWEALTH_IS_UAT         = var.drivewealth_is_uat
     DRIVEWEALTH_APP_KEY        = var.drivewealth_app_key
     DRIVEWEALTH_WLP_ID         = var.drivewealth_wlp_id
     DRIVEWEALTH_PARENT_IBID    = var.drivewealth_parent_ibid
@@ -167,9 +169,6 @@ locals {
     DRIVEWEALTH_API_PASSWORD   = var.drivewealth_api_password
     DRIVEWEALTH_API_URL        = var.drivewealth_api_url
     S3_BUCKET_UPLOADS_KYC      = var.s3_bucket_uploads_kyc
-    AWS_ACCESS_KEY_ID          = var.aws_access_key
-    AWS_SECRET_ACCESS_KEY      = var.aws_secret_key
-    AWS_DEFAULT_REGION         = var.aws_region
     STRIPE_API_KEY             = var.stripe_api_key
   }
 }

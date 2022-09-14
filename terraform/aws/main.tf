@@ -65,6 +65,7 @@ module "lambda" {
   algolia_app_id            = var.algolia_app_id
   algolia_search_key        = var.algolia_search_key
 
+  drivewealth_is_uat         = var.drivewealth_is_uat
   drivewealth_app_key        = var.drivewealth_app_key
   drivewealth_wlp_id         = var.drivewealth_wlp_id
   drivewealth_parent_ibid    = var.drivewealth_parent_ibid

@@ -161,6 +161,10 @@ actions:
       forward_client_headers: true
     permissions:
       - role: anonymous
+  - name: trading_add_money
+    definition:
+      kind: synchronous
+      handler: '{{AWS_LAMBDA_API_GATEWAY_ENDPOINT}}/hasuraAction'
   - name: trading_delete_funding_account
     definition:
       kind: synchronous
@@ -374,4 +378,5 @@ custom_types:
     - name: TradingReconfigureCollectionHoldingsOutput
     - name: ActualCollectionHoldingOutput
     - name: TradingSyncProviderDataOutput
+    - name: OkOutput
   scalars: []

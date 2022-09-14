@@ -180,5 +180,9 @@ class TradingService:
         self.sync_funding_accounts(profile_id)
         self._get_provider_service().sync_data(profile_id)
 
+    def debug_add_money(self, trading_account_id, amount):
+        self._get_provider_service().debug_add_money(trading_account_id,
+                                                     amount)
+
     def _get_provider_service(self):
         return self.drivewealth_provider

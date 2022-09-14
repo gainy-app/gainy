@@ -54,6 +54,7 @@ variable "stripe_api_key" {}
 variable "bigquery_google_project" {}
 variable "bigquery_credentials" {}
 
+variable "drivewealth_is_uat" {}
 variable "drivewealth_app_key" {}
 variable "drivewealth_wlp_id" {}
 variable "drivewealth_parent_ibid" {}

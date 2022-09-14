@@ -1,5 +1,7 @@
+import os
 from decimal import Decimal
 
+from common.exceptions import NotFoundException
 from portfolio.plaid import PlaidService
 from portfolio.plaid.models import PlaidAccessToken
 from trading.models import TradingMoneyFlow
@@ -11,6 +13,8 @@ from trading.drivewealth.repository import DriveWealthRepository
 from gainy.utils import get_logger
 
 logger = get_logger(__name__)
+
+IS_UAT = os.getenv("DRIVEWEALTH_IS_UAT", "true") != "false"
 
 
 class DriveWealthProvider(DriveWealthProviderKYC,
@@ -80,6 +84,18 @@ class DriveWealthProvider(DriveWealthProviderKYC,
         self._on_money_transfer(money_flow.profile_id)
 
         return entity
+
+    def debug_add_money(self, trading_account_id, amount):
+        if not IS_UAT:
+            raise Exception('Not supported in production')
+
+        account: DriveWealthAccount = self.drivewealth_repository.find_one(
+            DriveWealthAccount, {"trading_account_id": trading_account_id})
+
+        if not account:
+            raise NotFoundException()
+
+        self.api.add_money(account.ref_id, amount)
 
     def sync_data(self, profile_id):
         repository = self.drivewealth_repository

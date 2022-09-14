@@ -184,6 +184,16 @@ class DriveWealthApi:
                 'subAccounts': account_ids,
             })
 
+    def add_money(self, account_id, amount):
+        return self._make_request(
+            "POST", f"/accounts/{account_id}/transactions", {
+                "comment": "Initial deposit",
+                "amount": amount,
+                "wlpFinTranTypeID": "00cec36e-4d83-4703-a769-894198b829f2",
+                "source": "HUMAN",
+                "batch": False
+            })
+
     def get_auth_token(self):
         return self._make_request(
             "POST", "/auth", {
