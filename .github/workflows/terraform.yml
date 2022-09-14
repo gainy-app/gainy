@@ -107,6 +107,7 @@ env:
   TF_VAR_stripe_api_key: ${{ secrets.STRIPE_API_KEY }}
   TF_VAR_stripe_publishable_key: ${{ secrets.STRIPE_PUBLISHABLE_KEY }}
   TF_VAR_drivewealth_is_uat: ${{ secrets.DRIVEWEALTH_IS_UAT }}
+  TF_VAR_drivewealth_app_key: ${{ secrets.DRIVEWEALTH_APP_KEY }}
   TF_VAR_drivewealth_wlp_id: ${{ secrets.DRIVEWEALTH_WLP_ID }}
   TF_VAR_drivewealth_parent_ibid: ${{ secrets.DRIVEWEALTH_PARENT_IBID }}
   TF_VAR_drivewealth_ria_id: ${{ secrets.DRIVEWEALTH_RIA_ID }}

@@ -68,7 +68,7 @@ class TradingService:
             ).link_bank_account_with_plaid(access_token, account_id,
                                            account_name)
         except plaid.ApiException as e:
-            handle_error(e)
+            return handle_error(e)
 
         repository = self.trading_repository
         funding_account = repository.find_one(

@@ -32,6 +32,32 @@ mutation TradingAddMoney(
 }
 ```
 
+### Debugging
+Sync provider data
+```graphql
+mutation TradingSyncProviderData($profile_id: Int!) {
+  trading_sync_provider_data(profile_id: $profile_id) {
+    ok
+  }
+}
+```
+Add money to an account
+```graphql
+mutation TradingAddMoney(
+    $profile_id: Int!
+    $trading_account_id: Int!
+    $amount: Float!
+) {
+  trading_add_money(
+    profile_id: $profile_id
+    trading_account_id: $trading_account_id
+    amount: $amount
+  ){
+    ok
+  }
+}
+```
+
 ### **[TODO]** History
 1. Get rebalancing history (trading_collection_versions with status `complete`) 
 2. Get deposits / withdrawals history with actual statuses (trading_money_flow) 
