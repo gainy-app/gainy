@@ -186,7 +186,10 @@ class BaseDriveWealthMoneyFlowModel(BaseDriveWealthModel):
 
     def set_from_response(self, data=None):
         self.ref_id = data["id"]
-        self.trading_account_ref_id = data["accountDetails"]["accountID"]
+        if "accountDetails" in data:
+            self.trading_account_ref_id = data["accountDetails"]["accountID"]
+        elif "accountID" in data:
+            self.trading_account_ref_id = data["accountID"]
         self.status = data["status"]["message"]
         self.data = data
 

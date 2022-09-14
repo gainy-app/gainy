@@ -49,8 +49,9 @@ class DriveWealthProvider(DriveWealthProviderKYC,
         entity.set_from_response(data)
         entity.plaid_access_token_id = access_token.id
         entity.plaid_account_id = account_id
+        repository.persist(entity)
 
-        return repository.persist(entity)
+        return entity
 
     def delete_funding_account(self, funding_account_id: int):
         drivewealth_bank_account = self.drivewealth_repository.find_one(
