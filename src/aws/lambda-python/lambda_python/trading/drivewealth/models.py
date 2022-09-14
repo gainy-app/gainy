@@ -160,7 +160,8 @@ class DriveWealthBankAccount(BaseDriveWealthModel):
         if "userDetails" in data:
             self.drivewealth_user_id = data["userDetails"]['userID']
             self.holder_name = " ".join([
-                data["userDetails"]['firstName'], data["userDetails"]['lastName']
+                data["userDetails"]['firstName'],
+                data["userDetails"]['lastName']
             ])
 
     @classproperty

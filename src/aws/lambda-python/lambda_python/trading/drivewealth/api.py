@@ -133,14 +133,18 @@ class DriveWealthApi:
                 },
             })
 
-    def create_portfolio(self, user_id, name, client_portfolio_id, description):
+    def create_portfolio(self, user_id, name, client_portfolio_id,
+                         description):
         return self._make_request(
             "POST", "/managed/portfolios", {
                 'userID': user_id,
                 'name': name,
                 'clientPortfolioID': client_portfolio_id,
                 'description': description,
-                'holdings': [{"type": "CASH_RESERVE", "target": 1}],
+                'holdings': [{
+                    "type": "CASH_RESERVE",
+                    "target": 1
+                }],
             })
 
     def get_portfolio_status(self, portfolio: DriveWealthPortfolio):
