@@ -2,12 +2,8 @@ import os
 import re
 import requests
 import json
-import datetime
 import logging
 import itertools
-
-import psycopg2
-from psycopg2._psycopg import connection
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
@@ -112,7 +108,8 @@ def permute_params(full_options_dict):
         yield d
 
 
-def db_connect() -> connection:
+def db_connect():
+    import psycopg2
     import os
 
     HOST = os.getenv("PG_HOST")
