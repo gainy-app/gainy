@@ -349,7 +349,6 @@ custom_types:
     - name: KycSendFormOutput
     - name: KycStatus
     - name: PreSignedUploadFormOutput
-    - name: KycAddDocumentOutput
     - name: LinkBankAccountWithPlaidOutput
     - name: AccountInformation
     - name: TradingLinkBankAccountWithPlaidOutput
@@ -372,11 +371,8 @@ custom_types:
           type: object
           field_mapping:
             id: id
-    - name: TradingDeleteFundingAccountOutput
     - name: TradingMoneyFlowOutput
     - name: SampleOutput
-    - name: TradingReconfigureCollectionHoldingsOutput
     - name: ActualCollectionHoldingOutput
-    - name: TradingSyncProviderDataOutput
     - name: OkOutput
   scalars: []

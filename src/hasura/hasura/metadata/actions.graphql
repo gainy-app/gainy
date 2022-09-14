@@ -120,7 +120,7 @@ type Mutation {
     uploaded_file_id: Int!
     type: String!
     side: String!
-  ): KycAddDocumentOutput
+  ): OkOutput
 }
 
 type Query {
@@ -223,7 +223,7 @@ type Mutation {
   trading_delete_funding_account(
     profile_id: Int!
     funding_account_id: Int!
-  ): TradingDeleteFundingAccountOutput
+  ): OkOutput
 }
 
 type Mutation {
@@ -263,13 +263,13 @@ type Mutation {
     collection_id: Int!
     weights: [TickerWeight]!
     target_amount_delta: Float!
-  ): TradingReconfigureCollectionHoldingsOutput
+  ): OkOutput
 }
 
 type Mutation {
   trading_sync_provider_data(
     profile_id: Int!
-  ): TradingSyncProviderDataOutput
+  ): OkOutput
 }
 
 type Mutation {
@@ -503,10 +503,6 @@ type PreSignedUploadFormOutput {
   method: String!
 }
 
-type KycAddDocumentOutput {
-  ok: Boolean!
-}
-
 type LinkBankAccountWithPlaidOutput {
   errorMessage: String
 }
@@ -529,20 +525,12 @@ type FundingAccount {
   id: Int!
 }
 
-type TradingDeleteFundingAccountOutput {
-  ok: Boolean
-}
-
 type TradingMoneyFlowOutput {
   trading_money_flow_id: Int!
 }
 
 type SampleOutput {
   accessToken: String!
-}
-
-type TradingReconfigureCollectionHoldingsOutput {
-  ok: Boolean!
 }
 
 type ActualCollectionHoldingOutput {
@@ -552,11 +540,6 @@ type ActualCollectionHoldingOutput {
   value: Float
 }
 
-type TradingSyncProviderDataOutput {
-  ok: Boolean!
-}
-
 type OkOutput {
   ok: Boolean
 }
-
