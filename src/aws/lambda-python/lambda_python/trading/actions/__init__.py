@@ -10,3 +10,4 @@ from trading.actions.withdraw_funds import TradingWithdrawFunds
 from trading.actions.reconfigure_collection_holdings import TradingReconfigureCollectionHoldings
 from trading.actions.get_actual_collection_holdings import TradingGetActualCollectionHoldings
 from trading.actions.sync_provider_data import TradingSyncProviderData
+from trading.actions.add_money import TradingAddMoney

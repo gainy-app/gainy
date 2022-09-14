@@ -31,6 +31,7 @@ variable "gainy_compute_version" {}
 variable "revenuecat_api_key" {}
 variable "stripe_api_key" {}
 variable "stripe_publishable_key" {}
+variable "drivewealth_is_uat" {}
 variable "drivewealth_app_key" {}
 variable "drivewealth_wlp_id" {}
 variable "drivewealth_parent_ibid" {}
@@ -159,6 +160,7 @@ locals {
     GNEWS_API_TOKEN            = var.gnews_api_token
     REDIS_CACHE_HOST           = var.redis_cache_host
     REDIS_CACHE_PORT           = var.redis_cache_port
+    DRIVEWEALTH_IS_UAT         = var.drivewealth_is_uat
     DRIVEWEALTH_APP_KEY        = var.drivewealth_app_key
     DRIVEWEALTH_WLP_ID         = var.drivewealth_wlp_id
     DRIVEWEALTH_PARENT_IBID    = var.drivewealth_parent_ibid

@@ -218,6 +218,14 @@ type Mutation {
 }
 
 type Mutation {
+  trading_add_money(
+    profile_id: Int!
+    trading_account_id: Int!
+    amount: Float!
+  ): OkOutput
+}
+
+type Mutation {
   trading_delete_funding_account(
     profile_id: Int!
     funding_account_id: Int!
@@ -554,5 +562,9 @@ type StripeGetPaymentSheetDataOutput {
 
 type TradingSyncProviderDataOutput {
   ok: Boolean!
+}
+
+type OkOutput {
+  ok: Boolean
 }
 

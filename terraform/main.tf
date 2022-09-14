@@ -138,6 +138,7 @@ module "aws" {
   algolia_indexing_key      = module.algolia.algolia_indexing_key
   algolia_search_key        = module.algolia.algolia_search_key
 
+  drivewealth_is_uat         = var.drivewealth_is_uat
   drivewealth_app_key        = var.drivewealth_app_key
   drivewealth_wlp_id         = var.drivewealth_wlp_id
   drivewealth_parent_ibid    = var.drivewealth_parent_ibid

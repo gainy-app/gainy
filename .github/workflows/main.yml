@@ -29,6 +29,7 @@ jobs:
 
       - name: Make Env
         run: |
+          echo "DRIVEWEALTH_IS_UAT=$DRIVEWEALTH_IS_UAT" >> .env.test
           echo "DRIVEWEALTH_APP_KEY=$DRIVEWEALTH_APP_KEY" >> .env.test
           echo "DRIVEWEALTH_WLP_ID=$DRIVEWEALTH_WLP_ID" >> .env.test
           echo "DRIVEWEALTH_PARENT_IBID=$DRIVEWEALTH_PARENT_IBID" >> .env.test
@@ -38,6 +39,7 @@ jobs:
           echo "DRIVEWEALTH_API_PASSWORD=$DRIVEWEALTH_API_PASSWORD" >> .env.test
           echo "DRIVEWEALTH_API_URL=$DRIVEWEALTH_API_URL" >> .env.test
         env:
+          DRIVEWEALTH_IS_UAT: ${{ secrets.DRIVEWEALTH_IS_UAT }}
           DRIVEWEALTH_APP_KEY: ${{ secrets.DRIVEWEALTH_APP_KEY }}
           DRIVEWEALTH_WLP_ID: ${{ secrets.DRIVEWEALTH_WLP_ID }}
           DRIVEWEALTH_PARENT_IBID: ${{ secrets.DRIVEWEALTH_PARENT_IBID }}
@@ -120,6 +122,7 @@ jobs:
       BIGQUERY_CREDENTIALS: ${{ secrets.BIGQUERY_CREDENTIALS }}
       STRIPE_API_KEY: ${{ secrets.STRIPE_API_KEY }}
       STRIPE_PUBLISHABLE_KEY: ${{ secrets.STRIPE_PUBLISHABLE_KEY }}
+      DRIVEWEALTH_IS_UAT: ${{ secrets.DRIVEWEALTH_IS_UAT }}
       DRIVEWEALTH_APP_KEY: ${{ secrets.DRIVEWEALTH_APP_KEY }}
       DRIVEWEALTH_WLP_ID: ${{ secrets.DRIVEWEALTH_WLP_ID }}
       DRIVEWEALTH_PARENT_IBID: ${{ secrets.DRIVEWEALTH_PARENT_IBID }}
