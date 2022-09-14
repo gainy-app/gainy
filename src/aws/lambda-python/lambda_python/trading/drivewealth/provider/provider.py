@@ -41,8 +41,12 @@ class DriveWealthProvider(DriveWealthProviderKYC,
         data = self.api.link_bank_account(user.ref_id, processor_token,
                                           account_name)
 
-        return repository.upsert_bank_account(data, access_token.id,
-                                              account_id)
+        entity = DriveWealthBankAccount()
+        entity.set_from_response(data)
+        entity.plaid_access_token_id = access_token.id
+        entity.plaid_account_id = account_id
+
+        return repository.persist(entity)
 
     def delete_funding_account(self, funding_account_id: int):
         drivewealth_bank_account = self.drivewealth_repository.find_one(
@@ -60,12 +64,13 @@ class DriveWealthProvider(DriveWealthProviderKYC,
         if amount > 0:
             response = self.api.create_deposit(amount, trading_account,
                                                bank_account)
-            entity = DriveWealthDeposit(response)
+            entity = DriveWealthDeposit()
         else:
             response = self.api.create_redemption(amount, trading_account,
                                                   bank_account)
-            entity = DriveWealthRedemption(response)
+            entity = DriveWealthRedemption()
 
+        entity.set_from_response(response)
         entity.trading_account_ref_id = trading_account.ref_id
         entity.bank_account_ref_id = bank_account.ref_id
         entity.money_flow_id = money_flow.id
@@ -75,6 +80,46 @@ class DriveWealthProvider(DriveWealthProviderKYC,
         self._on_money_transfer(money_flow.profile_id)
 
         return entity
+
+    def sync_data(self, profile_id):
+        repository = self.drivewealth_repository
+        user = repository.get_user(profile_id)
+        if user is None:
+            return
+
+        self._sync_trading_accounts(user)
+        # self._sync_autopilot_runs(user.ref_id)
+        self._sync_bank_accounts(user.ref_id)
+        self._sync_deposits(user.ref_id)
+        # self._sync_documents(user.ref_id)
+        # self._sync_portfolio_statuses(user.ref_id)
+        # self._sync_redemptions(user.ref_id)
+        # self._sync_users(user.ref_id)
+
+    def _sync_bank_accounts(self, user_ref_id):
+        repository = self.drivewealth_repository
+
+        bank_accounts_data = self.api.get_user_bank_accounts(user_ref_id)
+        for bank_account_data in bank_accounts_data:
+            entity = repository.find_one(DriveWealthBankAccount, {"ref_id": bank_account_data['id']}) or DriveWealthBankAccount()
+            entity.set_from_response(bank_account_data)
+            entity.drivewealth_user_id = user_ref_id
+            return repository.persist(entity)
+
+    def _sync_deposits(self, user_ref_id):
+        repository = self.drivewealth_repository
+
+        deposits_data = self.api.get_user_deposits(user_ref_id)
+        for deposit_data in deposits_data:
+            entity = repository.find_one(DriveWealthDeposit, {"ref_id": deposit_data['id']}) or DriveWealthDeposit()
+            entity.set_from_response(deposit_data)
+            repository.persist(entity)
+
+            if not entity.money_flow_id:
+                continue
+            money_flow = repository.find_one(TradingMoneyFlow, {"id": entity.money_flow_id})
+            self._update_money_flow_status(entity, money_flow)
+            repository.persist(money_flow)
 
     def _update_money_flow_status(self, entity, money_flow: TradingMoneyFlow):
         money_flow.status = entity.status

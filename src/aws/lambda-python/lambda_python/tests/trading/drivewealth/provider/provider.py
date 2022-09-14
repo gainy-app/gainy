@@ -59,8 +59,11 @@ def test_transfer_money(monkeypatch):
     monkeypatch.setattr(api, "create_deposit", mock_create)
     monkeypatch.setattr(api, "create_redemption", mock_create)
 
-    money_flow = TradingMoneyFlow(profile_id, amount, trading_account_id,
-                                  funding_account_id)
+    money_flow = TradingMoneyFlow()
+    money_flow.profile_id = profile_id
+    money_flow.amount = amount
+    money_flow.trading_account_id = trading_account_id
+    money_flow.funding_account_id = funding_account_id
     monkeypatch.setattr(money_flow, "id", money_flow_id)
     monkeypatch.setattr(money_flow, "profile_id", profile_id)
 

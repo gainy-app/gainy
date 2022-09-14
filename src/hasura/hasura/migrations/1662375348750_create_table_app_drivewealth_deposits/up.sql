@@ -2,9 +2,9 @@ CREATE TABLE "app"."drivewealth_deposits"
 (
     "ref_id"                 varchar     NOT NULL,
     "trading_account_ref_id" varchar     NOT NULL,
-    "bank_account_ref_id"    varchar     NOT NULL,
+    "bank_account_ref_id"    varchar,
     "status"                 varchar     NOT NULL,
-    "money_flow_id"          int         not null,
+    "money_flow_id"          int,
     "data"                   json,
     "created_at"             timestamptz NOT NULL DEFAULT now(),
     "updated_at"             timestamptz NOT NULL DEFAULT now(),
