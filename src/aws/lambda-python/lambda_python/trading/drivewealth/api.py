@@ -141,11 +141,10 @@ class DriveWealthApi:
                 },
             })
 
-    def create_portfolio(self, user_id, name, client_portfolio_id,
-                         description):
+    def create_portfolio(self, name, client_portfolio_id, description):
         return self._make_request(
             "POST", "/managed/portfolios", {
-                'userID': user_id,
+                'userID': DRIVEWEALTH_RIA_ID,
                 'name': name,
                 'clientPortfolioID': client_portfolio_id,
                 'description': description,
@@ -162,11 +161,10 @@ class DriveWealthApi:
     def get_instrument_details(self, symbol: str):
         return self._make_request("GET", f"/instruments/{symbol}")
 
-    def create_fund(self, user_id, name, client_fund_id, description,
-                    holdings):
+    def create_fund(self, name, client_fund_id, description, holdings):
         return self._make_request(
             "POST", "/managed/funds", {
-                'userID': user_id,
+                'userID': DRIVEWEALTH_RIA_ID,
                 'name': name,
                 'clientFundID': client_fund_id,
                 'description': description,
@@ -179,18 +177,31 @@ class DriveWealthApi:
         })
 
     def update_portfolio(self, portfolio: DriveWealthPortfolio):
+        # noinspection PyTypeChecker
+        holdings = [{
+            "type": "CASH_RESERVE",
+            "target": portfolio.cash_target_weight,
+        }] + [{
+            "type": "FUND",
+            "id": fund_id,
+            "target": weight,
+        } for fund_id, weight in portfolio.holdings.items()]
+
         return self._make_request("PATCH",
                                   f"/managed/portfolios/{portfolio.ref_id}", {
-                                      'holdings': portfolio.holdings,
+                                      'holdings': holdings,
                                   })
 
-    def create_autopilot_run(self, account_ids):
+    def create_autopilot_run(self, account_ids: list):
         return self._make_request(
-            "POST", f"/autopilot/{DRIVEWEALTH_RIA_ID}", {
+            "POST", f"/managed/autopilot/{DRIVEWEALTH_RIA_ID}", {
                 'reviewOnly': False,
                 'forceRebalance': True,
                 'subAccounts': account_ids,
             })
+
+    def get_autopilot_run(self, ref_id):
+        return self._make_request("GET", f"/managed/autopilot/{ref_id}")
 
     def add_money(self, account_id, amount):
         return self._make_request(

@@ -1,4 +1,6 @@
 import datetime
+import re
+from abc import ABC
 from decimal import Decimal
 import json
 from typing import Dict, Optional, List, Any
@@ -8,12 +10,15 @@ import dateutil
 from common import DecimalEncoder
 from gainy.data_access.db_lock import ResourceType
 from gainy.data_access.models import BaseModel, classproperty, ResourceVersion
-from trading.models import CollectionHoldingStatus, ProfileKycStatus, KycStatus, TradingAccount
+from trading.models import CollectionHoldingStatus, ProfileKycStatus, KycStatus, TradingAccount, \
+    TradingCollectionVersion, TradingCollectionVersionStatus
 
 PRECISION = 1e-3
+ONE = Decimal(1)
+ZERO = Decimal(0)
 
 
-class BaseDriveWealthModel(BaseModel):
+class BaseDriveWealthModel(BaseModel, ABC):
     data = None
 
     @classproperty
@@ -216,6 +221,7 @@ class DriveWealthBankAccount(BaseDriveWealthModel):
     drivewealth_user_id = None
     funding_account_id = None
     plaid_access_token_id = None
+    status = None
     bank_account_nickname = None
     bank_account_number = None
     bank_routing_number = None
@@ -255,7 +261,7 @@ class DriveWealthBankAccount(BaseDriveWealthModel):
         return "drivewealth_bank_accounts"
 
 
-class BaseDriveWealthMoneyFlowModel(BaseDriveWealthModel):
+class BaseDriveWealthMoneyFlowModel(BaseDriveWealthModel, ABC):
     ref_id = None
     trading_account_ref_id = None
     bank_account_ref_id = None
@@ -296,10 +302,10 @@ class DriveWealthRedemption(BaseDriveWealthMoneyFlowModel):
 
 class DriveWealthFund(BaseDriveWealthModel):
     ref_id = None
-    drivewealth_user_id = None
+    profile_id = None
     collection_id = None
     trading_collection_version_id = None
-    weights = None
+    weights: Dict[str, Decimal] = None
     holdings = []
     data = None
     created_at = None
@@ -310,16 +316,22 @@ class DriveWealthFund(BaseDriveWealthModel):
     db_excluded_fields = ["created_at", "updated_at"]
     non_persistent_fields = ["created_at", "updated_at"]
 
-    def __init__(self, data=None):
-        super().__init__()
-
+    def set_from_response(self, data=None):
         if not data:
             return
 
         self.ref_id = data["id"]
-        self.drivewealth_user_id = data["userID"]
         self.data = data
         self.holdings = self.data["holdings"]
+
+    def to_dict(self) -> dict:
+        return {
+            **super().to_dict(),
+            "weights":
+            json.dumps(self.weights, cls=DecimalEncoder),
+            "holdings":
+            json.dumps(self.holdings, cls=DecimalEncoder),
+        }
 
     @classproperty
     def table_name(self) -> str:
@@ -372,16 +384,28 @@ class DriveWealthPortfolioStatus(BaseDriveWealthModel):
 
     key_fields = ["id"]
 
-    db_excluded_fields = ["created_at"]
+    db_excluded_fields = ["created_at", "holdings"]
     non_persistent_fields = ["id", "created_at"]
 
-    def __init__(self, data: dict):
-        super().__init__()
-        self.drivewealth_portfolio_id = data["id"]
-        self.data = data
+    def __init__(self, row=None):
+        super().__init__(row)
+        self._reset_holdings()
 
+    def set_from_response(self, data=None):
+        self.data = data
+        self._reset_holdings()
+
+        if not data:
+            return
+
+        self.drivewealth_portfolio_id = data["id"]
+
+    def _reset_holdings(self):
         self.holdings = {}
-        for i in data["holdings"]:
+        if not self.data:
+            return
+
+        for i in self.data["holdings"]:
             if i["type"] == "CASH_RESERVE":
                 self.cash_value = Decimal(i["value"])
                 self.cash_actual_weight = Decimal(i["actual"])
@@ -417,13 +441,23 @@ class DriveWealthPortfolioStatus(BaseDriveWealthModel):
     def table_name(self) -> str:
         return "drivewealth_portfolio_statuses"
 
+    def to_dict(self) -> dict:
+        holdings = {k: i.data for k, i in self.holdings.items()}
+        return {
+            **super().to_dict(),
+            "holdings":
+            json.dumps(holdings, cls=DecimalEncoder),
+            "data":
+            json.dumps(self.data, cls=DecimalEncoder),
+        }
+
 
 class DriveWealthPortfolio(BaseDriveWealthModel):
     ref_id = None
-    drivewealth_user_id = None
+    profile_id = None
     drivewealth_account_id = None
-    cash_target_weight = None
-    holdings = None
+    cash_target_weight: Decimal = None
+    holdings: Dict[str, Decimal] = None
     data = None
     created_at = None
     updated_at = None
@@ -433,17 +467,14 @@ class DriveWealthPortfolio(BaseDriveWealthModel):
     db_excluded_fields = ["created_at", "updated_at"]
     non_persistent_fields = ["created_at", "updated_at"]
 
-    def __init__(self, data=None):
-        super().__init__()
-
+    def set_from_response(self, data=None):
         if not data:
             return
 
         self.ref_id = data["id"]
-        self.drivewealth_user_id = data["userID"]
         self.data = data
 
-        self.cash_target_weight = 1
+        self.cash_target_weight = Decimal(1)
         self.holdings = {}
         for i in data["holdings"]:
             if i["type"] == "CASH_RESERVE":
@@ -456,7 +487,7 @@ class DriveWealthPortfolio(BaseDriveWealthModel):
         self.cash_target_weight = portfolio_status.cash_actual_weight
 
         for fund_ref_id, i in self.holdings.items():
-            self.holdings[fund_ref_id] = 0
+            self.holdings[fund_ref_id] = ZERO
 
         for fund_ref_id in portfolio_status.get_fund_ref_ids():
             self.holdings[
@@ -477,14 +508,23 @@ class DriveWealthPortfolio(BaseDriveWealthModel):
             raise Exception('fund weight can not be greater than 1')
 
         cash_weight -= weight_delta
-        self.cash_target_weight = min(1, max(0, cash_weight))
+        self.cash_target_weight = min(ONE, max(ZERO, cash_weight))
 
         fund_weight += weight_delta
-        self.set_fund_weight(fund, min(1, max(0, fund_weight)))
+        self.set_fund_weight(fund, min(ONE, max(ZERO, fund_weight)))
+
+    def normalize_weights(self):
+        weight_sum = Decimal(self.cash_target_weight)
+        for k, i in self.holdings.items():
+            weight_sum += i
+
+        self.cash_target_weight /= weight_sum
+        for k, i in self.holdings.items():
+            self.holdings[k] = i / weight_sum
 
     def get_fund_weight(self, fund_ref_id: str) -> Decimal:
         if not self.holdings or fund_ref_id not in self.holdings:
-            return 0
+            return ZERO
 
         return self.holdings[fund_ref_id]
 
@@ -494,6 +534,13 @@ class DriveWealthPortfolio(BaseDriveWealthModel):
 
         self.holdings[fund.ref_id] = weight
 
+    def to_dict(self) -> dict:
+        return {
+            **super().to_dict(),
+            "holdings":
+            json.dumps(self.holdings, cls=DecimalEncoder),
+        }
+
     @classproperty
     def table_name(self) -> str:
         return "drivewealth_portfolios"
@@ -502,7 +549,8 @@ class DriveWealthPortfolio(BaseDriveWealthModel):
 class DriveWealthAutopilotRun(BaseDriveWealthModel):
     ref_id = None
     status = None
-    accounts = None
+    account_id = None
+    collection_version_id = None
     data = None
     created_at = None
     updated_at = None
@@ -510,10 +558,11 @@ class DriveWealthAutopilotRun(BaseDriveWealthModel):
     key_fields = ["ref_id"]
 
     db_excluded_fields = ["created_at", "updated_at"]
-    non_persistent_fields = ["id", "created_at", "updated_at"]
+    non_persistent_fields = ["created_at", "updated_at"]
 
-    def __init__(self, data: dict):
-        super().__init__()
+    def set_from_response(self, data: dict = None):
+        if not data:
+            return
         self.ref_id = data["id"]
         self.status = data["status"]
         self.data = data
@@ -522,14 +571,62 @@ class DriveWealthAutopilotRun(BaseDriveWealthModel):
     def table_name(self) -> str:
         return "drivewealth_autopilot_runs"
 
-    def to_dict(self) -> dict:
-        return {
-            **super().to_dict(),
-            "accounts": json.dumps(self.accounts),
-        }
+    def _update_trading_collection_version(
+            self, trading_collection_version: TradingCollectionVersion):
+        # SUCCESS	Complete Autopilot run successful
+        if self.status == "SUCCESS":
+            trading_collection_version.status = TradingCollectionVersionStatus.STATUS_SUCCESS
+            return
+        '''
+        REBALANCE_FAILED                  rebalance has failed
+        SELL_AMOUNTCASH_ORDERS_FAILED     one or more sell orders have failed
+        SELL_ORDERQTY_ORDERS_FAILED       one or more sell orders have failed
+        BUY_ORDERQTY_ORDERS_FAILED        one or more buy orders have failed
+        BUY_AMOUNTCASH_ORDERS_FAILED      one or more buy orders have failed
+        ALLOCATION_FAILED                 fatal allocation failure
+        SUBACCOUNT_HOLDINGS_UPDATE_FAILED sub-account holdings within require rebalance update failed
+        SELL_AMOUNTCASH_ORDERS_TIMEDOUT   required sell orders have timed out
+        SELL_ORDERQTY_ORDERS_TIMEDOUT     required sell orders have timed out
+        BUY_ORDERQTY_ORDERS_TIMEDOUT      required buy orders have timedout
+        BUY_AMOUNTCASH_ORDERS_TIMEDOUT    required buy orders have timedout
+        ALLOCATION_TIMEDOUT               allocation processing timeout
+        REBALANCE_ABORTED                 rebalance has been cancelled
+        '''
+        if re.search(r'(FAILED|TIMEDOUT|ABORTED)$', self.status):
+            trading_collection_version.status = TradingCollectionVersionStatus.STATUS_FAILED
+            return
+        '''
+        REBALANCE_NOT_STARTED            rebalance has not yet started
+        REBALANCE_REVIEW_COMPLETED       completed rebalance, only rebalancing review
+        REBALANCE_NO_ORDERS_GENERATED    completed rebalance, no master orders generated
+        REBALANCE_COMPLETED              rebalance is 100% completed
+        REBALANCE_10                     percent of rebalance completed, increases in increments of 10 ("REBALANCE_10" ..... "REBALANCE_90")
+        AMOUNTCASH_ORDERS_AGGREGATED     aggregate cash value for required orders
+        ORDERQTY_ORDERS_AGGREGATED       quantity of orders when funds or instruments re replaced in portfolio
+        ORDERQTY_ORDERS_PREPARED         required buy and sell orders for rebalance are prepared to execute
+        AMOUNTCASH_ORDERS_PREPARED       cash amount of required buy and sell orders for rebalance
+        SELL_ORDERQTY_ORDERS_SUBMITTED   all required sell orders submitted for execution
+        SUBACCOUNT_ORDERS_ADJUSTED       adjustment to amount cash orders after quantity orders have executed
+        SELL_AMOUNTCASH_ORDERS_SUBMITTED all required sell orders submitted for execution
+        SELL_AMOUNTCASH_ORDERS_COMPLETED all required sell orders successfully executed
+        SELL_ORDERQTY_ORDERS_COMPLETED   all required sell orders successfully executed
+        BUY_ORDERQTY_ORDERS_SUBMITTED    all required buy orders submitted for execution
+        BUY_ORDERQTY_ORDERS_COMPLETED    all required buy orders successfully executed
+        BUY_AMOUNTCASH_ORDERS_SUBMITTED  all required buy orders submitted for execution
+        BUY_AMOUNTCASH_ORDERS_COMPLETED  all required buy orders successfully executed
+        ORDERS_CLEANEDUP                 cleaning up failed master orders
+        RIA_NEXT_REBALANCE_UPDATED       next scheduled rebalance updated
+        ALLOCATION_PREPARED              required allocations are prepared for processing
+        ALLOCATION_SUBMITTED             all required allocations submitted for processing
+        ALLOCATION_NOT_STARTED           required allocations have not yet been started
+        ALLOCATION_10                    percent of allocation completed, increases in increments of 10 ("ALLOCATION_10" ..... "ALLOCATION_90")
+        ALLOCATION_COMPLETED             all required allocations have been completed
+        SUBACCOUNT_HOLDINGS_UPDATED      all sub-account holdings within required rebalance updated
+        '''
+        trading_collection_version.status = TradingCollectionVersionStatus.STATUS_PENDING
 
 
-class DriveWealthKycStatus():
+class DriveWealthKycStatus:
     data = None
 
     def __init__(self, data: dict):

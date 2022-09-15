@@ -152,9 +152,12 @@ class TradingService:
                                         collection_id: int,
                                         weights: Dict[str, Decimal],
                                         target_amount_delta: Decimal):
-        collection_version = TradingCollectionVersion(profile_id,
-                                                      collection_id, weights,
-                                                      target_amount_delta)
+        collection_version = TradingCollectionVersion()
+        collection_version.profile_id = profile_id
+        collection_version.collection_id = collection_id
+        collection_version.weights = weights
+        collection_version.target_amount_delta = target_amount_delta
+
         self.trading_repository.persist(collection_version)
 
         self._get_provider_service().reconfigure_collection_holdings(
