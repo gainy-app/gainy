@@ -1,0 +1,5 @@
+mutation TradingSyncProviderData($profile_id: Int!) {
+  trading_sync_provider_data(profile_id: $profile_id) {
+    ok
+  }
+}

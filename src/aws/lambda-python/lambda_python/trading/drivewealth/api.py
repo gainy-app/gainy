@@ -56,6 +56,14 @@ class DriveWealthApi:
                                       "portfolioID": portfolio_ref_id
                                   }})
 
+    def get_account_money(self, account_id: str):
+        return self._make_request("GET",
+                                  f"/accounts/{account_id}/summary/money")
+
+    def get_account_positions(self, account_id: str):
+        return self._make_request("GET",
+                                  f"/accounts/{account_id}/summary/positions")
+
     def upload_document(self, user_id: str, document: KycDocument,
                         file_base64):
         return self._make_request(
