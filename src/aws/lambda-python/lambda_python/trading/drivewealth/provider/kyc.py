@@ -36,8 +36,7 @@ class DriveWealthProviderKYC:
         # create or update account
         accounts = repository.get_user_accounts(user_ref_id)
         if not accounts:
-            account_data = self.api.create_account(user_ref_id)
-            repository.upsert_user_account(user_ref_id, account_data)
+            self._create_account(user)
 
         return self.api.get_kyc_status(user_ref_id).get_profile_kyc_status()
 
@@ -59,9 +58,6 @@ class DriveWealthProviderKYC:
         for document_data in documents_data:
             repository.upsert_kyc_document(None, document_data)
 
-        # TODO move to somewhere more general
-        self._sync_trading_accounts(user)
-
         return kyc_status
 
     def send_kyc_document(self, profile_id: int, document: KycDocument,
@@ -77,35 +73,6 @@ class DriveWealthProviderKYC:
 
         data = self.api.upload_document(user.ref_id, document, file_data)
         repository.upsert_kyc_document(document.id, data)
-
-    def _sync_trading_accounts(self, user: DriveWealthUser):
-        user_ref_id = user.ref_id
-        repository = self.drivewealth_repository
-
-        accounts_data = self.api.get_user_accounts(user_ref_id)
-        for account_data in accounts_data:
-            drivewealth_trading_account = repository.upsert_user_account(
-                user_ref_id, account_data)
-            drivewealth_trading_account = repository.find_one(
-                DriveWealthAccount,
-                {"ref_id": drivewealth_trading_account.ref_id})
-
-            if drivewealth_trading_account.trading_account_id is None:
-                # TODO move to somewhere more general
-                trading_account = TradingAccount()
-                trading_account.profile_id = user.profile_id
-                trading_account.name = drivewealth_trading_account.nickname
-            else:
-                trading_account = repository.find_one(
-                    TradingAccount,
-                    {"id": drivewealth_trading_account.trading_account_id})
-
-            trading_account.cash_available_for_trade = drivewealth_trading_account.cash_available_for_trade
-            trading_account.cash_available_for_withdrawal = drivewealth_trading_account.cash_available_for_withdrawal
-            trading_account.cash_balance = drivewealth_trading_account.cash_balance
-            repository.persist(trading_account)
-            drivewealth_trading_account.trading_account_id = trading_account.id
-            repository.persist(drivewealth_trading_account)
 
     def _kyc_form_to_documents(self, kyc_form: dict):
         return [
@@ -234,3 +201,20 @@ class DriveWealthProviderKYC:
                 }
             },
         ]
+
+    def _create_account(self, user: DriveWealthUser):
+        repository = self.drivewealth_repository
+
+        account_data = self.api.create_account(user.ref_id)
+        account = repository.upsert_user_account(user.ref_id, account_data)
+        account: DriveWealthAccount = repository.find_one(
+            DriveWealthAccount, {"ref_id": account.ref_id})
+
+        trading_account = TradingAccount()
+        trading_account.profile_id = user.profile_id
+        trading_account.name = account.nickname
+        account.update_trading_account(trading_account)
+        repository.persist(trading_account)
+
+        account.trading_account_id = trading_account.id
+        repository.persist(account)
