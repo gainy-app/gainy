@@ -1,24 +1,14 @@
-from functools import lru_cache
-import os
-
-from hasura_tests.common import make_graphql_request
+from hasura_tests.common import make_graphql_request, load_query
 
 PROFILES = make_graphql_request(
     "{app_profiles(order_by:[{id: asc}]){id, user_id}}",
     user_id=None)['data']['app_profiles']
 
 
-@lru_cache(maxsize=None)
-def load_query(directory, query_name):
-    query_file = os.path.join(os.path.dirname(__file__), 'queries', directory,
-                              query_name + '.graphql')
-    with open(query_file, 'r') as f:
-        return f.read()
-
-
 def fill_kyc_form(profile_id, profile_user_id):
     kyc_form_config = make_graphql_request(
-        load_query('kyc', 'GetFormConfig'), {"profile_id": profile_id},
+        load_query('trading/queries/kyc',
+                   'GetFormConfig'), {"profile_id": profile_id},
         profile_user_id)['data']['kyc_get_form_config']
 
     signed_by = " ".join([
@@ -54,18 +44,18 @@ def fill_kyc_form(profile_id, profile_user_id):
     }
 
     result = make_graphql_request(
-        load_query('kyc', 'UpsertForm'), data,
+        load_query('trading/queries/kyc', 'UpsertForm'), data,
         profile_user_id)['data']['insert_app_kyc_form']['returning']
     assert len(result) > 0, (profile_id, profile_user_id, result)
     result = make_graphql_request(
-        load_query('kyc', 'UpsertForm'), data,
+        load_query('trading/queries/kyc', 'UpsertForm'), data,
         profile_user_id)['data']['insert_app_kyc_form']['returning']
     assert len(result) > 0, (profile_id, profile_user_id, result)
 
 
 def kyc_send_form(profile_id, profile_user_id):
-    response = make_graphql_request(load_query('kyc', 'SendForm'),
-                                    {"profile_id": profile_id},
-                                    profile_user_id)['data']['kyc_send_form']
+    response = make_graphql_request(
+        load_query('trading/queries/kyc', 'SendForm'),
+        {"profile_id": profile_id}, profile_user_id)['data']['kyc_send_form']
 
     assert response.get("status") is not None

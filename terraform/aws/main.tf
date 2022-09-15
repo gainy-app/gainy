@@ -51,6 +51,7 @@ module "lambda" {
   hubspot_api_key        = var.hubspot_api_key
   revenuecat_api_key     = var.revenuecat_api_key
   stripe_api_key         = var.stripe_api_key
+  stripe_publishable_key = var.stripe_publishable_key
 
   base_image_registry_address = var.base_image_registry_address
   base_image_version          = var.base_image_version

@@ -30,6 +30,7 @@ variable "codeartifact_pipy_url" {}
 variable "gainy_compute_version" {}
 variable "revenuecat_api_key" {}
 variable "stripe_api_key" {}
+variable "stripe_publishable_key" {}
 variable "drivewealth_is_uat" {}
 variable "drivewealth_app_key" {}
 variable "drivewealth_wlp_id" {}
@@ -170,6 +171,7 @@ locals {
     DRIVEWEALTH_API_URL        = var.drivewealth_api_url
     S3_BUCKET_UPLOADS_KYC      = var.s3_bucket_uploads_kyc
     STRIPE_API_KEY             = var.stripe_api_key
+    STRIPE_PUBLISHABLE_KEY     = var.stripe_publishable_key
   }
 }
 

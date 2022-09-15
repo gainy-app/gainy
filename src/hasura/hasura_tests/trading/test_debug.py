@@ -25,7 +25,8 @@ def test_trading_sync_provider_data():
             positions_cnt_before = cursor.fetchone()[0]
 
             make_graphql_request(
-                load_query('debug', 'TradingSyncProviderData'), {
+                load_query('trading/queries/debug', 'TradingSyncProviderData'),
+                {
                     "profile_id": profile_id,
                 }, None)
 

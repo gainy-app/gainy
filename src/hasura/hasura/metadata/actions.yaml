@@ -154,6 +154,12 @@ actions:
     permissions:
       - role: user
       - role: anonymous
+  - name: stripe_get_payment_sheet_data
+    definition:
+      kind: ""
+      handler: '{{AWS_LAMBDA_API_GATEWAY_ENDPOINT}}/hasuraAction'
+    permissions:
+      - role: user
   - name: stripe_webhook
     definition:
       kind: synchronous
@@ -339,7 +345,6 @@ custom_types:
     - name: CreatePlaidLinkTokenOutput
     - name: PlaidWebhookOutput
     - name: StripeGetCheckoutUrl
-    - name: StripeWebhookOutput
     - name: UpdatePurchasesOutput
     - name: Promocode
     - name: SetRecommendationSettingsOutput
@@ -373,5 +378,6 @@ custom_types:
     - name: TradingMoneyFlowOutput
     - name: SampleOutput
     - name: ActualCollectionHoldingOutput
+    - name: StripeGetPaymentSheetDataOutput
     - name: OkOutput
   scalars: []

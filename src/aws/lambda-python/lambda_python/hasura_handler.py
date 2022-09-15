@@ -11,8 +11,9 @@ from search.algolia_search import SearchTickers, SearchCollections
 from search.news_search import SearchNews
 from triggers import *
 from actions import *
-from web import *
 from trading.actions import *
+from _stripe.actions import *
+from _stripe.triggers import *
 
 setup_exception_logger_hook()
 
@@ -51,8 +52,9 @@ ACTIONS = [
     GetPortfolioPieChart(),
     PlaidWebhook(),
 
-    # Web
+    # Stripe
     StripeGetCheckoutUrl(),
+    StripeGetPaymentSheetData(),
     StripeWebhook(),
 
     # Search
@@ -62,7 +64,7 @@ ACTIONS = [
                       ALGOLIA_COLLECTIONS_INDEX),
     SearchNews(GNEWS_API_TOKEN, REDIS_CACHE_HOST, REDIS_CACHE_PORT),
 
-    # Managed Portfolio
+    # Trading
     KycGetFormConfig(),
     KycGetStatus(),
     KycSendForm(),
@@ -92,6 +94,7 @@ TRIGGERS = [
     SetRecommendations(),
     OnPlaidAccessTokenCreated(),
     OnInvitationCreatedOrUpdated(),
+    StripeDeletePaymentMethod(),
 ]
 
 trigger_dispatcher = HasuraTriggerDispatcher(TRIGGERS,

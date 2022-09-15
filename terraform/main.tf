@@ -22,6 +22,9 @@ terraform {
     algolia = {
       source = "philippe-vandermoere/algolia"
     }
+    stripe = {
+      source = "lukasaron/stripe"
+    }
   }
 }
 
@@ -69,6 +72,10 @@ provider "algolia" {
   api_key        = var.algolia_admin_api_key
 }
 
+provider "stripe" {
+  api_key = var.stripe_api_key
+}
+
 #################################### Modules ####################################
 
 module "algolia" {
@@ -106,7 +113,9 @@ module "aws" {
   hubspot_api_key             = var.hubspot_api_key
   polygon_api_token           = var.polygon_api_token
   coingecko_api_key           = var.coingecko_api_key
-  stripe_api_key              = var.stripe_api_key
+
+  stripe_api_key         = var.stripe_api_key
+  stripe_publishable_key = var.stripe_publishable_key
 
   aws_region              = var.aws_region
   aws_access_key          = var.aws_access_key
@@ -158,6 +167,11 @@ module "datadog" {
   datadog_aws_external_id         = var.datadog_aws_external_id
   env                             = var.env
   additional_forwarded_log_groups = module.aws.additional_forwarded_log_groups
+}
+
+module "stripe" {
+  source      = "./stripe"
+  webhook_url = "https://${module.aws.hasura_url}/api/rest/stripe_webhook"
 }
 
 #################################### Outputs ####################################

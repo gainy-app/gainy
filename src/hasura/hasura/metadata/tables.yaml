@@ -229,6 +229,45 @@
     name: notifications
 - table:
     schema: app
+    name: payment_methods
+  object_relationships:
+    - name: profile
+      using:
+        foreign_key_constraint_on: profile_id
+  select_permissions:
+    - role: user
+      permission:
+        columns:
+          - id
+          - profile_id
+          - name
+          - set_active_at
+          - created_at
+          - updated_at
+        filter:
+          profile:
+            user_id:
+              _eq: X-Hasura-User-Id
+  update_permissions:
+    - role: user
+      permission:
+        columns:
+          - name
+          - set_active_at
+        filter:
+          profile:
+            user_id:
+              _eq: X-Hasura-User-Id
+        check: null
+  delete_permissions:
+    - role: user
+      permission:
+        filter:
+          profile:
+            user_id:
+              _eq: X-Hasura-User-Id
+- table:
+    schema: app
     name: plaid_institutions
   select_permissions:
     - role: user
@@ -1000,6 +1039,20 @@
       definition:
         enable_manual: false
         insert:
+          columns: '*'
+      retry_conf:
+        num_retries: 0
+        interval_sec: 10
+        timeout_sec: 60
+      webhook: '{{AWS_LAMBDA_API_GATEWAY_ENDPOINT}}/hasuraTrigger'
+- table:
+    schema: app
+    name: stripe_payment_methods
+  event_triggers:
+    - name: stripe_payment_method_deleted
+      definition:
+        enable_manual: false
+        delete:
           columns: '*'
       retry_conf:
         num_retries: 0

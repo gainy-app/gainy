@@ -36,6 +36,9 @@ variable "stripe_api_key" {
   type      = string
   sensitive = true
 }
+variable "stripe_publishable_key" {
+  type = string
+}
 
 #################################### DriveWealth ####################################
 

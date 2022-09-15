@@ -197,6 +197,12 @@ type Query {
   ): StripeGetCheckoutUrl
 }
 
+type Query {
+  stripe_get_payment_sheet_data(
+    profile_id: Int!
+  ): StripeGetPaymentSheetDataOutput
+}
+
 type Mutation {
   stripe_webhook(
     id: String
@@ -208,7 +214,7 @@ type Mutation {
     pending_webhooks: Int
     request: jsonb
     type: String
-  ): StripeWebhookOutput
+  ): OkOutput
 }
 
 type Mutation {
@@ -423,10 +429,6 @@ type StripeGetCheckoutUrl {
   url: String!
 }
 
-type StripeWebhookOutput {
-  success: Boolean!
-}
-
 type UpdatePurchasesOutput {
   subscription_end_date: String
 }
@@ -537,4 +539,10 @@ type ActualCollectionHoldingOutput {
 
 type OkOutput {
   ok: Boolean
+}
+type StripeGetPaymentSheetDataOutput {
+  setup_intent_client_secret: String!
+  ephemeral_key: String!
+  customer_id: String!
+  publishable_key: String!
 }
