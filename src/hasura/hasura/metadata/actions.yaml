@@ -384,4 +384,5 @@ custom_types:
     - name: ActualCollectionHoldingOutput
     - name: OkOutput
     - name: StripeGetPaymentSheetDataOutput
+    - name: TradingReconfigureCollectionHoldingsOutput
   scalars: []

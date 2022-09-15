@@ -260,7 +260,6 @@ def test_upsert_portfolio(monkeypatch):
     portfolio = service._upsert_portfolio(profile_id, account)
 
     assert portfolio.ref_id == _PORTFOLIO_REF_ID
-    assert portfolio.drivewealth_user_id == _USER_ID
     assert portfolio.drivewealth_account_id == _ACCOUNT_ID
     assert portfolio.data == _PORTFOLIO
     assert portfolio.get_fund_weight(_FUND1_ID) == _FUND1_TARGET_WEIGHT
@@ -332,8 +331,12 @@ def test_upsert_fund(fund_exists, monkeypatch):
         monkeypatch.setattr(api, "create_fund", mock_create_fund)
     _mock_get_instrument_details(monkeypatch, api)
 
-    collection_version = TradingCollectionVersion(profile_id, collection_id,
-                                                  weights, Decimal(0))
+    collection_version = TradingCollectionVersion()
+    collection_version.profile_id = profile_id
+    collection_version.collection_id = collection_id
+    collection_version.weights = weights
+    collection_version.target_amount_delta = Decimal(0)
+
     monkeypatch.setattr(collection_version, "id",
                         trading_collection_version_id)
     monkeypatch.setattr(collection_version, "collection_id", collection_id)
@@ -344,7 +347,6 @@ def test_upsert_fund(fund_exists, monkeypatch):
 
     if not fund_exists:
         assert fund.ref_id == fund_ref_id
-        assert fund.drivewealth_user_id == _USER_ID
     assert fund.collection_id == collection_id
     assert fund.trading_collection_version_id == trading_collection_version_id
     assert fund.weights == weights

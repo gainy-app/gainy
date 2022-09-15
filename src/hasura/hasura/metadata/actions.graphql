@@ -275,7 +275,7 @@ type Mutation {
     collection_id: Int!
     weights: [TickerWeight]!
     target_amount_delta: Float!
-  ): OkOutput
+  ): TradingReconfigureCollectionHoldingsOutput
 }
 
 type Mutation {
@@ -552,5 +552,9 @@ type StripeGetPaymentSheetDataOutput {
   ephemeral_key: String!
   customer_id: String!
   publishable_key: String!
+}
+
+type TradingReconfigureCollectionHoldingsOutput {
+  trading_collection_version_id: Int!
 }
 

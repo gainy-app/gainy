@@ -1,12 +1,13 @@
 CREATE TABLE "app"."trading_collection_versions"
 (
-    "id"                        serial      NOT NULL,
-    "profile_id"                int         not null,
-    "collection_id"             int         not null,
-    "target_amount_delta" numeric         not null,
-    "weights"                   json,
-    "created_at"                timestamptz NOT NULL DEFAULT now(),
-    "updated_at"                timestamptz NOT NULL DEFAULT now(),
+    "id"                  serial      NOT NULL,
+    "profile_id"          int         not null,
+    "collection_id"       int         not null,
+    "status"              varchar,
+    "target_amount_delta" numeric     not null,
+    "weights"             json,
+    "created_at"          timestamptz NOT NULL DEFAULT now(),
+    "updated_at"          timestamptz NOT NULL DEFAULT now(),
     PRIMARY KEY ("id"),
     FOREIGN KEY ("profile_id") REFERENCES "app"."profiles" ("id") ON UPDATE cascade ON DELETE cascade
 );

@@ -7,7 +7,7 @@ CREATE TABLE "app"."drivewealth_users"
     "created_at"  timestamptz NOT NULL DEFAULT now(),
     "updated_at"  timestamptz NOT NULL DEFAULT now(),
     PRIMARY KEY ("ref_id"),
-    FOREIGN KEY ("profile_id") REFERENCES "app"."profiles" ("id") ON UPDATE set null ON DELETE set null
+    FOREIGN KEY ("profile_id") REFERENCES "app"."profiles" ("id") ON UPDATE restrict ON DELETE restrict
 );
 CREATE OR REPLACE FUNCTION "app"."set_current_timestamp_updated_at"()
     RETURNS TRIGGER AS

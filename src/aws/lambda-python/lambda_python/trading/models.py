@@ -123,12 +123,19 @@ class TradingMoneyFlow(BaseModel):
         return "trading_money_flow"
 
 
+class TradingCollectionVersionStatus(enum.Enum):
+    STATUS_PENDING = "PENDING"
+    STATUS_SUCCESS = "SUCCESS"
+    STATUS_FAILED = "FAILED"
+
+
 class TradingCollectionVersion(BaseModel):
     id = None
     profile_id = None
     collection_id = None
+    status = None
     target_amount_delta = None
-    weights = None
+    weights: Dict[str, Decimal] = None
     created_at = None
     updated_at = None
 
@@ -137,12 +144,14 @@ class TradingCollectionVersion(BaseModel):
     db_excluded_fields = ["created_at", "updated_at"]
     non_persistent_fields = ["id", "created_at", "updated_at"]
 
-    def __init__(self, profile_id: int, collection_id: int,
-                 weights: Dict[str, Decimal], target_amount_delta: Decimal):
-        self.profile_id = profile_id
-        self.collection_id = collection_id
-        self.target_amount_delta = target_amount_delta
-        self.weights = weights
+    def __init__(self, row=None):
+        super().__init__(row)
+
+        if not row:
+            return
+
+        self.status = TradingCollectionVersionStatus[
+            row["status"]] if row["status"] else None
 
     @classproperty
     def schema_name(self) -> str:
@@ -155,8 +164,8 @@ class TradingCollectionVersion(BaseModel):
     def to_dict(self) -> dict:
         return {
             **super().to_dict(),
-            "weights":
-            json.dumps(self.weights, cls=DecimalEncoder),
+            "status": self.status.name if self.status else None,
+            "weights": json.dumps(self.weights, cls=DecimalEncoder),
         }
 
 

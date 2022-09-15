@@ -1,7 +1,7 @@
 CREATE TABLE "app"."drivewealth_funds"
 (
     "ref_id"                        varchar     NOT NULL,
-    "drivewealth_user_id"           varchar     NOT NULL,
+    "profile_id"                    int         NOT NULL,
     "collection_id"                 int         NOT NULL,
     "trading_collection_version_id" int         NOT NULL,
     "holdings"                      json,
@@ -10,8 +10,8 @@ CREATE TABLE "app"."drivewealth_funds"
     "created_at"                    timestamptz NOT NULL DEFAULT now(),
     "updated_at"                    timestamptz NOT NULL DEFAULT now(),
     PRIMARY KEY ("ref_id"),
-    constraint "drivewealth_funds_drivewealth_user_id_collection_id" unique ("drivewealth_user_id", "collection_id"),
-    FOREIGN KEY ("drivewealth_user_id") REFERENCES "app"."drivewealth_users" ("ref_id") ON UPDATE cascade ON DELETE cascade,
+    constraint "drivewealth_funds_profile_id_collection_id" unique ("profile_id", "collection_id"),
+    FOREIGN KEY ("profile_id") REFERENCES "app"."profiles" ("id") ON UPDATE restrict ON DELETE restrict,
     FOREIGN KEY ("trading_collection_version_id") REFERENCES "app"."trading_collection_versions" ("id") ON UPDATE cascade ON DELETE cascade
 );
 CREATE OR REPLACE FUNCTION "app"."set_current_timestamp_updated_at"()

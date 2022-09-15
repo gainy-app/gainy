@@ -35,7 +35,7 @@ class DriveWealthProviderCollection(DriveWealthProviderBase):
 
         self.api.update_portfolio(portfolio)
         self.api.update_fund(chosen_fund)
-        self._create_autopilot_run(account)
+        self._create_autopilot_run(account, collection_version.id)
 
     def get_actual_collection_holdings(
             self, profile_id: int,
@@ -50,7 +50,7 @@ class DriveWealthProviderCollection(DriveWealthProviderBase):
             self, fund: DriveWealthFund
     ) -> List[DriveWealthPortfolioStatusFundHolding]:
         repository = self.drivewealth_repository
-        portfolio = repository.get_user_portfolio(fund.drivewealth_user_id)
+        portfolio = repository.get_profile_portfolio(fund.profile_id)
         if not portfolio:
             return []
         portfolio_status = self._get_portfolio_status(portfolio)
@@ -60,34 +60,36 @@ class DriveWealthProviderCollection(DriveWealthProviderBase):
 
         return fund_status.holdings
 
-    def _create_autopilot_run(self, account: DriveWealthAccount):
-        data = self.api.create_autopilot_run(account)
-        entity = DriveWealthAutopilotRun(data)
-        entity.accounts = [account.ref_id]
+    def _create_autopilot_run(self, account: DriveWealthAccount,
+                              collection_version_id: int):
+        data = self.api.create_autopilot_run([account.ref_id])
+        entity = DriveWealthAutopilotRun()
+        entity.set_from_response(data)
+        entity.account_id = account.ref_id
+        entity.collection_version_id = collection_version_id
         self.drivewealth_repository.persist(entity)
         return entity
 
     def _upsert_portfolio(self, profile_id, account: DriveWealthAccount):
         repository = self.drivewealth_repository
-        user = repository.get_user(profile_id)
-        portfolio = repository.get_user_portfolio(user.ref_id)
+        portfolio = repository.get_profile_portfolio(profile_id)
 
         if not portfolio:
-            user_id = user.ref_id
-            name = f"Gainy {user_id}'s portfolio"
+            name = f"Gainy profile #{profile_id}'s portfolio"
             client_portfolio_id = profile_id
             description = name
 
-            data = self.api.create_portfolio(user_id, name,
-                                             client_portfolio_id, description)
-            portfolio = DriveWealthPortfolio(data)
-            repository.persist(portfolio)
+            data = self.api.create_portfolio(name, client_portfolio_id,
+                                             description)
+            portfolio = DriveWealthPortfolio()
+            portfolio.set_from_response(data)
+            portfolio.profile_id = profile_id
 
         if not portfolio.drivewealth_account_id:
             self.api.update_account(account.ref_id, portfolio.ref_id)
             portfolio.drivewealth_account_id = account.ref_id
-            repository.persist(portfolio)
 
+        repository.persist(portfolio)
         return portfolio
 
     def _upsert_fund(
@@ -111,10 +113,12 @@ class DriveWealthProviderCollection(DriveWealthProviderBase):
             client_fund_id = f"{profile_id}_{collection_id}"
             description = name
 
-            data = self.api.create_fund(user_id, name, client_fund_id,
-                                        description, new_fund_holdings)
+            data = self.api.create_fund(name, client_fund_id, description,
+                                        new_fund_holdings)
 
-            fund = DriveWealthFund(data)
+            fund = DriveWealthFund()
+            fund.set_from_response(data)
+            fund.profile_id = profile_id
 
         fund.weights = weights
         fund.collection_id = collection_id
@@ -126,8 +130,7 @@ class DriveWealthProviderCollection(DriveWealthProviderBase):
     def _get_fund(self, profile_id: int,
                   collection_id: int) -> Optional[DriveWealthFund]:
         repository = self.drivewealth_repository
-        user = repository.get_user(profile_id)
-        fund = repository.get_user_fund(user, collection_id)
+        fund = repository.get_profile_fund(profile_id, collection_id)
 
         if not fund:
             return None
@@ -191,14 +194,14 @@ class DriveWealthProviderCollection(DriveWealthProviderBase):
         logger.info('_handle_cash_amount_change step1', extra=logging_extra)
 
         portfolio.move_cash_to_fund(chosen_fund, weight_delta)
+        portfolio.normalize_weights()
         self.drivewealth_repository.persist(portfolio)
         logging_extra["portfolio"] = portfolio.to_dict()
         logger.info('_handle_cash_amount_change step2', extra=logging_extra)
 
     def _on_money_transfer(self, profile_id):
         repository = self.drivewealth_repository
-        user = repository.get_user(profile_id)
-        portfolio = repository.get_user_portfolio(user.ref_id)
+        portfolio = repository.get_profile_portfolio(profile_id)
         if not portfolio:
             return
 
@@ -208,7 +211,8 @@ class DriveWealthProviderCollection(DriveWealthProviderBase):
             self,
             portfolio: DriveWealthPortfolio) -> DriveWealthPortfolioStatus:
         data = self.api.get_portfolio_status(portfolio)
-        portfolio_status = DriveWealthPortfolioStatus(data)
+        portfolio_status = DriveWealthPortfolioStatus()
+        portfolio_status.set_from_response(data)
         self.drivewealth_repository.persist(portfolio_status)
         return portfolio_status
 
