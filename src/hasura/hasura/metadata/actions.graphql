@@ -226,6 +226,12 @@ type Mutation {
 }
 
 type Mutation {
+  trading_delete_data(
+    profile_id: Int!
+  ): OkOutput
+}
+
+type Mutation {
   trading_delete_funding_account(
     profile_id: Int!
     funding_account_id: Int!
@@ -540,9 +546,11 @@ type ActualCollectionHoldingOutput {
 type OkOutput {
   ok: Boolean
 }
+
 type StripeGetPaymentSheetDataOutput {
   setup_intent_client_secret: String!
   ephemeral_key: String!
   customer_id: String!
   publishable_key: String!
 }
+

@@ -171,6 +171,10 @@ actions:
     definition:
       kind: synchronous
       handler: '{{AWS_LAMBDA_API_GATEWAY_ENDPOINT}}/hasuraAction'
+  - name: trading_delete_data
+    definition:
+      kind: synchronous
+      handler: '{{AWS_LAMBDA_API_GATEWAY_ENDPOINT}}/hasuraAction'
   - name: trading_delete_funding_account
     definition:
       kind: synchronous
@@ -378,6 +382,6 @@ custom_types:
     - name: TradingMoneyFlowOutput
     - name: SampleOutput
     - name: ActualCollectionHoldingOutput
-    - name: StripeGetPaymentSheetDataOutput
     - name: OkOutput
+    - name: StripeGetPaymentSheetDataOutput
   scalars: []

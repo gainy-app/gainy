@@ -184,5 +184,8 @@ class TradingService:
         self._get_provider_service().debug_add_money(trading_account_id,
                                                      amount)
 
+    def debug_delete_data(self, profile_id):
+        self._get_provider_service().debug_delete_data(profile_id)
+
     def _get_provider_service(self):
         return self.drivewealth_provider

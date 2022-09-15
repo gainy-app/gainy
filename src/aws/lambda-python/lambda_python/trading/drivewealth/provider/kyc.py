@@ -1,5 +1,7 @@
 import base64
 import io
+
+from trading.drivewealth.provider.base import DriveWealthProviderBase
 from trading.models import ProfileKycStatus, KycDocument, TradingAccount
 from trading.drivewealth.models import DriveWealthAccount, DriveWealthUser
 from trading.drivewealth.api import DriveWealthApi
@@ -9,7 +11,7 @@ from gainy.utils import get_logger
 logger = get_logger(__name__)
 
 
-class DriveWealthProviderKYC:
+class DriveWealthProviderKYC(DriveWealthProviderBase):
     drivewealth_repository: DriveWealthRepository = None
     api: DriveWealthApi = None
 
@@ -42,14 +44,11 @@ class DriveWealthProviderKYC:
 
     def kyc_get_status(self, profile_id: int) -> ProfileKycStatus:
         repository = self.drivewealth_repository
-        user = repository.get_user(profile_id)
-        if user is None:
-            raise Exception("KYC form has not been sent")
-        else:
-            user_data = self.api.get_user(user.ref_id)
-
-        user = repository.upsert_user(profile_id, user_data)
+        user = self._get_user(profile_id)
         user_ref_id = user.ref_id
+
+        user_data = self.api.get_user(user_ref_id)
+        repository.upsert_user(profile_id, user_data)
 
         kyc_status = self.api.get_kyc_status(
             user_ref_id).get_profile_kyc_status()
@@ -67,9 +66,7 @@ class DriveWealthProviderKYC:
         file_data = f"data:{document.content_type};base64,{file_base64}"
 
         repository = self.drivewealth_repository
-        user = repository.get_user(profile_id)
-        if user is None:
-            raise Exception("KYC form has not been sent")
+        user = self._get_user(profile_id)
 
         data = self.api.upload_document(user.ref_id, document, file_data)
         repository.upsert_kyc_document(document.id, data)
