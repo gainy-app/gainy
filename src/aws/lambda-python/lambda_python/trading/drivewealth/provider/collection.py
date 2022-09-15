@@ -1,5 +1,7 @@
 from decimal import Decimal
 from typing import Dict, Any, List, Optional
+
+from trading.drivewealth.provider.base import DriveWealthProviderBase
 from trading.exceptions import InsufficientFundsException
 from trading.models import TradingCollectionVersion
 from trading.drivewealth.models import DriveWealthAccount, DriveWealthFund, DriveWealthPortfolio, \
@@ -11,7 +13,7 @@ from gainy.utils import get_logger
 logger = get_logger(__name__)
 
 
-class DriveWealthProviderCollection:
+class DriveWealthProviderCollection(DriveWealthProviderBase):
     drivewealth_repository: DriveWealthRepository = None
     api: DriveWealthApi = None
 
@@ -22,8 +24,7 @@ class DriveWealthProviderCollection:
 
     def reconfigure_collection_holdings(
             self, collection_version: TradingCollectionVersion):
-        user = self.drivewealth_repository.get_user(
-            collection_version.profile_id)
+        user = self._get_user(collection_version.profile_id)
         account = self._get_trading_account(user.ref_id)
         profile_id = collection_version.profile_id
         portfolio = self._upsert_portfolio(profile_id, account)

@@ -78,6 +78,7 @@ ACTIONS = [
     TradingGetActualCollectionHoldings(),
     TradingSyncProviderData(),
     TradingAddMoney(),
+    TradingDeleteData(),
 ]
 
 action_dispatcher = HasuraActionDispatcher(ACTIONS,

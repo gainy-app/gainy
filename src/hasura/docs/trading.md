@@ -31,28 +31,10 @@ mutation TradingAddMoney(
   }
 }
 ```
-
-### Debugging
-Sync provider data
+Delete all trading data for a user
 ```graphql
-mutation TradingSyncProviderData($profile_id: Int!) {
-  trading_sync_provider_data(profile_id: $profile_id) {
-    ok
-  }
-}
-```
-Add money to an account
-```graphql
-mutation TradingAddMoney(
-    $profile_id: Int!
-    $trading_account_id: Int!
-    $amount: Float!
-) {
-  trading_add_money(
-    profile_id: $profile_id
-    trading_account_id: $trading_account_id
-    amount: $amount
-  ){
+mutation TradingDeleteData($profile_id: Int!) {
+  trading_delete_data(profile_id: $profile_id) {
     ok
   }
 }

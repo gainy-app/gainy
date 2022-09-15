@@ -4,6 +4,7 @@ from decimal import Decimal
 from common.exceptions import NotFoundException
 from portfolio.plaid import PlaidService
 from portfolio.plaid.models import PlaidAccessToken
+from trading.drivewealth.provider.base import DriveWealthProviderBase
 from trading.models import TradingMoneyFlow, TradingAccount
 from trading.drivewealth.provider.collection import DriveWealthProviderCollection
 from trading.drivewealth.provider.kyc import DriveWealthProviderKYC
@@ -19,7 +20,8 @@ IS_UAT = os.getenv("DRIVEWEALTH_IS_UAT", "true") != "false"
 
 
 class DriveWealthProvider(DriveWealthProviderKYC,
-                          DriveWealthProviderCollection):
+                          DriveWealthProviderCollection,
+                          DriveWealthProviderBase):
 
     def __init__(self, drivewealth_repository: DriveWealthRepository,
                  api: DriveWealthApi, plaid_service: PlaidService):
@@ -39,10 +41,7 @@ class DriveWealthProvider(DriveWealthProviderKYC,
         processor_token = self.plaid_service.create_processor_token(
             access_token.access_token, account_id, "drivewealth")
 
-        user = repository.get_user(access_token.profile_id)
-        if user is None:
-            raise Exception("KYC form has not been sent")
-
+        user = self._get_user(access_token.profile_id)
         data = self.api.link_bank_account(user.ref_id, processor_token,
                                           account_name)
 
@@ -99,11 +98,16 @@ class DriveWealthProvider(DriveWealthProviderKYC,
 
         self.api.add_money(account.ref_id, amount)
 
-    def sync_data(self, profile_id):
+    def debug_delete_data(self, profile_id):
+        if not IS_UAT:
+            raise Exception('Not supported in production')
+
         repository = self.drivewealth_repository
-        user = repository.get_user(profile_id)
-        if user is None:
-            return
+        user = self._get_user(profile_id)
+        repository.delete(user)
+
+    def sync_data(self, profile_id):
+        user = self._get_user(profile_id)
 
         self._sync_trading_accounts(user)
         # self._sync_autopilot_runs(user.ref_id)
