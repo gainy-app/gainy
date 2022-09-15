@@ -4,10 +4,11 @@ from decimal import Decimal
 from common.exceptions import NotFoundException
 from portfolio.plaid import PlaidService
 from portfolio.plaid.models import PlaidAccessToken
-from trading.models import TradingMoneyFlow
+from trading.models import TradingMoneyFlow, TradingAccount
 from trading.drivewealth.provider.collection import DriveWealthProviderCollection
 from trading.drivewealth.provider.kyc import DriveWealthProviderKYC
-from trading.drivewealth.models import DriveWealthBankAccount, DriveWealthAccount, DriveWealthDeposit, DriveWealthRedemption
+from trading.drivewealth.models import DriveWealthBankAccount, DriveWealthAccount, DriveWealthDeposit, \
+    DriveWealthRedemption, DriveWealthUser, DriveWealthAccountMoney, DriveWealthAccountPositions
 from trading.drivewealth.api import DriveWealthApi
 from trading.drivewealth.repository import DriveWealthRepository
 from gainy.utils import get_logger
@@ -112,6 +113,45 @@ class DriveWealthProvider(DriveWealthProviderKYC,
         # self._sync_portfolio_statuses(user.ref_id)
         # self._sync_redemptions(user.ref_id)
         # self._sync_users(user.ref_id)
+
+    def _sync_trading_accounts(self, user: DriveWealthUser):
+        user_ref_id = user.ref_id
+        repository = self.drivewealth_repository
+
+        accounts_data = self.api.get_user_accounts(user_ref_id)
+        for account_data in accounts_data:
+            account_ref_id = account_data["id"]
+            account_money_data = self.api.get_account_money(account_ref_id)
+            account_money = DriveWealthAccountMoney()
+            account_money.set_from_response(account_money_data)
+            repository.persist(account_money)
+
+            account_positions_data = self.api.get_account_positions(
+                account_ref_id)
+            account_positions = DriveWealthAccountPositions()
+            account_positions.set_from_response(account_positions_data)
+            repository.persist(account_positions)
+
+            account: DriveWealthAccount = repository.find_one(
+                DriveWealthAccount,
+                {"ref_id": account_ref_id}) or DriveWealthAccount()
+            account.drivewealth_user_id = user_ref_id
+            account.set_from_response(account_data)
+            repository.persist(account)
+
+            if account.trading_account_id is None:
+                continue
+
+            trading_account = repository.find_one(
+                TradingAccount, {"id": account.trading_account_id})
+            if trading_account is None:
+                continue
+
+            account.update_trading_account(trading_account)
+            account_money.update_trading_account(trading_account)
+            account_positions.update_trading_account(trading_account)
+
+            repository.persist(trading_account)
 
     def _sync_bank_accounts(self, user_ref_id):
         repository = self.drivewealth_repository

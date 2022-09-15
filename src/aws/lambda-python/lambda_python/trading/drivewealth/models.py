@@ -8,7 +8,7 @@ import dateutil
 from common import DecimalEncoder
 from gainy.data_access.db_lock import ResourceType
 from gainy.data_access.models import BaseModel, classproperty, ResourceVersion
-from trading.models import CollectionHoldingStatus, ProfileKycStatus, KycStatus
+from trading.models import CollectionHoldingStatus, ProfileKycStatus, KycStatus, TradingAccount
 
 PRECISION = 1e-3
 
@@ -126,6 +126,90 @@ class DriveWealthAccount(BaseDriveWealthModel):
     def table_name(self) -> str:
         return "drivewealth_accounts"
 
+    def set_from_response(self, data=None):
+        if not data:
+            return
+        self.ref_id = data["id"]
+        self.status = data["status"]['name']
+        self.ref_no = data["accountNo"]
+        self.nickname = data["nickname"]
+        self.cash_available_for_trade = data["bod"].get(
+            "cashAvailableForTrading", 0)
+        self.cash_available_for_withdrawal = data["bod"].get(
+            "cashAvailableForWithdrawal", 0)
+        self.cash_balance = data["bod"].get("cashBalance", 0)
+        self.data = json.dumps(data)
+
+    def update_trading_account(self, trading_account: TradingAccount):
+        trading_account.cash_available_for_trade = self.cash_available_for_trade
+        trading_account.cash_available_for_withdrawal = self.cash_available_for_withdrawal
+        trading_account.cash_balance = self.cash_balance
+        pass
+
+
+class DriveWealthAccountMoney(BaseDriveWealthModel):
+    id = None
+    drivewealth_account_id = None
+    cash_available_for_trade = None
+    cash_available_for_withdrawal = None
+    cash_balance = None
+    data = None
+    created_at = None
+
+    key_fields = ["id"]
+
+    db_excluded_fields = ["created_at"]
+    non_persistent_fields = ["id", "created_at"]
+
+    @classproperty
+    def table_name(self) -> str:
+        return "drivewealth_accounts_money"
+
+    def set_from_response(self, data=None):
+        if not data:
+            return
+        self.drivewealth_account_id = data["accountID"]
+        self.data = json.dumps(data)
+
+        cash = data["cash"]
+        self.cash_available_for_trade = cash["cashAvailableForTrade"]
+        self.cash_available_for_withdrawal = cash["cashAvailableForWithdrawal"]
+        self.cash_balance = cash["cashBalance"]
+
+    def update_trading_account(self, trading_account: TradingAccount):
+        trading_account.cash_available_for_trade = self.cash_available_for_trade
+        trading_account.cash_available_for_withdrawal = self.cash_available_for_withdrawal
+        trading_account.cash_balance = self.cash_balance
+        pass
+
+
+class DriveWealthAccountPositions(BaseDriveWealthModel):
+    id = None
+    drivewealth_account_id = None
+    equity_value = None
+    data = None
+    created_at = None
+
+    key_fields = ["id"]
+
+    db_excluded_fields = ["created_at"]
+    non_persistent_fields = ["id", "created_at"]
+
+    @classproperty
+    def table_name(self) -> str:
+        return "drivewealth_accounts_positions"
+
+    def set_from_response(self, data=None):
+        if not data:
+            return
+        self.drivewealth_account_id = data["accountID"]
+        self.equity_value = data["equityValue"]
+        self.data = json.dumps(data)
+
+    def update_trading_account(self, trading_account: TradingAccount):
+        trading_account.equity_value = self.equity_value
+        pass
+
 
 class DriveWealthBankAccount(BaseDriveWealthModel):
     ref_id = None
@@ -147,6 +231,8 @@ class DriveWealthBankAccount(BaseDriveWealthModel):
     non_persistent_fields = ["created_at", "updated_at"]
 
     def set_from_response(self, data=None):
+        if not data:
+            return
         self.ref_id = data['id']
         self.status = data["status"]
 

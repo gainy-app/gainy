@@ -57,6 +57,7 @@ class TradingAccount(BaseModel):
     cash_available_for_trade = None
     cash_available_for_withdrawal = None
     cash_balance = None
+    equity_value = None
     created_at = None
     updated_at = None
 

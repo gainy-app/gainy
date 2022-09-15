@@ -44,17 +44,8 @@ class DriveWealthRepository(Repository):
     def upsert_user_account(self, drivewealth_user_id,
                             data) -> DriveWealthAccount:
         entity = DriveWealthAccount()
-        entity.ref_id = data["id"]
         entity.drivewealth_user_id = drivewealth_user_id
-        entity.status = data["status"]['name']
-        entity.ref_no = data["accountNo"]
-        entity.nickname = data["nickname"]
-        entity.cash_available_for_trade = data["bod"].get(
-            "cashAvailableForTrading", 0)
-        entity.cash_available_for_withdrawal = data["bod"].get(
-            "cashAvailableForWithdrawal", 0)
-        entity.cash_balance = data["bod"].get("cashBalance", 0)
-        entity.data = json.dumps(data)
+        entity.set_from_response(data)
 
         self.persist(entity)
 

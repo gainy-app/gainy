@@ -1,10 +1,6 @@
 from trading import TradingRepository, TradingService
+from trading.drivewealth import DriveWealthProvider
 from trading.drivewealth.models import DriveWealthPortfolioStatusFundHolding
-from trading.drivewealth.provider.collection import DriveWealthProviderCollection
-
-
-def mock_noop(*args, **kwargs):
-    pass
 
 
 def test_get_actual_collection_holdings(monkeypatch):
@@ -29,7 +25,7 @@ def test_get_actual_collection_holdings(monkeypatch):
         assert _collection_id == collection_id
         return drivewealth_holdings
 
-    drivewealth_provider = DriveWealthProviderCollection(None, None)
+    drivewealth_provider = DriveWealthProvider(None, None, None)
     monkeypatch.setattr(drivewealth_provider, "get_actual_collection_holdings",
                         mock_get_actual_collection_holdings)
 
