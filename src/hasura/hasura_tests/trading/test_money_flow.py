@@ -7,7 +7,7 @@ profile_user_id = PROFILES[1]['user_id']
 
 def test_deposit():
     data = make_graphql_request(
-        load_query('money_flow', 'TradingDepositFunds'), {
+        load_query('trading/queries/money_flow', 'TradingDepositFunds'), {
             "profile_id": profile_id,
             "trading_account_id": 1,
             "amount": 10000,

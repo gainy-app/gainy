@@ -345,7 +345,6 @@ custom_types:
     - name: CreatePlaidLinkTokenOutput
     - name: PlaidWebhookOutput
     - name: StripeGetCheckoutUrl
-    - name: StripeWebhookOutput
     - name: UpdatePurchasesOutput
     - name: Promocode
     - name: SetRecommendationSettingsOutput

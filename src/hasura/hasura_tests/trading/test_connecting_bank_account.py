@@ -1,5 +1,5 @@
-from hasura_tests.common import make_graphql_request, db_connect
-from hasura_tests.trading.common import fill_kyc_form, kyc_send_form, load_query, PROFILES
+from hasura_tests.common import make_graphql_request, db_connect, load_query
+from hasura_tests.trading.common import fill_kyc_form, kyc_send_form, PROFILES
 
 profile_id = PROFILES[0]['id']
 profile_user_id = PROFILES[0]['user_id']
@@ -7,12 +7,13 @@ profile_user_id = PROFILES[0]['user_id']
 
 def test_create_plaid_link_token():
     data = make_graphql_request(
-        load_query('connecting_bank_account', 'CreatePlaidLinkToken'), {
-            "profile_id": profile_id,
-            "redirect_uri": "https://app.gainy.application.ios",
-            "env": "sandbox",
-            "purpose": "trading",
-        }, profile_user_id)['data']['create_plaid_link_token']
+        load_query('trading/queries/connecting_bank_account',
+                   'CreatePlaidLinkToken'), {
+                       "profile_id": profile_id,
+                       "redirect_uri": "https://app.gainy.application.ios",
+                       "env": "sandbox",
+                       "purpose": "trading",
+                   }, profile_user_id)['data']['create_plaid_link_token']
 
     assert "link_token" in data
     assert data["link_token"] is not None
@@ -42,12 +43,14 @@ def test_full_flow():
             access_token_id = cursor.fetchone()[0]
 
     data = make_graphql_request(
-        load_query('connecting_bank_account', 'LinkBankAccountWithPlaid'), {
-            "profile_id": profile_id,
-            "account_id": account_id,
-            "account_name": "test",
-            "access_token_id": access_token_id,
-        }, profile_user_id)['data']['trading_link_bank_account_with_plaid']
+        load_query('trading/queries/connecting_bank_account',
+                   'LinkBankAccountWithPlaid'), {
+                       "profile_id": profile_id,
+                       "account_id": account_id,
+                       "account_name": "test",
+                       "access_token_id": access_token_id,
+                   },
+        profile_user_id)['data']['trading_link_bank_account_with_plaid']
 
     assert "funding_account" in data
     assert data["funding_account"] is not None
@@ -55,7 +58,7 @@ def test_full_flow():
     funding_account_id = data["funding_account"]["id"]
 
     data = make_graphql_request(
-        load_query('connecting_bank_account',
+        load_query('trading/queries/connecting_bank_account',
                    'GetFundingAccountsWithUpdatedBalance'), {
                        "profile_id": profile_id,
                    }, profile_user_id)['data']['trading_get_funding_accounts']
@@ -64,10 +67,12 @@ def test_full_flow():
     assert funding_account_id in funding_account_ids
 
     data = make_graphql_request(
-        load_query('connecting_bank_account', 'DeleteFundingAccount'), {
-            "profile_id": profile_id,
-            "funding_account_id": funding_account_id,
-        }, profile_user_id)['data']['trading_delete_funding_account']
+        load_query('trading/queries/connecting_bank_account',
+                   'DeleteFundingAccount'), {
+                       "profile_id": profile_id,
+                       "funding_account_id": funding_account_id,
+                   },
+        profile_user_id)['data']['trading_delete_funding_account']
 
     assert "ok" in data
     assert data["ok"]

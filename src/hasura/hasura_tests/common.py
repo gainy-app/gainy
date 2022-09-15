@@ -1,5 +1,7 @@
 import os
 import re
+from functools import lru_cache
+
 import requests
 import json
 import logging
@@ -106,6 +108,14 @@ def permute_params(full_options_dict):
         for j in test_set:
             d.update(j)
         yield d
+
+
+@lru_cache(maxsize=None)
+def load_query(directory, query_name):
+    query_file = os.path.join(os.path.dirname(__file__), directory,
+                              query_name + '.graphql')
+    with open(query_file, 'r') as f:
+        return f.read()
 
 
 def db_connect():

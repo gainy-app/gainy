@@ -107,7 +107,7 @@ class StripeWebhook(HasuraAction):
         else:
             raise Exception("Unsupported event %s", event.type)
 
-        return {"success": True}
+        return {"ok": True}
 
     def _handle_payment_intent_succeeded(self,
                                          context_container: ContextContainer,

@@ -214,7 +214,7 @@ type Mutation {
     pending_webhooks: Int
     request: jsonb
     type: String
-  ): StripeWebhookOutput
+  ): OkOutput
 }
 
 type Mutation {
@@ -427,10 +427,6 @@ type PlaidWebhookOutput {
 
 type StripeGetCheckoutUrl {
   url: String!
-}
-
-type StripeWebhookOutput {
-  success: Boolean!
 }
 
 type UpdatePurchasesOutput {
