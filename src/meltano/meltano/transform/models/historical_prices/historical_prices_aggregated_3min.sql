@@ -17,10 +17,17 @@
 -- Execution Time: 100765.485 ms
 with
 {% if is_incremental() and var('realtime') %}
-     max_date as
+     max_date as  materialized
          (
-             select max(datetime) as datetime
+             select symbol, max(datetime) as datetime
              from {{ this }}
+             group by symbol
+         ),
+     latest_known_prices as
+         (
+             select symbol, adjusted_close
+             from max_date
+             join {{ this }} using (symbol, datetime)
          ),
 {% endif %}
      latest_open_trading_session as
@@ -38,7 +45,7 @@ with
              from {{ ref('week_trading_sessions') }}
                       join generate_series(open_at, least(now(), close_at - interval '1 second'), interval '{{ minutes }} minutes') dd on true
 {% if is_incremental() and var('realtime') %}
-                      join max_date on true
+                      join max_date using (symbol)
 {% endif %}
              where index = 0
 {% if is_incremental() and var('realtime') %}
@@ -52,7 +59,7 @@ with
              from {{ ref('historical_intraday_prices') }}
                       join latest_open_trading_session using (symbol)
 {% if is_incremental() and var('realtime') %}
-                      join max_date on true
+                      join max_date using (symbol)
 {% endif %}
              where historical_intraday_prices.time_{{ minutes }}min >= latest_open_trading_session.open_at - interval '1 hour' and historical_intraday_prices.time_{{ minutes }}min < latest_open_trading_session.close_at
 {% if is_incremental() and var('realtime') %}
@@ -130,18 +137,23 @@ select t2.symbol || '_' || t2.datetime                               as id,
 {% if is_incremental() %}
        coalesce(t2.open,
                 old_data.open,
+                latest_known_prices.adjusted_close,
                 historical_prices_marked.price_0d)::double precision as open,
        coalesce(t2.high,
                 old_data.high,
+                latest_known_prices.adjusted_close,
                 historical_prices_marked.price_0d)::double precision as high,
        coalesce(t2.low,
                 old_data.low,
+                latest_known_prices.adjusted_close,
                 historical_prices_marked.price_0d)::double precision as low,
        coalesce(t2.close,
                 old_data.close,
+                latest_known_prices.adjusted_close,
                 historical_prices_marked.price_0d)::double precision as close,
        coalesce(t2.adjusted_close,
                 old_data.adjusted_close,
+                latest_known_prices.adjusted_close,
                 historical_prices_marked.price_0d)::double precision as adjusted_close,
        coalesce(t2.volume, old_data.volume, 0)                       as volume,
        coalesce(t2.updated_at, old_data.updated_at)                  as updated_at
@@ -196,6 +208,7 @@ from (
      ) t2
          left join {{ ref('historical_prices_marked') }} using (symbol)
 {% if is_incremental() %}
+         left join latest_known_prices using (symbol)
          left join {{ this }} old_data using (symbol, datetime)
 where (old_data.symbol is null -- no old data
    or (t2.updated_at is not null and old_data.updated_at is null) -- old data is null and new is not
