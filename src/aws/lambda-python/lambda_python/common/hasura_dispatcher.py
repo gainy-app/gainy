@@ -1,10 +1,6 @@
 import json
-import traceback
 from abc import ABC, abstractmethod
 from typing import List
-import psycopg2
-from psycopg2 import sql
-from gainy.utils import db_connect
 from common.context_container import ContextContainer
 from common.hasura_exception import HasuraActionException
 from common.hasura_function import HasuraAction, HasuraTrigger
@@ -23,13 +19,11 @@ class HasuraDispatcher(ABC):
     def handle(self, event, context=None):
         headers = event['headers'] if 'headers' in event else {}
         request = self.extract_request(event)
-        context_container = ContextContainer()
-        context_container.request = request
-        context_container.headers = headers
 
-        with db_connect() as db_conn:
+        with ContextContainer() as context_container:
+            context_container.request = request
+            context_container.headers = headers
             try:
-                context_container.db_conn = db_conn
                 response = self.apply(context_container)
 
                 return self.format_response(200, response)

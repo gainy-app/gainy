@@ -1,23 +1,24 @@
 import base64
 import io
 
-from trading.drivewealth.provider.base import DriveWealthProviderBase
-from trading.models import ProfileKycStatus, KycDocument, TradingAccount
-from trading.drivewealth.models import DriveWealthAccount, DriveWealthUser
+from gainy.trading.models import TradingAccount
+from trading.models import ProfileKycStatus, KycDocument
 from trading.drivewealth.api import DriveWealthApi
 from trading.drivewealth.repository import DriveWealthRepository
+from trading.drivewealth.provider.base import DriveWealthProviderBase
 from gainy.utils import get_logger
+from gainy.trading.drivewealth.models import DriveWealthAccount, DriveWealthUser
 
 logger = get_logger(__name__)
 
 
 class DriveWealthProviderKYC(DriveWealthProviderBase):
-    drivewealth_repository: DriveWealthRepository = None
+    repository: DriveWealthRepository = None
     api: DriveWealthApi = None
 
-    def __init__(self, drivewealth_repository: DriveWealthRepository,
+    def __init__(self, repository: DriveWealthRepository,
                  api: DriveWealthApi):
-        self.drivewealth_repository = drivewealth_repository
+        self.repository = repository
         self.api = api
 
     def kyc_send_form(self, kyc_form: dict) -> ProfileKycStatus:
@@ -25,7 +26,7 @@ class DriveWealthProviderKYC(DriveWealthProviderBase):
         documents = self._kyc_form_to_documents(kyc_form)
 
         # create or update user
-        repository = self.drivewealth_repository
+        repository = self.repository
         user = repository.get_user(profile_id)
         if user is None:
             user_data = self.api.create_user(documents)
@@ -43,7 +44,7 @@ class DriveWealthProviderKYC(DriveWealthProviderBase):
         return self.api.get_kyc_status(user_ref_id).get_profile_kyc_status()
 
     def kyc_get_status(self, profile_id: int) -> ProfileKycStatus:
-        repository = self.drivewealth_repository
+        repository = self.repository
         user = self._get_user(profile_id)
         user_ref_id = user.ref_id
 
@@ -65,7 +66,7 @@ class DriveWealthProviderKYC(DriveWealthProviderBase):
 
         file_data = f"data:{document.content_type};base64,{file_base64}"
 
-        repository = self.drivewealth_repository
+        repository = self.repository
         user = self._get_user(profile_id)
 
         data = self.api.upload_document(user.ref_id, document, file_data)
@@ -200,7 +201,7 @@ class DriveWealthProviderKYC(DriveWealthProviderBase):
         ]
 
     def _create_account(self, user: DriveWealthUser):
-        repository = self.drivewealth_repository
+        repository = self.repository
 
         account_data = self.api.create_account(user.ref_id)
         account = repository.upsert_user_account(user.ref_id, account_data)

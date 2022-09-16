@@ -7,18 +7,20 @@ from portfolio.plaid import PlaidService
 from portfolio.plaid.common import handle_error
 from services import S3
 from portfolio.plaid.models import PlaidAccessToken
-from trading.models import KycDocument, FundingAccount, TradingAccount, TradingMoneyFlow, TradingCollectionVersion, \
+from trading.models import KycDocument, FundingAccount, TradingMoneyFlow, TradingCollectionVersion, \
     CollectionHoldingStatus, ProfileKycStatus
-from trading.drivewealth import DriveWealthProvider
+from trading.drivewealth.provider import DriveWealthProvider
 from trading.repository import TradingRepository
 
 import plaid
 from gainy.utils import get_logger
+from gainy.trading.models import TradingAccount
+from gainy.trading import TradingService as GainyTradingService
 
 logger = get_logger(__name__)
 
 
-class TradingService:
+class TradingService(GainyTradingService):
 
     def __init__(self, db_conn, trading_repository: TradingRepository,
                  drivewealth_provider: DriveWealthProvider,
@@ -189,6 +191,3 @@ class TradingService:
 
     def debug_delete_data(self, profile_id):
         self._get_provider_service().debug_delete_data(profile_id)
-
-    def _get_provider_service(self):
-        return self.drivewealth_provider

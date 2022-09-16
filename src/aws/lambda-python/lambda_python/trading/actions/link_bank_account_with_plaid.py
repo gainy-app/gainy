@@ -1,11 +1,8 @@
 from portfolio.plaid.common import PURPOSE_TRADING
 from common.context_container import ContextContainer
-from common.exceptions import ApiException, NotFoundException
-from common.hasura_exception import HasuraActionException
+from common.exceptions import NotFoundException
 from common.hasura_function import HasuraAction
-from trading import TradingService
 from portfolio.plaid.models import PlaidAccessToken
-from psycopg2.extras import RealDictCursor
 from gainy.utils import get_logger
 
 logger = get_logger(__name__)

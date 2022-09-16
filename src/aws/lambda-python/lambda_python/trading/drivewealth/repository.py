@@ -1,16 +1,14 @@
 import json
-from typing import Any, Iterable, Dict, List, Optional
-from trading.drivewealth.models import DriveWealthAccount, DriveWealthDocument, DriveWealthUser, DriveWealthBankAccount, \
-    DriveWealthFund, DriveWealthPortfolio, DriveWealthAuthToken, DriveWealthDeposit
-from psycopg2.extras import RealDictCursor
-from psycopg2 import sql
-from gainy.data_access.repository import Repository
+from typing import List, Optional
+from trading.drivewealth.models import DriveWealthDocument, DriveWealthFund, DriveWealthPortfolio
+from gainy.trading.drivewealth import DriveWealthRepository as GainyDriveWealthRepository
+from gainy.trading.drivewealth.models import DriveWealthAccount, DriveWealthUser
 from gainy.utils import get_logger
 
 logger = get_logger(__name__)
 
 
-class DriveWealthRepository(Repository):
+class DriveWealthRepository(GainyDriveWealthRepository):
 
     def get_user(self, profile_id) -> DriveWealthUser:
         return self.find_one(DriveWealthUser, {"profile_id": profile_id})
@@ -23,6 +21,8 @@ class DriveWealthRepository(Repository):
         entity.data = json.dumps(data)
 
         self.persist(entity)
+
+        print('PERSIST', entity)
         return entity
 
     def get_user_accounts(self,
@@ -68,6 +68,3 @@ class DriveWealthRepository(Repository):
         self.persist(entity)
 
         return entity
-
-    def get_latest_auth_token(self):
-        return self.find_one(DriveWealthAuthToken, None, [("version", "desc")])

@@ -4,22 +4,22 @@ from typing import Dict, Any, List, Optional
 from trading.drivewealth.provider.base import DriveWealthProviderBase
 from trading.exceptions import InsufficientFundsException
 from trading.models import TradingCollectionVersion
-from trading.drivewealth.models import DriveWealthAccount, DriveWealthFund, DriveWealthPortfolio, \
-    DriveWealthPortfolioStatus, DriveWealthAutopilotRun, PRECISION, DriveWealthPortfolioStatusFundHolding
+from trading.drivewealth.models import DriveWealthFund, DriveWealthPortfolio, DriveWealthPortfolioStatus, DriveWealthAutopilotRun, PRECISION, DriveWealthPortfolioStatusFundHolding
 from trading.drivewealth.api import DriveWealthApi
 from trading.drivewealth.repository import DriveWealthRepository
 from gainy.utils import get_logger
+from gainy.trading.drivewealth.models import DriveWealthAccount
 
 logger = get_logger(__name__)
 
 
 class DriveWealthProviderCollection(DriveWealthProviderBase):
-    drivewealth_repository: DriveWealthRepository = None
+    repository: DriveWealthRepository = None
     api: DriveWealthApi = None
 
-    def __init__(self, drivewealth_repository: DriveWealthRepository,
+    def __init__(self, repository: DriveWealthRepository,
                  api: DriveWealthApi):
-        self.drivewealth_repository = drivewealth_repository
+        self.repository = repository
         self.api = api
 
     def reconfigure_collection_holdings(
@@ -49,7 +49,7 @@ class DriveWealthProviderCollection(DriveWealthProviderBase):
     def _get_fund_actual_holdings_status(
             self, fund: DriveWealthFund
     ) -> List[DriveWealthPortfolioStatusFundHolding]:
-        repository = self.drivewealth_repository
+        repository = self.repository
         portfolio = repository.get_profile_portfolio(fund.profile_id)
         if not portfolio:
             return []
@@ -67,11 +67,11 @@ class DriveWealthProviderCollection(DriveWealthProviderBase):
         entity.set_from_response(data)
         entity.account_id = account.ref_id
         entity.collection_version_id = collection_version_id
-        self.drivewealth_repository.persist(entity)
+        self.repository.persist(entity)
         return entity
 
     def _upsert_portfolio(self, profile_id, account: DriveWealthAccount):
-        repository = self.drivewealth_repository
+        repository = self.repository
         portfolio = repository.get_profile_portfolio(profile_id)
 
         if not portfolio:
@@ -97,7 +97,7 @@ class DriveWealthProviderCollection(DriveWealthProviderBase):
             collection_version: TradingCollectionVersion) -> DriveWealthFund:
         collection_id = collection_version.collection_id
         weights = collection_version.weights
-        repository = self.drivewealth_repository
+        repository = self.repository
 
         fund = self._get_fund(profile_id, collection_id)
         new_fund_holdings = self._generate_new_fund_holdings(weights, fund)
@@ -129,7 +129,7 @@ class DriveWealthProviderCollection(DriveWealthProviderBase):
 
     def _get_fund(self, profile_id: int,
                   collection_id: int) -> Optional[DriveWealthFund]:
-        repository = self.drivewealth_repository
+        repository = self.repository
         fund = repository.get_profile_fund(profile_id, collection_id)
 
         if not fund:
@@ -195,12 +195,12 @@ class DriveWealthProviderCollection(DriveWealthProviderBase):
 
         portfolio.move_cash_to_fund(chosen_fund, weight_delta)
         portfolio.normalize_weights()
-        self.drivewealth_repository.persist(portfolio)
+        self.repository.persist(portfolio)
         logging_extra["portfolio"] = portfolio.to_dict()
         logger.info('_handle_cash_amount_change step2', extra=logging_extra)
 
     def _on_money_transfer(self, profile_id):
-        repository = self.drivewealth_repository
+        repository = self.repository
         portfolio = repository.get_profile_portfolio(profile_id)
         if not portfolio:
             return
@@ -213,8 +213,8 @@ class DriveWealthProviderCollection(DriveWealthProviderBase):
         data = self.api.get_portfolio_status(portfolio)
         portfolio_status = DriveWealthPortfolioStatus()
         portfolio_status.set_from_response(data)
-        self.drivewealth_repository.persist(portfolio_status)
+        self.repository.persist(portfolio_status)
         return portfolio_status
 
     def _get_trading_account(self, user_ref_id):
-        return self.drivewealth_repository.get_user_accounts(user_ref_id)[0]
+        return self.repository.get_user_accounts(user_ref_id)[0]

@@ -1,5 +1,6 @@
-from trading import TradingRepository, TradingService
-from trading.drivewealth import DriveWealthProvider
+from trading.service import TradingService
+from trading.repository import TradingRepository
+from trading.drivewealth.provider import DriveWealthProvider
 from trading.drivewealth.models import DriveWealthPortfolioStatusFundHolding
 
 

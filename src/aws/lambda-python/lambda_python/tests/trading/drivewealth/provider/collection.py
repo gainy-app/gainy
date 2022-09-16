@@ -2,13 +2,15 @@ from decimal import Decimal
 
 import pytest
 
-from tests.repository_mocks import mock_noop
+from gainy.tests.mocks.repository_mocks import mock_noop
 from trading.exceptions import InsufficientFundsException
 from trading.drivewealth.api import DriveWealthApi
-from trading.drivewealth.models import DriveWealthPortfolio, DriveWealthFund, DriveWealthUser, DriveWealthAccount
 from trading.drivewealth.repository import DriveWealthRepository
+from trading.drivewealth.models import DriveWealthPortfolio, DriveWealthFund
 from trading.drivewealth.provider.collection import DriveWealthProviderCollection
 from trading.models import TradingCollectionVersion
+
+from gainy.trading.drivewealth.models import DriveWealthUser, DriveWealthAccount
 
 _USER_ID = "41dde78c-e31b-43e5-9418-44ae08098738"
 

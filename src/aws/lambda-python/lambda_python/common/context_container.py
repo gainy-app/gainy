@@ -1,4 +1,4 @@
-from functools import cached_property, cache
+from functools import cached_property
 
 from _stripe.api import StripeApi
 from portfolio.plaid.service import PlaidService
@@ -6,25 +6,16 @@ from portfolio.service import PortfolioService
 from portfolio.service.chart import PortfolioChartService
 from portfolio.repository import PortfolioRepository
 from _stripe.repository import StripeRepository
-from trading import TradingService, TradingRepository
+from trading.service import TradingService
+from trading.repository import TradingRepository
 from trading.drivewealth.api import DriveWealthApi
 from trading.drivewealth.provider import DriveWealthProvider
 from trading.drivewealth.repository import DriveWealthRepository
 
-from gainy.recommendation.repository import RecommendationRepository
-from gainy.data_access.repository import Repository
+from gainy.context_container import ContextContainer as GainyContextContainer
 
 
-class ContextContainer():
-    db_conn = None
-
-    @cache
-    def get_repository(self, cls=None):
-        if cls:
-            raise Exception('get_repository for a class is not supported')
-
-        return Repository(self.db_conn)
-
+class ContextContainer(GainyContextContainer):
     @cached_property
     def stripe_repository(self) -> StripeRepository:
         return StripeRepository(self.db_conn)
@@ -32,10 +23,6 @@ class ContextContainer():
     @cached_property
     def stripe_api(self) -> StripeApi:
         return StripeApi()
-
-    @cached_property
-    def recommendation_repository(self) -> RecommendationRepository:
-        return RecommendationRepository(self.db_conn)
 
     ## portfolio
     @cached_property
