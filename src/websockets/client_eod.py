@@ -220,36 +220,7 @@ class PricesListener(AbstractPriceListener):
                 await asyncio.sleep(60)
 
             try:
-                async for websocket in websockets.connect(url):
-                    self.websocket = websocket
-                    self.logger.info(
-                        f"connected to websocket '{self.endpoint}' for symbols: {','.join(symbols)}"
-                    )
-                    try:
-                        await websocket.send(
-                            json.dumps({
-                                "action": "subscribe",
-                                "symbols": ",".join(symbols)
-                            }))
-                        async for message in websocket:
-                            await self.handle_message(message)
-
-                    except websockets.ConnectionClosed as e:
-                        self.logger.warning(
-                            f"ConnectionClosed Error caught: {e}")
-
-                    finally:
-                        self.logger.info(f"Unsubscribing from {self.endpoint}")
-                        try:
-                            await websocket.send(
-                                json.dumps({
-                                    "action": "unsubscribe",
-                                    "symbols": ",".join(symbols)
-                                }))
-                        except Exception as e:
-                            self.logger.warning(
-                                "%s Error caught while unsubscribing: %s",
-                                type(e).__name__, str(e))
+                await self._connect_and_listen(url, symbols)
 
             except asyncio.CancelledError:
                 self.logger.debug(f"listen done for {self.endpoint}")
@@ -283,6 +254,36 @@ class PricesListener(AbstractPriceListener):
         if re.search(r'\.INDX$', symbol) is not None:
             return 'index'
         return 'us'
+
+    async def _connect_and_listen(self, url, symbols):
+        async with websockets.connect(url) as websocket:
+            self.logger.info(
+                f"connected to websocket '{self.endpoint}' for symbols: {','.join(symbols)}"
+            )
+            try:
+                await websocket.send(
+                    json.dumps({
+                        "action": "subscribe",
+                        "symbols": ",".join(symbols)
+                    }))
+                async for message in websocket:
+                    await self.handle_message(message)
+
+            except websockets.ConnectionClosed as e:
+                self.logger.warning(f"ConnectionClosed Error caught: {e}")
+
+            finally:
+                self.logger.info(f"Unsubscribing from {self.endpoint}")
+                try:
+                    await websocket.send(
+                        json.dumps({
+                            "action": "unsubscribe",
+                            "symbols": ",".join(symbols)
+                        }))
+                except Exception as e:
+                    self.logger.warning(
+                        "%s Error caught while unsubscribing: %s",
+                        type(e).__name__, str(e))
 
 
 if __name__ == "__main__":
