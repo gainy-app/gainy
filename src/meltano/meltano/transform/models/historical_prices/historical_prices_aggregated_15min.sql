@@ -16,7 +16,7 @@
 
 -- Execution Time: 157857.871 ms
 with
-{% if is_incremental() and var('realtime') %}
+{% if is_incremental() %}
      max_date as materialized
          (
              select symbol, max(datetime) as datetime
