@@ -282,7 +282,7 @@ class PricesListener(AbstractPriceListener):
                         "symbols": ",".join(symbols)
                     }))
 
-            except websockets.ConnectionClosedOk:
+            except websockets.exceptions.ConnectionClosedOk:
                 pass
 
             except Exception as e:
