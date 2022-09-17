@@ -20,7 +20,7 @@ SYMBOLS_LIMIT = int(os.getenv('SYMBOLS_LIMIT', len(MANDATORY_SYMBOLS)))
 class PricesListener(AbstractPriceListener):
 
     def __init__(self, instance_key, endpoint=None):
-        self._ping_interval = 10
+        self._ping_interval = 5
         self.no_messages_reconnect_timeout = 60
         self.endpoint = endpoint
 
@@ -281,6 +281,10 @@ class PricesListener(AbstractPriceListener):
                         "action": "unsubscribe",
                         "symbols": ",".join(symbols)
                     }))
+
+            except websockets.ConnectionClosedOk:
+                pass
+
             except Exception as e:
                 self.logger.warning("%s Error caught while unsubscribing: %s",
                                     type(e).__name__, str(e))
