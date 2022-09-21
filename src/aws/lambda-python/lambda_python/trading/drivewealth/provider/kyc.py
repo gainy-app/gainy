@@ -16,8 +16,7 @@ class DriveWealthProviderKYC(DriveWealthProviderBase):
     repository: DriveWealthRepository = None
     api: DriveWealthApi = None
 
-    def __init__(self, repository: DriveWealthRepository,
-                 api: DriveWealthApi):
+    def __init__(self, repository: DriveWealthRepository, api: DriveWealthApi):
         self.repository = repository
         self.api = api
 

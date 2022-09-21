@@ -24,13 +24,12 @@ logger = get_logger(__name__)
 IS_UAT = os.getenv("DRIVEWEALTH_IS_UAT", "true") != "false"
 
 
-class DriveWealthProvider(GainyDriveWealthProvider,
-                          DriveWealthProviderKYC,
+class DriveWealthProvider(GainyDriveWealthProvider, DriveWealthProviderKYC,
                           DriveWealthProviderCollection,
                           DriveWealthProviderBase):
 
-    def __init__(self, repository: DriveWealthRepository,
-                 api: DriveWealthApi, plaid_service: PlaidService):
+    def __init__(self, repository: DriveWealthRepository, api: DriveWealthApi,
+                 plaid_service: PlaidService):
         self.repository = repository
         self.plaid_service = plaid_service
         self.api = api
