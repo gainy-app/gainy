@@ -112,7 +112,8 @@ class StripeWebhook(HasuraAction):
         repository = context_container.get_repository()
         payment_intent_id = data['id']
 
-        payment_intent = repository.find_one(StripePaymentIntent, {"ref_id": payment_intent_id})
+        payment_intent = repository.find_one(StripePaymentIntent,
+                                             {"ref_id": payment_intent_id})
         if not payment_intent:
             payment_intent = StripePaymentIntent()
         payment_intent.set_from_response(data)

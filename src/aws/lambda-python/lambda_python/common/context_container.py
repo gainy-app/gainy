@@ -15,6 +15,7 @@ from gainy.context_container import ContextContainer as GainyContextContainer
 
 
 class ContextContainer(GainyContextContainer):
+
     @cached_property
     def stripe_api(self) -> StripeApi:
         return StripeApi()

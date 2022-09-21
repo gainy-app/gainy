@@ -18,6 +18,7 @@ DRIVEWEALTH_RIA_PRODUCT_ID = os.getenv("DRIVEWEALTH_RIA_PRODUCT_ID")
 
 
 class DriveWealthApi(GainyDriveWealthApi):
+
     def __init__(self, repository: DriveWealthRepository):
         self.repository = repository
 

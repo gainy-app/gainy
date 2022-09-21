@@ -8,7 +8,6 @@ dag = create_dag(dag_id,
                  is_paused_upon_creation=True,
                  schedule_interval="30 12 1 * *")
 
-operator = BashOperator(
-    task_id="create-invoices",
-    bash_command="gainy_create_invoices",
-    dag=dag)
+operator = BashOperator(task_id="create-invoices",
+                        bash_command="gainy_create_invoices",
+                        dag=dag)

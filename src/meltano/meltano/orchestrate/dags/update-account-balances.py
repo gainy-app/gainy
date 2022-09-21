@@ -8,7 +8,6 @@ dag = create_dag(dag_id,
                  is_paused_upon_creation=True,
                  schedule_interval="15 20 * * *")
 
-operator = BashOperator(
-    task_id="update-account-balances",
-    bash_command="gainy_update_account_balances",
-    dag=dag)
+operator = BashOperator(task_id="update-account-balances",
+                        bash_command="gainy_update_account_balances",
+                        dag=dag)

@@ -17,8 +17,7 @@ class DriveWealthProviderCollection(GainyDriveWealthProviderBase):
     repository: DriveWealthRepository = None
     api: DriveWealthApi = None
 
-    def __init__(self, repository: DriveWealthRepository,
-                 api: DriveWealthApi):
+    def __init__(self, repository: DriveWealthRepository, api: DriveWealthApi):
         super().__init__(repository)
         self.api = api
 
