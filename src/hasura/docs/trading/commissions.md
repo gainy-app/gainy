@@ -1,30 +1,20 @@
 # Commissions
 https://stripe.com/docs/payments/save-and-reuse
+https://stripe.com/docs/payments/payment-intents/upgrade-to-handle-actions
 
 1. [Prepare payment sheet](#prepare-payment-sheet)
 2. [List payment methods](#list-payment-methods) 
 3. [Set active payment method](#set-active-payment-method)
 4. [Delete payment method](#delete-payment-method)
-5. Background job to create invoices
-   - TradingService.update_account_balance(trading_account)
-   - TradingService.calculate_commission(trading_account)
-   - BillingService.create_invoice(profile_id, amount, description)
-     - due date in future
-     - specify period and check there is no invoice for this period
-     - amount = commission * period days / 365
-6. Background job to pay invoices
-   - Get unpaid invoices, invoices with charge errors and changed payment methods 
-   - BillingService.create_payment(invoice)
-     - thread safe 
-     - PaymentService.charge(invoice)
-     - save result
+5. Background job to create invoices - [gainy_create_invoices](https://github.com/gainy-app/gainy-compute/gainy/billing/jobs/create_invoices.py)
+6. Background job to pay invoices - [gainy_charge_invoices](https://github.com/gainy-app/gainy-compute/gainy/billing/jobs/charge_invoices.py)
 7. Handle charging errors
+   - charge again 1-2-3 times in a day
+   - charge again when payment method is updated
    - send an email?
    - add notification?
    - stop trading?
 8. view commissions paid history
-
-Data used: payment_methods, invoices, invoice_payments
 
 
 ### Prepare payment sheet

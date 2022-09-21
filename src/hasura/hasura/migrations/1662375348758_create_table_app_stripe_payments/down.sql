@@ -1,1 +1,1 @@
-DROP TABLE "app"."stripe_payments";
+DROP TABLE "app"."stripe_payment_intents";

@@ -1,6 +1,7 @@
 CREATE TABLE "app"."stripe_payment_methods"
 (
     "ref_id"            varchar     NOT NULL,
+    "customer_ref_id"   varchar     NOT NULL,
     "payment_method_id" int unique,
     "name"              varchar not null,
     "data"              json,

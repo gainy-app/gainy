@@ -5,7 +5,6 @@ from portfolio.plaid.service import PlaidService
 from portfolio.service import PortfolioService
 from portfolio.service.chart import PortfolioChartService
 from portfolio.repository import PortfolioRepository
-from _stripe.repository import StripeRepository
 from trading.service import TradingService
 from trading.repository import TradingRepository
 from trading.drivewealth.api import DriveWealthApi
@@ -16,10 +15,6 @@ from gainy.context_container import ContextContainer as GainyContextContainer
 
 
 class ContextContainer(GainyContextContainer):
-    @cached_property
-    def stripe_repository(self) -> StripeRepository:
-        return StripeRepository(self.db_conn)
-
     @cached_property
     def stripe_api(self) -> StripeApi:
         return StripeApi()

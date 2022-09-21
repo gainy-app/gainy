@@ -1,24 +1,25 @@
 import base64
 import io
 
-from gainy.trading.models import TradingAccount
 from trading.models import ProfileKycStatus, KycDocument
 from trading.drivewealth.api import DriveWealthApi
 from trading.drivewealth.repository import DriveWealthRepository
-from trading.drivewealth.provider.base import DriveWealthProviderBase
-from gainy.utils import get_logger
+
+from gainy.trading.models import TradingAccount
 from gainy.trading.drivewealth.models import DriveWealthAccount, DriveWealthUser
+from gainy.trading.drivewealth.provider.base import DriveWealthProviderBase as GainyDriveWealthProviderBase
+from gainy.utils import get_logger
 
 logger = get_logger(__name__)
 
 
-class DriveWealthProviderKYC(DriveWealthProviderBase):
+class DriveWealthProviderKYC(GainyDriveWealthProviderBase):
     repository: DriveWealthRepository = None
     api: DriveWealthApi = None
 
     def __init__(self, repository: DriveWealthRepository,
                  api: DriveWealthApi):
-        self.repository = repository
+        super().__init__(repository)
         self.api = api
 
     def kyc_send_form(self, kyc_form: dict) -> ProfileKycStatus:
