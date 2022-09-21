@@ -1,1 +1,1 @@
-from trading.drivewealth.provider.provider import DriveWealthProvider
+from .provider import DriveWealthProvider
