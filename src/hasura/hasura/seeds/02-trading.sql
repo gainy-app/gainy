@@ -117,3 +117,4 @@ select row_number() over (),
        dd
 from generate_series(now() - interval '2 months', now(), interval '1 day') dd
 on conflict do nothing;
+select setval('app.drivewealth_accounts_positions_id_seq', (select max(id)+1 from app.drivewealth_accounts_positions), false);
