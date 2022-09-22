@@ -47,9 +47,11 @@ resource "aws_s3_bucket" "uploads_kyc" {
     Name = "Uploads KYC"
   }
 }
-resource "aws_s3_bucket_acl" "uploads_kyc" {
-  acl    = "private"
+resource "aws_s3_bucket_ownership_controls" "uploads_kyc" {
   bucket = aws_s3_bucket.uploads_kyc.bucket
+  rule {
+    object_ownership = "BucketOwnerEnforced"
+  }
 }
 resource "aws_s3_bucket_server_side_encryption_configuration" "uploads_kyc" {
   bucket = aws_s3_bucket.uploads_kyc.bucket
