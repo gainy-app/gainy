@@ -3,9 +3,9 @@ import json
 from _stripe.api import STRIPE_PUBLISHABLE_KEY
 from common.context_container import ContextContainer
 from common.hasura_function import HasuraAction
-from common.hasura_exception import HasuraActionException
 from gainy.billing.models import PaymentMethod, PaymentMethodProvider
 from gainy.billing.stripe.models import StripePaymentMethod, StripePaymentIntent
+from gainy.exceptions import HttpException
 from gainy.utils import get_logger
 from models import Profile
 
@@ -15,7 +15,7 @@ logger = get_logger(__name__)
 def handle_error(e):
     logger.exception('Stripe Error: %s' % (e))
 
-    raise HasuraActionException(400, "Stripe error: %s" % (e))
+    raise HttpException(400, "Stripe error: %s" % (e))
 
 
 class StripeGetCheckoutUrl(HasuraAction):

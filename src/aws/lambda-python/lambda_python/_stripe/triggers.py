@@ -1,6 +1,6 @@
 from common.context_container import ContextContainer
 from common.hasura_function import HasuraTrigger
-from common.hasura_exception import HasuraActionException
+from gainy.exceptions import HttpException
 from gainy.utils import get_logger
 
 logger = get_logger(__name__)
@@ -9,7 +9,7 @@ logger = get_logger(__name__)
 def handle_error(e):
     logger.exception('Stripe Error: %s' % (e))
 
-    raise HasuraActionException(400, "Stripe error: %s" % (e))
+    raise HttpException(400, "Stripe error: %s" % (e))
 
 
 class StripeDeletePaymentMethod(HasuraTrigger):
