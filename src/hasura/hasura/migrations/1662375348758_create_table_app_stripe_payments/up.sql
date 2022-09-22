@@ -5,7 +5,7 @@ CREATE TABLE "app"."stripe_payment_intents"
     "authentication_client_secret" varchar,
     "to_refund"                    bool,
     "is_refunded"                  bool,
-    "payment_intent_data"          json,
+    "data"                         json,
     "refund_data"                  json,
     "created_at"                   timestamptz NOT NULL DEFAULT now(),
     "updated_at"                   timestamptz NOT NULL DEFAULT now(),
