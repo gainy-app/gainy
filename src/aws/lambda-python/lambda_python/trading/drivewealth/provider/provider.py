@@ -5,7 +5,6 @@ from typing import List
 from common.exceptions import NotFoundException
 from portfolio.plaid import PlaidService
 from portfolio.plaid.models import PlaidAccessToken
-from trading.drivewealth.provider.base import DriveWealthProviderBase
 from trading.models import TradingMoneyFlow, FundingAccount, TradingCollectionVersion
 from trading.drivewealth.provider.collection import DriveWealthProviderCollection
 from trading.drivewealth.provider.kyc import DriveWealthProviderKYC
@@ -25,8 +24,7 @@ IS_UAT = os.getenv("DRIVEWEALTH_IS_UAT", "true") != "false"
 
 
 class DriveWealthProvider(GainyDriveWealthProvider, DriveWealthProviderKYC,
-                          DriveWealthProviderCollection,
-                          DriveWealthProviderBase):
+                          DriveWealthProviderCollection):
 
     def __init__(self, repository: DriveWealthRepository, api: DriveWealthApi,
                  plaid_service: PlaidService):
@@ -130,7 +128,7 @@ class DriveWealthProvider(GainyDriveWealthProvider, DriveWealthProviderKYC,
     def sync_data(self, profile_id):
         user = self._get_user(profile_id)
 
-        self.sync_trading_accounts(user)
+        self.sync_trading_accounts(profile_id)
         self._sync_autopilot_runs(user.ref_id)
         self._sync_bank_accounts(user.ref_id)
         self._sync_deposits(user.ref_id)

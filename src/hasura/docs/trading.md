@@ -81,8 +81,3 @@ mutation TradingDeleteData($profile_id: Int!) {
 
 1. Update `trading_collection_versions` status on `drivewealth_autopilot_run` execution
 2. Update `trading_money_flow` status on deposit / withdrawal execution
-
-## Questions
-
-KYC:
-- What's COMPLIANCE_AML_INFO

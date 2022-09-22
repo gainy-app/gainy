@@ -10,17 +10,17 @@ from stripe.api_resources.event import Event
 from stripe.api_resources.payment_method import PaymentMethod
 from stripe.api_resources.refund import Refund
 from stripe.api_resources.setup_intent import SetupIntent
+from gainy.billing.stripe.api import StripeApi as GainyStripeApi
 from gainy.utils import get_logger
 
 from models import Profile
 
 logger = get_logger(__name__)
 
-stripe.api_key = os.getenv('STRIPE_API_KEY')
 STRIPE_PUBLISHABLE_KEY = os.getenv('STRIPE_PUBLISHABLE_KEY')
 
 
-class StripeApi:
+class StripeApi(GainyStripeApi):
 
     def detach_payment_method(self, payment_method_id) -> PaymentMethod:
         return stripe.PaymentMethod.detach(payment_method_id)
@@ -64,6 +64,9 @@ class StripeApi:
             return customers[0]
 
         return None
+
+    def upsert_customer(self, profile: Profile):
+        return self.find_customer(profile) or self.create_customer(profile)
 
     def retrieve_event(self, event_id) -> Event:
         return stripe.Event.retrieve(event_id)

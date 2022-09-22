@@ -52,6 +52,9 @@
       webhook: '{{AWS_LAMBDA_API_GATEWAY_ENDPOINT}}/hasuraTrigger'
 - table:
     schema: app
+    name: invoices
+- table:
+    schema: app
     name: kyc_form
   object_relationships:
     - name: profile

@@ -1,12 +1,13 @@
 import json
 
-from _stripe.api import StripeApi, STRIPE_PUBLISHABLE_KEY
+from _stripe.api import STRIPE_PUBLISHABLE_KEY
 from common.context_container import ContextContainer
 from common.hasura_function import HasuraAction
 from common.hasura_exception import HasuraActionException
+from gainy.billing.models import PaymentMethod, PaymentMethodProvider
+from gainy.billing.stripe.models import StripePaymentMethod, StripePaymentIntent
 from gainy.utils import get_logger
-from models import Profile, PaymentMethod
-from _stripe.models import StripePaymentMethod
+from models import Profile
 
 logger = get_logger(__name__)
 
@@ -30,7 +31,7 @@ class StripeGetCheckoutUrl(HasuraAction):
         cancel_url = input_params["cancel_url"]
 
         api = context_container.stripe_api
-        repository = context_container.stripe_repository
+        repository = context_container.get_repository()
 
         try:
             checkout_session = api.create_checkout_session(
@@ -39,7 +40,10 @@ class StripeGetCheckoutUrl(HasuraAction):
             logger.info('Created Stripe session %s with payment intent %s' %
                         (checkout_session.id, payment_intent_id))
 
-            repository.add_payment_intent(payment_intent_id, to_refund)
+            payment_intent = StripePaymentIntent()
+            payment_intent.ref_id = payment_intent_id
+            payment_intent.to_refund = to_refund
+            repository.persist(payment_intent)
 
             return {'url': checkout_session.url}
         except Exception as e:
@@ -53,12 +57,12 @@ class StripeGetPaymentSheetData(HasuraAction):
 
     def apply(self, input_params, context_container: ContextContainer):
         api = context_container.stripe_api
-        repository = context_container.stripe_repository
+        repository = context_container.get_repository()
 
         profile_id = input_params["profile_id"]
         profile = repository.find_one(Profile, {"id": profile_id})
 
-        customer_id = self._get_customer_id(api, profile)
+        customer_id = api.upsert_customer(profile).id
 
         ephemeral_key = api.create_ephemeral_key(customer_id)
         setup_intent = api.create_setup_intent(customer_id)
@@ -69,14 +73,6 @@ class StripeGetPaymentSheetData(HasuraAction):
             "customer_id": customer_id,
             "publishable_key": STRIPE_PUBLISHABLE_KEY
         }
-
-    def _get_customer_id(self, api: StripeApi, profile: Profile):
-        customer = api.find_customer(profile)
-
-        if customer:
-            return customer.id
-
-        return api.create_customer(profile).id
 
 
 class StripeWebhook(HasuraAction):
@@ -113,22 +109,26 @@ class StripeWebhook(HasuraAction):
                                          context_container: ContextContainer,
                                          data):
         api = context_container.stripe_api
-        repository = context_container.stripe_repository
+        repository = context_container.get_repository()
         payment_intent_id = data['id']
 
-        repository.update_payment_intent(
-            payment_intent_id, {"payment_intent_data": json.dumps(data)})
+        payment_intent = repository.find_one(StripePaymentIntent,
+                                             {"ref_id": payment_intent_id})
+        if not payment_intent:
+            payment_intent = StripePaymentIntent()
+        payment_intent.set_from_response(data)
+        repository.persist(payment_intent)
 
-        to_refund = repository.is_to_refund(payment_intent_id)
-        if not to_refund:
+        if not payment_intent.to_refund:
             return
 
         try:
             refund = api.create_refund(payment_intent_id)
             logger.info('[STRIPE_WEBHOOK] refund %s', json.dumps(refund))
 
-            repository.update_payment_intent(
-                payment_intent_id, {"refund_data": json.dumps(refund)})
+            payment_intent.is_refunded = True
+            payment_intent.refund_data = refund
+            repository.persist(payment_intent)
         except Exception as e:
             logger.info('[STRIPE_WEBHOOK] error while refund %s', e)
             handle_error(e)
@@ -136,14 +136,13 @@ class StripeWebhook(HasuraAction):
     def _upsert_payment_method(self, context_container: ContextContainer,
                                data):
         api = context_container.stripe_api
-        repository = context_container.stripe_repository
+        repository = context_container.get_repository()
 
         stripe_payment_method = repository.find_one(StripePaymentMethod,
                                                     {"ref_id": data["id"]})
         if not stripe_payment_method:
             stripe_payment_method = StripePaymentMethod()
-
-        stripe_payment_method.update(data)
+        stripe_payment_method.set_from_response(data)
         repository.persist(stripe_payment_method)
 
         if not stripe_payment_method.payment_method_id:
@@ -154,6 +153,7 @@ class StripeWebhook(HasuraAction):
             profile_id = customer.metadata["profile_id"]
 
             payment_method = PaymentMethod()
+            payment_method.provider = PaymentMethodProvider.STRIPE
             payment_method.profile_id = profile_id
             payment_method.name = stripe_payment_method.name
             repository.persist(payment_method)
@@ -162,7 +162,7 @@ class StripeWebhook(HasuraAction):
 
     def _delete_payment_method(self, context_container: ContextContainer,
                                data):
-        repository = context_container.stripe_repository
+        repository = context_container.get_repository()
 
         stripe_payment_method = repository.find_one(StripePaymentMethod,
                                                     {"ref_id": data["id"]})

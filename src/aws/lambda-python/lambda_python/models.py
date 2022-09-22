@@ -1,5 +1,3 @@
-import datetime
-
 from gainy.data_access.models import BaseModel, classproperty
 
 
@@ -27,24 +25,3 @@ class Profile(BaseModel):
     @classproperty
     def table_name(self) -> str:
         return "profiles"
-
-
-class PaymentMethod(BaseModel):
-    id = None
-    profile_id: int = None
-    name: str = None
-    set_active_at: datetime.datetime = None
-    created_at = None
-
-    key_fields = ["id"]
-
-    db_excluded_fields = ["created_at"]
-    non_persistent_fields = ["id", "created_at"]
-
-    @classproperty
-    def schema_name(self) -> str:
-        return "app"
-
-    @classproperty
-    def table_name(self) -> str:
-        return "payment_methods"

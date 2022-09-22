@@ -10,9 +10,6 @@ logger = get_logger(__name__)
 
 class DriveWealthRepository(GainyDriveWealthRepository):
 
-    def get_user(self, profile_id) -> DriveWealthUser:
-        return self.find_one(DriveWealthUser, {"profile_id": profile_id})
-
     def upsert_user(self, profile_id, data) -> DriveWealthUser:
         entity = DriveWealthUser()
         entity.ref_id = data["id"]
@@ -22,7 +19,6 @@ class DriveWealthRepository(GainyDriveWealthRepository):
 
         self.persist(entity)
 
-        print('PERSIST', entity)
         return entity
 
     def get_user_accounts(self,

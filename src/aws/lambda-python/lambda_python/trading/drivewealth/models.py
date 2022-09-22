@@ -65,7 +65,7 @@ class DriveWealthBankAccount(BaseDriveWealthModel):
         self.bank_account_number = details['bankAccountNumber']
         self.bank_routing_number = details['bankRoutingNumber']
         self.bank_account_type = details.get('bankAccountType')
-        self.data = json.dumps(data)
+        self.data = data
 
         if "userDetails" in data:
             self.drivewealth_user_id = data["userDetails"]['userID']
@@ -265,8 +265,6 @@ class DriveWealthPortfolioStatus(BaseDriveWealthModel):
             **super().to_dict(),
             "holdings":
             json.dumps(holdings, cls=DecimalEncoder),
-            "data":
-            json.dumps(self.data, cls=DecimalEncoder),
         }
 
 
