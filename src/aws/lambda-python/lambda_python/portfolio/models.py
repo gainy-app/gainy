@@ -143,6 +143,7 @@ class Security(PortfolioBaseModel):
 
 
 class Account(PortfolioBaseModel):
+    id = None
     ref_id = None
     balance_available = None
     balance_current = None

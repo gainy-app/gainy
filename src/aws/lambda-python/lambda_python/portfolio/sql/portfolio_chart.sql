@@ -9,6 +9,7 @@ with latest_open_trading_session as
          (
              select distinct on (uniq_id, period, portfolio_transaction_chart.datetime)
                  portfolio_expanded_transactions.profile_id,
+                 portfolio_securities_normalized.type,
                  original_ticker_symbol,
                  quantity_norm_for_valuation,
                  period,
@@ -47,6 +48,7 @@ with latest_open_trading_session as
                     original_ticker_symbol,
                     period,
                     datetime,
+                    min(type)                         as type,
                     sum(quantity_norm_for_valuation)  as quantity,
                     count(uniq_id)                    as transaction_count,
                     sum(open)                         as open,
@@ -110,6 +112,22 @@ with latest_open_trading_session as
                     sum(value) as cash_value
              from raw_data
              group by profile_id
+         ),
+     raw_chart as materialized
+         (
+             select profile_id,
+                     period,
+                     datetime,
+                     count(distinct type)   as types_cnt,
+                     sum(transaction_count) as transaction_count,
+                     sum(open)              as open,
+                     sum(high)              as high,
+                     sum(low)               as low,
+                     sum(close)             as close,
+                     sum(adjusted_close)    as adjusted_close,
+                     sum(cash_adjustment)   as cash_adjustment
+              from ticker_chart_with_cash_adjustment
+              group by profile_id, period, datetime
          )
 select period,
        datetime,
@@ -119,18 +137,9 @@ select period,
        (low + greatest(0, cash_adjustment + coalesce(cash_value, 0)))::double precision            as low,
        (close + greatest(0, cash_adjustment + coalesce(cash_value, 0)))::double precision          as close,
        (adjusted_close + greatest(0, cash_adjustment + coalesce(cash_value, 0)))::double precision as adjusted_close
-from (
-         select profile_id,
-                period,
-                datetime,
-                sum(transaction_count) as transaction_count,
-                sum(open)              as open,
-                sum(high)              as high,
-                sum(low)               as low,
-                sum(close)             as close,
-                sum(adjusted_close)    as adjusted_close,
-                sum(cash_adjustment)   as cash_adjustment
-         from ticker_chart_with_cash_adjustment
-         group by profile_id, period, datetime
-     ) t
+from raw_chart
+         join(select profile_id, period, max(types_cnt) as max_types_cnt
+              from raw_chart
+              group by profile_id, period) t using (profile_id, period)
          left join static_values using (profile_id)
+where types_cnt = max_types_cnt

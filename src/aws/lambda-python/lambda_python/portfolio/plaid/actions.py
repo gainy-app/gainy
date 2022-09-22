@@ -101,10 +101,14 @@ class PlaidWebhook(HasuraAction):
         self.client = PlaidClient()
 
     def apply(self, db_conn, input_params, headers):
-        logger.info("[PLAID_WEBHOOK] %s", input_params)
+        item_id = input_params['item_id']
+        logging_extra = {
+            'input_params': input_params,
+            'item_id': item_id,
+            'headers': headers,
+        }
 
         try:
-            item_id = input_params['item_id']
             with db_conn.cursor() as cursor:
                 cursor.execute(
                     "SELECT id, profile_id, access_token FROM app.profile_plaid_access_tokens WHERE item_id = %(item_id)s",
@@ -118,31 +122,39 @@ class PlaidWebhook(HasuraAction):
                 ]
 
             count = 0
-            if len(access_tokens):
-                try:
-                    self.verify(input_params, headers,
-                                access_tokens[0]['access_token'])
-                except Exception as e:
-                    logger.error('[PLAID_WEBHOOK] verify: %s', e)
+            if not len(access_tokens):
+                return {'count': count}
 
-                webhook_type = input_params['webhook_type']
-                for access_token in access_tokens:
-                    self.portfolio_service.sync_institution(
+            token = access_tokens[0]['access_token']
+            logging_extra['profile_id'] = access_tokens[0]['profile_id']
+
+            logger.info("[PLAID_WEBHOOK] invoke", extra=logging_extra)
+
+            try:
+                self.verify(input_params, headers, token)
+            except Exception as e:
+                logger.error('[PLAID_WEBHOOK] verify: %s',
+                             e,
+                             extra=logging_extra)
+
+            webhook_type = input_params['webhook_type']
+            for access_token in access_tokens:
+                self.portfolio_service.sync_institution(db_conn, access_token)
+                if webhook_type == 'HOLDINGS':
+                    count += self.portfolio_service.sync_token_holdings(
                         db_conn, access_token)
-                    if webhook_type == 'HOLDINGS':
-                        count += self.portfolio_service.sync_token_holdings(
-                            db_conn, access_token)
-                    elif webhook_type == 'INVESTMENTS_TRANSACTIONS':
-                        count += self.portfolio_service.sync_token_transactions(
-                            db_conn, access_token)
+                elif webhook_type == 'INVESTMENTS_TRANSACTIONS':
+                    count += self.portfolio_service.sync_token_transactions(
+                        db_conn, access_token)
 
             return {'count': count}
         except Exception as e:
-            logger.error("[PLAID_WEBHOOK] %s", e)
+            logger.error("[PLAID_WEBHOOK] %s", e, extra=logging_extra)
             raise e
 
     def verify(self, body, headers, access_token):
-        signed_jwt = headers.get('Plaid-Verification')
+        signed_jwt = headers.get('Plaid-Verification') or headers.get(
+            'plaid-verification')
         current_key_id = jwt.get_unverified_header(signed_jwt)['kid']
 
         response = self.client.webhook_verification_key_get(

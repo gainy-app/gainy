@@ -4,9 +4,8 @@ import json
 import os
 import datetime
 import re
-from abc import abstractmethod
 from decimal import Decimal
-from common import run, AbstractPriceListener, NO_MESSAGES_RECONNECT_TIMEOUT
+from common import run, AbstractPriceListener
 
 EOD_API_TOKEN = os.environ["EOD_API_TOKEN"]
 MANDATORY_SYMBOLS = [
@@ -21,6 +20,7 @@ SYMBOLS_LIMIT = int(os.getenv('SYMBOLS_LIMIT', len(MANDATORY_SYMBOLS)))
 class PricesListener(AbstractPriceListener):
 
     def __init__(self, instance_key, endpoint=None):
+        self._ping_interval = 5
         self.no_messages_reconnect_timeout = 60
         self.endpoint = endpoint
 
@@ -182,7 +182,7 @@ class PricesListener(AbstractPriceListener):
         except Exception as e:
             self.logger.error('handle_message %s: %s', e, message_raw)
 
-    def should_reconnect(self):
+    def should_reconnect(self, log_prefix=None):
         return super().should_reconnect(self.endpoint)
 
     async def sync(self):
@@ -216,48 +216,19 @@ class PricesListener(AbstractPriceListener):
             if first_attempt:
                 first_attempt = False
             else:
-                self.logger.info("sleeping before reconnecting to websocket")
+                self.logger.info(
+                    f"sleeping before reconnecting to {self.endpoint}")
                 await asyncio.sleep(60)
 
             try:
-                async for websocket in websockets.connect(url):
-                    self.websocket = websocket
-                    self.logger.info(
-                        f"connected to websocket '{self.endpoint}' for symbols: {','.join(symbols)}"
-                    )
-                    try:
-                        await websocket.send(
-                            json.dumps({
-                                "action": "subscribe",
-                                "symbols": ",".join(symbols)
-                            }))
-                        async for message in websocket:
-                            await self.handle_message(message)
-
-                    except websockets.ConnectionClosed as e:
-                        self.logger.warning(
-                            f"ConnectionClosed Error caught: {e}")
-
-                    finally:
-                        self.logger.info(f"Unsubscribing from {self.endpoint}")
-                        try:
-                            await websocket.send(
-                                json.dumps({
-                                    "action": "unsubscribe",
-                                    "symbols": ",".join(symbols)
-                                }))
-                        except Exception as e:
-                            self.logger.warning(
-                                "%s Error caught while unsubscribing: %s",
-                                type(e).__name__, str(e))
+                await self._connect_and_listen(url, symbols)
 
             except asyncio.CancelledError:
                 self.logger.debug(f"listen done for {self.endpoint}")
                 return
 
             except Exception as e:
-                self.logger.error("%s Error caught in start func: %s",
-                                  type(e).__name__, str(e))
+                self.logger.exception(e)
 
                 continue
 
@@ -271,7 +242,7 @@ class PricesListener(AbstractPriceListener):
 
     def rev_transform_symbol(self, symbol):
         if self.endpoint == 'crypto':
-            return re.sub(r'\-USD$', '.CC', symbol)
+            return re.sub(r'-USD$', '.CC', symbol)
         if self.endpoint == 'index':
             return symbol + '.INDX'
 
@@ -283,6 +254,40 @@ class PricesListener(AbstractPriceListener):
         if re.search(r'\.INDX$', symbol) is not None:
             return 'index'
         return 'us'
+
+    async def _connect_and_listen(self, url, symbols):
+        try:
+            async with websockets.connect(
+                    url, ping_interval=self._ping_interval) as websocket:
+                self.logger.info(
+                    f"connected to websocket '{self.endpoint}' for symbols: {','.join(symbols)}"
+                )
+                await websocket.send(
+                    json.dumps({
+                        "action": "subscribe",
+                        "symbols": ",".join(symbols)
+                    }))
+                async for message in websocket:
+                    await self.handle_message(message)
+
+        except (websockets.ConnectionClosed, asyncio.TimeoutError) as e:
+            self.logger.warning(e)
+
+        finally:
+            self.logger.info(f"Unsubscribing from {self.endpoint}")
+            try:
+                await websocket.send(
+                    json.dumps({
+                        "action": "unsubscribe",
+                        "symbols": ",".join(symbols)
+                    }))
+
+            except websockets.ConnectionClosed:
+                pass
+
+            except Exception as e:
+                self.logger.warning("%s Error caught while unsubscribing: %s",
+                                    type(e).__name__, str(e))
 
 
 if __name__ == "__main__":

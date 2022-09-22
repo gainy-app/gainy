@@ -122,10 +122,10 @@ class PortfolioService:
                 transactions_count += cur_tx_cnt
                 if cur_tx_cnt < count:
                     break
-        except AccessTokenApiException as e:
-            pass
         except AccessTokenLoginRequiredException as e:
             self._set_access_token_reauth(db_conn, e.access_token)
+        except AccessTokenApiException as e:
+            pass
 
         # cleanup
         self.portfolio_repository.remove_other_by_access_token(
@@ -184,7 +184,7 @@ class PortfolioService:
 
     def __get_service(self, name):
         if name not in self.services:
-            raise Error('Service %s not supported' % (name))
+            raise Exception('Service %s not supported' % (name))
 
         return self.services[name]
 
