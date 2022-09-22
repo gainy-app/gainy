@@ -40,6 +40,7 @@ variable "drivewealth_ria_product_id" {}
 variable "drivewealth_api_username" {}
 variable "drivewealth_api_password" {}
 variable "drivewealth_api_url" {}
+variable "drivewealth_sqs_arn" {}
 variable "s3_bucket_uploads_kyc" {}
 variable "aws_access_key" {}
 variable "aws_secret_key" {}
@@ -306,7 +307,7 @@ module "sqs_listener_integration" {
   aws_lambda_invoke_arn         = "${module.sqs_listener.arn}:${module.sqs_listener.version}"
 
   sqs_batch_size = 100
-  sqs_queue_arns = []
+  sqs_queue_arns = var.drivewealth_sqs_arn != "" ? [var.drivewealth_sqs_arn] : []
 }
 
 ##################################################################################

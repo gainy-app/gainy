@@ -75,6 +75,7 @@ module "lambda" {
   drivewealth_api_username   = var.drivewealth_api_username
   drivewealth_api_password   = var.drivewealth_api_password
   drivewealth_api_url        = var.drivewealth_api_url
+  drivewealth_sqs_arn        = var.drivewealth_sqs_arn
 
   redis_cache_host = module.elasticache.redis_cache_host
   redis_cache_port = module.elasticache.redis_cache_port
