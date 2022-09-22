@@ -2,7 +2,8 @@ import os
 import json
 import plaid
 from plaid.api import plaid_api
-from common.hasura_exception import HasuraActionException
+
+from gainy.exceptions import HttpException
 from gainy.utils import get_logger
 
 logger = get_logger(__name__)
@@ -48,6 +49,6 @@ def handle_error(e):
     logger.error('Plaid Error: %s' % (e.body))
     error = json.loads(e.body)
 
-    raise HasuraActionException(
+    raise HttpException(
         400, "Plaid error: %s" %
         (error['display_message'] or error['error_message']))

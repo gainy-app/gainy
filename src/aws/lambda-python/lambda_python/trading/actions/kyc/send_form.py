@@ -1,5 +1,5 @@
 from common.context_container import ContextContainer
-from common.exceptions import NotFoundException
+from gainy.exceptions import NotFoundException
 from common.hasura_function import HasuraAction
 from gainy.utils import get_logger
 

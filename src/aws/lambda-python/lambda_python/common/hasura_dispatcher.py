@@ -2,9 +2,9 @@ import json
 from abc import ABC, abstractmethod
 from typing import List
 from common.context_container import ContextContainer
-from common.hasura_exception import HasuraActionException
 from common.hasura_function import HasuraAction, HasuraTrigger
 from common.hasura_response import base_response
+from gainy.exceptions import HttpException
 from gainy.utils import get_logger
 
 logger = get_logger(__name__)
@@ -27,7 +27,7 @@ class HasuraDispatcher(ABC):
                 response = self.apply(context_container)
 
                 return self.format_response(200, response)
-            except HasuraActionException as he:
+            except HttpException as he:
                 logger.warning(f"{he.http_code} {he.message}. event: {event}")
 
                 return self.format_response(he.http_code, {
@@ -51,7 +51,7 @@ class HasuraDispatcher(ABC):
             filter(lambda function: function.is_applicable(function_name),
                    self.functions))
         if len(filtered_actions) != 1:
-            raise HasuraActionException(
+            raise HttpException(
                 400, f"`{function_name}` is not a valid action or trigger")
 
         return filtered_actions[0]
@@ -101,14 +101,14 @@ class HasuraDispatcher(ABC):
             session_profile_id = self.get_profile_id(db_conn,
                                                      session_variables)
         except Exception:
-            raise HasuraActionException(
+            raise HttpException(
                 401, f"Unauthorized access to profile `{allowed_profile_ids}`")
 
         if not isinstance(allowed_profile_ids, list):
             allowed_profile_ids = [allowed_profile_ids]
 
         if session_profile_id not in allowed_profile_ids:
-            raise HasuraActionException(
+            raise HttpException(
                 401, f"Unauthorized access to profile `{allowed_profile_ids}`")
 
 

@@ -2,7 +2,7 @@ from typing import Iterable, Dict, List
 from decimal import Decimal
 import io
 
-from common.exceptions import NotFoundException
+from gainy.exceptions import NotFoundException
 from portfolio.plaid import PlaidService
 from portfolio.plaid.common import handle_error
 from services import S3
