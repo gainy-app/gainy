@@ -4,7 +4,7 @@ CREATE TABLE "app"."payment_methods"
     "profile_id"    int         not null,
     "name"          varchar     not null,
     "provider"      varchar     not null,
-    "set_active_at" timestamp,
+    "set_active_at" timestamp   NOT NULL DEFAULT now(),
     "created_at"    timestamptz NOT NULL DEFAULT now(),
     "updated_at"    timestamptz NOT NULL DEFAULT now(),
     PRIMARY KEY ("id"),

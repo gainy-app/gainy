@@ -8,13 +8,13 @@ https://stripe.com/docs/payments/payment-intents/upgrade-to-handle-actions
 4. [Delete payment method](#delete-payment-method)
 5. Background job to create invoices - [gainy_create_invoices](https://github.com/gainy-app/gainy-compute/gainy/billing/jobs/create_invoices.py)
 6. Background job to pay invoices - [gainy_charge_invoices](https://github.com/gainy-app/gainy-compute/gainy/billing/jobs/charge_invoices.py)
-7. Handle charging errors
+7. [TODO] Handle charging errors
    - charge again 1-2-3 times in a day
    - charge again when payment method is updated
    - send an email?
    - add notification?
    - stop trading?
-8. view commissions paid history
+8. [TODO] view commissions paid history
 
 
 ### Prepare payment sheet

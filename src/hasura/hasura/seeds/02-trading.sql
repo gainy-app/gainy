@@ -92,6 +92,7 @@ insert into app.drivewealth_deposits(ref_id, trading_account_ref_id, bank_accoun
 values ('GYEK000001-1663061386789-DRGPY', 'bf98c335-57ad-4337-ae9f-ed1fcfb447af.1662377145557', 'bank_2101f3e4-ba8c-431e-bfae-aa8070a14fdd', 'Approved', 1, '{"id": "GYEK000001-1663061386789-DRGPY", "paymentID": "GYEK000001-1663061386789-DRGPY", "type": "INSTANT_FUNDING", "amount": 10000.0, "currency": {"name": "USD", "description": "US Dollar", "symbol": "$"}, "status": {"id": 14, "message": "Approved", "comment": "Valid Instant Funding deposit. Auto-move to Approved. Waiting on net settlement.", "updated": "2022-09-13T09:29:46.912Z"}, "accountDetails": {"accountID": "bf98c335-57ad-4337-ae9f-ed1fcfb447af.1662377145557", "accountNo": "GYEK000001", "accountType": {"name": "LIVE", "description": "Live Account"}, "accountManagementType": {"name": "RIA_MANAGED", "description": "Robo Advisor Managed Account"}}, "wlpFinTranTypeID": "50c2100a-2bf8-4a07-91eb-d0395ed15ca9", "timestamp": "2022-09-13T09:29:46.789Z"}')
 on conflict do nothing;
 
+-- Portfolio
 insert into app.trading_collection_versions (id, profile_id, collection_id, target_amount_delta, weights)
 values  (1, 2, 89, 100, '{"AAPL": "1"}')
 on conflict do nothing;
@@ -118,3 +119,13 @@ select row_number() over (),
 from generate_series(now() - interval '2 months', now(), interval '1 day') dd
 on conflict do nothing;
 select setval('app.drivewealth_accounts_positions_id_seq', (select max(id)+1 from app.drivewealth_accounts_positions), false);
+
+-- Commissions
+insert into app.payment_methods (id, profile_id, name, provider)
+values  (1, 2, 'card visa 4242', 'STRIPE')
+on conflict do nothing;
+ALTER SEQUENCE app.payment_methods_id_seq RESTART WITH 2;
+
+insert into app.stripe_payment_methods (ref_id, customer_ref_id, payment_method_id, name, data)
+values  ('pm_1LhEWuD1LH0kYxao7AOiSejL', 'cus_MQ4gYGmV5H4WcR', 1, 'card visa 4242', '{"id": "pm_1LhEWuD1LH0kYxao7AOiSejL", "object": "payment_method", "billing_details": {"address": {"city": null, "country": null, "line1": null, "line2": null, "postal_code": null, "state": null}, "email": null, "name": null, "phone": null}, "card": {"brand": "visa", "checks": {"address_line1_check": null, "address_postal_code_check": null, "cvc_check": null}, "country": "US", "exp_month": 9, "exp_year": 2023, "fingerprint": "4iC4R4MJWP7lXxKu", "funding": "credit", "generated_from": null, "last4": "4242", "networks": {"available": ["visa"], "preferred": null}, "three_d_secure_usage": {"supported": true}, "wallet": null}, "created": 1662996396, "customer": "cus_MQ4gYGmV5H4WcR", "livemode": false, "metadata": {}, "type": "card"}')
+on conflict do nothing;
