@@ -101,6 +101,41 @@ resource "aws_iam_role" "lambda_exec" {
   })
 }
 
+resource "aws_iam_policy" "kyc_uploads" {
+  name        = "s3_kyc_upload_${var.env}"
+  description = "S3 KYC uploads policy ${var.env}"
+
+  policy = jsonencode({
+    "Version" : "2012-10-17",
+    "Statement" : [
+      {
+        "Effect" : "Allow",
+        "Action" : [
+          "s3:PutObject",
+          "s3:GetObject"
+        ],
+        "Resource" : [
+          "arn:aws:s3:::${var.s3_bucket_uploads_kyc}/*"
+        ]
+      },
+      {
+        "Effect" : "Allow",
+        "Action" : [
+          "s3:GetBucketLocation"
+        ],
+        "Resource" : [
+          "arn:aws:s3:::${var.s3_bucket_uploads_kyc}"
+        ]
+      }
+    ]
+  })
+}
+
+resource "aws_iam_role_policy_attachment" "kyc_uploads" {
+  role       = aws_iam_role.lambda_exec.name
+  policy_arn = aws_iam_policy.kyc_uploads.arn
+}
+
 resource "aws_iam_role_policy_attachment" "lambda_policy" {
   role       = aws_iam_role.lambda_exec.name
   policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"

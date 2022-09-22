@@ -47,6 +47,18 @@ resource "aws_s3_bucket" "uploads_kyc" {
     Name = "Uploads KYC"
   }
 }
+resource "aws_s3_bucket_acl" "uploads_kyc" {
+  acl    = "private"
+  bucket = aws_s3_bucket.uploads_kyc.bucket
+}
+resource "aws_s3_bucket_server_side_encryption_configuration" "uploads_kyc" {
+  bucket = aws_s3_bucket.uploads_kyc.bucket
+  rule {
+    apply_server_side_encryption_by_default {
+      sse_algorithm = "aws:kms"
+    }
+  }
+}
 
 output "mlflow_artifact_bucket" {
   value = aws_s3_bucket.mlflow.bucket
