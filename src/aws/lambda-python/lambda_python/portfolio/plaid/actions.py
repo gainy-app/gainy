@@ -5,13 +5,14 @@ import time
 from jose import jwt
 
 import plaid
-from portfolio.plaid import PlaidClient, PlaidService
-from portfolio.service import PortfolioService, SERVICE_PLAID
+
+from gainy.exceptions import HttpException
+from portfolio.plaid import PlaidClient
+from portfolio.service import SERVICE_PLAID
 
 from portfolio.plaid.common import handle_error, PURPOSE_PORTFOLIO, PURPOSE_TRADING
 from common.context_container import ContextContainer
 from common.hasura_function import HasuraAction
-from common.hasura_exception import HasuraActionException
 from gainy.utils import get_logger
 
 logger = get_logger(__name__)
@@ -195,7 +196,7 @@ class PlaidWebhook(HasuraAction):
 
         key = response['key']
         if key['expired_at'] is not None:
-            raise HasuraActionException(
+            raise HttpException(
                 400,
                 "[PLAID_WEBHOOK] Failed to validate plaid request key: Key expired"
             )
@@ -204,14 +205,14 @@ class PlaidWebhook(HasuraAction):
         try:
             claims = jwt.decode(signed_jwt, key, algorithms=['ES256'])
         except jwt.JWTError as e:
-            raise HasuraActionException(
+            raise HttpException(
                 400,
                 "[PLAID_WEBHOOK] Failed to validate plaid request key: decode failed with: %s"
                 % (str(e)))
 
         # Ensure that the token is not expired.
         if claims["iat"] < time.time() - 5 * 60:
-            raise HasuraActionException(
+            raise HttpException(
                 400,
                 "[PLAID_WEBHOOK] Failed to validate plaid request key: claim expired"
             )
@@ -227,7 +228,7 @@ class PlaidWebhook(HasuraAction):
         # Ensure that the hash of the body matches the claim.
         # Use constant time comparison to prevent timing attacks.
         if not hmac.compare_digest(body_hash, claims['request_body_sha256']):
-            raise HasuraActionException(
+            raise HttpException(
                 400,
                 "[PLAID_WEBHOOK] Failed to validate plaid request key: body hash mismatch"
             )

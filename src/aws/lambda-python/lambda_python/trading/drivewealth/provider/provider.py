@@ -2,7 +2,7 @@ import os
 from decimal import Decimal
 from typing import List
 
-from common.exceptions import NotFoundException
+from gainy.exceptions import NotFoundException
 from portfolio.plaid import PlaidService
 from portfolio.plaid.models import PlaidAccessToken
 from trading.models import TradingMoneyFlow, FundingAccount, TradingCollectionVersion
