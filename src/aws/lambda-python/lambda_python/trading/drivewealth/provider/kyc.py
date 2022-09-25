@@ -34,6 +34,7 @@ class DriveWealthProviderKYC(GainyDriveWealthProviderBase):
             user_data = self.api.update_user(user.ref_id, documents)
 
         user = DriveWealthUser()
+        user.profile_id = profile_id
         user.set_from_response(user_data)
         repository.persist(user)
 
