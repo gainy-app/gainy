@@ -15,7 +15,7 @@ from trading.drivewealth.repository import DriveWealthRepository
 
 from gainy.utils import get_logger
 from gainy.trading.models import TradingAccount
-from gainy.trading.drivewealth.models import DriveWealthAccount
+from gainy.trading.drivewealth.models import DriveWealthAccount, DriveWealthUser
 from gainy.trading.drivewealth import DriveWealthProvider as GainyDriveWealthProvider
 
 logger = get_logger(__name__)
@@ -128,6 +128,7 @@ class DriveWealthProvider(GainyDriveWealthProvider, DriveWealthProviderKYC,
     def sync_data(self, profile_id):
         user = self._get_user(profile_id)
 
+        self.sync_user(user.ref_id)
         self.sync_trading_accounts(profile_id)
         self._sync_autopilot_runs(user.ref_id)
         self._sync_bank_accounts(user.ref_id)

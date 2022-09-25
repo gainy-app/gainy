@@ -205,6 +205,7 @@ locals {
     DRIVEWEALTH_API_USERNAME   = var.drivewealth_api_username
     DRIVEWEALTH_API_PASSWORD   = var.drivewealth_api_password
     DRIVEWEALTH_API_URL        = var.drivewealth_api_url
+    DRIVEWEALTH_SQS_ARN        = var.drivewealth_sqs_arn
     S3_BUCKET_UPLOADS_KYC      = var.s3_bucket_uploads_kyc
     STRIPE_API_KEY             = var.stripe_api_key
     STRIPE_PUBLISHABLE_KEY     = var.stripe_publishable_key

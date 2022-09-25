@@ -5,6 +5,9 @@ from portfolio.plaid.service import PlaidService
 from portfolio.service import PortfolioService
 from portfolio.service.chart import PortfolioChartService
 from portfolio.repository import PortfolioRepository
+from queue_processing.dispatcher import QueueMessageDispatcher
+from services.sqs import SqsAdapter
+from trading.drivewealth.queue_message_handler import DriveWealthQueueMessageHandler
 from trading.service import TradingService
 from trading.repository import TradingRepository
 from trading.drivewealth.api import DriveWealthApi
@@ -61,3 +64,18 @@ class ContextContainer(GainyContextContainer):
     @cached_property
     def trading_repository(self):
         return TradingRepository(self.db_conn)
+
+    # queues
+    @cached_property
+    def sqs_adapter(self) -> SqsAdapter:
+        return SqsAdapter(self.get_repository())
+
+    @cached_property
+    def drivewealth_queue_message_handler(
+            self) -> DriveWealthQueueMessageHandler:
+        return DriveWealthQueueMessageHandler(self.drivewealth_repository,
+                                              self.drivewealth_provider)
+
+    @cached_property
+    def queue_message_dispatcher(self) -> QueueMessageDispatcher:
+        return QueueMessageDispatcher([self.drivewealth_queue_message_handler])

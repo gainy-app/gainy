@@ -470,6 +470,21 @@ class DriveWealthKycStatus:
         else:
             raise Exception('Unknown kyc status %s' % kyc_status)
 
-        status = ProfileKycStatus(status, kyc.get("statusComment"))
+        message_parts = []
+        message = kyc.get("statusComment")
+        if message:
+            message_parts.append(message)
+
+        document_message = None
+        for document in self.data["documents"]:
+            if document["status"]["name"] == "PENDING":
+                document_message = document["status"]["description"]
+
+        if document_message:
+            message_parts.append(document_message)
+
+        message = " ".join(message_parts)
+
+        status = ProfileKycStatus(status, message)
         status.updated_at = dateutil.parser.parse(kyc["updated"])
         return status
