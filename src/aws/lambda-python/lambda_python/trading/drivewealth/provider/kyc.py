@@ -74,14 +74,17 @@ class DriveWealthProviderKYC(GainyDriveWealthProviderBase):
         data = self.api.upload_document(user.ref_id, document, file_data)
         repository.upsert_kyc_document(document.id, data)
 
-    def sync_user(self, user_ref_id) -> DriveWealthUser:
+    def sync_user(self, user_ref_id):
         user: DriveWealthUser = self.repository.find_one(
-            DriveWealthUser, {"ref_id": user_ref_id}) or DriveWealthUser()
+            DriveWealthUser, {"ref_id": user_ref_id})
+        if not user:
+            return
+
         data = self.api.get_user(user_ref_id)
         user.set_from_response(data)
         self.repository.persist(user)
 
-        return user
+        return
 
     def _kyc_form_to_documents(self, kyc_form: dict):
         return [
