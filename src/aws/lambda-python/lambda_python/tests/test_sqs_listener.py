@@ -22,6 +22,9 @@ def test_drivewealth(monkeypatch):
         assert message.source_ref_id == "eventSourceARN"
         assert message.body == "body"
 
+        nonlocal handle_called
+        handle_called = True
+
     monkeypatch.setattr(queue_message_dispatcher, "handle", mock_handle)
 
     repository = Repository(None)
