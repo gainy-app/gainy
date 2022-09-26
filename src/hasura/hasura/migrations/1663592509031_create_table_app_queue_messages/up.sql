@@ -2,7 +2,7 @@ CREATE TABLE "app"."queue_messages"
 (
     "ref_id"              varchar                 NOT NULL,
     "source_ref_id"       varchar                 NOT NULL,
-    "source_event_ref_id" varchar                 NOT NULL,
+    "source_event_ref_id" varchar,
     "body"                json,
     "data"                json,
     "handled"             bool,

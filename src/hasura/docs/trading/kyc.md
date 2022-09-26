@@ -548,13 +548,3 @@ mutation KycAddDocument (
 
   - address_province: string
     > For U.S., use USPS postal abbreviations, outside U.S. use the standard province/territory name
-
-
-- drivewealth_kyc_status
-  - ref_id: string
-  - drivewealth_user_id: int
-  - status: string # `KYC_NOT_READY | KYC_READY | KYC_PROCESSING | KYC_APPROVED | KYC_INFO_REQUIRED | KYC_DOC_REQUIRED | KYC_MANUAL_REVIEW | KYC_DENIED`
-  - is_approved: boolean
-  - is_accepted: boolean
-  - errors: json
-  - data: json

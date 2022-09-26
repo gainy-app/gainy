@@ -1,6 +1,6 @@
 from common.context_container import ContextContainer
 from common.hasura_function import HasuraAction
-from trading.models import KycDocument
+from trading.models import KycDocument, KycDocumentSide, KycDocumentType
 from gainy.utils import get_logger
 
 logger = get_logger(__name__)
@@ -17,8 +17,8 @@ class KycAddDocument(HasuraAction):
 
         model = KycDocument()
         model.uploaded_file_id = input_params["uploaded_file_id"]
-        model.type = input_params["type"]
-        model.side = input_params["side"]
+        model.type = KycDocumentType(input_params["type"])
+        model.side = KycDocumentSide(input_params["side"])
 
         trading_service.send_kyc_document(profile_id, model)
 
