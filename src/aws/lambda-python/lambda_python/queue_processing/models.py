@@ -18,7 +18,7 @@ class QueueMessage(BaseModel):
     key_fields = ["ref_id"]
 
     db_excluded_fields = ["created_at", "updated_at"]
-    non_persistent_fields = ["id", "created_at", "updated_at"]
+    non_persistent_fields = ["created_at", "updated_at"]
 
     def __init__(self, row: dict = None):
         self.handled = False
