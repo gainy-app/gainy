@@ -129,7 +129,7 @@ class DriveWealthProvider(GainyDriveWealthProvider, DriveWealthProviderKYC,
         user = self._get_user(profile_id)
 
         self.sync_user(user.ref_id)
-        self.sync_trading_accounts(profile_id)
+        self.sync_profile_trading_accounts(profile_id)
         self._sync_autopilot_runs(user.ref_id)
         self._sync_bank_accounts(user.ref_id)
         self._sync_deposits(user.ref_id)
