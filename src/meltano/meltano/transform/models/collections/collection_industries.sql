@@ -17,9 +17,9 @@ select
        iif.industry_id,
        sum(iif.inverted_industry_frequency)::real / c.size as industry_grade
 from {{ ref('collections') }} c
-         join {{ ref('ticker_collections') }} tc
-              on c.id = tc.collection_id
+         join {{ ref('collection_ticker_actual_weights') }}
+              on collection_ticker_actual_weights.collection_id = c.id
          join inverted_industry_frequency iif
-              on tc.symbol = iif.symbol
+              on iif.symbol = collection_ticker_actual_weights.symbol
 where c.enabled = '1'
 group by c.id, iif.industry_id, c.size

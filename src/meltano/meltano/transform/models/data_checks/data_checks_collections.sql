@@ -16,8 +16,9 @@
 with collection_distinct_tickers as
          (
              select distinct symbol
-             from {{ ref('ticker_collections') }}
-                      join {{ ref('collections') }} on ticker_collections.collection_id = collections.id
+             from {{ ref('collection_ticker_actual_weights') }}
+                      join {{ ref('collections') }}
+                           on collection_ticker_actual_weights.collection_id = collections.id
              where collections.enabled = '1'
                and collections.personalized = '0'
          ),
@@ -91,17 +92,49 @@ select (code || '_' || symbol) as id,
        period,
        case
            when code = 'ttf_ticker_no_interest'
-               then 'TTF tickers ' || symbol || ' is not linked to any interest.'
+               then 'TTF ticker ' || symbol || ' is not linked to any interest.'
            when code = 'ttf_ticker_no_industry'
-               then 'TTF tickers ' || symbol || ' is not linked to any industry.'
+               then 'TTF ticker ' || symbol || ' is not linked to any industry.'
            when code = 'ttf_ticker_hidden'
-               then 'TTF tickers ' || symbol || ' not present in the tickers table.'
+               then 'TTF ticker ' || symbol || ' not present in the tickers table.'
            when code = 'ttf_ticker_no_risk_score'
-               then 'TTF tickers ' || symbol || ' not present in the ticker_risk_scores table.'
+               then 'TTF ticker ' || symbol || ' not present in the ticker_risk_scores table.'
            when code = 'ttf_ticker_no_category_continuous'
-               then 'TTF tickers ' || symbol || ' not present in the ticker_categories_continuous table.'
+               then 'TTF ticker ' || symbol || ' not present in the ticker_categories_continuous table.'
            when code = 'ttf_ticker_no_matchscore'
-               then 'TTF tickers ' || symbol || ' not present in the app.profile_ticker_match_score table.'
-           end as message,
-       now() as updated_at
+               then 'TTF ticker ' || symbol || ' not present in the app.profile_ticker_match_score table.'
+           when code = 'ttf_ticker_no_matchscore'
+               then 'TTF ticker ' || symbol || ' not present in the app.profile_ticker_match_score table.'
+           end                 as message,
+       now()                   as updated_at
 from errors
+
+union all
+
+(
+    with errors as
+             (
+                 select distinct on (
+                     gainy_collections.id
+                     ) gainy_collections.id as collection_id,
+                       'ttf_no_weights'     as code,
+                       'daily'              as period
+                 from {{ source('gainy', 'gainy_collections') }}
+                          left join {{ source('gainy', 'ticker_collections') }}
+                                    on ticker_collections.ttf_name = gainy_collections.name
+                          left join {{ source('gainy', 'ticker_collections_weights') }}
+                                    on ticker_collections_weights.ttf_name = gainy_collections.name
+                 where ticker_collections_weights is null
+                    and ticker_collections is null
+             )
+    select (code || '_' || collection_id) as id,
+           null                           as symbol,
+           code,
+           period,
+           case
+               when code = 'ttf_no_weights'
+                   then 'TTF ' || collection_id || ' has no weights.'
+               end                        as message,
+           now()                          as updated_at
+    from errors
+)

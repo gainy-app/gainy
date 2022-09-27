@@ -1,17 +1,16 @@
 {
   "streams": [
     {
-      "table_name": "collection_ticker_actual_weights",
-      "stream": "collection_ticker_actual_weights",
+      "table_name": "collection_historical_values",
+      "stream": "collection_historical_values",
       "metadata": [
         {
           "breadcrumb": [],
           "metadata": {
-            "replication-method": "FULL_TABLE",
+            "replication-method": "INCREMENTAL",
             "view-key-properties": [
-              "date",
               "collection_uniq_id",
-              "symbol"
+              "date"
             ],
             "schema-name": "public",
             "database-name": "gainy",
@@ -19,7 +18,7 @@
           }
         }
       ],
-      "tap_stream_id": "public-collection_ticker_actual_weights",
+      "tap_stream_id": "public-collection_historical_values",
       "schema": {
         "type": "object",
         "properties": {}
