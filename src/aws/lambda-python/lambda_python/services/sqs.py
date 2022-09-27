@@ -1,3 +1,5 @@
+import json
+
 from gainy.data_access.repository import Repository
 from queue_processing.models import QueueMessage
 
@@ -12,7 +14,7 @@ class SqsAdapter:
         message = QueueMessage()
         message.ref_id = record["messageId"]
         message.source_ref_id = record["eventSourceARN"]
-        message.body = record["body"]
+        message.body = json.loads(record["body"])
         message.data = record
         self.repo.persist(message)
         return message
