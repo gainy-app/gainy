@@ -10,7 +10,7 @@ def test_drivewealth(monkeypatch):
     record = {
         "messageId": "messageId",
         "eventSourceARN": "eventSourceARN",
-        "body": "body",
+        "body": '"body"',
     }
     event = {"Records": [record]}
 
