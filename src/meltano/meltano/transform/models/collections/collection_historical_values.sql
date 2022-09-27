@@ -17,10 +17,10 @@ with data0 as
                     collection_uniq_id,
                     collection_ticker_weights.date,
                     price,
-                    lag(price) over (partition by collection_uniq_id, symbol order by collection_ticker_weights.date)  as prev_price,
-                    lag(weight) over (partition by collection_uniq_id, symbol order by collection_ticker_weights.date) as prev_weight,
-                    coalesce(historical_dividends.value, 0)::numeric                                                   as dividends_value,
-                    greater(collection_ticker_weights.updated_at, historical_dividends.updated_at)                     as updated_at
+                    lag(price) over (partition by collection_uniq_id, symbol order by collection_ticker_weights.date)    as prev_price,
+                    lag(weight) over (partition by collection_uniq_id, symbol order by collection_ticker_weights.date)   as prev_weight,
+                    coalesce(historical_dividends.value, 0)::numeric                                                     as dividends_value,
+                    greater(collection_ticker_weights.updated_at::timestamp, historical_dividends.updated_at::timestamp) as updated_at
              from {{ ref('collection_ticker_weights') }}
                   left join {{ ref('historical_dividends') }} using (symbol, date)
          ),
