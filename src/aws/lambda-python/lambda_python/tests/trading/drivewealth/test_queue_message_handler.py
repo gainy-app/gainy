@@ -28,11 +28,11 @@ def test(monkeypatch):
     monkeypatch.setattr(message_handler, '_get_handler', mock_get_handler)
 
     message = QueueMessage(None)
-    message.body = json.dumps({
+    message.body = {
         "id": "id",
         "type": event_type,
-        "payload": event_payload
-    })
+        "payload": event_payload,
+    }
     message_handler.handle(message)
 
     assert handle_called
