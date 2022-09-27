@@ -12,7 +12,8 @@ SELECT eod_dividends.code as symbol,
        eod_dividends.currency,
        eod_dividends.period,
        eod_dividends.recorddate::date,
-       eod_dividends.value::numeric
+       eod_dividends.value::numeric,
+       eod_dividends._sdc_extracted_at as updated_at
 from {{ source('eod', 'eod_dividends') }}
 
 {% if is_incremental() %}
