@@ -66,7 +66,7 @@ select daily_collection_gain_cumulative.profile_id,
        date_trunc('week', date)::date              as date_week,
        date_trunc('month', date)::date             as date_month,
        coalesce(cumulative_daily_relative_gain, 1) as value,
-       dividends_value,
+       daily_collection_gain_cumulative.dividends_value,
        collection_uniq_id || '_' || date           as id,
        daily_collection_gain_cumulative.updated_at
 from daily_collection_gain_cumulative
