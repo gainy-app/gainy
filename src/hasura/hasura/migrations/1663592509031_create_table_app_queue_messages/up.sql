@@ -1,5 +1,6 @@
 CREATE TABLE "app"."queue_messages"
 (
+    "id"                  serial                  NOT NULL,
     "ref_id"              varchar                 NOT NULL,
     "source_ref_id"       varchar                 NOT NULL,
     "source_event_ref_id" varchar,
@@ -8,7 +9,7 @@ CREATE TABLE "app"."queue_messages"
     "handled"             bool,
     "created_at"          timestamp default now() not null,
     "updated_at"          timestamp default now() not null,
-    PRIMARY KEY ("ref_id")
+    PRIMARY KEY ("id")
 );
 
 CREATE OR REPLACE FUNCTION "app"."set_current_timestamp_updated_at"()

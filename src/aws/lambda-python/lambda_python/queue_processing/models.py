@@ -6,6 +6,7 @@ from gainy.data_access.models import BaseModel, classproperty
 
 
 class QueueMessage(BaseModel):
+    id: str = None
     ref_id: str = None
     source_ref_id: str = None
     source_event_ref_id: Optional[str] = None
@@ -15,10 +16,10 @@ class QueueMessage(BaseModel):
     created_at: datetime.datetime = None
     updated_at: datetime.datetime = None
 
-    key_fields = ["ref_id"]
+    key_fields = ["id"]
 
     db_excluded_fields = ["created_at", "updated_at"]
-    non_persistent_fields = ["created_at", "updated_at"]
+    non_persistent_fields = ["id", "created_at", "updated_at"]
 
     def __init__(self, row: dict = None):
         self.handled = False

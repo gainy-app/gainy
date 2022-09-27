@@ -164,6 +164,12 @@ type Mutation {
   ): PlaidWebhookOutput
 }
 
+type Mutation {
+  rehandle_queue_messages(
+    ids: [Int]!
+  ): ReHandleQueueMessagesOutput
+}
+
 type Query {
   search_collections(
     query: String!
@@ -556,5 +562,11 @@ type StripeGetPaymentSheetDataOutput {
 
 type TradingReconfigureCollectionHoldingsOutput {
   trading_collection_version_id: Int!
+}
+
+type ReHandleQueueMessagesOutput {
+  success: Int!
+  unsupported: Int!
+  error: Int!
 }
 

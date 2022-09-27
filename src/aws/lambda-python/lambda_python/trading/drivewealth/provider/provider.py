@@ -132,11 +132,32 @@ class DriveWealthProvider(GainyDriveWealthProvider, DriveWealthProviderKYC,
         self.sync_profile_trading_accounts(profile_id)
         self._sync_autopilot_runs(user.ref_id)
         self._sync_bank_accounts(user.ref_id)
-        self._sync_deposits(user.ref_id)
+        self._sync_user_deposits(user.ref_id)
         # self._sync_documents(user.ref_id)
         self._sync_portfolio_statuses(profile_id)
         # self._sync_redemptions(user.ref_id)
         # self._sync_users(user.ref_id)
+
+    def sync_deposit(self, deposit_ref_id: str, fetch_info=False):
+        repository = self.repository
+
+        entity = repository.find_one(DriveWealthDeposit,
+                                     {"ref_id": deposit_ref_id})
+        if not entity:
+            entity = DriveWealthDeposit()
+            fetch_info = True
+
+        if fetch_info:
+            deposit_data = self.api.get_deposit(deposit_ref_id)
+            entity.set_from_response(deposit_data)
+            repository.persist(entity)
+
+        if not entity.money_flow_id:
+            return
+        money_flow = repository.find_one(TradingMoneyFlow,
+                                         {"id": entity.money_flow_id})
+        self._update_money_flow_status(entity, money_flow)
+        repository.persist(money_flow)
 
     def _sync_bank_accounts(self, user_ref_id):
         repository = self.repository
@@ -150,7 +171,7 @@ class DriveWealthProvider(GainyDriveWealthProvider, DriveWealthProviderKYC,
             entity.drivewealth_user_id = user_ref_id
             return repository.persist(entity)
 
-    def _sync_deposits(self, user_ref_id):
+    def _sync_user_deposits(self, user_ref_id: str):
         repository = self.repository
 
         deposits_data = self.api.get_user_deposits(user_ref_id)
@@ -161,12 +182,7 @@ class DriveWealthProvider(GainyDriveWealthProvider, DriveWealthProviderKYC,
             entity.set_from_response(deposit_data)
             repository.persist(entity)
 
-            if not entity.money_flow_id:
-                continue
-            money_flow = repository.find_one(TradingMoneyFlow,
-                                             {"id": entity.money_flow_id})
-            self._update_money_flow_status(entity, money_flow)
-            repository.persist(money_flow)
+            self.sync_deposit(deposit_ref_id=entity.ref_id, fetch_info=False)
 
     def _sync_autopilot_runs(self, user_ref_id):
         repository = self.repository

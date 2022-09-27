@@ -48,20 +48,10 @@ class DriveWealthProviderKYC(GainyDriveWealthProviderBase):
         return self.api.get_kyc_status(user_ref_id).get_profile_kyc_status()
 
     def kyc_get_status(self, profile_id: int) -> ProfileKycStatus:
-        repository = self.repository
-
         user = self._get_user(profile_id)
         user_ref_id = user.ref_id
         self.sync_user(user_ref_id)
-
-        kyc_status = self.api.get_kyc_status(
-            user_ref_id).get_profile_kyc_status()
-
-        documents_data = self.api.get_user_documents(user_ref_id)
-        for document_data in documents_data:
-            repository.upsert_kyc_document(None, document_data)
-
-        return kyc_status
+        return self.sync_kyc(user_ref_id)
 
     def send_kyc_document(self, profile_id: int, document: KycDocument,
                           file_stream: io.BytesIO):
@@ -85,7 +75,15 @@ class DriveWealthProviderKYC(GainyDriveWealthProviderBase):
         user.set_from_response(data)
         self.repository.persist(user)
 
-        return
+    def sync_kyc(self, user_ref_id) -> ProfileKycStatus:
+        kyc_status = self.api.get_kyc_status(
+            user_ref_id).get_profile_kyc_status()
+
+        documents_data = self.api.get_user_documents(user_ref_id)
+        for document_data in documents_data:
+            self.repository.upsert_kyc_document(None, document_data)
+
+        return kyc_status
 
     def _kyc_form_to_documents(self, kyc_form: dict):
         return [

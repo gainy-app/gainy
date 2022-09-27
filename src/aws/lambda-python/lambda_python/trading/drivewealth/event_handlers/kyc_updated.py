@@ -6,17 +6,16 @@ from trading.drivewealth.repository import DriveWealthRepository
 logger = get_logger(__name__)
 
 
-class AccountsUpdatedEventHandler(AbstractDriveWealthEventHandler):
+class KycUpdatedEventHandler(AbstractDriveWealthEventHandler):
 
     def __init__(self, repo: DriveWealthRepository,
                  service: DriveWealthProvider):
         super().__init__(repo, service)
 
     def supports(self, event_type: str):
-        return event_type == "accounts.updated"
+        return event_type == "kyc.updated"
 
     def handle(self, event_payload: dict):
-        account_ref_id = event_payload["accountID"]
+        user_id = event_payload["userID"]
 
-        self.provider.sync_trading_account(account_ref_id=account_ref_id,
-                                           fetch_info=True)
+        self.provider.sync_kyc(user_id)
