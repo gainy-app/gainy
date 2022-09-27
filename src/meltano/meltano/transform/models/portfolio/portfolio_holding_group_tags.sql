@@ -19,7 +19,8 @@ with ticker_selected_collection as
                  ) symbol,
                    collection_id
              from {{ ref('profile_collections') }}
-                      join {{ ref('ticker_collections') }} on ticker_collections.collection_id = profile_collections.id
+                      join {{ ref('collection_ticker_actual_weights') }}
+                           on collection_ticker_actual_weights.collection_id = profile_collections.id
                       join {{ ref('collection_metrics') }}
                            on collection_metrics.collection_uniq_id = profile_collections.uniq_id
              where profile_collections.personalized = '0'
