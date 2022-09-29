@@ -118,9 +118,7 @@ class SetUserCategories(HasuraTrigger):
 
         logging_extra = {
             'profile_id': profile_id,
-            'risk_needed': risk_needed,
-            'risk_taking_ability': risk_taking_ability,
-            'loss_tolerance': loss_tolerance,
+            'payload': payload,
             'final_score': final_score,
             'categories': categories,
         }
