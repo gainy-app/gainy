@@ -93,7 +93,7 @@ with all_push_notifications as
                      order by relative_daily_change desc
                      limit 3
                  ) t
-                     join exchange_schedule on exchange_schedule.country_name = 'USA' and exchange_schedule.date = now()::date
+                     join {{ ref('exchange_schedule') }} on exchange_schedule.country_name = 'USA' and exchange_schedule.date = now()::date
             where now() between exchange_schedule.open_at + interval '30 minutes' and exchange_schedule.open_at + interval '1 hour'
             having count(collection_id) > 0
 
@@ -119,7 +119,7 @@ with all_push_notifications as
                      order by relative_daily_change
                      limit 3
                  ) t
-                     join exchange_schedule on exchange_schedule.country_name = 'USA' and exchange_schedule.date = now()::date
+                     join {{ ref('exchange_schedule') }} on exchange_schedule.country_name = 'USA' and exchange_schedule.date = now()::date
             where now() between exchange_schedule.open_at + interval '30 minutes' and exchange_schedule.open_at + interval '1 hour'
             having count(collection_id) > 0
 
