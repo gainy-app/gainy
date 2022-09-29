@@ -12,14 +12,14 @@ with all_ticker_collections as
          (
              select profile_favorite_collections.profile_id,
                     profile_favorite_collections.collection_id,
-                    coalesce(ticker_collections.symbol, personalized_ticker_collections.symbol) as symbol
+                    coalesce(collection_ticker_actual_weights.symbol, personalized_ticker_collections.symbol) as symbol
              from {{ source('app', 'profile_favorite_collections') }}
-                      left join {{ ref('ticker_collections') }}
-                                on ticker_collections.collection_id = profile_favorite_collections.collection_id
+                      left join {{ ref('collection_ticker_actual_weights') }}
+                                on collection_ticker_actual_weights.collection_id = profile_favorite_collections.collection_id
                       left join {{ source('app', 'personalized_ticker_collections') }}
                                 on personalized_ticker_collections.collection_id = profile_favorite_collections.collection_id
                                     and personalized_ticker_collections.profile_id = profile_favorite_collections.profile_id
-             where ticker_collections.symbol is not null
+             where collection_ticker_actual_weights.symbol is not null
                 or personalized_ticker_collections.symbol is not null
          ),
      unique_profile_collection_tickers as

@@ -311,8 +311,8 @@ union all
                           left join ticker_realtime_metrics
                                     on ticker_realtime_metrics.symbol =
                                        portfolio_securities_normalized.original_ticker_symbol
-                          join ticker_collections
-                               on ticker_collections.symbol = portfolio_securities_normalized.ticker_symbol
+                          join collection_ticker_actual_weights
+                               on collection_ticker_actual_weights.symbol = portfolio_securities_normalized.ticker_symbol
                           join app.profile_plaid_access_tokens
                                on profile_plaid_access_tokens.id = profile_holdings_normalized.plaid_access_token_id
                  where {where_clause}

@@ -132,35 +132,31 @@ with
             ( -- Cat: Dividend
 
                 with
-                    dividends as (select * from {{ source('eod', 'eod_dividends') }}),
-
                     last_consecutive_dividend_years as (
-                        select code, sum(consecflagone) as cdy --,dy
+                        select symbol, sum(consecflagone) as cdy --,dy
                         from -- 3. sum up 1'nes-flags of consequtive years of dividending, starting from current or previous year back in time
-                             (	select code, dy, -- gives 1 for consecutive numbers (desc, flag linked with prev row on current row), and first listed year always 1
-                                         1+ max(dy) over(partition by code) - dy+1 - row_number() over (partition by code order by dy desc) as consecflagone
-                                  from -- 2. make a list of code & dividend_year (dy)
-                                       (	select distinct on (d.code, date_part('year', d.date::timestamp)::int)
-                                                d.code,
-                                                date_part('year', d.date::timestamp)::int as dy
-                                            from dividends d
-                                                     join -- 1. filter out only stocks that are dividending in current or previous year (dividends yearly or more frequently - catch both by cur_year minus one)
-                                                (	select distinct code
-                                                     from dividends d
-                                                     where date_part('year', d.date::timestamp) >= date_part('year', now()::timestamp) -1
-                                                ) as last_dy_thisorprev on last_dy_thisorprev.code = d.code
-                                       ) as code_dy
-                             ) as code_dy_consec
+                             (	select symbol, dy, -- gives 1 for consecutive numbers (desc, flag linked with prev row on current row), and first listed year always 1
+                                         1+ max(dy) over(partition by symbol) - dy+1 - row_number() over (partition by symbol order by dy desc) as consecflagone
+                                  from -- 2. make a list of symbol & dividend_year (dy)
+                                       (	select distinct symbol, date_part('year', date)::int as dy
+                                            from {{ ref('historical_dividends') }} d
+                                                     -- 1. filter out only stocks that are dividending in current or previous year (dividends yearly or more frequently - catch both by cur_year minus one)
+                                                     join (
+                                                         select distinct symbol
+                                                         from {{ ref('historical_dividends') }} d
+                                                         where date >= date_trunc('year', now()) - interval '1 year'
+                                                      ) as last_dy_thisorprev using (symbol)
+                                       ) as symbol_dy
+                             ) as symbol_dy_consec
                         where consecflagone = 1
-                        group by code
+                        group by symbol
                     ),
 
                     last_sixty_months_dividends as (
-                        select d.code, sum(d.value) / 5 as avg_value_per_year
-                        from dividends d
-                        where d.date::timestamp > now()::timestamp - interval '5 years'
-                          and d.value is not null
-                        group by d.code
+                        select symbol, sum(value) / 5 as avg_value_per_year
+                        from {{ ref('historical_dividends') }}
+                        where date > now() - interval '5 years'
+                        group by symbol
                     ),
 
                     last_sixty_months_earnings as (
@@ -180,11 +176,11 @@ with
                                    (lsme.avg_value_per_year / lsmd.avg_value_per_year - 1.67) as dmedpsrat -- center at constant threshold (BusDoc: Average EPS/DPS ratio > 1.67 for the last 5 years)
 
                             from common_stocks t
-                                     join {{ ref('ticker_metrics') }} 					tm 		on tm.symbol = t.symbol
-                                     join last_sixty_months_dividends 		lsmd 	on lsmd.code = t.symbol
-                                     join {{ ref('highlights') }} 						h 		on h.symbol = t.symbol
-                                     join last_sixty_months_earnings 		lsme 	on lsme.symbol = t.symbol
-                                     left join last_consecutive_dividend_years 	lcdy 	on lcdy.code = t.symbol -- left join & coalesce 0, coz could lost some tickers with dps&dme that hasn't dividend on current or previous years, but has before (5 y horizon for dps dme) (got ~200 tickers 20220320)
+                                     join {{ ref('ticker_metrics') }} tm using (symbol)
+                                     join last_sixty_months_dividends lsmd using (symbol)
+                                     join {{ ref('highlights') }} h using (symbol)
+                                     join last_sixty_months_earnings lsme using (symbol)
+                                     left join last_consecutive_dividend_years lcdy using (symbol) -- left join & coalesce 0, coz could lost some tickers with dps&dme that hasn't dividend on current or previous years, but has before (5 y horizon for dps dme) (got ~200 tickers 20220320)
                             where h.dividend_share is not null
                               and tm.market_capitalization is not null
                         ),

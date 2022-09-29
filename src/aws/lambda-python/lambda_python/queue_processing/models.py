@@ -39,7 +39,3 @@ class QueueMessage(BaseModel):
             **super().to_dict(),
             "data": json.dumps(self.data),
         }
-
-    @property
-    def body_json(self):
-        return json.loads(self.body)

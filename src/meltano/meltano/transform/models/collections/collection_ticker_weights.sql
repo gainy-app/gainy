@@ -21,9 +21,21 @@ with ticker_collections_weights as materialized
                     _sdc_extracted_at      as updated_at
              from {{ source('gainy', 'ticker_collections_weights') }}
                       join {{ ref('collections') }} on collections.name = ticker_collections_weights.ttf_name
-             where _sdc_extracted_at > (
-                                           select max(_sdc_extracted_at) from {{ source('gainy', 'ticker_collections_weights') }}
-                                       ) - interval '1 hour'
+             where _sdc_extracted_at > (select max(_sdc_extracted_at) from {{ source('gainy', 'ticker_collections_weights') }}) - interval '1 hour'
+
+             union all
+
+             select null::int              as profile_id,
+                    '0_' || collections.id as collection_uniq_id,
+                    collections.id         as collection_id,
+                    symbol,
+                    dd::date               as date,
+                    ticker_collections.weight::numeric,
+                    _sdc_extracted_at      as updated_at
+             from {{ source('gainy', 'ticker_collections') }}
+                      join {{ ref('collections') }} on collections.name = ticker_collections.ttf_name
+                      join generate_series(ticker_collections.date_start::date, now()::date, interval '1 month') dd on true
+             where _sdc_extracted_at > (select max(_sdc_extracted_at) from {{ source('gainy', 'ticker_collections') }}) - interval '1 hour'
          ),
      ticker_collections_weights_expanded0 as materialized
          (

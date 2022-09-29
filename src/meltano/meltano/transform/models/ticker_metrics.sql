@@ -323,38 +323,36 @@ with highlights as (select * from {{ ref('highlights') }}),
                       (
                           select *,
                                  min(has_grown)
-                                 OVER (partition by code ORDER BY date ROWS BETWEEN CURRENT ROW and UNBOUNDED FOLLOWING) as has_grown_sequential
+                                 OVER (partition by symbol ORDER BY date ROWS BETWEEN CURRENT ROW and UNBOUNDED FOLLOWING) as has_grown_sequential
                           from (
                                    select *,
                                           (value >= last_value(value)
-                                                    OVER (partition by code ORDER BY date DESC ROWS BETWEEN CURRENT ROW AND 1 FOLLOWING)
+                                                    OVER (partition by symbol ORDER BY date DESC ROWS BETWEEN CURRENT ROW AND 1 FOLLOWING)
                                               and
-                                           date::date - last_value(date::date)
-                                                        OVER (partition by code ORDER BY date DESC ROWS BETWEEN CURRENT ROW AND 1 FOLLOWING) <=
+                                           date - last_value(date)
+                                                  OVER (partition by symbol ORDER BY date DESC ROWS BETWEEN CURRENT ROW AND 1 FOLLOWING) <=
                                            case
                                                when period = 'Annual' then 12 * 30 + 45
                                                when period = 'Quarterly' then 3 * 30 + 45
                                                when period = 'SemiAnnual' then 6 * 30 + 45
                                                when period = 'Monthly' then 30 + 15
                                                end)::int as has_grown
-                                   from raw_data.eod_dividends
-                                   order by code, raw_data.eod_dividends.date DESC
+                                   from {{ ref('historical_dividends') }}
+                                   order by symbol, date DESC
                                ) t
-                          order by code, date DESC
+                          order by symbol, date DESC
                       ),
                   dividend_stats as
                       (
-                          select distinct on (code) code,
-                                                    FLOOR(
-                                                                        sum(has_grown_sequential)
-                                                                        OVER (partition by expanded_dividends.code
-                                                                            ORDER BY expanded_dividends.date DESC
-                                                                            ROWS BETWEEN CURRENT ROW and UNBOUNDED FOLLOWING
-                                                                            ) /
-                                                                        4)::int as years_of_consecutive_dividend_growth,
-                                                    period::varchar             as dividend_frequency
+                          select distinct on (
+                              symbol
+                              ) symbol,
+                                FLOOR(sum(has_grown_sequential)
+                                      OVER (partition by symbol ORDER BY date DESC ROWS BETWEEN CURRENT ROW and UNBOUNDED FOLLOWING)
+                                      / 4)::int as years_of_consecutive_dividend_growth,
+                                period as dividend_frequency
                           from expanded_dividends
-                          order by code, date desc
+                          order by symbol, date desc
                       )
              select raw_eod_fundamentals.code                                                  as symbol,
                     highlights.dividend_yield::double precision,
@@ -364,7 +362,7 @@ with highlights as (select * from {{ ref('highlights') }}),
                     dividend_stats.dividend_frequency
              from raw_eod_fundamentals
                       left join highlights on raw_eod_fundamentals.code = highlights.symbol
-                      left join dividend_stats on raw_eod_fundamentals.code = dividend_stats.code
+                      left join dividend_stats on raw_eod_fundamentals.code = dividend_stats.symbol
          ),
      earnings_metrics as
          (

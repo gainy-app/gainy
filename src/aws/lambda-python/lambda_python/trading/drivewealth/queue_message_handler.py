@@ -28,7 +28,7 @@ class DriveWealthQueueMessageHandler(QueueMessageHandlerInterface):
         return message.source_ref_id == DRIVEWEALTH_SQS_ARN
 
     def handle(self, message: QueueMessage):
-        body = message.body_json
+        body = message.body
 
         message.source_event_ref_id = body["id"]
         event_type = body["type"]
