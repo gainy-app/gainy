@@ -37,5 +37,6 @@ class QueueMessage(BaseModel):
     def to_dict(self) -> dict:
         return {
             **super().to_dict(),
+            "body": json.dumps(self.body),
             "data": json.dumps(self.data),
         }
