@@ -9,22 +9,40 @@
   )
 }}
 
-
-with ticker_collections_weights as materialized
+with raw_ticker_collections_weights as materialized
          (
-             select null::int              as profile_id,
-                    '0_' || collections.id as collection_uniq_id,
-                    collections.id         as collection_id,
+             select collections.id    as collection_id,
                     symbol,
                     ticker_collections_weights.date::date,
-                    ticker_collections_weights.weight::numeric,
-                    _sdc_extracted_at      as updated_at
+                    ticker_collections_weights.weight,
+                    _sdc_extracted_at as updated_at
              from {{ source('gainy', 'ticker_collections_weights') }}
                       join {{ ref('collections') }} on collections.name = ticker_collections_weights.ttf_name
-             where _sdc_extracted_at > (select max(_sdc_extracted_at) from {{ source('gainy', 'ticker_collections_weights') }}) - interval '1 hour'
+             where _sdc_extracted_at > (
+                                           select max(_sdc_extracted_at) from {{ source('gainy', 'ticker_collections_weights') }}
+                                       ) - interval '1 hour'
+         ),
+     ticker_collections_weights as materialized
+         (
+             -- extend raw_ticker_collections_weights until now
+             select null::int             as profile_id,
+                    '0_' || collection_id as collection_uniq_id,
+                    collection_id,
+                    symbol,
+                    dd::date              as date,
+                    weight::numeric,
+                    updated_at
+             from (
+                      select collection_id, max(date) as date
+                      from raw_ticker_collections_weights
+                      group by collection_id
+                  ) collection_max_date
+                      join raw_ticker_collections_weights using (collection_id, date)
+                      join generate_series(date, now(), interval '1 month') dd on dd > date
 
              union all
 
+             -- static weights
              select null::int              as profile_id,
                     '0_' || collections.id as collection_uniq_id,
                     collections.id         as collection_id,
@@ -34,8 +52,12 @@ with ticker_collections_weights as materialized
                     _sdc_extracted_at      as updated_at
              from {{ source('gainy', 'ticker_collections') }}
                       join {{ ref('collections') }} on collections.name = ticker_collections.ttf_name
-                      join generate_series(ticker_collections.date_start::date, now()::date, interval '1 month') dd on true
-             where _sdc_extracted_at > (select max(_sdc_extracted_at) from {{ source('gainy', 'ticker_collections') }}) - interval '1 hour'
+                      join generate_series(ticker_collections.date_start::date, now()::date, interval '1 month') dd
+                           on true
+             where _sdc_extracted_at > (
+                                           select max(_sdc_extracted_at)
+                                           from raw_data.ticker_collections
+                                       ) - interval '1 hour'
          ),
      ticker_collections_weights_expanded0 as materialized
          (
