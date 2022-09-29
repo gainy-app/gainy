@@ -86,8 +86,8 @@ with all_push_notifications as
                      select first_value(profile_collections.id) over (order by relative_daily_change desc) as collection_id,
                             relative_daily_change,
                             name || ' (+' || round(relative_daily_change * 100) || '%)'                    as text
-                     from collection_metrics
-                              join profile_collections on profile_collections.uniq_id = collection_uniq_id
+                     from {{ ref('collection_metrics') }}
+                              join {{ ref('profile_collections') }} on profile_collections.uniq_id = collection_uniq_id
                      where relative_daily_change > 0.03
                        and personalized = '0'
                      order by relative_daily_change desc
@@ -112,8 +112,8 @@ with all_push_notifications as
                      select first_value(profile_collections.id) over (order by relative_daily_change) as collection_id,
                             relative_daily_change,
                             name || ' (' || round(relative_daily_change * 100) || '%)'                as text
-                     from collection_metrics
-                              join profile_collections on profile_collections.uniq_id = collection_uniq_id
+                     from {{ ref('collection_metrics') }}
+                              join {{ ref('profile_collections') }} on profile_collections.uniq_id = collection_uniq_id
                      where relative_daily_change < -0.03
                        and personalized = '0'
                      order by relative_daily_change
