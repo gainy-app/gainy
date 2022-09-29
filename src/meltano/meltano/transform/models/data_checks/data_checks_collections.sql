@@ -124,8 +124,9 @@ union all
                                     on ticker_collections.ttf_name = gainy_collections.name
                           left join {{ source('gainy', 'ticker_collections_weights') }}
                                     on ticker_collections_weights.ttf_name = gainy_collections.name
-                 where ticker_collections_weights is null
-                    and ticker_collections is null
+                 where gainy_collections.enabled = '1'
+                   and ticker_collections_weights is null
+                   and ticker_collections is null
              )
     select (code || '_' || collection_id) as id,
            null                           as symbol,

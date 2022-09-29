@@ -279,20 +279,6 @@ models:
           - type:
               type: 'integer'
 
-  - name: ticker_collections
-    description: Lists of tickers in non-personalized Gainy collections
-    columns:
-      - name: symbol
-        tests:
-          - not_null
-          - type:
-              type: 'character varying'
-      - name: collection_id
-        tests:
-          - not_null
-          - type:
-              type: 'integer'
-
   - name: ticker_events
     columns:
       - name: symbol
