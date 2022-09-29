@@ -1,1 +1,4 @@
+from .accounts_updated import AccountsUpdatedEventHandler
+from .deposits_updated import DepositsUpdatedEventHandler
+from .kyc_updated import KycUpdatedEventHandler
 from .users_updated import UsersUpdatedEventHandler
