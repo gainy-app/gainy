@@ -14,7 +14,7 @@ with raw_ticker_collections_weights as materialized
              select collections.id    as collection_id,
                     symbol,
                     ticker_collections_weights.date::date,
-                    ticker_collections_weights.weight,
+                    ticker_collections_weights.weight::numeric,
                     _sdc_extracted_at as updated_at
              from {{ source('gainy', 'ticker_collections_weights') }}
                       join {{ ref('collections') }} on collections.name = ticker_collections_weights.ttf_name
@@ -24,13 +24,25 @@ with raw_ticker_collections_weights as materialized
          ),
      ticker_collections_weights as materialized
          (
+             -- raw_ticker_collections_weights
+             select null::int             as profile_id,
+                    '0_' || collection_id as collection_uniq_id,
+                    collection_id,
+                    symbol,
+                    date,
+                    weight,
+                    updated_at
+             from raw_ticker_collections_weights
+
+             union all
+
              -- extend raw_ticker_collections_weights until now
              select null::int             as profile_id,
                     '0_' || collection_id as collection_uniq_id,
                     collection_id,
                     symbol,
                     dd::date              as date,
-                    weight::numeric,
+                    weight,
                     updated_at
              from (
                       select collection_id, max(date) as date
