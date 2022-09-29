@@ -2,8 +2,8 @@ CREATE TABLE "app"."drivewealth_redemptions"
 (
     "ref_id"                 varchar     NOT NULL,
     "trading_account_ref_id" varchar     NOT NULL,
-    "bank_account_ref_id"    varchar     NOT NULL,
-    "money_flow_id"          int         not null,
+    "bank_account_ref_id"    varchar,
+    "money_flow_id"          int,
     "status"                 varchar     NOT NULL,
     "data"                   json,
     "created_at"             timestamptz NOT NULL DEFAULT now(),

@@ -1,3 +1,5 @@
+import psycopg2.errors
+
 from common.context_container import ContextContainer
 from common.hasura_function import HasuraAction
 
@@ -31,12 +33,14 @@ class ReHandleQueueMessages(HasuraAction):
                 dispatcher.handle(message)
                 repo.persist(message)
                 success += 1
+                context_container.db_conn.commit()
             except UnsupportedMessageException as e:
                 unsupported += 1
                 logger.warning(e, extra=logger_extra)
             except Exception as e:
                 error += 1
                 logger.exception(e, extra=logger_extra)
+                context_container.db_conn.rollback()
 
         return {
             "success": success,
