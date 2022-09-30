@@ -1,6 +1,5 @@
-import sys, os, json, yaml, copy, re
+import os, json, yaml, copy, re
 import glob
-from typing import List
 from operator import itemgetter
 from gainy.utils import db_connect
 import psycopg2
@@ -113,7 +112,8 @@ def _generate_schedules(env):
             schedule['env']['TAP_POLYGON_OPTION_CONTRACT_NAMES'] = json.dumps(
                 option_contract_names)
 
-        if schedule['extractor'].startswith('tap-eodhistoricaldata'):
+        if schedule['extractor'].startswith(
+                'tap-eodhistoricaldata') and env != 'test':
             if "env" not in schedule:
                 schedule["env"] = {}
             schedule['env'][
