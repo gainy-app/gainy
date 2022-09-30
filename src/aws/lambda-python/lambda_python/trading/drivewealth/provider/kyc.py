@@ -17,9 +17,6 @@ class DriveWealthProviderKYC(GainyDriveWealthProvider):
     repository: DriveWealthRepository = None
     api: DriveWealthApi = None
 
-    def __init__(self, repository: DriveWealthRepository, api: DriveWealthApi):
-        super().__init__(repository, api)
-
     def kyc_send_form(self, kyc_form: dict) -> ProfileKycStatus:
         profile_id = kyc_form['profile_id']
         documents = self._kyc_form_to_documents(kyc_form)

@@ -15,22 +15,20 @@ from trading.drivewealth.repository import DriveWealthRepository
 
 from gainy.utils import get_logger
 from gainy.trading.models import TradingAccount
-from gainy.trading.drivewealth.models import DriveWealthAccount, DriveWealthUser
-from gainy.trading.drivewealth import DriveWealthProvider as GainyDriveWealthProvider
+from gainy.trading.drivewealth.models import DriveWealthAccount
 
 logger = get_logger(__name__)
 
 IS_UAT = os.getenv("DRIVEWEALTH_IS_UAT", "true") != "false"
 
 
-class DriveWealthProvider(GainyDriveWealthProvider, DriveWealthProviderKYC,
+class DriveWealthProvider(DriveWealthProviderKYC,
                           DriveWealthProviderCollection):
 
     def __init__(self, repository: DriveWealthRepository, api: DriveWealthApi,
                  plaid_service: PlaidService):
-        self.repository = repository
+        super().__init__(repository, api)
         self.plaid_service = plaid_service
-        self.api = api
 
     def link_bank_account_with_plaid(
             self, access_token: PlaidAccessToken, account_id: str,
