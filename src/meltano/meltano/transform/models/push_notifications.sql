@@ -36,6 +36,7 @@ with all_push_notifications as
                      join {{ ref('exchange_schedule') }} on exchange_schedule.country_name = 'USA' and exchange_schedule.date = now()::date
             where now() between exchange_schedule.open_at and exchange_schedule.close_at
             group by profile_id
+            having count(symbol) > 0
 
             union all
 
@@ -63,6 +64,64 @@ with all_push_notifications as
                      join {{ ref('exchange_schedule') }} on exchange_schedule.country_name = 'USA' and exchange_schedule.date = now()::date
             where now() between exchange_schedule.open_at and exchange_schedule.close_at
             group by profile_id
+            having count(symbol) > 0
+
+            union all
+
+            -- Daily TTF movers during the trading day
+            -- 1) 10 am daily 2) The 3 biggest TTF gainers and losers
+            -- Two separate notifications
+            -- Top morning TTF gainers are Cryptocurrencies mining (+9%), Silver mining (+7%), Cannabis (+7%)
+            -- Top morning TTF losers are Cryptocurrencies mining (+9%), Silver mining (+7%), Cannabis (+7%)
+            select null                                                                                as profile_id,
+                   'top_ttf_gainers_' || now()::date                                                   as uniq_id,
+                   min(exchange_schedule.open_at) + interval '30 minutes'                              as send_at,
+                   json_build_object('en', 'The top morning TTF ' ||
+                                           case when count(text) > 1 then 'gainers are ' else 'gainer is ' end ||
+                                           string_agg(text, ', ' order by relative_daily_change desc)) as text,
+                   json_build_object('t', 1, 'id', min(collection_id))                                 as data,
+                   true                                                                                as is_test,
+                   '4c70442b-ff04-475f-9a63-97d442127707'                                              as template_id
+            from (
+                     select first_value(profile_collections.id) over (order by relative_daily_change desc) as collection_id,
+                            relative_daily_change,
+                            name || ' (+' || round(relative_daily_change * 100) || '%)'                    as text
+                     from {{ ref('collection_metrics') }}
+                              join {{ ref('profile_collections') }} on profile_collections.uniq_id = collection_uniq_id
+                     where relative_daily_change > 0.03
+                       and personalized = '0'
+                     order by relative_daily_change desc
+                     limit 3
+                 ) t
+                     join {{ ref('exchange_schedule') }} on exchange_schedule.country_name = 'USA' and exchange_schedule.date = now()::date
+            where now() between exchange_schedule.open_at + interval '30 minutes' and exchange_schedule.open_at + interval '1 hour'
+            having count(collection_id) > 0
+
+            union all
+            
+            select null                                                                                as profile_id,
+                   'top_ttf_losers_' || now()::date                                                    as uniq_id,
+                   min(exchange_schedule.open_at) + interval '30 minutes'                              as send_at,
+                   json_build_object('en', 'The top morning TTF ' ||
+                                           case when count(text) > 1 then 'losers are ' else 'loser is ' end ||
+                                           string_agg(text, ', ' order by relative_daily_change desc)) as text,
+                   json_build_object('t', 1, 'id', min(collection_id))                                 as data,
+                   true                                                                                as is_test,
+                   '4c806577-88db-4f1e-a4d1-232fac0aa58a'                                              as template_id
+            from (
+                     select first_value(profile_collections.id) over (order by relative_daily_change) as collection_id,
+                            relative_daily_change,
+                            name || ' (' || round(relative_daily_change * 100) || '%)'                as text
+                     from {{ ref('collection_metrics') }}
+                              join {{ ref('profile_collections') }} on profile_collections.uniq_id = collection_uniq_id
+                     where relative_daily_change < -0.03
+                       and personalized = '0'
+                     order by relative_daily_change
+                     limit 3
+                 ) t
+                     join {{ ref('exchange_schedule') }} on exchange_schedule.country_name = 'USA' and exchange_schedule.date = now()::date
+            where now() between exchange_schedule.open_at + interval '30 minutes' and exchange_schedule.open_at + interval '1 hour'
+            having count(collection_id) > 0
 
             union all
 
@@ -74,7 +133,7 @@ with all_push_notifications as
                    exchange_schedule.close_at - interval '2 hours' as send_at,
                    json_build_object('en', 'The most performing TTF today is ' || collection_name || ' +' ||
                                            round(relative_daily_change * 100) ||
-                                           '%. Check this out!')   as text,
+                                           '%. Check it out!')   as text,
                    json_build_object('t', 1, 'id', collection_id)  as data,
                    false                                           as is_test,
                    'e1b4dd4e-3310-403b-bdc8-b51f56f54045'          as template_id
@@ -97,13 +156,13 @@ with all_push_notifications as
 
             (
                 -- New article
-                select null::int                                      as profile_id,
-                       ('new_article_' || blogs.slug)                 as uniq_id,
-                       now()::date + interval '17 hours'              as send_at,
-                       json_build_object('en', 'Read ' || blogs.name) as text,
-                       json_build_object('t', 4, 'id', blogs.id)      as data,
-                       true                                           as is_test,
-                       '07b00e92-a1ae-44ea-bde0-c0715a991f2f'         as template_id
+                select null::int                                                    as profile_id,
+                       'new_article_' || blogs.slug                                 as uniq_id,
+                       date_trunc('week', now())::date + interval '5 days 17 hours' as send_at,
+                       json_build_object('en', 'Read ' || trim(blogs.name))         as text,
+                       json_build_object('t', 4, 'id', blogs.id)                    as data,
+                       false                                                        as is_test,
+                       '07b00e92-a1ae-44ea-bde0-c0715a991f2f'                       as template_id
                 from {{ source('website', 'blogs') }}
                          left join {{ source('website', 'blogs') }} article_duplicate
                                    on (article_duplicate.id = blogs.id or article_duplicate.name = blogs.name or article_duplicate.slug = blogs.slug)
