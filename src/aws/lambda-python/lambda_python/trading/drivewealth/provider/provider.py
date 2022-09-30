@@ -150,8 +150,12 @@ class DriveWealthProvider(GainyDriveWealthProvider, DriveWealthProviderKYC,
         if fetch_info:
             deposit_data = self.api.get_deposit(deposit_ref_id)
             entity.set_from_response(deposit_data)
-            self.sync_trading_account(
-                account_ref_id=entity.trading_account_ref_id, fetch_info=True)
+            if not repository.find_one(
+                    DriveWealthAccount,
+                {"ref_id": entity.trading_account_ref_id}):
+                self.sync_trading_account(
+                    account_ref_id=entity.trading_account_ref_id,
+                    fetch_info=True)
             repository.persist(entity)
 
         if not entity.money_flow_id:

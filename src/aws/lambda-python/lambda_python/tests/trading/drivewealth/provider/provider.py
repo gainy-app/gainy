@@ -93,8 +93,11 @@ def test_transfer_money(monkeypatch, amount):
 
 def test_sync_deposit(monkeypatch):
     deposit_ref_id = "deposit_ref_id"
+    account_ref_id = "account_ref_id"
     money_flow_id = 4
     status = "status"
+
+    account = DriveWealthAccount()
 
     deposit = DriveWealthDeposit()
     monkeypatch.setattr(deposit, "money_flow_id", money_flow_id)
@@ -110,14 +113,18 @@ def test_sync_deposit(monkeypatch):
             (DriveWealthDeposit, {
                 "ref_id": deposit_ref_id
             }, deposit),
+            (DriveWealthAccount, {
+                "ref_id": account_ref_id,
+            }, account),
             (TradingMoneyFlow, {
                 "id": money_flow_id
             }, money_flow),
         ]))
 
     api = DriveWealthApi(drivewealth_repository)
-    monkeypatch.setattr(api, "get_deposit",
-                        mock_get_deposit(deposit_ref_id, status=status))
+    monkeypatch.setattr(
+        api, "get_deposit",
+        mock_get_deposit(deposit_ref_id, account_ref_id, status=status))
 
     service = DriveWealthProvider(drivewealth_repository, api, None)
     service.sync_deposit(deposit_ref_id=deposit_ref_id, fetch_info=True)

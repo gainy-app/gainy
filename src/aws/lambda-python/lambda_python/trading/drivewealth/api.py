@@ -64,9 +64,6 @@ class DriveWealthApi(GainyDriveWealthApi):
             "documents": documents,
         })
 
-    def get_user(self, user_id: str):
-        return self._make_request("GET", f"/users/{user_id}")
-
     def get_user_documents(self, user_id: str):
         return self._make_request("GET", f"/users/{user_id}/documents")
 
