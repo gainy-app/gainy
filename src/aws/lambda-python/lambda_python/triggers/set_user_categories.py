@@ -96,7 +96,7 @@ class SetUserCategories(HasuraTrigger):
 
         return max(risk_needed, risk_taking_ability, loss_tolerance)
 
-    def apply(self, db_conn, op, data):
+    def apply(self, op, data, context_container: ContextContainer):
         payload = self._extract_payload(data)
 
         final_score = self.calculate_score(payload)
