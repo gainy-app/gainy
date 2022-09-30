@@ -53,6 +53,8 @@ def send_push_notification(notification):
         "data": notification['data'],
         "isIos": True,
     }
+    if notification['title']:
+        payload["headings"] = notification['title']
 
     if notification['template_id']:
         payload['template_id'] = notification['template_id']
@@ -152,8 +154,8 @@ def send_all(sender_id):
     with db_connect() as db_conn:
         with db_conn.cursor(cursor_factory=DictCursor) as cursor:
             cursor.execute(
-                """insert into app.notifications(profile_id, uniq_id, send_at, text, data, sender_id, is_test, template_id)
-                   select profile_id, uniq_id, send_at, text, data, %(sender_id)s, is_test, template_id
+                """insert into app.notifications(profile_id, uniq_id, send_at, title, text, data, sender_id, is_test, template_id)
+                   select profile_id, uniq_id, send_at, title, text, data, %(sender_id)s, is_test, template_id
                    from push_notifications
                    where send_at <= now()
                    on conflict do nothing""", {"sender_id": sender_id})
@@ -161,7 +163,7 @@ def send_all(sender_id):
                 "update app.notifications set sender_id = %(sender_id)s where sender_id is null",
                 {"sender_id": sender_id})
             cursor.execute(
-                """select profiles.email, uuid, send_at, text, data, is_test, template_id
+                """select profiles.email, uuid, send_at, title, text, data, is_test, template_id
                    from app.notifications
                    left join app.profiles on profiles.id = notifications.profile_id
                    where sender_id = %(sender_id)s

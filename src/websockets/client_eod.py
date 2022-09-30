@@ -12,7 +12,8 @@ MANDATORY_SYMBOLS = [
     'DJI.INDX', 'GSPC.INDX', 'IXIC.INDX', 'BTC.CC', 'ETH.CC', 'USDT.CC',
     'DOGE.CC', 'BNB.CC', 'XRP.CC', 'DOT.CC', 'SOL.CC', 'ADA.CC', 'LINK.CC',
     'ATOM.CC', 'CRV.CC', 'MATIC.CC', 'DAI.CC', 'SHIB.CC', 'STEPN.CC', 'TRX.CC',
-    'UNI.CC', 'USDC.CC'
+    'UNI.CC', 'USDC.CC', 'AFRM', 'BILL', 'COIN', 'FISV', 'HOOD', 'INTU',
+    'NVEI', 'PYPL', 'SOFI', 'SQ', 'UPST', 'WDAY'
 ]
 SYMBOLS_LIMIT = int(os.getenv('SYMBOLS_LIMIT', len(MANDATORY_SYMBOLS)))
 
