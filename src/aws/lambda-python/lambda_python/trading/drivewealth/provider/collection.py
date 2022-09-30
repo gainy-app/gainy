@@ -8,18 +8,14 @@ from trading.drivewealth.api import DriveWealthApi
 from trading.drivewealth.repository import DriveWealthRepository
 from gainy.utils import get_logger
 from gainy.trading.drivewealth.models import DriveWealthAccount
-from gainy.trading.drivewealth.provider.base import DriveWealthProviderBase as GainyDriveWealthProviderBase
+from gainy.trading.drivewealth.provider import DriveWealthProvider as GainyDriveWealthProvider
 
 logger = get_logger(__name__)
 
 
-class DriveWealthProviderCollection(GainyDriveWealthProviderBase):
+class DriveWealthProviderCollection(GainyDriveWealthProvider):
     repository: DriveWealthRepository = None
     api: DriveWealthApi = None
-
-    def __init__(self, repository: DriveWealthRepository, api: DriveWealthApi):
-        super().__init__(repository)
-        self.api = api
 
     def reconfigure_collection_holdings(
             self, collection_version: TradingCollectionVersion):
