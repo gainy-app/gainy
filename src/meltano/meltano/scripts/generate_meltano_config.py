@@ -112,7 +112,8 @@ def _generate_schedules(env):
             schedule['env']['TAP_POLYGON_OPTION_CONTRACT_NAMES'] = json.dumps(
                 option_contract_names)
 
-        if schedule['extractor'].startswith('tap-eodhistoricaldata') and env != 'test':
+        if schedule['extractor'].startswith(
+                'tap-eodhistoricaldata') and env != 'test':
             if "env" not in schedule:
                 schedule["env"] = {}
             schedule['env'][
