@@ -98,14 +98,8 @@ class DriveWealthApi(GainyDriveWealthApi):
                 'accountNo': account.ref_no,
                 'amount': amount,
                 'currency': 'USD',
-                'type': 'INSTANT_FUNDING',
-                'details': {
-                    "accountHolderName": bank_account.holder_name,
-                    "bankAccountType": bank_account.bank_account_type,
-                    "bankAccountNumber": bank_account.bank_account_number,
-                    "bankRoutingNumber": bank_account.bank_routing_number,
-                    "country": "USA"
-                },
+                'type': 'ACH',
+                'bankAccountID': bank_account.ref_id,
             })
 
     def create_redemption(self, amount: Decimal, account, bank_account):
@@ -114,13 +108,8 @@ class DriveWealthApi(GainyDriveWealthApi):
                 'accountNo': account.ref_no,
                 'amount': amount,
                 'currency': 'USD',
-                'type': 'ACH_MANUAL',
-                'details': {
-                    "beneficiaryName": bank_account.holder_name,
-                    "bankAccountType": bank_account.bank_account_type,
-                    "bankAccountNumber": bank_account.bank_account_number,
-                    "bankRoutingNumber": bank_account.bank_routing_number
-                },
+                'type': 'ACH',
+                'bankAccountID': bank_account.ref_id,
             })
 
     def create_portfolio(self, name, client_portfolio_id, description):
