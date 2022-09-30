@@ -1,5 +1,4 @@
 import csv
-import json
 import os
 import sys
 from math import trunc
@@ -31,10 +30,7 @@ class SetUserCategories(HasuraTrigger):
     def get_allowed_profile_ids(self, op, data):
         return data["new"]['profile_id']
 
-    def apply(self, op, data, context_container: ContextContainer):
-        db_conn = context_container.db_conn
-        payload = self._extract_payload(data)
-
+    def calculate_score(self, payload):
         risk_needed = [1, 2, 2, 3][self._list_index(payload['risk_level'], 4)]
         if payload['average_market_return'] == 6 and risk_needed > 1:
             risk_needed = 3
@@ -88,12 +84,23 @@ class SetUserCategories(HasuraTrigger):
                 if buy_rate > 2 and loss_tolerance != 3:  # buy
                     loss_tolerance += 1
 
-        final_score = max(risk_needed, risk_taking_ability, loss_tolerance)
         for i in decision_matrix:
-            if i['Risk Need'] == risk_needed and i[
-                    'Risk Taking Ability'] == risk_taking_ability and i[
-                        'Loss Tolerance'] == loss_tolerance:
-                final_score = i['Hard code matrix']
+            if int(i['Risk Need']) != risk_needed:
+                continue
+            if int(i['Risk Taking Ability']) != risk_taking_ability:
+                continue
+            if int(i['Loss Tolerance']) != loss_tolerance:
+                continue
+
+            return int(i['Hard code matrix'])
+
+        return max(risk_needed, risk_taking_ability, loss_tolerance)
+
+    def apply(self, op, data, context_container: ContextContainer):
+        db_conn = context_container.db_conn
+        payload = self._extract_payload(data)
+
+        final_score = self.calculate_score(payload)
 
         profile_id = payload["profile_id"]
         with db_conn.cursor() as cursor:
@@ -113,9 +120,7 @@ class SetUserCategories(HasuraTrigger):
 
         logging_extra = {
             'profile_id': profile_id,
-            'risk_needed': risk_needed,
-            'risk_taking_ability': risk_taking_ability,
-            'loss_tolerance': loss_tolerance,
+            'payload': payload,
             'final_score': final_score,
             'categories': categories,
         }

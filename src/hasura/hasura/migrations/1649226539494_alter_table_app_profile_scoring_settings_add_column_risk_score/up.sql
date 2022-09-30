@@ -77,7 +77,7 @@ with user_categories_decision_matrix as
          (
              select profile_id,
                     risk_needed,
-                    round((investment_horizon_points + unexpected_purchases_source_points + damage_of_failure_points) /
+                    round((investment_horizon_points + unexpected_purchases_source_points + damage_of_failure_points)::double precision /
                           3) as                                                             risk_taking_ability,
 
                     round((stock_market_risk_level_points + trading_experience_points) / 2) loss_tolerance,
@@ -94,7 +94,7 @@ with user_categories_decision_matrix as
                     case
                         when if_market_drops_20_i_will_buy * 3 < 1 and loss_tolerance = 3
                             then loss_tolerance - 1
-                        when if_market_drops_20_i_will_buy * 3 > 1 and loss_tolerance != 3
+                        when if_market_drops_20_i_will_buy * 3 > 2 and loss_tolerance != 3
                             then loss_tolerance + 1
                         else loss_tolerance
                         end as loss_tolerance,
@@ -109,7 +109,7 @@ with user_categories_decision_matrix as
                     case
                         when if_market_drops_40_i_will_buy * 3 < 1 and loss_tolerance = 3
                             then loss_tolerance - 1
-                        when if_market_drops_40_i_will_buy * 3 > 1 and loss_tolerance != 3
+                        when if_market_drops_40_i_will_buy * 3 > 2 and loss_tolerance != 3
                             then loss_tolerance + 1
                         else loss_tolerance
                         end as loss_tolerance
