@@ -14,6 +14,7 @@ locals {
   ]) / 1024) * 1024
 
   upstream_pool_size                  = var.env == "production" ? 3 : 1
+  downstream_pool_size                = var.env == "production" ? 2 : 1
   eodhistoricaldata_jobs_count        = 3
   eodhistoricaldata_prices_jobs_count = 4
   coingecko_jobs_count                = 1

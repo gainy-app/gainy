@@ -155,6 +155,16 @@ plugins:
       config:
         itersize: 1
 
+    - name: tap-postgres-analytics-bigquery
+      inherit_from: tap-postgres
+      catalog: catalog/analytics/tap-bigquery.catalog.json
+
+    - name: tap-postgres-analytics-bigquery-small-batch
+      inherit_from: tap-postgres-analytics
+      catalog: catalog/analytics/tap-bigquery-small-batch.catalog.json
+      config:
+        itersize: 1
+
     # Website tap
     - name: tap-postgres-website
       inherit_from: tap-postgres
@@ -383,7 +393,7 @@ schedules:
       INTEGRATION: 'DOWNSTREAM'
 
   - name: postgres-to-bigquery
-    extractor: tap-postgres-analytics
+    extractor: tap-postgres-analytics-bigquery
     loader: target-bigquery
     transform: skip
     interval: '@daily'
@@ -393,7 +403,7 @@ schedules:
       INTEGRATION: 'DOWNSTREAM'
 
   - name: postgres-to-bigquery-small-batch
-    extractor: tap-postgres-analytics-small-batch
+    extractor: tap-postgres-analytics-bigquery-small-batch
     loader: target-bigquery-small-batch
     transform: skip
     interval: '@daily'

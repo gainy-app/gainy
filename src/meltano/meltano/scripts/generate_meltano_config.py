@@ -123,9 +123,9 @@ def _generate_schedules(env):
     return schedules
 
 
-def _generate_analytics_tap_catalog():
-    with open("scripts/templates/analytics_tap_catalog_schemas.template.json",
-              "r") as f:
+def _generate_analytics_tap_catalog(schemas_filename, catalog_filename,
+                                    small_batch_catalog_filename):
+    with open(f"scripts/templates/{schemas_filename}", "r") as f:
         schemas = json.load(f)
 
     streams = {
@@ -163,9 +163,9 @@ def _generate_analytics_tap_catalog():
             })
 
     os.makedirs("catalog/analytics", exist_ok=True)
-    with open("catalog/analytics/tap.catalog.json", "w") as f:
+    with open(f"catalog/analytics/{catalog_filename}", "w") as f:
         json.dump({"streams": streams['default']}, f)
-    with open("catalog/analytics/tap-small-batch.catalog.json", "w") as f:
+    with open(f"catalog/analytics/{small_batch_catalog_filename}", "w") as f:
         json.dump({"streams": streams['small-batch']}, f)
 
 
@@ -189,7 +189,12 @@ config['schedules'] = _generate_schedules(ENV)
 with open("meltano.yml", "w") as f:
     yaml.dump(config, f)
 
-_generate_analytics_tap_catalog()
+_generate_analytics_tap_catalog("analytics_tap_catalog_schemas.template.json",
+                                "tap.catalog.json",
+                                "tap-small-batch.catalog.json")
+_generate_analytics_tap_catalog(
+    "analytics_tap_bigquery_catalog_schemas.template.json",
+    "tap-bigquery.catalog.json", "tap-bigquery-small-batch.catalog.json")
 
 if DBT_TARGET_SCHEMA != 'public':
     ### Algolia search mapping ###
