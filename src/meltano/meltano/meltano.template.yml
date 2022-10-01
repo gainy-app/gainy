@@ -390,7 +390,7 @@ schedules:
       INTEGRATION: 'DOWNSTREAM'
 
   - name: postgres-to-bigquery
-    extractor: tap-postgres-analytics
+    extractor: tap-postgres-analytics-bigquery
     loader: target-bigquery
     transform: skip
     interval: '@daily'
@@ -400,7 +400,7 @@ schedules:
       INTEGRATION: 'DOWNSTREAM'
 
   - name: postgres-to-bigquery-small-batch
-    extractor: tap-postgres-analytics-small-batch
+    extractor: tap-postgres-analytics-bigquery-small-batch
     loader: target-bigquery-small-batch
     transform: skip
     interval: '@daily'
