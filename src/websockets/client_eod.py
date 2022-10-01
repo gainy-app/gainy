@@ -223,6 +223,9 @@ class PricesListener(AbstractPriceListener):
             try:
                 await self._connect_and_listen(url, symbols)
 
+            except (websockets.ConnectionClosed, asyncio.TimeoutError) as e:
+                self.logger.warning(e)
+
             except asyncio.CancelledError:
                 self.logger.debug(f"listen done for {self.endpoint}")
                 return
@@ -269,9 +272,6 @@ class PricesListener(AbstractPriceListener):
                     }))
                 async for message in websocket:
                     await self.handle_message(message)
-
-            except (websockets.ConnectionClosed, asyncio.TimeoutError) as e:
-                self.logger.warning(e)
 
             finally:
                 self.logger.info(f"Unsubscribing from {self.endpoint}")
