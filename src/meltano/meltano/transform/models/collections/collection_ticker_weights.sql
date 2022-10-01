@@ -1,6 +1,7 @@
 {{
   config(
     materialized = "incremental",
+    tags = ["realtime"],
     unique_key = "id",
     post_hook=[
       pk('collection_uniq_id, symbol, date'),
@@ -68,24 +69,30 @@ with raw_ticker_collections_weights as materialized
                            on true
              where _sdc_extracted_at > (
                                            select max(_sdc_extracted_at)
-                                           from raw_data.ticker_collections
+                                           from {{ source('gainy', 'ticker_collections') }}
                                        ) - interval '1 hour'
+         ),
+     old_stats as materialized
+         (
+             select collection_uniq_id, symbol, max(date) as date
+             from {{ this }}
+             group by collection_uniq_id, symbol
          ),
      ticker_collections_weights_expanded0 as materialized
          (
              select distinct on (
-                 collection_uniq_id,
+                 ticker_collections_weights.collection_uniq_id,
                  ticker_collections_weights.symbol,
                  historical_prices.date
-                 ) profile_id,
-                   collection_uniq_id,
-                   collection_id,
+                 ) ticker_collections_weights.profile_id,
+                   ticker_collections_weights.collection_uniq_id,
+                   ticker_collections_weights.collection_id,
                    ticker_collections_weights.symbol,
                    historical_prices.date,
                    historical_prices.adjusted_close       as price,
                    case
                        when historical_prices.date >= ticker_collections_weights.date
-                           then weight
+                           then ticker_collections_weights.weight
                        end                                as weight,
                    case
                        when historical_prices.date >= ticker_collections_weights.date
@@ -94,15 +101,38 @@ with raw_ticker_collections_weights as materialized
                    greatest(ticker_collections_weights.updated_at,
                             historical_prices.updated_at) as updated_at
              from ticker_collections_weights
+{% if is_incremental() and var('realtime') %}
+                      left join old_stats using (collection_uniq_id, symbol)
+{% endif %}
+
                       join {{ ref('historical_prices') }}
                            on historical_prices.symbol = ticker_collections_weights.symbol
                                and historical_prices.date between ticker_collections_weights.date - interval '1 week'
                                   and ticker_collections_weights.date + interval '1 month' - interval '1 day'
+
+
              where historical_prices.adjusted_close > 0
-             order by collection_uniq_id,
+
+{% if is_incremental() and var('realtime') %}
+               and (old_stats is null or historical_prices.date >= old_stats.date)
+{% endif %}
+
+             order by ticker_collections_weights.collection_uniq_id,
                       ticker_collections_weights.symbol,
                       historical_prices.date,
                       ticker_collections_weights.date
+         ),
+     ticker_collections_next_date as materialized
+         (
+             select symbol, collection_uniq_id, week_trading_sessions_static.date
+             from {{ ref('week_trading_sessions_static') }}
+             join (
+                      select collection_uniq_id, symbol, max(date) as date
+                      from ticker_collections_weights_expanded0
+                      group by symbol, collection_uniq_id
+                  ) t using (symbol)
+             where week_trading_sessions_static.date > t.date
+             order by symbol, collection_uniq_id, week_trading_sessions_static.date
          ),
      ticker_collections_weights_expanded1 as materialized
          (
@@ -153,16 +183,20 @@ with raw_ticker_collections_weights as materialized
          ),
      ticker_collections_weights_normalized as
          (
-             select profile_id,
-                    collection_uniq_id,
-                    collection_id,
-                    symbol,
-                    lag(date) over (partition by collection_id,symbol order by date desc) as date,
-                    weight / weight_sum                                                   as weight,
-                    price::numeric,
-                    updated_at
-             from ticker_collections_weights_expanded
-                      join ticker_collections_weights_stats using (collection_uniq_id, date)
+             select t.profile_id, t.collection_uniq_id, t.collection_id, t.symbol, coalesce(t.date, ticker_collections_next_date.date) as date, t.weight, t.price, t.updated_at
+             from (
+                      select profile_id,
+                             collection_uniq_id,
+                             collection_id,
+                             symbol,
+                             lag(date) over (partition by collection_id,symbol order by date desc) as date,
+                             weight / weight_sum                                                   as weight,
+                             price::numeric,
+                             updated_at
+                      from ticker_collections_weights_expanded
+                               join ticker_collections_weights_stats using (collection_uniq_id, date)
+                  ) t
+             join ticker_collections_next_date using (symbol, collection_uniq_id)
          )
 select ticker_collections_weights_normalized.*,
        collection_uniq_id || '_' || symbol  || '_' || date as id
