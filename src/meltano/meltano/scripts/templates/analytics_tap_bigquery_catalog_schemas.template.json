@@ -1,0 +1,12 @@
+{
+  "app": {
+    "analytics_profiles": {
+      "metadata": {
+        "view-key-properties": [
+          "id"
+        ],
+        "is-view": true
+      }
+    }
+  }
+}
