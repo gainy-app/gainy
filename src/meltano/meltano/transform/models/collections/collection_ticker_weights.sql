@@ -185,7 +185,14 @@ with raw_ticker_collections_weights as materialized
          ),
      ticker_collections_weights_normalized as
          (
-             select t.profile_id, t.collection_uniq_id, t.collection_id, t.symbol, coalesce(t.date, ticker_collections_next_date.date) as date, t.weight, t.price, t.updated_at
+             select t.profile_id,
+                    t.collection_uniq_id,
+                    t.collection_id,
+                    t.symbol,
+                    coalesce(t.date, ticker_collections_next_date.date) as date,
+                    t.weight,
+                    t.price,
+                    t.updated_at
              from (
                       select profile_id,
                              collection_uniq_id,
@@ -198,7 +205,7 @@ with raw_ticker_collections_weights as materialized
                       from ticker_collections_weights_expanded
                                join ticker_collections_weights_stats using (collection_uniq_id, date)
                   ) t
-             join ticker_collections_next_date using (symbol, collection_uniq_id)
+             left join ticker_collections_next_date using (symbol, collection_uniq_id)
          )
 select ticker_collections_weights_normalized.*,
        collection_uniq_id || '_' || symbol  || '_' || date as id
