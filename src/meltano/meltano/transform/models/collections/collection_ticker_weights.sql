@@ -72,12 +72,14 @@ with raw_ticker_collections_weights as materialized
                                            from {{ source('gainy', 'ticker_collections') }}
                                        ) - interval '1 hour'
          ),
+{% if is_incremental() and var('realtime') %}
      old_stats as materialized
          (
              select collection_uniq_id, symbol, max(date) as date
              from {{ this }}
              group by collection_uniq_id, symbol
          ),
+{% endif %}
      ticker_collections_weights_expanded0 as materialized
          (
              select distinct on (
