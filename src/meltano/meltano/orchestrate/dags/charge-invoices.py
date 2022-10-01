@@ -1,9 +1,9 @@
 from airflow.operators.bash import BashOperator
-from common import charge_dag
+from common import create_dag
 
 dag_id = "charge-invoices"
 tags = ["billing"]
-dag = charge_dag(dag_id,
+dag = create_dag(dag_id,
                  tags=tags,
                  is_paused_upon_creation=True,
                  schedule_interval="45 12 * * *")
