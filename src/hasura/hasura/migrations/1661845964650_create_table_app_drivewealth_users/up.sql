@@ -1,7 +1,7 @@
 CREATE TABLE "app"."drivewealth_users"
 (
     "ref_id"     varchar NOT NULL,
-    "profile_id" integer NOT NULL unique,
+    "profile_id" integer          unique,
     "status"     varchar NOT NULL,
     "data"       json    NOT NULL,
     "created_at"  timestamptz NOT NULL DEFAULT now(),
