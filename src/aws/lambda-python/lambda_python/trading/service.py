@@ -39,6 +39,8 @@ class TradingService(GainyTradingService):
         return self._get_provider_service().kyc_get_status(profile_id)
 
     def send_kyc_document(self, profile_id: int, document: KycDocument):
+        document.validate()
+
         with self.db_conn.cursor() as cursor:
             cursor.execute(
                 """select s3_bucket, s3_key, content_type from app.uploaded_files

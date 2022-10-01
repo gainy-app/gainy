@@ -147,6 +147,7 @@ module "aws" {
   drivewealth_api_username   = var.drivewealth_api_username
   drivewealth_api_password   = var.drivewealth_api_password
   drivewealth_api_url        = var.drivewealth_api_url
+  drivewealth_sqs_arn        = var.drivewealth_sqs_arn
 
   codeartifact_pipy_url = var.codeartifact_pipy_url
   gainy_compute_version = var.gainy_compute_version

@@ -96,11 +96,10 @@ class SearchCollections(SearchAction):
         return "collections"
 
     def apply(self, input_params, context_container: ContextContainer):
-        db_conn = context_container.db_conn
         profile_id = self.get_profile_id(input_params)
 
         result = []
-        for i in super().apply(db_conn, input_params, headers):
+        for i in super().apply(input_params, context_container):
             if i['id'] == TOP_20_FOR_YOU_COLLECTION_ID:
                 if profile_id is None:
                     continue

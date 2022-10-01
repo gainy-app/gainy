@@ -77,8 +77,11 @@ ACTIONS = [
     TradingReconfigureCollectionHoldings(),
     TradingGetActualCollectionHoldings(),
     TradingSyncProviderData(),
+
+    # Debug
     TradingAddMoney(),
     TradingDeleteData(),
+    ReHandleQueueMessages(),
 ]
 
 action_dispatcher = HasuraActionDispatcher(ACTIONS,

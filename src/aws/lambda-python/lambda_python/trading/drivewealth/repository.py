@@ -10,17 +10,6 @@ logger = get_logger(__name__)
 
 class DriveWealthRepository(GainyDriveWealthRepository):
 
-    def upsert_user(self, profile_id, data) -> DriveWealthUser:
-        entity = DriveWealthUser()
-        entity.ref_id = data["id"]
-        entity.profile_id = profile_id
-        entity.status = data["status"]["name"]
-        entity.data = json.dumps(data)
-
-        self.persist(entity)
-
-        return entity
-
     def get_user_accounts(self,
                           drivewealth_user_id) -> List[DriveWealthAccount]:
         return self.find_all(DriveWealthAccount,
@@ -56,7 +45,7 @@ class DriveWealthRepository(GainyDriveWealthRepository):
         entity = DriveWealthDocument()
         entity.ref_id = id
         entity.status = data["status"]["name"]
-        entity.data = json.dumps(data)
+        entity.data = data
 
         if kyc_document_id:
             entity.kyc_document_id = kyc_document_id

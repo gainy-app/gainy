@@ -39,6 +39,16 @@ mutation TradingDeleteData($profile_id: Int!) {
   }
 }
 ```
+Re-handle queue messages
+```graphql
+mutation ReHandleQueueMessages($ids: [Int]!) {
+  rehandle_queue_messages(ids: $ids) {
+    success
+    unsupported
+    error
+  }
+}
+```
 
 ### **[TODO]** History
 1. Get rebalancing history (trading_collection_versions with status `complete`) 

@@ -16,21 +16,19 @@ from trading.drivewealth.repository import DriveWealthRepository
 from gainy.utils import get_logger
 from gainy.trading.models import TradingAccount
 from gainy.trading.drivewealth.models import DriveWealthAccount
-from gainy.trading.drivewealth import DriveWealthProvider as GainyDriveWealthProvider
 
 logger = get_logger(__name__)
 
 IS_UAT = os.getenv("DRIVEWEALTH_IS_UAT", "true") != "false"
 
 
-class DriveWealthProvider(GainyDriveWealthProvider, DriveWealthProviderKYC,
+class DriveWealthProvider(DriveWealthProviderKYC,
                           DriveWealthProviderCollection):
 
     def __init__(self, repository: DriveWealthRepository, api: DriveWealthApi,
                  plaid_service: PlaidService):
-        self.repository = repository
+        super().__init__(repository, api)
         self.plaid_service = plaid_service
-        self.api = api
 
     def link_bank_account_with_plaid(
             self, access_token: PlaidAccessToken, account_id: str,
@@ -128,14 +126,42 @@ class DriveWealthProvider(GainyDriveWealthProvider, DriveWealthProviderKYC,
     def sync_data(self, profile_id):
         user = self._get_user(profile_id)
 
-        self.sync_trading_accounts(profile_id)
+        self.sync_user(user.ref_id)
+        self.sync_profile_trading_accounts(profile_id)
         self._sync_autopilot_runs(user.ref_id)
         self._sync_bank_accounts(user.ref_id)
-        self._sync_deposits(user.ref_id)
+        self._sync_user_deposits(user.ref_id)
         # self._sync_documents(user.ref_id)
         self._sync_portfolio_statuses(profile_id)
         # self._sync_redemptions(user.ref_id)
         # self._sync_users(user.ref_id)
+
+    def sync_deposit(self, deposit_ref_id: str, fetch_info=False):
+        repository = self.repository
+
+        entity = repository.find_one(DriveWealthDeposit,
+                                     {"ref_id": deposit_ref_id})
+        if not entity:
+            entity = DriveWealthDeposit()
+            fetch_info = True
+
+        if fetch_info:
+            deposit_data = self.api.get_deposit(deposit_ref_id)
+            entity.set_from_response(deposit_data)
+            if not repository.find_one(
+                    DriveWealthAccount,
+                {"ref_id": entity.trading_account_ref_id}):
+                self.sync_trading_account(
+                    account_ref_id=entity.trading_account_ref_id,
+                    fetch_info=True)
+            repository.persist(entity)
+
+        if not entity.money_flow_id:
+            return
+        money_flow = repository.find_one(TradingMoneyFlow,
+                                         {"id": entity.money_flow_id})
+        self._update_money_flow_status(entity, money_flow)
+        repository.persist(money_flow)
 
     def _sync_bank_accounts(self, user_ref_id):
         repository = self.repository
@@ -149,7 +175,7 @@ class DriveWealthProvider(GainyDriveWealthProvider, DriveWealthProviderKYC,
             entity.drivewealth_user_id = user_ref_id
             return repository.persist(entity)
 
-    def _sync_deposits(self, user_ref_id):
+    def _sync_user_deposits(self, user_ref_id: str):
         repository = self.repository
 
         deposits_data = self.api.get_user_deposits(user_ref_id)
@@ -160,12 +186,7 @@ class DriveWealthProvider(GainyDriveWealthProvider, DriveWealthProviderKYC,
             entity.set_from_response(deposit_data)
             repository.persist(entity)
 
-            if not entity.money_flow_id:
-                continue
-            money_flow = repository.find_one(TradingMoneyFlow,
-                                             {"id": entity.money_flow_id})
-            self._update_money_flow_status(entity, money_flow)
-            repository.persist(money_flow)
+            self.sync_deposit(deposit_ref_id=entity.ref_id, fetch_info=False)
 
     def _sync_autopilot_runs(self, user_ref_id):
         repository = self.repository

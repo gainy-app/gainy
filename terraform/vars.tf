@@ -78,6 +78,9 @@ variable "drivewealth_api_url" {
   type      = string
   sensitive = true
 }
+variable "drivewealth_sqs_arn" {
+  type = string
+}
 
 #################################### AWS ####################################
 

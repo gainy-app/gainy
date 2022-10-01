@@ -7,19 +7,15 @@ from trading.drivewealth.repository import DriveWealthRepository
 
 from gainy.trading.models import TradingAccount
 from gainy.trading.drivewealth.models import DriveWealthAccount, DriveWealthUser
-from gainy.trading.drivewealth.provider.base import DriveWealthProviderBase as GainyDriveWealthProviderBase
+from gainy.trading.drivewealth.provider import DriveWealthProvider as GainyDriveWealthProvider
 from gainy.utils import get_logger
 
 logger = get_logger(__name__)
 
 
-class DriveWealthProviderKYC(GainyDriveWealthProviderBase):
+class DriveWealthProviderKYC(GainyDriveWealthProvider):
     repository: DriveWealthRepository = None
     api: DriveWealthApi = None
-
-    def __init__(self, repository: DriveWealthRepository, api: DriveWealthApi):
-        super().__init__(repository)
-        self.api = api
 
     def kyc_send_form(self, kyc_form: dict) -> ProfileKycStatus:
         profile_id = kyc_form['profile_id']
@@ -33,7 +29,11 @@ class DriveWealthProviderKYC(GainyDriveWealthProviderBase):
         else:
             user_data = self.api.update_user(user.ref_id, documents)
 
-        user = repository.upsert_user(profile_id, user_data)
+        user = DriveWealthUser()
+        user.profile_id = profile_id
+        user.set_from_response(user_data)
+        repository.persist(user)
+
         user_ref_id = user.ref_id
 
         # create or update account
@@ -44,21 +44,10 @@ class DriveWealthProviderKYC(GainyDriveWealthProviderBase):
         return self.api.get_kyc_status(user_ref_id).get_profile_kyc_status()
 
     def kyc_get_status(self, profile_id: int) -> ProfileKycStatus:
-        repository = self.repository
         user = self._get_user(profile_id)
         user_ref_id = user.ref_id
-
-        user_data = self.api.get_user(user_ref_id)
-        repository.upsert_user(profile_id, user_data)
-
-        kyc_status = self.api.get_kyc_status(
-            user_ref_id).get_profile_kyc_status()
-
-        documents_data = self.api.get_user_documents(user_ref_id)
-        for document_data in documents_data:
-            repository.upsert_kyc_document(None, document_data)
-
-        return kyc_status
+        self.sync_user(user_ref_id)
+        return self.sync_kyc(user_ref_id)
 
     def send_kyc_document(self, profile_id: int, document: KycDocument,
                           file_stream: io.BytesIO):
@@ -71,6 +60,16 @@ class DriveWealthProviderKYC(GainyDriveWealthProviderBase):
 
         data = self.api.upload_document(user.ref_id, document, file_data)
         repository.upsert_kyc_document(document.id, data)
+
+    def sync_kyc(self, user_ref_id) -> ProfileKycStatus:
+        kyc_status = self.api.get_kyc_status(
+            user_ref_id).get_profile_kyc_status()
+
+        documents_data = self.api.get_user_documents(user_ref_id)
+        for document_data in documents_data:
+            self.repository.upsert_kyc_document(None, document_data)
+
+        return kyc_status
 
     def _kyc_form_to_documents(self, kyc_form: dict):
         return [
