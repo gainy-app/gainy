@@ -150,6 +150,29 @@
         ]
       }
     },
+    "crypto_coins": {
+      "metadata": {
+        "replication-key": "updated_at",
+        "replication-method": "INCREMENTAL",
+        "table-key-properties": [
+          "symbol"
+        ]
+      }
+    },
+    "crypto_metrics": {
+      "metadata": {
+        "table-key-properties": [
+          "symbol"
+        ]
+      }
+    },
+    "crypto_realtime_metrics": {
+      "metadata": {
+        "table-key-properties": [
+          "symbol"
+        ]
+      }
+    },
     "earnings_annual": {
       "metadata": {
         "replication-key": "updated_at",
@@ -327,6 +350,24 @@
     }
   },
   "raw_data": {
+    "coingecko_coin": {
+      "metadata": {
+        "replication-key": "_sdc_extracted_at",
+        "replication-method": "INCREMENTAL",
+        "table-key-properties": [
+          "id"
+        ]
+      }
+    },
+    "coingecko_market_realtime": {
+      "metadata": {
+        "replication-key": "_sdc_extracted_at",
+        "replication-method": "INCREMENTAL",
+        "table-key-properties": [
+          "id"
+        ]
+      }
+    },
     "eod_dividends": {
       "metadata": {
         "replication-key": "_sdc_extracted_at",
@@ -354,6 +395,17 @@
         "table-key-properties": [
           "code",
           "date"
+        ]
+      }
+    },
+    "eod_options": {
+      "isSmallBatch": true,
+      "metadata": {
+        "replication-key": "_sdc_extracted_at",
+        "replication-method": "INCREMENTAL",
+        "table-key-properties": [
+          "code",
+          "expirationdate"
         ]
       }
     },
