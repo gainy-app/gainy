@@ -256,9 +256,9 @@ class PricesListener(AbstractPriceListener):
         return 'us'
 
     async def _connect_and_listen(self, url, symbols):
-        try:
-            async with websockets.connect(
-                    url, ping_interval=self._ping_interval) as websocket:
+        async with websockets.connect(
+                url, ping_interval=self._ping_interval) as websocket:
+            try:
                 self.logger.info(
                     f"connected to websocket '{self.endpoint}' for symbols: {','.join(symbols)}"
                 )
@@ -270,24 +270,25 @@ class PricesListener(AbstractPriceListener):
                 async for message in websocket:
                     await self.handle_message(message)
 
-        except (websockets.ConnectionClosed, asyncio.TimeoutError) as e:
-            self.logger.warning(e)
+            except (websockets.ConnectionClosed, asyncio.TimeoutError) as e:
+                self.logger.warning(e)
 
-        finally:
-            self.logger.info(f"Unsubscribing from {self.endpoint}")
-            try:
-                await websocket.send(
-                    json.dumps({
-                        "action": "unsubscribe",
-                        "symbols": ",".join(symbols)
-                    }))
+            finally:
+                self.logger.info(f"Unsubscribing from {self.endpoint}")
+                try:
+                    await websocket.send(
+                        json.dumps({
+                            "action": "unsubscribe",
+                            "symbols": ",".join(symbols)
+                        }))
 
-            except websockets.ConnectionClosed:
-                pass
+                except websockets.ConnectionClosed:
+                    pass
 
-            except Exception as e:
-                self.logger.warning("%s Error caught while unsubscribing: %s",
-                                    type(e).__name__, str(e))
+                except Exception as e:
+                    self.logger.warning(
+                        "%s Error caught while unsubscribing: %s",
+                        type(e).__name__, str(e))
 
 
 if __name__ == "__main__":
