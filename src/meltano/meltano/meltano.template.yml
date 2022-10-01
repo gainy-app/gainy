@@ -153,7 +153,7 @@ plugins:
         itersize: 1
 
     - name: tap-postgres-analytics-bigquery
-      inherit_from: tap-postgres
+      inherit_from: tap-postgres-analytics
       catalog: catalog/analytics/tap-bigquery.catalog.json
 
     - name: tap-postgres-analytics-bigquery-small-batch

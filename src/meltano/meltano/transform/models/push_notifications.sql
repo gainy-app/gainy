@@ -232,6 +232,7 @@ with all_push_notifications as
                      where relative_gain_1m < 0
                      order by profile_id, relative_gain_1m
                 ) t
+                     join {{ source('app', 'profiles') }} on profiles.id = t.profile_id
                      join {{ ref('exchange_schedule') }} on exchange_schedule.country_name = 'USA' and exchange_schedule.date = now()::date
             where now() between exchange_schedule.open_at + interval '2 hours' and exchange_schedule.close_at
 
