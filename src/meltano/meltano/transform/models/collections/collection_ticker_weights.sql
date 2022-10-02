@@ -72,6 +72,21 @@ with raw_ticker_collections_weights as materialized
                                            from {{ source('gainy', 'ticker_collections') }}
                                        ) - interval '1 hour'
          ),
+     ticker_collections_next_date as materialized
+         (
+             select collection_uniq_id,
+                    symbol,
+                    min(week_trading_sessions_static.date) as date
+             from (
+                      select collection_uniq_id, symbol
+                      from ticker_collections_weights
+                      group by collection_uniq_id, symbol
+                  ) t
+                      join {{ ref('historical_prices_marked') }} using (symbol)
+                      join {{ ref('week_trading_sessions_static') }} using (symbol)
+             where week_trading_sessions_static.date > historical_prices_marked.date_0d
+             group by collection_uniq_id, symbol
+         ),
 {% if is_incremental() and var('realtime') %}
      old_stats as materialized
          (
@@ -123,23 +138,6 @@ with raw_ticker_collections_weights as materialized
                       ticker_collections_weights.symbol,
                       historical_prices.date,
                       ticker_collections_weights.date
-         ),
-     ticker_collections_next_date as materialized
-         (
-             select distinct on (
-                 collection_uniq_id,
-                 symbol
-                 ) collection_uniq_id,
-                   symbol,
-                   week_trading_sessions_static.date
-             from (
-                      select collection_uniq_id, symbol, max(date) as date
-                      from ticker_collections_weights_expanded0
-                      group by collection_uniq_id, symbol
-                  ) t
-             join {{ ref('week_trading_sessions_static') }} using (symbol)
-             where week_trading_sessions_static.date > t.date
-             order by collection_uniq_id, symbol, week_trading_sessions_static.date
          ),
      ticker_collections_weights_expanded1 as materialized
          (
