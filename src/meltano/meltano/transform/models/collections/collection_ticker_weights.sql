@@ -126,15 +126,20 @@ with raw_ticker_collections_weights as materialized
          ),
      ticker_collections_next_date as materialized
          (
-             select symbol, collection_uniq_id, week_trading_sessions_static.date
-             from {{ ref('week_trading_sessions_static') }}
-             join (
+             select distinct on (
+                 collection_uniq_id,
+                 symbol
+                 ) collection_uniq_id,
+                   symbol,
+                   week_trading_sessions_static.date
+             from (
                       select collection_uniq_id, symbol, max(date) as date
                       from ticker_collections_weights_expanded0
-                      group by symbol, collection_uniq_id
-                  ) t using (symbol)
+                      group by collection_uniq_id, symbol
+                  ) t
+             join {{ ref('week_trading_sessions_static') }} using (symbol)
              where week_trading_sessions_static.date > t.date
-             order by symbol, collection_uniq_id, week_trading_sessions_static.date
+             order by collection_uniq_id, symbol, week_trading_sessions_static.date
          ),
      ticker_collections_weights_expanded1 as materialized
          (
