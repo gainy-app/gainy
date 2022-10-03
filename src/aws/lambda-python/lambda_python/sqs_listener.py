@@ -8,7 +8,7 @@ setup_exception_logger_hook()
 
 
 def handle(event, context):
-    logger.info('new message', extra={"event": event, "context": context})
+    logger.info('New message', extra={"event": event, "context": context})
 
     with ContextContainer() as context_container:
         adapter = context_container.sqs_adapter
