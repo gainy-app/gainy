@@ -206,6 +206,17 @@ module "ecs-service" {
 
   bigquery_google_project = var.bigquery_google_project
   bigquery_credentials    = var.bigquery_credentials
+
+  drivewealth_is_uat         = var.drivewealth_is_uat
+  drivewealth_app_key        = var.drivewealth_app_key
+  drivewealth_wlp_id         = var.drivewealth_wlp_id
+  drivewealth_parent_ibid    = var.drivewealth_parent_ibid
+  drivewealth_ria_id         = var.drivewealth_ria_id
+  drivewealth_ria_product_id = var.drivewealth_ria_product_id
+  drivewealth_api_username   = var.drivewealth_api_username
+  drivewealth_api_password   = var.drivewealth_api_password
+  drivewealth_api_url        = var.drivewealth_api_url
+  drivewealth_sqs_arn        = var.drivewealth_sqs_arn
 }
 
 

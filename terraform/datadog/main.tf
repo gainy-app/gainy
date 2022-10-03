@@ -275,7 +275,7 @@ resource "datadog_monitor" "meltano_dag_run_date" {
   type    = "metric alert"
   message = "Airflow Meltano Dag Run Date triggered. Notify: @slack-${var.slack_channel_name} <!channel>"
 
-  query = "max(last_5m):min:app.days_from_latest_dag_run{postgres_env:production} by {dag_id} >= 1"
+  query = "max(last_5m):min:app.seconds_from_next_dag_run{postgres_env:production} by {dag_id} >= 1"
 
   monitor_thresholds {
     critical = 1

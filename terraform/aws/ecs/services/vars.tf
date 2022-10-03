@@ -57,3 +57,12 @@ variable "bigquery_credentials" {}
 variable "pg_datadog_password" {}
 variable "pg_internal_sync_username" {}
 variable "pg_internal_sync_password" {}
+variable "drivewealth_is_uat" {}
+variable "drivewealth_app_key" {}
+variable "drivewealth_wlp_id" {}
+variable "drivewealth_parent_ibid" {}
+variable "drivewealth_ria_id" {}
+variable "drivewealth_ria_product_id" {}
+variable "drivewealth_api_username" {}
+variable "drivewealth_api_password" {}
+variable "drivewealth_api_url" {}

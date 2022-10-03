@@ -24,6 +24,16 @@ locals {
     aws_log_group_name                  = aws_cloudwatch_log_group.meltano.name
     aws_log_region                      = var.aws_log_region
     aws_lambda_api_gateway_endpoint     = var.aws_lambda_api_gateway_endpoint
+
+    drivewealth_is_uat         = var.drivewealth_is_uat
+    drivewealth_app_key        = var.drivewealth_app_key
+    drivewealth_wlp_id         = var.drivewealth_wlp_id
+    drivewealth_parent_ibid    = var.drivewealth_parent_ibid
+    drivewealth_ria_id         = var.drivewealth_ria_id
+    drivewealth_ria_product_id = var.drivewealth_ria_product_id
+    drivewealth_api_username   = var.drivewealth_api_username
+    drivewealth_api_password   = var.drivewealth_api_password
+    drivewealth_api_url        = var.drivewealth_api_url
   }
   meltano_airflow_ui_task_description = jsondecode(templatefile(
     "${path.module}/task_definitions/meltano-airflow-ui.json",
