@@ -165,57 +165,63 @@ with check_params(table_name, dt_interval,
                     (volume is null)::int                      as iserror_volume_is_null
              from tickers_stddevs_means_devs
                       left join check_params cp on true
-             where date >= depth_check_threshold
          ), -- select * from tickers_checks;
 
      tickers_checks_verbose_union as
          (
              (
-                 select distinct on (
-                     symbol
-                     )-- symbols that was used as market will give 0 here and will not trigger (until allowable sigma > 0)
-                      symbol,
-                      table_name || '__adjusted_close_perc_change_dev_wom' as code,
-                      'daily'                                              as "period",
-                      json_build_object(
-                          'table_name', table_name,
-                          'stddev_threshold', allowable_sigma_dev_adjclose_percchange * stddev_adjusted_close_perc_change_wom,
-                          'mu', mean_adjusted_close_perc_change_wom,
-                          'stddev', stddev_adjusted_close_perc_change_wom,
-                          'value', dev_adjusted_close_perc_change_wom,
-                          'date', date
-                      )::text                                              as message
+                 select symbol,
+                        table_name || '__adjusted_close_perc_change_dev_wom' as code,
+                        'daily'                          as "period",
+                        json_build_object(
+                            'table_name', table_name,
+                            'stddev_threshold', max(allowable_sigma_dev_volume_dif * stddev_volume_dif),
+                            'mu', max(mean_volume_dif),
+                            'stddev', max(stddev_volume_dif),
+                            'value', max(dev_volume_dif),
+                            'date', max(date)
+                        )::text                          as message
                  from tickers_checks
+                         join (
+                                  select date
+                                  from tickers_checks
+                                  group by date
+                                  having avg(iserror_adjusted_close_perc_change_dev_wom) > 0.1 and date not between '2020-03-13' and '2020-03-24'
+                              ) t using (date)
                  where iserror_adjusted_close_perc_change_dev_wom > 0
-                 order by symbol, date desc
-             )
-             union all
-             (
-                 select distinct on (
-                     symbol
-                     ) symbol,
-                       table_name || '__volume_dif_dev' as code,
-                       'daily'                          as "period",
-                       json_build_object(
-                           'table_name', table_name,
-                           'stddev_threshold', allowable_sigma_dev_volume_dif * stddev_volume_dif,
-                           'mu', mean_volume_dif,
-                           'stddev', stddev_volume_dif,
-                           'value', dev_volume_dif,
-                           'date', date
-                       )::text                          as message
-                 from tickers_checks
-                 where iserror_volume_dif_dev > 0
-                 order by symbol, date desc
+                 group by symbol, table_name
              )
              union all
              (
                  select symbol,
-                        table_name || '__adjusted_close_twice_same'                       as code,
-                        'daily'                                                           as "period",
+                        table_name || '__volume_dif_dev' as code,
+                        'daily'                          as "period",
+                        json_build_object(
+                            'table_name', table_name,
+                            'stddev_threshold', max(allowable_sigma_dev_volume_dif * stddev_volume_dif),
+                            'mu', max(mean_volume_dif),
+                            'stddev', max(stddev_volume_dif),
+                            'value', max(dev_volume_dif),
+                            'date', max(date)
+                        )::text                          as message
+                 from tickers_checks
+                         join (
+                                  select date
+                                  from tickers_checks
+                                  group by date
+                                  having avg(iserror_adjusted_close_perc_change_dev_wom) > 0.1 and date not between '2020-03-13' and '2020-03-24'
+                              ) t using (date)
+                 where iserror_volume_dif_dev > 0
+                 group by symbol, table_name
+             )
+             union all
+             (
+                 select symbol,
+                        table_name || '__adjusted_close_twice_same'                            as code,
+                        'daily'                                                                as "period",
                         'Tickers ' || symbol || ' in table ' ||
                         table_name || ' has ' || sum(iserror_adjusted_close_twice_same) ||
-                        ' pairs of consecutive rows with same price. Example at ' || date as message
+                        ' pairs of consecutive rows with same price. Example at ' || max(date) as message
                  from tickers_checks
                          join (
                                   select date
