@@ -18,7 +18,7 @@ with check_params(table_name, dt_interval,
                   depth_stddev, depth_stddev_threshold,
                   depth_check, depth_check_threshold, -- depth_stddev >= depth_check !!
                   allowable_sigma_dev_adjclose_percchange, allowable_sigma_dev_volume_dif,
-                  symbol_asmarket_crypto, symbol_asmarket_other) as materialized
+                  symbol_asmarket_crypto, symbol_asmarket_other) as
          (
              values ('raw_data.eod_historical_prices', interval '1 day',
                      interval '5 year', to_char(now()::timestamp - interval '5 year', 'YYYY-MM-DD'),
@@ -27,7 +27,7 @@ with check_params(table_name, dt_interval,
                      'BTC.CC', 'SPY')
          ),
 
-     intrpl_dt_now_wrt_interval as materialized -- generating time frames
+     intrpl_dt_now_wrt_interval as -- generating time frames
          ( -- now()='2022-06-22 15:15:14' with dt_interval='15 minutes'::interval will give: '2022-06-22 15:15:00' (it drops last not full frame)
              select (to_timestamp(
                                  (extract(epoch from now()::timestamp)::int / extract(epoch from cp.dt_interval)::int
@@ -38,7 +38,7 @@ with check_params(table_name, dt_interval,
              from check_params cp
          ),
 
-     intrpl_symbol_asmarket_dt as materialized
+     intrpl_symbol_asmarket_dt as
          (
              select unnest(array [cp.symbol_asmarket_other, cp.symbol_asmarket_crypto]) as intrpl_symbol_asmarket,
                     TO_CHAR(d.dt, 'YYYY-MM-DD')                                         as date,
@@ -93,7 +93,7 @@ with check_params(table_name, dt_interval,
          ),
 
      -- Execution Time: 19542.805 ms
-     tickers_data as materialized
+     tickers_data as
          (
              select code                                  as symbol,
                     date,
@@ -136,7 +136,7 @@ with check_params(table_name, dt_interval,
          ), -- select * from tickers_difs;
 
      -- Execution Time: 125082.553 ms
-     tickers_stddevs_means_devs as materialized
+     tickers_stddevs_means_devs as
          (
              select *,
                     stddev_pop(adjusted_close_perc_change_wom) over (w_s)                                as stddev_adjusted_close_perc_change_wom,
@@ -209,7 +209,7 @@ with check_params(table_name, dt_interval,
                                   select date
                                   from tickers_checks
                                   group by date
-                                  having avg(iserror_adjusted_close_perc_change_dev_wom) > 0.1 and date not between '2020-03-13' and '2020-03-24'
+                                  having avg(iserror_volume_dif_dev) > 0.05 and date not between '2018-01-06' and '2018-01-07'
                               ) t using (date)
                  where iserror_volume_dif_dev > 0
                  group by symbol, table_name
