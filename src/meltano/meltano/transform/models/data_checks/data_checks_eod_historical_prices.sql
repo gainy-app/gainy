@@ -113,12 +113,10 @@ with check_params(table_name, dt_interval,
      tickers_lag as
          (
              select t.*, -- symbol, dt, adjusted_close, volume, intrpl_symbol_asmarket
-                    lag(t.adjusted_close, 1, t.adjusted_close)
-                    over (partition by t.symbol order by t.date asc)                            as adjusted_close_pre,
-                    lag(t.volume, 1, t.volume) over (partition by t.symbol order by t.date asc) as volume_pre,
+                    lag(t.adjusted_close) over (partition by t.symbol order by t.date)                          as adjusted_close_pre,
+                    lag(t.volume) over (partition by t.symbol order by t.date)                                  as volume_pre,
                     sam.intrpl_symbol_asmarket_adjusted_close,
-                    lag(sam.intrpl_symbol_asmarket_adjusted_close, 1, sam.intrpl_symbol_asmarket_adjusted_close)
-                    over (partition by t.symbol order by t.date asc)                            as intrpl_symbol_asmarket_adjusted_close_pre
+                    lag(sam.intrpl_symbol_asmarket_adjusted_close) over (partition by t.symbol order by t.date) as intrpl_symbol_asmarket_adjusted_close_pre
              from tickers_data t
                       join intrpl_symbol_asmarket_dt_prices sam using (intrpl_symbol_asmarket, date)
          ), -- select * from tickers_lag;
@@ -131,10 +129,6 @@ with check_params(table_name, dt_interval,
                     (adjusted_close - adjusted_close_pre)
                         / (1e-30 + abs(adjusted_close_pre))                        as adjusted_close_perc_change,
                     volume - volume_pre                                            as volume_dif,
-                    intrpl_symbol_asmarket_adjusted_close -
-                    intrpl_symbol_asmarket_adjusted_close_pre                      as intrpl_symbol_asmarket_adjusted_close_dif,
-                    (intrpl_symbol_asmarket_adjusted_close - intrpl_symbol_asmarket_adjusted_close_pre)
-                        / (1e-30 + abs(intrpl_symbol_asmarket_adjusted_close_pre)) as intrpl_symbol_asmarket_adjusted_close_perc_change,
                     (adjusted_close - adjusted_close_pre) / (1e-30 + abs(adjusted_close_pre))
                         - (intrpl_symbol_asmarket_adjusted_close - intrpl_symbol_asmarket_adjusted_close_pre)
                         / (1e-30 + abs(intrpl_symbol_asmarket_adjusted_close_pre)) as adjusted_close_perc_change_wom
@@ -159,20 +153,16 @@ with check_params(table_name, dt_interval,
      tickers_checks as materialized
          (
              select *,
-                    case
-                        when dev_adjusted_close_perc_change_wom >
-                             stddev_adjusted_close_perc_change_wom * cp.allowable_sigma_dev_adjclose_percchange
-                            then 1
-                        else 0 end                                                  as iserror_adjusted_close_perc_change_dev_wom,
-                    case
-                        when dev_volume_dif >
-                             stddev_volume_dif * cp.allowable_sigma_dev_volume_dif
-                            then 1
-                        else 0 end                                                  as iserror_volume_dif_dev,
-                    case when adjusted_close = adjusted_close_pre then 1 else 0 end as iserror_adjusted_close_twice_same,
-                    case when adjusted_close <= 0 then 1 else 0 end                 as iserror_adjusted_close_is_notpositive,
-                    case when adjusted_close is null then 1 else 0 end              as iserror_adjusted_close_is_null,
-                    case when volume is null then 1 else 0 end                      as iserror_volume_is_null
+                    (
+                        dev_adjusted_close_perc_change_wom > stddev_adjusted_close_perc_change_wom * cp.allowable_sigma_dev_adjclose_percchange
+                    )::int                                     as iserror_adjusted_close_perc_change_dev_wom,
+                    (
+                        dev_volume_dif > stddev_volume_dif * cp.allowable_sigma_dev_volume_dif
+                    )::int                                     as iserror_volume_dif_dev,
+                    (adjusted_close = adjusted_close_pre)::int as iserror_adjusted_close_twice_same,
+                    (adjusted_close <= 0)::int                 as iserror_adjusted_close_is_notpositive,
+                    (adjusted_close is null)::int              as iserror_adjusted_close_is_null,
+                    (volume is null)::int                      as iserror_volume_is_null
              from tickers_stddevs_means_devs
                       left join check_params cp on true
              where date >= depth_check_threshold
@@ -220,18 +210,21 @@ with check_params(table_name, dt_interval,
              )
              union all
              (
-                 select distinct on (
-                     symbol
-                     ) -- agg >0 && distinct on (symbol) -> example case
-                       symbol,
-                       table_name || '__adjusted_close_twice_same'                       as code,
-                       'daily'                                                           as "period",
-                       'Ticker ' || symbol || ' in table ' ||
-                       table_name || ' has ' || iserror_adjusted_close_twice_same ||
-                       ' pairs of consecutive rows with same price. Example at ' || date as message
+                 select symbol,
+                        table_name || '__adjusted_close_twice_same'                       as code,
+                        'daily'                                                           as "period",
+                        'Tickers ' || symbol || ' in table ' ||
+                        table_name || ' has ' || sum(iserror_adjusted_close_twice_same) ||
+                        ' pairs of consecutive rows with same price. Example at ' || date as message
                  from tickers_checks
+                         join (
+                                  select date
+                                  from tickers_checks
+                                  group by date
+                                  having avg(iserror_adjusted_close_twice_same) > 0.06
+                              ) t using (date)
                  where iserror_adjusted_close_twice_same > 0
-                 order by symbol, date desc
+                 group by symbol, table_name
              )
              union all
              (
