@@ -125,6 +125,7 @@ union all
                           left join {{ source('gainy', 'ticker_collections_weights') }}
                                     on ticker_collections_weights.ttf_name = gainy_collections.name
                  where gainy_collections.enabled = '1'
+                   and gainy_collections._sdc_extracted_at > (select max(_sdc_extracted_at) from {{ source ('gainy', 'gainy_collections') }}) - interval '1 minute'
                    and ticker_collections_weights is null
                    and ticker_collections is null
              )
