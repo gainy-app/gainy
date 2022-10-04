@@ -37,9 +37,9 @@
                         else 0 end as adjusted_close_gain
              from {{ ref('collection_ticker_weights') }}
                       join {{ ref('historical_prices_aggregated_3min') }} using (symbol, date)
-                      join {{ ref('week_trading_sessions') }} using (symbol, date)
-             where week_trading_sessions.index = 0
-               and historical_prices_aggregated_3min.datetime between week_trading_sessions.open_at and week_trading_sessions.close_at
+                      join {{ ref('week_trading_sessions_static') }} using (symbol, date)
+             where week_trading_sessions_static.index = 0
+               and historical_prices_aggregated_3min.datetime between week_trading_sessions_static.open_at and week_trading_sessions_static.close_at
          ),
     collection_realtime_gains as
         (
@@ -106,8 +106,8 @@ union all
                         else 0 end as adjusted_close_gain
              from {{ ref('collection_ticker_weights') }}
                       join {{ ref('historical_prices_aggregated_15min') }} using (symbol, date)
-                      join {{ ref('week_trading_sessions') }} using (symbol, date)
-             where historical_prices_aggregated_15min.datetime between week_trading_sessions.open_at and week_trading_sessions.close_at
+                      join {{ ref('week_trading_sessions_static') }} using (symbol, date)
+             where historical_prices_aggregated_15min.datetime between week_trading_sessions_static.open_at and week_trading_sessions_static.close_at
          ),
     collection_realtime_gains as
         (
