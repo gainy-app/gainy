@@ -351,7 +351,7 @@ with tickers_and_options as
                                          from {{ ref('historical_intraday_prices') }}
                                          group by symbol
                                     ) t using (symbol)
-                               join historical_prices using (symbol, date)
+                               join {{ ref('historical_prices') }} using (symbol, date)
                       where historical_prices.adjusted_close > 0
                   ) t
              where abs(diff) > 0.1
