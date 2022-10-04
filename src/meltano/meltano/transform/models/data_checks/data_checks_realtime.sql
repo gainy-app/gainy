@@ -96,7 +96,7 @@ with tickers_and_options as
                                  date_trunc('minute', eod_intraday_prices.time) -
                                  interval '1 minute' *
                                  mod(extract(minutes from eod_intraday_prices.time)::int, 15) - open_at as time
-                          from base_tickers
+                          from {{ ref('base_tickers') }}
                                    join {{ ref('week_trading_sessions_static') }} using (symbol)
                                    join {{ source('eod', 'eod_intraday_prices') }} using (symbol)
                           where (base_tickers.exchange_canonical in ('NYSE', 'NASDAQ') or
@@ -129,7 +129,7 @@ with tickers_and_options as
                                  interval '1 minute' *
                                  mod(extract(minutes from eod_intraday_prices.time)::int, 15) - open_at as time,
                                  open_at
-                          from base_tickers
+                          from {{ ref('base_tickers') }}
                                    join {{ ref('week_trading_sessions_static') }} using (symbol)
                                    join {{ source('eod', 'eod_intraday_prices') }} using (symbol)
                           where (base_tickers.exchange_canonical in ('NYSE', 'NASDAQ') or
