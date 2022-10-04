@@ -18,7 +18,7 @@ with check_params(table_name, dt_interval,
                   depth_stddev, depth_stddev_threshold,
                   depth_check, depth_check_threshold, -- depth_stddev >= depth_check !!
                   allowable_sigma_dev_adjclose_percchange, allowable_sigma_dev_volume_dif,
-                  symbol_asmarket_crypto, symbol_asmarket_other) as materialized
+                  symbol_asmarket_crypto, symbol_asmarket_other) as
          (
              values ('raw_data.eod_historical_prices', interval '1 day',
                      interval '5 year', to_char(now()::timestamp - interval '5 year', 'YYYY-MM-DD'),
@@ -27,7 +27,7 @@ with check_params(table_name, dt_interval,
                      'BTC.CC', 'SPY')
          ),
 
-     intrpl_dt_now_wrt_interval as materialized -- generating time frames
+     intrpl_dt_now_wrt_interval as -- generating time frames
          ( -- now()='2022-06-22 15:15:14' with dt_interval='15 minutes'::interval will give: '2022-06-22 15:15:00' (it drops last not full frame)
              select (to_timestamp(
                                  (extract(epoch from now()::timestamp)::int / extract(epoch from cp.dt_interval)::int
@@ -38,7 +38,7 @@ with check_params(table_name, dt_interval,
              from check_params cp
          ),
 
-     intrpl_symbol_asmarket_dt as materialized
+     intrpl_symbol_asmarket_dt as
          (
              select unnest(array [cp.symbol_asmarket_other, cp.symbol_asmarket_crypto]) as intrpl_symbol_asmarket,
                     TO_CHAR(d.dt, 'YYYY-MM-DD')                                         as date,
@@ -93,7 +93,7 @@ with check_params(table_name, dt_interval,
          ),
 
      -- Execution Time: 19542.805 ms
-     tickers_data as materialized
+     tickers_data as
          (
              select code                                  as symbol,
                     date,
@@ -113,12 +113,10 @@ with check_params(table_name, dt_interval,
      tickers_lag as
          (
              select t.*, -- symbol, dt, adjusted_close, volume, intrpl_symbol_asmarket
-                    lag(t.adjusted_close, 1, t.adjusted_close)
-                    over (partition by t.symbol order by t.date asc)                            as adjusted_close_pre,
-                    lag(t.volume, 1, t.volume) over (partition by t.symbol order by t.date asc) as volume_pre,
+                    lag(t.adjusted_close) over (partition by t.symbol order by t.date)                          as adjusted_close_pre,
+                    lag(t.volume) over (partition by t.symbol order by t.date)                                  as volume_pre,
                     sam.intrpl_symbol_asmarket_adjusted_close,
-                    lag(sam.intrpl_symbol_asmarket_adjusted_close, 1, sam.intrpl_symbol_asmarket_adjusted_close)
-                    over (partition by t.symbol order by t.date asc)                            as intrpl_symbol_asmarket_adjusted_close_pre
+                    lag(sam.intrpl_symbol_asmarket_adjusted_close) over (partition by t.symbol order by t.date) as intrpl_symbol_asmarket_adjusted_close_pre
              from tickers_data t
                       join intrpl_symbol_asmarket_dt_prices sam using (intrpl_symbol_asmarket, date)
          ), -- select * from tickers_lag;
@@ -131,10 +129,6 @@ with check_params(table_name, dt_interval,
                     (adjusted_close - adjusted_close_pre)
                         / (1e-30 + abs(adjusted_close_pre))                        as adjusted_close_perc_change,
                     volume - volume_pre                                            as volume_dif,
-                    intrpl_symbol_asmarket_adjusted_close -
-                    intrpl_symbol_asmarket_adjusted_close_pre                      as intrpl_symbol_asmarket_adjusted_close_dif,
-                    (intrpl_symbol_asmarket_adjusted_close - intrpl_symbol_asmarket_adjusted_close_pre)
-                        / (1e-30 + abs(intrpl_symbol_asmarket_adjusted_close_pre)) as intrpl_symbol_asmarket_adjusted_close_perc_change,
                     (adjusted_close - adjusted_close_pre) / (1e-30 + abs(adjusted_close_pre))
                         - (intrpl_symbol_asmarket_adjusted_close - intrpl_symbol_asmarket_adjusted_close_pre)
                         / (1e-30 + abs(intrpl_symbol_asmarket_adjusted_close_pre)) as adjusted_close_perc_change_wom
@@ -142,7 +136,7 @@ with check_params(table_name, dt_interval,
          ), -- select * from tickers_difs;
 
      -- Execution Time: 125082.553 ms
-     tickers_stddevs_means_devs as materialized
+     tickers_stddevs_means_devs as
          (
              select *,
                     stddev_pop(adjusted_close_perc_change_wom) over (w_s)                                as stddev_adjusted_close_perc_change_wom,
@@ -159,79 +153,84 @@ with check_params(table_name, dt_interval,
      tickers_checks as materialized
          (
              select *,
-                    case
-                        when dev_adjusted_close_perc_change_wom >
-                             stddev_adjusted_close_perc_change_wom * cp.allowable_sigma_dev_adjclose_percchange
-                            then 1
-                        else 0 end                                                  as iserror_adjusted_close_perc_change_dev_wom,
-                    case
-                        when dev_volume_dif >
-                             stddev_volume_dif * cp.allowable_sigma_dev_volume_dif
-                            then 1
-                        else 0 end                                                  as iserror_volume_dif_dev,
-                    case when adjusted_close = adjusted_close_pre then 1 else 0 end as iserror_adjusted_close_twice_same,
-                    case when adjusted_close <= 0 then 1 else 0 end                 as iserror_adjusted_close_is_notpositive,
-                    case when adjusted_close is null then 1 else 0 end              as iserror_adjusted_close_is_null,
-                    case when volume is null then 1 else 0 end                      as iserror_volume_is_null
+                    (
+                        dev_adjusted_close_perc_change_wom > stddev_adjusted_close_perc_change_wom * cp.allowable_sigma_dev_adjclose_percchange
+                    )::int                                     as iserror_adjusted_close_perc_change_dev_wom,
+                    (
+                        dev_volume_dif > stddev_volume_dif * cp.allowable_sigma_dev_volume_dif
+                    )::int                                     as iserror_volume_dif_dev,
+                    (adjusted_close = adjusted_close_pre)::int as iserror_adjusted_close_twice_same,
+                    (adjusted_close <= 0)::int                 as iserror_adjusted_close_is_notpositive,
+                    (adjusted_close is null)::int              as iserror_adjusted_close_is_null,
+                    (volume is null)::int                      as iserror_volume_is_null
              from tickers_stddevs_means_devs
                       left join check_params cp on true
-             where date >= depth_check_threshold
          ), -- select * from tickers_checks;
 
      tickers_checks_verbose_union as
          (
              (
-                 select distinct on (
-                     symbol
-                     )-- symbols that was used as market will give 0 here and will not trigger (until allowable sigma > 0)
-                      symbol,
-                      table_name || '__adjusted_close_perc_change_dev_wom' as code,
-                      'daily'                                              as "period",
-                      json_build_object(
-                          'table_name', table_name,
-                          'stddev_threshold', allowable_sigma_dev_adjclose_percchange * stddev_adjusted_close_perc_change_wom,
-                          'mu', mean_adjusted_close_perc_change_wom,
-                          'stddev', stddev_adjusted_close_perc_change_wom,
-                          'value', dev_adjusted_close_perc_change_wom,
-                          'date', date
-                      )::text                                              as message
+                 select symbol,
+                        table_name || '__adjusted_close_perc_change_dev_wom' as code,
+                        'daily'                          as "period",
+                        json_build_object(
+                            'table_name', table_name,
+                            'stddev_threshold', max(allowable_sigma_dev_volume_dif * stddev_volume_dif),
+                            'mu', max(mean_volume_dif),
+                            'stddev', max(stddev_volume_dif),
+                            'value', max(dev_volume_dif),
+                            'date', max(date)
+                        )::text                          as message
                  from tickers_checks
+                         join (
+                                  select date
+                                  from tickers_checks
+                                  group by date
+                                  having avg(iserror_adjusted_close_perc_change_dev_wom) > 0.1 and date not between '2020-03-13' and '2020-03-24'
+                              ) t using (date)
                  where iserror_adjusted_close_perc_change_dev_wom > 0
-                 order by symbol, date desc
+                 group by symbol, table_name
              )
              union all
              (
-                 select distinct on (
-                     symbol
-                     ) symbol,
-                       table_name || '__volume_dif_dev' as code,
-                       'daily'                          as "period",
-                       json_build_object(
-                           'table_name', table_name,
-                           'stddev_threshold', allowable_sigma_dev_volume_dif * stddev_volume_dif,
-                           'mu', mean_volume_dif,
-                           'stddev', stddev_volume_dif,
-                           'value', dev_volume_dif,
-                           'date', date
-                       )::text                          as message
+                 select symbol,
+                        table_name || '__volume_dif_dev' as code,
+                        'daily'                          as "period",
+                        json_build_object(
+                            'table_name', table_name,
+                            'stddev_threshold', max(allowable_sigma_dev_volume_dif * stddev_volume_dif),
+                            'mu', max(mean_volume_dif),
+                            'stddev', max(stddev_volume_dif),
+                            'value', max(dev_volume_dif),
+                            'date', max(date)
+                        )::text                          as message
                  from tickers_checks
+                         join (
+                                  select date
+                                  from tickers_checks
+                                  group by date
+                                  having avg(iserror_volume_dif_dev) > 0.05 and date not between '2018-01-06' and '2018-01-07'
+                              ) t using (date)
                  where iserror_volume_dif_dev > 0
-                 order by symbol, date desc
+                 group by symbol, table_name
              )
              union all
              (
-                 select distinct on (
-                     symbol
-                     ) -- agg >0 && distinct on (symbol) -> example case
-                       symbol,
-                       table_name || '__adjusted_close_twice_same'                       as code,
-                       'daily'                                                           as "period",
-                       'Ticker ' || symbol || ' in table ' ||
-                       table_name || ' has ' || iserror_adjusted_close_twice_same ||
-                       ' pairs of consecutive rows with same price. Example at ' || date as message
+                 select symbol,
+                        table_name || '__adjusted_close_twice_same'                            as code,
+                        'daily'                                                                as "period",
+                        'Tickers ' || symbol || ' in table ' ||
+                        table_name || ' has ' || sum(iserror_adjusted_close_twice_same) ||
+                        ' pairs of consecutive rows with same price. Example at ' || max(date) as message
                  from tickers_checks
+                         join (
+                                  select date
+                                  from tickers_checks
+                                  group by date
+                                  having avg(iserror_adjusted_close_twice_same) > 0.06
+                              ) t using (date)
                  where iserror_adjusted_close_twice_same > 0
-                 order by symbol, date desc
+                 group by symbol, table_name
              )
              union all
              (
