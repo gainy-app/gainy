@@ -8,7 +8,7 @@
     post_hook=[
       pk('symbol, datetime'),
       index(this, 'id', true),
-      'create index if not exists "datetime__symbol" ON {{ this }} (datetime, symbol)',
+      'create index if not exists "hpa_3min_datetime__symbol" ON {{ this }} (datetime, symbol)',
     ]
   )
 }}
