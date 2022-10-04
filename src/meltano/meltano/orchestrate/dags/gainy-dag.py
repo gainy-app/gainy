@@ -1,4 +1,3 @@
-import os
 from airflow.operators.bash import BashOperator
 from common import create_dag, get_meltano_command, get_schedules, MELTANO_PROJECT_ROOT, ENV
 
@@ -48,13 +47,13 @@ dbt = BashOperator(
 clean = BashOperator(
     task_id="clean",
     bash_command=
-    f"cd {MELTANO_PROJECT_ROOT}; /usr/local/bin/python scripts/cleanup.py",
+    f"cd {MELTANO_PROJECT_ROOT}; /usr/local/bin/python3 scripts/cleanup.py",
     dag=dag)
 
 generate_meltano_config = BashOperator(
     task_id="generate_meltano_config",
     bash_command=
-    f"cd {MELTANO_PROJECT_ROOT}; /usr/local/bin/python scripts/generate_meltano_config.py",
+    f"cd {MELTANO_PROJECT_ROOT}; /usr/local/bin/python3 scripts/generate_meltano_config.py",
     dag=dag)
 
 generate_meltano_config >> upstream >> dbt >> downstream >> clean
