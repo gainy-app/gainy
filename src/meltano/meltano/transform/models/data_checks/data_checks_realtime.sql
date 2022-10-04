@@ -41,7 +41,7 @@ with tickers_and_options as
                           select polygon_intraday_prices.symbol,
                                  max(close_at) as close_at,
                                  max(polygon_intraday_prices.time) as time
-                          from {{ source('eod', 'polygon_intraday_prices') }}
+                          from {{ source('polygon', 'polygon_intraday_prices') }}
                                    left join {{ ref('week_trading_sessions_static') }} using (symbol)
                           where week_trading_sessions_static is null
                             or (index = 0 and polygon_intraday_prices.time between week_trading_sessions_static.open_at and week_trading_sessions_static.close_at)
@@ -180,7 +180,7 @@ with tickers_and_options as
                                  mod(extract(minutes from polygon_intraday_prices.time)::int, 15) - open_at as time
                           from {{ ref('base_tickers') }}
                                    join {{ ref('week_trading_sessions_static') }} using (symbol)
-                                   join {{ source('eod', 'polygon_intraday_prices') }} using (symbol)
+                                   join {{ source('polygon', 'polygon_intraday_prices') }} using (symbol)
                           where (base_tickers.exchange_canonical in ('NYSE', 'NASDAQ') or
                                  (base_tickers.exchange_canonical is null and base_tickers.country_name = 'United States') or
                                  (base_tickers.exchange_canonical is null and base_tickers.country_name is null))
@@ -213,7 +213,7 @@ with tickers_and_options as
                                  open_at
                           from {{ ref('base_tickers') }}
                                    join {{ ref('week_trading_sessions_static') }} using (symbol)
-                                   join {{ source('eod', 'polygon_intraday_prices') }} using (symbol)
+                                   join {{ source('polygon', 'polygon_intraday_prices') }} using (symbol)
                           where (base_tickers.exchange_canonical in ('NYSE', 'NASDAQ') or
                                  (base_tickers.exchange_canonical is null and base_tickers.country_name = 'United States') or
                                  (base_tickers.exchange_canonical is null and base_tickers.country_name is null))
