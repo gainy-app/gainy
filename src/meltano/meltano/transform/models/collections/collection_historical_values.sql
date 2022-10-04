@@ -22,7 +22,7 @@ with data as materialized
                              historical_dividends.updated_at,
                              historical_prices.updated_at)                  as updated_at
              from {{ ref('collection_ticker_weights') }}
-                  join historical_prices using (symbol, date)
+                  join {{ ref('historical_prices') }} using (symbol, date)
                   left join {{ ref('historical_dividends') }} using (symbol, date)
          ),
      daily_collection_gain as
