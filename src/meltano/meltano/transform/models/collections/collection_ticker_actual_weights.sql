@@ -21,6 +21,7 @@ from (
                symbol,
                date,
                weight,
+               price,
                collection_uniq_id || '_' || symbol as id,
                updated_at
          from {{ ref('collection_ticker_weights') }}

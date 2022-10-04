@@ -16,11 +16,11 @@ with data as materialized
                     collection_id,
                     collection_uniq_id,
                     collection_ticker_weights.date,
-                    weight * (historical_prices.adjusted_close / price - 1) as relative_gain,
-                    coalesce(historical_dividends.value, 0)::numeric        as dividends_value,
+                    weight * (historical_prices.adjusted_close::numeric / price - 1) as relative_gain,
+                    coalesce(historical_dividends.value, 0)::numeric                 as dividends_value,
                     greatest(collection_ticker_weights.updated_at,
                              historical_dividends.updated_at,
-                             historical_prices.updated_at)                  as updated_at
+                             historical_prices.updated_at)                           as updated_at
              from {{ ref('collection_ticker_weights') }}
                   join {{ ref('historical_prices') }} using (symbol, date)
                   left join {{ ref('historical_dividends') }} using (symbol, date)
