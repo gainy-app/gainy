@@ -41,7 +41,7 @@ with tickers_and_options as
                           select polygon_intraday_prices.symbol,
                                  max(close_at) as close_at,
                                  max(polygon_intraday_prices.time) as time
-                          from {{ source('eod', 'polygon_intraday_prices') }}
+                          from {{ source('polygon', 'polygon_intraday_prices') }}
                                    left join {{ ref('week_trading_sessions_static') }} using (symbol)
                           where week_trading_sessions_static is null
                             or (index = 0 and polygon_intraday_prices.time between week_trading_sessions_static.open_at and week_trading_sessions_static.close_at)
@@ -96,7 +96,7 @@ with tickers_and_options as
                                  date_trunc('minute', eod_intraday_prices.time) -
                                  interval '1 minute' *
                                  mod(extract(minutes from eod_intraday_prices.time)::int, 15) - open_at as time
-                          from base_tickers
+                          from {{ ref('base_tickers') }}
                                    join {{ ref('week_trading_sessions_static') }} using (symbol)
                                    join {{ source('eod', 'eod_intraday_prices') }} using (symbol)
                           where (base_tickers.exchange_canonical in ('NYSE', 'NASDAQ') or
@@ -129,7 +129,7 @@ with tickers_and_options as
                                  interval '1 minute' *
                                  mod(extract(minutes from eod_intraday_prices.time)::int, 15) - open_at as time,
                                  open_at
-                          from base_tickers
+                          from {{ ref('base_tickers') }}
                                    join {{ ref('week_trading_sessions_static') }} using (symbol)
                                    join {{ source('eod', 'eod_intraday_prices') }} using (symbol)
                           where (base_tickers.exchange_canonical in ('NYSE', 'NASDAQ') or
@@ -180,7 +180,7 @@ with tickers_and_options as
                                  mod(extract(minutes from polygon_intraday_prices.time)::int, 15) - open_at as time
                           from {{ ref('base_tickers') }}
                                    join {{ ref('week_trading_sessions_static') }} using (symbol)
-                                   join {{ source('eod', 'polygon_intraday_prices') }} using (symbol)
+                                   join {{ source('polygon', 'polygon_intraday_prices') }} using (symbol)
                           where (base_tickers.exchange_canonical in ('NYSE', 'NASDAQ') or
                                  (base_tickers.exchange_canonical is null and base_tickers.country_name = 'United States') or
                                  (base_tickers.exchange_canonical is null and base_tickers.country_name is null))
@@ -213,7 +213,7 @@ with tickers_and_options as
                                  open_at
                           from {{ ref('base_tickers') }}
                                    join {{ ref('week_trading_sessions_static') }} using (symbol)
-                                   join {{ source('eod', 'polygon_intraday_prices') }} using (symbol)
+                                   join {{ source('polygon', 'polygon_intraday_prices') }} using (symbol)
                           where (base_tickers.exchange_canonical in ('NYSE', 'NASDAQ') or
                                  (base_tickers.exchange_canonical is null and base_tickers.country_name = 'United States') or
                                  (base_tickers.exchange_canonical is null and base_tickers.country_name is null))
@@ -351,7 +351,7 @@ with tickers_and_options as
                                          from {{ ref('historical_intraday_prices') }}
                                          group by symbol
                                     ) t using (symbol)
-                               join historical_prices using (symbol, date)
+                               join {{ ref('historical_prices') }} using (symbol, date)
                       where historical_prices.adjusted_close > 0
                   ) t
              where abs(diff) > 0.1
