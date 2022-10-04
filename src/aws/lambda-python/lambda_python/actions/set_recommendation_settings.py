@@ -75,7 +75,7 @@ class SetRecommendationSettings(HasuraAction):
 
             execute_values(
                 cursor,
-                "INSERT INTO app.profile_interests(profile_id, interest_id, skip_trigger) VALUES %s",
+                "INSERT INTO app.profile_interests(profile_id, interest_id, skip_trigger) VALUES %s ON CONFLICT DO NOTHING",
                 [(profile_id, interest_id, True) for interest_id in interests])
 
     def set_categories(self, db_conn, profile_id, categories):
@@ -89,6 +89,6 @@ class SetRecommendationSettings(HasuraAction):
 
             execute_values(
                 cursor,
-                "INSERT INTO app.profile_categories(profile_id, category_id, skip_trigger) VALUES %s",
+                "INSERT INTO app.profile_categories(profile_id, category_id, skip_trigger) VALUES %s ON CONFLICT DO NOTHING",
                 [(profile_id, category_id, True)
                  for category_id in categories])
