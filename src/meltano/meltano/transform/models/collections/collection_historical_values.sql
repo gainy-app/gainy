@@ -10,30 +10,20 @@
 }}
 
 
-with data0 as
+with data as materialized
          (
              select profile_id,
                     collection_id,
                     collection_uniq_id,
                     collection_ticker_weights.date,
-                    price,
-                    lag(price) over (partition by collection_uniq_id, symbol order by collection_ticker_weights.date)  as prev_price,
-                    lag(weight) over (partition by collection_uniq_id, symbol order by collection_ticker_weights.date) as prev_weight,
-                    coalesce(historical_dividends.value, 0)::numeric                                                   as dividends_value,
-                    greatest(collection_ticker_weights.updated_at, historical_dividends.updated_at)                    as updated_at
+                    weight * (historical_prices.adjusted_close / price - 1) as relative_gain,
+                    coalesce(historical_dividends.value, 0)::numeric        as dividends_value,
+                    greatest(collection_ticker_weights.updated_at,
+                             historical_dividends.updated_at,
+                             historical_prices.updated_at)                  as updated_at
              from {{ ref('collection_ticker_weights') }}
+                  join historical_prices using (symbol, date)
                   left join {{ ref('historical_dividends') }} using (symbol, date)
-         ),
-     data as materialized
-         (
-             select profile_id,
-                    collection_id,
-                    collection_uniq_id,
-                    date,
-                    prev_weight * (price / prev_price - 1) as relative_gain,
-                    dividends_value,
-                    updated_at
-             from data0
          ),
      daily_collection_gain as
          (
@@ -45,7 +35,7 @@ with data0 as
                     sum(dividends_value)   as dividends_value,
                     max(updated_at)        as updated_at
              from data
-             group by profile_id,collection_id,collection_uniq_id, date
+             group by profile_id, collection_id, collection_uniq_id, date
          ),
      daily_collection_gain_cumulative as
          (
