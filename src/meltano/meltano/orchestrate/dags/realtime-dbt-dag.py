@@ -3,11 +3,12 @@ from common import create_dag, get_meltano_command, MELTANO_PROJECT_ROOT, ENV
 
 dag_id = "realtime-dbt-dag"
 tags = ["meltano", "dbt"]
-dag = create_dag(
-    dag_id,
-    tags=tags,
-    schedule_interval="*/5 * * * *" if ENV == "production" else "*/15 * * * *",
-    is_paused_upon_creation=False)
+schedule_interval = "*/5 * * * *" if ENV == "production" else "*/15 * * * *"
+is_paused_upon_creation = ENV != "production"
+dag = create_dag(dag_id,
+                 tags=tags,
+                 schedule_interval=schedule_interval,
+                 is_paused_upon_creation=is_paused_upon_creation)
 
 clean = BashOperator(
     task_id="clean",
