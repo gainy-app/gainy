@@ -107,6 +107,9 @@ plugins:
           - entity: ticker_collections
             path: data/ticker_collections.csv
             keys: [ "ttf_name", "symbol" ]
+          - entity: ticker_collections_weights
+            path: data/ticker_collections_weights.csv
+            keys: [ "ttf_name", "symbol", "date" ]
           - entity: ticker_override
             path: data/ticker_override.csv
             keys: [ "symbol" ]

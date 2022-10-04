@@ -33,6 +33,7 @@ with
      time_series as
          (
              select symbol,
+                    week_trading_sessions.date,
                     date_trunc('minute', dd) -
                     interval '1 minute' *
                     mod(extract(minutes from dd)::int, {{ minutes }}) as time_truncated
@@ -40,8 +41,6 @@ with
                       join generate_series(open_at, least(now(), close_at - interval '1 second'), interval '{{ minutes }} minutes') dd on true
 {% if is_incremental() and var('realtime') %}
                       join max_date using (symbol)
-{% endif %}
-{% if is_incremental() and var('realtime') %}
              where dd > max_date.datetime - interval '30 minutes'
 {% endif %}
          ),
@@ -50,13 +49,10 @@ with
              select historical_intraday_prices.*,
                     historical_intraday_prices.time_{{ minutes }}min as time_truncated
              from {{ ref('historical_intraday_prices') }}
-                      join {{ ref('week_trading_sessions') }} using (symbol)
+                      join {{ ref('week_trading_sessions') }} using (symbol, date)
 {% if is_incremental() and var('realtime') %}
                       join max_date using (symbol)
-{% endif %}
-             where historical_intraday_prices.time_{{ minutes }}min >= week_trading_sessions.open_at - interval '1 hour' and historical_intraday_prices.time_{{ minutes }}min < week_trading_sessions.close_at
-{% if is_incremental() and var('realtime') %}
-               and historical_intraday_prices.time_{{ minutes }}min > max_date.datetime - interval '30 minutes'
+             where historical_intraday_prices.time_{{ minutes }}min > max_date.datetime - interval '30 minutes'
 {% endif %}
          ),
      combined_intraday_prices as
@@ -64,7 +60,8 @@ with
              select DISTINCT ON (
                  symbol,
                  time_truncated
-                 ) symbol                                                                                                                   as symbol,
+                 ) symbol,
+                   date,
                    time_truncated::timestamp                                                                                                as datetime,
                    first_value(open)
                    OVER (partition by symbol, time_truncated order by time, priority desc rows between current row and unbounded following) as open,
@@ -82,6 +79,7 @@ with
                    OVER (partition by symbol, time_truncated rows between current row and unbounded following)                              as updated_at
              from (
                       select symbol,
+                             date,
                              time,
                              open,
                              high,
@@ -95,6 +93,7 @@ with
                       from expanded_intraday_prices
                       union all
                       select symbol,
+                             date,
                              time_truncated as time,
                              null      as open,
                              null      as high,
@@ -109,6 +108,7 @@ with
                                join time_series using (symbol)
                       union all
                       select contract_name,
+                             date,
                              time_truncated as time,
                              null      as open,
                              null      as high,
@@ -126,6 +126,7 @@ with
          )
 select t2.symbol || '_' || t2.datetime                               as id,
        t2.symbol,
+       t2.date,
        t2.datetime,
 {% if is_incremental() %}
        coalesce(t2.open,
@@ -166,6 +167,7 @@ select t2.symbol || '_' || t2.datetime                               as id,
 {% endif %}
 from (
           select symbol,
+                 date,
                  datetime,
                  coalesce(
                          open,
