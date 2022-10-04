@@ -13,6 +13,7 @@
                     collection_id,
                     collection_uniq_id,
                     date,
+                    week_trading_sessions_static.prev_date,
                     datetime,
                     case
                         when collection_ticker_weights.price > 0
@@ -46,6 +47,7 @@
                    collection_id,
                    collection_uniq_id,
                    date,
+                   max(prev_date) as prev_date,
                    datetime,
                    sum(open_gain) + 1 as open_gain,
                    sum(high_gain) + 1 as high_gain,
@@ -58,15 +60,17 @@
     select collection_realtime_gains.profile_id,
            collection_realtime_gains.collection_id,
            collection_realtime_gains.collection_uniq_id,
-           datetime,
-           '1d'                                                      as period,
-            collection_historical_values.value * open_gain           as open,
-            collection_historical_values.value * high_gain           as high,
-            collection_historical_values.value * low_gain            as low,
-            collection_historical_values.value * close_gain          as close,
-            collection_historical_values.value * adjusted_close_gain as adjusted_close
+           collection_realtime_gains.datetime,
+           '1d'                                                     as period,
+           collection_historical_values.value * open_gain           as open,
+           collection_historical_values.value * high_gain           as high,
+           collection_historical_values.value * low_gain            as low,
+           collection_historical_values.value * close_gain          as close,
+           collection_historical_values.value * adjusted_close_gain as adjusted_close
     from collection_realtime_gains
-         join {{ ref('collection_historical_values') }} using (collection_uniq_id, date)
+         join {{ ref('collection_historical_values') }}
+             on collection_historical_values.collection_uniq_id = collection_realtime_gains.collection_uniq_id
+                and collection_historical_values.date = collection_realtime_gains.prev_date
 )
 
 union all
@@ -78,6 +82,7 @@ union all
                     collection_id,
                     collection_uniq_id,
                     date,
+                    week_trading_sessions_static.prev_date,
                     datetime,
                     case
                         when collection_ticker_weights.price > 0
@@ -110,6 +115,7 @@ union all
                    collection_id,
                    collection_uniq_id,
                    date,
+                   max(prev_date) as prev_date,
                    datetime,
                    sum(open_gain) + 1 as open_gain,
                    sum(high_gain) + 1 as high_gain,
@@ -122,15 +128,17 @@ union all
     select collection_realtime_gains.profile_id,
            collection_realtime_gains.collection_id,
            collection_realtime_gains.collection_uniq_id,
-           datetime,
-           '1w'                                                      as period,
-            collection_historical_values.value * open_gain           as open,
-            collection_historical_values.value * high_gain           as high,
-            collection_historical_values.value * low_gain            as low,
-            collection_historical_values.value * close_gain          as close,
-            collection_historical_values.value * adjusted_close_gain as adjusted_close
+           collection_realtime_gains.datetime,
+           '1w'                                                     as period,
+           collection_historical_values.value * open_gain           as open,
+           collection_historical_values.value * high_gain           as high,
+           collection_historical_values.value * low_gain            as low,
+           collection_historical_values.value * close_gain          as close,
+           collection_historical_values.value * adjusted_close_gain as adjusted_close
     from collection_realtime_gains
-         join {{ ref('collection_historical_values') }} using (collection_uniq_id, date)
+         join {{ ref('collection_historical_values') }}
+             on collection_historical_values.collection_uniq_id = collection_realtime_gains.collection_uniq_id
+                and collection_historical_values.date = collection_realtime_gains.prev_date
 )
 
 union all

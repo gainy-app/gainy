@@ -15,12 +15,6 @@ clean = BashOperator(
     f"cd {MELTANO_PROJECT_ROOT}; find .meltano/logs .meltano/run/elt -type f -mmin +480 -delete",
     dag=dag)
 
-coingecko_realtime = BashOperator(
-    task_id="coingecko-realtime",
-    bash_command=get_meltano_command(
-        "schedule run coingecko-realtime-to-postgres --force"),
-    dag=dag)
-
 vars = '{"realtime": true}'
 dbt = BashOperator(
     task_id="dbt-realtime",
