@@ -11,14 +11,14 @@
            collection_id,
            collection_uniq_id,
            datetime,
-           '1d'::varchar as period,
+           '1d'                         as period,
            sum(open * weight)           as open,
            sum(high * weight)           as high,
            sum(low * weight)            as low,
            sum(close * weight)          as close,
            sum(adjusted_close * weight) as adjusted_close
     from {{ ref('historical_prices_aggregated_3min') }}
-             join {{ ref('collection_tickers_weighted') }} using (symbol)
+             join {{ ref('collection_ticker_actual_weights') }} using (symbol)
              join {{ ref('week_trading_sessions') }} using (symbol)
     where week_trading_sessions.index = 0
       and historical_prices_aggregated_3min.datetime between week_trading_sessions.open_at and week_trading_sessions.close_at
@@ -32,124 +32,15 @@ union all
            collection_id,
            collection_uniq_id,
            datetime,
-           '1w'::varchar as period,
+           '1w'                         as period,
            sum(open * weight)           as open,
            sum(high * weight)           as high,
            sum(low * weight)            as low,
            sum(close * weight)          as close,
            sum(adjusted_close * weight) as adjusted_close
-    from {{ ref('historical_prices_aggregated_15min') }}
-             join {{ ref('collection_tickers_weighted') }} using (symbol)
-             join {{ ref('week_trading_sessions') }} using (symbol)
-    where historical_prices_aggregated_15min.datetime between week_trading_sessions.open_at and week_trading_sessions.close_at
-    group by profile_id, collection_id, collection_uniq_id, datetime, period
-)
-
-union all
-
-(
-    with latest_open_trading_session as
-             (
-                 select symbol, max(date) as date
-                 from {{ ref('week_trading_sessions') }}
-                 where index = 0
-                 group by symbol
-             )
-    select profile_id,
-           collection_id,
-           collection_uniq_id,
-           datetime,
-           '1m'::varchar as period,
-           sum(open * weight)           as open,
-           sum(high * weight)           as high,
-           sum(low * weight)            as low,
-           sum(close * weight)          as close,
-           sum(adjusted_close * weight) as adjusted_close
-    from {{ ref('historical_prices_aggregated_1d') }}
-             join {{ ref('collection_tickers_weighted') }} using (symbol)
-             left join latest_open_trading_session using (symbol)
-    where historical_prices_aggregated_1d.datetime >= coalesce(latest_open_trading_session.date, now()) - interval '1 month'
-    group by profile_id, collection_id, collection_uniq_id, datetime, period
-)
-
-union all
-
-(
-    with latest_open_trading_session as
-             (
-                 select symbol, max(date) as date
-                 from {{ ref('week_trading_sessions') }}
-                 where index = 0
-                 group by symbol
-             )
-    select profile_id,
-           collection_id,
-           collection_uniq_id,
-           datetime,
-           '3m'::varchar as period,
-           sum(open * weight)           as open,
-           sum(high * weight)           as high,
-           sum(low * weight)            as low,
-           sum(close * weight)          as close,
-           sum(adjusted_close * weight) as adjusted_close
-    from {{ ref('historical_prices_aggregated_1d') }}
-             join {{ ref('collection_tickers_weighted') }} using (symbol)
-             left join latest_open_trading_session using (symbol)
-    where historical_prices_aggregated_1d.datetime >= coalesce(latest_open_trading_session.date, now()) - interval '3 month'
-    group by profile_id, collection_id, collection_uniq_id, datetime, period
-)
-
-union all
-
-(
-    with latest_open_trading_session as
-             (
-                 select symbol, max(date) as date
-                 from {{ ref('week_trading_sessions') }}
-                 where index = 0
-                 group by symbol
-             )
-    select profile_id,
-           collection_id,
-           collection_uniq_id,
-           datetime,
-           '1y'::varchar as period,
-           sum(open * weight)           as open,
-           sum(high * weight)           as high,
-           sum(low * weight)            as low,
-           sum(close * weight)          as close,
-           sum(adjusted_close * weight) as adjusted_close
-    from {{ ref('historical_prices_aggregated_1d') }}
-             join {{ ref('collection_tickers_weighted') }} using (symbol)
-             left join latest_open_trading_session using (symbol)
-    where historical_prices_aggregated_1d.datetime >= coalesce(latest_open_trading_session.date, now()) - interval '1 year'
-    group by profile_id, collection_id, collection_uniq_id, datetime, period
-)
-
-union all
-
-(
-    with latest_open_trading_session as
-             (
-                 select symbol, max(date) as date
-                 from {{ ref('week_trading_sessions') }}
-                 where index = 0
-                 group by symbol
-             )
-    select profile_id,
-           collection_id,
-           collection_uniq_id,
-           datetime,
-           '5y'::varchar as period,
-           sum(open * weight)           as open,
-           sum(high * weight)           as high,
-           sum(low * weight)            as low,
-           sum(close * weight)          as close,
-           sum(adjusted_close * weight) as adjusted_close
-    from {{ ref('historical_prices_aggregated_1w') }}
-             join {{ ref('collection_tickers_weighted') }} using (symbol)
-             left join latest_open_trading_session using (symbol)
-    where historical_prices_aggregated_1w.datetime >= coalesce(latest_open_trading_session.date, now()) - interval '5 year'
+    from {{ ref('collection_ticker_weights') }}
+             join {{ ref('week_trading_sessions') }} using (symbol, date)
+             join {{ ref('historical_prices_aggregated_15min') }} using (symbol, date)
     group by profile_id, collection_id, collection_uniq_id, datetime, period
 )
 
@@ -159,14 +50,116 @@ union all
     select profile_id,
            collection_id,
            collection_uniq_id,
+           date::timestamp as datetime,
+           '1m'            as period,
+           value           as open,
+           value           as high,
+           value           as low,
+           value           as close,
+           value           as adjusted_close
+    from {{ ref('collection_historical_values') }}
+    where collection_historical_values.date >= now() - interval '1 month'
+)
+
+union all
+
+(
+    select profile_id,
+           collection_id,
+           collection_uniq_id,
+           date::timestamp as datetime,
+           '3m'            as period,
+           value           as open,
+           value           as high,
+           value           as low,
+           value           as close,
+           value           as adjusted_close
+    from {{ ref('collection_historical_values') }}
+    where collection_historical_values.date >= now() - interval '3 month'
+)
+
+union all
+
+(
+    select profile_id,
+           collection_id,
+           collection_uniq_id,
+           date::timestamp as datetime,
+           '1y'            as period,
+           value           as open,
+           value           as high,
+           value           as low,
+           value           as close,
+           value           as adjusted_close
+    from {{ ref('collection_historical_values') }}
+    where collection_historical_values.date >= now() - interval '1 year'
+)
+
+union all
+
+(
+    select profile_id,
+           collection_id,
+           collection_uniq_id,
            datetime,
-           'all'::varchar as period,
-           sum(open * weight)           as open,
-           sum(high * weight)           as high,
-           sum(low * weight)            as low,
-           sum(close * weight)          as close,
-           sum(adjusted_close * weight) as adjusted_close
-    from {{ ref('historical_prices_aggregated_1m') }}
-             join {{ ref('collection_tickers_weighted') }} using (symbol)
-    group by profile_id, collection_id, collection_uniq_id, datetime, period
+           '5y'           as period,
+           open,
+           high,
+           low,
+           adjusted_close as close,
+           adjusted_close
+    from (
+              select DISTINCT ON
+                    (
+                      date_week,
+                      collection_uniq_id
+                    ) profile_id,
+                      collection_id,
+                      collection_uniq_id,
+                      date_week                                                                                                        as datetime,
+                      first_value(value)
+                      OVER (partition by date_week, collection_uniq_id order by date rows between current row and unbounded following) as open,
+                      max(value)
+                      OVER (partition by date_week, collection_uniq_id order by date rows between current row and unbounded following) as high,
+                      min(value)
+                      OVER (partition by date_week, collection_uniq_id order by date rows between current row and unbounded following) as low,
+                      last_value(value)
+                      OVER (partition by date_week, collection_uniq_id order by date rows between current row and unbounded following) as adjusted_close
+              from {{ ref('collection_historical_values') }}
+              where date_week >= now() - interval '5 year' - interval '1 week'
+              order by date_week, collection_uniq_id, date
+         ) t
+    where t.datetime >= now() - interval '5 year'
+)
+
+union all
+
+(
+    with data as materialized
+         (
+             select profile_id,
+                    collection_id,
+                    collection_uniq_id,
+                    date_month,
+                    mode() within group ( order by date )      as open_date,
+                    mode() within group ( order by date desc ) as close_date,
+                    max(value)                                 as high,
+                    min(value)                                 as low,
+                    sum(value)                                 as volume
+             from {{ ref('collection_historical_values') }}
+             group by profile_id, collection_id, collection_uniq_id, date_month
+         )
+    select data.profile_id,
+           data.collection_id,
+           data.collection_uniq_id,
+           data.date_month as datetime,
+           'all'           as period,
+           chv_open.value  as open,
+           data.high,
+           data.low,
+           chv_close.value as close,
+           chv_close.value as adjusted_close
+    from data
+         join {{ ref('collection_historical_values') }} chv_open on chv_open.collection_uniq_id = data.collection_uniq_id and chv_open.date = data.open_date
+         join {{ ref('collection_historical_values') }} chv_close on chv_close.collection_uniq_id = data.collection_uniq_id and chv_close.date = data.close_date
 )

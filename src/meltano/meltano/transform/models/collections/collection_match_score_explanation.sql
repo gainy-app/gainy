@@ -25,20 +25,20 @@ with t_cat_sim_dif as
                     t.similarity * weight as similarity
              from (
                       select profile_categories.profile_id,
-                             collection_tickers_weighted.collection_id,
-                             collection_tickers_weighted.collection_uniq_id,
+                             collection_ticker_actual_weights.collection_id,
+                             collection_ticker_actual_weights.collection_uniq_id,
                              t_cat_sim_dif.category_id,
                              (sum(sim_dif * weight) / sum(weight))::double precision as similarity
                       from {{ source('app', 'profile_categories') }}
                                join t_cat_sim_dif using (category_id)
-                               join {{ ref('collection_tickers_weighted') }}
-                                    on collection_tickers_weighted.symbol = t_cat_sim_dif.symbol
-                                        and (collection_tickers_weighted.profile_id is null or
-                                             collection_tickers_weighted.profile_id =
+                               join {{ ref('collection_ticker_actual_weights') }}
+                                    on collection_ticker_actual_weights.symbol = t_cat_sim_dif.symbol
+                                        and (collection_ticker_actual_weights.profile_id is null or
+                                             collection_ticker_actual_weights.profile_id =
                                              profile_categories.profile_id)
                       group by profile_categories.profile_id,
-                               collection_tickers_weighted.collection_id,
-                               collection_tickers_weighted.collection_uniq_id,
+                               collection_ticker_actual_weights.collection_id,
+                               collection_ticker_actual_weights.collection_uniq_id,
                                t_cat_sim_dif.category_id
                   ) t
                       join {{ ref('collection_piechart') }}
@@ -58,20 +58,20 @@ with t_cat_sim_dif as
                     t.similarity * weight as similarity
              from (
                       select profile_interests.profile_id,
-                             collection_tickers_weighted.collection_id,
-                             collection_tickers_weighted.collection_uniq_id,
+                             collection_ticker_actual_weights.collection_id,
+                             collection_ticker_actual_weights.collection_uniq_id,
                              t_int_sim_dif.interest_id,
                              (sum(sim_dif * weight) / sum(weight))::double precision as similarity
                       from {{ source('app', 'profile_interests') }}
                                join t_int_sim_dif using (interest_id)
-                               join {{ ref('collection_tickers_weighted') }}
-                                    on collection_tickers_weighted.symbol = t_int_sim_dif.symbol
-                                        and (collection_tickers_weighted.profile_id is null or
-                                             collection_tickers_weighted.profile_id =
+                               join {{ ref('collection_ticker_actual_weights') }}
+                                    on collection_ticker_actual_weights.symbol = t_int_sim_dif.symbol
+                                        and (collection_ticker_actual_weights.profile_id is null or
+                                             collection_ticker_actual_weights.profile_id =
                                              profile_interests.profile_id)
                       group by profile_interests.profile_id,
-                               collection_tickers_weighted.collection_id,
-                               collection_tickers_weighted.collection_uniq_id,
+                               collection_ticker_actual_weights.collection_id,
+                               collection_ticker_actual_weights.collection_uniq_id,
                                t_int_sim_dif.interest_id
                   ) t
                       join {{ ref('collection_piechart') }}

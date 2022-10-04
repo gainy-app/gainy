@@ -277,10 +277,11 @@
         ]
       }
     },
-    "ticker_collections": {
+    "collection_ticker_weights": {
       "metadata": {
         "table-key-properties": [
-          "id"
+          "collection_uniq_id",
+          "date"
         ]
       }
     },

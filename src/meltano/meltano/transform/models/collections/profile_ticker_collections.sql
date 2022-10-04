@@ -16,7 +16,7 @@ WHERE collections.enabled = '1'
 UNION
 
 SELECT NULL :: integer AS profile_id,
-       tc.collection_id,
+       collection_id,
        ('0_' || collection_id) as collection_uniq_id,
-       tc.symbol
-FROM {{ ref('ticker_collections') }} tc
+       symbol
+FROM {{ ref('collection_ticker_actual_weights') }}
