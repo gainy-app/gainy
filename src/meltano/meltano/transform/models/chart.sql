@@ -16,7 +16,8 @@
            historical_prices_aggregated_3min.low,
            historical_prices_aggregated_3min.close,
            historical_prices_aggregated_3min.adjusted_close,
-           historical_prices_aggregated_3min.volume
+           historical_prices_aggregated_3min.volume,
+           historical_prices_aggregated_3min.updated_at
     from {{ ref('historical_prices_aggregated_3min') }}
              join {{ ref('week_trading_sessions') }} using (symbol)
     where week_trading_sessions.index = 0
@@ -35,7 +36,8 @@ union all
            historical_prices_aggregated_15min.low,
            historical_prices_aggregated_15min.close,
            historical_prices_aggregated_15min.adjusted_close,
-           historical_prices_aggregated_15min.volume
+           historical_prices_aggregated_15min.volume,
+           historical_prices_aggregated_15min.updated_at
     from {{ ref('historical_prices_aggregated_15min') }}
              join {{ ref('week_trading_sessions') }} using (symbol)
     where historical_prices_aggregated_15min.datetime between week_trading_sessions.open_at and week_trading_sessions.close_at - interval '15 minutes'
@@ -60,7 +62,8 @@ union all
            historical_prices_aggregated_1d.low,
            historical_prices_aggregated_1d.close,
            historical_prices_aggregated_1d.adjusted_close,
-           historical_prices_aggregated_1d.volume
+           historical_prices_aggregated_1d.volume,
+           historical_prices_aggregated_1d.updated_at
     from {{ ref('historical_prices_aggregated_1d') }}
              join latest_open_trading_session using (symbol)
     where historical_prices_aggregated_1d.datetime >= coalesce(latest_open_trading_session.date, now()) - interval '1 month'
@@ -85,7 +88,8 @@ union all
            historical_prices_aggregated_1d.low,
            historical_prices_aggregated_1d.close,
            historical_prices_aggregated_1d.adjusted_close,
-           historical_prices_aggregated_1d.volume
+           historical_prices_aggregated_1d.volume,
+           historical_prices_aggregated_1d.updated_at
     from {{ ref('historical_prices_aggregated_1d') }}
              join latest_open_trading_session using (symbol)
     where historical_prices_aggregated_1d.datetime >= coalesce(latest_open_trading_session.date, now()) - interval '3 month'
@@ -110,7 +114,8 @@ union all
            historical_prices_aggregated_1d.low,
            historical_prices_aggregated_1d.close,
            historical_prices_aggregated_1d.adjusted_close,
-           historical_prices_aggregated_1d.volume
+           historical_prices_aggregated_1d.volume,
+           historical_prices_aggregated_1d.updated_at
     from {{ ref('historical_prices_aggregated_1d') }}
              join latest_open_trading_session using (symbol)
     where historical_prices_aggregated_1d.datetime >= coalesce(latest_open_trading_session.date, now()) - interval '1 year'
@@ -135,7 +140,8 @@ union all
            historical_prices_aggregated_1w.low,
            historical_prices_aggregated_1w.close,
            historical_prices_aggregated_1w.adjusted_close,
-           historical_prices_aggregated_1w.volume
+           historical_prices_aggregated_1w.volume,
+           historical_prices_aggregated_1w.updated_at
     from {{ ref('historical_prices_aggregated_1w') }}
              join latest_open_trading_session using (symbol)
     where historical_prices_aggregated_1w.datetime >= coalesce(latest_open_trading_session.date, now()) - interval '5 year'
@@ -153,6 +159,7 @@ union all
            low,
            close,
            adjusted_close,
-           volume
+           volume,
+           updated_at
     from {{ ref('historical_prices_aggregated_1m') }}
 )
