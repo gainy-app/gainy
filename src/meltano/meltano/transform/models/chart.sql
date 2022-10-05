@@ -83,7 +83,6 @@ union all
                  group by symbol
              )
     select historical_prices_aggregated_1d.symbol,
-           historical_prices_aggregated_1d.date,
            historical_prices_aggregated_1d.datetime::date as date,
            historical_prices_aggregated_1d.datetime + interval '1 day' as close_datetime,
            '3m'::varchar as period,

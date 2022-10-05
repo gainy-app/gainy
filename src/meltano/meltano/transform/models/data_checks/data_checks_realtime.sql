@@ -419,6 +419,7 @@ with tickers_and_options as
                     'daily' as period,
                     message
              from realtime_chart_diff_with_historical
+
              union all
 
              select symbol,

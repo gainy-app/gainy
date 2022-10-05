@@ -124,10 +124,10 @@ union all
              (
                  select distinct on (
                      gainy_collections.id
-                     ) gainy_collections.id                          as collection_id,
-                       'ttf_no_weights'                              as code,
-                       'TTF ' || collection_id || ' has no weights.' as message,
-                       'daily'                                       as period
+                     ) gainy_collections.id                                 as collection_id,
+                       'ttf_no_weights'                                     as code,
+                       'TTF ' || gainy_collections.id || ' has no weights.' as message,
+                       'daily'                                              as period
                  from gainy_collections
                           left join {{ source('gainy', 'ticker_collections') }}
                                     on ticker_collections.ttf_name = gainy_collections.name
