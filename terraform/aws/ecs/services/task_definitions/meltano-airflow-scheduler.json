@@ -139,10 +139,9 @@
   "privileged": null,
   "memoryReservation": null,
   "healthCheck": {
-    "command": [ "CMD-SHELL", "meltano invoke airflow jobs check --job-type SchedulerJob --hostname \"$(hostname)\"" ],
-    "interval": 60,
-    "retries": 3,
-    "timeout": 60
+    "command": [ "CMD-SHELL", "nc -z localhost 8793" ],
+    "interval": 10,
+    "retries": 2
   },
   "logConfiguration": {
     "logDriver": "awslogs",

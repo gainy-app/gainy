@@ -62,7 +62,7 @@
     { "condition": "HEALTHY", "containerName": "meltano-airflow-scheduler" }
   ],
   "healthCheck": {
-    "command": [ "CMD-SHELL", "! curl http://localhost:5001/health | grep unhealthy" ],
+    "command": [ "CMD-SHELL", "curl http://localhost:5001/health | python -c 'import sys, json; data = json.load(sys.stdin); assert data[\"scheduler\"][\"status\"] == \"healthy\"; assert data[\"metadatabase\"][\"status\"] == \"healthy\"'" ],
     "interval": 10,
     "retries": 2
   },
