@@ -8,6 +8,7 @@ create table if not exists raw_data.eod_historical_prices
     low               double precision,
     open              double precision,
     volume            numeric,
+    first_date        varchar,
     _sdc_batched_at   timestamp,
     _sdc_deleted_at   varchar,
     _sdc_extracted_at timestamp,

@@ -13633,3 +13633,14 @@ values  ('BTC.CC', 0.06, 0.06, '2010-08-04', 0.06, 0.06, 0.06, 0),
         ('BTC.CC', 42739.422115806, 42739.422115806, '2022-02-14', 42944.615605701, 41765.196328523, 42197.500275324, 33625456902),
         ('BTC.CC', 44670.698943542, 44670.698943542, '2022-02-15', 44699.992465937, 42589.975301575, 42722.431488731, 48854507616)
         on conflict do nothing;
+
+with min_dates as
+    (
+        select code, min(date) as date
+        from raw_data.eod_historical_prices
+        group by code
+    )
+update raw_data.eod_historical_prices
+set first_value = min_dates.date
+from min_dates
+where eod_historical_prices.code = min_dates.code;
