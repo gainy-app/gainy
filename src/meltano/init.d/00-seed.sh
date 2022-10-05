@@ -34,7 +34,7 @@ if [ $($psql_auth -c "select count(*) from deployment.public_schemas where schem
 fi
 
 if [ "$ENV" != "local" ]; then
-  meltano schedule run postgres-to-search --force
+  nohup bash -c "meltano schedule run postgres-to-search --force" &> /dev/null &
 fi
 
 echo "Seeding done"
