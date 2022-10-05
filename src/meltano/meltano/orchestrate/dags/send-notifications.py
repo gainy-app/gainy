@@ -11,5 +11,5 @@ dag = create_dag(dag_id,
 operator = BashOperator(
     task_id="send-notifications",
     bash_command=
-    f"cd {MELTANO_PROJECT_ROOT}; python scripts/send_notifications.py",
+    f"cd {MELTANO_PROJECT_ROOT}; /venv/bin/python scripts/send_notifications.py",
     dag=dag)
