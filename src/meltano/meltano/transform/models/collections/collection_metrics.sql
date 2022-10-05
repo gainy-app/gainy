@@ -40,7 +40,7 @@ select profile_collections.profile_id,
         case when previous_day.adjusted_close > 0 then previous_day.adjusted_close end - 1
            )::double precision                                                     as relative_daily_change,
        previous_day.adjusted_close::double precision                               as previous_day_close_price,
-       market_capitalization_sum::bigint,
+       metrics.market_capitalization_sum::bigint,
        greatest(latest_day.updated_at, previous_day.updated_at)                    as updated_at
 from {{ ref('profile_collections') }}
          left join {{ source('app', 'profiles') }} on profiles.id = profile_collections.profile_id
