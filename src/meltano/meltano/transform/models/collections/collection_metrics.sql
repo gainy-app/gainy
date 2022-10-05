@@ -51,7 +51,7 @@ from {{ ref('profile_collections') }}
          left join collection_daily_latest_chart_point previous_day
                    on previous_day.collection_uniq_id = profile_collections.uniq_id and previous_day.idx = 2
 {% if is_incremental() %}
-         left join {{ this }} old_data using (collection_uniq_id)
+         left join {{ this }} old_data on old_data.collection_uniq_id = profile_collections.uniq_id
 {% endif %}
 
 where profile_collections.enabled = '1'
