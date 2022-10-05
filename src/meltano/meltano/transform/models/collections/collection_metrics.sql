@@ -9,41 +9,55 @@
   )
 }}
 
-with grouped_collections as
+with collection_daily_latest_chart_point as
          (
-             select profile_collections.profile_id,
-                    user_id,
-                    collection_uniq_id,
-                    sum(absolute_daily_change * weight)                              as absolute_daily_change,
-                    sum(actual_price * weight)                                       as actual_price,
-                    sum(actual_price * weight) - sum(absolute_daily_change * weight) as prev_close_price,
-                    max(time)                                                        as time,
-                    sum(market_capitalization)                                       as market_capitalization_sum,
-                    greatest(max(ticker_realtime_metrics.time),
-                        max(ticker_metrics.updated_at),
-                        max(collection_ticker_actual_weights.updated_at))            as updated_at
+             select collection_chart.*,
+                    row_number() over (partition by collection_uniq_id order by t.date desc) as idx
+             from (
+                      select collection_uniq_id, period, date, max(datetime) as datetime
+                      from {{ ref('collection_chart') }}
+                      where period = '1w'
+                      group by collection_uniq_id, period, date
+                  ) t
+                      join {{ ref('collection_chart') }} using (collection_uniq_id, period, datetime)
+     ),
+     metrics as
+         (
+             select collection_uniq_id,
+                    sum(weight * market_capitalization)                        as market_capitalization_sum,
+                    greatest(max(ticker_metrics.updated_at),
+                             max(collection_ticker_actual_weights.updated_at)) as updated_at
              from {{ ref('collection_ticker_actual_weights') }}
-                      join {{ ref('profile_collections') }} on profile_collections.uniq_id = collection_uniq_id
-                      left join {{ source('app', 'profiles') }} on profiles.id = profile_collections.profile_id
-                      join {{ ref('ticker_realtime_metrics') }} using (symbol)
                       join {{ ref('ticker_metrics') }} using (symbol)
-             where profile_collections.enabled = '1'
-             group by profile_collections.profile_id, user_id, collection_uniq_id
-         )
-select grouped_collections.profile_id,
-       grouped_collections.user_id,
-       grouped_collections.collection_uniq_id,
-       grouped_collections.actual_price::double precision          as actual_price,
-       grouped_collections.absolute_daily_change::double precision as absolute_daily_change,
-       (grouped_collections.actual_price /
-        case when grouped_collections.prev_close_price > 0 then grouped_collections.prev_close_price end - 1
-           )::double precision                                     as relative_daily_change,
-       grouped_collections.prev_close_price                        as previous_day_close_price,
-       grouped_collections.updated_at,
-       grouped_collections.market_capitalization_sum::bigint
-from grouped_collections
-
+             group by collection_uniq_id
+     )
+select profile_collections.profile_id,
+       profiles.user_id,
+       profile_collections.uniq_id                                                 as collection_uniq_id,
+       latest_day.adjusted_close::double precision                                 as actual_price,
+       (latest_day.adjusted_close - previous_day.adjusted_close)::double precision as absolute_daily_change,
+       (latest_day.adjusted_close /
+        case when previous_day.adjusted_close > 0 then previous_day.adjusted_close end - 1
+           )::double precision                                                     as relative_daily_change,
+       previous_day.adjusted_close::double precision                               as previous_day_close_price,
+       market_capitalization_sum::bigint,
+       greatest(latest_day.updated_at, previous_day.updated_at)                    as updated_at
+from {{ ref('profile_collections') }}
+         left join {{ source('app', 'profiles') }} on profiles.id = profile_collections.profile_id
+         left join metrics
+                   on metrics.collection_uniq_id = profile_collections.uniq_id
+         left join collection_daily_latest_chart_point latest_day
+                   on latest_day.collection_uniq_id = profile_collections.uniq_id and latest_day.idx = 1
+         left join collection_daily_latest_chart_point previous_day
+                   on previous_day.collection_uniq_id = profile_collections.uniq_id and previous_day.idx = 2
 {% if is_incremental() %}
          left join {{ this }} old_data using (collection_uniq_id)
-where grouped_collections.updated_at >= old_data.updated_at or old_data is null
+{% endif %}
+
+where profile_collections.enabled = '1'
+
+{% if is_incremental() %}
+  and (old_data is null
+       or previous_day.updated_at >= old_data.updated_at
+       or latest_day.updated_at >= old_data.updated_at)
 {% endif %}
