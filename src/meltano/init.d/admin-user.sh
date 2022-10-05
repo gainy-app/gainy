@@ -1,3 +1,4 @@
+cat /proc/meminfo
 if [ -z "$NO_AIRFLOW" ]; then
   if ! meltano invoke airflow users list | grep admin > /dev/null; then
     echo "Creating admin user"
@@ -8,3 +9,4 @@ if [ -z "$NO_AIRFLOW" ]; then
 else
   echo "Skip creating admin"
 fi
+cat /proc/meminfo
