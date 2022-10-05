@@ -22,7 +22,7 @@ with trading_sessions as
                     row_number() over (partition by exchange_name, country_name order by date desc) - 1 as index,
                     null                                                                                as type
              from {{ ref('exchange_schedule') }}
-             where open_at between now() - interval '1 week' and now()
+             where open_at between now() - interval '10 days' and now()
 
              union all
 
@@ -33,7 +33,7 @@ with trading_sessions as
                     dd + interval '1 day'                    as close_at,
                     row_number() over (order by dd desc) - 1 as index,
                     'crypto'                                 as type
-             FROM generate_series(now() - interval '1 week', now(), interval '1 day') dd
+             FROM generate_series(now() - interval '10 days', now(), interval '1 day') dd
          ),
      symbols as
          (
@@ -58,6 +58,7 @@ from (
          select (symbols.symbol || '_' || trading_sessions.date) as id,
                 symbols.symbol,
                 trading_sessions.date,
+                lag(trading_sessions.date) over (partition by symbol order by date) as prev_date,
                 trading_sessions.index::int,
                 trading_sessions.open_at,
                 trading_sessions.close_at
@@ -73,5 +74,10 @@ from (
      ) t
 {% if is_incremental() %}
          left join {{ this }} old_trading_sessions using (symbol, date, index)
-where old_trading_sessions is null
+{% endif %}
+
+where t.open_at between now() - interval '1 week' and now()
+
+{% if is_incremental() %}
+  and old_trading_sessions is null
 {% endif %}

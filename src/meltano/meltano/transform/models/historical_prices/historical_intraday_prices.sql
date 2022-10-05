@@ -106,8 +106,10 @@ with polygon_symbols as materialized
                         else 1.0 -- TODO verify todays intraday prices after split are adjusted?
                         end as split_rate
              from daily_close_prices
+                      join {{ ref('base_tickers') }} using (symbol)
                       left join {{ ref('historical_prices') }} using (symbol, date)
                       join raw_intraday_prices using (symbol, time)
+             where base_tickers.type != 'crypto'
 {% endif %}
          )
 select symbol,

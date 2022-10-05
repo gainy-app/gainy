@@ -29,14 +29,14 @@ with first_profile_transaction_date as
     old_model_stats as
          (
              select transactions_uniq_id, period,
-                    max(transactions_updated_at) as max_transactions_updated_at,
+                    max(updated_at) as max_updated_at,
                     max(datetime) as max_datetime
              from {{ this }}
              group by transactions_uniq_id, period
 {% endif %}
          )
 
-select *
+select t.*
 from (
          select (portfolio_expanded_transactions.uniq_id || '_' || chart.period || '_' || chart.datetime) as id,
                 portfolio_expanded_transactions.uniq_id                                                   as transactions_uniq_id,
@@ -47,7 +47,7 @@ from (
                 portfolio_expanded_transactions.quantity_norm_for_valuation * chart.low                   as low,
                 portfolio_expanded_transactions.quantity_norm_for_valuation * chart.close                 as close,
                 portfolio_expanded_transactions.quantity_norm_for_valuation * chart.adjusted_close        as adjusted_close,
-                portfolio_expanded_transactions.updated_at                                                as transactions_updated_at
+                greatest(portfolio_expanded_transactions.updated_at, chart.updated_at)                    as updated_at
          from {{ ref('portfolio_expanded_transactions') }}
                   left join first_profile_transaction_date using (profile_id)
                   join {{ ref('portfolio_securities_normalized') }}
@@ -61,6 +61,6 @@ from (
 {% if is_incremental() %}
          left join old_model_stats using (transactions_uniq_id, period)
 where old_model_stats.transactions_uniq_id is null
-   or t.transactions_updated_at > old_model_stats.max_transactions_updated_at -- new / updated transaction - recalc all
+   or t.updated_at > old_model_stats.max_updated_at -- new / updated transaction - recalc all
    or t.datetime > old_model_stats.max_datetime -- old transaction - recalc only new
 {% endif %}

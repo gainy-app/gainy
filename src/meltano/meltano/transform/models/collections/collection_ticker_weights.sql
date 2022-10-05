@@ -106,7 +106,7 @@ with raw_ticker_collections_weights as materialized
                    ticker_collections_weights.collection_id,
                    ticker_collections_weights.symbol,
                    historical_prices.date,
-                   historical_prices.adjusted_close       as price,
+                   historical_prices.adjusted_close       as price, -- TODO a lot of logics depends on this price to be the "close price of previous trading day"
                    case
                        when historical_prices.date >= ticker_collections_weights.date
                            then ticker_collections_weights.weight
