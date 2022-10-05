@@ -71,7 +71,6 @@ prices_with_split_rates as
                eod_historical_prices.volume,
                eod_historical_prices._sdc_batched_at
         from {{ source('eod', 'eod_historical_prices') }}
-
                  left join stocks_with_split using (code)
         where eod_historical_prices.date >= eod_historical_prices.first_date
     ),
