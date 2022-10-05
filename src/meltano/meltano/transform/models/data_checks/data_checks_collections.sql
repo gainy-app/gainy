@@ -145,11 +145,11 @@ union all
                                          row_number() over (partition by collection_uniq_id order by t.date desc) as idx
                                   from (
                                            select collection_uniq_id, period, date, max(datetime) as datetime
-                                           from collection_chart
+                                           from {{ ref('collection_chart') }}
                                            where period = '1w'
                                            group by collection_uniq_id, period, date
                                        ) t
-                                           join collection_chart using (collection_uniq_id, period, datetime)
+                                           join {{ ref('collection_chart') }} using (collection_uniq_id, period, datetime)
                               )
                      select distinct on (
                          gainy_collections.id
