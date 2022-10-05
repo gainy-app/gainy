@@ -1,1 +1,1 @@
-python3 scripts/generate_meltano_config.py
+python scripts/generate_meltano_config.py

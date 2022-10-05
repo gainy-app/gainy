@@ -23,7 +23,7 @@ for pattern in debug_schedule_patterns:
     generate_meltano_config = BashOperator(
         task_id="generate_meltano_config",
         bash_command=
-        f"cd {MELTANO_PROJECT_ROOT}; /usr/local/bin/python3 scripts/generate_meltano_config.py",
+        f"cd {MELTANO_PROJECT_ROOT}; /usr/local/bin/python scripts/generate_meltano_config.py",
         dag=dag)
 
     for schedule in schedules:
