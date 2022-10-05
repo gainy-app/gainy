@@ -13641,6 +13641,6 @@ with min_dates as
         group by code
     )
 update raw_data.eod_historical_prices
-set first_value = min_dates.date
+set first_date = min_dates.date
 from min_dates
 where eod_historical_prices.code = min_dates.code;
