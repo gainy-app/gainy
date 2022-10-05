@@ -233,6 +233,7 @@ where date is not null
 {% endif %}
 
 -- TODO make it historical for personalized collections
+
 -- union all
 --
 -- select profile_id || '_' || collection_id                       as collection_uniq_id,
