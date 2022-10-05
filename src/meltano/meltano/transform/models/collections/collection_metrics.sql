@@ -33,7 +33,7 @@ with collection_daily_latest_chart_point as
      )
 select profile_collections.profile_id,
        profiles.user_id,
-       profile_collections.uniq_id                                                 as collection_uniq_id,
+       profile_collections.uniq_id::text                                           as collection_uniq_id,
        latest_day.adjusted_close::double precision                                 as actual_price,
        (latest_day.adjusted_close - previous_day.adjusted_close)::double precision as absolute_daily_change,
        (latest_day.adjusted_close /
