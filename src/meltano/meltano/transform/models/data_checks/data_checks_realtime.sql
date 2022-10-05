@@ -27,25 +27,10 @@ with tickers_and_options as
          (
              with latest_trading_day as
                       (
-                          select eod_intraday_prices.symbol,
-                                 max(close_at) as close_at,
-                                 max(eod_intraday_prices.time) as time
-                          from {{ source('eod', 'eod_intraday_prices') }}
-                                   left join {{ ref('week_trading_sessions_static') }} using (symbol)
-                          where week_trading_sessions_static is null
-                            or (index = 0 and eod_intraday_prices.time between week_trading_sessions_static.open_at and week_trading_sessions_static.close_at)
-                          group by eod_intraday_prices.symbol
-
-                          union all
-
-                          select polygon_intraday_prices.symbol,
-                                 max(close_at) as close_at,
-                                 max(polygon_intraday_prices.time) as time
-                          from {{ source('polygon', 'polygon_intraday_prices') }}
-                                   left join {{ ref('week_trading_sessions_static') }} using (symbol)
-                          where week_trading_sessions_static is null
-                            or (index = 0 and polygon_intraday_prices.time between week_trading_sessions_static.open_at and week_trading_sessions_static.close_at)
-                          group by polygon_intraday_prices.symbol
+                          select symbol,
+                                 close_at
+                          from {{ ref('week_trading_sessions_static') }}
+                          where index = 0
                       )
              select symbol,
                     'old_realtime_metrics' as code,
@@ -54,7 +39,7 @@ with tickers_and_options as
              from tickers_and_options
                       left join {{ ref('ticker_realtime_metrics') }} using (symbol)
                       join latest_trading_day using (symbol)
-             where ticker_realtime_metrics.time < least(latest_trading_day.close_at, latest_trading_day.time) - interval '20 minutes'
+             where ticker_realtime_metrics.time < least(latest_trading_day.close_at, now()) - interval '20 minutes'
                 or (ticker_realtime_metrics is null and latest_trading_day is not null)
                 or (latest_trading_day.close_at is null and latest_trading_day is not null)
              group by symbol
@@ -71,8 +56,8 @@ with tickers_and_options as
                                     select symbol,
                                            '1d' as period
                                     from {{ ref('historical_prices_aggregated_3min') }}
-                                             join latest_trading_day using (symbol)
-                                    where datetime > least(latest_trading_day.close_at, latest_trading_day.time) - interval '30 minutes'
+                                             left join latest_trading_day using (symbol)
+                                    where datetime > least(latest_trading_day.close_at, now()) - interval '30 minutes'
                                     group by symbol
 
                                     union all
@@ -80,8 +65,8 @@ with tickers_and_options as
                                     select symbol,
                                            '1w' as period
                                     from {{ ref('historical_prices_aggregated_15min') }}
-                                             join latest_trading_day using (symbol)
-                                    where datetime > least(latest_trading_day.close_at, latest_trading_day.time) - interval '30 minutes'
+                                             left join latest_trading_day using (symbol)
+                                    where datetime > least(latest_trading_day.close_at, now()) - interval '40 minutes'
                                     group by symbol
                                 ) c using (symbol, period)
              where c is null
@@ -357,6 +342,34 @@ with tickers_and_options as
              where abs(diff) > 0.1
              group by symbol
          ),
+     ticker_wrong_previous_day_close_price as
+         (
+             with ticker_daily_latest_chart_point as
+                      (
+                          select chart.*,
+                                 row_number() over (partition by symbol order by t.date desc) as idx
+                          from (
+                                   select symbol, period, date, max(datetime) as datetime
+                                   from {{ ref('chart') }}
+                                   where period = '1w'
+                                   group by symbol, period, date
+                               ) t
+                                   join {{ ref('chart') }} using (symbol, period, datetime)
+                      )
+             select distinct on (
+                 symbol
+                 ) symbol,
+                   'Ticker ' || symbol || ' has wrong previous_day_close_price. ' ||
+                   json_build_array(ticker_realtime_metrics.previous_day_close_price,
+                                    ticker_daily_latest_chart_point.adjusted_close) as message
+             from {{ ref('tickers') }}
+                      left join {{ ref('ticker_realtime_metrics') }} using (symbol)
+                      left join ticker_daily_latest_chart_point using (symbol)
+             where ticker_realtime_metrics is null
+                or ticker_daily_latest_chart_point is null
+                or ticker_realtime_metrics.previous_day_close_price < 1e-6
+                or abs(ticker_daily_latest_chart_point.adjusted_close / ticker_realtime_metrics.previous_day_close_price - 1) > 0.2
+         ),
 {% endif %}
      errors as
          (
@@ -406,6 +419,13 @@ with tickers_and_options as
                     'daily' as period,
                     message
              from realtime_chart_diff_with_historical
+             union all
+
+             select symbol,
+                    'ticker_wrong_previous_day_close_price' as code,
+                    'daily' as period,
+                    message
+             from ticker_wrong_previous_day_close_price
 {% endif %}
          )
 select (code || '_' || symbol) as id,

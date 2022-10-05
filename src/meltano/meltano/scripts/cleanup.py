@@ -196,7 +196,7 @@ def clean_schemas(db_conn):
 
 def clean_obsolete_data(db_conn):
     queries = [
-        "delete from meltano.runs where ended_at < now() - interval '1 month'",
+        "delete from meltano_bak.runs where ended_at < now() - interval '1 month'",
         "delete from raw_data.eod_intraday_prices where time < now() - interval '2 weeks'",
         "delete from raw_data.polygon_intraday_prices where time < now() - interval '2 weeks'",
         "delete from deployment.realtime_listener_heartbeat where time < now() - interval '1 hour'",
