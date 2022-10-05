@@ -36,7 +36,7 @@
                             then weight * (adjusted_close / collection_ticker_weights.price - 1)
                         else 0 end                                          as adjusted_close_gain,
                     greatest(collection_ticker_weights.updated_at,
-                             historical_prices_aggregated_15min.updated_at) as updated_at
+                             historical_prices_aggregated_3min.updated_at) as updated_at
              from {{ ref('collection_ticker_weights') }}
                       join {{ ref('historical_prices_aggregated_3min') }} using (symbol, date)
                       join {{ ref('week_trading_sessions_static') }} using (symbol, date)
