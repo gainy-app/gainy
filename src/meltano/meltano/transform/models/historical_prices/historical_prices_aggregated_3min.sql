@@ -131,90 +131,95 @@ with
                       from {{ ref('ticker_options_monitored') }}
                                join time_series using (symbol)
                   ) t
+             where t.time_truncated < now() - interval '15 minutes'
              order by symbol, time_truncated, time, priority
          )
-select t2.symbol || '_' || t2.datetime                               as id,
-       t2.symbol,
-       t2.date,
-       t2.datetime,
-{% if is_incremental() %}
-       coalesce(t2.open,
-                old_data.open,
-                latest_known_prices.adjusted_close,
-                historical_prices_marked.price_0d)::double precision as open,
-       coalesce(t2.high,
-                old_data.high,
-                latest_known_prices.adjusted_close,
-                historical_prices_marked.price_0d)::double precision as high,
-       coalesce(t2.low,
-                old_data.low,
-                latest_known_prices.adjusted_close,
-                historical_prices_marked.price_0d)::double precision as low,
-       coalesce(t2.close,
-                old_data.close,
-                latest_known_prices.adjusted_close,
-                historical_prices_marked.price_0d)::double precision as close,
-       coalesce(t2.adjusted_close,
-                old_data.adjusted_close,
-                latest_known_prices.adjusted_close,
-                historical_prices_marked.price_0d)::double precision as adjusted_close,
-       coalesce(t2.volume, old_data.volume, 0)                       as volume,
-       coalesce(t2.updated_at, old_data.updated_at)                  as updated_at
-{% else %}
-       coalesce(t2.open,
-                historical_prices_marked.price_0d)::double precision as open,
-       coalesce(t2.high,
-                historical_prices_marked.price_0d)::double precision as high,
-       coalesce(t2.low,
-                historical_prices_marked.price_0d)::double precision as low,
-       coalesce(t2.close,
-                historical_prices_marked.price_0d)::double precision as close,
-       coalesce(t2.adjusted_close,
-                historical_prices_marked.price_0d)::double precision as adjusted_close,
-       coalesce(t2.volume, 0)                                        as volume,
-       t2.updated_at
-{% endif %}
+select *
 from (
-          select symbol,
-                 date,
-                 datetime,
-                 coalesce(
-                         open,
-                         first_value(close)
-                         OVER (partition by symbol, grp order by datetime)) as open,
-                 coalesce(
-                         high,
-                         first_value(close)
-                         OVER (partition by symbol, grp order by datetime)) as high,
-                 coalesce(
-                         low,
-                         first_value(close)
-                         OVER (partition by symbol, grp order by datetime)) as low,
-                 coalesce(
-                         close,
-                         first_value(close)
-                         OVER (partition by symbol, grp order by datetime)) as close,
-                 coalesce(
-                         adjusted_close,
-                         first_value(adjusted_close)
-                         OVER (partition by symbol, grp order by datetime)) as adjusted_close,
-                 volume,
-                 coalesce(
-                         updated_at,
-                         first_value(updated_at)
-                         OVER (partition by symbol, grp order by datetime)) as updated_at
-          from (
-                   select *,
-                          coalesce(sum(case when adjusted_close is not null then 1 end)
-                                   over (partition by symbol order by datetime), 0) as grp
-                   from combined_intraday_prices
-               ) t
-     ) t2
-         left join {{ ref('historical_prices_marked') }} using (symbol)
+         select t2.symbol || '_' || t2.datetime                               as id,
+                t2.symbol,
+                t2.date,
+                t2.datetime,
 {% if is_incremental() %}
-         left join latest_known_prices using (symbol)
-         left join {{ this }} old_data using (symbol, datetime)
-where (old_data.symbol is null -- no old data
-   or (t2.updated_at is not null and old_data.updated_at is null) -- old data is null and new is not
-   or t2.updated_at > old_data.updated_at) -- new data is newer than the old one
+                coalesce(t2.open,
+                         old_data.open,
+                         latest_known_prices.adjusted_close,
+                         historical_prices_marked.price_0d)::double precision as open,
+                coalesce(t2.high,
+                         old_data.high,
+                         latest_known_prices.adjusted_close,
+                         historical_prices_marked.price_0d)::double precision as high,
+                coalesce(t2.low,
+                         old_data.low,
+                         latest_known_prices.adjusted_close,
+                         historical_prices_marked.price_0d)::double precision as low,
+                coalesce(t2.close,
+                         old_data.close,
+                         latest_known_prices.adjusted_close,
+                         historical_prices_marked.price_0d)::double precision as close,
+                coalesce(t2.adjusted_close,
+                         old_data.adjusted_close,
+                         latest_known_prices.adjusted_close,
+                         historical_prices_marked.price_0d)::double precision as adjusted_close,
+                coalesce(t2.volume, old_data.volume, 0)                       as volume,
+                coalesce(t2.updated_at, old_data.updated_at)                  as updated_at
+{% else %}
+                coalesce(t2.open,
+                         historical_prices_marked.price_0d)::double precision as open,
+                coalesce(t2.high,
+                         historical_prices_marked.price_0d)::double precision as high,
+                coalesce(t2.low,
+                         historical_prices_marked.price_0d)::double precision as low,
+                coalesce(t2.close,
+                         historical_prices_marked.price_0d)::double precision as close,
+                coalesce(t2.adjusted_close,
+                         historical_prices_marked.price_0d)::double precision as adjusted_close,
+                coalesce(t2.volume, 0)                                        as volume,
+                t2.updated_at
 {% endif %}
+         from (
+                   select symbol,
+                          date,
+                          datetime,
+                          coalesce(
+                                  open,
+                                  first_value(close)
+                                  OVER (partition by symbol, grp order by datetime)) as open,
+                          coalesce(
+                                  high,
+                                  first_value(close)
+                                  OVER (partition by symbol, grp order by datetime)) as high,
+                          coalesce(
+                                  low,
+                                  first_value(close)
+                                  OVER (partition by symbol, grp order by datetime)) as low,
+                          coalesce(
+                                  close,
+                                  first_value(close)
+                                  OVER (partition by symbol, grp order by datetime)) as close,
+                          coalesce(
+                                  adjusted_close,
+                                  first_value(adjusted_close)
+                                  OVER (partition by symbol, grp order by datetime)) as adjusted_close,
+                          volume,
+                          coalesce(
+                                  updated_at,
+                                  first_value(updated_at)
+                                  OVER (partition by symbol, grp order by datetime)) as updated_at
+                   from (
+                            select *,
+                                   coalesce(sum(case when adjusted_close is not null then 1 end)
+                                            over (partition by symbol order by datetime), 0) as grp
+                            from combined_intraday_prices
+                        ) t
+              ) t2
+                  left join {{ ref('historical_prices_marked') }} using (symbol)
+{% if is_incremental() %}
+                  left join latest_known_prices using (symbol)
+                  left join {{ this }} old_data using (symbol, datetime)
+         where (old_data.symbol is null -- no old data
+            or (t2.updated_at is not null and old_data.updated_at is null) -- old data is null and new is not
+            or t2.updated_at > old_data.updated_at) -- new data is newer than the old one
+{% endif %}
+    ) t3
+where adjusted_close is not null

@@ -14,25 +14,7 @@
 }}
 
 
-with latest_trading_day as
-         (
-             select distinct on (exchange_name, country_name) *
-             from {{ ref('exchange_schedule') }}
-             where open_at < now()
-             order by exchange_name, country_name, date desc
-         ),
-     previous_trading_day as
-         (
-             select distinct on (exchange_schedule.exchange_name, exchange_schedule.country_name) exchange_schedule.*
-             from {{ ref('exchange_schedule') }}
-                      join latest_trading_day
-                           on (latest_trading_day.exchange_name = exchange_schedule.exchange_name
-                               or (latest_trading_day.exchange_name is null
-                                   and latest_trading_day.country_name = exchange_schedule.country_name))
-             where exchange_schedule.date < latest_trading_day.date
-             order by exchange_schedule.exchange_name, exchange_schedule.country_name, exchange_schedule.date desc
-         ),
-     tickers_and_options as
+with tickers_and_options as
          (
              select symbol, exchange_canonical, country_name, type
              from {{ ref('tickers') }}
@@ -43,62 +25,27 @@ with latest_trading_day as
          ),
      old_realtime_checks as
          (
-             with indexed_ticker_schedules as
+             with latest_trading_day as
                       (
-                          select symbol,
-                                 exchange_schedule.date,
-                                 exchange_schedule.open_at,
-                                 exchange_schedule.close_at - interval '1 millisecond'      as close_at,
-                                 row_number() over (partition by symbol order by date desc) as idx,
-                                 row_number() over (partition by symbol order by date)      as idx_inv
-                          from tickers_and_options
-                                   left join {{ ref('exchange_schedule')}}
-                                             on (tickers_and_options.exchange_canonical = exchange_schedule.exchange_name
-                                                 or (tickers_and_options.exchange_canonical is null and
-                                                     tickers_and_options.country_name = exchange_schedule.country_name))
-                          where open_at between now() - interval '1 week' and now()
-                            and type != 'crypto'
+                          select eod_intraday_prices.symbol,
+                                 max(close_at) as close_at,
+                                 max(eod_intraday_prices.time) as time
+                          from {{ source('eod', 'eod_intraday_prices') }}
+                                   left join {{ ref('week_trading_sessions_static') }} using (symbol)
+                          where week_trading_sessions_static is null
+                            or (index = 0 and eod_intraday_prices.time between week_trading_sessions_static.open_at and week_trading_sessions_static.close_at)
+                          group by eod_intraday_prices.symbol
 
                           union all
 
-                          select symbol,
-                                 (dd - interval '1 day')::date                            as date,
-                                 dd - interval '1 day'                                    as open_at,
-                                 dd - interval '1 millisecond'                            as close_at,
-                                 row_number() over (partition by symbol order by dd desc) as idx,
-                                 row_number() over (partition by symbol order by dd)      as idx_inv
-                          from generate_series(now() - interval '6 days', now(), interval '1 day') dd
-                                   join tickers_and_options on type = 'crypto'
-                      ),
-                  latest_trading_day as
-                      (
-                          select distinct on (
-                              t.symbol
-                              ) t.time,
-                                indexed_ticker_schedules.*
-                          from (
-                                   select eod_intraday_prices.symbol,
-                                          indexed_ticker_schedules.date,
-                                          max(eod_intraday_prices.time) as time
-                                   from {{ source('eod', 'eod_intraday_prices') }}
-                                            join indexed_ticker_schedules
-                                                 on indexed_ticker_schedules.symbol = eod_intraday_prices.symbol
-                                                     and eod_intraday_prices.time between indexed_ticker_schedules.open_at and indexed_ticker_schedules.close_at
-                                   group by eod_intraday_prices.symbol, indexed_ticker_schedules.date
-
-                                   union all
-
-                                   select polygon_intraday_prices.symbol,
-                                          indexed_ticker_schedules.date,
-                                          max(polygon_intraday_prices.time) as time
-                                   from {{ source('polygon', 'polygon_intraday_prices') }}
-                                            join indexed_ticker_schedules
-                                                 on indexed_ticker_schedules.symbol = polygon_intraday_prices.symbol
-                                                     and polygon_intraday_prices.time between indexed_ticker_schedules.open_at and indexed_ticker_schedules.close_at
-                                   group by polygon_intraday_prices.symbol, indexed_ticker_schedules.date
-                               ) t
-                                   join indexed_ticker_schedules using (symbol, date)
-                          order by t.symbol, t.time desc
+                          select polygon_intraday_prices.symbol,
+                                 max(close_at) as close_at,
+                                 max(polygon_intraday_prices.time) as time
+                          from {{ source('polygon', 'polygon_intraday_prices') }}
+                                   left join {{ ref('week_trading_sessions_static') }} using (symbol)
+                          where week_trading_sessions_static is null
+                            or (index = 0 and polygon_intraday_prices.time between week_trading_sessions_static.open_at and week_trading_sessions_static.close_at)
+                          group by polygon_intraday_prices.symbol
                       )
              select symbol,
                     'old_realtime_metrics' as code,
@@ -108,62 +55,55 @@ with latest_trading_day as
                       left join {{ ref('ticker_realtime_metrics') }} using (symbol)
                       join latest_trading_day using (symbol)
              where ticker_realtime_metrics.time < least(latest_trading_day.close_at, latest_trading_day.time) - interval '20 minutes'
-                or ticker_realtime_metrics is null
+                or (ticker_realtime_metrics is null and latest_trading_day is not null)
+                or (latest_trading_day.close_at is null and latest_trading_day is not null)
              group by symbol
 
              union all
 
              select symbol,
-                    'old_realtime_chart_' || period as code,
+                    'old_realtime_chart' as code,
                     'realtime' as period,
                     'Ticker ' || symbol || ' has old or no ' || json_agg(period) || ' chart.' as message
              from tickers_and_options
-                      join latest_trading_day using (symbol)
                       join (select period from (values ('1d'), ('1w')) t (period)) periods on true
                       left join (
                                     select symbol,
-                                           period,
-                                           max(chart.datetime) as datetime
-                                    from {{ ref('chart') }}
-                                    where chart.period in ('1d', '1w')
-                                    group by symbol, period
-                                ) chart_1d_latest using (symbol, period)
-             where chart_1d_latest.datetime < least(latest_trading_day.close_at, latest_trading_day.time) - interval '20 minutes'
-                or (chart_1d_latest is null and period = '1d' and idx = 1)
-                or (chart_1d_latest is null and period = '1w')
-             group by symbol, period
+                                           '1d' as period
+                                    from {{ ref('historical_prices_aggregated_3min') }}
+                                             join latest_trading_day using (symbol)
+                                    where datetime > least(latest_trading_day.close_at, latest_trading_day.time) - interval '30 minutes'
+                                    group by symbol
+
+                                    union all
+
+                                    select symbol,
+                                           '1w' as period
+                                    from {{ ref('historical_prices_aggregated_15min') }}
+                                             join latest_trading_day using (symbol)
+                                    where datetime > least(latest_trading_day.close_at, latest_trading_day.time) - interval '30 minutes'
+                                    group by symbol
+                                ) c using (symbol, period)
+             where c is null
+             group by symbol
          ),
      old_realtime_prices_eod as
          (
              with previous_trading_day_intraday_prices as
                       (
-                          with crypto_open_at as
-                                   (
-
-                                       select (
-                                                  values (date_trunc('minute', now() - interval '2 days') -
-                                                          interval '1 minute' *
-                                                          mod(extract(minutes from now() - interval '2 days')::int, 15))
-                                              ) as datetime
-                                   )
                           select symbol,
                                  type,
                                  date_trunc('minute', eod_intraday_prices.time) -
                                  interval '1 minute' *
-                                 mod(extract(minutes from eod_intraday_prices.time)::int, 15) -
-                                 coalesce(open_at, crypto_open_at.datetime) as time
+                                 mod(extract(minutes from eod_intraday_prices.time)::int, 15) - open_at as time
                           from {{ ref('base_tickers') }}
-                                   left join previous_trading_day
-                                             on (previous_trading_day.exchange_name = base_tickers.exchange_canonical
-                                                 or (base_tickers.exchange_canonical is null
-                                                     and previous_trading_day.country_name = base_tickers.country_name))
-                                   left join {{ source('eod', 'eod_intraday_prices')}} using (symbol)
-                                   join crypto_open_at on true
+                                   join {{ ref('week_trading_sessions_static') }} using (symbol)
+                                   join {{ source('eod', 'eod_intraday_prices') }} using (symbol)
                           where (base_tickers.exchange_canonical in ('NYSE', 'NASDAQ') or
                                  (base_tickers.exchange_canonical is null and base_tickers.country_name = 'United States') or
                                  (base_tickers.exchange_canonical is null and base_tickers.country_name is null))
-                            and eod_intraday_prices.time between coalesce(open_at, crypto_open_at.datetime) and coalesce(
-                                      close_at - interval '1 second', crypto_open_at.datetime + interval '1 day')
+                            and week_trading_sessions_static.index = 1
+                            and eod_intraday_prices.time between open_at and close_at - interval '1 second'
                       ),
                   previous_trading_day_intraday_prices_unique_symbols as
                       (
@@ -183,34 +123,20 @@ with latest_trading_day as
                       ),
                   latest_trading_day_intraday_prices as
                       (
-                          with crypto_open_at as
-                                   (
-
-                                       select (
-                                                  values (date_trunc('minute', now() - interval '1 day') -
-                                                          interval '1 minute' *
-                                                          mod(extract(minutes from now() - interval '1 day')::int, 15))
-                                              ) as datetime
-                                   )
                           select symbol,
                                  type,
                                  date_trunc('minute', eod_intraday_prices.time) -
                                  interval '1 minute' *
-                                 mod(extract(minutes from eod_intraday_prices.time)::int, 15) -
-                                 coalesce(open_at, crypto_open_at.datetime)                    as time,
-                                 coalesce(latest_trading_day.open_at, crypto_open_at.datetime) as open_at
+                                 mod(extract(minutes from eod_intraday_prices.time)::int, 15) - open_at as time,
+                                 open_at
                           from {{ ref('base_tickers') }}
-                                   left join latest_trading_day
-                                             on (latest_trading_day.exchange_name = base_tickers.exchange_canonical
-                                                 or (base_tickers.exchange_canonical is null
-                                                     and latest_trading_day.country_name = base_tickers.country_name))
-                                   left join {{ source('eod', 'eod_intraday_prices')}} using (symbol)
-                                   join crypto_open_at on true
+                                   join {{ ref('week_trading_sessions_static') }} using (symbol)
+                                   join {{ source('eod', 'eod_intraday_prices') }} using (symbol)
                           where (base_tickers.exchange_canonical in ('NYSE', 'NASDAQ') or
                                  (base_tickers.exchange_canonical is null and base_tickers.country_name = 'United States') or
                                  (base_tickers.exchange_canonical is null and base_tickers.country_name is null))
-                            and eod_intraday_prices.time between coalesce(open_at, crypto_open_at.datetime) and coalesce(
-                                      close_at - interval '1 second', crypto_open_at.datetime + interval '1 day')
+                            and week_trading_sessions_static.index = 0
+                            and eod_intraday_prices.time between open_at and close_at - interval '1 second'
                       ),
                   latest_trading_day_intraday_prices_stats as
                       (
@@ -247,33 +173,19 @@ with latest_trading_day as
          (
              with previous_trading_day_intraday_prices as
                       (
-                          with crypto_open_at as
-                                   (
-
-                                       select (
-                                                  values (date_trunc('minute', now() - interval '2 days') -
-                                                          interval '1 minute' *
-                                                          mod(extract(minutes from now() - interval '2 days')::int, 15))
-                                              ) as datetime
-                                   )
                           select symbol,
                                  type,
                                  date_trunc('minute', polygon_intraday_prices.time) -
                                  interval '1 minute' *
-                                 mod(extract(minutes from polygon_intraday_prices.time)::int, 15) -
-                                 coalesce(open_at, crypto_open_at.datetime) as time
+                                 mod(extract(minutes from polygon_intraday_prices.time)::int, 15) - open_at as time
                           from {{ ref('base_tickers') }}
-                                   left join previous_trading_day
-                                             on (previous_trading_day.exchange_name = base_tickers.exchange_canonical
-                                                 or (base_tickers.exchange_canonical is null
-                                                     and previous_trading_day.country_name = base_tickers.country_name))
-                                   left join {{ source('polygon', 'polygon_intraday_prices')}} using (symbol)
-                                   join crypto_open_at on true
+                                   join {{ ref('week_trading_sessions_static') }} using (symbol)
+                                   join {{ source('polygon', 'polygon_intraday_prices') }} using (symbol)
                           where (base_tickers.exchange_canonical in ('NYSE', 'NASDAQ') or
                                  (base_tickers.exchange_canonical is null and base_tickers.country_name = 'United States') or
                                  (base_tickers.exchange_canonical is null and base_tickers.country_name is null))
-                            and polygon_intraday_prices.time between coalesce(open_at, crypto_open_at.datetime) and coalesce(
-                                      close_at - interval '1 second', crypto_open_at.datetime + interval '1 day')
+                            and week_trading_sessions_static.index = 1
+                            and polygon_intraday_prices.time between open_at and close_at - interval '1 second'
                       ),
                   previous_trading_day_intraday_prices_unique_symbols as
                       (
@@ -293,34 +205,20 @@ with latest_trading_day as
                       ),
                   latest_trading_day_intraday_prices as
                       (
-                          with crypto_open_at as
-                                   (
-
-                                       select (
-                                                  values (date_trunc('minute', now() - interval '1 day') -
-                                                          interval '1 minute' *
-                                                          mod(extract(minutes from now() - interval '1 day')::int, 15))
-                                              ) as datetime
-                                   )
                           select symbol,
                                  type,
                                  date_trunc('minute', polygon_intraday_prices.time) -
                                  interval '1 minute' *
-                                 mod(extract(minutes from polygon_intraday_prices.time)::int, 15) -
-                                 coalesce(open_at, crypto_open_at.datetime)                    as time,
-                                 coalesce(latest_trading_day.open_at, crypto_open_at.datetime) as open_at
+                                 mod(extract(minutes from polygon_intraday_prices.time)::int, 15) - open_at as time,
+                                 open_at
                           from {{ ref('base_tickers') }}
-                                   left join latest_trading_day
-                                             on (latest_trading_day.exchange_name = base_tickers.exchange_canonical
-                                                 or (base_tickers.exchange_canonical is null
-                                                     and latest_trading_day.country_name = base_tickers.country_name))
-                                   left join {{ source('polygon', 'polygon_intraday_prices')}} using (symbol)
-                                   join crypto_open_at on true
+                                   join {{ ref('week_trading_sessions_static') }} using (symbol)
+                                   join {{ source('polygon', 'polygon_intraday_prices') }} using (symbol)
                           where (base_tickers.exchange_canonical in ('NYSE', 'NASDAQ') or
                                  (base_tickers.exchange_canonical is null and base_tickers.country_name = 'United States') or
                                  (base_tickers.exchange_canonical is null and base_tickers.country_name is null))
-                            and polygon_intraday_prices.time between coalesce(open_at, crypto_open_at.datetime) and coalesce(
-                                      close_at - interval '1 second', crypto_open_at.datetime + interval '1 day')
+                            and week_trading_sessions_static.index = 0
+                            and polygon_intraday_prices.time between open_at and close_at - interval '1 second'
                       ),
                   latest_trading_day_intraday_prices_stats as
                       (
@@ -370,17 +268,11 @@ with latest_trading_day as
                                       adjusted_close,
                                       volume
                                from {{ ref('historical_prices_aggregated_3min') }}
-
-                               union all
-
-                               select symbol,
-                                      '1w'                                                             as period,
-                                      lag(adjusted_close) over (partition by symbol order by datetime) as prev_adjusted_close,
-                                      lag(volume) over (partition by symbol order by datetime)         as prev_volume,
-                                      datetime,
-                                      adjusted_close,
-                                      volume
-                               from {{ ref('historical_prices_aggregated_15min') }}
+{% if var('realtime') %}
+                                    join {{ ref('week_trading_sessions') }} using (symbol)
+                               where week_trading_sessions.index = 0 and historical_prices_aggregated_3min.datetime between week_trading_sessions.open_at and week_trading_sessions.close_at
+                                 and datetime > least(now(), week_trading_sessions.close_at) - interval '1 hour'
+{% endif %}
                            ) t
                       where adjusted_close > 0
                         and prev_adjusted_close > 0
@@ -391,6 +283,23 @@ with latest_trading_day as
                 or (diff > 1 and (volume + prev_volume) > 10000)
                 or (diff > 2 and (volume + prev_volume) > 1000)
              group by symbol
+         ),
+     realtime_chart_diff_between_periods as
+         (
+             select symbol,
+                    'Ticker ' || symbol || ' differs between 1d and 1w. diff: ' || diff as message
+             from (
+                       select historical_prices_aggregated_15min.symbol,
+                              avg(abs(historical_prices_aggregated_15min.adjusted_close - historical_prices_aggregated_3min.adjusted_close) /
+                                  historical_prices_aggregated_15min.adjusted_close) as diff
+                       from {{ ref('historical_prices_aggregated_15min') }}
+                            join {{ ref('historical_prices_aggregated_3min') }}
+                                 on historical_prices_aggregated_3min.symbol = historical_prices_aggregated_15min.symbol
+                                     and historical_prices_aggregated_3min.datetime = historical_prices_aggregated_15min.datetime + interval '12 minutes'
+                       where historical_prices_aggregated_15min.adjusted_close > 0
+                       group by historical_prices_aggregated_15min.symbol
+                  ) t
+             where diff > 0.01
          ),
 {% if not var('realtime') %}
      realtime_chart_diff_with_historical as
@@ -404,29 +313,44 @@ with latest_trading_day as
                              historical_prices.adjusted_close as diff
                       from (
                                (
-                                   select distinct on (
-                                       symbol, datetime::date
-                                       ) symbol,
-                                         '1d'           as period,
-                                         datetime::date as date,
-                                         datetime,
-                                         adjusted_close
+                                   select symbol,
+                                          '1d'           as period,
+                                          date,
+                                          datetime,
+                                          adjusted_close
                                    from {{ ref('historical_prices_aggregated_3min') }}
-                                   order by symbol, datetime::date, datetime desc
+                                        join (
+                                                  select symbol,
+                                                         date,
+                                                         '1d'           as period,
+                                                         max(datetime) as datetime
+                                                  from {{ ref('historical_prices_aggregated_3min') }}
+                                                  group by symbol, date
+                                             ) t using (symbol, date, datetime)
                                )
                                union all
                                (
-                                   select distinct on (
-                                       symbol, datetime::date
-                                       ) symbol,
-                                         '1w'           as period,
-                                         datetime::date as date,
-                                         datetime,
-                                         adjusted_close
+                                   select symbol,
+                                          '1w'           as period,
+                                          date,
+                                          datetime,
+                                          adjusted_close
                                    from {{ ref('historical_prices_aggregated_15min') }}
-                                   order by symbol, datetime::date, datetime desc
+                                        join (
+                                                  select symbol,
+                                                         date,
+                                                         '1d'           as period,
+                                                         max(datetime) as datetime
+                                                  from {{ ref('historical_prices_aggregated_15min') }}
+                                                  group by symbol, date
+                                             ) t using (symbol, date, datetime)
                                )
                            ) realtime_daily_close_prices
+                               join ( -- only tickers with realtime prices
+                                         select symbol
+                                         from {{ ref('historical_intraday_prices') }}
+                                         group by symbol
+                                    ) t using (symbol)
                                join {{ ref('historical_prices') }} using (symbol, date)
                       where historical_prices.adjusted_close > 0
                   ) t
@@ -465,6 +389,14 @@ with latest_trading_day as
                     'realtime' as period,
                     message
              from realtime_chart_diff_with_prev_point
+
+             union all
+
+             select symbol,
+                    'realtime_chart_diff_between_periods' as code,
+                    'realtime' as period,
+                    message
+             from realtime_chart_diff_between_periods
 
 {% if not var('realtime') %}
              union all
