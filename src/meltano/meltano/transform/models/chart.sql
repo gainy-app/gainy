@@ -8,6 +8,7 @@
 
 (
     select historical_prices_aggregated_3min.symbol,
+           week_trading_sessions.date,
            historical_prices_aggregated_3min.datetime,
            historical_prices_aggregated_3min.datetime + interval '3 minutes' as close_datetime,
            '1d'::varchar as period,
@@ -28,6 +29,7 @@ union all
 
 (
     select historical_prices_aggregated_15min.symbol,
+           week_trading_sessions.date,
            historical_prices_aggregated_15min.datetime,
            historical_prices_aggregated_15min.datetime + interval '15 minutes' as close_datetime,
            '1w'::varchar as period,
@@ -54,6 +56,7 @@ union all
                  group by symbol
              )
     select historical_prices_aggregated_1d.symbol,
+           historical_prices_aggregated_1d.datetime::date as date,
            historical_prices_aggregated_1d.datetime,
            historical_prices_aggregated_1d.datetime + interval '1 day' as close_datetime,
            '1m'::varchar as period,
@@ -65,7 +68,7 @@ union all
            historical_prices_aggregated_1d.volume,
            historical_prices_aggregated_1d.updated_at
     from {{ ref('historical_prices_aggregated_1d') }}
-             join latest_open_trading_session using (symbol)
+             left join latest_open_trading_session using (symbol)
     where historical_prices_aggregated_1d.datetime >= coalesce(latest_open_trading_session.date, now()) - interval '1 month'
 )
 
@@ -80,6 +83,7 @@ union all
                  group by symbol
              )
     select historical_prices_aggregated_1d.symbol,
+           historical_prices_aggregated_1d.datetime::date as date,
            historical_prices_aggregated_1d.datetime,
            historical_prices_aggregated_1d.datetime + interval '1 day' as close_datetime,
            '3m'::varchar as period,
@@ -91,7 +95,7 @@ union all
            historical_prices_aggregated_1d.volume,
            historical_prices_aggregated_1d.updated_at
     from {{ ref('historical_prices_aggregated_1d') }}
-             join latest_open_trading_session using (symbol)
+             left join latest_open_trading_session using (symbol)
     where historical_prices_aggregated_1d.datetime >= coalesce(latest_open_trading_session.date, now()) - interval '3 month'
 )
 
@@ -106,6 +110,7 @@ union all
                  group by symbol
              )
     select historical_prices_aggregated_1d.symbol,
+           historical_prices_aggregated_1d.datetime::date as date,
            historical_prices_aggregated_1d.datetime,
            historical_prices_aggregated_1d.datetime + interval '1 day' as close_datetime,
            '1y'::varchar as period,
@@ -117,7 +122,7 @@ union all
            historical_prices_aggregated_1d.volume,
            historical_prices_aggregated_1d.updated_at
     from {{ ref('historical_prices_aggregated_1d') }}
-             join latest_open_trading_session using (symbol)
+             left join latest_open_trading_session using (symbol)
     where historical_prices_aggregated_1d.datetime >= coalesce(latest_open_trading_session.date, now()) - interval '1 year'
 )
 
@@ -132,6 +137,7 @@ union all
                  group by symbol
              )
     select historical_prices_aggregated_1w.symbol,
+           historical_prices_aggregated_1w.datetime::date as date,
            historical_prices_aggregated_1w.datetime,
            historical_prices_aggregated_1w.datetime + interval '1 week' as close_datetime,
            '5y'::varchar as period,
@@ -143,7 +149,7 @@ union all
            historical_prices_aggregated_1w.volume,
            historical_prices_aggregated_1w.updated_at
     from {{ ref('historical_prices_aggregated_1w') }}
-             join latest_open_trading_session using (symbol)
+             left join latest_open_trading_session using (symbol)
     where historical_prices_aggregated_1w.datetime >= coalesce(latest_open_trading_session.date, now()) - interval '5 year'
 )
 
@@ -151,6 +157,7 @@ union all
 
 (
     select symbol,
+           datetime::date                as date,
            datetime,
            datetime + interval '1 month' as close_datetime,
            'all'::varchar                as period,

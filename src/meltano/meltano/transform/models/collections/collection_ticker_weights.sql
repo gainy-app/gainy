@@ -78,13 +78,19 @@ with raw_ticker_collections_weights as materialized
                     symbol,
                     min(week_trading_sessions_static.date) as date
              from (
-                      select collection_uniq_id, symbol
+                      select collection_uniq_id, symbol, max(date) as date
                       from ticker_collections_weights
                       group by collection_uniq_id, symbol
-                  ) t
+                  ) collection_symbol_dates
+                      join (
+                               select collection_uniq_id, max(date) as date
+                               from ticker_collections_weights
+                               group by collection_uniq_id
+                           ) collection_dates using (collection_uniq_id)
                       join {{ ref('historical_prices_marked') }} using (symbol)
                       join {{ ref('week_trading_sessions_static') }} using (symbol)
              where week_trading_sessions_static.date > historical_prices_marked.date_0d
+               and collection_symbol_dates.date >= collection_dates.date
              group by collection_uniq_id, symbol
          ),
 {% if is_incremental() and var('realtime') %}
