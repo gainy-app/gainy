@@ -1,5 +1,7 @@
 import json
 import datetime
+from typing import Optional
+
 from portfolio.plaid import PlaidClient
 from portfolio.models import HoldingData, Security, Account, TransactionData, Institution
 from portfolio.exceptions import AccessTokenApiException, AccessTokenLoginRequiredException
@@ -17,7 +19,14 @@ class PlaidService:
     def max_transactions_limit(self):
         return 500
 
-    def get_holdings(self, db_conn, plaid_access_token):
+    def get_holdings(self, plaid_access_token):
+        if plaid_access_token.get("is_artificial"):
+            return {
+                'holdings': [],
+                'securities': [],
+                'accounts': [],
+            }
+
         try:
             # InvestmentsHoldingsGetResponse[]
             response = self.plaid_client.get_investment_holdings(
@@ -35,25 +44,28 @@ class PlaidService:
                 self.__hydrate_account(account)
                 for account in response.accounts
             ]
+
+            for i in holdings:
+                i.plaid_access_token_id = plaid_access_token["id"]
+            for i in accounts:
+                i.plaid_access_token_id = plaid_access_token["id"]
+
+            return {
+                'holdings': holdings,
+                'securities': securities,
+                'accounts': accounts,
+            }
         except plaid.ApiException as e:
             self._handle_api_exception(e, plaid_access_token)
 
-        for i in holdings:
-            i.plaid_access_token_id = plaid_access_token["id"]
-        for i in accounts:
-            i.plaid_access_token_id = plaid_access_token["id"]
+    def get_transactions(self, plaid_access_token, count=100, offset=0):
+        if plaid_access_token.get("is_artificial"):
+            return {
+                'transactions': [],
+                'securities': [],
+                'accounts': [],
+            }
 
-        return {
-            'holdings': holdings,
-            'securities': securities,
-            'accounts': accounts,
-        }
-
-    def get_transactions(self,
-                         db_conn,
-                         plaid_access_token,
-                         count=100,
-                         offset=0):
         try:
             # InvestmentsTransactionsGetResponse[]
             response = self.plaid_client.get_investment_transactions(
@@ -76,21 +88,24 @@ class PlaidService:
                 self.__hydrate_account(account)
                 for account in response.accounts
             ]
+
+            for i in transactions:
+                i.plaid_access_token_id = plaid_access_token["id"]
+            for i in accounts:
+                i.plaid_access_token_id = plaid_access_token["id"]
+
+            return {
+                'transactions': transactions,
+                'securities': securities,
+                'accounts': accounts,
+            }
         except plaid.ApiException as e:
             self._handle_api_exception(e, plaid_access_token)
 
-        for i in transactions:
-            i.plaid_access_token_id = plaid_access_token["id"]
-        for i in accounts:
-            i.plaid_access_token_id = plaid_access_token["id"]
+    def get_institution(self, plaid_access_token) -> Optional[Institution]:
+        if plaid_access_token.get("is_artificial"):
+            return None
 
-        return {
-            'transactions': transactions,
-            'securities': securities,
-            'accounts': accounts,
-        }
-
-    def get_institution(self, db_conn, plaid_access_token):
         item_response = self.plaid_client.get_item(
             plaid_access_token['access_token'])
         institution_id = item_response['item']['institution_id']
@@ -109,7 +124,7 @@ class PlaidService:
                     "plaid_access_token_id": plaid_access_token['id'],
                 })
 
-    def __hydrate_holding_data(self, data):
+    def __hydrate_holding_data(self, data) -> HoldingData:
         model = HoldingData()
         model.iso_currency_code = data.iso_currency_code
         model.quantity = data.quantity
@@ -119,7 +134,7 @@ class PlaidService:
 
         return model
 
-    def __hydrate_transaction_data(self, data):
+    def __hydrate_transaction_data(self, data) -> TransactionData:
         model = TransactionData()
 
         model.amount = data.amount
@@ -138,7 +153,7 @@ class PlaidService:
 
         return model
 
-    def __hydrate_security(self, data):
+    def __hydrate_security(self, data) -> Security:
         model = Security()
         model.close_price = data.close_price
         model.close_price_as_of = (data.close_price_as_of or
@@ -151,7 +166,7 @@ class PlaidService:
 
         return model
 
-    def __hydrate_account(self, data):
+    def __hydrate_account(self, data) -> Account:
         model = Account()
         model.ref_id = data['account_id']
         model.balance_available = data['balances']['available']
@@ -166,7 +181,7 @@ class PlaidService:
 
         return model
 
-    def __hydrate_institution(self, data):
+    def __hydrate_institution(self, data) -> Institution:
         model = Institution()
         model.ref_id = data['institution_id']
         model.name = data['name']
