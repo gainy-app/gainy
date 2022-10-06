@@ -17,3 +17,14 @@ FROM generate_series((select min(date) from latest_historical_prices)::date + in
          join latest_historical_prices on true
 where extract(isodow from dd) < 6
 on conflict do nothing;
+
+with min_dates as
+    (
+        select code, min(date) as date
+        from raw_data.eod_historical_prices
+        group by code
+    )
+update raw_data.eod_historical_prices
+set first_date = min_dates.date
+from min_dates
+where eod_historical_prices.code = min_dates.code;
