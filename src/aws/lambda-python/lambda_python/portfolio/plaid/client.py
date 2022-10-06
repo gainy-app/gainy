@@ -12,7 +12,7 @@ from plaid.model.webhook_verification_key_get_request import WebhookVerification
 from plaid.model.item_get_request import ItemGetRequest
 from plaid.model.institutions_get_by_id_request import InstitutionsGetByIdRequest
 
-from portfolio.plaid.common import get_plaid_client, handle_error
+from portfolio.plaid.common import get_plaid_client
 
 PLAID_WEBHOOK_URL = os.getenv("PLAID_WEBHOOK_URL")
 COUNTRY_CODES = [CountryCode('US')]

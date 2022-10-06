@@ -2,11 +2,12 @@ insert into app.plaid_institutions (name, ref_id)
 values ('Demo', 'demo')
 on conflict do nothing;
 
-INSERT INTO app.profile_plaid_access_tokens (profile_id, access_token, item_id, institution_id)
+INSERT INTO app.profile_plaid_access_tokens (profile_id, access_token, item_id, institution_id, is_artificial)
 select profiles.id,
        'portfolio_demo_' || gen_random_uuid(),
        'portfolio_demo_' || profiles.id,
-       plaid_institutions.id
+       plaid_institutions.id,
+       true
 from app.profiles
          left join app.plaid_institutions on plaid_institutions.ref_id = 'demo'
 where profiles.id = 1

@@ -23,8 +23,7 @@ class PortfolioService:
         for access_token in self.__get_access_tokens(db_conn, profile_id):
             try:
                 token_data = self.__get_service(
-                    access_token['service']).get_holdings(
-                        db_conn, access_token)
+                    access_token['service']).get_holdings(access_token)
 
                 holdings += token_data['holdings']
                 securities += token_data['securities']
@@ -39,8 +38,8 @@ class PortfolioService:
 
     def sync_token_holdings(self, db_conn, access_token):
         try:
-            data = self.__get_service(access_token['service']).get_holdings(
-                db_conn, access_token)
+            data = self.__get_service(
+                access_token['service']).get_holdings(access_token)
             holdings = data['holdings']
             self.persist_holding_data(db_conn, access_token['profile_id'],
                                       data['securities'], data['accounts'],
@@ -60,8 +59,7 @@ class PortfolioService:
             try:
                 self.sync_institution(db_conn, access_token)
                 token_service = self.__get_service(access_token['service'])
-                token_data = token_service.get_transactions(db_conn,
-                                                            access_token,
+                token_data = token_service.get_transactions(access_token,
                                                             count=count,
                                                             offset=offset)
 
@@ -85,8 +83,7 @@ class PortfolioService:
             for offset in range(0, 1000000, count):
                 request_start = time.time()
                 data = self.__get_service(
-                    access_token['service']).get_transactions(db_conn,
-                                                              access_token,
+                    access_token['service']).get_transactions(access_token,
                                                               count=count,
                                                               offset=offset)
                 request_end = time.time()
@@ -135,7 +132,11 @@ class PortfolioService:
 
     def sync_institution(self, db_conn, access_token):
         institution = self.__get_service(
-            access_token['service']).get_institution(db_conn, access_token)
+            access_token['service']).get_institution(access_token)
+
+        if not institution:
+            return
+
         self.portfolio_repository.persist(db_conn, institution)
         self.__get_service(access_token['service']).set_token_institution(
             db_conn, access_token, institution)
