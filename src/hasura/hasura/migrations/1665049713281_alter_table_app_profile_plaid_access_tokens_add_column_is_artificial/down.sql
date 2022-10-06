@@ -1,4 +1,1 @@
--- Could not auto-generate a down migration.
--- Please write an appropriate down migration for the SQL below:
--- alter table "app"."profile_plaid_access_tokens" add column "is_artificial" boolean
---  not null default 'false';
+alter table "app"."profile_plaid_access_tokens" drop column "is_artificial";
