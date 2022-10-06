@@ -11,6 +11,7 @@ def get_test_reconfigure_collection_holdings_target_amount_delta():
     return [100, -100]
 
 
+@pytest.mark.drivewealth
 @pytest.mark.parametrize(
     "target_amount_delta",
     get_test_reconfigure_collection_holdings_target_amount_delta())

@@ -1,3 +1,5 @@
+import pytest
+
 from hasura_tests.common import make_graphql_request, db_connect, load_query
 from hasura_tests.trading.common import fill_kyc_form, kyc_send_form, PROFILES
 
@@ -15,6 +17,7 @@ def test_get_kyc_form():
                          profile_user_id)['data']['app_kyc_form_by_pk']
 
 
+@pytest.mark.drivewealth
 def test_kyc_send_form():
     drivewealth_user_ref_id = None
 
@@ -36,6 +39,7 @@ def test_kyc_send_form():
                     assert drivewealth_user_ref_id == ref_id
 
 
+@pytest.mark.drivewealth
 def test_kyc_get_status():
     response = make_graphql_request(
         load_query('trading/queries/kyc', 'GetStatus'),

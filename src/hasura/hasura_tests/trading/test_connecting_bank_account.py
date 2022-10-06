@@ -1,3 +1,5 @@
+import pytest
+
 from hasura_tests.common import make_graphql_request, db_connect, load_query
 from hasura_tests.trading.common import fill_kyc_form, kyc_send_form, PROFILES
 
@@ -19,6 +21,7 @@ def test_create_plaid_link_token():
     assert data["link_token"] is not None
 
 
+@pytest.mark.drivewealth
 def test_full_flow():
     fill_kyc_form(profile_id, profile_user_id)
     kyc_send_form(profile_id, profile_user_id)

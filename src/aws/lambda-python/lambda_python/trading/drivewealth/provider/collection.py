@@ -3,7 +3,9 @@ from typing import Dict, Any, List, Optional
 
 from trading.exceptions import InsufficientFundsException
 from trading.models import TradingCollectionVersion
-from trading.drivewealth.models import DriveWealthFund, DriveWealthPortfolio, DriveWealthPortfolioStatus, DriveWealthAutopilotRun, PRECISION, DriveWealthPortfolioStatusFundHolding
+from trading.drivewealth.models import DriveWealthFund, DriveWealthPortfolio, DriveWealthPortfolioStatus, \
+    DriveWealthAutopilotRun, PRECISION, DriveWealthPortfolioStatusFundHolding, DriveWealthInstrument, \
+    DriveWealthInstrumentStatus
 from trading.drivewealth.api import DriveWealthApi
 from trading.drivewealth.repository import DriveWealthRepository
 from gainy.utils import get_logger
@@ -16,6 +18,13 @@ logger = get_logger(__name__)
 class DriveWealthProviderCollection(GainyDriveWealthProvider):
     repository: DriveWealthRepository = None
     api: DriveWealthApi = None
+
+    def sync_instrument(self, ref_id: str = None, symbol: str = None):
+        data = self.api.get_instrument_details(ref_id=ref_id, symbol=symbol)
+        instrument = DriveWealthInstrument()
+        instrument.set_from_response(data)
+        self.repository.persist(instrument)
+        return instrument
 
     def reconfigure_collection_holdings(
             self, collection_version: TradingCollectionVersion):
@@ -71,7 +80,7 @@ class DriveWealthProviderCollection(GainyDriveWealthProvider):
 
         if not portfolio:
             name = f"Gainy profile #{profile_id}'s portfolio"
-            client_portfolio_id = profile_id
+            client_portfolio_id = profile_id  # TODO change to some other entity
             description = name
 
             data = self.api.create_portfolio(name, client_portfolio_id,
@@ -144,8 +153,8 @@ class DriveWealthProviderCollection(GainyDriveWealthProvider):
 
         # TODO check dw instruments symbols to match our symbols
         for symbol, weight in weights.items():
-            instrument = self.api.get_instrument_details(symbol)
-            new_holdings[instrument["id"]] = weight
+            instrument = self._get_instrument(symbol)
+            new_holdings[instrument.ref_id] = weight
 
         return [{
             "instrumentID": k,
@@ -213,3 +222,14 @@ class DriveWealthProviderCollection(GainyDriveWealthProvider):
 
     def _get_trading_account(self, user_ref_id):
         return self.repository.get_user_accounts(user_ref_id)[0]
+
+    def _get_instrument(self, symbol) -> DriveWealthInstrument:
+        instrument = self.repository.find_one(
+            DriveWealthInstrument, {
+                "symbol": symbol,
+                "status": DriveWealthInstrumentStatus.ACTIVE
+            })
+        if instrument:
+            return instrument
+
+        return self.sync_instrument(symbol=symbol)

@@ -4,12 +4,11 @@ from trading.drivewealth.abstract_event_handler import AbstractDriveWealthEventH
 logger = get_logger(__name__)
 
 
-class KycUpdatedEventHandler(AbstractDriveWealthEventHandler):
+class InstrumentUpdatedEventHandler(AbstractDriveWealthEventHandler):
 
     def supports(self, event_type: str):
-        return event_type == "kyc.updated"
+        return event_type == 'instruments.updated'
 
     def handle(self, event_payload: dict):
-        user_id = event_payload["userID"]
-
-        self.provider.sync_kyc(user_id)
+        ref_id = event_payload["instrumentID"]
+        self.provider.sync_instrument(ref_id=ref_id)

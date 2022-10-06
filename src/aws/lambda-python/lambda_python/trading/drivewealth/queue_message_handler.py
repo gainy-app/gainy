@@ -5,7 +5,7 @@ import trading.drivewealth.event_handlers
 from queue_processing.exceptions import UnsupportedMessageException
 from queue_processing.interfaces import QueueMessageHandlerInterface
 from queue_processing.models import QueueMessage
-from trading.drivewealth.event_handler_interface import AbstractDriveWealthEventHandler
+from trading.drivewealth.abstract_event_handler import AbstractDriveWealthEventHandler
 from trading.drivewealth.provider import DriveWealthProvider
 from trading.drivewealth.repository import DriveWealthRepository
 
