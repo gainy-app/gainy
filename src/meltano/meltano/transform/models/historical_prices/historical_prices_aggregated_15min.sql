@@ -14,7 +14,7 @@
 }}
 
 
--- Execution Time: 157857.871 ms
+-- Execution Time: 228534.729 ms
 with
 {% if is_incremental() %}
      max_date as materialized
@@ -127,7 +127,7 @@ with
          )
 select *
 from (
-         select t2.symbol || '_' || t2.datetime                               as id,
+         select t2.symbol || '_' || t2.datetime                                            as id,
                 t2.symbol,
                 t2.date,
                 t2.datetime,
@@ -135,37 +135,37 @@ from (
                 coalesce(t2.open,
                          old_data.open,
                          latest_known_prices.adjusted_close,
-                         historical_prices_marked.price_0d)::double precision as open,
+                         historical_prices_aggregated_1d.adjusted_close)::double precision as open,
                 coalesce(t2.high,
                          old_data.high,
                          latest_known_prices.adjusted_close,
-                         historical_prices_marked.price_0d)::double precision as high,
+                         historical_prices_aggregated_1d.adjusted_close)::double precision as high,
                 coalesce(t2.low,
                          old_data.low,
                          latest_known_prices.adjusted_close,
-                         historical_prices_marked.price_0d)::double precision as low,
+                         historical_prices_aggregated_1d.adjusted_close)::double precision as low,
                 coalesce(t2.close,
                          old_data.close,
                          latest_known_prices.adjusted_close,
-                         historical_prices_marked.price_0d)::double precision as close,
+                         historical_prices_aggregated_1d.adjusted_close)::double precision as close,
                 coalesce(t2.adjusted_close,
                          old_data.adjusted_close,
                          latest_known_prices.adjusted_close,
-                         historical_prices_marked.price_0d)::double precision as adjusted_close,
-                coalesce(t2.volume, old_data.volume, 0)                       as volume,
-                coalesce(t2.updated_at, old_data.updated_at)                  as updated_at
+                         historical_prices_aggregated_1d.adjusted_close)::double precision as adjusted_close,
+                coalesce(t2.volume, old_data.volume, 0)                                    as volume,
+                coalesce(t2.updated_at, old_data.updated_at)                               as updated_at
 {% else %}
                 coalesce(t2.open,
-                         historical_prices_marked.price_0d)::double precision as open,
+                         historical_prices_aggregated_1d.adjusted_close)::double precision as open,
                 coalesce(t2.high,
-                         historical_prices_marked.price_0d)::double precision as high,
+                         historical_prices_aggregated_1d.adjusted_close)::double precision as high,
                 coalesce(t2.low,
-                         historical_prices_marked.price_0d)::double precision as low,
+                         historical_prices_aggregated_1d.adjusted_close)::double precision as low,
                 coalesce(t2.close,
-                         historical_prices_marked.price_0d)::double precision as close,
+                         historical_prices_aggregated_1d.adjusted_close)::double precision as close,
                 coalesce(t2.adjusted_close,
-                         historical_prices_marked.price_0d)::double precision as adjusted_close,
-                coalesce(t2.volume, 0)                                        as volume,
+                         historical_prices_aggregated_1d.adjusted_close)::double precision as adjusted_close,
+                coalesce(t2.volume, 0)                                                     as volume,
                 t2.updated_at
 {% endif %}
          from (
@@ -204,7 +204,10 @@ from (
                             from combined_intraday_prices
                         ) t
               ) t2
-                  left join {{ ref('historical_prices_marked') }} using (symbol)
+                  left join {{ ref('week_trading_sessions_static') }} using (symbol, date)
+                  left join {{ ref('historical_prices_aggregated_1d') }}
+                            on historical_prices_aggregated_1d.symbol = t2.symbol
+                                and historical_prices_aggregated_1d.datetime = week_trading_sessions_static.prev_date
 {% if is_incremental() %}
                   left join latest_known_prices using (symbol)
                   left join {{ this }} old_data using (symbol, datetime)

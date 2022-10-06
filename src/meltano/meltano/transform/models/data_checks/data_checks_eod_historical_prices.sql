@@ -175,10 +175,10 @@ with check_params(table_name, dt_interval,
                         'daily'                          as "period",
                         json_build_object(
                             'table_name', table_name,
-                            'stddev_threshold', max(allowable_sigma_dev_volume_dif * stddev_volume_dif),
-                            'mu', max(mean_volume_dif),
-                            'stddev', max(stddev_volume_dif),
-                            'value', max(dev_volume_dif),
+                            'stddev_threshold', max(allowable_sigma_dev_adjclose_percchange * stddev_adjusted_close_perc_change_wom),
+                            'mu', max(mean_adjusted_close_perc_change_wom),
+                            'stddev', max(stddev_adjusted_close_perc_change_wom),
+                            'value', max(dev_adjusted_close_perc_change_wom),
                             'date', max(date)
                         )::text                          as message
                  from tickers_checks
