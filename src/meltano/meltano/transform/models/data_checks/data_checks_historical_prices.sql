@@ -228,7 +228,7 @@ with check_params(table_name, dt_interval,
                                   select date
                                   from tickers_checks
                                   group by date
-                                  having avg(iserror_adjusted_close_twice_same) > 0.06
+                                  having avg(iserror_adjusted_close_twice_same) > 0.2
                               ) t using (date)
                  where iserror_adjusted_close_twice_same > 0
                  group by symbol, table_name
