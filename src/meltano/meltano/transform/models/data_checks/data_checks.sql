@@ -46,3 +46,11 @@ select symbol,
        period,
        message
 from {{ ref('data_checks_realtime') }}
+
+union all
+
+select symbol,
+       code,
+       period,
+       message
+from {{ ref('data_checks_collection_historical_prices') }}
