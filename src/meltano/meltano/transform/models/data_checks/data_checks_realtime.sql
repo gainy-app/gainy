@@ -290,7 +290,7 @@ with tickers_and_options as
      realtime_chart_diff_with_historical as
          (
              select symbol,
-                    'Ticker ' || symbol || ' has old realtime chart difference comparing to historical chart. '
+                    'Ticker ' || symbol || ' has realtime chart difference comparing to historical chart. '
                         || json_agg(json_build_array(period, datetime, diff)) as message
              from (
                       select *,
