@@ -112,31 +112,67 @@ from errors
 union all
 
 (
-    with errors as
+    with gainy_collections as
+             (
+                 select *,
+                        '0_' || gainy_collections.id as collection_uniq_id
+                 from {{ source('gainy', 'gainy_collections') }}
+                 where gainy_collections.enabled = '1'
+                   and gainy_collections._sdc_extracted_at > (select max(_sdc_extracted_at)from raw_data.gainy_collections) - interval '1 minute'
+             ),
+         errors as
              (
                  select distinct on (
                      gainy_collections.id
-                     ) gainy_collections.id as collection_id,
-                       'ttf_no_weights'     as code,
-                       'daily'              as period
-                 from {{ source('gainy', 'gainy_collections') }}
+                     ) gainy_collections.id                                 as collection_id,
+                       'ttf_no_weights'                                     as code,
+                       'TTF ' || gainy_collections.id || ' has no weights.' as message,
+                       'daily'                                              as period
+                 from gainy_collections
                           left join {{ source('gainy', 'ticker_collections') }}
                                     on ticker_collections.ttf_name = gainy_collections.name
                           left join {{ source('gainy', 'ticker_collections_weights') }}
                                     on ticker_collections_weights.ttf_name = gainy_collections.name
-                 where gainy_collections.enabled = '1'
-                   and gainy_collections._sdc_extracted_at > (select max(_sdc_extracted_at) from {{ source ('gainy', 'gainy_collections') }}) - interval '1 minute'
-                   and ticker_collections_weights is null
+                 where ticker_collections_weights is null
                    and ticker_collections is null
+
+                 union all
+
+                 (
+                     with collection_daily_latest_chart_point as
+                              (
+                                  select collection_chart.*,
+                                         row_number() over (partition by collection_uniq_id order by t.date desc) as idx
+                                  from (
+                                           select collection_uniq_id, period, date, max(datetime) as datetime
+                                           from {{ ref('collection_chart') }}
+                                           where period = '1w'
+                                           group by collection_uniq_id, period, date
+                                       ) t
+                                           join {{ ref('collection_chart') }} using (collection_uniq_id, period, datetime)
+                              )
+                     select distinct on (
+                         gainy_collections.id
+                         ) gainy_collections.id                                          as collection_id,
+                           'ttf_wrong_previous_day_close_price'                          as code,
+                           'TTF ' || gainy_collections.id || ' has wrong previous_day_close_price. ' ||
+                           json_build_array(collection_metrics.previous_day_close_price,
+                                            collection_daily_latest_chart_point.adjusted_close) as message,
+                           'daily'                                                       as period
+                     from gainy_collections
+                              left join {{ ref('collection_metrics') }} using (collection_uniq_id)
+                              left join collection_daily_latest_chart_point using (collection_uniq_id)
+                     where collection_metrics is null
+                        or collection_daily_latest_chart_point is null
+                        or collection_metrics.previous_day_close_price < 1e-6
+                        or abs(collection_daily_latest_chart_point.adjusted_close / collection_metrics.previous_day_close_price - 1) > 0.2
+                 )
              )
     select (code || '_' || collection_id) as id,
            null                           as symbol,
            code,
            period,
-           case
-               when code = 'ttf_no_weights'
-                   then 'TTF ' || collection_id || ' has no weights.'
-               end                        as message,
+           message,
            now()                          as updated_at
     from errors
 )

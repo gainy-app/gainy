@@ -11,13 +11,13 @@
 }}
 
 
-with uniq_tickers as
+with uniq_tickers as materialized
          (
              select symbol, min(date) as min_date
              from {{ ref('historical_prices') }}
              group by symbol
          ),
-     tickers_dates_skeleton as
+     tickers_dates_skeleton as materialized
          (
              (
                  -- exchange tickers

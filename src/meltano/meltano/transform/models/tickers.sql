@@ -43,6 +43,7 @@ select base_tickers.symbol,
        base_tickers.country_name,
        now()::timestamp as updated_at
 from {{ ref('base_tickers') }}
+         join (select symbol from {{ ref('week_trading_sessions_static') }} group by symbol) t using (symbol)
          left join latest_price using (symbol)
          left join latest_crypto_price using (symbol)
 where ((base_tickers.description is not null and length(base_tickers.description) >= 5) or type = 'index')
