@@ -218,8 +218,11 @@ from (
                             on historical_prices_aggregated_1d.symbol = t2.symbol
                                 and historical_prices_aggregated_1d.datetime = week_trading_sessions_static.prev_date
 {% if is_incremental() %}
-                  left join latest_known_prices using (symbol)
-                  left join {{ this }} old_data using (symbol, datetime)
+                  left join latest_known_prices
+                            on latest_known_prices.symbol = t2.symbol
+                  left join {{ this }} old_data
+                            on old_data.symbol = t2.symbol
+                                and old_data.datetime = t2.datetime
          where (old_data.symbol is null -- no old data
             or (t2.updated_at is not null and old_data.updated_at is null) -- old data is null and new is not
             or t2.updated_at > old_data.updated_at) -- new data is newer than the old one

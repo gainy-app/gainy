@@ -63,7 +63,7 @@ with check_params(table_name, dt_interval,
                     date,
                     --t.adjusted_close as adjusted_close_raw, --have left it here if anyone wants to check
                     coalesce(t.adjusted_close,
-                             public.linear_interpolate(
+                             linear_interpolate(
                                      extract(epoch from d.dt),
                                      LAST_VALUE_IGNORENULLS(
                                      case when t.adjusted_close is not null then extract(epoch from d.dt) else null end)
