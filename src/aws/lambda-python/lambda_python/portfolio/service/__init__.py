@@ -133,7 +133,12 @@ class PortfolioService:
     def sync_institution(self, access_token):
         institution = self.__get_service(
             access_token['service']).get_institution(access_token)
+
+        if not institution:
+            return
+
         self.portfolio_repository.persist(institution)
+
         self.__get_service(access_token['service']).set_token_institution(
             access_token, institution)
 

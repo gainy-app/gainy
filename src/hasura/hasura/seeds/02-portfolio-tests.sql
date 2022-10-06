@@ -7,10 +7,11 @@ select 'portfolio-test-' || idx || '@gainy.app',
 from generate_series(1, 26) idx
 on conflict do nothing;
 
-INSERT INTO app.profile_plaid_access_tokens (profile_id, access_token, item_id)
+INSERT INTO app.profile_plaid_access_tokens (profile_id, access_token, item_id, is_artificial)
 select profiles.id,
        'portfolio_test_' || gen_random_uuid(),
-       'item_id_portfolio_test_' || profiles.id
+       'item_id_portfolio_test_' || profiles.id,
+       true
 from app.profiles
          left join app.profile_plaid_access_tokens on profiles.id = profile_plaid_access_tokens.profile_id
 where email like 'portfolio-test-%@gainy.app'
