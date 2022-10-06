@@ -176,10 +176,10 @@ with check_params(table_name, dt_interval,
                         'daily'                          as "period",
                         json_build_object(
                             'table_name', table_name,
-                            'stddev_threshold', max(allowable_sigma_dev_volume_dif * stddev_volume_dif),
-                            'mu', max(mean_volume_dif),
-                            'stddev', max(stddev_volume_dif),
-                            'value', max(dev_volume_dif),
+                            'stddev_threshold', max(allowable_sigma_dev_adjclose_percchange * stddev_adjusted_close_perc_change_wom),
+                            'mu', max(mean_adjusted_close_perc_change_wom),
+                            'stddev', max(stddev_adjusted_close_perc_change_wom),
+                            'value', max(dev_adjusted_close_perc_change_wom),
                             'date', max(date)
                         )::text                          as message
                  from tickers_checks
@@ -281,21 +281,15 @@ with check_params(table_name, dt_interval,
          ),
      latest_trading_day as
          (
-             select distinct on (exchange_name, country_name) *
-             from {{ ref('exchange_schedule') }}
-             where open_at < now()
-             order by exchange_name, country_name, date desc
+             select symbol, date
+             from {{ ref('week_trading_sessions_static') }}
+             where index = 0
          ),
      previous_trading_day as
          (
-             select distinct on (exchange_schedule.exchange_name, exchange_schedule.country_name) exchange_schedule.*
-             from {{ ref('exchange_schedule') }}
-                      join latest_trading_day
-                           on (latest_trading_day.exchange_name = exchange_schedule.exchange_name
-                               or (latest_trading_day.exchange_name is null
-                                   and latest_trading_day.country_name = exchange_schedule.country_name))
-             where exchange_schedule.date < latest_trading_day.date
-             order by exchange_schedule.exchange_name, exchange_schedule.country_name, exchange_schedule.date desc
+             select symbol, date
+             from {{ ref('week_trading_sessions_static') }}
+             where index = 1
          ),
      old_historical_prices as
          (
@@ -308,14 +302,8 @@ with check_params(table_name, dt_interval,
                       group by symbol
                   ) t
                       join {{ ref('tickers') }} using (symbol)
-                      join latest_trading_day
-                           on (latest_trading_day.exchange_name = tickers.exchange_canonical
-                               or (tickers.exchange_canonical is null
-                                   and latest_trading_day.country_name = tickers.country_name))
-                      join previous_trading_day
-                           on (previous_trading_day.exchange_name = tickers.exchange_canonical
-                               or (tickers.exchange_canonical is null
-                                   and previous_trading_day.country_name = tickers.country_name))
+                      join latest_trading_day using (symbol)
+                      join previous_trading_day using (symbol)
              where t.date is null
                 or (now() > latest_trading_day.date + interval '1 day 6 hours' and t.date < latest_trading_day.date)
                 or (now() > previous_trading_day.date + interval '1 day 6 hours' and t.date < previous_trading_day.date)
