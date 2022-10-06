@@ -2,11 +2,12 @@ from decimal import Decimal
 
 import pytest
 
-from gainy.tests.mocks.repository_mocks import mock_noop
+from gainy.tests.mocks.repository_mocks import mock_noop, mock_persist
 from trading.exceptions import InsufficientFundsException
 from trading.drivewealth.api import DriveWealthApi
 from trading.drivewealth.repository import DriveWealthRepository
-from trading.drivewealth.models import DriveWealthPortfolio, DriveWealthFund
+from trading.drivewealth.models import DriveWealthPortfolio, DriveWealthFund, DriveWealthInstrumentStatus, \
+    DriveWealthInstrument
 from trading.drivewealth.provider.collection import DriveWealthProviderCollection
 from trading.models import TradingCollectionVersion
 
@@ -473,3 +474,40 @@ def test_update_portfolio(monkeypatch):
     assert portfolio_status.cash_value == _CASH_VALUE
     assert portfolio_status.get_fund_value(_FUND1_ID) == _FUND1_VALUE
     assert portfolio_status.get_fund_value(_FUND2_ID) == _FUND2_VALUE
+
+
+
+def test_sync_instrument(monkeypatch):
+    instrument_ref_id = "instrument_ref_id"
+    instrument_symbol = "symbol"
+    instrument_status = str(DriveWealthInstrumentStatus.ACTIVE)
+    instrument_data = {
+        "instrumentID": instrument_ref_id,
+        "symbol":instrument_symbol,
+        "status": instrument_status,
+    }
+
+    drivewealth_repository = DriveWealthRepository(None)
+    api = DriveWealthApi()
+
+    def mock_get_instrument_details(ref_id: str = None, symbol: str = None):
+        assert ref_id == instrument_ref_id
+        assert symbol == instrument_symbol
+        return instrument_data
+
+    persisted_objects = {}
+    monkeypatch.setattr(api, "get_instrument_details", mock_get_instrument_details)
+    monkeypatch.setattr(drivewealth_repository, "persist", mock_persist(persisted_objects))
+
+    service = DriveWealthProviderCollection(drivewealth_repository, api)
+
+    instrument = service.sync_instrument(ref_id=instrument_ref_id, symbol=instrument_symbol)
+
+    assert DriveWealthInstrument in persisted_objects
+    assert persisted_objects[DriveWealthInstrument]
+
+    assert instrument in persisted_objects[DriveWealthInstrument]
+    assert instrument.ref_id == instrument_ref_id
+    assert instrument.symbol == instrument_symbol
+    assert instrument.status == instrument_status
+    assert instrument.data == instrument_data
