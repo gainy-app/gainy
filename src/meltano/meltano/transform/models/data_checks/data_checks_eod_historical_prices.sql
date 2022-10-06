@@ -28,64 +28,50 @@ with check_params(table_name) as
              where date >= first_date
          ),
 
-     -- Execution Time: 147882.394 ms
-     tickers_checks as materialized
-         (
-             select *,
-                    (adjusted_close <= 0)::int                 as iserror_adjusted_close_is_notpositive,
-                    (adjusted_close is null)::int              as iserror_adjusted_close_is_null,
-                    (volume is null)::int                      as iserror_volume_is_null
-             from eod_historical_prices
-                      left join check_params cp on true
-         ), -- select * from tickers_checks;
-
      tickers_checks_verbose_union as
          (
              (
-                 select distinct on (
-                     symbol
-                     ) -- agg >0 && distinct on (symbol) -> example case
-                       symbol,
-                       table_name || '__adjusted_close_is_notpositive'                            as code,
-                       'daily'                                                                    as "period",
-                       'Ticker ' || symbol || ' in table ' || table_name || ' has ' ||
-                       iserror_adjusted_close_is_notpositive ||
-                       ' rows with adjusted_close not positive values (<=0). Example at ' || date as message
-                 from tickers_checks
-                 where iserror_adjusted_close_is_notpositive > 0
-                 order by symbol, date desc
+                 select symbol,
+                        table_name || '__adjusted_close_is_notpositive'                                      as code,
+                        'daily'                                                                              as "period",
+                        'Ticker ' || symbol || ' in table ' || table_name || ' has ' ||
+                        count(date) ||
+                        ' rows with adjusted_close not positive values (<=0). Example at ' || json_agg(date) as message
+                 from eod_historical_prices
+                          join check_params cp on true
+                 where adjusted_close <= 0
+                 group by symbol, table_name
+                 having count(date) > 0
              )
              union all
              (
-                 select distinct on (
-                     symbol
-                     ) -- agg >0 && distinct on (symbol) -> example case
-                       symbol,
-                       table_name || '__adjusted_close_is_null'                       as code,
-                       'daily'                                                        as "period",
-                       'Ticker ' || symbol || ' in table ' ||
-                       table_name || ' has ' || iserror_adjusted_close_is_null ||
-                       ' rows with adjusted_close = NULL values. Example at ' || date as message
-                 from tickers_checks
-                 where iserror_adjusted_close_is_null > 0
-                 order by symbol, date desc
+                 select symbol,
+                        table_name || '__adjusted_close_is_null'                                 as code,
+                        'daily'                                                                  as "period",
+                        'Ticker ' || symbol || ' in table ' ||
+                        table_name || ' has ' || count(date) ||
+                        ' rows with adjusted_close = NULL values. Example at ' || json_agg(date) as message
+                 from eod_historical_prices
+                          join check_params cp on true
+                 where adjusted_close is null
+                 group by symbol, table_name
+                 having count(date) > 0
              )
              union all
              (
-                 select distinct on (
-                     symbol
-                     ) -- agg >0 && distinct on (symbol) -> example case
-                       symbol,
-                       table_name || '__volume_is_null'                       as code,
-                       'daily'                                                as "period",
-                       'Ticker ' || symbol || ' in table ' ||
-                       table_name || ' has ' || iserror_volume_is_null ||
-                       ' rows with volume = NULL values. Example at ' || date as message
-                 from tickers_checks
-                 where iserror_volume_is_null > 0
-                 order by symbol, date desc
+                 select symbol,
+                        table_name || '__volume_is_null'                                 as code,
+                        'daily'                                                          as "period",
+                        'Ticker ' || symbol || ' in table ' ||
+                        table_name || ' has ' || count(date) ||
+                        ' rows with volume = NULL values. Example at ' || json_agg(date) as message
+                 from eod_historical_prices
+                          join check_params cp on true
+                 where volume is null
+                 group by symbol, table_name
+                 having count(date) > 0
              )
-         )
+     )
 select code || '__' || symbol as id,
        symbol,
        code,
