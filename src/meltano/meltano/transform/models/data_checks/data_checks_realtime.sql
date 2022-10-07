@@ -350,7 +350,7 @@ with tickers_and_options as
                           from (
                                    select symbol, period, date, max(datetime) as datetime
                                    from {{ ref('chart') }}
-                                            join week_trading_sessions_static using (symbol, date)
+                                            join {{ ref('week_trading_sessions_static') }} using (symbol, date)
                                    where index = 1 and period = '1w'
                                    group by symbol, period, date
                                ) t
