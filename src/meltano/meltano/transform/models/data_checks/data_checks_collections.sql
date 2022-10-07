@@ -44,9 +44,11 @@ with collection_distinct_tickers as
                    'ttf_ticker_no_industry' as code,
                    'daily' as period
              from collection_distinct_tickers
+                      left join {{ ref('base_tickers') }} using (symbol)
                       left join {{ ref('ticker_industries') }} using (symbol)
                       left join {{ ref('gainy_industries') }} on gainy_industries.id = ticker_industries.industry_id
              where gainy_industries.id is null
+               and (base_tickers is null or base_tickers.type != 'etf')
 
              union all
 
