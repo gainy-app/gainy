@@ -247,7 +247,7 @@ type Mutation {
 type Mutation {
   trading_deposit_funds(
     profile_id: Int!
-    trading_account_id: Int!
+    trading_account_id: Int
     amount: Float!
     funding_account_id: Int!
   ): TradingMoneyFlowOutput
@@ -293,7 +293,7 @@ type Mutation {
 type Mutation {
   trading_withdraw_funds(
     profile_id: Int!
-    trading_account_id: Int!
+    trading_account_id: Int
     amount: Float!
     funding_account_id: Int!
   ): TradingMoneyFlowOutput

@@ -5,7 +5,7 @@ Same query as it is for connecting a portfolio account. For Trading purposes the
 ```graphql
 mutation TradingDepositFunds(
     $profile_id: Int!
-    $trading_account_id: Int!
+    $trading_account_id: Int
     $amount: Float!
     $funding_account_id: Int!
 ) {
@@ -25,7 +25,7 @@ Same query as it is for connecting a portfolio account. For Trading purposes the
 ```graphql
 mutation TradingWithdrawFunds(
     $profile_id: Int!
-    $trading_account_id: Int!
+    $trading_account_id: Int
     $amount: Float!
     $funding_account_id: Int!
 ) {

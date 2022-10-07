@@ -8,7 +8,7 @@
           "breadcrumb": [],
           "metadata": {
             "replication-method": "INCREMENTAL",
-            "view-key-properties": [
+            "table-key-properties": [
               "collection_uniq_id",
               "date"
             ],

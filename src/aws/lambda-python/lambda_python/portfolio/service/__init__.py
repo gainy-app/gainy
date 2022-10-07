@@ -204,7 +204,7 @@ class PortfolioService:
     def __get_access_tokens(self, profile_id):
         with self.db_conn.cursor() as cursor:
             cursor.execute(
-                f"SELECT id, access_token FROM app.profile_plaid_access_tokens WHERE profile_id = %s and purpose = 'portfolio'",
+                f"SELECT id, access_token, is_artificial FROM app.profile_plaid_access_tokens WHERE profile_id = %s and purpose = 'portfolio'",
                 (profile_id, ))
 
             access_tokens = cursor.fetchall()

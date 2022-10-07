@@ -1,10 +1,10 @@
-mutation TradingDepositFunds(
+mutation TradingWithdrawFunds(
     $profile_id: Int!
     $trading_account_id: Int
     $amount: Float!
     $funding_account_id: Int!
 ) {
-    trading_deposit_funds(
+    trading_withdraw_funds(
         profile_id: $profile_id
         trading_account_id: $trading_account_id
         amount: $amount
