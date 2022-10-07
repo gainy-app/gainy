@@ -129,8 +129,13 @@ class DriveWealthApi(GainyDriveWealthApi):
         return self._make_request(
             "GET", f"/accounts/{portfolio.drivewealth_account_id}/portfolio")
 
-    def get_instrument_details(self, symbol: str):
-        return self._make_request("GET", f"/instruments/{symbol}")
+    def get_instrument_details(self, ref_id: str = None, symbol: str = None):
+        if ref_id:
+            return self._make_request("GET", f"/instruments/{ref_id}")
+        if symbol:
+            return self._make_request("GET", f"/instruments/{symbol}")
+
+        raise Exception('Either ref_id or symbol must be specified.')
 
     def create_fund(self, name, client_fund_id, description, holdings):
         return self._make_request(

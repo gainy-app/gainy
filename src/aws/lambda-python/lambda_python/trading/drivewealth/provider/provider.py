@@ -9,7 +9,7 @@ from trading.models import TradingMoneyFlow, FundingAccount, TradingCollectionVe
 from trading.drivewealth.provider.collection import DriveWealthProviderCollection
 from trading.drivewealth.provider.kyc import DriveWealthProviderKYC
 from trading.drivewealth.models import DriveWealthBankAccount, DriveWealthDeposit, \
-    DriveWealthRedemption, DriveWealthAutopilotRun, DriveWealthPortfolio
+    DriveWealthRedemption, DriveWealthAutopilotRun, DriveWealthPortfolio, DriveWealthInstrument
 from trading.drivewealth.api import DriveWealthApi
 from trading.drivewealth.repository import DriveWealthRepository
 

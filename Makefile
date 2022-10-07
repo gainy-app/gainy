@@ -66,7 +66,7 @@ test-meltano-realtime:
 
 test-hasura:
 	docker-compose -p gainy_test -f docker-compose.test.yml run --rm --entrypoint "/wait.sh" test-meltano invoke dbt run --select tag:realtime historical_prices ticker_options_monitored ticker_metrics --exclude tag:view
-	docker-compose -p gainy_test -f docker-compose.test.yml exec -T test-hasura pytest /hasura_tests
+	docker-compose -p gainy_test -f docker-compose.test.yml exec -T test-hasura pytest /hasura_tests -m "not drivewealth"
 
 test-lambda:
 	docker-compose -p gainy_test -f docker-compose.test.yml exec -T test-lambda-python-action pytest

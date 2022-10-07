@@ -1,3 +1,5 @@
+import pytest
+
 from hasura_tests.common import make_graphql_request
 from hasura_tests.trading.common import load_query, PROFILES
 
@@ -5,6 +7,7 @@ profile_id = PROFILES[1]['id']
 profile_user_id = PROFILES[1]['user_id']
 
 
+@pytest.mark.drivewealth
 def test_deposit():
     data = make_graphql_request(
         load_query('trading/queries', 'TradingDepositFunds'), {
