@@ -187,6 +187,7 @@ union all
 select 'fake_row_allowing_deletion' as id,
        null                         as symbol,
        null                         as code,
-       null                         as period,
+       period,
        null                         as message,
        now()                        as updated_at
+join (values('daily', 'realtime')) t(period) on true
