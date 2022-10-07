@@ -62,7 +62,6 @@ test-images:
 test-meltano-realtime:
 	docker-compose -p gainy_test -f docker-compose.test.yml run --rm --entrypoint "/wait.sh" test-meltano invoke dbt run --exclude tag:view
 	docker-compose -p gainy_test -f docker-compose.test.yml run --rm --entrypoint "/wait.sh" test-meltano invoke dbt run --vars '{"realtime": true}' --select tag:realtime
-	sleep 30
 	docker-compose -p gainy_test -f docker-compose.test.yml run --rm --entrypoint "/wait.sh" test-meltano invoke dbt test
 
 test-hasura:
