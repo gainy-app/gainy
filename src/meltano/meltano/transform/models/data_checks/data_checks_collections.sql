@@ -86,7 +86,6 @@ with collection_distinct_tickers as
                       left join matchscore_distinct_tickers using (symbol)
                                left join {{ ref('tickers') }} using (symbol)
              where matchscore_distinct_tickers.symbol is null
-             and tickers.type <> 'crypto'
          )
 select (code || '_' || symbol) as id,
        symbol,
@@ -162,12 +161,14 @@ union all
                                             collection_daily_latest_chart_point.adjusted_close) as message,
                            'daily'                                                       as period
                      from gainy_collections
+                              join {{ ref('profile_collections') }} on profile_collections.uniq_id = collection_uniq_id
                               left join {{ ref('collection_metrics') }} using (collection_uniq_id)
                               left join collection_daily_latest_chart_point using (collection_uniq_id)
-                     where collection_metrics is null
-                        or collection_daily_latest_chart_point is null
-                        or collection_metrics.previous_day_close_price < 1e-6
-                        or abs(collection_daily_latest_chart_point.adjusted_close / collection_metrics.previous_day_close_price - 1) > 0.2
+                     where profile_collections.enabled = '1'
+                       and (collection_metrics is null
+                         or collection_daily_latest_chart_point is null
+                         or collection_metrics.previous_day_close_price < 1e-6
+                         or abs(collection_daily_latest_chart_point.adjusted_close / collection_metrics.previous_day_close_price - 1) > 0.2)
                  )
              )
     select (code || '_' || collection_id) as id,
