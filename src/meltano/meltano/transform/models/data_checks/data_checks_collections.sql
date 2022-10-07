@@ -190,4 +190,4 @@ select 'fake_row_allowing_deletion' as id,
        period,
        null                         as message,
        now()                        as updated_at
-join (values('daily', 'realtime')) t(period) on true
+from (values('daily', 'realtime')) t(period)
