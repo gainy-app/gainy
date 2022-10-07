@@ -213,7 +213,7 @@ class PortfolioService:
 
             return [
                 dict(
-                    zip(['id', 'access_token', 'service'],
+                    zip(['id', 'access_token', 'is_artificial', 'service'],
                         row + (SERVICE_PLAID, ))) for row in access_tokens
             ]
 
