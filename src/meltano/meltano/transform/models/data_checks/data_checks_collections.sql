@@ -8,6 +8,7 @@
         using (select period, max(updated_at) as max_updated_at from {{this}} group by period) dc_stats
         where dc_stats.period = {{this}}.period
         and {{this}}.updated_at < dc_stats.max_updated_at',
+      'delete from {{this}} where id = \'fake_row_allowing_deletion\'',
     ]
   )
 }}
@@ -44,9 +45,11 @@ with collection_distinct_tickers as
                    'ttf_ticker_no_industry' as code,
                    'daily' as period
              from collection_distinct_tickers
+                      left join {{ ref('base_tickers') }} using (symbol)
                       left join {{ ref('ticker_industries') }} using (symbol)
                       left join {{ ref('gainy_industries') }} on gainy_industries.id = ticker_industries.industry_id
              where gainy_industries.id is null
+               and (base_tickers is null or base_tickers.type != 'etf')
 
              union all
 
@@ -84,7 +87,6 @@ with collection_distinct_tickers as
                       left join matchscore_distinct_tickers using (symbol)
                                left join {{ ref('tickers') }} using (symbol)
              where matchscore_distinct_tickers.symbol is null
-             and tickers.type <> 'crypto'
          )
 select (code || '_' || symbol) as id,
        symbol,
@@ -160,12 +162,14 @@ union all
                                             collection_daily_latest_chart_point.adjusted_close) as message,
                            'daily'                                                       as period
                      from gainy_collections
+                              join {{ ref('profile_collections') }} on profile_collections.uniq_id = collection_uniq_id
                               left join {{ ref('collection_metrics') }} using (collection_uniq_id)
                               left join collection_daily_latest_chart_point using (collection_uniq_id)
-                     where collection_metrics is null
-                        or collection_daily_latest_chart_point is null
-                        or collection_metrics.previous_day_close_price < 1e-6
-                        or abs(collection_daily_latest_chart_point.adjusted_close / collection_metrics.previous_day_close_price - 1) > 0.2
+                     where profile_collections.enabled = '1'
+                       and (collection_metrics is null
+                         or collection_daily_latest_chart_point is null
+                         or collection_metrics.previous_day_close_price < 1e-6
+                         or abs(collection_daily_latest_chart_point.adjusted_close / collection_metrics.previous_day_close_price - 1) > 0.2)
                  )
              )
     select (code || '_' || collection_id) as id,
@@ -176,3 +180,14 @@ union all
            now()                          as updated_at
     from errors
 )
+
+union all
+
+-- add one fake record to allow post_hook above to clean other rows
+select 'fake_row_allowing_deletion' as id,
+       null                         as symbol,
+       null                         as code,
+       period,
+       null                         as message,
+       now()                        as updated_at
+from (values('daily', 'realtime')) t(period)

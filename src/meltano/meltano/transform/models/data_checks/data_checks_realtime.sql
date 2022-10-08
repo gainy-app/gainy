@@ -346,28 +346,26 @@ with tickers_and_options as
          (
              with ticker_daily_latest_chart_point as
                       (
-                          select chart.*,
-                                 row_number() over (partition by symbol order by t.date desc) as idx
+                          select chart.*
                           from (
                                    select symbol, period, date, max(datetime) as datetime
                                    from {{ ref('chart') }}
-                                   where period = '1w'
+                                            join {{ ref('week_trading_sessions_static') }} using (symbol, date)
+                                   where index = 1 and period = '1w'
                                    group by symbol, period, date
                                ) t
                                    join {{ ref('chart') }} using (symbol, period, datetime)
                       )
-             select distinct on (
-                 symbol
-                 ) symbol,
-                   'Ticker ' || symbol || ' has wrong previous_day_close_price. ' ||
-                   json_build_array(ticker_realtime_metrics.previous_day_close_price,
-                                    ticker_daily_latest_chart_point.adjusted_close) as message
+             select symbol,
+                    'Ticker ' || symbol || ' has wrong previous_day_close_price. ' ||
+                    json_build_array(ticker_realtime_metrics.previous_day_close_price,
+                                     ticker_daily_latest_chart_point.adjusted_close) as message
              from {{ ref('tickers') }}
                       left join {{ ref('ticker_realtime_metrics') }} using (symbol)
                       left join ticker_daily_latest_chart_point using (symbol)
              where ticker_realtime_metrics is null
                 or ticker_daily_latest_chart_point is null
-                or ticker_realtime_metrics.previous_day_close_price < 1e-6
+                or ticker_realtime_metrics.previous_day_close_price < 1e-12
                 or abs(ticker_daily_latest_chart_point.adjusted_close / ticker_realtime_metrics.previous_day_close_price - 1) > 0.2
          ),
 {% endif %}
