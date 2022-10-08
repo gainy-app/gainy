@@ -8,6 +8,7 @@
         using (select period, max(updated_at) as max_updated_at from {{this}} group by period) dc_stats
         where dc_stats.period = {{this}}.period
         and {{this}}.updated_at < dc_stats.max_updated_at',
+      'delete from {{this}} where id = \'fake_row_allowing_deletion\'',
     ]
   )
 }}
@@ -179,3 +180,14 @@ union all
            now()                          as updated_at
     from errors
 )
+
+union all
+
+-- add one fake record to allow post_hook above to clean other rows
+select 'fake_row_allowing_deletion' as id,
+       null                         as symbol,
+       null                         as code,
+       period,
+       null                         as message,
+       now()                        as updated_at
+from (values('daily', 'realtime')) t(period)

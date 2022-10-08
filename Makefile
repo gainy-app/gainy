@@ -53,7 +53,7 @@ test-build:
 	docker-compose -p gainy_test -f docker-compose.test.yml build --progress plain
 
 test-meltano:
-	docker-compose -p gainy_test -f docker-compose.test.yml run --rm test-meltano invoke dbt test
+	docker-compose -p gainy_test -f docker-compose.test.yml run --rm test-meltano invoke dbt test --select test_type:generic
 	docker-compose -p gainy_test -f docker-compose.test.yml run --rm --entrypoint gainy_recommendation test-meltano
 
 test-images:
