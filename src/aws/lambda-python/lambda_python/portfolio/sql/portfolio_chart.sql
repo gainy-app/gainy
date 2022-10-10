@@ -10,7 +10,7 @@ with latest_open_trading_session as
              select distinct on (uniq_id, period, portfolio_transaction_chart.datetime)
                  portfolio_expanded_transactions.profile_id,
                  portfolio_securities_normalized.type,
-                 original_ticker_symbol,
+                 original_ticker_symbol as symbol,
                  quantity_norm_for_valuation,
                  period,
                  portfolio_transaction_chart.datetime,
