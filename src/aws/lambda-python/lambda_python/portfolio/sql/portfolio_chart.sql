@@ -84,7 +84,7 @@ with latest_open_trading_session as
                   ) t1
                       join ticker_chart using (period, datetime)
      ),
-     schedule as
+     schedule as  materialized
          (
              select profile_id, period, datetime
 
@@ -93,7 +93,7 @@ with latest_open_trading_session as
              where symbols_to_exclude_from_schedule is null
              group by profile_id, period, datetime
      ),
-     ticker_chart_latest_datapoint as
+     ticker_chart_latest_datapoint as  materialized
          (
              select ticker_chart.*
              from (
@@ -116,8 +116,8 @@ with latest_open_trading_session as
                         else 0
                         end as cash_adjustment
              from ticker_chart
-                      join ticker_chart_latest_datapoint using (profile_id, symbol, period)
                       join schedule using (profile_id, period, datetime)
+                      join ticker_chart_latest_datapoint using (profile_id, symbol, period)
          ),
      static_values as
          (
