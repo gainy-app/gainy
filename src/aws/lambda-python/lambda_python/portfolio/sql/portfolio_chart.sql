@@ -10,7 +10,7 @@ with latest_open_trading_session as
              select distinct on (uniq_id, period, portfolio_transaction_chart.datetime)
                  portfolio_expanded_transactions.profile_id,
                  portfolio_securities_normalized.type,
-                 original_ticker_symbol,
+                 original_ticker_symbol as symbol,
                  quantity_norm_for_valuation,
                  period,
                  portfolio_transaction_chart.datetime,
@@ -45,10 +45,9 @@ with latest_open_trading_session as
      ticker_chart as
          (
              select profile_id,
-                    original_ticker_symbol,
+                    symbol,
                     period,
                     datetime,
-                    min(type)                         as type,
                     sum(quantity_norm_for_valuation)  as quantity,
                     count(uniq_id)                    as transaction_count,
                     sum(open)                         as open,
@@ -57,19 +56,54 @@ with latest_open_trading_session as
                     sum(close)                        as close,
                     sum(adjusted_close)               as adjusted_close
              from raw_chart_data
-             group by profile_id, original_ticker_symbol, period, datetime
+             group by profile_id, symbol, period, datetime
          ),
-     ticker_chart_latest_datapoint as
+     chart_date_stats as
+         (
+             select symbol,
+                    period,
+                    min(datetime) as min_datetime,
+                    max(datetime) as max_datetime
+             from raw_chart_data
+             group by symbol, period
+     ),
+     symbols_to_exclude_from_schedule as
+         (
+             select distinct symbol
+             from (
+                      select distinct period, datetime
+                      from (
+                               select period, datetime
+                               from ticker_chart
+                               group by period, datetime
+                           ) t
+                               left join chart_date_stats using (period)
+                               left join ticker_chart using (symbol, period, datetime)
+                      where ticker_chart is null
+                        and (datetime between min_datetime and max_datetime or period = '1d')
+                  ) t1
+                      join ticker_chart using (period, datetime)
+     ),
+     schedule as  materialized
+         (
+             select profile_id, period, datetime
+
+             from ticker_chart
+                      left join symbols_to_exclude_from_schedule using (symbol)
+             where symbols_to_exclude_from_schedule is null
+             group by profile_id, period, datetime
+     ),
+     ticker_chart_latest_datapoint as  materialized
          (
              select ticker_chart.*
              from (
-                      select original_ticker_symbol,
+                      select symbol,
                              period,
                              max(datetime) as datetime
                       from raw_chart_data
-                      group by original_ticker_symbol, period
+                      group by symbol, period
                   ) latest_datapoint
-                      join ticker_chart using (original_ticker_symbol, period, datetime)
+                      join ticker_chart using (symbol, period, datetime)
          ),
      ticker_chart_with_cash_adjustment as
          (
@@ -82,7 +116,8 @@ with latest_open_trading_session as
                         else 0
                         end as cash_adjustment
              from ticker_chart
-                      join ticker_chart_latest_datapoint using (profile_id, original_ticker_symbol, period)
+                      join schedule using (profile_id, period, datetime)
+                      join ticker_chart_latest_datapoint using (profile_id, symbol, period)
          ),
      static_values as
          (
@@ -118,7 +153,6 @@ with latest_open_trading_session as
              select profile_id,
                      period,
                      datetime,
-                     count(distinct type)   as types_cnt,
                      sum(transaction_count) as transaction_count,
                      sum(open)              as open,
                      sum(high)              as high,
@@ -138,8 +172,4 @@ select period,
        (close + greatest(0, cash_adjustment + coalesce(cash_value, 0)))::double precision          as close,
        (adjusted_close + greatest(0, cash_adjustment + coalesce(cash_value, 0)))::double precision as adjusted_close
 from raw_chart
-         join(select profile_id, period, max(types_cnt) as max_types_cnt
-              from raw_chart
-              group by profile_id, period) t using (profile_id, period)
          left join static_values using (profile_id)
-where types_cnt = max_types_cnt
