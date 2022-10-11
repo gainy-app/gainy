@@ -69,7 +69,7 @@ with latest_open_trading_session as
      ),
      symbols_to_exclude_from_schedule as
          (
-             select distinct symbol
+             select distinct ticker_chart.symbol
              from (
                       select distinct period, datetime
                       from (
@@ -79,15 +79,15 @@ with latest_open_trading_session as
                            ) t
                                left join chart_date_stats using (period)
                                left join ticker_chart using (symbol, period, datetime)
-                               left join week_trading_sessions_static
-                                         on week_trading_sessions_static.symbol = chart_date_stats.symbol
-                                             and datetime >= week_trading_sessions_static.open_at
-                                             and datetime < week_trading_sessions_static.close_at
                       where ticker_chart is null
                         and (datetime between min_datetime and max_datetime or period = '1d')
-                        and (week_trading_sessions_static is not null or period != '1w')
                   ) t1
                       join ticker_chart using (period, datetime)
+                      left join week_trading_sessions_static
+                                on week_trading_sessions_static.symbol = ticker_chart.symbol
+                                    and datetime >= week_trading_sessions_static.open_at
+                                    and datetime < week_trading_sessions_static.close_at
+             where week_trading_sessions_static is not null or period != '1w'
      ),
      schedule as  materialized
          (
