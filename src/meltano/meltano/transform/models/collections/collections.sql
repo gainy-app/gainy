@@ -30,16 +30,16 @@ with ticker_collections_weights as
                                            from {{ source('gainy', 'ticker_collections')}}
                                        ) - interval '1 hour'
      ),
+     ticker_collections_weights_max_date as
+         (
+             select ttf_name,
+                    max(date) as date
+             from ticker_collections_weights
+             group by ttf_name
+     ),
      ticker_sizes as materialized
          (
              (
-                 with ticker_collections_weights_max_date as
-                          (
-                              select ttf_name,
-                                     max(date) as date
-                              from ticker_collections_weights
-                              group by ttf_name
-                          )
                  select ttf_name,
                         count(symbol) as size
                  from ticker_collections_weights_max_date
@@ -50,9 +50,11 @@ with ticker_collections_weights as
 
              union all
 
-             select ttf_name, count(symbol) as size
+             select ttf_name, count(ticker_collections.symbol) as size
              from ticker_collections
                       join {{ ref('tickers') }} using (symbol)
+                      left join ticker_collections_weights using (ttf_name)
+             where ticker_collections_weights is null
              group by ttf_name
      )
 select c.id::int,
