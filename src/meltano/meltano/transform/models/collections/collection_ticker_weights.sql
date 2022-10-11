@@ -14,7 +14,7 @@ with raw_ticker_collections_weights as materialized
          (
              select collections.id    as collection_id,
                     symbol,
-                    ticker_collections_weights.date::date,
+                    date_trunc('month', ticker_collections_weights.date::date) as date,
                     ticker_collections_weights.weight::numeric,
                     _sdc_extracted_at as updated_at
              from {{ source('gainy', 'ticker_collections_weights') }}
@@ -65,7 +65,7 @@ with raw_ticker_collections_weights as materialized
                     _sdc_extracted_at      as updated_at
              from {{ source('gainy', 'ticker_collections') }}
                       join {{ ref('collections') }} on collections.name = ticker_collections.ttf_name
-                      join generate_series(ticker_collections.date_start::date, now()::date, interval '1 month') dd
+                      join generate_series(date_trunc('month', ticker_collections.date_start::date), now()::date, interval '1 month') dd
                            on true
              where _sdc_extracted_at > (
                                            select max(_sdc_extracted_at)
@@ -137,7 +137,7 @@ with raw_ticker_collections_weights as materialized
              where historical_prices.adjusted_close > 0
 
 {% if is_incremental() and var('realtime') %}
-               and (old_stats is null or historical_prices.date >= old_stats.date)
+               and (old_stats is null or historical_prices.date >= old_stats.date - interval '2 month')
 {% endif %}
 
              order by ticker_collections_weights.collection_uniq_id,
