@@ -80,7 +80,7 @@ with latest_open_trading_session as
                                left join chart_date_stats using (period)
                                left join ticker_chart using (symbol, period, datetime)
                       where ticker_chart is null
-                        and datetime between min_datetime and max_datetime
+                        and (datetime between min_datetime and max_datetime or period = '1d')
                   ) t1
                       join ticker_chart using (period, datetime)
      ),
