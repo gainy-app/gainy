@@ -155,6 +155,7 @@ module "ecs-service" {
   pg_datadog_password       = random_password.datadog_postgres.result
   pg_internal_sync_username = random_password.datadog_postgres.result
   pg_internal_sync_password = random_password.internal_sync_postgres.result
+  github_token              = var.github_token
 
   aws_lambda_api_gateway_endpoint = "${module.lambda.aws_apigatewayv2_api_endpoint}/${local.deployment_key}"
   hasura_enable_console           = "true"

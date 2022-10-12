@@ -113,6 +113,7 @@ module "aws" {
   hubspot_api_key             = var.hubspot_api_key
   polygon_api_token           = var.polygon_api_token
   coingecko_api_key           = var.coingecko_api_key
+  github_token                = var.github_token
 
   stripe_api_key         = var.stripe_api_key
   stripe_publishable_key = var.stripe_publishable_key

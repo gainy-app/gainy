@@ -7,6 +7,7 @@ variable "domain" {
 variable "cloudflare_zone_id" {}
 variable "hasura_jwt_secret" {}
 variable "hubspot_api_key" {}
+variable "github_token" {}
 
 variable "aws_region" {}
 variable "aws_access_key" {}

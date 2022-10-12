@@ -39,6 +39,10 @@ variable "stripe_api_key" {
 variable "stripe_publishable_key" {
   type = string
 }
+variable "github_token" {
+  type      = string
+  sensitive = true
+}
 
 #################################### DriveWealth ####################################
 
