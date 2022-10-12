@@ -64,7 +64,6 @@ on:
       DRIVEWEALTH_API_PASSWORD: { required: true }
       DRIVEWEALTH_API_URL: { required: true }
       DRIVEWEALTH_SQS_ARN: { required: false }
-      GITHUB_TOKEN: { required: true }
 
 env:
   AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
