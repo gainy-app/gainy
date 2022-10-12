@@ -24,16 +24,6 @@ with first_profile_transaction_date as
                     min(date) as datetime
              from {{ source('app', 'profile_portfolio_transactions') }}
              group by profile_id
-{% if is_incremental() %}
-         ),
-    old_model_stats as
-         (
-             select transactions_uniq_id, period,
-                    max(updated_at) as max_updated_at,
-                    max(datetime) as max_datetime
-             from {{ this }}
-             group by transactions_uniq_id, period
-{% endif %}
          )
 
 select t.*
@@ -46,8 +36,7 @@ from (
                 portfolio_expanded_transactions.quantity_norm_for_valuation * chart.high                  as high,
                 portfolio_expanded_transactions.quantity_norm_for_valuation * chart.low                   as low,
                 portfolio_expanded_transactions.quantity_norm_for_valuation * chart.close                 as close,
-                portfolio_expanded_transactions.quantity_norm_for_valuation * chart.adjusted_close        as adjusted_close,
-                greatest(portfolio_expanded_transactions.updated_at, chart.updated_at)                    as updated_at
+                portfolio_expanded_transactions.quantity_norm_for_valuation * chart.adjusted_close        as adjusted_close
          from {{ ref('portfolio_expanded_transactions') }}
                   left join first_profile_transaction_date using (profile_id)
                   join {{ ref('portfolio_securities_normalized') }}
@@ -59,8 +48,7 @@ from (
      ) t
 
 {% if is_incremental() %}
-         left join old_model_stats using (transactions_uniq_id, period)
-where old_model_stats.transactions_uniq_id is null
-   or t.updated_at > old_model_stats.max_updated_at -- new / updated transaction - recalc all
-   or t.datetime > old_model_stats.max_datetime -- old transaction - recalc only new
+         left join {{ this }} old_data using (transactions_uniq_id, period, datetime)
+where old_data is null
+   or abs(old_data.adjusted_close - old_data.adjusted_close) > 1e-2 -- new / updated transaction - recalc all
 {% endif %}

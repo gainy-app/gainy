@@ -7,7 +7,7 @@
         {
           "breadcrumb": [],
           "metadata": {
-            "replication-method": "INCREMENTAL",
+            "replication-method": "FULL_TABLE",
             "table-key-properties": [
               "collection_uniq_id",
               "date"
@@ -21,7 +21,31 @@
       "tap_stream_id": "public-collection_historical_values",
       "schema": {
         "type": "object",
-        "properties": {}
+        "properties": {
+          "profile_id": {
+            "type": ["integer", "null"]
+          },
+          "collection_id": {
+            "type": "integer"
+          },
+          "collection_uniq_id": {
+            "type": "string"
+          },
+          "date": {
+            "type": "string",
+            "format": "date"
+          },
+          "value": {
+            "type": "number"
+          },
+          "dividends_value": {
+            "type": ["number", "null"]
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
       },
       "selected": true
     }

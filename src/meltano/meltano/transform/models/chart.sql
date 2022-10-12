@@ -22,7 +22,7 @@
     from {{ ref('historical_prices_aggregated_3min') }}
              join {{ ref('week_trading_sessions') }} using (symbol)
     where week_trading_sessions.index = 0
-      and historical_prices_aggregated_3min.datetime between week_trading_sessions.open_at and week_trading_sessions.close_at - interval '3 minutes'
+      and historical_prices_aggregated_3min.datetime between week_trading_sessions.open_at and week_trading_sessions.close_at - interval '1 microsecond'
 )
 
 union all
@@ -42,7 +42,7 @@ union all
            historical_prices_aggregated_15min.updated_at
     from {{ ref('historical_prices_aggregated_15min') }}
              join {{ ref('week_trading_sessions') }} using (symbol)
-    where historical_prices_aggregated_15min.datetime between week_trading_sessions.open_at and week_trading_sessions.close_at - interval '15 minutes'
+    where historical_prices_aggregated_15min.datetime between week_trading_sessions.open_at and week_trading_sessions.close_at - interval '1 microsecond'
 )
 
 union all
