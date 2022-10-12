@@ -65,12 +65,9 @@ with raw_ticker_collections_weights as materialized
                     _sdc_extracted_at      as updated_at
              from {{ source('gainy', 'ticker_collections') }}
                       join {{ ref('collections') }} on collections.name = ticker_collections.ttf_name
-                      join generate_series(date_trunc('month', ticker_collections.date_start::date), now()::date, interval '1 month') dd
-                           on true
-             where _sdc_extracted_at > (
-                                           select max(_sdc_extracted_at)
-                                           from {{ source('gainy', 'ticker_collections') }}
-                                       ) - interval '1 hour'
+                      join generate_series(date_trunc('month', ticker_collections.date_start::date), now()::date, interval '1 month') dd on true
+             where _sdc_extracted_at > (select max(_sdc_extracted_at) from {{ source('gainy', 'ticker_collections') }}) - interval '1 hour'
+               and ticker_collections.weight is not null
          ),
      ticker_collections_next_date as materialized
          (
