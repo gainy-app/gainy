@@ -69,7 +69,9 @@ locals {
       pg_datadog_password                  = var.pg_datadog_password
       pg_internal_sync_username            = var.pg_production_internal_sync_username
       pg_internal_sync_password            = var.pg_internal_sync_password
-      github_token                         = var.github_token
+      github_app_id                        = var.github_app_id
+      github_app_installation_id           = var.github_app_installation_id
+      github_app_private_key               = var.github_app_private_key
 
       pg_external_access_host     = var.pg_external_access_host
       pg_external_access_port     = var.pg_external_access_port
