@@ -101,6 +101,7 @@ with polygon_symbols as materialized
                     daily_close_prices.date,
                     case
                         when raw_intraday_prices.close > 0
+                            and base_tickers.type != 'crypto'
                             and abs(historical_prices.adjusted_close / raw_intraday_prices.close - 1) > 1e-2
                             then historical_prices.adjusted_close / raw_intraday_prices.close
                         else 1.0 -- TODO verify todays intraday prices after split are adjusted?
@@ -109,7 +110,6 @@ with polygon_symbols as materialized
                       join {{ ref('base_tickers') }} using (symbol)
                       left join {{ ref('historical_prices') }} using (symbol, date)
                       join raw_intraday_prices using (symbol, time)
-             where base_tickers.type != 'crypto'
 {% endif %}
          )
 select symbol,

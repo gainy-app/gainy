@@ -18,6 +18,9 @@ def handle_error(e):
     raise HttpException(400, "Stripe error: %s" % (e))
 
 
+# TODO unit tests for all classes
+
+
 class StripeGetCheckoutUrl(HasuraAction):
 
     def __init__(self):
