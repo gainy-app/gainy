@@ -38,19 +38,19 @@ def test_stripe_get_payment_sheet_data():
     assert data["publishable_key"]
 
 
-def get_stripe_webhook_event_ids():
-    return [
-        'evt_3LhsRvD1LH0kYxao0MPxrbhd',  # payment_intent.succeeded
-        'evt_1LhEWvD1LH0kYxaoaTOJ2mU1',  # payment_method.attached
-    ]
-
-
-@pytest.mark.parametrize("event_id", get_stripe_webhook_event_ids())
-def test_webhook(event_id):
-    query = load_query('queries', 'StripeWebhook')
-    data = make_graphql_request(query, {
-        "event_id": event_id,
-    }, None)['data']['stripe_webhook']
-
-    assert "ok" in data
-    assert data["ok"]
+# def get_stripe_webhook_event_ids():
+#     return [
+#         'evt_3LhsRvD1LH0kYxao0MPxrbhd',  # payment_intent.succeeded
+#         'evt_1LhEWvD1LH0kYxaoaTOJ2mU1',  # payment_method.attached
+#     ]
+#
+#
+# @pytest.mark.parametrize("event_id", get_stripe_webhook_event_ids())
+# def test_webhook(event_id):
+#     query = load_query('queries', 'StripeWebhook')
+#     data = make_graphql_request(query, {
+#         "event_id": event_id,
+#     }, None)['data']['stripe_webhook']
+#
+#     assert "ok" in data
+#     assert data["ok"]
