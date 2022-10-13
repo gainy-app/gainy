@@ -40,10 +40,36 @@ resource "aws_s3_bucket" "gainy_history" {
   }
 }
 
+resource "aws_s3_bucket" "uploads_kyc" {
+  bucket = "uploads-kyc-${var.env}"
+
+  tags = {
+    Name = "Uploads KYC"
+  }
+}
+resource "aws_s3_bucket_ownership_controls" "uploads_kyc" {
+  bucket = aws_s3_bucket.uploads_kyc.bucket
+  rule {
+    object_ownership = "BucketOwnerEnforced"
+  }
+}
+resource "aws_s3_bucket_server_side_encryption_configuration" "uploads_kyc" {
+  bucket = aws_s3_bucket.uploads_kyc.bucket
+  rule {
+    apply_server_side_encryption_by_default {
+      sse_algorithm = "aws:kms"
+    }
+  }
+}
+
 output "mlflow_artifact_bucket" {
   value = aws_s3_bucket.mlflow.bucket
 }
 
 output "gainy_history_bucket" {
   value = aws_s3_bucket.gainy_history.bucket
+}
+
+output "uploads_kyc_bucket" {
+  value = aws_s3_bucket.uploads_kyc.bucket
 }

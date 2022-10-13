@@ -6,13 +6,13 @@ from gainy.data_access.repository import Repository
 
 class PortfolioRepository(Repository):
 
-    def remove_other_by_access_token(self, db_conn, entities):
+    def remove_other_by_access_token(self, entities):
         if isinstance(entities, BaseModel):
             entities = [entities]
 
         entities_grouped = self._group_entities(entities)
 
-        with db_conn.cursor() as cursor:
+        with self.db_conn.cursor() as cursor:
             for (schema_name,
                  table_name), entities in entities_grouped.items():
 

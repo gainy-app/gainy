@@ -1,13 +1,10 @@
 import json
-import traceback
 from abc import ABC, abstractmethod
 from typing import List
-import psycopg2
-from psycopg2 import sql
-from gainy.utils import db_connect
-from common.hasura_exception import HasuraActionException
+from common.context_container import ContextContainer
 from common.hasura_function import HasuraAction, HasuraTrigger
 from common.hasura_response import base_response
+from gainy.exceptions import HttpException
 from gainy.utils import get_logger
 
 logger = get_logger(__name__)
@@ -23,12 +20,14 @@ class HasuraDispatcher(ABC):
         headers = event['headers'] if 'headers' in event else {}
         request = self.extract_request(event)
 
-        with db_connect() as db_conn:
+        with ContextContainer() as context_container:
+            context_container.request = request
+            context_container.headers = headers
             try:
-                response = self.apply(db_conn, request, headers)
+                response = self.apply(context_container)
 
                 return self.format_response(200, response)
-            except HasuraActionException as he:
+            except HttpException as he:
                 logger.warning(f"{he.http_code} {he.message}. event: {event}")
 
                 return self.format_response(he.http_code, {
@@ -44,7 +43,7 @@ class HasuraDispatcher(ABC):
                 })
 
     @abstractmethod
-    def apply(self, dn_conn, request, headers):
+    def apply(self, context_container: ContextContainer):
         pass
 
     def choose_function_by_name(self, function_name):
@@ -52,7 +51,7 @@ class HasuraDispatcher(ABC):
             filter(lambda function: function.is_applicable(function_name),
                    self.functions))
         if len(filtered_actions) != 1:
-            raise HasuraActionException(
+            raise HttpException(
                 400, f"`{function_name}` is not a valid action or trigger")
 
         return filtered_actions[0]
@@ -102,14 +101,14 @@ class HasuraDispatcher(ABC):
             session_profile_id = self.get_profile_id(db_conn,
                                                      session_variables)
         except Exception:
-            raise HasuraActionException(
+            raise HttpException(
                 401, f"Unauthorized access to profile `{allowed_profile_ids}`")
 
         if not isinstance(allowed_profile_ids, list):
             allowed_profile_ids = [allowed_profile_ids]
 
         if session_profile_id not in allowed_profile_ids:
-            raise HasuraActionException(
+            raise HttpException(
                 401, f"Unauthorized access to profile `{allowed_profile_ids}`")
 
 
@@ -120,7 +119,10 @@ class HasuraActionDispatcher(HasuraDispatcher):
                  is_gateway_proxy: bool = True):
         super().__init__(actions, is_gateway_proxy)
 
-    def apply(self, db_conn, request, headers):
+    def apply(self, context_container: ContextContainer):
+        request = context_container.request
+        db_conn = context_container.db_conn
+
         action = self.choose_function_by_name(request["action"]["name"])
 
         input_params = request["input"]
@@ -134,7 +136,7 @@ class HasuraActionDispatcher(HasuraDispatcher):
             action.profile_id = self.get_profile_id(
                 db_conn, request["session_variables"])
 
-        return action.apply(db_conn, input_params, headers)
+        return action.apply(input_params, context_container)
 
 
 class HasuraTriggerDispatcher(HasuraDispatcher):
@@ -144,7 +146,10 @@ class HasuraTriggerDispatcher(HasuraDispatcher):
                  is_gateway_proxy: bool = True):
         super().__init__(triggers, is_gateway_proxy)
 
-    def apply(self, db_conn, request, headers):
+    def apply(self, context_container: ContextContainer):
+        request = context_container.request
+        db_conn = context_container.db_conn
+
         trigger = self.choose_function_by_name(request["trigger"]["name"])
 
         op = request["event"]["op"]
@@ -158,4 +163,4 @@ class HasuraTriggerDispatcher(HasuraDispatcher):
             self.check_authorization(db_conn, allowed_profile_ids,
                                      session_variables)
 
-        return trigger.apply(db_conn, op, data)
+        return trigger.apply(op, data, context_container)

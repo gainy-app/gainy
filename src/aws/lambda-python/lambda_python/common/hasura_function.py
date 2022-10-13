@@ -1,6 +1,7 @@
 from abc import abstractmethod, ABC
 
-from common.hasura_exception import HasuraActionException
+from common.context_container import ContextContainer
+from gainy.exceptions import HttpException
 
 
 class HasuraAction(ABC):
@@ -20,8 +21,8 @@ class HasuraAction(ABC):
 
         profile_id = input_params.get(self.profile_id_param, None)
         if not profile_id:
-            raise HasuraActionException(
-                400, f"{self.name}: Profile id is not provided")
+            raise HttpException(400,
+                                f"{self.name}: Profile id is not provided")
 
         return profile_id
 
@@ -32,7 +33,7 @@ class HasuraAction(ABC):
         return name == self.name
 
     @abstractmethod
-    def apply(self, db_conn, input_params, headers):
+    def apply(self, input_params, context_container: ContextContainer):
         pass
 
 
@@ -46,7 +47,7 @@ class HasuraTrigger(ABC):
         return name in self.names
 
     @abstractmethod
-    def apply(self, db_conn, op, data):
+    def apply(self, op, data, context_container: ContextContainer):
         pass
 
     @abstractmethod

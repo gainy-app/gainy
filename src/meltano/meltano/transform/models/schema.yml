@@ -52,6 +52,9 @@ sources:
     schema: app
     tables:
       - name: analytics_profiles
+      - name: drivewealth_accounts
+      - name: drivewealth_accounts_positions
+      - name: drivewealth_users
       - name: influencers
       - name: invitations
       - name: notifications

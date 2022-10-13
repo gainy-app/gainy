@@ -3,18 +3,45 @@ import datetime
 from typing import Optional
 
 from portfolio.plaid import PlaidClient
+from portfolio.plaid.common import handle_error
 from portfolio.models import HoldingData, Security, Account, TransactionData, Institution
 from portfolio.exceptions import AccessTokenApiException, AccessTokenLoginRequiredException
 from gainy.utils import get_logger
 
 import plaid
 
+logger = get_logger(__name__)
+
 
 class PlaidService:
 
-    def __init__(self):
+    def __init__(self, db_conn):
+        self.db_conn = db_conn
         self.plaid_client = PlaidClient()
         self.logger = get_logger(__name__)
+
+    def exchange_public_token(self, public_token, env):
+        try:
+            return self.plaid_client.exchange_public_token(public_token, env)
+        except plaid.ApiException as e:
+            handle_error(e)
+
+    def get_item_accounts(self, access_token, account_ids=None):
+        try:
+            return self.plaid_client.get_item_accounts(access_token,
+                                                       account_ids)
+        except plaid.ApiException as e:
+            handle_error(e)
+
+    def create_processor_token(self, access_token, account_id, processor):
+        try:
+            response = self.plaid_client.create_processor_token(
+                access_token, account_id, processor)
+        except plaid.ApiException as e:
+            handle_error(e)
+
+        logger.info('create_processor_token', extra={"response": response})
+        return response['processor_token']
 
     def max_transactions_limit(self):
         return 500
@@ -115,8 +142,8 @@ class PlaidService:
 
         return self.__hydrate_institution(institution_response['institution'])
 
-    def set_token_institution(self, db_conn, plaid_access_token, institution):
-        with db_conn.cursor() as cursor:
+    def set_token_institution(self, plaid_access_token, institution):
+        with self.db_conn.cursor() as cursor:
             cursor.execute(
                 "UPDATE app.profile_plaid_access_tokens SET institution_id = %(institution_id)s WHERE id = %(plaid_access_token_id)s",
                 {

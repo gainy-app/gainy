@@ -12,6 +12,7 @@ type Query {
     redirect_uri: String!
     env: String
     access_token_id: Int
+    purpose: String
   ): CreatePlaidLinkTokenOutput
 }
 
@@ -91,6 +92,14 @@ type Query {
   ): [PortfolioTransaction]
 }
 
+type Mutation {
+  get_pre_signed_upload_form(
+    profile_id: Int!
+    upload_type: String!
+    content_type: String!
+  ): PreSignedUploadFormOutput
+}
+
 type Query {
   get_promocode(
     code: String!
@@ -105,12 +114,40 @@ type Query {
   ): [Collection]
 }
 
+type Mutation {
+  kyc_add_document(
+    profile_id: Int!
+    uploaded_file_id: Int!
+    type: String!
+    side: String!
+  ): OkOutput
+}
+
+type Query {
+  kyc_get_form_config(
+    profile_id: Int!
+  ): KycFormConfig
+}
+
+type Query {
+  kyc_get_status(
+    profile_id: Int!
+  ): KycStatus
+}
+
+type Mutation {
+  kyc_send_form(
+    profile_id: Int!
+  ): KycStatus
+}
+
 type Query {
   link_plaid_account(
     profile_id: Int!
     public_token: String!
     env: String
     access_token_id: Int
+    purpose: String
   ): LinkPlaidAccountOutput
 }
 
@@ -125,6 +162,12 @@ type Mutation {
     new_investments_transactions: Int
     cancelled_investments_transactions: Int
   ): PlaidWebhookOutput
+}
+
+type Mutation {
+  rehandle_queue_messages(
+    ids: [Int]!
+  ): ReHandleQueueMessagesOutput
 }
 
 type Query {
@@ -160,6 +203,12 @@ type Query {
   ): StripeGetCheckoutUrl
 }
 
+type Query {
+  stripe_get_payment_sheet_data(
+    profile_id: Int!
+  ): StripeGetPaymentSheetDataOutput
+}
+
 type Mutation {
   stripe_webhook(
     id: String
@@ -171,7 +220,83 @@ type Mutation {
     pending_webhooks: Int
     request: jsonb
     type: String
-  ): StripeWebhookOutput
+  ): OkOutput
+}
+
+type Mutation {
+  trading_add_money(
+    profile_id: Int!
+    trading_account_id: Int!
+    amount: Float!
+  ): OkOutput
+}
+
+type Mutation {
+  trading_delete_data(
+    profile_id: Int!
+  ): OkOutput
+}
+
+type Mutation {
+  trading_delete_funding_account(
+    profile_id: Int!
+    funding_account_id: Int!
+  ): OkOutput
+}
+
+type Mutation {
+  trading_deposit_funds(
+    profile_id: Int!
+    trading_account_id: Int
+    amount: Float!
+    funding_account_id: Int!
+  ): TradingMoneyFlowOutput
+}
+
+type Query {
+  trading_get_actual_collection_holdings(
+    profile_id: Int!
+    collection_id: Int!
+  ): [ActualCollectionHoldingOutput]
+}
+
+type Query {
+  trading_get_funding_accounts(
+    profile_id: Int!
+  ): [FundingAccount]
+}
+
+type Mutation {
+  trading_link_bank_account_with_plaid(
+    profile_id: Int!
+    account_id: String!
+    account_name: String!
+    access_token_id: Int!
+  ): TradingLinkBankAccountWithPlaidOutput
+}
+
+type Mutation {
+  trading_reconfigure_collection_holdings(
+    profile_id: Int!
+    collection_id: Int!
+    weights: [TickerWeight]!
+    target_amount_delta: Float!
+  ): TradingReconfigureCollectionHoldingsOutput
+}
+
+type Mutation {
+  trading_sync_provider_data(
+    profile_id: Int!
+  ): OkOutput
+}
+
+type Mutation {
+  trading_withdraw_funds(
+    profile_id: Int!
+    trading_account_id: Int
+    amount: Float!
+    funding_account_id: Int!
+  ): TradingMoneyFlowOutput
 }
 
 type Mutation {
@@ -182,6 +307,11 @@ type Mutation {
 
 input PlaidWebhookError {
   error_code: Int
+}
+
+input TickerWeight {
+  symbol: String!
+  weight: Float!
 }
 
 type ChartDataPoint {
@@ -263,6 +393,7 @@ type MatchScore {
 type LinkPlaidAccountOutput {
   result: Boolean!
   plaid_access_token_id: Int
+  accounts: [AccountInformation]
 }
 
 type PortfolioHolding {
@@ -310,10 +441,6 @@ type StripeGetCheckoutUrl {
   url: String!
 }
 
-type StripeWebhookOutput {
-  success: Boolean!
-}
-
 type UpdatePurchasesOutput {
   subscription_end_date: String
 }
@@ -327,5 +454,119 @@ type Promocode {
 
 type SetRecommendationSettingsOutput {
   recommended_collections: [Collection]
+}
+
+type KycFormConfig {
+  first_name: KycFormFieldConfig
+  last_name: KycFormFieldConfig
+  country: KycFormFieldConfig
+  email_address: KycFormFieldConfig
+  language: KycFormFieldConfig
+  employment_status: KycFormFieldConfig
+  employment_type: KycFormFieldConfig
+  employment_position: KycFormFieldConfig
+  investor_profile_experience: KycFormFieldConfig
+  investor_profile_risk_tolerance: KycFormFieldConfig
+  investor_profile_objectives: KycFormFieldConfig
+  investor_profile_annual_income: KycFormFieldConfig
+  investor_profile_net_worth_total: KycFormFieldConfig
+  investor_profile_net_worth_liquid: KycFormFieldConfig
+  disclosures_drivewealth_terms_of_use: KycFormFieldConfig
+  disclosures_drivewealth_customer_agreement: KycFormFieldConfig
+  disclosures_drivewealth_market_data_agreement: KycFormFieldConfig
+  disclosures_rule14b: KycFormFieldConfig
+  disclosures_drivewealth_privacy_policy: KycFormFieldConfig
+  disclosures_signed_by: KycFormFieldConfig
+  tax_id_value: KycFormFieldConfig
+  tax_id_type: KycFormFieldConfig
+  citizenship: KycFormFieldConfig
+  gender: KycFormFieldConfig
+  marital_status: KycFormFieldConfig
+  birthdate: KycFormFieldConfig
+  address_street1: KycFormFieldConfig
+  address_city: KycFormFieldConfig
+  address_postal_code: KycFormFieldConfig
+  address_country: KycFormFieldConfig
+}
+
+type KycFormFieldConfig {
+  required: Boolean
+  placeholder: String
+  choices: json
+}
+
+type KycSendFormOutput {
+  error_message: String
+  status: String
+}
+
+type KycStatus {
+  message: String
+  status: String
+  updated_at: String
+}
+
+type PreSignedUploadFormOutput {
+  id: Int!
+  url: String!
+  method: String!
+}
+
+type LinkBankAccountWithPlaidOutput {
+  errorMessage: String
+}
+
+type AccountInformation {
+  account_id: String!
+  balance_available: Int!
+  balance_current: Int!
+  iso_currency_code: String!
+  mask: String!
+  name: String!
+  official_name: String!
+}
+
+type TradingLinkBankAccountWithPlaidOutput {
+  id: Int!
+}
+
+type FundingAccount {
+  id: Int!
+}
+
+type TradingMoneyFlowOutput {
+  trading_money_flow_id: Int!
+}
+
+type SampleOutput {
+  accessToken: String!
+}
+
+type ActualCollectionHoldingOutput {
+  symbol: String!
+  target_weight: Float
+  actual_weight: Float
+  value: Float
+}
+
+type OkOutput {
+  ok: Boolean
+}
+
+type StripeGetPaymentSheetDataOutput {
+  setup_intent_client_secret: String!
+  ephemeral_key: String!
+  customer_id: String!
+  publishable_key: String!
+}
+
+type TradingReconfigureCollectionHoldingsOutput {
+  trading_collection_version_id: Int!
+}
+
+type ReHandleQueueMessagesOutput {
+  success: Int!
+  unsupported: Int!
+  error: Int!
 }
 

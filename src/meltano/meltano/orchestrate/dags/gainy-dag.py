@@ -48,13 +48,13 @@ dbt = BashOperator(
 clean = BashOperator(
     task_id="clean",
     bash_command=
-    f"cd {MELTANO_PROJECT_ROOT}; /usr/local/bin/python scripts/cleanup.py",
+    f"cd {MELTANO_PROJECT_ROOT}; /venv/bin/python scripts/cleanup.py",
     dag=dag)
 
 generate_meltano_config = BashOperator(
     task_id="generate_meltano_config",
     bash_command=
-    f"cd {MELTANO_PROJECT_ROOT}; /usr/local/bin/python scripts/generate_meltano_config.py",
+    f"cd {MELTANO_PROJECT_ROOT}; /venv/bin/python scripts/generate_meltano_config.py",
     dag=dag)
 
 generate_meltano_config >> upstream >> dbt >> downstream >> clean

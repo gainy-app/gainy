@@ -1,12 +1,10 @@
-import datetime
-import dateutil.relativedelta
-import logging
 import psycopg2
 from services import BillingService
+from common.context_container import ContextContainer
 from common.hasura_function import HasuraTrigger
+from gainy.utils import get_logger
 
-logger = logging.getLogger()
-logger.setLevel(logging.INFO)
+logger = get_logger(__name__)
 
 
 class OnInvitationCreatedOrUpdated(HasuraTrigger):
@@ -19,7 +17,8 @@ class OnInvitationCreatedOrUpdated(HasuraTrigger):
         payload = self._extract_payload(data)
         return [payload['to_profile_id']]
 
-    def apply(self, db_conn, op, data):
+    def apply(self, op, data, context_container: ContextContainer):
+        db_conn = context_container.db_conn
         payload = self._extract_payload(data)
         invitation_id = payload['id']
 

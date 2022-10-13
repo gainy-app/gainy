@@ -1,3 +1,4 @@
+from common.context_container import ContextContainer
 from common.hasura_function import HasuraTrigger
 from gainy.recommendation.compute import ComputeRecommendationsAndPersist
 from gainy.data_access.optimistic_lock import ConcurrentVersionUpdate
@@ -16,7 +17,8 @@ class SetRecommendations(HasuraTrigger):
             "recommendations__profile_interests"
         ])
 
-    def apply(self, db_conn, op, data):
+    def apply(self, op, data, context_container: ContextContainer):
+        db_conn = context_container.db_conn
         profile_id = self.get_profile_id(data)
         payload = self._extract_payload(data)
         category_id = payload.get("category_id")
@@ -37,13 +39,14 @@ class SetRecommendations(HasuraTrigger):
                         extra=logging_extra)
             return
 
+        repository = context_container.recommendation_repository
         recommendations_func = ComputeRecommendationsAndPersist(
-            db_conn, profile_id)
-        old_version = recommendations_func.load_version(db_conn)
+            repository, profile_id)
+        old_version = recommendations_func.load_version()
 
         try:
-            recommendations_func.get_and_persist(db_conn, max_tries=5)
-            new_version = recommendations_func.load_version(db_conn)
+            recommendations_func.execute(max_tries=5)
+            new_version = recommendations_func.load_version()
             logger.info('Calculated Match Scores',
                         extra={
                             **logging_extra,

@@ -27,6 +27,28 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
 
+#      - name: Make Env
+#        run: |
+#          echo "DRIVEWEALTH_IS_UAT=$DRIVEWEALTH_IS_UAT" >> .env.test
+#          echo "DRIVEWEALTH_APP_KEY=$DRIVEWEALTH_APP_KEY" >> .env.test
+#          echo "DRIVEWEALTH_WLP_ID=$DRIVEWEALTH_WLP_ID" >> .env.test
+#          echo "DRIVEWEALTH_PARENT_IBID=$DRIVEWEALTH_PARENT_IBID" >> .env.test
+#          echo "DRIVEWEALTH_RIA_ID=$DRIVEWEALTH_RIA_ID" >> .env.test
+#          echo "DRIVEWEALTH_RIA_PRODUCT_ID=$DRIVEWEALTH_RIA_PRODUCT_ID" >> .env.test
+#          echo "DRIVEWEALTH_API_USERNAME=$DRIVEWEALTH_API_USERNAME" >> .env.test
+#          echo "DRIVEWEALTH_API_PASSWORD=$DRIVEWEALTH_API_PASSWORD" >> .env.test
+#          echo "DRIVEWEALTH_API_URL=$DRIVEWEALTH_API_URL" >> .env.test
+#        env:
+#          DRIVEWEALTH_IS_UAT: ${{ secrets.DRIVEWEALTH_IS_UAT }}
+#          DRIVEWEALTH_APP_KEY: ${{ secrets.DRIVEWEALTH_APP_KEY }}
+#          DRIVEWEALTH_WLP_ID: ${{ secrets.DRIVEWEALTH_WLP_ID }}
+#          DRIVEWEALTH_PARENT_IBID: ${{ secrets.DRIVEWEALTH_PARENT_IBID }}
+#          DRIVEWEALTH_RIA_ID: ${{ secrets.DRIVEWEALTH_RIA_ID }}
+#          DRIVEWEALTH_RIA_PRODUCT_ID: ${{ secrets.DRIVEWEALTH_RIA_PRODUCT_ID }}
+#          DRIVEWEALTH_API_USERNAME: ${{ secrets.DRIVEWEALTH_API_USERNAME }}
+#          DRIVEWEALTH_API_PASSWORD: ${{ secrets.DRIVEWEALTH_API_PASSWORD }}
+#          DRIVEWEALTH_API_URL: ${{ secrets.DRIVEWEALTH_API_URL }}
+
       - name: Run tests
         id: test
         continue-on-error: true
@@ -99,3 +121,14 @@ jobs:
       REVENUECAT_API_KEY: ${{ secrets.REVENUECAT_API_KEY }}
       BIGQUERY_CREDENTIALS: ${{ secrets.BIGQUERY_CREDENTIALS }}
       STRIPE_API_KEY: ${{ secrets.STRIPE_API_KEY }}
+      STRIPE_PUBLISHABLE_KEY: ${{ secrets.STRIPE_PUBLISHABLE_KEY }}
+      DRIVEWEALTH_IS_UAT: ${{ secrets.DRIVEWEALTH_IS_UAT }}
+      DRIVEWEALTH_APP_KEY: ${{ secrets.DRIVEWEALTH_APP_KEY }}
+      DRIVEWEALTH_WLP_ID: ${{ secrets.DRIVEWEALTH_WLP_ID }}
+      DRIVEWEALTH_PARENT_IBID: ${{ secrets.DRIVEWEALTH_PARENT_IBID }}
+      DRIVEWEALTH_RIA_ID: ${{ secrets.DRIVEWEALTH_RIA_ID }}
+      DRIVEWEALTH_RIA_PRODUCT_ID: ${{ secrets.DRIVEWEALTH_RIA_PRODUCT_ID }}
+      DRIVEWEALTH_API_USERNAME: ${{ secrets.DRIVEWEALTH_API_USERNAME }}
+      DRIVEWEALTH_API_PASSWORD: ${{ secrets.DRIVEWEALTH_API_PASSWORD }}
+      DRIVEWEALTH_API_URL: ${{ secrets.DRIVEWEALTH_API_URL }}
+      DRIVEWEALTH_SQS_ARN: ${{ secrets.DRIVEWEALTH_SQS_ARN }}

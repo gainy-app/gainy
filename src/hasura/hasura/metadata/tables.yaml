@@ -52,7 +52,223 @@
       webhook: '{{AWS_LAMBDA_API_GATEWAY_ENDPOINT}}/hasuraTrigger'
 - table:
     schema: app
+    name: invoices
+- table:
+    schema: app
+    name: kyc_form
+  object_relationships:
+    - name: profile
+      using:
+        foreign_key_constraint_on: profile_id
+  insert_permissions:
+    - role: user
+      permission:
+        check:
+          profile:
+            user_id:
+              _eq: X-Hasura-User-Id
+        columns:
+          - address_city
+          - address_country
+          - address_postal_code
+          - address_province
+          - address_street1
+          - address_street2
+          - birthdate
+          - citizenship
+          - country
+          - disclosures_drivewealth_customer_agreement
+          - disclosures_drivewealth_data_sharing
+          - disclosures_drivewealth_ira_agreement
+          - disclosures_drivewealth_market_data_agreement
+          - disclosures_drivewealth_privacy_policy
+          - disclosures_drivewealth_terms_of_use
+          - disclosures_extended_hours_agreement
+          - disclosures_rule14b
+          - disclosures_signed_by
+          - email_address
+          - employment_affiliated_with_a_broker
+          - employment_company_name
+          - employment_is_director_of_a_public_company
+          - employment_position
+          - employment_status
+          - employment_type
+          - first_name
+          - gender
+          - investor_profile_annual_income
+          - investor_profile_experience
+          - investor_profile_net_worth_liquid
+          - investor_profile_net_worth_total
+          - investor_profile_objectives
+          - investor_profile_risk_tolerance
+          - irs_backup_withholdings_notified
+          - is_us_tax_payer
+          - language
+          - last_name
+          - marital_status
+          - phone_number
+          - politically_exposed_names
+          - profile_id
+          - tax_id_type
+          - tax_id_value
+          - tax_treaty_with_us
+        backend_only: false
+  select_permissions:
+    - role: user
+      permission:
+        columns:
+          - address_city
+          - address_country
+          - address_postal_code
+          - address_province
+          - address_street1
+          - address_street2
+          - birthdate
+          - citizenship
+          - country
+          - created_at
+          - disclosures_drivewealth_customer_agreement
+          - disclosures_drivewealth_data_sharing
+          - disclosures_drivewealth_ira_agreement
+          - disclosures_drivewealth_market_data_agreement
+          - disclosures_drivewealth_privacy_policy
+          - disclosures_drivewealth_terms_of_use
+          - disclosures_extended_hours_agreement
+          - disclosures_rule14b
+          - disclosures_signed_by
+          - email_address
+          - employment_affiliated_with_a_broker
+          - employment_company_name
+          - employment_is_director_of_a_public_company
+          - employment_position
+          - employment_status
+          - employment_type
+          - first_name
+          - gender
+          - investor_profile_annual_income
+          - investor_profile_experience
+          - investor_profile_net_worth_liquid
+          - investor_profile_net_worth_total
+          - investor_profile_objectives
+          - investor_profile_risk_tolerance
+          - irs_backup_withholdings_notified
+          - is_us_tax_payer
+          - language
+          - last_name
+          - marital_status
+          - phone_number
+          - politically_exposed_names
+          - profile_id
+          - status
+          - tax_id_type
+          - tax_id_value
+          - tax_treaty_with_us
+          - updated_at
+        filter:
+          profile:
+            user_id:
+              _eq: X-Hasura-User-Id
+  update_permissions:
+    - role: user
+      permission:
+        columns:
+          - address_city
+          - address_country
+          - address_postal_code
+          - address_province
+          - address_street1
+          - address_street2
+          - birthdate
+          - citizenship
+          - country
+          - disclosures_drivewealth_customer_agreement
+          - disclosures_drivewealth_data_sharing
+          - disclosures_drivewealth_ira_agreement
+          - disclosures_drivewealth_market_data_agreement
+          - disclosures_drivewealth_privacy_policy
+          - disclosures_drivewealth_terms_of_use
+          - disclosures_extended_hours_agreement
+          - disclosures_rule14b
+          - disclosures_signed_by
+          - email_address
+          - employment_affiliated_with_a_broker
+          - employment_company_name
+          - employment_is_director_of_a_public_company
+          - employment_position
+          - employment_status
+          - employment_type
+          - first_name
+          - gender
+          - investor_profile_annual_income
+          - investor_profile_experience
+          - investor_profile_net_worth_liquid
+          - investor_profile_net_worth_total
+          - investor_profile_objectives
+          - investor_profile_risk_tolerance
+          - irs_backup_withholdings_notified
+          - is_us_tax_payer
+          - language
+          - last_name
+          - marital_status
+          - phone_number
+          - politically_exposed_names
+          - profile_id
+          - tax_id_type
+          - tax_id_value
+          - tax_treaty_with_us
+        filter:
+          _and:
+            - profile:
+                user_id:
+                  _eq: X-Hasura-User-Id
+            - _or:
+                - status:
+                    _neq: APPROVED
+                - status:
+                    _is_null: true
+        check: null
+- table:
+    schema: app
     name: notifications
+- table:
+    schema: app
+    name: payment_methods
+  object_relationships:
+    - name: profile
+      using:
+        foreign_key_constraint_on: profile_id
+  select_permissions:
+    - role: user
+      permission:
+        columns:
+          - id
+          - profile_id
+          - name
+          - set_active_at
+          - created_at
+          - updated_at
+        filter:
+          profile:
+            user_id:
+              _eq: X-Hasura-User-Id
+  update_permissions:
+    - role: user
+      permission:
+        columns:
+          - name
+          - set_active_at
+        filter:
+          profile:
+            user_id:
+              _eq: X-Hasura-User-Id
+        check: null
+  delete_permissions:
+    - role: user
+      permission:
+        filter:
+          profile:
+            user_id:
+              _eq: X-Hasura-User-Id
 - table:
     schema: app
     name: plaid_institutions
@@ -382,6 +598,7 @@
           - institution_id
           - needs_reauth_since
           - profile_id
+          - purpose
         filter:
           profile:
             _or:
@@ -393,9 +610,12 @@
     - role: user
       permission:
         filter:
-          profile:
-            user_id:
-              _eq: X-Hasura-User-Id
+          _and:
+            - profile:
+                user_id:
+                  _eq: X-Hasura-User-Id
+            - purpose:
+                _eq: portfolio
   event_triggers:
     - name: on_plaid_access_token_created
       definition:
@@ -829,6 +1049,66 @@
         timeout_sec: 60
       webhook: '{{AWS_LAMBDA_API_GATEWAY_ENDPOINT}}/hasuraTrigger'
 - table:
+    schema: app
+    name: stripe_payment_methods
+  event_triggers:
+    - name: stripe_payment_method_deleted
+      definition:
+        enable_manual: false
+        delete:
+          columns: '*'
+      retry_conf:
+        num_retries: 0
+        interval_sec: 10
+        timeout_sec: 60
+      webhook: '{{AWS_LAMBDA_API_GATEWAY_ENDPOINT}}/hasuraTrigger'
+- table:
+    schema: app
+    name: trading_funding_accounts
+  object_relationships:
+    - name: profile
+      using:
+        foreign_key_constraint_on: profile_id
+  select_permissions:
+    - role: user
+      permission:
+        columns:
+          - id
+          - profile_id
+          - plaid_access_token_id
+          - plaid_account_id
+          - name
+          - balance
+          - created_at
+          - updated_at
+        filter:
+          profile:
+            user_id:
+              _eq: X-Hasura-User-Id
+- table:
+    schema: app
+    name: trading_money_flow
+  object_relationships:
+    - name: profile
+      using:
+        foreign_key_constraint_on: profile_id
+  select_permissions:
+    - role: user
+      permission:
+        columns:
+          - id
+          - profile_id
+          - trading_account_id
+          - funding_account_id
+          - status
+          - amount
+          - created_at
+          - updated_at
+        filter:
+          profile:
+            user_id:
+              _eq: X-Hasura-User-Id
+- table:
     schema: public
     name: analyst_ratings
   select_permissions:
@@ -1070,6 +1350,38 @@
                 _is_null: true
             - user_id:
                 _eq: X-Hasura-User-Id
+- table:
+    schema: public
+    name: collection_ticker_actual_weights
+  object_relationships:
+    - name: profile
+      using:
+        manual_configuration:
+          remote_table:
+            schema: app
+            name: profiles
+          insertion_order: null
+          column_mapping:
+            profile_id: id
+  select_permissions:
+    - role: user
+      permission:
+        columns:
+          - profile_id
+          - collection_id
+          - collection_uniq_id
+          - symbol
+          - date
+          - weight
+          - id
+          - updated_at
+        filter:
+          _or:
+            - profile_id:
+                _is_null: true
+            - profile:
+                user_id:
+                  _eq: X-Hasura-User-Id
 - table:
     schema: public
     name: crypto_metrics

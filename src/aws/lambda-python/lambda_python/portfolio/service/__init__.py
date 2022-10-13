@@ -12,15 +12,17 @@ SERVICE_PLAID = 'plaid'
 
 class PortfolioService:
 
-    def __init__(self):
-        self.portfolio_repository = PortfolioRepository()
-        self.services = {SERVICE_PLAID: PlaidService()}
+    def __init__(self, db_conn, portfolio_repository: PortfolioRepository,
+                 plaid_service: PlaidService):
+        self.db_conn = db_conn
+        self.portfolio_repository = portfolio_repository
+        self.services = {SERVICE_PLAID: plaid_service}
 
-    def get_holdings(self, db_conn, profile_id):
+    def get_holdings(self, profile_id):
         holdings = []
         securities = []
         accounts = []
-        for access_token in self.__get_access_tokens(db_conn, profile_id):
+        for access_token in self.__get_access_tokens(profile_id):
             try:
                 token_data = self.__get_service(
                     access_token['service']).get_holdings(access_token)
@@ -29,35 +31,34 @@ class PortfolioService:
                 securities += token_data['securities']
                 accounts += token_data['accounts']
             except AccessTokenLoginRequiredException as e:
-                self._set_access_token_reauth(db_conn, e.access_token)
+                self._set_access_token_reauth(e.access_token)
 
-        self.persist_holding_data(db_conn, profile_id, securities, accounts,
-                                  holdings)
+        self.persist_holding_data(profile_id, securities, accounts, holdings)
 
         return holdings
 
-    def sync_token_holdings(self, db_conn, access_token):
+    def sync_token_holdings(self, access_token):
         try:
             data = self.__get_service(
                 access_token['service']).get_holdings(access_token)
             holdings = data['holdings']
-            self.persist_holding_data(db_conn, access_token['profile_id'],
+            self.persist_holding_data(access_token['profile_id'],
                                       data['securities'], data['accounts'],
                                       holdings)
 
             return len(holdings)
         except AccessTokenLoginRequiredException as e:
-            self._set_access_token_reauth(db_conn, e.access_token)
+            self._set_access_token_reauth(e.access_token)
             return 0
 
-    def get_transactions(self, db_conn, profile_id, count=500, offset=0):
+    def get_transactions(self, profile_id, count=500, offset=0):
         transactions = []
         securities = []
         accounts = []
 
-        for access_token in self.__get_access_tokens(db_conn, profile_id):
+        for access_token in self.__get_access_tokens(profile_id):
             try:
-                self.sync_institution(db_conn, access_token)
+                self.sync_institution(access_token)
                 token_service = self.__get_service(access_token['service'])
                 token_data = token_service.get_transactions(access_token,
                                                             count=count,
@@ -67,14 +68,14 @@ class PortfolioService:
                 securities += token_data['securities']
                 accounts += token_data['accounts']
             except AccessTokenLoginRequiredException as e:
-                self._set_access_token_reauth(db_conn, e.access_token)
+                self._set_access_token_reauth(e.access_token)
 
-        self.persist_transaction_data(db_conn, profile_id, securities,
-                                      accounts, transactions)
+        self.persist_transaction_data(profile_id, securities, accounts,
+                                      transactions)
 
         return transactions
 
-    def sync_token_transactions(self, db_conn, access_token):
+    def sync_token_transactions(self, access_token):
         all_transactions = []
         transactions_count = 0
         count = self.__get_service(
@@ -93,8 +94,7 @@ class PortfolioService:
 
                 persist_start = time.time()
                 all_transactions += cur_transactions
-                self.persist_transaction_data(db_conn,
-                                              access_token['profile_id'],
+                self.persist_transaction_data(access_token['profile_id'],
                                               data['securities'],
                                               data['accounts'],
                                               cur_transactions)
@@ -120,31 +120,31 @@ class PortfolioService:
                 if cur_tx_cnt < count:
                     break
         except AccessTokenLoginRequiredException as e:
-            self._set_access_token_reauth(db_conn, e.access_token)
+            self._set_access_token_reauth(e.access_token)
         except AccessTokenApiException as e:
             pass
 
         # cleanup
         self.portfolio_repository.remove_other_by_access_token(
-            db_conn, all_transactions)
+            all_transactions)
 
         return transactions_count
 
-    def sync_institution(self, db_conn, access_token):
+    def sync_institution(self, access_token):
         institution = self.__get_service(
             access_token['service']).get_institution(access_token)
 
         if not institution:
             return
 
-        self.portfolio_repository.persist(db_conn, institution)
-        self.__get_service(access_token['service']).set_token_institution(
-            db_conn, access_token, institution)
+        self.portfolio_repository.persist(institution)
 
-    def persist_holding_data(self, db_conn, profile_id, securities, accounts,
-                             holdings):
-        securities_dict = self.__persist_securities(db_conn, securities)
-        accounts_dict = self.__persist_accounts(db_conn, accounts, profile_id)
+        self.__get_service(access_token['service']).set_token_institution(
+            access_token, institution)
+
+    def persist_holding_data(self, profile_id, securities, accounts, holdings):
+        securities_dict = self.__persist_securities(securities)
+        accounts_dict = self.__persist_accounts(accounts, profile_id)
         holdings = [
             i for i in holdings if i.security_ref_id is not None
             and i.security_ref_id in securities_dict and i.account_ref_id
@@ -157,18 +157,16 @@ class PortfolioService:
             entity.profile_id = profile_id
             entity.security_id = securities_dict[entity.security_ref_id]
             entity.account_id = accounts_dict[entity.account_ref_id]
-        self.portfolio_repository.persist(db_conn, holdings)
+        self.portfolio_repository.persist(holdings)
 
         # cleanup
-        self.portfolio_repository.remove_other_by_access_token(
-            db_conn, holdings)
-        self.portfolio_repository.remove_other_by_access_token(
-            db_conn, accounts)
+        self.portfolio_repository.remove_other_by_access_token(holdings)
+        self.portfolio_repository.remove_other_by_access_token(accounts)
 
-    def persist_transaction_data(self, db_conn, profile_id, securities,
-                                 accounts, transactions):
-        securities_dict = self.__persist_securities(db_conn, securities)
-        accounts_dict = self.__persist_accounts(db_conn, accounts, profile_id)
+    def persist_transaction_data(self, profile_id, securities, accounts,
+                                 transactions):
+        securities_dict = self.__persist_securities(securities)
+        accounts_dict = self.__persist_accounts(accounts, profile_id)
         transactions = [
             i for i in transactions if i.security_ref_id is not None
             and i.security_ref_id in securities_dict and i.account_ref_id
@@ -181,7 +179,7 @@ class PortfolioService:
             entity.profile_id = profile_id
             entity.security_id = securities_dict[entity.security_ref_id]
             entity.account_id = accounts_dict[entity.account_ref_id]
-        self.portfolio_repository.persist(db_conn, transactions)
+        self.portfolio_repository.persist(transactions)
 
     def __get_service(self, name):
         if name not in self.services:
@@ -189,24 +187,24 @@ class PortfolioService:
 
         return self.services[name]
 
-    def __persist_securities(self, db_conn, securities):
-        self.portfolio_repository.persist(db_conn, self.__unique(securities))
+    def __persist_securities(self, securities):
+        self.portfolio_repository.persist(self.__unique(securities))
         return {security.ref_id: security.id for security in securities}
 
-    def __persist_accounts(self, db_conn, accounts, profile_id):
+    def __persist_accounts(self, accounts, profile_id):
         for entity in accounts:
             entity.profile_id = profile_id
-        self.portfolio_repository.persist(db_conn, self.__unique(accounts))
+        self.portfolio_repository.persist(self.__unique(accounts))
         return {account.ref_id: account.id for account in accounts}
 
     def __unique(self, entities):
         d = {entity.unique_id(): entity for entity in entities}
         return d.values()
 
-    def __get_access_tokens(self, db_conn, profile_id):
-        with db_conn.cursor() as cursor:
+    def __get_access_tokens(self, profile_id):
+        with self.db_conn.cursor() as cursor:
             cursor.execute(
-                f"SELECT id, access_token,is_artificial FROM app.profile_plaid_access_tokens WHERE profile_id = %s",
+                f"SELECT id, access_token, is_artificial FROM app.profile_plaid_access_tokens WHERE profile_id = %s and purpose = 'portfolio'",
                 (profile_id, ))
 
             access_tokens = cursor.fetchall()
@@ -217,8 +215,8 @@ class PortfolioService:
                         row + (SERVICE_PLAID, ))) for row in access_tokens
             ]
 
-    def _set_access_token_reauth(self, db_conn, access_token):
-        with db_conn.cursor() as cursor:
+    def _set_access_token_reauth(self, access_token):
+        with self.db_conn.cursor() as cursor:
             cursor.execute(
                 "update app.profile_plaid_access_tokens set needs_reauth_since = now() where id = %(access_token_id)s",
                 {"access_token_id": access_token['id']})

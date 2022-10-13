@@ -1,0 +1,5 @@
+query StripeGetCheckoutUrl($price_id: String!, $success_url: String!, $cancel_url: String!) {
+  stripe_get_checkout_url(price_id: $price_id, success_url: $success_url, cancel_url: $cancel_url) {
+    url
+  }
+}

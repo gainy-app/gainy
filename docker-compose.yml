@@ -78,6 +78,7 @@ services:
     image: gainy-hasura:latest
     build:
       context: ./src/hasura
+      target: test
       args:
         BASE_IMAGE_REGISTRY_ADDRESS: ${BASE_IMAGE_REGISTRY_ADDRESS}
         BASE_IMAGE_VERSION: ${BASE_IMAGE_VERSION}
@@ -87,6 +88,7 @@ services:
       - "9695:9695"
     volumes:
       - ./src/hasura/hasura:/hasura
+      - ./src/hasura/hasura_tests:/hasura_tests
     depends_on:
       - postgres
     env_file:

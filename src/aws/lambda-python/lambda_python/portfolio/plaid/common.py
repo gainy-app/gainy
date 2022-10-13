@@ -2,10 +2,14 @@ import os
 import json
 import plaid
 from plaid.api import plaid_api
-from common.hasura_exception import HasuraActionException
+
+from gainy.exceptions import HttpException
 from gainy.utils import get_logger
 
 logger = get_logger(__name__)
+
+PURPOSE_PORTFOLIO = "portfolio"
+PURPOSE_TRADING = "trading"
 
 PLAID_CLIENT_ID = os.getenv('PLAID_CLIENT_ID')
 PLAID_SECRET = os.getenv('PLAID_SECRET')
@@ -18,8 +22,8 @@ PLAID_HOSTS = {
 }
 
 if PLAID_ENV not in PLAID_HOSTS:
-    raise Error('Wrong plaid env %s, available options are: %s' %
-                (PLAID_ENV, ",".join(keys(PLAID_HOSTS))))
+    raise Exception('Wrong plaid env %s, available options are: %s' %
+                    (PLAID_ENV, ",".join(PLAID_HOSTS.keys())))
 
 
 def get_plaid_client(env=None):
@@ -45,6 +49,6 @@ def handle_error(e):
     logger.error('Plaid Error: %s' % (e.body))
     error = json.loads(e.body)
 
-    raise HasuraActionException(
+    raise HttpException(
         400, "Plaid error: %s" %
         (error['display_message'] or error['error_message']))

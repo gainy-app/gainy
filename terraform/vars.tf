@@ -36,6 +36,51 @@ variable "stripe_api_key" {
   type      = string
   sensitive = true
 }
+variable "stripe_publishable_key" {
+  type = string
+}
+
+#################################### DriveWealth ####################################
+
+variable "drivewealth_is_uat" {
+  type    = string
+  default = "true"
+}
+variable "drivewealth_app_key" {
+  type      = string
+  sensitive = true
+}
+variable "drivewealth_wlp_id" {
+  type      = string
+  sensitive = true
+}
+variable "drivewealth_parent_ibid" {
+  type      = string
+  sensitive = true
+}
+variable "drivewealth_ria_id" {
+  type      = string
+  sensitive = true
+}
+variable "drivewealth_ria_product_id" {
+  type      = string
+  sensitive = true
+}
+variable "drivewealth_api_username" {
+  type      = string
+  sensitive = true
+}
+variable "drivewealth_api_password" {
+  type      = string
+  sensitive = true
+}
+variable "drivewealth_api_url" {
+  type      = string
+  sensitive = true
+}
+variable "drivewealth_sqs_arn" {
+  type = string
+}
 
 #################################### AWS ####################################
 

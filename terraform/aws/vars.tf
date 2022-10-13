@@ -49,7 +49,20 @@ variable "gainy_compute_version" {}
 variable "onesignal_app_id" {}
 variable "onesignal_api_key" {}
 variable "revenuecat_api_key" {}
+
 variable "stripe_api_key" {}
+variable "stripe_publishable_key" {}
 
 variable "bigquery_google_project" {}
 variable "bigquery_credentials" {}
+
+variable "drivewealth_is_uat" {}
+variable "drivewealth_app_key" {}
+variable "drivewealth_wlp_id" {}
+variable "drivewealth_parent_ibid" {}
+variable "drivewealth_ria_id" {}
+variable "drivewealth_ria_product_id" {}
+variable "drivewealth_api_username" {}
+variable "drivewealth_api_password" {}
+variable "drivewealth_api_url" {}
+variable "drivewealth_sqs_arn" {}

@@ -1,7 +1,7 @@
 from abc import ABC
 
+from common.context_container import ContextContainer
 from common.hasura_function import HasuraAction
-from gainy.recommendation.repository import RecommendationRepository
 
 
 class AbstractMatchScoreAction(HasuraAction, ABC):
@@ -26,12 +26,13 @@ class GetMatchScoreByTicker(AbstractMatchScoreAction):
     def __init__(self):
         super().__init__("get_match_score_by_ticker", "profile_id")
 
-    def apply(self, db_conn, input_params, headers):
+    def apply(self, input_params, context_container: ContextContainer):
+        db_conn = context_container.db_conn
         profile_id = input_params["profile_id"]
         ticker = input_params["symbol"]
 
-        match_scores = self.read_match_scores(
-            RecommendationRepository(db_conn), profile_id, [ticker])
+        repository = context_container.recommendation_repository
+        match_scores = self.read_match_scores(repository, profile_id, [ticker])
 
         if not match_scores:
             return None
@@ -45,15 +46,16 @@ class GetMatchScoreByTickerList(AbstractMatchScoreAction):
     def __init__(self):
         super().__init__("get_match_scores_by_ticker_list", "profile_id")
 
-    def apply(self, db_conn, input_params, headers):
+    def apply(self, input_params, context_container: ContextContainer):
+        db_conn = context_container.db_conn
         profile_id = input_params["profile_id"]
         tickers = input_params["symbols"]
 
         if len(tickers) == 0:
             return []
 
-        return super().read_match_scores(RecommendationRepository(db_conn),
-                                         profile_id, tickers)
+        repository = context_container.recommendation_repository
+        return super().read_match_scores(repository, profile_id, tickers)
 
 
 # Deprecated: should read Match score from DB via GraphQL instead
@@ -62,11 +64,12 @@ class GetMatchScoreByCollection(AbstractMatchScoreAction):
     def __init__(self):
         super().__init__("get_match_scores_by_collection", "profile_id")
 
-    def apply(self, db_conn, input_params, headers):
+    def apply(self, input_params, context_container: ContextContainer):
+        db_conn = context_container.db_conn
         profile_id = input_params["profile_id"]
         collection_id = input_params["collection_id"]
 
-        repository = RecommendationRepository(db_conn)
+        repository = context_container.recommendation_repository
         collection_tickers = repository.read_collection_tickers(
             profile_id, collection_id)
 

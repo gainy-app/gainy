@@ -4,6 +4,7 @@ from typing import List, Any
 from algoliasearch.search_client import SearchClient
 
 from gainy.recommendation import TOP_20_FOR_YOU_COLLECTION_ID
+from common.context_container import ContextContainer
 from common.hasura_function import HasuraAction
 from operator import itemgetter
 
@@ -19,7 +20,8 @@ class SearchAction(HasuraAction, ABC):
         self.attributes_to_retrieve = attributes_to_retrieve
         self.key_attribute = key_attribute
 
-    def apply(self, db_conn, input_params, headers):
+    def apply(self, input_params, context_container: ContextContainer):
+        db_conn = context_container.db_conn
         query = input_params["query"]
         offset = input_params.get("offset", 0)
         limit = input_params.get("limit", 10)
@@ -93,11 +95,11 @@ class SearchCollections(SearchAction):
     def table_name(self) -> str:
         return "collections"
 
-    def apply(self, db_conn, input_params, headers):
+    def apply(self, input_params, context_container: ContextContainer):
         profile_id = self.get_profile_id(input_params)
 
         result = []
-        for i in super().apply(db_conn, input_params, headers):
+        for i in super().apply(input_params, context_container):
             if i['id'] == TOP_20_FOR_YOU_COLLECTION_ID:
                 if profile_id is None:
                     continue

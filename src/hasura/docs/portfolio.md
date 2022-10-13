@@ -3,12 +3,11 @@
 ```graphql
 {
     app_profiles {
-        profile_plaid_access_tokens {
+        profile_plaid_access_tokens(where: {purpose: {_eq: "portfolio"}}) {
             id
         }
     }
 }
-
 ```
 
 ### Create Link Token
@@ -28,6 +27,7 @@
     link_plaid_account(profile_id: 2, 
         public_token: "public-sandbox-0c02e9cb-ef57-4a82-a4eb-f8d7d99dfb01") {
         result
+        plaid_access_token_id
     }
 }
 ```
@@ -37,7 +37,7 @@
 The app needs to launch the reauth flow when the access token's `needs_reauth_since` field is not null:
 ```graphql
 {
-  app_profile_plaid_access_tokens { needs_reauth_since }
+  app_profile_plaid_access_tokens(where: {purpose: {_eq: "portfolio"}}) { needs_reauth_since }
 }
 ```
 
@@ -323,7 +323,7 @@ query GetPortfolioPieChart(
     }
     
     # broker options:
-    app_profile_plaid_access_tokens { id }
+    app_profile_plaid_access_tokens(where: {purpose: {_eq: "portfolio"}}) { id }
 
     # interests options:
     interests(where: {enabled: {_eq: "1"}}, order_by: {sort_order: asc}) {

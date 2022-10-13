@@ -65,6 +65,12 @@ actions:
       handler: '{{AWS_LAMBDA_API_GATEWAY_ENDPOINT}}/hasuraAction'
     permissions:
       - role: user
+  - name: get_pre_signed_upload_form
+    definition:
+      kind: synchronous
+      handler: '{{AWS_LAMBDA_API_GATEWAY_ENDPOINT}}/hasuraAction'
+    permissions:
+      - role: user
   - name: get_promocode
     definition:
       kind: ""
@@ -74,6 +80,30 @@ actions:
   - name: get_recommended_collections
     definition:
       kind: ""
+      handler: '{{AWS_LAMBDA_API_GATEWAY_ENDPOINT}}/hasuraAction'
+    permissions:
+      - role: user
+  - name: kyc_add_document
+    definition:
+      kind: synchronous
+      handler: '{{AWS_LAMBDA_API_GATEWAY_ENDPOINT}}/hasuraAction'
+    permissions:
+      - role: user
+  - name: kyc_get_form_config
+    definition:
+      kind: ""
+      handler: '{{AWS_LAMBDA_API_GATEWAY_ENDPOINT}}/hasuraAction'
+    permissions:
+      - role: user
+  - name: kyc_get_status
+    definition:
+      kind: ""
+      handler: '{{AWS_LAMBDA_API_GATEWAY_ENDPOINT}}/hasuraAction'
+    permissions:
+      - role: user
+  - name: kyc_send_form
+    definition:
+      kind: synchronous
       handler: '{{AWS_LAMBDA_API_GATEWAY_ENDPOINT}}/hasuraAction'
     permissions:
       - role: user
@@ -88,8 +118,21 @@ actions:
       kind: synchronous
       handler: '{{AWS_LAMBDA_API_GATEWAY_ENDPOINT}}/hasuraAction'
       forward_client_headers: true
+      request_transform:
+        body:
+          action: transform
+          template: |-
+            {
+              "body": {{$body}}
+            }
+        version: 2
+        template_engine: Kriti
     permissions:
       - role: anonymous
+  - name: rehandle_queue_messages
+    definition:
+      kind: synchronous
+      handler: '{{AWS_LAMBDA_API_GATEWAY_ENDPOINT}}/hasuraAction'
   - name: search_collections
     definition:
       kind: ""
@@ -115,6 +158,12 @@ actions:
     permissions:
       - role: user
       - role: anonymous
+  - name: stripe_get_payment_sheet_data
+    definition:
+      kind: ""
+      handler: '{{AWS_LAMBDA_API_GATEWAY_ENDPOINT}}/hasuraAction'
+    permissions:
+      - role: user
   - name: stripe_webhook
     definition:
       kind: synchronous
@@ -122,6 +171,60 @@ actions:
       forward_client_headers: true
     permissions:
       - role: anonymous
+  - name: trading_add_money
+    definition:
+      kind: synchronous
+      handler: '{{AWS_LAMBDA_API_GATEWAY_ENDPOINT}}/hasuraAction'
+  - name: trading_delete_data
+    definition:
+      kind: synchronous
+      handler: '{{AWS_LAMBDA_API_GATEWAY_ENDPOINT}}/hasuraAction'
+  - name: trading_delete_funding_account
+    definition:
+      kind: synchronous
+      handler: '{{AWS_LAMBDA_API_GATEWAY_ENDPOINT}}/hasuraAction'
+    permissions:
+      - role: user
+  - name: trading_deposit_funds
+    definition:
+      kind: synchronous
+      handler: '{{AWS_LAMBDA_API_GATEWAY_ENDPOINT}}/hasuraAction'
+    permissions:
+      - role: user
+  - name: trading_get_actual_collection_holdings
+    definition:
+      kind: ""
+      handler: '{{AWS_LAMBDA_API_GATEWAY_ENDPOINT}}/hasuraAction'
+    permissions:
+      - role: user
+  - name: trading_get_funding_accounts
+    definition:
+      kind: ""
+      handler: '{{AWS_LAMBDA_API_GATEWAY_ENDPOINT}}/hasuraAction'
+    permissions:
+      - role: user
+  - name: trading_link_bank_account_with_plaid
+    definition:
+      kind: synchronous
+      handler: '{{AWS_LAMBDA_API_GATEWAY_ENDPOINT}}/hasuraAction'
+    permissions:
+      - role: user
+  - name: trading_reconfigure_collection_holdings
+    definition:
+      kind: synchronous
+      handler: '{{AWS_LAMBDA_API_GATEWAY_ENDPOINT}}/hasuraAction'
+    permissions:
+      - role: user
+  - name: trading_sync_provider_data
+    definition:
+      kind: synchronous
+      handler: '{{AWS_LAMBDA_API_GATEWAY_ENDPOINT}}/hasuraAction'
+  - name: trading_withdraw_funds
+    definition:
+      kind: synchronous
+      handler: '{{AWS_LAMBDA_API_GATEWAY_ENDPOINT}}/hasuraAction'
+    permissions:
+      - role: user
   - name: update_purchases
     definition:
       kind: synchronous
@@ -132,6 +235,7 @@ custom_types:
   enums: []
   input_objects:
     - name: PlaidWebhookError
+    - name: TickerWeight
   objects:
     - name: ChartDataPoint
     - name: PieChartDataPoint
@@ -249,8 +353,41 @@ custom_types:
     - name: CreatePlaidLinkTokenOutput
     - name: PlaidWebhookOutput
     - name: StripeGetCheckoutUrl
-    - name: StripeWebhookOutput
     - name: UpdatePurchasesOutput
     - name: Promocode
     - name: SetRecommendationSettingsOutput
+    - name: KycFormConfig
+    - name: KycFormFieldConfig
+    - name: KycSendFormOutput
+    - name: KycStatus
+    - name: PreSignedUploadFormOutput
+    - name: LinkBankAccountWithPlaidOutput
+    - name: AccountInformation
+    - name: TradingLinkBankAccountWithPlaidOutput
+      relationships:
+        - remote_table:
+            schema: app
+            name: trading_funding_accounts
+          name: funding_account
+          source: default
+          type: object
+          field_mapping:
+            id: id
+    - name: FundingAccount
+      relationships:
+        - remote_table:
+            schema: app
+            name: trading_funding_accounts
+          name: funding_account
+          source: default
+          type: object
+          field_mapping:
+            id: id
+    - name: TradingMoneyFlowOutput
+    - name: SampleOutput
+    - name: ActualCollectionHoldingOutput
+    - name: OkOutput
+    - name: StripeGetPaymentSheetDataOutput
+    - name: TradingReconfigureCollectionHoldingsOutput
+    - name: ReHandleQueueMessagesOutput
   scalars: []

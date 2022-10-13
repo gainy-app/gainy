@@ -22,6 +22,9 @@ terraform {
     algolia = {
       source = "philippe-vandermoere/algolia"
     }
+    stripe = {
+      source = "lukasaron/stripe"
+    }
   }
 }
 
@@ -69,6 +72,10 @@ provider "algolia" {
   api_key        = var.algolia_admin_api_key
 }
 
+provider "stripe" {
+  api_key = var.stripe_api_key
+}
+
 #################################### Modules ####################################
 
 module "algolia" {
@@ -106,7 +113,9 @@ module "aws" {
   hubspot_api_key             = var.hubspot_api_key
   polygon_api_token           = var.polygon_api_token
   coingecko_api_key           = var.coingecko_api_key
-  stripe_api_key              = var.stripe_api_key
+
+  stripe_api_key         = var.stripe_api_key
+  stripe_publishable_key = var.stripe_publishable_key
 
   aws_region              = var.aws_region
   aws_access_key          = var.aws_access_key
@@ -129,6 +138,17 @@ module "aws" {
   algolia_indexing_key      = module.algolia.algolia_indexing_key
   algolia_search_key        = module.algolia.algolia_search_key
 
+  drivewealth_is_uat         = var.drivewealth_is_uat
+  drivewealth_app_key        = var.drivewealth_app_key
+  drivewealth_wlp_id         = var.drivewealth_wlp_id
+  drivewealth_parent_ibid    = var.drivewealth_parent_ibid
+  drivewealth_ria_id         = var.drivewealth_ria_id
+  drivewealth_ria_product_id = var.drivewealth_ria_product_id
+  drivewealth_api_username   = var.drivewealth_api_username
+  drivewealth_api_password   = var.drivewealth_api_password
+  drivewealth_api_url        = var.drivewealth_api_url
+  drivewealth_sqs_arn        = var.drivewealth_sqs_arn
+
   codeartifact_pipy_url = var.codeartifact_pipy_url
   gainy_compute_version = var.gainy_compute_version
   onesignal_app_id      = var.onesignal_app_id
@@ -148,6 +168,11 @@ module "datadog" {
   datadog_aws_external_id         = var.datadog_aws_external_id
   env                             = var.env
   additional_forwarded_log_groups = module.aws.additional_forwarded_log_groups
+}
+
+module "stripe" {
+  source      = "./stripe"
+  webhook_url = "https://${module.aws.hasura_url}/api/rest/stripe_webhook"
 }
 
 #################################### Outputs ####################################

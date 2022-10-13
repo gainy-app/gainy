@@ -1,9 +1,10 @@
-import logging
+from common.context_container import ContextContainer
 
 from actions.update_purchases import UpdatePurchases
 
-logger = logging.getLogger()
-logger.setLevel(logging.INFO)
+from gainy.utils import get_logger
+
+logger = get_logger(__name__)
 
 
 class ApplyPromocode(UpdatePurchases):
@@ -11,8 +12,10 @@ class ApplyPromocode(UpdatePurchases):
     def __init__(self):
         super().__init__("apply_promocode")
 
-    def apply(self, db_conn, input_params, headers):
-        response = super().apply(db_conn, input_params, headers)
+    def apply(self, input_params, context_container: ContextContainer):
+        db_conn = context_container.db_conn
+
+        response = super().apply(input_params, context_container)
 
         profile_id = input_params["profile_id"]
         promocode = input_params["promocode"]

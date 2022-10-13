@@ -53,6 +53,17 @@ on:
       REVENUECAT_API_KEY: { required: true }
       BIGQUERY_CREDENTIALS: { required: true }
       STRIPE_API_KEY: { required: true }
+      STRIPE_PUBLISHABLE_KEY: { required: true }
+      DRIVEWEALTH_IS_UAT: { required: true }
+      DRIVEWEALTH_APP_KEY: { required: true }
+      DRIVEWEALTH_WLP_ID: { required: true }
+      DRIVEWEALTH_PARENT_IBID: { required: true }
+      DRIVEWEALTH_RIA_ID: { required: true }
+      DRIVEWEALTH_RIA_PRODUCT_ID: { required: true }
+      DRIVEWEALTH_API_USERNAME: { required: true }
+      DRIVEWEALTH_API_PASSWORD: { required: true }
+      DRIVEWEALTH_API_URL: { required: true }
+      DRIVEWEALTH_SQS_ARN: { required: false }
 
 env:
   AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
@@ -95,12 +106,23 @@ env:
   TF_VAR_revenuecat_api_key: ${{ secrets.REVENUECAT_API_KEY }}
   TF_VAR_bigquery_credentials: ${{ secrets.BIGQUERY_CREDENTIALS }}
   TF_VAR_stripe_api_key: ${{ secrets.STRIPE_API_KEY }}
+  TF_VAR_stripe_publishable_key: ${{ secrets.STRIPE_PUBLISHABLE_KEY }}
+  TF_VAR_drivewealth_is_uat: ${{ secrets.DRIVEWEALTH_IS_UAT }}
+  TF_VAR_drivewealth_app_key: ${{ secrets.DRIVEWEALTH_APP_KEY }}
+  TF_VAR_drivewealth_wlp_id: ${{ secrets.DRIVEWEALTH_WLP_ID }}
+  TF_VAR_drivewealth_parent_ibid: ${{ secrets.DRIVEWEALTH_PARENT_IBID }}
+  TF_VAR_drivewealth_ria_id: ${{ secrets.DRIVEWEALTH_RIA_ID }}
+  TF_VAR_drivewealth_ria_product_id: ${{ secrets.DRIVEWEALTH_RIA_PRODUCT_ID }}
+  TF_VAR_drivewealth_api_username: ${{ secrets.DRIVEWEALTH_API_USERNAME }}
+  TF_VAR_drivewealth_api_password: ${{ secrets.DRIVEWEALTH_API_PASSWORD }}
+  TF_VAR_drivewealth_api_url: ${{ secrets.DRIVEWEALTH_API_URL }}
+  TF_VAR_drivewealth_sqs_arn: ${{ secrets.DRIVEWEALTH_SQS_ARN }}
 
 jobs:
-  deploy:
-    name: "Terraform"
+  test:
+    name: "Test"
     runs-on: ubuntu-latest
-    environment: ${{ inputs.env }}
+    if: inputs.only_plan
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -137,9 +159,46 @@ jobs:
         run: terraform validate -no-color
         working-directory: terraform
 
+      - name: Terraform Plan
+        id: plan
+        if: inputs.only_plan
+        run: terraform plan -no-color -lock=false
+        working-directory: terraform
+
+  deploy:
+    name: "Deploy"
+    runs-on: ubuntu-latest
+    if: "!inputs.only_plan"
+    environment: ${{ inputs.env }}
+    concurrency: ${{ inputs.env }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Set Terraform Environment Variables
+        run: |
+          source .env.make
+          source deployment/scripts/code_artifactory.sh
+          echo "TF_VAR_base_image_registry_address=$BASE_IMAGE_REGISTRY_ADDRESS" >> $GITHUB_ENV
+          echo "TF_VAR_base_image_version=$BASE_IMAGE_VERSION" >> $GITHUB_ENV
+          echo "TF_VAR_codeartifact_pipy_url=$CODEARTIFACT_PIPY_URL" >> $GITHUB_ENV
+          echo "TF_VAR_gainy_compute_version=$GAINY_COMPUTE_VERSION" >> $GITHUB_ENV
+
+      - name: Docker Registry Auth
+        run: make docker-auth
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v1
+        with:
+          cli_config_credentials_token: ${{ secrets.TF_API_TOKEN }}
+
+      - name: Terraform Init
+        id: init
+        run: terraform init -backend-config=backend-${{ env.TF_VAR_env }}.hcl -reconfigure
+        working-directory: terraform
+
       - name: Terraform State Cleanup Prepare
         id: state-clean-prepare
-        if: "!inputs.only_plan"
         # grep only needed resources
         # tr to make it a one-liner
         # sed to filter out :: command, that github apparently adds to step output for some f-cked up reason
@@ -148,20 +207,9 @@ jobs:
 
       - name: Terraform State Cleanup
         id: state-clean
-        if: steps.state-clean-prepare.outputs.resources != '' && !inputs.only_plan
+        if: steps.state-clean-prepare.outputs.resources != ''
         run: terraform state rm ${{ steps.state-clean-prepare.outputs.resources }}
         working-directory: terraform
-
-      - name: Terraform Plan
-        id: plan
-        if: inputs.only_plan
-        run: terraform plan -no-color -lock=false
-        continue-on-error: true
-        working-directory: terraform
-
-      - name: Terraform Plan Status
-        if: steps.plan.outcome == 'failure'
-        run: exit 1
 
       - name: Terraform Apply
         id: apply

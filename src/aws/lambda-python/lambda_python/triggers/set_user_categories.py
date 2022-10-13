@@ -3,6 +3,7 @@ import os
 import sys
 from math import trunc
 from psycopg2.extras import execute_values
+from common.context_container import ContextContainer
 from common.hasura_function import HasuraTrigger
 from gainy.utils import get_logger
 from gainy.data_access.db_lock import LockAcquisitionTimeout
@@ -95,7 +96,8 @@ class SetUserCategories(HasuraTrigger):
 
         return max(risk_needed, risk_taking_ability, loss_tolerance)
 
-    def apply(self, db_conn, op, data):
+    def apply(self, op, data, context_container: ContextContainer):
+        db_conn = context_container.db_conn
         payload = self._extract_payload(data)
 
         final_score = self.calculate_score(payload)
@@ -135,13 +137,14 @@ class SetUserCategories(HasuraTrigger):
                 [(profile_id, category_id, True)
                  for category_id in categories])
 
+        repository = context_container.recommendation_repository
         recommendations_func = ComputeRecommendationsAndPersist(
-            db_conn, profile_id)
-        old_version = recommendations_func.load_version(db_conn)
+            repository, profile_id)
+        old_version = recommendations_func.load_version()
         try:
-            recommendations_func.get_and_persist(db_conn, max_tries=2)
+            recommendations_func.execute(max_tries=2)
 
-            new_version = recommendations_func.load_version(db_conn)
+            new_version = recommendations_func.load_version()
             logger.info('Calculated Match Scores',
                         extra={
                             **logging_extra,

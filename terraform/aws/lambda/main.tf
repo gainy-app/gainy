@@ -30,11 +30,21 @@ variable "codeartifact_pipy_url" {}
 variable "gainy_compute_version" {}
 variable "revenuecat_api_key" {}
 variable "stripe_api_key" {}
-
-output "aws_apigatewayv2_api_endpoint" {
-  value      = "${aws_apigatewayv2_api.lambda.api_endpoint}/${aws_apigatewayv2_stage.lambda.name}"
-  depends_on = [module.hasuraAction, module.hasuraTrigger]
-}
+variable "stripe_publishable_key" {}
+variable "drivewealth_is_uat" {}
+variable "drivewealth_app_key" {}
+variable "drivewealth_wlp_id" {}
+variable "drivewealth_parent_ibid" {}
+variable "drivewealth_ria_id" {}
+variable "drivewealth_ria_product_id" {}
+variable "drivewealth_api_username" {}
+variable "drivewealth_api_password" {}
+variable "drivewealth_api_url" {}
+variable "drivewealth_sqs_arn" {}
+variable "s3_bucket_uploads_kyc" {}
+variable "aws_access_key" {}
+variable "aws_secret_key" {}
+variable "aws_region" {}
 
 # gateway
 
@@ -92,9 +102,49 @@ resource "aws_iam_role" "lambda_exec" {
   })
 }
 
+resource "aws_iam_policy" "kyc_uploads" {
+  name        = "s3_kyc_upload_${var.env}"
+  description = "S3 KYC uploads policy ${var.env}"
+
+  policy = jsonencode({
+    "Version" : "2012-10-17",
+    "Statement" : [
+      {
+        "Effect" : "Allow",
+        "Action" : [
+          "s3:PutObject",
+          "s3:GetObject"
+        ],
+        "Resource" : [
+          "arn:aws:s3:::${var.s3_bucket_uploads_kyc}/*"
+        ]
+      },
+      {
+        "Effect" : "Allow",
+        "Action" : [
+          "s3:GetBucketLocation"
+        ],
+        "Resource" : [
+          "arn:aws:s3:::${var.s3_bucket_uploads_kyc}"
+        ]
+      }
+    ]
+  })
+}
+
+resource "aws_iam_role_policy_attachment" "kyc_uploads" {
+  role       = aws_iam_role.lambda_exec.name
+  policy_arn = aws_iam_policy.kyc_uploads.arn
+}
+
 resource "aws_iam_role_policy_attachment" "lambda_policy" {
   role       = aws_iam_role.lambda_exec.name
   policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+}
+
+resource "aws_iam_role_policy_attachment" "iam_role_policy_attachment_lambda_vpc_access_execution" {
+  role       = aws_iam_role.lambda_exec.name
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole"
 }
 
 #################################### Build ####################################
@@ -121,6 +171,45 @@ locals {
   })
   python_lambda_image_tag  = format("lambda-python-%s-%s-%s", var.env, var.base_image_version, md5(jsonencode(local.python_lambda_build_args_force_build)))
   python_lambda_image_name = format("%v/%v:%v", local.docker_registry_address, var.docker_repository_name, local.python_lambda_image_tag)
+
+  env_vars = {
+    PG_HOST                    = var.pg_host
+    PG_PORT                    = var.pg_port
+    PG_DBNAME                  = var.pg_dbname
+    PG_USERNAME                = var.pg_username
+    PG_PASSWORD                = var.pg_password
+    PUBLIC_SCHEMA_NAME         = var.public_schema_name
+    DATADOG_API_KEY            = var.datadog_api_key
+    DATADOG_APP_KEY            = var.datadog_app_key
+    ENV                        = var.env
+    PLAID_CLIENT_ID            = var.plaid_client_id
+    PLAID_SECRET               = var.plaid_secret
+    PLAID_DEVELOPMENT_SECRET   = var.plaid_development_secret
+    PLAID_ENV                  = var.plaid_env
+    PLAID_WEBHOOK_URL          = "https://${var.hasura_url}/api/rest/plaid_webhook"
+    ALGOLIA_APP_ID             = var.algolia_app_id
+    ALGOLIA_TICKERS_INDEX      = var.algolia_tickers_index
+    ALGOLIA_COLLECTIONS_INDEX  = var.algolia_collections_index
+    ALGOLIA_SEARCH_API_KEY     = var.algolia_search_key
+    HUBSPOT_API_KEY            = var.hubspot_api_key
+    REVENUECAT_API_KEY         = var.revenuecat_api_key
+    GNEWS_API_TOKEN            = var.gnews_api_token
+    REDIS_CACHE_HOST           = var.redis_cache_host
+    REDIS_CACHE_PORT           = var.redis_cache_port
+    DRIVEWEALTH_IS_UAT         = var.drivewealth_is_uat
+    DRIVEWEALTH_APP_KEY        = var.drivewealth_app_key
+    DRIVEWEALTH_WLP_ID         = var.drivewealth_wlp_id
+    DRIVEWEALTH_PARENT_IBID    = var.drivewealth_parent_ibid
+    DRIVEWEALTH_RIA_ID         = var.drivewealth_ria_id
+    DRIVEWEALTH_RIA_PRODUCT_ID = var.drivewealth_ria_product_id
+    DRIVEWEALTH_API_USERNAME   = var.drivewealth_api_username
+    DRIVEWEALTH_API_PASSWORD   = var.drivewealth_api_password
+    DRIVEWEALTH_API_URL        = var.drivewealth_api_url
+    DRIVEWEALTH_SQS_ARN        = var.drivewealth_sqs_arn
+    S3_BUCKET_UPLOADS_KYC      = var.s3_bucket_uploads_kyc
+    STRIPE_API_KEY             = var.stripe_api_key
+    STRIPE_PUBLISHABLE_KEY     = var.stripe_publishable_key
+  }
 }
 
 #################################### Python lambdas ####################################
@@ -149,84 +238,82 @@ resource "docker_registry_image" "lambda_python" {
   }
 }
 
-module "hasuraTrigger" {
-  source                                    = "./type-image"
-  env                                       = var.env
-  function_name                             = "hasuraTrigger"
-  handler                                   = "hasura_handler.handle_trigger"
-  timeout                                   = 150
-  url                                       = "/${var.deployment_key}/hasuraTrigger"
-  aws_apigatewayv2_api_lambda_id            = aws_apigatewayv2_api.lambda.id
-  aws_apigatewayv2_api_lambda_execution_arn = aws_apigatewayv2_api.lambda.execution_arn
-  aws_iam_role_lambda_exec_role             = aws_iam_role.lambda_exec
-  image_uri                                 = docker_registry_image.lambda_python.name
-  memory_size                               = var.env == "production" ? 512 : 256
+##################################################################################
 
-  env_vars = {
-    PG_HOST                   = var.pg_host
-    PG_PORT                   = var.pg_port
-    PG_DBNAME                 = var.pg_dbname
-    PG_USERNAME               = var.pg_username
-    PG_PASSWORD               = var.pg_password
-    PUBLIC_SCHEMA_NAME        = var.public_schema_name
-    DATADOG_API_KEY           = var.datadog_api_key
-    DATADOG_APP_KEY           = var.datadog_app_key
-    ENV                       = var.env
-    PLAID_CLIENT_ID           = var.plaid_client_id
-    PLAID_SECRET              = var.plaid_secret
-    PLAID_DEVELOPMENT_SECRET  = var.plaid_development_secret
-    PLAID_ENV                 = var.plaid_env
-    ALGOLIA_APP_ID            = var.algolia_app_id
-    ALGOLIA_TICKERS_INDEX     = var.algolia_tickers_index
-    ALGOLIA_COLLECTIONS_INDEX = var.algolia_collections_index
-    ALGOLIA_SEARCH_API_KEY    = var.algolia_search_key
-    HUBSPOT_API_KEY           = var.hubspot_api_key
-    REVENUECAT_API_KEY        = var.revenuecat_api_key
-    STRIPE_API_KEY            = var.stripe_api_key
-  }
+module "hasura_trigger" {
+  source                 = "./function"
+  env                    = var.env
+  function_name          = "hasuraTrigger"
+  handler                = "hasura_handler.handle_trigger"
+  timeout                = 150
+  exec_role_arn          = aws_iam_role.lambda_exec.arn
+  image_uri              = docker_registry_image.lambda_python.name
+  memory_size            = var.env == "production" ? 512 : 256
+  env_vars               = local.env_vars
   vpc_security_group_ids = var.vpc_security_group_ids
   vpc_subnet_ids         = var.vpc_subnet_ids
 }
 
-module "hasuraAction" {
-  source                                    = "./type-image"
-  env                                       = var.env
-  function_name                             = "hasuraAction"
-  handler                                   = "hasura_handler.handle_action"
-  timeout                                   = 150
+module "hasura_trigger_integration" {
+  source                                    = "./route-integration"
+  url                                       = "/${var.deployment_key}/hasuraTrigger"
+  aws_apigatewayv2_api_lambda_id            = aws_apigatewayv2_api.lambda.id
+  aws_apigatewayv2_api_lambda_execution_arn = aws_apigatewayv2_api.lambda.execution_arn
+  aws_lambda_invoke_arn                     = "${module.hasura_trigger.arn}:${module.hasura_trigger.version}"
+}
+
+##################################################################################
+
+module "hasura_action" {
+  source                 = "./function"
+  env                    = var.env
+  function_name          = "hasuraAction"
+  handler                = "hasura_handler.handle_action"
+  timeout                = 150
+  exec_role_arn          = aws_iam_role.lambda_exec.arn
+  image_uri              = docker_registry_image.lambda_python.name
+  memory_size            = var.env == "production" ? 256 : 128
+  env_vars               = local.env_vars
+  vpc_security_group_ids = var.vpc_security_group_ids
+  vpc_subnet_ids         = var.vpc_subnet_ids
+}
+
+module "hasura_action_integration" {
+  source                                    = "./route-integration"
   url                                       = "/${var.deployment_key}/hasuraAction"
   aws_apigatewayv2_api_lambda_id            = aws_apigatewayv2_api.lambda.id
   aws_apigatewayv2_api_lambda_execution_arn = aws_apigatewayv2_api.lambda.execution_arn
-  aws_iam_role_lambda_exec_role             = aws_iam_role.lambda_exec
-  image_uri                                 = docker_registry_image.lambda_python.name
-  memory_size                               = var.env == "production" ? 256 : 128
+  aws_lambda_invoke_arn                     = "${module.hasura_action.arn}:${module.hasura_action.version}"
+}
 
-  env_vars = {
-    PG_HOST                   = var.pg_host
-    PG_PORT                   = var.pg_port
-    PG_DBNAME                 = var.pg_dbname
-    PG_USERNAME               = var.pg_username
-    PG_PASSWORD               = var.pg_password
-    PUBLIC_SCHEMA_NAME        = var.public_schema_name
-    DATADOG_API_KEY           = var.datadog_api_key
-    DATADOG_APP_KEY           = var.datadog_app_key
-    ENV                       = var.env
-    PLAID_CLIENT_ID           = var.plaid_client_id
-    PLAID_SECRET              = var.plaid_secret
-    PLAID_DEVELOPMENT_SECRET  = var.plaid_development_secret
-    PLAID_ENV                 = var.plaid_env
-    ALGOLIA_APP_ID            = var.algolia_app_id
-    ALGOLIA_TICKERS_INDEX     = var.algolia_tickers_index
-    ALGOLIA_COLLECTIONS_INDEX = var.algolia_collections_index
-    ALGOLIA_SEARCH_API_KEY    = var.algolia_search_key
-    ALGOLIA_SEARCH_API_KEY    = var.algolia_search_key
-    GNEWS_API_TOKEN           = var.gnews_api_token
-    REDIS_CACHE_HOST          = var.redis_cache_host
-    REDIS_CACHE_PORT          = var.redis_cache_port
-    PLAID_WEBHOOK_URL         = "https://${var.hasura_url}/api/rest/plaid_webhook"
-    REVENUECAT_API_KEY        = var.revenuecat_api_key
-    STRIPE_API_KEY            = var.stripe_api_key
-  }
+##################################################################################
+
+module "sqs_listener" {
+  source                 = "./function"
+  env                    = var.env
+  function_name          = "sqsListener"
+  handler                = "sqs_listener.handle"
+  timeout                = 30
+  exec_role_arn          = aws_iam_role.lambda_exec.arn
+  image_uri              = docker_registry_image.lambda_python.name
+  memory_size            = var.env == "production" ? 256 : 128
+  env_vars               = local.env_vars
   vpc_security_group_ids = var.vpc_security_group_ids
   vpc_subnet_ids         = var.vpc_subnet_ids
+}
+
+module "sqs_listener_integration" {
+  source                        = "./sqs-integration"
+  aws_iam_role_lambda_exec_role = aws_iam_role.lambda_exec
+  aws_lambda_invoke_arn         = "${module.sqs_listener.arn}:${module.sqs_listener.version}"
+
+  sqs_batch_size = 10
+  sqs_queue_arns = var.drivewealth_sqs_arn != "" ? [var.drivewealth_sqs_arn] : []
+}
+
+##################################################################################
+
+output "aws_apigatewayv2_api_endpoint" {
+  value      = "${aws_apigatewayv2_api.lambda.api_endpoint}/${aws_apigatewayv2_stage.lambda.name}"
+  depends_on = [module.hasura_action, module.hasura_trigger]
 }

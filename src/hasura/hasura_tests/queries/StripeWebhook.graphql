@@ -1,0 +1,7 @@
+mutation StripeWebhook($event_id: String!) {
+  stripe_webhook(
+    id: $event_id
+  ) {
+    ok
+  }
+}

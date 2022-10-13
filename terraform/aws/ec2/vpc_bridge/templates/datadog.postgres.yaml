@@ -11,24 +11,27 @@ instances:
     custom_queries:
       - metric_prefix: app
         query: >
-          with dags (dag_id) as (values ('gainy-dag'), ('realtime-dbt-dag'), ('realtime-website-dag'), ('send-notifications')),
-               expanded_dag_runs as
+          with dags (dag_id, dag_interval) as (
+                                                  values ('gainy-dag', interval '1 day'),
+                                                         ('realtime-dbt-dag', interval '5 minutes'),
+                                                         ('realtime-website-dag', interval '5 minutes'),
+                                                         ('send-notifications', interval '1 minute'),
+                                                         ('charge-invoices', interval '1 day'),
+                                                         ('create-invoices', interval '1 month'),
+                                                         ('update-account-balances', interval '1 day')
+                                              ),
+               dag_next_run as
                    (
                        select distinct on (
                            dag_id
-                           ) *,
-                             case
-                                 when dag_id = 'gainy-dag'
-                                     then start_date + interval '1 day'
-                                 when dag_id in ('realtime-dbt-dag', 'realtime-website-dag')
-                                     then start_date + interval '5 minutes'
-                                 when dag_id = 'send-notifications'
-                                     then start_date + interval '1 minutes'
-                                 end next_run_date
+                           ) dag_id,
+                             state,
+                             start_date + dag_interval as next_run_date
                        from airflow.dag_run
+                                join dags using (dag_id)
                        where state in ('success', 'running')
                        order by dag_id, start_date desc
-                   ),
+               ),
                dag_runs_metrics as
                    (
                        select dag_id,
@@ -37,10 +40,9 @@ instances:
                                       then 0
                                   else
                                       greatest(0, extract(epoch from now() - next_run_date - interval '5 minutes'))
-                                  end as seconds_from_latest_dag_run
-                       from expanded_dag_runs
-                       where dag_id in ('gainy-dag', 'realtime-dbt-dag', 'realtime-website-dag', 'send-notifications')
-                   ),
+                                  end as seconds_from_next_dag_run
+                       from dag_next_run
+               ),
                successful_dag_runs_metrics as
                    (
                        select distinct on (
@@ -51,7 +53,7 @@ instances:
                        where state = 'success'
                          and end_date - start_date >= interval '1 minute'
                        order by dag_id, end_date desc
-                   ),
+               ),
                failed_dag_runs_metrics as
                    (
                        select dag_id,
@@ -61,7 +63,7 @@ instances:
                          and start_date > now() - interval '1 day'
                          and (dag_id != 'realtime-dbt-dag' or start_date > now() - interval '1 day')
                        group by dag_id
-                   ),
+               ),
                failed_tasks_metrics as
                    (
                        select dag_id,
@@ -70,21 +72,21 @@ instances:
                        where state not in ('success', 'removed', 'running')
                          and start_date > now() - interval '1 day'
                        group by dag_id
-                   )
+               )
           select dags.dag_id,
-                 coalesce(dag_runs_metrics.seconds_from_latest_dag_run, 0) as seconds_from_latest_dag_run,
+                 coalesce(dag_runs_metrics.seconds_from_next_dag_run, 0) as seconds_from_next_dag_run,
                  successful_dag_runs_metrics.latest_dag_run_duration_minutes,
-                 coalesce(failed_dag_runs_metrics.failed_dag_runs, 0)      as failed_dag_runs,
-                 coalesce(failed_tasks_metrics.failed_tasks, 0)            as failed_tasks
+                 coalesce(failed_dag_runs_metrics.failed_dag_runs, 0)    as failed_dag_runs,
+                 coalesce(failed_tasks_metrics.failed_tasks, 0)          as failed_tasks
           from dags
-                   left join dag_runs_metrics on dag_runs_metrics.dag_id = dags.dag_id
+                   join dag_runs_metrics on dag_runs_metrics.dag_id = dags.dag_id
                    left join successful_dag_runs_metrics on successful_dag_runs_metrics.dag_id = dags.dag_id
                    left join failed_dag_runs_metrics on failed_dag_runs_metrics.dag_id = dags.dag_id
                    left join failed_tasks_metrics on failed_tasks_metrics.dag_id = dags.dag_id
         columns:
           - name: dag_id
             type: tag
-          - name: days_from_latest_dag_run
+          - name: seconds_from_next_dag_run
             type: gauge
           - name: latest_dag_run_duration_minutes
             type: gauge

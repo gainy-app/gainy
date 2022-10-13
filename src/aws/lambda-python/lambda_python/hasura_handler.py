@@ -1,5 +1,3 @@
-import os
-
 from gainy.utils import setup_exception_logger_hook
 
 from common.hasura_dispatcher import HasuraActionDispatcher, HasuraTriggerDispatcher
@@ -13,7 +11,9 @@ from search.algolia_search import SearchTickers, SearchCollections
 from search.news_search import SearchNews
 from triggers import *
 from actions import *
-from web import *
+from trading.actions import *
+from _stripe.actions import *
+from _stripe.triggers import *
 
 setup_exception_logger_hook()
 
@@ -40,6 +40,7 @@ ACTIONS = [
     ApplyPromocode(),
     UpdatePurchases(),
     GetPromocode(),
+    GetPreSignedUploadForm(),
 
     # Portfolio
     CreatePlaidLinkToken(),
@@ -51,8 +52,9 @@ ACTIONS = [
     GetPortfolioPieChart(),
     PlaidWebhook(),
 
-    # Web
+    # Stripe
     StripeGetCheckoutUrl(),
+    StripeGetPaymentSheetData(),
     StripeWebhook(),
 
     # Search
@@ -60,7 +62,26 @@ ACTIONS = [
                   ALGOLIA_TICKERS_INDEX),
     SearchCollections(ALGOLIA_APP_ID, ALGOLIA_SEARCH_API_KEY,
                       ALGOLIA_COLLECTIONS_INDEX),
-    SearchNews(GNEWS_API_TOKEN, REDIS_CACHE_HOST, REDIS_CACHE_PORT)
+    SearchNews(GNEWS_API_TOKEN, REDIS_CACHE_HOST, REDIS_CACHE_PORT),
+
+    # Trading
+    KycGetFormConfig(),
+    KycGetStatus(),
+    KycSendForm(),
+    KycAddDocument(),
+    TradingLinkBankAccountWithPlaid(),
+    TradingGetFundingAccounts(),
+    TradingDeleteFundingAccount(),
+    TradingDepositFunds(),
+    TradingWithdrawFunds(),
+    TradingReconfigureCollectionHoldings(),
+    TradingGetActualCollectionHoldings(),
+    TradingSyncProviderData(),
+
+    # Debug
+    TradingAddMoney(),
+    TradingDeleteData(),
+    ReHandleQueueMessages(),
 ]
 
 action_dispatcher = HasuraActionDispatcher(ACTIONS,
@@ -77,6 +98,7 @@ TRIGGERS = [
     SetRecommendations(),
     OnPlaidAccessTokenCreated(),
     OnInvitationCreatedOrUpdated(),
+    StripeDeletePaymentMethod(),
 ]
 
 trigger_dispatcher = HasuraTriggerDispatcher(TRIGGERS,
