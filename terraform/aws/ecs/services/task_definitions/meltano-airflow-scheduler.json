@@ -57,7 +57,7 @@
     { "name": "TARGET_S3_CSV_HISTORY_S3_BUCKET",       "value": "${gainy_history_s3_bucket}" },
     { "name": "GITHUB_APP_ID",                         "value": "${github_app_id}" },
     { "name": "GITHUB_APP_INSTALLATION_ID",            "value": "${github_app_installation_id}" },
-    { "name": "GITHUB_APP_PRIVATE_KEY",                "value": "${github_app_private_key}" },
+    { "name": "GITHUB_APP_PRIVATE_KEY",                "value": ${jsonencode(github_app_private_key)} },
 
     { "name": "TARGET_POSTGRES_HOST",                  "value": "${pg_host}" },
     { "name": "TARGET_POSTGRES_PORT",                  "value": "${pg_port}" },
