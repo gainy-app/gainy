@@ -121,6 +121,7 @@ plugins:
             keys: [ "id" ]
 
     - name: tap-postgres
+      pip_url: git+https://github.com/asmisha/pipelinewise-tap-postgres.git@refresh-streams-schema
       config:
         itersize: 1000
 
