@@ -64,6 +64,7 @@ select c.id::int,
        c.personalized,
        c.image_url,
        c.influencer_id::int,
+       c.optimization_enabled::int,
        ticker_sizes.size::int,
        now()::timestamp as updated_at
 from {{ source('gainy', 'gainy_collections') }} c

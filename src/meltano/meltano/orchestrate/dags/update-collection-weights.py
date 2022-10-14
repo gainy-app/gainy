@@ -24,7 +24,7 @@ upload = BashOperator(
     dag=dag)
 
 cleanup = BashOperator(task_id="cleanup",
-                       bash_command=f"rm {file_path}",
+                       bash_command=f"rm {file_path} || true",
                        dag=dag)
 
-optimize >> upload >> cleanup
+cleanup >> optimize >> upload >> cleanup
