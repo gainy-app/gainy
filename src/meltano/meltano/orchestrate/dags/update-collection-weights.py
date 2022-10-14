@@ -23,8 +23,12 @@ upload = BashOperator(
     f"gainy_github_update_file -r gainy-app/gainy -d src/meltano/meltano/data/ticker_collections_weights/{file_name} -s {file_path} --team-reviewers collection-weights-reviewers",
     dag=dag)
 
-cleanup = BashOperator(task_id="cleanup",
-                       bash_command=f"rm {file_path} || true",
-                       dag=dag)
+cleanup_pre = BashOperator(task_id="cleanup_pre",
+                           bash_command=f"rm {file_path} || true",
+                           dag=dag)
 
-cleanup >> optimize >> upload >> cleanup
+cleanup_post = BashOperator(task_id="cleanup_post",
+                            bash_command=f"rm {file_path} || true",
+                            dag=dag)
+
+cleanup_pre >> optimize >> upload >> cleanup_post
