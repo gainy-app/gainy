@@ -5,7 +5,7 @@
     unique_key = "id",
     post_hook=[
       pk('collection_uniq_id, symbol'),
-      index(this, 'id', true),
+      index('id', true),
     ]
   )
 }}

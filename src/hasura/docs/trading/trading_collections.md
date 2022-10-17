@@ -2,6 +2,7 @@
 1. [Get recommended TTF weights](#get-recommended-ttf-weights)
 2. [Reconfigure TTF holdings](#reconfigure-ttf-holdings)
 3. [Get actual TTF holding weights and amount](#get-actual-ttf-holding-weights-and-amount)
+4. [Get actual TTF amount and history](#get-actual-ttf-amount-and-history)
 
 ### Get recommended TTF weights
 ```graphql
@@ -19,7 +20,7 @@ Generate the trades to make user's TTF holdings look like input params.
 mutation TradingWithdrawFunds(
     $profile_id: Int!
     $collection_id: Int!
-    $weights: [TickerWeight]!
+    $weights: [TickerWeight]
     $target_amount_delta: Float!
 ) {
 
@@ -55,6 +56,28 @@ query TradingGetActualCollectionHoldings(
     target_weight
     actual_weight
     value
+  }
+}
+```
+
+
+### Get actual TTF amount and history
+```graphql
+query TradingGetCollectionData($profile_id: Int!, $collection_id: Int!) {
+  trading_get_collection_data(profile_id: $profile_id, collection_id: $collection_id) {
+    history {
+      pending {
+        created_at
+        success_at
+        target_amount_delta
+      }
+      successful {
+        created_at
+        success_at
+        target_amount_delta
+      }
+    }
+    actual_value
   }
 }
 ```

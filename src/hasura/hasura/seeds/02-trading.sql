@@ -94,7 +94,7 @@ on conflict do nothing;
 
 -- Portfolio
 insert into app.trading_collection_versions (id, profile_id, collection_id, target_amount_delta, weights)
-values  (1, 2, 89, 100, '{"AAPL": "1"}')
+values  (1, 2, 83, 100, '{"AAPL": "1"}')
 on conflict do nothing;
 ALTER SEQUENCE app.trading_collection_versions_id_seq RESTART WITH 2;
 
@@ -107,7 +107,7 @@ values  ('ria_rebalance_f29c337d-e759-4e5e-9715-07c27fb66127', 'bf98c335-57ad-43
 on conflict do nothing;
 
 insert into app.drivewealth_funds (ref_id, profile_id, collection_id, trading_collection_version_id, holdings, weights, data)
-values  ('fund_3dc895e3-a923-4c37-8a91-eac748120215', 2, 89, 1, '[{"instrumentID": "a67422af-8504-43df-9e63-7361eb0bd99e", "target": "1"}]', '{"AAPL": "1"}', '{"id": "fund_3dc895e3-a923-4c37-8a91-eac748120215", "userID": "7b746acb-0afa-42c3-9c94-1bc8c16ce7b2", "name": "Gainy bf98c335-57ad-4337-ae9f-ed1fcfb447af''s fund for collection 89", "type": "FUND", "clientFundID": "2_89", "description": "Gainy bf98c335-57ad-4337-ae9f-ed1fcfb447af''s fund for collection 89", "holdings": [{"instrumentID": "a67422af-8504-43df-9e63-7361eb0bd99e", "target": 1}], "triggers": [], "isInstrumentTargetsChanged": false, "instrumentTargetsChanged": false}')
+values  ('fund_3dc895e3-a923-4c37-8a91-eac748120215', 2, 83, 1, '[{"instrumentID": "a67422af-8504-43df-9e63-7361eb0bd99e", "target": "1"}]', '{"AAPL": "1"}', '{"id": "fund_3dc895e3-a923-4c37-8a91-eac748120215", "userID": "7b746acb-0afa-42c3-9c94-1bc8c16ce7b2", "name": "Gainy bf98c335-57ad-4337-ae9f-ed1fcfb447af''s fund for collection 89", "type": "FUND", "clientFundID": "2_89", "description": "Gainy bf98c335-57ad-4337-ae9f-ed1fcfb447af''s fund for collection 89", "holdings": [{"instrumentID": "a67422af-8504-43df-9e63-7361eb0bd99e", "target": 1}], "triggers": [], "isInstrumentTargetsChanged": false, "instrumentTargetsChanged": false}')
 on conflict do nothing;
 
 insert into app.drivewealth_accounts_positions (id, drivewealth_account_id, equity_value, data, created_at)

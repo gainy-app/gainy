@@ -8,7 +8,7 @@ from portfolio.plaid.common import handle_error
 from services import S3
 from portfolio.plaid.models import PlaidAccessToken
 from trading.models import KycDocument, FundingAccount, TradingMoneyFlow, TradingCollectionVersion, \
-    CollectionHoldingStatus, ProfileKycStatus
+    CollectionHoldingStatus, ProfileKycStatus, CollectionStatus
 from trading.drivewealth.provider import DriveWealthProvider
 from trading.repository import TradingRepository
 
@@ -169,11 +169,16 @@ class TradingService(GainyTradingService):
 
         return collection_version
 
+    # TODO deprecated ?
     def get_actual_collection_holdings(
             self, profile_id, collection_id) -> List[CollectionHoldingStatus]:
-        holdings = self._get_provider_service().get_actual_collection_holdings(
+        collection_status: CollectionStatus = self._get_provider_service().get_actual_collection_data(
             profile_id, collection_id)
-        return [i.get_collection_holding_status() for i in holdings]
+        return collection_status.holdings
+
+    def get_actual_collection_status(self, profile_id: int, collection_id: int) -> CollectionStatus:
+        return self._get_provider_service().get_actual_collection_data(
+            profile_id, collection_id)
 
     def sync_funding_accounts(self, profile_id) -> Iterable[FundingAccount]:
         repository = self.trading_repository

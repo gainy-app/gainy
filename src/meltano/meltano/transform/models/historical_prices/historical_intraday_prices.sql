@@ -5,7 +5,7 @@
     tags = ["realtime"],
     post_hook=[
       pk('symbol, time'),
-      index(this, 'id', true),
+      index('id', true),
       'create index if not exists "symbol__time_3min" ON {{ this }} (symbol, time_3min)',
       'create index if not exists "symbol__time_15min" ON {{ this }} (symbol, time_15min)',
     ]

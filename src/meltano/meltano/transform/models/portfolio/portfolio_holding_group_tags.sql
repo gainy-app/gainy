@@ -5,7 +5,8 @@
     tags = ["realtime"],
     post_hook=[
       pk('id'),
-      'create index if not exists "profile_id__symbol" ON {{ this }} (profile_id, symbol)',
+      index('holding_group_id'),
+      'create index if not exists "holding_group_id" ON {{ this }} (holding_group_id)',
       'delete from {{ this }} where updated_at < (select max(updated_at) from {{ this }} where is_realtime = false)',
     ]
   )
@@ -28,30 +29,52 @@ with ticker_selected_collection as
          ),
      holding_group_collections as
          (
-             select portfolio_holding_group_details.profile_id,
-                    portfolio_holding_group_details.ticker_symbol as symbol,
-                    profile_ticker_collections.collection_id,
-                    profile_ticker_collections.collection_uniq_id
-             from {{ ref('portfolio_holding_group_details') }}
-                      join {{ ref('profile_ticker_collections') }}
-                           on profile_ticker_collections.symbol = portfolio_holding_group_details.ticker_symbol
-                               and (profile_ticker_collections.profile_id = portfolio_holding_group_details.profile_id or profile_ticker_collections.profile_id is null)
+             select t.*
+             from (-- tickers
+                      select portfolio_holding_group_details.holding_group_id,
+                             portfolio_holding_group_details.profile_id,
+                             portfolio_holding_group_details.ticker_symbol as symbol,
+                             profile_ticker_collections.collection_id,
+                             profile_ticker_collections.collection_uniq_id
+                      from {{ ref('portfolio_holding_group_details') }}
+                               join {{ ref('profile_ticker_collections') }}
+                                    on profile_ticker_collections.symbol = portfolio_holding_group_details.ticker_symbol
+                                        and (profile_ticker_collections.profile_id =
+                                             portfolio_holding_group_details.profile_id or
+                                             profile_ticker_collections.profile_id is null)
+
+                      union all
+
+                      -- ttfs
+                      select portfolio_holding_group_details.holding_group_id,
+                             portfolio_holding_group_details.profile_id,
+                             portfolio_holding_group_details.ticker_symbol as symbol,
+                             portfolio_holding_group_details.collection_id,
+                             profile_collections.uniq_id                   as collection_uniq_id
+                      from {{ ref('portfolio_holding_group_details') }}
+                               join {{ ref('profile_collections') }}
+                                    on profile_collections.id = portfolio_holding_group_details.collection_id
+                                        and (profile_collections.profile_id = portfolio_holding_group_details.profile_id or profile_collections.profile_id is null)
+                  ) t
                       join {{ ref('collection_metrics') }} using (collection_uniq_id)
-             order by collection_metrics.market_capitalization_sum desc
-         ),
+             order by holding_group_id, collection_metrics.market_capitalization_sum desc
+     ),
      holding_group_collection_tags as
          (
-             select profile_id,
-                    ticker_symbol as symbol,
-                    collection_match_score_explanation.collection_id,
-                    collection_match_score_explanation.collection_uniq_id,
+             select portfolio_holding_group_details.holding_group_id,
+                    portfolio_holding_group_details.profile_id,
+                    portfolio_holding_group_details.ticker_symbol as symbol,
                     collection_match_score_explanation.category_id,
                     collection_match_score_explanation.interest_id
              from {{ ref('portfolio_holding_group_details') }}
                       left join ticker_selected_collection
                                 on ticker_selected_collection.symbol = portfolio_holding_group_details.ticker_symbol
-                      left join {{ ref('collection_match_score_explanation') }} using (profile_id, collection_id)
-         ),
+                      join {{ ref('collection_match_score_explanation') }}
+                           on collection_match_score_explanation.profile_id = portfolio_holding_group_details.profile_id
+                               and collection_match_score_explanation.collection_id in
+                                   (portfolio_holding_group_details.collection_id,
+                                    ticker_selected_collection.collection_id)
+     ),
      ticker_tags_ranked as
          (
              select *,
@@ -61,7 +84,7 @@ with ticker_selected_collection as
                              category_id,
                              null as interest_id,
                              sim_dif
-                      from {{ ref('ticker_categories_continuous') }}
+                      from ticker_categories_continuous
 
                       union all
 
@@ -69,12 +92,13 @@ with ticker_selected_collection as
                              null as category_id,
                              ticker_interests.interest_id,
                              sim_dif
-                      from {{ ref('ticker_interests') }}
+                      from ticker_interests
                   ) t
-         ),
+     ),
      all_rows as
          (
-             select profile_id,
+             select holding_group_id,
+                    profile_id,
                     symbol,
                     collection_id,
                     collection_uniq_id,
@@ -86,7 +110,8 @@ with ticker_selected_collection as
 
              union all
 
-             select profile_id,
+             select holding_group_id,
+                    profile_id,
                     symbol,
                     null::int                                           as collection_id,
                     null::text                                          as collection_uniq_id,
@@ -95,11 +120,11 @@ with ticker_selected_collection as
                     0                                                   as priority,
                     row_number() over (partition by profile_id, symbol) as row_num
              from holding_group_collection_tags
-             where holding_group_collection_tags.collection_id is not null
 
              union all
 
-             select profile_id,
+             select holding_group_id,
+                    profile_id,
                     symbol,
                     null::int                                           as collection_id,
                     null::text                                          as collection_uniq_id,
@@ -107,28 +132,33 @@ with ticker_selected_collection as
                     ticker_tags_ranked.interest_id,
                     0                                                   as priority,
                     row_number() over (partition by profile_id, symbol) as row_num
-             from holding_group_collection_tags
-                      join ticker_tags_ranked using (symbol)
-             where holding_group_collection_tags.collection_id is null
-               and row_num <= 5
-         )
-select all_rows.profile_id,
-       all_rows.symbol,
-       all_rows.collection_id,
-       all_rows.collection_uniq_id,
-       all_rows.category_id,
-       all_rows.interest_id,
-       -(row_number()
-        over (partition by all_rows.profile_id, all_rows.symbol order by all_rows.priority desc, all_rows.row_num))::int as priority,
-       now()                                                                                                             as updated_at,
-       (all_rows.profile_id || '_' ||
-        all_rows.symbol || '_' ||
-        coalesce(all_rows.collection_id, 0) || '_' ||
-        coalesce(all_rows.category_id, 0) || '_' ||
-        coalesce(all_rows.interest_id, 0))                                                                               as id,
-       {{ var('realtime') }}                                                                                             as is_realtime
+             from {{ ref('portfolio_holding_group_details') }}
+                      join ticker_tags_ranked
+                                on ticker_tags_ranked.symbol = portfolio_holding_group_details.ticker_symbol
+             where row_num <= 5
+     )
+select distinct on (
+    all_rows.holding_group_id,
+    all_rows.collection_id,
+    all_rows.category_id,
+    all_rows.interest_id
+    ) all_rows.holding_group_id,
+      all_rows.profile_id,
+      all_rows.symbol,
+      all_rows.collection_id,
+      all_rows.collection_uniq_id,
+      all_rows.category_id,
+      all_rows.interest_id,
+      -(row_number()
+        over (partition by all_rows.holding_group_id order by all_rows.priority desc, all_rows.row_num))::int as priority,
+      now()                                                                                                   as updated_at,
+      (all_rows.holding_group_id || '_' ||
+       coalesce(all_rows.collection_id, 0) || '_' ||
+       coalesce(all_rows.category_id, 0) || '_' ||
+       coalesce(all_rows.interest_id, 0))                                                                     as id,
+       {{ var('realtime') }}                                                                                  as is_realtime
 from all_rows
 {% if is_incremental() and var('realtime') %}
-         left join {{ this }} old_data using (profile_id, symbol)
+         left join {{ this }} old_data using (holding_group_id)
 where old_data is null
 {% endif %}

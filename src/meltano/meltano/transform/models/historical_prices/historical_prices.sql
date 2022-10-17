@@ -4,7 +4,7 @@
     unique_key = "id",
     post_hook=[
       pk('symbol, date'),
-      index(this, 'id', true),
+      index('id', true),
       'create unique index if not exists "symbol__date_year__date" ON {{ this }} (symbol, date_year, date)',
       'create unique index if not exists "symbol__date_month__date" ON {{ this }} (symbol, date_month, date)',
       'create unique index if not exists "date_week__symbol__date" ON {{ this }} (date_week, symbol, date)',

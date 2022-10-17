@@ -55,6 +55,8 @@ sources:
       - name: drivewealth_accounts
       - name: drivewealth_accounts_positions
       - name: drivewealth_users
+      - name: drivewealth_portfolio_statuses
+      - name: drivewealth_portfolios
       - name: influencers
       - name: invitations
       - name: notifications

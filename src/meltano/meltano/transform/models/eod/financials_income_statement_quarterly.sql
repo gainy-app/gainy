@@ -4,7 +4,7 @@
     unique_key = "id",
     post_hook=[
       pk('symbol, date'),
-      index(this, 'id', true),
+      index('id', true),
     ]
   )
 }}

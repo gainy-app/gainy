@@ -261,6 +261,13 @@ type Query {
 }
 
 type Query {
+  trading_get_collection_data(
+    profile_id: Int!
+    collection_id: Int!
+  ): TradingGetCollectionDataOutput
+}
+
+type Query {
   trading_get_funding_accounts(
     profile_id: Int!
   ): [FundingAccount]
@@ -279,7 +286,7 @@ type Mutation {
   trading_reconfigure_collection_holdings(
     profile_id: Int!
     collection_id: Int!
-    weights: [TickerWeight]!
+    weights: [TickerWeight]
     target_amount_delta: Float!
   ): TradingReconfigureCollectionHoldingsOutput
 }
@@ -568,5 +575,21 @@ type ReHandleQueueMessagesOutput {
   success: Int!
   unsupported: Int!
   error: Int!
+}
+
+type TradingGetCollectionDataOutput {
+  actual_value: Float!
+  history: TradingCollectionHistoryOutput
+}
+
+type TradingCollectionVersionData {
+  target_amount_delta: Float!
+  created_at: String!
+  success_at: String!
+}
+
+type TradingCollectionHistoryOutput {
+  pending: [TradingCollectionVersionData]
+  successful: [TradingCollectionVersionData]
 }
 

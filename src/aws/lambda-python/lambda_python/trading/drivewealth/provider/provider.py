@@ -188,6 +188,22 @@ class DriveWealthProvider(DriveWealthProviderKYC,
 
             self.sync_deposit(deposit_ref_id=entity.ref_id, fetch_info=False)
 
+    def sync_autopilot_run(self, entity: DriveWealthAutopilotRun):
+        repository = self.repository
+        data = self.api.get_autopilot_run(entity.ref_id)
+        entity.set_from_response(data)
+        repository.persist(entity)
+
+        if not entity.collection_version_id:
+            return
+
+        trading_collection_version = repository.find_one(
+            TradingCollectionVersion,
+            {"id": entity.collection_version_id})
+
+        entity.update_trading_collection_version(trading_collection_version)
+        repository.persist(trading_collection_version)
+
     def _sync_autopilot_runs(self, user_ref_id):
         repository = self.repository
 
@@ -199,18 +215,7 @@ class DriveWealthProvider(DriveWealthProviderKYC,
                     DriveWealthAutopilotRun, {"account_id": account.ref_id})
 
             for entity in autopilot_runs:
-                data = self.api.get_autopilot_run(entity.ref_id)
-                entity.set_from_response(data)
-                repository.persist(entity)
-
-                if not entity.collection_version_id:
-                    continue
-                trading_collection_version = repository.find_one(
-                    TradingCollectionVersion,
-                    {"id": entity.collection_version_id})
-                entity._update_trading_collection_version(
-                    trading_collection_version)
-                repository.persist(trading_collection_version)
+                self.sync_autopilot_run(entity)
 
     def _sync_portfolio_statuses(self, profile_id):
         repository = self.repository

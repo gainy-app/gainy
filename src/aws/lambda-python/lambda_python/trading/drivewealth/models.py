@@ -10,7 +10,7 @@ import dateutil.parser
 from gainy.data_access.models import classproperty, DecimalEncoder
 from gainy.trading.drivewealth.models import BaseDriveWealthModel
 from trading.models import CollectionHoldingStatus, ProfileKycStatus, KycStatus, \
-    TradingCollectionVersion, TradingCollectionVersionStatus
+    TradingCollectionVersion, TradingCollectionVersionStatus, CollectionStatus
 
 PRECISION = 1e-3
 ONE = Decimal(1)
@@ -222,6 +222,12 @@ class DriveWealthPortfolioStatusHolding:
             for i in self.data["holdings"]
         ]
 
+    def get_collection_status(self) -> CollectionStatus:
+        entity = CollectionStatus()
+        entity.value = self.data["value"]
+        entity.holdings = [i.get_collection_holding_status() for i in self.holdings]
+        return entity
+
 
 class DriveWealthPortfolioStatus(BaseDriveWealthModel):
     id = None
@@ -419,12 +425,13 @@ class DriveWealthAutopilotRun(BaseDriveWealthModel):
     def table_name(self) -> str:
         return "drivewealth_autopilot_runs"
 
-    def _update_trading_collection_version(
+    def update_trading_collection_version(
             self, trading_collection_version: TradingCollectionVersion):
         # SUCCESS	Complete Autopilot run successful
         if self.status == "SUCCESS":
-            trading_collection_version.status = TradingCollectionVersionStatus.STATUS_SUCCESS
+            trading_collection_version.set_status(TradingCollectionVersionStatus.SUCCESS)
             return
+
         '''
         REBALANCE_FAILED                  rebalance has failed
         SELL_AMOUNTCASH_ORDERS_FAILED     one or more sell orders have failed
@@ -441,8 +448,9 @@ class DriveWealthAutopilotRun(BaseDriveWealthModel):
         REBALANCE_ABORTED                 rebalance has been cancelled
         '''
         if re.search(r'(FAILED|TIMEDOUT|ABORTED)$', self.status):
-            trading_collection_version.status = TradingCollectionVersionStatus.STATUS_FAILED
+            trading_collection_version.set_status(TradingCollectionVersionStatus.FAILED)
             return
+
         '''
         REBALANCE_NOT_STARTED            rebalance has not yet started
         REBALANCE_REVIEW_COMPLETED       completed rebalance, only rebalancing review
@@ -471,7 +479,7 @@ class DriveWealthAutopilotRun(BaseDriveWealthModel):
         ALLOCATION_COMPLETED             all required allocations have been completed
         SUBACCOUNT_HOLDINGS_UPDATED      all sub-account holdings within required rebalance updated
         '''
-        trading_collection_version.status = TradingCollectionVersionStatus.STATUS_PENDING
+        trading_collection_version.set_status(TradingCollectionVersionStatus.PENDING)
 
 
 class DriveWealthKycStatus:

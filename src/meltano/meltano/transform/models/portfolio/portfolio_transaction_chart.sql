@@ -5,7 +5,7 @@
     tags = ["realtime"],
     post_hook=[
       pk('transactions_uniq_id, period, datetime'),
-      index(this, 'id', true),
+      index('id', true),
       'delete from {{this}}
         using {{this}} ptc
         left join {{ ref("portfolio_expanded_transactions") }} on portfolio_expanded_transactions.uniq_id = ptc.transactions_uniq_id

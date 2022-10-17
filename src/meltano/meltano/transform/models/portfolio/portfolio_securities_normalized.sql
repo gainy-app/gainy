@@ -6,7 +6,7 @@
     post_hook=[
       pk('id'),
       fk(this, 'id', 'app', 'portfolio_securities', 'id'),
-      index(this, 'original_ticker_symbol'),
+      index('original_ticker_symbol'),
     ]
   )
 }}

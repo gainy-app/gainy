@@ -17,7 +17,11 @@ with robinhood_options as (
     group by profile_holdings.profile_id
 )
 
-select profile_holdings.id                                               as holding_id,
+select 'ticker_' || profile_holdings.profile_id ||
+       '_' || portfolio_securities_normalized.ticker_symbol              as holding_group_id,
+       profile_holdings.profile_id ||
+       '_plaid_' || profile_holdings.id                                  as holding_id,
+       profile_holdings.id                                               as plaid_holding_id,
        profile_holdings.plaid_access_token_id,
        profile_holdings.security_id,
        profile_holdings.profile_id,
@@ -38,6 +42,7 @@ select profile_holdings.id                                               as hold
                      else 1 end                                          as quantity_norm_for_valuation, -- to multiple by price
        coalesce(base_tickers.name, portfolio_securities_normalized.name) as name,
        portfolio_securities_normalized.ticker_symbol,
+       null                                                              as collection_id,
        portfolio_securities_normalized.type
 from {{ source('app', 'profile_holdings') }}
          join {{ ref('portfolio_securities_normalized') }}
@@ -48,3 +53,22 @@ from {{ source('app', 'profile_holdings') }}
          left join {{ source('app', 'plaid_institutions') }} on plaid_institutions.id = profile_plaid_access_tokens.institution_id
          left join robinhood_options on robinhood_options.profile_id = profile_holdings.profile_id
 where profile_holdings.quantity > 0
+
+union all
+
+select 'ttf_' || profile_id || '_' || collection_id                  as holding_group_id,
+       'ttf_' || profile_id || '_' || collection_id || '_' || symbol as holding_id,
+       null                                                          as plaid_holding_id,
+       null                                                          as plaid_access_token_id,
+       null                                                          as security_id,
+       profile_id,
+       null                                                          as account_id,
+       null                                                          as quantity,
+       1                                                             as quantity_norm_for_valuation,
+       base_tickers.name                                             as name,
+       symbol                                                        as ticker_symbol,
+       collection_id,
+       'ttf'                                                         as type
+from {{ ref('drivewealth_holdings') }}
+         left join {{ ref('base_tickers') }} using (symbol)
+where collection_id is not null

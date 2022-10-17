@@ -1,11 +1,12 @@
 from decimal import Decimal
 from typing import Dict, Any, List, Optional
 
+from exceptions import EntityNotFoundException
 from trading.exceptions import InsufficientFundsException
-from trading.models import TradingCollectionVersion
+from trading.models import TradingCollectionVersion, CollectionStatus
 from trading.drivewealth.models import DriveWealthFund, DriveWealthPortfolio, DriveWealthPortfolioStatus, \
     DriveWealthAutopilotRun, PRECISION, DriveWealthPortfolioStatusFundHolding, DriveWealthInstrument, \
-    DriveWealthInstrumentStatus
+    DriveWealthInstrumentStatus, DriveWealthPortfolioStatusHolding
 from trading.drivewealth.api import DriveWealthApi
 from trading.drivewealth.repository import DriveWealthRepository
 from gainy.utils import get_logger
@@ -26,6 +27,20 @@ class DriveWealthProviderCollection(GainyDriveWealthProvider):
         self.repository.persist(instrument)
         return instrument
 
+    def get_collection_actual_value(self, profile_id: int, collection_id: int) -> float:
+        # user = self._get_user(collection_version.profile_id)
+        # account = self._get_trading_account(user.ref_id)
+        # profile_id = collection_version.profile_id
+        # portfolio = self._upsert_portfolio(profile_id, account)
+        chosen_fund = self._upsert_fund(profile_id, collection_version)
+
+        # self._handle_cash_amount_change(collection_version.target_amount_delta,
+        #                                 portfolio, chosen_fund)
+        #
+        # self.api.update_portfolio(portfolio)
+        # self.api.update_fund(chosen_fund)
+        # self._create_autopilot_run(account, collection_version)
+
     def reconfigure_collection_holdings(
             self, collection_version: TradingCollectionVersion):
         user = self._get_user(collection_version.profile_id)
@@ -39,39 +54,40 @@ class DriveWealthProviderCollection(GainyDriveWealthProvider):
 
         self.api.update_portfolio(portfolio)
         self.api.update_fund(chosen_fund)
-        self._create_autopilot_run(account, collection_version.id)
+        self._create_autopilot_run(account, collection_version)
 
-    def get_actual_collection_holdings(
+    def get_actual_collection_data(
             self, profile_id: int,
-            collection_id: int) -> List[DriveWealthPortfolioStatusFundHolding]:
+            collection_id: int) -> CollectionStatus:
         fund = self._get_fund(profile_id, collection_id)
         if not fund:
-            return []
+            raise EntityNotFoundException(DriveWealthFund)
 
-        return self._get_fund_actual_holdings_status(fund)
-
-    def _get_fund_actual_holdings_status(
-            self, fund: DriveWealthFund
-    ) -> List[DriveWealthPortfolioStatusFundHolding]:
         repository = self.repository
         portfolio = repository.get_profile_portfolio(fund.profile_id)
         if not portfolio:
-            return []
+            raise EntityNotFoundException(DriveWealthPortfolio)
+
         portfolio_status = self._get_portfolio_status(portfolio)
         fund_status = portfolio_status.get_fund(fund.ref_id)
         if not fund_status:
-            return []
+            raise EntityNotFoundException(DriveWealthPortfolioStatusHolding)
 
-        return fund_status.holdings
+        return fund_status.get_collection_status()
 
     def _create_autopilot_run(self, account: DriveWealthAccount,
-                              collection_version_id: int):
+                              collection_version: TradingCollectionVersion):
         data = self.api.create_autopilot_run([account.ref_id])
         entity = DriveWealthAutopilotRun()
         entity.set_from_response(data)
         entity.account_id = account.ref_id
-        entity.collection_version_id = collection_version_id
+        entity.collection_version_id = collection_version.id
         self.repository.persist(entity)
+
+        entity.update_trading_collection_version(
+            collection_version)
+        self.repository.persist(collection_version)
+
         return entity
 
     def _upsert_portfolio(self, profile_id, account: DriveWealthAccount):
@@ -178,6 +194,8 @@ class DriveWealthProviderCollection(GainyDriveWealthProvider):
             "target_amount_delta": target_amount_delta,
             "portfolio_status": portfolio_status.to_dict(),
             "portfolio": portfolio.to_dict(),
+            "chosen_fund": chosen_fund.to_dict(),
+            "fund_value": fund_value,
         }
         logger.info('_handle_cash_amount_change step0', extra=logging_extra)
 

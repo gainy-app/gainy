@@ -5,7 +5,7 @@
     tags = ["realtime"],
     post_hook=[
       pk('symbol, date'),
-      index(this, 'id', true),
+      index('id', true),
       'delete from {{this}} where open_at < now() - interval \'1 week\'',
     ]
   )

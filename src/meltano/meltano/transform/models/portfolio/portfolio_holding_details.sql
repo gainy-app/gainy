@@ -4,8 +4,8 @@
     unique_key = "holding_id",
     tags = ["realtime"],
     post_hook=[
-      index(this, 'holding_id', true),
-      index(this, 'ticker_symbol'),
+      index('holding_id', true),
+      index('ticker_symbol'),
     ]
   )
 }}
@@ -14,7 +14,7 @@ with first_purchase_date as
          (
              select distinct on (
                  profile_holdings.id
-                 ) profile_holdings.id as holding_id,
+                 ) profile_holdings.id as plaid_holding_id,
                    date
              from {{ source('app', 'profile_portfolio_transactions') }}
                       join {{ source('app', 'profile_holdings') }}
@@ -33,8 +33,10 @@ with first_purchase_date as
          ),
      long_term_tax_holdings as
          (
-             select distinct on (holding_id) holding_id,
-                                             ltt_quantity_total::double precision
+             select distinct on (
+                 holding_id
+                 ) holding_id as plaid_holding_id,
+                   ltt_quantity_total::double precision
              from (
                       select profile_holdings.id                                                                                                             as holding_id,
                              quantity_sign,
@@ -78,11 +80,11 @@ select profile_holdings_normalized.holding_id,
        profile_holdings_normalized.quantity,
        (actual_value - absolute_gain_total) / quantity        as avg_cost
 from {{ ref('profile_holdings_normalized') }}
-         left join first_purchase_date on first_purchase_date.holding_id = profile_holdings_normalized.holding_id
+         left join first_purchase_date using (plaid_holding_id)
          left join {{ ref('portfolio_holding_gains') }} on portfolio_holding_gains.holding_id = profile_holdings_normalized.holding_id
          left join {{ ref('portfolio_securities_normalized') }} on portfolio_securities_normalized.id = profile_holdings_normalized.security_id
          left join {{ ref('base_tickers') }} on base_tickers.symbol = portfolio_securities_normalized.ticker_symbol
          left join next_earnings_date on next_earnings_date.symbol = base_tickers.symbol
          left join {{ ref('ticker_metrics') }} on ticker_metrics.symbol = base_tickers.symbol
-         left join long_term_tax_holdings on long_term_tax_holdings.holding_id = profile_holdings_normalized.holding_id
+         left join long_term_tax_holdings using (plaid_holding_id)
          left join {{ ref('ticker_options') }} on ticker_options.contract_name = portfolio_securities_normalized.original_ticker_symbol

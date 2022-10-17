@@ -4,7 +4,7 @@
     unique_key = "symbol",
     post_hook=[
       pk('symbol, component_symbol'),
-      index(this, 'id', true),
+      index('id', true),
       'delete from {{ this }}
         using (select distinct on (symbol) symbol, version from {{ this }} order by symbol, updated_at desc) old_version
         where ticker_components.symbol = old_version.symbol

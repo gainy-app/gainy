@@ -21,7 +21,7 @@ with collection_daily_latest_chart_point as
                   ) t
                       join {{ ref('collection_chart') }} using (collection_uniq_id, period, datetime)
      ),
-     metrics as
+     ticker_metrics as
          (
              select collection_uniq_id,
                     sum(weight * market_capitalization)                        as market_capitalization_sum,
@@ -30,6 +30,42 @@ with collection_daily_latest_chart_point as
              from {{ ref('collection_ticker_actual_weights') }}
                       join {{ ref('ticker_metrics') }} using (symbol)
              group by collection_uniq_id
+     ),
+     metrics as
+         (
+             select collection_uniq_id,
+                    value_0d /
+                    case
+                        when coalesce(value_1w, value_all) > 0
+                            then coalesce(value_1w, value_all)
+                        end - 1 as value_change_1w,
+                    value_0d /
+                    case
+                        when coalesce(value_1m, value_all) > 0
+                            then coalesce(value_1m, value_all)
+                        end - 1 as value_change_1m,
+                    value_0d /
+                    case
+                        when coalesce(value_3m, value_all) > 0
+                            then coalesce(value_3m, value_all)
+                        end - 1 as value_change_3m,
+                    value_0d /
+                    case
+                        when coalesce(value_1y, value_all) > 0
+                            then coalesce(value_1y, value_all)
+                        end - 1 as value_change_1y,
+                    value_0d /
+                    case
+                        when coalesce(value_5y, value_all) > 0
+                            then coalesce(value_5y, value_all)
+                        end - 1 as value_change_5y,
+                    value_0d /
+                    case
+                        when value_all > 0
+                            then value_all
+                        end - 1 as value_change_all,
+                    updated_at
+             from {{ ref('collection_historical_values_marked') }}
      )
 select profile_collections.profile_id,
        profiles.user_id,
@@ -39,11 +75,20 @@ select profile_collections.profile_id,
        (latest_day.adjusted_close /
         case when previous_day.adjusted_close > 0 then previous_day.adjusted_close end - 1
            )::double precision                                                     as relative_daily_change,
+       value_change_1w,
+       value_change_1m,
+       value_change_3m,
+       value_change_1y,
+       value_change_5y,
+       value_change_all,
        previous_day.adjusted_close::double precision                               as previous_day_close_price,
-       metrics.market_capitalization_sum::bigint,
-       greatest(latest_day.updated_at, previous_day.updated_at)                    as updated_at
+       ticker_metrics.market_capitalization_sum::bigint,
+       greatest(latest_day.updated_at, previous_day.updated_at,
+           ticker_metrics.updated_at, metrics.updated_at)                          as updated_at
 from {{ ref('profile_collections') }}
          left join {{ source('app', 'profiles') }} on profiles.id = profile_collections.profile_id
+         left join ticker_metrics
+                   on ticker_metrics.collection_uniq_id = profile_collections.uniq_id
          left join metrics
                    on metrics.collection_uniq_id = profile_collections.uniq_id
          left join collection_daily_latest_chart_point latest_day

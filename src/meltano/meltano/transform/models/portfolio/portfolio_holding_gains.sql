@@ -4,7 +4,7 @@
     unique_key = "holding_id",
     tags = ["realtime"],
     post_hook=[
-      index(this, 'holding_id', true),
+      pk('holding_id'),
     ]
   )
 }}
@@ -12,7 +12,8 @@
 
 with relative_data as
          (
-             select profile_holdings_normalized.holding_id,
+             select holding_group_id,
+                    holding_id,
                     profile_holdings_normalized.profile_id,
                     now()::timestamp                              as updated_at,
                     ticker_realtime_metrics.actual_price          as actual_price,
@@ -42,10 +43,15 @@ with relative_data as
          ),
      long_term_tax_holdings as
          (
-             select distinct on (holding_id) holding_id,
-                                             ltt_quantity_total::double precision
+             select distinct on (
+                 holding_group_id,
+                 holding_id
+                 ) holding_group_id,
+                   holding_id,
+                   ltt_quantity_total::double precision
              from (
-                      select profile_holdings_normalized.holding_id                                                                                                                 as holding_id,
+                      select profile_holdings_normalized.holding_group_id,
+                             profile_holdings_normalized.holding_id,
                              quantity_sign,
                              date,
                              min(cumsum)
@@ -55,9 +61,9 @@ with relative_data as
                                       security_id,
                                       portfolio_expanded_transactions.account_id,
                                       date,
-                                      sign(quantity_norm)                                                                                                as quantity_sign,
+                                      sign(quantity_norm)                                                                                                    as quantity_sign,
                                       sum(quantity_norm)
-                                      over (partition by security_id, portfolio_expanded_transactions.profile_id order by sign(quantity_norm), date) as cumsum
+                                      over (partition by security_id, portfolio_expanded_transactions.profile_id order by sign(quantity_norm), date)         as cumsum
                                from {{ ref('portfolio_expanded_transactions') }}
                                where portfolio_expanded_transactions.profile_id is not null
                            ) t
@@ -67,26 +73,91 @@ with relative_data as
                                         and profile_holdings_normalized.account_id = t.account_id
                   ) t
              where date < now() - interval '1 year'
-             order by holding_id, quantity_sign desc, date desc
-         )
-select relative_data.holding_id,
-       updated_at,
-       actual_value,
-       (actual_value / (1e-9 + sum(actual_value) over (partition by profile_id)))::double precision as value_to_portfolio_value,
-       relative_gain_1d::double precision,
-       relative_gain_1w::double precision,
-       relative_gain_1m::double precision,
-       relative_gain_3m::double precision,
-       relative_gain_1y::double precision,
-       relative_gain_5y::double precision,
-       relative_gain_total::double precision,
-       absolute_gain_1d::double precision,
-       (actual_price * (1 - 1 / (1 + relative_gain_1w)))::double precision                          as absolute_gain_1w,
-       (actual_price * (1 - 1 / (1 + relative_gain_1m)))::double precision                          as absolute_gain_1m,
-       (actual_price * (1 - 1 / (1 + relative_gain_3m)))::double precision                          as absolute_gain_3m,
-       (actual_price * (1 - 1 / (1 + relative_gain_1y)))::double precision                          as absolute_gain_1y,
-       (actual_price * (1 - 1 / (1 + relative_gain_5y)))::double precision                          as absolute_gain_5y,
-       (actual_price * (1 - 1 / (1 + relative_gain_total)))::double precision                       as absolute_gain_total,
-       coalesce(long_term_tax_holdings.ltt_quantity_total, 0)                                       as ltt_quantity_total
-from relative_data
-         left join long_term_tax_holdings on long_term_tax_holdings.holding_id = relative_data.holding_id
+             order by holding_group_id, holding_id, quantity_sign desc, date desc
+     ),
+     all_rows as
+         (
+             select holding_group_id,
+                    holding_id,
+                    profile_id,
+                    updated_at,
+                    actual_value,
+                    relative_gain_1d::double precision,
+                    relative_gain_1w::double precision,
+                    relative_gain_1m::double precision,
+                    relative_gain_3m::double precision,
+                    relative_gain_1y::double precision,
+                    relative_gain_5y::double precision,
+                    relative_gain_total::double precision,
+                    absolute_gain_1d::double precision,
+                    (actual_price * (1 - 1 / (1 + relative_gain_1w)))::double precision    as absolute_gain_1w,
+                    (actual_price * (1 - 1 / (1 + relative_gain_1m)))::double precision    as absolute_gain_1m,
+                    (actual_price * (1 - 1 / (1 + relative_gain_3m)))::double precision    as absolute_gain_3m,
+                    (actual_price * (1 - 1 / (1 + relative_gain_1y)))::double precision    as absolute_gain_1y,
+                    (actual_price * (1 - 1 / (1 + relative_gain_5y)))::double precision    as absolute_gain_5y,
+                    (actual_price * (1 - 1 / (1 + relative_gain_total)))::double precision as absolute_gain_total,
+                    coalesce(long_term_tax_holdings.ltt_quantity_total, 0)                 as ltt_quantity_total
+             from relative_data
+                      left join long_term_tax_holdings using (holding_group_id, holding_id)
+
+             union all
+
+             (
+                 with expanded_holding_groups as
+                          (
+                              select drivewealth_holdings.holding_group_id,
+                                     holding_id,
+                                     drivewealth_holdings.profile_id,
+                                     drivewealth_holdings.collection_id,
+                                     drivewealth_holdings.symbol,
+                                     drivewealth_holdings.updated_at,
+                                     drivewealth_holdings.actual_value::numeric
+                              from {{ ref('drivewealth_holdings') }}
+                                       join {{ ref('profile_holdings_normalized') }} using (holding_id)
+                          ),
+                      expanded_holding_groups_with_gains as
+                          (
+                              select holding_group_id,
+                                     holding_id,
+                                     expanded_holding_groups.profile_id,
+                                     expanded_holding_groups.collection_id,
+                                     expanded_holding_groups.updated_at,
+                                     expanded_holding_groups.actual_value,
+                                     ticker_realtime_metrics.actual_price,
+                                     ticker_realtime_metrics.relative_daily_change as relative_gain_1d,
+                                     ticker_metrics.price_change_1w       as relative_gain_1w,
+                                     ticker_metrics.price_change_1m       as relative_gain_1m,
+                                     ticker_metrics.price_change_3m       as relative_gain_3m,
+                                     ticker_metrics.price_change_1y       as relative_gain_1y,
+                                     ticker_metrics.price_change_5y       as relative_gain_5y,
+                                     ticker_metrics.price_change_all      as relative_gain_total
+                              from expanded_holding_groups
+                                       left join {{ ref('ticker_metrics') }} using (symbol)
+                                       left join {{ ref('ticker_realtime_metrics') }} using (symbol)
+                      )
+                 select holding_group_id,
+                        holding_id,
+                        profile_id,
+                        updated_at,
+                        actual_value::double precision,
+                        relative_gain_1d::double precision,
+                        relative_gain_1w::double precision,
+                        relative_gain_1m::double precision,
+                        relative_gain_3m::double precision,
+                        relative_gain_1y::double precision,
+                        relative_gain_5y::double precision,
+                        relative_gain_total::double precision,
+                        (actual_price * (1 - 1 / (1 + relative_gain_1d)))::double precision    as absolute_gain_1d,
+                        (actual_price * (1 - 1 / (1 + relative_gain_1w)))::double precision    as absolute_gain_1w,
+                        (actual_price * (1 - 1 / (1 + relative_gain_1m)))::double precision    as absolute_gain_1m,
+                        (actual_price * (1 - 1 / (1 + relative_gain_3m)))::double precision    as absolute_gain_3m,
+                        (actual_price * (1 - 1 / (1 + relative_gain_1y)))::double precision    as absolute_gain_1y,
+                        (actual_price * (1 - 1 / (1 + relative_gain_5y)))::double precision    as absolute_gain_5y,
+                        (actual_price * (1 - 1 / (1 + relative_gain_total)))::double precision as absolute_gain_total,
+                        null::double precision as ltt_quantity_total
+                 from expanded_holding_groups_with_gains
+             )
+     )
+select all_rows.*,
+       (actual_value / (1e-9 + sum(actual_value) over (partition by profile_id)))::double precision as value_to_portfolio_value
+from all_rows

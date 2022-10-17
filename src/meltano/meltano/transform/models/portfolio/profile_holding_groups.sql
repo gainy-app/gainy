@@ -5,8 +5,10 @@
   )
 }}
 
-select profile_id,
-       ticker_symbol as symbol,
-       sum(profile_holdings_normalized.quantity) as quantity
+select holding_group_id as id,
+       profile_id,
+       case when collection_id is null then ticker_symbol end                                   as symbol,
+       collection_id,
+       sum(profile_holdings_normalized.quantity)       as quantity
 from {{ ref('profile_holdings_normalized') }}
-group by profile_id, ticker_symbol
+group by holding_group_id, profile_id, ticker_symbol, collection_id

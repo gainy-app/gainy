@@ -135,7 +135,7 @@ resource "aws_synthetics_canary" "hasura" {
   execution_role_arn   = aws_iam_role.canary_exec.arn
   handler              = "hasura.handler"
   zip_file             = data.archive_file.canary_scripts.output_path
-  runtime_version      = "syn-python-selenium-1.0"
+  runtime_version      = "syn-python-selenium-1.3"
   start_canary         = true
 
   schedule {

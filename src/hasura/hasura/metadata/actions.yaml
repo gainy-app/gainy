@@ -125,8 +125,8 @@ actions:
             {
               "body": {{$body}}
             }
-        version: 2
         template_engine: Kriti
+        version: 2
     permissions:
       - role: anonymous
   - name: rehandle_queue_messages
@@ -197,6 +197,12 @@ actions:
       handler: '{{AWS_LAMBDA_API_GATEWAY_ENDPOINT}}/hasuraAction'
     permissions:
       - role: user
+  - name: trading_get_collection_data
+    definition:
+      kind: ""
+      handler: '{{AWS_LAMBDA_API_GATEWAY_ENDPOINT}}/hasuraAction'
+    permissions:
+      - role: user
   - name: trading_get_funding_accounts
     definition:
       kind: ""
@@ -245,111 +251,111 @@ custom_types:
     - name: LiveStockPriceData
     - name: Ticker
       relationships:
-        - remote_table:
-            schema: public
-            name: tickers
+        - field_mapping:
+            symbol: symbol
           name: ticker
+          remote_table:
+            name: tickers
+            schema: public
           source: default
           type: object
-          field_mapping:
-            symbol: symbol
     - name: Collection
       relationships:
-        - remote_table:
-            schema: public
-            name: profile_collections
+        - field_mapping:
+            uniq_id: uniq_id
           name: collection
+          remote_table:
+            name: profile_collections
+            schema: public
           source: default
           type: object
-          field_mapping:
-            uniq_id: uniq_id
     - name: MatchScore
       relationships:
-        - remote_table:
-            schema: public
-            name: tickers
+        - field_mapping:
+            symbol: symbol
           name: ticker
+          remote_table:
+            name: tickers
+            schema: public
           source: default
           type: object
-          field_mapping:
-            symbol: symbol
     - name: LinkPlaidAccountOutput
     - name: PortfolioHolding
       relationships:
-        - remote_table:
-            schema: app
-            name: profiles
+        - field_mapping:
+            profile_id: id
           name: profile
+          remote_table:
+            name: profiles
+            schema: app
           source: default
           type: object
-          field_mapping:
-            profile_id: id
-        - remote_table:
-            schema: app
-            name: portfolio_securities
+        - field_mapping:
+            security_id: id
           name: security
+          remote_table:
+            name: portfolio_securities
+            schema: app
           source: default
           type: array
-          field_mapping:
-            security_id: id
-        - remote_table:
-            schema: app
-            name: profile_portfolio_accounts
-          name: account
-          source: default
-          type: object
-          field_mapping:
+        - field_mapping:
             account_id: id
-        - remote_table:
-            schema: public
-            name: portfolio_holding_details
-          name: holding_details
-          source: default
-          type: object
-          field_mapping:
-            id: holding_id
-        - remote_table:
+          name: account
+          remote_table:
+            name: profile_portfolio_accounts
             schema: app
-            name: profile_holdings
-          name: holding
           source: default
           type: object
-          field_mapping:
+        - field_mapping:
+            id: holding_id
+          name: holding_details
+          remote_table:
+            name: portfolio_holding_details
+            schema: public
+          source: default
+          type: object
+        - field_mapping:
             id: id
+          name: holding
+          remote_table:
+            name: profile_holdings
+            schema: app
+          source: default
+          type: object
     - name: PortfolioTransaction
       relationships:
-        - remote_table:
-            schema: app
-            name: profiles
-          name: profile
-          source: default
-          type: object
-          field_mapping:
+        - field_mapping:
             profile_id: id
-        - remote_table:
+          name: profile
+          remote_table:
+            name: profiles
             schema: app
-            name: profile_portfolio_accounts
-          name: account
           source: default
           type: object
-          field_mapping:
+        - field_mapping:
             account_id: id
-        - remote_table:
+          name: account
+          remote_table:
+            name: profile_portfolio_accounts
             schema: app
-            name: portfolio_securities
-          name: security
           source: default
           type: object
-          field_mapping:
+        - field_mapping:
             security_id: id
-        - remote_table:
+          name: security
+          remote_table:
+            name: portfolio_securities
             schema: app
-            name: profile_portfolio_transactions
-          name: transaction
           source: default
           type: object
-          field_mapping:
+        - field_mapping:
             id: id
+          name: transaction
+          remote_table:
+            name: profile_portfolio_transactions
+            schema: app
+          source: default
+          type: object
     - name: CreatePlaidLinkTokenOutput
     - name: PlaidWebhookOutput
     - name: StripeGetCheckoutUrl
@@ -365,24 +371,24 @@ custom_types:
     - name: AccountInformation
     - name: TradingLinkBankAccountWithPlaidOutput
       relationships:
-        - remote_table:
-            schema: app
-            name: trading_funding_accounts
+        - field_mapping:
+            id: id
           name: funding_account
+          remote_table:
+            name: trading_funding_accounts
+            schema: app
           source: default
           type: object
-          field_mapping:
-            id: id
     - name: FundingAccount
       relationships:
-        - remote_table:
-            schema: app
-            name: trading_funding_accounts
+        - field_mapping:
+            id: id
           name: funding_account
+          remote_table:
+            name: trading_funding_accounts
+            schema: app
           source: default
           type: object
-          field_mapping:
-            id: id
     - name: TradingMoneyFlowOutput
     - name: SampleOutput
     - name: ActualCollectionHoldingOutput
@@ -390,4 +396,7 @@ custom_types:
     - name: StripeGetPaymentSheetDataOutput
     - name: TradingReconfigureCollectionHoldingsOutput
     - name: ReHandleQueueMessagesOutput
+    - name: TradingGetCollectionDataOutput
+    - name: TradingCollectionVersionData
+    - name: TradingCollectionHistoryOutput
   scalars: []

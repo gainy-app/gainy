@@ -1,7 +1,7 @@
 mutation TradingReconfigureCollectionHoldings(
     $profile_id: Int!
     $collection_id: Int!
-    $weights: [TickerWeight]!
+    $weights: [TickerWeight]
     $target_amount_delta: Float!
 ) {
   trading_reconfigure_collection_holdings(

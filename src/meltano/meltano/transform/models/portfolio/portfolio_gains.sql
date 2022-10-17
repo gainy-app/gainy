@@ -4,7 +4,7 @@
     unique_key = "profile_id",
     tags = ["realtime"],
     post_hook=[
-      index(this, 'profile_id', true),
+      index('profile_id', true),
     ]
   )
 }}
