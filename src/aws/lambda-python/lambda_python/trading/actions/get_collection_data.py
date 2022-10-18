@@ -13,8 +13,7 @@ logger = get_logger(__name__)
 class TradingGetCollectionData(HasuraAction):
 
     def __init__(self):
-        super().__init__("trading_get_collection_data",
-                         "profile_id")
+        super().__init__("trading_get_collection_data", "profile_id")
 
     def apply(self, input_params, context_container: ContextContainer):
         profile_id = input_params['profile_id']
@@ -24,14 +23,24 @@ class TradingGetCollectionData(HasuraAction):
         trading_repository = context_container.trading_repository
 
         try:
-            actual_value = trading_service.get_actual_collection_status(profile_id, collection_id).value
+            actual_value = trading_service.get_actual_collection_status(
+                profile_id, collection_id).value
         except EntityNotFoundException:
             actual_value = 0
 
-        trading_collection_versions: List[TradingCollectionVersion] = trading_repository.find_all(TradingCollectionVersion, {"profile_id": profile_id, "collection_id": collection_id}, [("created_at", "DESC")])
+        trading_collection_versions: List[
+            TradingCollectionVersion] = trading_repository.find_all(
+                TradingCollectionVersion, {
+                    "profile_id": profile_id,
+                    "collection_id": collection_id
+                }, [("created_at", "DESC")])
 
-        success_tcvs = filter(lambda x: x.status == TradingCollectionVersionStatus.SUCCESS, trading_collection_versions)
-        pending_tcvs = filter(lambda x: x.status == TradingCollectionVersionStatus.PENDING, trading_collection_versions)
+        success_tcvs = filter(
+            lambda x: x.status == TradingCollectionVersionStatus.
+            EXECUTED_FULLY, trading_collection_versions)
+        pending_tcvs = filter(
+            lambda x: x.status == TradingCollectionVersionStatus.PENDING,
+            trading_collection_versions)
 
         return {
             'actual_value': actual_value,
@@ -45,5 +54,5 @@ class TradingGetCollectionData(HasuraAction):
         return [{
             "target_amount_delta": i.target_amount_delta,
             "created_at": format_datetime(i.created_at),
-            "success_at": format_datetime(i.success_at),
+            "executed_at": format_datetime(i.executed_at),
         } for i in tcvs]

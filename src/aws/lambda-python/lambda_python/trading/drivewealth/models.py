@@ -1,5 +1,6 @@
 import enum
 import re
+import requests
 from abc import ABC
 from decimal import Decimal
 import json
@@ -225,7 +226,9 @@ class DriveWealthPortfolioStatusHolding:
     def get_collection_status(self) -> CollectionStatus:
         entity = CollectionStatus()
         entity.value = self.data["value"]
-        entity.holdings = [i.get_collection_holding_status() for i in self.holdings]
+        entity.holdings = [
+            i.get_collection_holding_status() for i in self.holdings
+        ]
         return entity
 
 
@@ -334,7 +337,7 @@ class DriveWealthPortfolio(BaseDriveWealthModel):
             if i["type"] == "CASH_RESERVE":
                 self.cash_target_weight = i["target"]
             else:
-                self.holdings[i["instrumentID"]] = i["target"]
+                self.holdings[i["id"]] = i["target"]
 
     def set_target_weights_from_status_actual_weights(
             self, portfolio_status: DriveWealthPortfolioStatus):
@@ -406,6 +409,7 @@ class DriveWealthAutopilotRun(BaseDriveWealthModel):
     account_id = None
     collection_version_id = None
     data = None
+    orders_outcome = None
     created_at = None
     updated_at = None
 
@@ -420,6 +424,12 @@ class DriveWealthAutopilotRun(BaseDriveWealthModel):
         self.ref_id = data["id"]
         self.status = data["status"]
         self.data = data
+        print(self.data["allocations"]["outcome"])
+
+        # TODO remove verify after DW fixes cert issue
+        # TODO move to SQS
+        self.orders_outcome = requests.get(self.data["orders"]["outcome"],
+                                           verify=False).text
 
     @classproperty
     def table_name(self) -> str:
@@ -429,9 +439,9 @@ class DriveWealthAutopilotRun(BaseDriveWealthModel):
             self, trading_collection_version: TradingCollectionVersion):
         # SUCCESS	Complete Autopilot run successful
         if self.status == "SUCCESS":
-            trading_collection_version.set_status(TradingCollectionVersionStatus.SUCCESS)
+            trading_collection_version.set_status(
+                TradingCollectionVersionStatus.EXECUTED_FULLY)
             return
-
         '''
         REBALANCE_FAILED                  rebalance has failed
         SELL_AMOUNTCASH_ORDERS_FAILED     one or more sell orders have failed
@@ -448,9 +458,9 @@ class DriveWealthAutopilotRun(BaseDriveWealthModel):
         REBALANCE_ABORTED                 rebalance has been cancelled
         '''
         if re.search(r'(FAILED|TIMEDOUT|ABORTED)$', self.status):
-            trading_collection_version.set_status(TradingCollectionVersionStatus.FAILED)
+            trading_collection_version.set_status(
+                TradingCollectionVersionStatus.FAILED)
             return
-
         '''
         REBALANCE_NOT_STARTED            rebalance has not yet started
         REBALANCE_REVIEW_COMPLETED       completed rebalance, only rebalancing review
@@ -479,7 +489,8 @@ class DriveWealthAutopilotRun(BaseDriveWealthModel):
         ALLOCATION_COMPLETED             all required allocations have been completed
         SUBACCOUNT_HOLDINGS_UPDATED      all sub-account holdings within required rebalance updated
         '''
-        trading_collection_version.set_status(TradingCollectionVersionStatus.PENDING)
+        trading_collection_version.set_status(
+            TradingCollectionVersionStatus.PENDING)
 
 
 class DriveWealthKycStatus:

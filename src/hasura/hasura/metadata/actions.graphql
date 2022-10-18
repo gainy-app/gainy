@@ -585,7 +585,7 @@ type TradingGetCollectionDataOutput {
 type TradingCollectionVersionData {
   target_amount_delta: Float!
   created_at: String!
-  success_at: String!
+  executed_at: String!
 }
 
 type TradingCollectionHistoryOutput {

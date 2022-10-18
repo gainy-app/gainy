@@ -231,7 +231,7 @@ class PortfolioChartService:
 
         join_clause.append(
             sql.SQL(
-                "join ticker_interests on ticker_interests.symbol = portfolio_securities_normalized.ticker_symbol"
+                "join ticker_interests on ticker_interests.symbol = portfolio_expanded_transactions.symbol"
             ))
         where_clause.append(sql.SQL("interest_id in %(interest_ids)s"))
         params['interest_ids'] = tuple(filter.interest_ids)
@@ -243,7 +243,7 @@ class PortfolioChartService:
 
         join_clause.append(
             sql.SQL(
-                "join ticker_categories on ticker_categories.symbol = portfolio_securities_normalized.ticker_symbol"
+                "join ticker_categories on ticker_categories.symbol = portfolio_expanded_transactions.symbol"
             ))
         where_clause.append(sql.SQL("category_id in %(category_ids)s"))
         params['category_ids'] = tuple(filter.category_ids)
@@ -254,8 +254,7 @@ class PortfolioChartService:
             return
 
         where_clause.append(
-            sql.SQL(
-                "portfolio_securities_normalized.type in %(security_types)s"))
+            sql.SQL("profile_holdings_normalized.type in %(security_types)s"))
         params['security_types'] = tuple(filter.security_types)
 
     def _filter_query_by_ltt_only(self, params, where_clause, join_clause,
@@ -263,13 +262,7 @@ class PortfolioChartService:
         if not filter.ltt_only:
             return
         join_clause.append(
-            sql.SQL(
-                "join app.profile_holdings on profile_holdings.profile_id = profile_plaid_access_tokens.profile_id and profile_holdings.security_id = portfolio_securities_normalized.id and profile_holdings.account_id = profile_portfolio_accounts.id"
-            ))
-        join_clause.append(
-            sql.SQL(
-                "join portfolio_holding_details on portfolio_holding_details.holding_id = profile_holdings.id"
-            ))
+            sql.SQL("join portfolio_holding_details using (holding_id)"))
         where_clause.append(
             sql.SQL("portfolio_holding_details.ltt_quantity_total > 0"))
 

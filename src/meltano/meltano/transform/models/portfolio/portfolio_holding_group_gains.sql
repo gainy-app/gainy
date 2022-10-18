@@ -24,6 +24,7 @@ with ticker_holding_groups as
              from {{ ref('portfolio_holding_gains') }}
                       join {{ ref('profile_holdings_normalized') }} using (holding_id)
              where collection_id is null
+               and profile_holdings_normalized.holding_group_id is not null
              group by profile_holdings_normalized.holding_group_id, profile_holdings_normalized.profile_id, symbol
          ),
      ticker_holding_groups_with_gains as

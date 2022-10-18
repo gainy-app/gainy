@@ -9,9 +9,9 @@ with latest_open_trading_session as
          (
              select distinct on (uniq_id, period, portfolio_transaction_chart.datetime)
                  portfolio_expanded_transactions.profile_id,
-                 portfolio_securities_normalized.type,
-                 original_ticker_symbol as symbol,
-                 quantity_norm_for_valuation,
+                 profile_holdings_normalized.type,
+                 portfolio_expanded_transactions.symbol,
+                 portfolio_expanded_transactions.quantity_norm_for_valuation,
                  period,
                  portfolio_transaction_chart.datetime,
                  uniq_id,
@@ -23,15 +23,14 @@ with latest_open_trading_session as
              from portfolio_transaction_chart
                       join portfolio_expanded_transactions
                            on portfolio_expanded_transactions.uniq_id = portfolio_transaction_chart.transactions_uniq_id
-                      join portfolio_securities_normalized
-                           on portfolio_securities_normalized.id = portfolio_expanded_transactions.security_id
+                      left join profile_holdings_normalized using (holding_id)
                       left join week_trading_sessions
-                                on week_trading_sessions.symbol = original_ticker_symbol
+                                on week_trading_sessions.symbol = portfolio_expanded_transactions.symbol
                                     and portfolio_transaction_chart.datetime between week_trading_sessions.open_at and week_trading_sessions.close_at
                       left join latest_open_trading_session
-                                on latest_open_trading_session.symbol = original_ticker_symbol
-                      join app.profile_portfolio_accounts on profile_portfolio_accounts.id = portfolio_expanded_transactions.account_id
-                      join app.profile_plaid_access_tokens on profile_plaid_access_tokens.id = profile_portfolio_accounts.plaid_access_token_id
+                                on latest_open_trading_session.symbol = portfolio_expanded_transactions.symbol
+                      left join app.profile_portfolio_accounts on profile_portfolio_accounts.id = portfolio_expanded_transactions.account_id
+                      left join app.profile_plaid_access_tokens on profile_plaid_access_tokens.id = profile_portfolio_accounts.plaid_access_token_id
                       {join_clause}
              where ((period = '1d' and week_trading_sessions.index = 0)
                  or (period = '1w' and week_trading_sessions.index is not null)
@@ -129,24 +128,16 @@ with latest_open_trading_session as
              with raw_data as
                       (
                           select distinct on (
-                              profile_holdings_normalized.holding_id
-                              ) profile_holdings_normalized.profile_id,
+                              holding_id
+                              ) profile_id,
                                 case
-                                    when portfolio_securities_normalized.type = 'cash'
-                                        and portfolio_securities_normalized.ticker_symbol = 'CUR:USD'
-                                        then profile_holdings_normalized.quantity::numeric
+                                    when type = 'cash' and ticker_symbol = 'CUR:USD'
+                                        then quantity::numeric
                                     else 0
                                     end as value
                           from profile_holdings_normalized
-                                   join portfolio_securities_normalized
-                                        on portfolio_securities_normalized.id = profile_holdings_normalized.security_id
-                                   join app.profile_portfolio_accounts
-                                        on profile_portfolio_accounts.id = profile_holdings_normalized.account_id
-                                   join app.profile_plaid_access_tokens
-                                        on profile_plaid_access_tokens.id =
-                                           profile_portfolio_accounts.plaid_access_token_id
-                          where portfolio_securities_normalized.type = 'cash'
-                            and portfolio_securities_normalized.ticker_symbol = 'CUR:USD'
+                          where type = 'cash'
+                            and ticker_symbol = 'CUR:USD'
                       )
              select profile_id,
                     sum(value) as cash_value

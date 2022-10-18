@@ -39,11 +39,9 @@ from (
                 portfolio_expanded_transactions.quantity_norm_for_valuation * chart.adjusted_close        as adjusted_close
          from {{ ref('portfolio_expanded_transactions') }}
                   left join first_profile_transaction_date using (profile_id)
-                  join {{ ref('portfolio_securities_normalized') }}
-                       on portfolio_securities_normalized.id = portfolio_expanded_transactions.security_id
                   join {{ ref('chart') }}
-                       on chart.symbol = portfolio_securities_normalized.original_ticker_symbol
-                           and (chart.close_datetime > portfolio_expanded_transactions.date or portfolio_expanded_transactions.date is null)
+                       on chart.symbol = portfolio_expanded_transactions.symbol
+                           and (chart.close_datetime > portfolio_expanded_transactions.datetime or portfolio_expanded_transactions is null)
                            and (chart.close_datetime > first_profile_transaction_date.datetime or first_profile_transaction_date.profile_id is null)
      ) t
 

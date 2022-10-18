@@ -27,20 +27,6 @@ class DriveWealthProviderCollection(GainyDriveWealthProvider):
         self.repository.persist(instrument)
         return instrument
 
-    def get_collection_actual_value(self, profile_id: int, collection_id: int) -> float:
-        # user = self._get_user(collection_version.profile_id)
-        # account = self._get_trading_account(user.ref_id)
-        # profile_id = collection_version.profile_id
-        # portfolio = self._upsert_portfolio(profile_id, account)
-        chosen_fund = self._upsert_fund(profile_id, collection_version)
-
-        # self._handle_cash_amount_change(collection_version.target_amount_delta,
-        #                                 portfolio, chosen_fund)
-        #
-        # self.api.update_portfolio(portfolio)
-        # self.api.update_fund(chosen_fund)
-        # self._create_autopilot_run(account, collection_version)
-
     def reconfigure_collection_holdings(
             self, collection_version: TradingCollectionVersion):
         user = self._get_user(collection_version.profile_id)
@@ -56,9 +42,8 @@ class DriveWealthProviderCollection(GainyDriveWealthProvider):
         self.api.update_fund(chosen_fund)
         self._create_autopilot_run(account, collection_version)
 
-    def get_actual_collection_data(
-            self, profile_id: int,
-            collection_id: int) -> CollectionStatus:
+    def get_actual_collection_data(self, profile_id: int,
+                                   collection_id: int) -> CollectionStatus:
         fund = self._get_fund(profile_id, collection_id)
         if not fund:
             raise EntityNotFoundException(DriveWealthFund)
@@ -84,8 +69,7 @@ class DriveWealthProviderCollection(GainyDriveWealthProvider):
         entity.collection_version_id = collection_version.id
         self.repository.persist(entity)
 
-        entity.update_trading_collection_version(
-            collection_version)
+        entity.update_trading_collection_version(collection_version)
         self.repository.persist(collection_version)
 
         return entity
@@ -94,7 +78,9 @@ class DriveWealthProviderCollection(GainyDriveWealthProvider):
         repository = self.repository
         portfolio = repository.get_profile_portfolio(profile_id)
 
-        if not portfolio:
+        if portfolio:
+            self._sync_portfolio(portfolio)
+        else:
             name = f"Gainy profile #{profile_id}'s portfolio"
             client_portfolio_id = profile_id  # TODO change to some other entity
             description = name
@@ -237,6 +223,11 @@ class DriveWealthProviderCollection(GainyDriveWealthProvider):
         portfolio_status.set_from_response(data)
         self.repository.persist(portfolio_status)
         return portfolio_status
+
+    def _sync_portfolio(self, portfolio: DriveWealthPortfolio):
+        data = self.api.get_portfolio(portfolio)
+        portfolio.set_from_response(data)
+        self.repository.persist(portfolio)
 
     def _get_trading_account(self, user_ref_id):
         return self.repository.get_user_accounts(user_ref_id)[0]

@@ -25,17 +25,24 @@ with robinhood_options as (
 ),
      normalized_transactions as
          (
-             select id,
-                    amount,
-                    date,
-                    name,
-                    price,
-                    type,
-                    security_id,
-                    profile_id,
-                    account_id,
-                    (abs(quantity) * case when type = 'sell' then -1 else 1 end)::numeric as quantity_norm
+             select profile_portfolio_transactions.id,
+                    portfolio_securities_normalized.original_ticker_symbol as symbol,
+                    profile_portfolio_transactions.amount,
+                    profile_portfolio_transactions.date,
+                    profile_portfolio_transactions.name,
+                    profile_portfolio_transactions.price,
+                    profile_portfolio_transactions.type,
+                    profile_portfolio_transactions.security_id,
+                    profile_portfolio_transactions.profile_id,
+                    profile_portfolio_transactions.account_id,
+                    (case
+                        when profile_portfolio_transactions.type = 'sell'
+                            then -1
+                        else 1
+                        end * abs(quantity))::numeric                      as quantity_norm
              from {{ source('app', 'profile_portfolio_transactions') }}
+                   left join {{ ref('portfolio_securities_normalized') }}
+                             on portfolio_securities_normalized.id = profile_portfolio_transactions.security_id
          ),
      first_trade_date as ( select symbol, min(date) as first_trade_date from {{ ref('historical_prices') }} group by symbol ),
      first_transaction_date as
@@ -72,6 +79,7 @@ with robinhood_options as (
                               ) expanded_transactions.security_id,
                                 expanded_transactions.account_id,
                                 expanded_transactions.profile_id,
+                                portfolio_securities_normalized.original_ticker_symbol as symbol,
                                 expanded_transactions.name,
                                 expanded_transactions.rolling_quantity,
                                 historical_prices.date,
@@ -93,6 +101,7 @@ with robinhood_options as (
              select null::int                                                               as id,
                     'auto0_' || expanded_transactions_with_price.account_id || '_' ||
                     expanded_transactions_with_price.security_id                            as uniq_id,
+                    symbol,
                     expanded_transactions_with_price.adjusted_close * abs(rolling_quantity) as amount,
                     expanded_transactions_with_price.date::date                             as date,
                     expanded_transactions_with_price.adjusted_close                         as price,
@@ -188,6 +197,7 @@ with robinhood_options as (
                       )
              select null::int                                             as id,
                     'auto2_' || expanded_transactions.id                  as uniq_id,
+                    symbol,
                     historical_prices.adjusted_close * abs(sell_quantity) as amount,
                     expanded_transactions.date::date                      as date,
                     historical_prices.adjusted_close                      as price,
@@ -225,6 +235,7 @@ with robinhood_options as (
                  account_id
                  ) null::int                                    as id,
                    'auto1_' || account_id || '_' || security_id as uniq_id,
+                   original_ticker_symbol as symbol,
                    historical_prices.adjusted_close * diff      as amount,
                    historical_prices.date::date                 as date,
                    historical_prices.adjusted_close             as price,
@@ -252,7 +263,7 @@ with robinhood_options as (
                                left join expanded_transactions
                                          on profile_holdings_normalized.account_id = expanded_transactions.account_id and
                                             profile_holdings_normalized.security_id = expanded_transactions.security_id
-                      where portfolio_securities_normalized.type != 'cash'
+                      where portfolio_securities_normalized.type not in ('cash', 'ttf')
                       order by profile_holdings_normalized.account_id, profile_holdings_normalized.security_id,
                           expanded_transactions.row_num desc
                   ) t
@@ -264,11 +275,59 @@ with robinhood_options as (
              where diff > 0
              order by security_id, account_id, historical_prices.date desc
      ),
+     ttf_transactions as
+         (
+             with dw_allocations as
+                      (
+                          select tcv.profile_id,
+                                 tcv.id                              as tvc_id,
+                                 tcv.collection_id,
+                                 dar.ref_id                          as dar_ref_id,
+                                 json_array_elements(orders_outcome) as data
+                          from app.trading_collection_versions tcv
+                                   join app.drivewealth_autopilot_runs dar on dar.collection_version_id = tcv.id
+                          where tcv.status = 'EXECUTED_FULLY'
+                      ),
+                  dw_allocations_transactions as
+                      (
+                          select profile_id,
+                                 collection_id,
+                                 tvc_id || '_' || dar_ref_id ||
+                                 (dw_allocations.data ->> 'orderID')                     as uniq_id,
+                                 drivewealth_instruments.data ->> 'symbol'               as symbol,
+                                 lower(dw_allocations.data ->> 'side')                   as type,
+                                 case
+                                     when lower(dw_allocations.data ->> 'side') = 'buy'
+                                         then 1
+                                     else -1
+                                     end * (dw_allocations.data ->> 'orderQty')::numeric as quantity,
+                                 (dw_allocations.data ->> 'grossTradeAmt')::numeric /
+                                 (dw_allocations.data ->> 'orderQty')::numeric           as price,
+                                 (dw_allocations.data ->> 'executedWhen')::timestamptz   as executed_at
+                          from dw_allocations
+                                   left join app.drivewealth_instruments
+                                             on drivewealth_instruments.ref_id = dw_allocations.data ->> 'instrumentID'
+                  )
+             select 'ttf_dw_' || uniq_id as uniq_id,
+                    symbol,
+                    quantity             as quantity_norm,
+                    price,
+                    executed_at          as datetime,
+                    type,
+                    null::int            as security_id,
+                    profile_id,
+                    null::int            as account_id,
+                    collection_id
+             from dw_allocations_transactions
+     ),
      groupped_expanded_transactions as
          (
-             select sum(quantity_norm) * sum(abs(quantity_norm) * price) /
+             select t.symbol,
+                    sum(quantity_norm) * sum(abs(quantity_norm) * price) /
                     sum(abs(quantity_norm))                                   as amount,
                     sum(abs(quantity_norm) * price) / sum(abs(quantity_norm)) as price,
+                    coalesce(min(plaid_holdings.holding_id),
+                             min(dw_holdings.holding_id))                     as holding_id,
                     t.security_id,
                     t.profile_id,
                     t.account_id,
@@ -287,60 +346,122 @@ with robinhood_options as (
                                       then 100
                                   else 1 end)                                 as quantity_norm_for_valuation, -- to multiple by price
                     max(uniq_id)::varchar                                     as uniq_id,
-                    t.date
+                    t.datetime
              from (
-                      select *
+                      select id,
+                             uniq_id,
+                             symbol,
+                             amount,
+                             date as datetime,
+                             price,
+                             type,
+                             security_id,
+                             profile_id,
+                             account_id,
+                             null::int as collection_id,
+                             quantity_norm
                       from mismatched_sell_transactions
 
                       union all
 
-                      select *
+                      select id,
+                             uniq_id,
+                             symbol,
+                             amount,
+                             date as datetime,
+                             price,
+                             type,
+                             security_id,
+                             profile_id,
+                             account_id,
+                             null::int as collection_id,
+                             quantity_norm
                       from mismatched_buy_transactions
 
                       union all
 
-                      select *
+                      select id,
+                             uniq_id,
+                             symbol,
+                             amount,
+                             date as datetime,
+                             price,
+                             type,
+                             security_id,
+                             profile_id,
+                             account_id,
+                             null::int as collection_id,
+                             quantity_norm
                       from mismatched_holdings_transactions
 
                       union all
 
                       select id,
                              id || '_' || account_id || '_' || security_id as uniq_id,
+                             symbol,
                              amount,
-                             date,
+                             date as datetime,
                              price,
                              type,
                              security_id,
                              profile_id,
                              account_id,
+                             null::int as collection_id,
                              quantity_norm
                       from normalized_transactions
+
+                      union all
+
+                      select null as id,
+                             uniq_id,
+                             symbol,
+                             quantity_norm * price as amount,
+                             datetime,
+                             price,
+                             type,
+                             security_id,
+                             profile_id,
+                             account_id,
+                             collection_id,
+                             quantity_norm
+                      from ttf_transactions
                   ) t
-                      join {{ ref('portfolio_securities_normalized') }}
-                           on portfolio_securities_normalized.id = t.security_id
+                      left join {{ ref('base_tickers') }} using (symbol)
+                      left join {{ ref('ticker_options') }} on ticker_options.contract_name = t.symbol
+                      left join {{ ref('profile_holdings_normalized') }} plaid_holdings using (profile_id, security_id, account_id)
+                      left join {{ ref('profile_holdings_normalized') }} dw_holdings
+                                on dw_holdings.profile_id = t.profile_id
+                                    and dw_holdings.collection_id = t.collection_id
+                                    and dw_holdings.ticker_symbol = t.symbol
+                      left join {{ ref('portfolio_securities_normalized') }}
+                                on portfolio_securities_normalized.id = t.security_id
                       left join {{ source('app', 'profile_portfolio_accounts') }} on profile_portfolio_accounts.id = t.account_id
                       left join {{ source('app', 'profile_plaid_access_tokens') }} on profile_plaid_access_tokens.id = profile_portfolio_accounts.plaid_access_token_id
                       left join {{ source('app', 'plaid_institutions') }} on plaid_institutions.id = profile_plaid_access_tokens.institution_id
+
                       left join robinhood_options on robinhood_options.profile_id = t.profile_id
              where t.type in ('buy', 'sell')
-             group by t.date, t.security_id, t.account_id, t.profile_id
+               and (base_tickers is not null or ticker_options is not null)
+             group by t.datetime, t.security_id, t.account_id, t.profile_id, t.symbol, t.symbol
              having sum(abs(quantity_norm)) > 0
          )
-select groupped_expanded_transactions.amount,
+select groupped_expanded_transactions.symbol,
+       groupped_expanded_transactions.amount,
        groupped_expanded_transactions.price,
        groupped_expanded_transactions.quantity_norm as quantity,
+       groupped_expanded_transactions.holding_id,
        groupped_expanded_transactions.security_id,
        groupped_expanded_transactions.profile_id,
        groupped_expanded_transactions.account_id,
        groupped_expanded_transactions.quantity_norm,
        groupped_expanded_transactions.quantity_norm_for_valuation,
        groupped_expanded_transactions.uniq_id,
-       groupped_expanded_transactions.date,
+       groupped_expanded_transactions.datetime,
 {% if is_incremental() %}
        case
-           when old_portfolio_expanded_transactions.quantity_norm = groupped_expanded_transactions.quantity_norm
-            and (old_portfolio_expanded_transactions.date = groupped_expanded_transactions.date or (old_portfolio_expanded_transactions.date is null and groupped_expanded_transactions.date is null))
-               then old_portfolio_expanded_transactions.updated_at
+           when old_data.quantity_norm = groupped_expanded_transactions.quantity_norm
+            and (old_data.datetime = groupped_expanded_transactions.datetime or (old_data.datetime is null and groupped_expanded_transactions.datetime is null))
+               then old_data.updated_at
            else now()
            end as updated_at,
 {% else %}
@@ -349,5 +470,5 @@ select groupped_expanded_transactions.amount,
        now() as last_seen_at
 from groupped_expanded_transactions
 {% if is_incremental() %}
-         left join {{ this }} old_portfolio_expanded_transactions using (uniq_id)
+         left join {{ this }} old_data using (uniq_id)
 {% endif %}

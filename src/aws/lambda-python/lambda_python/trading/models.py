@@ -132,7 +132,7 @@ class TradingMoneyFlow(BaseModel):
 
 class TradingCollectionVersionStatus(enum.Enum):
     PENDING = "PENDING"
-    SUCCESS = "SUCCESS"
+    EXECUTED_FULLY = "EXECUTED_FULLY"
     FAILED = "FAILED"
 
 
@@ -144,7 +144,7 @@ class TradingCollectionVersion(BaseModel):
     target_amount_delta = None
     weights: Dict[str, Decimal] = None
     created_at = None
-    success_at = None
+    executed_at = None
     updated_at = None
 
     key_fields = ["id"]
@@ -178,9 +178,9 @@ class TradingCollectionVersion(BaseModel):
 
     def set_status(self, status: TradingCollectionVersionStatus):
         self.status = status
-        if status == TradingCollectionVersionStatus.SUCCESS:
+        if status == TradingCollectionVersionStatus.EXECUTED_FULLY:
             # TODO set from actual autopilot execution data
-            self.success_at = datetime.datetime.now()
+            self.executed_at = datetime.datetime.now()
 
 
 class CollectionHoldingStatus:

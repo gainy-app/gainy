@@ -68,12 +68,12 @@ query TradingGetCollectionData($profile_id: Int!, $collection_id: Int!) {
     history {
       pending {
         created_at
-        success_at
+        executed_at
         target_amount_delta
       }
       successful {
         created_at
-        success_at
+        executed_at
         target_amount_delta
       }
     }

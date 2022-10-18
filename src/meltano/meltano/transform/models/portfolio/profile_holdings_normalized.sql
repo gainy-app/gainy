@@ -42,6 +42,7 @@ select 'ticker_' || profile_holdings.profile_id ||
                      else 1 end                                          as quantity_norm_for_valuation, -- to multiple by price
        coalesce(base_tickers.name, portfolio_securities_normalized.name) as name,
        portfolio_securities_normalized.ticker_symbol,
+       portfolio_securities_normalized.original_ticker_symbol,
        null                                                              as collection_id,
        portfolio_securities_normalized.type
 from {{ source('app', 'profile_holdings') }}
@@ -67,6 +68,7 @@ select 'ttf_' || profile_id || '_' || collection_id                  as holding_
        1                                                             as quantity_norm_for_valuation,
        base_tickers.name                                             as name,
        symbol                                                        as ticker_symbol,
+       symbol                                                        as original_ticker_symbol,
        collection_id,
        'ttf'                                                         as type
 from {{ ref('drivewealth_holdings') }}

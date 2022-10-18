@@ -125,6 +125,10 @@ class DriveWealthApi(GainyDriveWealthApi):
                 }],
             })
 
+    def get_portfolio(self, portfolio: DriveWealthPortfolio):
+        return self._make_request("GET",
+                                  f"/managed/portfolios/{portfolio.ref_id}")
+
     def get_portfolio_status(self, portfolio: DriveWealthPortfolio):
         return self._make_request(
             "GET", f"/accounts/{portfolio.drivewealth_account_id}/portfolio")

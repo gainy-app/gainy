@@ -3,6 +3,7 @@ from decimal import Decimal
 from typing import List
 
 from gainy.exceptions import NotFoundException
+from gainy.trading.drivewealth.exceptions import DriveWealthApiException
 from portfolio.plaid import PlaidService
 from portfolio.plaid.models import PlaidAccessToken
 from trading.models import TradingMoneyFlow, FundingAccount, TradingCollectionVersion
@@ -132,7 +133,7 @@ class DriveWealthProvider(DriveWealthProviderKYC,
         self._sync_bank_accounts(user.ref_id)
         self._sync_user_deposits(user.ref_id)
         # self._sync_documents(user.ref_id)
-        self._sync_portfolio_statuses(profile_id)
+        self._sync_portfolios(profile_id)
         # self._sync_redemptions(user.ref_id)
         # self._sync_users(user.ref_id)
 
@@ -190,7 +191,12 @@ class DriveWealthProvider(DriveWealthProviderKYC,
 
     def sync_autopilot_run(self, entity: DriveWealthAutopilotRun):
         repository = self.repository
-        data = self.api.get_autopilot_run(entity.ref_id)
+        try:
+            data = self.api.get_autopilot_run(entity.ref_id)
+        except DriveWealthApiException as e:
+            logger.warning(e)
+            return
+
         entity.set_from_response(data)
         repository.persist(entity)
 
@@ -198,8 +204,7 @@ class DriveWealthProvider(DriveWealthProviderKYC,
             return
 
         trading_collection_version = repository.find_one(
-            TradingCollectionVersion,
-            {"id": entity.collection_version_id})
+            TradingCollectionVersion, {"id": entity.collection_version_id})
 
         entity.update_trading_collection_version(trading_collection_version)
         repository.persist(trading_collection_version)
@@ -217,12 +222,13 @@ class DriveWealthProvider(DriveWealthProviderKYC,
             for entity in autopilot_runs:
                 self.sync_autopilot_run(entity)
 
-    def _sync_portfolio_statuses(self, profile_id):
+    def _sync_portfolios(self, profile_id):
         repository = self.repository
 
         portfolios: List[DriveWealthPortfolio] = repository.find_all(
             DriveWealthPortfolio, {"profile_id": profile_id})
         for portfolio in portfolios:
+            self._sync_portfolio(portfolio)
             self._get_portfolio_status(portfolio)
 
     def _update_money_flow_status(self, entity, money_flow: TradingMoneyFlow):

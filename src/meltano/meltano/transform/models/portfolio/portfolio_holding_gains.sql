@@ -44,26 +44,22 @@ with relative_data as
      long_term_tax_holdings as
          (
              select distinct on (
-                 holding_group_id,
                  holding_id
-                 ) holding_group_id,
-                   holding_id,
+                 ) holding_id,
                    ltt_quantity_total::double precision
              from (
-                      select profile_holdings_normalized.holding_group_id,
-                             profile_holdings_normalized.holding_id,
+                      select profile_holdings_normalized.holding_id,
                              quantity_sign,
-                             date,
-                             min(cumsum)
-                             over (partition by t.profile_id, t.security_id order by t.quantity_sign, date rows between current row and unbounded following) as ltt_quantity_total
+                             datetime,
+                             min(cumsum) over wnd as ltt_quantity_total
                       from (
                                select portfolio_expanded_transactions.profile_id,
                                       security_id,
                                       portfolio_expanded_transactions.account_id,
-                                      date,
+                                      datetime,
                                       sign(quantity_norm)                                                                                                    as quantity_sign,
                                       sum(quantity_norm)
-                                      over (partition by security_id, portfolio_expanded_transactions.profile_id order by sign(quantity_norm), date)         as cumsum
+                                      over (partition by security_id, portfolio_expanded_transactions.profile_id order by sign(quantity_norm), datetime)     as cumsum
                                from {{ ref('portfolio_expanded_transactions') }}
                                where portfolio_expanded_transactions.profile_id is not null
                            ) t
@@ -71,9 +67,12 @@ with relative_data as
                                     on profile_holdings_normalized.profile_id = t.profile_id
                                         and profile_holdings_normalized.security_id = t.security_id
                                         and profile_holdings_normalized.account_id = t.account_id
+                      window wnd as (partition by t.profile_id, t.security_id
+                                     order by t.quantity_sign, datetime
+                                     rows between current row and unbounded following)
                   ) t
-             where date < now() - interval '1 year'
-             order by holding_group_id, holding_id, quantity_sign desc, date desc
+             where datetime < now() - interval '1 year'
+             order by holding_id, quantity_sign desc, datetime desc
      ),
      all_rows as
          (
@@ -98,7 +97,7 @@ with relative_data as
                     (actual_price * (1 - 1 / (1 + relative_gain_total)))::double precision as absolute_gain_total,
                     coalesce(long_term_tax_holdings.ltt_quantity_total, 0)                 as ltt_quantity_total
              from relative_data
-                      left join long_term_tax_holdings using (holding_group_id, holding_id)
+                      left join long_term_tax_holdings using (holding_id)
 
              union all
 

@@ -14,14 +14,13 @@ with raw_data_0d as
                     date  as date_0d,
                     value as value_0d,
                     updated_at
-             from collection_historical_values
+             from {{ ref('collection_historical_values') }}
                       join (
                                select collection_uniq_id,
                                       max(collection_historical_values.date) as date
-                               from collection_historical_values
+                               from {{ ref('collection_historical_values') }}
                                group by collection_uniq_id
-                           ) t
-                           using (collection_uniq_id, date)
+                           ) t using (collection_uniq_id, date)
          ),
      raw_data_1w as
          (
@@ -32,12 +31,11 @@ with raw_data_0d as
                       left join (
                                     select collection_uniq_id,
                                            max(collection_historical_values.date) as date
-                                    from collection_historical_values
+                                    from {{ ref('collection_historical_values') }}
                                     where date < now()::date - interval '1 week'
                                     group by collection_uniq_id
-                                ) t
-                                using (collection_uniq_id)
-                      left join collection_historical_values using (collection_uniq_id, date)
+                                ) t using (collection_uniq_id)
+                      left join {{ ref('collection_historical_values') }} using (collection_uniq_id, date)
      ),
      raw_data_10d as
          (
@@ -47,7 +45,7 @@ with raw_data_0d as
                    collection_historical_values.date  as date_10d,
                    collection_historical_values.value as value_10d
              from raw_data_1w
-                      left join collection_historical_values
+                      left join {{ ref('collection_historical_values') }}
                                 on collection_historical_values.collection_uniq_id = raw_data_1w.collection_uniq_id
                                     and date < now()::date - interval '10 days'
                                     and date > now()::date - interval '10 days' - interval '1 week'
@@ -61,7 +59,7 @@ with raw_data_0d as
                    collection_historical_values.date  as date_1m,
                    collection_historical_values.value as value_1m
              from raw_data_10d
-                      left join collection_historical_values
+                      left join {{ ref('collection_historical_values') }}
                                 on collection_historical_values.collection_uniq_id = raw_data_10d.collection_uniq_id
                                     and date < now()::date - interval '1 month'
                                     and date > now()::date - interval '1 month' - interval '1 week'
@@ -75,7 +73,7 @@ with raw_data_0d as
                    collection_historical_values.date  as date_2m,
                    collection_historical_values.value as value_2m
              from raw_data_1m
-                      left join collection_historical_values
+                      left join {{ ref('collection_historical_values') }}
                                 on collection_historical_values.collection_uniq_id = raw_data_1m.collection_uniq_id
                                     and date < now()::date - interval '2 month'
                                     and date > now()::date - interval '2 month' - interval '1 week'
@@ -89,7 +87,7 @@ with raw_data_0d as
                    collection_historical_values.date  as date_3m,
                    collection_historical_values.value as value_3m
              from raw_data_2m
-                      left join collection_historical_values
+                      left join {{ ref('collection_historical_values') }}
                                 on collection_historical_values.collection_uniq_id = raw_data_2m.collection_uniq_id
                                     and date < now()::date - interval '3 month'
                                     and date > now()::date - interval '3 month' - interval '1 week'
@@ -104,11 +102,11 @@ with raw_data_0d as
                       left join (
                                     select collection_uniq_id,
                                            max(collection_historical_values.date) as date
-                                    from collection_historical_values
+                                    from {{ ref('collection_historical_values') }}
                                     where date < now()::date - interval '1 year'
                                     group by collection_uniq_id
                                 ) t using (collection_uniq_id)
-                      left join collection_historical_values using (collection_uniq_id, date)
+                      left join {{ ref('collection_historical_values') }} using (collection_uniq_id, date)
      ),
      raw_data_13m as
          (
@@ -118,7 +116,7 @@ with raw_data_0d as
                    collection_historical_values.date  as date_13m,
                    collection_historical_values.value as value_13m
              from raw_data_1y
-                      left join collection_historical_values
+                      left join {{ ref('collection_historical_values') }}
                                 on collection_historical_values.collection_uniq_id = raw_data_1y.collection_uniq_id
                                     and date < now()::date - interval '13 month'
                                     and date > now()::date - interval '13 month' - interval '1 week'
@@ -132,7 +130,7 @@ with raw_data_0d as
                    collection_historical_values.date  as date_5y,
                    collection_historical_values.value as value_5y
              from raw_data_13m
-                      left join collection_historical_values
+                      left join {{ ref('collection_historical_values') }}
                                 on collection_historical_values.collection_uniq_id = raw_data_13m.collection_uniq_id
                                     and date < now()::date - interval '5 year'
                                     and date > now()::date - interval '5 year' - interval '1 week'
@@ -147,11 +145,11 @@ with raw_data_0d as
                       join (
                                select collection_uniq_id,
                                       min(collection_historical_values.date) as date
-                               from collection_historical_values
+                               from {{ ref('collection_historical_values') }}
                                group by collection_uniq_id
                            ) t
                            using (collection_uniq_id)
-                      join collection_historical_values using (collection_uniq_id, date)
+                      join {{ ref('collection_historical_values') }} using (collection_uniq_id, date)
      )
 select collection_uniq_id,
        date_0d,

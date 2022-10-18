@@ -21,7 +21,8 @@ class TradingReconfigureCollectionHoldings(HasuraAction):
         target_amount_delta = Decimal(input_params['target_amount_delta'])
 
         if not weights:
-            weights = context_container.trading_repository.get_collection_actual_weights(collection_id)
+            weights = context_container.trading_repository.get_collection_actual_weights(
+                collection_id)
         weights = {i["symbol"]: Decimal(i["weight"]) for i in weights}
 
         trading_service = context_container.trading_service

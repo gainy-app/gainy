@@ -27,7 +27,7 @@ with latest_portfolio_status as
                     drivewealth_funds.collection_id,
                     json_array_elements(portfolio_holding_data -> 'holdings') as fund_holding_data
              from portfolio_funds
-                      join app.drivewealth_funds on drivewealth_funds.ref_id = portfolio_holding_data ->> 'id'
+                      join {{ source('app', 'drivewealth_funds') }} on drivewealth_funds.ref_id = portfolio_holding_data ->> 'id'
              where portfolio_holding_data ->> 'type' != 'CASH_RESERVE'
      ),
      base_tickers_type_to_security_type as
@@ -55,7 +55,7 @@ select 'ttf_' || profile_id || '_' || collection_id                             
        null::timestamp                                                               as updated_at,
        collection_id
 from fund_holdings
-         left join base_tickers
+         left join {{ ref('base_tickers') }}
                    on base_tickers.symbol = fund_holding_data ->> 'symbol'
          left join base_tickers_type_to_security_type using (type)
 

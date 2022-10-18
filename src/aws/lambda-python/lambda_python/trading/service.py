@@ -172,11 +172,12 @@ class TradingService(GainyTradingService):
     # TODO deprecated ?
     def get_actual_collection_holdings(
             self, profile_id, collection_id) -> List[CollectionHoldingStatus]:
-        collection_status: CollectionStatus = self._get_provider_service().get_actual_collection_data(
-            profile_id, collection_id)
+        collection_status: CollectionStatus = self._get_provider_service(
+        ).get_actual_collection_data(profile_id, collection_id)
         return collection_status.holdings
 
-    def get_actual_collection_status(self, profile_id: int, collection_id: int) -> CollectionStatus:
+    def get_actual_collection_status(self, profile_id: int,
+                                     collection_id: int) -> CollectionStatus:
         return self._get_provider_service().get_actual_collection_data(
             profile_id, collection_id)
 

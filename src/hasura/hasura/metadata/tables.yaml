@@ -1680,11 +1680,11 @@
       using:
         manual_configuration:
           column_mapping:
-            holding_id: id
+            holding_id: holding_id
           insertion_order: null
           remote_table:
-            name: profile_holdings
-            schema: app
+            name: profile_holdings_normalized
+            schema: public
     - name: ticker
       using:
         manual_configuration:
@@ -1729,11 +1729,11 @@
       using:
         manual_configuration:
           column_mapping:
-            holding_id: id
+            holding_id: holding_id
           insertion_order: null
           remote_table:
-            name: profile_holdings
-            schema: app
+            name: profile_holdings_normalized
+            schema: public
   select_permissions:
     - role: user
       permission:

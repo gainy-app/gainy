@@ -254,25 +254,22 @@ with all_push_notifications as
                      with raw_positions as
                               (
                                   select profile_id,
-                                         portfolio_expanded_transactions.date,
+                                         portfolio_expanded_transactions.datetime,
                                          quantity_norm,
                                          original_ticker_symbol,
                                          sum(case when quantity_norm > 0 then abs(amount) end)
-                                         over (partition by profile_id, account_id, security_id order by portfolio_expanded_transactions.date, quantity_norm desc) as cost_sum,
+                                         over (partition by profile_id, account_id, security_id order by portfolio_expanded_transactions.datetime, quantity_norm desc) as cost_sum,
                                          sum(case when quantity_norm < 0 then abs(amount) end)
-                                         over (partition by profile_id, account_id, security_id order by portfolio_expanded_transactions.date, quantity_norm desc) as take_profit_sum,
+                                         over (partition by profile_id, account_id, security_id order by portfolio_expanded_transactions.datetime, quantity_norm desc) as take_profit_sum,
                                          sum(quantity_norm)
-                                         over (partition by profile_id, account_id, security_id order by portfolio_expanded_transactions.date, quantity_norm desc) as quantity_sum,
+                                         over (partition by profile_id, account_id, security_id order by portfolio_expanded_transactions.datetime, quantity_norm desc) as quantity_sum,
                                          sum((uniq_id like 'auto%')::int)
-                                         over (partition by profile_id, account_id, security_id order by portfolio_expanded_transactions.date, quantity_norm desc) as auto_cnt,
+                                         over (partition by profile_id, account_id, security_id order by portfolio_expanded_transactions.datetime, quantity_norm desc) as auto_cnt,
                                          account_id,
                                          security_id
                                   from {{ ref('portfolio_expanded_transactions') }}
                                            join {{ ref('portfolio_securities_normalized') }}
                                                 on portfolio_securities_normalized.id = portfolio_expanded_transactions.security_id
-                                           left join {{ ref('historical_prices') }}
-                                                     on historical_prices.symbol = portfolio_securities_normalized.original_ticker_symbol
-                                                         and historical_prices.date = portfolio_expanded_transactions.date
                               ),
                           distinct_positions as
                               (
@@ -285,7 +282,7 @@ with all_push_notifications as
                                         quantity_sum,
                                         auto_cnt
                                   from raw_positions
-                                  order by profile_id, account_id, security_id, date desc, quantity_norm
+                                  order by profile_id, account_id, security_id, datetime desc, quantity_norm
                               ),
                          positions_with_profit as
                              (
