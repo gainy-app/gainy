@@ -54,6 +54,7 @@ sources:
       - name: analytics_profiles
       - name: drivewealth_accounts
       - name: drivewealth_accounts_positions
+      - name: drivewealth_autopilot_runs
       - name: drivewealth_funds
       - name: drivewealth_users
       - name: drivewealth_portfolio_statuses
