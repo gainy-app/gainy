@@ -894,11 +894,11 @@ models:
       - name: holding_id
         tests:
           - type:
-              type: 'integer'
+              type: 'text'
       - name: updated_at
         tests:
           - type:
-              type: 'timestamp without time zone'
+              type: 'timestamp with time zone'
       - name: actual_value
         tests:
           - type:
@@ -985,7 +985,7 @@ models:
       - name: updated_at
         tests:
           - type:
-              type: 'timestamp without time zone'
+              type: 'timestamp with time zone'
       - name: actual_value
         tests:
           - type:
@@ -1060,7 +1060,7 @@ models:
       - name: holding_id
         tests:
           - type:
-              type: 'integer'
+              type: 'text'
       - name: ticker_symbol
         tests:
           - type:
@@ -1183,7 +1183,7 @@ models:
       - name: updated_at
         tests:
           - type:
-              type: 'timestamp without time zone'
+              type: 'timestamp with time zone'
       - name: relative_gain_1d
         tests:
           - type:
@@ -1885,7 +1885,7 @@ models:
       - name: holding_id
         tests:
           - type:
-              type: 'integer'
+              type: 'text'
       - name: plaid_access_token_id
         tests:
           - type:
