@@ -76,6 +76,7 @@ sources:
       - name: profile_ticker_match_score
       - name: profiles
       - name: subscriptions
+      - name: trading_collection_versions
 
   - name: website
     description: Website data, managed by webflow integrations at gainy.app
