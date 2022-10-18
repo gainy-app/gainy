@@ -256,8 +256,8 @@ with robinhood_options as (
                             profile_first_transaction_date,
                             profile_holdings_normalized.quantity::numeric -
                             coalesce(expanded_transactions.rolling_quantity, 0) as diff
-                      from profile_holdings_normalized
-                               join portfolio_securities_normalized
+                      from {{ ref('profile_holdings_normalized') }}
+                               join {{ ref('portfolio_securities_normalized') }}
                                     on portfolio_securities_normalized.id = profile_holdings_normalized.security_id
                                left join first_transaction_date using (profile_id)
                                left join expanded_transactions
@@ -268,7 +268,7 @@ with robinhood_options as (
                           expanded_transactions.row_num desc
                   ) t
                       left join first_trade_date on first_trade_date.symbol = original_ticker_symbol
-                      left join historical_prices
+                      left join {{ ref('historical_prices') }}
                                 on historical_prices.symbol = original_ticker_symbol and
                                    (historical_prices.date between profile_first_transaction_date - interval '1 week' and profile_first_transaction_date or
                                     historical_prices.date = first_trade_date.first_trade_date)
@@ -284,8 +284,8 @@ with robinhood_options as (
                                  tcv.collection_id,
                                  dar.ref_id                          as dar_ref_id,
                                  json_array_elements(orders_outcome) as data
-                          from app.trading_collection_versions tcv
-                                   join app.drivewealth_autopilot_runs dar on dar.collection_version_id = tcv.id
+                          from {{ source('app', 'trading_collection_versions') }} tcv
+                                   join {{ source('app', 'drivewealth_autopilot_runs') }} dar on dar.collection_version_id = tcv.id
                           where tcv.status = 'EXECUTED_FULLY'
                       ),
                   dw_allocations_transactions as
@@ -305,7 +305,7 @@ with robinhood_options as (
                                  (dw_allocations.data ->> 'orderQty')::numeric           as price,
                                  (dw_allocations.data ->> 'executedWhen')::timestamptz   as executed_at
                           from dw_allocations
-                                   left join app.drivewealth_instruments
+                                   left join {{ source('app', 'drivewealth_instruments') }}
                                              on drivewealth_instruments.ref_id = dw_allocations.data ->> 'instrumentID'
                   )
              select 'ttf_dw_' || uniq_id as uniq_id,
