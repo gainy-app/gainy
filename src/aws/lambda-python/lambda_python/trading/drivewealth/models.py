@@ -426,10 +426,11 @@ class DriveWealthAutopilotRun(BaseDriveWealthModel):
         self.status = data["status"]
         self.data = data
 
-        # TODO remove verify after DW fixes cert issue
-        # TODO move to SQS
-        self.orders_outcome = requests.get(self.data["orders"]["outcome"],
-                                           verify=False).text
+        if "orders" in self.data:
+            # TODO remove verify after DW fixes cert issue
+            # TODO move to SQS
+            self.orders_outcome = requests.get(self.data["orders"]["outcome"],
+                                               verify=False).text
 
     @classproperty
     def table_name(self) -> str:
