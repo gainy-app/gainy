@@ -425,7 +425,6 @@ class DriveWealthAutopilotRun(BaseDriveWealthModel):
         self.ref_id = data["id"]
         self.status = data["status"]
         self.data = data
-        print(self.data["allocations"]["outcome"])
 
         # TODO remove verify after DW fixes cert issue
         # TODO move to SQS
