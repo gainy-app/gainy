@@ -337,7 +337,8 @@ class DriveWealthPortfolio(BaseDriveWealthModel):
             if i["type"] == "CASH_RESERVE":
                 self.cash_target_weight = i["target"]
             else:
-                self.holdings[i["id"]] = i["target"]
+                fund_id = i.get("id") or i.get("instrumentID")
+                self.holdings[fund_id] = i["target"]
 
     def set_target_weights_from_status_actual_weights(
             self, portfolio_status: DriveWealthPortfolioStatus):
