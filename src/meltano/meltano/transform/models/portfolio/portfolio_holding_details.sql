@@ -1,10 +1,10 @@
 {{
   config(
     materialized = "incremental",
-    unique_key = "holding_id",
+    unique_key = "holding_id_v2",
     tags = ["realtime"],
     post_hook=[
-      index('holding_id', true),
+      index('holding_id_v2', true),
       index('ticker_symbol'),
     ]
   )
@@ -14,7 +14,7 @@ with first_purchase_date as
          (
              select distinct on (
                  profile_holdings.id
-                 ) profile_holdings.id as plaid_holding_id,
+                 ) profile_holdings.id as holding_id,
                    date
              from {{ source('app', 'profile_portfolio_transactions') }}
                       join {{ source('app', 'profile_holdings') }}
@@ -31,27 +31,28 @@ with first_purchase_date as
              where report_date >= now()
              group by symbol
          )
-select profile_holdings_normalized.holding_id,
-       portfolio_securities_normalized.original_ticker_symbol as ticker_symbol,
+select profile_holdings_normalized.holding_id_v2,
+       profile_holdings_normalized.holding_id,
+       profile_holdings_normalized.symbol              as ticker_symbol,
        profile_holdings_normalized.account_id,
-       first_purchase_date.date::timestamp                    as purchase_date,
+       first_purchase_date.date::timestamp             as purchase_date,
        relative_gain_total,
        relative_gain_1d,
        portfolio_holding_gains.value_to_portfolio_value,
        coalesce(ticker_options.name, base_tickers.name,
-                portfolio_securities_normalized.name)         as ticker_name,
+                portfolio_securities_normalized.name)  as ticker_name,
        ticker_metrics.market_capitalization,
-       next_earnings_date.date::timestamp                     as next_earnings_date,
-       portfolio_securities_normalized.type                   as security_type,
+       next_earnings_date.date::timestamp              as next_earnings_date,
+       portfolio_securities_normalized.type            as security_type,
        portfolio_holding_gains.ltt_quantity_total,
        profile_holdings_normalized.name,
        profile_holdings_normalized.quantity,
-       (actual_value - absolute_gain_total) / quantity        as avg_cost
+       (actual_value - absolute_gain_total) / quantity as avg_cost
 from {{ ref('profile_holdings_normalized') }}
-         left join first_purchase_date using (plaid_holding_id)
-         left join {{ ref('portfolio_holding_gains') }} on portfolio_holding_gains.holding_id = profile_holdings_normalized.holding_id
+         left join first_purchase_date using (holding_id)
+         left join {{ ref('portfolio_holding_gains') }} using (holding_id_v2)
          left join {{ ref('portfolio_securities_normalized') }} on portfolio_securities_normalized.id = profile_holdings_normalized.security_id
-         left join {{ ref('base_tickers') }} on base_tickers.symbol = portfolio_securities_normalized.ticker_symbol
+         left join {{ ref('base_tickers') }} on base_tickers.symbol = profile_holdings_normalized.ticker_symbol
          left join next_earnings_date on next_earnings_date.symbol = base_tickers.symbol
          left join {{ ref('ticker_metrics') }} on ticker_metrics.symbol = base_tickers.symbol
-         left join {{ ref('ticker_options') }} on ticker_options.contract_name = portfolio_securities_normalized.original_ticker_symbol
+         left join {{ ref('ticker_options') }} on ticker_options.contract_name = profile_holdings_normalized.symbol

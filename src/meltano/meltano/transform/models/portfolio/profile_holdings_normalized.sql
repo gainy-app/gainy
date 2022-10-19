@@ -1,76 +1,83 @@
 {{
   config(
-    materialized = "view",
-    tags = ["view"],
+    materialized = "incremental",
+    unique_key = "holding_id_v2",
+    tags = ["realtime"],
+    post_hook=[
+      pk('holding_id_v2'),
+      'delete from {{this}} where updated_at < (select max(updated_at) from {{this}})',
+      'create index if not exists "phn_profile_id_security_id_account_id" ON {{ this }} (profile_id, security_id, account_id)',
+      'create index if not exists "phn_profile_id_collection_id_symbol" ON {{ this }} (profile_id, collection_id, symbol)',
+      fk('holding_id', 'app', 'profile_holdings', 'id'),
+      fk('plaid_access_token_id', 'app', 'profile_plaid_access_tokens', 'id'),
+      fk('security_id', this.schema, 'portfolio_securities_normalized', 'id'),
+      fk('profile_id', 'app', 'profiles', 'id'),
+      fk('account_id', 'app', 'profile_portfolio_accounts', 'id'),
+    ]
   )
 }}
 
-with robinhood_options as (
-    select profile_holdings.profile_id,
-           sum(mod(profile_holdings.quantity::int, 100)) as quantity_module_sum
-    from {{ source('app', 'profile_holdings') }}
-             join {{ source('app', 'portfolio_securities') }} on portfolio_securities.id = profile_holdings.security_id
-             left join {{ source('app', 'profile_plaid_access_tokens') }} on profile_plaid_access_tokens.id = profile_holdings.plaid_access_token_id
-             left join {{ source('app', 'plaid_institutions') }} on plaid_institutions.id = profile_plaid_access_tokens.institution_id
-    where portfolio_securities.type = 'derivative'
-      and plaid_institutions.ref_id = 'ins_54'
-    group by profile_holdings.profile_id
+
+with data as
+    (
+        select 'ticker_' || profile_holdings.profile_id ||
+               '_' || portfolio_securities_normalized.ticker_symbol              as holding_group_id,
+               profile_holdings.profile_id ||
+               '_plaid_' || profile_holdings.id                                  as holding_id_v2,
+               profile_holdings.id                                               as holding_id,
+               profile_holdings.plaid_access_token_id,
+               profile_holdings.security_id,
+               profile_holdings.profile_id,
+               profile_holdings.account_id,
+               profile_holdings.quantity                                         as quantity,
+               profile_holdings.quantity * case
+                             when portfolio_securities_normalized.type = 'derivative'
+                                 then 100
+                             else 1 end                                          as quantity_norm_for_valuation, -- to multiple by price
+               coalesce(base_tickers.name, portfolio_securities_normalized.name) as name,
+               portfolio_securities_normalized.original_ticker_symbol            as symbol,
+               portfolio_securities_normalized.ticker_symbol,
+               null                                                              as collection_id,
+               portfolio_securities_normalized.type,
+               greatest(profile_holdings.updated_at,
+                        portfolio_securities_normalized.updated_at,
+                        base_tickers.updated_at)                                 as updated_at
+        from {{ source('app', 'profile_holdings') }}
+                 join {{ ref('portfolio_securities_normalized') }}
+                      on portfolio_securities_normalized.id = profile_holdings.security_id
+                 left join {{ ref('base_tickers') }}
+                      on base_tickers.symbol = portfolio_securities_normalized.ticker_symbol
+                 left join {{ source('app', 'profile_plaid_access_tokens') }} on profile_plaid_access_tokens.id = profile_holdings.plaid_access_token_id
+                 left join {{ source('app', 'plaid_institutions') }} on plaid_institutions.id = profile_plaid_access_tokens.institution_id
+        where profile_holdings.quantity > 0
+
+        union all
+
+        select 'ttf_' || profile_id || '_' || collection_id                  as holding_group_id,
+               'ttf_' || profile_id || '_' || collection_id || '_' || symbol as holding_id_v2,
+               null                                                          as holding_id,
+               null                                                          as plaid_access_token_id,
+               null                                                          as security_id,
+               profile_id,
+               null                                                          as account_id,
+               quantity,
+               quantity_norm_for_valuation,
+               base_tickers.name                                             as name,
+               symbol,
+               symbol                                                        as ticker_symbol,
+               collection_id,
+               'ttf'                                                         as type,
+               greatest(drivewealth_holdings.updated_at,
+                        base_tickers.updated_at)                             as updated_at
+        from {{ ref('drivewealth_holdings') }}
+                 left join {{ ref('base_tickers') }} using (symbol)
+        where collection_id is not null
 )
+select data.*
+from data
 
-select 'ticker_' || profile_holdings.profile_id ||
-       '_' || portfolio_securities_normalized.ticker_symbol              as holding_group_id,
-       profile_holdings.profile_id ||
-       '_plaid_' || profile_holdings.id                                  as holding_id,
-       profile_holdings.id                                               as plaid_holding_id,
-       profile_holdings.plaid_access_token_id,
-       profile_holdings.security_id,
-       profile_holdings.profile_id,
-       profile_holdings.account_id,
-       profile_holdings.quantity / case
-                                       when robinhood_options.quantity_module_sum = 0 and
-                                            portfolio_securities_normalized.type = 'derivative' and
-                                            plaid_institutions.ref_id = 'ins_54' then 100
-                                       else 1 end                        as quantity,
-       profile_holdings.quantity / case
-                                       when robinhood_options.quantity_module_sum = 0 and
-                                            portfolio_securities_normalized.type = 'derivative' and
-                                            plaid_institutions.ref_id = 'ins_54' then 100
-                                       else 1
-           end * case
-                     when portfolio_securities_normalized.type = 'derivative'
-                         then 100
-                     else 1 end                                          as quantity_norm_for_valuation, -- to multiple by price
-       coalesce(base_tickers.name, portfolio_securities_normalized.name) as name,
-       portfolio_securities_normalized.ticker_symbol,
-       portfolio_securities_normalized.original_ticker_symbol,
-       null                                                              as collection_id,
-       portfolio_securities_normalized.type
-from {{ source('app', 'profile_holdings') }}
-         join {{ ref('portfolio_securities_normalized') }}
-              on portfolio_securities_normalized.id = profile_holdings.security_id
-         left join {{ ref('base_tickers') }}
-              on base_tickers.symbol = portfolio_securities_normalized.ticker_symbol
-         left join {{ source('app', 'profile_plaid_access_tokens') }} on profile_plaid_access_tokens.id = profile_holdings.plaid_access_token_id
-         left join {{ source('app', 'plaid_institutions') }} on plaid_institutions.id = profile_plaid_access_tokens.institution_id
-         left join robinhood_options on robinhood_options.profile_id = profile_holdings.profile_id
-where profile_holdings.quantity > 0
-
-union all
-
-select 'ttf_' || profile_id || '_' || collection_id                  as holding_group_id,
-       'ttf_' || profile_id || '_' || collection_id || '_' || symbol as holding_id,
-       null                                                          as plaid_holding_id,
-       null                                                          as plaid_access_token_id,
-       null                                                          as security_id,
-       profile_id,
-       null                                                          as account_id,
-       null                                                          as quantity,
-       1                                                             as quantity_norm_for_valuation,
-       base_tickers.name                                             as name,
-       symbol                                                        as ticker_symbol,
-       symbol                                                        as original_ticker_symbol,
-       collection_id,
-       'ttf'                                                         as type
-from {{ ref('drivewealth_holdings') }}
-         left join {{ ref('base_tickers') }} using (symbol)
-where collection_id is not null
+{% if is_incremental() %}
+         left join {{ this }} old_data using (holding_id_v2)
+where old_data is null
+   or data.updated_at > old_data.updated_at
+{% endif %}

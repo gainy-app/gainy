@@ -244,57 +244,52 @@ with all_push_notifications as
                         date_trunc('week', now()::date))                             as uniq_id,
                    exchange_schedule.open_at + interval '1 hour'                     as send_at,
                    null::json                                                        as title,
-                   json_build_object('en', original_ticker_symbol || ' is ' || (relative_daily_change * 100)::int ||
+                   json_build_object('en', symbol || ' is ' || (relative_daily_change * 100)::int ||
                             '% today. You have already made ' ||
                             (relative_position_gain * 100)::int || '%. Maybe sell?') as text,
-                   json_build_object('t', 7, 's', original_ticker_symbol)            as data,
+                   json_build_object('t', 7, 's', symbol)                            as data,
                    false                                                             as is_test,
                    '11dc7a5a-aa96-4835-893a-cea11581ab6c'                            as template_id
             from (
                      with raw_positions as
                               (
-                                  select profile_id,
+                                  select portfolio_expanded_transactions.profile_id,
                                          portfolio_expanded_transactions.datetime,
                                          quantity_norm,
-                                         original_ticker_symbol,
-                                         sum(case when quantity_norm > 0 then abs(amount) end)
-                                         over (partition by profile_id, account_id, security_id order by portfolio_expanded_transactions.datetime, quantity_norm desc) as cost_sum,
-                                         sum(case when quantity_norm < 0 then abs(amount) end)
-                                         over (partition by profile_id, account_id, security_id order by portfolio_expanded_transactions.datetime, quantity_norm desc) as take_profit_sum,
-                                         sum(quantity_norm)
-                                         over (partition by profile_id, account_id, security_id order by portfolio_expanded_transactions.datetime, quantity_norm desc) as quantity_sum,
-                                         sum((uniq_id like 'auto%')::int)
-                                         over (partition by profile_id, account_id, security_id order by portfolio_expanded_transactions.datetime, quantity_norm desc) as auto_cnt,
-                                         account_id,
-                                         security_id
+                                         portfolio_expanded_transactions.symbol,
+                                         sum(case when quantity_norm > 0 then abs(amount) end) over wnd as cost_sum,
+                                         sum(case when quantity_norm < 0 then abs(amount) end) over wnd as take_profit_sum,
+                                         sum(quantity_norm) over wnd                                    as quantity_sum,
+                                         sum((uniq_id like 'auto%')::int) over wnd                      as auto_cnt
                                   from {{ ref('portfolio_expanded_transactions') }}
-                                           join {{ ref('portfolio_securities_normalized') }}
-                                                on portfolio_securities_normalized.id = portfolio_expanded_transactions.security_id
+                                           join {{ ref('profile_holdings_normalized') }} using (holding_id_v2)
+                                  window wnd as (partition by portfolio_expanded_transactions.profile_id, portfolio_expanded_transactions.symbol
+                                                 order by portfolio_expanded_transactions.datetime, quantity_norm desc)
                               ),
                           distinct_positions as
                               (
                                   select distinct on (
-                                      profile_id, account_id, security_id
+                                      profile_id, symbol
                                       ) profile_id,
-                                        original_ticker_symbol,
+                                        symbol,
                                         cost_sum,
                                         take_profit_sum,
                                         quantity_sum,
                                         auto_cnt
                                   from raw_positions
-                                  order by profile_id, account_id, security_id, datetime desc, quantity_norm
+                                  order by profile_id, symbol, datetime desc, quantity_norm
                               ),
                          positions_with_profit as
                              (
                                  select distinct_positions.profile_id,
-                                        distinct_positions.original_ticker_symbol,
+                                        distinct_positions.symbol,
                                         cost_sum                                                                        as cost,
                                         coalesce(take_profit_sum, 0) + quantity_sum * historical_prices_marked.price_0d as profit,
                                         (coalesce(take_profit_sum, 0) + quantity_sum * historical_prices_marked.price_0d - cost_sum) / cost_sum as relative_position_gain,
                                         ticker_realtime_metrics.relative_daily_change
                                  from distinct_positions
-                                          join {{ ref('historical_prices_marked') }} on historical_prices_marked.symbol = distinct_positions.original_ticker_symbol
-                                          join {{ ref('ticker_realtime_metrics') }} on ticker_realtime_metrics.symbol = distinct_positions.original_ticker_symbol
+                                          join {{ ref('historical_prices_marked') }} using (symbol)
+                                          join {{ ref('ticker_realtime_metrics') }} using (symbol)
                                  where auto_cnt = 0
                                    and cost_sum > 0
                                    and quantity_sum > 0

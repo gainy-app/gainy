@@ -137,7 +137,7 @@ def _mock_get_instrument(monkeypatch, service):
     monkeypatch.setattr(service, "_get_instrument", mock_get_instrument)
 
 
-def test_get_actual_collection_holdings(monkeypatch):
+def test_get_actual_collection_data(monkeypatch):
     profile_id = 1
     collection_id = 2
 
@@ -179,16 +179,15 @@ def test_get_actual_collection_holdings(monkeypatch):
     monkeypatch.setattr(api, "get_portfolio_status", mock_get_portfolio_status)
 
     service = DriveWealthProviderCollection(drivewealth_repository, api)
-    holdings = service.get_actual_collection_holdings(profile_id,
-                                                      collection_id)
+    holdings = service.get_actual_collection_data(profile_id,
+                                                  collection_id).holdings
 
     expected_holdings = _PORTFOLIO_STATUS["holdings"][1]["holdings"]
     for i in range(2):
-        status = holdings[i].get_collection_holding_status()
-        assert status.symbol == expected_holdings[i]["symbol"]
-        assert status.target_weight == expected_holdings[i]["target"]
-        assert status.actual_weight == expected_holdings[i]["actual"]
-        assert status.value == expected_holdings[i]["value"]
+        assert holdings[i].symbol == expected_holdings[i]["symbol"]
+        assert holdings[i].target_weight == expected_holdings[i]["target"]
+        assert holdings[i].actual_weight == expected_holdings[i]["actual"]
+        assert holdings[i].value == expected_holdings[i]["value"]
 
 
 def test_create_autopilot_run(monkeypatch):

@@ -25,11 +25,10 @@ class PortfolioChartService:
             return []
 
         self._filter_query_by_profile_id(params, where_clause, join_clause,
-                                         profile_id)
+                                         profile_id,
+                                         "portfolio_expanded_transactions")
         self._filter_query_by_periods(params, where_clause, join_clause,
                                       filter)
-        self._filter_query_by_account_ids(params, where_clause, join_clause,
-                                          filter)
         self._filter_query_by_institution_ids(params, where_clause,
                                               join_clause, filter)
         self._filter_query_by_access_token_ids(params, where_clause,
@@ -68,11 +67,10 @@ class PortfolioChartService:
             return []
 
         self._filter_query_by_profile_id(params, where_clause, join_clause,
-                                         profile_id)
+                                         profile_id,
+                                         "portfolio_expanded_transactions")
         self._filter_query_by_periods(params, where_clause, join_clause,
                                       filter)
-        self._filter_query_by_account_ids(params, where_clause, join_clause,
-                                          filter)
         self._filter_query_by_institution_ids(params, where_clause,
                                               join_clause, filter)
         self._filter_query_by_access_token_ids(params, where_clause,
@@ -113,7 +111,8 @@ class PortfolioChartService:
             return []
 
         self._filter_query_by_profile_id(params, where_clause, join_clause,
-                                         profile_id)
+                                         profile_id,
+                                         "profile_holdings_normalized")
         self._filter_query_by_access_token_ids(params, where_clause,
                                                join_clause, filter)
 
@@ -163,8 +162,6 @@ class PortfolioChartService:
     def _should_return_empty_result(self, filter):
         if filter.periods is not None and not len(filter.periods):
             return True
-        if filter.account_ids is not None and not len(filter.account_ids):
-            return True
         if filter.institution_ids is not None and not len(
                 filter.institution_ids):
             return True
@@ -182,10 +179,10 @@ class PortfolioChartService:
         return False
 
     def _filter_query_by_profile_id(self, params, where_clause, join_clause,
-                                    profile_id):
+                                    profile_id, table_name):
         params["profile_id"] = profile_id,
         where_clause.append(
-            sql.SQL("profile_plaid_access_tokens.profile_id = %(profile_id)s"))
+            sql.SQL(f"{table_name}.profile_id = %(profile_id)s"))
 
     def _filter_query_by_periods(self, params, where_clause, join_clause,
                                  filter):
@@ -195,15 +192,6 @@ class PortfolioChartService:
         where_clause.append(
             sql.SQL("portfolio_transaction_chart.period in %(periods)s"))
         params['periods'] = tuple(filter.periods)
-
-    def _filter_query_by_account_ids(self, params, where_clause, join_clause,
-                                     filter):
-        if not filter.account_ids:
-            return
-
-        where_clause.append(
-            sql.SQL("profile_portfolio_accounts.id in %(account_ids)s"))
-        params['account_ids'] = tuple(filter.account_ids)
 
     def _filter_query_by_institution_ids(self, params, where_clause,
                                          join_clause, filter):
@@ -254,7 +242,9 @@ class PortfolioChartService:
             return
 
         where_clause.append(
-            sql.SQL("profile_holdings_normalized.type in %(security_types)s"))
+            sql.SQL(
+                "portfolio_expanded_transactions.security_type in %(security_types)s"
+            ))
         params['security_types'] = tuple(filter.security_types)
 
     def _filter_query_by_ltt_only(self, params, where_clause, join_clause,
@@ -262,7 +252,7 @@ class PortfolioChartService:
         if not filter.ltt_only:
             return
         join_clause.append(
-            sql.SQL("join portfolio_holding_details using (holding_id)"))
+            sql.SQL("join portfolio_holding_details using (holding_id_v2)"))
         where_clause.append(
             sql.SQL("portfolio_holding_details.ltt_quantity_total > 0"))
 

@@ -404,8 +404,6 @@ query GetPortfolioPieChart(
             value_to_portfolio_value
         }
         holdings {
-            account_id
-            holding_id
             name
             quantity
             ticker_symbol

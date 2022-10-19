@@ -42,19 +42,16 @@ def test_demo_portfolio():
 
 def get_test_portfolio_chart_filters_data():
     query = """{
-        app_profile_portfolio_accounts { id }
         app_profile_plaid_access_tokens { id }
         app_plaid_institutions(where: {name: {_eq: "Demo"}}) {id}
     }"""
     data = make_graphql_request(query)['data']
-    account_id = data['app_profile_portfolio_accounts'][0]['id']
     access_token_id = data['app_profile_plaid_access_tokens'][0]['id']
     institution_id = data['app_plaid_institutions'][0]['id']
 
     full_options_dict = {
         "periods": ["1d"],
         "accessTokenIds": [None, access_token_id],
-        "accountIds": [None, account_id],
         "institutionIds": [None, institution_id],
         "interestIds": [None, 12],
         "categoryIds": [None, 6],
@@ -284,6 +281,7 @@ def verify_portfolio_chart_previous_period_close(period,
     if expected_value is None:
         assert previous_period_close is None, f"{assert_message_prefix}: wrong previous_period_close for period {period}, expected {expected_value}"
     else:
+        assert previous_period_close is not None, f"{assert_message_prefix}: wrong previous_period_close for period {period}, expected {expected_value}"
         assert abs(
             previous_period_close - expected_value
         ) < PRICE_EPS, f"{assert_message_prefix}: wrong previous_period_close for period {period}, expected {expected_value}"

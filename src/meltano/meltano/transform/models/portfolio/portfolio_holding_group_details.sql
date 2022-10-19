@@ -49,7 +49,7 @@ select profile_holdings_normalized.holding_group_id,
        sum(portfolio_holding_details.ltt_quantity_total)           as ltt_quantity_total,
        now()                                                       as updated_at
 from {{ ref('portfolio_holding_details') }}
-         join {{ ref('profile_holdings_normalized') }} using (holding_id)
+         join {{ ref('profile_holdings_normalized') }} using (holding_id_v2)
          join {{ ref('portfolio_securities_normalized') }}
               on portfolio_securities_normalized.id = profile_holdings_normalized.security_id
          join {{ ref('portfolio_holding_group_gains') }}

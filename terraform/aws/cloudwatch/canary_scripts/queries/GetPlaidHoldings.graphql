@@ -49,7 +49,6 @@ query GetPlaidHoldings($profileId: Int!) {
         }
         holdings {
             account_id
-            holding_id
             name
             quantity
             ticker_symbol

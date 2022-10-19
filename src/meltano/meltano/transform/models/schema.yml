@@ -54,7 +54,9 @@ sources:
       - name: analytics_profiles
       - name: drivewealth_accounts
       - name: drivewealth_accounts_positions
+      - name: drivewealth_autopilot_runs
       - name: drivewealth_funds
+      - name: drivewealth_instruments
       - name: drivewealth_users
       - name: drivewealth_portfolio_statuses
       - name: drivewealth_portfolios
@@ -76,6 +78,7 @@ sources:
       - name: profile_ticker_match_score
       - name: profiles
       - name: subscriptions
+      - name: trading_collection_versions
 
   - name: website
     description: Website data, managed by webflow integrations at gainy.app
@@ -892,6 +895,10 @@ models:
         tests:
           - type:
               type: 'integer'
+      - name: holding_id_v2
+        tests:
+          - type:
+              type: 'text'
       - name: updated_at
         tests:
           - type:
@@ -1058,6 +1065,10 @@ models:
         tests:
           - type:
               type: 'integer'
+      - name: holding_id_v2
+        tests:
+          - type:
+              type: 'text'
       - name: ticker_symbol
         tests:
           - type:
@@ -1883,6 +1894,10 @@ models:
         tests:
           - type:
               type: 'integer'
+      - name: holding_id_v2
+        tests:
+          - type:
+              type: 'text'
       - name: plaid_access_token_id
         tests:
           - type:

@@ -5,7 +5,7 @@
     tags = ["realtime"],
     post_hook=[
       pk('id'),
-      fk(this, 'id', 'app', 'portfolio_securities', 'id'),
+      fk('id', 'app', 'portfolio_securities', 'id'),
       index('original_ticker_symbol'),
     ]
   )
@@ -30,7 +30,9 @@ from (
                     when base_tickers.type = 'common stock'
                         then 'equity'
                     else portfolio_securities.type
-                    end                                      as type
+                    end                                      as type,
+               greatest(portfolio_securities.updated_at,
+                        base_tickers.updated_at)             as updated_at
          from {{ source('app', 'portfolio_securities') }}
                   left join {{ ref('base_tickers') }}
                             -- crypto

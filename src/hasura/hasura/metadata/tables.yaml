@@ -1680,7 +1680,7 @@
       using:
         manual_configuration:
           column_mapping:
-            holding_id: holding_id
+            holding_id_v2: holding_id_v2
           insertion_order: null
           remote_table:
             name: profile_holdings_normalized
@@ -1729,7 +1729,7 @@
       using:
         manual_configuration:
           column_mapping:
-            holding_id: holding_id
+            holding_id_v2: holding_id_v2
           insertion_order: null
           remote_table:
             name: profile_holdings_normalized
@@ -2113,7 +2113,7 @@
       using:
         manual_configuration:
           column_mapping:
-            holding_id: holding_id
+            holding_id_v2: holding_id_v2
           insertion_order: null
           remote_table:
             name: portfolio_holding_gains
@@ -2122,7 +2122,7 @@
       using:
         manual_configuration:
           column_mapping:
-            holding_id: holding_id
+            holding_id_v2: holding_id_v2
           insertion_order: null
           remote_table:
             name: portfolio_holding_details

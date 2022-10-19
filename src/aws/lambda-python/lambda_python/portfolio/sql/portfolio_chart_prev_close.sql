@@ -18,16 +18,14 @@ with latest_open_trading_session as
              from portfolio_transaction_chart
                       join portfolio_expanded_transactions
                            on portfolio_expanded_transactions.uniq_id = portfolio_transaction_chart.transactions_uniq_id
-                      left join profile_holdings_normalized using (holding_id)
+                      left join profile_holdings_normalized using (holding_id_v2)
                       left join week_trading_sessions
                                 on week_trading_sessions.symbol = portfolio_expanded_transactions.symbol
                                     and portfolio_transaction_chart.datetime between week_trading_sessions.open_at and week_trading_sessions.close_at
                       left join latest_open_trading_session
                                 on latest_open_trading_session.symbol = portfolio_expanded_transactions.symbol
-                      join app.profile_portfolio_accounts
-                           on profile_portfolio_accounts.id = portfolio_expanded_transactions.account_id
-                      join app.profile_plaid_access_tokens
-                           on profile_plaid_access_tokens.id = profile_portfolio_accounts.plaid_access_token_id
+                      left join app.profile_plaid_access_tokens
+                                on profile_plaid_access_tokens.id = profile_holdings_normalized.plaid_access_token_id
                       join historical_prices_marked
                            on historical_prices_marked.symbol = portfolio_expanded_transactions.symbol
                       {join_clause}
@@ -90,7 +88,7 @@ with latest_open_trading_session as
              with raw_data as
                       (
                           select distinct on (
-                              holding_id
+                              holding_id_v2
                               ) profile_id,
                                 case
                                     when type = 'cash' and ticker_symbol = 'CUR:USD'

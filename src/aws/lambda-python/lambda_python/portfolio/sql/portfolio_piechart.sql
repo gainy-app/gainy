@@ -1,11 +1,11 @@
 with holdings as
          (
              select profile_holdings_normalized.profile_id,
-                    holding_id,
+                    holding_id_v2,
                     quantity_norm_for_valuation,
                     plaid_access_token_id,
-                    profile_holdings_normalized.ticker_symbol as symbol,
-                    profile_holdings_normalized.original_ticker_symbol,
+                    profile_holdings_normalized.ticker_symbol,
+                    profile_holdings_normalized.symbol,
                     profile_holdings_normalized.type as security_type
              from profile_holdings_normalized
                       left join app.profile_plaid_access_tokens
@@ -16,15 +16,17 @@ with holdings as
      portfolio_tickers as
          (
              select holdings.profile_id,
-                    symbol,
+                    holdings.ticker_symbol                    as symbol,
+                    ticker_name,
                     sum(actual_value)                         as weight,
                     sum(ticker_realtime_metrics.absolute_daily_change *
                         holdings.quantity_norm_for_valuation) as absolute_daily_change,
                     sum(actual_value)                         as absolute_value
              from holdings
-                      join portfolio_holding_gains using (holding_id)
-                      left join ticker_realtime_metrics using (symbol)
-             group by holdings.profile_id, symbol
+                      join portfolio_holding_gains using (holding_id_v2)
+                      join portfolio_holding_details using (holding_id_v2)
+                      left join ticker_realtime_metrics on ticker_realtime_metrics.symbol = holdings.ticker_symbol
+             group by holdings.profile_id, holdings.ticker_symbol, ticker_name
      ),
      portfolio_tickers_weight_sum as
          (
@@ -47,9 +49,6 @@ select portfolio_tickers.profile_id,
        absolute_value
 from portfolio_tickers
          join portfolio_tickers_weight_sum using (profile_id)
-         join portfolio_holding_group_details
-              on portfolio_holding_group_details.ticker_symbol = portfolio_tickers.symbol
-                  and portfolio_holding_group_details.profile_id = portfolio_tickers.profile_id
 where weight is not null
   and weight_sum > 0
 
@@ -59,14 +58,14 @@ union all
     with data as materialized
              (
                  select holdings.profile_id,
-                        symbol,
-                        sim_dif + 1 as weight_category_in_symbol,
+                        ticker_symbol as symbol,
+                        sim_dif + 1   as weight_category_in_symbol,
                         category_id,
                         holdings.quantity_norm_for_valuation,
                         actual_value
                  from holdings
-                          join portfolio_holding_gains using (holding_id)
-                          join ticker_categories_continuous using (symbol)
+                          join portfolio_holding_gains using (holding_id_v2)
+                          join ticker_categories_continuous on ticker_categories_continuous.symbol = ticker_symbol
              ),
          portfolio_stats as
              (
@@ -146,15 +145,14 @@ union all
     with data as materialized
              (
                  select holdings.profile_id,
-                        symbol,
-                        sim_dif + 1 as weight_interest_in_symbol,
+                        ticker_symbol as symbol,
+                        sim_dif + 1   as weight_interest_in_symbol,
                         interest_id,
                         holdings.quantity_norm_for_valuation,
                         actual_value
                  from holdings
-                          join portfolio_holding_gains using (holding_id)
-                          left join ticker_realtime_metrics using (symbol)
-                          join ticker_interests using (symbol)
+                          join portfolio_holding_gains using (holding_id_v2)
+                          join ticker_interests on ticker_interests.symbol = ticker_symbol
              ),
          portfolio_stats as
              (
@@ -240,9 +238,8 @@ union all
                             holdings.quantity_norm_for_valuation) as absolute_daily_change,
                         sum(actual_value)                         as absolute_value
                  from holdings
-                          join portfolio_holding_gains using (holding_id)
-                          left join ticker_realtime_metrics
-                                    on ticker_realtime_metrics.symbol = holdings.original_ticker_symbol
+                          join portfolio_holding_gains using (holding_id_v2)
+                          left join ticker_realtime_metrics using (symbol)
                  group by holdings.profile_id, holdings.security_type
              ),
          portfolio_security_types_weight_sum as
@@ -286,15 +283,14 @@ union all
     with data as materialized
              (
                  select holdings.profile_id,
-                        symbol,
-                        weight as weight_collection_in_symbol,
+                        ticker_symbol as symbol,
+                        weight        as weight_collection_in_symbol,
                         collection_id,
                         holdings.quantity_norm_for_valuation,
                         actual_value
                  from holdings
-                          join portfolio_holding_gains using (holding_id)
-                          left join ticker_realtime_metrics using (symbol)
-                          join collection_ticker_actual_weights using (symbol)
+                          join portfolio_holding_gains using (holding_id_v2)
+                          join collection_ticker_actual_weights on collection_ticker_actual_weights.symbol = ticker_symbol
              ),
          portfolio_stats as
              (

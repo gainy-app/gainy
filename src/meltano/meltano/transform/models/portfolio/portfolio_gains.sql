@@ -22,7 +22,7 @@ with expanded_holdings as
                     sum(quantity_norm_for_valuation * absolute_gain_5y::numeric)    as absolute_gain_5y,
                     sum(quantity_norm_for_valuation * absolute_gain_total::numeric) as absolute_gain_total
              from {{ ref('portfolio_holding_gains') }}
-                      join {{ ref('profile_holdings_normalized') }} using (holding_id)
+                      join {{ ref('profile_holdings_normalized') }} using (holding_id_v2)
              group by profile_holdings_normalized.profile_id
          )
 select profile_id,

@@ -16,16 +16,17 @@ with ticker_holding_groups as
          (
              select profile_holdings_normalized.holding_group_id,
                     profile_holdings_normalized.profile_id,
-                    ticker_symbol                     as symbol,
-                    max(updated_at)                   as updated_at,
-                    sum(actual_value::numeric)        as actual_value,
-                    sum(absolute_gain_total::numeric) as absolute_gain_total,
-                    sum(ltt_quantity_total::numeric)  as ltt_quantity_total
+                    ticker_symbol                                     as symbol,
+                    greatest(max(portfolio_holding_gains.updated_at),
+                             max(portfolio_holding_gains.updated_at)) as updated_at,
+                    sum(actual_value::numeric)                        as actual_value,
+                    sum(absolute_gain_total::numeric)                 as absolute_gain_total,
+                    sum(ltt_quantity_total::numeric)                  as ltt_quantity_total
              from {{ ref('portfolio_holding_gains') }}
-                      join {{ ref('profile_holdings_normalized') }} using (holding_id)
+                      join {{ ref('profile_holdings_normalized') }} using (holding_id_v2)
              where collection_id is null
                and profile_holdings_normalized.holding_group_id is not null
-             group by profile_holdings_normalized.holding_group_id, profile_holdings_normalized.profile_id, symbol
+             group by profile_holdings_normalized.holding_group_id, profile_holdings_normalized.profile_id, ticker_symbol
          ),
      ticker_holding_groups_with_gains as
          (
@@ -100,7 +101,7 @@ with ticker_holding_groups as
                     profile_id,
                     null                                                                           as ticker_symbol,
                     collection_id,
-                    updated_at,
+                    updated_at::timestamp,
                     actual_value::double precision,
                     ltt_quantity_total,
                     (absolute_gain_1d / (actual_value - absolute_gain_1d))::double precision       as relative_gain_1d,

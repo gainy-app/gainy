@@ -1,7 +1,8 @@
+from trading.models import CollectionStatus
 from trading.service import TradingService
 from trading.repository import TradingRepository
 from trading.drivewealth.provider import DriveWealthProvider
-from trading.drivewealth.models import DriveWealthPortfolioStatusFundHolding
+from trading.drivewealth.models import DriveWealthPortfolioStatusFundHolding, DriveWealthPortfolioStatusHolding
 
 
 def test_get_actual_collection_holdings(monkeypatch):
@@ -21,14 +22,19 @@ def test_get_actual_collection_holdings(monkeypatch):
         DriveWealthPortfolioStatusFundHolding(expected_holdings)
     ]
 
-    def mock_get_actual_collection_holdings(_profile_id, _collection_id):
+    collection_status = CollectionStatus()
+    collection_status.holdings = [
+        i.get_collection_holding_status() for i in drivewealth_holdings
+    ]
+
+    def mock_get_actual_collection_data(_profile_id, _collection_id):
         assert _profile_id == profile_id
         assert _collection_id == collection_id
-        return drivewealth_holdings
+        return collection_status
 
     drivewealth_provider = DriveWealthProvider(None, None, None)
-    monkeypatch.setattr(drivewealth_provider, "get_actual_collection_holdings",
-                        mock_get_actual_collection_holdings)
+    monkeypatch.setattr(drivewealth_provider, "get_actual_collection_data",
+                        mock_get_actual_collection_data)
 
     trading_repository = TradingRepository(None)
     service = TradingService(None, trading_repository, drivewealth_provider,
