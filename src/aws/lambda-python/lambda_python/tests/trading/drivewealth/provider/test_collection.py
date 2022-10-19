@@ -192,6 +192,9 @@ def test_get_actual_collection_data(monkeypatch):
 
 def test_create_autopilot_run(monkeypatch):
     collection_version_id = 1
+    collection_version = TradingCollectionVersion()
+    monkeypatch.setattr(collection_version, "id", collection_version_id)
+
     account = DriveWealthAccount()
     monkeypatch.setattr(account, "ref_id", _ACCOUNT_ID)
 
@@ -213,8 +216,7 @@ def test_create_autopilot_run(monkeypatch):
     monkeypatch.setattr(api, "create_autopilot_run", mock_create_autopilot_run)
 
     service = DriveWealthProviderCollection(drivewealth_repository, api)
-    autopilot_run = service._create_autopilot_run(account,
-                                                  collection_version_id)
+    autopilot_run = service._create_autopilot_run(account, collection_version)
 
     assert autopilot_run.ref_id == data["id"]
     assert autopilot_run.status == data["status"]
