@@ -25,7 +25,8 @@ def test_portfolio_holdings_data(user_id, quantities, quantities_override):
         make_graphql_request(query, {"symbol": "AAPL240621C00225000"})['data'],
     }
 
-    last_trading_day_date = max(i['chart'][0]['datetime'] for i in metrics.values())
+    last_trading_day_date = max(i['chart'][0]['datetime']
+                                for i in metrics.values())
     last_trading_day_date = dateutil.parser.parse(last_trading_day_date)
 
     # flatten metrics dict
@@ -52,10 +53,14 @@ def test_portfolio_holdings_data(user_id, quantities, quantities_override):
     periods_mapping = {
         "gain_1d": ("relative_daily_change", datetime.timedelta(days=0)),
         "gain_1w": ("price_change_1w", datetime.timedelta(days=7)),
-        "gain_1m": ("price_change_1m", dateutil.relativedelta.relativedelta(months=1)),
-        "gain_3m": ("price_change_3m", dateutil.relativedelta.relativedelta(months=3)),
-        "gain_1y": ("price_change_1y", dateutil.relativedelta.relativedelta(years=1)),
-        "gain_5y": ("price_change_5y", dateutil.relativedelta.relativedelta(years=5)),
+        "gain_1m":
+        ("price_change_1m", dateutil.relativedelta.relativedelta(months=1)),
+        "gain_3m":
+        ("price_change_3m", dateutil.relativedelta.relativedelta(months=3)),
+        "gain_1y": ("price_change_1y",
+                    dateutil.relativedelta.relativedelta(years=1)),
+        "gain_5y": ("price_change_5y",
+                    dateutil.relativedelta.relativedelta(years=5)),
         "gain_total": ("price_change_all", None),
     }
 
@@ -96,7 +101,8 @@ def test_portfolio_holdings_data(user_id, quantities, quantities_override):
 
                 purchase_date = holding['holding_details']['purchase_date']
                 if purchase_date:
-                    purchase_date = dateutil.parser.parse(purchase_date) if purchase_date else None
+                    purchase_date = dateutil.parser.parse(
+                        purchase_date) if purchase_date else None
                     if timedelta is None or purchase_date >= last_trading_day_date - timedelta:
                         logging.info(f'Skipping holding {symbol}')
                         continue
@@ -106,13 +112,14 @@ def test_portfolio_holdings_data(user_id, quantities, quantities_override):
                 ]:
                     assert abs(
                         holding['holding_details'][relative_portfolio_key] -
-                        metrics[symbol][metrics_key]
-                    ) < PRICE_EPS, (relative_portfolio_key, symbol)
-                assert abs(gains[relative_portfolio_key] - metrics[symbol]
-                           [metrics_key]) < PRICE_EPS, (relative_portfolio_key, symbol)
-                assert abs(gains[absolute_portfolio_key] -
-                           quantity * absolute_symbol_price_change[symbol]
-                           ) < PRICE_EPS, (absolute_portfolio_key, symbol)
+                        metrics[symbol][metrics_key]) < PRICE_EPS, (
+                            relative_portfolio_key, symbol)
+                assert abs(gains[relative_portfolio_key] -
+                           metrics[symbol][metrics_key]) < PRICE_EPS, (
+                               relative_portfolio_key, symbol)
+                assert abs(gains[absolute_portfolio_key] - quantity *
+                           absolute_symbol_price_change[symbol]) < PRICE_EPS, (
+                               absolute_portfolio_key, symbol)
 
             symbol = holding_group['details']['ticker_symbol']
             gains = holding_group['gains']
@@ -123,11 +130,14 @@ def test_portfolio_holdings_data(user_id, quantities, quantities_override):
                     'relative_gain_1d', 'relative_gain_total'
             ]:
                 assert abs(holding_group['details'][relative_portfolio_key] -
-                           expected_relative_gain) < PRICE_EPS, (absolute_portfolio_key, symbol)
+                           expected_relative_gain) < PRICE_EPS, (
+                               absolute_portfolio_key, symbol)
             assert abs(gains[relative_portfolio_key] -
-                       expected_relative_gain) < PRICE_EPS, (absolute_portfolio_key, symbol)
+                       expected_relative_gain) < PRICE_EPS, (
+                           absolute_portfolio_key, symbol)
             assert abs(gains[absolute_portfolio_key] -
-                       holding_absolute_gain_sum) < PRICE_EPS, (absolute_portfolio_key, symbol)
+                       holding_absolute_gain_sum) < PRICE_EPS, (
+                           absolute_portfolio_key, symbol)
             holding_group_absolute_gain_sum += gains[absolute_portfolio_key]
 
         actual_value = portfolio_gains['actual_value']

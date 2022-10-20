@@ -214,4 +214,3 @@ def get_test_portfolio_data(only_with_holdings=False):
             ]
             yield ('user_id_portfolio_test_' + str(i), quantities,
                    quantities_override)
-

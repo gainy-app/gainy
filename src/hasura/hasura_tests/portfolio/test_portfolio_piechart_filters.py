@@ -72,4 +72,3 @@ def test_portfolio_piechart_filters(params):
             assert abs(portfolio_gains_data['actual_value'] -
                        piechart_sums[entity_type]['absolute_value']
                        ) < PRICE_EPS, entity_type
-
