@@ -10,47 +10,47 @@
 }}
 
 select transaction_uniq_id,
-       date_0d,
+       historical_prices_marked.date_0d,
        case
            when date_0d >= portfolio_expanded_transactions.datetime
                then quantity * price_0d
            end                                        as value_0d,
-       date_1w,
+       historical_prices_marked.date_1w,
        case
            when date_1w >= portfolio_expanded_transactions.datetime
                then quantity * price_1w
            end                                        as value_1w,
-       date_10d,
+       historical_prices_marked.date_10d,
        case
            when date_10d >= portfolio_expanded_transactions.datetime
                then quantity * price_10d
            end                                        as value_10d,
-       date_1m,
+       historical_prices_marked.date_1m,
        case
            when date_1m >= portfolio_expanded_transactions.datetime
                then quantity * price_1m
            end                                        as value_1m,
-       date_2m,
+       historical_prices_marked.date_2m,
        case
            when date_2m >= portfolio_expanded_transactions.datetime
                then quantity * price_2m
            end                                        as value_2m,
-       date_3m,
+       historical_prices_marked.date_3m,
        case
            when date_3m >= portfolio_expanded_transactions.datetime
                then quantity * price_3m
            end                                        as value_3m,
-       date_1y,
+       historical_prices_marked.date_1y,
        case
            when date_1y >= portfolio_expanded_transactions.datetime
                then quantity * price_1y
            end                                        as value_1y,
-       date_13m,
+       historical_prices_marked.date_13m,
        case
            when date_13m >= portfolio_expanded_transactions.datetime
                then quantity * price_13m
            end                                        as value_13m,
-       date_5y,
+       historical_prices_marked.date_5y,
        case
            when date_5y >= portfolio_expanded_transactions.datetime
                then quantity * price_5y
