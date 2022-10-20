@@ -8,7 +8,7 @@ with latest_open_trading_session as
      raw_chart_data as
          (
              select distinct on (
-                 uniq_id, period, portfolio_transaction_chart.datetime
+                 transaction_uniq_id, period, portfolio_transaction_chart.datetime
                  ) portfolio_expanded_transactions.profile_id,
                    portfolio_expanded_transactions.symbol,
                    portfolio_expanded_transactions.quantity_norm_for_valuation,
@@ -16,8 +16,7 @@ with latest_open_trading_session as
                    portfolio_transaction_chart.datetime,
                    adjusted_close::numeric
              from portfolio_transaction_chart
-                      join portfolio_expanded_transactions
-                           on portfolio_expanded_transactions.uniq_id = portfolio_transaction_chart.transactions_uniq_id
+                      join portfolio_expanded_transactions using (transaction_uniq_id)
                       left join profile_holdings_normalized using (holding_id_v2)
                       left join week_trading_sessions
                                 on week_trading_sessions.symbol = portfolio_expanded_transactions.symbol

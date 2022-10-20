@@ -40,7 +40,7 @@ with tickers_and_options as
                       left join {{ ref('ticker_realtime_metrics') }} using (symbol)
                       join latest_trading_day using (symbol)
              where ticker_realtime_metrics.time < least(latest_trading_day.close_at, now()) - interval '20 minutes'
-                or (ticker_realtime_metrics is null and latest_trading_day is not null)
+                or (ticker_realtime_metrics.symbol is null and latest_trading_day.symbol is not null)
                 or (latest_trading_day.close_at is null and latest_trading_day is not null)
              group by symbol
 
@@ -69,7 +69,7 @@ with tickers_and_options as
                                     where datetime > least(latest_trading_day.close_at, now()) - interval '40 minutes'
                                     group by symbol
                                 ) c using (symbol, period)
-             where c is null
+             where c.symbol is null
              group by symbol
          ),
      old_realtime_prices_eod as
@@ -152,7 +152,7 @@ with tickers_and_options as
              from latest_diff
                       join previous_trading_day_intraday_prices_unique_symbols using (type, time)
                       left join latest_trading_day_intraday_prices using (symbol, time)
-             where diff < -0.30 and latest_trading_day_intraday_prices is null
+             where diff < -0.30 and latest_trading_day_intraday_prices.symbol is null
          ),
      old_realtime_prices_polygon as
          (
@@ -234,7 +234,7 @@ with tickers_and_options as
              from latest_diff
                       join previous_trading_day_intraday_prices_unique_symbols using (type, time)
                       left join latest_trading_day_intraday_prices using (symbol, time)
-             where diff < -0.30 and latest_trading_day_intraday_prices is null
+             where diff < -0.30 and latest_trading_day_intraday_prices.symbol is null
          ),
      realtime_chart_diff_with_prev_point as
          (
@@ -363,8 +363,8 @@ with tickers_and_options as
              from {{ ref('tickers') }}
                       left join {{ ref('ticker_realtime_metrics') }} using (symbol)
                       left join ticker_daily_latest_chart_point using (symbol)
-             where ticker_realtime_metrics is null
-                or ticker_daily_latest_chart_point is null
+             where ticker_realtime_metrics.symbol is null
+                or ticker_daily_latest_chart_point.symbol is null
                 or ticker_realtime_metrics.previous_day_close_price < 1e-12
                 or abs(ticker_daily_latest_chart_point.adjusted_close / ticker_realtime_metrics.previous_day_close_price - 1) > 0.2
          ),

@@ -79,5 +79,5 @@ from (
 where t.open_at between now() - interval '1 week' and now()
 
 {% if is_incremental() %}
-  and old_trading_sessions is null
+  and old_trading_sessions.symbol is null
 {% endif %}

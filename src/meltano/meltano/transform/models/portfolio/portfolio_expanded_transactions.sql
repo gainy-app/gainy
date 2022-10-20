@@ -1,10 +1,10 @@
 {{
   config(
     materialized = "incremental",
-    unique_key = "uniq_id",
+    unique_key = "transaction_uniq_id",
     tags = ["realtime"],
     post_hook=[
-      index('uniq_id', true),
+      index('transaction_uniq_id', true),
       'delete from {{this}} where last_seen_at < (select max(last_seen_at) from {{this}})',
     ]
   )
@@ -333,7 +333,7 @@ with plaid_transactions as
                                             when t.security_type = 'derivative'
                                                 then 100
                                             else 1 end)                       as quantity_norm_for_valuation, -- to multiple by price
-                    max(uniq_id)::varchar                                     as uniq_id,
+                    max(uniq_id)::varchar                                     as transaction_uniq_id,
                     security_type,
                     t.datetime
              from (
@@ -418,7 +418,7 @@ with plaid_transactions as
                       left join {{ ref('base_tickers') }} using (symbol)
                       left join {{ ref('ticker_options') }} on ticker_options.contract_name = t.symbol
              where t.type in ('buy', 'sell')
-               and (base_tickers is not null or ticker_options is not null)
+               and (base_tickers.symbol is not null or ticker_options.symbol is not null)
              group by t.holding_id_v2, t.datetime, t.profile_id, t.symbol, t.security_type
              having sum(abs(quantity_norm)) > 0
      )
@@ -430,7 +430,7 @@ select groupped_expanded_transactions.symbol,
        groupped_expanded_transactions.profile_id,
        groupped_expanded_transactions.quantity_norm,
        groupped_expanded_transactions.quantity_norm_for_valuation,
-       groupped_expanded_transactions.uniq_id,
+       groupped_expanded_transactions.transaction_uniq_id,
        groupped_expanded_transactions.datetime,
        groupped_expanded_transactions.security_type,
 {% if is_incremental() %}
@@ -446,5 +446,5 @@ select groupped_expanded_transactions.symbol,
        now() as last_seen_at
 from groupped_expanded_transactions
 {% if is_incremental() %}
-         left join {{ this }} old_data using (uniq_id)
+         left join {{ this }} old_data using (transaction_uniq_id)
 {% endif %}

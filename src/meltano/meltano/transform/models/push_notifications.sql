@@ -175,9 +175,9 @@ with all_push_notifications as
                          left join {{ source('app', 'notifications') }} all_article_notifications
                                    on all_article_notifications.uniq_id like 'new_article_%'
                                        and all_article_notifications.updated_at > now() - interval '1 week'
-                 where article_duplicate is null -- the article has no duplicates
-                   and this_article_notifications is null -- this article has not been sent
-                   and all_article_notifications is null -- previous article notification was sent more than a week ago
+                 where article_duplicate.id is null -- the article has no duplicates
+                   and this_article_notifications.uniq_id is null -- this article has not been sent
+                   and all_article_notifications.uniq_id is null -- previous article notification was sent more than a week ago
                  order by blogs.published_on desc
                  limit 1
             )
@@ -260,7 +260,7 @@ with all_push_notifications as
                                          sum(case when quantity_norm > 0 then abs(amount) end) over wnd as cost_sum,
                                          sum(case when quantity_norm < 0 then abs(amount) end) over wnd as take_profit_sum,
                                          sum(quantity_norm) over wnd                                    as quantity_sum,
-                                         sum((uniq_id like 'auto%')::int) over wnd                      as auto_cnt
+                                         sum((transaction_uniq_id like 'auto%')::int) over wnd          as auto_cnt
                                   from {{ ref('portfolio_expanded_transactions') }}
                                            join {{ ref('profile_holdings_normalized') }} using (holding_id_v2)
                                   window wnd as (partition by portfolio_expanded_transactions.profile_id, portfolio_expanded_transactions.symbol

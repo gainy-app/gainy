@@ -8,8 +8,6 @@ with holdings as
                     profile_holdings_normalized.symbol,
                     profile_holdings_normalized.type as security_type
              from profile_holdings_normalized
-                      left join app.profile_plaid_access_tokens
-                                on profile_plaid_access_tokens.id = profile_holdings_normalized.plaid_access_token_id
              where {where_clause}
          ),
 

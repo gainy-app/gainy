@@ -2,6 +2,7 @@ import os
 from psycopg2 import sql
 from psycopg2.extras import RealDictCursor
 from gainy.utils import get_logger
+from portfolio.models import PortfolioChartFilter
 
 logger = get_logger(__name__)
 
@@ -13,7 +14,7 @@ class PortfolioChartService:
     def __init__(self, db_conn):
         self.db_conn = db_conn
 
-    def get_portfolio_chart(self, profile_id, filter):
+    def get_portfolio_chart(self, profile_id, filter: PortfolioChartFilter):
         with open(os.path.join(SCRIPT_DIR, "../sql/portfolio_chart.sql")) as f:
             query = f.read()
 
@@ -33,6 +34,8 @@ class PortfolioChartService:
                                               join_clause, filter)
         self._filter_query_by_access_token_ids(params, where_clause,
                                                join_clause, filter)
+        self._filter_query_by_broker_ids(params, where_clause,
+                                              join_clause, filter)
         self._filter_query_by_interest_ids(params, where_clause, join_clause,
                                            filter)
         self._filter_query_by_category_ids(params, where_clause, join_clause,
@@ -53,7 +56,7 @@ class PortfolioChartService:
 
         return rows
 
-    def get_portfolio_chart_previous_period_close(self, profile_id, filter):
+    def get_portfolio_chart_previous_period_close(self, profile_id, filter: PortfolioChartFilter):
         with open(
                 os.path.join(SCRIPT_DIR,
                              "../sql/portfolio_chart_prev_close.sql")) as f:
@@ -75,6 +78,8 @@ class PortfolioChartService:
                                               join_clause, filter)
         self._filter_query_by_access_token_ids(params, where_clause,
                                                join_clause, filter)
+        self._filter_query_by_broker_ids(params, where_clause,
+                                              join_clause, filter)
         self._filter_query_by_interest_ids(params, where_clause, join_clause,
                                            filter)
         self._filter_query_by_category_ids(params, where_clause, join_clause,
@@ -98,7 +103,7 @@ class PortfolioChartService:
 
         return data[0]
 
-    def get_portfolio_piechart(self, profile_id, filter):
+    def get_portfolio_piechart(self, profile_id, filter: PortfolioChartFilter):
         with open(os.path.join(SCRIPT_DIR,
                                "../sql/portfolio_piechart.sql")) as f:
             query = f.read()
@@ -114,6 +119,8 @@ class PortfolioChartService:
                                          profile_id,
                                          "profile_holdings_normalized")
         self._filter_query_by_access_token_ids(params, where_clause,
+                                               join_clause, filter)
+        self._filter_query_by_broker_ids(params, where_clause,
                                                join_clause, filter)
 
         rows = self._execute_query(params, where_clause, join_clause, query)
@@ -159,7 +166,7 @@ class PortfolioChartService:
             prev_row = row
             yield row
 
-    def _should_return_empty_result(self, filter):
+    def _should_return_empty_result(self, filter: PortfolioChartFilter):
         if filter.periods is not None and not len(filter.periods):
             return True
         if filter.institution_ids is not None and not len(
@@ -167,6 +174,9 @@ class PortfolioChartService:
             return True
         if filter.access_token_ids is not None and not len(
                 filter.access_token_ids):
+            return True
+        if filter.broker_ids is not None and not len(
+                filter.broker_ids):
             return True
         if filter.interest_ids is not None and not len(filter.interest_ids):
             return True
@@ -185,7 +195,7 @@ class PortfolioChartService:
             sql.SQL(f"{table_name}.profile_id = %(profile_id)s"))
 
     def _filter_query_by_periods(self, params, where_clause, join_clause,
-                                 filter):
+                                 filter: PortfolioChartFilter):
         if not filter.periods:
             return
 
@@ -194,7 +204,7 @@ class PortfolioChartService:
         params['periods'] = tuple(filter.periods)
 
     def _filter_query_by_institution_ids(self, params, where_clause,
-                                         join_clause, filter):
+                                         join_clause, filter: PortfolioChartFilter):
         if not filter.institution_ids:
             return
 
@@ -205,15 +215,26 @@ class PortfolioChartService:
         params['institution_ids'] = tuple(filter.institution_ids)
 
     def _filter_query_by_access_token_ids(self, params, where_clause,
-                                          join_clause, filter):
+                                          join_clause, filter: PortfolioChartFilter):
         if not filter.access_token_ids:
             return
         where_clause.append(
-            sql.SQL("profile_plaid_access_tokens.id in %(access_token_ids)s"))
+            sql.SQL("profile_holdings_normalized.plaid_access_token_id in %(access_token_ids)s"))
         params['access_token_ids'] = tuple(filter.access_token_ids)
 
+    def _filter_query_by_broker_ids(self, params, where_clause,
+                                         join_clause, filter: PortfolioChartFilter):
+        if not filter.broker_ids:
+            return
+
+        where_clause.append(
+            sql.SQL(
+                "profile_holdings_normalized.broker_uniq_id in %(broker_ids)s"
+            ))
+        params['broker_ids'] = tuple(filter.broker_ids)
+
     def _filter_query_by_interest_ids(self, params, where_clause, join_clause,
-                                      filter):
+                                      filter: PortfolioChartFilter):
         if not filter.interest_ids:
             return
 
@@ -225,7 +246,7 @@ class PortfolioChartService:
         params['interest_ids'] = tuple(filter.interest_ids)
 
     def _filter_query_by_category_ids(self, params, where_clause, join_clause,
-                                      filter):
+                                      filter: PortfolioChartFilter):
         if not filter.category_ids:
             return
 
@@ -237,7 +258,7 @@ class PortfolioChartService:
         params['category_ids'] = tuple(filter.category_ids)
 
     def _filter_query_by_security_types(self, params, where_clause,
-                                        join_clause, filter):
+                                        join_clause, filter: PortfolioChartFilter):
         if not filter.security_types:
             return
 
@@ -248,7 +269,7 @@ class PortfolioChartService:
         params['security_types'] = tuple(filter.security_types)
 
     def _filter_query_by_ltt_only(self, params, where_clause, join_clause,
-                                  filter):
+                                  filter: PortfolioChartFilter):
         if not filter.ltt_only:
             return
         join_clause.append(

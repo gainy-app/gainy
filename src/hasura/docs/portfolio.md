@@ -75,144 +75,6 @@ mutation{
 }
 ```
 
-### Get Holdings
-
-```graphql
-{
-    get_portfolio_holdings(profile_id: 2) {
-        id
-        quantity
-        iso_currency_code
-        profile_id
-        security_id
-        security {
-            close_price
-            close_price_as_of
-            created_at
-            iso_currency_code
-            id
-            name
-            ticker_symbol
-            type
-            updated_at
-            tickers {
-                name
-                sector
-                symbol
-            }
-        }
-        account {
-            balance_available
-            balance_current
-            balance_iso_currency_code
-            balance_limit
-            created_at
-            id
-            mask
-            name
-            official_name
-            subtype
-            type
-        }
-    }
-}
-```
-
-### Get Transactions
-
-```graphql
-{
-    get_portfolio_transactions(profile_id: 1) {
-        id
-        quantity
-        iso_currency_code
-        profile_id
-        security_id
-        security {
-            close_price
-            close_price_as_of
-            created_at
-            iso_currency_code
-            id
-            name
-            ticker_symbol
-            type
-            updated_at
-            tickers {
-                name
-                sector
-                symbol
-            }
-        }
-        account {
-            balance_available
-            balance_current
-            balance_iso_currency_code
-            balance_limit
-            created_at
-            id
-            mask
-            name
-            official_name
-            subtype
-            type
-        }
-        amount
-        date
-        fees
-        name
-        price
-    }
-}
-```
-
-### Gains
-
-```GraphQL
-{
-  app_profiles {
-    portfolio_gains {
-      absolute_gain_1d
-      absolute_gain_1m
-      absolute_gain_1w
-      absolute_gain_1y
-      absolute_gain_3m
-      absolute_gain_5y
-      absolute_gain_total
-      actual_value
-      relative_gain_1d
-      relative_gain_1m
-      relative_gain_1w
-      relative_gain_1y
-      relative_gain_3m
-      relative_gain_5y
-      relative_gain_total
-    }
-    profile_holdings {
-      portfolio_holding_gains {
-        absolute_gain_1d
-        absolute_gain_1m
-        absolute_gain_1w
-        absolute_gain_1y
-        absolute_gain_3m
-        absolute_gain_5y
-        absolute_gain_total
-        actual_value
-        relative_gain_1d
-        relative_gain_1m
-        relative_gain_1w
-        relative_gain_1y
-        relative_gain_3m
-        relative_gain_5y
-        relative_gain_total
-        value_to_portfolio_value
-        ltt_quantity_total
-      }
-    }
-  }
-}
-```
-
 ### Chart
 
 periods: 1d, 1w, 1m, 3m, 1y, 5y, all
@@ -222,8 +84,6 @@ query GetPortfolioChart(
     $profileId: Int!,
     $periods: [String]!,
     $interestIds: [Int],
-    $accessTokenIds: [Int],
-    $accountIds: [Int],
     $categoryIds: [Int],
     $lttOnly: Boolean,
     $securityTypes: [String]
@@ -232,8 +92,6 @@ query GetPortfolioChart(
         profile_id: $profileId,
         periods: $periods,
         interest_ids: $interestIds,
-        access_token_ids: $accessTokenIds,
-        account_ids: $accountIds,
         category_ids: $categoryIds,
         ltt_only: $lttOnly,
         security_types: $securityTypes
@@ -248,8 +106,6 @@ query GetPortfolioChart(
     get_portfolio_chart_previous_period_close(
         profile_id: $profileId,
         interest_ids: $interestIds,
-        access_token_ids: $accessTokenIds,
-        account_ids: $accountIds,
         category_ids: $categoryIds,
         ltt_only: $lttOnly,
         security_types: $securityTypes
@@ -262,7 +118,6 @@ query GetPortfolioChart(
         prev_close_5y
     }
 }
-
 ```
 
 ### Pie Chart
@@ -293,34 +148,10 @@ query GetPortfolioPieChart(
 
 ```GraphQL
 {
-    # app_profile_holdings(order_by: {holding_details: {purchase_date: asc}})
-    # app_profile_holdings(order_by: {holding_details: {relative_gain_total: asc}})
-    # app_profile_holdings(order_by: {holding_details: {relative_gain_1d: asc}})
-    # app_profile_holdings(order_by: {holding_details: {value_to_portfolio_value: asc}})
-    # app_profile_holdings(order_by: {holding_details: {ticker_name: asc}})
-    # app_profile_holdings(order_by: {holding_details: {market_capitalization: asc}})
-    # app_profile_holdings(order_by: {holding_details: {next_earnings_date: asc}})
-    # app_profile_holdings(where: {holding_details: {account_id: {_eq: 7}}})
-    # app_profile_holdings(where: {access_token: {id: {_eq: 1}}})
     # app_profile_holdings(where: {holding_details: {ticker: {ticker_interests: {interest_id: {_in: [5]}}}}})
     # app_profile_holdings(where: {holding_details: {ticker: {ticker_categories: {category_id: {_in: []}}}}}) 
     # app_profile_holdings(where: {holding_details: {security_type: {_in: ["equity"]}}})
     # app_profile_holdings(where: {holding_details: {ltt_quantity_total: {_gt: 0}}})
-    
-    # account options:
-    app_profile_portfolio_accounts {
-        balance_available
-        balance_current
-        balance_iso_currency_code
-        balance_limit
-        created_at
-        mask
-        name
-        official_name
-        subtype
-        type
-        updated_at
-    }
     
     # broker options:
     app_profile_plaid_access_tokens(where: {purpose: {_eq: "portfolio"}}) { id }
@@ -348,14 +179,15 @@ query GetPortfolioPieChart(
     #    loan: Loans and loan receivables.
     #    mutual fund: Open- and closed-end vehicles pooling funds of multiple investors.
     #    other: Unknown or other investment types
+    #    ttf: TTF
 }
 ```
 
 ### Full request with grouping
 
 ```GraphQL
-{
-    portfolio_gains (where:{profile_id: {_eq: 1}}) {
+query GetPlaidHoldings($profileId: Int!) {
+    portfolio_gains (where:{profile_id: {_eq: $profileId}}) {
         absolute_gain_1d
         absolute_gain_1m
         absolute_gain_1w
@@ -372,17 +204,24 @@ query GetPortfolioPieChart(
         relative_gain_5y
         relative_gain_total
     }
-    profile_holding_groups(where:{profile_id: {_eq: 1}}) {
+    profile_holding_groups(where:{profile_id: {_eq: $profileId}}) {
+        tags(order_by: {priority: desc}) {
+            collection{
+                id
+                name
+            }
+        }
         details {
             ltt_quantity_total
             market_capitalization
             next_earnings_date
             purchase_date
+            name
+            ticker_symbol
+            collection_id
+            ticker_symbol
             relative_gain_1d
             relative_gain_total
-            ticker_name
-            ticker_symbol
-            value_to_portfolio_value
         }
         gains{
             absolute_gain_1d
@@ -407,20 +246,21 @@ query GetPortfolioPieChart(
             name
             quantity
             ticker_symbol
+            type
+            broker {
+                uniq_id
+                name
+            }
             holding_details {
                 purchase_date
-                relative_gain_total
-                relative_gain_1d
-                value_to_portfolio_value
+                ticker_symbol
                 ticker_name
                 market_capitalization
                 next_earnings_date
                 ltt_quantity_total
                 security_type
-                account_id
-                name
-                quantity
-                avg_cost
+                relative_gain_1d
+                relative_gain_total
             }
             gains {
                 absolute_gain_1d
@@ -442,22 +282,20 @@ query GetPortfolioPieChart(
                 value_to_portfolio_value
             }
         }
-        tags (order_by: {priority: desc}) {
-            collection{
-                id
-                name
-            }
-            interest{
-                id
-                name
-            }
-            category{
-                id
-                name
+        symbol
+
+        ticker {
+            name
+            ...RemoteTickerDetailsFull
+            realtime_metrics {
+                absolute_daily_change
+                actual_price
+                daily_volume
+                relative_daily_change
+                symbol
+                time
             }
         }
-        quantity
-        symbol
     }
 }
 ```

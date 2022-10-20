@@ -68,5 +68,5 @@ from (
 {% if is_incremental() %}
          left join {{ this }} old_portfolio_securities_normalized
                    using (id, name, ticker_symbol, original_ticker_symbol, type)
-where old_portfolio_securities_normalized is null
+where old_portfolio_securities_normalized.id is null
 {% endif %}

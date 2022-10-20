@@ -12,16 +12,10 @@
 
 with first_purchase_date as
          (
-             select distinct on (
-                 profile_holdings.id
-                 ) profile_holdings.id as holding_id,
-                   date
-             from {{ source('app', 'profile_portfolio_transactions') }}
-                      join {{ source('app', 'profile_holdings') }}
-                           on profile_holdings.profile_id = profile_portfolio_transactions.profile_id
-                               and profile_holdings.security_id = profile_portfolio_transactions.security_id
-                               and profile_holdings.account_id = profile_portfolio_transactions.account_id
-             order by profile_holdings.id, date
+             select holding_id_v2,
+                    min(datetime) as datetime
+             from {{ ref('portfolio_expanded_transactions') }}
+             group by holding_id_v2
          ),
      next_earnings_date as
          (
@@ -35,7 +29,7 @@ select profile_holdings_normalized.holding_id_v2,
        profile_holdings_normalized.holding_id,
        profile_holdings_normalized.symbol              as ticker_symbol,
        profile_holdings_normalized.account_id,
-       first_purchase_date.date::timestamp             as purchase_date,
+       first_purchase_date.datetime::timestamp         as purchase_date,
        relative_gain_total,
        relative_gain_1d,
        portfolio_holding_gains.value_to_portfolio_value,
@@ -49,7 +43,7 @@ select profile_holdings_normalized.holding_id_v2,
        profile_holdings_normalized.quantity,
        (actual_value - absolute_gain_total) / quantity as avg_cost
 from {{ ref('profile_holdings_normalized') }}
-         left join first_purchase_date using (holding_id)
+         left join first_purchase_date using (holding_id_v2)
          left join {{ ref('portfolio_holding_gains') }} using (holding_id_v2)
          left join {{ ref('portfolio_securities_normalized') }} on portfolio_securities_normalized.id = profile_holdings_normalized.security_id
          left join {{ ref('base_tickers') }} on base_tickers.symbol = profile_holdings_normalized.ticker_symbol

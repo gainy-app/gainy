@@ -102,7 +102,7 @@ from {{ ref('profile_collections') }}
 where profile_collections.enabled = '1'
 
 {% if is_incremental() %}
-  and (old_data is null
+  and (old_data.collection_uniq_id is null
        or previous_day.updated_at >= old_data.updated_at
        or latest_day.updated_at >= old_data.updated_at)
 {% endif %}

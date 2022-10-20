@@ -29,5 +29,5 @@ from (
      ) t
 {% if is_incremental() %}
          left join {{ this }} old_data using (collection_uniq_id, symbol)
-where old_data is null or old_data.date < t.date
+where old_data.collection_uniq_id is null or old_data.date < t.date
 {% endif %}

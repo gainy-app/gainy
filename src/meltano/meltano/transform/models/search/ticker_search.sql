@@ -55,7 +55,7 @@ from {{ ref('tickers') }}
          left join ticker_industries using (symbol)
          left join ticker_categories using (symbol)
          left join ticker_search_alternative_names using (symbol)
-where (type not in ('crypto', 'index') or tickers_with_realtime_prices is not null)
+where (type not in ('crypto', 'index') or tickers_with_realtime_prices.symbol is not null)
 {% if not var('search_crypto_enabled') %}
   and tickers.type != 'crypto'
 {% endif %}

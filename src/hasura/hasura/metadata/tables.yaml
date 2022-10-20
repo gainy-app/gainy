@@ -1632,6 +1632,16 @@
           - sort_order
         filter: {}
 - table:
+    name: portfolio_brokers
+    schema: public
+  select_permissions:
+    - role: user
+      permission:
+        columns:
+          - name
+          - uniq_id
+        filter: {}
+- table:
     name: portfolio_gains
     schema: public
   object_relationships:
@@ -1782,6 +1792,7 @@
     - role: user
       permission:
         columns:
+          - collection_id
           - ltt_quantity_total
           - market_capitalization
           - name
@@ -2109,6 +2120,18 @@
     name: profile_holdings_normalized
     schema: public
   object_relationships:
+    - name: access_token
+      using:
+        foreign_key_constraint_on: plaid_access_token_id
+    - name: broker
+      using:
+        manual_configuration:
+          column_mapping:
+            broker_uniq_id: uniq_id
+          insertion_order: null
+          remote_table:
+            name: portfolio_brokers
+            schema: public
     - name: gains
       using:
         manual_configuration:

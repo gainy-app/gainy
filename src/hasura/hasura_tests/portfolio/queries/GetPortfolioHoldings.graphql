@@ -1,4 +1,4 @@
-query GetPortfolioHoldings($profileId: Int!) {
+query GetPlaidHoldings($profileId: Int!) {
     get_portfolio_chart(profile_id: $profileId, periods: ["1d"]) {
         adjusted_close
     }
@@ -20,16 +20,23 @@ query GetPortfolioHoldings($profileId: Int!) {
         relative_gain_total
     }
     profile_holding_groups(where:{profile_id: {_eq: $profileId}}) {
+        tags(order_by: {priority: desc}) {
+            collection{
+                id
+                name
+            }
+        }
         details {
             ltt_quantity_total
             market_capitalization
             next_earnings_date
             purchase_date
+            name
+            ticker_symbol
+            collection_id
+            ticker_symbol
             relative_gain_1d
             relative_gain_total
-            ticker_name
-            ticker_symbol
-            value_to_portfolio_value
         }
         gains{
             absolute_gain_1d
@@ -51,23 +58,24 @@ query GetPortfolioHoldings($profileId: Int!) {
             value_to_portfolio_value
         }
         holdings {
-            account_id
             name
             quantity
             ticker_symbol
             type
+            broker {
+                uniq_id
+                name
+            }
             holding_details {
-                ticker_symbol
                 purchase_date
-                relative_gain_total
-                relative_gain_1d
-                value_to_portfolio_value
+                ticker_symbol
                 ticker_name
                 market_capitalization
                 next_earnings_date
                 ltt_quantity_total
                 security_type
-                account_id
+                relative_gain_1d
+                relative_gain_total
             }
             gains {
                 absolute_gain_1d
@@ -89,28 +97,17 @@ query GetPortfolioHoldings($profileId: Int!) {
                 value_to_portfolio_value
             }
         }
-        tags{
-            collection{
-                id
-                name
-            }
-            interest{
-                id
-                name
-            }
-            category{
-                id
-                name
-            }
-        }
-        quantity
         symbol
 
         ticker {
             name
             realtime_metrics {
+                absolute_daily_change
                 actual_price
+                daily_volume
                 relative_daily_change
+                symbol
+                time
             }
         }
     }

@@ -85,5 +85,5 @@ from data_groupped
 where component_weight > 0
 
 {% if is_incremental() %}
-  and data_groupped.version != old_version.version or old_version is null
+  and data_groupped.version != old_version.version or old_version.symbol is null
 {% endif %}

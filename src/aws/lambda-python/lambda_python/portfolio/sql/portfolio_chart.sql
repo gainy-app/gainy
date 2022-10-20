@@ -7,22 +7,21 @@ with latest_open_trading_session as
          ),
      raw_chart_data as
          (
-             select distinct on (uniq_id, period, portfolio_transaction_chart.datetime)
+             select distinct on (transaction_uniq_id, period, portfolio_transaction_chart.datetime)
                  portfolio_expanded_transactions.profile_id,
                  profile_holdings_normalized.type,
                  portfolio_expanded_transactions.symbol,
                  portfolio_expanded_transactions.quantity_norm_for_valuation,
                  period,
                  portfolio_transaction_chart.datetime,
-                 uniq_id,
+                 transaction_uniq_id,
                  open::numeric,
                  high::numeric,
                  low::numeric,
                  close::numeric,
                  adjusted_close::numeric
              from portfolio_transaction_chart
-                      join portfolio_expanded_transactions
-                           on portfolio_expanded_transactions.uniq_id = portfolio_transaction_chart.transactions_uniq_id
+                      join portfolio_expanded_transactions using (transaction_uniq_id)
                       left join profile_holdings_normalized using (holding_id_v2)
                       left join week_trading_sessions
                                 on week_trading_sessions.symbol = portfolio_expanded_transactions.symbol
@@ -47,7 +46,7 @@ with latest_open_trading_session as
                     period,
                     datetime,
                     sum(quantity_norm_for_valuation)  as quantity,
-                    count(uniq_id)                    as transaction_count,
+                    count(transaction_uniq_id)        as transaction_count,
                     sum(open)                         as open,
                     sum(high)                         as high,
                     sum(low)                          as low,
@@ -77,7 +76,7 @@ with latest_open_trading_session as
                            ) t
                                left join chart_date_stats using (period)
                                left join ticker_chart using (symbol, period, datetime)
-                      where ticker_chart is null
+                      where ticker_chart.symbol is null
                         and (datetime between min_datetime and max_datetime or period = '1d')
                   ) t1
                       join ticker_chart using (period, datetime)
@@ -85,7 +84,7 @@ with latest_open_trading_session as
                                 on week_trading_sessions_static.symbol = ticker_chart.symbol
                                     and datetime >= week_trading_sessions_static.open_at
                                     and datetime < week_trading_sessions_static.close_at
-             where week_trading_sessions_static is not null or period != '1w'
+             where week_trading_sessions_static.symbol is not null or period != '1w'
      ),
      schedule as  materialized
          (
@@ -93,7 +92,7 @@ with latest_open_trading_session as
 
              from ticker_chart
                       left join symbols_to_exclude_from_schedule using (symbol)
-             where symbols_to_exclude_from_schedule is null
+             where symbols_to_exclude_from_schedule.symbol is null
              group by profile_id, period, datetime
      ),
      ticker_chart_latest_datapoint as  materialized

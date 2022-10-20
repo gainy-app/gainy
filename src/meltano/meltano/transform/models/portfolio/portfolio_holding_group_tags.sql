@@ -160,5 +160,5 @@ select distinct on (
 from all_rows
 {% if is_incremental() and var('realtime') %}
          left join {{ this }} old_data using (holding_group_id)
-where old_data is null
+where old_data.holding_group_id is null
 {% endif %}

@@ -5,7 +5,6 @@
     tags = ["realtime"],
     post_hook=[
       pk('holding_id_v2'),
-      'delete from {{this}} where updated_at < (select max(updated_at) from {{this}})',
       'create index if not exists "phn_profile_id_security_id_account_id" ON {{ this }} (profile_id, security_id, account_id)',
       'create index if not exists "phn_profile_id_collection_id_symbol" ON {{ this }} (profile_id, collection_id, symbol)',
       fk('holding_id', 'app', 'profile_holdings', 'id'),
@@ -39,6 +38,7 @@ with data as
                portfolio_securities_normalized.ticker_symbol,
                null                                                              as collection_id,
                portfolio_securities_normalized.type,
+               portfolio_brokers.uniq_id                                         as broker_uniq_id,
                greatest(profile_holdings.updated_at,
                         portfolio_securities_normalized.updated_at,
                         base_tickers.updated_at)                                 as updated_at
@@ -46,9 +46,9 @@ with data as
                  join {{ ref('portfolio_securities_normalized') }}
                       on portfolio_securities_normalized.id = profile_holdings.security_id
                  left join {{ ref('base_tickers') }}
-                      on base_tickers.symbol = portfolio_securities_normalized.ticker_symbol
+                           on base_tickers.symbol = portfolio_securities_normalized.ticker_symbol
                  left join {{ source('app', 'profile_plaid_access_tokens') }} on profile_plaid_access_tokens.id = profile_holdings.plaid_access_token_id
-                 left join {{ source('app', 'plaid_institutions') }} on plaid_institutions.id = profile_plaid_access_tokens.institution_id
+                 left join {{ ref('portfolio_brokers') }} on portfolio_brokers.plaid_institution_id = profile_plaid_access_tokens.institution_id
         where profile_holdings.quantity > 0
 
         union all
@@ -67,10 +67,12 @@ with data as
                symbol                                                        as ticker_symbol,
                collection_id,
                'ttf'                                                         as type,
+               portfolio_brokers.uniq_id                                     as broker_uniq_id,
                greatest(drivewealth_holdings.updated_at,
                         base_tickers.updated_at)                             as updated_at
         from {{ ref('drivewealth_holdings') }}
                  left join {{ ref('base_tickers') }} using (symbol)
+                 left join {{ ref('portfolio_brokers') }} on portfolio_brokers.uniq_id = 'dw_ttf'
         where collection_id is not null
 )
 select data.*
@@ -78,6 +80,6 @@ from data
 
 {% if is_incremental() %}
          left join {{ this }} old_data using (holding_id_v2)
-where old_data is null
+where old_data.holding_id_v2 is null
    or data.updated_at > old_data.updated_at
 {% endif %}

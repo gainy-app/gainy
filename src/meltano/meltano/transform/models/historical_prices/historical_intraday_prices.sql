@@ -36,7 +36,7 @@ with polygon_symbols as materialized
              from {{ source('eod', 'eod_intraday_prices') }}
                       join {{ ref('week_trading_sessions') }} using (symbol)
                       left join polygon_symbols using (symbol, date)
-             where polygon_symbols is null
+             where polygon_symbols.symbol is null
                and time >= week_trading_sessions.open_at
                and time < week_trading_sessions.close_at
          ),
