@@ -7,9 +7,9 @@ INSERT INTO app.profiles (id, email, first_name, last_name, gender, created_at, 
                      'AO0OQyz0jyL5lNUpvKbpVdAPvlI4', '',
                      'legal_address'),
                     (3, 'test-plaid-portfolio@gainy.app', 'fn', 'ln', 0, '2021-10-18 11:46:18.851570 +00:00',
-                     'AO0OQyz0jyL5lNUpvKbpVdAPvlI4', '',
+                     'AO0OQyz0jyL5lNUpvKbpVdAPvlI5', '',
                      'legal_address');
-ALTER SEQUENCE app.profiles_id_seq RESTART WITH 3;
+ALTER SEQUENCE app.profiles_id_seq RESTART WITH 4;
 
 INSERT INTO app.profile_scoring_settings (profile_id, created_at, risk_level, average_market_return, investment_horizon,
                                    unexpected_purchases_source, damage_of_failure, stock_market_risk_level,
