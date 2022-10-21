@@ -16,4 +16,5 @@ INSERT INTO app.profile_scoring_settings (profile_id, created_at, risk_level, av
                                    trading_experience, if_market_drops_20_i_will_buy,
                                    if_market_drops_40_i_will_buy)
 VALUES (1, '2021-10-18 11:46:18.851570 +00:00', 0.5, 6, 0.5, 'checking_savings', 0.5, 'very_risky', 'never_tried', 0.5, 0.5),
-       (2, '2021-10-18 11:46:18.851570 +00:00', 0.5, 6, 0.5, 'checking_savings', 0.5, 'very_risky', 'never_tried', 0.5, 0.5);
+       (2, '2021-10-18 11:46:18.851570 +00:00', 0.5, 6, 0.5, 'checking_savings', 0.5, 'very_risky', 'never_tried', 0.5, 0.5),
+       (3, '2021-10-18 11:46:18.851570 +00:00', 0.5, 6, 0.5, 'checking_savings', 0.5, 'very_risky', 'never_tried', 0.5, 0.5);
