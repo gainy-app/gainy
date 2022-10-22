@@ -5,8 +5,8 @@
     tags = ["realtime"],
     post_hook=[
       pk('holding_group_id'),
-      'create unique index if not exists "profile_id__ticker_symbol" ON {{ this }} (profile_id, ticker_symbol)',
-      'create unique index if not exists "profile_id__collection_id" ON {{ this }} (profile_id, collection_id)',
+      'create index if not exists "profile_id__ticker_symbol" ON {{ this }} (profile_id, ticker_symbol)',
+      'create index if not exists "profile_id__collection_id" ON {{ this }} (profile_id, collection_id)',
       'delete from {{this}} where updated_at < (select max(updated_at) from {{this}})',
     ]
   )
