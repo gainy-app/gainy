@@ -13,7 +13,6 @@
 }}
 
 
-explain analyze
 with holding_groups0 as
          (
              select profile_holdings_normalized.holding_group_id,
