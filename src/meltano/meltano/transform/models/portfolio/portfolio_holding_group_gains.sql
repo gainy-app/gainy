@@ -13,12 +13,10 @@
 }}
 
 
+explain analyze
 with holding_groups0 as
          (
              select profile_holdings_normalized.holding_group_id,
-                    profile_holdings_normalized.profile_id,
-                    ticker_symbol,
-                    collection_id,
                     greatest(max(portfolio_holding_gains.updated_at),
                              max(profile_holdings_normalized.updated_at))     as updated_at,
                     sum(portfolio_holding_gains.actual_value::numeric)        as actual_value,
@@ -33,14 +31,11 @@ with holding_groups0 as
              from {{ ref('portfolio_holding_gains') }}
                       join {{ ref('profile_holdings_normalized') }} using (holding_id_v2)
              where profile_holdings_normalized.holding_group_id is not null
-             group by profile_holdings_normalized.holding_group_id, profile_holdings_normalized.profile_id, ticker_symbol, collection_id
-     ),
+             group by profile_holdings_normalized.holding_group_id
+         ),
      holding_groups as
          (
              select holding_group_id,
-                    profile_id,
-                    ticker_symbol,
-                    collection_id,
                     updated_at::timestamp,
                     actual_value::double precision,
                     ltt_quantity_total::double precision,
@@ -61,6 +56,11 @@ with holding_groups0 as
              from holding_groups0
      )
 
-select *,
+select holding_groups.*,
+       profile_id,
+       symbol                                                                                       as ticker_symbol,
+       collection_id,
        (actual_value / (1e-9 + sum(actual_value) over (partition by profile_id)))::double precision as value_to_portfolio_value
 from holding_groups
+         join {{ ref('profile_holding_groups') }} on profile_holding_groups.id = holding_group_id
+

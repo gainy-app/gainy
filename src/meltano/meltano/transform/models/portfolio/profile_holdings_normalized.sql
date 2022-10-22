@@ -53,27 +53,25 @@ with data as
 
         union all
 
-        select 'ttf_' || profile_id || '_' || collection_id                  as holding_group_id,
-               'ttf_' || profile_id || '_' || collection_id || '_' || symbol as holding_id_v2,
-               null                                                          as holding_id,
-               null                                                          as plaid_access_token_id,
-               null                                                          as security_id,
+        select 'ttf_' || profile_id || coalesce('_' || collection_id, '')                  as holding_group_id,
+               'ttf_' || profile_id || coalesce('_' || collection_id, '') || '_' || symbol as holding_id_v2,
+               null                                                                        as holding_id,
+               null                                                                        as plaid_access_token_id,
+               null                                                                        as security_id,
                profile_id,
-               null                                                          as account_id,
+               null                                                                        as account_id,
                quantity,
                quantity_norm_for_valuation,
-               base_tickers.name                                             as name,
+               coalesce(base_tickers.name, drivewealth_holdings.name)                      as name,
                symbol,
-               symbol                                                        as ticker_symbol,
+               symbol                                                                      as ticker_symbol,
                collection_id,
-               'ttf'                                                         as type,
-               portfolio_brokers.uniq_id                                     as broker_uniq_id,
-               greatest(drivewealth_holdings.updated_at,
-                        base_tickers.updated_at)                             as updated_at
+               'ttf'                                                                       as type,
+               portfolio_brokers.uniq_id                                                   as broker_uniq_id,
+               greatest(drivewealth_holdings.updated_at, base_tickers.updated_at)          as updated_at
         from {{ ref('drivewealth_holdings') }}
                  left join {{ ref('base_tickers') }} using (symbol)
                  left join {{ ref('portfolio_brokers') }} on portfolio_brokers.uniq_id = 'dw_ttf'
-        where collection_id is not null
 )
 select data.*
 from data

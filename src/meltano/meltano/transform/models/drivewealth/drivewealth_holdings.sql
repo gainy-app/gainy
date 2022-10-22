@@ -53,7 +53,8 @@ select 'ttf_' || profile_id || '_' || collection_id                  as holding_
        null                                                          as account_id,
        (fund_holding_data ->> 'openQty')::numeric                    as quantity,
        (fund_holding_data ->> 'openQty')::numeric                    as quantity_norm_for_valuation,
-       (fund_holding_data ->> 'value')::numeric                      as actual_value,
+       (fund_holding_data ->> 'openQty')::numeric *
+       ticker_realtime_metrics.actual_price                          as actual_value,
        base_tickers.name                                             as name,
        base_tickers.symbol                                           as symbol,
        coalesce(base_tickers_type_to_security_type.security_type,
@@ -66,6 +67,7 @@ from fund_holdings
          left join {{ ref('base_tickers') }}
                    on base_tickers.symbol = fund_holding_data ->> 'symbol'
          left join base_tickers_type_to_security_type using (type)
+         left join {{ ref('ticker_realtime_metrics') }} using (symbol)
 
 union all
 
