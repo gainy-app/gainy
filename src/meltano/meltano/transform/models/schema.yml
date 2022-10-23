@@ -1983,6 +1983,7 @@ models:
               type: 'timestamp with time zone'
       - name: uniq_id
         tests:
+          - not_null
           - type:
               type: 'character varying'
       - name: date

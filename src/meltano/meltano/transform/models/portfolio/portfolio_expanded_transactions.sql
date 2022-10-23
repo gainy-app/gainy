@@ -259,7 +259,8 @@ with plaid_transactions as
                       from {{ ref('profile_holdings_normalized') }}
                                left join first_transaction_date using (profile_id)
                                left join expanded_transactions using (account_id, security_id)
-                      where profile_holdings_normalized.type not in ('cash', 'ttf')
+                      where profile_holdings_normalized.type != 'cash'
+                        and profile_holdings_normalized.collection_id is null
                       order by profile_holdings_normalized.account_id, profile_holdings_normalized.security_id,
                                expanded_transactions.row_num desc
                   ) t
