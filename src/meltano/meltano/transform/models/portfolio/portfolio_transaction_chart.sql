@@ -5,6 +5,7 @@
     tags = ["realtime"],
     post_hook=[
       pk('transaction_uniq_id, period, datetime'),
+      'create index if not exists "ptc_profile_id" ON {{ this }} (profile_id)',
       index('id', true),
       'delete from {{this}}
         using {{this}} ptc
@@ -67,6 +68,7 @@ select t.*
 from (
          select portfolio_expanded_transactions.transaction_uniq_id || '_' ||
                 chart.period || '_' || chart.datetime                                              as id,
+                portfolio_expanded_transactions.profile_id,
                 portfolio_expanded_transactions.transaction_uniq_id,
                 chart.datetime,
                 chart.period,

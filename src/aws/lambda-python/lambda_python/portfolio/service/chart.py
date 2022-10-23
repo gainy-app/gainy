@@ -27,7 +27,7 @@ class PortfolioChartService:
 
         self._filter_query_by_profile_id(params, where_clause, join_clause,
                                          profile_id,
-                                         "portfolio_expanded_transactions")
+                                         "portfolio_transaction_chart")
         self._filter_query_by_periods(params, where_clause, join_clause,
                                       filter)
         self._filter_query_by_institution_ids(params, where_clause,
@@ -72,7 +72,7 @@ class PortfolioChartService:
 
         self._filter_query_by_profile_id(params, where_clause, join_clause,
                                          profile_id,
-                                         "portfolio_expanded_transactions")
+                                         "portfolio_transaction_chart")
         self._filter_query_by_periods(params, where_clause, join_clause,
                                       filter)
         self._filter_query_by_institution_ids(params, where_clause,

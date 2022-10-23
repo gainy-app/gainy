@@ -210,6 +210,14 @@ query GetPlaidHoldings($profileId: Int!) {
                 id
                 name
             }
+            interest{
+                id
+                name
+            }
+            category{
+                id
+                name
+            }
         }
         details {
             ltt_quantity_total
