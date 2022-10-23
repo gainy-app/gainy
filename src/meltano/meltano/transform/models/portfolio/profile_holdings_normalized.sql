@@ -21,9 +21,8 @@ with data as
     (
         select case
                    when portfolio_securities_normalized.type = 'cash'
-                       then profile_holdings.profile_id || '_cash'
-                   else 'ticker_' || profile_holdings.profile_id ||
-                            '_' || portfolio_securities_normalized.ticker_symbol
+                       then profile_holdings.profile_id || '_cash_' || portfolio_securities_normalized.ticker_symbol
+                   else 'ticker_' || profile_holdings.profile_id || '_' || portfolio_securities_normalized.ticker_symbol
                    end                                                           as holding_group_id,
                profile_holdings.profile_id ||
                '_plaid_' || profile_holdings.id                                  as holding_id_v2,
@@ -59,7 +58,7 @@ with data as
 
         select case
                    when drivewealth_holdings.type = 'cash'
-                       then profile_id || '_cash'
+                       then profile_id || '_cash_' || symbol
                    else 'ttf_' || profile_id || coalesce('_' || collection_id, '')
                    end                                                                     as holding_group_id,
                'ttf_' || profile_id || coalesce('_' || collection_id, '') || '_' || symbol as holding_id_v2,
