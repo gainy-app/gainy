@@ -13,6 +13,7 @@ with latest_open_trading_session as
                  portfolio_expanded_transactions.symbol,
                  portfolio_expanded_transactions.quantity_norm_for_valuation,
                  period,
+                 week_trading_sessions.date,
                  portfolio_transaction_chart.datetime,
                  transaction_uniq_id,
                  open::numeric,
@@ -30,7 +31,7 @@ with latest_open_trading_session as
                                 on latest_open_trading_session.symbol = portfolio_expanded_transactions.symbol
                       left join app.profile_plaid_access_tokens on profile_plaid_access_tokens.id = profile_holdings_normalized.plaid_access_token_id
                       {join_clause}
-             where ((period = '1d' and week_trading_sessions.index = 0)
+             where ((period = '1d' and week_trading_sessions.index is not null)
                  or (period = '1w' and week_trading_sessions.index is not null)
                  or (period = '1m' and portfolio_transaction_chart.datetime >= latest_open_trading_session.date - interval '1 month')
                  or (period = '3m' and portfolio_transaction_chart.datetime >= latest_open_trading_session.date - interval '3 months')
@@ -44,6 +45,7 @@ with latest_open_trading_session as
              select profile_id,
                     symbol,
                     period,
+                    date,
                     datetime,
                     sum(quantity_norm_for_valuation)  as quantity,
                     count(transaction_uniq_id)        as transaction_count,
@@ -53,7 +55,7 @@ with latest_open_trading_session as
                     sum(close)                        as close,
                     sum(adjusted_close)               as adjusted_close
              from raw_chart_data
-             group by profile_id, symbol, period, datetime
+             group by profile_id, symbol, period, date, datetime
          ),
      chart_date_stats as
          (
@@ -155,6 +157,8 @@ with latest_open_trading_session as
                      sum(adjusted_close)    as adjusted_close,
                      sum(cash_adjustment)   as cash_adjustment
               from ticker_chart_with_cash_adjustment
+                       left join week_trading_sessions using (symbol, date)
+              where (period != '1d' or week_trading_sessions.index = 0)
               group by profile_id, period, datetime
          )
 select period,
