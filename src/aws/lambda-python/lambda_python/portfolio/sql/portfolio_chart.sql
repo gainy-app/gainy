@@ -13,7 +13,7 @@ with latest_open_trading_session as
                  original_ticker_symbol as symbol,
                  quantity_norm_for_valuation,
                  period,
-                 week_trading_sessions.date,
+                 week_trading_sessions.index as week_trading_session_index,
                  portfolio_transaction_chart.datetime,
                  uniq_id,
                  open::numeric,
@@ -48,7 +48,7 @@ with latest_open_trading_session as
              select profile_id,
                     symbol,
                     period,
-                    date,
+                    week_trading_session_index,
                     datetime,
                     sum(quantity_norm_for_valuation)  as quantity,
                     count(uniq_id)                    as transaction_count,
@@ -58,7 +58,7 @@ with latest_open_trading_session as
                     sum(close)                        as close,
                     sum(adjusted_close)               as adjusted_close
              from raw_chart_data
-             group by profile_id, symbol, period, date, datetime
+             group by profile_id, symbol, period, week_trading_session_index, datetime
          ),
      chart_date_stats as
          (
@@ -168,8 +168,7 @@ with latest_open_trading_session as
                      sum(adjusted_close)    as adjusted_close,
                      sum(cash_adjustment)   as cash_adjustment
               from ticker_chart_with_cash_adjustment
-                       left join week_trading_sessions using (symbol, date)
-              where (period != '1d' or week_trading_sessions.index = 0)
+              where (period != '1d' or week_trading_session_index = 0)
               group by profile_id, period, datetime
          )
 select period,
