@@ -24,7 +24,44 @@ with first_profile_transaction_date as
                     min(date) as datetime
              from {{ source('app', 'profile_portfolio_transactions') }}
              group by profile_id
-         )
+         ),
+    chart as
+        (
+             (
+                  select historical_prices_aggregated_3min.symbol,
+                         week_trading_sessions.date,
+                         historical_prices_aggregated_3min.datetime,
+                         historical_prices_aggregated_3min.datetime + interval '3 minutes' as close_datetime,
+                         '1d'::varchar as period,
+                         historical_prices_aggregated_3min.open,
+                         historical_prices_aggregated_3min.high,
+                         historical_prices_aggregated_3min.low,
+                         historical_prices_aggregated_3min.close,
+                         historical_prices_aggregated_3min.adjusted_close,
+                         historical_prices_aggregated_3min.volume,
+                         historical_prices_aggregated_3min.updated_at
+                  from {{ ref('historical_prices_aggregated_3min') }}
+                           join {{ ref('week_trading_sessions') }} using (symbol)
+                  where historical_prices_aggregated_3min.datetime between week_trading_sessions.open_at and week_trading_sessions.close_at - interval '1 microsecond'
+             )
+             union all
+             (
+                  select symbol,
+                         date,
+                         datetime,
+                         close_datetime,
+                         period,
+                         open,
+                         high,
+                         low,
+                         close,
+                         adjusted_close,
+                         volume,
+                         updated_at
+                  from {{ ref('chart') }}
+                  where period != '1d'
+            )
+     )
 
 select t.*
 from (
@@ -41,7 +78,7 @@ from (
                   left join first_profile_transaction_date using (profile_id)
                   join {{ ref('portfolio_securities_normalized') }}
                        on portfolio_securities_normalized.id = portfolio_expanded_transactions.security_id
-                  join {{ ref('chart') }}
+                  join chart
                        on chart.symbol = portfolio_securities_normalized.original_ticker_symbol
                            and (chart.close_datetime > portfolio_expanded_transactions.date or portfolio_expanded_transactions.date is null)
                            and (chart.close_datetime > first_profile_transaction_date.datetime or first_profile_transaction_date.profile_id is null)
