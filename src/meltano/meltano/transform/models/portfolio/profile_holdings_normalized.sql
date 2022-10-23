@@ -19,8 +19,12 @@
 
 with data as
     (
-        select 'ticker_' || profile_holdings.profile_id ||
-               '_' || portfolio_securities_normalized.ticker_symbol              as holding_group_id,
+        select case
+                   when portfolio_securities_normalized.type = 'cash'
+                       then profile_holdings.profile_id || '_cash'
+                   else 'ticker_' || profile_holdings.profile_id ||
+                            '_' || portfolio_securities_normalized.ticker_symbol
+                   end                                                           as holding_group_id,
                profile_holdings.profile_id ||
                '_plaid_' || profile_holdings.id                                  as holding_id_v2,
                profile_holdings.id                                               as holding_id,
@@ -53,7 +57,11 @@ with data as
 
         union all
 
-        select 'ttf_' || profile_id || coalesce('_' || collection_id, '')                  as holding_group_id,
+        select case
+                   when drivewealth_holdings.type = 'cash'
+                       then profile_id || '_cash'
+                   else 'ttf_' || profile_id || coalesce('_' || collection_id, '')
+                   end                                                                     as holding_group_id,
                'ttf_' || profile_id || coalesce('_' || collection_id, '') || '_' || symbol as holding_id_v2,
                null                                                                        as holding_id,
                null                                                                        as plaid_access_token_id,
@@ -66,7 +74,7 @@ with data as
                symbol,
                symbol                                                                      as ticker_symbol,
                collection_id,
-               'ttf'                                                                       as type,
+               drivewealth_holdings.type,
                portfolio_brokers.uniq_id                                                   as broker_uniq_id,
                greatest(drivewealth_holdings.updated_at, base_tickers.updated_at)          as updated_at
         from {{ ref('drivewealth_holdings') }}

@@ -27,17 +27,17 @@ with first_purchase_date as
          )
 select profile_holdings_normalized.holding_id_v2,
        profile_holdings_normalized.holding_id,
-       profile_holdings_normalized.symbol              as ticker_symbol,
+       profile_holdings_normalized.symbol         as ticker_symbol,
        profile_holdings_normalized.account_id,
-       first_purchase_date.datetime::timestamp         as purchase_date,
+       first_purchase_date.datetime::timestamp    as purchase_date,
        relative_gain_total,
        relative_gain_1d,
        portfolio_holding_gains.value_to_portfolio_value,
        coalesce(ticker_options.name, base_tickers.name,
-                portfolio_securities_normalized.name)  as ticker_name,
+                profile_holdings_normalized.name) as ticker_name,
        ticker_metrics.market_capitalization,
-       next_earnings_date.date::timestamp              as next_earnings_date,
-       portfolio_securities_normalized.type            as security_type,
+       next_earnings_date.date::timestamp         as next_earnings_date,
+       profile_holdings_normalized.type           as security_type,
        portfolio_holding_gains.ltt_quantity_total,
        profile_holdings_normalized.name,
        profile_holdings_normalized.quantity,
@@ -45,7 +45,6 @@ select profile_holdings_normalized.holding_id_v2,
 from {{ ref('profile_holdings_normalized') }}
          left join first_purchase_date using (holding_id_v2)
          left join {{ ref('portfolio_holding_gains') }} using (holding_id_v2)
-         left join {{ ref('portfolio_securities_normalized') }} on portfolio_securities_normalized.id = profile_holdings_normalized.security_id
          left join {{ ref('base_tickers') }} on base_tickers.symbol = profile_holdings_normalized.ticker_symbol
          left join next_earnings_date on next_earnings_date.symbol = base_tickers.symbol
          left join {{ ref('ticker_metrics') }} on ticker_metrics.symbol = base_tickers.symbol

@@ -47,9 +47,7 @@ with latest_portfolio_status as
                              ('common stock', 'equity')
                   ) t (type, security_type)
      )
-select 'ttf_' || profile_id || '_' || collection_id                  as holding_group_id,
-       'ttf_' || profile_id || '_' || collection_id || '_' || symbol as holding_id_v2,
-       profile_id,
+select profile_id,
        null                                                          as account_id,
        (fund_holding_data ->> 'openQty')::numeric                    as quantity,
        (fund_holding_data ->> 'openQty')::numeric                    as quantity_norm_for_valuation,
@@ -71,9 +69,7 @@ from fund_holdings
 
 union all
 
-select null                                          as holding_group_id,
-       null                                          as holding_id_v2,
-       portfolio_funds.profile_id,
+select portfolio_funds.profile_id,
        null                                          as account_id,
        (portfolio_holding_data ->> 'value')::numeric as quantity,
        (portfolio_holding_data ->> 'value')::numeric as quantity_norm_for_valuation,
