@@ -11,11 +11,11 @@
   )
 }}
 
-select drivewealth_holdings.holding_group_id,
-       drivewealth_holdings.profile_id,
+select profile_holdings_normalized.holding_group_id,
+       profile_holdings_normalized.profile_id,
        null as ticker_symbol,
        collection_id,
-       min(drivewealth_holdings.purchase_date)                     as purchase_date,
+       min(profile_holdings_normalized.purchase_date)              as purchase_date,
        min(portfolio_holding_group_gains.relative_gain_total)      as relative_gain_total,
        min(portfolio_holding_group_gains.relative_gain_1d)         as relative_gain_1d,
        min(portfolio_holding_group_gains.value_to_portfolio_value) as value_to_portfolio_value,
@@ -25,10 +25,10 @@ select drivewealth_holdings.holding_group_id,
        null                                                        as next_earnings_date,
        null                                                        as ltt_quantity_total,
        now()                                                       as updated_at
-from {{ ref('drivewealth_holdings') }}
+from {{ ref('profile_holdings_normalized') }}
          join {{ ref('portfolio_holding_group_gains') }} using (profile_id, collection_id)
          join {{ ref('collections') }} on collections.id = collection_id
-group by drivewealth_holdings.holding_group_id, drivewealth_holdings.profile_id, collection_id
+group by profile_holdings_normalized.holding_group_id, profile_holdings_normalized.profile_id, collection_id
 
 union all
 
