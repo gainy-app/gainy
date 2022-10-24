@@ -4,7 +4,7 @@ import pytest
 
 from gainy.tests.mocks.repository_mocks import mock_find, mock_persist, mock_noop
 from tests.trading.drivewealth.api_mocks import mock_create_deposit, mock_create_redemption, mock_get_deposit
-from trading.models import TradingMoneyFlow
+from trading.models import TradingMoneyFlow, TradingMoneyFlowStatus
 from trading.drivewealth.models import DriveWealthBankAccount, DriveWealthDeposit, DriveWealthRedemption
 from trading.drivewealth.api import DriveWealthApi
 from trading.drivewealth.provider import DriveWealthProvider
@@ -95,7 +95,7 @@ def test_sync_deposit(monkeypatch):
     deposit_ref_id = "deposit_ref_id"
     account_ref_id = "account_ref_id"
     money_flow_id = 4
-    status = "status"
+    status = 'Successful'
 
     account = DriveWealthAccount()
 
@@ -135,4 +135,4 @@ def test_sync_deposit(monkeypatch):
     assert deposit.money_flow_id == money_flow_id
 
     assert money_flow.__class__ in persisted_objects
-    assert money_flow.status == status
+    assert money_flow.status == TradingMoneyFlowStatus.SUCCESS

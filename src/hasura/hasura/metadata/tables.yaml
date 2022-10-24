@@ -1,6 +1,6 @@
 - table:
-    schema: app
     name: invitations
+    schema: app
   object_relationships:
     - name: from_profile
       using:
@@ -18,7 +18,6 @@
         columns:
           - from_profile_id
           - to_profile_id
-        backend_only: false
   select_permissions:
     - role: user
       permission:
@@ -38,24 +37,24 @@
   event_triggers:
     - name: on_invitation_created_or_updated
       definition:
+        delete:
+          columns: '*'
         enable_manual: false
         insert:
-          columns: '*'
-        delete:
           columns: '*'
         update:
           columns: '*'
       retry_conf:
-        num_retries: 0
         interval_sec: 10
+        num_retries: 0
         timeout_sec: 60
       webhook: '{{AWS_LAMBDA_API_GATEWAY_ENDPOINT}}/hasuraTrigger'
 - table:
-    schema: app
     name: invoices
-- table:
     schema: app
+- table:
     name: kyc_form
+    schema: app
   object_relationships:
     - name: profile
       using:
@@ -112,7 +111,6 @@
           - tax_id_type
           - tax_id_value
           - tax_treaty_with_us
-        backend_only: false
   select_permissions:
     - role: user
       permission:
@@ -228,11 +226,11 @@
                     _is_null: true
         check: null
 - table:
-    schema: app
     name: notifications
-- table:
     schema: app
+- table:
     name: payment_methods
+    schema: app
   object_relationships:
     - name: profile
       using:
@@ -265,13 +263,14 @@
   delete_permissions:
     - role: user
       permission:
+        backend_only: false
         filter:
           profile:
             user_id:
               _eq: X-Hasura-User-Id
 - table:
-    schema: app
     name: plaid_institutions
+    schema: app
   select_permissions:
     - role: user
       permission:
@@ -282,26 +281,26 @@
           - updated_at
         filter: {}
 - table:
-    schema: app
     name: portfolio_securities
+    schema: app
   object_relationships:
     - name: tickers
       using:
         manual_configuration:
-          remote_table:
-            schema: public
-            name: tickers
-          insertion_order: null
           column_mapping:
             ticker_symbol: symbol
+          insertion_order: null
+          remote_table:
+            name: tickers
+            schema: public
   array_relationships:
     - name: profile_holdings
       using:
         foreign_key_constraint_on:
           column: security_id
           table:
-            schema: app
             name: profile_holdings
+            schema: app
   select_permissions:
     - role: user
       permission:
@@ -318,8 +317,8 @@
           - updated_at
         filter: {}
 - table:
-    schema: app
     name: profile_categories
+    schema: app
   object_relationships:
     - name: profile
       using:
@@ -334,7 +333,6 @@
         columns:
           - category_id
           - profile_id
-        backend_only: false
   select_permissions:
     - role: user
       permission:
@@ -359,6 +357,7 @@
   delete_permissions:
     - role: user
       permission:
+        backend_only: false
         filter:
           profile:
             user_id:
@@ -370,23 +369,23 @@
         insert:
           columns: '*'
       retry_conf:
-        num_retries: 1
         interval_sec: 30
+        num_retries: 1
         timeout_sec: 150
       webhook: '{{AWS_LAMBDA_API_GATEWAY_ENDPOINT}}/hasuraTrigger'
 - table:
-    schema: app
     name: profile_collection_match_score
+    schema: app
   object_relationships:
     - name: profile
       using:
         manual_configuration:
-          remote_table:
-            schema: app
-            name: profiles
-          insertion_order: null
           column_mapping:
             profile_id: id
+          insertion_order: null
+          remote_table:
+            name: profiles
+            schema: app
   select_permissions:
     - role: user
       permission:
@@ -406,18 +405,18 @@
             user_id:
               _eq: X-Hasura-User-Id
 - table:
-    schema: app
     name: profile_favorite_collections
+    schema: app
   object_relationships:
     - name: collection
       using:
         manual_configuration:
-          remote_table:
-            schema: public
-            name: profile_collections
-          insertion_order: null
           column_mapping:
             collection_id: id
+          insertion_order: null
+          remote_table:
+            name: profile_collections
+            schema: public
     - name: profile
       using:
         foreign_key_constraint_on: profile_id
@@ -431,7 +430,6 @@
         columns:
           - collection_id
           - profile_id
-        backend_only: false
   select_permissions:
     - role: user
       permission:
@@ -460,13 +458,14 @@
   delete_permissions:
     - role: user
       permission:
+        backend_only: false
         filter:
           profile:
             user_id:
               _eq: X-Hasura-User-Id
 - table:
-    schema: app
     name: profile_holdings
+    schema: app
   object_relationships:
     - name: access_token
       using:
@@ -477,21 +476,21 @@
     - name: holding_details
       using:
         manual_configuration:
-          remote_table:
-            schema: public
-            name: portfolio_holding_details
-          insertion_order: null
           column_mapping:
             id: holding_id
+          insertion_order: null
+          remote_table:
+            name: portfolio_holding_details
+            schema: public
     - name: portfolio_holding_gains
       using:
         manual_configuration:
-          remote_table:
-            schema: public
-            name: portfolio_holding_gains
-          insertion_order: null
           column_mapping:
             id: holding_id
+          insertion_order: null
+          remote_table:
+            name: portfolio_holding_gains
+            schema: public
     - name: profile
       using:
         foreign_key_constraint_on: profile_id
@@ -502,13 +501,13 @@
     - name: holding_transactions
       using:
         manual_configuration:
-          remote_table:
-            schema: app
-            name: profile_portfolio_transactions
-          insertion_order: null
           column_mapping:
-            security_id: security_id
             profile_id: profile_id
+            security_id: security_id
+          insertion_order: null
+          remote_table:
+            name: profile_portfolio_transactions
+            schema: app
   select_permissions:
     - role: user
       permission:
@@ -523,8 +522,8 @@
             user_id:
               _eq: X-Hasura-User-Id
 - table:
-    schema: app
     name: profile_interests
+    schema: app
   object_relationships:
     - name: profile
       using:
@@ -539,7 +538,6 @@
         columns:
           - interest_id
           - profile_id
-        backend_only: false
   select_permissions:
     - role: user
       permission:
@@ -564,6 +562,7 @@
   delete_permissions:
     - role: user
       permission:
+        backend_only: false
         filter:
           profile:
             user_id:
@@ -575,13 +574,13 @@
         insert:
           columns: '*'
       retry_conf:
-        num_retries: 1
         interval_sec: 30
+        num_retries: 1
         timeout_sec: 150
       webhook: '{{AWS_LAMBDA_API_GATEWAY_ENDPOINT}}/hasuraTrigger'
 - table:
-    schema: app
     name: profile_plaid_access_tokens
+    schema: app
   object_relationships:
     - name: institution
       using:
@@ -609,6 +608,7 @@
   delete_permissions:
     - role: user
       permission:
+        backend_only: false
         filter:
           _and:
             - profile:
@@ -623,13 +623,13 @@
         insert:
           columns: '*'
       retry_conf:
-        num_retries: 0
         interval_sec: 10
+        num_retries: 0
         timeout_sec: 60
       webhook: '{{AWS_LAMBDA_API_GATEWAY_ENDPOINT}}/hasuraTrigger'
 - table:
-    schema: app
     name: profile_portfolio_accounts
+    schema: app
   object_relationships:
     - name: profile
       using:
@@ -640,8 +640,8 @@
         foreign_key_constraint_on:
           column: account_id
           table:
-            schema: app
             name: profile_holdings
+            schema: app
   select_permissions:
     - role: user
       permission:
@@ -665,8 +665,8 @@
             user_id:
               _eq: X-Hasura-User-Id
 - table:
-    schema: app
     name: profile_portfolio_transactions
+    schema: app
   object_relationships:
     - name: account
       using:
@@ -702,8 +702,8 @@
             user_id:
               _eq: X-Hasura-User-Id
 - table:
-    schema: app
     name: profile_scoring_settings
+    schema: app
   object_relationships:
     - name: profile
       using:
@@ -725,7 +725,6 @@
           - stock_market_risk_level
           - trading_experience
           - unexpected_purchases_source
-        backend_only: false
   select_permissions:
     - role: user
       permission:
@@ -783,23 +782,23 @@
             - risk_level
             - created_at
       retry_conf:
-        num_retries: 1
         interval_sec: 10
+        num_retries: 1
         timeout_sec: 60
       webhook: '{{AWS_LAMBDA_API_GATEWAY_ENDPOINT}}/hasuraTrigger'
 - table:
-    schema: app
     name: profile_ticker_match_score
+    schema: app
   object_relationships:
     - name: profile
       using:
         manual_configuration:
-          remote_table:
-            schema: app
-            name: profiles
-          insertion_order: null
           column_mapping:
             profile_id: id
+          insertion_order: null
+          remote_table:
+            name: profiles
+            schema: app
   select_permissions:
     - role: user
       permission:
@@ -817,8 +816,8 @@
             user_id:
               _eq: X-Hasura-User-Id
 - table:
-    schema: app
     name: profile_ticker_metrics_settings
+    schema: app
   object_relationships:
     - name: profile
       using:
@@ -835,7 +834,6 @@
           - field_name
           - order
           - profile_id
-        backend_only: false
   select_permissions:
     - role: user
       permission:
@@ -867,13 +865,14 @@
   delete_permissions:
     - role: user
       permission:
+        backend_only: false
         filter:
           profile:
             user_id:
               _eq: X-Hasura-User-Id
 - table:
-    schema: app
     name: profile_watchlist_tickers
+    schema: app
   object_relationships:
     - name: profile
       using:
@@ -888,7 +887,6 @@
         columns:
           - profile_id
           - symbol
-        backend_only: false
   select_permissions:
     - role: user
       permission:
@@ -916,73 +914,74 @@
   delete_permissions:
     - role: user
       permission:
+        backend_only: false
         filter:
           profile:
             user_id:
               _eq: X-Hasura-User-Id
 - table:
-    schema: app
     name: profiles
+    schema: app
   object_relationships:
     - name: portfolio_gains
       using:
         manual_configuration:
-          remote_table:
-            schema: public
-            name: portfolio_gains
-          insertion_order: null
           column_mapping:
             id: profile_id
+          insertion_order: null
+          remote_table:
+            name: portfolio_gains
+            schema: public
     - name: profile_scoring_setting
       using:
         foreign_key_constraint_on:
           column: profile_id
           table:
-            schema: app
             name: profile_scoring_settings
+            schema: app
   array_relationships:
     - name: profile_categories
       using:
         foreign_key_constraint_on:
           column: profile_id
           table:
-            schema: app
             name: profile_categories
+            schema: app
     - name: profile_favorite_collections
       using:
         foreign_key_constraint_on:
           column: profile_id
           table:
-            schema: app
             name: profile_favorite_collections
+            schema: app
     - name: profile_holdings
       using:
         foreign_key_constraint_on:
           column: profile_id
           table:
-            schema: app
             name: profile_holdings
+            schema: app
     - name: profile_interests
       using:
         foreign_key_constraint_on:
           column: profile_id
           table:
-            schema: app
             name: profile_interests
+            schema: app
     - name: profile_plaid_access_tokens
       using:
         foreign_key_constraint_on:
           column: profile_id
           table:
-            schema: app
             name: profile_plaid_access_tokens
+            schema: app
     - name: profile_watchlist_tickers
       using:
         foreign_key_constraint_on:
           column: profile_id
           table:
-            schema: app
             name: profile_watchlist_tickers
+            schema: app
   insert_permissions:
     - role: user
       permission:
@@ -997,7 +996,6 @@
           - last_name
           - legal_address
           - user_id
-        backend_only: false
   select_permissions:
     - role: user
       permission:
@@ -1034,6 +1032,7 @@
   delete_permissions:
     - role: user
       permission:
+        backend_only: false
         filter:
           user_id:
             _eq: X-Hasura-User-Id
@@ -1044,27 +1043,27 @@
         insert:
           columns: '*'
       retry_conf:
-        num_retries: 0
         interval_sec: 10
+        num_retries: 0
         timeout_sec: 60
       webhook: '{{AWS_LAMBDA_API_GATEWAY_ENDPOINT}}/hasuraTrigger'
 - table:
-    schema: app
     name: stripe_payment_methods
+    schema: app
   event_triggers:
     - name: stripe_payment_method_deleted
       definition:
-        enable_manual: false
         delete:
           columns: '*'
+        enable_manual: false
       retry_conf:
-        num_retries: 0
         interval_sec: 10
+        num_retries: 0
         timeout_sec: 60
       webhook: '{{AWS_LAMBDA_API_GATEWAY_ENDPOINT}}/hasuraTrigger'
 - table:
-    schema: app
     name: trading_funding_accounts
+    schema: app
   object_relationships:
     - name: profile
       using:
@@ -1086,8 +1085,8 @@
             user_id:
               _eq: X-Hasura-User-Id
 - table:
-    schema: app
     name: trading_money_flow
+    schema: app
   object_relationships:
     - name: profile
       using:
@@ -1109,8 +1108,8 @@
             user_id:
               _eq: X-Hasura-User-Id
 - table:
-    schema: public
     name: analyst_ratings
+    schema: public
   select_permissions:
     - role: anonymous
       permission:
@@ -1137,8 +1136,8 @@
           - target_price
         filter: {}
 - table:
-    schema: public
     name: categories
+    schema: public
   select_permissions:
     - role: user
       permission:
@@ -1149,8 +1148,8 @@
           - collection_id
         filter: {}
 - table:
-    schema: public
     name: chart
+    schema: public
   select_permissions:
     - role: anonymous
       permission:
@@ -1179,18 +1178,18 @@
           - volume
         filter: {}
 - table:
-    schema: public
     name: collection_chart
+    schema: public
   object_relationships:
     - name: profile
       using:
         manual_configuration:
-          remote_table:
-            schema: app
-            name: profiles
-          insertion_order: null
           column_mapping:
             profile_id: id
+          insertion_order: null
+          remote_table:
+            name: profiles
+            schema: app
   select_permissions:
     - role: user
       permission:
@@ -1213,18 +1212,18 @@
                 user_id:
                   _eq: X-Hasura-User-Id
 - table:
-    schema: public
     name: collection_match_score
+    schema: public
   object_relationships:
     - name: profile
       using:
         manual_configuration:
-          remote_table:
-            schema: app
-            name: profiles
-          insertion_order: null
           column_mapping:
             profile_id: id
+          insertion_order: null
+          remote_table:
+            name: profiles
+            schema: app
   select_permissions:
     - role: user
       permission:
@@ -1244,36 +1243,36 @@
             user_id:
               _eq: X-Hasura-User-Id
 - table:
-    schema: public
     name: collection_match_score_explanation
+    schema: public
   object_relationships:
     - name: category
       using:
         manual_configuration:
-          remote_table:
-            schema: public
-            name: categories
-          insertion_order: null
           column_mapping:
             category_id: id
+          insertion_order: null
+          remote_table:
+            name: categories
+            schema: public
     - name: interest
       using:
         manual_configuration:
-          remote_table:
-            schema: public
-            name: interests
-          insertion_order: null
           column_mapping:
             interest_id: id
+          insertion_order: null
+          remote_table:
+            name: interests
+            schema: public
     - name: profile
       using:
         manual_configuration:
-          remote_table:
-            schema: app
-            name: profiles
-          insertion_order: null
           column_mapping:
             profile_id: id
+          insertion_order: null
+          remote_table:
+            name: profiles
+            schema: app
   select_permissions:
     - role: user
       permission:
@@ -1287,18 +1286,18 @@
           user_id:
             _eq: X-Hasura-User-Id
 - table:
-    schema: public
     name: collection_metrics
+    schema: public
   object_relationships:
     - name: profile
       using:
         manual_configuration:
-          remote_table:
-            schema: app
-            name: profiles
-          insertion_order: null
           column_mapping:
             profile_id: id
+          insertion_order: null
+          remote_table:
+            name: profiles
+            schema: app
   select_permissions:
     - role: user
       permission:
@@ -1318,18 +1317,18 @@
             - user_id:
                 _eq: X-Hasura-User-Id
 - table:
-    schema: public
     name: collection_piechart
+    schema: public
   object_relationships:
     - name: profile
       using:
         manual_configuration:
-          remote_table:
-            schema: app
-            name: profiles
-          insertion_order: null
           column_mapping:
             profile_id: id
+          insertion_order: null
+          remote_table:
+            name: profiles
+            schema: app
   select_permissions:
     - role: user
       permission:
@@ -1351,18 +1350,18 @@
             - user_id:
                 _eq: X-Hasura-User-Id
 - table:
-    schema: public
     name: collection_ticker_actual_weights
+    schema: public
   object_relationships:
     - name: profile
       using:
         manual_configuration:
-          remote_table:
-            schema: app
-            name: profiles
-          insertion_order: null
           column_mapping:
             profile_id: id
+          insertion_order: null
+          remote_table:
+            name: profiles
+            schema: app
   select_permissions:
     - role: user
       permission:
@@ -1383,8 +1382,8 @@
                 user_id:
                   _eq: X-Hasura-User-Id
 - table:
-    schema: public
     name: crypto_metrics
+    schema: public
   select_permissions:
     - role: anonymous
       permission:
@@ -1491,8 +1490,8 @@
           - price_change_all
         filter: {}
 - table:
-    schema: public
     name: crypto_realtime_metrics
+    schema: public
   select_permissions:
     - role: anonymous
       permission:
@@ -1523,8 +1522,8 @@
           - low_24h
         filter: {}
 - table:
-    schema: public
     name: etf_metrics
+    schema: public
   select_permissions:
     - role: user
       permission:
@@ -1540,18 +1539,18 @@
           - max_annual_return
         filter: {}
 - table:
-    schema: public
     name: gainy_industries
+    schema: public
   array_relationships:
     - name: ticker_industries
       using:
         manual_configuration:
-          remote_table:
-            schema: public
-            name: ticker_industries
-          insertion_order: null
           column_mapping:
             id: industry_id
+          insertion_order: null
+          remote_table:
+            name: ticker_industries
+            schema: public
   select_permissions:
     - role: anonymous
       permission:
@@ -1568,8 +1567,8 @@
           - collection_id
         filter: {}
 - table:
-    schema: public
     name: historical_prices_aggregated
+    schema: public
   select_permissions:
     - role: anonymous
       permission:
@@ -1598,18 +1597,18 @@
           - volume
         filter: {}
 - table:
-    schema: public
     name: interests
+    schema: public
   array_relationships:
     - name: ticker_interests
       using:
         manual_configuration:
-          remote_table:
-            schema: public
-            name: ticker_interests
-          insertion_order: null
           column_mapping:
             id: interest_id
+          insertion_order: null
+          remote_table:
+            name: ticker_interests
+            schema: public
   select_permissions:
     - role: anonymous
       permission:
@@ -1630,18 +1629,18 @@
           - sort_order
         filter: {}
 - table:
-    schema: public
     name: portfolio_gains
+    schema: public
   object_relationships:
     - name: profile
       using:
         manual_configuration:
-          remote_table:
-            schema: app
-            name: profiles
-          insertion_order: null
           column_mapping:
             profile_id: id
+          insertion_order: null
+          remote_table:
+            name: profiles
+            schema: app
   select_permissions:
     - role: user
       permission:
@@ -1671,27 +1670,27 @@
               - id:
                   _eq: 1
 - table:
-    schema: public
     name: portfolio_holding_details
+    schema: public
   object_relationships:
     - name: holding
       using:
         manual_configuration:
-          remote_table:
-            schema: app
-            name: profile_holdings
-          insertion_order: null
           column_mapping:
             holding_id: id
+          insertion_order: null
+          remote_table:
+            name: profile_holdings
+            schema: app
     - name: ticker
       using:
         manual_configuration:
-          remote_table:
-            schema: public
-            name: tickers
-          insertion_order: null
           column_mapping:
             ticker_symbol: symbol
+          insertion_order: null
+          remote_table:
+            name: tickers
+            schema: public
   select_permissions:
     - role: user
       permission:
@@ -1720,18 +1719,18 @@
                 - id:
                     _eq: 1
 - table:
-    schema: public
     name: portfolio_holding_gains
+    schema: public
   object_relationships:
     - name: holding
       using:
         manual_configuration:
-          remote_table:
-            schema: app
-            name: profile_holdings
-          insertion_order: null
           column_mapping:
             holding_id: id
+          insertion_order: null
+          remote_table:
+            name: profile_holdings
+            schema: app
   select_permissions:
     - role: user
       permission:
@@ -1764,18 +1763,18 @@
                 - id:
                     _eq: 1
 - table:
-    schema: public
     name: portfolio_holding_group_details
+    schema: public
   object_relationships:
     - name: profile
       using:
         manual_configuration:
-          remote_table:
-            schema: app
-            name: profiles
-          insertion_order: null
           column_mapping:
             profile_id: id
+          insertion_order: null
+          remote_table:
+            name: profiles
+            schema: app
   select_permissions:
     - role: user
       permission:
@@ -1798,18 +1797,18 @@
               - id:
                   _eq: 1
 - table:
-    schema: public
     name: portfolio_holding_group_gains
+    schema: public
   object_relationships:
     - name: profile
       using:
         manual_configuration:
-          remote_table:
-            schema: app
-            name: profiles
-          insertion_order: null
           column_mapping:
             profile_id: id
+          insertion_order: null
+          remote_table:
+            name: profiles
+            schema: app
   select_permissions:
     - role: user
       permission:
@@ -1842,45 +1841,45 @@
               - id:
                   _eq: 1
 - table:
-    schema: public
     name: portfolio_holding_group_tags
+    schema: public
   object_relationships:
     - name: category
       using:
         manual_configuration:
-          remote_table:
-            schema: public
-            name: categories
-          insertion_order: null
           column_mapping:
             category_id: id
+          insertion_order: null
+          remote_table:
+            name: categories
+            schema: public
     - name: collection
       using:
         manual_configuration:
-          remote_table:
-            schema: public
-            name: profile_collections
-          insertion_order: null
           column_mapping:
             collection_uniq_id: uniq_id
+          insertion_order: null
+          remote_table:
+            name: profile_collections
+            schema: public
     - name: interest
       using:
         manual_configuration:
-          remote_table:
-            schema: public
-            name: interests
-          insertion_order: null
           column_mapping:
             interest_id: id
+          insertion_order: null
+          remote_table:
+            name: interests
+            schema: public
     - name: profile
       using:
         manual_configuration:
-          remote_table:
-            schema: app
-            name: profiles
-          insertion_order: null
           column_mapping:
             profile_id: id
+          insertion_order: null
+          remote_table:
+            name: profiles
+            schema: app
   select_permissions:
     - role: user
       permission:
@@ -1900,27 +1899,27 @@
               - id:
                   _eq: 1
 - table:
-    schema: public
     name: profile_collection_tickers_performance_ranked
+    schema: public
   object_relationships:
     - name: profile
       using:
         manual_configuration:
-          remote_table:
-            schema: app
-            name: profiles
-          insertion_order: null
           column_mapping:
             profile_id: id
+          insertion_order: null
+          remote_table:
+            name: profiles
+            schema: app
     - name: ticker
       using:
         manual_configuration:
-          remote_table:
-            schema: public
-            name: tickers
-          insertion_order: null
           column_mapping:
             symbol: symbol
+          insertion_order: null
+          remote_table:
+            name: tickers
+            schema: public
   select_permissions:
     - role: user
       permission:
@@ -1936,60 +1935,60 @@
             user_id:
               _eq: X-Hasura-User-Id
 - table:
-    schema: public
     name: profile_collections
+    schema: public
   configuration:
-    custom_root_fields: {}
-    custom_name: collections
     column_config: {}
     custom_column_names: {}
+    custom_name: collections
+    custom_root_fields: {}
   object_relationships:
     - name: match_score
       using:
         manual_configuration:
-          remote_table:
-            schema: public
-            name: collection_match_score
-          insertion_order: null
           column_mapping:
             uniq_id: collection_uniq_id
+          insertion_order: null
+          remote_table:
+            name: collection_match_score
+            schema: public
     - name: metrics
       using:
         manual_configuration:
-          remote_table:
-            schema: public
-            name: collection_metrics
-          insertion_order: null
           column_mapping:
             uniq_id: collection_uniq_id
+          insertion_order: null
+          remote_table:
+            name: collection_metrics
+            schema: public
     - name: profile
       using:
         manual_configuration:
-          remote_table:
-            schema: app
-            name: profiles
-          insertion_order: null
           column_mapping:
             profile_id: id
+          insertion_order: null
+          remote_table:
+            name: profiles
+            schema: app
   array_relationships:
     - name: match_score_explanation
       using:
         manual_configuration:
-          remote_table:
-            schema: public
-            name: collection_match_score_explanation
-          insertion_order: null
           column_mapping:
             uniq_id: collection_uniq_id
+          insertion_order: null
+          remote_table:
+            name: collection_match_score_explanation
+            schema: public
     - name: ticker_collections
       using:
         manual_configuration:
-          remote_table:
-            schema: public
-            name: profile_ticker_collections
-          insertion_order: null
           column_mapping:
             uniq_id: collection_uniq_id
+          insertion_order: null
+          remote_table:
+            name: profile_ticker_collections
+            schema: public
   select_permissions:
     - role: anonymous
       permission:
@@ -2029,68 +2028,68 @@
                 _is_null: true
         allow_aggregations: true
 - table:
-    schema: public
     name: profile_holding_groups
+    schema: public
   object_relationships:
     - name: details
       using:
         manual_configuration:
-          remote_table:
-            schema: public
-            name: portfolio_holding_group_details
-          insertion_order: null
           column_mapping:
-            symbol: ticker_symbol
             profile_id: profile_id
+            symbol: ticker_symbol
+          insertion_order: null
+          remote_table:
+            name: portfolio_holding_group_details
+            schema: public
     - name: gains
       using:
         manual_configuration:
-          remote_table:
-            schema: public
-            name: portfolio_holding_group_gains
-          insertion_order: null
           column_mapping:
-            symbol: ticker_symbol
             profile_id: profile_id
+            symbol: ticker_symbol
+          insertion_order: null
+          remote_table:
+            name: portfolio_holding_group_gains
+            schema: public
     - name: profile
       using:
         manual_configuration:
-          remote_table:
-            schema: app
-            name: profiles
-          insertion_order: null
           column_mapping:
             profile_id: id
+          insertion_order: null
+          remote_table:
+            name: profiles
+            schema: app
     - name: ticker
       using:
         manual_configuration:
-          remote_table:
-            schema: public
-            name: tickers
-          insertion_order: null
           column_mapping:
             symbol: symbol
+          insertion_order: null
+          remote_table:
+            name: tickers
+            schema: public
   array_relationships:
     - name: holdings
       using:
         manual_configuration:
-          remote_table:
-            schema: public
-            name: profile_holdings_normalized
-          insertion_order: null
           column_mapping:
-            symbol: ticker_symbol
             profile_id: profile_id
+            symbol: ticker_symbol
+          insertion_order: null
+          remote_table:
+            name: profile_holdings_normalized
+            schema: public
     - name: tags
       using:
         manual_configuration:
-          remote_table:
-            schema: public
-            name: portfolio_holding_group_tags
-          insertion_order: null
           column_mapping:
-            symbol: symbol
             profile_id: profile_id
+            symbol: symbol
+          insertion_order: null
+          remote_table:
+            name: portfolio_holding_group_tags
+            schema: public
   select_permissions:
     - role: user
       permission:
@@ -2106,48 +2105,48 @@
               - id:
                   _eq: 1
 - table:
-    schema: public
     name: profile_holdings_normalized
+    schema: public
   object_relationships:
     - name: gains
       using:
         manual_configuration:
-          remote_table:
-            schema: public
-            name: portfolio_holding_gains
-          insertion_order: null
           column_mapping:
             holding_id: holding_id
+          insertion_order: null
+          remote_table:
+            name: portfolio_holding_gains
+            schema: public
     - name: holding_details
       using:
         manual_configuration:
-          remote_table:
-            schema: public
-            name: portfolio_holding_details
-          insertion_order: null
           column_mapping:
             holding_id: holding_id
+          insertion_order: null
+          remote_table:
+            name: portfolio_holding_details
+            schema: public
     - name: profile
       using:
         manual_configuration:
-          remote_table:
-            schema: app
-            name: profiles
-          insertion_order: null
           column_mapping:
             profile_id: id
+          insertion_order: null
+          remote_table:
+            name: profiles
+            schema: app
   array_relationships:
     - name: transactions
       using:
         manual_configuration:
-          remote_table:
-            schema: app
-            name: profile_portfolio_transactions
-          insertion_order: null
           column_mapping:
-            security_id: security_id
             account_id: account_id
             profile_id: profile_id
+            security_id: security_id
+          insertion_order: null
+          remote_table:
+            name: profile_portfolio_transactions
+            schema: app
   select_permissions:
     - role: user
       permission:
@@ -2168,41 +2167,41 @@
               - id:
                   _eq: 1
 - table:
-    schema: public
     name: profile_ticker_collections
+    schema: public
   configuration:
-    custom_root_fields: {}
-    custom_name: ticker_collections
     column_config: {}
     custom_column_names: {}
+    custom_name: ticker_collections
+    custom_root_fields: {}
   object_relationships:
     - name: collection
       using:
         manual_configuration:
-          remote_table:
-            schema: public
-            name: profile_collections
-          insertion_order: null
           column_mapping:
             collection_uniq_id: uniq_id
+          insertion_order: null
+          remote_table:
+            name: profile_collections
+            schema: public
     - name: profile
       using:
         manual_configuration:
-          remote_table:
-            schema: app
-            name: profiles
-          insertion_order: null
           column_mapping:
             profile_id: id
+          insertion_order: null
+          remote_table:
+            name: profiles
+            schema: app
     - name: ticker
       using:
         manual_configuration:
-          remote_table:
-            schema: public
-            name: tickers
-          insertion_order: null
           column_mapping:
             symbol: symbol
+          insertion_order: null
+          remote_table:
+            name: tickers
+            schema: public
   select_permissions:
     - role: anonymous
       permission:
@@ -2227,18 +2226,18 @@
                 _is_null: true
         allow_aggregations: true
 - table:
-    schema: public
     name: ticker_categories
+    schema: public
   object_relationships:
     - name: categories
       using:
         manual_configuration:
-          remote_table:
-            schema: public
-            name: categories
-          insertion_order: null
           column_mapping:
             category_id: id
+          insertion_order: null
+          remote_table:
+            name: categories
+            schema: public
   select_permissions:
     - role: user
       permission:
@@ -2248,8 +2247,8 @@
           - symbol
         filter: {}
 - table:
-    schema: public
     name: ticker_events
+    schema: public
   select_permissions:
     - role: user
       permission:
@@ -2262,18 +2261,18 @@
           - type
         filter: {}
 - table:
-    schema: public
     name: ticker_highlights
+    schema: public
   object_relationships:
     - name: ticker
       using:
         manual_configuration:
-          remote_table:
-            schema: public
-            name: tickers
-          insertion_order: null
           column_mapping:
             symbol: symbol
+          insertion_order: null
+          remote_table:
+            name: tickers
+            schema: public
   select_permissions:
     - role: anonymous
       permission:
@@ -2290,27 +2289,27 @@
           - created_at
         filter: {}
 - table:
-    schema: public
     name: ticker_industries
+    schema: public
   object_relationships:
     - name: gainy_industry
       using:
         manual_configuration:
-          remote_table:
-            schema: public
-            name: gainy_industries
-          insertion_order: null
           column_mapping:
             industry_id: id
+          insertion_order: null
+          remote_table:
+            name: gainy_industries
+            schema: public
     - name: ticker
       using:
         manual_configuration:
-          remote_table:
-            schema: public
-            name: tickers
-          insertion_order: null
           column_mapping:
             symbol: symbol
+          insertion_order: null
+          remote_table:
+            name: tickers
+            schema: public
   select_permissions:
     - role: anonymous
       permission:
@@ -2327,27 +2326,27 @@
           - industry_order
         filter: {}
 - table:
-    schema: public
     name: ticker_interests
+    schema: public
   object_relationships:
     - name: interest
       using:
         manual_configuration:
-          remote_table:
-            schema: public
-            name: interests
-          insertion_order: null
           column_mapping:
             interest_id: id
+          insertion_order: null
+          remote_table:
+            name: interests
+            schema: public
     - name: ticker
       using:
         manual_configuration:
-          remote_table:
-            schema: public
-            name: tickers
-          insertion_order: null
           column_mapping:
             symbol: symbol
+          insertion_order: null
+          remote_table:
+            name: tickers
+            schema: public
   select_permissions:
     - role: user
       permission:
@@ -2357,18 +2356,18 @@
           - symbol
         filter: {}
 - table:
-    schema: public
     name: ticker_metrics
+    schema: public
   object_relationships:
     - name: ticker
       using:
         manual_configuration:
-          remote_table:
-            schema: public
-            name: tickers
-          insertion_order: null
           column_mapping:
             symbol: symbol
+          insertion_order: null
+          remote_table:
+            name: tickers
+            schema: public
   select_permissions:
     - role: anonymous
       permission:
@@ -2502,8 +2501,8 @@
           - years_of_consecutive_dividend_growth
         filter: {}
 - table:
-    schema: public
     name: ticker_realtime_metrics
+    schema: public
   select_permissions:
     - role: anonymous
       permission:
@@ -2532,127 +2531,127 @@
           - time
         filter: {}
 - table:
-    schema: public
     name: tickers
+    schema: public
   object_relationships:
     - name: crypto_metrics
       using:
         manual_configuration:
-          remote_table:
-            schema: public
-            name: crypto_metrics
-          insertion_order: null
           column_mapping:
             symbol: symbol
+          insertion_order: null
+          remote_table:
+            name: crypto_metrics
+            schema: public
     - name: crypto_realtime_metrics
       using:
         manual_configuration:
-          remote_table:
-            schema: public
-            name: crypto_realtime_metrics
-          insertion_order: null
           column_mapping:
             symbol: symbol
+          insertion_order: null
+          remote_table:
+            name: crypto_realtime_metrics
+            schema: public
     - name: etf_metrics
       using:
         manual_configuration:
-          remote_table:
-            schema: public
-            name: etf_metrics
-          insertion_order: null
           column_mapping:
             symbol: symbol
+          insertion_order: null
+          remote_table:
+            name: etf_metrics
+            schema: public
     - name: match_score
       using:
         manual_configuration:
-          remote_table:
-            schema: app
-            name: profile_ticker_match_score
-          insertion_order: null
           column_mapping:
             symbol: symbol
+          insertion_order: null
+          remote_table:
+            name: profile_ticker_match_score
+            schema: app
     - name: realtime_metrics
       using:
         manual_configuration:
-          remote_table:
-            schema: public
-            name: ticker_realtime_metrics
-          insertion_order: null
           column_mapping:
             symbol: symbol
+          insertion_order: null
+          remote_table:
+            name: ticker_realtime_metrics
+            schema: public
     - name: ticker_analyst_ratings
       using:
         manual_configuration:
-          remote_table:
-            schema: public
-            name: analyst_ratings
-          insertion_order: null
           column_mapping:
             symbol: symbol
+          insertion_order: null
+          remote_table:
+            name: analyst_ratings
+            schema: public
     - name: ticker_metrics
       using:
         manual_configuration:
-          remote_table:
-            schema: public
-            name: ticker_metrics
-          insertion_order: null
           column_mapping:
             symbol: symbol
+          insertion_order: null
+          remote_table:
+            name: ticker_metrics
+            schema: public
   array_relationships:
     - name: ticker_categories
       using:
         manual_configuration:
-          remote_table:
-            schema: public
-            name: ticker_categories
-          insertion_order: null
           column_mapping:
             symbol: symbol
+          insertion_order: null
+          remote_table:
+            name: ticker_categories
+            schema: public
     - name: ticker_collections
       using:
         manual_configuration:
-          remote_table:
-            schema: public
-            name: profile_ticker_collections
-          insertion_order: null
           column_mapping:
             symbol: symbol
+          insertion_order: null
+          remote_table:
+            name: profile_ticker_collections
+            schema: public
     - name: ticker_events
       using:
         manual_configuration:
-          remote_table:
-            schema: public
-            name: ticker_events
-          insertion_order: null
           column_mapping:
             symbol: symbol
+          insertion_order: null
+          remote_table:
+            name: ticker_events
+            schema: public
     - name: ticker_highlights
       using:
         manual_configuration:
-          remote_table:
-            schema: public
-            name: ticker_highlights
-          insertion_order: null
           column_mapping:
             symbol: symbol
+          insertion_order: null
+          remote_table:
+            name: ticker_highlights
+            schema: public
     - name: ticker_industries
       using:
         manual_configuration:
-          remote_table:
-            schema: public
-            name: ticker_industries
-          insertion_order: null
           column_mapping:
             symbol: symbol
+          insertion_order: null
+          remote_table:
+            name: ticker_industries
+            schema: public
     - name: ticker_interests
       using:
         manual_configuration:
-          remote_table:
-            schema: public
-            name: ticker_interests
-          insertion_order: null
           column_mapping:
             symbol: symbol
+          insertion_order: null
+          remote_table:
+            name: ticker_interests
+            schema: public
   select_permissions:
     - role: anonymous
       permission:
@@ -2695,8 +2694,29 @@
           - updated_at
         filter: {}
 - table:
+    name: trading_history
     schema: public
+  object_relationships:
+    - name: profile
+      using:
+        foreign_key_constraint_on: profile_id
+  select_permissions:
+    - role: user
+      permission:
+        columns:
+          - amount
+          - datetime
+          - name
+          - profile_id
+          - tags
+          - type
+        filter:
+          profile:
+            user_id:
+              _eq: X-Hasura-User-Id
+- table:
     name: website_blog_articles
+    schema: public
   select_permissions:
     - role: anonymous
       permission:

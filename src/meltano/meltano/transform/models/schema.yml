@@ -57,6 +57,7 @@ sources:
       - name: drivewealth_users
       - name: influencers
       - name: invitations
+      - name: invoices
       - name: notifications
       - name: personalized_collection_sizes
       - name: personalized_ticker_collections
@@ -73,6 +74,8 @@ sources:
       - name: profile_ticker_match_score
       - name: profiles
       - name: subscriptions
+      - name: trading_collection_versions
+      - name: trading_money_flow
 
   - name: website
     description: Website data, managed by webflow integrations at gainy.app
@@ -2369,6 +2372,33 @@ models:
         tests:
           - type:
               type: 'double precision'
+
+  - name: trading_history
+    columns:
+      - name: profile_id
+        tests:
+          - type:
+              type: 'integer'
+      - name: type
+        tests:
+          - type:
+              type: 'text'
+      - name: name
+        tests:
+          - type:
+              type: 'text'
+      - name: datetime
+        tests:
+          - type:
+              type: 'timestamp with time zone'
+      - name: amount
+        tests:
+          - type:
+              type: 'double precision'
+      - name: tags
+        tests:
+          - type:
+              type: 'json'
 
 exposures:
   - name: ticker_search_index

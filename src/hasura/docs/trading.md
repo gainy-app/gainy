@@ -6,6 +6,21 @@
 - [Trading collections](trading/trading_collections.md)
 - [Commissions](trading/commissions.md)
 
+### History
+```graphql
+query GetTradingHistory($profile_id: Int!, $types: [String!]!) {
+  trading_history(where: {profile_id: {_eq: $profile_id}, type: {_in: $types}}, order_by: {datetime: desc}) {
+    amount
+    datetime
+    name
+    tags
+    type
+  }
+}
+```
+Available types: `["deposit", "withdraw", "trading_fee", "ttf_transaction"]`
+
+
 ### Debugging
 Sync provider data
 ```graphql
@@ -50,12 +65,6 @@ mutation ReHandleQueueMessages($ids: [Int]!) {
 }
 ```
 
-### **[TODO]** History
-1. Get rebalancing history (trading_collection_versions with status `complete`) 
-2. Get deposits / withdrawals history with actual statuses (trading_money_flow) 
-3. Get commission payment history 
-
-
 ### **[TODO]** Notifications
 
 - KYC status changed
@@ -69,25 +78,3 @@ mutation ReHandleQueueMessages($ids: [Int]!) {
 5. Get unread notifications count
 
 ## Data
-
-- invoices
-  - id: int
-  - profile_id: int
-  - amount: int
-  - due_date: timestamp
-  - description: string
-  - period_start: date
-  - period_end: date
-  - metadata: json
-
-- invoice_payments
-  - id: int
-  - profile_id: int
-  - invoice_id: int
-  - result: boolean
-  - response: json
-
-## SQS
-
-1. Update `trading_collection_versions` status on `drivewealth_autopilot_run` execution
-2. Update `trading_money_flow` status on deposit / withdrawal execution
