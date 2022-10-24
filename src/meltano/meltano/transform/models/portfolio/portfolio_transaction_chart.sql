@@ -4,7 +4,7 @@
     unique_key = "id",
     tags = ["realtime"],
     post_hook=[
-      pk('transaction_uniq_id, period, datetime'),
+      pk('transactions_uniq_id, period, datetime'),
       'create index if not exists "ptc_profile_id" ON {{ this }} (profile_id)',
       index(this, 'id', true),
       'delete from {{this}}
