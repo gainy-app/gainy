@@ -118,7 +118,9 @@ class BaseDriveWealthMoneyFlowModel(BaseDriveWealthModel, ABC):
         Unknown	-1	–	Reserved for errors.
         """
 
-        if self.status in ['Started','Pending','Other','Approved', 'On Hold']:
+        if self.status in [
+                'Started', 'Pending', 'Other', 'Approved', 'On Hold'
+        ]:
             return TradingMoneyFlowStatus.PENDING
         if self.status in ['Successful']:
             return TradingMoneyFlowStatus.SUCCESS

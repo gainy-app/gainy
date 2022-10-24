@@ -109,6 +109,7 @@ class TradingMoneyFlowStatus(enum.Enum):
     SUCCESS = "SUCCESS"
     FAILED = "FAILED"
 
+
 class TradingMoneyFlow(BaseModel):
     id = None
     profile_id = None
@@ -144,7 +145,8 @@ class TradingMoneyFlow(BaseModel):
     def to_dict(self) -> dict:
         return {
             **super().to_dict(),
-            "status": self.status.name if self.status else None,
+            "status":
+            self.status.name if self.status else None,
         }
 
 

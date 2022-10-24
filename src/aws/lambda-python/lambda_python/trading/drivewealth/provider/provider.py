@@ -221,5 +221,6 @@ class DriveWealthProvider(DriveWealthProviderKYC,
         for portfolio in portfolios:
             self._get_portfolio_status(portfolio)
 
-    def _update_money_flow_status(self, entity: BaseDriveWealthMoneyFlowModel, money_flow: TradingMoneyFlow):
+    def _update_money_flow_status(self, entity: BaseDriveWealthMoneyFlowModel,
+                                  money_flow: TradingMoneyFlow):
         money_flow.status = entity.get_money_flow_status()
