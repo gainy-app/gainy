@@ -10,7 +10,7 @@ import dateutil.parser
 from gainy.data_access.models import classproperty, DecimalEncoder
 from gainy.trading.drivewealth.models import BaseDriveWealthModel
 from trading.models import CollectionHoldingStatus, ProfileKycStatus, KycStatus, \
-    TradingCollectionVersion, TradingCollectionVersionStatus
+    TradingCollectionVersion, TradingCollectionVersionStatus, TradingMoneyFlowStatus
 
 PRECISION = 1e-3
 ONE = Decimal(1)
@@ -103,6 +103,28 @@ class BaseDriveWealthMoneyFlowModel(BaseDriveWealthModel, ABC):
             self.trading_account_ref_id = data["accountID"]
         self.status = data["status"]["message"]
         self.data = data
+
+    def get_money_flow_status(self) -> TradingMoneyFlowStatus:
+        """
+        Started	0	"STARTED"
+        Pending	1	"PENDING"	Every new deposit for a self-directed account is set to "Pending". From here, the deposit can be marked as "Rejected", "On Hold" or "Approved".
+        Successful	2	"SUCCESSFUL"	After a deposit is marked "Approved", the next step is "Successful".
+        Failed	3	"FAILED"	If a deposit is marked as "Rejected", the deposit will immediately be set to "Failed".
+        Other	4	"OTHER"
+        Approved	14	"APPROVED"	Once marked as "Approved", the deposit will be processed.
+        Rejected	15	"REJECTED"	Updating a deposit to "Rejected" will immediately set it 's status to "Failed"
+        On Hold	16	"ON_HOLD"	The "On Hold" status is reserved for deposits that aren't ready to be processed.
+        Returned	5	"RETURNED"	A deposit is marked as returned if DW receives notification from our bank that the deposit had failed.
+        Unknown	-1	–	Reserved for errors.
+        """
+
+        if self.status in [
+                'Started', 'Pending', 'Other', 'Approved', 'On Hold'
+        ]:
+            return TradingMoneyFlowStatus.PENDING
+        if self.status in ['Successful']:
+            return TradingMoneyFlowStatus.SUCCESS
+        return TradingMoneyFlowStatus.FAILED
 
 
 class DriveWealthDeposit(BaseDriveWealthMoneyFlowModel):
@@ -423,7 +445,7 @@ class DriveWealthAutopilotRun(BaseDriveWealthModel):
             self, trading_collection_version: TradingCollectionVersion):
         # SUCCESS	Complete Autopilot run successful
         if self.status == "SUCCESS":
-            trading_collection_version.status = TradingCollectionVersionStatus.STATUS_SUCCESS
+            trading_collection_version.status = TradingCollectionVersionStatus.SUCCESS
             return
         '''
         REBALANCE_FAILED                  rebalance has failed
@@ -441,7 +463,7 @@ class DriveWealthAutopilotRun(BaseDriveWealthModel):
         REBALANCE_ABORTED                 rebalance has been cancelled
         '''
         if re.search(r'(FAILED|TIMEDOUT|ABORTED)$', self.status):
-            trading_collection_version.status = TradingCollectionVersionStatus.STATUS_FAILED
+            trading_collection_version.status = TradingCollectionVersionStatus.FAILED
             return
         '''
         REBALANCE_NOT_STARTED            rebalance has not yet started
@@ -471,7 +493,7 @@ class DriveWealthAutopilotRun(BaseDriveWealthModel):
         ALLOCATION_COMPLETED             all required allocations have been completed
         SUBACCOUNT_HOLDINGS_UPDATED      all sub-account holdings within required rebalance updated
         '''
-        trading_collection_version.status = TradingCollectionVersionStatus.STATUS_PENDING
+        trading_collection_version.status = TradingCollectionVersionStatus.PENDING
 
 
 class DriveWealthKycStatus:
