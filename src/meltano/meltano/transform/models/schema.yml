@@ -1241,7 +1241,7 @@ models:
         tests:
           - type:
               type: 'text'
-      - name: transactions_uniq_id
+      - name: transaction_uniq_id
         tests:
           - type:
               type: 'character varying'

@@ -17,7 +17,7 @@ with latest_open_trading_session as
                    adjusted_close::numeric
              from portfolio_transaction_chart
                       join portfolio_expanded_transactions
-                           on portfolio_expanded_transactions.uniq_id = portfolio_transaction_chart.transactions_uniq_id
+                           on portfolio_expanded_transactions.uniq_id = portfolio_transaction_chart.transaction_uniq_id
                       join portfolio_securities_normalized
                            on portfolio_securities_normalized.id = portfolio_expanded_transactions.security_id
                       left join week_trading_sessions
