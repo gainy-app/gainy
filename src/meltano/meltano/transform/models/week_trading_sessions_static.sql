@@ -29,8 +29,8 @@ with trading_sessions as
              select dd::date                                 as date,
                     null                                     as exchange_name,
                     null                                     as country_name,
-                    dd                                       as open_at,
-                    dd + interval '1 day'                    as close_at,
+                    dd - interval '1 day'                    as open_at,
+                    dd                                       as close_at,
                     row_number() over (order by dd desc) - 1 as index,
                     'crypto'                                 as type
              FROM generate_series(now() - interval '10 days', now(), interval '1 day') dd
