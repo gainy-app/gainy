@@ -21,7 +21,7 @@ DEFAULT_ENV = "development"
 
 
 def get_purpose(input_params):
-    purpose = input_params.get("purpose", "portfolio")
+    purpose = input_params.get("purpose") or PURPOSE_PORTFOLIO
     if purpose not in [PURPOSE_PORTFOLIO, PURPOSE_TRADING]:
         raise Exception('Wrong purpose')
     return purpose
