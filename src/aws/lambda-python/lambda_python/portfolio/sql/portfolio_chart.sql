@@ -87,12 +87,25 @@ with filtered_transactions as
                 or period = '1d'
              group by period, datetime
      ),
+     symbols_to_exclude_from_schedule as
+         (
+             select distinct period, ticker_chart.symbol
+             from datetimes_to_exclude_from_schedule
+                      join ticker_chart using (period, datetime)
+                      left join week_trading_sessions_static
+                                on week_trading_sessions_static.symbol = ticker_chart.symbol
+                                    and datetime >= week_trading_sessions_static.open_at
+                                    and datetime < week_trading_sessions_static.close_at
+             where week_trading_sessions_static is not null or period != '1w'
+     ),
      schedule as materialized
          (
              select profile_id, period, datetime
              from ticker_chart
                       left join datetimes_to_exclude_from_schedule using (period, datetime)
-             where datetimes_to_exclude_from_schedule.datetime is null
+                      left join symbols_to_exclude_from_schedule using (period, symbol)
+             where (period = '1d' and datetimes_to_exclude_from_schedule.datetime is null)
+                or (period != '1d' and symbols_to_exclude_from_schedule.symbol is null)
              group by profile_id, period, datetime
      ),
      ticker_chart_with_cash_adjustment as
