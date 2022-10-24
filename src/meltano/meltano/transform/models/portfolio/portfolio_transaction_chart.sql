@@ -70,7 +70,6 @@ from (
                 chart.period || '_' || chart.datetime                                              as id,
                 portfolio_expanded_transactions.profile_id,
                 portfolio_expanded_transactions.transaction_uniq_id,
-                chart.date,
                 chart.datetime,
                 chart.period,
                 portfolio_expanded_transactions.quantity_norm_for_valuation * chart.open           as open,
