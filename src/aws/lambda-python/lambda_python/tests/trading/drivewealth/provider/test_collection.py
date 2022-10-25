@@ -322,7 +322,7 @@ def test_upsert_fund(fund_exists, monkeypatch):
         def mock_update_fund(_fund):
             assert _fund == fund
             assert _fund.holdings == new_fund_holdings
-            return data
+            _fund.data = data
 
         monkeypatch.setattr(api, "update_fund", mock_update_fund)
     else:
