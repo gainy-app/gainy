@@ -5,7 +5,7 @@
     tags = ["realtime"],
     post_hook=[
       pk('uniq_id'),
-      fk(this, 'profile_id', 'app', 'profiles', 'id'),
+      fk('profile_id', 'app', 'profiles', 'id'),
       'create index if not exists "th_profile_id_datetime_type" ON {{ this }} (profile_id, datetime, type)',
     ]
   )
