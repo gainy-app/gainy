@@ -387,15 +387,11 @@ class DriveWealthPortfolio(BaseDriveWealthModel):
         if fund_weight + weight_delta > 1 + PRECISION:
             raise Exception('fund weight can not be greater than 1')
 
-        print(self.cash_target_weight, weight_delta)
         cash_weight -= weight_delta
         self.cash_target_weight = min(ONE, max(ZERO, cash_weight))
-        print(self.cash_target_weight, weight_delta)
 
-        print(self.get_fund_weight(fund.ref_id), weight_delta)
         fund_weight += weight_delta
         self.set_fund_weight(fund, min(ONE, max(ZERO, fund_weight)))
-        print(self.get_fund_weight(fund.ref_id), weight_delta)
 
     def normalize_weights(self):
         weight_sum = Decimal(self.cash_target_weight)

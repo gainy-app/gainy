@@ -273,13 +273,3 @@ class DriveWealthProvider(DriveWealthProviderKYC,
     def _update_money_flow_status(self, entity: BaseDriveWealthMoneyFlowModel,
                                   money_flow: TradingMoneyFlow):
         money_flow.status = entity.get_money_flow_status()
-
-    # TODO move to compute
-
-    def _sync_account_money(self,
-                            account_ref_id: str) -> DriveWealthAccountMoney:
-        account_money_data = self.api.get_account_money(account_ref_id)
-        account_money = DriveWealthAccountMoney()
-        account_money.set_from_response(account_money_data)
-        self.repository.persist(account_money)
-        return account_money
