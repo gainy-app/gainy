@@ -13634,6 +13634,10 @@ values  ('BTC.CC', 0.06, 0.06, '2010-08-04', 0.06, 0.06, 0.06, 0),
         ('BTC.CC', 44670.698943542, 44670.698943542, '2022-02-15', 44699.992465937, 42589.975301575, 42722.431488731, 48854507616)
         on conflict do nothing;
 
+insert into raw_data.eod_historical_prices (code, adjusted_close, close, date, high, low, open, volume)
+values  ('SPY', 459.6114, 466.57, '2021-12-13', 470.56, 466.27, 470.19, 87724680)
+on conflict do nothing;
+
 with min_dates as
     (
         select code, min(date) as date

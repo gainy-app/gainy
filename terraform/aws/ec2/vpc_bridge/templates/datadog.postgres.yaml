@@ -19,6 +19,7 @@ instances:
                                                          ('send-notifications', interval '1 minute'),
                                                          ('charge-invoices', interval '1 day'),
                                                          ('create-invoices', interval '1 month'),
+                                                         ('update-collection-weights', interval '1 month'),
                                                          ('update-account-balances', interval '1 day')
                                               ),
                dag_next_run as

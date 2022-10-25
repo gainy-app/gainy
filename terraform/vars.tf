@@ -39,6 +39,16 @@ variable "stripe_api_key" {
 variable "stripe_publishable_key" {
   type = string
 }
+variable "github_app_id" {
+  type = string
+}
+variable "github_app_installation_id" {
+  type = string
+}
+variable "github_app_private_key" {
+  type      = string
+  sensitive = true
+}
 
 #################################### DriveWealth ####################################
 

@@ -1,4 +1,3 @@
-import os
 from airflow.operators.bash import BashOperator
 from common import create_dag, get_meltano_command, get_schedules, MELTANO_PROJECT_ROOT, ENV
 
@@ -13,7 +12,7 @@ dag_id = "gainy-dag"
 dag = create_dag(
     dag_id,
     tags=list(tags),
-    schedule_interval="0 4 * * *" if ENV == "production" else "0 5 * * *",
+    schedule_interval="0 4 * * *" if ENV == "production" else "0 6 * * *",
     is_paused_upon_creation=True)
 
 # Operators
