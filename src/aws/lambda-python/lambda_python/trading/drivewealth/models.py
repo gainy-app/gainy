@@ -448,7 +448,7 @@ class DriveWealthAutopilotRun(BaseDriveWealthModel):
         self.status = data["status"]
         self.data = data
 
-        if "orders" in self.data:
+        if self.data.get("orders", {}).get("outcome"):
             # TODO remove verify after DW fixes cert issue
             # TODO move to SQS
             self.orders_outcome = requests.get(self.data["orders"]["outcome"],
