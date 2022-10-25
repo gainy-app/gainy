@@ -229,3 +229,8 @@ class CollectionStatus:
             "value": self.value,
             "holdings": self.holdings,
         }
+
+
+class ProfileBalances:
+    withdrawable_cash = 0
+    buying_power = 0

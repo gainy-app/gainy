@@ -6,7 +6,8 @@ from gainy.exceptions import NotFoundException
 from gainy.trading.drivewealth.exceptions import DriveWealthApiException
 from portfolio.plaid import PlaidService
 from portfolio.plaid.models import PlaidAccessToken
-from trading.models import TradingMoneyFlow, FundingAccount, TradingCollectionVersion
+from trading.models import TradingMoneyFlow, FundingAccount, TradingCollectionVersion, ProfileBalances, \
+    TradingCollectionVersionStatus
 from trading.drivewealth.provider.collection import DriveWealthProviderCollection
 from trading.drivewealth.provider.kyc import DriveWealthProviderKYC
 from trading.drivewealth.models import DriveWealthBankAccount, DriveWealthDeposit, \
@@ -17,7 +18,7 @@ from trading.drivewealth.repository import DriveWealthRepository
 
 from gainy.utils import get_logger
 from gainy.trading.models import TradingAccount
-from gainy.trading.drivewealth.models import DriveWealthAccount
+from gainy.trading.drivewealth.models import DriveWealthAccount, DriveWealthUser, DriveWealthAccountMoney
 
 logger = get_logger(__name__)
 
@@ -88,6 +89,41 @@ class DriveWealthProvider(DriveWealthProviderKYC,
         self._on_money_transfer(money_flow.profile_id)
 
         return entity
+
+    def get_actual_balances(self, profile_id) -> ProfileBalances:
+        balances = ProfileBalances()
+
+        user = self._get_user(profile_id)
+        accounts = self.repository.get_user_accounts(user.ref_id)
+        account_money_entities = []
+        for account in accounts:
+            #todo cache
+            account_money = self._sync_account_money(account.ref_id)
+            account_money_entities.append(account_money)
+
+            if IS_UAT:
+                balances.withdrawable_cash += account_money.cash_balance
+            else:
+                balances.withdrawable_cash += account_money.cash_available_for_withdrawal
+
+        portfolio = self.repository.get_profile_portfolio(profile_id)
+        if portfolio:
+            #todo cache
+            portfolio_status = self._get_portfolio_status(portfolio)
+            balances.buying_power += portfolio_status.cash_value
+
+            trading_collection_versions: List[
+                TradingCollectionVersion] = self.repository.find_all(
+                    TradingCollectionVersion, {
+                        "profile_id": profile_id,
+                        "status": TradingCollectionVersionStatus.PENDING.name
+                    })
+            for trading_collection_version in trading_collection_versions:
+                balances.buying_power -= trading_collection_version.target_amount_delta
+        else:
+            balances.buying_power = balances.withdrawable_cash
+
+        return balances
 
     def debug_add_money(self, trading_account_id, amount):
         if not IS_UAT:
@@ -221,6 +257,8 @@ class DriveWealthProvider(DriveWealthProviderKYC,
                     DriveWealthAutopilotRun, {"account_id": account.ref_id})
 
             for entity in autopilot_runs:
+                if entity.is_successful() or entity.is_failed():
+                    continue
                 self.sync_autopilot_run(entity)
 
     def _sync_portfolios(self, profile_id):
@@ -235,3 +273,13 @@ class DriveWealthProvider(DriveWealthProviderKYC,
     def _update_money_flow_status(self, entity: BaseDriveWealthMoneyFlowModel,
                                   money_flow: TradingMoneyFlow):
         money_flow.status = entity.get_money_flow_status()
+
+    # TODO move to compute
+
+    def _sync_account_money(self,
+                            account_ref_id: str) -> DriveWealthAccountMoney:
+        account_money_data = self.api.get_account_money(account_ref_id)
+        account_money = DriveWealthAccountMoney()
+        account_money.set_from_response(account_money_data)
+        self.repository.persist(account_money)
+        return account_money

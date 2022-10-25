@@ -152,9 +152,10 @@ class DriveWealthApi(GainyDriveWealthApi):
             })
 
     def update_fund(self, fund: DriveWealthFund):
-        return self._make_request("PATCH", f"/managed/funds/{fund.ref_id}", {
+        data = self._make_request("PATCH", f"/managed/funds/{fund.ref_id}", {
             'holdings': fund.holdings,
         })
+        fund.set_from_response(data)
 
     def update_portfolio(self, portfolio: DriveWealthPortfolio):
         # noinspection PyTypeChecker
@@ -167,10 +168,11 @@ class DriveWealthApi(GainyDriveWealthApi):
             "target": weight,
         } for fund_id, weight in portfolio.holdings.items()]
 
-        return self._make_request("PATCH",
+        data = self._make_request("PATCH",
                                   f"/managed/portfolios/{portfolio.ref_id}", {
                                       'holdings': holdings,
                                   })
+        portfolio.set_from_response(data)
 
     def create_autopilot_run(self, account_ids: list):
         return self._make_request(

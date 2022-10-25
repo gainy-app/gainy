@@ -387,11 +387,15 @@ class DriveWealthPortfolio(BaseDriveWealthModel):
         if fund_weight + weight_delta > 1 + PRECISION:
             raise Exception('fund weight can not be greater than 1')
 
+        print(self.cash_target_weight, weight_delta)
         cash_weight -= weight_delta
         self.cash_target_weight = min(ONE, max(ZERO, cash_weight))
+        print(self.cash_target_weight, weight_delta)
 
+        print(self.get_fund_weight(fund.ref_id), weight_delta)
         fund_weight += weight_delta
         self.set_fund_weight(fund, min(ONE, max(ZERO, fund_weight)))
+        print(self.get_fund_weight(fund.ref_id), weight_delta)
 
     def normalize_weights(self):
         weight_sum = Decimal(self.cash_target_weight)
@@ -448,7 +452,7 @@ class DriveWealthAutopilotRun(BaseDriveWealthModel):
         self.status = data["status"]
         self.data = data
 
-        if "orders" in self.data:
+        if self.data.get("orders", {}).get("outcome"):
             # TODO remove verify after DW fixes cert issue
             # TODO move to SQS
             self.orders_outcome = requests.get(self.data["orders"]["outcome"],
@@ -458,14 +462,12 @@ class DriveWealthAutopilotRun(BaseDriveWealthModel):
     def table_name(self) -> str:
         return "drivewealth_autopilot_runs"
 
-    def update_trading_collection_version(
-            self, trading_collection_version: TradingCollectionVersion):
+    def is_successful(self):
         # SUCCESS	Complete Autopilot run successful
-        if self.status == "SUCCESS":
-            trading_collection_version.set_status(
-                TradingCollectionVersionStatus.EXECUTED_FULLY)
-            return
-        '''
+        return self.status == "SUCCESS"
+
+    def is_failed(self):
+        """
         REBALANCE_FAILED                  rebalance has failed
         SELL_AMOUNTCASH_ORDERS_FAILED     one or more sell orders have failed
         SELL_ORDERQTY_ORDERS_FAILED       one or more sell orders have failed
@@ -479,8 +481,17 @@ class DriveWealthAutopilotRun(BaseDriveWealthModel):
         BUY_AMOUNTCASH_ORDERS_TIMEDOUT    required buy orders have timedout
         ALLOCATION_TIMEDOUT               allocation processing timeout
         REBALANCE_ABORTED                 rebalance has been cancelled
-        '''
-        if re.search(r'(FAILED|TIMEDOUT|ABORTED)$', self.status):
+        """
+        return re.search(r'(FAILED|TIMEDOUT|ABORTED)$', self.status)
+
+    def update_trading_collection_version(
+            self, trading_collection_version: TradingCollectionVersion):
+        if self.is_successful():
+            trading_collection_version.set_status(
+                TradingCollectionVersionStatus.EXECUTED_FULLY)
+            return
+
+        if self.is_failed():
             trading_collection_version.set_status(
                 TradingCollectionVersionStatus.FAILED)
             return

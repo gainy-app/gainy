@@ -110,8 +110,7 @@ class DriveWealthProviderCollection(GainyDriveWealthProvider):
 
         if fund:
             fund.holdings = new_fund_holdings
-            data = self.api.update_fund(fund)
-            fund.data = data
+            self.api.update_fund(fund)
         else:
             user = repository.get_user(profile_id)
             user_id = user.ref_id
@@ -229,7 +228,7 @@ class DriveWealthProviderCollection(GainyDriveWealthProvider):
         portfolio.set_from_response(data)
         self.repository.persist(portfolio)
 
-    def _get_trading_account(self, user_ref_id):
+    def _get_trading_account(self, user_ref_id) -> DriveWealthAccount:
         return self.repository.get_user_accounts(user_ref_id)[0]
 
     def _get_instrument(self, symbol) -> DriveWealthInstrument:
