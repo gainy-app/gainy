@@ -59,6 +59,16 @@
         ]
       }
     },
+    "profile_ticker_match_score": {
+      "replication-key": "updated_at",
+      "replication-method": "INCREMENTAL",
+      "metadata": {
+        "table-key-properties": [
+          "profile_id",
+          "symbol"
+        ]
+      }
+    },
     "profile_ticker_metrics_settings": {
       "replication-key": "updated_at",
       "replication-method": "INCREMENTAL",
