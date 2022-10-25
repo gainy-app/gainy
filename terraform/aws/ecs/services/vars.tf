@@ -66,3 +66,6 @@ variable "drivewealth_ria_product_id" {}
 variable "drivewealth_api_username" {}
 variable "drivewealth_api_password" {}
 variable "drivewealth_api_url" {}
+variable "github_app_id" {}
+variable "github_app_installation_id" {}
+variable "github_app_private_key" {}

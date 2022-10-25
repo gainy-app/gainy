@@ -18,6 +18,7 @@ CREATE TABLE IF NOT EXISTS raw_data.eod_fundamentals
     type                varchar,
     etf_data            jsonb,
     mutualfund_data     jsonb,
+    components          jsonb,
     _sdc_batched_at     timestamp,
     _sdc_deleted_at     varchar,
     _sdc_extracted_at   timestamp,
