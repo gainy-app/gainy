@@ -10,7 +10,8 @@ from trading.models import TradingMoneyFlow, FundingAccount, TradingCollectionVe
 from trading.drivewealth.provider.collection import DriveWealthProviderCollection
 from trading.drivewealth.provider.kyc import DriveWealthProviderKYC
 from trading.drivewealth.models import DriveWealthBankAccount, DriveWealthDeposit, \
-    DriveWealthRedemption, DriveWealthAutopilotRun, DriveWealthPortfolio, DriveWealthInstrument
+    DriveWealthRedemption, DriveWealthAutopilotRun, DriveWealthPortfolio, DriveWealthInstrument, \
+    BaseDriveWealthMoneyFlowModel
 from trading.drivewealth.api import DriveWealthApi
 from trading.drivewealth.repository import DriveWealthRepository
 
@@ -231,5 +232,6 @@ class DriveWealthProvider(DriveWealthProviderKYC,
             self._sync_portfolio(portfolio)
             self._get_portfolio_status(portfolio)
 
-    def _update_money_flow_status(self, entity, money_flow: TradingMoneyFlow):
-        money_flow.status = entity.status
+    def _update_money_flow_status(self, entity: BaseDriveWealthMoneyFlowModel,
+                                  money_flow: TradingMoneyFlow):
+        money_flow.status = entity.get_money_flow_status()

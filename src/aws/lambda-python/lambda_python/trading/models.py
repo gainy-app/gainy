@@ -106,10 +106,16 @@ class FundingAccount(BaseModel):
         return "trading_funding_accounts"
 
 
+class TradingMoneyFlowStatus(enum.Enum):
+    PENDING = "PENDING"
+    SUCCESS = "SUCCESS"
+    FAILED = "FAILED"
+
+
 class TradingMoneyFlow(BaseModel):
     id = None
     profile_id = None
-    status = None
+    status: TradingMoneyFlowStatus = None
     amount = None
     trading_account_id = None
     funding_account_id = None
@@ -121,6 +127,15 @@ class TradingMoneyFlow(BaseModel):
     db_excluded_fields = ["created_at", "updated_at"]
     non_persistent_fields = ["id", "created_at", "updated_at"]
 
+    def __init__(self, row=None):
+        super().__init__(row)
+
+        if not row:
+            return
+
+        self.status = TradingMoneyFlowStatus[
+            row["status"]] if row["status"] else None
+
     @classproperty
     def schema_name(self) -> str:
         return "app"
@@ -128,6 +143,13 @@ class TradingMoneyFlow(BaseModel):
     @classproperty
     def table_name(self) -> str:
         return "trading_money_flow"
+
+    def to_dict(self) -> dict:
+        return {
+            **super().to_dict(),
+            "status":
+            self.status.name if self.status else None,
+        }
 
 
 class TradingCollectionVersionStatus(enum.Enum):

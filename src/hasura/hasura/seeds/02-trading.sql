@@ -84,7 +84,7 @@ values ('bf98c335-57ad-4337-ae9f-ed1fcfb447af.1662377145557', 'bf98c335-57ad-433
 on conflict do nothing;
 
 insert into app.trading_money_flow(id, profile_id, trading_account_id, funding_account_id, status, amount)
-values (1, 2, 1, 1, 'Approved', 10000)
+values (1, 2, 1, 1, 'SUCCESS', 10000)
 on conflict do nothing;
 ALTER SEQUENCE app.trading_money_flow_id_seq RESTART WITH 2;
 
