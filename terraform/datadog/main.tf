@@ -54,13 +54,8 @@ resource "datadog_monitor" "billing_spend" {
 
   query = "sum(last_1d):aws.billing.forecasted_spend{*}.as_count().rollup(avg, 1800) / day_before(aws.billing.forecasted_spend{*}.as_count().rollup(avg, 1800)) - 1 > 0.05"
 
-  monitor_threshold_windows {
-    recovery_window = "last_12h"
-    trigger_window  = "last_12h"
-  }
-
   monitor_thresholds {
-    critical          = "0.1"
+    critical          = "0.05"
     critical_recovery = "0"
   }
 
@@ -79,12 +74,7 @@ resource "datadog_monitor" "hasura_alb_5xx" {
   message = "Hasura 5xx Errors Monitor triggered. Notify: @slack-${var.slack_channel_name} <!channel>"
   #  escalation_message = "Escalation message @pagerduty"
 
-  query = "sum(last_1h):default_zero(avg:aws.applicationelb.httpcode_elb_5xx{name:*-production} by {name}.as_count()) > 0"
-
-  monitor_threshold_windows {
-    recovery_window = "last_15m"
-    trigger_window  = "last_15m"
-  }
+  query = "sum(last_1h):default_zero(avg:aws.applicationelb.httpcode_elb_5xx{name:*-production} by {name}.as_count()) > 0.01"
 
   monitor_thresholds {
     critical          = "0.01"
@@ -128,16 +118,11 @@ resource "datadog_monitor" "lambda_invocations" {
 
   query = "sum(last_7d):aws.lambda.invocations{functionname:*_production} by {functionname}.as_count().rollup(sum, 86400) / week_before(aws.lambda.invocations{functionname:*_production} by {functionname}.as_count().rollup(sum, 86400)) - 1 > 10"
 
-  monitor_threshold_windows {
-    recovery_window = "last_1d"
-    trigger_window  = "last_1d"
-  }
-
   monitor_thresholds {
-    critical          = "1"
-    critical_recovery = "0.9"
-    warning           = "0.5"
-    warning_recovery  = "0.45"
+    critical          = "10"
+    critical_recovery = "9"
+    warning           = "5"
+    warning_recovery  = "4.5"
   }
 
   require_full_window = false
@@ -173,12 +158,7 @@ resource "datadog_monitor" "lambda_errors" {
   type    = "query alert"
   message = "Lambda Errors Monitor triggered. Notify: @slack-${var.slack_channel_name} <!channel>"
 
-  query = "sum(last_7d):aws.lambda.errors{functionname:*_production} by {functionname}.as_count().rollup(sum, 86400) > 0"
-
-  monitor_threshold_windows {
-    recovery_window = "last_1h"
-    trigger_window  = "last_1h"
-  }
+  query = "sum(last_7d):aws.lambda.errors{functionname:*_production} by {functionname}.as_count().rollup(sum, 86400) > 0.01"
 
   monitor_thresholds {
     critical          = "0.01"
@@ -245,11 +225,6 @@ resource "datadog_monitor" "rds_cpu" {
   message = "RDS CPU Monitor triggered. Notify: @slack-${var.slack_channel_name} <!channel>"
 
   query = "sum(last_14d):aws.rds.cpuutilization{dbinstanceidentifier:*-production}.as_count().rollup(avg, 3600) > 0.8"
-
-  monitor_threshold_windows {
-    recovery_window = "last_4d"
-    trigger_window  = "last_4d"
-  }
 
   monitor_thresholds {
     critical          = "0.8"
@@ -373,14 +348,9 @@ resource "datadog_monitor" "cloudwatch_synthetics_duration" {
 
   query = "sum(last_10d):cloudwatchsynthetics.Duration{canaryname:*-production} by {canaryname}.as_count().rollup(avg, 1800) / hour_before(cloudwatchsynthetics.Duration{canaryname:*-production} by {canaryname}.as_count().rollup(avg, 1800)) - 1 > 1"
 
-  monitor_threshold_windows {
-    recovery_window = "last_1d"
-    trigger_window  = "last_1d"
-  }
-
   monitor_thresholds {
-    critical          = "0.5"
-    critical_recovery = "0.4"
+    critical          = "1"
+    critical_recovery = "0.5"
   }
 
   require_full_window = false
