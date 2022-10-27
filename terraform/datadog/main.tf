@@ -52,7 +52,7 @@ resource "datadog_monitor" "billing_spend" {
   message = "Billing Spend Monitor triggered. Notify: @slack-${var.slack_channel_name} <!channel>"
   #  escalation_message = "Escalation message @pagerduty"
 
-  query = "sum(last_1d):aws.billing.forecasted_spend{*}.as_count().rollup(avg, 1800) / day_before(aws.billing.forecasted_spend{*}.as_count().rollup(avg, 1800)) - 1 > 0.05"
+  query = "sum(last_1d):aws.billing.forecasted_spend{*}.rollup(avg, 1800) / day_before(aws.billing.forecasted_spend{*}.rollup(avg, 1800)) - 1 > 0.05"
 
   monitor_thresholds {
     critical          = "0.05"
@@ -74,7 +74,7 @@ resource "datadog_monitor" "hasura_alb_5xx" {
   message = "Hasura 5xx Errors Monitor triggered. Notify: @slack-${var.slack_channel_name} <!channel>"
   #  escalation_message = "Escalation message @pagerduty"
 
-  query = "sum(last_1h):default_zero(avg:aws.applicationelb.httpcode_elb_5xx{name:*-production} by {name}.as_count()) > 0.01"
+  query = "sum(last_1h):default_zero(avg:aws.applicationelb.httpcode_elb_5xx{name:*-production} by {name}) > 0.01"
 
   monitor_thresholds {
     critical          = "0.01"
@@ -116,18 +116,18 @@ resource "datadog_monitor" "lambda_invocations" {
   type    = "query alert"
   message = "Lambda Invocations Monitor triggered. Notify: @slack-${var.slack_channel_name} <!channel>"
 
-  query = "sum(last_7d):aws.lambda.invocations{functionname:*_production} by {functionname}.as_count().rollup(sum, 86400) / week_before(aws.lambda.invocations{functionname:*_production} by {functionname}.as_count().rollup(sum, 86400)) - 1 > 10"
+  query = "sum(last_7d):aws.lambda.invocations{functionname:*_production} by {functionname}.rollup(sum, 86400) / week_before(aws.lambda.invocations{functionname:*_production} by {functionname}.rollup(sum, 86400)) - 1 > 5"
 
   monitor_thresholds {
-    critical          = "10"
-    critical_recovery = "9"
-    warning           = "5"
-    warning_recovery  = "4.5"
+    critical          = "5"
+    critical_recovery = "4"
+    warning           = "2"
+    warning_recovery  = "1"
   }
 
   require_full_window = false
   notify_no_data      = false
-  renotify_interval   = 60
+  renotify_interval   = 240
 
   tags = ["lambda"]
 }
@@ -138,10 +138,10 @@ resource "datadog_monitor" "lambda_duration" {
   message = "Lambda Duration Monitor triggered. Notify: @slack-${var.slack_channel_name} <!channel>"
   #  escalation_message = "Escalation message @pagerduty"
 
-  query = "sum(last_7d):(sum:aws.lambda.duration{functionname:*_production} by {functionname}.as_count().rollup(sum, 3600) - hour_before(sum:aws.lambda.duration{functionname:*_production} by {functionname}.as_count().rollup(sum, 3600))) / hour_before(sum:aws.lambda.duration{functionname:*_production} by {functionname}.as_count().rollup(sum, 3600)) > 5"
+  query = "sum(last_7d):avg:aws.lambda.duration{functionname:*_production} by {functionname}.rollup(avg, 3600) / day_before(avg:aws.lambda.duration{functionname:*_production} by {functionname}.rollup(avg, 3600)) - 1 > 1"
 
   monitor_thresholds {
-    critical = "5"
+    critical = "1"
   }
 
   require_full_window = true
@@ -158,7 +158,7 @@ resource "datadog_monitor" "lambda_errors" {
   type    = "query alert"
   message = "Lambda Errors Monitor triggered. Notify: @slack-${var.slack_channel_name} <!channel>"
 
-  query = "sum(last_7d):aws.lambda.errors{functionname:*_production} by {functionname}.as_count().rollup(sum, 86400) > 0.01"
+  query = "sum(last_7d):sum:aws.lambda.errors{functionname:*_production} by {functionname}.rollup(sum, 3600) > 0.01"
 
   monitor_thresholds {
     critical          = "0.01"
@@ -224,7 +224,7 @@ resource "datadog_monitor" "rds_cpu" {
   type    = "query alert"
   message = "RDS CPU Monitor triggered. Notify: @slack-${var.slack_channel_name} <!channel>"
 
-  query = "sum(last_14d):aws.rds.cpuutilization{dbinstanceidentifier:*-production}.as_count().rollup(avg, 3600) > 80"
+  query = "avg(last_14d):avg:aws.rds.cpuutilization{dbinstanceidentifier:*-production} by {dbinstanceidentifier}.rollup(avg, 3600) > 80"
 
   monitor_thresholds {
     critical          = "80"
@@ -266,7 +266,7 @@ resource "datadog_monitor" "meltano_dag_run_duration" {
   type    = "query alert"
   message = "Airflow Meltano Dag Run Duration triggered. Notify: @slack-${var.slack_channel_name} <!channel>"
 
-  query = "sum(last_15m):(avg:app.latest_dag_run_duration_minutes{*} by {dag_id}.as_count().rollup(sum, 900) - hour_before(clamp_min(avg:app.latest_dag_run_duration_minutes{*} by {dag_id}.as_count().rollup(sum, 900), 10))) / hour_before(clamp_min(avg:app.latest_dag_run_duration_minutes{*} by {dag_id}.as_count().rollup(sum, 900), 10)) > 5"
+  query = "avg(last_15m):avg:app.latest_dag_run_duration_minutes{*} by {dag_id}.rollup(avg, 3600) / day_before(avg:app.latest_dag_run_duration_minutes{*} by {dag_id}.rollup(avg, 3600)) > 5"
 
   monitor_thresholds {
     critical = 5
@@ -307,7 +307,7 @@ resource "datadog_monitor" "data_errors_count" {
   type    = "query alert"
   message = "Data errors triggered. Notify: @slack-${var.slack_channel_name} <!channel>"
 
-  query = "sum(last_1d):(max:app.data_errors_count{postgres_env:production} by {code}.as_count().rollup(max, 900) - hour_before(clamp_min(max:app.data_errors_count{postgres_env:production} by {code}.as_count().rollup(max, 900), 10))) / hour_before(clamp_min(max:app.data_errors_count{postgres_env:production} by {code}.as_count().rollup(max, 900), 10)) > 1"
+  query = "sum(last_1d):avg:app.data_errors_count{postgres_env:production} by {code}.rollup(avg, 3600) / day_before(avg:app.data_errors_count{postgres_env:production} by {code}.rollup(avg, 3600)) - 1 > 1"
 
   monitor_thresholds {
     critical = "1"
@@ -348,7 +348,7 @@ resource "datadog_monitor" "cloudwatch_synthetics_duration" {
   type    = "query alert"
   message = "CloudWatch Synthetics Duration triggered. Notify: @slack-${var.slack_channel_name} <!channel>"
 
-  query = "sum(last_10d):cloudwatchsynthetics.Duration{canaryname:*-production} by {canaryname}.as_count().rollup(avg, 1800) / hour_before(cloudwatchsynthetics.Duration{canaryname:*-production} by {canaryname}.as_count().rollup(avg, 1800)) - 1 > 1"
+  query = "sum(last_10d):cloudwatchsynthetics.Duration{canaryname:*-production} by {canaryname}.rollup(avg, 1800) / hour_before(cloudwatchsynthetics.Duration{canaryname:*-production} by {canaryname}.rollup(avg, 1800)) - 1 > 1"
 
   monitor_thresholds {
     critical          = "1"
@@ -393,10 +393,10 @@ resource "datadog_monitor" "logs_count" {
   type    = "query alert"
   message = "Logs count triggered. Notify: @slack-${var.slack_channel_name} <!channel>"
 
-  query = "sum(last_15m):(sum:aws.logs.forwarded_log_events{*} by {loggroupname}.as_count().rollup(sum, 900) - hour_before(clamp_min(sum:aws.logs.forwarded_log_events{*} by {loggroupname}.as_count().rollup(sum, 900), 500))) / hour_before(clamp_min(sum:aws.logs.forwarded_log_events{*} by {loggroupname}.as_count().rollup(sum, 900), 500)) > 5"
+  query = "sum(last_15m):avg:aws.logs.forwarded_log_events{*} by {loggroupname}.rollup(avg, 3600) / hour_before(sum:aws.logs.forwarded_log_events{*} by {loggroupname}.rollup(avg, 3600)) - 1 > 1"
 
   monitor_thresholds {
-    critical = 5
+    critical = 1
   }
 
   require_full_window = false
