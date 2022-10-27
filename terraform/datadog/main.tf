@@ -224,18 +224,19 @@ resource "datadog_monitor" "rds_cpu" {
   type    = "query alert"
   message = "RDS CPU Monitor triggered. Notify: @slack-${var.slack_channel_name} <!channel>"
 
-  query = "sum(last_14d):aws.rds.cpuutilization{dbinstanceidentifier:*-production}.as_count().rollup(avg, 3600) > 0.8"
+  query = "sum(last_14d):aws.rds.cpuutilization{dbinstanceidentifier:*-production}.as_count().rollup(avg, 3600) > 80"
 
   monitor_thresholds {
-    critical          = "0.8"
-    critical_recovery = "0.7"
-    warning           = "0.5"
-    warning_recovery  = "0.4"
+    critical          = "80"
+    critical_recovery = "70"
+    warning           = "50"
+    warning_recovery  = "40"
   }
 
   require_full_window = false
   notify_no_data      = true
-  renotify_interval   = 15
+  renotify_interval   = 60
+  no_data_timeframe   = 120
 
   tags = ["rds"]
 }
@@ -294,6 +295,7 @@ resource "datadog_monitor" "meltano_failed_tasks" {
   require_full_window = false
   notify_no_data      = true
   renotify_interval   = 1440
+  no_data_timeframe   = 120
 
   tags = ["meltano"]
 }
@@ -356,6 +358,7 @@ resource "datadog_monitor" "cloudwatch_synthetics_duration" {
   require_full_window = false
   notify_no_data      = true
   renotify_interval   = 240
+  no_data_timeframe   = 60
 
   tags = ["canaries"]
 }
