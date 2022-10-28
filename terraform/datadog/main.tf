@@ -138,7 +138,7 @@ resource "datadog_monitor" "lambda_duration" {
   message = "Lambda Duration Monitor triggered. Notify: @slack-${var.slack_channel_name} <!channel>"
   #  escalation_message = "Escalation message @pagerduty"
 
-  query = "sum(last_7d):avg:aws.lambda.duration{functionname:*_production} by {functionname}.rollup(avg, 3600) / day_before(avg:aws.lambda.duration{functionname:*_production} by {functionname}.rollup(avg, 3600)) - 1 > 1"
+  query = "avg(last_7d):avg:aws.lambda.duration{functionname:*_production} by {functionname}.rollup(avg, 3600) / day_before(avg:aws.lambda.duration{functionname:*_production} by {functionname}.rollup(avg, 3600)) - 1 > 1"
 
   monitor_thresholds {
     critical = "1"
@@ -266,7 +266,7 @@ resource "datadog_monitor" "meltano_dag_run_duration" {
   type    = "query alert"
   message = "Airflow Meltano Dag Run Duration triggered. Notify: @slack-${var.slack_channel_name} <!channel>"
 
-  query = "avg(last_15m):avg:app.latest_dag_run_duration_minutes{*} by {dag_id}.rollup(avg, 3600) / day_before(avg:app.latest_dag_run_duration_minutes{*} by {dag_id}.rollup(avg, 3600)) > 5"
+  query = "avg(last_1h):avg:app.latest_dag_run_duration_minutes{*} by {dag_id}.rollup(avg, 3600) / day_before(avg:app.latest_dag_run_duration_minutes{*} by {dag_id}.rollup(avg, 3600)) > 5"
 
   monitor_thresholds {
     critical = 5
@@ -274,7 +274,7 @@ resource "datadog_monitor" "meltano_dag_run_duration" {
 
   require_full_window = false
   notify_no_data      = true
-  no_data_timeframe   = 30
+  no_data_timeframe   = 120
   renotify_interval   = 720
 
   tags = ["meltano"]
@@ -348,7 +348,7 @@ resource "datadog_monitor" "cloudwatch_synthetics_duration" {
   type    = "query alert"
   message = "CloudWatch Synthetics Duration triggered. Notify: @slack-${var.slack_channel_name} <!channel>"
 
-  query = "sum(last_10d):cloudwatchsynthetics.Duration{canaryname:*-production} by {canaryname}.rollup(avg, 1800) / hour_before(cloudwatchsynthetics.Duration{canaryname:*-production} by {canaryname}.rollup(avg, 1800)) - 1 > 1"
+  query = "avg(last_10d):cloudwatchsynthetics.Duration{canaryname:*-production} by {canaryname}.rollup(avg, 1800) / hour_before(cloudwatchsynthetics.Duration{canaryname:*-production} by {canaryname}.rollup(avg, 1800)) - 1 > 1"
 
   monitor_thresholds {
     critical          = "1"
@@ -393,7 +393,7 @@ resource "datadog_monitor" "logs_count" {
   type    = "query alert"
   message = "Logs count triggered. Notify: @slack-${var.slack_channel_name} <!channel>"
 
-  query = "sum(last_15m):avg:aws.logs.forwarded_log_events{*} by {loggroupname}.rollup(avg, 3600) / hour_before(sum:aws.logs.forwarded_log_events{*} by {loggroupname}.rollup(avg, 3600)) - 1 > 1"
+  query = "sum(last_1h):avg:aws.logs.forwarded_log_events{*} by {loggroupname}.rollup(avg, 3600) / hour_before(sum:aws.logs.forwarded_log_events{*} by {loggroupname}.rollup(avg, 3600)) - 1 > 1"
 
   monitor_thresholds {
     critical = 1
