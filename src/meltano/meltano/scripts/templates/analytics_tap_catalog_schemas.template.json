@@ -59,6 +59,16 @@
         ]
       }
     },
+    "profile_collection_match_score": {
+      "metadata": {
+        "replication-key": "updated_at",
+        "replication-method": "INCREMENTAL",
+        "table-key-properties": [
+          "profile_id",
+          "collection_uniq_id"
+        ]
+      }
+    },
     "profile_ticker_match_score": {
       "metadata": {
         "replication-key": "updated_at",
