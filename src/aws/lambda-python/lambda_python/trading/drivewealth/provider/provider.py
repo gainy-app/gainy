@@ -1,7 +1,7 @@
 import os
 from decimal import Decimal
-from typing import List
 
+from gainy.data_access.repository import MAX_TRANSACTION_SIZE
 from gainy.exceptions import NotFoundException
 from gainy.trading.drivewealth.exceptions import DriveWealthApiException
 from portfolio.plaid import PlaidService
@@ -10,8 +10,7 @@ from trading.models import TradingMoneyFlow, FundingAccount, TradingCollectionVe
 from trading.drivewealth.provider.collection import DriveWealthProviderCollection
 from trading.drivewealth.provider.kyc import DriveWealthProviderKYC
 from trading.drivewealth.models import DriveWealthBankAccount, DriveWealthDeposit, \
-    DriveWealthRedemption, DriveWealthAutopilotRun, DriveWealthPortfolio, DriveWealthInstrument, \
-    BaseDriveWealthMoneyFlowModel
+    DriveWealthRedemption, DriveWealthAutopilotRun, BaseDriveWealthMoneyFlowModel
 from trading.drivewealth.api import DriveWealthApi
 from trading.drivewealth.repository import DriveWealthRepository
 
@@ -130,11 +129,11 @@ class DriveWealthProvider(DriveWealthProviderKYC,
 
         self.sync_user(user.ref_id)
         self.sync_profile_trading_accounts(profile_id)
-        self._sync_autopilot_runs(user.ref_id)
+        self._sync_autopilot_runs()
         self._sync_bank_accounts(user.ref_id)
         self._sync_user_deposits(user.ref_id)
         # self._sync_documents(user.ref_id)
-        self._sync_portfolios(profile_id)
+        self.sync_portfolios(profile_id)
         # self._sync_redemptions(user.ref_id)
         # self._sync_users(user.ref_id)
 
@@ -201,36 +200,20 @@ class DriveWealthProvider(DriveWealthProviderKYC,
         entity.set_from_response(data)
         repository.persist(entity)
 
-        if not entity.collection_version_id:
-            return
-
-        trading_collection_version = repository.find_one(
-            TradingCollectionVersion, {"id": entity.collection_version_id})
-
-        entity.update_trading_collection_version(trading_collection_version)
-        repository.persist(trading_collection_version)
-
-    def _sync_autopilot_runs(self, user_ref_id):
+    def _sync_autopilot_runs(self):
         repository = self.repository
-
-        accounts: List[DriveWealthAccount] = repository.find_all(
-            DriveWealthAccount, {"drivewealth_user_id": user_ref_id})
-        for account in accounts:
-            autopilot_runs: List[
-                DriveWealthAutopilotRun] = repository.find_all(
-                    DriveWealthAutopilotRun, {"account_id": account.ref_id})
-
-            for entity in autopilot_runs:
-                self.sync_autopilot_run(entity)
-
-    def _sync_portfolios(self, profile_id):
-        repository = self.repository
-
-        portfolios: List[DriveWealthPortfolio] = repository.find_all(
-            DriveWealthPortfolio, {"profile_id": profile_id})
-        for portfolio in portfolios:
-            self._sync_portfolio(portfolio)
-            self._get_portfolio_status(portfolio)
+        entities = []
+        try:
+            for data in self.api.get_autopilot_runs():
+                entity = DriveWealthAutopilotRun()
+                entity.set_from_response(data)
+                entities.append(entity)
+                if len(entities) >= MAX_TRANSACTION_SIZE:
+                    repository.persist(entities)
+        except DriveWealthApiException as e:
+            logger.exception(e)
+        finally:
+            repository.persist(entities)
 
     def _update_money_flow_status(self, entity: BaseDriveWealthMoneyFlowModel,
                                   money_flow: TradingMoneyFlow):

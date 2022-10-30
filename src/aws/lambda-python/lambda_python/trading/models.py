@@ -1,7 +1,7 @@
 import datetime
 
 import json
-from typing import Dict, Optional, List
+from typing import Dict, Optional
 from decimal import Decimal
 import enum
 
@@ -205,27 +205,6 @@ class TradingCollectionVersion(BaseModel):
             self.executed_at = datetime.datetime.now()
 
 
-class CollectionHoldingStatus:
-    symbol = None
-    target_weight = None
-    actual_weight = None
-    value = None
-
-    def to_dict(self) -> dict:
-        return {
-            "symbol": self.symbol,
-            "target_weight": self.target_weight,
-            "actual_weight": self.actual_weight,
-            "value": self.value,
-        }
-
-
-class CollectionStatus:
-    holdings: List[CollectionHoldingStatus] = None
-    value = None
-
-    def to_dict(self) -> dict:
-        return {
-            "value": self.value,
-            "holdings": self.holdings,
-        }
+class ProfileBalances:
+    withdrawable_cash = 0
+    buying_power = 0

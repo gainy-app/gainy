@@ -51,7 +51,7 @@ union all
     with latest_open_trading_session as
              (
                  select symbol, max(date) as date
-                 from {{ ref('week_trading_sessions') }}
+                 from {{ ref('week_trading_sessions_static') }}
                  where index = 0
                  group by symbol
              )
@@ -78,7 +78,7 @@ union all
     with latest_open_trading_session as
              (
                  select symbol, max(date) as date
-                 from {{ ref('week_trading_sessions') }}
+                 from {{ ref('week_trading_sessions_static') }}
                  where index = 0
                  group by symbol
              )
@@ -105,7 +105,7 @@ union all
     with latest_open_trading_session as
              (
                  select symbol, max(date) as date
-                 from {{ ref('week_trading_sessions') }}
+                 from {{ ref('week_trading_sessions_static') }}
                  where index = 0
                  group by symbol
              )
@@ -132,7 +132,7 @@ union all
     with latest_open_trading_session as
              (
                  select symbol, max(date) as date
-                 from {{ ref('week_trading_sessions') }}
+                 from {{ ref('week_trading_sessions_static') }}
                  where index = 0
                  group by symbol
              )

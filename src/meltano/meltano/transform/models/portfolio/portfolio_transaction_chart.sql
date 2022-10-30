@@ -84,6 +84,22 @@ from (
                        on chart.symbol = portfolio_expanded_transactions.symbol
                            and (chart.close_datetime > portfolio_expanded_transactions.datetime or portfolio_expanded_transactions.datetime is null)
                            and (chart.close_datetime > first_profile_transaction_date.datetime or first_profile_transaction_date.profile_id is null)
+         where portfolio_expanded_transactions.security_type != 'ttf'
+
+         union all
+
+         select transaction_uniq_id || '_' || period || '_' || datetime as id,
+                profile_id,
+                transaction_uniq_id,
+                datetime,
+                period,
+                open,
+                high,
+                low,
+                close,
+                adjusted_close,
+                updated_at
+         from {{ ref('drivewealth_portfolio_chart') }}
      ) t
 
 {% if is_incremental() %}

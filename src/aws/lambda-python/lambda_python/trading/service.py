@@ -3,12 +3,13 @@ from decimal import Decimal
 import io
 
 from gainy.exceptions import NotFoundException
+from gainy.trading.drivewealth.models import CollectionStatus, CollectionHoldingStatus
 from portfolio.plaid import PlaidService
 from portfolio.plaid.common import handle_error
 from services import S3
 from portfolio.plaid.models import PlaidAccessToken
 from trading.models import KycDocument, FundingAccount, TradingMoneyFlow, TradingCollectionVersion, \
-    CollectionHoldingStatus, ProfileKycStatus, CollectionStatus
+    ProfileKycStatus
 from trading.drivewealth.provider import DriveWealthProvider
 from trading.repository import TradingRepository
 

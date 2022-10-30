@@ -275,50 +275,25 @@ with plaid_transactions as
      ),
      ttf_transactions as
          (
-             with dw_allocations as
+             with stats as
                       (
-                          select tcv.profile_id,
-                                 tcv.id                              as tvc_id,
-                                 tcv.collection_id,
-                                 dar.ref_id                          as dar_ref_id,
-                                 json_array_elements(orders_outcome) as data
-                          from {{ source('app', 'trading_collection_versions') }} tcv
-                                   join {{ source('app', 'drivewealth_autopilot_runs') }} dar on dar.collection_version_id = tcv.id
-                          where tcv.status = 'EXECUTED_FULLY'
-                      ),
-                  dw_allocations_transactions as
-                      (
-                          select profile_id,
-                                 collection_id,
-                                 tvc_id || '_' || dar_ref_id ||
-                                 (dw_allocations.data ->> 'orderID')                     as uniq_id,
-                                 drivewealth_instruments.data ->> 'symbol'               as symbol,
-                                 lower(dw_allocations.data ->> 'side')                   as type,
-                                 case
-                                     when lower(dw_allocations.data ->> 'side') = 'buy'
-                                         then 1
-                                     else -1
-                                     end * (dw_allocations.data ->> 'orderQty')::numeric as quantity,
-                                 (dw_allocations.data ->> 'grossTradeAmt')::numeric /
-                                 (dw_allocations.data ->> 'orderQty')::numeric           as price,
-                                 (dw_allocations.data ->> 'executedWhen')::timestamptz   as executed_at
-                          from dw_allocations
-                                   left join {{ source('app', 'drivewealth_instruments') }}
-                                             on drivewealth_instruments.ref_id = dw_allocations.data ->> 'instrumentID'
-                  )
-             select 'ttf_dw_' || uniq_id                 as uniq_id,
+                          select profile_id, collection_id, symbol, min(date) as min_date, max(date) as max_date
+                          from {{ ref('drivewealth_portfolio_historical_holdings') }}
+                          group by profile_id, collection_id, symbol
+                      )
+             select 'ttf_dw_' || profile_id || '_' || collection_id || '_' || symbol as uniq_id,
                     symbol,
-                    holding_id_v2,
-                    dw_allocations_transactions.quantity as quantity_norm,
-                    price,
-                    executed_at                          as datetime,
-                    dw_allocations_transactions.type,
-                    null::int                            as security_id,
-                    dw_allocations_transactions.profile_id,
-                    null::int                            as account_id,
-                    'ttf'                                as security_type,
-                    dw_allocations_transactions.collection_id
-             from dw_allocations_transactions
+                    profile_holdings_normalized.holding_id_v2,
+                    null::double precision                                           as quantity_norm,
+                    null::double precision                                           as price,
+                    min_date                                                         as datetime,
+                    'buy'                                                            as type,
+                    null::int                                                        as security_id,
+                    profile_id,
+                    null::int                                                        as account_id,
+                    'ttf'                                                            as security_type,
+                    collection_id
+             from stats
                       left join {{ ref('profile_holdings_normalized') }} using (profile_id, collection_id, symbol)
      ),
      groupped_expanded_transactions as
@@ -405,7 +380,7 @@ with plaid_transactions as
                       select null                  as id,
                              uniq_id,
                              symbol,
-                             quantity_norm * price as amount,
+                             null::double precision as amount,
                              datetime,
                              price,
                              type,
@@ -421,7 +396,7 @@ with plaid_transactions as
              where t.type in ('buy', 'sell')
                and (base_tickers.symbol is not null or ticker_options.symbol is not null)
              group by t.holding_id_v2, t.datetime, t.profile_id, t.symbol, t.security_type
-             having sum(abs(quantity_norm)) > 0
+             having sum(abs(quantity_norm)) > 0 or security_type = 'ttf'
      )
 select groupped_expanded_transactions.symbol,
        groupped_expanded_transactions.amount,

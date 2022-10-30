@@ -1,8 +1,7 @@
-from trading.models import CollectionStatus
+from gainy.trading.drivewealth.models import DriveWealthPortfolioStatusFundHolding, CollectionStatus
 from trading.service import TradingService
 from trading.repository import TradingRepository
 from trading.drivewealth.provider import DriveWealthProvider
-from trading.drivewealth.models import DriveWealthPortfolioStatusFundHolding, DriveWealthPortfolioStatusHolding
 
 
 def test_get_actual_collection_holdings(monkeypatch):
