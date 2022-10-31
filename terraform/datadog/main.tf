@@ -74,7 +74,7 @@ resource "datadog_monitor" "hasura_alb_5xx" {
   message = "Hasura 5xx Errors Monitor triggered. Notify: @slack-${var.slack_channel_name} <!channel>"
   #  escalation_message = "Escalation message @pagerduty"
 
-  query = "sum(last_1h):default_zero(avg:aws.applicationelb.httpcode_elb_5xx{name:*-production} by {name}) > 0.01"
+  query = "sum(last_1h):default_zero(sum:aws.applicationelb.httpcode_elb_5xx{name:*-production} by {name}) > 0.01"
 
   monitor_thresholds {
     critical          = "0.01"
