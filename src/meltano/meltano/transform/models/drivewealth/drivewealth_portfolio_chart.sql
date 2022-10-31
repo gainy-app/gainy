@@ -53,7 +53,7 @@ union all
     with latest_open_trading_session as
              (
                  select symbol, max(date) as date
-                 from week_trading_sessions
+                 from {{ ref('week_trading_sessions') }}
                  where index = 0
                  group by symbol
              )
