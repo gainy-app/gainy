@@ -60,10 +60,14 @@ union all
                         sim_dif + 1   as weight_category_in_symbol,
                         category_id,
                         holdings.quantity_norm_for_valuation,
-                        actual_value
+                        actual_value,
+                        absolute_daily_change,
+                        actual_price,
+                        previous_day_close_price
                  from holdings
                           join portfolio_holding_gains using (holding_id_v2)
                           join ticker_categories_continuous on ticker_categories_continuous.symbol = ticker_symbol
+                          join ticker_realtime_metrics on ticker_realtime_metrics.symbol = holdings.symbol
              ),
          portfolio_stats as
              (
@@ -102,7 +106,6 @@ union all
                  from data
                           join portfolio_stats using (profile_id)
                           join portfolio_symbol_stats using (profile_id, symbol)
-                          join ticker_realtime_metrics using (symbol)
                  where actual_value_sum > 0
                    and weight_category_in_symbol_sum > 0
          ),
@@ -147,10 +150,14 @@ union all
                         sim_dif + 1   as weight_interest_in_symbol,
                         interest_id,
                         holdings.quantity_norm_for_valuation,
-                        actual_value
+                        actual_value,
+                        absolute_daily_change,
+                        actual_price,
+                        previous_day_close_price
                  from holdings
                           join portfolio_holding_gains using (holding_id_v2)
                           join ticker_interests on ticker_interests.symbol = ticker_symbol
+                          join ticker_realtime_metrics on ticker_realtime_metrics.symbol = holdings.symbol
              ),
          portfolio_stats as
              (
@@ -189,7 +196,6 @@ union all
                  from data
                           join portfolio_stats using (profile_id)
                           join portfolio_symbol_stats using (profile_id, symbol)
-                          join ticker_realtime_metrics using (symbol)
                  where actual_value_sum > 0
                    and weight_interest_in_symbol_sum > 0
          ),
@@ -285,10 +291,14 @@ union all
                         weight        as weight_collection_in_symbol,
                         collection_id,
                         holdings.quantity_norm_for_valuation,
-                        actual_value
+                        actual_value,
+                        absolute_daily_change,
+                        actual_price,
+                        previous_day_close_price
                  from holdings
                           join portfolio_holding_gains using (holding_id_v2)
                           join collection_ticker_actual_weights on collection_ticker_actual_weights.symbol = ticker_symbol
+                          join ticker_realtime_metrics on ticker_realtime_metrics.symbol = holdings.symbol
              ),
          portfolio_stats as
              (
@@ -327,7 +337,6 @@ union all
                  from data
                           join portfolio_stats using (profile_id)
                           join portfolio_symbol_stats using (profile_id, symbol)
-                          join ticker_realtime_metrics using (symbol)
                  where actual_value_sum > 0
                    and weight_collection_in_symbol_sum > 0
          ),

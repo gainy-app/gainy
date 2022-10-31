@@ -502,7 +502,7 @@ type KycFormConfig {
 type KycFormFieldConfig {
   required: Boolean
   placeholder: String
-  choices: json
+  choices: [KycFormChoicesFieldConfig]
 }
 
 type KycSendFormOutput {

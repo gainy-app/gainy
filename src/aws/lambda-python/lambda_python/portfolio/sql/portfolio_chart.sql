@@ -21,6 +21,7 @@ with filtered_transactions as
                     filtered_transactions.quantity_norm_for_valuation,
                     period,
                     week_trading_sessions_static.index as week_trading_session_index,
+                    ticker_realtime_metrics.time as latest_trading_time,
                     portfolio_transaction_chart.datetime,
                     transaction_uniq_id,
                     open::numeric,
@@ -34,13 +35,7 @@ with filtered_transactions as
                       left join week_trading_sessions_static
                                 on week_trading_sessions_static.symbol = filtered_transactions.symbol
                                     and portfolio_transaction_chart.datetime between week_trading_sessions_static.open_at and week_trading_sessions_static.close_at - interval '1 millisecond'
-             where ((period in ('1d', '1w') and portfolio_transaction_chart.datetime between week_trading_sessions_static.open_at and week_trading_sessions_static.close_at)
-                 or (period = '1m' and portfolio_transaction_chart.datetime >= ticker_realtime_metrics.time::date - interval '1 month')
-                 or (period = '3m' and portfolio_transaction_chart.datetime >= ticker_realtime_metrics.time::date - interval '3 months')
-                 or (period = '1y' and portfolio_transaction_chart.datetime >= ticker_realtime_metrics.time::date - interval '1 year')
-                 or (period = '5y' and portfolio_transaction_chart.datetime >= ticker_realtime_metrics.time::date - interval '5 years')
-                 or (period = 'all'))
-               and {chart_where_clause}
+             where {chart_where_clause}
          ),
      ticker_chart as
          (
@@ -48,6 +43,7 @@ with filtered_transactions as
                     symbol,
                     period,
                     min(week_trading_session_index)   as week_trading_session_index,
+                    min(latest_trading_time)          as latest_trading_time,
                     datetime,
                     sum(quantity_norm_for_valuation)  as quantity,
                     count(transaction_uniq_id)        as transaction_count,
@@ -155,7 +151,12 @@ with filtered_transactions as
                      sum(cash_adjustment)   as cash_adjustment
               from ticker_chart_with_cash_adjustment
               group by profile_id, period, datetime
-              having (period != '1d' or min(week_trading_session_index) = 0)
+             having (period != '1d' or min(week_trading_session_index) = 0)
+                and (period != '1w' or min(week_trading_session_index) < 7)
+                and (period != '1m' or datetime >= min(latest_trading_time) - interval '1 month')
+                and (period != '3m' or datetime >= min(latest_trading_time) - interval '3 month')
+                and (period != '1y' or datetime >= min(latest_trading_time) - interval '1 year')
+                and (period != '5y' or datetime >= min(latest_trading_time) - interval '5 year')
          )
 select period,
        datetime,
