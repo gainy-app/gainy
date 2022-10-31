@@ -153,10 +153,10 @@ with filtered_transactions as
               group by profile_id, period, datetime
              having (period != '1d' or min(week_trading_session_index) = 0)
                 and (period != '1w' or min(week_trading_session_index) < 7)
-                and (period != '1m' or datetime >= min(latest_trading_time) - interval '1 month')
-                and (period != '3m' or datetime >= min(latest_trading_time) - interval '3 month')
-                and (period != '1y' or datetime >= min(latest_trading_time) - interval '1 year')
-                and (period != '5y' or datetime >= min(latest_trading_time) - interval '5 year')
+                and (period != '1m' or datetime >= min(latest_trading_time)::date - interval '1 month')
+                and (period != '3m' or datetime >= min(latest_trading_time)::date - interval '3 month')
+                and (period != '1y' or datetime >= min(latest_trading_time)::date - interval '1 year')
+                and (period != '5y' or datetime >= min(latest_trading_time)::date - interval '5 year')
          )
 select period,
        datetime,
