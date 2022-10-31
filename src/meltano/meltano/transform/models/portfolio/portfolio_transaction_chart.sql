@@ -71,7 +71,7 @@ with first_profile_transaction_date as
                     historical_prices_aggregated_1d.adjusted_close,
                     historical_prices_aggregated_1d.updated_at
              from {{ ref('historical_prices_aggregated_1d') }}
-             where historical_prices_aggregated_1d.datetime >= now() - interval '1 month - 1 week'
+             where historical_prices_aggregated_1d.datetime >= now() - interval '1 month + 1 week'
 
              union all
 
@@ -86,7 +86,7 @@ with first_profile_transaction_date as
                     historical_prices_aggregated_1d.adjusted_close,
                     historical_prices_aggregated_1d.updated_at
              from {{ ref('historical_prices_aggregated_1d') }}
-             where historical_prices_aggregated_1d.datetime >= now() - interval '3 month - 1 week'
+             where historical_prices_aggregated_1d.datetime >= now() - interval '3 month + 1 week'
 
              union all
 
