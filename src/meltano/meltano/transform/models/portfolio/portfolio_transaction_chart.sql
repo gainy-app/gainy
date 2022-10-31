@@ -67,17 +67,22 @@ with first_profile_transaction_date as
 select t.*
 from (
          select portfolio_expanded_transactions.transaction_uniq_id || '_' ||
-                chart.period || '_' || chart.datetime                                              as id,
+                chart.period || '_' || chart.datetime                                             as id,
                 portfolio_expanded_transactions.profile_id,
                 portfolio_expanded_transactions.transaction_uniq_id,
-                chart.datetime,
+                chart.datetime::timestamp,
                 chart.period,
-                portfolio_expanded_transactions.quantity_norm_for_valuation * chart.open           as open,
-                portfolio_expanded_transactions.quantity_norm_for_valuation * chart.high           as high,
-                portfolio_expanded_transactions.quantity_norm_for_valuation * chart.low            as low,
-                portfolio_expanded_transactions.quantity_norm_for_valuation * chart.close          as close,
-                portfolio_expanded_transactions.quantity_norm_for_valuation * chart.adjusted_close as adjusted_close,
-                greatest(portfolio_expanded_transactions.updated_at, chart.updated_at)::timestamp  as updated_at
+                (portfolio_expanded_transactions.quantity_norm_for_valuation * chart.open
+                    )::double precision                                                           as open,
+                (portfolio_expanded_transactions.quantity_norm_for_valuation * chart.high
+                    )::double precision                                                           as high,
+                (portfolio_expanded_transactions.quantity_norm_for_valuation * chart.low
+                    )::double precision                                                           as low,
+                (portfolio_expanded_transactions.quantity_norm_for_valuation * chart.close
+                    )::double precision                                                           as close,
+                (portfolio_expanded_transactions.quantity_norm_for_valuation * chart.adjusted_close
+                    )::double precision                                                           as adjusted_close,
+                greatest(portfolio_expanded_transactions.updated_at, chart.updated_at)::timestamp as updated_at
          from {{ ref('portfolio_expanded_transactions') }}
                   left join first_profile_transaction_date using (profile_id)
                   join chart
@@ -90,14 +95,14 @@ from (
 
          select transaction_uniq_id || '_' || period || '_' || datetime as id,
                 profile_id,
-                transaction_uniq_id,
-                datetime,
-                period,
-                open,
-                high,
-                low,
-                close,
-                adjusted_close,
+                transaction_uniq_id::varchar,
+                datetime::timestamp,
+                period::varchar,
+                open::double precision,
+                high::double precision,
+                low::double precision,
+                close::double precision,
+                adjusted_close::double precision,
                 updated_at
          from {{ ref('drivewealth_portfolio_chart') }}
      ) t

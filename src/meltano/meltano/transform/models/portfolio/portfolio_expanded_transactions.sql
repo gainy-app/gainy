@@ -317,14 +317,14 @@ with plaid_transactions as
                              uniq_id,
                              symbol,
                              amount,
-                             date      as datetime,
+                             date::timestamp as datetime,
                              price,
                              type,
                              security_type,
                              profile_id,
                              holding_id_v2,
-                             null::int as collection_id,
-                             quantity_norm
+                             null::int       as collection_id,
+                             quantity_norm::numeric
                       from mismatched_sell_transactions
 
                       union all
@@ -333,14 +333,14 @@ with plaid_transactions as
                              uniq_id,
                              symbol,
                              amount,
-                             date      as datetime,
+                             date::timestamp as datetime,
                              price,
                              type,
                              security_type,
                              profile_id,
                              holding_id_v2,
-                             null::int as collection_id,
-                             quantity_norm
+                             null::int       as collection_id,
+                             quantity_norm::numeric
                       from mismatched_buy_transactions
 
                       union all
@@ -349,14 +349,14 @@ with plaid_transactions as
                              uniq_id,
                              symbol,
                              amount,
-                             date      as datetime,
+                             date::timestamp as datetime,
                              price,
                              type,
                              security_type,
                              profile_id,
                              holding_id_v2,
-                             null::int as collection_id,
-                             quantity_norm
+                             null::int       as collection_id,
+                             quantity_norm::numeric
                       from mismatched_holdings_transactions
 
                       union all
@@ -365,14 +365,14 @@ with plaid_transactions as
                              uniq_id,
                              symbol,
                              amount,
-                             date      as datetime,
+                             date::timestamp as datetime,
                              price,
                              type,
                              security_type,
                              profile_id,
                              holding_id_v2,
-                             null::int as collection_id,
-                             quantity_norm
+                             null::int       as collection_id,
+                             quantity_norm::numeric
                       from plaid_transactions
 
                       union all
@@ -381,14 +381,14 @@ with plaid_transactions as
                              uniq_id,
                              symbol,
                              null::double precision as amount,
-                             datetime,
+                             datetime::timestamp,
                              price,
                              type,
                              security_type,
                              profile_id,
                              holding_id_v2,
                              collection_id,
-                             quantity_norm
+                             quantity_norm::numeric
                       from ttf_transactions
                   ) t
                       left join {{ ref('base_tickers') }} using (symbol)
