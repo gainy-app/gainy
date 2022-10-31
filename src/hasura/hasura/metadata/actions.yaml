@@ -396,6 +396,7 @@ custom_types:
     - name: StripeGetPaymentSheetDataOutput
     - name: TradingReconfigureCollectionHoldingsOutput
     - name: ReHandleQueueMessagesOutput
+    - name: KycFormChoicesFieldConfig
     - name: TradingGetCollectionDataOutput
     - name: TradingCollectionVersionData
     - name: TradingCollectionHistoryOutput
