@@ -262,7 +262,7 @@ query GetKycForm($profile_id: Int!) {
 
 ### Action to get KYC form placeholders
 ```graphql
-query GetFormConfig($profile_id: Int!) {
+query KycGetFormConfig($profile_id: Int!) {
   kyc_get_form_config(profile_id: $profile_id) {
     first_name {
       choices {
