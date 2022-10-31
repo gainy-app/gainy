@@ -34,7 +34,7 @@ class KycGetFormConfig(HasuraAction):
         gender_placeholder = "Male" if profile[
             'gender'] == 1 else "Female" if profile['gender'] == 0 else None
 
-        return {
+        data = {
             "first_name": {
                 "required": True,
                 "placeholder": profile["first_name"]
@@ -49,6 +49,7 @@ class KycGetFormConfig(HasuraAction):
                 "choices": country_choices
             },
             "email_address": {
+                "required": True,
                 "placeholder": profile["email"]
             },
             "language": {
@@ -259,6 +260,7 @@ class KycGetFormConfig(HasuraAction):
                 }
             },
             "citizenship": {
+                "required": True,
                 "placeholder": "USA",
                 "choices": country_choices
             },
@@ -271,6 +273,7 @@ class KycGetFormConfig(HasuraAction):
                 }
             },
             "marital_status": {
+                "required": True,
                 "choices": {
                     "SINGLE": "Single",
                     "DIVORCED": "Divorced",
@@ -292,7 +295,20 @@ class KycGetFormConfig(HasuraAction):
                 "required": True
             },
             "address_country": {
+                "required": True,
                 "placeholder": "USA",
                 "choices": country_choices
             }
         }
+
+        data = {
+            k: {
+                "required": None,
+                "placeholder": None,
+                "choices": None,
+                **i,
+            }
+            for k, i in data.items()
+        }
+
+        return data
