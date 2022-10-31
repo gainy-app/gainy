@@ -390,4 +390,5 @@ custom_types:
     - name: StripeGetPaymentSheetDataOutput
     - name: TradingReconfigureCollectionHoldingsOutput
     - name: ReHandleQueueMessagesOutput
+    - name: KycFormChoicesFieldConfig
   scalars: []
