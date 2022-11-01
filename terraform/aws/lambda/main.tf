@@ -15,6 +15,7 @@ variable "base_image_version" {}
 variable "plaid_client_id" {}
 variable "plaid_secret" {}
 variable "plaid_development_secret" {}
+variable "plaid_sandbox_secret" {}
 variable "plaid_env" {}
 variable "algolia_tickers_index" {}
 variable "algolia_collections_index" {}
@@ -185,6 +186,7 @@ locals {
     PLAID_CLIENT_ID            = var.plaid_client_id
     PLAID_SECRET               = var.plaid_secret
     PLAID_DEVELOPMENT_SECRET   = var.plaid_development_secret
+    PLAID_SANDBOX_SECRET       = var.plaid_sandbox_secret
     PLAID_ENV                  = var.plaid_env
     PLAID_WEBHOOK_URL          = "https://${var.hasura_url}/api/rest/plaid_webhook"
     ALGOLIA_APP_ID             = var.algolia_app_id
