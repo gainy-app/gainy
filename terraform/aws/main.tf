@@ -59,6 +59,7 @@ module "lambda" {
   plaid_client_id          = var.plaid_client_id
   plaid_secret             = var.plaid_secret
   plaid_development_secret = var.plaid_development_secret
+  plaid_sandbox_secret     = var.plaid_sandbox_secret
   plaid_env                = var.plaid_env
 
   algolia_tickers_index     = var.algolia_tickers_index

@@ -14,6 +14,7 @@ PURPOSE_TRADING = "trading"
 PLAID_CLIENT_ID = os.getenv('PLAID_CLIENT_ID')
 PLAID_SECRET = os.getenv('PLAID_SECRET')
 PLAID_DEVELOPMENT_SECRET = os.getenv('PLAID_DEVELOPMENT_SECRET')
+PLAID_SANDBOX_SECRET = os.getenv('PLAID_SANDBOX_SECRET')
 PLAID_ENV = os.getenv('PLAID_ENV')
 PLAID_HOSTS = {
     'sandbox': plaid.Environment.Sandbox,
@@ -31,7 +32,12 @@ def get_plaid_client(env=None):
         env = PLAID_ENV
 
     host = PLAID_HOSTS[env]
-    secret = PLAID_DEVELOPMENT_SECRET if env == 'development' and PLAID_DEVELOPMENT_SECRET else PLAID_SECRET
+    if env == 'development':
+        secret = PLAID_DEVELOPMENT_SECRET
+    elif env == 'sandbox':
+        secret = PLAID_SANDBOX_SECRET
+    else:
+        secret = PLAID_SECRET
 
     configuration = plaid.Configuration(host=host,
                                         api_key={

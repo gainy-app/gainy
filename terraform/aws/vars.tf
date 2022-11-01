@@ -39,6 +39,7 @@ variable "pg_website_schema" {
 variable "plaid_client_id" {}
 variable "plaid_secret" {}
 variable "plaid_development_secret" {}
+variable "plaid_sandbox_secret" {}
 variable "plaid_env" {}
 
 variable "algolia_tickers_index" {}
