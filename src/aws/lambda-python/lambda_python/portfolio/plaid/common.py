@@ -32,9 +32,9 @@ def get_plaid_client(env=None):
         env = PLAID_ENV
 
     host = PLAID_HOSTS[env]
-    if env == 'development':
+    if env == 'development' and PLAID_DEVELOPMENT_SECRET:
         secret = PLAID_DEVELOPMENT_SECRET
-    elif env == 'sandbox':
+    elif env == 'sandbox' and PLAID_SANDBOX_SECRET:
         secret = PLAID_SANDBOX_SECRET
     else:
         secret = PLAID_SECRET
