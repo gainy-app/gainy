@@ -3,8 +3,8 @@ from decimal import Decimal
 import pytest
 
 from gainy.tests.mocks.repository_mocks import mock_noop, mock_persist, mock_find
-from gainy.tests.mocks.trading.drivewealth.api_mocks import CASH_TARGET_WEIGHT, FUND1_ID, FUND1_TARGET_WEIGHT, FUND2_ID, \
-    FUND2_TARGET_WEIGHT, PORTFOLIO_STATUS, CASH_VALUE, FUND1_VALUE
+from gainy.tests.mocks.trading.drivewealth.api_mocks import CASH_TARGET_WEIGHT, FUND1_ID, FUND1_TARGET_WEIGHT, \
+    PORTFOLIO_STATUS, CASH_VALUE, FUND1_VALUE, PORTFOLIO, USER_ID, PORTFOLIO_REF_ID, PORTFOLIO_STATUS_EQUITY_VALUE
 from trading.exceptions import InsufficientFundsException
 from trading.drivewealth.api import DriveWealthApi
 from trading.drivewealth.repository import DriveWealthRepository
@@ -13,29 +13,6 @@ from trading.drivewealth.provider.collection import DriveWealthProviderCollectio
 from trading.models import TradingCollectionVersion
 
 from gainy.trading.drivewealth.models import DriveWealthUser, DriveWealthAccount, DriveWealthPortfolio, DriveWealthFund
-
-_USER_ID = "41dde78c-e31b-43e5-9418-44ae08098738"
-
-_PORTFOLIO_REF_ID = "portfolio_24338197-62da-4ac8-a0c9-3204e396f9c7"
-_PORTFOLIO = {
-    "id":
-    _PORTFOLIO_REF_ID,
-    "userID":
-    _USER_ID,
-    "holdings": [{
-        "instrumentID": None,
-        "type": "CASH_RESERVE",
-        "target": CASH_TARGET_WEIGHT,
-    }, {
-        "instrumentID": FUND1_ID,
-        "type": "FUND",
-        "target": FUND1_TARGET_WEIGHT,
-    }, {
-        "instrumentID": FUND2_ID,
-        "type": "FUND",
-        "target": FUND2_TARGET_WEIGHT,
-    }]
-}
 
 _FUND_WEIGHTS = {
     "symbol_B": Decimal(0.3),
@@ -48,20 +25,6 @@ _FUND_HOLDINGS = [{
     "instrumentID": "B",
     "target": 0.4
 }]
-_NEW_FUND_HOLDINGS = [
-    {
-        "instrumentID": "A",
-        "target": 0,
-    },
-    {
-        "instrumentID": "B",
-        "target": 0.3,
-    },
-    {
-        "instrumentID": "C",
-        "target": 0.7,
-    },
-]
 
 _ACCOUNT_ID = "bf98c335-57ad-4337-ae9f-ed1fcfb447af.1662377145557"
 
@@ -87,9 +50,9 @@ def test_get_actual_collection_data(monkeypatch):
     collection_id = 2
 
     user = DriveWealthUser()
-    monkeypatch.setattr(user, "ref_id", _USER_ID)
+    monkeypatch.setattr(user, "ref_id", USER_ID)
 
-    portfolio = DriveWealthPortfolio(_PORTFOLIO)
+    portfolio = DriveWealthPortfolio(PORTFOLIO)
     fund = DriveWealthFund()
     monkeypatch.setattr(fund, "ref_id", FUND1_ID)
     monkeypatch.setattr(fund, "profile_id", profile_id)
@@ -173,7 +136,7 @@ def test_upsert_portfolio(monkeypatch):
     profile_id = 1
 
     user = DriveWealthUser()
-    monkeypatch.setattr(user, "ref_id", _USER_ID)
+    monkeypatch.setattr(user, "ref_id", USER_ID)
     account = DriveWealthAccount()
     monkeypatch.setattr(account, "ref_id", _ACCOUNT_ID)
 
@@ -195,22 +158,22 @@ def test_upsert_portfolio(monkeypatch):
 
     def mock_create_portfolio(_name, _client_portfolio_id, _description):
         assert _client_portfolio_id == profile_id
-        return _PORTFOLIO
+        return PORTFOLIO
 
     monkeypatch.setattr(api, "create_portfolio", mock_create_portfolio)
 
     def mock_update_account(_account_ref_id, _portfolio_ref_id):
         assert _account_ref_id == _ACCOUNT_ID
-        assert _portfolio_ref_id == _PORTFOLIO_REF_ID
+        assert _portfolio_ref_id == PORTFOLIO_REF_ID
 
     monkeypatch.setattr(api, "update_account", mock_update_account)
 
     service = DriveWealthProviderCollection(drivewealth_repository, api)
     portfolio = service._upsert_portfolio(profile_id, account)
 
-    assert portfolio.ref_id == _PORTFOLIO_REF_ID
+    assert portfolio.ref_id == PORTFOLIO_REF_ID
     assert portfolio.drivewealth_account_id == _ACCOUNT_ID
-    assert portfolio.data == _PORTFOLIO
+    assert portfolio.data == PORTFOLIO
     assert portfolio.get_fund_weight(FUND1_ID) == FUND1_TARGET_WEIGHT
 
 
@@ -227,7 +190,7 @@ def test_upsert_fund(fund_exists, monkeypatch):
     fund_ref_id = "fund_dff726ff-f213-42b1-a759-b20efa3f56d7"
 
     user = DriveWealthUser()
-    monkeypatch.setattr(user, "ref_id", _USER_ID)
+    monkeypatch.setattr(user, "ref_id", USER_ID)
 
     fund = DriveWealthFund()
     monkeypatch.setattr(fund, "ref_id", fund_ref_id)
@@ -247,7 +210,7 @@ def test_upsert_fund(fund_exists, monkeypatch):
     monkeypatch.setattr(drivewealth_repository, "get_profile_fund",
                         mock_get_profile_fund)
 
-    data = {"id": fund_ref_id, "userID": _USER_ID, "holdings": _FUND_HOLDINGS}
+    data = {"id": fund_ref_id, "userID": USER_ID, "holdings": _FUND_HOLDINGS}
 
     new_fund_holdings = [
         {
@@ -341,7 +304,7 @@ def get_test_handle_cash_amount_change_amounts_ok():
 def test_handle_cash_amount_change_ok(amount, monkeypatch):
     amount = Decimal(amount)
     portfolio = DriveWealthPortfolio()
-    portfolio.set_from_response(_PORTFOLIO)
+    portfolio.set_from_response(PORTFOLIO)
     drivewealth_repository = DriveWealthRepository(None)
     api = DriveWealthApi(None)
 
@@ -381,7 +344,7 @@ def get_test_handle_cash_amount_change_amounts_ko():
 @pytest.mark.parametrize("amount",
                          get_test_handle_cash_amount_change_amounts_ko())
 def test_handle_cash_amount_change_ko(amount, monkeypatch):
-    portfolio = DriveWealthPortfolio(_PORTFOLIO)
+    portfolio = DriveWealthPortfolio(PORTFOLIO)
     drivewealth_repository = DriveWealthRepository(None)
     api = DriveWealthApi(None)
 
@@ -399,6 +362,48 @@ def test_handle_cash_amount_change_ko(amount, monkeypatch):
     with pytest.raises(InsufficientFundsException) as error_info:
         service._handle_cash_amount_change(amount, portfolio, fund)
         assert error_info.__class__ == InsufficientFundsException
+
+
+def get_test_rebalance_cash_cash_target_values_ok():
+    return [0, 100, CASH_VALUE - 100, CASH_VALUE, CASH_VALUE + 100, PORTFOLIO_STATUS_EQUITY_VALUE - 100, PORTFOLIO_STATUS_EQUITY_VALUE]
+
+
+@pytest.mark.parametrize("cash_target_value",
+                         get_test_rebalance_cash_cash_target_values_ok())
+def test_rebalance_portfolio_cash(cash_target_value, monkeypatch):
+    # cash_target_value = Decimal(cash_target_value)
+    # portfolio = DriveWealthPortfolio()
+    # portfolio.set_from_response(PORTFOLIO)
+    # drivewealth_repository = DriveWealthRepository(None)
+    # api = DriveWealthApi(None)
+    #
+    # def mock_get_portfolio_status(_portfolio):
+    #     assert _portfolio == portfolio
+    #     return PORTFOLIO_STATUS
+    #
+    # monkeypatch.setattr(api, "get_portfolio_status", mock_get_portfolio_status)
+    # monkeypatch.setattr(drivewealth_repository, "persist", mock_noop)
+    #
+    # service = DriveWealthProviderCollection(drivewealth_repository, api)
+    # fund = DriveWealthFund()
+    # monkeypatch.setattr(fund, "ref_id", FUND1_ID)
+    #
+    # assert abs(portfolio.cash_target_weight - CASH_TARGET_WEIGHT) < 1e-3
+    # assert abs(portfolio.get_fund_weight(FUND1_ID) -
+    #            FUND1_TARGET_WEIGHT) < 1e-3
+    #
+    # service._handle_cash_amount_change(amount, portfolio, fund)
+    #
+    # if amount:
+    #     assert abs(portfolio.cash_target_weight -
+    #                (CASH_VALUE - amount) / PORTFOLIO_STATUS['equity']) < 1e-3
+    #     assert abs(
+    #         portfolio.get_fund_weight(FUND1_ID) -
+    #         (FUND1_VALUE + amount) / PORTFOLIO_STATUS['equity']) < 1e-3
+    # else:
+    #     assert abs(portfolio.cash_target_weight - CASH_TARGET_WEIGHT) < 1e-3
+    #     assert abs(portfolio.get_fund_weight(FUND1_ID) -
+    #                FUND1_TARGET_WEIGHT) < 1e-3
 
 
 def get_test_upsert_fund_instrument_exists():

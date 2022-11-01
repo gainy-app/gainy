@@ -9,7 +9,7 @@ from trading.drivewealth.api import DriveWealthApi
 from trading.drivewealth.repository import DriveWealthRepository
 from gainy.utils import get_logger
 from gainy.trading.drivewealth.models import DriveWealthAccount, DriveWealthFund, DriveWealthPortfolio, \
-    DriveWealthPortfolioStatusHolding, CollectionStatus
+    DriveWealthPortfolioStatusHolding, CollectionStatus, ZERO, ONE
 from gainy.trading.drivewealth.provider import DriveWealthProvider as GainyDriveWealthProvider
 
 logger = get_logger(__name__)
@@ -34,6 +34,8 @@ class DriveWealthProviderCollection(GainyDriveWealthProvider):
         portfolio = self._upsert_portfolio(profile_id, account)
         chosen_fund = self._upsert_fund(profile_id, collection_version)
 
+        self.rebalance_portfolio_cash(portfolio)
+
         self._handle_cash_amount_change(collection_version.target_amount_delta,
                                         portfolio, chosen_fund)
 
@@ -43,9 +45,6 @@ class DriveWealthProviderCollection(GainyDriveWealthProvider):
 
         self.api.update_fund(chosen_fund)
         self.repository.persist(chosen_fund)
-
-        # avoid force rebalancing
-        # self._create_autopilot_run(account, collection_version)
 
     def get_actual_collection_data(self, profile_id: int,
                                    collection_id: int) -> CollectionStatus:
@@ -178,12 +177,11 @@ class DriveWealthProviderCollection(GainyDriveWealthProvider):
         portfolio_status = self._get_portfolio_status(portfolio)
         portfolio.update_from_status(portfolio_status)
         self.repository.persist(portfolio)
-        if portfolio.is_pending_rebalance():
-            cash_actual_weight = portfolio_status.cash_target_weight
-            cash_value = portfolio_status.cash_target_weight * portfolio_status.equity_value
-        else:
-            cash_value = portfolio_status.cash_value
-            cash_actual_weight = portfolio_status.cash_actual_weight
+        if portfolio_status.equity_value < ONE:
+            return
+
+        cash_value = portfolio.cash_target_value
+        cash_actual_weight = portfolio.cash_target_value / portfolio_status.equity_value
 
         fund_value = portfolio_status.get_fund_value(chosen_fund.ref_id)
         fund_actual_weight = portfolio_status.get_fund_actual_weight(
@@ -215,7 +213,6 @@ class DriveWealthProviderCollection(GainyDriveWealthProvider):
         logger.info('_handle_cash_amount_change step1', extra=logging_extra)
 
         portfolio.move_cash_to_fund(chosen_fund, weight_delta)
-        portfolio.normalize_weights()
         self.repository.persist(portfolio)
         logging_extra["portfolio"] = portfolio.to_dict()
         logger.info('_handle_cash_amount_change step2', extra=logging_extra)
