@@ -30,6 +30,7 @@ class PlaidClient:
 
     def __init__(self):
         self.client = get_plaid_client()
+        self.sandbox_client = get_plaid_client('sandbox')
         self.development_client = get_plaid_client('development')
 
     def create_link_token(self,
@@ -127,6 +128,8 @@ class PlaidClient:
         return response
 
     def get_client(self, access_token):
+        if access_token and access_token.find('sandbox') > -1:
+            return self.sandbox_client
         if access_token and access_token.find('development') > -1:
             return self.development_client
 
