@@ -172,7 +172,6 @@ class DriveWealthAutopilotRun(BaseDriveWealthModel):
     status = None
     account_id = None
     data = None
-    orders_outcome = None
     created_at = None
     updated_at = None
 
@@ -187,12 +186,6 @@ class DriveWealthAutopilotRun(BaseDriveWealthModel):
         self.ref_id = data["id"]
         self.status = data["status"]
         self.data = data
-
-        if self.data.get("orders", {}).get("outcome"):
-            # TODO remove verify after DW fixes cert issue
-            # TODO move to SQS
-            self.orders_outcome = requests.get(self.data["orders"]["outcome"],
-                                               verify=False).text
 
     @classproperty
     def table_name(self) -> str:
