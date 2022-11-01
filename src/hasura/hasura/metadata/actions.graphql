@@ -49,6 +49,7 @@ type Query {
     profile_id: Int!
     periods: [String]!
     access_token_ids: [Int]
+    account_ids: [Int]
     broker_ids: [String]
     institution_ids: [Int]
     interest_ids: [Int]
@@ -62,6 +63,7 @@ type Query {
   get_portfolio_chart_previous_period_close(
     profile_id: Int!
     access_token_ids: [Int]
+    account_ids: [Int]
     broker_ids: [String]
     institution_ids: [Int]
     interest_ids: [Int]
@@ -506,7 +508,7 @@ type KycFormConfig {
 type KycFormFieldConfig {
   required: Boolean
   placeholder: String
-  choices: json
+  choices: [KycFormChoicesFieldConfig]
 }
 
 type KycSendFormOutput {
@@ -582,6 +584,11 @@ type ReHandleQueueMessagesOutput {
   success: Int!
   unsupported: Int!
   error: Int!
+}
+
+type KycFormChoicesFieldConfig {
+  name: String!
+  value: String!
 }
 
 type TradingGetCollectionDataOutput {

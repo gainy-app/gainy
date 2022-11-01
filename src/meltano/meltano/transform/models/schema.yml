@@ -1254,10 +1254,6 @@ models:
 
   - name: portfolio_transaction_chart
     columns:
-      - name: id
-        tests:
-          - type:
-              type: 'text'
       - name: transaction_uniq_id
         tests:
           - type:
@@ -1980,7 +1976,7 @@ models:
       - name: datetime
         tests:
           - type:
-              type: 'timestamp with time zone'
+              type: 'timestamp without time zone'
 
   - name: push_notifications
     columns:

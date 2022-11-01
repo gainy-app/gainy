@@ -220,6 +220,10 @@ variable "plaid_development_secret" {
   type      = string
   sensitive = true
 }
+variable "plaid_sandbox_secret" {
+  type      = string
+  sensitive = true
+}
 variable "plaid_env" {
   type = string
 }

@@ -3,7 +3,7 @@ import os
 
 from trading.models import KycDocument
 from trading.drivewealth.repository import DriveWealthRepository
-from trading.drivewealth.models import DriveWealthBankAccount, DriveWealthPortfolio, DriveWealthFund, DriveWealthKycStatus
+from trading.drivewealth.models import DriveWealthBankAccount, DriveWealthKycStatus
 
 from gainy.utils import get_logger, env
 from gainy.trading.drivewealth import DriveWealthApi as GainyDriveWealthApi
@@ -125,14 +125,6 @@ class DriveWealthApi(GainyDriveWealthApi):
                 }],
             })
 
-    def get_portfolio(self, portfolio: DriveWealthPortfolio):
-        return self._make_request("GET",
-                                  f"/managed/portfolios/{portfolio.ref_id}")
-
-    def get_portfolio_status(self, portfolio: DriveWealthPortfolio):
-        return self._make_request(
-            "GET", f"/accounts/{portfolio.drivewealth_account_id}/portfolio")
-
     def get_instrument_details(self, ref_id: str = None, symbol: str = None):
         if ref_id:
             return self._make_request("GET", f"/instruments/{ref_id}")
@@ -151,29 +143,6 @@ class DriveWealthApi(GainyDriveWealthApi):
                 'holdings': holdings,
             })
 
-    def update_fund(self, fund: DriveWealthFund):
-        data = self._make_request("PATCH", f"/managed/funds/{fund.ref_id}", {
-            'holdings': fund.holdings,
-        })
-        fund.set_from_response(data)
-
-    def update_portfolio(self, portfolio: DriveWealthPortfolio):
-        # noinspection PyTypeChecker
-        holdings = [{
-            "type": "CASH_RESERVE",
-            "target": portfolio.cash_target_weight,
-        }] + [{
-            "type": "FUND",
-            "id": fund_id,
-            "target": weight,
-        } for fund_id, weight in portfolio.holdings.items()]
-
-        data = self._make_request("PATCH",
-                                  f"/managed/portfolios/{portfolio.ref_id}", {
-                                      'holdings': holdings,
-                                  })
-        portfolio.set_from_response(data)
-
     def create_autopilot_run(self, account_ids: list):
         return self._make_request(
             "POST", f"/managed/autopilot/{DRIVEWEALTH_RIA_ID}", {
@@ -184,6 +153,13 @@ class DriveWealthApi(GainyDriveWealthApi):
 
     def get_autopilot_run(self, ref_id):
         return self._make_request("GET", f"/managed/autopilot/{ref_id}")
+
+    def get_autopilot_runs(self) -> list:
+        get_data = {}
+        return self._make_request(
+            "GET",
+            f"/users/{DRIVEWEALTH_RIA_ID}/managed/autopilot",
+            get_data=get_data)
 
     def add_money(self, account_id, amount):
         return self._make_request(

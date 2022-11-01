@@ -3,6 +3,7 @@ from decimal import Decimal
 import io
 
 from gainy.exceptions import NotFoundException
+from gainy.trading.drivewealth.models import CollectionStatus
 from portfolio.plaid import PlaidService
 from portfolio.plaid.common import handle_error
 from services import S3

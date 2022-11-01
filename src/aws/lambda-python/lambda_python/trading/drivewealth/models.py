@@ -1,21 +1,14 @@
 import enum
 import re
-import requests
 from abc import ABC
-from decimal import Decimal
-import json
-from typing import Dict, Optional, List
-
 import dateutil.parser
 
-from gainy.data_access.models import classproperty, DecimalEncoder
+from gainy.data_access.models import classproperty
 from gainy.trading.drivewealth.models import BaseDriveWealthModel
-from trading.models import CollectionHoldingStatus, ProfileKycStatus, KycStatus, \
-    TradingCollectionVersion, TradingCollectionVersionStatus, TradingMoneyFlowStatus, CollectionStatus
+from trading.models import ProfileKycStatus, KycStatus, \
+    TradingCollectionVersion, TradingCollectionVersionStatus, TradingMoneyFlowStatus
 
 PRECISION = 1e-3
-ONE = Decimal(1)
-ZERO = Decimal(0)
 
 
 class DriveWealthDocument(BaseDriveWealthModel):
@@ -142,44 +135,6 @@ class DriveWealthRedemption(BaseDriveWealthMoneyFlowModel):
         return "drivewealth_redemptions"
 
 
-class DriveWealthFund(BaseDriveWealthModel):
-    ref_id = None
-    profile_id = None
-    collection_id = None
-    trading_collection_version_id = None
-    weights: Dict[str, Decimal] = None
-    holdings = []
-    data = None
-    created_at = None
-    updated_at = None
-
-    key_fields = ["ref_id"]
-
-    db_excluded_fields = ["created_at", "updated_at"]
-    non_persistent_fields = ["created_at", "updated_at"]
-
-    def set_from_response(self, data=None):
-        if not data:
-            return
-
-        self.ref_id = data["id"]
-        self.data = data
-        self.holdings = self.data["holdings"]
-
-    def to_dict(self) -> dict:
-        return {
-            **super().to_dict(),
-            "weights":
-            json.dumps(self.weights, cls=DecimalEncoder),
-            "holdings":
-            json.dumps(self.holdings, cls=DecimalEncoder),
-        }
-
-    @classproperty
-    def table_name(self) -> str:
-        return "drivewealth_funds"
-
-
 class DriveWealthInstrumentStatus(str, enum.Enum):
     ACTIVE = "ACTIVE"
 
@@ -211,228 +166,11 @@ class DriveWealthInstrument(BaseDriveWealthModel):
         return "drivewealth_instruments"
 
 
-class DriveWealthPortfolioStatusFundHolding:
-
-    def __init__(self, data):
-        self.data = data
-
-    def get_collection_holding_status(self) -> CollectionHoldingStatus:
-        entity = CollectionHoldingStatus()
-        entity.symbol = self.data["symbol"]
-        entity.target_weight = self.data["target"]
-        entity.actual_weight = self.data["actual"]
-        entity.value = self.data["value"]
-        return entity
-
-
-class DriveWealthPortfolioStatusHolding:
-
-    def __init__(self, data):
-        self.data = data
-
-    @property
-    def value(self) -> str:
-        return self.data["value"]
-
-    @property
-    def actual_weight(self) -> str:
-        return self.data["actual"]
-
-    @property
-    def holdings(self) -> List[DriveWealthPortfolioStatusFundHolding]:
-        return [
-            DriveWealthPortfolioStatusFundHolding(i)
-            for i in self.data["holdings"]
-        ]
-
-    def get_collection_status(self) -> CollectionStatus:
-        entity = CollectionStatus()
-        entity.value = self.data["value"]
-        entity.holdings = [
-            i.get_collection_holding_status() for i in self.holdings
-        ]
-        return entity
-
-
-class DriveWealthPortfolioStatus(BaseDriveWealthModel):
-    id = None
-    drivewealth_portfolio_id = None
-    cash_value: Decimal = None
-    cash_actual_weight: Decimal = None
-    holdings: Dict[str, DriveWealthPortfolioStatusHolding] = None
-    data = None
-    created_at = None
-
-    key_fields = ["id"]
-
-    db_excluded_fields = ["created_at", "holdings"]
-    non_persistent_fields = ["id", "created_at"]
-
-    def __init__(self, row=None):
-        super().__init__(row)
-        self._reset_holdings()
-
-    def set_from_response(self, data=None):
-        self.data = data
-        self._reset_holdings()
-
-        if not data:
-            return
-
-        self.drivewealth_portfolio_id = data["id"]
-
-    def _reset_holdings(self):
-        self.holdings = {}
-        if not self.data:
-            return
-
-        for i in self.data["holdings"]:
-            if i["type"] == "CASH_RESERVE":
-                self.cash_value = Decimal(i["value"])
-                self.cash_actual_weight = Decimal(i["actual"])
-            else:
-                self.holdings[i["id"]] = DriveWealthPortfolioStatusHolding(i)
-
-    def get_fund_value(self, fund_ref_id) -> Decimal:
-        if not self.holdings or fund_ref_id not in self.holdings:
-            return Decimal(0)
-
-        return Decimal(self.holdings[fund_ref_id].value)
-
-    def get_fund_actual_weight(self, fund_ref_id) -> Decimal:
-        if not self.holdings or fund_ref_id not in self.holdings:
-            return Decimal(0)
-
-        return Decimal(self.holdings[fund_ref_id].actual_weight)
-
-    def get_fund(self,
-                 fund_ref_id) -> Optional[DriveWealthPortfolioStatusHolding]:
-        if not self.holdings or fund_ref_id not in self.holdings:
-            return None
-
-        return self.holdings[fund_ref_id]
-
-    def get_fund_ref_ids(self) -> list:
-        if not self.holdings:
-            return []
-
-        return list(self.holdings.keys())
-
-    @classproperty
-    def table_name(self) -> str:
-        return "drivewealth_portfolio_statuses"
-
-    def to_dict(self) -> dict:
-        holdings = {k: i.data for k, i in self.holdings.items()}
-        return {
-            **super().to_dict(),
-            "holdings":
-            json.dumps(holdings, cls=DecimalEncoder),
-        }
-
-
-class DriveWealthPortfolio(BaseDriveWealthModel):
-    ref_id = None
-    profile_id = None
-    drivewealth_account_id = None
-    cash_target_weight: Decimal = None
-    holdings: Dict[str, Decimal] = None
-    data = None
-    created_at = None
-    updated_at = None
-
-    key_fields = ["ref_id"]
-
-    db_excluded_fields = ["created_at", "updated_at"]
-    non_persistent_fields = ["created_at", "updated_at"]
-
-    def set_from_response(self, data=None):
-        if not data:
-            return
-
-        self.ref_id = data["id"]
-        self.data = data
-
-        self.cash_target_weight = Decimal(1)
-        self.holdings = {}
-        for i in data["holdings"]:
-            if i["type"] == "CASH_RESERVE":
-                self.cash_target_weight = i["target"]
-            else:
-                fund_id = i.get("id") or i.get("instrumentID")
-                self.holdings[fund_id] = i["target"]
-
-    def set_target_weights_from_status_actual_weights(
-            self, portfolio_status: DriveWealthPortfolioStatus):
-        self.cash_target_weight = portfolio_status.cash_actual_weight
-
-        for fund_ref_id, i in self.holdings.items():
-            self.holdings[fund_ref_id] = ZERO
-
-        for fund_ref_id in portfolio_status.get_fund_ref_ids():
-            self.holdings[
-                fund_ref_id] = portfolio_status.get_fund_actual_weight(
-                    fund_ref_id)
-
-    def move_cash_to_fund(self, fund: DriveWealthFund, weight_delta: Decimal):
-        cash_weight = self.cash_target_weight
-        if cash_weight - weight_delta < -PRECISION:
-            raise Exception('cash weight can not be negative')
-        if cash_weight - weight_delta > 1 + PRECISION:
-            raise Exception('cash weight can not be greater than 1')
-
-        fund_weight = self.get_fund_weight(fund.ref_id)
-        if fund_weight + weight_delta < -PRECISION:
-            raise Exception('fund weight can not be negative')
-        if fund_weight + weight_delta > 1 + PRECISION:
-            raise Exception('fund weight can not be greater than 1')
-
-        cash_weight -= weight_delta
-        self.cash_target_weight = min(ONE, max(ZERO, cash_weight))
-
-        fund_weight += weight_delta
-        self.set_fund_weight(fund, min(ONE, max(ZERO, fund_weight)))
-
-    def normalize_weights(self):
-        weight_sum = Decimal(self.cash_target_weight)
-        for k, i in self.holdings.items():
-            weight_sum += i
-
-        self.cash_target_weight /= weight_sum
-        for k, i in self.holdings.items():
-            self.holdings[k] = i / weight_sum
-
-    def get_fund_weight(self, fund_ref_id: str) -> Decimal:
-        if not self.holdings or fund_ref_id not in self.holdings:
-            return ZERO
-
-        return self.holdings[fund_ref_id]
-
-    def set_fund_weight(self, fund: DriveWealthFund, weight: Decimal):
-        if not self.holdings:
-            self.holdings = {}
-
-        self.holdings[fund.ref_id] = weight
-
-    def to_dict(self) -> dict:
-        return {
-            **super().to_dict(),
-            "holdings":
-            json.dumps(self.holdings, cls=DecimalEncoder),
-        }
-
-    @classproperty
-    def table_name(self) -> str:
-        return "drivewealth_portfolios"
-
-
 class DriveWealthAutopilotRun(BaseDriveWealthModel):
     ref_id = None
     status = None
     account_id = None
-    collection_version_id = None
     data = None
-    orders_outcome = None
     created_at = None
     updated_at = None
 
@@ -447,12 +185,6 @@ class DriveWealthAutopilotRun(BaseDriveWealthModel):
         self.ref_id = data["id"]
         self.status = data["status"]
         self.data = data
-
-        if self.data.get("orders", {}).get("outcome"):
-            # TODO remove verify after DW fixes cert issue
-            # TODO move to SQS
-            self.orders_outcome = requests.get(self.data["orders"]["outcome"],
-                                               verify=False).text
 
     @classproperty
     def table_name(self) -> str:
