@@ -4,22 +4,23 @@
     unique_key = "id",
     post_hook=[
       pk('symbol, datetime'),
-      index(this, 'id', true),
+      index('id', true),
       'create index if not exists "hpa_1m_datetime__symbol" ON {{ this }} (datetime, symbol)',
     ]
   )
 }}
 
 
+-- Execution Time: 93183.028 ms
 with data as materialized
          (
              select symbol,
                     date_month,
-                    mode() within group ( order by date )      as open_date,
-                    mode() within group ( order by date desc ) as close_date,
-                    max(high)                                  as high,
-                    min(low)                                   as low,
-                    sum(volume)                                as volume
+                    min(date)   as open_date,
+                    max(date)   as close_date,
+                    max(high)   as high,
+                    min(low)    as low,
+                    sum(volume) as volume
              from {{ ref('historical_prices') }}
              group by symbol, date_month
          )

@@ -5,8 +5,8 @@
     tags = ["realtime"],
     post_hook=[
       pk('id'),
-      fk(this, 'id', 'app', 'portfolio_securities', 'id'),
-      index(this, 'original_ticker_symbol'),
+      fk('id', 'app', 'portfolio_securities', 'id'),
+      index('original_ticker_symbol'),
     ]
   )
 }}
@@ -30,7 +30,9 @@ from (
                     when base_tickers.type = 'common stock'
                         then 'equity'
                     else portfolio_securities.type
-                    end                                      as type
+                    end                                      as type,
+               greatest(portfolio_securities.updated_at,
+                        base_tickers.updated_at)             as updated_at
          from {{ source('app', 'portfolio_securities') }}
                   left join {{ ref('base_tickers') }}
                             -- crypto
@@ -54,20 +56,17 @@ from (
 --                                 -- stocks
                                 or (portfolio_securities.type not in ('crypto', 'cryptocurrency', 'derivative') and
                                     base_tickers.symbol = portfolio_securities.ticker_symbol)
-         where
-             (
-                 base_tickers.symbol is not null
-                 {% if not var('portfolio_crypto_enabled') %}
-                     and base_tickers.type != 'crypto'
-                 {% endif %}
-             )
-         {% if var('portfolio_usd_enabled') %}
-            or (portfolio_securities.type = 'cash' and portfolio_securities.ticker_symbol = 'CUR:USD')
+         where true
+         {% if not var('portfolio_crypto_enabled') %}
+            and not (base_tickers.type = 'crypto')
+         {% endif %}
+         {% if not var('portfolio_usd_enabled') %}
+            and not (portfolio_securities.type = 'cash' and portfolio_securities.ticker_symbol = 'CUR:USD')
          {% endif %}
      ) t
 
 {% if is_incremental() %}
          left join {{ this }} old_portfolio_securities_normalized
                    using (id, name, ticker_symbol, original_ticker_symbol, type)
-where old_portfolio_securities_normalized is null
+where old_portfolio_securities_normalized.id is null
 {% endif %}

@@ -3,7 +3,7 @@
     materialized = "table",
     post_hook=[
       pk('symbol'),
-      fk(this, 'symbol', this.schema, 'tickers', 'symbol')
+      fk('symbol', this.schema, 'tickers', 'symbol')
     ]
   )
 }}

@@ -4,7 +4,7 @@
     unique_key = "symbol",
     post_hook=[
       pk('symbol, component_symbol'),
-      index(this, 'id', true),
+      index('id', true),
       'delete from {{ this }}
         using (select distinct on (symbol) symbol, version from {{ this }} order by symbol, updated_at desc) old_version
         where ticker_components_flat.symbol = old_version.symbol
@@ -50,7 +50,7 @@ with
                       left join {{ ref('ticker_components') }} component_ticker_components
                                 on component_ticker_components.symbol = ticker_components.component_symbol
                   -- eliminate loops when etf owns itself
-             where component_ticker_components is null
+             where component_ticker_components.symbol is null
                 or component_ticker_components.component_symbol != component_ticker_components.symbol
          ),
      ticker_components_flat1 as
@@ -86,7 +86,7 @@ with
              from ticker_components_flat0
                       left join {{ ref('ticker_components') }} component_ticker_components
                                 on component_ticker_components.symbol = ticker_components_flat0.component_symbol
-             where component_ticker_components is null
+             where component_ticker_components.symbol is null
                 or component_ticker_components.component_symbol != component_ticker_components.symbol
          ),
     data_groupped as
@@ -112,5 +112,5 @@ select data_groupped.*
 from data_groupped
 {% if is_incremental() %}
          left join old_version using (symbol)
-where data_groupped.version != old_version.version or old_version is null
+where data_groupped.version != old_version.version or old_version.version is null
 {% endif %}

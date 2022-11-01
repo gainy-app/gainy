@@ -4,7 +4,7 @@
     unique_key = "id",
     post_hook=[
       pk('id'),
-      index(this, 'symbol'),
+      index('symbol'),
       'delete from {{this}}
         using (select period, max(updated_at) as max_updated_at from {{this}} group by period) dc_stats
         where dc_stats.period = {{this}}.period

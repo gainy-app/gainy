@@ -5,8 +5,22 @@
   )
 }}
 
-select profile_id,
-       ticker_symbol as symbol,
+select holding_group_id                          as id,
+       profile_id,
+       ticker_symbol                             as symbol,
+       null::int                                 as collection_id,
        sum(profile_holdings_normalized.quantity) as quantity
 from {{ ref('profile_holdings_normalized') }}
-group by profile_id, ticker_symbol
+where collection_id is null
+group by holding_group_id, profile_id, ticker_symbol
+
+union all
+
+select holding_group_id       as id,
+       profile_id,
+       null::varchar          as symbol,
+       collection_id,
+       null::double precision as quantity
+from {{ ref('profile_holdings_normalized') }}
+where collection_id is not null
+group by holding_group_id, profile_id, collection_id

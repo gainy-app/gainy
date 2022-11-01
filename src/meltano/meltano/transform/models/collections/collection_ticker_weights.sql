@@ -5,7 +5,7 @@
     unique_key = "id",
     post_hook=[
       pk('collection_uniq_id, symbol, date'),
-      index(this, 'id', true),
+      index('id', true),
     ]
   )
 }}
@@ -134,7 +134,7 @@ with raw_ticker_collections_weights as materialized
              where historical_prices.adjusted_close > 0
 
 {% if is_incremental() and var('realtime') %}
-               and (old_stats is null or historical_prices.date >= old_stats.date - interval '2 month')
+               and (old_stats.collection_uniq_id is null or historical_prices.date >= old_stats.date - interval '2 month')
 {% endif %}
 
              order by ticker_collections_weights.collection_uniq_id,
@@ -224,7 +224,7 @@ from ticker_collections_weights_normalized
 where date is not null
 
 {% if is_incremental() %}
-  and (old_data is null
+  and (old_data.collection_uniq_id is null
     or abs(ticker_collections_weights_normalized.weight - old_data.weight) > 1e-6
     or abs(ticker_collections_weights_normalized.price - old_data.price) > 1e-3)
 {% endif %}

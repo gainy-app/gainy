@@ -5,7 +5,7 @@
     tags = ["realtime"],
     post_hook=[
       pk('symbol, time'),
-      index(this, 'id', true),
+      index('id', true),
       'create index if not exists "symbol__time_3min" ON {{ this }} (symbol, time_3min)',
       'create index if not exists "symbol__time_15min" ON {{ this }} (symbol, time_15min)',
     ]
@@ -36,7 +36,7 @@ with polygon_symbols as materialized
              from {{ source('eod', 'eod_intraday_prices') }}
                       join {{ ref('week_trading_sessions') }} using (symbol)
                       left join polygon_symbols using (symbol, date)
-             where polygon_symbols is null
+             where polygon_symbols.symbol is null
                and time >= week_trading_sessions.open_at
                and time < week_trading_sessions.close_at
          ),

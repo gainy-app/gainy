@@ -1,4 +1,4 @@
-{% macro index(this, column, unique) %}
+{% macro index(column, unique) %}
 
 {% set sql %}
     {% if unique %}
@@ -7,11 +7,11 @@
             IF NOT EXISTS (
                 SELECT constraint_schema, constraint_name
                 FROM information_schema.table_constraints
-                WHERE constraint_schema =  {{ "'" + this.schema + "'" }}
-                    AND constraint_name = {{ "'" + this.name + "_unique_" + column + "'" }}
+                WHERE constraint_schema = '{{ this.schema }}'
+                    AND constraint_name = '{{ this.name }}_unique_{{ column }}'
             )
             THEN
-                ALTER TABLE {{ this }} ADD CONSTRAINT {{ this.name + "_unique_" + column }} UNIQUE ({{column}});
+                ALTER TABLE {{ this }} ADD CONSTRAINT {{ this.name }}_unique_{{ column }} UNIQUE ({{column}});
             END IF;
         END$$;
     {% else %}

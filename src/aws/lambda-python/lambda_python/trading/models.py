@@ -1,3 +1,5 @@
+import datetime
+
 import json
 from typing import Dict, Optional
 from decimal import Decimal
@@ -152,7 +154,7 @@ class TradingMoneyFlow(BaseModel):
 
 class TradingCollectionVersionStatus(enum.Enum):
     PENDING = "PENDING"
-    SUCCESS = "SUCCESS"
+    EXECUTED_FULLY = "EXECUTED_FULLY"
     FAILED = "FAILED"
 
 
@@ -160,10 +162,11 @@ class TradingCollectionVersion(BaseModel):
     id = None
     profile_id = None
     collection_id = None
-    status = None
+    status: TradingCollectionVersionStatus = None
     target_amount_delta = None
     weights: Dict[str, Decimal] = None
     created_at = None
+    executed_at = None
     updated_at = None
 
     key_fields = ["id"]
@@ -195,17 +198,13 @@ class TradingCollectionVersion(BaseModel):
             "weights": json.dumps(self.weights, cls=DecimalEncoder),
         }
 
+    def set_status(self, status: TradingCollectionVersionStatus):
+        self.status = status
+        if status == TradingCollectionVersionStatus.EXECUTED_FULLY:
+            # TODO set from actual autopilot execution data
+            self.executed_at = datetime.datetime.now()
 
-class CollectionHoldingStatus:
-    symbol = None
-    target_weight = None
-    actual_weight = None
-    value = None
 
-    def to_dict(self) -> dict:
-        return {
-            "symbol": self.symbol,
-            "target_weight": self.target_weight,
-            "actual_weight": self.actual_weight,
-            "value": self.value,
-        }
+class ProfileBalances:
+    withdrawable_cash = 0
+    buying_power = 0

@@ -50,6 +50,7 @@ type Query {
     periods: [String]!
     access_token_ids: [Int]
     account_ids: [Int]
+    broker_ids: [String]
     institution_ids: [Int]
     interest_ids: [Int]
     category_ids: [Int]
@@ -63,6 +64,7 @@ type Query {
     profile_id: Int!
     access_token_ids: [Int]
     account_ids: [Int]
+    broker_ids: [String]
     institution_ids: [Int]
     interest_ids: [Int]
     category_ids: [Int]
@@ -81,6 +83,7 @@ type Query {
   get_portfolio_piechart(
     profile_id: Int!
     access_token_ids: [Int]
+    broker_ids: [String]
   ): [PieChartDataPoint]
 }
 
@@ -261,6 +264,13 @@ type Query {
 }
 
 type Query {
+  trading_get_collection_data(
+    profile_id: Int!
+    collection_id: Int!
+  ): TradingGetCollectionDataOutput
+}
+
+type Query {
   trading_get_funding_accounts(
     profile_id: Int!
   ): [FundingAccount]
@@ -279,7 +289,7 @@ type Mutation {
   trading_reconfigure_collection_holdings(
     profile_id: Int!
     collection_id: Int!
-    weights: [TickerWeight]!
+    weights: [TickerWeight]
     target_amount_delta: Float!
   ): TradingReconfigureCollectionHoldingsOutput
 }
@@ -573,5 +583,21 @@ type ReHandleQueueMessagesOutput {
 type KycFormChoicesFieldConfig {
   name: String!
   value: String!
+}
+
+type TradingGetCollectionDataOutput {
+  actual_value: Float!
+  history: TradingCollectionHistoryOutput
+}
+
+type TradingCollectionVersionData {
+  target_amount_delta: Float!
+  created_at: String!
+  executed_at: String!
+}
+
+type TradingCollectionHistoryOutput {
+  pending: [TradingCollectionVersionData]
+  successful: [TradingCollectionVersionData]
 }
 

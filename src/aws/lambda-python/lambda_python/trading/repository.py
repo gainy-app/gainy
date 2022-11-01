@@ -1,3 +1,5 @@
+from typing import Any, Dict, List
+
 from psycopg2.extras import RealDictCursor
 from gainy.trading import TradingRepository as GainyTradingRepository
 
@@ -21,3 +23,13 @@ class TradingRepository(GainyTradingRepository):
                     "profile_id": profile_id,
                     "status": status,
                 })
+
+    def get_collection_actual_weights(
+            self, collection_id: int) -> List[Dict[str, Any]]:
+        with self.db_conn.cursor(cursor_factory=RealDictCursor) as cursor:
+            cursor.execute(
+                "select symbol, weight from collection_ticker_actual_weights where collection_id = %(collection_id)s",
+                {
+                    "collection_id": collection_id,
+                })
+            return cursor.fetchall()

@@ -4,7 +4,7 @@
     unique_key = "contract_name",
     post_hook=[
       pk('contract_name'),
-      index(this, 'symbol', false),
+      index('symbol', false),
       'delete from {{this}} where expiration_date < now()::date',
     ]
   )

@@ -1,3 +1,7 @@
+from typing import Optional
+
+import datetime
+
 import json
 
 
@@ -14,3 +18,7 @@ def error_response(status_code, message, payload={}):
     payload = payload.copy()
     payload['message'] = message
     return base_response(status_code, payload)
+
+
+def format_datetime(d: Optional[datetime.datetime]):
+    return d.strftime("%Y-%m-%dT%H:%M:%S%z") if d else None

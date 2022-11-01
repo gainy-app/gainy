@@ -25,5 +25,5 @@ from {{ source('eod', 'eod_dividends') }}
 WHERE eod_dividends.code is not null
   and eod_dividends.value is not null
 {% if is_incremental() %}
-  and (old_data is null or abs(old_data.value - eod_dividends.value) > 1e-2)
+  and (old_data.symbol is null or abs(old_data.value - eod_dividends.value) > 1e-2)
 {% endif %}

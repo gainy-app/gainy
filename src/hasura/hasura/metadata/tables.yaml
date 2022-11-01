@@ -1062,6 +1062,9 @@
         timeout_sec: 60
       webhook: '{{AWS_LAMBDA_API_GATEWAY_ENDPOINT}}/hasuraTrigger'
 - table:
+    name: trading_collection_versions
+    schema: app
+- table:
     name: trading_funding_accounts
     schema: app
   object_relationships:
@@ -1629,6 +1632,16 @@
           - sort_order
         filter: {}
 - table:
+    name: portfolio_brokers
+    schema: public
+  select_permissions:
+    - role: user
+      permission:
+        columns:
+          - name
+          - uniq_id
+        filter: {}
+- table:
     name: portfolio_gains
     schema: public
   object_relationships:
@@ -1677,11 +1690,11 @@
       using:
         manual_configuration:
           column_mapping:
-            holding_id: id
+            holding_id_v2: holding_id_v2
           insertion_order: null
           remote_table:
-            name: profile_holdings
-            schema: app
+            name: profile_holdings_normalized
+            schema: public
     - name: ticker
       using:
         manual_configuration:
@@ -1726,11 +1739,11 @@
       using:
         manual_configuration:
           column_mapping:
-            holding_id: id
+            holding_id_v2: holding_id_v2
           insertion_order: null
           remote_table:
-            name: profile_holdings
-            schema: app
+            name: profile_holdings_normalized
+            schema: public
   select_permissions:
     - role: user
       permission:
@@ -1779,16 +1792,18 @@
     - role: user
       permission:
         columns:
-          - profile_id
-          - ticker_symbol
-          - purchase_date
-          - relative_gain_total
-          - relative_gain_1d
-          - value_to_portfolio_value
-          - ticker_name
-          - market_capitalization
-          - next_earnings_date
+          - collection_id
           - ltt_quantity_total
+          - market_capitalization
+          - name
+          - next_earnings_date
+          - profile_id
+          - purchase_date
+          - relative_gain_1d
+          - relative_gain_total
+          - ticker_name
+          - ticker_symbol
+          - value_to_portfolio_value
         filter:
           profile:
             _or:
@@ -2035,8 +2050,7 @@
       using:
         manual_configuration:
           column_mapping:
-            profile_id: profile_id
-            symbol: ticker_symbol
+            id: holding_group_id
           insertion_order: null
           remote_table:
             name: portfolio_holding_group_details
@@ -2045,8 +2059,7 @@
       using:
         manual_configuration:
           column_mapping:
-            profile_id: profile_id
-            symbol: ticker_symbol
+            id: holding_group_id
           insertion_order: null
           remote_table:
             name: portfolio_holding_group_gains
@@ -2074,8 +2087,7 @@
       using:
         manual_configuration:
           column_mapping:
-            profile_id: profile_id
-            symbol: ticker_symbol
+            id: holding_group_id
           insertion_order: null
           remote_table:
             name: profile_holdings_normalized
@@ -2084,8 +2096,7 @@
       using:
         manual_configuration:
           column_mapping:
-            profile_id: profile_id
-            symbol: symbol
+            id: holding_group_id
           insertion_order: null
           remote_table:
             name: portfolio_holding_group_tags
@@ -2094,9 +2105,10 @@
     - role: user
       permission:
         columns:
+          - collection_id
           - profile_id
-          - symbol
           - quantity
+          - symbol
         filter:
           profile:
             _or:
@@ -2108,11 +2120,23 @@
     name: profile_holdings_normalized
     schema: public
   object_relationships:
+    - name: access_token
+      using:
+        foreign_key_constraint_on: plaid_access_token_id
+    - name: broker
+      using:
+        manual_configuration:
+          column_mapping:
+            broker_uniq_id: uniq_id
+          insertion_order: null
+          remote_table:
+            name: portfolio_brokers
+            schema: public
     - name: gains
       using:
         manual_configuration:
           column_mapping:
-            holding_id: holding_id
+            holding_id_v2: holding_id_v2
           insertion_order: null
           remote_table:
             name: portfolio_holding_gains
@@ -2121,7 +2145,7 @@
       using:
         manual_configuration:
           column_mapping:
-            holding_id: holding_id
+            holding_id_v2: holding_id_v2
           insertion_order: null
           remote_table:
             name: portfolio_holding_details

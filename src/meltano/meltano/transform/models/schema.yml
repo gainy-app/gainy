@@ -54,7 +54,12 @@ sources:
       - name: analytics_profiles
       - name: drivewealth_accounts
       - name: drivewealth_accounts_positions
+      - name: drivewealth_autopilot_runs
+      - name: drivewealth_funds
+      - name: drivewealth_instruments
       - name: drivewealth_users
+      - name: drivewealth_portfolio_statuses
+      - name: drivewealth_portfolios
       - name: influencers
       - name: invitations
       - name: invoices
@@ -104,7 +109,6 @@ models:
       - name: collection_id
         tests:
           - unique
-          # - not_null # temporary disabled as not all linked to collections
           - type:
               type: 'integer'
 
@@ -892,6 +896,10 @@ models:
         tests:
           - type:
               type: 'integer'
+      - name: holding_id_v2
+        tests:
+          - type:
+              type: 'text'
       - name: updated_at
         tests:
           - type:
@@ -967,8 +975,9 @@ models:
 
   - name: portfolio_holding_group_gains
     columns:
-      - name: id
+      - name: holding_group_id
         tests:
+          - not_null
           - type:
               type: 'text'
       - name: profile_id
@@ -1058,6 +1067,10 @@ models:
         tests:
           - type:
               type: 'integer'
+      - name: holding_id_v2
+        tests:
+          - type:
+              type: 'text'
       - name: ticker_symbol
         tests:
           - type:
@@ -1117,8 +1130,9 @@ models:
 
   - name: portfolio_holding_group_details
     columns:
-      - name: id
+      - name: holding_group_id
         tests:
+          - not_null
           - type:
               type: 'text'
       - name: profile_id
@@ -1240,11 +1254,7 @@ models:
 
   - name: portfolio_transaction_chart
     columns:
-      - name: id
-        tests:
-          - type:
-              type: 'text'
-      - name: transactions_uniq_id
+      - name: transaction_uniq_id
         tests:
           - type:
               type: 'character varying'
@@ -1276,10 +1286,6 @@ models:
         tests:
           - type:
               type: 'double precision'
-      - name: transactions_updated_at
-        tests:
-          - type:
-              type: 'timestamp with time zone'
 
   - name: ticker_realtime_metrics
     columns:
@@ -1883,6 +1889,10 @@ models:
         tests:
           - type:
               type: 'integer'
+      - name: holding_id_v2
+        tests:
+          - type:
+              type: 'text'
       - name: plaid_access_token_id
         tests:
           - type:
@@ -1919,6 +1929,10 @@ models:
         tests:
           - type:
               type: 'character varying'
+      - name: broker_uniq_id
+        tests:
+          - type:
+              type: 'text'
 
   - name: portfolio_expanded_transactions
     columns:
@@ -1934,15 +1948,7 @@ models:
         tests:
           - type:
               type: 'numeric'
-      - name: security_id
-        tests:
-          - type:
-              type: 'integer'
       - name: profile_id
-        tests:
-          - type:
-              type: 'integer'
-      - name: account_id
         tests:
           - type:
               type: 'integer'
@@ -1962,14 +1968,15 @@ models:
         tests:
           - type:
               type: 'timestamp with time zone'
-      - name: uniq_id
+      - name: transaction_uniq_id
         tests:
+          - not_null
           - type:
               type: 'character varying'
-      - name: date
+      - name: datetime
         tests:
           - type:
-              type: 'date'
+              type: 'timestamp without time zone'
 
   - name: push_notifications
     columns:
@@ -2006,10 +2013,6 @@ models:
 
   - name: data_checks
     columns:
-      - name: id
-        tests:
-          - type:
-              type: 'text'
       - name: symbol
         tests:
           - type:
@@ -2026,10 +2029,6 @@ models:
         tests:
           - type:
               type: 'text'
-      - name: updated_at
-        tests:
-          - type:
-              type: 'timestamp with time zone'
 
   - name: collection_ticker_weights
     columns:
@@ -2280,7 +2279,7 @@ models:
           - type:
               type: 'timestamp with time zone'
 
-  - name: week_trading_sessions
+  - name: week_trading_sessions_static
     columns:
       - name: updated_at
         tests:
@@ -2290,6 +2289,29 @@ models:
         tests:
           - type:
               type: 'text'
+      - name: symbol
+        tests:
+          - type:
+              type: 'character varying'
+      - name: date
+        tests:
+          - type:
+              type: 'date'
+      - name: index
+        tests:
+          - type:
+              type: 'integer'
+      - name: open_at
+        tests:
+          - type:
+              type: 'timestamp with time zone'
+      - name: close_at
+        tests:
+          - type:
+              type: 'timestamp with time zone'
+
+  - name: week_trading_sessions
+    columns:
       - name: symbol
         tests:
           - type:
@@ -2399,6 +2421,21 @@ models:
         tests:
           - type:
               type: 'json'
+
+  - name: portfolio_brokers
+    columns:
+      - name: uniq_id
+        tests:
+          - type:
+              type: 'text'
+      - name: plaid_institution_id
+        tests:
+          - type:
+              type: 'integer'
+      - name: name
+        tests:
+          - type:
+              type: 'character varying'
 
 exposures:
   - name: ticker_search_index

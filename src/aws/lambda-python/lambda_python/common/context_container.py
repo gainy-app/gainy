@@ -62,7 +62,7 @@ class ContextContainer(GainyContextContainer):
                               self.drivewealth_provider, self.plaid_service)
 
     @cached_property
-    def trading_repository(self):
+    def trading_repository(self) -> TradingRepository:
         return TradingRepository(self.db_conn)
 
     # queues

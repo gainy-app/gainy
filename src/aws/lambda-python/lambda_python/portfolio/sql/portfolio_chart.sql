@@ -1,55 +1,52 @@
-with latest_open_trading_session as
+with filtered_transactions as
          (
-             select symbol, max(date) as date
-             from week_trading_sessions
-             where index = 0
-             group by symbol
+             select portfolio_expanded_transactions.transaction_uniq_id,
+                    portfolio_expanded_transactions.profile_id,
+                    portfolio_expanded_transactions.holding_id_v2,
+                    portfolio_expanded_transactions.symbol,
+                    sum(portfolio_expanded_transactions.quantity_norm_for_valuation) as quantity_norm_for_valuation
+             from portfolio_expanded_transactions
+                      left join profile_holdings_normalized using (holding_id_v2)
+                      left join app.profile_plaid_access_tokens
+                                on profile_plaid_access_tokens.id = profile_holdings_normalized.plaid_access_token_id
+                      {join_clause}
+             where {transaction_where_clause}
+             group by portfolio_expanded_transactions.transaction_uniq_id, portfolio_expanded_transactions.profile_id,
+                      portfolio_expanded_transactions.holding_id_v2, portfolio_expanded_transactions.symbol
          ),
      raw_chart_data as
          (
-             select distinct on (uniq_id, period, portfolio_transaction_chart.datetime)
-                 portfolio_expanded_transactions.profile_id,
-                 portfolio_securities_normalized.type,
-                 original_ticker_symbol as symbol,
-                 quantity_norm_for_valuation,
-                 period,
-                 portfolio_transaction_chart.datetime,
-                 uniq_id,
-                 open::numeric,
-                 high::numeric,
-                 low::numeric,
-                 close::numeric,
-                 adjusted_close::numeric
+             select filtered_transactions.profile_id,
+                    filtered_transactions.symbol,
+                    filtered_transactions.quantity_norm_for_valuation,
+                    period,
+                    week_trading_sessions_static.index as week_trading_session_index,
+                    ticker_realtime_metrics.time as latest_trading_time,
+                    portfolio_transaction_chart.datetime,
+                    transaction_uniq_id,
+                    open::numeric,
+                    high::numeric,
+                    low::numeric,
+                    close::numeric,
+                    adjusted_close::numeric
              from portfolio_transaction_chart
-                      join portfolio_expanded_transactions
-                           on portfolio_expanded_transactions.uniq_id = portfolio_transaction_chart.transactions_uniq_id
-                      join portfolio_securities_normalized
-                           on portfolio_securities_normalized.id = portfolio_expanded_transactions.security_id
-                      left join week_trading_sessions
-                                on week_trading_sessions.symbol = original_ticker_symbol
-                                    and portfolio_transaction_chart.datetime between week_trading_sessions.open_at and week_trading_sessions.close_at
-                      left join latest_open_trading_session
-                                on latest_open_trading_session.symbol = original_ticker_symbol
-                      join app.profile_portfolio_accounts on profile_portfolio_accounts.id = portfolio_expanded_transactions.account_id
-                      join app.profile_plaid_access_tokens on profile_plaid_access_tokens.id = profile_portfolio_accounts.plaid_access_token_id
-                      {join_clause}
-             where ((period = '1d' and week_trading_sessions.index = 0)
-                 or (period = '1w' and week_trading_sessions.index is not null)
-                 or (period = '1m' and portfolio_transaction_chart.datetime >= latest_open_trading_session.date - interval '1 month')
-                 or (period = '3m' and portfolio_transaction_chart.datetime >= latest_open_trading_session.date - interval '3 months')
-                 or (period = '1y' and portfolio_transaction_chart.datetime >= latest_open_trading_session.date - interval '1 year')
-                 or (period = '5y' and portfolio_transaction_chart.datetime >= latest_open_trading_session.date - interval '5 years')
-                 or (period = 'all'))
-               and {where_clause}
+                      join filtered_transactions using (transaction_uniq_id, profile_id)
+                      left join ticker_realtime_metrics using (symbol)
+                      left join week_trading_sessions_static
+                                on week_trading_sessions_static.symbol = filtered_transactions.symbol
+                                    and portfolio_transaction_chart.datetime between week_trading_sessions_static.open_at and week_trading_sessions_static.close_at - interval '1 millisecond'
+             where {chart_where_clause}
          ),
      ticker_chart as
          (
              select profile_id,
                     symbol,
                     period,
+                    min(week_trading_session_index)   as week_trading_session_index,
+                    min(latest_trading_time)          as latest_trading_time,
                     datetime,
                     sum(quantity_norm_for_valuation)  as quantity,
-                    count(uniq_id)                    as transaction_count,
+                    count(transaction_uniq_id)        as transaction_count,
                     sum(open)                         as open,
                     sum(high)                         as high,
                     sum(low)                          as low,
@@ -67,21 +64,29 @@ with latest_open_trading_session as
              from raw_chart_data
              group by symbol, period
      ),
-     symbols_to_exclude_from_schedule as
+     datetimes_to_exclude_from_schedule as materialized
          (
-             select distinct ticker_chart.symbol
+             select period, datetime
              from (
-                      select distinct period, datetime
+                      select distinct symbol, period, datetime
                       from (
                                select period, datetime
                                from ticker_chart
                                group by period, datetime
                            ) t
-                               left join chart_date_stats using (period)
+                               join chart_date_stats using (period)
                                left join ticker_chart using (symbol, period, datetime)
-                      where ticker_chart is null
-                        and (datetime between min_datetime and max_datetime or period = '1d')
-                  ) t1
+                      where ticker_chart.symbol is null
+                  ) t
+                      join chart_date_stats using (symbol, period)
+             where datetime between min_datetime and max_datetime
+                or period = '1d'
+             group by period, datetime
+     ),
+     symbols_to_exclude_from_schedule as
+         (
+             select distinct period, ticker_chart.symbol
+             from datetimes_to_exclude_from_schedule
                       join ticker_chart using (period, datetime)
                       left join week_trading_sessions_static
                                 on week_trading_sessions_static.symbol = ticker_chart.symbol
@@ -89,64 +94,43 @@ with latest_open_trading_session as
                                     and datetime < week_trading_sessions_static.close_at
              where week_trading_sessions_static is not null or period != '1w'
      ),
-     schedule as  materialized
+     schedule as materialized
          (
              select profile_id, period, datetime
-
              from ticker_chart
-                      left join symbols_to_exclude_from_schedule using (symbol)
-             where symbols_to_exclude_from_schedule is null
+                      left join datetimes_to_exclude_from_schedule using (period, datetime)
+                      left join symbols_to_exclude_from_schedule using (period, symbol)
+             where (period = '1d' and datetimes_to_exclude_from_schedule.datetime is null)
+                or (period != '1d' and symbols_to_exclude_from_schedule.symbol is null)
              group by profile_id, period, datetime
      ),
-     ticker_chart_latest_datapoint as  materialized
-         (
-             select ticker_chart.*
-             from (
-                      select symbol,
-                             period,
-                             max(datetime) as datetime
-                      from raw_chart_data
-                      group by symbol, period
-                  ) latest_datapoint
-                      join ticker_chart using (symbol, period, datetime)
-         ),
      ticker_chart_with_cash_adjustment as
          (
-
              select ticker_chart.*,
                     case
                         when ticker_chart.quantity > 0
                             then ticker_chart.adjusted_close / ticker_chart.quantity *
-                                 (ticker_chart_latest_datapoint.quantity - ticker_chart.quantity)
+                                 (last_value(quantity) over (partition by profile_id, period, symbol order by datetime rows between current row and unbounded following) - ticker_chart.quantity)
                         else 0
                         end as cash_adjustment
              from ticker_chart
                       join schedule using (profile_id, period, datetime)
-                      join ticker_chart_latest_datapoint using (profile_id, symbol, period)
          ),
      static_values as
          (
              with raw_data as
                       (
                           select distinct on (
-                              profile_holdings_normalized.holding_id
-                              ) profile_holdings_normalized.profile_id,
+                              holding_id_v2
+                              ) profile_id,
                                 case
-                                    when portfolio_securities_normalized.type = 'cash'
-                                        and portfolio_securities_normalized.ticker_symbol = 'CUR:USD'
-                                        then profile_holdings_normalized.quantity::numeric
+                                    when type = 'cash' and ticker_symbol = 'CUR:USD'
+                                        then quantity::numeric
                                     else 0
                                     end as value
                           from profile_holdings_normalized
-                                   join portfolio_securities_normalized
-                                        on portfolio_securities_normalized.id = profile_holdings_normalized.security_id
-                                   join app.profile_portfolio_accounts
-                                        on profile_portfolio_accounts.id = profile_holdings_normalized.account_id
-                                   join app.profile_plaid_access_tokens
-                                        on profile_plaid_access_tokens.id =
-                                           profile_portfolio_accounts.plaid_access_token_id
-                          where portfolio_securities_normalized.type = 'cash'
-                            and portfolio_securities_normalized.ticker_symbol = 'CUR:USD'
+                          where type = 'cash'
+                            and ticker_symbol = 'CUR:USD'
                       )
              select profile_id,
                     sum(value) as cash_value
@@ -167,6 +151,12 @@ with latest_open_trading_session as
                      sum(cash_adjustment)   as cash_adjustment
               from ticker_chart_with_cash_adjustment
               group by profile_id, period, datetime
+             having (period != '1d' or min(week_trading_session_index) = 0)
+                and (period != '1w' or min(week_trading_session_index) < 7)
+                and (period != '1m' or datetime >= min(latest_trading_time)::date - interval '1 month')
+                and (period != '3m' or datetime >= min(latest_trading_time)::date - interval '3 month')
+                and (period != '1y' or datetime >= min(latest_trading_time)::date - interval '1 year')
+                and (period != '5y' or datetime >= min(latest_trading_time)::date - interval '5 year')
          )
 select period,
        datetime,

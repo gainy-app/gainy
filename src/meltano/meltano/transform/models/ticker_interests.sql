@@ -4,7 +4,7 @@
     unique_key = "id",
     post_hook=[
       pk('symbol, interest_id'),
-      index(this, 'id', true),
+      index('id', true),
       'delete from {{this}} where updated_at < (select max(updated_at) from {{this}})',
     ]
   )

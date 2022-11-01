@@ -1,16 +1,16 @@
 import os
 from decimal import Decimal
-from typing import List
 
+from gainy.data_access.repository import MAX_TRANSACTION_SIZE
 from gainy.exceptions import NotFoundException
+from gainy.trading.drivewealth.exceptions import DriveWealthApiException
 from portfolio.plaid import PlaidService
 from portfolio.plaid.models import PlaidAccessToken
 from trading.models import TradingMoneyFlow, FundingAccount, TradingCollectionVersion
 from trading.drivewealth.provider.collection import DriveWealthProviderCollection
 from trading.drivewealth.provider.kyc import DriveWealthProviderKYC
 from trading.drivewealth.models import DriveWealthBankAccount, DriveWealthDeposit, \
-    DriveWealthRedemption, DriveWealthAutopilotRun, DriveWealthPortfolio, DriveWealthInstrument, \
-    BaseDriveWealthMoneyFlowModel
+    DriveWealthRedemption, DriveWealthAutopilotRun, BaseDriveWealthMoneyFlowModel
 from trading.drivewealth.api import DriveWealthApi
 from trading.drivewealth.repository import DriveWealthRepository
 
@@ -129,11 +129,11 @@ class DriveWealthProvider(DriveWealthProviderKYC,
 
         self.sync_user(user.ref_id)
         self.sync_profile_trading_accounts(profile_id)
-        self._sync_autopilot_runs(user.ref_id)
+        self._sync_autopilot_runs()
         self._sync_bank_accounts(user.ref_id)
         self._sync_user_deposits(user.ref_id)
         # self._sync_documents(user.ref_id)
-        self._sync_portfolio_statuses(profile_id)
+        self.sync_portfolios(profile_id)
         # self._sync_redemptions(user.ref_id)
         # self._sync_users(user.ref_id)
 
@@ -189,37 +189,31 @@ class DriveWealthProvider(DriveWealthProviderKYC,
 
             self.sync_deposit(deposit_ref_id=entity.ref_id, fetch_info=False)
 
-    def _sync_autopilot_runs(self, user_ref_id):
+    def sync_autopilot_run(self, entity: DriveWealthAutopilotRun):
         repository = self.repository
+        try:
+            data = self.api.get_autopilot_run(entity.ref_id)
+        except DriveWealthApiException as e:
+            logger.warning(e)
+            return
 
-        accounts: List[DriveWealthAccount] = repository.find_all(
-            DriveWealthAccount, {"drivewealth_user_id": user_ref_id})
-        for account in accounts:
-            autopilot_runs: List[
-                DriveWealthAutopilotRun] = repository.find_all(
-                    DriveWealthAutopilotRun, {"account_id": account.ref_id})
+        entity.set_from_response(data)
+        repository.persist(entity)
 
-            for entity in autopilot_runs:
-                data = self.api.get_autopilot_run(entity.ref_id)
+    def _sync_autopilot_runs(self):
+        repository = self.repository
+        entities = []
+        try:
+            for data in self.api.get_autopilot_runs():
+                entity = DriveWealthAutopilotRun()
                 entity.set_from_response(data)
-                repository.persist(entity)
-
-                if not entity.collection_version_id:
-                    continue
-                trading_collection_version = repository.find_one(
-                    TradingCollectionVersion,
-                    {"id": entity.collection_version_id})
-                entity._update_trading_collection_version(
-                    trading_collection_version)
-                repository.persist(trading_collection_version)
-
-    def _sync_portfolio_statuses(self, profile_id):
-        repository = self.repository
-
-        portfolios: List[DriveWealthPortfolio] = repository.find_all(
-            DriveWealthPortfolio, {"profile_id": profile_id})
-        for portfolio in portfolios:
-            self._get_portfolio_status(portfolio)
+                entities.append(entity)
+                if len(entities) >= MAX_TRANSACTION_SIZE:
+                    repository.persist(entities)
+        except DriveWealthApiException as e:
+            logger.exception(e)
+        finally:
+            repository.persist(entities)
 
     def _update_money_flow_status(self, entity: BaseDriveWealthMoneyFlowModel,
                                   money_flow: TradingMoneyFlow):

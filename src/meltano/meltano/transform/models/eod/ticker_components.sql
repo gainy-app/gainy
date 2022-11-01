@@ -4,7 +4,7 @@
     unique_key = "symbol",
     post_hook=[
       pk('symbol, component_symbol'),
-      index(this, 'id', true),
+      index('id', true),
       'delete from {{ this }}
         using (select distinct on (symbol) symbol, version from {{ this }} order by symbol, updated_at desc) old_version
         where ticker_components.symbol = old_version.symbol
@@ -85,5 +85,5 @@ from data_groupped
 where component_weight > 0
 
 {% if is_incremental() %}
-  and data_groupped.version != old_version.version or old_version is null
+  and data_groupped.version != old_version.version or old_version.symbol is null
 {% endif %}

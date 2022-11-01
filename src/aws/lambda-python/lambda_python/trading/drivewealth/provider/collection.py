@@ -1,15 +1,15 @@
 from decimal import Decimal
 from typing import Dict, Any, List, Optional
 
+from exceptions import EntityNotFoundException
 from trading.exceptions import InsufficientFundsException
 from trading.models import TradingCollectionVersion
-from trading.drivewealth.models import DriveWealthFund, DriveWealthPortfolio, DriveWealthPortfolioStatus, \
-    DriveWealthAutopilotRun, PRECISION, DriveWealthPortfolioStatusFundHolding, DriveWealthInstrument, \
-    DriveWealthInstrumentStatus
+from trading.drivewealth.models import DriveWealthAutopilotRun, PRECISION, DriveWealthInstrument, DriveWealthInstrumentStatus
 from trading.drivewealth.api import DriveWealthApi
 from trading.drivewealth.repository import DriveWealthRepository
 from gainy.utils import get_logger
-from gainy.trading.drivewealth.models import DriveWealthAccount
+from gainy.trading.drivewealth.models import DriveWealthAccount, DriveWealthFund, DriveWealthPortfolio, \
+    DriveWealthPortfolioStatusHolding, CollectionStatus
 from gainy.trading.drivewealth.provider import DriveWealthProvider as GainyDriveWealthProvider
 
 logger = get_logger(__name__)
@@ -38,47 +38,55 @@ class DriveWealthProviderCollection(GainyDriveWealthProvider):
                                         portfolio, chosen_fund)
 
         self.api.update_portfolio(portfolio)
-        self.api.update_fund(chosen_fund)
-        self._create_autopilot_run(account, collection_version.id)
+        portfolio.set_pending_rebalance()
+        self.repository.persist(portfolio)
 
-    def get_actual_collection_holdings(
-            self, profile_id: int,
-            collection_id: int) -> List[DriveWealthPortfolioStatusFundHolding]:
+        self.api.update_fund(chosen_fund)
+        self.repository.persist(chosen_fund)
+
+        # avoid force rebalancing
+        # self._create_autopilot_run(account, collection_version)
+
+    def get_actual_collection_data(self, profile_id: int,
+                                   collection_id: int) -> CollectionStatus:
         fund = self._get_fund(profile_id, collection_id)
         if not fund:
-            return []
+            raise EntityNotFoundException(DriveWealthFund)
 
-        return self._get_fund_actual_holdings_status(fund)
-
-    def _get_fund_actual_holdings_status(
-            self, fund: DriveWealthFund
-    ) -> List[DriveWealthPortfolioStatusFundHolding]:
         repository = self.repository
         portfolio = repository.get_profile_portfolio(fund.profile_id)
         if not portfolio:
-            return []
+            raise EntityNotFoundException(DriveWealthPortfolio)
+
         portfolio_status = self._get_portfolio_status(portfolio)
+        portfolio.update_from_status(portfolio_status)
+        repository.persist(portfolio)
         fund_status = portfolio_status.get_fund(fund.ref_id)
         if not fund_status:
-            return []
+            raise EntityNotFoundException(DriveWealthPortfolioStatusHolding)
 
-        return fund_status.holdings
+        return fund_status.get_collection_status()
 
     def _create_autopilot_run(self, account: DriveWealthAccount,
-                              collection_version_id: int):
+                              collection_version: TradingCollectionVersion):
         data = self.api.create_autopilot_run([account.ref_id])
         entity = DriveWealthAutopilotRun()
         entity.set_from_response(data)
         entity.account_id = account.ref_id
-        entity.collection_version_id = collection_version_id
         self.repository.persist(entity)
+
+        entity.update_trading_collection_version(collection_version)
+        self.repository.persist(collection_version)
+
         return entity
 
     def _upsert_portfolio(self, profile_id, account: DriveWealthAccount):
         repository = self.repository
         portfolio = repository.get_profile_portfolio(profile_id)
 
-        if not portfolio:
+        if portfolio:
+            self._sync_portfolio(portfolio)
+        else:
             name = f"Gainy profile #{profile_id}'s portfolio"
             client_portfolio_id = profile_id  # TODO change to some other entity
             description = name
@@ -168,8 +176,15 @@ class DriveWealthProviderCollection(GainyDriveWealthProvider):
             return 0
 
         portfolio_status = self._get_portfolio_status(portfolio)
-        cash_value = portfolio_status.cash_value
-        cash_actual_weight = portfolio_status.cash_actual_weight
+        portfolio.update_from_status(portfolio_status)
+        self.repository.persist(portfolio)
+        if portfolio.is_pending_rebalance():
+            cash_actual_weight = portfolio_status.cash_target_weight
+            cash_value = portfolio_status.cash_target_weight * portfolio_status.equity_value
+        else:
+            cash_value = portfolio_status.cash_value
+            cash_actual_weight = portfolio_status.cash_actual_weight
+
         fund_value = portfolio_status.get_fund_value(chosen_fund.ref_id)
         fund_actual_weight = portfolio_status.get_fund_actual_weight(
             chosen_fund.ref_id)
@@ -178,6 +193,8 @@ class DriveWealthProviderCollection(GainyDriveWealthProvider):
             "target_amount_delta": target_amount_delta,
             "portfolio_status": portfolio_status.to_dict(),
             "portfolio": portfolio.to_dict(),
+            "chosen_fund": chosen_fund.to_dict(),
+            "fund_value": fund_value,
         }
         logger.info('_handle_cash_amount_change step0', extra=logging_extra)
 
@@ -209,16 +226,9 @@ class DriveWealthProviderCollection(GainyDriveWealthProvider):
         if not portfolio:
             return
 
-        self._get_portfolio_status(portfolio)
-
-    def _get_portfolio_status(
-            self,
-            portfolio: DriveWealthPortfolio) -> DriveWealthPortfolioStatus:
-        data = self.api.get_portfolio_status(portfolio)
-        portfolio_status = DriveWealthPortfolioStatus()
-        portfolio_status.set_from_response(data)
-        self.repository.persist(portfolio_status)
-        return portfolio_status
+        portfolio_status = self._get_portfolio_status(portfolio)
+        portfolio.update_from_status(portfolio_status)
+        self.repository.persist(portfolio)
 
     def _get_trading_account(self, user_ref_id):
         return self.repository.get_user_accounts(user_ref_id)[0]

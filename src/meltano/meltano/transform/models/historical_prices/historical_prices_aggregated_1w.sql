@@ -4,7 +4,7 @@
     unique_key = "id",
     post_hook=[
       pk('symbol, datetime'),
-      index(this, 'id', true),
+      index('id', true),
       'create index if not exists "hpa_1w_datetime__symbol" ON {{ this }} (datetime, symbol)',
     ]
   )

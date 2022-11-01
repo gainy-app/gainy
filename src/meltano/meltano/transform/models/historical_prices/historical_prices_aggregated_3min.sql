@@ -7,7 +7,7 @@
     tags = ["realtime"],
     post_hook=[
       pk('symbol, datetime'),
-      index(this, 'id', true),
+      index('id', true),
       'create index if not exists "hpa_3min_datetime__symbol" ON {{ this }} (datetime, symbol)',
     ]
   )
@@ -30,20 +30,14 @@ with
              join {{ this }} using (symbol, datetime)
          ),
 {% endif %}
-     latest_open_trading_session as
-         (
-             select *
-             from {{ ref('week_trading_sessions') }}
-             where index = 0
-         ),
      time_series as
          (
              select symbol,
-                    latest_open_trading_session.date,
+                    week_trading_sessions.date,
                     date_trunc('minute', dd) -
                     interval '1 minute' *
                     mod(extract(minutes from dd)::int, {{ minutes }}) as time_truncated
-             from latest_open_trading_session
+             from {{ ref('week_trading_sessions') }}
                       join generate_series(open_at, least(now(), close_at - interval '1 second'), interval '{{ minutes }} minutes') dd on true
 {% if is_incremental() and var('realtime') %}
                       join max_date using (symbol)
@@ -55,13 +49,10 @@ with
              select historical_intraday_prices.*,
                     historical_intraday_prices.time_{{ minutes }}min as time_truncated
              from {{ ref('historical_intraday_prices') }}
-                      join latest_open_trading_session using (symbol)
+                      join {{ ref('week_trading_sessions') }} using (symbol, date)
 {% if is_incremental() and var('realtime') %}
                       join max_date using (symbol)
-{% endif %}
-             where historical_intraday_prices.time_{{ minutes }}min >= latest_open_trading_session.open_at - interval '1 hour' and historical_intraday_prices.time_{{ minutes }}min < latest_open_trading_session.close_at
-{% if is_incremental() and var('realtime') %}
-               and historical_intraday_prices.time_{{ minutes }}min > max_date.datetime - interval '30 minutes'
+             where historical_intraday_prices.time_{{ minutes }}min > max_date.datetime - interval '30 minutes'
 {% endif %}
          ),
      combined_intraday_prices as

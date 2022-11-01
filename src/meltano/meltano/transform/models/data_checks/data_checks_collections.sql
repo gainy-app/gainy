@@ -49,7 +49,7 @@ with collection_distinct_tickers as
                       left join {{ ref('ticker_industries') }} using (symbol)
                       left join {{ ref('gainy_industries') }} on gainy_industries.id = ticker_industries.industry_id
              where gainy_industries.id is null
-               and (base_tickers is null or base_tickers.type != 'etf')
+               and (base_tickers.type is null or base_tickers.type != 'etf')
 
              union all
 
@@ -135,8 +135,8 @@ union all
                                     on ticker_collections.ttf_name = gainy_collections.name
                           left join {{ source('gainy', 'ticker_collections_weights') }}
                                     on ticker_collections_weights.ttf_name = gainy_collections.name
-                 where ticker_collections_weights is null
-                   and ticker_collections is null
+                 where ticker_collections_weights.ttf_name is null
+                   and ticker_collections.ttf_name is null
 
                  union all
 
@@ -166,8 +166,8 @@ union all
                               left join {{ ref('collection_metrics') }} using (collection_uniq_id)
                               left join collection_daily_latest_chart_point using (collection_uniq_id)
                      where profile_collections.enabled = '1'
-                       and (collection_metrics is null
-                         or collection_daily_latest_chart_point is null
+                       and (collection_metrics.collection_uniq_id is null
+                         or collection_daily_latest_chart_point.collection_uniq_id is null
                          or collection_metrics.previous_day_close_price < 1e-6
                          or abs(collection_daily_latest_chart_point.adjusted_close / collection_metrics.previous_day_close_price - 1) > 0.2)
                  )

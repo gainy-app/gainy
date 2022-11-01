@@ -1,21 +1,35 @@
 insert into raw_data.eod_intraday_prices (symbol, time, open, high, low, close, volume, granularity)
 with latest_historical_prices as
          (
-             select distinct on (code) code, open, high, low, close, volume
+             select distinct on (code) code, open, high, low, adjusted_close, volume
              from raw_data.eod_historical_prices
              order by code, date desc
-         )
-select latest_historical_prices.code                       as symbol,
-       dd::timestamp                                       as time,
-       latest_historical_prices.open + random() * 10 - 5   as open,
-       latest_historical_prices.high + random() * 10 - 5   as high,
-       latest_historical_prices.low + random() * 10 - 5    as low,
-       latest_historical_prices.close + random() * 10 - 5  as close,
-       latest_historical_prices.volume + random() * 10 - 5 as volume,
-       60000                                               as granularity
-FROM generate_series(now() - interval '1 week', now(), interval '1 minute') dd
-         join latest_historical_prices on true
-where extract(isodow from dd) < 6;
+         ),
+    with_random as
+        (
+              select latest_historical_prices.code,
+                     dd::timestamp as time,
+                     random() as r1,
+                     random() as r2,
+                     latest_historical_prices.open,
+                     latest_historical_prices.high,
+                     latest_historical_prices.low,
+                     latest_historical_prices.adjusted_close,
+                     latest_historical_prices.volume
+              FROM generate_series(now() - interval '1 week', now(), interval '1 minute') dd
+                       join latest_historical_prices on true
+              where extract(isodow from dd) < 6
+     )
+select code,
+       time,
+       open * (r1 / 10 + 1) as open,
+       high * (r1 / 10 + 1) as high,
+       low * (r1 / 10 + 1) as low,
+       adjusted_close * (r1 / 10 + 1) as close,
+       volume * (r2 + 0.5) as volume,
+       60000 as granularity
+FROM with_random
+on conflict do nothing;
 
 insert into raw_data.polygon_intraday_prices (symbol, time, open, high, low, close, volume, granularity)
 with latest_historical_prices as
@@ -23,15 +37,29 @@ with latest_historical_prices as
              select distinct on (contract_name) contract_name as code, o as open, h as high, l as low, c as close, v as volume
              from raw_data.polygon_options_historical_prices
              order by contract_name, t desc
-         )
-select latest_historical_prices.code                       as symbol,
-       dd::timestamp                                       as time,
-       latest_historical_prices.open + random() * 10 - 5   as open,
-       latest_historical_prices.high + random() * 10 - 5   as high,
-       latest_historical_prices.low + random() * 10 - 5    as low,
-       latest_historical_prices.close + random() * 10 - 5  as close,
-       latest_historical_prices.volume + random() * 10 - 5 as volume,
-       60000                                               as granularity
-FROM generate_series(now() - interval '1 week', now(), interval '1 minute') dd
-         join latest_historical_prices on true
-where extract(isodow from dd) < 6;
+         ),
+    with_random as
+        (
+              select latest_historical_prices.code,
+                     dd::timestamp as time,
+                     random() as r1,
+                     random() as r2,
+                     latest_historical_prices.open,
+                     latest_historical_prices.high,
+                     latest_historical_prices.low,
+                     latest_historical_prices.close,
+                     latest_historical_prices.volume
+              FROM generate_series(now() - interval '1 week', now(), interval '1 minute') dd
+                       join latest_historical_prices on true
+              where extract(isodow from dd) < 6
+     )
+select code,
+       time,
+       open * (r1 / 10 + 1) as open,
+       high * (r1 / 10 + 1) as high,
+       low * (r1 / 10 + 1) as low,
+       close * (r1 / 10 + 1) as close,
+       volume * (r2 + 0.5) as volume,
+       60000 as granularity
+FROM with_random
+on conflict do nothing;
