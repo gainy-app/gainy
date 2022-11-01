@@ -227,11 +227,6 @@ class DriveWealthProviderCollection(GainyDriveWealthProvider):
         portfolio.update_from_status(portfolio_status)
         self.repository.persist(portfolio)
 
-    def _sync_portfolio(self, portfolio: DriveWealthPortfolio):
-        data = self.api.get_portfolio(portfolio)
-        portfolio.set_from_response(data)
-        self.repository.persist(portfolio)
-
     def _get_trading_account(self, user_ref_id) -> DriveWealthAccount:
         return self.repository.get_user_accounts(user_ref_id)[0]
 
