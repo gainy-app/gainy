@@ -35,13 +35,27 @@ with holdings as
      gains as
          (
              select holding_id_v2,
-                    sum(quantity_norm_for_valuation * (actual_price - actual_price / (relative_daily_change + 1))) as absolute_gain_1d,
-                    sum(quantity_norm_for_valuation * (actual_price - actual_price / (relative_gain_1w + 1)))      as absolute_gain_1w,
-                    sum(quantity_norm_for_valuation * (actual_price - actual_price / (relative_gain_1m + 1)))      as absolute_gain_1m,
-                    sum(quantity_norm_for_valuation * (actual_price - actual_price / (relative_gain_3m + 1)))      as absolute_gain_3m,
-                    sum(quantity_norm_for_valuation * (actual_price - actual_price / (relative_gain_1y + 1)))      as absolute_gain_1y,
-                    sum(quantity_norm_for_valuation * (actual_price - actual_price / (relative_gain_5y + 1)))      as absolute_gain_5y,
-                    sum(quantity_norm_for_valuation * (actual_price - actual_price / (relative_gain_all + 1)))     as absolute_gain_total
+                    sum(case when relative_daily_change > -1
+                            then quantity_norm_for_valuation * (actual_price - actual_price / (relative_daily_change + 1))
+                        end) as absolute_gain_1d,
+                    sum(case when relative_gain_1w > -1
+                            then quantity_norm_for_valuation * (actual_price - actual_price / (relative_gain_1w + 1))
+                        end) as absolute_gain_1w,
+                    sum(case when relative_gain_1m > -1
+                            then quantity_norm_for_valuation * (actual_price - actual_price / (relative_gain_1m + 1))
+                        end) as absolute_gain_1m,
+                    sum(case when relative_gain_3m > -1
+                            then quantity_norm_for_valuation * (actual_price - actual_price / (relative_gain_3m + 1))
+                        end) as absolute_gain_3m,
+                    sum(case when relative_gain_1y > -1
+                            then quantity_norm_for_valuation * (actual_price - actual_price / (relative_gain_1y + 1))
+                        end) as absolute_gain_1y,
+                    sum(case when relative_gain_5y > -1
+                            then quantity_norm_for_valuation * (actual_price - actual_price / (relative_gain_5y + 1))
+                        end) as absolute_gain_5y,
+                    sum(case when relative_gain_all > -1
+                            then quantity_norm_for_valuation * (actual_price - actual_price / (relative_gain_all + 1))
+                        end) as absolute_gain_total
              from {{ ref('portfolio_expanded_transactions') }}
                       left join {{ ref('portfolio_transaction_metrics') }} using (transaction_uniq_id)
                       left join {{ ref('ticker_realtime_metrics') }} using (symbol)
@@ -84,12 +98,30 @@ select holding_group_id,
        actual_value,
        (actual_value / (1e-9 + sum(actual_value) over (partition by profile_id)))::double precision as value_to_portfolio_value,
        relative_gain_1d::double precision,
-       (absolute_gain_1w / (actual_value - absolute_gain_1w))::double precision       as relative_gain_1w,
-       (absolute_gain_1m / (actual_value - absolute_gain_1m))::double precision       as relative_gain_1m,
-       (absolute_gain_3m / (actual_value - absolute_gain_3m))::double precision       as relative_gain_3m,
-       (absolute_gain_1y / (actual_value - absolute_gain_1y))::double precision       as relative_gain_1y,
-       (absolute_gain_5y / (actual_value - absolute_gain_5y))::double precision       as relative_gain_5y,
-       (absolute_gain_total / (actual_value - absolute_gain_total))::double precision as relative_gain_total,
+       case
+           when abs(actual_value - absolute_gain_1w) > 1e-9
+               then absolute_gain_1w / (actual_value - absolute_gain_1w)
+           end::double precision       as relative_gain_1w,
+       case
+           when abs(actual_value - absolute_gain_1m) > 1e-9
+               then absolute_gain_1m / (actual_value - absolute_gain_1m)
+           end::double precision       as relative_gain_1m,
+       case
+           when abs(actual_value - absolute_gain_3m) > 1e-9
+               then absolute_gain_3m / (actual_value - absolute_gain_3m)
+           end::double precision       as relative_gain_3m,
+       case
+           when abs(actual_value - absolute_gain_1y) > 1e-9
+               then absolute_gain_1y / (actual_value - absolute_gain_1y)
+           end::double precision       as relative_gain_1y,
+       case
+           when abs(actual_value - absolute_gain_5y) > 1e-9
+               then absolute_gain_5y / (actual_value - absolute_gain_5y)
+           end::double precision       as relative_gain_5y,
+       case
+           when abs(actual_value - absolute_gain_total) > 1e-9
+               then absolute_gain_total / (actual_value - absolute_gain_total)
+           end::double precision as relative_gain_total,
        absolute_gain_1d,
        absolute_gain_1w,
        absolute_gain_1m,
