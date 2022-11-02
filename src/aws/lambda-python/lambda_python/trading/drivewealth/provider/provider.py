@@ -1,3 +1,5 @@
+from typing import List
+
 import os
 from decimal import Decimal
 
@@ -6,7 +8,8 @@ from gainy.exceptions import NotFoundException
 from gainy.trading.drivewealth.exceptions import DriveWealthApiException
 from portfolio.plaid import PlaidService
 from portfolio.plaid.models import PlaidAccessToken
-from trading.models import TradingMoneyFlow, FundingAccount, TradingCollectionVersion
+from trading.models import TradingMoneyFlow, FundingAccount, TradingCollectionVersion, ProfileBalances, \
+    TradingCollectionVersionStatus
 from trading.drivewealth.provider.collection import DriveWealthProviderCollection
 from trading.drivewealth.provider.kyc import DriveWealthProviderKYC
 from trading.drivewealth.models import DriveWealthBankAccount, DriveWealthDeposit, \
@@ -87,6 +90,43 @@ class DriveWealthProvider(DriveWealthProviderKYC,
         self._on_money_transfer(money_flow.profile_id)
 
         return entity
+
+    def get_actual_balances(self, profile_id) -> ProfileBalances:
+        balances = ProfileBalances()
+
+        user = self._get_user(profile_id)
+        accounts = self.repository.get_user_accounts(user.ref_id)
+        account_money_entities = []
+        for account in accounts:
+            #todo cache
+            account_money = self._sync_account_money(account.ref_id)
+            account_money_entities.append(account_money)
+
+            if IS_UAT:
+                balances.withdrawable_cash += account_money.cash_balance
+            else:
+                balances.withdrawable_cash += account_money.cash_available_for_withdrawal
+
+        portfolio = self.repository.get_profile_portfolio(profile_id)
+        if portfolio:
+            #todo cache
+            portfolio_status = self._get_portfolio_status(portfolio)
+            portfolio.update_from_status(portfolio_status)
+            self.repository.persist(portfolio)
+            balances.buying_power += portfolio_status.cash_value
+
+            trading_collection_versions: List[
+                TradingCollectionVersion] = self.repository.find_all(
+                    TradingCollectionVersion, {
+                        "profile_id": profile_id,
+                        "status": TradingCollectionVersionStatus.PENDING.name
+                    })
+            for trading_collection_version in trading_collection_versions:
+                balances.buying_power -= trading_collection_version.target_amount_delta
+        else:
+            balances.buying_power = balances.withdrawable_cash
+
+        return balances
 
     def debug_add_money(self, trading_account_id, amount):
         if not IS_UAT:

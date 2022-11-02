@@ -4,7 +4,7 @@ import pytest
 
 from gainy.tests.mocks.repository_mocks import mock_noop, mock_persist, mock_find
 from gainy.tests.mocks.trading.drivewealth.api_mocks import CASH_TARGET_WEIGHT, FUND1_ID, FUND1_TARGET_WEIGHT, \
-    PORTFOLIO_STATUS, CASH_VALUE, FUND1_VALUE, PORTFOLIO, USER_ID, PORTFOLIO_REF_ID, PORTFOLIO_STATUS_EQUITY_VALUE
+    PORTFOLIO_STATUS, CASH_VALUE, FUND1_VALUE, PORTFOLIO, USER_ID, PORTFOLIO_REF_ID
 from trading.exceptions import InsufficientFundsException
 from trading.drivewealth.api import DriveWealthApi
 from trading.drivewealth.repository import DriveWealthRepository
@@ -215,11 +215,11 @@ def test_upsert_fund(fund_exists, monkeypatch):
     new_fund_holdings = [
         {
             "instrumentID": "B",
-            "target": Decimal(0.3),
+            "target": round(Decimal(0.3), 4),
         },
         {
             "instrumentID": "C",
-            "target": Decimal(0.7),
+            "target": round(Decimal(0.7), 4),
         },
     ]
 
@@ -229,16 +229,15 @@ def test_upsert_fund(fund_exists, monkeypatch):
         def mock_update_fund(_fund):
             assert _fund == fund
             assert _fund.holdings == new_fund_holdings
-            return data
+            _fund.set_from_response(data)
 
         monkeypatch.setattr(api, "update_fund", mock_update_fund)
     else:
 
-        def mock_create_fund(_name, _client_fund_id, _description,
-                             _new_fund_holdings):
+        def mock_create_fund(_fund, _name, _client_fund_id, _description):
             assert _client_fund_id == f"{profile_id}_{collection_id}"
-            assert _new_fund_holdings == new_fund_holdings
-            return data
+            assert _fund.holdings == new_fund_holdings
+            _fund.set_from_response(data)
 
         monkeypatch.setattr(api, "create_fund", mock_create_fund)
 
@@ -257,8 +256,7 @@ def test_upsert_fund(fund_exists, monkeypatch):
     _mock_get_instrument(monkeypatch, service)
     fund = service._upsert_fund(profile_id, collection_version)
 
-    if not fund_exists:
-        assert fund.ref_id == fund_ref_id
+    assert fund.ref_id == fund_ref_id
     assert fund.collection_id == collection_id
     assert fund.trading_collection_version_id == trading_collection_version_id
     assert fund.weights == weights
@@ -344,7 +342,8 @@ def get_test_handle_cash_amount_change_amounts_ko():
 @pytest.mark.parametrize("amount",
                          get_test_handle_cash_amount_change_amounts_ko())
 def test_handle_cash_amount_change_ko(amount, monkeypatch):
-    portfolio = DriveWealthPortfolio(PORTFOLIO)
+    portfolio = DriveWealthPortfolio()
+    portfolio.set_from_response(PORTFOLIO)
     drivewealth_repository = DriveWealthRepository(None)
     api = DriveWealthApi(None)
 
