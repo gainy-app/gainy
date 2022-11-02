@@ -4,8 +4,8 @@ from common.context_container import ContextContainer
 from common.hasura_function import HasuraAction
 from common.hasura_response import format_datetime
 from exceptions import EntityNotFoundException
+from gainy.trading.models import TradingCollectionVersion
 from gainy.utils import get_logger
-from trading.models import TradingCollectionVersionStatus, TradingCollectionVersion
 
 logger = get_logger(__name__)
 
@@ -35,12 +35,8 @@ class TradingGetCollectionData(HasuraAction):
                     "collection_id": collection_id
                 }, [("created_at", "DESC")])
 
-        success_tcvs = filter(
-            lambda x: x.status == TradingCollectionVersionStatus.
-            EXECUTED_FULLY, trading_collection_versions)
-        pending_tcvs = filter(
-            lambda x: x.status == TradingCollectionVersionStatus.PENDING,
-            trading_collection_versions)
+        success_tcvs = filter(lambda x: x.is_executed(), trading_collection_versions)
+        pending_tcvs = filter(lambda x: x.is_pending(), trading_collection_versions)
 
         return {
             'actual_value': actual_value,

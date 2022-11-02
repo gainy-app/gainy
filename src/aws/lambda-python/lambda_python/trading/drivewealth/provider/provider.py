@@ -3,13 +3,13 @@ from typing import List
 import os
 from decimal import Decimal
 
+from gainy.data_access.operators import OperatorIn
 from gainy.data_access.repository import MAX_TRANSACTION_SIZE
 from gainy.exceptions import NotFoundException
 from gainy.trading.drivewealth.exceptions import DriveWealthApiException
 from portfolio.plaid import PlaidService
 from portfolio.plaid.models import PlaidAccessToken
-from trading.models import TradingMoneyFlow, FundingAccount, TradingCollectionVersion, ProfileBalances, \
-    TradingCollectionVersionStatus
+from trading.models import TradingMoneyFlow, FundingAccount, ProfileBalances
 from trading.drivewealth.provider.collection import DriveWealthProviderCollection
 from trading.drivewealth.provider.kyc import DriveWealthProviderKYC
 from trading.drivewealth.models import DriveWealthBankAccount, DriveWealthDeposit, \
@@ -18,7 +18,7 @@ from trading.drivewealth.api import DriveWealthApi
 from trading.drivewealth.repository import DriveWealthRepository
 
 from gainy.utils import get_logger
-from gainy.trading.models import TradingAccount
+from gainy.trading.models import TradingAccount, TradingCollectionVersion, TradingCollectionVersionStatus
 from gainy.trading.drivewealth.models import DriveWealthAccount
 
 logger = get_logger(__name__)
@@ -110,7 +110,7 @@ class DriveWealthProvider(DriveWealthProviderKYC,
         portfolio = self.repository.get_profile_portfolio(profile_id)
         if portfolio:
             #todo cache
-            portfolio_status = self._get_portfolio_status(portfolio)
+            portfolio_status = self.get_portfolio_status(portfolio)
             portfolio.update_from_status(portfolio_status)
             self.repository.persist(portfolio)
             balances.buying_power += portfolio_status.cash_value
@@ -119,7 +119,7 @@ class DriveWealthProvider(DriveWealthProviderKYC,
                 TradingCollectionVersion] = self.repository.find_all(
                     TradingCollectionVersion, {
                         "profile_id": profile_id,
-                        "status": TradingCollectionVersionStatus.PENDING.name
+                        "status": OperatorIn([TradingCollectionVersionStatus.PENDING.name, TradingCollectionVersionStatus.PENDING_EXECUTION.name])
                     })
             for trading_collection_version in trading_collection_versions:
                 balances.buying_power -= trading_collection_version.target_amount_delta

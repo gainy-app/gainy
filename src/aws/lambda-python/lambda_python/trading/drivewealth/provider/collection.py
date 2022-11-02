@@ -1,10 +1,6 @@
-from decimal import Decimal
-from typing import Dict, Any, List, Optional
-
 from exceptions import EntityNotFoundException
-from trading.exceptions import InsufficientFundsException
-from trading.models import TradingCollectionVersion
-from trading.drivewealth.models import DriveWealthAutopilotRun, PRECISION, DriveWealthInstrument, DriveWealthInstrumentStatus
+from gainy.trading.models import TradingCollectionVersion
+from trading.drivewealth.models import DriveWealthAutopilotRun
 from trading.drivewealth.api import DriveWealthApi
 from trading.drivewealth.repository import DriveWealthRepository
 from gainy.utils import get_logger
@@ -19,37 +15,9 @@ class DriveWealthProviderCollection(GainyDriveWealthProvider):
     repository: DriveWealthRepository = None
     api: DriveWealthApi = None
 
-    def sync_instrument(self, ref_id: str = None, symbol: str = None):
-        data = self.api.get_instrument_details(ref_id=ref_id, symbol=symbol)
-        instrument = DriveWealthInstrument()
-        instrument.set_from_response(data)
-        self.repository.persist(instrument)
-        return instrument
-
-    def reconfigure_collection_holdings(
-            self, collection_version: TradingCollectionVersion):
-        user = self._get_user(collection_version.profile_id)
-        account = self._get_trading_account(user.ref_id)
-        profile_id = collection_version.profile_id
-        portfolio = self._upsert_portfolio(profile_id, account)
-        chosen_fund = self._upsert_fund(profile_id, collection_version)
-
-        self.rebalance_portfolio_cash(portfolio)
-
-        self._handle_cash_amount_change(collection_version.target_amount_delta,
-                                        portfolio, chosen_fund)
-
-        self.api.update_portfolio(portfolio)
-        portfolio.set_pending_rebalance()
-        self.repository.persist(portfolio)
-
-        chosen_fund.normalize_weights()
-        self.api.update_fund(chosen_fund)
-        self.repository.persist(chosen_fund)
-
     def get_actual_collection_data(self, profile_id: int,
                                    collection_id: int) -> CollectionStatus:
-        fund = self._get_fund(profile_id, collection_id)
+        fund = self.get_fund(profile_id, collection_id)
         if not fund:
             raise EntityNotFoundException(DriveWealthFund)
 
@@ -58,7 +26,7 @@ class DriveWealthProviderCollection(GainyDriveWealthProvider):
         if not portfolio:
             raise EntityNotFoundException(DriveWealthPortfolio)
 
-        portfolio_status = self._get_portfolio_status(portfolio)
+        portfolio_status = self.get_portfolio_status(portfolio)
         portfolio.update_from_status(portfolio_status)
         repository.persist(portfolio)
         fund_status = portfolio_status.get_fund(fund.ref_id)
@@ -80,165 +48,12 @@ class DriveWealthProviderCollection(GainyDriveWealthProvider):
 
         return entity
 
-    def _upsert_portfolio(self, profile_id, account: DriveWealthAccount):
-        repository = self.repository
-        portfolio = repository.get_profile_portfolio(profile_id)
-
-        if portfolio:
-            self._sync_portfolio(portfolio)
-        else:
-            name = f"Gainy profile #{profile_id}'s portfolio"
-            client_portfolio_id = profile_id  # TODO change to some other entity
-            description = name
-
-            data = self.api.create_portfolio(name, client_portfolio_id,
-                                             description)
-            portfolio = DriveWealthPortfolio()
-            portfolio.set_from_response(data)
-            portfolio.profile_id = profile_id
-
-        if not portfolio.drivewealth_account_id:
-            self.api.update_account(account.ref_id, portfolio.ref_id)
-            portfolio.drivewealth_account_id = account.ref_id
-
-        repository.persist(portfolio)
-        return portfolio
-
-    def _upsert_fund(
-            self, profile_id,
-            collection_version: TradingCollectionVersion) -> DriveWealthFund:
-        collection_id = collection_version.collection_id
-        weights = collection_version.weights
-        repository = self.repository
-
-        fund = self._get_fund(profile_id, collection_id) or DriveWealthFund()
-        fund.profile_id = profile_id
-        fund.collection_id = collection_id
-        fund.holdings = self._generate_new_fund_holdings(weights, fund)
-        fund.normalize_weights()
-
-        if fund.ref_id:
-            self.api.update_fund(fund)
-        else:
-            user = repository.get_user(profile_id)
-            user_id = user.ref_id
-            name = f"Gainy {user_id}'s fund for collection {collection_id}"
-            client_fund_id = f"{profile_id}_{collection_id}"
-            description = name
-            self.api.create_fund(fund, name, client_fund_id, description)
-
-        fund.weights = weights
-        fund.trading_collection_version_id = collection_version.id
-        repository.persist(fund)
-
-        return fund
-
-    def _get_fund(self, profile_id: int,
-                  collection_id: int) -> Optional[DriveWealthFund]:
-        repository = self.repository
-        fund = repository.get_profile_fund(profile_id, collection_id)
-
-        if not fund:
-            return None
-
-        return fund
-
-    def _generate_new_fund_holdings(
-            self, weights: Dict[str, Any],
-            fund: Optional[DriveWealthFund]) -> List[Dict[str, Any]]:
-        new_holdings = {}
-
-        # add old holdings with zero weight for the api to remove it if they are missing from the weights
-        if fund:
-            for holding in fund.holdings:
-                new_holdings[holding["instrumentID"]] = 0
-
-        # TODO check dw instruments symbols to match our symbols
-        for symbol, weight in weights.items():
-            instrument = self._get_instrument(symbol)
-            new_holdings[instrument.ref_id] = weight
-
-        return [{
-            "instrumentID": k,
-            "target": i,
-        } for k, i in new_holdings.items()]
-
-    def _handle_cash_amount_change(self, target_amount_delta: Decimal,
-                                   portfolio: DriveWealthPortfolio,
-                                   chosen_fund: DriveWealthFund):
-        if not target_amount_delta:
-            return 0
-
-        portfolio_status = self._get_portfolio_status(portfolio)
-        portfolio.update_from_status(portfolio_status)
-        self.repository.persist(portfolio)
-        if portfolio.is_pending_rebalance():
-            cash_actual_weight = portfolio_status.cash_target_weight
-            cash_value = cash_actual_weight * portfolio_status.equity_value
-            fund_actual_weight = portfolio.get_fund_weight(chosen_fund.ref_id)
-            fund_value = fund_actual_weight * portfolio_status.equity_value
-        else:
-            cash_value = portfolio_status.cash_value
-            cash_actual_weight = portfolio_status.cash_actual_weight
-
-            fund_actual_weight = portfolio_status.get_fund_actual_weight(
-                chosen_fund.ref_id)
-            fund_value = portfolio_status.get_fund_value(chosen_fund.ref_id)
-            portfolio.set_target_weights_from_status_actual_weights(
-                portfolio_status)
-
-        logging_extra = {
-            "target_amount_delta": target_amount_delta,
-            "portfolio_status": portfolio_status.to_dict(),
-            "portfolio": portfolio.to_dict(),
-            "is_pending_rebalance": portfolio.is_pending_rebalance(),
-            "chosen_fund": chosen_fund.to_dict(),
-            "cash_actual_weight": cash_actual_weight,
-            "cash_value": cash_value,
-            "fund_actual_weight": fund_actual_weight,
-            "fund_value": fund_value,
-        }
-        logger.info('_handle_cash_amount_change step0', extra=logging_extra)
-
-        # TODO handle initial buy after deposit?
-        if target_amount_delta > 0:
-            if target_amount_delta - cash_value > PRECISION:
-                raise InsufficientFundsException()
-            weight_delta = target_amount_delta / cash_value * cash_actual_weight
-        else:
-            if abs(target_amount_delta) - fund_value > PRECISION:
-                raise InsufficientFundsException()
-            weight_delta = target_amount_delta / fund_value * fund_actual_weight
-
-        logging_extra["weight_delta"] = weight_delta
-        logging_extra["portfolio"] = portfolio.to_dict()
-        logger.info('_handle_cash_amount_change step1', extra=logging_extra)
-
-        portfolio.move_cash_to_fund(chosen_fund, weight_delta)
-        self.repository.persist(portfolio)
-        logging_extra["portfolio"] = portfolio.to_dict()
-        logger.info('_handle_cash_amount_change step2', extra=logging_extra)
-
     def _on_money_transfer(self, profile_id):
         repository = self.repository
         portfolio = repository.get_profile_portfolio(profile_id)
         if not portfolio:
             return
 
-        portfolio_status = self._get_portfolio_status(portfolio)
+        portfolio_status = self.get_portfolio_status(portfolio)
         portfolio.update_from_status(portfolio_status)
         self.repository.persist(portfolio)
-
-    def _get_trading_account(self, user_ref_id) -> DriveWealthAccount:
-        return self.repository.get_user_accounts(user_ref_id)[0]
-
-    def _get_instrument(self, symbol) -> DriveWealthInstrument:
-        instrument = self.repository.find_one(
-            DriveWealthInstrument, {
-                "symbol": symbol,
-                "status": DriveWealthInstrumentStatus.ACTIVE
-            })
-        if instrument:
-            return instrument
-
-        return self.sync_instrument(symbol=symbol)

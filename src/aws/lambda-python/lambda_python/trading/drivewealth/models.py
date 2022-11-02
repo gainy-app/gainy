@@ -135,37 +135,6 @@ class DriveWealthRedemption(BaseDriveWealthMoneyFlowModel):
         return "drivewealth_redemptions"
 
 
-class DriveWealthInstrumentStatus(str, enum.Enum):
-    ACTIVE = "ACTIVE"
-
-
-class DriveWealthInstrument(BaseDriveWealthModel):
-    ref_id = None
-    symbol = None
-    status = None
-    data = None
-    created_at = None
-    updated_at = None
-
-    key_fields = ["ref_id"]
-
-    db_excluded_fields = ["created_at", "updated_at"]
-    non_persistent_fields = ["created_at", "updated_at"]
-
-    def set_from_response(self, data=None):
-        if not data:
-            return
-
-        self.ref_id = data.get("id") or data.get("instrumentID")
-        self.symbol = data["symbol"]
-        self.status = data["status"]
-        self.data = data
-
-    @classproperty
-    def table_name(self) -> str:
-        return "drivewealth_instruments"
-
-
 class DriveWealthAutopilotRun(BaseDriveWealthModel):
     ref_id = None
     status = None
@@ -214,45 +183,13 @@ class DriveWealthAutopilotRun(BaseDriveWealthModel):
 
     def update_trading_collection_version(
             self, trading_collection_version: TradingCollectionVersion):
+
         if self.is_successful():
             trading_collection_version.set_status(
                 TradingCollectionVersionStatus.EXECUTED_FULLY)
-            return
-
-        if self.is_failed():
+        elif self.is_failed():
             trading_collection_version.set_status(
                 TradingCollectionVersionStatus.FAILED)
-            return
-        '''
-        REBALANCE_NOT_STARTED            rebalance has not yet started
-        REBALANCE_REVIEW_COMPLETED       completed rebalance, only rebalancing review
-        REBALANCE_NO_ORDERS_GENERATED    completed rebalance, no master orders generated
-        REBALANCE_COMPLETED              rebalance is 100% completed
-        REBALANCE_10                     percent of rebalance completed, increases in increments of 10 ("REBALANCE_10" ..... "REBALANCE_90")
-        AMOUNTCASH_ORDERS_AGGREGATED     aggregate cash value for required orders
-        ORDERQTY_ORDERS_AGGREGATED       quantity of orders when funds or instruments re replaced in portfolio
-        ORDERQTY_ORDERS_PREPARED         required buy and sell orders for rebalance are prepared to execute
-        AMOUNTCASH_ORDERS_PREPARED       cash amount of required buy and sell orders for rebalance
-        SELL_ORDERQTY_ORDERS_SUBMITTED   all required sell orders submitted for execution
-        SUBACCOUNT_ORDERS_ADJUSTED       adjustment to amount cash orders after quantity orders have executed
-        SELL_AMOUNTCASH_ORDERS_SUBMITTED all required sell orders submitted for execution
-        SELL_AMOUNTCASH_ORDERS_COMPLETED all required sell orders successfully executed
-        SELL_ORDERQTY_ORDERS_COMPLETED   all required sell orders successfully executed
-        BUY_ORDERQTY_ORDERS_SUBMITTED    all required buy orders submitted for execution
-        BUY_ORDERQTY_ORDERS_COMPLETED    all required buy orders successfully executed
-        BUY_AMOUNTCASH_ORDERS_SUBMITTED  all required buy orders submitted for execution
-        BUY_AMOUNTCASH_ORDERS_COMPLETED  all required buy orders successfully executed
-        ORDERS_CLEANEDUP                 cleaning up failed master orders
-        RIA_NEXT_REBALANCE_UPDATED       next scheduled rebalance updated
-        ALLOCATION_PREPARED              required allocations are prepared for processing
-        ALLOCATION_SUBMITTED             all required allocations submitted for processing
-        ALLOCATION_NOT_STARTED           required allocations have not yet been started
-        ALLOCATION_10                    percent of allocation completed, increases in increments of 10 ("ALLOCATION_10" ..... "ALLOCATION_90")
-        ALLOCATION_COMPLETED             all required allocations have been completed
-        SUBACCOUNT_HOLDINGS_UPDATED      all sub-account holdings within required rebalance updated
-        '''
-        trading_collection_version.set_status(
-            TradingCollectionVersionStatus.PENDING)
 
 
 class DriveWealthKycStatus:

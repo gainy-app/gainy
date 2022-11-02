@@ -8,14 +8,13 @@ from portfolio.plaid import PlaidService
 from portfolio.plaid.common import handle_error
 from services import S3
 from portfolio.plaid.models import PlaidAccessToken
-from trading.models import KycDocument, FundingAccount, TradingMoneyFlow, TradingCollectionVersion, \
-    ProfileKycStatus, ProfileBalances, TradingCollectionVersionStatus
+from trading.models import KycDocument, FundingAccount, TradingMoneyFlow, ProfileKycStatus, ProfileBalances
 from trading.drivewealth.provider import DriveWealthProvider
 from trading.repository import TradingRepository
 
 import plaid
 from gainy.utils import get_logger
-from gainy.trading.models import TradingAccount
+from gainy.trading.models import TradingAccount, TradingCollectionVersion, TradingCollectionVersionStatus
 from gainy.trading import TradingService as GainyTradingService
 
 logger = get_logger(__name__)
@@ -157,6 +156,8 @@ class TradingService(GainyTradingService):
                                         collection_id: int,
                                         weights: Dict[str, Decimal],
                                         target_amount_delta: Decimal):
+
+        # TODO check if account is set up for trading
         collection_version = TradingCollectionVersion()
         collection_version.status = TradingCollectionVersionStatus.PENDING
         collection_version.profile_id = profile_id
@@ -165,9 +166,6 @@ class TradingService(GainyTradingService):
         collection_version.target_amount_delta = target_amount_delta
 
         self.trading_repository.persist(collection_version)
-
-        self._get_provider_service().reconfigure_collection_holdings(
-            collection_version)
 
         return collection_version
 
