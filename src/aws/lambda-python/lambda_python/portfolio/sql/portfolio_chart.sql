@@ -162,4 +162,4 @@ select period,
        (adjusted_close + greatest(0, cash_adjustment + coalesce(cash_value, 0)))::double precision as adjusted_close
 from raw_chart
          left join static_values on true
-where {period_where_clause}
+{period_where_clause}

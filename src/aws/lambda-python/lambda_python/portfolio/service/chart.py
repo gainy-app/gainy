@@ -220,7 +220,7 @@ class PortfolioChartService:
         if not filter.periods:
             return
 
-        where_clause.append(sql.SQL("period in %(periods)s"))
+        where_clause.append(sql.SQL("where period in %(periods)s"))
         params['periods'] = tuple(filter.periods)
 
     def _filter_query_by_institution_ids(self, params, where_clause,

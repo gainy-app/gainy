@@ -5,7 +5,10 @@
     tags = ["realtime"],
     post_hook=[
       index('transaction_uniq_id', true),
-      'delete from {{this}} where last_seen_at < (select max(last_seen_at) from {{this}})',
+      'delete from {{this}}
+        using (select profile_id, max(updated_at) as max_updated_at from {{this}} group by profile_id) old_stats
+        where old_stats.profile_id = {{this}}.profile_id
+        and {{this}}.updated_at < old_stats.max_updated_at'
     ]
   )
 }}
@@ -397,6 +400,19 @@ with plaid_transactions as
                and (base_tickers.symbol is not null or ticker_options.symbol is not null)
              group by t.holding_id_v2, t.datetime, t.profile_id, t.symbol, t.security_type
              having sum(abs(quantity_norm)) > 0 or security_type = 'ttf'
+{% if is_incremental() %}
+     ),
+     profiles_to_update as
+         (
+             select distinct groupped_expanded_transactions.profile_id
+             from groupped_expanded_transactions
+                      left join {{ this }} old_data using (transaction_uniq_id)
+             where old_data.transaction_uniq_id is null
+                or old_data.quantity_norm != groupped_expanded_transactions.quantity_norm
+                or old_data.datetime is null and groupped_expanded_transactions.datetime is not null
+                or old_data.datetime is not null and groupped_expanded_transactions.datetime is null
+                or old_data.datetime != groupped_expanded_transactions.datetime
+{% endif %}
      )
 select groupped_expanded_transactions.symbol,
        groupped_expanded_transactions.amount,
@@ -409,18 +425,8 @@ select groupped_expanded_transactions.symbol,
        groupped_expanded_transactions.transaction_uniq_id::text,
        groupped_expanded_transactions.datetime,
        groupped_expanded_transactions.security_type,
-{% if is_incremental() %}
-       case
-           when old_data.quantity_norm = groupped_expanded_transactions.quantity_norm
-            and (old_data.datetime = groupped_expanded_transactions.datetime or (old_data.datetime is null and groupped_expanded_transactions.datetime is null))
-               then old_data.updated_at
-           else now()
-           end as updated_at,
-{% else %}
-       now() as updated_at,
-{% endif %}
-       now() as last_seen_at
+       now() as updated_at
 from groupped_expanded_transactions
 {% if is_incremental() %}
-         left join {{ this }} old_data using (transaction_uniq_id)
+         join profiles_to_update using (profile_id)
 {% endif %}
