@@ -4,8 +4,7 @@ from typing import Dict, Any, List, Optional
 from exceptions import EntityNotFoundException
 from trading.exceptions import InsufficientFundsException
 from trading.models import TradingCollectionVersion
-from trading.drivewealth.models import DriveWealthPortfolio, DriveWealthAutopilotRun, PRECISION, DriveWealthInstrument, \
-    DriveWealthInstrumentStatus, DriveWealthPortfolioStatusHolding
+from trading.drivewealth.models import DriveWealthAutopilotRun, PRECISION, DriveWealthInstrument, DriveWealthInstrumentStatus
 from trading.drivewealth.api import DriveWealthApi
 from trading.drivewealth.repository import DriveWealthRepository
 from gainy.utils import get_logger
@@ -42,8 +41,12 @@ class DriveWealthProviderCollection(GainyDriveWealthProvider):
         portfolio.set_pending_rebalance()
         self.repository.persist(portfolio)
 
+        chosen_fund.normalize_weights()
         self.api.update_fund(chosen_fund)
         self.repository.persist(chosen_fund)
+
+        # avoid force rebalancing
+        self._create_autopilot_run(account, collection_version)
 
     def get_actual_collection_data(self, profile_id: int,
                                    collection_id: int) -> CollectionStatus:
@@ -114,6 +117,7 @@ class DriveWealthProviderCollection(GainyDriveWealthProvider):
 
         if fund:
             fund.holdings = new_fund_holdings
+            fund.normalize_weights()
             self.api.update_fund(fund)
         else:
             user = repository.get_user(profile_id)
@@ -177,20 +181,28 @@ class DriveWealthProviderCollection(GainyDriveWealthProvider):
         self.repository.persist(portfolio)
         if portfolio.is_pending_rebalance():
             cash_actual_weight = portfolio_status.cash_target_weight
-            cash_value = portfolio_status.cash_target_weight * portfolio_status.equity_value
+            cash_value = cash_actual_weight * portfolio_status.equity_value
+            fund_actual_weight = portfolio.get_fund_weight(chosen_fund.ref_id)
+            fund_value = fund_actual_weight * portfolio_status.equity_value
         else:
             cash_value = portfolio_status.cash_value
             cash_actual_weight = portfolio_status.cash_actual_weight
 
-        fund_value = portfolio_status.get_fund_value(chosen_fund.ref_id)
-        fund_actual_weight = portfolio_status.get_fund_actual_weight(
-            chosen_fund.ref_id)
+            fund_actual_weight = portfolio_status.get_fund_actual_weight(
+                chosen_fund.ref_id)
+            fund_value = portfolio_status.get_fund_value(chosen_fund.ref_id)
+            portfolio.set_target_weights_from_status_actual_weights(
+                portfolio_status)
 
         logging_extra = {
             "target_amount_delta": target_amount_delta,
             "portfolio_status": portfolio_status.to_dict(),
             "portfolio": portfolio.to_dict(),
+            "is_pending_rebalance": portfolio.is_pending_rebalance(),
             "chosen_fund": chosen_fund.to_dict(),
+            "cash_actual_weight": cash_actual_weight,
+            "cash_value": cash_value,
+            "fund_actual_weight": fund_actual_weight,
             "fund_value": fund_value,
         }
         logger.info('_handle_cash_amount_change step0', extra=logging_extra)
@@ -205,8 +217,6 @@ class DriveWealthProviderCollection(GainyDriveWealthProvider):
                 raise InsufficientFundsException()
             weight_delta = target_amount_delta / fund_value * fund_actual_weight
 
-        portfolio.set_target_weights_from_status_actual_weights(
-            portfolio_status)
         logging_extra["weight_delta"] = weight_delta
         logging_extra["portfolio"] = portfolio.to_dict()
         logger.info('_handle_cash_amount_change step1', extra=logging_extra)
