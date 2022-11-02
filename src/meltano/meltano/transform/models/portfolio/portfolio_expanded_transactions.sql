@@ -411,7 +411,7 @@ with plaid_transactions as
                 or old_data.quantity_norm != groupped_expanded_transactions.quantity_norm
                 or old_data.datetime is null and groupped_expanded_transactions.datetime is not null
                 or old_data.datetime is not null and groupped_expanded_transactions.datetime is null
-                or old_data.datetime != groupped_expanded_transactions.datetime
+                or (old_data.datetime is not null and groupped_expanded_transactions.datetime is not null and old_data.datetime != groupped_expanded_transactions.datetime)
 {% endif %}
      )
 select groupped_expanded_transactions.symbol,
