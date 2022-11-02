@@ -1265,7 +1265,7 @@ models:
       - name: period
         tests:
           - type:
-              type: 'character varying'
+              type: 'text'
       - name: open
         tests:
           - type:
@@ -1972,7 +1972,7 @@ models:
         tests:
           - not_null
           - type:
-              type: 'character varying'
+              type: 'text'
       - name: datetime
         tests:
           - type:

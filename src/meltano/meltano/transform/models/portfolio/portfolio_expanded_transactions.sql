@@ -406,7 +406,7 @@ select groupped_expanded_transactions.symbol,
        groupped_expanded_transactions.profile_id,
        groupped_expanded_transactions.quantity_norm,
        groupped_expanded_transactions.quantity_norm_for_valuation,
-       groupped_expanded_transactions.transaction_uniq_id,
+       groupped_expanded_transactions.transaction_uniq_id::text,
        groupped_expanded_transactions.datetime,
        groupped_expanded_transactions.security_type,
 {% if is_incremental() %}
