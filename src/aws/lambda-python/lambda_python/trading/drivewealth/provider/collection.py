@@ -112,12 +112,13 @@ class DriveWealthProviderCollection(GainyDriveWealthProvider):
         weights = collection_version.weights
         repository = self.repository
 
-        fund = self._get_fund(profile_id, collection_id)
-        new_fund_holdings = self._generate_new_fund_holdings(weights, fund)
+        fund = self._get_fund(profile_id, collection_id) or DriveWealthFund()
+        fund.profile_id = profile_id
+        fund.collection_id = collection_id
+        fund.holdings = self._generate_new_fund_holdings(weights, fund)
+        fund.normalize_weights()
 
-        if fund:
-            fund.holdings = new_fund_holdings
-            fund.normalize_weights()
+        if fund.ref_id:
             self.api.update_fund(fund)
         else:
             user = repository.get_user(profile_id)
@@ -125,16 +126,9 @@ class DriveWealthProviderCollection(GainyDriveWealthProvider):
             name = f"Gainy {user_id}'s fund for collection {collection_id}"
             client_fund_id = f"{profile_id}_{collection_id}"
             description = name
-
-            data = self.api.create_fund(name, client_fund_id, description,
-                                        new_fund_holdings)
-
-            fund = DriveWealthFund()
-            fund.set_from_response(data)
-            fund.profile_id = profile_id
+            self.api.create_fund(fund, name, client_fund_id, description)
 
         fund.weights = weights
-        fund.collection_id = collection_id
         fund.trading_collection_version_id = collection_version.id
         repository.persist(fund)
 

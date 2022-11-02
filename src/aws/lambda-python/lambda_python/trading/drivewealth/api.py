@@ -7,7 +7,7 @@ from trading.drivewealth.models import DriveWealthBankAccount, DriveWealthKycSta
 
 from gainy.utils import get_logger, env
 from gainy.trading.drivewealth import DriveWealthApi as GainyDriveWealthApi
-from gainy.trading.drivewealth.models import DriveWealthAccount
+from gainy.trading.drivewealth.models import DriveWealthAccount, DriveWealthFund
 
 logger = get_logger(__name__)
 
@@ -133,15 +133,17 @@ class DriveWealthApi(GainyDriveWealthApi):
 
         raise Exception('Either ref_id or symbol must be specified.')
 
-    def create_fund(self, name, client_fund_id, description, holdings):
-        return self._make_request(
+    def create_fund(self, fund: DriveWealthFund, name, client_fund_id,
+                    description):
+        data = self._make_request(
             "POST", "/managed/funds", {
                 'userID': DRIVEWEALTH_RIA_ID,
                 'name': name,
                 'clientFundID': client_fund_id,
                 'description': description,
-                'holdings': holdings,
+                'holdings': fund.holdings,
             })
+        fund.set_from_response(data)
 
     def create_autopilot_run(self, account_ids: list):
         return self._make_request(
