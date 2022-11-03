@@ -21,7 +21,8 @@ with filtered_transactions as
                     filtered_transactions.symbol,
                     filtered_transactions.quantity_norm_for_valuation,
                     period,
-                    week_trading_sessions_static.index as week_trading_session_index,
+                    week_trading_session_index,
+                    latest_trading_time,
                     portfolio_transaction_chart.datetime,
                     transaction_uniq_id,
                     open::numeric,
@@ -32,22 +33,14 @@ with filtered_transactions as
              from portfolio_transaction_chart
                       join filtered_transactions using (transaction_uniq_id, profile_id)
                       left join ticker_realtime_metrics using (symbol)
-                      left join week_trading_sessions_static
-                                on week_trading_sessions_static.symbol = filtered_transactions.symbol
-                                    and portfolio_transaction_chart.datetime between week_trading_sessions_static.open_at and week_trading_sessions_static.close_at - interval '1 millisecond'
-             where ((period in ('1d', '1w') and portfolio_transaction_chart.datetime between week_trading_sessions_static.open_at and week_trading_sessions_static.close_at)
-                 or (period = '1m' and portfolio_transaction_chart.datetime >= ticker_realtime_metrics.time::date - interval '1 month')
-                 or (period = '3m' and portfolio_transaction_chart.datetime >= ticker_realtime_metrics.time::date - interval '3 months')
-                 or (period = '1y' and portfolio_transaction_chart.datetime >= ticker_realtime_metrics.time::date - interval '1 year')
-                 or (period = '5y' and portfolio_transaction_chart.datetime >= ticker_realtime_metrics.time::date - interval '5 years'))
-               and {chart_where_clause}
+             where {chart_where_clause}
      ),
      ticker_chart as
          (
-             select profile_id,
-                    symbol,
+             select symbol,
                     period,
                     min(week_trading_session_index)  as week_trading_session_index,
+                    min(latest_trading_time)         as latest_trading_time,
                     datetime,
                     sum(quantity_norm_for_valuation) as quantity,
                     count(transaction_uniq_id)       as transaction_count,
@@ -57,7 +50,7 @@ with filtered_transactions as
                     sum(close)                       as close,
                     sum(adjusted_close)              as adjusted_close
              from raw_chart_data
-             group by profile_id, symbol, period, datetime
+             group by symbol, period, datetime
      ),
      chart_date_stats as
          (
@@ -96,18 +89,17 @@ with filtered_transactions as
                                 on week_trading_sessions_static.symbol = ticker_chart.symbol
                                     and datetime >= week_trading_sessions_static.open_at
                                     and datetime < week_trading_sessions_static.close_at
-             where week_trading_sessions_static is not null
-                or period != '1w'
+             where week_trading_sessions_static is not null or period != '1w'
      ),
      schedule as materialized
          (
-             select profile_id, period, datetime
+             select period, datetime
              from ticker_chart
                       left join datetimes_to_exclude_from_schedule using (period, datetime)
                       left join symbols_to_exclude_from_schedule using (period, symbol)
              where (period = '1d' and datetimes_to_exclude_from_schedule.datetime is null)
                 or (period != '1d' and symbols_to_exclude_from_schedule.symbol is null)
-             group by profile_id, period, datetime
+             group by period, datetime
      ),
      ticker_chart_with_cash_adjustment as
          (
@@ -116,12 +108,12 @@ with filtered_transactions as
                         when ticker_chart.quantity > 0
                             then ticker_chart.adjusted_close / ticker_chart.quantity *
                                  (last_value(quantity)
-                                  over (partition by profile_id, period, symbol order by datetime rows between current row and unbounded following) -
+                                  over (partition by period, symbol order by datetime rows between current row and unbounded following) -
                                   ticker_chart.quantity)
                         else 0
                         end as cash_adjustment
              from ticker_chart
-                      join schedule using (profile_id, period, datetime)
+                      join schedule using (period, datetime)
      ),
      static_values as
          (
@@ -136,33 +128,36 @@ with filtered_transactions as
                                     else 0
                                     end as value
                           from profile_holdings_normalized
-                          where type = 'cash'
+                          where profile_id in (select profile_id from filtered_transactions group by profile_id)
+                            and type = 'cash'
                             and ticker_symbol = 'CUR:USD'
                       )
-             select profile_id,
-                    sum(value) as cash_value
+             select sum(value) as cash_value
              from raw_data
-             group by profile_id
      ),
      raw_chart as materialized
          (
-             select profile_id,
-                    period,
+             select period,
                     datetime,
                     sum(cash_adjustment) as cash_adjustment
              from ticker_chart_with_cash_adjustment
-             group by profile_id, period, datetime
+             group by period, datetime
              having (period != '1d' or min(week_trading_session_index) = 0)
+                and (period != '1w' or min(week_trading_session_index) < 7)
+                and (period != '1m' or datetime >= min(latest_trading_time)::date - interval '1 month')
+                and (period != '3m' or datetime >= min(latest_trading_time)::date - interval '3 month')
+                and (period != '1y' or datetime >= min(latest_trading_time)::date - interval '1 year')
+                and (period != '5y' or datetime >= min(latest_trading_time)::date - interval '5 year')
      ),
      cash_adjustments as materialized
          (
-             select profile_id, period, datetime, cash_adjustment
+             select period, datetime, cash_adjustment
              from (
-                      select profile_id, period, min(datetime) as datetime
+                      select period, min(datetime) as datetime
                       from raw_chart
-                      group by profile_id, period
+                      group by period
                   ) t
-                      join raw_chart using (profile_id, period, datetime)
+                      join raw_chart using (period, datetime)
      ),
      raw_data_1d as
          (
@@ -171,9 +166,7 @@ with filtered_transactions as
                     sum(cash_adjustment)                                                 as cash_adjustment
              from filtered_transactions
                       join historical_prices_marked using (symbol)
-                      left join cash_adjustments
-                                on cash_adjustments.profile_id = filtered_transactions.profile_id
-                                    and period = '1d'
+                      left join cash_adjustments on period = '1d'
              group by filtered_transactions.profile_id
      ),
      raw_data_1w as
@@ -183,9 +176,7 @@ with filtered_transactions as
                     sum(cash_adjustment)                                                 as cash_adjustment
              from filtered_transactions
                       join historical_prices_marked using (symbol)
-                      left join cash_adjustments
-                                on cash_adjustments.profile_id = filtered_transactions.profile_id
-                                    and period = '1w'
+                      left join cash_adjustments on period = '1w'
              where filtered_transactions.datetime <= historical_prices_marked.date_1w
              group by filtered_transactions.profile_id
      ),
@@ -196,9 +187,7 @@ with filtered_transactions as
                     sum(cash_adjustment)                                                 as cash_adjustment
              from filtered_transactions
                       join historical_prices_marked using (symbol)
-                      left join cash_adjustments
-                                on cash_adjustments.profile_id = filtered_transactions.profile_id
-                                    and period = '1m'
+                      left join cash_adjustments on period = '1m'
              where filtered_transactions.datetime <= historical_prices_marked.date_1m
              group by filtered_transactions.profile_id
      ),
@@ -209,9 +198,7 @@ with filtered_transactions as
                     sum(cash_adjustment)                                                 as cash_adjustment
              from filtered_transactions
                       join historical_prices_marked using (symbol)
-                      left join cash_adjustments
-                                on cash_adjustments.profile_id = filtered_transactions.profile_id
-                                    and period = '3m'
+                      left join cash_adjustments on period = '3m'
              where filtered_transactions.datetime <= historical_prices_marked.date_3m
              group by filtered_transactions.profile_id
      ),
@@ -222,9 +209,7 @@ with filtered_transactions as
                     sum(cash_adjustment)                                                 as cash_adjustment
              from filtered_transactions
                       join historical_prices_marked using (symbol)
-                      left join cash_adjustments
-                                on cash_adjustments.profile_id = filtered_transactions.profile_id
-                                    and period = '1y'
+                      left join cash_adjustments on period = '1y'
              where filtered_transactions.datetime <= historical_prices_marked.date_1y
              group by filtered_transactions.profile_id
      ),
@@ -235,23 +220,20 @@ with filtered_transactions as
                     sum(cash_adjustment)                                                 as cash_adjustment
              from filtered_transactions
                       join historical_prices_marked using (symbol)
-                      left join cash_adjustments
-                                on cash_adjustments.profile_id = filtered_transactions.profile_id
-                                    and period = '5y'
+                      left join cash_adjustments on period = '5y'
              where filtered_transactions.datetime <= historical_prices_marked.date_5y
              group by filtered_transactions.profile_id
      )
-select profile_id,
-       prev_close_1d + greatest(0, raw_data_1d.cash_adjustment + coalesce(cash_value, 0)) as prev_close_1d,
+select prev_close_1d + greatest(0, raw_data_1d.cash_adjustment + coalesce(cash_value, 0)) as prev_close_1d,
        prev_close_1w + greatest(0, raw_data_1w.cash_adjustment + coalesce(cash_value, 0)) as prev_close_1w,
        prev_close_1m + greatest(0, raw_data_1m.cash_adjustment + coalesce(cash_value, 0)) as prev_close_1m,
        prev_close_3m + greatest(0, raw_data_3m.cash_adjustment + coalesce(cash_value, 0)) as prev_close_3m,
        prev_close_1y + greatest(0, raw_data_1y.cash_adjustment + coalesce(cash_value, 0)) as prev_close_1y,
        prev_close_5y + greatest(0, raw_data_5y.cash_adjustment + coalesce(cash_value, 0)) as prev_close_5y
 from raw_data_1d
-         left join static_values using (profile_id)
-         left join raw_data_1w using (profile_id)
-         left join raw_data_1m using (profile_id)
-         left join raw_data_3m using (profile_id)
-         left join raw_data_1y using (profile_id)
-         left join raw_data_5y using (profile_id)
+         left join static_values on true
+         left join raw_data_1w on true
+         left join raw_data_1m on true
+         left join raw_data_3m on true
+         left join raw_data_1y on true
+         left join raw_data_5y on true

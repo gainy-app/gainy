@@ -21,6 +21,7 @@ class PortfolioChartService:
         params = {}
         transaction_where_clause = []
         chart_where_clause = []
+        period_where_clause = []
         join_clause = []
 
         if self._should_return_empty_result(filter):
@@ -33,7 +34,8 @@ class PortfolioChartService:
                                          join_clause, profile_id,
                                          "portfolio_expanded_transactions")
 
-        self._filter_query_by_periods(params, chart_where_clause, None, filter)
+        self._filter_query_by_periods(params, period_where_clause, None,
+                                      filter)
         self._filter_query_by_institution_ids(params, transaction_where_clause,
                                               join_clause, filter)
         self._filter_query_by_access_token_ids(params,
@@ -53,7 +55,8 @@ class PortfolioChartService:
         rows = self._execute_query(
             params, {
                 "transaction_where_clause": transaction_where_clause,
-                "chart_where_clause": chart_where_clause
+                "chart_where_clause": chart_where_clause,
+                "period_where_clause": period_where_clause,
             }, join_clause, query)
 
         rows = list(self._filter_chart_by_transaction_count(rows))
@@ -87,7 +90,6 @@ class PortfolioChartService:
                                          join_clause, profile_id,
                                          "portfolio_expanded_transactions")
 
-        self._filter_query_by_periods(params, chart_where_clause, None, filter)
         self._filter_query_by_institution_ids(params, transaction_where_clause,
                                               join_clause, filter)
         self._filter_query_by_access_token_ids(params,
@@ -107,7 +109,7 @@ class PortfolioChartService:
         data = self._execute_query(
             params, {
                 "transaction_where_clause": transaction_where_clause,
-                "chart_where_clause": chart_where_clause
+                "chart_where_clause": chart_where_clause,
             }, join_clause, query)
 
         if not data:
@@ -218,8 +220,7 @@ class PortfolioChartService:
         if not filter.periods:
             return
 
-        where_clause.append(
-            sql.SQL("portfolio_transaction_chart.period in %(periods)s"))
+        where_clause.append(sql.SQL("where period in %(periods)s"))
         params['periods'] = tuple(filter.periods)
 
     def _filter_query_by_institution_ids(self, params, where_clause,

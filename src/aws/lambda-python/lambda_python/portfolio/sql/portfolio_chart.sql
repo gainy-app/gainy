@@ -20,8 +20,8 @@ with filtered_transactions as
                     filtered_transactions.symbol,
                     filtered_transactions.quantity_norm_for_valuation,
                     period,
-                    week_trading_sessions_static.index as week_trading_session_index,
-                    ticker_realtime_metrics.time as latest_trading_time,
+                    week_trading_session_index,
+                    latest_trading_time,
                     portfolio_transaction_chart.datetime,
                     transaction_uniq_id,
                     open::numeric,
@@ -32,28 +32,24 @@ with filtered_transactions as
              from portfolio_transaction_chart
                       join filtered_transactions using (transaction_uniq_id, profile_id)
                       left join ticker_realtime_metrics using (symbol)
-                      left join week_trading_sessions_static
-                                on week_trading_sessions_static.symbol = filtered_transactions.symbol
-                                    and portfolio_transaction_chart.datetime between week_trading_sessions_static.open_at and week_trading_sessions_static.close_at - interval '1 millisecond'
              where {chart_where_clause}
          ),
      ticker_chart as
          (
-             select profile_id,
-                    symbol,
+             select symbol,
                     period,
-                    min(week_trading_session_index)   as week_trading_session_index,
-                    min(latest_trading_time)          as latest_trading_time,
+                    min(week_trading_session_index)  as week_trading_session_index,
+                    min(latest_trading_time)         as latest_trading_time,
                     datetime,
-                    sum(quantity_norm_for_valuation)  as quantity,
-                    count(transaction_uniq_id)        as transaction_count,
-                    sum(open)                         as open,
-                    sum(high)                         as high,
-                    sum(low)                          as low,
-                    sum(close)                        as close,
-                    sum(adjusted_close)               as adjusted_close
+                    sum(quantity_norm_for_valuation) as quantity,
+                    count(transaction_uniq_id)       as transaction_count,
+                    sum(open)                        as open,
+                    sum(high)                        as high,
+                    sum(low)                         as low,
+                    sum(close)                       as close,
+                    sum(adjusted_close)              as adjusted_close
              from raw_chart_data
-             group by profile_id, symbol, period, datetime
+             group by symbol, period, datetime
          ),
      chart_date_stats as
          (
@@ -96,13 +92,13 @@ with filtered_transactions as
      ),
      schedule as materialized
          (
-             select profile_id, period, datetime
+             select period, datetime
              from ticker_chart
                       left join datetimes_to_exclude_from_schedule using (period, datetime)
                       left join symbols_to_exclude_from_schedule using (period, symbol)
              where (period = '1d' and datetimes_to_exclude_from_schedule.datetime is null)
                 or (period != '1d' and symbols_to_exclude_from_schedule.symbol is null)
-             group by profile_id, period, datetime
+             group by period, datetime
      ),
      ticker_chart_with_cash_adjustment as
          (
@@ -110,11 +106,11 @@ with filtered_transactions as
                     case
                         when ticker_chart.quantity > 0
                             then ticker_chart.adjusted_close / ticker_chart.quantity *
-                                 (last_value(quantity) over (partition by profile_id, period, symbol order by datetime rows between current row and unbounded following) - ticker_chart.quantity)
+                                 (last_value(quantity) over (partition by period, symbol order by datetime rows between current row and unbounded following) - ticker_chart.quantity)
                         else 0
                         end as cash_adjustment
              from ticker_chart
-                      join schedule using (profile_id, period, datetime)
+                      join schedule using (period, datetime)
          ),
      static_values as
          (
@@ -129,28 +125,26 @@ with filtered_transactions as
                                     else 0
                                     end as value
                           from profile_holdings_normalized
-                          where type = 'cash'
+                          where profile_id in (select profile_id from filtered_transactions group by profile_id)
+                            and type = 'cash'
                             and ticker_symbol = 'CUR:USD'
                       )
-             select profile_id,
-                    sum(value) as cash_value
+             select sum(value) as cash_value
              from raw_data
-             group by profile_id
          ),
      raw_chart as materialized
          (
-             select profile_id,
-                     period,
-                     datetime,
-                     sum(transaction_count) as transaction_count,
-                     sum(open)              as open,
-                     sum(high)              as high,
-                     sum(low)               as low,
-                     sum(close)             as close,
-                     sum(adjusted_close)    as adjusted_close,
-                     sum(cash_adjustment)   as cash_adjustment
-              from ticker_chart_with_cash_adjustment
-              group by profile_id, period, datetime
+             select period,
+                    datetime,
+                    sum(transaction_count) as transaction_count,
+                    sum(open)              as open,
+                    sum(high)              as high,
+                    sum(low)               as low,
+                    sum(close)             as close,
+                    sum(adjusted_close)    as adjusted_close,
+                    sum(cash_adjustment)   as cash_adjustment
+             from ticker_chart_with_cash_adjustment
+             group by period, datetime
              having (period != '1d' or min(week_trading_session_index) = 0)
                 and (period != '1w' or min(week_trading_session_index) < 7)
                 and (period != '1m' or datetime >= min(latest_trading_time)::date - interval '1 month')
@@ -167,4 +161,5 @@ select period,
        (close + greatest(0, cash_adjustment + coalesce(cash_value, 0)))::double precision          as close,
        (adjusted_close + greatest(0, cash_adjustment + coalesce(cash_value, 0)))::double precision as adjusted_close
 from raw_chart
-         left join static_values using (profile_id)
+         left join static_values on true
+{period_where_clause}
