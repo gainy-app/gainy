@@ -42,7 +42,8 @@ union all
            historical_prices_aggregated_15min.updated_at
     from {{ ref('historical_prices_aggregated_15min') }}
              join {{ ref('week_trading_sessions') }} using (symbol)
-    where historical_prices_aggregated_15min.datetime between week_trading_sessions.open_at and week_trading_sessions.close_at - interval '1 microsecond'
+    where week_trading_sessions.date >= now() - interval '1 week'
+      and historical_prices_aggregated_15min.datetime between week_trading_sessions.open_at and week_trading_sessions.close_at - interval '1 microsecond'
 )
 
 union all
