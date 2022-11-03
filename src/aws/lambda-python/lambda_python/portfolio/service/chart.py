@@ -18,24 +18,15 @@ class PortfolioChartService:
         with open(os.path.join(SCRIPT_DIR, "../sql/portfolio_chart.sql")) as f:
             query = f.read()
 
-        params = {}
+        params = {"profile_id": profile_id}
         transaction_where_clause = []
         chart_where_clause = []
-        period_where_clause = []
         join_clause = []
 
         if self._should_return_empty_result(filter):
             return []
 
-        self._filter_query_by_profile_id(params, chart_where_clause, None,
-                                         profile_id,
-                                         "portfolio_transaction_chart")
-        self._filter_query_by_profile_id(params, transaction_where_clause,
-                                         join_clause, profile_id,
-                                         "portfolio_expanded_transactions")
-
-        self._filter_query_by_periods(params, period_where_clause, None,
-                                      filter)
+        self._filter_query_by_periods(params, chart_where_clause, None, filter)
         self._filter_query_by_institution_ids(params, transaction_where_clause,
                                               join_clause, filter)
         self._filter_query_by_access_token_ids(params,
@@ -52,11 +43,15 @@ class PortfolioChartService:
         self._filter_query_by_ltt_only(params, transaction_where_clause,
                                        join_clause, filter)
 
+        if transaction_where_clause:
+            transaction_where_clause.insert(0, sql.SQL(""))
+        if chart_where_clause:
+            chart_where_clause.insert(0, sql.SQL(""))
+
         rows = self._execute_query(
             params, {
                 "transaction_where_clause": transaction_where_clause,
                 "chart_where_clause": chart_where_clause,
-                "period_where_clause": period_where_clause,
             }, join_clause, query)
 
         rows = list(self._filter_chart_by_transaction_count(rows))
@@ -75,7 +70,7 @@ class PortfolioChartService:
                              "../sql/portfolio_chart_prev_close.sql")) as f:
             query = f.read()
 
-        params = {}
+        params = {"profile_id": profile_id}
         transaction_where_clause = []
         chart_where_clause = []
         join_clause = []
@@ -83,13 +78,7 @@ class PortfolioChartService:
         if self._should_return_empty_result(filter):
             return []
 
-        self._filter_query_by_profile_id(params, chart_where_clause, None,
-                                         profile_id,
-                                         "portfolio_transaction_chart")
-        self._filter_query_by_profile_id(params, transaction_where_clause,
-                                         join_clause, profile_id,
-                                         "portfolio_expanded_transactions")
-
+        self._filter_query_by_periods(params, chart_where_clause, None, filter)
         self._filter_query_by_institution_ids(params, transaction_where_clause,
                                               join_clause, filter)
         self._filter_query_by_access_token_ids(params,
@@ -105,6 +94,11 @@ class PortfolioChartService:
                                              join_clause, filter)
         self._filter_query_by_ltt_only(params, transaction_where_clause,
                                        join_clause, filter)
+
+        if transaction_where_clause:
+            transaction_where_clause.insert(0, sql.SQL(""))
+        if chart_where_clause:
+            chart_where_clause.insert(0, sql.SQL(""))
 
         data = self._execute_query(
             params, {
@@ -209,18 +203,12 @@ class PortfolioChartService:
 
         return False
 
-    def _filter_query_by_profile_id(self, params, where_clause, join_clause,
-                                    profile_id, table_name):
-        params["profile_id"] = profile_id,
-        where_clause.append(
-            sql.SQL(f"{table_name}.profile_id = %(profile_id)s"))
-
     def _filter_query_by_periods(self, params, where_clause, join_clause,
                                  filter: PortfolioChartFilter):
         if not filter.periods:
             return
 
-        where_clause.append(sql.SQL("where period in %(periods)s"))
+        where_clause.append(sql.SQL("period in %(periods)s"))
         params['periods'] = tuple(filter.periods)
 
     def _filter_query_by_institution_ids(self, params, where_clause,

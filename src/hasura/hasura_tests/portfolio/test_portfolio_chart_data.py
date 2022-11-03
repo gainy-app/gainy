@@ -1,5 +1,5 @@
 import datetime
-import dateutil.relativedelta
+import dateutil.parser
 import numbers
 import os
 import pytest
@@ -84,6 +84,7 @@ def verify_portfolio_chart(portfolio_chart,
 
 def verify_portfolio_chart_previous_period_close(period,
                                                  previous_period_close,
+                                                 threshold_datetime,
                                                  quantities_override,
                                                  portfolio_chart_1y,
                                                  assert_message_prefix=""):
@@ -94,19 +95,6 @@ def verify_portfolio_chart_previous_period_close(period,
         ) < PRICE_EPS, f"{assert_message_prefix}: wrong previous_period_close on period {period}, expected 0"
         return
 
-    if period == '1d':
-        threshold_datetime = datetime.datetime.now()
-    elif period == '1w':
-        threshold_datetime = datetime.datetime.now() - datetime.timedelta(
-            days=7)
-    elif period == '1m':
-        threshold_datetime = datetime.datetime.now(
-        ) - dateutil.relativedelta.relativedelta(months=1)
-    elif period == '3m':
-        threshold_datetime = datetime.datetime.now(
-        ) - dateutil.relativedelta.relativedelta(months=3)
-    else:
-        raise Exception(f'{period} is not supported')
     threshold_datetime = threshold_datetime.replace(hour=0,
                                                     minute=0,
                                                     second=0,
@@ -134,7 +122,7 @@ def verify_portfolio_chart_previous_period_close(period,
 
         return  # TODO test complex cases
 
-    print(period, previous_period_close, row)
+    print(period, threshold_datetime, previous_period_close, row)
 
     if expected_value is None:
         assert previous_period_close is None, f"{assert_message_prefix}: wrong previous_period_close for period {period}, expected {expected_value}"
@@ -160,17 +148,9 @@ def verify_profile(user_id,
     },
                                           user_id=user_id)['data']
     portfolio_chart_1y = portfolio_data['get_portfolio_chart']
-    for period in periods:
-        previous_period_close = portfolio_data[
-            'get_portfolio_chart_previous_period_close'][
-                f"prev_close_{period}"]
-        verify_portfolio_chart_previous_period_close(period,
-                                                     previous_period_close,
-                                                     quantities_override,
-                                                     portfolio_chart_1y,
-                                                     user_id)
 
     for period in periods:
+        print(profile_id, period)
         portfolio_chart = make_graphql_request(
             chart_query, {
                 "profileId": profile_id,
@@ -179,6 +159,20 @@ def verify_profile(user_id,
             user_id=user_id)['data']['get_portfolio_chart']
         verify_portfolio_chart(portfolio_chart, charts[period], quantities,
                                quantities_override, period)
+
+        previous_period_close = portfolio_data[
+            'get_portfolio_chart_previous_period_close'][
+                f"prev_close_{period}"]
+
+        if not portfolio_chart:
+            assert not previous_period_close
+            continue
+
+        threshold_datetime = min(i['datetime'] for i in portfolio_chart)
+        threshold_datetime = dateutil.parser.parse(threshold_datetime)
+        verify_portfolio_chart_previous_period_close(
+            period, previous_period_close, threshold_datetime,
+            quantities_override, portfolio_chart_1y, user_id)
 
 
 def get_test_portfolio_data(only_with_holdings=False):

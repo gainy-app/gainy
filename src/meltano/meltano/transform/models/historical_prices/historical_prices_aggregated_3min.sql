@@ -33,11 +33,11 @@ with
      time_series as
          (
              select symbol,
-                    week_trading_sessions.date,
+                    week_trading_sessions_static.date,
                     date_trunc('minute', dd) -
                     interval '1 minute' *
                     mod(extract(minutes from dd)::int, {{ minutes }}) as time_truncated
-             from {{ ref('week_trading_sessions') }}
+             from {{ ref('week_trading_sessions_static') }}
                       join generate_series(open_at, least(now(), close_at - interval '1 second'), interval '{{ minutes }} minutes') dd on true
 {% if is_incremental() and var('realtime') %}
                       join max_date using (symbol)
@@ -49,7 +49,7 @@ with
              select historical_intraday_prices.*,
                     historical_intraday_prices.time_{{ minutes }}min as time_truncated
              from {{ ref('historical_intraday_prices') }}
-                      join {{ ref('week_trading_sessions') }} using (symbol, date)
+                      join {{ ref('week_trading_sessions_static') }} using (symbol, date)
 {% if is_incremental() and var('realtime') %}
                       join max_date using (symbol)
              where historical_intraday_prices.time_{{ minutes }}min > max_date.datetime - interval '30 minutes'

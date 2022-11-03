@@ -21,7 +21,7 @@ with polygon_symbols as materialized
                       join {{ ref('week_trading_sessions_static') }} using (symbol)
              where polygon_intraday_prices.time >= week_trading_sessions_static.open_at
                and polygon_intraday_prices.time < week_trading_sessions_static.close_at
-{% if not var('realtime') %}
+{% if var('realtime') %}
                and week_trading_sessions_static.index = 0
 {% endif %}
              group by symbol, week_trading_sessions_static.date
@@ -42,7 +42,7 @@ with polygon_symbols as materialized
              where polygon_symbols.symbol is null
                and time >= week_trading_sessions_static.open_at
                and time < week_trading_sessions_static.close_at
-{% if not var('realtime') %}
+{% if var('realtime') %}
                and week_trading_sessions_static.index = 0
 {% endif %}
          ),
@@ -61,7 +61,7 @@ with polygon_symbols as materialized
                       join polygon_symbols using (symbol, date)
              where time >= week_trading_sessions_static.open_at
                and time < week_trading_sessions_static.close_at
-{% if not var('realtime') %}
+{% if var('realtime') %}
                and week_trading_sessions_static.index = 0
 {% endif %}
          ),

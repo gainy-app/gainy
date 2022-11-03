@@ -6,7 +6,7 @@
     post_hook=[
       pk('symbol, date'),
       index('id', true),
-      'delete from {{this}} where open_at < now() - interval \'1 week\'',
+      'delete from {{this}} where open_at < now() - interval \'2 week\'',
     ]
   )
 }}
@@ -22,18 +22,18 @@ with trading_sessions as
                     row_number() over (partition by exchange_name, country_name order by date desc) - 1 as index,
                     null                                                                                as type
              from {{ ref('exchange_schedule') }}
-             where open_at between now() - interval '10 days' and now()
+             where open_at between now() - interval '2 weeks' and now()
 
              union all
 
              select dd::date                                 as date,
                     null                                     as exchange_name,
                     null                                     as country_name,
-                    dd - interval '1 day'                    as open_at,
-                    dd                                       as close_at,
+                    dd::timestamp                            as open_at,
+                    dd::timestamp + interval '1 day'         as close_at,
                     row_number() over (order by dd desc) - 1 as index,
                     'crypto'                                 as type
-             FROM generate_series(now() - interval '10 days', now(), interval '1 day') dd
+             FROM generate_series(now()::date - interval '2 weeks', now()::date, interval '1 day') dd
          ),
      symbols as
          (
@@ -76,7 +76,7 @@ from (
          left join {{ this }} old_trading_sessions using (symbol, date, index)
 {% endif %}
 
-where t.open_at between now() - interval '1 week' and now()
+where t.open_at between now() - interval '2 week' and now()
 
 {% if is_incremental() %}
   and old_trading_sessions.symbol is null
