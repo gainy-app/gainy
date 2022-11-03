@@ -11,6 +11,11 @@ dag = create_dag(dag_id,
 file_name = 'weights_{{ ts_nodash }}.csv'
 file_path = f'/tmp/{file_name}'
 
+sysinfo = BashOperator(
+    task_id="sysinfo",
+    bash_command="/venv/bin/python --version && /venv/bin/python -mpip freeze",
+    dag=dag)
+
 optimize = BashOperator(
     task_id="optimize",
     bash_command=
@@ -31,4 +36,4 @@ cleanup_post = BashOperator(task_id="cleanup_post",
                             bash_command=f"rm {file_path} || true",
                             dag=dag)
 
-cleanup_pre >> optimize >> upload >> cleanup_post
+sysinfo >> cleanup_pre >> optimize >> upload >> cleanup_post
