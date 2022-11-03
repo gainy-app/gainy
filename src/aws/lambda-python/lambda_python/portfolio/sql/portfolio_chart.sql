@@ -55,50 +55,22 @@ with filtered_transactions as
              from raw_chart_data
              group by symbol, period, datetime, date
          ),
-     chart_date_stats as
+     schedule as materialized
          (
-             select symbol,
-                    period,
-                    min(datetime) as min_datetime,
-                    max(datetime) as max_datetime
-             from raw_chart_data
-             group by symbol, period
-     ),
-     datetimes_to_exclude_from_schedule as
-         (
-             select period, datetime
+             select distinct period, datetime
              from (
-                      select distinct symbol, period, datetime
+                      select t.*,
+                             max(cnt)
+                             over (partition by period order by datetime rows between unbounded preceding and current row ) as cum_max_cnt
                       from (
-                               select period, datetime
+                               select period,
+                                      datetime,
+                                      count(distinct symbol) as cnt
                                from ticker_chart
                                group by period, datetime
                            ) t
-                               join chart_date_stats using (period)
-                               left join ticker_chart using (symbol, period, datetime)
-                      where ticker_chart.symbol is null
                   ) t
-                      join chart_date_stats using (symbol, period)
-             where datetime between min_datetime and max_datetime
-                or period = '1d'
-             group by period, datetime
-     ),
-     symbols_to_exclude_from_schedule as
-         (
-             select distinct period, ticker_chart.symbol
-             from datetimes_to_exclude_from_schedule
-                      join ticker_chart using (period, datetime)
-             where week_trading_session_index is not null or period != '1w'
-     ),
-     schedule as
-         (
-             select period, datetime
-             from ticker_chart
-                      left join datetimes_to_exclude_from_schedule using (period, datetime)
-                      left join symbols_to_exclude_from_schedule using (period, symbol)
-             where (period = '1d' and datetimes_to_exclude_from_schedule.datetime is null)
-                or (period != '1d' and symbols_to_exclude_from_schedule.symbol is null)
-             group by period, datetime
+             where cnt = cum_max_cnt
      ),
      ticker_chart_with_cash_adjustment as
          (
