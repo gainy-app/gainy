@@ -123,20 +123,20 @@ class PortfolioChartService:
                                "../sql/portfolio_piechart.sql")) as f:
             query = f.read()
 
-        params = {}
+        params = {"profile_id": profile_id}
         where_clause = []
         join_clause = []
 
         if self._should_return_empty_result(filter):
             return []
 
-        self._filter_query_by_profile_id(params, where_clause, join_clause,
-                                         profile_id,
-                                         "profile_holdings_normalized")
         self._filter_query_by_access_token_ids(params, where_clause,
                                                join_clause, filter)
         self._filter_query_by_broker_ids(params, where_clause, join_clause,
                                          filter)
+
+        if where_clause:
+            where_clause.insert(0, sql.SQL(""))
 
         rows = self._execute_query(params, {"where_clause": where_clause},
                                    join_clause, query)
