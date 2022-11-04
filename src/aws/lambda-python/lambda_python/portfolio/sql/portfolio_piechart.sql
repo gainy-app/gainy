@@ -8,7 +8,8 @@ with holdings as
                     profile_holdings_normalized.symbol,
                     profile_holdings_normalized.type as security_type
              from profile_holdings_normalized
-             where {where_clause}
+             where profile_id = %(profile_id)s
+                   {where_clause}
          ),
 
      portfolio_tickers as

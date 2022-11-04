@@ -115,7 +115,8 @@ union all
              from {{ ref('collection_ticker_weights') }}
                       join {{ ref('historical_prices_aggregated_15min') }} using (symbol, date)
                       join {{ ref('week_trading_sessions_static') }} using (symbol, date)
-             where historical_prices_aggregated_15min.datetime between week_trading_sessions_static.open_at and week_trading_sessions_static.close_at
+             where week_trading_sessions_static.date >= now() - interval '1 week'
+               and historical_prices_aggregated_15min.datetime between week_trading_sessions_static.open_at and week_trading_sessions_static.close_at
          ),
     collection_realtime_gains as
         (

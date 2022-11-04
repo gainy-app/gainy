@@ -63,8 +63,13 @@ from data
 
 {% if is_incremental() %}
          left join {{ this }} old_data on old_data.uniq_id = data.profile_id || '_' || data.type || '_' || data.id
-where old_data.uniq_id is null
+{% endif %}
+
+where data.profile_id is not null
+
+{% if is_incremental() %}
+  and (old_data.uniq_id is null
    or data.datetime != old_data.datetime
    or data.amount != old_data.amount
-   or data.tags::text != old_data.tags::text
+   or data.tags::text != old_data.tags::text)
 {% endif %}
