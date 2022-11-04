@@ -217,6 +217,16 @@ class PortfolioChartService:
         if not filter.institution_ids:
             return
 
+        s = sql.SQL(
+            "left join profile_holdings_normalized using (holding_id_v2)")
+        if s not in join_clause:
+            join_clause.append(s)
+
+        join_clause.append(
+            sql.SQL(
+                "left join app.profile_plaid_access_tokens on profile_plaid_access_tokens.id = profile_holdings_normalized.plaid_access_token_id"
+            ))
+
         where_clause.append(sql.SQL("institution_id in %(institution_ids)s"))
         params['institution_ids'] = tuple(filter.institution_ids)
 
@@ -225,6 +235,12 @@ class PortfolioChartService:
                                           filter: PortfolioChartFilter):
         if not filter.access_token_ids:
             return
+
+        s = sql.SQL(
+            "left join profile_holdings_normalized using (holding_id_v2)")
+        if s not in join_clause:
+            join_clause.append(s)
+
         where_clause.append(
             sql.SQL("plaid_access_token_id in %(access_token_ids)s"))
         params['access_token_ids'] = tuple(filter.access_token_ids)
@@ -233,6 +249,11 @@ class PortfolioChartService:
                                     filter: PortfolioChartFilter):
         if not filter.broker_ids:
             return
+
+        s = sql.SQL(
+            "left join profile_holdings_normalized using (holding_id_v2)")
+        if s not in join_clause:
+            join_clause.append(s)
 
         where_clause.append(
             sql.SQL(

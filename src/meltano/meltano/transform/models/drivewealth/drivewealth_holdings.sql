@@ -49,9 +49,9 @@ with latest_portfolio_status as
      )
 select profile_id,
        null                                                          as account_id,
-       (fund_holding_data ->> 'openQty')::numeric                    as quantity,
-       (fund_holding_data ->> 'openQty')::numeric                    as quantity_norm_for_valuation,
-       (fund_holding_data ->> 'openQty')::numeric *
+       (fund_holding_data ->> 'openQty')::double precision           as quantity,
+       (fund_holding_data ->> 'openQty')::double precision           as quantity_norm_for_valuation,
+       (fund_holding_data ->> 'openQty')::double precision *
        ticker_realtime_metrics.actual_price                          as actual_value,
        base_tickers.name                                             as name,
        base_tickers.symbol                                           as symbol,
@@ -70,15 +70,15 @@ from fund_holdings
 union all
 
 select portfolio_funds.profile_id,
-       null                                          as account_id,
-       (portfolio_holding_data ->> 'value')::numeric as quantity,
-       (portfolio_holding_data ->> 'value')::numeric as quantity_norm_for_valuation,
-       (portfolio_holding_data ->> 'value')::numeric as actual_value,
-       'U S Dollar'                                  as name,
-       'CUR:USD'                                     as symbol,
-       'cash'                                        as type,
-       null::timestamp                               as purchase_date,
+       null                                                   as account_id,
+       (portfolio_holding_data ->> 'value')::double precision as quantity,
+       (portfolio_holding_data ->> 'value')::double precision as quantity_norm_for_valuation,
+       (portfolio_holding_data ->> 'value')::double precision as actual_value,
+       'U S Dollar'                                           as name,
+       'CUR:USD'                                              as symbol,
+       'cash'                                                 as type,
+       null::timestamp                                        as purchase_date,
        updated_at,
-       null                                          as collection_id
+       null                                                   as collection_id
 from portfolio_funds
 where portfolio_holding_data ->> 'type' = 'CASH_RESERVE'
