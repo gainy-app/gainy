@@ -17,7 +17,7 @@ query GetCollectionTickerActualWeights($collection_id: Int!){
 ### Reconfigure TTF holdings
 Generate the trades to make user's TTF holdings look like input params.
 ```graphql
-mutation TradingWithdrawFunds(
+mutation TradingReconfigureCollectionHoldings(
     $profile_id: Int!
     $collection_id: Int!
     $weights: [TickerWeight]
@@ -30,7 +30,7 @@ mutation TradingWithdrawFunds(
     weights: $weights
     target_amount_delta: $target_amount_delta
   ){
-    ok
+    trading_collection_version_id
   }
 }
 ```
@@ -59,7 +59,6 @@ query TradingGetActualCollectionHoldings(
   }
 }
 ```
-
 
 ### Get actual TTF amount and history
 ```graphql

@@ -5,6 +5,7 @@
     tags = ["realtime"],
     post_hook=[
       index('transaction_uniq_id', true),
+      'create index if not exists pet_profile_id_symbol_datetime_index on {{this}} (profile_id, symbol, datetime)',
       'delete from {{this}}
         using (select profile_id, max(updated_at) as max_updated_at from {{this}} group by profile_id) old_stats
         where old_stats.profile_id = {{this}}.profile_id
@@ -33,7 +34,7 @@ with plaid_transactions as
                          when profile_portfolio_transactions.type = 'sell'
                              then -1
                          else 1
-                         end * abs(profile_portfolio_transactions.quantity))::numeric            as quantity_norm
+                         end * abs(profile_portfolio_transactions.quantity))                     as quantity_norm
              from {{ source('app', 'profile_portfolio_transactions') }}
                       left join {{ ref('profile_holdings_normalized') }} using (profile_id, security_id, account_id)
                       left join {{ ref('portfolio_securities_normalized') }} on portfolio_securities_normalized.id = profile_portfolio_transactions.security_id
@@ -174,7 +175,7 @@ with plaid_transactions as
                                                             t.rolling_quantity))
                                                   over (partition by security_id, account_id order by date rows between unbounded preceding and 1 preceding),
                                                   0)
-                                     )::numeric as sell_quantity,
+                                     ) as sell_quantity,
                                  symbol,
                                  security_id,
                                  profile_id,
@@ -255,10 +256,9 @@ with plaid_transactions as
                             profile_holdings_normalized.security_id,
                             profile_holdings_normalized.profile_id,
                             profile_holdings_normalized.account_id,
-                            profile_holdings_normalized.type as security_type,
+                            profile_holdings_normalized.type                                                           as security_type,
                             profile_first_transaction_date,
-                            profile_holdings_normalized.quantity::numeric -
-                            coalesce(expanded_transactions.rolling_quantity, 0) as diff
+                            profile_holdings_normalized.quantity - coalesce(expanded_transactions.rolling_quantity, 0) as diff
                       from {{ ref('profile_holdings_normalized') }}
                                left join first_transaction_date using (profile_id)
                                left join expanded_transactions using (account_id, security_id)
@@ -327,7 +327,7 @@ with plaid_transactions as
                              profile_id,
                              holding_id_v2,
                              null::int       as collection_id,
-                             quantity_norm::numeric
+                             quantity_norm::double precision
                       from mismatched_sell_transactions
 
                       union all
@@ -343,7 +343,7 @@ with plaid_transactions as
                              profile_id,
                              holding_id_v2,
                              null::int       as collection_id,
-                             quantity_norm::numeric
+                             quantity_norm::double precision
                       from mismatched_buy_transactions
 
                       union all
@@ -359,7 +359,7 @@ with plaid_transactions as
                              profile_id,
                              holding_id_v2,
                              null::int       as collection_id,
-                             quantity_norm::numeric
+                             quantity_norm::double precision
                       from mismatched_holdings_transactions
 
                       union all
@@ -375,7 +375,7 @@ with plaid_transactions as
                              profile_id,
                              holding_id_v2,
                              null::int       as collection_id,
-                             quantity_norm::numeric
+                             quantity_norm::double precision
                       from plaid_transactions
 
                       union all
@@ -391,7 +391,7 @@ with plaid_transactions as
                              profile_id,
                              holding_id_v2,
                              collection_id,
-                             quantity_norm::numeric
+                             quantity_norm::double precision
                       from ttf_transactions
                   ) t
                       left join {{ ref('base_tickers') }} using (symbol)

@@ -1,6 +1,5 @@
 import enum
 import re
-import requests
 from abc import ABC
 import dateutil.parser
 
@@ -191,14 +190,12 @@ class DriveWealthAutopilotRun(BaseDriveWealthModel):
     def table_name(self) -> str:
         return "drivewealth_autopilot_runs"
 
-    def update_trading_collection_version(
-            self, trading_collection_version: TradingCollectionVersion):
+    def is_successful(self):
         # SUCCESS	Complete Autopilot run successful
-        if self.status == "SUCCESS":
-            trading_collection_version.set_status(
-                TradingCollectionVersionStatus.EXECUTED_FULLY)
-            return
-        '''
+        return self.status == "SUCCESS"
+
+    def is_failed(self):
+        """
         REBALANCE_FAILED                  rebalance has failed
         SELL_AMOUNTCASH_ORDERS_FAILED     one or more sell orders have failed
         SELL_ORDERQTY_ORDERS_FAILED       one or more sell orders have failed
@@ -212,8 +209,17 @@ class DriveWealthAutopilotRun(BaseDriveWealthModel):
         BUY_AMOUNTCASH_ORDERS_TIMEDOUT    required buy orders have timedout
         ALLOCATION_TIMEDOUT               allocation processing timeout
         REBALANCE_ABORTED                 rebalance has been cancelled
-        '''
-        if re.search(r'(FAILED|TIMEDOUT|ABORTED)$', self.status):
+        """
+        return re.search(r'(FAILED|TIMEDOUT|ABORTED)$', self.status)
+
+    def update_trading_collection_version(
+            self, trading_collection_version: TradingCollectionVersion):
+        if self.is_successful():
+            trading_collection_version.set_status(
+                TradingCollectionVersionStatus.EXECUTED_FULLY)
+            return
+
+        if self.is_failed():
             trading_collection_version.set_status(
                 TradingCollectionVersionStatus.FAILED)
             return

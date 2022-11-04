@@ -1,23 +1,17 @@
 with filtered_transactions as
          (
              select portfolio_expanded_transactions.transaction_uniq_id,
-                    portfolio_expanded_transactions.profile_id,
-                    portfolio_expanded_transactions.holding_id_v2,
                     portfolio_expanded_transactions.symbol,
                     sum(portfolio_expanded_transactions.quantity_norm_for_valuation) as quantity_norm_for_valuation
              from portfolio_expanded_transactions
-                      left join profile_holdings_normalized using (holding_id_v2)
-                      left join app.profile_plaid_access_tokens
-                                on profile_plaid_access_tokens.id = profile_holdings_normalized.plaid_access_token_id
                       {join_clause}
              where portfolio_expanded_transactions.profile_id = %(profile_id)s
                    {transaction_where_clause}
-             group by portfolio_expanded_transactions.transaction_uniq_id, portfolio_expanded_transactions.profile_id,
-                      portfolio_expanded_transactions.holding_id_v2, portfolio_expanded_transactions.symbol
+             group by portfolio_expanded_transactions.transaction_uniq_id, portfolio_expanded_transactions.symbol
          ),
      raw_chart_data as
          (
-             select filtered_transactions.profile_id,
+             select profile_id,
                     filtered_transactions.symbol,
                     filtered_transactions.quantity_norm_for_valuation,
                     period,
@@ -26,14 +20,13 @@ with filtered_transactions as
                     portfolio_transaction_chart.date,
                     portfolio_transaction_chart.datetime,
                     transaction_uniq_id,
-                    open::numeric,
-                    high::numeric,
-                    low::numeric,
-                    close::numeric,
-                    adjusted_close::numeric
+                    open,
+                    high,
+                    low,
+                    close,
+                    adjusted_close
              from portfolio_transaction_chart
-                      join filtered_transactions using (transaction_uniq_id, profile_id)
-                      left join ticker_realtime_metrics using (symbol)
+                      join filtered_transactions using (transaction_uniq_id)
              where profile_id = %(profile_id)s
                    {chart_where_clause}
          ),
@@ -44,7 +37,7 @@ with filtered_transactions as
                     min(week_trading_session_index)  as week_trading_session_index,
                     min(latest_trading_time)         as latest_trading_time,
                     datetime,
-                    date,
+                    min(date)                        as date,
                     sum(quantity_norm_for_valuation) as quantity,
                     count(transaction_uniq_id)       as transaction_count,
                     sum(open)                        as open,
@@ -53,7 +46,7 @@ with filtered_transactions as
                     sum(close)                       as close,
                     sum(adjusted_close)              as adjusted_close
              from raw_chart_data
-             group by symbol, period, datetime, date
+             group by symbol, period, datetime
          ),
      schedule as materialized
          (
@@ -93,7 +86,7 @@ with filtered_transactions as
                           ) profile_id,
                             case
                                 when type = 'cash' and ticker_symbol = 'CUR:USD'
-                                    then quantity::numeric
+                                    then quantity
                                 else 0
                                 end as value
                       from profile_holdings_normalized
