@@ -1,6 +1,6 @@
 from decimal import Decimal
 
-from gainy.tests.mocks.repository_mocks import mock_noop
+from gainy.tests.mocks.repository_mocks import mock_noop, mock_find
 from gainy.tests.mocks.trading.drivewealth.api_mocks import FUND1_ID, PORTFOLIO_STATUS, PORTFOLIO, USER_ID
 from gainy.trading.models import TradingCollectionVersion
 from trading.drivewealth.api import DriveWealthApi
@@ -8,7 +8,7 @@ from trading.drivewealth.repository import DriveWealthRepository
 from trading.drivewealth.provider.collection import DriveWealthProviderCollection
 
 from gainy.trading.drivewealth.models import DriveWealthUser, DriveWealthAccount, DriveWealthPortfolio, DriveWealthFund, \
-    DriveWealthInstrument
+    DriveWealthInstrument, DriveWealthPortfolioStatus
 
 _FUND_WEIGHTS = {
     "symbol_B": Decimal(0.3),
@@ -48,7 +48,12 @@ def test_get_actual_collection_data(monkeypatch):
     user = DriveWealthUser()
     monkeypatch.setattr(user, "ref_id", USER_ID)
 
-    portfolio = DriveWealthPortfolio(PORTFOLIO)
+    portfolio = DriveWealthPortfolio()
+    portfolio.set_from_response(PORTFOLIO)
+
+    portfolio_status = DriveWealthPortfolioStatus()
+    portfolio_status.set_from_response(PORTFOLIO_STATUS)
+
     fund = DriveWealthFund()
     monkeypatch.setattr(fund, "ref_id", FUND1_ID)
     monkeypatch.setattr(fund, "profile_id", profile_id)
@@ -74,15 +79,13 @@ def test_get_actual_collection_data(monkeypatch):
     monkeypatch.setattr(drivewealth_repository, "get_profile_fund",
                         mock_get_profile_fund)
 
-    api = DriveWealthApi(None)
-
-    def mock_get_portfolio_status(_portfolio):
+    def mock_sync_portfolio_status(_portfolio):
         assert _portfolio == portfolio
-        return PORTFOLIO_STATUS
+        return portfolio_status
 
-    monkeypatch.setattr(api, "get_portfolio_status", mock_get_portfolio_status)
-
-    service = DriveWealthProviderCollection(drivewealth_repository, api)
+    service = DriveWealthProviderCollection(drivewealth_repository, None)
+    monkeypatch.setattr(service, "sync_portfolio_status",
+                        mock_sync_portfolio_status)
     holdings = service.get_actual_collection_data(profile_id,
                                                   collection_id).holdings
 
