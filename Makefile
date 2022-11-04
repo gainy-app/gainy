@@ -27,6 +27,9 @@ upd:
 build: docker-auth
 	docker-compose build
 
+build-lambda: docker-auth
+	docker-compose build lambda-python-trigger lambda-python-action
+
 down:
 	docker-compose down
 

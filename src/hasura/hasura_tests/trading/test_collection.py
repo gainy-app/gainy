@@ -8,7 +8,7 @@ profile_user_id = PROFILES[1]['user_id']
 
 
 def get_test_reconfigure_collection_holdings_target_amount_delta():
-    return [100, -100]
+    return [100, -90]
 
 
 @pytest.mark.drivewealth
