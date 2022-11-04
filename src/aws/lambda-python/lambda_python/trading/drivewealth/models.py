@@ -1,12 +1,11 @@
-import enum
 import re
 from abc import ABC
 import dateutil.parser
 
 from gainy.data_access.models import classproperty
 from gainy.trading.drivewealth.models import BaseDriveWealthModel
-from trading.models import ProfileKycStatus, KycStatus, TradingMoneyFlowStatus
-from gainy.trading.models import TradingCollectionVersion, TradingCollectionVersionStatus
+from trading.models import ProfileKycStatus, KycStatus
+from gainy.trading.models import TradingCollectionVersion, TradingCollectionVersionStatus, TradingMoneyFlowStatus
 
 PRECISION = 1e-3
 

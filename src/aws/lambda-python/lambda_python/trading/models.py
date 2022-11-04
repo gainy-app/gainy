@@ -7,6 +7,7 @@ import enum
 
 from gainy.data_access.models import BaseModel, classproperty, DecimalEncoder
 from gainy.exceptions import BadRequestException
+from gainy.trading.models import TradingMoneyFlowStatus
 
 
 class KycStatus(str, enum.Enum):
@@ -104,12 +105,6 @@ class FundingAccount(BaseModel):
     @classproperty
     def table_name(self) -> str:
         return "trading_funding_accounts"
-
-
-class TradingMoneyFlowStatus(enum.Enum):
-    PENDING = "PENDING"
-    SUCCESS = "SUCCESS"
-    FAILED = "FAILED"
 
 
 class TradingMoneyFlow(BaseModel):

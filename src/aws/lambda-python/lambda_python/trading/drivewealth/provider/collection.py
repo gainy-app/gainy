@@ -26,9 +26,7 @@ class DriveWealthProviderCollection(GainyDriveWealthProvider):
         if not portfolio:
             raise EntityNotFoundException(DriveWealthPortfolio)
 
-        portfolio_status = self.get_portfolio_status(portfolio)
-        portfolio.update_from_status(portfolio_status)
-        repository.persist(portfolio)
+        portfolio_status = self.sync_portfolio_status(portfolio)
         fund_status = portfolio_status.get_fund(fund.ref_id)
         if not fund_status:
             raise EntityNotFoundException(DriveWealthPortfolioStatusHolding)
@@ -54,6 +52,4 @@ class DriveWealthProviderCollection(GainyDriveWealthProvider):
         if not portfolio:
             return
 
-        portfolio_status = self.get_portfolio_status(portfolio)
-        portfolio.update_from_status(portfolio_status)
-        self.repository.persist(portfolio)
+        self.sync_portfolio_status(portfolio)

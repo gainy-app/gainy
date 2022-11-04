@@ -110,9 +110,7 @@ class DriveWealthProvider(DriveWealthProviderKYC,
         portfolio = self.repository.get_profile_portfolio(profile_id)
         if portfolio:
             #todo cache
-            portfolio_status = self.get_portfolio_status(portfolio)
-            portfolio.update_from_status(portfolio_status)
-            self.repository.persist(portfolio)
+            portfolio_status = self.sync_portfolio_status(portfolio)
             balances.buying_power += portfolio_status.cash_value
 
             trading_collection_versions: List[
