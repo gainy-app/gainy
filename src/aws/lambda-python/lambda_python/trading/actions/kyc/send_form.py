@@ -23,4 +23,9 @@ class KycSendForm(HasuraAction):
 
         kyc_status = trading_service.kyc_send_form(kyc_form)
         repository.update_kyc_form(profile_id, kyc_status.status)
-        return {"status": kyc_status.status}
+        return {
+            "status": kyc_status.status,
+            "message": kyc_status.message,
+            "updated_at":
+            kyc_status.updated_at.strftime("%Y-%m-%dT%H:%M:%S%z"),
+        }
