@@ -165,7 +165,9 @@ def verify_profile(user_id,
                 f"prev_close_{period}"]
 
         if not portfolio_chart:
-            assert not previous_period_close
+            # TODO since the chart is filtered, we don't know the first date of the weekly chart,
+            # so we can't reliably check previous_period_close
+            # assert not previous_period_close
             continue
 
         threshold_datetime = min(i['datetime'] for i in portfolio_chart)

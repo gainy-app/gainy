@@ -1947,7 +1947,7 @@ models:
       - name: quantity
         tests:
           - type:
-              type: 'numeric'
+              type: 'double precision'
       - name: profile_id
         tests:
           - type:
@@ -1955,11 +1955,11 @@ models:
       - name: quantity_norm
         tests:
           - type:
-              type: 'numeric'
+              type: 'double precision'
       - name: quantity_norm_for_valuation
         tests:
           - type:
-              type: 'numeric'
+              type: 'double precision'
       - name: updated_at
         tests:
           - type:
