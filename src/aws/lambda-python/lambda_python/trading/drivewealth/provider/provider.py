@@ -118,8 +118,14 @@ class DriveWealthProvider(DriveWealthProviderKYC,
             trading_collection_versions: List[
                 TradingCollectionVersion] = self.repository.find_all(
                     TradingCollectionVersion, {
-                        "profile_id": profile_id,
-                        "status": OperatorIn([TradingCollectionVersionStatus.PENDING.name, TradingCollectionVersionStatus.PENDING_EXECUTION.name])
+                        "profile_id":
+                        profile_id,
+                        "status":
+                        OperatorIn([
+                            TradingCollectionVersionStatus.PENDING.name,
+                            TradingCollectionVersionStatus.PENDING_EXECUTION.
+                            name
+                        ])
                     })
             for trading_collection_version in trading_collection_versions:
                 balances.buying_power -= trading_collection_version.target_amount_delta

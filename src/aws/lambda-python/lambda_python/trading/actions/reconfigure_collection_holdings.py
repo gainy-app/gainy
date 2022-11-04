@@ -2,8 +2,8 @@ from decimal import Decimal
 from common.context_container import ContextContainer
 from common.hasura_function import HasuraAction
 from gainy.exceptions import BadRequestException
+from gainy.trading.exceptions import InsufficientFundsException
 from gainy.utils import get_logger
-from trading.exceptions import InsufficientFundsException
 
 logger = get_logger(__name__)
 

@@ -35,8 +35,10 @@ class TradingGetCollectionData(HasuraAction):
                     "collection_id": collection_id
                 }, [("created_at", "DESC")])
 
-        success_tcvs = filter(lambda x: x.is_executed(), trading_collection_versions)
-        pending_tcvs = filter(lambda x: x.is_pending(), trading_collection_versions)
+        success_tcvs = filter(lambda x: x.is_executed(),
+                              trading_collection_versions)
+        pending_tcvs = filter(lambda x: x.is_pending(),
+                              trading_collection_versions)
 
         return {
             'actual_value': actual_value,

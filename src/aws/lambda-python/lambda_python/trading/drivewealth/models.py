@@ -5,8 +5,8 @@ import dateutil.parser
 
 from gainy.data_access.models import classproperty
 from gainy.trading.drivewealth.models import BaseDriveWealthModel
-from trading.models import ProfileKycStatus, KycStatus, \
-    TradingCollectionVersion, TradingCollectionVersionStatus, TradingMoneyFlowStatus
+from trading.models import ProfileKycStatus, KycStatus, TradingMoneyFlowStatus
+from gainy.trading.models import TradingCollectionVersion, TradingCollectionVersionStatus
 
 PRECISION = 1e-3
 

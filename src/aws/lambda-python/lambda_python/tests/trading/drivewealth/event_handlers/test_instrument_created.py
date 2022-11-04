@@ -1,7 +1,7 @@
 from gainy.tests.mocks.repository_mocks import mock_persist
 from gainy.trading.drivewealth import DriveWealthRepository
+from gainy.trading.drivewealth.models import DriveWealthInstrument
 from trading.drivewealth.event_handlers import InstrumentCreatedEventHandler
-from trading.drivewealth.models import DriveWealthInstrument
 
 
 def test(monkeypatch):
