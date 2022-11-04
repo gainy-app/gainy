@@ -194,7 +194,7 @@ class DriveWealthProviderKYC(GainyDriveWealthProvider):
                     "city": kyc_form['address_city'],
                     "province": kyc_form['address_province'],
                     "postalCode": kyc_form['address_postal_code'],
-                    "country": kyc_form['address_country'],
+                    "country": kyc_form['address_country'] or "USA",
                 }
             },
         ]

@@ -7,7 +7,7 @@ from trading.drivewealth.models import DriveWealthBankAccount, DriveWealthKycSta
 
 from gainy.utils import get_logger, env
 from gainy.trading.drivewealth import DriveWealthApi as GainyDriveWealthApi
-from gainy.trading.drivewealth.models import DriveWealthAccount, DriveWealthFund
+from gainy.trading.drivewealth.models import DriveWealthAccount
 
 logger = get_logger(__name__)
 
