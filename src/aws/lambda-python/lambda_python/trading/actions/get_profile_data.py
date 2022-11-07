@@ -4,8 +4,9 @@ from common.context_container import ContextContainer
 from common.hasura_function import HasuraAction
 from common.hasura_response import format_datetime
 from exceptions import EntityNotFoundException
+from gainy.trading.models import TradingMoneyFlowStatus
 from gainy.utils import get_logger
-from trading.models import TradingMoneyFlow, TradingMoneyFlowStatus, ProfileBalances
+from trading.models import TradingMoneyFlow, ProfileBalances
 
 logger = get_logger(__name__)
 

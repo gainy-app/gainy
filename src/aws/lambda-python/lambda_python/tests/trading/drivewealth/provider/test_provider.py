@@ -3,8 +3,9 @@ from decimal import Decimal
 import pytest
 
 from gainy.tests.mocks.repository_mocks import mock_find, mock_persist, mock_noop
+from gainy.trading.models import TradingMoneyFlowStatus
 from tests.trading.drivewealth.api_mocks import mock_create_deposit, mock_create_redemption, mock_get_deposit
-from trading.models import TradingMoneyFlow, TradingMoneyFlowStatus
+from trading.models import TradingMoneyFlow
 from trading.drivewealth.models import DriveWealthBankAccount, DriveWealthDeposit, DriveWealthRedemption
 from trading.drivewealth.api import DriveWealthApi
 from trading.drivewealth.provider import DriveWealthProvider
