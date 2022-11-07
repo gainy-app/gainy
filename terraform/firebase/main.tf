@@ -79,6 +79,34 @@ module "functions-refreshToken" {
   depends_on           = [google_project_service.cf, google_project_service.cb, google_project_service.compute]
 }
 
+
+# Enable Cloud Places API
+resource "google_project_service" "places-backend" {
+  project = google_project.project.id
+  service = "places-backend.googleapis.com"
+
+  disable_dependent_services = true
+  disable_on_destroy         = true
+  lifecycle {
+    prevent_destroy = false
+  }
+}
+resource "google_apikeys_key" "places-backend" {
+  name    = "places-backend ${var.env}"
+  project = google_project.project.id
+
+  restrictions {
+    api_targets {
+      service = google_project_service.places-backend.service
+      methods = ["GET*"]
+    }
+  }
+}
+
 output "google_project_id" {
   value = local.google_project_id
+}
+
+output "google_places_api_key" {
+  value = google_apikeys_key.places-backend.key_string
 }
