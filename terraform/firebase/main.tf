@@ -95,11 +95,11 @@ resource "google_project_service" "places-backend" {
 
   disable_dependent_services = true
   disable_on_destroy         = true
-  depends_on                 = [google_project_service.apikeys]
 }
 resource "google_apikeys_key" "places-backend" {
-  name    = "places-backend ${var.env}"
-  project = google_project.project.project_id
+  name       = "places-backend ${var.env}"
+  project    = google_project.project.project_id
+  depends_on = [google_project_service.apikeys]
 
   restrictions {
     api_targets {
