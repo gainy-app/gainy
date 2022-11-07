@@ -82,7 +82,7 @@ module "functions-refreshToken" {
 
 # Enable Cloud Places API
 resource "google_project_service" "apikeys" {
-  project = google_project.project.project_id
+  project = google_project.project.name
   service = "apikeys.googleapis.com"
 
   disable_dependent_services = true
@@ -90,7 +90,7 @@ resource "google_project_service" "apikeys" {
 }
 # Enable Cloud Places API
 resource "google_project_service" "places-backend" {
-  project = google_project.project.project_id
+  project = google_project.project.name
   service = "places-backend.googleapis.com"
 
   disable_dependent_services = true
@@ -98,7 +98,7 @@ resource "google_project_service" "places-backend" {
 }
 resource "google_apikeys_key" "places-backend" {
   name       = "places-backend ${var.env}"
-  project    = google_project.project.project_id
+  project    = google_project.project.name
   depends_on = [google_project_service.apikeys]
 
   restrictions {
