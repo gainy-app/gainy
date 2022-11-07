@@ -102,7 +102,7 @@ resource "google_project_service" "places-backend" {
 
 resource "google_apikeys_key" "places-backend" {
   name       = "places-backend-${var.env}"
-  project    = local.google_project_id
+  project    = google_project.project.id
   depends_on = [google_project_service.apikeys, google_project.project]
 
   restrictions {
