@@ -2,12 +2,13 @@ from typing import Iterable, Dict, List
 from decimal import Decimal
 import io
 
-from gainy.exceptions import NotFoundException
+from gainy.data_access.operators import OperatorIn
+from gainy.exceptions import NotFoundException, BadRequestException
 from gainy.trading.drivewealth.models import CollectionStatus, CollectionHoldingStatus
 from portfolio.plaid import PlaidService
 from portfolio.plaid.common import handle_error
 from services import S3
-from portfolio.plaid.models import PlaidAccessToken
+from portfolio.plaid.models import PlaidAccessToken, PlaidAccount
 from trading.models import KycDocument, FundingAccount, TradingMoneyFlow, TradingCollectionVersion, \
     ProfileKycStatus, ProfileBalances, TradingCollectionVersionStatus
 from trading.drivewealth.provider import DriveWealthProvider
@@ -76,22 +77,38 @@ class TradingService(GainyTradingService):
             return handle_error(e)
 
         repository = self.trading_repository
-        funding_account = repository.find_one(
-            FundingAccount, {"plaid_access_token_id": access_token.id})
-        if not funding_account:
-            funding_account = FundingAccount()
-            funding_account.profile_id = access_token.profile_id
-            funding_account.plaid_access_token_id = access_token.id
-            funding_account.plaid_account_id = account_id
-            funding_account.name = account_name
+        funding_account = repository.find_one(FundingAccount,
+                                              {"plaid_account_id": account_id})
+        if funding_account:
+            raise BadRequestException('Account already connected.')
 
-            repository.persist(funding_account)
+        funding_account = FundingAccount()
+        funding_account.profile_id = access_token.profile_id
+        funding_account.plaid_access_token_id = access_token.id
+        funding_account.plaid_account_id = account_id
+        funding_account.name = account_name
+
+        repository.persist(funding_account)
 
         provider_bank_account.funding_account_id = funding_account.id
         logger.info(provider_bank_account.to_dict())
         repository.persist(provider_bank_account)
 
         return funding_account
+
+    def filter_existing_funding_accounts(
+            self, accounts: List[PlaidAccount]) -> List[PlaidAccount]:
+        plaid_account_ids = [i.account_id for i in accounts]
+        funding_accounts: List[
+            FundingAccount] = self.trading_repository.find_all(
+                FundingAccount,
+                {"plaid_account_id": OperatorIn(plaid_account_ids)})
+
+        existing_account_ids = [i.plaid_account_id for i in funding_accounts]
+
+        return [
+            i for i in accounts if i.account_id not in existing_account_ids
+        ]
 
     def update_funding_accounts_balance(
             self, funding_accounts: Iterable[FundingAccount]):

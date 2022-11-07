@@ -1,4 +1,5 @@
-import os
+from typing import List
+
 import hashlib
 import hmac
 import time
@@ -8,6 +9,7 @@ import plaid
 
 from gainy.exceptions import HttpException
 from portfolio.plaid import PlaidClient
+from portfolio.plaid.models import PlaidAccount
 from portfolio.service import SERVICE_PLAID
 
 from portfolio.plaid.common import handle_error, PURPOSE_PORTFOLIO, PURPOSE_TRADING
@@ -70,7 +72,6 @@ class CreatePlaidLinkToken(HasuraAction):
             response = self.client.create_link_token(profile_id, redirect_uri,
                                                      products, env,
                                                      access_token)
-            link_token = response['link_token']
 
             return {'link_token': response['link_token']}
         except plaid.ApiException as e:
@@ -83,7 +84,8 @@ class LinkPlaidAccount(HasuraAction):
         super().__init__("link_plaid_account", "profile_id")
 
     def apply(self, input_params, context_container: ContextContainer):
-        service = context_container.plaid_service
+        trading_service = context_container.trading_service
+        plaid_service = context_container.plaid_service
         db_conn = context_container.db_conn
         profile_id = input_params["profile_id"]
         public_token = input_params["public_token"]
@@ -91,7 +93,7 @@ class LinkPlaidAccount(HasuraAction):
         access_token_id = input_params.get("access_token_id")
         purpose = get_purpose(input_params)
 
-        response = service.exchange_public_token(public_token, env)
+        response = plaid_service.exchange_public_token(public_token, env)
         access_token = response['access_token']
 
         parameters = {
@@ -115,8 +117,10 @@ class LinkPlaidAccount(HasuraAction):
 
         accounts = []
         if purpose == PURPOSE_TRADING:
-            response = service.get_item_accounts(access_token)
-            accounts = [i.to_dict() for i in response]
+            accounts = plaid_service.get_item_accounts(access_token)
+            accounts = trading_service.filter_existing_funding_accounts(
+                accounts)
+            accounts = [i.to_dict() for i in accounts]
 
         return {
             'result': True,
