@@ -82,16 +82,15 @@ module "functions-refreshToken" {
 
 # Enable Cloud Places API
 resource "google_project_service" "places-backend" {
-  project = local.google_project_id
+  project = google_project.project.project_id
   service = "places-backend.googleapis.com"
 
   disable_dependent_services = true
   disable_on_destroy         = true
-  depends_on                 = [google_project.project]
 }
 resource "google_apikeys_key" "places-backend" {
   name    = "places-backend ${var.env}"
-  project = google_project.project.id
+  project = google_project.project.project_id
 
   restrictions {
     api_targets {
