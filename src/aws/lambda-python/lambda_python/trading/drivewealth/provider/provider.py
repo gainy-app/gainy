@@ -18,8 +18,9 @@ from trading.drivewealth.api import DriveWealthApi
 from trading.drivewealth.repository import DriveWealthRepository
 
 from gainy.utils import get_logger
-from gainy.trading.models import TradingAccount, TradingCollectionVersion, TradingCollectionVersionStatus
-from gainy.trading.drivewealth.models import DriveWealthAccount
+from gainy.trading.models import TradingAccount, TradingCollectionVersion, TradingCollectionVersionStatus, \
+    TradingMoneyFlowStatus
+from gainy.trading.drivewealth.models import DriveWealthAccount, DriveWealthUser
 
 logger = get_logger(__name__)
 
@@ -143,6 +144,15 @@ class DriveWealthProvider(DriveWealthProviderKYC,
             raise NotFoundException()
 
         self.api.add_money(account.ref_id, amount)
+
+        user: DriveWealthUser = self.repository.find_one(
+            DriveWealthUser, {"ref_id": account.drivewealth_user_id})
+        money_flow = TradingMoneyFlow()
+        money_flow.profile_id = user.profile_id
+        money_flow.amount = amount
+        money_flow.status = TradingMoneyFlowStatus.SUCCESS
+        money_flow.trading_account_id = trading_account_id
+        self.repository.persist(money_flow)
 
     def debug_delete_data(self, profile_id):
         if not IS_UAT:
