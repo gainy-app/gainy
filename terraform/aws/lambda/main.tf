@@ -46,6 +46,7 @@ variable "s3_bucket_uploads_kyc" {}
 variable "aws_access_key" {}
 variable "aws_secret_key" {}
 variable "aws_region" {}
+variable "google_places_api_key" {}
 
 # gateway
 
@@ -211,6 +212,7 @@ locals {
     S3_BUCKET_UPLOADS_KYC      = var.s3_bucket_uploads_kyc
     STRIPE_API_KEY             = var.stripe_api_key
     STRIPE_PUBLISHABLE_KEY     = var.stripe_publishable_key
+    GOOGLE_PLACES_API_KEY      = var.google_places_api_key
   }
 }
 
