@@ -1257,7 +1257,7 @@ models:
       - name: transaction_uniq_id
         tests:
           - type:
-              type: 'character varying'
+              type: 'text'
       - name: datetime
         tests:
           - type:
@@ -1265,7 +1265,7 @@ models:
       - name: period
         tests:
           - type:
-              type: 'character varying'
+              type: 'text'
       - name: open
         tests:
           - type:
@@ -1947,7 +1947,7 @@ models:
       - name: quantity
         tests:
           - type:
-              type: 'numeric'
+              type: 'double precision'
       - name: profile_id
         tests:
           - type:
@@ -1955,16 +1955,12 @@ models:
       - name: quantity_norm
         tests:
           - type:
-              type: 'numeric'
+              type: 'double precision'
       - name: quantity_norm_for_valuation
         tests:
           - type:
-              type: 'numeric'
+              type: 'double precision'
       - name: updated_at
-        tests:
-          - type:
-              type: 'timestamp with time zone'
-      - name: last_seen_at
         tests:
           - type:
               type: 'timestamp with time zone'
@@ -1972,7 +1968,7 @@ models:
         tests:
           - not_null
           - type:
-              type: 'character varying'
+              type: 'text'
       - name: datetime
         tests:
           - type:

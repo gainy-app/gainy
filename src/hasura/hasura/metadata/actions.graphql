@@ -228,8 +228,8 @@ type Mutation {
 
 type Mutation {
   trading_add_money(
-    profile_id: Int!
-    trading_account_id: Int!
+    profile_id: Int
+    trading_account_id: Int
     amount: Float!
   ): OkOutput
 }
@@ -274,6 +274,12 @@ type Query {
   trading_get_funding_accounts(
     profile_id: Int!
   ): [FundingAccount]
+}
+
+type Query {
+  trading_get_profile_data(
+    profile_id: Int!
+  ): TradingGetProfileDataOutput
 }
 
 type Mutation {
@@ -599,5 +605,20 @@ type TradingCollectionVersionData {
 type TradingCollectionHistoryOutput {
   pending: [TradingCollectionVersionData]
   successful: [TradingCollectionVersionData]
+}
+
+type TradingGetProfileDataOutput {
+  withdrawable_cash: Float!
+  buying_power: Float!
+  history: TradingProfileHistoryOutput
+}
+
+type TradingProfileHistoryOutput {
+  pending: [TradingProfileHistoryMoneyFlowData]
+}
+
+type TradingProfileHistoryMoneyFlowData {
+  amount: Float!
+  created_at: String!
 }
 

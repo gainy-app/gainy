@@ -5,7 +5,11 @@
     tags = ["realtime"],
     post_hook=[
       index('transaction_uniq_id', true),
-      'delete from {{this}} where last_seen_at < (select max(last_seen_at) from {{this}})',
+      'create index if not exists pet_profile_id_symbol_datetime_index on {{this}} (profile_id, symbol, datetime)',
+      'delete from {{this}}
+        using (select profile_id, max(updated_at) as max_updated_at from {{this}} group by profile_id) old_stats
+        where old_stats.profile_id = {{this}}.profile_id
+        and {{this}}.updated_at < old_stats.max_updated_at'
     ]
   )
 }}
@@ -30,7 +34,7 @@ with plaid_transactions as
                          when profile_portfolio_transactions.type = 'sell'
                              then -1
                          else 1
-                         end * abs(profile_portfolio_transactions.quantity))::numeric            as quantity_norm
+                         end * abs(profile_portfolio_transactions.quantity))                     as quantity_norm
              from {{ source('app', 'profile_portfolio_transactions') }}
                       left join {{ ref('profile_holdings_normalized') }} using (profile_id, security_id, account_id)
                       left join {{ ref('portfolio_securities_normalized') }} on portfolio_securities_normalized.id = profile_portfolio_transactions.security_id
@@ -171,7 +175,7 @@ with plaid_transactions as
                                                             t.rolling_quantity))
                                                   over (partition by security_id, account_id order by date rows between unbounded preceding and 1 preceding),
                                                   0)
-                                     )::numeric as sell_quantity,
+                                     ) as sell_quantity,
                                  symbol,
                                  security_id,
                                  profile_id,
@@ -252,10 +256,9 @@ with plaid_transactions as
                             profile_holdings_normalized.security_id,
                             profile_holdings_normalized.profile_id,
                             profile_holdings_normalized.account_id,
-                            profile_holdings_normalized.type as security_type,
+                            profile_holdings_normalized.type                                                           as security_type,
                             profile_first_transaction_date,
-                            profile_holdings_normalized.quantity::numeric -
-                            coalesce(expanded_transactions.rolling_quantity, 0) as diff
+                            profile_holdings_normalized.quantity - coalesce(expanded_transactions.rolling_quantity, 0) as diff
                       from {{ ref('profile_holdings_normalized') }}
                                left join first_transaction_date using (profile_id)
                                left join expanded_transactions using (account_id, security_id)
@@ -324,7 +327,7 @@ with plaid_transactions as
                              profile_id,
                              holding_id_v2,
                              null::int       as collection_id,
-                             quantity_norm::numeric
+                             quantity_norm::double precision
                       from mismatched_sell_transactions
 
                       union all
@@ -340,7 +343,7 @@ with plaid_transactions as
                              profile_id,
                              holding_id_v2,
                              null::int       as collection_id,
-                             quantity_norm::numeric
+                             quantity_norm::double precision
                       from mismatched_buy_transactions
 
                       union all
@@ -356,7 +359,7 @@ with plaid_transactions as
                              profile_id,
                              holding_id_v2,
                              null::int       as collection_id,
-                             quantity_norm::numeric
+                             quantity_norm::double precision
                       from mismatched_holdings_transactions
 
                       union all
@@ -372,7 +375,7 @@ with plaid_transactions as
                              profile_id,
                              holding_id_v2,
                              null::int       as collection_id,
-                             quantity_norm::numeric
+                             quantity_norm::double precision
                       from plaid_transactions
 
                       union all
@@ -388,7 +391,7 @@ with plaid_transactions as
                              profile_id,
                              holding_id_v2,
                              collection_id,
-                             quantity_norm::numeric
+                             quantity_norm::double precision
                       from ttf_transactions
                   ) t
                       left join {{ ref('base_tickers') }} using (symbol)
@@ -397,6 +400,19 @@ with plaid_transactions as
                and (base_tickers.symbol is not null or ticker_options.symbol is not null)
              group by t.holding_id_v2, t.datetime, t.profile_id, t.symbol, t.security_type
              having sum(abs(quantity_norm)) > 0 or security_type = 'ttf'
+{% if is_incremental() %}
+     ),
+     profiles_to_update as
+         (
+             select distinct groupped_expanded_transactions.profile_id
+             from groupped_expanded_transactions
+                      left join {{ this }} old_data using (transaction_uniq_id)
+             where old_data.transaction_uniq_id is null
+                or old_data.quantity_norm != groupped_expanded_transactions.quantity_norm
+                or old_data.datetime is null and groupped_expanded_transactions.datetime is not null
+                or old_data.datetime is not null and groupped_expanded_transactions.datetime is null
+                or (old_data.datetime is not null and groupped_expanded_transactions.datetime is not null and old_data.datetime != groupped_expanded_transactions.datetime)
+{% endif %}
      )
 select groupped_expanded_transactions.symbol,
        groupped_expanded_transactions.amount,
@@ -406,21 +422,11 @@ select groupped_expanded_transactions.symbol,
        groupped_expanded_transactions.profile_id,
        groupped_expanded_transactions.quantity_norm,
        groupped_expanded_transactions.quantity_norm_for_valuation,
-       groupped_expanded_transactions.transaction_uniq_id,
+       groupped_expanded_transactions.transaction_uniq_id::text,
        groupped_expanded_transactions.datetime,
        groupped_expanded_transactions.security_type,
-{% if is_incremental() %}
-       case
-           when old_data.quantity_norm = groupped_expanded_transactions.quantity_norm
-            and (old_data.datetime = groupped_expanded_transactions.datetime or (old_data.datetime is null and groupped_expanded_transactions.datetime is null))
-               then old_data.updated_at
-           else now()
-           end as updated_at,
-{% else %}
-       now() as updated_at,
-{% endif %}
-       now() as last_seen_at
+       now() as updated_at
 from groupped_expanded_transactions
 {% if is_incremental() %}
-         left join {{ this }} old_data using (transaction_uniq_id)
+         join profiles_to_update using (profile_id)
 {% endif %}

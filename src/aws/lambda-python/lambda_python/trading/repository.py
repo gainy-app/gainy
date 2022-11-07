@@ -2,6 +2,7 @@ from typing import Any, Dict, List
 
 from psycopg2.extras import RealDictCursor
 from gainy.trading import TradingRepository as GainyTradingRepository
+from gainy.trading.models import TradingAccount
 
 
 class TradingRepository(GainyTradingRepository):
@@ -33,3 +34,6 @@ class TradingRepository(GainyTradingRepository):
                     "collection_id": collection_id,
                 })
             return cursor.fetchall()
+
+    def get_trading_account(self, profile_id: int) -> TradingAccount:
+        return self.find_one(TradingAccount, {"profile_id": profile_id})

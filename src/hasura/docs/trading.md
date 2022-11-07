@@ -20,6 +20,22 @@ query GetTradingHistory($profile_id: Int!, $types: [String!]!) {
 ```
 Available types: `["deposit", "withdraw", "trading_fee", "ttf_transaction"]`
 
+### Get actual balances and pending transactions
+```graphql
+query TradingGetProfileData($profile_id: Int!) {
+  trading_get_profile_data(profile_id: $profile_id) {
+    history {
+      pending {
+        created_at
+        amount
+      }
+    }
+    withdrawable_cash
+    buying_power
+  }
+}
+```
+
 
 ### Debugging
 Sync provider data
@@ -33,8 +49,8 @@ mutation TradingSyncProviderData($profile_id: Int!) {
 Add money to an account
 ```graphql
 mutation TradingAddMoney(
-    $profile_id: Int!
-    $trading_account_id: Int!
+    $profile_id: Int
+    $trading_account_id: Int
     $amount: Float!
 ) {
   trading_add_money(

@@ -16,17 +16,20 @@
 with polygon_symbols as materialized
          (
              select symbol,
-                    week_trading_sessions.date
+                    week_trading_sessions_static.date
              from {{ source('polygon', 'polygon_intraday_prices') }}
-                      join {{ ref('week_trading_sessions') }} using (symbol)
-             where polygon_intraday_prices.time >= week_trading_sessions.open_at
-               and polygon_intraday_prices.time < week_trading_sessions.close_at
-             group by symbol, week_trading_sessions.date
+                      join {{ ref('week_trading_sessions_static') }} using (symbol)
+             where polygon_intraday_prices.time >= week_trading_sessions_static.open_at
+               and polygon_intraday_prices.time < week_trading_sessions_static.close_at
+{% if var('realtime') %}
+               and week_trading_sessions_static.index = 0
+{% endif %}
+             group by symbol, week_trading_sessions_static.date
          ),
      raw_eod_intraday_prices as
          (
              select eod_intraday_prices.symbol,
-                    week_trading_sessions.date,
+                    week_trading_sessions_static.date,
                     time,
                     open,
                     high,
@@ -34,16 +37,19 @@ with polygon_symbols as materialized
                     close,
                     volume
              from {{ source('eod', 'eod_intraday_prices') }}
-                      join {{ ref('week_trading_sessions') }} using (symbol)
+                      join {{ ref('week_trading_sessions_static') }} using (symbol)
                       left join polygon_symbols using (symbol, date)
              where polygon_symbols.symbol is null
-               and time >= week_trading_sessions.open_at
-               and time < week_trading_sessions.close_at
+               and time >= week_trading_sessions_static.open_at
+               and time < week_trading_sessions_static.close_at
+{% if var('realtime') %}
+               and week_trading_sessions_static.index = 0
+{% endif %}
          ),
      raw_polygon_intraday_prices as
          (
              select polygon_intraday_prices.symbol,
-                    week_trading_sessions.date,
+                    week_trading_sessions_static.date,
                     time,
                     open,
                     high,
@@ -51,10 +57,13 @@ with polygon_symbols as materialized
                     close,
                     volume
              from {{ source('polygon', 'polygon_intraday_prices') }}
-                      join {{ ref('week_trading_sessions') }} using (symbol)
+                      join {{ ref('week_trading_sessions_static') }} using (symbol)
                       join polygon_symbols using (symbol, date)
-             where time >= week_trading_sessions.open_at
-               and time < week_trading_sessions.close_at
+             where time >= week_trading_sessions_static.open_at
+               and time < week_trading_sessions_static.close_at
+{% if var('realtime') %}
+               and week_trading_sessions_static.index = 0
+{% endif %}
          ),
      raw_intraday_prices as materialized
          (

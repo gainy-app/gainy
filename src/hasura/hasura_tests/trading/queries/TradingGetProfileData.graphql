@@ -1,0 +1,12 @@
+query TradingGetProfileData($profile_id: Int!) {
+  trading_get_profile_data(profile_id: $profile_id) {
+    history {
+      pending {
+        created_at
+        amount
+      }
+    }
+    withdrawable_cash
+    buying_power
+  }
+}

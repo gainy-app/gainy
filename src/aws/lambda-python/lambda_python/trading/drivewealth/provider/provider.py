@@ -1,12 +1,15 @@
+from typing import List
+
 import os
 from decimal import Decimal
 
+from gainy.data_access.operators import OperatorIn
 from gainy.data_access.repository import MAX_TRANSACTION_SIZE
 from gainy.exceptions import NotFoundException
 from gainy.trading.drivewealth.exceptions import DriveWealthApiException
 from portfolio.plaid import PlaidService
 from portfolio.plaid.models import PlaidAccessToken
-from trading.models import TradingMoneyFlow, FundingAccount, TradingCollectionVersion
+from trading.models import TradingMoneyFlow, FundingAccount, ProfileBalances
 from trading.drivewealth.provider.collection import DriveWealthProviderCollection
 from trading.drivewealth.provider.kyc import DriveWealthProviderKYC
 from trading.drivewealth.models import DriveWealthBankAccount, DriveWealthDeposit, \
@@ -15,8 +18,9 @@ from trading.drivewealth.api import DriveWealthApi
 from trading.drivewealth.repository import DriveWealthRepository
 
 from gainy.utils import get_logger
-from gainy.trading.models import TradingAccount
-from gainy.trading.drivewealth.models import DriveWealthAccount
+from gainy.trading.models import TradingAccount, TradingCollectionVersion, TradingCollectionVersionStatus, \
+    TradingMoneyFlowStatus
+from gainy.trading.drivewealth.models import DriveWealthAccount, DriveWealthUser
 
 logger = get_logger(__name__)
 
@@ -88,6 +92,47 @@ class DriveWealthProvider(DriveWealthProviderKYC,
 
         return entity
 
+    def get_actual_balances(self, profile_id) -> ProfileBalances:
+        balances = ProfileBalances()
+
+        user = self._get_user(profile_id)
+        accounts = self.repository.get_user_accounts(user.ref_id)
+        account_money_entities = []
+        for account in accounts:
+            #todo cache
+            account_money = self._sync_account_money(account.ref_id)
+            account_money_entities.append(account_money)
+
+            if IS_UAT:
+                balances.withdrawable_cash += account_money.cash_balance
+            else:
+                balances.withdrawable_cash += account_money.cash_available_for_withdrawal
+
+        portfolio = self.repository.get_profile_portfolio(profile_id)
+        if portfolio:
+            #todo cache
+            portfolio_status = self.sync_portfolio_status(portfolio)
+            balances.buying_power += portfolio_status.cash_value
+
+            trading_collection_versions: List[
+                TradingCollectionVersion] = self.repository.find_all(
+                    TradingCollectionVersion, {
+                        "profile_id":
+                        profile_id,
+                        "status":
+                        OperatorIn([
+                            TradingCollectionVersionStatus.PENDING.name,
+                            TradingCollectionVersionStatus.PENDING_EXECUTION.
+                            name
+                        ])
+                    })
+            for trading_collection_version in trading_collection_versions:
+                balances.buying_power -= trading_collection_version.target_amount_delta
+        else:
+            balances.buying_power = balances.withdrawable_cash
+
+        return balances
+
     def debug_add_money(self, trading_account_id, amount):
         if not IS_UAT:
             raise Exception('Not supported in production')
@@ -99,6 +144,15 @@ class DriveWealthProvider(DriveWealthProviderKYC,
             raise NotFoundException()
 
         self.api.add_money(account.ref_id, amount)
+
+        user: DriveWealthUser = self.repository.find_one(
+            DriveWealthUser, {"ref_id": account.drivewealth_user_id})
+        money_flow = TradingMoneyFlow()
+        money_flow.profile_id = user.profile_id
+        money_flow.amount = amount
+        money_flow.status = TradingMoneyFlowStatus.SUCCESS
+        money_flow.trading_account_id = trading_account_id
+        self.repository.persist(money_flow)
 
     def debug_delete_data(self, profile_id):
         if not IS_UAT:

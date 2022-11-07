@@ -24,7 +24,7 @@ def test_invitations():
     }, to_profile_user_id)['data']['insert_app_invitations_one']
     assert data['id'] is not None
 
-    time.sleep(1)
+    time.sleep(1.5)
 
     profile_data = make_graphql_request(
         "{app_profiles{id, subscription_end_date}}", {},
