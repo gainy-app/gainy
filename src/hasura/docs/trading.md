@@ -49,8 +49,8 @@ mutation TradingSyncProviderData($profile_id: Int!) {
 Add money to an account
 ```graphql
 mutation TradingAddMoney(
-    $profile_id: Int!
-    $trading_account_id: Int!
+    $profile_id: Int
+    $trading_account_id: Int
     $amount: Float!
 ) {
   trading_add_money(

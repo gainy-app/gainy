@@ -228,8 +228,8 @@ type Mutation {
 
 type Mutation {
   trading_add_money(
-    profile_id: Int!
-    trading_account_id: Int!
+    profile_id: Int
+    trading_account_id: Int
     amount: Float!
   ): OkOutput
 }

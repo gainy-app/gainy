@@ -7,7 +7,7 @@ from trading.drivewealth.models import DriveWealthBankAccount, DriveWealthKycSta
 
 from gainy.utils import get_logger, env
 from gainy.trading.drivewealth import DriveWealthApi as GainyDriveWealthApi
-from gainy.trading.drivewealth.models import DriveWealthAccount, DriveWealthFund
+from gainy.trading.drivewealth.models import DriveWealthAccount
 
 logger = get_logger(__name__)
 
@@ -42,12 +42,6 @@ class DriveWealthApi(GainyDriveWealthApi):
                 "riaUserID": DRIVEWEALTH_RIA_ID,
                 "riaProductID": DRIVEWEALTH_RIA_PRODUCT_ID,
             })
-
-    def update_account(self, account_ref_id, portfolio_ref_id):
-        return self._make_request("PATCH", f"/accounts/{account_ref_id}",
-                                  {"ria": {
-                                      "portfolioID": portfolio_ref_id
-                                  }})
 
     def upload_document(self, user_id: str, document: KycDocument,
                         file_base64):
@@ -111,39 +105,6 @@ class DriveWealthApi(GainyDriveWealthApi):
                 'type': 'ACH',
                 'bankAccountID': bank_account.ref_id,
             })
-
-    def create_portfolio(self, name, client_portfolio_id, description):
-        return self._make_request(
-            "POST", "/managed/portfolios", {
-                'userID': DRIVEWEALTH_RIA_ID,
-                'name': name,
-                'clientPortfolioID': client_portfolio_id,
-                'description': description,
-                'holdings': [{
-                    "type": "CASH_RESERVE",
-                    "target": 1
-                }],
-            })
-
-    def get_instrument_details(self, ref_id: str = None, symbol: str = None):
-        if ref_id:
-            return self._make_request("GET", f"/instruments/{ref_id}")
-        if symbol:
-            return self._make_request("GET", f"/instruments/{symbol}")
-
-        raise Exception('Either ref_id or symbol must be specified.')
-
-    def create_fund(self, fund: DriveWealthFund, name, client_fund_id,
-                    description):
-        data = self._make_request(
-            "POST", "/managed/funds", {
-                'userID': DRIVEWEALTH_RIA_ID,
-                'name': name,
-                'clientFundID': client_fund_id,
-                'description': description,
-                'holdings': fund.holdings,
-            })
-        fund.set_from_response(data)
 
     def create_autopilot_run(self, account_ids: list):
         return self._make_request(
