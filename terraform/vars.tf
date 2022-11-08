@@ -21,6 +21,13 @@ variable "hubspot_api_key" {
   type      = string
   sensitive = true
 }
+variable "revenuecat_api_key" {
+  type      = string
+  sensitive = true
+}
+
+#################################### OneSignal ####################################
+
 variable "onesignal_app_id" {
   type = string
 }
@@ -28,10 +35,9 @@ variable "onesignal_api_key" {
   type      = string
   sensitive = true
 }
-variable "revenuecat_api_key" {
-  type      = string
-  sensitive = true
-}
+
+#################################### Stripe ####################################
+
 variable "stripe_api_key" {
   type      = string
   sensitive = true
@@ -39,6 +45,9 @@ variable "stripe_api_key" {
 variable "stripe_publishable_key" {
   type = string
 }
+
+#################################### GitHub ####################################
+
 variable "github_app_id" {
   type = string
 }
@@ -130,6 +139,10 @@ variable "bigquery_credentials" {
 variable "google_billing_id" {}
 variable "google_user" {}
 variable "google_organization_id" {}
+variable "google_places_api_key" {
+  type      = string
+  sensitive = true
+}
 
 #################################### Cloudflare ####################################
 

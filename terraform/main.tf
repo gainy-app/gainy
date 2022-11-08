@@ -116,7 +116,7 @@ module "aws" {
   github_app_id               = var.github_app_id
   github_app_installation_id  = var.github_app_installation_id
   github_app_private_key      = var.github_app_private_key
-  google_places_api_key       = module.firebase.google_places_api_key
+  google_places_api_key       = var.google_places_api_key
 
   stripe_api_key         = var.stripe_api_key
   stripe_publishable_key = var.stripe_publishable_key
