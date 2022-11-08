@@ -22,7 +22,6 @@ class KycSendForm(HasuraAction):
             raise NotFoundException()
 
         trading_service.validate_kyc_form(kyc_form)
-        return
         kyc_status = trading_service.kyc_send_form(kyc_form)
         repository.update_kyc_form(profile_id, kyc_status.status)
         return {
