@@ -34,24 +34,16 @@ class KycFormValidator(ABC):
                 street1, street2, city, province, postal_code, country
             ]
             address = ", ".join(filter(lambda x: x, address_parts))
-            geocode_result = gmaps.geocode(address)
-            logging_extra["geocode_result"] = geocode_result
 
-            if not geocode_result:
+            place_search = gmaps.places(query=address, type="post_office")
+            logging_extra["place_search"] = place_search
+            if not place_search['results']:
                 raise ValidationException("Could not decode address.")
 
-            place_types = set(geocode_result[0]["types"])
+            place_types = set(place_search['results'][0]["types"])
             if {"post_office", "post_box"}.intersection(place_types):
                 raise ValidationException(
                     "Address must not be a post office address.")
 
-            # place_id = geocode_result[0]["place_id"]
-            # place_details = gmaps.place(place_id, fields=["type"])
-            #
-            # logging_extra["place_details"] = place_details
-            #
-            # place_search = gmaps.places(query=address, type="post_office")
-            #
-            # logging_extra["place_search"] = place_search
         finally:
             logger.info("validate_not_po", extra=logging_extra)
