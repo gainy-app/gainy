@@ -163,8 +163,10 @@ select code                                      as symbol,
        (substr(date, 0, 8) || '-01')::timestamp  as date_month,
        date_trunc('week', date::date)::timestamp as date_week,
        adjusted_close,
-       coalesce(adjusted_close / lag(adjusted_close) over wnd - 1,
-           0)                                    as relative_daily_gain,
+       case
+           when lag(adjusted_close) over wnd > 0
+               then coalesce(adjusted_close / lag(adjusted_close) over wnd - 1, 0)
+           end                                   as relative_daily_gain,
        close,
        date::date,
        high,
@@ -187,7 +189,10 @@ SELECT contract_name                                                   as code,
        date_trunc('month', to_timestamp(t / 1000))::timestamp          as date_month,
        date_trunc('week', to_timestamp(t / 1000))::timestamp           as date_week,
        c                                                               as adjusted_close,
-       coalesce(c / lag(c) over wnd - 1, 0)                            as relative_daily_gain,
+       case
+           when lag(c) over wnd > 0
+               then coalesce(c / lag(c) over wnd - 1, 0)
+           end                                                         as relative_daily_gain,
        c                                                               as close,
        to_timestamp(t / 1000)::date                                    as date,
        h                                                               as high,
@@ -211,7 +216,10 @@ SELECT polygon_crypto_tickers.symbol                                          as
        date_trunc('month', to_timestamp(t / 1000))::timestamp                 as date_month,
        date_trunc('week', to_timestamp(t / 1000))::timestamp                  as date_week,
        c                                                                      as adjusted_close,
-       coalesce(c / lag(c) over wnd - 1, 0)                                   as relative_daily_gain,
+       case
+           when lag(c) over wnd > 0
+               then coalesce(c / lag(c) over wnd - 1, 0)
+           end                                                                as relative_daily_gain,
        c                                                                      as close,
        to_timestamp(t / 1000)::date                                           as date,
        h                                                                      as high,
