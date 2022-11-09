@@ -1064,6 +1064,38 @@
 - table:
     name: trading_collection_versions
     schema: app
+  object_relationships:
+    - name: profile
+      using:
+        foreign_key_constraint_on: profile_id
+  array_relationships:
+    - name: history
+      using:
+        manual_configuration:
+          column_mapping:
+            id: trading_collection_version_id
+          insertion_order: null
+          remote_table:
+            name: trading_history
+            schema: public
+  select_permissions:
+    - role: user
+      permission:
+        columns:
+          - id
+          - profile_id
+          - collection_id
+          - status
+          - target_amount_delta
+          - weights
+          - created_at
+          - updated_at
+          - executed_at
+          - fail_reason
+        filter:
+          profile:
+            user_id:
+              _eq: X-Hasura-User-Id
 - table:
     name: trading_funding_accounts
     schema: app
@@ -2733,10 +2765,67 @@
           - name
           - profile_id
           - tags
+          - trading_collection_version_id
           - type
         filter:
           profile:
             user_id:
+              _eq: X-Hasura-User-Id
+- table:
+    name: trading_profile_collection_status
+    schema: public
+  object_relationships:
+    - name: profile
+      using:
+        manual_configuration:
+          column_mapping:
+            profile_id: id
+          insertion_order: null
+          remote_table:
+            name: profiles
+            schema: app
+  select_permissions:
+    - role: user
+      permission:
+        columns:
+          - absolute_gain_1d
+          - absolute_gain_total
+          - actual_value
+          - collection_id
+          - profile_id
+          - relative_gain_1d
+          - relative_gain_total
+          - value_to_portfolio_value
+        filter:
+          profile:
+            user_id:
+              _eq: X-Hasura-User-Id
+- table:
+    name: trading_profile_status
+    schema: public
+  object_relationships:
+    - name: profile
+      using:
+        manual_configuration:
+          column_mapping:
+            profile_id: id
+          insertion_order: null
+          remote_table:
+            name: profiles
+            schema: app
+  select_permissions:
+    - role: user
+      permission:
+        columns:
+          - profile_id
+          - kyc_done
+          - funding_account_connected
+          - deposited_funds
+          - withdrawable_cash
+          - buying_power
+        filter:
+          profile:
+            id:
               _eq: X-Hasura-User-Id
 - table:
     name: website_blog_articles

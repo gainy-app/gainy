@@ -5,8 +5,8 @@
     post_hook=[
       pk('profile_id, collection_id, symbol, date'),
       index('id', true),
-      'create index if not exists "dphh_profile_id_collection_id_symbol_date_week" ON {{ this }} (profile_id, collection_id, symbol, date_week)',
-      'create index if not exists "dphh_profile_id_collection_id_symbol_date_month" ON {{ this }} (profile_id, collection_id, symbol, date_month)',
+      'create index if not exists "dpthh_profile_id_collection_id_symbol_date_week" ON {{ this }} (profile_id, collection_id, symbol, date_week)',
+      'create index if not exists "dpthh_profile_id_collection_id_symbol_date_month" ON {{ this }} (profile_id, collection_id, symbol, date_month)',
     ]
   )
 }}
@@ -57,15 +57,43 @@ with portfolio_statuses as
                     (fund_holding_data ->> 'value')::numeric   as value,
                     updated_at
              from fund_holdings
+     ),
+     schedule as
+         (
+             select profile_id, collection_id, symbol, dd::date as date
+             from (
+                      select profile_id,
+                             collection_id,
+                             symbol,
+                             min(date) as min_date
+                      from data
+                      group by profile_id, collection_id, symbol
+                  ) t
+                      join {{ ref('ticker_realtime_metrics') }} using (symbol)
+                      join generate_series(min_date, ticker_realtime_metrics.time::date, interval '1 day') dd on true
+     ),
+    data_extended as
+         (
+             select profile_id,
+                    collection_id,
+                    symbol,
+                    date,
+                    coalesce(relative_daily_gain, 0)                        as relative_daily_gain,
+                    public.last_value_ignorenulls(value) over wnd           as value,
+                    public.last_value_ignorenulls(data.updated_at) over wnd as updated_at
+             from schedule
+                      left join data using (profile_id, collection_id, symbol, date)
+                      left join {{ ref('historical_prices') }} using (symbol, date)
+                 window wnd as (partition by profile_id, collection_id, symbol order by date rows between unbounded preceding and current row)
      )
-select data.*,
+select data_extended.*,
        date_trunc('week', date)::date                                     as date_week,
        date_trunc('month', date)::date                                    as date_month,
        profile_id || '_' || collection_id || '_' || symbol || '_' || date as id
-from data
+from data_extended
 
 {% if is_incremental() %}
          left join {{ this }} old_data using (profile_id, collection_id, symbol, date)
 where old_data.profile_id is null
-   or data.updated_at > old_data.updated_at
+   or data_extended.updated_at > old_data.updated_at
 {% endif %}

@@ -80,7 +80,6 @@ ACTIONS = [
     TradingGetActualCollectionHoldings(),
     TradingSyncProviderData(),
     TradingGetCollectionData(),
-    TradingGetProfileData(),
 
     # Debug
     TradingAddMoney(),

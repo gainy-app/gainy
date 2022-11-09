@@ -9,7 +9,7 @@ from portfolio.plaid import PlaidService
 from portfolio.plaid.common import handle_error
 from services import S3
 from portfolio.plaid.models import PlaidAccessToken, PlaidAccount
-from trading.models import KycDocument, FundingAccount, TradingMoneyFlow, ProfileKycStatus, ProfileBalances
+from trading.models import KycDocument, FundingAccount, TradingMoneyFlow, ProfileKycStatus
 from trading.drivewealth.provider import DriveWealthProvider
 from trading.repository import TradingRepository
 
@@ -198,8 +198,8 @@ class TradingService(GainyTradingService):
         return self._get_provider_service().get_actual_collection_data(
             profile_id, collection_id)
 
-    def get_actual_balances(self, profile_id: int) -> ProfileBalances:
-        return self._get_provider_service().get_actual_balances(profile_id)
+    def update_profile_balance(self, profile_id: int):
+        return self._get_provider_service().update_profile_balance(profile_id)
 
     def sync_funding_accounts(self, profile_id) -> Iterable[FundingAccount]:
         repository = self.trading_repository
