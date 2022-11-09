@@ -55,8 +55,8 @@ with data as
                     json_build_object('ttf', true,
                                       'buy', target_amount_delta > 0,
                                       'sell', target_amount_delta < 0,
-                                      'pending', status = 'PENDING' or status is null,
-                                      'error', coalesce(status, '') = 'EXECUTED_FULLY'
+                                      'pending', status in ('PENDING', 'PENDING_EXECUTION') or status is null,
+                                      'error', coalesce(status, '') = 'FAILED'
                         )                                           as tags
              from {{ source('app', 'trading_collection_versions') }}
                       join {{ ref('collections') }} on collections.id = trading_collection_versions.collection_id
