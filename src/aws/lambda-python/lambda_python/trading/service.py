@@ -8,6 +8,7 @@ from gainy.trading.drivewealth.models import CollectionStatus, CollectionHolding
 from portfolio.plaid import PlaidService
 from portfolio.plaid.common import handle_error
 from services import S3
+from trading.kyc_form_validator import KycFormValidator
 from portfolio.plaid.models import PlaidAccessToken, PlaidAccount
 from trading.models import KycDocument, FundingAccount, TradingMoneyFlow, ProfileKycStatus, ProfileBalances
 from trading.drivewealth.provider import DriveWealthProvider
@@ -219,3 +220,13 @@ class TradingService(GainyTradingService):
 
     def debug_delete_data(self, profile_id):
         self._get_provider_service().debug_delete_data(profile_id)
+
+    def validate_kyc_form(self, kyc_form):
+        KycFormValidator.validate_not_po(
+            street1=kyc_form['address_street1'],
+            street2=kyc_form['address_street2'],
+            city=kyc_form['address_city'],
+            province=kyc_form['address_province'],
+            postal_code=kyc_form['address_postal_code'],
+            country=kyc_form['address_country'] or "USA",
+        )

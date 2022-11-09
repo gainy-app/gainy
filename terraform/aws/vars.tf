@@ -10,6 +10,7 @@ variable "hubspot_api_key" {}
 variable "github_app_id" {}
 variable "github_app_installation_id" {}
 variable "github_app_private_key" {}
+variable "google_places_api_key" {}
 
 variable "aws_region" {}
 variable "aws_access_key" {}
