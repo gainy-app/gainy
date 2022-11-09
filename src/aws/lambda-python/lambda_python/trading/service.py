@@ -8,12 +8,8 @@ from gainy.trading.drivewealth.models import CollectionStatus, CollectionHolding
 from portfolio.plaid import PlaidService
 from portfolio.plaid.common import handle_error
 from services import S3
-<<<<<<< HEAD
-from portfolio.plaid.models import PlaidAccessToken
 from trading.kyc_form_validator import KycFormValidator
-=======
 from portfolio.plaid.models import PlaidAccessToken, PlaidAccount
->>>>>>> main
 from trading.models import KycDocument, FundingAccount, TradingMoneyFlow, ProfileKycStatus, ProfileBalances
 from trading.drivewealth.provider import DriveWealthProvider
 from trading.repository import TradingRepository
