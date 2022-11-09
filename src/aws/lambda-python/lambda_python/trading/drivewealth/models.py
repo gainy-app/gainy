@@ -89,12 +89,17 @@ class BaseDriveWealthMoneyFlowModel(BaseDriveWealthModel, ABC):
     non_persistent_fields = ["created_at", "updated_at"]
 
     def set_from_response(self, data=None):
-        self.ref_id = data["id"]
+        self.ref_id = data.get("id") or data.get("paymentID")
         if "accountDetails" in data:
             self.trading_account_ref_id = data["accountDetails"]["accountID"]
         elif "accountID" in data:
             self.trading_account_ref_id = data["accountID"]
-        self.status = data["status"]["message"]
+
+        if "statusMessage" in data:
+            self.status = data["statusMessage"]
+        else:
+            self.status = data["status"]["message"]
+
         self.data = data
 
     def get_money_flow_status(self) -> TradingMoneyFlowStatus:
@@ -104,6 +109,9 @@ class BaseDriveWealthMoneyFlowModel(BaseDriveWealthModel, ABC):
         Successful	2	"SUCCESSFUL"	After a deposit is marked "Approved", the next step is "Successful".
         Failed	3	"FAILED"	If a deposit is marked as "Rejected", the deposit will immediately be set to "Failed".
         Other	4	"OTHER"
+        RIA Pending	11	"RIA_Pending"
+        RIA Approved	12	"RIA_Approved"
+        RIA Rejected	13	"RIA_Rejected"
         Approved	14	"APPROVED"	Once marked as "Approved", the deposit will be processed.
         Rejected	15	"REJECTED"	Updating a deposit to "Rejected" will immediately set it 's status to "Failed"
         On Hold	16	"ON_HOLD"	The "On Hold" status is reserved for deposits that aren't ready to be processed.
@@ -112,7 +120,8 @@ class BaseDriveWealthMoneyFlowModel(BaseDriveWealthModel, ABC):
         """
 
         if self.status in [
-                'Started', 'Pending', 'Other', 'Approved', 'On Hold'
+                'Started', 'Pending', 'Other', 'Approved', 'On Hold',
+                'RIA_Pending'
         ]:
             return TradingMoneyFlowStatus.PENDING
         if self.status in ['Successful']:
@@ -189,6 +198,37 @@ class DriveWealthAutopilotRun(BaseDriveWealthModel):
         elif self.is_failed():
             trading_collection_version.set_status(
                 TradingCollectionVersionStatus.FAILED)
+
+
+class DriveWealthOrder(BaseDriveWealthModel):
+    ref_id = None
+    status = None  # NEW, PARTIAL_FILL, CANCELLED, REJECTED, FILLED
+    account_id = None
+    symbol = None
+    data = None
+    last_executed_at = None
+    created_at = None
+    updated_at = None
+
+    key_fields = ["ref_id"]
+
+    db_excluded_fields = ["created_at", "updated_at"]
+    non_persistent_fields = ["created_at", "updated_at"]
+
+    def set_from_response(self, data: dict = None):
+        if not data:
+            return
+        self.ref_id = data["id"]
+        self.status = data["status"]
+        self.account_id = data["accountID"]
+        self.symbol = data["symbol"]
+        if "lastExecuted" in data:
+            self.last_executed_at = data["lastExecuted"]
+        self.data = data
+
+    @classproperty
+    def table_name(self) -> str:
+        return "drivewealth_orders"
 
 
 class DriveWealthKycStatus:

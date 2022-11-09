@@ -14,6 +14,8 @@ class NoopEventHandler(AbstractDriveWealthEventHandler):
             'deposits.created',
             'kyc.created',
             'transactions.created',
+            'mam.allocationlist.accepted',
+            'mam.allocationlist.complete',
         ]
 
     def handle(self, event_payload: dict):
