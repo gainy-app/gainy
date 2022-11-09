@@ -5,7 +5,6 @@
     tags = ["realtime"],
     post_hook=[
       pk('holding_id_v2'),
-      'delete from {{this}} where updated_at < (select max(updated_at) from {{this}})',
     ]
   )
 }}
