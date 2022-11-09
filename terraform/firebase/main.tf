@@ -79,6 +79,16 @@ module "functions-refreshToken" {
   depends_on           = [google_project_service.cf, google_project_service.cb, google_project_service.compute]
 }
 
+
+# Enable Cloud Places API
+resource "google_project_service" "geocoding-backend" {
+  project = google_project.project.project_id
+  service = "geocoding-backend.googleapis.com"
+
+  disable_dependent_services = true
+  disable_on_destroy         = true
+}
+
 output "google_project_id" {
   value = local.google_project_id
 }
