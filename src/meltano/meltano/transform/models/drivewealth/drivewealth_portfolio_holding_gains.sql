@@ -1,7 +1,7 @@
 {{
   config(
     materialized = "incremental",
-    unique_key = "id",
+    unique_key = "holding_id_v2",
     post_hook=[
       pk('holding_id_v2'),
     ]
