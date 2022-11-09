@@ -90,16 +90,6 @@ class DriveWealthProvider(DriveWealthProviderKYC,
 
         return entity
 
-    def update_profile_balance(self, profile_id):
-        user = self._get_user(profile_id)
-        accounts = self.repository.get_user_accounts(user.ref_id)
-        for account in accounts:
-            self.sync_account_money(account.ref_id)
-
-        portfolio = self.repository.get_profile_portfolio(profile_id)
-        if portfolio:
-            self.sync_portfolio_status(portfolio)
-
     def debug_add_money(self, trading_account_id, amount):
         if not IS_UAT:
             raise Exception('Not supported in production')

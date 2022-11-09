@@ -294,12 +294,6 @@ type Mutation {
 }
 
 type Mutation {
-  trading_update_profile_balance(
-    profile_id: Int!
-  ): OkOutput
-}
-
-type Mutation {
   trading_withdraw_funds(
     profile_id: Int!
     trading_account_id: Int

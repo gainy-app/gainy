@@ -44,7 +44,7 @@ with data as
                portfolio_brokers.uniq_id                                         as broker_uniq_id,
                greatest(profile_holdings.updated_at,
                         portfolio_securities_normalized.updated_at,
-                        base_tickers.updated_at)                                 as updated_at
+                        base_tickers.updated_at)::timestamp                      as updated_at
         from {{ source('app', 'profile_holdings') }}
                  join {{ ref('portfolio_securities_normalized') }}
                       on portfolio_securities_normalized.id = profile_holdings.security_id

@@ -12,4 +12,3 @@ from trading.actions.get_actual_collection_holdings import TradingGetActualColle
 from trading.actions.sync_provider_data import TradingSyncProviderData
 from trading.actions.add_money import TradingAddMoney
 from trading.actions.delete_trading_data import TradingDeleteData
-from trading.actions.get_collection_data import TradingGetCollectionData
