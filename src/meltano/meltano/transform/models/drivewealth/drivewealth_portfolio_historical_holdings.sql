@@ -5,8 +5,8 @@
     post_hook=[
       pk('profile_id, collection_id, symbol, date'),
       index('id', true),
-      'create index if not exists "dpthh_profile_id_collection_id_symbol_date_week" ON {{ this }} (profile_id, collection_id, symbol, date_week)',
-      'create index if not exists "dpthh_profile_id_collection_id_symbol_date_month" ON {{ this }} (profile_id, collection_id, symbol, date_month)',
+      'create index if not exists "dphh_profile_id_collection_id_symbol_date_week" ON {{ this }} (profile_id, collection_id, symbol, date_week)',
+      'create index if not exists "dphh_profile_id_collection_id_symbol_date_month" ON {{ this }} (profile_id, collection_id, symbol, date_month)',
     ]
   )
 }}
