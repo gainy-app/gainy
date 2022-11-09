@@ -26,6 +26,24 @@ if PLAID_ENV not in PLAID_HOSTS:
     raise Exception('Wrong plaid env %s, available options are: %s' %
                     (PLAID_ENV, ",".join(PLAID_HOSTS.keys())))
 
+DEFAULT_ENV = "development"
+
+
+def get_purpose(input_params):
+    purpose = input_params.get("purpose") or PURPOSE_PORTFOLIO
+    if purpose not in [PURPOSE_PORTFOLIO, PURPOSE_TRADING]:
+        raise Exception('Wrong purpose')
+    return purpose
+
+
+def get_purpose_products(purpose):
+    if purpose == PURPOSE_PORTFOLIO:
+        return ['investments']
+    elif purpose == PURPOSE_TRADING:
+        return ['auth']
+    else:
+        raise Exception('Wrong purpose')
+
 
 def get_plaid_client(env=None):
     if env is None:

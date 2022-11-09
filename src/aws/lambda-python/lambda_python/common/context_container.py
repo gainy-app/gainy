@@ -18,6 +18,8 @@ from gainy.context_container import ContextContainer as GainyContextContainer
 
 
 class ContextContainer(GainyContextContainer):
+    request = None
+    headers: dict = None
 
     @cached_property
     def stripe_api(self) -> StripeApi:

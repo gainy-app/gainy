@@ -2,7 +2,7 @@ from airflow.operators.bash import BashOperator
 from common import create_dag
 
 dag_id = "trading-update-account-balances"
-tags = ["billing", "trading"]
+tags = ["billing", "trading", "drivewealth"]
 dag = create_dag(dag_id,
                  tags=tags,
                  is_paused_upon_creation=True,
