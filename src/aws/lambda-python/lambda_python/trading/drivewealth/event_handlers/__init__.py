@@ -8,4 +8,5 @@ from .orders_created import OrderCreatedEventHandler
 from .orders_updated import OrderUpdatedEventHandler
 from .redemptions_created import RedemptionCreatedEventHandler
 from .redemptions_updated import RedemptionUpdatedEventHandler
+from .statement_created import StatementCreatedEventHandler
 from .users_updated import UsersUpdatedEventHandler

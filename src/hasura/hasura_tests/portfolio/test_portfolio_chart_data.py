@@ -3,6 +3,8 @@ import dateutil.parser
 import numbers
 import os
 import pytest
+
+from gainy.utils import DATETIME_ISO8601_FORMAT
 from hasura_tests.common import make_graphql_request, PRICE_EPS
 from hasura_tests.portfolio.common import PROFILE_IDS
 
@@ -27,7 +29,8 @@ def verify_portfolio_chart(portfolio_chart,
     portfolio_chart_index = 0
     for date in sorted(symbol_chart_datetimes):
         if datetime.datetime.now() - datetime.datetime.strptime(
-                date, '%Y-%m-%dT%H:%M:%S') < datetime.timedelta(minutes=30):
+                date, DATETIME_ISO8601_FORMAT) < datetime.timedelta(
+                    minutes=30):
             continue
         cur_quantities = quantity_override = None
 
@@ -102,10 +105,10 @@ def verify_portfolio_chart_previous_period_close(period,
 
     expected_value = None
     row_datetime = datetime.datetime.strptime(
-        portfolio_chart_1y[0]['datetime'], "%Y-%m-%dT%H:%M:%S")
+        portfolio_chart_1y[0]['datetime'], DATETIME_ISO8601_FORMAT)
     for row in reversed(portfolio_chart_1y):
         row_datetime = datetime.datetime.strptime(row['datetime'],
-                                                  "%Y-%m-%dT%H:%M:%S")
+                                                  DATETIME_ISO8601_FORMAT)
         if row_datetime >= threshold_datetime:
             continue
 
@@ -114,10 +117,10 @@ def verify_portfolio_chart_previous_period_close(period,
 
     for start_date, end_date, _quantities in quantities_override:
         if start_date is not None and start_date > row_datetime.strftime(
-                "%Y-%m-%dT%H:%M:%S"):
+                DATETIME_ISO8601_FORMAT):
             continue
         if end_date is not None and end_date < row_datetime.strftime(
-                "%Y-%m-%dT%H:%M:%S"):
+                DATETIME_ISO8601_FORMAT):
             continue
 
         return  # TODO test complex cases

@@ -1,13 +1,17 @@
 import datetime
 
-import json
-from typing import Dict, Optional
-from decimal import Decimal
+from typing import Optional, List
 import enum
 
-from gainy.data_access.models import BaseModel, classproperty, DecimalEncoder
+from gainy.data_access.models import BaseModel, classproperty
 from gainy.exceptions import BadRequestException
 from gainy.trading.models import TradingMoneyFlowStatus
+
+
+class TradingStatementType(str, enum.Enum):
+    MONTHLY_STATEMENT = "MONTHLY_STATEMENT"
+    TAX = "TAX"
+    TRADE_CONFIRMATION = "TRADE_CONFIRMATION"
 
 
 class KycStatus(str, enum.Enum):
@@ -44,6 +48,33 @@ class ProfileKycStatus:
     def __init__(self, status: str, message: Optional[str]):
         self.status = KycStatus(status)
         self.message = message
+
+
+class TradingStatement(BaseModel):
+    id: int = None
+    profile_id: int = None
+    type: TradingStatementType = None
+    display_name: str = None
+    created_at: datetime.datetime = None
+
+    key_fields = ["id"]
+
+    db_excluded_fields = ["created_at"]
+    non_persistent_fields = ["id", "created_at"]
+
+    def __init__(self, row: dict = None):
+        super().__init__(row)
+
+        if row and row["type"]:
+            self.type = TradingStatementType(row["type"])
+
+    @classproperty
+    def schema_name(self) -> str:
+        return "app"
+
+    @classproperty
+    def table_name(self) -> str:
+        return "trading_statements"
 
 
 class KycDocument(BaseModel):

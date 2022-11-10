@@ -1,5 +1,6 @@
 import datetime
 
+from gainy.utils import DATETIME_ISO8601_FORMAT_TZ
 from trading.models import KycStatus
 from trading.drivewealth.models import DriveWealthKycStatus
 from trading.drivewealth.api import DriveWealthApi
@@ -15,7 +16,8 @@ def test_sync_kyc(monkeypatch):
             "status": {
                 "name": "KYC_APPROVED"
             },
-            "updated": datetime.datetime.now().strftime("%Y-%m-%dT%H:%M:%S%z")
+            "updated":
+            datetime.datetime.now().strftime(DATETIME_ISO8601_FORMAT_TZ)
         }
     }
 

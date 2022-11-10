@@ -11,7 +11,7 @@ from services import S3
 from trading.exceptions import WrongTradingCollectionVersionStatusException
 from trading.kyc_form_validator import KycFormValidator
 from portfolio.plaid.models import PlaidAccessToken, PlaidAccount
-from trading.models import KycDocument, FundingAccount, TradingMoneyFlow, ProfileKycStatus
+from trading.models import KycDocument, FundingAccount, TradingMoneyFlow, ProfileKycStatus, TradingStatement
 from trading.drivewealth.provider import DriveWealthProvider
 from trading.repository import TradingRepository
 
@@ -232,3 +232,6 @@ class TradingService(GainyTradingService):
 
         trading_collection_version.status = TradingCollectionVersionStatus.CANCELLED
         self.trading_repository.persist(trading_collection_version)
+
+    def download_statement(self, statement: TradingStatement) -> str:
+        return self._get_provider_service().download_statement(statement)
