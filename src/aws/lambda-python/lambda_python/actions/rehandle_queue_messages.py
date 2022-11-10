@@ -1,4 +1,4 @@
-import psycopg2.errors
+import time
 
 from common.context_container import ContextContainer
 from common.hasura_function import HasuraAction
@@ -26,6 +26,7 @@ class ReHandleQueueMessages(HasuraAction):
         unsupported = 0
         error = 0
         for message in repo.iterate_all(QueueMessage, _filter):
+            start = time.time()
             message: QueueMessage
             logger_extra = {"queue_message_id": message.id}
 
@@ -34,6 +35,8 @@ class ReHandleQueueMessages(HasuraAction):
                 repo.persist(message)
                 success += 1
                 context_container.db_conn.commit()
+                logger_extra["duration"] = time.time() - start
+                logger.info('Handled queue message', extra=logger_extra)
             except UnsupportedMessageException as e:
                 unsupported += 1
                 logger.warning(e, extra=logger_extra)
