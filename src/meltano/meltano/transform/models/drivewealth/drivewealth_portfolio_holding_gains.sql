@@ -14,7 +14,7 @@ with raw_data_1m as
              select profile_id,
                     collection_id,
                     symbol,
-                    sum(relative_daily_gain * value) as absolute_gain
+                    sum(value * relative_daily_gain / (1 + relative_daily_gain)) as absolute_gain
              from {{ ref('drivewealth_portfolio_historical_holdings') }}
              where date > now() - interval '1 month'
              group by profile_id, collection_id, symbol
@@ -24,7 +24,7 @@ with raw_data_1m as
              select profile_id,
                     collection_id,
                     symbol,
-                    sum(relative_daily_gain * value) as absolute_gain
+                    sum(value * relative_daily_gain / (1 + relative_daily_gain)) as absolute_gain
              from {{ ref('drivewealth_portfolio_historical_holdings') }}
              where date > now() - interval '3 months'
              group by profile_id, collection_id, symbol
@@ -34,7 +34,7 @@ with raw_data_1m as
              select profile_id,
                     collection_id,
                     symbol,
-                    sum(relative_daily_gain * value) as absolute_gain
+                    sum(value * relative_daily_gain / (1 + relative_daily_gain)) as absolute_gain
              from {{ ref('drivewealth_portfolio_historical_holdings') }}
              where date > now() - interval '1 year'
              group by profile_id, collection_id, symbol
@@ -44,7 +44,7 @@ with raw_data_1m as
              select profile_id,
                     collection_id,
                     symbol,
-                    sum(relative_daily_gain * value) as absolute_gain
+                    sum(value * relative_daily_gain / (1 + relative_daily_gain)) as absolute_gain
              from {{ ref('drivewealth_portfolio_historical_holdings') }}
              where date > now() - interval '5 years'
              group by profile_id, collection_id, symbol
@@ -54,7 +54,7 @@ with raw_data_1m as
              select profile_id,
                     collection_id,
                     symbol,
-                    sum(relative_daily_gain * value) as absolute_gain
+                    sum(value * relative_daily_gain / (1 + relative_daily_gain)) as absolute_gain
              from {{ ref('drivewealth_portfolio_historical_holdings') }}
              group by profile_id, collection_id, symbol
      )

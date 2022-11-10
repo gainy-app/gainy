@@ -22,7 +22,7 @@ with raw_data_1d as
                    case
                        when drivewealth_portfolio_historical_holdings.date < ticker_realtime_metrics.date
                            then value * ticker_realtime_metrics.relative_daily_change
-                       else value * drivewealth_portfolio_historical_holdings.relative_daily_gain
+                       else value * drivewealth_portfolio_historical_holdings.relative_daily_gain / (1 + drivewealth_portfolio_historical_holdings.relative_daily_gain)
                        end                                                         as absolute_gain,
                    case
                        when drivewealth_portfolio_historical_holdings.date < ticker_realtime_metrics.date
@@ -43,7 +43,7 @@ with raw_data_1d as
                       select profile_id,
                              collection_id,
                              symbol,
-                             sum(value * drivewealth_portfolio_historical_holdings.relative_daily_gain) as absolute_gain
+                             sum(value * relative_daily_gain / (1 + relative_daily_gain)) as absolute_gain
                       from {{ ref('drivewealth_portfolio_historical_holdings') }}
                                left join raw_data_1d using (profile_id, collection_id, symbol)
                       where drivewealth_portfolio_historical_holdings.date > now() - interval '1 week'
