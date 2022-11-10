@@ -79,6 +79,7 @@ ACTIONS = [
     TradingReconfigureCollectionHoldings(),
     TradingGetActualCollectionHoldings(),
     TradingSyncProviderData(),
+    TradingCancelPendingOrder(),
 
     # Debug
     TradingAddMoney(),
