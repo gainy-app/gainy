@@ -81,6 +81,7 @@ ACTIONS = [
     TradingSyncProviderData(),
     TradingGetCollectionData(),
     TradingGetProfileData(),
+    TradingCancelPendingOrder(),
 
     # Debug
     TradingAddMoney(),

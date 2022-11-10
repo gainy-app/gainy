@@ -8,6 +8,7 @@ from gainy.trading.drivewealth.models import CollectionStatus, CollectionHolding
 from portfolio.plaid import PlaidService
 from portfolio.plaid.common import handle_error
 from services import S3
+from trading.exceptions import WrongTradingCollectionVersionStatusException
 from trading.kyc_form_validator import KycFormValidator
 from portfolio.plaid.models import PlaidAccessToken, PlaidAccount
 from trading.models import KycDocument, FundingAccount, TradingMoneyFlow, ProfileKycStatus, ProfileBalances
@@ -230,3 +231,11 @@ class TradingService(GainyTradingService):
             postal_code=kyc_form['address_postal_code'],
             country=kyc_form['address_country'] or "USA",
         )
+
+    def cancel_pending_order(self, trading_collection_version: TradingCollectionVersion):
+        self.trading_repository.refresh(trading_collection_version)
+        if trading_collection_version.status != TradingCollectionVersionStatus.PENDING:
+            raise WrongTradingCollectionVersionStatusException()
+
+        trading_collection_version.status = TradingCollectionVersionStatus.CANCELLED
+        self.trading_repository.persist(trading_collection_version)

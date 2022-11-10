@@ -235,6 +235,13 @@ type Mutation {
 }
 
 type Mutation {
+  trading_cancel_pending_order(
+    profile_id: Int
+    trading_collection_version_id: Int
+  ): TradingCollectionVersionOutput
+}
+
+type Mutation {
   trading_delete_data(
     profile_id: Int!
   ): OkOutput
@@ -297,7 +304,7 @@ type Mutation {
     collection_id: Int!
     weights: [TickerWeight]
     target_amount_delta: Float!
-  ): TradingReconfigureCollectionHoldingsOutput
+  ): TradingCollectionVersionOutput
 }
 
 type Mutation {
@@ -576,10 +583,6 @@ type StripeGetPaymentSheetDataOutput {
   publishable_key: String!
 }
 
-type TradingReconfigureCollectionHoldingsOutput {
-  trading_collection_version_id: Int!
-}
-
 type ReHandleQueueMessagesOutput {
   success: Int!
   unsupported: Int!
@@ -620,5 +623,9 @@ type TradingProfileHistoryOutput {
 type TradingProfileHistoryMoneyFlowData {
   amount: Float!
   created_at: String!
+}
+
+type TradingCollectionVersionOutput {
+  trading_collection_version_id: Int!
 }
 

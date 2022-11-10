@@ -23,7 +23,6 @@ mutation TradingReconfigureCollectionHoldings(
     $weights: [TickerWeight]
     $target_amount_delta: Float!
 ) {
-
   trading_reconfigure_collection_holdings(
     profile_id: $profile_id
     collection_id: $collection_id
@@ -39,6 +38,21 @@ Types:
 input TickerWeight {
     symbol: String!
     weight: Float!    
+}
+```
+
+### Cancel pending TTF order
+```graphql
+mutation TradingCancelPendingOrder(
+    $profile_id: Int!
+    $trading_collection_version_id: Int!
+) {
+  trading_cancel_pending_order(
+    profile_id: $profile_id
+    trading_collection_version_id: $trading_collection_version_id
+  ){
+    trading_collection_version_id
+  }
 }
 ```
 
