@@ -112,6 +112,7 @@ class DriveWealthApi(GainyDriveWealthApi):
                                   f"/funding/redemptions/{redemption.ref_id}",
                                   {
                                       'status': status,
+                                      'statusComment': 'Updated by Gainy',
                                   })
         redemption.set_from_response(data)
 
