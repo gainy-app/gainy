@@ -1,11 +1,16 @@
+from typing import List, Iterable
+
+import datetime
+
 from decimal import Decimal
 import os
 
-from trading.models import KycDocument
+from trading.models import KycDocument, TradingStatementType
 from trading.drivewealth.repository import DriveWealthRepository
-from trading.drivewealth.models import DriveWealthBankAccount, DriveWealthKycStatus, DriveWealthRedemption
+from trading.drivewealth.models import DriveWealthBankAccount, DriveWealthKycStatus, DriveWealthRedemption, \
+    DriveWealthStatement
 
-from gainy.utils import get_logger, env
+from gainy.utils import get_logger, env, DATETIME_ISO8601_FORMAT_TZ
 from gainy.trading.drivewealth import DriveWealthApi as GainyDriveWealthApi
 from gainy.trading.drivewealth.models import DriveWealthAccount
 
@@ -15,6 +20,17 @@ DRIVEWEALTH_WLP_ID = os.getenv("DRIVEWEALTH_WLP_ID")
 DRIVEWEALTH_PARENT_IBID = os.getenv("DRIVEWEALTH_PARENT_IBID")
 DRIVEWEALTH_RIA_ID = os.getenv("DRIVEWEALTH_RIA_ID")
 DRIVEWEALTH_RIA_PRODUCT_ID = os.getenv("DRIVEWEALTH_RIA_PRODUCT_ID")
+
+
+def _hydrate_documents(account: DriveWealthAccount, type: TradingStatementType,
+                       data: list) -> Iterable[DriveWealthStatement]:
+    for i in data:
+        entity = DriveWealthStatement()
+        entity.set_from_response(i)
+        entity.type = type
+        entity.account_id = account.ref_id
+        entity.user_id = account.drivewealth_user_id
+        yield entity
 
 
 class DriveWealthApi(GainyDriveWealthApi):
@@ -143,3 +159,52 @@ class DriveWealthApi(GainyDriveWealthApi):
                 "source": "HUMAN",
                 "batch": False
             })
+
+    def get_statement_url(self, statement: DriveWealthStatement) -> str:
+        return self._make_request(
+            "GET",
+            f"/statements/{statement.account_id}/{statement.file_key}")["url"]
+
+    def get_documents_trading_confirmations(
+            self, account: DriveWealthAccount) -> List[DriveWealthStatement]:
+        data = self._make_request(
+            "GET", f"/accounts/{account.ref_id}/confirms", {
+                "from":
+                account.created_at.strftime(DATETIME_ISO8601_FORMAT_TZ),
+                "to":
+                datetime.datetime.now(tz=datetime.timezone.utc).strftime(
+                    DATETIME_ISO8601_FORMAT_TZ),
+            })
+
+        return list(
+            _hydrate_documents(account,
+                               TradingStatementType.TRADE_CONFIRMATION, data))
+
+    def get_documents_tax(
+            self, account: DriveWealthAccount) -> List[DriveWealthStatement]:
+        data = self._make_request(
+            "GET", f"/accounts/{account.ref_id}/taxforms", {
+                "from":
+                account.created_at.strftime(DATETIME_ISO8601_FORMAT_TZ),
+                "to":
+                datetime.datetime.now(tz=datetime.timezone.utc).strftime(
+                    DATETIME_ISO8601_FORMAT_TZ),
+            })
+
+        return list(_hydrate_documents(account, TradingStatementType.TAX,
+                                       data))
+
+    def get_documents_statements(
+            self, account: DriveWealthAccount) -> List[DriveWealthStatement]:
+        data = self._make_request(
+            "GET", f"/accounts/{account.ref_id}/statements", {
+                "from":
+                account.created_at.strftime(DATETIME_ISO8601_FORMAT_TZ),
+                "to":
+                datetime.datetime.now(tz=datetime.timezone.utc).strftime(
+                    DATETIME_ISO8601_FORMAT_TZ),
+            })
+
+        return list(
+            _hydrate_documents(account, TradingStatementType.MONTHLY_STATEMENT,
+                               data))

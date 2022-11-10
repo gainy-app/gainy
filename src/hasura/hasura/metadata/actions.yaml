@@ -195,6 +195,10 @@ actions:
       handler: '{{AWS_LAMBDA_API_GATEWAY_ENDPOINT}}/hasuraAction'
     permissions:
       - role: user
+  - name: trading_download_statement
+    definition:
+      kind: ""
+      handler: '{{AWS_LAMBDA_API_GATEWAY_ENDPOINT}}/hasuraAction'
   - name: trading_get_actual_collection_holdings
     definition:
       kind: ""
@@ -395,4 +399,5 @@ custom_types:
     - name: ReHandleQueueMessagesOutput
     - name: KycFormChoicesFieldConfig
     - name: TradingCollectionVersionOutput
+    - name: UrlOutput
   scalars: []

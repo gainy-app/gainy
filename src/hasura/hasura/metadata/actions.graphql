@@ -264,6 +264,13 @@ type Mutation {
 }
 
 type Query {
+  trading_download_statement(
+    profile_id: Int!
+    statement_id: Int!
+  ): UrlOutput
+}
+
+type Query {
   trading_get_actual_collection_holdings(
     profile_id: Int!
     collection_id: Int!
@@ -584,3 +591,8 @@ type KycFormChoicesFieldConfig {
 type TradingCollectionVersionOutput {
   trading_collection_version_id: Int!
 }
+
+type UrlOutput {
+  url: String!
+}
+

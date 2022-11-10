@@ -1,6 +1,5 @@
 import os, sys
 import datetime
-import dateutil
 
 task_dir = os.path.abspath(os.path.join(__file__, '../../../'))
 sys.path.append(task_dir)

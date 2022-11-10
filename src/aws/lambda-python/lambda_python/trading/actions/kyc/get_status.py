@@ -1,6 +1,6 @@
 from common.context_container import ContextContainer
 from common.hasura_function import HasuraAction
-from gainy.utils import get_logger
+from gainy.utils import get_logger, DATETIME_ISO8601_FORMAT_TZ
 
 logger = get_logger(__name__)
 
@@ -21,7 +21,10 @@ class KycGetStatus(HasuraAction):
         kyc_status = trading_service.kyc_get_status(profile_id)
         repository.update_kyc_form(profile_id, kyc_status.status)
         return {
-            "status": kyc_status.status,
-            "message": kyc_status.message,
-            "updated_at": kyc_status.updated_at.strftime("%Y-%m-%dT%H:%M:%S%z")
+            "status":
+            kyc_status.status,
+            "message":
+            kyc_status.message,
+            "updated_at":
+            kyc_status.updated_at.strftime(DATETIME_ISO8601_FORMAT_TZ)
         }

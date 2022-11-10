@@ -4,6 +4,8 @@ import datetime
 
 import json
 
+from gainy.utils import DATETIME_ISO8601_FORMAT_TZ
+
 
 def base_response(status_code, body=None):
     return {
@@ -21,4 +23,4 @@ def error_response(status_code, message, payload={}):
 
 
 def format_datetime(d: Optional[datetime.datetime]):
-    return d.strftime("%Y-%m-%dT%H:%M:%S%z") if d else None
+    return d.strftime(DATETIME_ISO8601_FORMAT_TZ) if d else None

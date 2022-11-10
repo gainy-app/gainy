@@ -1,7 +1,7 @@
 from common.context_container import ContextContainer
 from gainy.exceptions import NotFoundException
 from common.hasura_function import HasuraAction
-from gainy.utils import get_logger
+from gainy.utils import get_logger, DATETIME_ISO8601_FORMAT_TZ
 
 logger = get_logger(__name__)
 
@@ -25,8 +25,10 @@ class KycSendForm(HasuraAction):
         kyc_status = trading_service.kyc_send_form(kyc_form)
         repository.update_kyc_form(profile_id, kyc_status.status)
         return {
-            "status": kyc_status.status,
-            "message": kyc_status.message,
+            "status":
+            kyc_status.status,
+            "message":
+            kyc_status.message,
             "updated_at":
-            kyc_status.updated_at.strftime("%Y-%m-%dT%H:%M:%S%z"),
+            kyc_status.updated_at.strftime(DATETIME_ISO8601_FORMAT_TZ),
         }
