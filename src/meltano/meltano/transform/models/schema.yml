@@ -53,16 +53,16 @@ sources:
     tables:
       - name: analytics_profiles
       - name: drivewealth_accounts
+      - name: drivewealth_accounts_money
       - name: drivewealth_accounts_positions
-      - name: drivewealth_autopilot_runs
       - name: drivewealth_funds
-      - name: drivewealth_instruments
       - name: drivewealth_users
       - name: drivewealth_portfolio_statuses
       - name: drivewealth_portfolios
       - name: influencers
       - name: invitations
       - name: invoices
+      - name: kyc_form
       - name: notifications
       - name: personalized_collection_sizes
       - name: personalized_ticker_collections
@@ -80,6 +80,7 @@ sources:
       - name: profiles
       - name: subscriptions
       - name: trading_collection_versions
+      - name: trading_funding_accounts
       - name: trading_money_flow
 
   - name: website
@@ -2432,6 +2433,60 @@ models:
         tests:
           - type:
               type: 'character varying'
+
+  - name: trading_profile_status
+    columns:
+      - name: profile_id
+        tests:
+          - type:
+              type: 'integer'
+      - name: kyc_done
+        tests:
+          - type:
+              type: 'boolean'
+      - name: funding_account_connected
+        tests:
+          - type:
+              type: 'boolean'
+      - name: deposited_funds
+        tests:
+          - type:
+              type: 'boolean'
+      - name: withdrawable_cash
+        tests:
+          - type:
+              type: 'double precision'
+      - name: buying_power
+        tests:
+          - type:
+              type: 'double precision'
+
+  - name: trading_profile_collection_status
+    columns:
+      - name: profile_id
+        tests:
+          - type:
+              type: 'integer'
+      - name: collection_id
+        tests:
+          - type:
+              type: 'integer'
+      - name: value_to_portfolio_value
+        tests:
+          - type:
+              type: 'double precision'
+      - name: actual_value
+        tests:
+          - type:
+              type: 'double precision'
+      - name: relative_gain_1d
+        tests:
+          - type:
+              type: 'double precision'
+      - name: absolute_gain_1d
+        tests:
+          - type:
+              type: 'double precision'
 
 exposures:
   - name: ticker_search_index

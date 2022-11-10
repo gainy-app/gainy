@@ -11,7 +11,7 @@ from services import S3
 from trading.exceptions import WrongTradingCollectionVersionStatusException
 from trading.kyc_form_validator import KycFormValidator
 from portfolio.plaid.models import PlaidAccessToken, PlaidAccount
-from trading.models import KycDocument, FundingAccount, TradingMoneyFlow, ProfileKycStatus, ProfileBalances
+from trading.models import KycDocument, FundingAccount, TradingMoneyFlow, ProfileKycStatus
 from trading.drivewealth.provider import DriveWealthProvider
 from trading.repository import TradingRepository
 
@@ -194,14 +194,6 @@ class TradingService(GainyTradingService):
         collection_status: CollectionStatus = self._get_provider_service(
         ).get_actual_collection_data(profile_id, collection_id)
         return collection_status.holdings
-
-    def get_actual_collection_status(self, profile_id: int,
-                                     collection_id: int) -> CollectionStatus:
-        return self._get_provider_service().get_actual_collection_data(
-            profile_id, collection_id)
-
-    def get_actual_balances(self, profile_id: int) -> ProfileBalances:
-        return self._get_provider_service().get_actual_balances(profile_id)
 
     def sync_funding_accounts(self, profile_id) -> Iterable[FundingAccount]:
         repository = self.trading_repository

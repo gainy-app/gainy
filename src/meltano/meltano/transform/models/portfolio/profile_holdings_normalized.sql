@@ -44,7 +44,7 @@ with data as
                portfolio_brokers.uniq_id                                         as broker_uniq_id,
                greatest(profile_holdings.updated_at,
                         portfolio_securities_normalized.updated_at,
-                        base_tickers.updated_at)                                 as updated_at
+                        base_tickers.updated_at)::timestamp                      as updated_at
         from {{ source('app', 'profile_holdings') }}
                  join {{ ref('portfolio_securities_normalized') }}
                       on portfolio_securities_normalized.id = profile_holdings.security_id
@@ -75,7 +75,8 @@ with data as
                collection_id,
                drivewealth_holdings.type,
                portfolio_brokers.uniq_id                                                   as broker_uniq_id,
-               greatest(drivewealth_holdings.updated_at, base_tickers.updated_at)          as updated_at
+               greatest(drivewealth_holdings.updated_at,
+                        base_tickers.updated_at)::timestamp                                as updated_at
         from {{ ref('drivewealth_holdings') }}
                  left join {{ ref('base_tickers') }} using (symbol)
                  left join {{ ref('portfolio_brokers') }} on portfolio_brokers.uniq_id = 'dw_ttf'

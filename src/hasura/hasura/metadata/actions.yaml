@@ -201,19 +201,7 @@ actions:
       handler: '{{AWS_LAMBDA_API_GATEWAY_ENDPOINT}}/hasuraAction'
     permissions:
       - role: user
-  - name: trading_get_collection_data
-    definition:
-      kind: ""
-      handler: '{{AWS_LAMBDA_API_GATEWAY_ENDPOINT}}/hasuraAction'
-    permissions:
-      - role: user
   - name: trading_get_funding_accounts
-    definition:
-      kind: ""
-      handler: '{{AWS_LAMBDA_API_GATEWAY_ENDPOINT}}/hasuraAction'
-    permissions:
-      - role: user
-  - name: trading_get_profile_data
     definition:
       kind: ""
       handler: '{{AWS_LAMBDA_API_GATEWAY_ENDPOINT}}/hasuraAction'
@@ -406,11 +394,5 @@ custom_types:
     - name: StripeGetPaymentSheetDataOutput
     - name: ReHandleQueueMessagesOutput
     - name: KycFormChoicesFieldConfig
-    - name: TradingGetCollectionDataOutput
-    - name: TradingCollectionVersionData
-    - name: TradingCollectionHistoryOutput
-    - name: TradingGetProfileDataOutput
-    - name: TradingProfileHistoryOutput
-    - name: TradingProfileHistoryMoneyFlowData
     - name: TradingCollectionVersionOutput
   scalars: []

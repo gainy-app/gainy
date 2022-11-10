@@ -594,38 +594,6 @@ type KycFormChoicesFieldConfig {
   value: String!
 }
 
-type TradingGetCollectionDataOutput {
-  actual_value: Float!
-  history: TradingCollectionHistoryOutput
-}
-
-type TradingCollectionVersionData {
-  target_amount_delta: Float!
-  created_at: String!
-  executed_at: String!
-}
-
-type TradingCollectionHistoryOutput {
-  pending: [TradingCollectionVersionData]
-  successful: [TradingCollectionVersionData]
-}
-
-type TradingGetProfileDataOutput {
-  withdrawable_cash: Float!
-  buying_power: Float!
-  history: TradingProfileHistoryOutput
-}
-
-type TradingProfileHistoryOutput {
-  pending: [TradingProfileHistoryMoneyFlowData]
-}
-
-type TradingProfileHistoryMoneyFlowData {
-  amount: Float!
-  created_at: String!
-}
-
 type TradingCollectionVersionOutput {
   trading_collection_version_id: Int!
 }
-
