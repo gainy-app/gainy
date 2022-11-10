@@ -5,34 +5,26 @@
     tags = ["realtime"],
     post_hook=[
       pk('holding_id_v2'),
-      'delete from {{this}} where updated_at < (select max(updated_at) from {{this}})',
     ]
   )
 }}
 
 
-with holdings as
+with plaid_holdings as
          (
 
-             select holding_group_id,
-                    holding_id_v2,
-                    holding_id,
-                    profile_holdings_normalized.profile_id,
-                    now()::timestamp                              as updated_at,
-                    ticker_realtime_metrics.actual_price          as actual_price,
+             select holding_id_v2,
                     case
                         when profile_holdings_normalized.type = 'cash' and
                              profile_holdings_normalized.symbol = 'CUR:USD'
                             then profile_holdings_normalized.quantity
                         else ticker_realtime_metrics.actual_price *
                              profile_holdings_normalized.quantity_norm_for_valuation
-                        end                                       as actual_value,
-                    ticker_realtime_metrics.relative_daily_change as relative_gain_1d,
-                    profile_holdings_normalized.quantity::numeric
+                        end                                       as actual_value
              from {{ ref('profile_holdings_normalized') }}
                       left join {{ ref('ticker_realtime_metrics') }} using (symbol)
          ),
-     gains as
+     plaid_gains as
          (
              select holding_id_v2,
                     sum(case when relative_daily_change > -1
@@ -89,7 +81,26 @@ with holdings as
                   ) t
              where datetime < now() - interval '1 year'
              order by holding_id_v2, quantity_sign desc, datetime desc
-         )
+         ),
+    combined_gains as
+        (
+             select holding_id_v2,
+                    ticker_realtime_metrics.relative_daily_change                                                         as relative_gain_1d,
+                    coalesce(drivewealth_portfolio_holding_gains_realtime.actual_value, plaid_holdings.actual_value)      as actual_value,
+                    coalesce(drivewealth_portfolio_holding_gains_realtime.absolute_gain_1d, plaid_gains.absolute_gain_1d) as absolute_gain_1d,
+                    coalesce(drivewealth_portfolio_holding_gains_realtime.absolute_gain_1w, plaid_gains.absolute_gain_1w) as absolute_gain_1w,
+                    coalesce(drivewealth_portfolio_holding_gains.absolute_gain_1m, plaid_gains.absolute_gain_1m)          as absolute_gain_1m,
+                    coalesce(drivewealth_portfolio_holding_gains.absolute_gain_3m, plaid_gains.absolute_gain_3m)          as absolute_gain_3m,
+                    coalesce(drivewealth_portfolio_holding_gains.absolute_gain_1y, plaid_gains.absolute_gain_1y)          as absolute_gain_1y,
+                    coalesce(drivewealth_portfolio_holding_gains.absolute_gain_5y, plaid_gains.absolute_gain_5y)          as absolute_gain_5y,
+                    coalesce(drivewealth_portfolio_holding_gains.absolute_gain_total, plaid_gains.absolute_gain_total)    as absolute_gain_total
+             from {{ ref('profile_holdings_normalized') }}
+                      left join {{ ref('ticker_realtime_metrics') }} using (symbol)
+                      left join plaid_gains using (holding_id_v2)
+                      left join plaid_holdings using (holding_id_v2)
+                      left join {{ ref('drivewealth_portfolio_holding_gains') }} using (holding_id_v2)
+                      left join {{ ref('drivewealth_portfolio_holding_gains_realtime') }} using (holding_id_v2)
+    )
 select holding_group_id,
        holding_id_v2,
        holding_id,
@@ -130,6 +141,6 @@ select holding_group_id,
        absolute_gain_5y,
        absolute_gain_total,
        coalesce(long_term_tax_holdings.ltt_quantity_total, 0)                                       as ltt_quantity_total
-from holdings
-         left join gains using (holding_id_v2)
+from {{ ref('profile_holdings_normalized') }}
+         left join combined_gains using (holding_id_v2)
          left join long_term_tax_holdings using (holding_id_v2)

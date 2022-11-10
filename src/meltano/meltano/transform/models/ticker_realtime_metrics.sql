@@ -16,10 +16,12 @@ with latest_trading_day as
                     hpa_close.adjusted_close          as close_price,
                     t.min_datetime                    as open_datetime,
                     t.max_datetime + interval '3 min' as close_datetime,
+                    t.max_date                        as close_date,
                     t.sum_volume                      as volume
              from (
                       select symbol,
                              max(datetime) as max_datetime,
+                             max(date)     as max_date,
                              min(datetime) as min_datetime,
                              sum(volume)      sum_volume
                       from {{ ref('chart') }}
@@ -93,6 +95,10 @@ with latest_trading_day as
                                 max_historical.date + max_historical.period_interval
                         ) as datetime,
                     coalesce(
+                            historical_intraday_prices.date,
+                            historical_prices.date
+                        ) as date,
+                    coalesce(
                             historical_intraday_prices.adjusted_close,
                             historical_prices.adjusted_close
                         ) as adjusted_close
@@ -109,6 +115,7 @@ with latest_trading_day as
          )
 select symbol,
        coalesce(latest_trading_day.close_datetime, latest_datapoint.datetime)              as time,
+       coalesce(latest_trading_day.close_date, latest_datapoint.date)                      as date,
        coalesce(latest_trading_day.close_price, latest_datapoint.adjusted_close)           as actual_price,
        coalesce(latest_trading_day.close_price - previous_trading_day.adjusted_close, 0.0) as absolute_daily_change,
        case

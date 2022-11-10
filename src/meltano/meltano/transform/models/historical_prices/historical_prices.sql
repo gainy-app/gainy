@@ -163,6 +163,10 @@ select code                                      as symbol,
        (substr(date, 0, 8) || '-01')::timestamp  as date_month,
        date_trunc('week', date::date)::timestamp as date_week,
        adjusted_close,
+       case
+           when lag(adjusted_close) over wnd > 0
+               then coalesce(adjusted_close / lag(adjusted_close) over wnd - 1, 0)
+           end                                   as relative_daily_gain,
        close,
        date::date,
        high,
@@ -175,6 +179,7 @@ from all_rows
     left join old_model_stats on true
     where all_rows._sdc_batched_at >= old_model_stats.max_updated_at or old_model_stats.max_updated_at is null
 {% endif %}
+    window wnd as (partition by code order by date rows between 1 preceding and current row)
 
 union all
 
@@ -184,6 +189,10 @@ SELECT contract_name                                                   as code,
        date_trunc('month', to_timestamp(t / 1000))::timestamp          as date_month,
        date_trunc('week', to_timestamp(t / 1000))::timestamp           as date_week,
        c                                                               as adjusted_close,
+       case
+           when lag(c) over wnd > 0
+               then coalesce(c / lag(c) over wnd - 1, 0)
+           end                                                         as relative_daily_gain,
        c                                                               as close,
        to_timestamp(t / 1000)::date                                    as date,
        h                                                               as high,
@@ -197,6 +206,7 @@ join {{ ref('ticker_options_monitored') }} using (contract_name)
     left join old_model_stats on true
     where polygon_options_historical_prices._sdc_batched_at >= old_model_stats.max_updated_at or old_model_stats.max_updated_at is null
 {% endif %}
+    window wnd as (partition by contract_name order by t rows between 1 preceding and current row)
 
 union all
 
@@ -206,6 +216,10 @@ SELECT polygon_crypto_tickers.symbol                                          as
        date_trunc('month', to_timestamp(t / 1000))::timestamp                 as date_month,
        date_trunc('week', to_timestamp(t / 1000))::timestamp                  as date_week,
        c                                                                      as adjusted_close,
+       case
+           when lag(c) over wnd > 0
+               then coalesce(c / lag(c) over wnd - 1, 0)
+           end                                                                as relative_daily_gain,
        c                                                                      as close,
        to_timestamp(t / 1000)::date                                           as date,
        h                                                                      as high,
@@ -220,3 +234,4 @@ from polygon_crypto_tickers
     left join old_model_stats on true
     where polygon_crypto_historical_prices._sdc_batched_at >= old_model_stats.max_updated_at or old_model_stats.max_updated_at is null
 {% endif %}
+    window wnd as (partition by polygon_crypto_tickers.symbol order by t rows between 1 preceding and current row)
