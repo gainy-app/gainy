@@ -10,9 +10,7 @@ from services import S3
 from trading.exceptions import WrongTradingCollectionVersionStatusException
 from trading.kyc_form_validator import KycFormValidator
 from gainy.plaid.models import PlaidAccessToken, PlaidAccount
-from trading.models import KycDocument, TradingMoneyFlow, ProfileKycStatus
-from trading.drivewealth.provider import DriveWealthProvider
-from trading.repository import TradingRepository
+from trading.models import KycDocument, TradingMoneyFlow, ProfileKycStatus, TradingStatement
 
 import plaid
 from gainy.utils import get_logger

@@ -26,7 +26,6 @@ class OnUserCreated(HasuraTrigger):
         return data['new']['id']
 
     def apply(self, op, data, context_container: ContextContainer):
-        db_conn = context_container.db_conn
         payload = self._extract_payload(data)
         profile_id = payload['id']
         email = payload["email"]
@@ -39,8 +38,8 @@ class OnUserCreated(HasuraTrigger):
                                      text="User Created #%d" % (profile_id),
                                      tags=["env:%s" % (self.env)])
         except Exception as e:
-            logging.error("[%s] Exception when sending datadog event: %s",
-                          __name__, e)
+            logger.error("[%s] Exception when sending datadog event: %s",
+                         __name__, e)
 
         if self.env == "production":
             try:
@@ -48,6 +47,6 @@ class OnUserCreated(HasuraTrigger):
                                                     payload["first_name"],
                                                     payload["last_name"])
             except Exception as e:
-                logging.error(
+                logger.error(
                     "[%s] Exception when creating hubspot contact: %s",
                     __name__, e)
