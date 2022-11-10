@@ -232,7 +232,8 @@ class TradingService(GainyTradingService):
             country=kyc_form['address_country'] or "USA",
         )
 
-    def cancel_pending_order(self, trading_collection_version: TradingCollectionVersion):
+    def cancel_pending_order(
+            self, trading_collection_version: TradingCollectionVersion):
         self.trading_repository.refresh(trading_collection_version)
         if trading_collection_version.status != TradingCollectionVersionStatus.PENDING:
             raise WrongTradingCollectionVersionStatusException()
