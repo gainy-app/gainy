@@ -175,6 +175,10 @@ actions:
     definition:
       kind: synchronous
       handler: '{{AWS_LAMBDA_API_GATEWAY_ENDPOINT}}/hasuraAction'
+  - name: trading_cancel_pending_order
+    definition:
+      kind: synchronous
+      handler: '{{AWS_LAMBDA_API_GATEWAY_ENDPOINT}}/hasuraAction'
   - name: trading_delete_data
     definition:
       kind: synchronous
@@ -388,7 +392,7 @@ custom_types:
     - name: ActualCollectionHoldingOutput
     - name: OkOutput
     - name: StripeGetPaymentSheetDataOutput
-    - name: TradingReconfigureCollectionHoldingsOutput
     - name: ReHandleQueueMessagesOutput
     - name: KycFormChoicesFieldConfig
+    - name: TradingCollectionVersionOutput
   scalars: []

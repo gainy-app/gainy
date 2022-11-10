@@ -56,6 +56,7 @@ with data as
                                       'buy', target_amount_delta > 0,
                                       'sell', target_amount_delta < 0,
                                       'pending', status in ('PENDING', 'PENDING_EXECUTION') or status is null,
+                                      'cancelled', coalesce(status, '') = 'CANCELLED',
                                       'error', coalesce(status, '') = 'FAILED'
                         )                                           as tags
              from {{ source('app', 'trading_collection_versions') }}
