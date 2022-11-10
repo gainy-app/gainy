@@ -1,5 +1,3 @@
-from trading.drivewealth.event_handlers.accounts_updated import AccountsUpdatedEventHandler
-from trading.drivewealth.event_handlers.deposits_updated import DepositsUpdatedEventHandler
 from trading.drivewealth.event_handlers.kyc_updated import KycUpdatedEventHandler
 from trading.drivewealth.provider import DriveWealthProvider
 

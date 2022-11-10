@@ -1,3 +1,4 @@
+from gainy.trading.drivewealth.models import DriveWealthAccount
 from gainy.utils import get_logger
 from trading.drivewealth.abstract_event_handler import AbstractDriveWealthEventHandler
 
@@ -10,7 +11,15 @@ class AccountsUpdatedEventHandler(AbstractDriveWealthEventHandler):
         return event_type == "accounts.updated"
 
     def handle(self, event_payload: dict):
-        account_ref_id = event_payload["accountID"]
+        ref_id = event_payload["accountID"]
 
-        self.provider.sync_trading_account(account_ref_id=account_ref_id,
-                                           fetch_info=True)
+        account = self.repo.find_one(DriveWealthAccount, {"ref_id": ref_id})
+        if account:
+            data = event_payload['current']
+            if "status" in data:
+                account.status = data["status"]['name']
+
+            self.repo.persist(account)
+        else:
+            self.provider.sync_trading_account(account_ref_id=ref_id,
+                                               fetch_info=True)

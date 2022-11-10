@@ -3,7 +3,7 @@ import os
 
 from trading.models import KycDocument
 from trading.drivewealth.repository import DriveWealthRepository
-from trading.drivewealth.models import DriveWealthBankAccount, DriveWealthKycStatus
+from trading.drivewealth.models import DriveWealthBankAccount, DriveWealthKycStatus, DriveWealthRedemption
 
 from gainy.utils import get_logger, env
 from gainy.trading.drivewealth import DriveWealthApi as GainyDriveWealthApi
@@ -105,6 +105,16 @@ class DriveWealthApi(GainyDriveWealthApi):
                 'type': 'ACH',
                 'bankAccountID': bank_account.ref_id,
             })
+
+    def update_redemption(self, redemption: DriveWealthRedemption,
+                          status: str):
+        data = self._make_request("PATCH",
+                                  f"/funding/redemptions/{redemption.ref_id}",
+                                  {
+                                      'status': status,
+                                      'statusComment': 'Updated by Gainy',
+                                  })
+        redemption.set_from_response(data)
 
     def create_autopilot_run(self, account_ids: list):
         return self._make_request(

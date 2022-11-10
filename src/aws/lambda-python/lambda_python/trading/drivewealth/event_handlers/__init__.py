@@ -4,4 +4,8 @@ from .instrument_created import InstrumentCreatedEventHandler
 from .instrument_updated import InstrumentUpdatedEventHandler
 from .kyc_updated import KycUpdatedEventHandler
 from .noop import NoopEventHandler
+from .orders_created import OrderCreatedEventHandler
+from .orders_updated import OrderUpdatedEventHandler
+from .redemptions_created import RedemptionCreatedEventHandler
+from .redemptions_updated import RedemptionUpdatedEventHandler
 from .users_updated import UsersUpdatedEventHandler

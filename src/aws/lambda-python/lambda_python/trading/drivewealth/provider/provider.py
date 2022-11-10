@@ -12,7 +12,7 @@ from trading.models import TradingMoneyFlow, FundingAccount
 from trading.drivewealth.provider.collection import DriveWealthProviderCollection
 from trading.drivewealth.provider.kyc import DriveWealthProviderKYC
 from trading.drivewealth.models import DriveWealthBankAccount, DriveWealthDeposit, \
-    DriveWealthRedemption, DriveWealthAutopilotRun, BaseDriveWealthMoneyFlowModel
+    DriveWealthRedemption, DriveWealthAutopilotRun, BaseDriveWealthMoneyFlowModel, DriveWealthOrder
 from trading.drivewealth.api import DriveWealthApi
 from trading.drivewealth.repository import DriveWealthRepository
 
@@ -210,6 +210,13 @@ class DriveWealthProvider(DriveWealthProviderKYC,
 
         entity.set_from_response(data)
         repository.persist(entity)
+
+    def handle_redemption_status(self, redemption: DriveWealthRedemption):
+        if redemption.status == 'RIA_Pending':
+            self.api.update_redemption(redemption, status='RIA_Approved')
+
+    def handle_order_status(self, order: DriveWealthOrder):
+        pass
 
     def _sync_autopilot_runs(self):
         repository = self.repository
