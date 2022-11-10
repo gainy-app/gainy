@@ -1,8 +1,10 @@
 from common.context_container import ContextContainer
 from common.hasura_function import HasuraAction
 from exceptions import ForbiddenException
+from gainy.exceptions import BadRequestException
 from gainy.trading.models import TradingCollectionVersion
 from gainy.utils import get_logger
+from trading.exceptions import WrongTradingCollectionVersionStatusException
 
 logger = get_logger(__name__)
 
@@ -23,7 +25,11 @@ class TradingCancelPendingOrder(HasuraAction):
         if trading_collection_version.profile_id != profile_id:
             raise ForbiddenException()
 
-        context_container.trading_service.cancel_pending_order(
-            trading_collection_version)
+        try:
+            context_container.trading_service.cancel_pending_order(
+                trading_collection_version)
+        except WrongTradingCollectionVersionStatusException:
+            raise BadRequestException(
+                'Can not cancel an order not in a pending state.')
 
         return {'trading_collection_version_id': trading_collection_version_id}

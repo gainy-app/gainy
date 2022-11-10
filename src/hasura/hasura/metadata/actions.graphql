@@ -271,22 +271,9 @@ type Query {
 }
 
 type Query {
-  trading_get_collection_data(
-    profile_id: Int!
-    collection_id: Int!
-  ): TradingGetCollectionDataOutput
-}
-
-type Query {
   trading_get_funding_accounts(
     profile_id: Int!
   ): [FundingAccount]
-}
-
-type Query {
-  trading_get_profile_data(
-    profile_id: Int!
-  ): TradingGetProfileDataOutput
 }
 
 type Mutation {
