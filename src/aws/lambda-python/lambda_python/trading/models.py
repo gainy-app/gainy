@@ -145,8 +145,3 @@ class TradingMoneyFlow(BaseModel):
             "status":
             self.status.name if self.status else None,
         }
-
-
-class ProfileBalances:
-    withdrawable_cash = 0
-    buying_power = 0

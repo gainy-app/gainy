@@ -100,14 +100,11 @@ with raw_data_0d as
                    historical_prices.date           as date_1y,
                    historical_prices.adjusted_close as price_1y
              from raw_data_3m
-                      left join (
-                               select symbol,
-                                      max(historical_prices.date) as date
-                               from {{ ref('historical_prices') }}
-                               where date < now()::date - interval '1 year'
-                               group by symbol
-                           ) t using (symbol)
-                      left join {{ ref('historical_prices') }} using (symbol, date)
+                      left join {{ ref('historical_prices') }}
+                                on historical_prices.symbol = raw_data_3m.symbol
+                                    and date < now()::date - interval '1 year'
+                                    and date > now()::date - interval '1 year' - interval '1 week'
+             order by symbol, date desc
          ),
      raw_data_13m as
          (

@@ -79,8 +79,6 @@ ACTIONS = [
     TradingReconfigureCollectionHoldings(),
     TradingGetActualCollectionHoldings(),
     TradingSyncProviderData(),
-    TradingGetCollectionData(),
-    TradingGetProfileData(),
 
     # Debug
     TradingAddMoney(),
