@@ -1,10 +1,12 @@
+import datetime
+
 import re
 from abc import ABC
 import dateutil.parser
 
 from gainy.data_access.models import classproperty
 from gainy.trading.drivewealth.models import BaseDriveWealthModel
-from trading.models import ProfileKycStatus, KycStatus
+from trading.models import ProfileKycStatus, KycStatus, TradingStatementType
 from gainy.trading.models import TradingCollectionVersion, TradingCollectionVersionStatus, TradingMoneyFlowStatus
 
 PRECISION = 1e-3
@@ -269,3 +271,34 @@ class DriveWealthKycStatus:
         status = ProfileKycStatus(status, message)
         status.updated_at = dateutil.parser.parse(kyc["updated"])
         return status
+
+
+class DriveWealthStatement(BaseDriveWealthModel):
+    file_key: str = None
+    trading_statement_id: int = None
+    type: TradingStatementType = None
+    display_name: str = None
+    account_id: str = None
+    user_id: str = None
+    created_at: datetime.datetime = None
+
+    key_fields = ["file_key"]
+
+    db_excluded_fields = ["created_at"]
+    non_persistent_fields = ["created_at"]
+
+    def __init__(self, row: dict = None):
+        super().__init__(row)
+
+        if row and row["type"]:
+            self.type = TradingStatementType(row["type"])
+
+    def set_from_response(self, data: dict = None):
+        if not data:
+            return
+        self.display_name = data["displayName"]
+        self.file_key = data["fileKey"]
+
+    @classproperty
+    def table_name(self) -> str:
+        return "drivewealth_statements"

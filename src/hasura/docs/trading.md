@@ -37,6 +37,28 @@ query TradingGetProfileStatus($profile_id: Int!) {
 }
 ```
 
+### Statements
+#### List:
+```graphql
+query TradingGetStatements($profile_id: Int!) {
+  app_trading_statements(where: {profile_id: {_eq: $profile_id}}) {
+    display_name
+    type
+    id
+  }
+}
+```
+Available types: `["MONTHLY_STATEMENT", "TAX", "TRADE_CONFIRMATION"]`
+
+#### Download:
+```graphql
+query TradingDownloadStatement($profile_id: Int!, $statement_id: Int!) {
+  trading_download_statement(profile_id: $profile_id, statement_id: $statement_id) {
+    url
+  }
+}
+```
+
 
 ### Debugging
 Sync provider data

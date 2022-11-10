@@ -11,6 +11,8 @@ from trading.exceptions import WrongTradingCollectionVersionStatusException
 from trading.kyc_form_validator import KycFormValidator
 from gainy.plaid.models import PlaidAccessToken, PlaidAccount
 from trading.models import KycDocument, TradingMoneyFlow, ProfileKycStatus
+from trading.drivewealth.provider import DriveWealthProvider
+from trading.repository import TradingRepository
 
 import plaid
 from gainy.utils import get_logger
@@ -188,3 +190,6 @@ class TradingService(GainyTradingService):
 
         trading_collection_version.status = TradingCollectionVersionStatus.CANCELLED
         self.trading_repository.persist(trading_collection_version)
+
+    def download_statement(self, statement: TradingStatement) -> str:
+        return self._get_provider_service().download_statement(statement)

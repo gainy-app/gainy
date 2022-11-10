@@ -1,7 +1,6 @@
 import json
-import time
 from datetime import datetime
-import pytz
+import dateutil.parser
 import backoff
 import re
 import requests
@@ -10,7 +9,7 @@ from backoff import full_jitter
 from common.context_container import ContextContainer
 from common.hasura_function import HasuraAction
 from search.cache import CachingLoader, RedisCache
-from gainy.utils import get_logger
+from gainy.utils import get_logger, DATETIME_ISO8601_FORMAT_TZ
 
 logger = get_logger(__name__)
 
@@ -42,7 +41,6 @@ class SearchNews(HasuraAction):
             RedisCache(redis_host, redis_port, ttl_seconds=60 * 60), load_url)
 
     def apply(self, input_params, context_container: ContextContainer):
-        db_conn = context_container.db_conn
         query = input_params["symbol"]
         limit = input_params.get("limit", 5)
 
@@ -70,9 +68,8 @@ class SearchNews(HasuraAction):
 
     @staticmethod
     def _reformat_datetime(time_string):
-        parsed_datetime = pytz.utc.localize(
-            datetime.strptime(time_string, "%Y-%m-%dT%H:%M:%SZ"))
-        return datetime.strftime(parsed_datetime, "%Y-%m-%dT%H:%M:%S%z")
+        return dateutil.parser.parse(time_string).strftime(
+            DATETIME_ISO8601_FORMAT_TZ)
 
     def _build_url(self, query, limit) -> str:
         query = re.sub(r'\.CC$', '', query)

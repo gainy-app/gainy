@@ -6,11 +6,11 @@ from gainy.exceptions import NotFoundException
 from gainy.trading.drivewealth.exceptions import DriveWealthApiException
 from portfolio.plaid import PlaidService
 from gainy.plaid.models import PlaidAccessToken
-from trading.models import TradingMoneyFlow
+from trading.models import TradingMoneyFlow, TradingStatement
 from trading.drivewealth.provider.collection import DriveWealthProviderCollection
 from trading.drivewealth.provider.kyc import DriveWealthProviderKYC
 from trading.drivewealth.models import DriveWealthBankAccount, DriveWealthDeposit, \
-    DriveWealthRedemption, DriveWealthAutopilotRun, BaseDriveWealthMoneyFlowModel, DriveWealthOrder
+    DriveWealthRedemption, DriveWealthAutopilotRun, BaseDriveWealthMoneyFlowModel, DriveWealthStatement
 from trading.drivewealth.api import DriveWealthApi
 from trading.drivewealth.repository import DriveWealthRepository
 
@@ -142,6 +142,7 @@ class DriveWealthProvider(DriveWealthProviderKYC,
         self._sync_bank_accounts(user.ref_id)
         self._sync_user_deposits(user.ref_id)
         # self._sync_documents(user.ref_id)
+        self._sync_statements(profile_id)
         self.sync_portfolios(profile_id)
         # self._sync_redemptions(user.ref_id)
         # self._sync_users(user.ref_id)
@@ -173,6 +174,51 @@ class DriveWealthProvider(DriveWealthProviderKYC,
         self._update_money_flow_status(entity, money_flow)
         repository.persist(money_flow)
 
+    def sync_autopilot_run(self, entity: DriveWealthAutopilotRun):
+        repository = self.repository
+        try:
+            data = self.api.get_autopilot_run(entity.ref_id)
+        except DriveWealthApiException as e:
+            logger.warning(e)
+            return
+
+        entity.set_from_response(data)
+        repository.persist(entity)
+
+    def handle_redemption_status(self, redemption: DriveWealthRedemption):
+        if redemption.status == 'RIA_Pending':
+            self.api.update_redemption(redemption, status='RIA_Approved')
+
+    def download_statement(self, statement: TradingStatement) -> str:
+        dw_statement = self.repository.find_one(
+            DriveWealthStatement, {"trading_statement_id": statement.id})
+        if not dw_statement:
+            raise NotFoundException
+
+        return self.api.get_statement_url(dw_statement)
+
+    def create_trading_statements(self, entities: list[DriveWealthStatement],
+                                  profile_id):
+        for dw_statement in entities:
+            if dw_statement.trading_statement_id:
+                continue
+
+            trading_statement = TradingStatement()
+            trading_statement.profile_id = profile_id
+            trading_statement.type = dw_statement.type
+            trading_statement.display_name = dw_statement.display_name
+            self.repository.persist(trading_statement)
+            dw_statement.trading_statement_id = trading_statement.id
+            self.repository.persist(dw_statement)
+
+    def get_profile_id_by_user_id(self, user_ref_id: str) -> int:
+        user: DriveWealthUser = self.repository.find_one(
+            DriveWealthUser, {"ref_id": user_ref_id})
+        if not user:
+            raise NotFoundException
+
+        return user.profile_id
+
     def _sync_bank_accounts(self, user_ref_id):
         repository = self.repository
 
@@ -198,24 +244,6 @@ class DriveWealthProvider(DriveWealthProviderKYC,
 
             self.sync_deposit(deposit_ref_id=entity.ref_id, fetch_info=False)
 
-    def sync_autopilot_run(self, entity: DriveWealthAutopilotRun):
-        repository = self.repository
-        try:
-            data = self.api.get_autopilot_run(entity.ref_id)
-        except DriveWealthApiException as e:
-            logger.warning(e)
-            return
-
-        entity.set_from_response(data)
-        repository.persist(entity)
-
-    def handle_redemption_status(self, redemption: DriveWealthRedemption):
-        if redemption.status == 'RIA_Pending':
-            self.api.update_redemption(redemption, status='RIA_Approved')
-
-    def handle_order_status(self, order: DriveWealthOrder):
-        pass
-
     def _sync_autopilot_runs(self):
         repository = self.repository
         entities = []
@@ -234,3 +262,13 @@ class DriveWealthProvider(DriveWealthProviderKYC,
     def _update_money_flow_status(self, entity: BaseDriveWealthMoneyFlowModel,
                                   money_flow: TradingMoneyFlow):
         money_flow.status = entity.get_money_flow_status()
+
+    def _sync_statements(self, profile_id):
+        user = self._get_user(profile_id)
+        account = self._get_trading_account(user.ref_id)
+        entities: list[DriveWealthStatement] = []
+        entities += self.api.get_documents_trading_confirmations(account)
+        entities += self.api.get_documents_tax(account)
+        entities += self.api.get_documents_statements(account)
+        self.repository.persist(entities)
+        self.create_trading_statements(entities, profile_id)
