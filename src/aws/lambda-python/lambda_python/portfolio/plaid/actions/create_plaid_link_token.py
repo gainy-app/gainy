@@ -2,7 +2,7 @@ import plaid
 
 from portfolio.plaid import PlaidClient
 
-from portfolio.plaid.common import handle_error, DEFAULT_ENV, get_purpose, get_purpose_products
+from gainy.plaid.common import handle_error, DEFAULT_ENV, get_purpose, get_purpose_products
 from common.context_container import ContextContainer
 from common.hasura_function import HasuraAction
 from gainy.utils import get_logger

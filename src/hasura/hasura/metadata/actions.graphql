@@ -584,3 +584,4 @@ type KycFormChoicesFieldConfig {
 type TradingCollectionVersionOutput {
   trading_collection_version_id: Int!
 }
+

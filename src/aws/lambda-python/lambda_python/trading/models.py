@@ -83,30 +83,6 @@ class KycDocument(BaseModel):
                 f"Document of type {self.type} can't have BACK side")
 
 
-class FundingAccount(BaseModel):
-    id = None
-    profile_id = None
-    plaid_access_token_id = None
-    plaid_account_id = None
-    name = None
-    balance = None
-    created_at = None
-    updated_at = None
-
-    key_fields = ["id"]
-
-    db_excluded_fields = ["created_at", "updated_at"]
-    non_persistent_fields = ["id", "created_at", "updated_at"]
-
-    @classproperty
-    def schema_name(self) -> str:
-        return "app"
-
-    @classproperty
-    def table_name(self) -> str:
-        return "trading_funding_accounts"
-
-
 class TradingMoneyFlow(BaseModel):
     id = None
     profile_id = None

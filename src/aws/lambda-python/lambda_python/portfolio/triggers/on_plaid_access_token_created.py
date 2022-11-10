@@ -1,5 +1,5 @@
 from portfolio.service import SERVICE_PLAID
-from portfolio.plaid.common import PURPOSE_PORTFOLIO
+from gainy.plaid.common import PURPOSE_PORTFOLIO
 from common.context_container import ContextContainer
 from common.hasura_function import HasuraTrigger
 

@@ -36,8 +36,7 @@ def test_get_actual_collection_holdings(monkeypatch):
                         mock_get_actual_collection_data)
 
     trading_repository = TradingRepository(None)
-    service = TradingService(None, trading_repository, drivewealth_provider,
-                             None)
+    service = TradingService(trading_repository, drivewealth_provider, None)
     holdings = service.get_actual_collection_holdings(profile_id,
                                                       collection_id)
 

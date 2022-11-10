@@ -1,7 +1,7 @@
 from typing import Any, Dict, List
 
 from psycopg2.extras import RealDictCursor
-from gainy.trading import TradingRepository as GainyTradingRepository
+from gainy.trading.repository import TradingRepository as GainyTradingRepository
 from gainy.trading.models import TradingAccount
 
 

@@ -2,8 +2,9 @@ import json
 import datetime
 from typing import Optional
 
+from gainy.plaid.service import PlaidService as GainyPlaidService
 from portfolio.plaid import PlaidClient
-from portfolio.plaid.common import handle_error
+from gainy.plaid.common import handle_error
 from portfolio.models import HoldingData, Security, Account, TransactionData, Institution
 from portfolio.exceptions import AccessTokenApiException, AccessTokenLoginRequiredException
 from gainy.utils import get_logger
@@ -13,23 +14,15 @@ import plaid
 logger = get_logger(__name__)
 
 
-class PlaidService:
+class PlaidService(GainyPlaidService):
 
     def __init__(self, db_conn):
         self.db_conn = db_conn
         self.plaid_client = PlaidClient()
-        self.logger = get_logger(__name__)
 
     def exchange_public_token(self, public_token, env):
         try:
             return self.plaid_client.exchange_public_token(public_token, env)
-        except plaid.ApiException as e:
-            handle_error(e)
-
-    def get_item_accounts(self, access_token, account_ids=None):
-        try:
-            return self.plaid_client.get_item_accounts(access_token,
-                                                       account_ids)
         except plaid.ApiException as e:
             handle_error(e)
 

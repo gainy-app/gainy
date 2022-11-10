@@ -1,5 +1,3 @@
-from typing import List
-
 import os
 from decimal import Decimal
 
@@ -7,8 +5,8 @@ from gainy.data_access.repository import MAX_TRANSACTION_SIZE
 from gainy.exceptions import NotFoundException
 from gainy.trading.drivewealth.exceptions import DriveWealthApiException
 from portfolio.plaid import PlaidService
-from portfolio.plaid.models import PlaidAccessToken
-from trading.models import TradingMoneyFlow, FundingAccount
+from gainy.plaid.models import PlaidAccessToken
+from trading.models import TradingMoneyFlow
 from trading.drivewealth.provider.collection import DriveWealthProviderCollection
 from trading.drivewealth.provider.kyc import DriveWealthProviderKYC
 from trading.drivewealth.models import DriveWealthBankAccount, DriveWealthDeposit, \
@@ -17,7 +15,7 @@ from trading.drivewealth.api import DriveWealthApi
 from trading.drivewealth.repository import DriveWealthRepository
 
 from gainy.utils import get_logger
-from gainy.trading.models import TradingAccount, TradingCollectionVersion, TradingMoneyFlowStatus
+from gainy.trading.models import FundingAccount, TradingAccount, TradingCollectionVersion, TradingMoneyFlowStatus
 from gainy.trading.drivewealth.models import DriveWealthAccount, DriveWealthUser
 
 logger = get_logger(__name__)
