@@ -4,9 +4,10 @@ import numbers
 import os
 import pytest
 
-from gainy.utils import DATETIME_ISO8601_FORMAT
 from hasura_tests.common import make_graphql_request, PRICE_EPS
 from hasura_tests.portfolio.common import PROFILE_IDS
+
+DATETIME_ISO8601_FORMAT = '%Y-%m-%dT%H:%M:%S'
 
 
 def verify_portfolio_chart(portfolio_chart,
