@@ -2842,6 +2842,7 @@
           - funding_account_connected
           - deposited_funds
           - withdrawable_cash
+          - pending_cash
           - buying_power
         filter:
           profile:
