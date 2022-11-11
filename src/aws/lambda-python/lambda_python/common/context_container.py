@@ -1,7 +1,6 @@
 from functools import cached_property
 
 from _stripe.api import StripeApi
-from portfolio.plaid.service import PlaidService
 from portfolio.service import PortfolioService
 from portfolio.service.chart import PortfolioChartService
 from portfolio.repository import PortfolioRepository
@@ -29,10 +28,6 @@ class ContextContainer(GainyContextContainer):
     @cached_property
     def portfolio_repository(self) -> PortfolioRepository:
         return PortfolioRepository(self.db_conn)
-
-    @cached_property
-    def plaid_service(self) -> PlaidService:
-        return PlaidService(self.db_conn)
 
     @cached_property
     def portfolio_service(self) -> PortfolioService:
