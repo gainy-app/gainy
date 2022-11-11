@@ -2,6 +2,12 @@ import json
 import datetime
 from typing import Optional
 
+from plaid.model.account_base import AccountBase as PlaidAccount
+from plaid.model.holding import Holding as PlaidHolding
+from plaid.model.investment_transaction import InvestmentTransaction as PlaidTransaction
+from plaid.model.investments_transactions_get_response import InvestmentsTransactionsGetResponse
+from plaid.model.security import Security as PlaidSecurity
+
 from gainy.plaid.service import PlaidService as GainyPlaidService
 from portfolio.plaid import PlaidClient
 from gainy.plaid.common import handle_error
@@ -87,8 +93,7 @@ class PlaidService(GainyPlaidService):
             }
 
         try:
-            # InvestmentsTransactionsGetResponse[]
-            response = self.plaid_client.get_investment_transactions(
+            response: InvestmentsTransactionsGetResponse = self.plaid_client.get_investment_transactions(
                 plaid_access_token["access_token"],
                 count=count,
                 offset=offset,
@@ -144,7 +149,7 @@ class PlaidService(GainyPlaidService):
                     "plaid_access_token_id": plaid_access_token['id'],
                 })
 
-    def __hydrate_holding_data(self, data) -> HoldingData:
+    def __hydrate_holding_data(self, data: PlaidHolding) -> HoldingData:
         model = HoldingData()
         model.iso_currency_code = data.iso_currency_code
         model.quantity = data.quantity
@@ -154,7 +159,8 @@ class PlaidService(GainyPlaidService):
 
         return model
 
-    def __hydrate_transaction_data(self, data) -> TransactionData:
+    def __hydrate_transaction_data(self,
+                                   data: PlaidTransaction) -> TransactionData:
         model = TransactionData()
 
         model.amount = data.amount
@@ -164,8 +170,8 @@ class PlaidService(GainyPlaidService):
         model.name = data.name
         model.price = data.price
         model.quantity = data.quantity
-        model.subtype = data.subtype
-        model.type = data.type
+        model.subtype = data.subtype.value
+        model.type = data.type.value
 
         model.ref_id = data.investment_transaction_id
         model.account_ref_id = data.account_id
@@ -173,7 +179,7 @@ class PlaidService(GainyPlaidService):
 
         return model
 
-    def __hydrate_security(self, data) -> Security:
+    def __hydrate_security(self, data: PlaidSecurity) -> Security:
         model = Security()
         model.close_price = data.close_price
         model.close_price_as_of = (data.close_price_as_of or
@@ -186,7 +192,7 @@ class PlaidService(GainyPlaidService):
 
         return model
 
-    def __hydrate_account(self, data) -> Account:
+    def __hydrate_account(self, data: PlaidAccount) -> Account:
         model = Account()
         model.ref_id = data['account_id']
         model.balance_available = data['balances']['available']

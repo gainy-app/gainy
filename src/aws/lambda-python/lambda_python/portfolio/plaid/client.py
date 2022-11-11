@@ -1,5 +1,7 @@
 import os
 
+from plaid.model.investments_transactions_get_response import InvestmentsTransactionsGetResponse
+
 from gainy.plaid.client import PlaidClient as GainyPlaidClient
 
 from plaid.model.country_code import CountryCode
@@ -69,7 +71,8 @@ class PlaidClient(GainyPlaidClient):
                                     start_date,
                                     end_date,
                                     count=100,
-                                    offset=0):
+                                    offset=0
+                                    ) -> InvestmentsTransactionsGetResponse:
         request = InvestmentsTransactionsGetRequest(
             access_token=access_token,
             start_date=start_date,
