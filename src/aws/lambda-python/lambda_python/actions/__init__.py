@@ -4,3 +4,5 @@ from actions.get_promocode import GetPromocode
 from actions.set_recommendation_settings import SetRecommendationSettings
 from actions.update_purchases import UpdatePurchases
 from actions.rehandle_queue_messages import ReHandleQueueMessages
+from actions.verification_send_code import VerificationSendCode
+from actions.verification_verify_code import VerificationVerifyCode

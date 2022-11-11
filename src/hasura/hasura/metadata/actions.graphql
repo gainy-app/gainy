@@ -322,6 +322,22 @@ type Mutation {
   ): UpdatePurchasesOutput
 }
 
+type Mutation {
+  verification_send_code(
+    profile_id: Int!
+    channel: String!
+    address: String!
+  ): VerificationSendCodeOutput
+}
+
+type Mutation {
+  verification_verify_code(
+    profile_id: Int!
+    verification_code_id: Int!
+    user_input: String!
+  ): OkOutput
+}
+
 input PlaidWebhookError {
   error_code: Int
 }
@@ -594,5 +610,9 @@ type TradingCollectionVersionOutput {
 
 type UrlOutput {
   url: String!
+}
+
+type VerificationSendCodeOutput {
+  verification_code_id: Int!
 }
 

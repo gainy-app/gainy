@@ -18,7 +18,7 @@ from trading.repository import TradingRepository
 import plaid
 from gainy.utils import get_logger
 from gainy.trading.models import TradingAccount, TradingCollectionVersion, TradingCollectionVersionStatus
-from gainy.trading import TradingService as GainyTradingService
+from gainy.trading.service import TradingService as GainyTradingService
 
 logger = get_logger(__name__)
 
