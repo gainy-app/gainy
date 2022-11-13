@@ -84,7 +84,7 @@ class ContextContainer(GainyContextContainer):
     ## trading
     @cached_property
     def trading_service(self) -> TradingService:
-        return TradingService(self.db_conn, self.trading_repository,
+        return TradingService(self.trading_repository,
                               self.drivewealth_provider, self.plaid_service)
 
     @cached_property

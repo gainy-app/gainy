@@ -2842,10 +2842,11 @@
           - funding_account_connected
           - deposited_funds
           - withdrawable_cash
+          - pending_cash
           - buying_power
         filter:
           profile:
-            id:
+            user_id:
               _eq: X-Hasura-User-Id
 - table:
     name: website_blog_articles

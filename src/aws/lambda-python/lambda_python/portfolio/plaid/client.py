@@ -1,8 +1,8 @@
-from typing import List
 import os
 
-from portfolio.plaid.common import get_plaid_client
-from portfolio.plaid.models import PlaidAccount
+from plaid.model.investments_transactions_get_response import InvestmentsTransactionsGetResponse
+
+from gainy.plaid.client import PlaidClient as GainyPlaidClient
 
 from plaid.model.country_code import CountryCode
 from plaid.model.products import Products
@@ -15,8 +15,6 @@ from plaid.model.investments_transactions_get_request_options import Investments
 from plaid.model.webhook_verification_key_get_request import WebhookVerificationKeyGetRequest
 from plaid.model.item_get_request import ItemGetRequest
 from plaid.model.institutions_get_by_id_request import InstitutionsGetByIdRequest
-from plaid.model.accounts_get_request import AccountsGetRequest
-from plaid.model.accounts_get_request_options import AccountsGetRequestOptions
 from plaid.model.processor_token_create_request import ProcessorTokenCreateRequest
 from gainy.utils import get_logger
 
@@ -26,12 +24,7 @@ PLAID_WEBHOOK_URL = os.getenv("PLAID_WEBHOOK_URL")
 COUNTRY_CODES = [CountryCode('US')]
 
 
-class PlaidClient:
-
-    def __init__(self):
-        self.client = get_plaid_client()
-        self.sandbox_client = get_plaid_client('sandbox')
-        self.development_client = get_plaid_client('development')
+class PlaidClient(GainyPlaidClient):
 
     def create_link_token(self,
                           profile_id,
@@ -73,26 +66,13 @@ class PlaidClient:
         request = InvestmentsHoldingsGetRequest(access_token=access_token)
         return self.get_client(access_token).investments_holdings_get(request)
 
-    def get_item_accounts(self,
-                          access_token,
-                          account_ids: List = None) -> List[PlaidAccount]:
-        if account_ids:
-            options = AccountsGetRequestOptions(account_ids=account_ids)
-            request = AccountsGetRequest(access_token=access_token,
-                                         options=options)
-        else:
-            request = AccountsGetRequest(access_token=access_token)
-
-        response = self.get_client(access_token).accounts_get(request)
-
-        return [PlaidAccount(i) for i in response['accounts']]
-
     def get_investment_transactions(self,
                                     access_token,
                                     start_date,
                                     end_date,
                                     count=100,
-                                    offset=0):
+                                    offset=0
+                                    ) -> InvestmentsTransactionsGetResponse:
         request = InvestmentsTransactionsGetRequest(
             access_token=access_token,
             start_date=start_date,
@@ -126,11 +106,3 @@ class PlaidClient:
             request)
 
         return response
-
-    def get_client(self, access_token):
-        if access_token and access_token.find('sandbox') > -1:
-            return self.sandbox_client
-        if access_token and access_token.find('development') > -1:
-            return self.development_client
-
-        return self.client

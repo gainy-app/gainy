@@ -2452,6 +2452,10 @@ models:
         tests:
           - type:
               type: 'boolean'
+      - name: pending_cash
+        tests:
+          - type:
+              type: 'double precision'
       - name: withdrawable_cash
         tests:
           - type:

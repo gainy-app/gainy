@@ -5,33 +5,23 @@ import io
 from gainy.data_access.operators import OperatorIn
 from gainy.exceptions import NotFoundException, BadRequestException
 from gainy.trading.drivewealth.models import CollectionStatus, CollectionHoldingStatus
-from portfolio.plaid import PlaidService
-from portfolio.plaid.common import handle_error
+from gainy.plaid.common import handle_error
 from services import S3
 from trading.exceptions import WrongTradingCollectionVersionStatusException
 from trading.kyc_form_validator import KycFormValidator
-from portfolio.plaid.models import PlaidAccessToken, PlaidAccount
-from trading.models import KycDocument, FundingAccount, TradingMoneyFlow, ProfileKycStatus, TradingStatement
-from trading.drivewealth.provider import DriveWealthProvider
-from trading.repository import TradingRepository
+from gainy.plaid.models import PlaidAccessToken, PlaidAccount
+from trading.models import KycDocument, TradingMoneyFlow, ProfileKycStatus, TradingStatement
 
 import plaid
 from gainy.utils import get_logger
-from gainy.trading.models import TradingAccount, TradingCollectionVersion, TradingCollectionVersionStatus
+from gainy.trading.models import TradingAccount, TradingCollectionVersion, TradingCollectionVersionStatus, \
+    FundingAccount
 from gainy.trading.service import TradingService as GainyTradingService
 
 logger = get_logger(__name__)
 
 
 class TradingService(GainyTradingService):
-
-    def __init__(self, db_conn, trading_repository: TradingRepository,
-                 drivewealth_provider: DriveWealthProvider,
-                 plaid_service: PlaidService):
-        self.db_conn = db_conn
-        self.trading_repository = trading_repository
-        self.drivewealth_provider = drivewealth_provider
-        self.plaid_service = plaid_service
 
     def kyc_send_form(self, kyc_form: dict):
         if not kyc_form:
@@ -44,7 +34,7 @@ class TradingService(GainyTradingService):
     def send_kyc_document(self, profile_id: int, document: KycDocument):
         document.validate()
 
-        with self.db_conn.cursor() as cursor:
+        with self.trading_repository.db_conn.cursor() as cursor:
             cursor.execute(
                 """select s3_bucket, s3_key, content_type from app.uploaded_files
                 where profile_id = %(profile_id)s and id = %(id)s""", {
@@ -88,11 +78,11 @@ class TradingService(GainyTradingService):
         funding_account.plaid_access_token_id = access_token.id
         funding_account.plaid_account_id = account_id
         funding_account.name = account_name
-
         repository.persist(funding_account)
 
+        self.update_funding_accounts_balance([funding_account])
+
         provider_bank_account.funding_account_id = funding_account.id
-        logger.info(provider_bank_account.to_dict())
         repository.persist(provider_bank_account)
 
         return funding_account
@@ -110,40 +100,6 @@ class TradingService(GainyTradingService):
         return [
             i for i in accounts if i.account_id not in existing_account_ids
         ]
-
-    def update_funding_accounts_balance(
-            self, funding_accounts: Iterable[FundingAccount]):
-        by_at_id = {}
-        for funding_account in funding_accounts:
-            if not funding_account.plaid_access_token_id:
-                continue
-            if funding_account.plaid_access_token_id not in by_at_id:
-                by_at_id[funding_account.plaid_access_token_id] = []
-            by_at_id[funding_account.plaid_access_token_id].append(
-                funding_account)
-
-        plaid_service = self.plaid_service
-        repository = self.trading_repository
-        for plaid_access_token_id, funding_accounts in by_at_id.items():
-            access_token = repository.find_one(PlaidAccessToken,
-                                               {"id": plaid_access_token_id})
-            funding_accounts_by_account_id: Dict[int, FundingAccount] = {
-                funding_account.plaid_account_id: funding_account
-                for funding_account in funding_accounts
-                if funding_account.plaid_account_id
-            }
-
-            plaid_accounts = plaid_service.get_item_accounts(
-                access_token.access_token,
-                list(funding_accounts_by_account_id.keys()))
-            for plaid_account in plaid_accounts:
-                if plaid_account.account_id not in funding_accounts_by_account_id:
-                    continue
-                funding_accounts_by_account_id[
-                    plaid_account.
-                    account_id].balance = plaid_account.balance_available
-
-            repository.persist(funding_accounts_by_account_id.values())
 
     def delete_funding_account(self, funding_account: FundingAccount):
         self._get_provider_service().delete_funding_account(funding_account.id)

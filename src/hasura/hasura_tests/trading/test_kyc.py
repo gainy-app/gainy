@@ -45,5 +45,4 @@ def test_kyc_get_status():
         load_query('trading/queries/kyc', 'GetStatus'),
         {"profile_id": profile_id}, profile_user_id)['data']['kyc_get_status']
 
-    assert response.get("message") is not None
     assert response.get("status") is not None
