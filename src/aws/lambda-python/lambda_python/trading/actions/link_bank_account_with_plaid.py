@@ -1,8 +1,8 @@
-from portfolio.plaid.common import PURPOSE_TRADING
+from gainy.plaid.common import PURPOSE_TRADING
 from common.context_container import ContextContainer
 from gainy.exceptions import NotFoundException
 from common.hasura_function import HasuraAction
-from portfolio.plaid.models import PlaidAccessToken
+from gainy.plaid.models import PlaidAccessToken
 from gainy.utils import get_logger
 
 logger = get_logger(__name__)

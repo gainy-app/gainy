@@ -139,8 +139,8 @@ class DriveWealthProviderKYC(GainyDriveWealthProvider):
                     kyc_form['disclosures_drivewealth_data_sharing'],
                     "signedBy":
                     kyc_form['disclosures_signed_by'],
-                    "extendedHoursAgreement":
-                    kyc_form['disclosures_extended_hours_agreement'],
+                    # "extendedHoursAgreement":
+                    # kyc_form['disclosures_extended_hours_agreement'],
                 }
             },
             {

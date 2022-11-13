@@ -1,4 +1,4 @@
-from portfolio.plaid.common import PURPOSE_TRADING, DEFAULT_ENV, get_purpose
+from gainy.plaid.common import PURPOSE_TRADING, DEFAULT_ENV, get_purpose
 from common.context_container import ContextContainer
 from common.hasura_function import HasuraAction
 from gainy.utils import get_logger

@@ -1,4 +1,4 @@
-from hasura_tests.common import make_graphql_request, load_query
+from hasura_tests.common import make_graphql_request, load_query, db_connect
 
 PROFILES = make_graphql_request(
     "{app_profiles(order_by:[{id: asc}]){id, user_id}}",
@@ -6,6 +6,13 @@ PROFILES = make_graphql_request(
 
 
 def fill_kyc_form(profile_id, profile_user_id):
+    query = """DELETE FROM app.kyc_form where profile_id = %(profile_id)s"""
+    with db_connect() as db_conn:
+        with db_conn.cursor() as cursor:
+            cursor.execute(query, {
+                "profile_id": profile_id,
+            })
+
     kyc_form_config = make_graphql_request(
         load_query('trading/queries/kyc',
                    'GetFormConfig'), {"profile_id": profile_id},
@@ -23,9 +30,13 @@ def fill_kyc_form(profile_id, profile_user_id):
         "email_address": kyc_form_config["email_address"]["placeholder"],
         "phone_number": "+1234567890",
         "birthdate": "1992-11-27",
-        "address_street1": "1 Wall st.",
-        "address_city": "New York",
-        "address_postal_code": "12345",
+        "address_street1": "773 Vista Tulocay ln",
+        "address_city": "Napa",
+        "address_postal_code": "94559",
+        "address_province": "CA",
+        "address_country": "USA",
+        "country": "USA",
+        "citizenship": "USA",
         "tax_id_value": "123456789",
         "tax_id_type": "SSN",
         "employment_status": "UNEMPLOYED",
