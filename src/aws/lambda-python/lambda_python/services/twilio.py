@@ -7,7 +7,7 @@ logger = get_logger(__name__)
 
 TWILIO_ACCOUNT_SID = os.getenv('TWILIO_ACCOUNT_SID')
 TWILIO_AUTH_TOKEN = os.getenv('TWILIO_AUTH_TOKEN')
-TWILIO_SERVICE_ID = os.getenv('TWILIO_SERVICE_ID')
+TWILIO_VERIFICATION_SERVICE_ID = os.getenv('TWILIO_VERIFICATION_SERVICE_ID')
 
 TWILIO_VERIFICATION_CHANNEL_SMS = 'sms'
 TWILIO_VERIFICATION_CHANNEL_EMAIL = 'email'
@@ -46,7 +46,7 @@ class TwilioClient:
 
     @cached_property
     def _verification_service(self):
-        return self._client.verify.v2.services(TWILIO_SERVICE_ID)
+        return self._client.verify.v2.services(TWILIO_VERIFICATION_SERVICE_ID)
 
     @cached_property
     def _lookup_service(self):

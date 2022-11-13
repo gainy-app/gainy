@@ -89,6 +89,13 @@ module "lambda" {
   aws_access_key        = var.aws_access_key
   aws_secret_key        = var.aws_secret_key
   aws_region            = var.aws_region
+
+  verification_code_cooldown = var.verification_code_cooldown
+  verification_code_ttl      = var.verification_code_ttl
+
+  twilio_verification_service_id = var.twilio_verification_service_id
+  twilio_account_sid             = var.twilio_account_sid
+  twilio_auth_token              = var.twilio_auth_token
 }
 
 module "ecs" {
