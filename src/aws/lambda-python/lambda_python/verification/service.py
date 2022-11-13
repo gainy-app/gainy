@@ -1,6 +1,5 @@
 import datetime
 import os
-import random
 
 from gainy.data_access.operators import OperatorGt
 from gainy.data_access.repository import Repository
@@ -11,11 +10,6 @@ from verification.models import VerificationCodeChannel, VerificationCode
 
 VERIFICATION_CODE_COOLDOWN = os.getenv("VERIFICATION_CODE_COOLDOWN")
 VERIFICATION_CODE_TTL = os.getenv("VERIFICATION_CODE_TTL")
-VERIFICATION_CODE_LENGTH = os.getenv("VERIFICATION_CODE_LENGTH")
-VERIFICATION_CODE_ALPHABET = os.getenv("VERIFICATION_CODE_ALPHABET")
-
-# def _generate_random_string(str_size: int, allowed_chars: str):
-#     return ''.join(random.choice(allowed_chars) for _ in range(str_size))
 
 
 def _create_entity(profile_id: int, channel: VerificationCodeChannel,
@@ -24,7 +18,6 @@ def _create_entity(profile_id: int, channel: VerificationCodeChannel,
     verification_code.profile_id = profile_id
     verification_code.channel = channel
     verification_code.address = address
-    # verification_code.code = _generate_random_string(int(VERIFICATION_CODE_LENGTH), VERIFICATION_CODE_ALPHABET)
 
     return verification_code
 

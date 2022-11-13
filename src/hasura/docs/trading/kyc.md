@@ -582,9 +582,8 @@ mutation VerificationSendCode($profile_id: Int!, $channel: String!, $address: St
 ```
 Channels: `["SMS", "EMAIL"]`
 ```graphql
-mutation VerificationVerifyCode($profile_id: Int!, $verification_code_id: Int!, $user_input: String!) {
+mutation VerificationVerifyCode($verification_code_id: String!, $user_input: String!) {
   verification_verify_code(
-    profile_id: $profile_id
     verification_code_id: $verification_code_id
     user_input: $user_input
   ){

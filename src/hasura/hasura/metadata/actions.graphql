@@ -332,8 +332,7 @@ type Mutation {
 
 type Mutation {
   verification_verify_code(
-    profile_id: Int!
-    verification_code_id: Int!
+    verification_code_id: String!
     user_input: String!
   ): OkOutput
 }

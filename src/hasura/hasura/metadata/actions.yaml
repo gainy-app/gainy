@@ -253,6 +253,7 @@ actions:
       handler: '{{AWS_LAMBDA_API_GATEWAY_ENDPOINT}}/hasuraAction'
     permissions:
       - role: user
+      - role: anonymous
 custom_types:
   enums: []
   input_objects:

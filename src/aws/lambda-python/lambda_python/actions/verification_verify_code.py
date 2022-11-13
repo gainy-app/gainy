@@ -11,16 +11,15 @@ logger = get_logger(__name__)
 class VerificationVerifyCode(HasuraAction):
 
     def __init__(self, action_name="verification_verify_code"):
-        super().__init__(action_name, "profile_id")
+        super().__init__(action_name)
 
     def apply(self, input_params, context_container: ContextContainer):
-        profile_id = input_params["profile_id"]
         verification_code_id = input_params["verification_code_id"]
         user_input = input_params["user_input"]
 
         verification_code: VerificationCode = context_container.get_repository(
         ).find_one(VerificationCode, {"id": verification_code_id})
-        if not verification_code or verification_code.profile_id != profile_id:
+        if not verification_code:
             raise NotFoundException()
 
         try:

@@ -11,11 +11,10 @@ class VerificationCodeChannel(str, enum.Enum):
 
 
 class VerificationCode(BaseModel):
-    id: int = None
+    id: str = None
     profile_id: int = None
     channel: VerificationCodeChannel = None
     address: str = None
-    code: str = None
     failed_at: datetime.datetime = None
     verified_at: datetime.datetime = None
     created_at: datetime.datetime = None

@@ -1,10 +1,9 @@
 CREATE TABLE "app"."verification_codes"
 (
-    "id"          serial      NOT NULL,
+    "id"          uuid        NOT NULL DEFAULT gen_random_uuid(),
     "profile_id"  int         NOT NULL,
     "channel"     varchar     NOT NULL,
     "address"     varchar     NOT NULL,
-    "code"        varchar,
     "failed_at"   timestamptz,
     "verified_at" timestamptz,
     "created_at"  timestamptz NOT NULL DEFAULT now(),
