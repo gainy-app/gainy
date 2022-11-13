@@ -7,6 +7,19 @@ from portfolio.models import PortfolioChartFilter
 logger = get_logger(__name__)
 
 SCRIPT_DIR = os.path.dirname(__file__)
+INTEREST_MIN_THRESHOLD = 3
+CATEGORY_MIN_THRESHOLD = 3
+
+
+def _should_include_cash(filter: PortfolioChartFilter):
+    if filter.interest_ids:
+        return False
+    if filter.category_ids:
+        return False
+    if filter.security_types:
+        return 'cash' in filter.security_types
+
+    return True
 
 
 class PortfolioChartService:
@@ -18,7 +31,10 @@ class PortfolioChartService:
         with open(os.path.join(SCRIPT_DIR, "../sql/portfolio_chart.sql")) as f:
             query = f.read()
 
-        params = {"profile_id": profile_id}
+        params = {
+            "profile_id": profile_id,
+            "include_cash": _should_include_cash(filter)
+        }
         transaction_where_clause = []
         chart_where_clause = []
         join_clause = []
@@ -70,7 +86,10 @@ class PortfolioChartService:
                              "../sql/portfolio_chart_prev_close.sql")) as f:
             query = f.read()
 
-        params = {"profile_id": profile_id}
+        params = {
+            "profile_id": profile_id,
+            "include_cash": _should_include_cash(filter)
+        }
         transaction_where_clause = []
         chart_where_clause = []
         join_clause = []
@@ -270,7 +289,10 @@ class PortfolioChartService:
             sql.SQL(
                 "join ticker_interests on ticker_interests.symbol = portfolio_expanded_transactions.symbol"
             ))
-        where_clause.append(sql.SQL("interest_id in %(interest_ids)s"))
+        where_clause.append(
+            sql.SQL(
+                f"interest_id in %(interest_ids)s and ticker_interests.rank <= {INTEREST_MIN_THRESHOLD}"
+            ))
         params['interest_ids'] = tuple(filter.interest_ids)
 
     def _filter_query_by_category_ids(self, params, where_clause, join_clause,
@@ -282,7 +304,10 @@ class PortfolioChartService:
             sql.SQL(
                 "join ticker_categories on ticker_categories.symbol = portfolio_expanded_transactions.symbol"
             ))
-        where_clause.append(sql.SQL("category_id in %(category_ids)s"))
+        where_clause.append(
+            sql.SQL(
+                f"category_id in %(category_ids)s and ticker_categories.rank <= {CATEGORY_MIN_THRESHOLD}"
+            ))
         params['category_ids'] = tuple(filter.category_ids)
 
     def _filter_query_by_security_types(self, params, where_clause,

@@ -27,6 +27,14 @@ with account_stats as
                   ) t
              group by profile_id
          ),
+    deposit_stats as
+         (
+             select profile_id,
+                    sum(amount) as pending_cash
+             from {{ source('app', 'trading_money_flow') }}
+             where status = 'PENDING' and amount > 0
+             group by profile_id
+         ),
      portfolio_stats as
          (
              select profile_id,
@@ -56,6 +64,7 @@ select profile_id,
        kyc_form_approved.profile_id is not null        as kyc_done,
        trading_funding_accounts.profile_id is not null as funding_account_connected,
        trading_money_flow.profile_id is not null       as deposited_funds,
+       coalesce(pending_cash, 0)::double precision     as pending_cash,
        coalesce(
 {% if var("drivewealth_is_uat") %}
                account_stats.cash_balance
@@ -89,6 +98,7 @@ from (
                        from {{ source('app', 'trading_money_flow') }}
                        where status = 'SUCCESS'
                    ) trading_money_flow using (profile_id)
+         left join deposit_stats using (profile_id)
          left join account_stats using (profile_id)
          left join portfolio_stats using (profile_id)
          left join trading_collection_versions_stats using (profile_id)

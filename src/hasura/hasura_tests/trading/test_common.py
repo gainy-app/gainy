@@ -18,3 +18,4 @@ def test_profile_status():
     assert "app_trading_money_flow" in data
     assert "withdrawable_cash" in data['trading_profile_status'][0]
     assert "buying_power" in data['trading_profile_status'][0]
+    assert "pending_cash" in data['trading_profile_status'][0]

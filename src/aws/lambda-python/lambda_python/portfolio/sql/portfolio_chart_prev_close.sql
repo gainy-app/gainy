@@ -81,7 +81,10 @@ with filtered_transactions as
      ),
      static_values as
          (
-             select sum(value) as cash_value
+             select case
+                        when %(include_cash)s
+                            then sum(value)
+                        end as cash_value
              from (
                       select distinct on (
                           profile_holdings_normalized.holding_id_v2

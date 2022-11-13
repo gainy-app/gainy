@@ -513,4 +513,4 @@ select (category_id || '_' || symbol)                                       as i
        sim_dif,
        now()::timestamp                                                     as updated_at,
        (row_number() over (partition by symbol order by sim_dif desc))::int as rank
-from complex_ticker_categories
+from complex_ticker_categories_normalized
