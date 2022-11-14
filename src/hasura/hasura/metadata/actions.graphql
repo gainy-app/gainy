@@ -612,6 +612,6 @@ type UrlOutput {
 }
 
 type VerificationSendCodeOutput {
-  verification_code_id: Int!
+  verification_code_id: String!
 }
 
