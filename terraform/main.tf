@@ -162,6 +162,13 @@ module "aws" {
 
   bigquery_google_project = var.google_project_id
   bigquery_credentials    = var.bigquery_credentials
+
+  verification_code_cooldown = var.verification_code_cooldown
+  verification_code_ttl      = var.verification_code_ttl
+
+  twilio_verification_service_id = var.twilio_verification_service_id
+  twilio_account_sid             = var.twilio_account_sid
+  twilio_auth_token              = var.twilio_auth_token
 }
 
 module "datadog" {

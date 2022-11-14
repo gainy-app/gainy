@@ -1,12 +1,14 @@
 from functools import cached_property
 
 from _stripe.api import StripeApi
+from gainy.utils import env
 from portfolio.plaid.service import PlaidService
 from portfolio.service import PortfolioService
 from portfolio.service.chart import PortfolioChartService
 from portfolio.repository import PortfolioRepository
 from queue_processing.dispatcher import QueueMessageDispatcher
 from services.sqs import SqsAdapter
+from services.twilio import TwilioClient
 from trading.drivewealth.queue_message_handler import DriveWealthQueueMessageHandler
 from trading.service import TradingService
 from trading.repository import TradingRepository
@@ -15,6 +17,9 @@ from trading.drivewealth.provider import DriveWealthProvider
 from trading.drivewealth.repository import DriveWealthRepository
 
 from gainy.context_container import ContextContainer as GainyContextContainer
+from verification.client.email import EmailVerificationClient
+from verification.client.sms import SmsVerificationClient
+from verification.service import VerificationService
 
 
 class ContextContainer(GainyContextContainer):
@@ -24,6 +29,27 @@ class ContextContainer(GainyContextContainer):
     @cached_property
     def stripe_api(self) -> StripeApi:
         return StripeApi()
+
+    @cached_property
+    def twilio_client(self) -> TwilioClient:
+        return TwilioClient()
+
+    # verification
+    @cached_property
+    def sms_verification_client(self) -> SmsVerificationClient:
+        return SmsVerificationClient(self.twilio_client)
+
+    @cached_property
+    def email_verification_client(self) -> EmailVerificationClient:
+        return EmailVerificationClient(self.twilio_client)
+
+    @cached_property
+    def verification_service(self) -> VerificationService:
+        return VerificationService(self.get_repository(), [
+            self.sms_verification_client,
+            self.email_verification_client,
+        ],
+                                   env() != "production")
 
     ## portfolio
     @cached_property

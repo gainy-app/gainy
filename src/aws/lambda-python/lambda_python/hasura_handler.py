@@ -66,11 +66,17 @@ ACTIONS = [
                       ALGOLIA_COLLECTIONS_INDEX),
     SearchNews(GNEWS_API_TOKEN, REDIS_CACHE_HOST, REDIS_CACHE_PORT),
 
-    # Trading
+    # KYC
     KycGetFormConfig(),
     KycGetStatus(),
     KycSendForm(),
     KycAddDocument(),
+
+    # Verification
+    VerificationSendCode(),
+    VerificationVerifyCode(),
+
+    # Trading
     TradingLinkBankAccountWithPlaid(),
     TradingGetFundingAccounts(),
     TradingDeleteFundingAccount(),
