@@ -190,7 +190,7 @@ from data
 
 {% if is_incremental() %}
          left join old_model_stats using (symbol)
-where old_model_stats.max_time is null or raw_intraday_prices.time > max_time
+where old_model_stats.max_time is null or data.time > max_time
 {% endif %}
 
 order by symbol, time, priority desc
