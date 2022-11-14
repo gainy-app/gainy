@@ -175,9 +175,9 @@ select distinct on (
     symbol, time
     ) symbol,
       date,
-      time,
-      time_3min,
-      time_15min,
+      time::timestamp,
+      time_3min::timestamp,
+      time_15min::timestamp,
       open::double precision,
       high::double precision,
       low::double precision,

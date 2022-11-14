@@ -393,7 +393,7 @@ resource "datadog_monitor" "logs_count" {
   type    = "query alert"
   message = "Logs count triggered. Notify: @slack-${var.slack_channel_name} <!channel>"
 
-  query = "clamp_min(sum:aws.logs.forwarded_log_events{*} by {loggroupname}.rollup(sum, 86400), 1000) / clamp_min(day_before(sum:aws.logs.forwarded_log_events{*} by {loggroupname}.rollup(sum, 86400)), 1000) - 1 > 1"
+  query = "sum(last_1d):clamp_min(sum:aws.logs.forwarded_log_events{*} by {loggroupname}.rollup(sum, 86400), 1000) / clamp_min(day_before(sum:aws.logs.forwarded_log_events{*} by {loggroupname}.rollup(sum, 86400)), 1000) - 1 > 1"
 
   monitor_thresholds {
     critical = 1
