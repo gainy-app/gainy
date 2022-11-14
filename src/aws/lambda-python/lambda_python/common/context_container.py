@@ -1,6 +1,7 @@
 from functools import cached_property
 
 from _stripe.api import StripeApi
+from gainy.utils import env
 from portfolio.plaid.service import PlaidService
 from portfolio.service import PortfolioService
 from portfolio.service.chart import PortfolioChartService
@@ -47,7 +48,8 @@ class ContextContainer(GainyContextContainer):
         return VerificationService(self.get_repository(), [
             self.sms_verification_client,
             self.email_verification_client,
-        ])
+        ],
+                                   env() != "production")
 
     ## portfolio
     @cached_property

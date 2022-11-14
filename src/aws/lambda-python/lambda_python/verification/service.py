@@ -34,10 +34,13 @@ def _check_can_verify(entity: VerificationCode):
 
 class VerificationService:
 
-    def __init__(self, repository: Repository,
-                 clients: list[VerificationClient]):
+    def __init__(self,
+                 repository: Repository,
+                 clients: list[VerificationClient],
+                 dry_run=False):
         self.repository = repository
         self.clients = clients
+        self.dry_run = dry_run
 
     def send_code(self, profile_id: int, channel: VerificationCodeChannel,
                   address: str):
@@ -47,14 +50,19 @@ class VerificationService:
         self._check_can_send(entity)
         self.repository.persist(entity)
         self._choose_client(entity).validate_address(entity)
-        self._choose_client(entity).send(entity)
+
+        if not self.dry_run:
+            self._choose_client(entity).send(entity)
 
         return entity
 
     def verify_code(self, entity: VerificationCode, user_input: str):
         _check_can_verify(entity)
         try:
-            self._choose_client(entity).check_user_input(entity, user_input)
+            if not self.dry_run:
+                self._choose_client(entity).check_user_input(
+                    entity, user_input)
+
             entity.verified_at = datetime.datetime.now(
                 tz=datetime.timezone.utc)
             self.repository.persist(entity)
