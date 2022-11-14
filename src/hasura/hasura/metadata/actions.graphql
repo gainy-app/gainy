@@ -550,8 +550,8 @@ type LinkBankAccountWithPlaidOutput {
 
 type AccountInformation {
   account_id: String!
-  balance_available: Int!
-  balance_current: Int!
+  balance_available: Float!
+  balance_current: Float!
   iso_currency_code: String!
   mask: String!
   name: String!

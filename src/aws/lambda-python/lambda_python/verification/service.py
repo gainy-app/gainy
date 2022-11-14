@@ -69,12 +69,11 @@ class VerificationService:
         old_entity = self.repository.find_one(
             VerificationCode, {
                 "profile_id": entity.profile_id,
+                "channel": entity.channel.name,
                 "created_at": OperatorGt(created_at_threshold)
             })
 
         if old_entity:
-            print(old_entity.to_dict())
-            print(created_at_threshold)
             raise CooldownException()
 
     def _choose_client(self, entity: VerificationCode) -> VerificationClient:

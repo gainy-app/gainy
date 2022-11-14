@@ -15,31 +15,40 @@ TWILIO_VERIFICATION_CHANNEL_EMAIL = 'email'
 
 class TwilioClient:
 
-    def verification_create(self, address, channel: str):
+    def verification_create(self,
+                            address: str,
+                            channel: str,
+                            verification_code_id: str = None):
         try:
-            response = self._verification_service.verifications.create(
-                to=address, channel=channel)
-            logger.info('verification_create', extra={"response": response})
-            return response.status == 'pending'
+            substitutions = {"verification_code_id": verification_code_id}
+            instance = self._verification_service.verifications.create(
+                to=address,
+                channel=channel,
+                channel_configuration={"substitutions": substitutions})
+            logger.info('verification_create',
+                        extra={"instance": instance.__dict__})
+            return instance.status == 'pending'
         except Exception as e:
             logger.exception('verification_create', extra={"exception": e})
             raise e
 
     def verification_check(self, address, code: str) -> bool:
         try:
-            response = self._verification_service.verification_checks.create(
+            instance = self._verification_service.verification_checks.create(
                 to=address, code=code)
-            logger.info('verification_check', extra={"response": response})
-            return response.status == 'approved'
+            logger.info('verification_check',
+                        extra={"instance": instance.__dict__})
+            return instance.status == 'approved'
         except Exception as e:
             logger.exception('verification_check', extra={"exception": e})
             raise e
 
     def validate_phone_number(self, phone_number) -> bool:
         try:
-            response = self._lookup_service.phone_numbers(phone_number).fetch()
-            logger.info('validate_phone_number', extra={"response": response})
-            return response.valid
+            instance = self._lookup_service.phone_numbers(phone_number).fetch()
+            logger.info('validate_phone_number',
+                        extra={"instance": instance.__dict__})
+            return instance.valid
         except Exception as e:
             logger.exception('validate_phone_number', extra={"exception": e})
             raise e

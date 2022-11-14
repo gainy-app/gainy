@@ -16,7 +16,9 @@ class EmailVerificationClient(VerificationClient):
 
     def send(self, entity: VerificationCode):
         if not self.twilio_client.verification_create(
-                entity.address, TWILIO_VERIFICATION_CHANNEL_EMAIL):
+                entity.address,
+                TWILIO_VERIFICATION_CHANNEL_EMAIL,
+                verification_code_id=entity.id):
             raise Exception('Failed to send verification code.')
 
     def check_user_input(self,
