@@ -25,6 +25,14 @@ variable "revenuecat_api_key" {
   type      = string
   sensitive = true
 }
+variable "verification_code_cooldown" {
+  type    = number
+  default = 30
+}
+variable "verification_code_ttl" {
+  type    = number
+  default = 300
+}
 
 #################################### OneSignal ####################################
 
@@ -241,3 +249,17 @@ variable "plaid_env" {
   type = string
 }
 
+#################################### Twilio ####################################
+
+variable "twilio_verification_service_id" {
+  type      = string
+  sensitive = true
+}
+variable "twilio_account_sid" {
+  type      = string
+  sensitive = true
+}
+variable "twilio_auth_token" {
+  type      = string
+  sensitive = true
+}

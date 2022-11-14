@@ -568,6 +568,30 @@ mutation KycAddDocument (
 }
 ```
 
+### Verification 
+```graphql
+mutation VerificationSendCode($profile_id: Int!, $channel: String!, $address: String!) {
+  verification_send_code(
+    profile_id: $profile_id
+    channel: $channel
+    address: $address
+  ){
+    verification_code_id
+  }
+}
+```
+Channels: `["SMS", "EMAIL"]`
+```graphql
+mutation VerificationVerifyCode($verification_code_id: String!, $user_input: String!) {
+  verification_verify_code(
+    verification_code_id: $verification_code_id
+    user_input: $user_input
+  ){
+    ok
+  }
+}
+```
+
 ## Data
 
 - kyc_form

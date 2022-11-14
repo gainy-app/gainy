@@ -322,6 +322,21 @@ type Mutation {
   ): UpdatePurchasesOutput
 }
 
+type Mutation {
+  verification_send_code(
+    profile_id: Int!
+    channel: String!
+    address: String!
+  ): VerificationSendCodeOutput
+}
+
+type Mutation {
+  verification_verify_code(
+    verification_code_id: String!
+    user_input: String!
+  ): OkOutput
+}
+
 input PlaidWebhookError {
   error_code: Int
 }
@@ -535,8 +550,8 @@ type LinkBankAccountWithPlaidOutput {
 
 type AccountInformation {
   account_id: String!
-  balance_available: Int!
-  balance_current: Int!
+  balance_available: Float!
+  balance_current: Float!
   iso_currency_code: String!
   mask: String!
   name: String!
@@ -594,5 +609,9 @@ type TradingCollectionVersionOutput {
 
 type UrlOutput {
   url: String!
+}
+
+type VerificationSendCodeOutput {
+  verification_code_id: String!
 }
 
