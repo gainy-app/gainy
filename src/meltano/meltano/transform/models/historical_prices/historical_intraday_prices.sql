@@ -148,7 +148,7 @@ with polygon_symbols as materialized
              {% endif %}
 
              {% if is_incremental() and not var('realtime') %}
-                or abs(split_rate - 1) > 1e-3
+             where abs(split_rate - 1) > 1e-3
              {% endif %}
 
              {% if not var('realtime') %}
