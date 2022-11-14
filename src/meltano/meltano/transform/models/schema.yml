@@ -614,15 +614,15 @@ models:
       - name: buy
         tests:
           - type:
-              type: 'integer'
+              type: 'double precision'
       - name: hold
         tests:
           - type:
-              type: 'integer'
+              type: 'double precision'
       - name: sell
         tests:
           - type:
-              type: 'integer'
+              type: 'double precision'
       - name: rating
         tests:
           - type:
@@ -630,11 +630,11 @@ models:
       - name: strong_buy
         tests:
           - type:
-              type: 'integer'
+              type: 'double precision'
       - name: strong_sell
         tests:
           - type:
-              type: 'integer'
+              type: 'double precision'
       - name: target_price
         tests:
           - type:
