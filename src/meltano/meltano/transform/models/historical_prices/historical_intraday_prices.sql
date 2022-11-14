@@ -166,8 +166,8 @@ with polygon_symbols as materialized
                     volume::double precision,
                     adjusted_close::double precision,
                     1                                as priority
-             from historical_prices
-                      join week_trading_sessions_static using (symbol, date)
+             from {{ ref('historical_prices') }}
+                      join {{ ref('week_trading_sessions_static') }} using (symbol, date)
              {% endif %}
         )
 
