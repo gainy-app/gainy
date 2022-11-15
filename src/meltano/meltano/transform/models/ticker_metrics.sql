@@ -72,6 +72,7 @@ with highlights as (select * from {{ ref('highlights') }}),
              with avg_volume_10d as
                       (
                           select symbol,
+                                 avg(volume * adjusted_close) as value_money,
                                  avg(hp.volume) as value
                           from historical_prices hp
                           where hp.date > now() - interval '10 days'
@@ -80,6 +81,7 @@ with highlights as (select * from {{ ref('highlights') }}),
                   avg_volume_90d as
                       (
                           select symbol,
+                                 avg(volume * adjusted_close) as value_money,
                                  avg(hp.volume) as value
                           from historical_prices hp
                           where hp.date > now() - interval '90 days'
@@ -139,9 +141,11 @@ with highlights as (select * from {{ ref('highlights') }}),
                           group by code
                       )
              select t.symbol,
-                    avg_volume_10d.value::double precision as avg_volume_10d,
+                    avg_volume_10d.value_money::double precision as avg_volume_10d_money,
+                    avg_volume_10d.value::double precision       as avg_volume_10d,
                     ticker_shares_stats.shares_outstanding::bigint,
-                    avg_volume_90d.value::double precision as avg_volume_90d,
+                    avg_volume_90d.value_money::double precision as avg_volume_90d_money,
+                    avg_volume_90d.value::double precision       as avg_volume_90d,
                     ticker_shares_stats.shares_float::bigint,
                     technicals.short_ratio::double precision,
                     technicals.short_percent::double precision,
@@ -152,7 +156,7 @@ with highlights as (select * from {{ ref('highlights') }}),
                     historical_volatility.absolute_historical_volatility_adjusted_max_1y,
                     historical_volatility.relative_historical_volatility_adjusted_min_1y,
                     historical_volatility.relative_historical_volatility_adjusted_max_1y,
-                    implied_volatility.value               as implied_volatility
+                    implied_volatility.value                     as implied_volatility
              from base_tickers t
                       left join ticker_shares_stats using (symbol)
                       left join technicals using (symbol)
@@ -418,8 +422,10 @@ select DISTINCT ON
                highlights.profit_margin::double precision,
 
                trading_metrics.avg_volume_10d,
+               trading_metrics.avg_volume_10d_money,
                trading_metrics.shares_outstanding,
                trading_metrics.avg_volume_90d,
+               trading_metrics.avg_volume_90d_money,
                trading_metrics.shares_float,
                trading_metrics.short_ratio,
                trading_metrics.short_percent,

@@ -304,9 +304,12 @@ with check_params(table_name, dt_interval,
                       join {{ ref('tickers') }} using (symbol)
                       join latest_trading_day using (symbol)
                       join previous_trading_day using (symbol)
-             where t.date is null
-                or (now() > latest_trading_day.date + interval '1 day 6 hours' and t.date < latest_trading_day.date)
-                or (now() > previous_trading_day.date + interval '1 day 6 hours' and t.date < previous_trading_day.date)
+                      join {{ ref('ticker_metrics') }} using (symbol)
+             where ticker_metrics.avg_volume_90d_money > 1000000
+               and ticker_metrics.avg_volume_10d_money > 1000000
+               and (t.date is null
+                 or (now() > latest_trading_day.date + interval '1 day 6 hours' and t.date < latest_trading_day.date)
+                 or (now() > previous_trading_day.date + interval '1 day 6 hours' and t.date < previous_trading_day.date))
          )
 select code || '__' || symbol as id,
        symbol,

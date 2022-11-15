@@ -1,7 +1,7 @@
 from common.context_container import ContextContainer
 from gainy.exceptions import NotFoundException
 from common.hasura_function import HasuraAction
-from trading.models import FundingAccount
+from gainy.trading.models import FundingAccount
 from gainy.utils import get_logger
 
 logger = get_logger(__name__)

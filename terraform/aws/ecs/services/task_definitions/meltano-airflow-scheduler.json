@@ -129,6 +129,12 @@
     { "name": "DRIVEWEALTH_API_PASSWORD",              "value": "${drivewealth_api_password}" },
     { "name": "DRIVEWEALTH_API_URL",                   "value": "${drivewealth_api_url}" },
 
+    { "name": "PLAID_CLIENT_ID",                       "value": "${plaid_client_id}" },
+    { "name": "PLAID_SECRET",                          "value": "${plaid_secret}" },
+    { "name": "PLAID_DEVELOPMENT_SECRET",              "value": "${plaid_development_secret}" },
+    { "name": "PLAID_SANDBOX_SECRET",                  "value": "${plaid_sandbox_secret}" },
+    { "name": "PLAID_ENV",                             "value": "${plaid_env}" },
+
     { "name": "MLFLOW_ARTIFACT_LOCATION",              "value": "${mlflow_artifact_location}" },
     { "name": "MLFLOW_TRACKING_URI",                   "value": "postgresql://${pg_username}:${pg_password}@${pg_host}:${pg_port}/${pg_dbname}?options=-csearch_path=${pg_mlflow_schema}" }
   ],

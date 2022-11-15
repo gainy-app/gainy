@@ -27,13 +27,14 @@ polygon_crypto_tickers as
     ),
 latest_stock_price_date as
     (
-        SELECT code as symbol, max(date)::date as date
+        SELECT code as symbol, max(date) as date
         from {{ source('eod', 'eod_historical_prices') }}
+        where adjusted_close > 0
         group by code
     ),
 next_trading_session as
     (
-        select distinct on (symbol) symbol, exchange_schedule.date
+        select distinct on (symbol) symbol, exchange_schedule.date::date
         from latest_stock_price_date
                  join {{ ref('base_tickers') }} using (symbol)
                  left join {{ ref('exchange_schedule') }}
@@ -41,7 +42,7 @@ next_trading_session as
                                base_tickers.exchange_canonical or
                                (base_tickers.exchange_canonical is null and
                                 exchange_schedule.country_name = base_tickers.country_name))
-        where exchange_schedule.date > latest_stock_price_date.date
+        where exchange_schedule.date > latest_stock_price_date.date::date
         order by symbol, exchange_schedule.date
     ),
 stocks_with_split as
@@ -73,19 +74,17 @@ prices_with_split_rates as
         from {{ source('eod', 'eod_historical_prices') }}
                  left join stocks_with_split using (code)
         where eod_historical_prices.date >= eod_historical_prices.first_date
+          and eod_historical_prices.adjusted_close > 0
     ),
 latest_day_split_rate as
     (
         SELECT eod_historical_prices.code,
-               first_value(adjusted_close / close) over (partition by code order by date desc) as latest_day_split_rate
+               first_value(adjusted_close / close) over wnd as latest_day_split_rate
         from {{ source('eod', 'eod_historical_prices') }}
-                 join (
-                          SELECT eod_historical_prices.code,
-                                 max(eod_historical_prices.date) as date
-                          from {{ source('eod', 'eod_historical_prices') }}
-                          where close > 0
-                          group by code
-                      ) t using (code, date)
+                 join latest_stock_price_date
+                      on latest_stock_price_date.symbol = eod_historical_prices.code
+                          and latest_stock_price_date.date = eod_historical_prices.date
+          window wnd as (partition by code order by eod_historical_prices.date desc)
     ),
 prev_split as
     (

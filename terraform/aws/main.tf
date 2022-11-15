@@ -89,6 +89,13 @@ module "lambda" {
   aws_access_key        = var.aws_access_key
   aws_secret_key        = var.aws_secret_key
   aws_region            = var.aws_region
+
+  verification_code_cooldown = var.verification_code_cooldown
+  verification_code_ttl      = var.verification_code_ttl
+
+  twilio_verification_service_id = var.twilio_verification_service_id
+  twilio_account_sid             = var.twilio_account_sid
+  twilio_auth_token              = var.twilio_auth_token
 }
 
 module "ecs" {
@@ -221,6 +228,12 @@ module "ecs-service" {
   drivewealth_api_username   = var.drivewealth_api_username
   drivewealth_api_password   = var.drivewealth_api_password
   drivewealth_api_url        = var.drivewealth_api_url
+
+  plaid_client_id          = var.plaid_client_id
+  plaid_secret             = var.plaid_secret
+  plaid_development_secret = var.plaid_development_secret
+  plaid_sandbox_secret     = var.plaid_sandbox_secret
+  plaid_env                = var.plaid_env
 }
 
 

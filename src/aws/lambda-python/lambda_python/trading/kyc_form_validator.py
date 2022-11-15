@@ -35,10 +35,10 @@ class KycFormValidator(ABC):
             ]
             address = ", ".join(filter(lambda x: x, address_parts))
 
-            place_search = gmaps.places(query=address, type="post_office")
+            place_search = gmaps.places(query=address)
             logging_extra["place_search"] = place_search
             if not place_search['results']:
-                raise ValidationException("Could not decode address.")
+                return
 
             place_types = set(place_search['results'][0]["types"])
             if {"post_office", "post_box"}.intersection(place_types):

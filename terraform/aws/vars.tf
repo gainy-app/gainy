@@ -71,3 +71,9 @@ variable "drivewealth_api_username" {}
 variable "drivewealth_api_password" {}
 variable "drivewealth_api_url" {}
 variable "drivewealth_sqs_arn" {}
+
+variable "verification_code_cooldown" {}
+variable "verification_code_ttl" {}
+variable "twilio_verification_service_id" {}
+variable "twilio_account_sid" {}
+variable "twilio_auth_token" {}

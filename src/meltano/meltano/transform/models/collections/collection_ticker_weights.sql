@@ -183,11 +183,15 @@ with raw_ticker_collections_weights as materialized
          ),
      ticker_collections_weights_stats as
          (
-             select collection_uniq_id,
-                    date,
-                    sum(weight) as weight_sum
-             from ticker_collections_weights_expanded
-             group by collection_uniq_id, date
+             select *,
+                    lag(date) over (partition by collection_uniq_id order by date desc) as next_date
+             from (
+                      select collection_uniq_id,
+                             date,
+                             sum(weight) as weight_sum
+                      from ticker_collections_weights_expanded
+                      group by collection_uniq_id, date
+                  ) t
          ),
      ticker_collections_weights_normalized as
          (
@@ -204,8 +208,8 @@ with raw_ticker_collections_weights as materialized
                              collection_uniq_id,
                              collection_id,
                              symbol,
-                             lag(date) over (partition by collection_id,symbol order by date desc) as date,
-                             weight / weight_sum                                                   as weight,
+                             next_date           as date,
+                             weight / weight_sum as weight,
                              price::numeric,
                              updated_at
                       from ticker_collections_weights_expanded

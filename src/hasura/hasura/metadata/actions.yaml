@@ -105,6 +105,7 @@ actions:
     definition:
       kind: synchronous
       handler: '{{AWS_LAMBDA_API_GATEWAY_ENDPOINT}}/hasuraAction'
+      timeout: 60
     permissions:
       - role: user
   - name: link_plaid_account
@@ -133,6 +134,7 @@ actions:
     definition:
       kind: synchronous
       handler: '{{AWS_LAMBDA_API_GATEWAY_ENDPOINT}}/hasuraAction'
+      timeout: 60
   - name: search_collections
     definition:
       kind: ""
@@ -239,6 +241,19 @@ actions:
       handler: '{{AWS_LAMBDA_API_GATEWAY_ENDPOINT}}/hasuraAction'
     permissions:
       - role: user
+  - name: verification_send_code
+    definition:
+      kind: synchronous
+      handler: '{{AWS_LAMBDA_API_GATEWAY_ENDPOINT}}/hasuraAction'
+    permissions:
+      - role: user
+  - name: verification_verify_code
+    definition:
+      kind: synchronous
+      handler: '{{AWS_LAMBDA_API_GATEWAY_ENDPOINT}}/hasuraAction'
+    permissions:
+      - role: user
+      - role: anonymous
 custom_types:
   enums: []
   input_objects:
@@ -400,4 +415,5 @@ custom_types:
     - name: KycFormChoicesFieldConfig
     - name: TradingCollectionVersionOutput
     - name: UrlOutput
+    - name: VerificationSendCodeOutput
   scalars: []

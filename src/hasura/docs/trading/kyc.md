@@ -204,7 +204,7 @@ mutation UpsertKycForm (
 
 Minimal information:
 ```json
-{"profile_id": 1, "first_name": "Mikhail", "last_name": "Astashkevich", "email_address": "qurazor1@gmail.com", "phone_number": "+1234567890", "birthdate": "1992-11-27", "address_street1": "1 Wall st.", "address_city": "New York", "address_postal_code": "12345", "tax_id_value": "123456789", "tax_id_type": "SSN", "employment_status": "UNEMPLOYED", "investor_profile_annual_income": 123456, "investor_profile_objectives": "LONG_TERM", "investor_profile_experience": "YRS_10_", "investor_profile_net_worth_liquid": 123, "investor_profile_net_worth_total": 1234, "investor_profile_risk_tolerance": "SPECULATION", "disclosures_drivewealth_terms_of_use": true, "disclosures_rule14b": true, "disclosures_drivewealth_customer_agreement": true, "disclosures_drivewealth_privacy_policy": true, "disclosures_drivewealth_market_data_agreement": true, "disclosures_signed_by": "Mikhail Astashkevich", "address_province": "CA", "address_country": "USA", "country": "USA", "citizenship": "USA"}
+{"profile_id": 1, "first_name": "Mikhail", "last_name": "Astashkevich", "email_address": "qurazor1@gmail.com", "phone_number": "+1234567890", "birthdate": "1992-11-27", "address_street1": "773 Vista Tulocay ln", "address_city": "Napa", "address_postal_code": "94559", "tax_id_value": "123456789", "tax_id_type": "SSN", "employment_status": "UNEMPLOYED", "investor_profile_annual_income": 123456, "investor_profile_objectives": "LONG_TERM", "investor_profile_experience": "YRS_10_", "investor_profile_net_worth_liquid": 123, "investor_profile_net_worth_total": 1234, "investor_profile_risk_tolerance": "SPECULATION", "disclosures_drivewealth_terms_of_use": true, "disclosures_rule14b": true, "disclosures_drivewealth_customer_agreement": true, "disclosures_drivewealth_privacy_policy": true, "disclosures_drivewealth_market_data_agreement": true, "disclosures_signed_by": "Mikhail Astashkevich", "address_province": "CA", "address_country": "USA", "country": "USA", "citizenship": "USA"}
 ```
 
 ### Get KYC form values
@@ -562,6 +562,30 @@ mutation KycAddDocument (
     uploaded_file_id: $uploaded_file_id
     type: $type
     side: $side
+  ){
+    ok
+  }
+}
+```
+
+### Verification 
+```graphql
+mutation VerificationSendCode($profile_id: Int!, $channel: String!, $address: String!) {
+  verification_send_code(
+    profile_id: $profile_id
+    channel: $channel
+    address: $address
+  ){
+    verification_code_id
+  }
+}
+```
+Channels: `["SMS", "EMAIL"]`
+```graphql
+mutation VerificationVerifyCode($verification_code_id: String!, $user_input: String!) {
+  verification_verify_code(
+    verification_code_id: $verification_code_id
+    user_input: $user_input
   ){
     ok
   }

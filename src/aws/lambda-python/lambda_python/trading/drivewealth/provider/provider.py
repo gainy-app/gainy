@@ -1,5 +1,3 @@
-from typing import List
-
 import os
 from decimal import Decimal
 
@@ -7,8 +5,8 @@ from gainy.data_access.repository import MAX_TRANSACTION_SIZE
 from gainy.exceptions import NotFoundException
 from gainy.trading.drivewealth.exceptions import DriveWealthApiException
 from portfolio.plaid import PlaidService
-from portfolio.plaid.models import PlaidAccessToken
-from trading.models import TradingMoneyFlow, FundingAccount, TradingStatement
+from gainy.plaid.models import PlaidAccessToken
+from trading.models import TradingMoneyFlow, TradingStatement
 from trading.drivewealth.provider.collection import DriveWealthProviderCollection
 from trading.drivewealth.provider.kyc import DriveWealthProviderKYC
 from trading.drivewealth.models import DriveWealthBankAccount, DriveWealthDeposit, \
@@ -17,7 +15,7 @@ from trading.drivewealth.api import DriveWealthApi
 from trading.drivewealth.repository import DriveWealthRepository
 
 from gainy.utils import get_logger
-from gainy.trading.models import TradingAccount, TradingCollectionVersion, TradingMoneyFlowStatus
+from gainy.trading.models import FundingAccount, TradingAccount, TradingCollectionVersion, TradingMoneyFlowStatus
 from gainy.trading.drivewealth.models import DriveWealthAccount, DriveWealthUser
 
 logger = get_logger(__name__)
@@ -143,11 +141,8 @@ class DriveWealthProvider(DriveWealthProviderKYC,
         self._sync_autopilot_runs()
         self._sync_bank_accounts(user.ref_id)
         self._sync_user_deposits(user.ref_id)
-        # self._sync_documents(user.ref_id)
-        self._sync_statements(profile_id)
+        # self._sync_statements(profile_id)
         self.sync_portfolios(profile_id)
-        # self._sync_redemptions(user.ref_id)
-        # self._sync_users(user.ref_id)
 
     def sync_deposit(self, deposit_ref_id: str, fetch_info=False):
         repository = self.repository
