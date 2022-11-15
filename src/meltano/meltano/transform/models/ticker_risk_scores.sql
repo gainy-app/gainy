@@ -1,7 +1,6 @@
 {{
   config(
-    materialized = "incremental",
-    unique_key = "symbol",
+    materialized = "table",
     post_hook=[
       pk('symbol'),
     ]
