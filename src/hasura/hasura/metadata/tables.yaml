@@ -2840,6 +2840,7 @@
           - profile_id
           - kyc_done
           - funding_account_connected
+          - account_no
           - deposited_funds
           - withdrawable_cash
           - pending_cash
