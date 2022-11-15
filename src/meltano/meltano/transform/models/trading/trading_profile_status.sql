@@ -61,6 +61,7 @@ with account_stats as
              group by profile_id
      )
 select profile_id,
+       trading_accounts.account_no,
        kyc_form_approved.profile_id is not null        as kyc_done,
        trading_funding_accounts.profile_id is not null as funding_account_connected,
        trading_money_flow.profile_id is not null       as deposited_funds,
@@ -98,6 +99,13 @@ from (
                        from {{ source('app', 'trading_money_flow') }}
                        where status = 'SUCCESS'
                    ) trading_money_flow using (profile_id)
+         left join (
+                       select distinct on (profile_id) profile_id, ref_no as account_no
+                       from {{ source('app', 'drivewealth_accounts') }}
+                       join {{ source('app', 'drivewealth_users') }}
+                            on drivewealth_accounts.drivewealth_user_id = drivewealth_users.ref_id
+                       where drivewealth_accounts.status = 'OPEN'
+                   ) trading_accounts using (profile_id)
          left join deposit_stats using (profile_id)
          left join account_stats using (profile_id)
          left join portfolio_stats using (profile_id)
