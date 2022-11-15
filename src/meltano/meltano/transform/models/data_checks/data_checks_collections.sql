@@ -35,6 +35,7 @@ with collection_distinct_tickers as
                     'ttf_ticker_no_interest' as code,
                     'daily' as period
              from collection_distinct_tickers
+                      join {{ ref('tickers') }} using (symbol)
                       left join {{ ref('ticker_interests') }} using (symbol)
                       left join {{ ref('interests') }} on interests.id = ticker_interests.interest_id
              where interests.id is null
@@ -45,11 +46,11 @@ with collection_distinct_tickers as
                    'ttf_ticker_no_industry' as code,
                    'daily' as period
              from collection_distinct_tickers
-                      left join {{ ref('base_tickers') }} using (symbol)
+                      join {{ ref('tickers') }} using (symbol)
                       left join {{ ref('ticker_industries') }} using (symbol)
                       left join {{ ref('gainy_industries') }} on gainy_industries.id = ticker_industries.industry_id
              where gainy_industries.id is null
-               and (base_tickers.type is null or base_tickers.type != 'etf')
+               and (tickers.type is null or tickers.type != 'etf')
 
              union all
 
@@ -66,6 +67,7 @@ with collection_distinct_tickers as
                     'ttf_ticker_no_risk_score' as code,
                     'daily' as period
              from collection_distinct_tickers
+                      join {{ ref('tickers') }} using (symbol)
                       left join {{ ref('ticker_risk_scores') }} using (symbol)
              where ticker_risk_scores.symbol is null
            
@@ -75,6 +77,7 @@ with collection_distinct_tickers as
                     'ttf_ticker_no_category_continuous' as code,
                     'daily' as period
              from collection_distinct_tickers
+                      join {{ ref('tickers') }} using (symbol)
                       left join {{ ref('ticker_categories_continuous') }} using (symbol)
              where ticker_categories_continuous.symbol is null
 
@@ -84,8 +87,8 @@ with collection_distinct_tickers as
                     'ttf_ticker_no_matchscore' as code,
                     'daily' as period
              from collection_distinct_tickers
+                      join {{ ref('tickers') }} using (symbol)
                       left join matchscore_distinct_tickers using (symbol)
-                               left join {{ ref('tickers') }} using (symbol)
              where matchscore_distinct_tickers.symbol is null
          )
 select (code || '_' || symbol) as id,
