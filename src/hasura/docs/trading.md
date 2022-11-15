@@ -31,7 +31,7 @@ query TradingGetProfileStatus($profile_id: Int!) {
     withdrawable_cash
     pending_cash
   }
-  app_trading_money_flow(where: {status: {_eq: "PENDING"}}) {
+  app_trading_money_flow(where: {profile_id: {_eq: $profile_id}, status: {_eq: "PENDING"}}) {
     amount
     created_at
   }
