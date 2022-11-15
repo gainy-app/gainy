@@ -228,6 +228,12 @@ module "ecs-service" {
   drivewealth_api_username   = var.drivewealth_api_username
   drivewealth_api_password   = var.drivewealth_api_password
   drivewealth_api_url        = var.drivewealth_api_url
+
+  plaid_client_id          = var.plaid_client_id
+  plaid_secret             = var.plaid_secret
+  plaid_development_secret = var.plaid_development_secret
+  plaid_sandbox_secret     = var.plaid_sandbox_secret
+  plaid_env                = var.plaid_env
 }
 
 

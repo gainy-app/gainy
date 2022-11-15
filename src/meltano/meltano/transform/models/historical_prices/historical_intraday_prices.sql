@@ -120,39 +120,77 @@ with polygon_symbols as materialized
                       left join {{ ref('historical_prices') }} using (symbol, date)
                       join raw_intraday_prices using (symbol, time)
 {% endif %}
-         )
-select symbol,
-       date,
-       time,
-       time_3min,
-       time_15min,
-       open::double precision,
-       high::double precision,
-       low::double precision,
-       close::double precision,
-       volume::double precision,
+         ),
+    data as
+        (
+             select symbol,
+                    date,
+                    time,
+                    time_3min,
+                    time_15min,
+                    open::double precision,
+                    high::double precision,
+                    low::double precision,
+                    close::double precision,
+                    volume::double precision,
 
-{% if not var('realtime') %}
-       (close * split_rate)::double precision as adjusted_close,
-{% else %}
-       close::double precision as adjusted_close,
-{% endif %}
+             {% if not var('realtime') %}
+                    (close * split_rate)::double precision as adjusted_close,
+             {% else %}
+                    close::double precision                as adjusted_close,
+             {% endif %}
+                    0                                      as priority
 
-       now()::timestamp as updated_at,
-       (symbol || '_' || time) as id
-from raw_intraday_prices
+             from raw_intraday_prices
+
+             {% if not var('realtime') %}
+                      left join daily_adjustment_rate using (symbol, date)
+             {% endif %}
+
+             {% if is_incremental() and not var('realtime') %}
+             where abs(split_rate - 1) > 1e-3
+             {% endif %}
+
+             {% if not var('realtime') %}
+             union all
+
+             select symbol,
+                    date,
+                    close_at                         as time,
+                    close_at - interval '3 minutes'  as time_3min,
+                    close_at - interval '15 minutes' as time_15min,
+                    open::double precision,
+                    high::double precision,
+                    low::double precision,
+                    close::double precision,
+                    volume::double precision,
+                    adjusted_close::double precision,
+                    1                                as priority
+             from {{ ref('historical_prices') }}
+                      join {{ ref('week_trading_sessions_static') }} using (symbol, date)
+             {% endif %}
+        )
+
+select distinct on (
+    symbol, time
+    ) symbol,
+      date,
+      time::timestamp,
+      time_3min::timestamp,
+      time_15min::timestamp,
+      open::double precision,
+      high::double precision,
+      low::double precision,
+      close::double precision,
+      volume::double precision,
+      adjusted_close::double precision,
+      now()::timestamp        as updated_at,
+      (symbol || '_' || time) as id
+from data
 
 {% if is_incremental() %}
          left join old_model_stats using (symbol)
+where old_model_stats.max_time is null or data.time > max_time
 {% endif %}
 
-{% if not var('realtime') %}
-         left join daily_adjustment_rate using (symbol, date)
-{% endif %}
-
-{% if is_incremental() %}
-where old_model_stats.max_time is null or raw_intraday_prices.time > max_time
-{% endif %}
-{% if is_incremental() and not var('realtime') %}
-   or abs(split_rate - 1) > 1e-3
-{% endif %}
+order by symbol, time, priority desc

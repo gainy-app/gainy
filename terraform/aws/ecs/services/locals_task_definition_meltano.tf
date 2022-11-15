@@ -92,6 +92,12 @@ locals {
       polygon_api_token = var.polygon_api_token
       coingecko_api_key = var.coingecko_api_key
 
+      plaid_client_id          = var.plaid_client_id
+      plaid_secret             = var.plaid_secret
+      plaid_development_secret = var.plaid_development_secret
+      plaid_sandbox_secret     = var.plaid_sandbox_secret
+      plaid_env                = var.plaid_env
+
       # mlflow
       aws_region               = var.aws_region
       aws_access_key           = var.aws_access_key
