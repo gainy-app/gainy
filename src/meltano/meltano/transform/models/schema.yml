@@ -2440,6 +2440,10 @@ models:
         tests:
           - type:
               type: 'integer'
+      - name: account_no
+        tests:
+          - type:
+              type: 'character varying'
       - name: kyc_done
         tests:
           - type:

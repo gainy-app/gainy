@@ -3,6 +3,7 @@ query TradingGetProfileStatus($profile_id: Int!) {
     buying_power
     deposited_funds
     funding_account_connected
+    account_no
     kyc_done
     withdrawable_cash
     pending_cash
