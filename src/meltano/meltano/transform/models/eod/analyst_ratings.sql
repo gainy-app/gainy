@@ -11,14 +11,14 @@
 
 with expanded as
     (
-         select distinct code::text                       as symbol,
-                (analystratings ->> 'Buy')::int           as buy,
-                (analystratings ->> 'Hold')::int          as hold,
-                (analystratings ->> 'Sell')::int          as sell,
-                (analystratings ->> 'Rating')::float      as rating,
-                (analystratings ->> 'StrongBuy')::int     as strong_buy,
-                (analystratings ->> 'StrongSell')::int    as strong_sell,
-                (analystratings ->> 'TargetPrice')::float as target_price,
+         select distinct code::text                                  as symbol,
+                round((analystratings ->> 'Buy')::float)::int        as buy,
+                round((analystratings ->> 'Hold')::float)::int       as hold,
+                round((analystratings ->> 'Sell')::float)::int       as sell,
+                (analystratings ->> 'Rating')::float                 as rating,
+                round((analystratings ->> 'StrongBuy')::float)::int  as strong_buy,
+                round((analystratings ->> 'StrongSell')::float)::int as strong_sell,
+                (analystratings ->> 'TargetPrice')::float            as target_price,
                 case
                     when is_date(updatedat)
                         then updatedat::timestamp
