@@ -12,12 +12,12 @@
 with expanded as
     (
          select distinct code::text                       as symbol,
-                (analystratings ->> 'Buy')::float         as buy,
-                (analystratings ->> 'Hold')::float        as hold,
-                (analystratings ->> 'Sell')::float        as sell,
+                (analystratings ->> 'Buy')::int           as buy,
+                (analystratings ->> 'Hold')::int          as hold,
+                (analystratings ->> 'Sell')::int          as sell,
                 (analystratings ->> 'Rating')::float      as rating,
-                (analystratings ->> 'StrongBuy')::float   as strong_buy,
-                (analystratings ->> 'StrongSell')::float  as strong_sell,
+                (analystratings ->> 'StrongBuy')::int     as strong_buy,
+                (analystratings ->> 'StrongSell')::int    as strong_sell,
                 (analystratings ->> 'TargetPrice')::float as target_price,
                 case
                     when is_date(updatedat)

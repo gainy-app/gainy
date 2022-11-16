@@ -38,34 +38,13 @@ with holding_groups0 as
                     updated_at::timestamp,
                     actual_value::double precision,
                     ltt_quantity_total::double precision,
-                    case
-                        when abs(actual_value - absolute_gain_1d) > 0
-                            then (absolute_gain_1d / (actual_value - absolute_gain_1d))
-                        end::double precision       as relative_gain_1d,
-                    case
-                        when abs(actual_value - absolute_gain_1w) > 0
-                            then (absolute_gain_1w / (actual_value - absolute_gain_1w))
-                        end::double precision       as relative_gain_1w,
-                    case
-                        when abs(actual_value - absolute_gain_1m) > 0
-                            then (absolute_gain_1m / (actual_value - absolute_gain_1m))
-                        end::double precision       as relative_gain_1m,
-                    case
-                        when abs(actual_value - absolute_gain_3m) > 0
-                            then (absolute_gain_3m / (actual_value - absolute_gain_3m))
-                        end::double precision       as relative_gain_3m,
-                    case
-                        when abs(actual_value - absolute_gain_1y) > 0
-                            then (absolute_gain_1y / (actual_value - absolute_gain_1y))
-                        end::double precision       as relative_gain_1y,
-                    case
-                        when abs(actual_value - absolute_gain_5y) > 0
-                            then (absolute_gain_5y / (actual_value - absolute_gain_5y))
-                        end::double precision       as relative_gain_5y,
-                    case
-                        when abs(actual_value - absolute_gain_total) > 0
-                            then (absolute_gain_total / (actual_value - absolute_gain_total))
-                        end::double precision as relative_gain_total,
+                    (absolute_gain_1d / (actual_value - absolute_gain_1d))::double precision       as relative_gain_1d,
+                    (absolute_gain_1w / (actual_value - absolute_gain_1w))::double precision       as relative_gain_1w,
+                    (absolute_gain_1m / (actual_value - absolute_gain_1m))::double precision       as relative_gain_1m,
+                    (absolute_gain_3m / (actual_value - absolute_gain_3m))::double precision       as relative_gain_3m,
+                    (absolute_gain_1y / (actual_value - absolute_gain_1y))::double precision       as relative_gain_1y,
+                    (absolute_gain_5y / (actual_value - absolute_gain_5y))::double precision       as relative_gain_5y,
+                    (absolute_gain_total / (actual_value - absolute_gain_total))::double precision as relative_gain_total,
                     absolute_gain_1d::double precision,
                     absolute_gain_1w::double precision,
                     absolute_gain_1m::double precision,
