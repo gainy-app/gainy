@@ -62,20 +62,20 @@ with account_stats as
      )
 select profile_id,
        trading_accounts.account_no,
-       kyc_status.status = 'APPROVED'                  as kyc_done,
-       kyc_status.status                               as kyc_status,
-       kyc_status.message                              as kyc_message,
-       kyc_status.error_messages                       as kyc_error_messages,
-       trading_funding_accounts.profile_id is not null as funding_account_connected,
-       trading_money_flow.profile_id is not null       as deposited_funds,
-       coalesce(pending_cash, 0)::double precision     as pending_cash,
+       kyc_status.status is not null and kyc_status.status = 'APPROVED' as kyc_done,
+       kyc_status.status                                                as kyc_status,
+       kyc_status.message                                               as kyc_message,
+       kyc_status.error_messages                                        as kyc_error_messages,
+       trading_funding_accounts.profile_id is not null                  as funding_account_connected,
+       trading_money_flow.profile_id is not null                        as deposited_funds,
+       coalesce(pending_cash, 0)::double precision                      as pending_cash,
        coalesce(
 {% if var("drivewealth_is_uat") %}
                account_stats.cash_balance
 {% else %}
                cash_available_for_withdrawal
 {% endif %}
-           , 0)::double precision                      as withdrawable_cash,
+           , 0)::double precision                                       as withdrawable_cash,
        coalesce(
                    portfolio_stats.cash_value + coalesce(target_amount_delta, 0),
 {% if var("drivewealth_is_uat") %}
@@ -83,7 +83,7 @@ select profile_id,
 {% else %}
                    cash_available_for_withdrawal
 {% endif %}
-           , 0)::double precision                      as buying_power
+           , 0)::double precision                                       as buying_power
 from (
          select id as profile_id
          from {{ source('app', 'profiles') }}
