@@ -1,6 +1,7 @@
 import base64
 import io
 
+from gainy.exceptions import NotFoundException
 from trading.models import ProfileKycStatus, KycDocument
 from trading.drivewealth.api import DriveWealthApi
 from trading.drivewealth.repository import DriveWealthRepository
@@ -41,7 +42,10 @@ class DriveWealthProviderKYC(GainyDriveWealthProvider):
         if not accounts:
             self._create_account(user)
 
-        return self.api.get_kyc_status(user_ref_id).get_profile_kyc_status()
+        status = self.api.get_kyc_status(user_ref_id).get_profile_kyc_status()
+        status.profile_id = profile_id
+        self.repository.persist(status)
+        return status
 
     def kyc_get_status(self, profile_id: int) -> ProfileKycStatus:
         user = self._get_user(profile_id)
@@ -64,12 +68,23 @@ class DriveWealthProviderKYC(GainyDriveWealthProvider):
     def sync_kyc(self, user_ref_id) -> ProfileKycStatus:
         kyc_status = self.api.get_kyc_status(
             user_ref_id).get_profile_kyc_status()
+        profile_id = self.get_profile_id_by_user_id(user_ref_id)
+        kyc_status.profile_id = profile_id
+        self.repository.persist(kyc_status)
 
         documents_data = self.api.get_user_documents(user_ref_id)
         for document_data in documents_data:
             self.repository.upsert_kyc_document(None, document_data)
 
         return kyc_status
+
+    def get_profile_id_by_user_id(self, user_ref_id: str) -> int:
+        user: DriveWealthUser = self.repository.find_one(
+            DriveWealthUser, {"ref_id": user_ref_id})
+        if not user:
+            raise NotFoundException
+
+        return user.profile_id
 
     def _kyc_form_to_documents(self, kyc_form: dict):
         return [

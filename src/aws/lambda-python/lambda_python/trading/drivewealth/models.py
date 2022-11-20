@@ -241,36 +241,38 @@ class DriveWealthKycStatus:
 
     def get_profile_kyc_status(self) -> ProfileKycStatus:
         kyc = self.data["kyc"]
-        kyc_status = kyc["status"]["name"]
+        kyc_status = self.map_dw_kyc_status(kyc["status"]["name"])
+        message = kyc["status"].get("name") or kyc.get("statusComment")
+
+        errors = kyc.get("errors", [])
+        error_messages = list(map(lambda e: e['description'], errors))
+
+        entity = ProfileKycStatus()
+        entity.status = kyc_status
+        entity.message = message
+        entity.error_messages = error_messages
+        entity.created_at = dateutil.parser.parse(kyc["updated"])
+        return entity
+
+    @staticmethod
+    def map_dw_kyc_status(kyc_status):
         if kyc_status == "KYC_NOT_READY":
-            status = KycStatus.NOT_READY
-        elif kyc_status == "KYC_READY":
-            status = KycStatus.READY
-        elif kyc_status == "KYC_PROCESSING":
-            status = KycStatus.PROCESSING
-        elif kyc_status == "KYC_APPROVED":
-            status = KycStatus.APPROVED
-        elif kyc_status == "KYC_INFO_REQUIRED":
-            status = KycStatus.INFO_REQUIRED
-        elif kyc_status == "KYC_DOC_REQUIRED":
-            status = KycStatus.DOC_REQUIRED
-        elif kyc_status == "KYC_MANUAL_REVIEW":
-            status = KycStatus.MANUAL_REVIEW
-        elif kyc_status == "KYC_DENIED":
-            status = KycStatus.DENIED
-        else:
-            raise Exception('Unknown kyc status %s' % kyc_status)
-
-        errors = kyc.get("errors")
-        if errors:
-            message = ". ".join(
-                map(lambda e: f"{e['description']} ({e['code']})", errors))
-        else:
-            message = kyc.get("statusComment")
-
-        status = ProfileKycStatus(status, message)
-        status.updated_at = dateutil.parser.parse(kyc["updated"])
-        return status
+            return KycStatus.NOT_READY
+        if kyc_status == "KYC_READY":
+            return KycStatus.READY
+        if kyc_status == "KYC_PROCESSING":
+            return KycStatus.PROCESSING
+        if kyc_status == "KYC_APPROVED":
+            return KycStatus.APPROVED
+        if kyc_status == "KYC_INFO_REQUIRED":
+            return KycStatus.INFO_REQUIRED
+        if kyc_status == "KYC_DOC_REQUIRED":
+            return KycStatus.DOC_REQUIRED
+        if kyc_status == "KYC_MANUAL_REVIEW":
+            return KycStatus.MANUAL_REVIEW
+        if kyc_status == "KYC_DENIED":
+            return KycStatus.DENIED
+        raise Exception('Unknown kyc status %s' % kyc_status)
 
 
 class DriveWealthStatement(BaseDriveWealthModel):

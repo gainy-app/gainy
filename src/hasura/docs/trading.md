@@ -29,6 +29,9 @@ query TradingGetProfileStatus($profile_id: Int!) {
     funding_account_connected
     account_no
     kyc_done
+    kyc_status
+    kyc_message
+    kyc_error_messages
     withdrawable_cash
     pending_cash
   }
