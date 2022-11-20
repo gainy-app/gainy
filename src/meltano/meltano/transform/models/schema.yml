@@ -63,6 +63,7 @@ sources:
       - name: invitations
       - name: invoices
       - name: kyc_form
+      - name: kyc_statuses
       - name: notifications
       - name: personalized_collection_sizes
       - name: personalized_ticker_collections
@@ -2448,6 +2449,18 @@ models:
         tests:
           - type:
               type: 'boolean'
+      - name: kyc_status
+        tests:
+          - type:
+              type: 'character varying'
+      - name: kyc_message
+        tests:
+          - type:
+              type: 'character varying'
+      - name: kyc_error_messages
+        tests:
+          - type:
+              type: 'json'
       - name: funding_account_connected
         tests:
           - type:

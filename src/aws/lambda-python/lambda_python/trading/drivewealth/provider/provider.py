@@ -208,14 +208,6 @@ class DriveWealthProvider(DriveWealthProviderKYC,
             dw_statement.trading_statement_id = trading_statement.id
             self.repository.persist(dw_statement)
 
-    def get_profile_id_by_user_id(self, user_ref_id: str) -> int:
-        user: DriveWealthUser = self.repository.find_one(
-            DriveWealthUser, {"ref_id": user_ref_id})
-        if not user:
-            raise NotFoundException
-
-        return user.profile_id
-
     def _sync_bank_accounts(self, user_ref_id):
         repository = self.repository
 

@@ -62,7 +62,10 @@ with account_stats as
      )
 select profile_id,
        trading_accounts.account_no,
-       kyc_form_approved.profile_id is not null        as kyc_done,
+       kyc_status.status = 'APPROVED'                  as kyc_done,
+       kyc_status.status                               as kyc_status,
+       kyc_status.message                              as kyc_message,
+       kyc_status.error_messages                       as kyc_error_messages,
        trading_funding_accounts.profile_id is not null as funding_account_connected,
        trading_money_flow.profile_id is not null       as deposited_funds,
        coalesce(pending_cash, 0)::double precision     as pending_cash,
@@ -86,10 +89,10 @@ from (
          from {{ source('app', 'profiles') }}
      ) profiles
          left join (
-                       select distinct profile_id
-                       from {{ source('app', 'kyc_form') }}
-                       where status = 'APPROVED'
-                   ) kyc_form_approved using (profile_id)
+                       select distinct on (profile_id) *
+                       from {{ source('app', 'kyc_statuses') }}
+                       order by profile_id, created_at desc
+                   ) kyc_status using (profile_id)
          left join (
                        select distinct profile_id
                        from {{ source('app', 'trading_funding_accounts') }}

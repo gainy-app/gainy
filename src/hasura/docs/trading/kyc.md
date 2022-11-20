@@ -519,17 +519,6 @@ mutation KycSendForm($profile_id: Int!) {
 }
 ```
 
-### Get KYC status
-```graphql
-query KycGetStatus($profile_id: Int!) {
-  kyc_get_status(profile_id: $profile_id) {
-    message
-    status # NOT_READY, READY, PROCESSING, APPROVED, INFO_REQUIRED, DOC_REQUIRED, MANUAL_REVIEW, DENIED
-    updated_at
-  }
-}
-```
-
 ### Generate pre-signed-url to upload documents
 ```graphql
 mutation get_pre_signed_upload_form (

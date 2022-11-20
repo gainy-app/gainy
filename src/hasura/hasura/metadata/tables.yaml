@@ -2839,6 +2839,9 @@
         columns:
           - profile_id
           - kyc_done
+          - kyc_status
+          - kyc_message
+          - kyc_error_messages
           - funding_account_connected
           - account_no
           - deposited_funds

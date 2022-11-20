@@ -23,7 +23,7 @@ logger = get_logger(__name__)
 
 class TradingService(GainyTradingService):
 
-    def kyc_send_form(self, kyc_form: dict):
+    def kyc_send_form(self, kyc_form: dict) -> ProfileKycStatus:
         if not kyc_form:
             raise Exception('kyc_form is null')
         return self._get_provider_service().kyc_send_form(kyc_form)
