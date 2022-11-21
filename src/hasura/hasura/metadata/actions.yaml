@@ -147,6 +147,12 @@ actions:
       handler: '{{AWS_LAMBDA_API_GATEWAY_ENDPOINT}}/hasuraAction'
     permissions:
       - role: user
+  - name: send_app_link
+    definition:
+      kind: synchronous
+      handler: '{{AWS_LAMBDA_API_GATEWAY_ENDPOINT}}/hasuraAction'
+    permissions:
+      - role: user
   - name: set_recommendation_settings
     definition:
       kind: synchronous
@@ -201,6 +207,9 @@ actions:
     definition:
       kind: ""
       handler: '{{AWS_LAMBDA_API_GATEWAY_ENDPOINT}}/hasuraAction'
+    permissions:
+      - role: user
+      - role: anonymous
   - name: trading_get_actual_collection_holdings
     definition:
       kind: ""

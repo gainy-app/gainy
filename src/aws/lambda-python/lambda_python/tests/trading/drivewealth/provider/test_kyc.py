@@ -1,7 +1,8 @@
 import datetime
 
+from gainy.tests.mocks.repository_mocks import mock_persist
 from gainy.utils import DATETIME_ISO8601_FORMAT_TZ
-from trading.models import KycStatus
+from trading.models import KycStatus, ProfileKycStatus
 from trading.drivewealth.models import DriveWealthKycStatus
 from trading.drivewealth.api import DriveWealthApi
 from trading.drivewealth.provider import DriveWealthProvider
@@ -10,6 +11,7 @@ from trading.drivewealth.repository import DriveWealthRepository
 
 def test_sync_kyc(monkeypatch):
     user_ref_id = "user_ref_id"
+    profile_id = 1
     document_data = "document_data"
     kyc_data = {
         "kyc": {
@@ -28,6 +30,9 @@ def test_sync_kyc(monkeypatch):
 
     monkeypatch.setattr(drivewealth_repository, "upsert_kyc_document",
                         mock_upsert_kyc_document)
+    persisted_objects = {}
+    monkeypatch.setattr(drivewealth_repository, "persist",
+                        mock_persist(persisted_objects))
 
     api = DriveWealthApi(drivewealth_repository)
 
@@ -43,6 +48,16 @@ def test_sync_kyc(monkeypatch):
     monkeypatch.setattr(api, "get_user_documents", mock_get_user_documents)
 
     service = DriveWealthProvider(drivewealth_repository, api, None)
+
+    def mock_get_profile_id_by_user_id(user_id):
+        assert user_id == user_ref_id
+        return profile_id
+
+    monkeypatch.setattr(service, "get_profile_id_by_user_id",
+                        mock_get_profile_id_by_user_id)
     kyc_status = service.sync_kyc(user_ref_id)
 
     assert kyc_status.status == KycStatus.APPROVED
+    assert kyc_status.profile_id == profile_id
+    assert ProfileKycStatus in persisted_objects
+    assert kyc_status in persisted_objects[ProfileKycStatus]

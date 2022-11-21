@@ -18,5 +18,15 @@ This repo contains Gainy's GraphQL API server built with [Hasura](https://hasura
 - [Stripe](docs/stripe.md)
 - [Trading](docs/trading.md)
 
+### 
+```graphql
+mutation SendAppLink($phone_number: String!) {
+  send_app_link(
+    phone_number: $phone_number
+  ){
+    ok
+  }
+}
+```
 ## Development
 Note: do not use foreign key relationships - all relationship should be of manual type (otherwise hasura fails during pipeline run).

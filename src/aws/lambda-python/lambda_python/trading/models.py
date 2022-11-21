@@ -40,14 +40,32 @@ class KycDocumentSide(str, enum.Enum):
     BACK = "BACK"
 
 
-class ProfileKycStatus:
-    status = None
-    message = None
-    updated_at = None
+class ProfileKycStatus(BaseModel):
+    id: int = None
+    profile_id: int = None
+    status: KycStatus = None
+    message: str = None
+    error_messages: list[str] = None
+    created_at: datetime.datetime = None
 
-    def __init__(self, status: str, message: Optional[str]):
-        self.status = KycStatus(status)
-        self.message = message
+    key_fields = ["id"]
+
+    db_excluded_fields = ["created_at"]
+    non_persistent_fields = ["id", "created_at"]
+
+    def __init__(self, row: dict = None):
+        super().__init__(row)
+
+        if row and row["status"]:
+            self.status = KycStatus(row["status"])
+
+    @classproperty
+    def schema_name(self) -> str:
+        return "app"
+
+    @classproperty
+    def table_name(self) -> str:
+        return "kyc_statuses"
 
 
 class TradingStatement(BaseModel):

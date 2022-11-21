@@ -30,5 +30,5 @@ class KycSendForm(HasuraAction):
             "message":
             kyc_status.message,
             "updated_at":
-            kyc_status.updated_at.strftime(DATETIME_ISO8601_FORMAT_TZ),
+            kyc_status.created_at.strftime(DATETIME_ISO8601_FORMAT_TZ),
         }
