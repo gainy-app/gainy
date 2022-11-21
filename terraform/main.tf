@@ -167,6 +167,7 @@ module "aws" {
   verification_code_ttl      = var.verification_code_ttl
 
   twilio_verification_service_id = var.twilio_verification_service_id
+  twilio_messaging_service_id    = var.twilio_messaging_service_id
   twilio_account_sid             = var.twilio_account_sid
   twilio_auth_token              = var.twilio_auth_token
 }

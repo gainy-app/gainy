@@ -27,8 +27,6 @@ ALGOLIA_COLLECTIONS_INDEX = os.getenv("ALGOLIA_COLLECTIONS_INDEX")
 ALGOLIA_SEARCH_API_KEY = os.getenv("ALGOLIA_SEARCH_API_KEY")
 
 GNEWS_API_TOKEN = os.getenv("GNEWS_API_TOKEN")
-REDIS_CACHE_HOST = os.getenv("REDIS_CACHE_HOST")
-REDIS_CACHE_PORT = os.getenv("REDIS_CACHE_PORT")
 
 API_GATEWAY_PROXY_INTEGRATION = os.getenv(
     "AWS_LAMBDA_API_GATEWAY_PROXY_INTEGRATION", "True") == "True"
@@ -43,6 +41,7 @@ ACTIONS = [
     UpdatePurchases(),
     GetPromocode(),
     GetPreSignedUploadForm(),
+    SendAppLink(),
 
     # Portfolio
     CreatePlaidLinkToken(),
@@ -64,7 +63,7 @@ ACTIONS = [
                   ALGOLIA_TICKERS_INDEX),
     SearchCollections(ALGOLIA_APP_ID, ALGOLIA_SEARCH_API_KEY,
                       ALGOLIA_COLLECTIONS_INDEX),
-    SearchNews(GNEWS_API_TOKEN, REDIS_CACHE_HOST, REDIS_CACHE_PORT),
+    SearchNews(GNEWS_API_TOKEN),
 
     # KYC
     KycGetFormConfig(),

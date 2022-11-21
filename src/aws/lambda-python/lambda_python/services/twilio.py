@@ -8,12 +8,23 @@ logger = get_logger(__name__)
 TWILIO_ACCOUNT_SID = os.getenv('TWILIO_ACCOUNT_SID')
 TWILIO_AUTH_TOKEN = os.getenv('TWILIO_AUTH_TOKEN')
 TWILIO_VERIFICATION_SERVICE_ID = os.getenv('TWILIO_VERIFICATION_SERVICE_ID')
+TWILIO_MESSAGING_SERVICE_ID = os.getenv('TWILIO_MESSAGING_SERVICE_ID')
 
 TWILIO_VERIFICATION_CHANNEL_SMS = 'sms'
 TWILIO_VERIFICATION_CHANNEL_EMAIL = 'email'
 
 
 class TwilioClient:
+
+    def send_sms(self, phone_number: str, text: str):
+        try:
+            instance = self._client.messages.create(
+                body=text, from_=TWILIO_MESSAGING_SERVICE_ID, to=phone_number)
+            logger.info('send_sms', extra={"instance": instance.__dict__})
+            return instance.status in ['sent', 'accepted']
+        except Exception as e:
+            logger.exception('send_sms', extra={"exception": e})
+            raise e
 
     def verification_create(self,
                             address: str,

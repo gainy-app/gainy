@@ -255,6 +255,11 @@ variable "twilio_verification_service_id" {
   type      = string
   sensitive = true
 }
+
+variable "twilio_messaging_service_id" {
+  type      = string
+  sensitive = true
+}
 variable "twilio_account_sid" {
   type      = string
   sensitive = true

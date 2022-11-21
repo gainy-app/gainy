@@ -190,6 +190,12 @@ type Query {
 }
 
 type Mutation {
+  send_app_link(
+    phone_number: String!
+  ): OkOutput
+}
+
+type Mutation {
   set_recommendation_settings(
     profile_id: Int!
     interests: [Int]
