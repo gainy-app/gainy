@@ -1,3 +1,4 @@
+import os
 from functools import cached_property
 
 from _stripe.api import StripeApi
@@ -7,6 +8,7 @@ from portfolio.service import PortfolioService
 from portfolio.service.chart import PortfolioChartService
 from portfolio.repository import PortfolioRepository
 from queue_processing.dispatcher import QueueMessageDispatcher
+from services.cache import Cache, RedisCache, LocalCache
 from services.sqs import SqsAdapter
 from services.twilio import TwilioClient
 from trading.drivewealth.queue_message_handler import DriveWealthQueueMessageHandler
@@ -21,6 +23,9 @@ from verification.client.email import EmailVerificationClient
 from verification.client.sms import SmsVerificationClient
 from verification.service import VerificationService
 
+REDIS_CACHE_HOST = os.getenv("REDIS_CACHE_HOST")
+REDIS_CACHE_PORT = os.getenv("REDIS_CACHE_PORT")
+
 
 class ContextContainer(GainyContextContainer):
     request = None
@@ -33,6 +38,13 @@ class ContextContainer(GainyContextContainer):
     @cached_property
     def twilio_client(self) -> TwilioClient:
         return TwilioClient()
+
+    @cached_property
+    def cache(self) -> Cache:
+        if REDIS_CACHE_HOST and REDIS_CACHE_PORT:
+            return RedisCache(REDIS_CACHE_HOST, REDIS_CACHE_PORT)
+
+        return LocalCache()
 
     # verification
     @cached_property

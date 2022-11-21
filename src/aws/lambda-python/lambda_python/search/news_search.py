@@ -1,5 +1,4 @@
 import json
-from datetime import datetime
 import dateutil.parser
 import backoff
 import re
@@ -8,7 +7,7 @@ from urllib.parse import urlencode
 from backoff import full_jitter
 from common.context_container import ContextContainer
 from common.hasura_function import HasuraAction
-from search.cache import CachingLoader, RedisCache
+from services.cache import CachingLoader, RedisCache
 from gainy.utils import get_logger, DATETIME_ISO8601_FORMAT_TZ
 
 logger = get_logger(__name__)
@@ -34,19 +33,20 @@ def load_url(url: str):
 
 class SearchNews(HasuraAction):
 
-    def __init__(self, gnews_api_token, redis_host, redis_port):
+    def __init__(self, gnews_api_token):
         super().__init__("fetchNewsData")
         self.gnews_api_token = gnews_api_token
-        self.caching_loader = CachingLoader(
-            RedisCache(redis_host, redis_port, ttl_seconds=60 * 60), load_url)
 
     def apply(self, input_params, context_container: ContextContainer):
         query = input_params["symbol"]
         limit = input_params.get("limit", 5)
+        caching_loader = CachingLoader(context_container.cache,
+                                       load_url,
+                                       ttl_seconds=60 * 60)
 
         url = self._build_url(query, limit)
         try:
-            response_json = json.loads(self.caching_loader.get(url))
+            response_json = json.loads(caching_loader.get(url))
 
             articles = response_json["articles"]
 
