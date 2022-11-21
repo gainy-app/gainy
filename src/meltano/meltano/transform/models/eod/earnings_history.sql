@@ -35,7 +35,7 @@ from expanded
 {% if is_incremental() %}
          left join {{ this }} old_data
                    on old_data.symbol = expanded.symbol
-                       and old_data.expanded.key::date = expanded.date
+                       and old_data.date = expanded.key::date
 {% endif %}
 
 where key != '0000-00-00'
