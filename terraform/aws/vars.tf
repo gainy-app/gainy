@@ -75,5 +75,6 @@ variable "drivewealth_sqs_arn" {}
 variable "verification_code_cooldown" {}
 variable "verification_code_ttl" {}
 variable "twilio_verification_service_id" {}
+variable "twilio_messaging_service_id" {}
 variable "twilio_account_sid" {}
 variable "twilio_auth_token" {}
