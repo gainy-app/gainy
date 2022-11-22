@@ -1,13 +1,7 @@
 {{
   config(
-    materialized = "incremental",
-    unique_key = "holding_group_id",
-    tags = ["realtime"],
-    post_hook=[
-      pk('holding_group_id'),
-      'create unique index if not exists "profile_id__ticker_symbol" ON {{ this }} (profile_id, ticker_symbol)',
-      'delete from {{this}} where updated_at < (select max(updated_at) from {{this}})',
-    ]
+    materialized = "view",
+    tags = ["view"],
   )
 }}
 

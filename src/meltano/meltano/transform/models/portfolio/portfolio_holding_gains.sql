@@ -1,11 +1,7 @@
 {{
   config(
-    materialized = "incremental",
-    unique_key = "holding_id_v2",
-    tags = ["realtime"],
-    post_hook=[
-      pk('holding_id_v2'),
-    ]
+    materialized = "view",
+    tags = ["view"],
   )
 }}
 
@@ -20,7 +16,7 @@ with plaid_holdings as
                             then profile_holdings_normalized.quantity
                         else ticker_realtime_metrics.actual_price *
                              profile_holdings_normalized.quantity_norm_for_valuation
-                        end                                       as actual_value
+                        end as actual_value
              from {{ ref('profile_holdings_normalized') }}
                       left join {{ ref('ticker_realtime_metrics') }} using (symbol)
          ),
@@ -68,7 +64,7 @@ with plaid_holdings as
                                select portfolio_expanded_transactions.profile_id,
                                       holding_id_v2,
                                       datetime,
-                                      sign(quantity_norm)                                                   as quantity_sign,
+                                      sign(quantity_norm)                                                      as quantity_sign,
                                       sum(quantity_norm)
                                       over (partition by holding_id_v2 order by sign(quantity_norm), datetime) as cumsum
                                from {{ ref('portfolio_expanded_transactions') }}
