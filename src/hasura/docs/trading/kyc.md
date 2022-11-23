@@ -524,7 +524,7 @@ mutation KycSendForm($profile_id: Int!) {
 mutation get_pre_signed_upload_form (
     $profile_id: Int!
     $upload_type: String! # must be "kyc"
-    $content_type: String!
+    $content_type: String! # file mime type
 ) {
   get_pre_signed_upload_form(
     profile_id: $profile_id
@@ -537,6 +537,7 @@ mutation get_pre_signed_upload_form (
   }
 }
 ```
+Note: The maximum file size for a document is 10MB.
 
 ### Add KYC uploaded Document 
 ```graphql

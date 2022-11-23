@@ -1,22 +1,22 @@
-### Check whether profile has linked plaid accounts
-
-```graphql
-{
-    app_profiles {
-        profile_plaid_access_tokens(where: {purpose: {_eq: "portfolio"}}) {
-            id
-        }
-    }
-}
-```
-
 ### Create Link Token
-
+Same query as it is for connecting a portfolio account. For Portfolio purposes the purpose must be set to `trading` 
 ```graphql
-{
-    create_plaid_link_token(profile_id: 2, redirect_uri: "https://app.gainy.application.ios"){
-        link_token
-    }
+query CreatePlaidLinkToken(
+    $profile_id: Int!
+    $redirect_uri: String!
+    $env: String
+    $access_token_id: Int
+    $purpose: String
+) {
+  create_plaid_link_token(
+    profile_id: $profile_id
+    redirect_uri: $redirect_uri
+    env: $env
+    access_token_id: $access_token_id
+    purpose: $purpose
+  ){
+    link_token
+  }
 }
 ```
 
@@ -34,25 +34,10 @@
 
 ### Reauth flow
 
-The app needs to launch the reauth flow when the access token's `needs_reauth_since` field is not null:
-```graphql
-{
-  app_profile_plaid_access_tokens(where: {purpose: {_eq: "portfolio"}}) { needs_reauth_since }
-}
-```
+The app needs to launch the reauth flow when the access token's `needs_reauth_since` field is not null.
+Then you need to pass `access_token_id` along with other fields to the `create_plaid_link_token` and `link_plaid_account` endpoints. 
 
-Then you need to pass `access_token_id` along with other fields to the `create_plaid_link_token` and `link_plaid_account` endpoints: 
-```graphql
-{
-    create_plaid_link_token(
-        profile_id: 2, 
-        redirect_uri: "https://app.gainy.application.ios",
-        access_token_id: 1
-    ){
-        link_token
-    }
-}
-```
+
 ```graphql
 {
     link_plaid_account(
@@ -83,6 +68,7 @@ periods: 1d, 1w, 1m, 3m, 1y, 5y, all
 query GetPortfolioChart(
     $profileId: Int!,
     $periods: [String]!,
+    $broker_ids: [String],
     $interestIds: [Int],
     $categoryIds: [Int],
     $lttOnly: Boolean,
@@ -91,6 +77,7 @@ query GetPortfolioChart(
     get_portfolio_chart(
         profile_id: $profileId,
         periods: $periods,
+        broker_ids: $broker_ids,
         interest_ids: $interestIds,
         category_ids: $categoryIds,
         ltt_only: $lttOnly,
@@ -105,6 +92,7 @@ query GetPortfolioChart(
     }
     get_portfolio_chart_previous_period_close(
         profile_id: $profileId,
+        broker_ids: $broker_ids,
         interest_ids: $interestIds,
         category_ids: $categoryIds,
         ltt_only: $lttOnly,
@@ -127,11 +115,11 @@ entity_type = ticker | category | interest | security_type
 ```graphql
 query GetPortfolioPieChart(
     $profileId: Int!,
-    $accessTokenIds: [Int]
+    $broker_ids: [String]
 ) {
     get_portfolio_piechart(
         profile_id: $profileId,
-        access_token_ids: $accessTokenIds
+        broker_ids: $broker_ids
     ) {
         weight
         entity_type
@@ -148,28 +136,6 @@ query GetPortfolioPieChart(
 
 ```GraphQL
 {
-    # app_profile_holdings(where: {holding_details: {ticker: {ticker_interests: {interest_id: {_in: [5]}}}}})
-    # app_profile_holdings(where: {holding_details: {ticker: {ticker_categories: {category_id: {_in: []}}}}}) 
-    # app_profile_holdings(where: {holding_details: {security_type: {_in: ["equity"]}}})
-    # app_profile_holdings(where: {holding_details: {ltt_quantity_total: {_gt: 0}}})
-    
-    # broker options:
-    app_profile_plaid_access_tokens(where: {purpose: {_eq: "portfolio"}}) { id }
-
-    # interests options:
-    interests(where: {enabled: {_eq: "1"}}, order_by: {sort_order: asc}) {
-        id
-        name
-        icon_url
-    }
-    
-    # categories options:
-    categories {
-        id
-        name
-        icon_url
-    }
-
     # security_type options:
     #    cash: Cash, currency, and money market funds
     #    derivative: Options, warrants, and other derivative instruments
