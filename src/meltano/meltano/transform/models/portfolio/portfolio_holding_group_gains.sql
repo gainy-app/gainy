@@ -1,6 +1,6 @@
 {{
   config(
-    materialized = "table",
+    materialized = "incremental",
     unique_key = "holding_group_id",
     tags = ["realtime"],
     post_hook=[
@@ -82,4 +82,3 @@ select holding_groups.*,
        (actual_value / (1e-9 + sum(actual_value) over (partition by profile_id)))::double precision as value_to_portfolio_value
 from holding_groups
          join {{ ref('profile_holding_groups') }} on profile_holding_groups.id = holding_group_id
-
