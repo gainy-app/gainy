@@ -1,10 +1,8 @@
 {{
   config(
-    materialized = "incremental",
-    unique_key = "id",
+    materialized = "table",
     post_hook=[
       pk('symbol, date'),
-      index('id', true),
     ]
   )
 }}
@@ -22,7 +20,6 @@ with expanded as (
 )
 select expanded.symbol,
        expanded.key::date                              as date,
-       (expanded.symbol || '_' || expanded.key)        as id,
        (expanded.value ->> 'currency')::text           as currency,
        (expanded.value ->> 'epsActual')::numeric       as eps_actual,
        (expanded.value ->> 'reportDate')::date         as report_date,
@@ -32,15 +29,4 @@ select expanded.symbol,
        (expanded.value ->> 'beforeAfterMarket')::text  as before_after_market,
        expanded.updated_at
 from expanded
-{% if is_incremental() %}
-         left join {{ this }} old_data
-                   on old_data.symbol = expanded.symbol
-                       and old_data.date = expanded.key::date
-{% endif %}
-
 where key != '0000-00-00'
-
-{% if is_incremental() %}
-  and old_data.symbol is null
-   or expanded.updated_at > old_data.updated_at
-{% endif %}

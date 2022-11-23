@@ -1,7 +1,13 @@
 {{
   config(
-    materialized = "view",
-    tags = ["view"],
+    materialized = "incremental",
+    unique_key = "holding_group_id",
+    tags = ["realtime"],
+    post_hook=[
+      pk('holding_group_id'),
+      'create index if not exists "profile_id__ticker_symbol" ON {{ this }} (profile_id, ticker_symbol)',
+      'create index if not exists "profile_id__collection_id" ON {{ this }} (profile_id, collection_id)',
+    ]
   )
 }}
 
