@@ -1,7 +1,12 @@
 {{
   config(
-    materialized = "view",
-    tags = ["view"],
+    materialized = "table",
+    unique_key = "holding_id_v2",
+    tags = ["realtime"],
+    post_hook=[
+      index('holding_id_v2', true),
+      index('ticker_symbol'),
+    ]
   )
 }}
 

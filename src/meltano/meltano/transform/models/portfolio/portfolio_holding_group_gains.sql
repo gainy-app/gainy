@@ -1,7 +1,13 @@
 {{
   config(
-    materialized = "view",
-    tags = ["view"],
+    materialized = "table",
+    unique_key = "holding_group_id",
+    tags = ["realtime"],
+    post_hook=[
+      pk('holding_group_id'),
+      'create index if not exists "profile_id__ticker_symbol" ON {{ this }} (profile_id, ticker_symbol)',
+      'create index if not exists "profile_id__collection_id" ON {{ this }} (profile_id, collection_id)',
+    ]
   )
 }}
 
@@ -76,3 +82,4 @@ select holding_groups.*,
        (actual_value / (1e-9 + sum(actual_value) over (partition by profile_id)))::double precision as value_to_portfolio_value
 from holding_groups
          join {{ ref('profile_holding_groups') }} on profile_holding_groups.id = holding_group_id
+
