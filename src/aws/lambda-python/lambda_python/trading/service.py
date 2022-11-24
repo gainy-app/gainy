@@ -106,8 +106,6 @@ class TradingService(GainyTradingService):
 
         repository = self.trading_repository
         repository.delete(funding_account)
-        repository.delete_by(PlaidAccessToken,
-                             {"id": funding_account.plaid_access_token_id})
 
     def create_money_flow(self, profile_id: int, amount: Decimal,
                           trading_account: TradingAccount,

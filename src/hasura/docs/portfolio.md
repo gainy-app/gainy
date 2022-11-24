@@ -1,3 +1,17 @@
+### Check whether profile has linked plaid accounts
+
+```graphql
+query GetPlaidAccessTokens($profile_id: Int!) {
+  app_profile_plaid_access_tokens(where: {profile_id: {_eq: $profile_id}, purpose: {_eq: "portfolio"}}) {
+    id
+    institution {
+      id
+      name
+    }
+  }
+}
+```
+
 ### Create Link Token
 Same query as it is for connecting a portfolio account. For Portfolio purposes the purpose must be set to `trading` 
 ```graphql
