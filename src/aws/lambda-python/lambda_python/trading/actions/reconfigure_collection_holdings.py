@@ -25,13 +25,15 @@ class TradingReconfigureCollectionHoldings(HasuraAction):
                 collection_id)
         weights = {i["symbol"]: Decimal(i["weight"]) for i in weights}
 
-        trading_account_id = context_container.trading_repository.get_trading_account(profile_id).id
+        trading_account_id = context_container.trading_repository.get_trading_account(
+            profile_id).id
 
         trading_service = context_container.trading_service
 
         try:
             trading_collection_version = trading_service.reconfigure_collection_holdings(
-                profile_id, collection_id, trading_account_id, weights, target_amount_delta)
+                profile_id, collection_id, trading_account_id, weights,
+                target_amount_delta)
         except InsufficientFundsException as e:
             raise BadRequestException(str(e))
 

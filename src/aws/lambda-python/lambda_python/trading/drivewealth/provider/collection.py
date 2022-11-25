@@ -21,13 +21,16 @@ class DriveWealthProviderCollection(GainyDriveWealthProvider):
         if not fund:
             raise EntityNotFoundException(DriveWealthFund)
 
-        trading_collection_version: TradingCollectionVersion = self.repository.find_one(TradingCollectionVersion, {"id": fund.trading_collection_version_id})
+        trading_collection_version: TradingCollectionVersion = self.repository.find_one(
+            TradingCollectionVersion,
+            {"id": fund.trading_collection_version_id})
         if not fund:
             raise EntityNotFoundException(TradingCollectionVersion)
         trading_account_id = trading_collection_version.trading_account_id
 
         repository = self.repository
-        portfolio = repository.get_profile_portfolio(fund.profile_id, trading_account_id)
+        portfolio = repository.get_profile_portfolio(fund.profile_id,
+                                                     trading_account_id)
         if not portfolio:
             raise EntityNotFoundException(DriveWealthPortfolio)
 
@@ -53,7 +56,8 @@ class DriveWealthProviderCollection(GainyDriveWealthProvider):
 
     def _on_money_transfer(self, profile_id: int, trading_account_id: int):
         repository = self.repository
-        portfolio = repository.get_profile_portfolio(profile_id, trading_account_id)
+        portfolio = repository.get_profile_portfolio(profile_id,
+                                                     trading_account_id)
         if not portfolio:
             return
 

@@ -38,7 +38,8 @@ class TradingRepository(GainyTradingRepository):
             return cursor.fetchall()
 
     def get_trading_account(self, profile_id: int) -> TradingAccount:
-        trading_account = self.find_one(TradingAccount, {"profile_id": profile_id})
+        trading_account = self.find_one(TradingAccount,
+                                        {"profile_id": profile_id})
 
         if not trading_account:
             raise NotFoundException()
