@@ -5,8 +5,48 @@ with latest_historical_prices as
              from raw_data.eod_historical_prices
              order by code, date desc
          ),
-    with_random as
-        (
+     exchange_schedule as
+         (
+             with exchanges as
+                      (select *
+                       from raw_data.exchanges
+                       where _sdc_extracted_at >
+                             (select max(_sdc_extracted_at) from raw_data.exchanges) - interval '1 minute'),
+                  schedule as
+                      (
+                          SELECT CONCAT(dd::date, '_', exchanges.name)::varchar as id,
+                                 dd::date                                       as date,
+                                 exchanges.name::varchar                        as exchange_name,
+                                 exchanges.country_name::varchar                as country_name,
+                                 coalesce(
+                                         polygon_marketstatus_upcoming.open::timestamptz,
+                                         (dd::date + exchanges.open_at::time) at time zone exchanges.timezone
+                                     )                                          as open_at,
+                                 coalesce(
+                                         polygon_marketstatus_upcoming.close::timestamptz,
+                                         (dd::date + exchanges.close_at::time) at time zone exchanges.timezone
+                                     )                                          as close_at
+                          FROM generate_series(now() - interval '1 month 1 week', now() + interval '1 week', interval '1 day') dd
+                                   join exchanges on true
+                                   left join raw_data.polygon_marketstatus_upcoming
+                                             ON polygon_marketstatus_upcoming.exchange = exchanges.name
+                                                 and polygon_marketstatus_upcoming.date::date = dd::date
+                          where extract (isodow from dd) < 6
+                            and (polygon_marketstatus_upcoming.status is null
+                             or polygon_marketstatus_upcoming.status != 'closed')
+                      )
+             select distinct on (
+                 date, country_name
+                 ) (date || '_' || country_name)::varchar as id,
+                   date,
+                   null::varchar                          as exchange_name,
+                   country_name,
+                   open_at,
+                   close_at
+             from schedule
+         ),
+     with_random as
+         (
               select latest_historical_prices.code,
                      random() as r1,
                      random() as r2,
@@ -19,6 +59,9 @@ with latest_historical_prices as
                      latest_historical_prices.volume
               FROM generate_series((select min(date) from latest_historical_prices)::date + interval '1 day', now() - interval '1 day', interval '1 day') dd
                        join latest_historical_prices on true
+                       join exchange_schedule
+                            on exchange_schedule.country_name = 'USA'
+                                and exchange_schedule.date = dd::date
               where extract(isodow from dd) < 6
      )
 select code,
