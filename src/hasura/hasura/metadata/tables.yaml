@@ -1072,15 +1072,16 @@
     - role: user
       permission:
         columns:
-          - id
-          - profile_id
-          - name
+          - account_no
           - cash_available_for_trade
           - cash_available_for_withdrawal
           - cash_balance
           - created_at
-          - updated_at
           - equity_value
+          - id
+          - name
+          - profile_id
+          - updated_at
         filter:
           profile:
             user_id:
@@ -1154,6 +1155,9 @@
     - name: profile
       using:
         foreign_key_constraint_on: profile_id
+    - name: trading_account
+      using:
+        foreign_key_constraint_on: trading_account_id
   select_permissions:
     - role: user
       permission:
@@ -2807,12 +2811,16 @@
     - name: trading_collection_version
       using:
         foreign_key_constraint_on: trading_collection_version_id
+    - name: trading_money_flow
+      using:
+        foreign_key_constraint_on: money_flow_id
   select_permissions:
     - role: user
       permission:
         columns:
           - amount
           - datetime
+          - money_flow_id
           - name
           - profile_id
           - tags

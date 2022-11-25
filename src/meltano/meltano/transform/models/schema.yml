@@ -2399,6 +2399,14 @@ models:
         tests:
           - type:
               type: 'integer'
+      - name: trading_collection_version_id
+        tests:
+          - type:
+              type: 'integer'
+      - name: money_flow_id
+        tests:
+          - type:
+              type: 'integer'
       - name: type
         tests:
           - type:

@@ -15,7 +15,7 @@ query GetTradingHistory($profile_id: Int!, $types: [String!]!) {
     name
     tags
     type
-    trading_collection_version {
+    trading_collection_version { # for TTF orders
       trading_account{
         account_no
       }
@@ -24,9 +24,16 @@ query GetTradingHistory($profile_id: Int!, $types: [String!]!) {
       target_amount_delta
       weights
     }
+    trading_money_flow { # for deposits / withdrawals
+      trading_account{
+        account_no
+      }
+      created_at
+      status # ["PENDING", "SUCCESS", "FAILED"]
+      amount
+    }
   }
 }
-
 ```
 Available types: `["deposit", "withdraw", "trading_fee", "ttf_transaction"]`
 
