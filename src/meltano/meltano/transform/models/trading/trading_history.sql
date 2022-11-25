@@ -6,6 +6,7 @@
     post_hook=[
       pk('uniq_id'),
       fk('profile_id', 'app', 'profiles', 'id'),
+      fk('trading_collection_version_id', 'app', 'trading_collection_versions', 'id'),
       'create index if not exists "th_profile_id_datetime_type" ON {{ this }} (profile_id, datetime, type)',
     ]
   )

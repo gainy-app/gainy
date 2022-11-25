@@ -15,8 +15,18 @@ query GetTradingHistory($profile_id: Int!, $types: [String!]!) {
     name
     tags
     type
+    trading_collection_version {
+      trading_account{
+        account_no
+      }
+      created_at
+      status # ["PENDING", "PENDING_EXECUTION", "EXECUTED_FULLY", "CANCELLED", "FAILED"]
+      target_amount_delta
+      weights
+    }
   }
 }
+
 ```
 Available types: `["deposit", "withdraw", "trading_fee", "ttf_transaction"]`
 

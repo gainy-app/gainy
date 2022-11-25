@@ -13,27 +13,10 @@ def test_deposit():
         load_query('trading/queries', 'TradingDepositFunds'),
         {
             "profile_id": profile_id,
-            # "trading_account_id": 1,
             "amount": 10000,
             "funding_account_id": 1
         },
         profile_user_id)['data']['trading_deposit_funds']
-
-    assert "trading_money_flow_id" in data
-    assert data["trading_money_flow_id"] is not None
-
-
-@pytest.mark.drivewealth
-def test_withdraw():
-    data = make_graphql_request(
-        load_query('trading/queries', 'TradingWithdrawFunds'),
-        {
-            "profile_id": profile_id,
-            # "trading_account_id": 1,
-            "amount": 10000,
-            "funding_account_id": 1
-        },
-        profile_user_id)['data']['trading_withdraw_funds']
 
     assert "trading_money_flow_id" in data
     assert data["trading_money_flow_id"] is not None
