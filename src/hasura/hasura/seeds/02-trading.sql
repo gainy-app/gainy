@@ -71,8 +71,8 @@ where profile_id = 2
 
 
 INSERT INTO app.trading_accounts (id, profile_id, name, cash_available_for_trade, cash_available_for_withdrawal,
-                                  cash_balance)
-VALUES (1, 2, 'Mikhail''s Robo Advisor Managed Account', 0, 0, 0)
+                                  cash_balance, account_no)
+VALUES (1, 2, 'Mikhail''s Robo Advisor Managed Account', 0, 0, 0, 'GYEK000001')
 on conflict do nothing;
 ALTER SEQUENCE app.trading_accounts_id_seq RESTART WITH 2;
 
@@ -100,13 +100,13 @@ on conflict do nothing;
 insert into app.drivewealth_portfolio_statuses (drivewealth_portfolio_id, cash_value, cash_actual_weight, data)
 values  ('portfolio_d7dd65da-96aa-4009-a935-4c2ea5e21130', 29758.9300000000002910383045673370361328125, 0.993700000000000027711166694643907248973846435546875, '{"id": "portfolio_d7dd65da-96aa-4009-a935-4c2ea5e21130", "equity": 29946.88, "totalDrift": 0.0001, "rebalanceRequired": false, "nextPortfolioRebalance": "2022-10-18T13:30:00.000Z", "lastPortfolioRebalance": "2022-10-17T13:32:17.053Z", "holdings": [{"id": "CASH", "type": "CASH_RESERVE", "name": null, "target": 0.9938, "actual": 0.9937, "value": 29758.93, "rebalanceRequired": false, "holdings": null}, {"id": "fund_3dc895e3-a923-4c37-8a91-eac748120215", "type": "FUND", "name": "Gainy bf98c335-57ad-4337-ae9f-ed1fcfb447af''s fund for collection 89", "target": 0.006, "actual": 0.0062, "value": 187.95, "rebalanceRequired": false, "holdings": [{"instrumentID": "a67422af-8504-43df-9e63-7361eb0bd99e", "symbol": "AAPL", "target": 1, "actual": 1.0, "openQty": 1.31979237, "value": 187.95}]}]}');
 
-insert into app.trading_collection_versions (id, profile_id, collection_id, status, target_amount_delta, weights, executed_at)
-values  (1, 2, 83, 'EXECUTED_FULLY', 200, '{"AAPL": "1"}', '2022-10-17 13:29:20.422333 +00:00'),
-        (2, 2, 83, null, -1000, '{"AAPL": "1"}', null),
-        (3, 2, 83, null, -1000, '{"AAPL": "1"}', null),
-        (4, 2, 83, null, -1000, '{"AAPL": "1"}', null),
-        (5, 2, 83, 'EXECUTED_FULLY', -1000, '{"AAPL": "1"}', '2022-10-17 13:29:21.655114 +00:00'),
-        (6, 2, 83, 'EXECUTED_FULLY', 1000, '{"AAPL": "1"}', '2022-09-14 13:36:42.758000 +00:00')
+insert into app.trading_collection_versions (id, profile_id, collection_id, status, target_amount_delta, weights, executed_at, trading_account_id)
+values  (1, 2, 83, 'EXECUTED_FULLY', 200, '{"AAPL": "1"}', '2022-10-17 13:29:20.422333 +00:00', 1),
+        (2, 2, 83, null, -1000, '{"AAPL": "1"}', null, 1),
+        (3, 2, 83, null, -1000, '{"AAPL": "1"}', null, 1),
+        (4, 2, 83, null, -1000, '{"AAPL": "1"}', null, 1),
+        (5, 2, 83, 'EXECUTED_FULLY', -1000, '{"AAPL": "1"}', '2022-10-17 13:29:21.655114 +00:00', 1),
+        (6, 2, 83, 'EXECUTED_FULLY', 1000, '{"AAPL": "1"}', '2022-09-14 13:36:42.758000 +00:00', 1)
 on conflict do nothing;
 ALTER SEQUENCE app.trading_collection_versions_id_seq RESTART WITH 7;
 

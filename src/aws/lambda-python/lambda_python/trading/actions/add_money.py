@@ -12,15 +12,12 @@ class TradingAddMoney(HasuraAction):
         trading_service = context_container.trading_service
         trading_repository = context_container.trading_repository
 
-        if input_params["trading_account_id"]:
+        if "trading_account_id" in input_params:
             trading_account_id = input_params["trading_account_id"]
-        elif input_params["profile_id"]:
+        elif "profile_id" in input_params:
             profile_id = input_params["profile_id"]
-            trading_account = trading_repository.get_trading_account(
-                profile_id)
-            if not trading_account:
-                raise NotFoundException()
-            trading_account_id = trading_account.id
+            trading_account_id = trading_repository.get_trading_account(
+                profile_id).id
         else:
             raise BadRequestException(
                 "Either profile_id or trading_account_id must be specified")

@@ -6,6 +6,8 @@
     post_hook=[
       pk('uniq_id'),
       fk('profile_id', 'app', 'profiles', 'id'),
+      fk('trading_collection_version_id', 'app', 'trading_collection_versions', 'id'),
+      fk('money_flow_id', 'app', 'trading_money_flow', 'id'),
       'create index if not exists "th_profile_id_datetime_type" ON {{ this }} (profile_id, datetime, type)',
     ]
   )
@@ -18,6 +20,7 @@ with data as
                     case when amount > 0 then 'deposit' else 'withdraw' end as type,
                     trading_money_flow.id,
                     null::int                                               as trading_collection_version_id,
+                    trading_money_flow.id                                   as money_flow_id,
                     case when amount > 0 then 'Deposit' else 'Withdraw' end as name,
                     created_at                                              as datetime,
                     amount,
@@ -34,6 +37,7 @@ with data as
                     'trading_fee' as type,
                     invoices.id,
                     null::int     as trading_collection_version_id,
+                    null::int     as money_flow_id,
                     'Service fee' as name,
                     created_at    as datetime,
                     amount,
@@ -49,6 +53,7 @@ with data as
                     'ttf_transaction'                               as type,
                     trading_collection_versions.id,
                     trading_collection_versions.id                  as trading_collection_version_id,
+                    null::int     as money_flow_id,
                     collections.name,
                     created_at                                      as datetime,
                     trading_collection_versions.target_amount_delta as amount,
@@ -64,6 +69,7 @@ with data as
          )
 select data.profile_id,
        data.trading_collection_version_id,
+       data.money_flow_id,
        data.type,
        data.name,
        data.datetime,

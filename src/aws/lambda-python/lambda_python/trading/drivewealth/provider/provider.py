@@ -84,7 +84,7 @@ class DriveWealthProvider(DriveWealthProviderKYC,
         self._update_money_flow_status(entity, money_flow)
         self.repository.persist(entity)
 
-        self._on_money_transfer(money_flow.profile_id)
+        self._on_money_transfer(money_flow.profile_id, trading_account_id)
 
         return entity
 
