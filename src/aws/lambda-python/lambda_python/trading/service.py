@@ -106,8 +106,6 @@ class TradingService(GainyTradingService):
 
         repository = self.trading_repository
         repository.delete(funding_account)
-        repository.delete_by(PlaidAccessToken,
-                             {"id": funding_account.plaid_access_token_id})
 
     def create_money_flow(self, profile_id: int, amount: Decimal,
                           trading_account: TradingAccount,
@@ -129,6 +127,7 @@ class TradingService(GainyTradingService):
 
     def reconfigure_collection_holdings(self, profile_id: int,
                                         collection_id: int,
+                                        trading_account_id: int,
                                         weights: Dict[str, Decimal],
                                         target_amount_delta: Decimal):
 
@@ -139,6 +138,7 @@ class TradingService(GainyTradingService):
         collection_version.collection_id = collection_id
         collection_version.weights = weights
         collection_version.target_amount_delta = target_amount_delta
+        collection_version.trading_account_id = trading_account_id
 
         self.trading_repository.persist(collection_version)
 

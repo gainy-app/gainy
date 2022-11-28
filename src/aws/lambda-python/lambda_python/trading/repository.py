@@ -1,6 +1,8 @@
 from typing import Any, Dict, List
 
 from psycopg2.extras import RealDictCursor
+
+from gainy.exceptions import NotFoundException
 from gainy.trading.repository import TradingRepository as GainyTradingRepository
 from gainy.trading.models import TradingAccount
 
@@ -36,4 +38,10 @@ class TradingRepository(GainyTradingRepository):
             return cursor.fetchall()
 
     def get_trading_account(self, profile_id: int) -> TradingAccount:
-        return self.find_one(TradingAccount, {"profile_id": profile_id})
+        trading_account = self.find_one(TradingAccount,
+                                        {"profile_id": profile_id})
+
+        if not trading_account:
+            raise NotFoundException()
+
+        return trading_account

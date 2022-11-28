@@ -1,13 +1,11 @@
 {{
   config(
-    materialized = "incremental",
+    materialized = "table",
     unique_key = "id",
     tags = ["realtime"],
     post_hook=[
       pk('id'),
       index('holding_group_id'),
-      'create index if not exists "holding_group_id" ON {{ this }} (holding_group_id)',
-      'delete from {{ this }} where updated_at < (select max(updated_at) from {{ this }} where is_realtime = false)',
     ]
   )
 }}
@@ -158,7 +156,3 @@ select distinct on (
        coalesce(all_rows.interest_id, 0))                                                                     as id,
        {{ var('realtime') }}                                                                                  as is_realtime
 from all_rows
-{% if is_incremental() and var('realtime') %}
-         left join {{ this }} old_data using (holding_group_id)
-where old_data.holding_group_id is null
-{% endif %}

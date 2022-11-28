@@ -1,10 +1,10 @@
 {{
   config(
-    materialized = "incremental",
+    materialized = "table",
     unique_key = "holding_id_v2",
     tags = ["realtime"],
     post_hook=[
-      index('holding_id_v2', true),
+      pk('holding_id_v2'),
       index('ticker_symbol'),
     ]
   )

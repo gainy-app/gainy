@@ -44,6 +44,8 @@ def _mock_get_instrument(monkeypatch, service):
 def test_get_actual_collection_data(monkeypatch):
     profile_id = 1
     collection_id = 2
+    trading_collection_version_id = 3
+    trading_account_id = 3
 
     user = DriveWealthUser()
     monkeypatch.setattr(user, "ref_id", USER_ID)
@@ -57,13 +59,20 @@ def test_get_actual_collection_data(monkeypatch):
     fund = DriveWealthFund()
     monkeypatch.setattr(fund, "ref_id", FUND1_ID)
     monkeypatch.setattr(fund, "profile_id", profile_id)
+    monkeypatch.setattr(fund, "trading_collection_version_id",
+                        trading_collection_version_id)
+
+    trading_collection_version = TradingCollectionVersion()
+    monkeypatch.setattr(trading_collection_version, "trading_account_id",
+                        trading_account_id)
 
     def mock_get_user(_profile_id):
         assert _profile_id == profile_id
         return user
 
-    def mock_get_profile_portfolio(_profile_id):
+    def mock_get_profile_portfolio(_profile_id, _trading_account_id):
         assert _profile_id == profile_id
+        assert _trading_account_id == trading_account_id
         return portfolio
 
     def mock_get_profile_fund(_profile_id, _collection_id):
@@ -78,6 +87,11 @@ def test_get_actual_collection_data(monkeypatch):
                         mock_get_profile_portfolio)
     monkeypatch.setattr(drivewealth_repository, "get_profile_fund",
                         mock_get_profile_fund)
+    monkeypatch.setattr(
+        drivewealth_repository, "find_one",
+        mock_find([(TradingCollectionVersion, {
+            "id": trading_collection_version_id
+        }, trading_collection_version)]))
 
     def mock_sync_portfolio_status(_portfolio):
         assert _portfolio == portfolio

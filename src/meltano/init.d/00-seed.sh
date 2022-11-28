@@ -11,7 +11,7 @@ $psql_auth -c "GRANT SELECT ON ALL TABLES IN SCHEMA airflow TO datadog;"
 $psql_auth -c "create user ${PG_INTERNAL_SYNC_USERNAME} with password '${PG_INTERNAL_SYNC_PASSWORD}';" || $psql_auth -c "alter user ${PG_INTERNAL_SYNC_USERNAME} with password '${PG_INTERNAL_SYNC_PASSWORD}';"
 
 echo 'Importing seeds'
-find seed seed/$ENV -maxdepth 1 -iname '*.sql' | sort | while read -r i; do
+find seed -maxdepth 1 -iname '*.sql' | sort | while read -r i; do
   $psql_auth -P pager -f "$i"
 done
 
@@ -25,7 +25,11 @@ $psql_auth -c "GRANT USAGE ON SCHEMA $DBT_TARGET_SCHEMA TO datadog;"
 
 if [ $($psql_auth -c "select count(*) from deployment.public_schemas where schema_name = '$DBT_TARGET_SCHEMA' and deployed_at is not null" -t --csv) == "0" ]; then
   echo 'Running csv-to-postgres'
-  if meltano schedule run csv-to-postgres --force; then
+  meltano schedule run csv-to-postgres --force --transform skip
+  find seed/$ENV -maxdepth 1 -iname '*.sql' | sort | while read -r i; do
+    $psql_auth -P pager -f "$i"
+  done
+  if meltano invoke dbt run --full-refresh; then
     $psql_auth -c "update deployment.public_schemas set deployed_at = now() where schema_name = '$DBT_TARGET_SCHEMA';"
   else
     echo 'Failed to seed public schema, exiting'
