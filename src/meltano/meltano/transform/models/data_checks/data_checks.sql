@@ -54,3 +54,11 @@ select symbol,
        period,
        message
 from {{ ref('data_checks_collection_historical_prices') }}
+
+union all
+
+select symbol,
+       code,
+       period,
+       message
+from {{ ref('data_checks_drivewealth') }}

@@ -4,6 +4,14 @@
 3. [Get actual TTF holding weights and amount](#get-actual-ttf-holding-weights-and-amount)
 4. [Get actual TTF amount and history](#get-actual-ttf-amount-and-history)
 
+
+### Trading mechanism
+- All the requests are in PENDING state until 9.30am EST
+- At 9.30 am they're sent to DW, status changes to PENDING_EXECUTION
+- At 10.00 they're executed by DW
+- From 10 to 11 we're getting events from DW _and updating TCS statuses_
+- At 17 we download all accounts _and portfolios information_
+
 ### Get recommended TTF weights
 ```graphql
 query GetCollectionTickerActualWeights($collection_id: Int!){
