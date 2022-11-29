@@ -46,7 +46,7 @@ query TradingGetProfileStatus($profile_id: Int!) {
     funding_account_connected
     account_no
     kyc_done
-    kyc_status
+    kyc_status # NOT_READY, READY, PROCESSING, APPROVED, INFO_REQUIRED, DOC_REQUIRED, MANUAL_REVIEW, DENIED
     kyc_message
     kyc_error_messages
     withdrawable_cash

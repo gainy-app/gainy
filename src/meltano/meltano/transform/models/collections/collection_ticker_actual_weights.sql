@@ -13,19 +13,21 @@
 
 select t.*
 from (
-         select distinct on (
-             collection_uniq_id, symbol
-             ) profile_id,
-               collection_id,
-               collection_uniq_id,
-               symbol,
-               date,
-               weight,
-               price,
-               collection_uniq_id || '_' || symbol as id,
-               updated_at
+         select profile_id,
+                collection_id,
+                collection_uniq_id,
+                symbol,
+                date,
+                weight,
+                price,
+                collection_uniq_id || '_' || symbol as id,
+                updated_at
          from {{ ref('collection_ticker_weights') }}
-         order by collection_uniq_id, symbol, date desc
+                  join (
+                           select collection_uniq_id, max(date) as date
+                           from {{ ref('collection_ticker_weights') }}
+                           group by collection_uniq_id
+                       ) t using (collection_uniq_id, date)
      ) t
 {% if is_incremental() %}
          left join {{ this }} old_data using (collection_uniq_id, symbol)
