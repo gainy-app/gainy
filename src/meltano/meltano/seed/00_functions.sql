@@ -73,3 +73,10 @@ exception when others then
     return false;
 end;
 $$ language plpgsql;
+
+-- also in https://github.com/gainy-app/gainy-compute/blob/main/gainy/trading/drivewealth/__init__.py
+-- also in https://github.com/gainy-app/gainy-compute/blob/main/fixtures/functions.sql
+create or replace function normalize_drivewealth_symbol(s varchar) returns varchar as
+$$
+select regexp_replace(regexp_replace($1, '\.([AB])$', '-\1'), '\.(.*)$', '');
+$$ language sql;

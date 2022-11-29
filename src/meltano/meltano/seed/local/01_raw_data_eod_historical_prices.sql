@@ -26,7 +26,7 @@ with latest_historical_prices as
                                          polygon_marketstatus_upcoming.close::timestamptz,
                                          (dd::date + exchanges.close_at::time) at time zone exchanges.timezone
                                      )                                          as close_at
-                          FROM generate_series(now() - interval '1 month 1 week', now() + interval '1 week', interval '1 day') dd
+                          FROM generate_series(now() - interval '1 year 1 week', now() + interval '1 week', interval '1 day') dd
                                    join exchanges on true
                                    left join raw_data.polygon_marketstatus_upcoming
                                              ON polygon_marketstatus_upcoming.exchange = exchanges.name
