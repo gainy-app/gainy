@@ -97,6 +97,7 @@ module "lambda" {
   twilio_messaging_service_id    = var.twilio_messaging_service_id
   twilio_account_sid             = var.twilio_account_sid
   twilio_auth_token              = var.twilio_auth_token
+  sendgrid_api_key               = var.sendgrid_api_key
 }
 
 module "ecs" {

@@ -31,7 +31,7 @@ def test_get_actual_collection_holdings(monkeypatch):
         assert _collection_id == collection_id
         return collection_status
 
-    drivewealth_provider = DriveWealthProvider(None, None, None)
+    drivewealth_provider = DriveWealthProvider(None, None, None, None)
     monkeypatch.setattr(drivewealth_provider, "get_actual_collection_data",
                         mock_get_actual_collection_data)
 
