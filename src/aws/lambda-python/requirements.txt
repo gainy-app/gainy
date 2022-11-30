@@ -14,3 +14,4 @@ boto3>=1.24.58,<1.25
 googlemaps==4.6.0
 twilio<8
 py3-validate-email==1.0.0
+sendgrid<7

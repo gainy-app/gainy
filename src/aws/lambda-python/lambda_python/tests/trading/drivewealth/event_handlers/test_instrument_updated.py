@@ -41,7 +41,7 @@ def test_not_exists(monkeypatch):
         mock_find([(DriveWealthInstrument, {
             "ref_id": instrument_id
         }, None)]))
-    provider = DriveWealthProvider(None, None, None)
+    provider = DriveWealthProvider(None, None, None, None)
 
     def mock_sync_instrument(ref_id):
         assert ref_id == instrument_id

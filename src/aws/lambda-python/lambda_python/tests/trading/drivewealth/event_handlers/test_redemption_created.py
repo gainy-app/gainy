@@ -6,7 +6,7 @@ from trading.drivewealth.repository import DriveWealthRepository
 
 
 def test(monkeypatch):
-    provider = DriveWealthProvider(None, None, None)
+    provider = DriveWealthProvider(None, None, None, None)
     handle_redemption_status_calls = []
     monkeypatch.setattr(provider, 'handle_redemption_status',
                         mock_record_calls(handle_redemption_status_calls))

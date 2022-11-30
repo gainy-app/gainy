@@ -36,7 +36,7 @@ def test(monkeypatch, type):
     persisted_objects = {}
     monkeypatch.setattr(repository, 'persist', mock_persist(persisted_objects))
 
-    provider = DriveWealthProvider(None, None, None)
+    provider = DriveWealthProvider(None, None, None, None)
     create_trading_statements_calls = []
     monkeypatch.setattr(provider, 'create_trading_statements',
                         mock_record_calls(create_trading_statements_calls))

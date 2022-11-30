@@ -3,8 +3,9 @@ from decimal import Decimal
 import pytest
 
 from gainy.data_access.models import BaseModel
-from gainy.tests.mocks.repository_mocks import mock_find, mock_persist, mock_noop
+from gainy.tests.mocks.repository_mocks import mock_find, mock_persist, mock_noop, mock_record_calls
 from gainy.trading.models import TradingMoneyFlowStatus
+from services.notification import NotificationService
 from tests.trading.drivewealth.api_mocks import mock_create_deposit, mock_create_redemption, mock_get_deposit
 from trading.models import TradingMoneyFlow, TradingStatement
 from trading.drivewealth.models import DriveWealthBankAccount, DriveWealthDeposit, DriveWealthRedemption, \
@@ -13,7 +14,7 @@ from trading.drivewealth.api import DriveWealthApi
 from trading.drivewealth.provider import DriveWealthProvider
 from trading.drivewealth.repository import DriveWealthRepository
 
-from gainy.trading.drivewealth.models import DriveWealthAccount
+from gainy.trading.drivewealth.models import DriveWealthAccount, DriveWealthInstrument, DriveWealthInstrumentStatus
 
 
 def get_test_transfer_money_amounts():
@@ -76,7 +77,7 @@ def test_transfer_money(monkeypatch, amount):
     monkeypatch.setattr(money_flow, "id", money_flow_id)
     monkeypatch.setattr(money_flow, "profile_id", profile_id)
 
-    service = DriveWealthProvider(drivewealth_repository, api, None)
+    service = DriveWealthProvider(drivewealth_repository, api, None, None)
     monkeypatch.setattr(service, "_on_money_transfer", mock_noop)
     entity = service.transfer_money(money_flow, amount, trading_account_id,
                                     funding_account_id)
@@ -129,7 +130,7 @@ def test_sync_deposit(monkeypatch):
         api, "get_deposit",
         mock_get_deposit(deposit_ref_id, account_ref_id, status=status))
 
-    service = DriveWealthProvider(drivewealth_repository, api, None)
+    service = DriveWealthProvider(drivewealth_repository, api, None, None)
     service.sync_deposit(deposit_ref_id=deposit_ref_id, fetch_info=True)
 
     assert deposit.__class__ in persisted_objects
@@ -177,7 +178,7 @@ def test_create_trading_statements(monkeypatch):
     monkeypatch.setattr(repository, "persist",
                         custom_mock_persist(persisted_objects))
 
-    provider = DriveWealthProvider(repository, None, None)
+    provider = DriveWealthProvider(repository, None, None, None)
     provider.create_trading_statements(entities, profile_id)
 
     assert entity1 in persisted_objects[DriveWealthStatement]
@@ -212,5 +213,36 @@ def test_download_statement(monkeypatch):
 
     monkeypatch.setattr(api, "get_statement_url", mock_get_statement_url)
 
-    provider = DriveWealthProvider(repository, api, None)
+    provider = DriveWealthProvider(repository, api, None, None)
     assert url == provider.download_statement(statement)
+
+
+def test_handle_instrument_status_change(monkeypatch):
+    symbol = "symbol"
+    status = DriveWealthInstrumentStatus.ACTIVE
+    new_status = "new_status"
+
+    instrument = DriveWealthInstrument()
+    monkeypatch.setattr(instrument, "status", status)
+    monkeypatch.setattr(instrument, "symbol", symbol)
+
+    repository = DriveWealthRepository(None)
+
+    def mock_symbol_is_in_collection(_symbol):
+        assert symbol == _symbol
+        return True
+
+    monkeypatch.setattr(repository, "symbol_is_in_collection",
+                        mock_symbol_is_in_collection)
+
+    notification_service = NotificationService(None)
+    calls = []
+    monkeypatch.setattr(notification_service,
+                        "notify_dw_instrument_status_changed",
+                        mock_record_calls(calls))
+
+    provider = DriveWealthProvider(repository, None, None,
+                                   notification_service)
+    provider.handle_instrument_status_change(instrument, new_status)
+
+    assert (symbol, status, new_status) in [args for args, kwargs in calls]

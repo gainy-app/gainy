@@ -21,7 +21,10 @@ class InstrumentUpdatedEventHandler(AbstractDriveWealthEventHandler):
             if "symbol" in data:
                 instrument.symbol = data["symbol"]
             if "status" in data:
+                self.provider.handle_instrument_status_change(
+                    instrument, data["status"])
                 instrument.status = data["status"]
+
             self.repo.persist(instrument)
         else:
             try:
