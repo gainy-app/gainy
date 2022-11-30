@@ -7,7 +7,7 @@ def test(monkeypatch):
     payment_id = "payment_id"
     sync_trading_account_called = False
 
-    provider = DriveWealthProvider(None, None, None)
+    provider = DriveWealthProvider(None, None, None, None)
 
     def mock_sync_deposit(deposit_ref_id, fetch_info):
         assert fetch_info

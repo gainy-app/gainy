@@ -26,3 +26,10 @@ class DriveWealthRepository(GainyDriveWealthRepository):
         self.persist(entity)
 
         return entity
+
+    def symbol_is_in_collection(self, symbol: str) -> bool:
+        with self.db_conn.cursor() as cursor:
+            cursor.execute(
+                'select exists(select collection_id from collection_ticker_actual_weights where symbol = %(symbol)s)',
+                {"symbol": symbol})
+            return cursor.fetchone()[0]
