@@ -2,7 +2,7 @@ import os
 from decimal import Decimal
 
 from gainy.data_access.repository import MAX_TRANSACTION_SIZE
-from gainy.exceptions import NotFoundException
+from gainy.exceptions import NotFoundException, EntityNotFoundException
 from gainy.trading.drivewealth.exceptions import DriveWealthApiException
 from portfolio.plaid import PlaidService
 from gainy.plaid.models import PlaidAccessToken
@@ -69,8 +69,13 @@ class DriveWealthProvider(DriveWealthProviderKYC,
                        trading_account_id: int, funding_account_id: int):
         trading_account = self.repository.find_one(
             DriveWealthAccount, {"trading_account_id": trading_account_id})
+        if not trading_account:
+            raise EntityNotFoundException(DriveWealthAccount)
+
         bank_account = self.repository.find_one(
             DriveWealthBankAccount, {"funding_account_id": funding_account_id})
+        if not bank_account:
+            raise EntityNotFoundException(DriveWealthBankAccount)
 
         if amount > 0:
             response = self.api.create_deposit(amount, trading_account,
