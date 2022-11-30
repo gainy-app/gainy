@@ -70,8 +70,8 @@ class ProfileKycStatus(BaseModel):
 
     def to_dict(self) -> dict:
         return {
-            **super().to_dict(),
-            "error_messages": json.dumps(self.error_messages)
+            **super().to_dict(), "error_messages":
+            json.dumps(self.error_messages)
         }
 
 
