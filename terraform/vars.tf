@@ -249,7 +249,7 @@ variable "plaid_env" {
   type = string
 }
 
-#################################### Twilio ####################################
+#################################### Twilio & SendGrid ####################################
 
 variable "twilio_verification_service_id" {
   type      = string
@@ -265,6 +265,10 @@ variable "twilio_account_sid" {
   sensitive = true
 }
 variable "twilio_auth_token" {
+  type      = string
+  sensitive = true
+}
+variable "sendgrid_api_key" {
   type      = string
   sensitive = true
 }

@@ -13,7 +13,7 @@ query GetTradingHistory($profile_id: Int!, $types: [String!]!) {
     amount
     datetime
     name
-    tags
+    tags # ["deposit", "withdraw", "pending", "error", "fee", "ttf", "buy", "sell", "cancelled"]
     type
     trading_collection_version { # for TTF orders
       trading_account{

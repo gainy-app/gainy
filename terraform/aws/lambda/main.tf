@@ -171,6 +171,9 @@ locals {
     TWILIO_MESSAGING_SERVICE_ID    = var.twilio_messaging_service_id
     TWILIO_ACCOUNT_SID             = var.twilio_account_sid
     TWILIO_AUTH_TOKEN              = var.twilio_auth_token
+    SENDGRID_API_KEY               = var.sendgrid_api_key
+
+    DW_MANAGER_EMAILS = "mikhail@gainy.app,mike@gainy.app"
 
     APP_STORE_LINK = "https://go.gainy.app/ZOFw/Webp"
   }

@@ -2,10 +2,11 @@ import os
 from decimal import Decimal
 
 from gainy.data_access.repository import MAX_TRANSACTION_SIZE
-from gainy.exceptions import NotFoundException
+from gainy.exceptions import NotFoundException, EntityNotFoundException
 from gainy.trading.drivewealth.exceptions import DriveWealthApiException
 from portfolio.plaid import PlaidService
 from gainy.plaid.models import PlaidAccessToken
+from services.notification import NotificationService
 from trading.models import TradingMoneyFlow, TradingStatement
 from trading.drivewealth.provider.collection import DriveWealthProviderCollection
 from trading.drivewealth.provider.kyc import DriveWealthProviderKYC
@@ -16,7 +17,8 @@ from trading.drivewealth.repository import DriveWealthRepository
 
 from gainy.utils import get_logger
 from gainy.trading.models import FundingAccount, TradingAccount, TradingCollectionVersion, TradingMoneyFlowStatus
-from gainy.trading.drivewealth.models import DriveWealthAccount, DriveWealthUser
+from gainy.trading.drivewealth.models import DriveWealthAccount, DriveWealthUser, DriveWealthInstrument, \
+    DriveWealthInstrumentStatus
 
 logger = get_logger(__name__)
 
@@ -27,9 +29,11 @@ class DriveWealthProvider(DriveWealthProviderKYC,
                           DriveWealthProviderCollection):
 
     def __init__(self, repository: DriveWealthRepository, api: DriveWealthApi,
-                 plaid_service: PlaidService):
+                 plaid_service: PlaidService,
+                 notification_service: NotificationService):
         super().__init__(repository, api)
         self.plaid_service = plaid_service
+        self.notification_service = notification_service
 
     def link_bank_account_with_plaid(
             self, access_token: PlaidAccessToken, account_id: str,
@@ -65,8 +69,13 @@ class DriveWealthProvider(DriveWealthProviderKYC,
                        trading_account_id: int, funding_account_id: int):
         trading_account = self.repository.find_one(
             DriveWealthAccount, {"trading_account_id": trading_account_id})
+        if not trading_account:
+            raise EntityNotFoundException(DriveWealthAccount)
+
         bank_account = self.repository.find_one(
             DriveWealthBankAccount, {"funding_account_id": funding_account_id})
+        if not bank_account:
+            raise EntityNotFoundException(DriveWealthBankAccount)
 
         if amount > 0:
             response = self.api.create_deposit(amount, trading_account,
@@ -141,7 +150,7 @@ class DriveWealthProvider(DriveWealthProviderKYC,
         self._sync_autopilot_runs()
         self._sync_bank_accounts(user.ref_id)
         self._sync_user_deposits(user.ref_id)
-        # self._sync_statements(profile_id)
+        self._sync_statements(profile_id)
         self.sync_portfolios(profile_id)
 
     def sync_deposit(self, deposit_ref_id: str, fetch_info=False):
@@ -185,6 +194,18 @@ class DriveWealthProvider(DriveWealthProviderKYC,
     def handle_redemption_status(self, redemption: DriveWealthRedemption):
         if redemption.status == 'RIA_Pending':
             self.api.update_redemption(redemption, status='RIA_Approved')
+
+    def handle_instrument_status_change(self,
+                                        instrument: DriveWealthInstrument,
+                                        new_status: str):
+        if instrument.status != DriveWealthInstrumentStatus.ACTIVE:
+            return
+
+        if not self.repository.symbol_is_in_collection(instrument.symbol):
+            return
+
+        self.notification_service.notify_dw_instrument_status_changed(
+            instrument.symbol, instrument.status, new_status)
 
     def download_statement(self, statement: TradingStatement) -> str:
         dw_statement = self.repository.find_one(

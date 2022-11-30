@@ -13,7 +13,7 @@ def test(monkeypatch):
     persisted_objects = {}
     monkeypatch.setattr(repository, 'persist', mock_persist(persisted_objects))
 
-    provider = DriveWealthProvider(None, None, None)
+    provider = DriveWealthProvider(None, None, None, None)
 
     def mock_get_profile_id_by_user_id(_user_id):
         assert _user_id == user_id

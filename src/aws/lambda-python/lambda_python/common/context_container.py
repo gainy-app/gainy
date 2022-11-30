@@ -9,6 +9,8 @@ from portfolio.service.chart import PortfolioChartService
 from portfolio.repository import PortfolioRepository
 from queue_processing.dispatcher import QueueMessageDispatcher
 from services.cache import Cache, RedisCache, LocalCache
+from services.notification import NotificationService
+from services.sendgrid import SendGridService
 from services.sqs import SqsAdapter
 from services.twilio import TwilioClient
 from trading.drivewealth.queue_message_handler import DriveWealthQueueMessageHandler
@@ -38,6 +40,14 @@ class ContextContainer(GainyContextContainer):
     @cached_property
     def twilio_client(self) -> TwilioClient:
         return TwilioClient()
+
+    @cached_property
+    def sendgrid_service(self) -> SendGridService:
+        return SendGridService()
+
+    @cached_property
+    def notification_service(self) -> NotificationService:
+        return NotificationService(self.sendgrid_service)
 
     @cached_property
     def cache(self) -> Cache:
@@ -93,7 +103,8 @@ class ContextContainer(GainyContextContainer):
     @cached_property
     def drivewealth_provider(self):
         return DriveWealthProvider(self.drivewealth_repository,
-                                   self.drivewealth_api, self.plaid_service)
+                                   self.drivewealth_api, self.plaid_service,
+                                   self.notification_service)
 
     ## trading
     @cached_property
