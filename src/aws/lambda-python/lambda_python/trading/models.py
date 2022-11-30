@@ -1,4 +1,5 @@
 import datetime
+import json
 
 from typing import Optional, List
 import enum
@@ -66,6 +67,12 @@ class ProfileKycStatus(BaseModel):
     @classproperty
     def table_name(self) -> str:
         return "kyc_statuses"
+
+    def to_dict(self) -> dict:
+        return {
+            **super().to_dict(),
+            "error_messages": json.dumps(self.error_messages)
+        }
 
 
 class TradingStatement(BaseModel):
