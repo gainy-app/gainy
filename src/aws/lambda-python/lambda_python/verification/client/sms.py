@@ -1,4 +1,5 @@
 from services.twilio import TwilioClient, TWILIO_VERIFICATION_CHANNEL_SMS
+from trading.kyc_form_validator import ALLOWED_COUNTRY_CODES
 from verification.client import VerificationClient
 from verification.exceptions import WrongCodeException
 from verification.models import VerificationCode, VerificationCodeChannel
@@ -10,8 +11,8 @@ class SmsVerificationClient(VerificationClient):
         self.twilio_client = twilio_client
 
     def validate_address(self, entity: VerificationCode):
-        if not self.twilio_client.validate_phone_number(entity.address):
-            raise Exception('Invalid phone number.')
+        self.twilio_client.validate_phone_number(entity.address,
+                                                 ALLOWED_COUNTRY_CODES)
 
     def send(self, entity: VerificationCode):
         if not self.twilio_client.verification_create(

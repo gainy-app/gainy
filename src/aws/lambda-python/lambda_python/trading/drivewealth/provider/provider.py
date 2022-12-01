@@ -7,7 +7,7 @@ from gainy.trading.drivewealth.exceptions import DriveWealthApiException
 from portfolio.plaid import PlaidService
 from gainy.plaid.models import PlaidAccessToken
 from services.notification import NotificationService
-from trading.models import TradingMoneyFlow, TradingStatement
+from trading.models import TradingMoneyFlow, TradingStatement, ProfileKycStatus
 from trading.drivewealth.provider.collection import DriveWealthProviderCollection
 from trading.drivewealth.provider.kyc import DriveWealthProviderKYC
 from trading.drivewealth.models import DriveWealthBankAccount, DriveWealthDeposit, \
@@ -141,6 +141,15 @@ class DriveWealthProvider(DriveWealthProviderKYC,
         for entity in repository.find_all(TradingMoneyFlow,
                                           {"profile_id": profile_id}):
             repository.delete(entity)
+
+        for entity in repository.find_all(ProfileKycStatus,
+                                          {"profile_id": profile_id}):
+            repository.delete(entity)
+
+        with repository.db_conn.cursor() as cursor:
+            cursor.execute(
+                "update app.kyc_form set status = null where profile_id = %(profile_id)s",
+                {"profile_id": profile_id})
 
     def sync_data(self, profile_id):
         user = self._get_user(profile_id)

@@ -1,6 +1,5 @@
 import json
 import os
-import datetime
 import http.client
 import urllib.parse
 from aws_synthetics.selenium import synthetics_webdriver as syn_webdriver
