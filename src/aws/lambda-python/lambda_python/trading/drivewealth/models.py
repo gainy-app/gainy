@@ -108,7 +108,9 @@ class BaseDriveWealthMoneyFlowModel(BaseDriveWealthModel, ABC):
         self.data = data
 
     def is_pending(self) -> bool:
-        return self.status in ['Started', 'RIA_Pending', 'Pending', 'Other', 'On Hold']
+        return self.status in [
+            'Started', 'RIA_Pending', 'Pending', 'Other', 'On Hold'
+        ]
 
     def is_approved(self) -> bool:
         return self.status in ['Approved', 'RIA_Approved']
