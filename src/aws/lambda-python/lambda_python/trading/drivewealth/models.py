@@ -78,7 +78,7 @@ class DriveWealthBankAccount(BaseDriveWealthModel):
         return "drivewealth_bank_accounts"
 
 
-class DriveWealthRedemptionStatus(enum.Enum, str):
+class DriveWealthRedemptionStatus(str, enum.Enum):
     RIA_Pending = 'RIA_Pending'
     RIA_Approved = 'RIA_Approved'
 

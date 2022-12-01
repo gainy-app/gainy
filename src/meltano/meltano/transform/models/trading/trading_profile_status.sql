@@ -77,7 +77,7 @@ select profile_id,
 {% endif %}
            , 0)::double precision                                       as withdrawable_cash,
        coalesce(
-                   portfolio_stats.cash_value + coalesce(target_amount_delta, 0),
+                   portfolio_stats.cash_value - coalesce(target_amount_delta, 0),
 {% if var("drivewealth_is_uat") %}
                    account_stats.cash_balance
 {% else %}
