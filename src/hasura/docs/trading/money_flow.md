@@ -15,7 +15,14 @@ mutation TradingDepositFunds(
         amount: $amount
         funding_account_id: $funding_account_id
     ) {
-        trading_money_flow_id
+        trading_money_flow {
+          trading_account{
+            account_no
+          }
+          created_at
+          status # ["PENDING", "APPROVED", "SUCCESS", "FAILED"]
+          amount
+        }
     }
 }
 ```
@@ -35,7 +42,14 @@ mutation TradingWithdrawFunds(
         amount: $amount
         funding_account_id: $funding_account_id
     ) {
-        trading_money_flow_id
+        trading_money_flow {
+          trading_account{
+            account_no
+          }
+          created_at
+          status # ["PENDING", "APPROVED", "SUCCESS", "FAILED"]
+          amount
+        }
     }
 }
 ```

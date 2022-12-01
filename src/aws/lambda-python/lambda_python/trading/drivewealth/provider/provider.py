@@ -3,7 +3,7 @@ from decimal import Decimal
 
 from gainy.data_access.repository import MAX_TRANSACTION_SIZE
 from gainy.exceptions import NotFoundException, EntityNotFoundException
-from gainy.trading.drivewealth.exceptions import DriveWealthApiException
+from gainy.trading.drivewealth.exceptions import DriveWealthApiException, BadMissingParametersBodyException
 from portfolio.plaid import PlaidService
 from gainy.plaid.models import PlaidAccessToken
 from services.notification import NotificationService
@@ -11,7 +11,8 @@ from trading.models import TradingMoneyFlow, TradingStatement
 from trading.drivewealth.provider.collection import DriveWealthProviderCollection
 from trading.drivewealth.provider.kyc import DriveWealthProviderKYC
 from trading.drivewealth.models import DriveWealthBankAccount, DriveWealthDeposit, \
-    DriveWealthRedemption, DriveWealthAutopilotRun, BaseDriveWealthMoneyFlowModel, DriveWealthStatement
+    DriveWealthRedemption, DriveWealthAutopilotRun, BaseDriveWealthMoneyFlowModel, DriveWealthStatement, \
+    DriveWealthRedemptionStatus
 from trading.drivewealth.api import DriveWealthApi
 from trading.drivewealth.repository import DriveWealthRepository
 
@@ -168,7 +169,7 @@ class DriveWealthProvider(DriveWealthProviderKYC,
 
         self.update_money_flow_from_dw(entity)
 
-    def sync_redemption(self, redemption_ref_id: str):
+    def sync_redemption(self, redemption_ref_id: str) -> DriveWealthRedemption:
         repository = self.repository
 
         entity = repository.find_one(
@@ -181,6 +182,7 @@ class DriveWealthProvider(DriveWealthProviderKYC,
         repository.persist(entity)
 
         self.update_money_flow_from_dw(entity)
+        return entity
 
     def sync_autopilot_run(self, entity: DriveWealthAutopilotRun):
         repository = self.repository
@@ -194,8 +196,16 @@ class DriveWealthProvider(DriveWealthProviderKYC,
         repository.persist(entity)
 
     def handle_redemption_status(self, redemption: DriveWealthRedemption):
-        if redemption.status == 'RIA_Pending':
-            self.api.update_redemption(redemption, status='RIA_Approved')
+        if redemption.status == DriveWealthRedemptionStatus.RIA_Pending:
+            try:
+                self.api.update_redemption(
+                    redemption,
+                    status=DriveWealthRedemptionStatus.RIA_Approved)
+            except BadMissingParametersBodyException as e:
+                redemption = self.sync_redemption(redemption.ref_id)
+                if redemption.status != DriveWealthRedemptionStatus.RIA_Pending:
+                    return
+                raise e
 
     def handle_instrument_status_change(self,
                                         instrument: DriveWealthInstrument,

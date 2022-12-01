@@ -1,4 +1,5 @@
 import datetime
+import enum
 
 import re
 from abc import ABC
@@ -77,6 +78,11 @@ class DriveWealthBankAccount(BaseDriveWealthModel):
         return "drivewealth_bank_accounts"
 
 
+class DriveWealthRedemptionStatus(enum.Enum, str):
+    RIA_Pending = 'RIA_Pending'
+    RIA_Approved = 'RIA_Approved'
+
+
 class BaseDriveWealthMoneyFlowModel(BaseDriveWealthModel, ABC):
     ref_id = None
     trading_account_ref_id = None
@@ -109,11 +115,14 @@ class BaseDriveWealthMoneyFlowModel(BaseDriveWealthModel, ABC):
 
     def is_pending(self) -> bool:
         return self.status in [
-            'Started', 'RIA_Pending', 'Pending', 'Other', 'On Hold'
+            'Started', DriveWealthRedemptionStatus.RIA_Pending, 'Pending',
+            'Other', 'On Hold'
         ]
 
     def is_approved(self) -> bool:
-        return self.status in ['Approved', 'RIA_Approved']
+        return self.status in [
+            'Approved', DriveWealthRedemptionStatus.RIA_Approved
+        ]
 
     def get_money_flow_status(self) -> TradingMoneyFlowStatus:
         """

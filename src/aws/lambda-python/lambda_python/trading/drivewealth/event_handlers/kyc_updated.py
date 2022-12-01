@@ -209,6 +209,9 @@ class KycUpdatedEventHandler(AbstractDriveWealthEventHandler):
     def handle(self, event_payload: dict):
         user_id = event_payload["userID"]
         profile_id = self.provider.get_profile_id_by_user_id(user_id)
+        if not profile_id:
+            return
+
         entity = _get_profile_kyc_status(event_payload['current'])
         entity.profile_id = profile_id
         self.repo.persist(entity)
