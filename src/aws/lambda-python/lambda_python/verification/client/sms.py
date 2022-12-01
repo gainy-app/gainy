@@ -11,7 +11,8 @@ class SmsVerificationClient(VerificationClient):
         self.twilio_client = twilio_client
 
     def validate_address(self, entity: VerificationCode):
-        self.twilio_client.validate_phone_number(entity.address, ALLOWED_COUNTRY_CODES)
+        self.twilio_client.validate_phone_number(entity.address,
+                                                 ALLOWED_COUNTRY_CODES)
 
     def send(self, entity: VerificationCode):
         if not self.twilio_client.verification_create(

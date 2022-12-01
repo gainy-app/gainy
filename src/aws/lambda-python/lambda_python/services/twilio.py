@@ -65,8 +65,11 @@ class TwilioClient:
             if not instance.valid:
                 raise ValidationException('Invalid phone number.')
 
-            if env() == ENV_PRODUCTION and allowed_country_codes and instance.country_code not in allowed_country_codes:
-                raise ValidationException('Currently the following countries are supported: ' + ', '.join(allowed_country_codes))
+            if env(
+            ) == ENV_PRODUCTION and allowed_country_codes and instance.country_code not in allowed_country_codes:
+                raise ValidationException(
+                    'Currently the following countries are supported: ' +
+                    ', '.join(allowed_country_codes))
 
         except ValidationException as e:
             raise e

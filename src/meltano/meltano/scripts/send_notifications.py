@@ -14,7 +14,8 @@ ENV = env()
 SEGMENTS = {
     ENV_PRODUCTION:
     json.loads(os.environ.get('ONESIGNAL_SEGMENTS_PRODUCTION', '[]')),
-    ENV_TEST: json.loads(os.environ.get('ONESIGNAL_SEGMENTS_TEST', '[]')),
+    ENV_TEST:
+    json.loads(os.environ.get('ONESIGNAL_SEGMENTS_TEST', '[]')),
     ENV_LOCAL: [],
 }
 EMAILS_LOCAL = json.loads(os.environ.get('ONESIGNAL_EMAILS_LOCAL', '[]'))

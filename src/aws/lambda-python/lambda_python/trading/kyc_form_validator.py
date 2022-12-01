@@ -51,26 +51,45 @@ class KycFormValidator(ABC):
             logging_extra["place"] = place
 
             address_components = place['result']['address_components']
-            country_components = list(filter(lambda x: 'country' in x['types'], address_components))
+            country_components = list(
+                filter(lambda x: 'country' in x['types'], address_components))
             if not country_components:
                 raise ValidationException("Failed to verify country.")
 
             country_code = country_components[0]['short_name']
             logging_extra["country_code"] = country_code
-            if env() == ENV_PRODUCTION and country_code not in ALLOWED_COUNTRY_CODES:
-                raise ValidationException('Currently the following countries are supported: ' + ', '.join(ALLOWED_COUNTRY_CODES))
+            if env(
+            ) == ENV_PRODUCTION and country_code not in ALLOWED_COUNTRY_CODES:
+                raise ValidationException(
+                    'Currently the following countries are supported: ' +
+                    ', '.join(ALLOWED_COUNTRY_CODES))
 
-            suggested_postal_code = list(filter(lambda x: 'postal_code' in x['types'], address_components))
-            suggested_postal_code = suggested_postal_code[0]["short_name"] if suggested_postal_code else None
-            suggested_province = list(filter(lambda x: 'administrative_area_level_1' in x['types'], address_components))
-            suggested_province = suggested_province[0]["short_name"] if suggested_province else None
-            suggested_locality = list(filter(lambda x: 'locality' in x['types'], address_components))
-            suggested_locality = suggested_locality[0]["short_name"] if suggested_locality else None
-            suggested_street_number = list(filter(lambda x: 'street_number' in x['types'], address_components))
-            suggested_street_number = suggested_street_number[0]["short_name"] if suggested_street_number else None
-            suggested_route = list(filter(lambda x: 'route' in x['types'], address_components))
-            suggested_route = suggested_route[0]["short_name"] if suggested_route else None
-            suggested_street1 = " ".join(filter(lambda x:x, [suggested_street_number, suggested_route]))
+            suggested_postal_code = list(
+                filter(lambda x: 'postal_code' in x['types'],
+                       address_components))
+            suggested_postal_code = suggested_postal_code[0][
+                "short_name"] if suggested_postal_code else None
+            suggested_province = list(
+                filter(lambda x: 'administrative_area_level_1' in x['types'],
+                       address_components))
+            suggested_province = suggested_province[0][
+                "short_name"] if suggested_province else None
+            suggested_locality = list(
+                filter(lambda x: 'locality' in x['types'], address_components))
+            suggested_locality = suggested_locality[0][
+                "short_name"] if suggested_locality else None
+            suggested_street_number = list(
+                filter(lambda x: 'street_number' in x['types'],
+                       address_components))
+            suggested_street_number = suggested_street_number[0][
+                "short_name"] if suggested_street_number else None
+            suggested_route = list(
+                filter(lambda x: 'route' in x['types'], address_components))
+            suggested_route = suggested_route[0][
+                "short_name"] if suggested_route else None
+            suggested_street1 = " ".join(
+                filter(lambda x: x,
+                       [suggested_street_number, suggested_route]))
 
             return {
                 "street1": suggested_street1,
