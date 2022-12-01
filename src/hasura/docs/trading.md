@@ -29,7 +29,7 @@ query GetTradingHistory($profile_id: Int!, $types: [String!]!) {
         account_no
       }
       created_at
-      status # ["PENDING", "SUCCESS", "FAILED"]
+      status # ["PENDING", "APPROVED", "SUCCESS", "FAILED"]
       amount
     }
   }
@@ -52,7 +52,7 @@ query TradingGetProfileStatus($profile_id: Int!) {
     withdrawable_cash
     pending_cash
   }
-  app_trading_money_flow(where: {status: {_eq: "PENDING"}}) {
+  app_trading_money_flow(where: {status: {_in: ["PENDING", "APPROVED"]}}) {
     amount
     created_at
   }

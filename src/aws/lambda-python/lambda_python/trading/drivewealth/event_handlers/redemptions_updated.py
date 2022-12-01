@@ -12,8 +12,8 @@ class RedemptionUpdatedEventHandler(AbstractDriveWealthEventHandler):
 
     def handle(self, event_payload: dict):
         ref_id = event_payload["paymentID"]
-        redemption = self.repo.find_one(DriveWealthRedemption,
-                                        {"ref_id": ref_id})
+        redemption: DriveWealthRedemption = self.repo.find_one(
+            DriveWealthRedemption, {"ref_id": ref_id})
 
         if not redemption:
             redemption = DriveWealthRedemption()
@@ -21,3 +21,9 @@ class RedemptionUpdatedEventHandler(AbstractDriveWealthEventHandler):
         redemption.set_from_response(event_payload)
         self.repo.persist(redemption)
         self.provider.handle_redemption_status(redemption)
+
+        if redemption.is_approved() and redemption.fees_total_amount is None:
+            # Todo fees in more cases?
+            self.provider.sync_redemption(redemption.ref_id)
+
+        self.provider.update_money_flow_from_dw(redemption)

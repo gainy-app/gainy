@@ -32,7 +32,7 @@ with account_stats as
              select profile_id,
                     sum(amount) as pending_cash
              from {{ source('app', 'trading_money_flow') }}
-             where status = 'PENDING' and amount > 0
+             where status in ('PENDING', 'APPROVED') and amount > 0
              group by profile_id
          ),
      portfolio_stats as

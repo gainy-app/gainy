@@ -16,6 +16,12 @@ def test_exists(monkeypatch):
     handle_redemption_status_calls = []
     monkeypatch.setattr(provider, 'handle_redemption_status',
                         mock_record_calls(handle_redemption_status_calls))
+    update_money_flow_from_dw_calls = []
+    monkeypatch.setattr(provider, 'update_money_flow_from_dw',
+                        mock_record_calls(update_money_flow_from_dw_calls))
+    sync_redemption_calls = []
+    monkeypatch.setattr(provider, 'sync_redemption',
+                        mock_record_calls(sync_redemption_calls))
 
     redemption = DriveWealthRedemption()
 
@@ -37,6 +43,12 @@ def test_exists(monkeypatch):
     assert redemption in [
         args[0] for args, kwards in handle_redemption_status_calls
     ]
+    assert redemption in [
+        args[0] for args, kwargs in update_money_flow_from_dw_calls
+    ]
+    assert redemption.ref_id == message["paymentID"]
+    assert redemption.trading_account_ref_id == message["accountID"]
+    assert redemption.status == message["statusMessage"]
 
 
 def test_not_exists(monkeypatch):
@@ -44,6 +56,12 @@ def test_not_exists(monkeypatch):
     handle_redemption_status_calls = []
     monkeypatch.setattr(provider, 'handle_redemption_status',
                         mock_record_calls(handle_redemption_status_calls))
+    update_money_flow_from_dw_calls = []
+    monkeypatch.setattr(provider, 'update_money_flow_from_dw',
+                        mock_record_calls(update_money_flow_from_dw_calls))
+    sync_redemption_calls = []
+    monkeypatch.setattr(provider, 'sync_redemption',
+                        mock_record_calls(sync_redemption_calls))
 
     repository = DriveWealthRepository(None)
     monkeypatch.setattr(
@@ -63,3 +81,9 @@ def test_not_exists(monkeypatch):
     assert redemption in [
         args[0] for args, kwards in handle_redemption_status_calls
     ]
+    assert redemption in [
+        args[0] for args, kwargs in update_money_flow_from_dw_calls
+    ]
+    assert redemption.ref_id == message["paymentID"]
+    assert redemption.trading_account_ref_id == message["accountID"]
+    assert redemption.status == message["statusMessage"]
