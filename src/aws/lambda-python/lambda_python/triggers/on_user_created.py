@@ -5,7 +5,7 @@ import datadog
 from common.context_container import ContextContainer
 from common.hasura_function import HasuraTrigger
 from services import HubspotService
-from gainy.utils import get_logger
+from gainy.utils import get_logger, ENV_PRODUCTION
 
 logger = get_logger(__name__)
 
@@ -41,7 +41,7 @@ class OnUserCreated(HasuraTrigger):
             logger.error("[%s] Exception when sending datadog event: %s",
                          __name__, e)
 
-        if self.env == "production":
+        if self.env == ENV_PRODUCTION:
             try:
                 self.hubspot_service.create_contact(email,
                                                     payload["first_name"],

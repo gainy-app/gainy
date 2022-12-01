@@ -6,7 +6,7 @@ from services import BillingService, RevenueCatService
 import datetime
 import dateutil.parser
 from psycopg2.extras import execute_values
-from gainy.utils import env, get_logger
+from gainy.utils import env, get_logger, ENV_PRODUCTION, ENV_LOCAL
 
 logger = get_logger(__name__)
 
@@ -43,7 +43,7 @@ class UpdatePurchases(HasuraAction):
         }
 
     def sync_revenuecat(self, db_conn, profile_id):
-        if env() not in ['production', 'local']:
+        if env() not in [ENV_PRODUCTION, ENV_LOCAL]:
             return
 
         values = []

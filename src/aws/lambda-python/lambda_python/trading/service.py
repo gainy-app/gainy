@@ -171,7 +171,7 @@ class TradingService(GainyTradingService):
         self._get_provider_service().debug_delete_data(profile_id)
 
     def validate_kyc_form(self, kyc_form):
-        KycFormValidator.validate_not_po(
+        KycFormValidator.validate_address(
             street1=kyc_form['address_street1'],
             street2=kyc_form['address_street2'],
             city=kyc_form['address_city'],

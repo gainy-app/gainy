@@ -3,6 +3,7 @@
 - [Get KYC form values](#get-kyc-form-values)
 - [Fill KYC fields](#fill-kyc-fields)
 - [Action to get KYC form placeholders](#action-to-get-kyc-form-placeholders)
+- [Validate address and show suggested formatted address](#validate-address-and-show-suggested-formatted-address)
 - [Send KYC data](#send-kyc-data)
 - [Get KYC status](#get-kyc-status)
 - [Generate pre-signed-url to upload documents](#generate-pre-signed-url-to-upload-documents)
@@ -257,7 +258,6 @@ query GetKycForm($profile_id: Int!) {
     irs_backup_withholdings_notified
   }
 }
-
 ```
 
 ### Action to get KYC form placeholders
@@ -503,6 +503,37 @@ query KycGetFormConfig($profile_id: Int!) {
       }
       placeholder
       required
+    }
+  }
+}
+```
+
+### Validate address and show suggested formatted address
+```graphql
+query KycValidateAddress(
+  $street1: String!
+  $street2: String
+  $city: String!
+  $province: String!
+  $postal_code: String!
+  $country: String
+) {
+  kyc_validate_address(
+    street1: $street1
+    street2: $street2
+    city: $city
+    province: $province
+    postal_code: $postal_code
+    country: $country
+  ){ 
+    ok 
+    suggested{
+      street1
+      street2
+      city
+      province
+      postal_code
+      country
     }
   }
 }

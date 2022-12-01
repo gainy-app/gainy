@@ -4,7 +4,7 @@ import psycopg2
 from psycopg2.extras import DictCursor
 import requests
 import uuid
-from gainy.utils import db_connect, get_logger, env
+from gainy.utils import db_connect, get_logger, env, ENV_PRODUCTION, ENV_TEST, ENV_LOCAL
 
 psycopg2.extras.register_uuid()
 
@@ -12,10 +12,11 @@ API_KEY = os.environ['ONESIGNAL_API_KEY']
 APP_ID = os.environ['ONESIGNAL_APP_ID']
 ENV = env()
 SEGMENTS = {
-    'production':
+    ENV_PRODUCTION:
     json.loads(os.environ.get('ONESIGNAL_SEGMENTS_PRODUCTION', '[]')),
-    'test': json.loads(os.environ.get('ONESIGNAL_SEGMENTS_TEST', '[]')),
-    'local': [],
+    ENV_TEST:
+    json.loads(os.environ.get('ONESIGNAL_SEGMENTS_TEST', '[]')),
+    ENV_LOCAL: [],
 }
 EMAILS_LOCAL = json.loads(os.environ.get('ONESIGNAL_EMAILS_LOCAL', '[]'))
 MAX_NOTIFICATIONS_PER_TEMPLATE = 1
@@ -27,12 +28,12 @@ def pick_target(notification):
     if notification['email']:
         return ([notification['email']], None)
 
-    if ENV == 'local':
+    if ENV == ENV_LOCAL:
         return (EMAILS_LOCAL, None)
 
     env = ENV
-    if ENV == 'production' and notification['is_test']:
-        env = 'test'
+    if ENV == ENV_PRODUCTION and notification['is_test']:
+        env = ENV_TEST
 
     segments = SEGMENTS.get(env, [])
 
