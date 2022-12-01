@@ -20,7 +20,7 @@ class VerificationSendCode(HasuraAction):
 
         if channel not in list(VerificationCodeChannel):
             raise BadRequestException(
-                f'Wrong channel {channel}. Options: {VerificationCodeChannel}')
+                f'Wrong channel {channel}. Options: {[e.value for e in VerificationCodeChannel]}')
 
         try:
             verification_code = context_container.verification_service.send_code(

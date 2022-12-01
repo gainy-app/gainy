@@ -14,7 +14,7 @@ from datadog_api_client.v1.api.metrics_api import MetricsApi
 from datadog_api_client.v1.model.metrics_payload import MetricsPayload
 from datadog_api_client.v1.model.point import Point
 from datadog_api_client.v1.model.series import Series
-from gainy.utils import get_logger, setup_exception_logger_hook
+from gainy.utils import get_logger, setup_exception_logger_hook, ENV_PRODUCTION
 
 setup_exception_logger_hook()
 
@@ -74,7 +74,7 @@ def persist_records(values, source):
 
 
 def submit_dd_metric(metric_name, value, tags=[]):
-    if ENV != 'production':
+    if ENV != ENV_PRODUCTION:
         return
 
     body = MetricsPayload(series=[
