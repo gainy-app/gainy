@@ -10,7 +10,7 @@ from trading.drivewealth.repository import DriveWealthRepository
 from trading.drivewealth.models import DriveWealthBankAccount, DriveWealthKycStatus, DriveWealthRedemption, \
     DriveWealthStatement
 
-from gainy.utils import get_logger, env, DATETIME_ISO8601_FORMAT_TZ
+from gainy.utils import get_logger, env, DATETIME_ISO8601_FORMAT_TZ, ENV_PRODUCTION
 from gainy.trading.drivewealth import DriveWealthApi as GainyDriveWealthApi
 from gainy.trading.drivewealth.models import DriveWealthAccount
 
@@ -54,7 +54,7 @@ class DriveWealthApi(GainyDriveWealthApi):
                 "accountType": "LIVE",
                 "accountManagementType": "RIA_MANAGED",
                 "tradingType": "CASH",
-                "ignoreMarketHoursForTest": env() != "production",
+                "ignoreMarketHoursForTest": env() != ENV_PRODUCTION,
                 "riaUserID": DRIVEWEALTH_RIA_ID,
                 "riaProductID": DRIVEWEALTH_RIA_PRODUCT_ID,
             })
@@ -100,6 +100,14 @@ class DriveWealthApi(GainyDriveWealthApi):
 
     def get_deposit(self, deposit_id):
         return self._make_request("GET", f"/funding/deposits/{deposit_id}")
+
+    def get_user_redemptions(self, user_id):
+        return self._make_request("GET",
+                                  f"/users/{user_id}/funding/redemptions")
+
+    def get_redemption(self, redemption_id):
+        return self._make_request("GET",
+                                  f"/funding/redemptions/{redemption_id}")
 
     def create_deposit(self, amount: Decimal, account: DriveWealthAccount,
                        bank_account: DriveWealthBankAccount):

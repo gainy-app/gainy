@@ -1,5 +1,6 @@
 import datetime
 import json
+from decimal import Decimal
 
 from typing import Optional, List
 import enum
@@ -146,6 +147,7 @@ class TradingMoneyFlow(BaseModel):
     amount = None
     trading_account_id = None
     funding_account_id = None
+    fees_total_amount: Decimal = None
     created_at = None
     updated_at = None
 

@@ -6,7 +6,8 @@ from gainy.data_access.models import BaseModel
 from gainy.tests.mocks.repository_mocks import mock_find, mock_persist, mock_noop, mock_record_calls
 from gainy.trading.models import TradingMoneyFlowStatus
 from services.notification import NotificationService
-from tests.trading.drivewealth.api_mocks import mock_create_deposit, mock_create_redemption, mock_get_deposit
+from tests.trading.drivewealth.api_mocks import mock_create_deposit, mock_create_redemption, mock_get_deposit, \
+    mock_get_redemption
 from trading.models import TradingMoneyFlow, TradingStatement
 from trading.drivewealth.models import DriveWealthBankAccount, DriveWealthDeposit, DriveWealthRedemption, \
     DriveWealthStatement
@@ -131,12 +132,59 @@ def test_sync_deposit(monkeypatch):
         mock_get_deposit(deposit_ref_id, account_ref_id, status=status))
 
     service = DriveWealthProvider(drivewealth_repository, api, None, None)
-    service.sync_deposit(deposit_ref_id=deposit_ref_id, fetch_info=True)
+    service.sync_deposit(deposit_ref_id=deposit_ref_id)
 
     assert deposit.__class__ in persisted_objects
     assert deposit.ref_id == deposit_ref_id
     assert deposit.status == status
     assert deposit.money_flow_id == money_flow_id
+
+    assert money_flow.__class__ in persisted_objects
+    assert money_flow.status == TradingMoneyFlowStatus.SUCCESS
+
+
+def test_sync_redemption(monkeypatch):
+    redemption_ref_id = "redemption_ref_id"
+    account_ref_id = "account_ref_id"
+    money_flow_id = 4
+    status = 'Successful'
+
+    account = DriveWealthAccount()
+
+    redemption = DriveWealthRedemption()
+    monkeypatch.setattr(redemption, "money_flow_id", money_flow_id)
+    money_flow = TradingMoneyFlow()
+
+    drivewealth_repository = DriveWealthRepository(None)
+    persisted_objects = {}
+    monkeypatch.setattr(drivewealth_repository, "persist",
+                        mock_persist(persisted_objects))
+    monkeypatch.setattr(
+        drivewealth_repository, "find_one",
+        mock_find([
+            (DriveWealthRedemption, {
+                "ref_id": redemption_ref_id
+            }, redemption),
+            (DriveWealthAccount, {
+                "ref_id": account_ref_id,
+            }, account),
+            (TradingMoneyFlow, {
+                "id": money_flow_id
+            }, money_flow),
+        ]))
+
+    api = DriveWealthApi(drivewealth_repository)
+    monkeypatch.setattr(
+        api, "get_redemption",
+        mock_get_redemption(redemption_ref_id, account_ref_id, status=status))
+
+    service = DriveWealthProvider(drivewealth_repository, api, None, None)
+    service.sync_redemption(redemption_ref_id=redemption_ref_id)
+
+    assert redemption.__class__ in persisted_objects
+    assert redemption.ref_id == redemption_ref_id
+    assert redemption.status == status
+    assert redemption.money_flow_id == money_flow_id
 
     assert money_flow.__class__ in persisted_objects
     assert money_flow.status == TradingMoneyFlowStatus.SUCCESS

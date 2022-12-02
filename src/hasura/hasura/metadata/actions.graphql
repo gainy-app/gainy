@@ -145,6 +145,17 @@ type Mutation {
 }
 
 type Query {
+  kyc_validate_address(
+    street1: String!
+    street2: String
+    city: String!
+    province: String!
+    postal_code: String!
+    country: String
+  ): KycValidateAddressOutput
+}
+
+type Query {
   link_plaid_account(
     profile_id: Int!
     public_token: String!
@@ -619,5 +630,19 @@ type UrlOutput {
 
 type VerificationSendCodeOutput {
   verification_code_id: String!
+}
+
+type KycValidateAddressOutput {
+  ok: Boolean
+  suggested: SuggestedAddressOutput
+}
+
+type SuggestedAddressOutput {
+  street1: String
+  street2: String
+  city: String
+  province: String
+  postal_code: String
+  country: String
 }
 

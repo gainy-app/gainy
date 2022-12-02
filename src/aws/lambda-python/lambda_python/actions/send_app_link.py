@@ -16,8 +16,7 @@ APP_STORE_LINK_COOLDOWN = 30
 
 
 def _validate_phone_number(twilio_client: TwilioClient, phone_number: str):
-    if not twilio_client.validate_phone_number(phone_number):
-        raise BadRequestException('Invalid phone number.')
+    twilio_client.validate_phone_number(phone_number)
 
 
 def _send(twilio_client: TwilioClient, phone_number):

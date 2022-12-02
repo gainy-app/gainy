@@ -68,6 +68,7 @@ ACTIONS = [
     # KYC
     KycGetFormConfig(),
     KycGetStatus(),
+    KycValidateAddress(),
     KycSendForm(),
     KycAddDocument(),
 
