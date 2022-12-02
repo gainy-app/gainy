@@ -101,6 +101,14 @@ class DriveWealthApi(GainyDriveWealthApi):
     def get_deposit(self, deposit_id):
         return self._make_request("GET", f"/funding/deposits/{deposit_id}")
 
+    def get_user_redemptions(self, user_id):
+        return self._make_request("GET",
+                                  f"/users/{user_id}/funding/redemptions")
+
+    def get_redemption(self, redemption_id):
+        return self._make_request("GET",
+                                  f"/funding/redemptions/{redemption_id}")
+
     def create_deposit(self, amount: Decimal, account: DriveWealthAccount,
                        bank_account: DriveWealthBankAccount):
         return self._make_request(

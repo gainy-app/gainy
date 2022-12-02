@@ -26,7 +26,7 @@ with data as
                     amount,
                     json_build_object('deposit', amount > 0,
                                       'withdraw', amount < 0,
-                                      'pending', status = 'PENDING' or status is null,
+                                      'pending', status in ('PENDING', 'APPROVED') or status is null,
                                       'error', coalesce(status, '') = 'FAILED'
                         )                                                   as tags
              from {{ source('app', 'trading_money_flow') }}

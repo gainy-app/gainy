@@ -1,5 +1,6 @@
 from gainy.utils import get_logger
 from trading.drivewealth.abstract_event_handler import AbstractDriveWealthEventHandler
+from trading.drivewealth.models import DriveWealthDeposit
 
 logger = get_logger(__name__)
 
@@ -10,6 +11,12 @@ class DepositsUpdatedEventHandler(AbstractDriveWealthEventHandler):
         return event_type == "deposits.updated"
 
     def handle(self, event_payload: dict):
-        payment_id = event_payload["paymentID"]
+        ref_id = event_payload["paymentID"]
+        deposit = self.repo.find_one(DriveWealthDeposit, {"ref_id": ref_id})
 
-        self.provider.sync_deposit(deposit_ref_id=payment_id, fetch_info=True)
+        if not deposit:
+            deposit = DriveWealthDeposit()
+
+        deposit.set_from_response(event_payload)
+        self.repo.persist(deposit)
+        self.provider.update_money_flow_from_dw(deposit)

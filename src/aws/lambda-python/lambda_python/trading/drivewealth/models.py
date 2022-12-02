@@ -1,7 +1,10 @@
 import datetime
+import enum
 
 import re
 from abc import ABC
+from decimal import Decimal
+
 import dateutil.parser
 
 from gainy.data_access.models import classproperty
@@ -75,6 +78,11 @@ class DriveWealthBankAccount(BaseDriveWealthModel):
         return "drivewealth_bank_accounts"
 
 
+class DriveWealthRedemptionStatus(str, enum.Enum):
+    RIA_Pending = 'RIA_Pending'
+    RIA_Approved = 'RIA_Approved'
+
+
 class BaseDriveWealthMoneyFlowModel(BaseDriveWealthModel, ABC):
     ref_id = None
     trading_account_ref_id = None
@@ -82,6 +90,7 @@ class BaseDriveWealthMoneyFlowModel(BaseDriveWealthModel, ABC):
     money_flow_id = None
     data = None
     status = None
+    fees_total_amount: Decimal = None
     created_at = None
     updated_at = None
 
@@ -104,6 +113,17 @@ class BaseDriveWealthMoneyFlowModel(BaseDriveWealthModel, ABC):
 
         self.data = data
 
+    def is_pending(self) -> bool:
+        return self.status in [
+            'Started', DriveWealthRedemptionStatus.RIA_Pending, 'Pending',
+            'Other', 'On Hold'
+        ]
+
+    def is_approved(self) -> bool:
+        return self.status in [
+            'Approved', DriveWealthRedemptionStatus.RIA_Approved
+        ]
+
     def get_money_flow_status(self) -> TradingMoneyFlowStatus:
         """
         Started	0	"STARTED"
@@ -121,11 +141,10 @@ class BaseDriveWealthMoneyFlowModel(BaseDriveWealthModel, ABC):
         Unknown	-1	–	Reserved for errors.
         """
 
-        if self.status in [
-                'Started', 'Pending', 'Other', 'Approved', 'On Hold',
-                'RIA_Pending'
-        ]:
+        if self.is_pending():
             return TradingMoneyFlowStatus.PENDING
+        if self.is_approved():
+            return TradingMoneyFlowStatus.APPROVED
         if self.status in ['Successful']:
             return TradingMoneyFlowStatus.SUCCESS
         return TradingMoneyFlowStatus.FAILED
@@ -139,6 +158,18 @@ class DriveWealthDeposit(BaseDriveWealthMoneyFlowModel):
 
 
 class DriveWealthRedemption(BaseDriveWealthMoneyFlowModel):
+
+    def set_from_response(self, data=None):
+        if not data:
+            return
+
+        if "fees" in data:
+            fees_total_amount = Decimal(0)
+            for fee in data["fees"]:
+                fees_total_amount += Decimal(fee["amount"])
+            self.fees_total_amount = fees_total_amount
+
+        super().set_from_response(data)
 
     @classproperty
     def table_name(self) -> str:

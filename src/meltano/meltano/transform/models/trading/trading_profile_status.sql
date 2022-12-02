@@ -32,7 +32,7 @@ with account_stats as
              select profile_id,
                     sum(amount) as pending_cash
              from {{ source('app', 'trading_money_flow') }}
-             where status = 'PENDING' and amount > 0
+             where status in ('PENDING', 'APPROVED') and amount > 0
              group by profile_id
          ),
      portfolio_stats as
@@ -77,7 +77,7 @@ select profile_id,
 {% endif %}
            , 0)::double precision                                       as withdrawable_cash,
        coalesce(
-                   portfolio_stats.cash_value + coalesce(target_amount_delta, 0),
+                   portfolio_stats.cash_value - coalesce(target_amount_delta, 0),
 {% if var("drivewealth_is_uat") %}
                    account_stats.cash_balance
 {% else %}

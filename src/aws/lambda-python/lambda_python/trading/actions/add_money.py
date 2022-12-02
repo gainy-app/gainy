@@ -12,9 +12,10 @@ class TradingAddMoney(HasuraAction):
         trading_service = context_container.trading_service
         trading_repository = context_container.trading_repository
 
-        if "trading_account_id" in input_params:
+        if "trading_account_id" in input_params and input_params[
+                "trading_account_id"]:
             trading_account_id = input_params["trading_account_id"]
-        elif "profile_id" in input_params:
+        elif "profile_id" in input_params and input_params["profile_id"]:
             profile_id = input_params["profile_id"]
             trading_account_id = trading_repository.get_trading_account(
                 profile_id).id

@@ -1,6 +1,6 @@
 from gainy.tests.mocks.repository_mocks import mock_persist, mock_record_calls
 from trading.drivewealth.event_handlers import RedemptionCreatedEventHandler
-from trading.drivewealth.models import DriveWealthRedemption
+from trading.drivewealth.models import DriveWealthRedemption, DriveWealthRedemptionStatus
 from trading.drivewealth.provider import DriveWealthProvider
 from trading.drivewealth.repository import DriveWealthRepository
 
@@ -19,7 +19,7 @@ def test(monkeypatch):
 
     message = {
         "paymentID": "GYEK000001-1666639501262-RY7T6",
-        "statusMessage": "RIA_Pending",
+        "statusMessage": DriveWealthRedemptionStatus.RIA_Pending,
         "accountID": "bf98c335-57ad-4337-ae9f-ed1fcfb447af.1662377145557",
     }
     event_handler.handle(message)
