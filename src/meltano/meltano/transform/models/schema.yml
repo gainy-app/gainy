@@ -2518,6 +2518,25 @@ models:
           - type:
               type: 'double precision'
 
+  - name: countries
+    columns:
+      - name: name
+        tests:
+          - type:
+              type: 'character varying'
+      - name: alpha2
+        tests:
+          - type:
+              type: 'character varying'
+      - name: alpha3
+        tests:
+          - type:
+              type: 'character varying'
+      - name: flag_w40_url
+        tests:
+          - type:
+              type: 'character varying'
+
 exposures:
   - name: ticker_search_index
     type: application

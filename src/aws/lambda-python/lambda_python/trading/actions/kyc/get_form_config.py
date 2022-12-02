@@ -12,7 +12,6 @@ class KycGetFormConfig(HasuraAction):
         super().__init__(action_name, "profile_id")
 
     def apply(self, input_params, context_container: ContextContainer):
-        db_conn = context_container.db_conn
         profile_id = input_params["profile_id"]
 
         with context_container.db_conn.cursor(
@@ -25,11 +24,18 @@ class KycGetFormConfig(HasuraAction):
 
             cursor.execute("select * from raw_data.gainy_countries")
             countries = cursor.fetchall()
+            cursor.execute("select * from raw_data.gainy_us_states")
+            us_states = cursor.fetchall()
 
         country_choices = [{
             "value": country["alpha-3"],
             "name": country["name"],
         } for country in countries]
+
+        us_state_choices = [{
+            "value": state["abbreviation"],
+            "name": state["name"],
+        } for state in us_states]
 
         gender_placeholder = "Male" if profile[
             'gender'] == 1 else "Female" if profile['gender'] == 0 else None
@@ -47,6 +53,10 @@ class KycGetFormConfig(HasuraAction):
                 "required": True,
                 "placeholder": "USA",
                 "choices": country_choices
+            },
+            "province": {
+                "required": True,
+                "choices": us_state_choices
             },
             "email_address": {
                 "required": True,
