@@ -1,5 +1,13 @@
 variable "env" {}
 
+resource "aws_s3_bucket" "static" {
+  bucket = "gainy-static-${var.env}"
+
+  tags = {
+    Name = "Gainy static"
+  }
+}
+
 resource "aws_s3_bucket" "collections" {
   bucket = "gainy-collections-${var.env}"
 

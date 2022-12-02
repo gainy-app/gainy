@@ -98,6 +98,9 @@ plugins:
           - entity: gainy_countries
             path: data/countries.csv # https://github.com/lukes/ISO-3166-Countries-with-Regional-Codes/blob/master/all/all.json
             keys: [ "name", "alpha-2", "alpha-3" ]
+          - entity: gainy_us_states
+            path: data/us_states.csv # https://github.com/jasonong/List-of-US-States/blob/master/states.csv
+            keys: [ "abbreviation" ]
           - entity: exchanges
             path: data/exchanges.csv
             keys: [ "name" ]

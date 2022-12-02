@@ -1469,6 +1469,26 @@
                 user_id:
                   _eq: X-Hasura-User-Id
 - table:
+    name: countries
+    schema: public
+  select_permissions:
+    - role: anonymous
+      permission:
+        columns:
+          - alpha2
+          - alpha3
+          - flag_w40_url
+          - name
+        filter: {}
+    - role: user
+      permission:
+        columns:
+          - alpha2
+          - alpha3
+          - flag_w40_url
+          - name
+        filter: {}
+- table:
     name: crypto_metrics
     schema: public
   select_permissions:

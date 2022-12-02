@@ -8,6 +8,7 @@
 - [Get KYC status](#get-kyc-status)
 - [Generate pre-signed-url to upload documents](#generate-pre-signed-url-to-upload-documents)
 - [Add KYC uploaded Document](#add-kyc-uploaded-document)
+- [Country flags](#add-kyc-uploaded-document)
 
 ### Fill KYC fields
 ```graphql
@@ -609,6 +610,18 @@ mutation VerificationVerifyCode($verification_code_id: String!, $user_input: Str
     user_input: $user_input
   ){
     ok
+  }
+}
+```
+
+### Country flags 
+```graphql
+{
+  countries {
+    name
+    alpha2
+    alpha3
+    flag_w40_url
   }
 }
 ```
