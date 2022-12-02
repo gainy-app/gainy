@@ -101,11 +101,8 @@ from app.profile_portfolio_accounts
          left join raw_data.polygon_options_historical_prices
               on polygon_options_historical_prices.contract_name = ticker_symbol
                      and floor(polygon_options_historical_prices.t / 86400000) * 86400000 between extract(epoch from now()::date - interval '8 days') * 1000 and extract(epoch from now()::date - interval '5 days') * 1000
-         left join raw_data.polygon_marketstatus_upcoming
-                   on polygon_marketstatus_upcoming.date::date = coalesce(eod_historical_prices.date::date, to_timestamp(polygon_options_historical_prices.t / 1000)::date)
 where email in ('portfolio-test-2@gainy.app', 'portfolio-test-15@gainy.app')
   and profile_portfolio_accounts.type = 'primary'
-  and polygon_marketstatus_upcoming.date is null
 order by profile_id, ticker_symbol, coalesce(eod_historical_prices.date::date, to_timestamp(polygon_options_historical_prices.t / 1000)::date) desc
 on conflict do nothing;
 
@@ -143,11 +140,8 @@ from app.profile_portfolio_accounts
          left join raw_data.polygon_options_historical_prices
               on polygon_options_historical_prices.contract_name = ticker_symbol
                      and floor(polygon_options_historical_prices.t / 86400000) * 86400000 between extract(epoch from now()::date - interval '8 days') * 1000 and extract(epoch from now()::date - interval '5 days') * 1000
-         left join raw_data.polygon_marketstatus_upcoming
-                   on polygon_marketstatus_upcoming.date::date = coalesce(eod_historical_prices.date::date, to_timestamp(polygon_options_historical_prices.t / 1000)::date)
 where email in ('portfolio-test-3@gainy.app', 'portfolio-test-16@gainy.app')
   and profile_portfolio_accounts.type = 'primary'
-  and polygon_marketstatus_upcoming.date is null
 order by profile_id, ticker_symbol, coalesce(eod_historical_prices.date::date, to_timestamp(polygon_options_historical_prices.t / 1000)::date) desc
 on conflict do nothing;
 
@@ -185,11 +179,8 @@ from app.profile_portfolio_accounts
          left join raw_data.polygon_options_historical_prices
               on polygon_options_historical_prices.contract_name = ticker_symbol
                      and floor(polygon_options_historical_prices.t / 86400000) * 86400000 between extract(epoch from now()::date - interval '8 days') * 1000 and extract(epoch from now()::date - interval '5 days') * 1000
-         left join raw_data.polygon_marketstatus_upcoming
-                   on polygon_marketstatus_upcoming.date::date = coalesce(eod_historical_prices.date::date, to_timestamp(polygon_options_historical_prices.t / 1000)::date)
 where email in ('portfolio-test-4@gainy.app', 'portfolio-test-17@gainy.app')
   and profile_portfolio_accounts.type = 'secondary'
-  and polygon_marketstatus_upcoming.date is null
 order by profile_id, ticker_symbol, coalesce(eod_historical_prices.date::date, to_timestamp(polygon_options_historical_prices.t / 1000)::date) desc
 on conflict do nothing;
 
@@ -227,11 +218,8 @@ from app.profile_portfolio_accounts
          left join raw_data.polygon_options_historical_prices
               on polygon_options_historical_prices.contract_name = ticker_symbol
                      and floor(polygon_options_historical_prices.t / 86400000) * 86400000 between extract(epoch from now()::date - interval '8 days') * 1000 and extract(epoch from now()::date - interval '5 days') * 1000
-         left join raw_data.polygon_marketstatus_upcoming
-                   on polygon_marketstatus_upcoming.date::date = coalesce(eod_historical_prices.date::date, to_timestamp(polygon_options_historical_prices.t / 1000)::date)
 where email in ('portfolio-test-5@gainy.app', 'portfolio-test-18@gainy.app')
   and profile_portfolio_accounts.type = 'secondary'
-  and polygon_marketstatus_upcoming.date is null
 order by profile_id, ticker_symbol, coalesce(eod_historical_prices.date::date, to_timestamp(polygon_options_historical_prices.t / 1000)::date) desc
 on conflict do nothing;
 
@@ -269,11 +257,8 @@ from app.profile_portfolio_accounts
          left join raw_data.polygon_options_historical_prices
               on polygon_options_historical_prices.contract_name = ticker_symbol
                      and floor(polygon_options_historical_prices.t / 86400000) * 86400000 between extract(epoch from now()::date - interval '8 days') * 1000 and extract(epoch from now()::date - interval '5 days') * 1000
-         left join raw_data.polygon_marketstatus_upcoming
-                   on polygon_marketstatus_upcoming.date::date = coalesce(eod_historical_prices.date::date, to_timestamp(polygon_options_historical_prices.t / 1000)::date)
 where email in ('portfolio-test-6@gainy.app', 'portfolio-test-19@gainy.app')
   and profile_portfolio_accounts.type = 'primary'
-  and polygon_marketstatus_upcoming.date is null
 order by profile_id, ticker_symbol, coalesce(eod_historical_prices.date::date, to_timestamp(polygon_options_historical_prices.t / 1000)::date) desc
 on conflict do nothing;
 
@@ -313,11 +298,8 @@ from app.profile_portfolio_accounts
          left join raw_data.polygon_options_historical_prices
                    on polygon_options_historical_prices.contract_name = ticker_symbol
                        and to_timestamp(polygon_options_historical_prices.t / 1000)::date > buy_tx.date
-         left join raw_data.polygon_marketstatus_upcoming
-                   on polygon_marketstatus_upcoming.date::date = coalesce(eod_historical_prices.date::date, to_timestamp(polygon_options_historical_prices.t / 1000)::date)
 where email in ('portfolio-test-6@gainy.app', 'portfolio-test-19@gainy.app')
   and profile_portfolio_accounts.type = 'primary'
-  and polygon_marketstatus_upcoming.date is null
 order by profile_id, ticker_symbol, coalesce(eod_historical_prices.date::date, to_timestamp(polygon_options_historical_prices.t / 1000)::date)
 on conflict do nothing;
 
@@ -355,11 +337,8 @@ from app.profile_portfolio_accounts
          left join raw_data.polygon_options_historical_prices
               on polygon_options_historical_prices.contract_name = ticker_symbol
                      and floor(polygon_options_historical_prices.t / 86400000) * 86400000 between extract(epoch from now()::date - interval '8 days') * 1000 and extract(epoch from now()::date - interval '5 days') * 1000
-         left join raw_data.polygon_marketstatus_upcoming
-                   on polygon_marketstatus_upcoming.date::date = coalesce(eod_historical_prices.date::date, to_timestamp(polygon_options_historical_prices.t / 1000)::date)
 where email in ('portfolio-test-7@gainy.app', 'portfolio-test-20@gainy.app')
   and profile_portfolio_accounts.type = 'primary'
-  and polygon_marketstatus_upcoming.date is null
 order by profile_id, ticker_symbol, coalesce(eod_historical_prices.date::date, to_timestamp(polygon_options_historical_prices.t / 1000)::date) desc
 on conflict do nothing;
 
@@ -399,11 +378,8 @@ from app.profile_portfolio_accounts
          left join raw_data.polygon_options_historical_prices
                    on polygon_options_historical_prices.contract_name = ticker_symbol
                        and to_timestamp(polygon_options_historical_prices.t / 1000)::date > buy_tx.date
-         left join raw_data.polygon_marketstatus_upcoming
-                   on polygon_marketstatus_upcoming.date::date = coalesce(eod_historical_prices.date::date, to_timestamp(polygon_options_historical_prices.t / 1000)::date)
 where email in ('portfolio-test-7@gainy.app', 'portfolio-test-20@gainy.app')
   and profile_portfolio_accounts.type = 'secondary'
-  and polygon_marketstatus_upcoming.date is null
 order by profile_id, ticker_symbol, coalesce(eod_historical_prices.date::date, to_timestamp(polygon_options_historical_prices.t / 1000)::date)
 on conflict do nothing;
 
@@ -441,11 +417,8 @@ from app.profile_portfolio_accounts
          left join raw_data.polygon_options_historical_prices
               on polygon_options_historical_prices.contract_name = ticker_symbol
                      and floor(polygon_options_historical_prices.t / 86400000) * 86400000 between extract(epoch from now()::date - interval '8 days') * 1000 and extract(epoch from now()::date - interval '5 days') * 1000
-         left join raw_data.polygon_marketstatus_upcoming
-                   on polygon_marketstatus_upcoming.date::date = coalesce(eod_historical_prices.date::date, to_timestamp(polygon_options_historical_prices.t / 1000)::date)
 where email in ('portfolio-test-8@gainy.app', 'portfolio-test-21@gainy.app')
   and profile_portfolio_accounts.type = 'secondary'
-  and polygon_marketstatus_upcoming.date is null
 order by profile_id, ticker_symbol, coalesce(eod_historical_prices.date::date, to_timestamp(polygon_options_historical_prices.t / 1000)::date) desc
 on conflict do nothing;
 
@@ -485,11 +458,8 @@ from app.profile_portfolio_accounts
          left join raw_data.polygon_options_historical_prices
                    on polygon_options_historical_prices.contract_name = ticker_symbol
                        and to_timestamp(polygon_options_historical_prices.t / 1000)::date > buy_tx.date
-         left join raw_data.polygon_marketstatus_upcoming
-                   on polygon_marketstatus_upcoming.date::date = coalesce(eod_historical_prices.date::date, to_timestamp(polygon_options_historical_prices.t / 1000)::date)
 where email in ('portfolio-test-8@gainy.app', 'portfolio-test-21@gainy.app')
   and profile_portfolio_accounts.type = 'primary'
-  and polygon_marketstatus_upcoming.date is null
 order by profile_id, ticker_symbol, coalesce(eod_historical_prices.date::date, to_timestamp(polygon_options_historical_prices.t / 1000)::date)
 on conflict do nothing;
 
@@ -534,11 +504,8 @@ from app.profile_portfolio_accounts
                        ) t ("index")
               ) t2
               on true
-         left join raw_data.polygon_marketstatus_upcoming
-                   on polygon_marketstatus_upcoming.date::date = coalesce(eod_historical_prices.date::date, to_timestamp(polygon_options_historical_prices.t / 1000)::date)
 where email in ('portfolio-test-9@gainy.app', 'portfolio-test-22@gainy.app')
   and profile_portfolio_accounts.type = 'secondary'
-  and polygon_marketstatus_upcoming.date is null
 order by profile_id, ticker_symbol, coalesce(eod_historical_prices.date::date, to_timestamp(polygon_options_historical_prices.t / 1000)::date) desc
 on conflict do nothing;
 
@@ -578,11 +545,8 @@ from app.profile_portfolio_accounts
          left join raw_data.polygon_options_historical_prices
                    on polygon_options_historical_prices.contract_name = ticker_symbol
                        and to_timestamp(polygon_options_historical_prices.t / 1000)::date > buy_tx.date
-         left join raw_data.polygon_marketstatus_upcoming
-                   on polygon_marketstatus_upcoming.date::date = coalesce(eod_historical_prices.date::date, to_timestamp(polygon_options_historical_prices.t / 1000)::date)
 where email in ('portfolio-test-9@gainy.app', 'portfolio-test-22@gainy.app')
   and profile_portfolio_accounts.type = 'secondary'
-  and polygon_marketstatus_upcoming.date is null
 order by profile_id, ticker_symbol, coalesce(eod_historical_prices.date::date, to_timestamp(polygon_options_historical_prices.t / 1000)::date)
 on conflict do nothing;
 
@@ -620,11 +584,8 @@ from app.profile_portfolio_accounts
          left join raw_data.polygon_options_historical_prices
               on polygon_options_historical_prices.contract_name = ticker_symbol
                      and floor(polygon_options_historical_prices.t / 86400000) * 86400000 between extract(epoch from now()::date - interval '8 days') * 1000 and extract(epoch from now()::date - interval '5 days') * 1000
-         left join raw_data.polygon_marketstatus_upcoming
-                   on polygon_marketstatus_upcoming.date::date = coalesce(eod_historical_prices.date::date, to_timestamp(polygon_options_historical_prices.t / 1000)::date)
 where email in ('portfolio-test-10@gainy.app', 'portfolio-test-23@gainy.app')
   and profile_portfolio_accounts.type = 'primary'
-  and polygon_marketstatus_upcoming.date is null
 order by profile_id, ticker_symbol, coalesce(eod_historical_prices.date::date, to_timestamp(polygon_options_historical_prices.t / 1000)::date) desc
 on conflict do nothing;
 
@@ -664,11 +625,8 @@ from app.profile_portfolio_accounts
          left join raw_data.polygon_options_historical_prices
                    on polygon_options_historical_prices.contract_name = ticker_symbol
                        and to_timestamp(polygon_options_historical_prices.t / 1000)::date > sell_tx.date
-         left join raw_data.polygon_marketstatus_upcoming
-                   on polygon_marketstatus_upcoming.date::date = coalesce(eod_historical_prices.date::date, to_timestamp(polygon_options_historical_prices.t / 1000)::date)
 where email in ('portfolio-test-10@gainy.app', 'portfolio-test-23@gainy.app')
   and profile_portfolio_accounts.type = 'primary'
-  and polygon_marketstatus_upcoming.date is null
 order by profile_id, ticker_symbol, coalesce(eod_historical_prices.date::date, to_timestamp(polygon_options_historical_prices.t / 1000)::date)
 on conflict do nothing;
 
@@ -706,11 +664,8 @@ from app.profile_portfolio_accounts
          left join raw_data.polygon_options_historical_prices
               on polygon_options_historical_prices.contract_name = ticker_symbol
                      and floor(polygon_options_historical_prices.t / 86400000) * 86400000 between extract(epoch from now()::date - interval '8 days') * 1000 and extract(epoch from now()::date - interval '5 days') * 1000
-         left join raw_data.polygon_marketstatus_upcoming
-                   on polygon_marketstatus_upcoming.date::date = coalesce(eod_historical_prices.date::date, to_timestamp(polygon_options_historical_prices.t / 1000)::date)
 where email in ('portfolio-test-11@gainy.app', 'portfolio-test-24@gainy.app')
   and profile_portfolio_accounts.type = 'primary'
-  and polygon_marketstatus_upcoming.date is null
 order by profile_id, ticker_symbol, coalesce(eod_historical_prices.date::date, to_timestamp(polygon_options_historical_prices.t / 1000)::date) desc
 on conflict do nothing;
 
@@ -750,11 +705,8 @@ from app.profile_portfolio_accounts
          left join raw_data.polygon_options_historical_prices
                    on polygon_options_historical_prices.contract_name = ticker_symbol
                        and to_timestamp(polygon_options_historical_prices.t / 1000)::date > sell_tx.date
-         left join raw_data.polygon_marketstatus_upcoming
-                   on polygon_marketstatus_upcoming.date::date = coalesce(eod_historical_prices.date::date, to_timestamp(polygon_options_historical_prices.t / 1000)::date)
 where email in ('portfolio-test-11@gainy.app', 'portfolio-test-24@gainy.app')
   and profile_portfolio_accounts.type = 'secondary'
-  and polygon_marketstatus_upcoming.date is null
 order by profile_id, ticker_symbol, coalesce(eod_historical_prices.date::date, to_timestamp(polygon_options_historical_prices.t / 1000)::date)
 on conflict do nothing;
 
@@ -792,11 +744,8 @@ from app.profile_portfolio_accounts
          left join raw_data.polygon_options_historical_prices
               on polygon_options_historical_prices.contract_name = ticker_symbol
                      and floor(polygon_options_historical_prices.t / 86400000) * 86400000 between extract(epoch from now()::date - interval '8 days') * 1000 and extract(epoch from now()::date - interval '5 days') * 1000
-         left join raw_data.polygon_marketstatus_upcoming
-                   on polygon_marketstatus_upcoming.date::date = coalesce(eod_historical_prices.date::date, to_timestamp(polygon_options_historical_prices.t / 1000)::date)
 where email in ('portfolio-test-12@gainy.app', 'portfolio-test-25@gainy.app')
   and profile_portfolio_accounts.type = 'secondary'
-  and polygon_marketstatus_upcoming.date is null
 order by profile_id, ticker_symbol, coalesce(eod_historical_prices.date::date, to_timestamp(polygon_options_historical_prices.t / 1000)::date) desc
 on conflict do nothing;
 
@@ -836,11 +785,8 @@ from app.profile_portfolio_accounts
          left join raw_data.polygon_options_historical_prices
                    on polygon_options_historical_prices.contract_name = ticker_symbol
                        and to_timestamp(polygon_options_historical_prices.t / 1000)::date > sell_tx.date
-         left join raw_data.polygon_marketstatus_upcoming
-                   on polygon_marketstatus_upcoming.date::date = coalesce(eod_historical_prices.date::date, to_timestamp(polygon_options_historical_prices.t / 1000)::date)
 where email in ('portfolio-test-12@gainy.app', 'portfolio-test-25@gainy.app')
   and profile_portfolio_accounts.type = 'primary'
-  and polygon_marketstatus_upcoming.date is null
 order by profile_id, ticker_symbol, coalesce(eod_historical_prices.date::date, to_timestamp(polygon_options_historical_prices.t / 1000)::date)
 on conflict do nothing;
 
@@ -878,11 +824,8 @@ from app.profile_portfolio_accounts
          left join raw_data.polygon_options_historical_prices
               on polygon_options_historical_prices.contract_name = ticker_symbol
                      and floor(polygon_options_historical_prices.t / 86400000) * 86400000 between extract(epoch from now()::date - interval '8 days') * 1000 and extract(epoch from now()::date - interval '5 days') * 1000
-         left join raw_data.polygon_marketstatus_upcoming
-                   on polygon_marketstatus_upcoming.date::date = coalesce(eod_historical_prices.date::date, to_timestamp(polygon_options_historical_prices.t / 1000)::date)
 where email in ('portfolio-test-13@gainy.app', 'portfolio-test-26@gainy.app')
   and profile_portfolio_accounts.type = 'secondary'
-  and polygon_marketstatus_upcoming.date is null
 order by profile_id, ticker_symbol, coalesce(eod_historical_prices.date::date, to_timestamp(polygon_options_historical_prices.t / 1000)::date) desc
 on conflict do nothing;
 
@@ -922,10 +865,7 @@ from app.profile_portfolio_accounts
          left join raw_data.polygon_options_historical_prices
                    on polygon_options_historical_prices.contract_name = ticker_symbol
                        and to_timestamp(polygon_options_historical_prices.t / 1000)::date > sell_tx.date
-         left join raw_data.polygon_marketstatus_upcoming
-                   on polygon_marketstatus_upcoming.date::date = coalesce(eod_historical_prices.date::date, to_timestamp(polygon_options_historical_prices.t / 1000)::date)
 where email in ('portfolio-test-13@gainy.app', 'portfolio-test-26@gainy.app')
   and profile_portfolio_accounts.type = 'secondary'
-  and polygon_marketstatus_upcoming.date is null
 order by profile_id, ticker_symbol, coalesce(eod_historical_prices.date::date, to_timestamp(polygon_options_historical_prices.t / 1000)::date)
 on conflict do nothing;
