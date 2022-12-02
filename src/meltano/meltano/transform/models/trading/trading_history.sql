@@ -66,7 +66,6 @@ select data.profile_id,
        data.name,
        data.datetime,
        data.amount::double precision,
-       data.tags,
-       data.profile_id || '_' || data.type || '_' || data.id as uniq_id
+       data.tags
 from data
 where data.profile_id is not null

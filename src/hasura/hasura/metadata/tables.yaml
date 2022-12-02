@@ -2807,13 +2807,31 @@
   object_relationships:
     - name: profile
       using:
-        foreign_key_constraint_on: profile_id
+        manual_configuration:
+          column_mapping:
+            profile_id: id
+          insertion_order: null
+          remote_table:
+            name: profiles
+            schema: app
     - name: trading_collection_version
       using:
-        foreign_key_constraint_on: trading_collection_version_id
+        manual_configuration:
+          column_mapping:
+            trading_collection_version_id: id
+          insertion_order: null
+          remote_table:
+            name: trading_collection_versions
+            schema: app
     - name: trading_money_flow
       using:
-        foreign_key_constraint_on: money_flow_id
+        manual_configuration:
+          column_mapping:
+            money_flow_id: id
+          insertion_order: null
+          remote_table:
+            name: trading_money_flow
+            schema: app
   select_permissions:
     - role: user
       permission:
