@@ -536,6 +536,7 @@ type KycFormConfig {
   address_city: KycFormFieldConfig
   address_postal_code: KycFormFieldConfig
   address_country: KycFormFieldConfig
+  address_province: KycFormFieldConfig
 }
 
 type KycFormFieldConfig {

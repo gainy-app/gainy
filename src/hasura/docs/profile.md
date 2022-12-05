@@ -1,3 +1,13 @@
+1. [Create profile](#create-profile)
+2. [Update onboarding info](#update-onboarding-info)
+3. [Update interests and categories](#update-interests-and-categories)
+4. [Update favorite collections](#update-favorite-collections)
+5. [Update watchlisted tickers](#update-watchlisted-tickers)
+6. [Metrics settings](#metrics-settings)
+7. [Metrics settings for a collection](#metrics-settings-for-a-collection)
+8. [Delete user](#delete-user)
+9. [Profile flags](#profile-flags)
+
 ### Create profile
 
 ```graphql
@@ -235,6 +245,30 @@ query{
 mutation {
   delete_app_profiles_by_pk(id: 1) {
     id
+  }
+}
+```
+
+### Profile flags
+
+```graphql
+{
+  app_profiles {
+    flags{
+      is_trading_enabled
+      is_region_changing_allowed
+    }
+  }
+}
+```
+Update
+```graphql
+mutation UpdateProfileFlags($profile_id: Int!, $is_trading_enabled: Boolean) {
+  insert_app_profile_flags_one(
+      object: {profile_id: $profile_id, is_trading_enabled: $is_trading_enabled}, 
+      on_conflict: {constraint: profile_flags_pkey, update_columns: is_trading_enabled}
+  ) {
+    profile_id
   }
 }
 ```
