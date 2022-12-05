@@ -464,6 +464,48 @@
             user_id:
               _eq: X-Hasura-User-Id
 - table:
+    name: profile_flags
+    schema: app
+  object_relationships:
+    - name: profile
+      using:
+        foreign_key_constraint_on: profile_id
+  insert_permissions:
+    - role: user
+      permission:
+        check:
+          profile:
+            user_id:
+              _eq: X-Hasura-User-Id
+        columns:
+          - is_trading_enabled
+          - profile_id
+  select_permissions:
+    - role: user
+      permission:
+        columns:
+          - is_region_changing_allowed
+          - is_trading_enabled
+          - profile_id
+        filter:
+          profile:
+            user_id:
+              _eq: X-Hasura-User-Id
+  update_permissions:
+    - role: user
+      permission:
+        columns:
+          - is_trading_enabled
+          - profile_id
+        filter:
+          profile:
+            user_id:
+              _eq: X-Hasura-User-Id
+        check:
+          profile:
+            user_id:
+              _eq: X-Hasura-User-Id
+- table:
     name: profile_holdings
     schema: app
   object_relationships:
@@ -923,6 +965,15 @@
     name: profiles
     schema: app
   object_relationships:
+    - name: flags
+      using:
+        manual_configuration:
+          column_mapping:
+            id: profile_id
+          insertion_order: null
+          remote_table:
+            name: profile_flags
+            schema: public
     - name: portfolio_gains
       using:
         manual_configuration:
@@ -2146,6 +2197,31 @@
             - profile_id:
                 _is_null: true
         allow_aggregations: true
+- table:
+    name: profile_flags
+    schema: public
+  object_relationships:
+    - name: profile
+      using:
+        manual_configuration:
+          column_mapping:
+            profile_id: id
+          insertion_order: null
+          remote_table:
+            name: profiles
+            schema: app
+  select_permissions:
+    - role: user
+      permission:
+        columns:
+          - profile_id
+          - is_region_changing_allowed
+          - is_trading_enabled
+          - is_test
+        filter:
+          profile:
+            user_id:
+              _eq: X-Hasura-User-Id
 - table:
     name: profile_holding_groups
     schema: public

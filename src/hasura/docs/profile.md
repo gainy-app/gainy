@@ -238,3 +238,27 @@ mutation {
   }
 }
 ```
+
+### Profile flags
+
+```graphql
+{
+  app_profiles {
+    flags{
+      is_trading_enabled
+      is_region_changing_allowed
+    }
+  }
+}
+```
+Update
+```graphql
+mutation UpdateProfileFlags($profile_id: Int!, $is_trading_enabled: Boolean) {
+  insert_app_profile_flags_one(
+      object: {profile_id: $profile_id, is_trading_enabled: $is_trading_enabled}, 
+      on_conflict: {constraint: profile_flags_pkey, update_columns: is_trading_enabled}
+  ) {
+    profile_id
+  }
+}
+```
