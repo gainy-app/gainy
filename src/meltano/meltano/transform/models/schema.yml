@@ -73,6 +73,7 @@ sources:
       - name: profile_categories
       - name: profile_collection_match_score
       - name: profile_favorite_collections
+      - name: profile_flags
       - name: profile_holdings
       - name: profile_interests
       - name: profile_plaid_access_tokens
@@ -2536,6 +2537,21 @@ models:
         tests:
           - type:
               type: 'character varying'
+
+  - name: profile_flags
+    columns:
+      - name: profile_id
+        tests:
+          - type:
+              type: 'integer'
+      - name: is_region_changing_allowed
+        tests:
+          - type:
+              type: 'boolean'
+      - name: is_trading_enabled
+        tests:
+          - type:
+              type: 'boolean'
 
 exposures:
   - name: ticker_search_index
