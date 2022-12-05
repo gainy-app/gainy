@@ -2,7 +2,7 @@ import os
 from functools import cached_property
 
 from _stripe.api import StripeApi
-from gainy.utils import env, ENV_PRODUCTION
+from gainy.utils import env, ENV_PRODUCTION, ENV_LOCAL
 from portfolio.plaid.service import PlaidService
 from portfolio.service import PortfolioService
 from portfolio.service.chart import PortfolioChartService
@@ -14,6 +14,7 @@ from services.sendgrid import SendGridService
 from services.sqs import SqsAdapter
 from services.twilio import TwilioClient
 from trading.drivewealth.queue_message_handler import DriveWealthQueueMessageHandler
+from trading.kyc_form_validator import KycFormValidator
 from trading.service import TradingService
 from trading.repository import TradingRepository
 from trading.drivewealth.api import DriveWealthApi
@@ -71,7 +72,7 @@ class ContextContainer(GainyContextContainer):
             self.sms_verification_client,
             self.email_verification_client,
         ],
-                                   env() != ENV_PRODUCTION)
+                                   env() not in [ENV_PRODUCTION, ENV_LOCAL])
 
     ## portfolio
     @cached_property
@@ -106,11 +107,16 @@ class ContextContainer(GainyContextContainer):
                                    self.drivewealth_api, self.plaid_service,
                                    self.notification_service)
 
-    ## trading
+    # trading
+    @cached_property
+    def kyc_form_validator(self) -> KycFormValidator:
+        return KycFormValidator(self.trading_repository)
+
     @cached_property
     def trading_service(self) -> TradingService:
         return TradingService(self.trading_repository,
-                              self.drivewealth_provider, self.plaid_service)
+                              self.drivewealth_provider, self.plaid_service,
+                              self.kyc_form_validator)
 
     @cached_property
     def trading_repository(self) -> TradingRepository:
