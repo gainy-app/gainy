@@ -350,6 +350,13 @@
         ]
       }
     },
+    "ticker_risk_scores": {
+      "metadata": {
+        "table-key-properties": [
+          "symbol"
+        ]
+      }
+    },
     "ticker_shares_stats": {
       "metadata": {
         "replication-key": "updated_at",

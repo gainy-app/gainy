@@ -64,8 +64,7 @@ class KycFormValidator(ABC):
 
             country_code = country_components[0]['short_name']
             logging_extra["country_code"] = country_code
-            if env(
-            ) == ENV_PRODUCTION and country_code not in ALLOWED_COUNTRY_CODES:
+            if country_code not in ALLOWED_COUNTRY_CODES:
                 raise ValidationException(
                     'Currently the following countries are supported: ' +
                     ', '.join(ALLOWED_COUNTRY_CODES))
