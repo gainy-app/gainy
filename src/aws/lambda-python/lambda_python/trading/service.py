@@ -2,26 +2,39 @@ from typing import Iterable, Dict, List
 from decimal import Decimal
 import io
 
+from exceptions import ValidationException
 from gainy.data_access.operators import OperatorIn
 from gainy.exceptions import NotFoundException, BadRequestException
 from gainy.trading.drivewealth.models import CollectionStatus, CollectionHoldingStatus
 from gainy.plaid.common import handle_error
+from portfolio.plaid import PlaidService
 from services import S3
+from trading.drivewealth.provider import DriveWealthProvider
 from trading.exceptions import WrongTradingCollectionVersionStatusException
 from trading.kyc_form_validator import KycFormValidator
 from gainy.plaid.models import PlaidAccessToken, PlaidAccount
 from trading.models import KycDocument, TradingMoneyFlow, ProfileKycStatus, TradingStatement
 
 import plaid
-from gainy.utils import get_logger
+from gainy.utils import get_logger, env, ENV_PRODUCTION
 from gainy.trading.models import TradingAccount, TradingCollectionVersion, TradingCollectionVersionStatus, \
     FundingAccount
 from gainy.trading.service import TradingService as GainyTradingService
+from trading.repository import TradingRepository
+from verification.models import VerificationCodeChannel
 
 logger = get_logger(__name__)
 
 
 class TradingService(GainyTradingService):
+
+    def __init__(self, trading_repository: TradingRepository,
+                 drivewealth_provider: DriveWealthProvider,
+                 plaid_service: PlaidService,
+                 kyc_form_validator: KycFormValidator):
+        super().__init__(trading_repository, drivewealth_provider,
+                         plaid_service)
+        self.kyc_form_validator = kyc_form_validator
 
     def kyc_send_form(self, kyc_form: dict) -> ProfileKycStatus:
         if not kyc_form:
@@ -171,6 +184,9 @@ class TradingService(GainyTradingService):
         self._get_provider_service().debug_delete_data(profile_id)
 
     def validate_kyc_form(self, kyc_form):
+        if env() != ENV_PRODUCTION:
+            return
+
         KycFormValidator.validate_address(
             street1=kyc_form['address_street1'],
             street2=kyc_form['address_street2'],
@@ -179,6 +195,28 @@ class TradingService(GainyTradingService):
             postal_code=kyc_form['address_postal_code'],
             country=kyc_form['address_country'] or "USA",
         )
+
+        try:
+            self.kyc_form_validator.validate_verification(
+                profile_id=kyc_form['profile_id'],
+                channel=VerificationCodeChannel.SMS,
+                address=kyc_form['phone_number'],
+            )
+        except ValidationException as e:
+            logger.info(e)
+            raise ValidationException("Phone number %s is not verified." %
+                                      kyc_form['phone_number'])
+
+        try:
+            self.kyc_form_validator.validate_verification(
+                profile_id=kyc_form['profile_id'],
+                channel=VerificationCodeChannel.EMAIL,
+                address=kyc_form['email_address'],
+            )
+        except ValidationException as e:
+            logger.info(e)
+            raise ValidationException("Email %s is not verified." %
+                                      kyc_form['email_address'])
 
     def cancel_pending_order(
             self, trading_collection_version: TradingCollectionVersion):

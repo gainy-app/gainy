@@ -3,7 +3,10 @@ import os
 from abc import ABC
 
 from exceptions import ValidationException
+from gainy.data_access.operators import OperatorLt, OperatorNotNull
 from gainy.utils import get_logger, env, ENV_PRODUCTION
+from trading.repository import TradingRepository
+from verification.models import VerificationCodeChannel, VerificationCode
 
 logger = get_logger(__name__)
 
@@ -12,6 +15,9 @@ ALLOWED_COUNTRY_CODES = ['US']
 
 
 class KycFormValidator(ABC):
+
+    def __init__(self, repository: TradingRepository):
+        self.repository = repository
 
     @staticmethod
     def validate_address(street1, street2, city, province, postal_code,
@@ -58,8 +64,7 @@ class KycFormValidator(ABC):
 
             country_code = country_components[0]['short_name']
             logging_extra["country_code"] = country_code
-            if env(
-            ) == ENV_PRODUCTION and country_code not in ALLOWED_COUNTRY_CODES:
+            if country_code not in ALLOWED_COUNTRY_CODES:
                 raise ValidationException(
                     'Currently the following countries are supported: ' +
                     ', '.join(ALLOWED_COUNTRY_CODES))
@@ -101,3 +106,20 @@ class KycFormValidator(ABC):
             }
         finally:
             logger.info("validate_address", extra=logging_extra)
+
+    def validate_verification(self, profile_id: int,
+                              channel: VerificationCodeChannel, address: str):
+        entity = self.repository.find_one(
+            VerificationCode, {
+                "profile_id": profile_id,
+                "channel": channel,
+                "address": address,
+                "verified_at": OperatorNotNull(),
+            })
+
+        if entity:
+            return
+
+        raise ValidationException(
+            "%s communication address %s is not verified." %
+            (channel.name, address))
