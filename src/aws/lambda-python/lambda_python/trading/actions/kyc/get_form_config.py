@@ -54,7 +54,7 @@ class KycGetFormConfig(HasuraAction):
                 "placeholder": "USA",
                 "choices": country_choices
             },
-            "province": {
+            "address_province": {
                 "required": True,
                 "choices": us_state_choices
             },

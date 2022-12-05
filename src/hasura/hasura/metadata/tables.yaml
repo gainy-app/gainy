@@ -2217,7 +2217,6 @@
           - profile_id
           - is_region_changing_allowed
           - is_trading_enabled
-          - is_test
         filter:
           profile:
             user_id:
