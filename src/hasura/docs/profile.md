@@ -1,3 +1,13 @@
+1. [Create profile](#create-profile)
+2. [Update onboarding info](#update-onboarding-info)
+3. [Update interests and categories](#update-interests-and-categories)
+4. [Update favorite collections](#update-favorite-collections)
+5. [Update watchlisted tickers](#update-watchlisted-tickers)
+6. [Metrics settings](#metrics-settings)
+7. [Metrics settings for a collection](#metrics-settings-for-a-collection)
+8. [Delete user](#delete-user)
+9. [Profile flags](#profile-flags)
+
 ### Create profile
 
 ```graphql
