@@ -8,6 +8,7 @@
 - [Get KYC status](#get-kyc-status)
 - [Generate pre-signed-url to upload documents](#generate-pre-signed-url-to-upload-documents)
 - [Add KYC uploaded Document](#add-kyc-uploaded-document)
+- [Verification](#verification)
 - [Country flags](#add-kyc-uploaded-document)
 
 ### Fill KYC fields
