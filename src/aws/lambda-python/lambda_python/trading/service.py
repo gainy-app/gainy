@@ -207,17 +207,6 @@ class TradingService(GainyTradingService):
             raise ValidationException("Phone number %s is not verified." %
                                       kyc_form['phone_number'])
 
-        try:
-            self.kyc_form_validator.validate_verification(
-                profile_id=kyc_form['profile_id'],
-                channel=VerificationCodeChannel.EMAIL,
-                address=kyc_form['email_address'],
-            )
-        except ValidationException as e:
-            logger.info(e)
-            raise ValidationException("Email %s is not verified." %
-                                      kyc_form['email_address'])
-
     def cancel_pending_order(
             self, trading_collection_version: TradingCollectionVersion):
         self.trading_repository.refresh(trading_collection_version)

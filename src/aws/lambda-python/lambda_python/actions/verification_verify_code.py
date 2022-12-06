@@ -17,6 +17,9 @@ class VerificationVerifyCode(HasuraAction):
         verification_code_id = input_params["verification_code_id"]
         user_input = input_params["user_input"]
 
+        if not verification_code_id:
+            raise NotFoundException()
+
         verification_code: VerificationCode = context_container.get_repository(
         ).find_one(VerificationCode, {"id": verification_code_id})
         if not verification_code:
