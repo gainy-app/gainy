@@ -1,4 +1,4 @@
-from typing import Iterable, Dict, List
+from typing import Iterable, List
 from decimal import Decimal
 import io
 
@@ -138,25 +138,6 @@ class TradingService(GainyTradingService):
 
         return money_flow
 
-    def reconfigure_collection_holdings(self, profile_id: int,
-                                        collection_id: int,
-                                        trading_account_id: int,
-                                        weights: Dict[str, Decimal],
-                                        target_amount_delta: Decimal):
-
-        # TODO check if account is set up for trading
-        collection_version = TradingCollectionVersion()
-        collection_version.status = TradingCollectionVersionStatus.PENDING
-        collection_version.profile_id = profile_id
-        collection_version.collection_id = collection_id
-        collection_version.weights = weights
-        collection_version.target_amount_delta = target_amount_delta
-        collection_version.trading_account_id = trading_account_id
-
-        self.trading_repository.persist(collection_version)
-
-        return collection_version
-
     # TODO deprecated ?
     def get_actual_collection_holdings(
             self, profile_id, collection_id) -> List[CollectionHoldingStatus]:
@@ -206,17 +187,6 @@ class TradingService(GainyTradingService):
             logger.info(e)
             raise ValidationException("Phone number %s is not verified." %
                                       kyc_form['phone_number'])
-
-        try:
-            self.kyc_form_validator.validate_verification(
-                profile_id=kyc_form['profile_id'],
-                channel=VerificationCodeChannel.EMAIL,
-                address=kyc_form['email_address'],
-            )
-        except ValidationException as e:
-            logger.info(e)
-            raise ValidationException("Email %s is not verified." %
-                                      kyc_form['email_address'])
 
     def cancel_pending_order(
             self, trading_collection_version: TradingCollectionVersion):
