@@ -97,7 +97,7 @@ def test_get_actual_collection_data(monkeypatch):
         assert _portfolio == portfolio
         return portfolio_status
 
-    service = DriveWealthProviderCollection(drivewealth_repository, None)
+    service = DriveWealthProviderCollection(drivewealth_repository, None, None)
     monkeypatch.setattr(service, "sync_portfolio_status",
                         mock_sync_portfolio_status)
     holdings = service.get_actual_collection_data(profile_id,
@@ -136,7 +136,7 @@ def test_create_autopilot_run(monkeypatch):
 
     monkeypatch.setattr(api, "create_autopilot_run", mock_create_autopilot_run)
 
-    service = DriveWealthProviderCollection(drivewealth_repository, api)
+    service = DriveWealthProviderCollection(drivewealth_repository, api, None)
     autopilot_run = service._create_autopilot_run(account, collection_version)
 
     assert autopilot_run.ref_id == data["id"]

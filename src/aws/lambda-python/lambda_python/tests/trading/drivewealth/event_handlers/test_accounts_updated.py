@@ -42,7 +42,7 @@ def test_not_exists(monkeypatch):
             "ref_id": account_id
         }, None)]))
 
-    provider = DriveWealthProvider(None, None, None, None)
+    provider = DriveWealthProvider(None, None, None, None, None)
 
     def mock_sync_trading_account(account_ref_id, fetch_info):
         assert fetch_info

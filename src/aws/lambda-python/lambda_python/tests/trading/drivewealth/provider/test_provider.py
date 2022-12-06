@@ -78,7 +78,8 @@ def test_transfer_money(monkeypatch, amount):
     monkeypatch.setattr(money_flow, "id", money_flow_id)
     monkeypatch.setattr(money_flow, "profile_id", profile_id)
 
-    service = DriveWealthProvider(drivewealth_repository, api, None, None)
+    service = DriveWealthProvider(drivewealth_repository, api, None, None,
+                                  None)
     monkeypatch.setattr(service, "_on_money_transfer", mock_noop)
     entity = service.transfer_money(money_flow, amount, trading_account_id,
                                     funding_account_id)
@@ -131,7 +132,8 @@ def test_sync_deposit(monkeypatch):
         api, "get_deposit",
         mock_get_deposit(deposit_ref_id, account_ref_id, status=status))
 
-    service = DriveWealthProvider(drivewealth_repository, api, None, None)
+    service = DriveWealthProvider(drivewealth_repository, api, None, None,
+                                  None)
     service.sync_deposit(deposit_ref_id=deposit_ref_id)
 
     assert deposit.__class__ in persisted_objects
@@ -178,7 +180,8 @@ def test_sync_redemption(monkeypatch):
         api, "get_redemption",
         mock_get_redemption(redemption_ref_id, account_ref_id, status=status))
 
-    service = DriveWealthProvider(drivewealth_repository, api, None, None)
+    service = DriveWealthProvider(drivewealth_repository, api, None, None,
+                                  None)
     service.sync_redemption(redemption_ref_id=redemption_ref_id)
 
     assert redemption.__class__ in persisted_objects
@@ -226,7 +229,7 @@ def test_create_trading_statements(monkeypatch):
     monkeypatch.setattr(repository, "persist",
                         custom_mock_persist(persisted_objects))
 
-    provider = DriveWealthProvider(repository, None, None, None)
+    provider = DriveWealthProvider(repository, None, None, None, None)
     provider.create_trading_statements(entities, profile_id)
 
     assert entity1 in persisted_objects[DriveWealthStatement]
@@ -261,7 +264,7 @@ def test_download_statement(monkeypatch):
 
     monkeypatch.setattr(api, "get_statement_url", mock_get_statement_url)
 
-    provider = DriveWealthProvider(repository, api, None, None)
+    provider = DriveWealthProvider(repository, api, None, None, None)
     assert url == provider.download_statement(statement)
 
 
@@ -289,7 +292,7 @@ def test_handle_instrument_status_change(monkeypatch):
                         "notify_dw_instrument_status_changed",
                         mock_record_calls(calls))
 
-    provider = DriveWealthProvider(repository, None, None,
+    provider = DriveWealthProvider(repository, None, None, None,
                                    notification_service)
     provider.handle_instrument_status_change(instrument, new_status)
 
