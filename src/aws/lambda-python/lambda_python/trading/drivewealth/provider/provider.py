@@ -43,7 +43,10 @@ class DriveWealthProvider(DriveWealthProviderKYC,
             account_name: str) -> DriveWealthBankAccount:
         repository = self.repository
         bank_account = repository.find_one(
-            DriveWealthBankAccount, {"plaid_access_token_id": access_token.id})
+            DriveWealthBankAccount, {
+                "plaid_access_token_id": access_token.id,
+                "plaid_account_id": account_id
+            })
         if bank_account:
             return bank_account
 
