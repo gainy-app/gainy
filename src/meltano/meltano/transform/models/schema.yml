@@ -79,6 +79,7 @@ sources:
       - name: profile_plaid_access_tokens
       - name: profile_portfolio_accounts
       - name: profile_portfolio_transactions
+      - name: profile_scoring_settings
       - name: profile_ticker_match_score
       - name: profiles
       - name: subscriptions
