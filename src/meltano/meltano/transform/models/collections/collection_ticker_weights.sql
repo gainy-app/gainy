@@ -16,6 +16,7 @@ with raw_ticker_collections_weights as materialized
                     symbol,
                     date_trunc('month', ticker_collections_weights.date::date) as date,
                     ticker_collections_weights.weight::numeric,
+                    optimized_at::date,
                     _sdc_extracted_at as updated_at
              from {{ source('gainy', 'ticker_collections_weights') }}
                       join {{ ref('collections') }} on collections.name = ticker_collections_weights.ttf_name
@@ -32,6 +33,7 @@ with raw_ticker_collections_weights as materialized
                     symbol,
                     date,
                     weight,
+                    optimized_at,
                     updated_at
              from raw_ticker_collections_weights
 
@@ -44,6 +46,7 @@ with raw_ticker_collections_weights as materialized
                     symbol,
                     dd::date              as date,
                     weight,
+                    optimized_at,
                     updated_at
              from (
                       select collection_id, max(date) as date
@@ -62,6 +65,7 @@ with raw_ticker_collections_weights as materialized
                     symbol,
                     dd::date               as date,
                     ticker_collections.weight::numeric,
+                    optimized_at::date,
                     _sdc_extracted_at      as updated_at
              from {{ source('gainy', 'ticker_collections') }}
                       join {{ ref('collections') }} on collections.name = ticker_collections.ttf_name
@@ -118,6 +122,7 @@ with raw_ticker_collections_weights as materialized
                        when historical_prices.date >= ticker_collections_weights.date
                            then ticker_collections_weights.date
                        end                                as period_id,
+                   ticker_collections_weights.optimized_at,
                    greatest(ticker_collections_weights.updated_at,
                             historical_prices.updated_at) as updated_at
              from ticker_collections_weights
@@ -154,6 +159,7 @@ with raw_ticker_collections_weights as materialized
                              weight)    as weight,
                     coalesce(lag(period_id) over (partition by collection_id,symbol order by date desc),
                              period_id) as period_id,
+                    optimized_at,
                     updated_at
              from ticker_collections_weights_expanded0
          ),
@@ -169,6 +175,7 @@ with raw_ticker_collections_weights as materialized
                     over (partition by collection_id, symbol, period_id order by date) as latest_rebalance_price,
                     first_value(weight)
                     over (partition by collection_id, symbol, period_id order by date) as latest_rebalance_weight,
+                    optimized_at,
                     updated_at
              from ticker_collections_weights_expanded1
              where period_id is not null
@@ -202,6 +209,7 @@ with raw_ticker_collections_weights as materialized
                     coalesce(t.date, ticker_collections_next_date.date) as date,
                     t.weight,
                     t.price,
+                    t.optimized_at,
                     t.updated_at
              from (
                       select profile_id,
@@ -211,6 +219,7 @@ with raw_ticker_collections_weights as materialized
                              next_date           as date,
                              weight / weight_sum as weight,
                              price::numeric,
+                             optimized_at,
                              updated_at
                       from ticker_collections_weights_expanded
                                join ticker_collections_weights_stats using (collection_uniq_id, date)

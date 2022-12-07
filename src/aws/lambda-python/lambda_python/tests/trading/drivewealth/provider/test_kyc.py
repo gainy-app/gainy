@@ -47,7 +47,8 @@ def test_sync_kyc(monkeypatch):
     monkeypatch.setattr(api, "get_kyc_status", mock_get_kyc_status)
     monkeypatch.setattr(api, "get_user_documents", mock_get_user_documents)
 
-    service = DriveWealthProvider(drivewealth_repository, api, None, None)
+    service = DriveWealthProvider(drivewealth_repository, api, None, None,
+                                  None)
 
     def mock_get_profile_id_by_user_id(user_id):
         assert user_id == user_ref_id

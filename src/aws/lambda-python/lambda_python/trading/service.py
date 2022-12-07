@@ -1,4 +1,4 @@
-from typing import Iterable, Dict, List
+from typing import Iterable, List
 from decimal import Decimal
 import io
 
@@ -137,25 +137,6 @@ class TradingService(GainyTradingService):
                                                     funding_account.id)
 
         return money_flow
-
-    def reconfigure_collection_holdings(self, profile_id: int,
-                                        collection_id: int,
-                                        trading_account_id: int,
-                                        weights: Dict[str, Decimal],
-                                        target_amount_delta: Decimal):
-
-        # TODO check if account is set up for trading
-        collection_version = TradingCollectionVersion()
-        collection_version.status = TradingCollectionVersionStatus.PENDING
-        collection_version.profile_id = profile_id
-        collection_version.collection_id = collection_id
-        collection_version.weights = weights
-        collection_version.target_amount_delta = target_amount_delta
-        collection_version.trading_account_id = trading_account_id
-
-        self.trading_repository.persist(collection_version)
-
-        return collection_version
 
     # TODO deprecated ?
     def get_actual_collection_holdings(

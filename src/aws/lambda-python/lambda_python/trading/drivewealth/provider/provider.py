@@ -20,6 +20,7 @@ from gainy.utils import get_logger
 from gainy.trading.models import FundingAccount, TradingAccount, TradingCollectionVersion, TradingMoneyFlowStatus
 from gainy.trading.drivewealth.models import DriveWealthAccount, DriveWealthUser, DriveWealthInstrument, \
     DriveWealthInstrumentStatus
+from trading.repository import TradingRepository
 
 logger = get_logger(__name__)
 
@@ -30,9 +31,10 @@ class DriveWealthProvider(DriveWealthProviderKYC,
                           DriveWealthProviderCollection):
 
     def __init__(self, repository: DriveWealthRepository, api: DriveWealthApi,
+                 trading_repository: TradingRepository,
                  plaid_service: PlaidService,
                  notification_service: NotificationService):
-        super().__init__(repository, api)
+        super().__init__(repository, api, trading_repository)
         self.plaid_service = plaid_service
         self.notification_service = notification_service
 

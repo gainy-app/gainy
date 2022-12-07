@@ -14,7 +14,7 @@ message = {
 def test_exists(monkeypatch):
     deposit = DriveWealthDeposit()
 
-    provider = DriveWealthProvider(None, None, None, None)
+    provider = DriveWealthProvider(None, None, None, None, None)
     update_money_flow_from_dw_calls = []
     monkeypatch.setattr(provider, 'update_money_flow_from_dw',
                         mock_record_calls(update_money_flow_from_dw_calls))
@@ -43,7 +43,7 @@ def test_exists(monkeypatch):
 
 
 def test_not_exists(monkeypatch):
-    provider = DriveWealthProvider(None, None, None, None)
+    provider = DriveWealthProvider(None, None, None, None, None)
     update_money_flow_from_dw_calls = []
     monkeypatch.setattr(provider, 'update_money_flow_from_dw',
                         mock_record_calls(update_money_flow_from_dw_calls))
