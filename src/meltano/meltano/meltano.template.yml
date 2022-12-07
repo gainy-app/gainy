@@ -197,7 +197,6 @@ plugins:
       pip_url: tap-bigquery
       config:
         start_datetime: '2020-01-01'
-        credentials_path: /project/bigquery-credentials.json
 
   loaders:
     - name: target-postgres
