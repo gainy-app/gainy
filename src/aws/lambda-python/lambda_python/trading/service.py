@@ -81,8 +81,16 @@ class TradingService(GainyTradingService):
             return handle_error(e)
 
         repository = self.trading_repository
-        funding_account = repository.find_one(FundingAccount,
-                                              {"plaid_account_id": account_id})
+        if provider_bank_account.funding_account_id:
+            return repository.find_one(
+                FundingAccount,
+                {"id": provider_bank_account.funding_account_id})
+
+        funding_account = repository.find_one(
+            FundingAccount, {
+                "plaid_access_token_id": access_token.id,
+                "plaid_account_id": account_id
+            })
         if funding_account:
             raise BadRequestException('Account already connected.')
 
