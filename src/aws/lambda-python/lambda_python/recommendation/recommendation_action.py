@@ -16,7 +16,8 @@ class GetRecommendedCollections(HasuraAction):
         limit = input_params.get("limit", 30)
 
         try:
-            collections = context_container.recommendation_service.get_recommended_collections(profile_id, limit)
+            collections = context_container.recommendation_service.get_recommended_collections(
+                profile_id, limit)
 
             return format_collections(collections)
         except Exception as e:

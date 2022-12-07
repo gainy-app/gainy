@@ -41,9 +41,7 @@ class SetRecommendationSettings(HasuraAction):
         else:
             collections = []
 
-        return {
-            "recommended_collections": format_collections(collections)
-        }
+        return {"recommended_collections": format_collections(collections)}
 
     def set_interests(self, db_conn, profile_id, interests):
         if interests is None:

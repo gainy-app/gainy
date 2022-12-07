@@ -134,7 +134,8 @@ class SetUserCategories(HasuraTrigger):
                 [(profile_id, category_id, True)
                  for category_id in categories])
 
-        context_container.recommendation_service.compute_match_score(profile_id)
+        context_container.recommendation_service.compute_match_score(
+            profile_id)
 
     @staticmethod
     def _list_index(value, list_size):
