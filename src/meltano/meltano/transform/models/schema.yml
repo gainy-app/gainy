@@ -2544,6 +2544,10 @@ models:
         tests:
           - type:
               type: 'integer'
+      - name: is_personalization_enabled
+        tests:
+          - type:
+              type: 'boolean'
       - name: is_region_changing_allowed
         tests:
           - type:
