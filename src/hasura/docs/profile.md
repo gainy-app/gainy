@@ -257,6 +257,7 @@ mutation {
     flags{
       is_trading_enabled
       is_region_changing_allowed
+      is_personalization_enabled
     }
   }
 }

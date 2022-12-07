@@ -21,6 +21,7 @@ from (
                 weight,
                 price,
                 collection_uniq_id || '_' || symbol as id,
+                optimized_at,
                 updated_at
          from {{ ref('collection_ticker_weights') }}
                   join (

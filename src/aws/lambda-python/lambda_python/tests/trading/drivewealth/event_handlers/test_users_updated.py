@@ -6,7 +6,7 @@ def test(monkeypatch):
     user_id = "user_id"
     sync_user_called = False
 
-    provider = DriveWealthProvider(None, None, None, None)
+    provider = DriveWealthProvider(None, None, None, None, None)
 
     def mock_sync_user(_user_id):
         assert _user_id == user_id

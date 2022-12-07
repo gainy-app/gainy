@@ -104,7 +104,8 @@ class ContextContainer(GainyContextContainer):
     @cached_property
     def drivewealth_provider(self):
         return DriveWealthProvider(self.drivewealth_repository,
-                                   self.drivewealth_api, self.plaid_service,
+                                   self.drivewealth_api,
+                                   self.trading_repository, self.plaid_service,
                                    self.notification_service)
 
     # trading

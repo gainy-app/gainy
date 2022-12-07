@@ -2215,6 +2215,7 @@
       permission:
         columns:
           - profile_id
+          - is_personalization_enabled
           - is_region_changing_allowed
           - is_trading_enabled
         filter:
