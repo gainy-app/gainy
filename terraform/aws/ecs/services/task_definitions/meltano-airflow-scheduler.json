@@ -101,7 +101,7 @@
     { "name": "TARGET_BIGQUERY_LOCATION",              "value": "${bigquery_location}" },
     { "name": "BIGQUERY_PROJECT_ID",                   "value": "${bigquery_google_project}" },
     { "name": "BIGQUERY_CREDENTIALS",                  "value": ${jsonencode(bigquery_credentials)} },
-    { "name": "TAP_BIGQUERY_STREAMS",                  "value": ${jsonencode([{"columns": ["*"], "datetime_key": "updated_at", "name": "stats_ttf_clicks", "table": "${bigquery_google_project}.analytics_287066082.stats_ttf_clicks"}])} },
+    { "name": "TAP_BIGQUERY_STREAMS",                  "value": ${jsonencode(jsonencode([{"columns": ["*"], "datetime_key": "updated_at", "name": "stats_ttf_clicks", "table": "${bigquery_google_project}.analytics_287066082.stats_ttf_clicks"}]))} },
 
     { "name": "DBT_THREADS",                           "value": "${dbt_threads}" },
     { "name": "DBT_TARGET_SCHEMA",                     "value": "${pg_transform_schema}" },
