@@ -6,9 +6,6 @@ from psycopg2.extras import execute_values
 from common.context_container import ContextContainer
 from common.hasura_function import HasuraTrigger
 from gainy.utils import get_logger
-from gainy.data_access.db_lock import LockAcquisitionTimeout
-from gainy.data_access.optimistic_lock import ConcurrentVersionUpdate
-from gainy.recommendation.compute import ComputeRecommendationsAndPersist
 
 logger = get_logger(__name__)
 script_directory = os.path.dirname(os.path.realpath(__file__))
@@ -124,7 +121,7 @@ class SetUserCategories(HasuraTrigger):
             'final_score': final_score,
             'categories': categories,
         }
-        logger.info('set_user_categories ', extra=logging_extra)
+        logger.info('set_user_categories', extra=logging_extra)
 
         with db_conn.cursor() as cursor:
             cursor.execute(
@@ -137,22 +134,7 @@ class SetUserCategories(HasuraTrigger):
                 [(profile_id, category_id, True)
                  for category_id in categories])
 
-        repository = context_container.recommendation_repository
-        recommendations_func = ComputeRecommendationsAndPersist(
-            repository, profile_id)
-        old_version = recommendations_func.load_version()
-        try:
-            recommendations_func.execute(max_tries=2)
-
-            new_version = recommendations_func.load_version()
-            logger.info('Calculated Match Scores',
-                        extra={
-                            **logging_extra,
-                            'old_version': old_version.recommendations_version,
-                            'new_version': new_version.recommendations_version,
-                        })
-        except (LockAcquisitionTimeout, ConcurrentVersionUpdate) as e:
-            logger.exception(e, extra=logging_extra)
+        context_container.recommendation_service.compute_match_score(profile_id)
 
     @staticmethod
     def _list_index(value, list_size):

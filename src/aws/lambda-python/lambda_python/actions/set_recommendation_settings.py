@@ -2,9 +2,7 @@ from common.context_container import ContextContainer
 from common.hasura_function import HasuraAction
 
 from psycopg2.extras import execute_values
-from gainy.data_access.db_lock import LockAcquisitionTimeout
-from gainy.data_access.optimistic_lock import ConcurrentVersionUpdate
-from gainy.recommendation.compute import ComputeRecommendationsAndPersist
+from gainy.recommendation.serivce import format_collections
 from gainy.utils import get_logger
 
 logger = get_logger(__name__)
@@ -24,43 +22,27 @@ class SetRecommendationSettings(HasuraAction):
             "recommended_collections_count")
 
         logging_extra = {
-            'function': 'SetRecommendationSettings',
             'profile_id': profile_id,
             'interests': interests,
             'categories': categories,
         }
 
+        logger.info('SetRecommendationSettings', extra=logging_extra)
+
         self.set_interests(db_conn, profile_id, interests)
         self.set_categories(db_conn, profile_id, categories)
 
-        repository = context_container.recommendation_repository
-        recommendations_func = ComputeRecommendationsAndPersist(
-            repository, profile_id)
-        old_version = recommendations_func.load_version()
-        try:
-            recommendations_func.execute(max_tries=2)
-
-            new_version = recommendations_func.load_version()
-            logger.info('Calculated Match Scores',
-                        extra={
-                            **logging_extra,
-                            'old_version': old_version.recommendations_version,
-                            'new_version': new_version.recommendations_version,
-                        })
-        except (LockAcquisitionTimeout, ConcurrentVersionUpdate) as e:
-            logger.exception(e, extra=logging_extra)
+        service = context_container.recommendation_service
+        service.compute_match_score(profile_id)
 
         if recommended_collections_count is not None:
-            collections = repository.get_recommended_collections(
+            collections = service.get_recommended_collections(
                 profile_id, recommended_collections_count)
         else:
             collections = []
 
         return {
-            "recommended_collections": [{
-                "id": id,
-                "uniq_id": uniq_id
-            } for id, uniq_id in collections]
+            "recommended_collections": format_collections(collections)
         }
 
     def set_interests(self, db_conn, profile_id, interests):

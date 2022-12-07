@@ -43,6 +43,17 @@ alter table raw_data.auto_ticker_industries add if not exists industry_1_cossim 
 alter table raw_data.auto_ticker_industries add if not exists industry_2_cossim double precision;
 alter table raw_data.auto_ticker_industries add if not exists min_cossim double precision;
 
+create table if not exists raw_data.stats_ttf_clicks
+(
+    _etl_tstamp       double precision,
+    _sdc_batched_at   timestamp,
+    _sdc_deleted_at   varchar,
+    _sdc_extracted_at timestamp,
+    clicks_count      numeric,
+    collection_id     numeric,
+    updated_at        timestamp
+);
+
 create table if not exists deployment.public_schemas
 (
     schema_name varchar   not null,
