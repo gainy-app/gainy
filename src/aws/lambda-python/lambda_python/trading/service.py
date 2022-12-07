@@ -17,8 +17,8 @@ from trading.models import KycDocument, TradingMoneyFlow, ProfileKycStatus, Trad
 
 import plaid
 from gainy.utils import get_logger, env, ENV_PRODUCTION
-from gainy.trading.models import TradingAccount, TradingCollectionVersion, TradingCollectionVersionStatus, \
-    FundingAccount
+from gainy.trading.models import TradingAccount, TradingCollectionVersion, TradingOrderStatus, \
+    FundingAccount, TradingOrder, TradingOrderSource
 from gainy.trading.service import TradingService as GainyTradingService
 from trading.repository import TradingRepository
 from verification.models import VerificationCodeChannel
@@ -191,11 +191,31 @@ class TradingService(GainyTradingService):
     def cancel_pending_order(
             self, trading_collection_version: TradingCollectionVersion):
         self.trading_repository.refresh(trading_collection_version)
-        if trading_collection_version.status != TradingCollectionVersionStatus.PENDING:
+        if trading_collection_version.status != TradingOrderStatus.PENDING:
             raise WrongTradingCollectionVersionStatusException()
 
-        trading_collection_version.status = TradingCollectionVersionStatus.CANCELLED
+        trading_collection_version.status = TradingOrderStatus.CANCELLED
         self.trading_repository.persist(trading_collection_version)
 
     def download_statement(self, statement: TradingStatement) -> str:
         return self._get_provider_service().download_statement(statement)
+
+    def check_tradeable_symbol(self, symbol: str):
+        return self._get_provider_service().check_tradeable_symbol(symbol)
+
+    def create_stock_order(self, profile_id: int, source: TradingOrderSource,
+                           symbol: str, trading_account_id: int,
+                           target_amount_delta: Decimal):
+        self.check_tradeable_symbol(symbol)
+
+        collection_order = TradingOrder()
+        collection_order.profile_id = profile_id
+        collection_order.source = source
+        collection_order.symbol = symbol
+        collection_order.status = TradingOrderStatus.PENDING
+        collection_order.target_amount_delta = target_amount_delta
+        collection_order.trading_account_id = trading_account_id
+
+        self.trading_repository.persist(collection_order)
+
+        return collection_order

@@ -10,7 +10,7 @@ import dateutil.parser
 from gainy.data_access.models import classproperty
 from gainy.trading.drivewealth.models import BaseDriveWealthModel
 from trading.models import ProfileKycStatus, KycStatus, TradingStatementType
-from gainy.trading.models import TradingCollectionVersion, TradingCollectionVersionStatus, TradingMoneyFlowStatus
+from gainy.trading.models import TradingCollectionVersion, TradingOrderStatus, TradingMoneyFlowStatus
 
 PRECISION = 1e-3
 
@@ -227,10 +227,9 @@ class DriveWealthAutopilotRun(BaseDriveWealthModel):
 
         if self.is_successful():
             trading_collection_version.set_status(
-                TradingCollectionVersionStatus.EXECUTED_FULLY)
+                TradingOrderStatus.EXECUTED_FULLY)
         elif self.is_failed():
-            trading_collection_version.set_status(
-                TradingCollectionVersionStatus.FAILED)
+            trading_collection_version.set_status(TradingOrderStatus.FAILED)
 
 
 class DriveWealthOrder(BaseDriveWealthModel):
