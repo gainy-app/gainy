@@ -75,9 +75,9 @@ def test_get_actual_collection_data(monkeypatch):
         assert _trading_account_id == trading_account_id
         return portfolio
 
-    def mock_get_profile_fund(_profile_id, _collection_id=None):
+    def mock_get_profile_fund(_profile_id, **kwargs):
         assert _profile_id == profile_id
-        assert _collection_id == collection_id
+        assert kwargs["collection_id"] == collection_id
         return fund
 
     drivewealth_repository = DriveWealthRepository(None)
