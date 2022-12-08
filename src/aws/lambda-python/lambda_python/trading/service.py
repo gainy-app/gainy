@@ -10,7 +10,7 @@ from gainy.plaid.common import handle_error
 from portfolio.plaid import PlaidService
 from services import S3
 from trading.drivewealth.provider import DriveWealthProvider
-from trading.exceptions import WrongTradingCollectionVersionStatusException
+from trading.exceptions import WrongTradingOrderStatusException
 from trading.kyc_form_validator import KycFormValidator
 from gainy.plaid.models import PlaidAccessToken, PlaidAccount
 from trading.models import KycDocument, TradingMoneyFlow, ProfileKycStatus, TradingStatement
@@ -196,14 +196,22 @@ class TradingService(GainyTradingService):
             raise ValidationException("Phone number %s is not verified." %
                                       kyc_form['phone_number'])
 
-    def cancel_pending_order(
+    def cancel_pending_collection_version(
             self, trading_collection_version: TradingCollectionVersion):
         self.trading_repository.refresh(trading_collection_version)
         if trading_collection_version.status != TradingOrderStatus.PENDING:
-            raise WrongTradingCollectionVersionStatusException()
+            raise WrongTradingOrderStatusException()
 
         trading_collection_version.status = TradingOrderStatus.CANCELLED
         self.trading_repository.persist(trading_collection_version)
+
+    def cancel_pending_order(self, trading_order: TradingOrder):
+        self.trading_repository.refresh(trading_order)
+        if trading_order.status != TradingOrderStatus.PENDING:
+            raise WrongTradingOrderStatusException()
+
+        trading_order.status = TradingOrderStatus.CANCELLED
+        self.trading_repository.persist(trading_order)
 
     def download_statement(self, statement: TradingStatement) -> str:
         return self._get_provider_service().download_statement(statement)

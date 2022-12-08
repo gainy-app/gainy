@@ -17,7 +17,7 @@ type Query {
 }
 
 type Mutation {
-  create_stock_order(
+  trading_create_stock_order(
     profile_id: Int!
     symbol: String!
     target_amount_delta: Float!
@@ -261,9 +261,10 @@ type Mutation {
 
 type Mutation {
   trading_cancel_pending_order(
-    profile_id: Int
+    profile_id: Int!
     trading_collection_version_id: Int
-  ): TradingCollectionVersionOutput
+    trading_order_id: Int
+  ): TradingCancelPendingOrderOutput
 }
 
 type Mutation {
@@ -657,5 +658,10 @@ type SuggestedAddressOutput {
 
 type TradingCreateStockOrderOutput {
   trading_order_id: Int!
+}
+
+type TradingCancelPendingOrderOutput {
+  trading_collection_version_id: Int
+  trading_order_id: Int
 }
 

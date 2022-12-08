@@ -20,7 +20,7 @@ mutation TradingCreateStockOrder(
     $symbol: String!
     $target_amount_delta: Float!
 ) {
-  create_stock_order(
+  trading_create_stock_order(
     profile_id: $profile_id
     symbol: $symbol
     target_amount_delta: $target_amount_delta
@@ -40,7 +40,7 @@ mutation TradingCancelPendingOrder(
     profile_id: $profile_id
     trading_order_id: $trading_order_id
   ){
-    trading_collection_version_id
+    trading_order_id
   }
 }
 ```

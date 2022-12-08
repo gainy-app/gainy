@@ -12,7 +12,7 @@ logger = get_logger(__name__)
 class TradingCreateStockOrder(HasuraAction):
 
     def __init__(self):
-        super().__init__("create_stock_order", "profile_id")
+        super().__init__("trading_create_stock_order", "profile_id")
 
     def apply(self, input_params, context_container: ContextContainer):
         profile_id = input_params['profile_id']
