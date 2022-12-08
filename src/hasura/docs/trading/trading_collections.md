@@ -1,8 +1,9 @@
 # Trading collections
 1. [Get recommended TTF weights](#get-recommended-ttf-weights)
 2. [Reconfigure TTF holdings](#reconfigure-ttf-holdings)
-3. [Get actual TTF holding weights and amount](#get-actual-ttf-holding-weights-and-amount)
-4. [Get actual TTF amount and history](#get-actual-ttf-amount-and-history)
+3. [Cancel pending TTF order](#cancel-pending-ttf-order)
+4. [Get actual TTF holding weights and amount](#get-actual-ttf-holding-weights-and-amount)
+5. [Get actual TTF amount and history](#get-actual-ttf-amount-and-history)
 
 
 ### Trading mechanism
@@ -93,7 +94,7 @@ query TradingGetProfileCollectionStatus($profile_id: Int!, $collection_id: Int!)
     relative_gain_total
     value_to_portfolio_value
   }
-  app_trading_collection_versions(where: {profile_id: {_eq: $profile_id}, collection_id: {_eq: $collection_id}}, limit: 3) {
+  app_trading_collection_versions(where: {profile_id: {_eq: $profile_id}, collection_id: {_eq: $collection_id}}, limit: 3, order_by: {created_at: desc}) {
     id
     created_at
     target_amount_delta

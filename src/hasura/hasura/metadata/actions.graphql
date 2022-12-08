@@ -16,6 +16,14 @@ type Query {
   ): CreatePlaidLinkTokenOutput
 }
 
+type Mutation {
+  create_stock_order(
+    profile_id: Int!
+    symbol: String!
+    target_amount_delta: Float!
+  ): TradingCreateStockOrderOutput
+}
+
 type Query {
   fetchNewsData(
     symbol: String!
@@ -645,5 +653,9 @@ type SuggestedAddressOutput {
   province: String
   postal_code: String
   country: String
+}
+
+type TradingCreateStockOrderOutput {
+  trading_order_id: Int!
 }
 

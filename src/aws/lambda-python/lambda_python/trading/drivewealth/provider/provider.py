@@ -7,6 +7,7 @@ from gainy.trading.drivewealth.exceptions import DriveWealthApiException, BadMis
 from portfolio.plaid import PlaidService
 from gainy.plaid.models import PlaidAccessToken
 from services.notification import NotificationService
+from trading.exceptions import SymbolIsNotTradeableException
 from trading.models import TradingMoneyFlow, TradingStatement, ProfileKycStatus
 from trading.drivewealth.provider.collection import DriveWealthProviderCollection
 from trading.drivewealth.provider.kyc import DriveWealthProviderKYC
@@ -254,6 +255,14 @@ class DriveWealthProvider(DriveWealthProviderKYC,
             self.repository.persist(trading_statement)
             dw_statement.trading_statement_id = trading_statement.id
             self.repository.persist(dw_statement)
+
+    def check_tradeable_symbol(self, symbol: str):
+        try:
+            instrument = self.repository.get_instrument_by_symbol(symbol)
+            if instrument.status != DriveWealthInstrumentStatus.ACTIVE:
+                raise SymbolIsNotTradeableException(symbol)
+        except EntityNotFoundException:
+            raise SymbolIsNotTradeableException(symbol)
 
     def _sync_bank_accounts(self, user_ref_id):
         repository = self.repository

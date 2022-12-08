@@ -15,3 +15,4 @@ from trading.actions.add_money import TradingAddMoney
 from trading.actions.delete_trading_data import TradingDeleteData
 from trading.actions.cancel_pending_order import TradingCancelPendingOrder
 from trading.actions.download_statement import TradingDownloadDocument
+from trading.actions.create_stock_order import TradingCreateStockOrder
