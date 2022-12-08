@@ -506,6 +506,14 @@ query KycGetFormConfig($profile_id: Int!) {
       placeholder
       required
     }
+    address_province {
+      choices {
+        value
+        name
+      }
+      placeholder
+      required
+    }
   }
 }
 ```
