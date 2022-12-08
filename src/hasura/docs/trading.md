@@ -4,6 +4,7 @@
 - [Connect bank account](trading/connecting_bank_account.md)
 - [Deposits / withdrawals](trading/money_flow.md)
 - [Trading collections](trading/trading_collections.md)
+- [Trading stocks](trading/trading_stocks.md)
 - [Commissions](trading/commissions.md)
 
 ### History
