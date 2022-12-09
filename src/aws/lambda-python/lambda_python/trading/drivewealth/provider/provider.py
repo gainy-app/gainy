@@ -351,7 +351,7 @@ class DriveWealthProvider(DriveWealthProviderKYC,
             return
 
         portfolio: DriveWealthPortfolio = self.repository.find_one(
-            DriveWealthPortfolio, {"ref_id": account.portfolio_id})
+            DriveWealthPortfolio, {"drivewealth_account_id": account.ref_id})
         if not portfolio:
             return
 
