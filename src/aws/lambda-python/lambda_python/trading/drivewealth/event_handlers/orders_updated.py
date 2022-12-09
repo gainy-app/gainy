@@ -19,3 +19,5 @@ class OrderUpdatedEventHandler(AbstractDriveWealthEventHandler):
 
         order.set_from_response(event_payload)
         self.repo.persist(order)
+
+        self.provider.handle_order(order)

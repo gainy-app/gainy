@@ -1,3 +1,4 @@
+import datetime
 from decimal import Decimal
 
 import pytest
@@ -10,12 +11,13 @@ from tests.trading.drivewealth.api_mocks import mock_create_deposit, mock_create
     mock_get_redemption
 from trading.models import TradingMoneyFlow, TradingStatement
 from trading.drivewealth.models import DriveWealthBankAccount, DriveWealthDeposit, DriveWealthRedemption, \
-    DriveWealthStatement
+    DriveWealthStatement, DriveWealthOrder
 from trading.drivewealth.api import DriveWealthApi
 from trading.drivewealth.provider import DriveWealthProvider
 from trading.drivewealth.repository import DriveWealthRepository
 
-from gainy.trading.drivewealth.models import DriveWealthAccount, DriveWealthInstrument, DriveWealthInstrumentStatus
+from gainy.trading.drivewealth.models import DriveWealthAccount, DriveWealthInstrument, DriveWealthInstrumentStatus, \
+    DriveWealthPortfolio
 
 
 def get_test_transfer_money_amounts():
@@ -297,3 +299,41 @@ def test_handle_instrument_status_change(monkeypatch):
     provider.handle_instrument_status_change(instrument, new_status)
 
     assert (symbol, status, new_status) in [args for args, kwargs in calls]
+
+
+def test_handle_order(monkeypatch):
+    order_executed_at = datetime.datetime.now()
+    last_order_executed_at = order_executed_at - datetime.timedelta(seconds=1)
+    account_id = 1
+    portfolio_id = 2
+
+    order = DriveWealthOrder()
+    order.last_executed_at = order_executed_at
+    order.account_id = account_id
+
+    account = DriveWealthAccount()
+    order.portfolio_id = portfolio_id
+
+    portfolio = DriveWealthPortfolio()
+    portfolio.last_order_executed_at = last_order_executed_at
+
+    repository = DriveWealthRepository(None)
+    monkeypatch.setattr(
+        repository, "find_one",
+        mock_find([
+            (DriveWealthAccount, {
+                "ref_id": account_id
+            }, account),
+            (DriveWealthPortfolio, {
+                "ref_id": portfolio_id
+            }, portfolio),
+        ]))
+    persisted_objects = {}
+    monkeypatch.setattr(repository, "persist", mock_persist(persisted_objects))
+
+    provider = DriveWealthProvider(repository, None, None, None, None)
+    provider.handle_order(order)
+
+    assert DriveWealthPortfolio in persisted_objects
+    assert portfolio in persisted_objects[DriveWealthPortfolio]
+    assert portfolio.last_order_executed_at == order_executed_at
