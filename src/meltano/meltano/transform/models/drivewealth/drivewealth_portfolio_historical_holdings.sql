@@ -3,10 +3,10 @@
     materialized = "incremental",
     unique_key = "id",
     post_hook=[
-      pk('profile_id, collection_id, symbol, date'),
+      pk('profile_id, holding_id_v2, symbol, date'),
       index('id', true),
-      'create index if not exists "dphh_profile_id_collection_id_symbol_date_week" ON {{ this }} (profile_id, collection_id, symbol, date_week)',
-      'create index if not exists "dphh_profile_id_collection_id_symbol_date_month" ON {{ this }} (profile_id, collection_id, symbol, date_month)',
+      'create index if not exists "dphh_profile_id_holding_id_v2_symbol_date_week" ON {{ this }} (profile_id, holding_id_v2, symbol, date_week)',
+      'create index if not exists "dphh_profile_id_holding_id_v2_symbol_date_month" ON {{ this }} (profile_id, holding_id_v2, symbol, date_month)',
     ]
   )
 }}
@@ -51,7 +51,11 @@ with portfolio_statuses as
      data as
          (
              select profile_id,
-                    collection_id,
+                    case
+                        when collection_id is null
+                            then 'dw_ticker_' || profile_id || '_' || (fund_holding_data ->> 'symbol')
+                        else 'dw_ttf_' || profile_id || '_' || collection_id || '_' || (fund_holding_data ->> 'symbol')
+                        end                                    as holding_id_v2,
                     (fund_holding_data ->> 'symbol')           as symbol,
                     date,
                     (fund_holding_data ->> 'value')::numeric   as value,
@@ -60,40 +64,54 @@ with portfolio_statuses as
      ),
      schedule as
          (
-             select profile_id, collection_id, symbol, dd::date as date
+             select profile_id, holding_id_v2, symbol, dd::date as date
              from (
                       select profile_id,
-                             collection_id,
+                             holding_id_v2,
                              symbol,
                              min(date) as min_date
                       from data
-                      group by profile_id, collection_id, symbol
+                      group by profile_id, holding_id_v2, symbol
                   ) t
                       join {{ ref('ticker_realtime_metrics') }} using (symbol)
                       join generate_series(min_date, ticker_realtime_metrics.time::date, interval '1 day') dd on true
      ),
-    data_extended as
+     data_extended0 as
          (
              select profile_id,
-                    collection_id,
+                    holding_id_v2,
                     symbol,
                     date,
-                    coalesce(relative_daily_gain, 0)                        as relative_daily_gain,
-                    public.last_value_ignorenulls(value) over wnd           as value,
-                    public.last_value_ignorenulls(data.updated_at) over wnd as updated_at
+                    coalesce(relative_daily_gain, 0)                     as relative_daily_gain,
+                    exp(sum(ln(coalesce(relative_daily_gain, 0) + 1))
+                        over (partition by holding_id_v2 order by date)) as cumulative_daily_relative_gain,
+                    value                                                as value,
+                    data.updated_at
              from schedule
-                      left join data using (profile_id, collection_id, symbol, date)
+                      left join data using (profile_id, holding_id_v2, symbol, date)
                       left join {{ ref('historical_prices') }} using (symbol, date)
-                 window wnd as (partition by profile_id, collection_id, symbol order by date rows between unbounded preceding and current row)
+     ),
+     data_extended as
+         (
+             select profile_id,
+                    holding_id_v2,
+                    symbol,
+                    date,
+                    relative_daily_gain,
+                    cumulative_daily_relative_gain *
+                    (public.last_value_ignorenulls(value / cumulative_daily_relative_gain) over wnd) as value,
+                    public.last_value_ignorenulls(data_extended0.updated_at) over wnd                as updated_at
+             from data_extended0
+                 window wnd as (partition by profile_id, holding_id_v2 order by date rows between unbounded preceding and current row)
      )
 select data_extended.*,
-       date_trunc('week', date)::date                                     as date_week,
-       date_trunc('month', date)::date                                    as date_month,
-       profile_id || '_' || collection_id || '_' || symbol || '_' || date as id
+       date_trunc('week', date)::date                    as date_week,
+       date_trunc('month', date)::date                   as date_month,
+       profile_id || '_' || holding_id_v2 || '_' || date as id
 from data_extended
 
 {% if is_incremental() %}
-         left join {{ this }} old_data using (profile_id, collection_id, symbol, date)
+         left join {{ this }} old_data using (profile_id, holding_id_v2, date)
 where old_data.profile_id is null
    or data_extended.updated_at > old_data.updated_at
 {% endif %}

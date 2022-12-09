@@ -25,7 +25,7 @@ from {{ ref('portfolio_expanded_transactions') }}
                   and (hpa.datetime > portfolio_expanded_transactions.datetime - interval '3 minutes' or
                        portfolio_expanded_transactions.datetime is null)
 where hpa.datetime between week_trading_sessions_static.open_at and week_trading_sessions_static.close_at - interval '1 microsecond'
-  and portfolio_expanded_transactions.security_type != 'ttf'
+  and portfolio_expanded_transactions.is_app_trading = false
 
 union all
 
@@ -48,7 +48,7 @@ from {{ ref('portfolio_expanded_transactions') }}
                   and (hpa.datetime > portfolio_expanded_transactions.datetime - interval '15 minutes' or
                        portfolio_expanded_transactions.datetime is null)
 where hpa.datetime between week_trading_sessions_static.open_at and week_trading_sessions_static.close_at - interval '1 microsecond'
-  and portfolio_expanded_transactions.security_type != 'ttf'
+  and portfolio_expanded_transactions.is_app_trading = false
 
 union all
 
@@ -71,7 +71,7 @@ from {{ ref('portfolio_expanded_transactions') }}
                   and (hpa.datetime > portfolio_expanded_transactions.datetime - interval '1 day' or
                        portfolio_expanded_transactions.datetime is null)
 where hpa.datetime >= now() - interval '1 month + 1 week'
-  and portfolio_expanded_transactions.security_type != 'ttf'
+  and portfolio_expanded_transactions.is_app_trading = false
 
 union all
 
@@ -94,7 +94,7 @@ from {{ ref('portfolio_expanded_transactions') }}
                   and (hpa.datetime > portfolio_expanded_transactions.datetime - interval '1 day' or
                        portfolio_expanded_transactions.datetime is null)
 where hpa.datetime >= now() - interval '3 month + 1 week'
-  and portfolio_expanded_transactions.security_type != 'ttf'
+  and portfolio_expanded_transactions.is_app_trading = false
 
 union all
 
@@ -116,7 +116,7 @@ from {{ ref('portfolio_expanded_transactions') }}
               on hpa.symbol = portfolio_expanded_transactions.symbol
                   and (hpa.datetime > portfolio_expanded_transactions.datetime - interval '1 day' or
                        portfolio_expanded_transactions.datetime is null)
-where portfolio_expanded_transactions.security_type != 'ttf'
+where portfolio_expanded_transactions.is_app_trading = false
 
 union all
 
@@ -138,7 +138,7 @@ from {{ ref('portfolio_expanded_transactions') }}
               on hpa.symbol = portfolio_expanded_transactions.symbol
                   and (hpa.datetime > portfolio_expanded_transactions.datetime - interval '1 week' or
                        portfolio_expanded_transactions.datetime is null)
-where portfolio_expanded_transactions.security_type != 'ttf'
+where portfolio_expanded_transactions.is_app_trading = false
 
 union all
 
@@ -160,7 +160,7 @@ from {{ ref('portfolio_expanded_transactions') }}
               on hpa.symbol = portfolio_expanded_transactions.symbol
                   and (hpa.datetime > portfolio_expanded_transactions.datetime - interval '1 month' or
                        portfolio_expanded_transactions.datetime is null)
-where portfolio_expanded_transactions.security_type != 'ttf'
+where portfolio_expanded_transactions.is_app_trading = false
 
 union all
 

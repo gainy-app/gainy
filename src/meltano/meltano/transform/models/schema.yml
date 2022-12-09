@@ -85,6 +85,7 @@ sources:
       - name: profiles
       - name: subscriptions
       - name: trading_collection_versions
+      - name: trading_orders
       - name: trading_funding_accounts
       - name: trading_money_flow
 
@@ -463,6 +464,10 @@ models:
         tests:
           - type:
               type: 'text'
+      - name: is_trading_enabled
+        tests:
+          - type:
+              type: 'boolean'
       - name: updated_at
         tests:
           - type:
@@ -2407,6 +2412,10 @@ models:
         tests:
           - type:
               type: 'integer'
+      - name: trading_order_id
+        tests:
+          - type:
+              type: 'integer'
       - name: money_flow_id
         tests:
           - type:
@@ -2559,7 +2568,7 @@ models:
           - type:
               type: 'boolean'
 
-  - name: stats_ttf_clicks
+  - name: top_global_collections
     columns:
       - name: collection_id
         tests:
@@ -2569,6 +2578,33 @@ models:
         tests:
           - type:
               type: 'integer'
+
+  - name: trading_profile_ticker_status
+    columns:
+      - name: profile_id
+        tests:
+          - type:
+              type: 'integer'
+      - name: symbol
+        tests:
+          - type:
+              type: 'character varying'
+      - name: value_to_portfolio_value
+        tests:
+          - type:
+              type: 'double precision'
+      - name: actual_value
+        tests:
+          - type:
+              type: 'double precision'
+      - name: relative_gain_1d
+        tests:
+          - type:
+              type: 'double precision'
+      - name: absolute_gain_1d
+        tests:
+          - type:
+              type: 'double precision'
 
 exposures:
   - name: ticker_search_index

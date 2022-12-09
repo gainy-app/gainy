@@ -1,10 +1,15 @@
 {{
   config(
-    materialized = "table",
+    materialized = "incremental",
     unique_key = "holding_id_v2",
     tags = ["realtime"],
     post_hook=[
       pk('holding_id_v2'),
+      'delete from {{this}}
+        using {{this}} AS t
+        LEFT OUTER JOIN {{ ref(\'profile_holdings_normalized\') }} using (holding_id_v2)
+        WHERE portfolio_holding_gains.holding_id_v2 = t.holding_id_v2
+          AND profile_holdings_normalized.holding_id_v2 is null',
     ]
   )
 }}
