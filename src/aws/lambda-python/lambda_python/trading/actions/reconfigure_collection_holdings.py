@@ -1,8 +1,6 @@
 from decimal import Decimal
 from common.context_container import ContextContainer
 from common.hasura_function import HasuraAction
-from gainy.exceptions import BadRequestException
-from gainy.trading.exceptions import InsufficientFundsException
 from gainy.trading.models import TradingOrderSource
 from gainy.utils import get_logger
 
@@ -26,15 +24,12 @@ class TradingReconfigureCollectionHoldings(HasuraAction):
 
         trading_service = context_container.trading_service
 
-        try:
-            trading_collection_version = trading_service.create_collection_version(
-                profile_id,
-                TradingOrderSource.MANUAL,
-                collection_id,
-                trading_account_id,
-                weights=weights,
-                target_amount_delta=target_amount_delta)
-        except InsufficientFundsException as e:
-            raise BadRequestException(str(e))
+        trading_collection_version = trading_service.create_collection_version(
+            profile_id,
+            TradingOrderSource.MANUAL,
+            collection_id,
+            trading_account_id,
+            weights=weights,
+            target_amount_delta=target_amount_delta)
 
         return {'trading_collection_version_id': trading_collection_version.id}

@@ -79,9 +79,9 @@ select profile_id,
        coalesce(
                    portfolio_stats.cash_value - coalesce(target_amount_delta, 0),
 {% if var("drivewealth_is_uat") %}
-                   account_stats.cash_balance
+                   account_stats.cash_balance + coalesce(pending_cash, 0)::double precision
 {% else %}
-                   cash_available_for_withdrawal
+                   cash_available_for_withdrawal + coalesce(pending_cash, 0)::double precision
 {% endif %}
            , 0)::double precision                                       as buying_power
 from (
@@ -100,7 +100,7 @@ from (
          left join (
                        select distinct profile_id
                        from {{ source('app', 'trading_money_flow') }}
-                       where status = 'SUCCESS'
+                       where status != 'FAILED'
                    ) trading_money_flow using (profile_id)
          left join (
                        select distinct on (profile_id) profile_id, ref_no as account_no
