@@ -305,14 +305,14 @@ def test_handle_order(monkeypatch):
     order_executed_at = datetime.datetime.now()
     last_order_executed_at = order_executed_at - datetime.timedelta(seconds=1)
     account_id = 1
-    portfolio_id = 2
+    account_ref_id = "account_ref_id"
 
     order = DriveWealthOrder()
     order.last_executed_at = order_executed_at
     order.account_id = account_id
 
     account = DriveWealthAccount()
-    account.portfolio_id = portfolio_id
+    account.ref_id = account_ref_id
 
     portfolio = DriveWealthPortfolio()
     portfolio.last_order_executed_at = last_order_executed_at
@@ -325,7 +325,7 @@ def test_handle_order(monkeypatch):
                 "ref_id": account_id
             }, account),
             (DriveWealthPortfolio, {
-                "ref_id": portfolio_id
+                "drivewealth_account_id": account_ref_id
             }, portfolio),
         ]))
     persisted_objects = {}
