@@ -16,14 +16,6 @@ type Query {
   ): CreatePlaidLinkTokenOutput
 }
 
-type Mutation {
-  trading_create_stock_order(
-    profile_id: Int!
-    symbol: String!
-    target_amount_delta: Float!
-  ): TradingCreateStockOrderOutput
-}
-
 type Query {
   fetchNewsData(
     symbol: String!
@@ -265,6 +257,14 @@ type Mutation {
     trading_collection_version_id: Int
     trading_order_id: Int
   ): TradingCancelPendingOrderOutput
+}
+
+type Mutation {
+  trading_create_stock_order(
+    profile_id: Int!
+    symbol: String!
+    target_amount_delta: Float!
+  ): TradingCreateStockOrderOutput
 }
 
 type Mutation {

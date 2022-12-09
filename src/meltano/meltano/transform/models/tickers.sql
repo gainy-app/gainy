@@ -23,6 +23,12 @@ with latest_price as
              from {{ source('polygon', 'polygon_crypto_historical_prices') }}
              where t >= extract(epoch from now() - interval '7 days') * 1000
              group by symbol
+         ),
+     tradeable_tickers as
+         (
+             select public.normalize_drivewealth_symbol(symbol) as symbol
+             from {{ source('app', 'drivewealth_instruments') }}
+             where status = 'ACTIVE'
          )
 select base_tickers.symbol,
        base_tickers.type,
@@ -41,11 +47,13 @@ select base_tickers.symbol,
        base_tickers.exchange,
        base_tickers.exchange_canonical,
        base_tickers.country_name,
-       now()::timestamp as updated_at
+       tradeable_tickers.symbol is not null as is_trading_enabled,
+       now()::timestamp                     as updated_at
 from {{ ref('base_tickers') }}
          join (select symbol from {{ ref('week_trading_sessions_static') }} group by symbol) t using (symbol)
          left join latest_price using (symbol)
          left join latest_crypto_price using (symbol)
+         left join tradeable_tickers using (symbol)
 where ((base_tickers.description is not null and length(base_tickers.description) >= 5) or type = 'index')
   and (latest_price.symbol is not null or latest_crypto_price.symbol is not null)
   and type in ('fund', 'etf', 'mutual fund', 'preferred stock', 'common stock', 'crypto', 'index')

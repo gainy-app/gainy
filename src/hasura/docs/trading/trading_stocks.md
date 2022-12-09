@@ -48,7 +48,7 @@ mutation TradingCancelPendingOrder(
 ### Get actual stock amount and history
 ```graphql
 query TradingGetProfileStockStatus($profile_id: Int!, $symbol: String!) {
-  trading_profile_stock_status(where: {profile_id: {_eq: $profile_id}, symbol: {_eq: $symbol}}) {
+  trading_profile_ticker_status(where: {profile_id: {_eq: $profile_id}, symbol: {_eq: $symbol}}) {
     absolute_gain_1d
     absolute_gain_total
     actual_value
@@ -56,7 +56,7 @@ query TradingGetProfileStockStatus($profile_id: Int!, $symbol: String!) {
     relative_gain_total
     value_to_portfolio_value
   }
-  app_trading_orders(where: {profile_id: {_eq: $symbol}, symbol: {_eq: $symbol}}, limit: 3, order_by: {created_at: desc}) {
+  app_trading_orders(where: {profile_id: {_eq: $profile_id}, symbol: {_eq: $symbol}}, limit: 3, order_by: {created_at: desc}) {
     id
     created_at
     target_amount_delta
