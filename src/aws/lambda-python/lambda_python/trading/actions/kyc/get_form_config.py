@@ -24,7 +24,8 @@ class KycGetFormConfig(HasuraAction):
 
             cursor.execute("select * from raw_data.gainy_countries")
             countries = cursor.fetchall()
-            cursor.execute("select * from raw_data.gainy_us_states order by name")
+            cursor.execute(
+                "select * from raw_data.gainy_us_states order by name")
             us_states = cursor.fetchall()
 
         country_choices = [{
