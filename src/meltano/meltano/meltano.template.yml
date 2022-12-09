@@ -192,6 +192,12 @@ plugins:
       inherit_from: tap-postgres-history
       catalog: catalog/history/tap.weekly.catalog.json
 
+    - name: tap-bigquery
+      variant: anelendata
+      pip_url: tap-bigquery
+      config:
+        start_datetime: '2020-01-01'
+
   loaders:
     - name: target-postgres
       variant: transferwise
@@ -249,6 +255,7 @@ plugins:
       variant: transferwise
       pip_url: pipelinewise-target-bigquery
       config:
+        project_id: $BIGQUERY_PROJECT_ID
         batch_size_rows: 10000
         flush_all_streams: true
         add_metadata_columns: true
@@ -296,6 +303,15 @@ schedules:
     start_date: 2021-09-03 13:52:48.598227
     env:
       TARGET_ENVS: '["production","local"]'
+
+  - name: bigquery-to-postgres
+    extractor: tap-bigquery
+    loader: target-postgres
+    transform: skip
+    interval: '@daily'
+    start_date: 2021-09-03 13:52:48.598227
+    env:
+      GOOGLE_APPLICATION_CREDENTIALS: "/project/bigquery-credentials.json"
 
   - name: eodhistoricaldata-to-postgres-0
     extractor: tap-eodhistoricaldata
