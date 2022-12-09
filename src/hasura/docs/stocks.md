@@ -53,12 +53,6 @@
             shares_float
             short_ratio
             beta
-            absolute_historical_volatility_adjusted_current
-            relative_historical_volatility_adjusted_current
-            absolute_historical_volatility_adjusted_min_1y
-            absolute_historical_volatility_adjusted_max_1y
-            relative_historical_volatility_adjusted_min_1y
-            relative_historical_volatility_adjusted_max_1y
             implied_volatility
             # growth
             revenue_growth_yoy
