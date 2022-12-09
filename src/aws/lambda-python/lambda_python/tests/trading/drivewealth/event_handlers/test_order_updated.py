@@ -1,6 +1,7 @@
-from gainy.tests.mocks.repository_mocks import mock_find, mock_persist
+from gainy.tests.mocks.repository_mocks import mock_find, mock_persist, mock_record_calls
 from trading.drivewealth.event_handlers import OrderUpdatedEventHandler
 from trading.drivewealth.models import DriveWealthOrder
+from trading.drivewealth.provider import DriveWealthProvider
 from trading.drivewealth.repository import DriveWealthRepository
 
 message = {
@@ -24,12 +25,18 @@ def test_exists(monkeypatch):
     persisted_objects = {}
     monkeypatch.setattr(repository, 'persist', mock_persist(persisted_objects))
 
-    event_handler = OrderUpdatedEventHandler(repository, None)
+    provider = DriveWealthProvider(None, None, None, None, None)
+    handle_order_calls = []
+    monkeypatch.setattr(provider, 'handle_order',
+                        mock_record_calls(handle_order_calls))
+
+    event_handler = OrderUpdatedEventHandler(repository, provider)
 
     event_handler.handle(message)
 
     assert DriveWealthOrder in persisted_objects
     assert order in persisted_objects[DriveWealthOrder]
+    assert order in [args[0] for args, kwargs in handle_order_calls]
 
 
 def test_not_exists(monkeypatch):
@@ -42,8 +49,16 @@ def test_not_exists(monkeypatch):
     persisted_objects = {}
     monkeypatch.setattr(repository, 'persist', mock_persist(persisted_objects))
 
-    event_handler = OrderUpdatedEventHandler(repository, None)
+    provider = DriveWealthProvider(None, None, None, None, None)
+    handle_order_calls = []
+    monkeypatch.setattr(provider, 'handle_order',
+                        mock_record_calls(handle_order_calls))
+
+    event_handler = OrderUpdatedEventHandler(repository, provider)
 
     event_handler.handle(message)
 
     assert DriveWealthOrder in persisted_objects
+    assert len(persisted_objects[DriveWealthOrder]) > 0
+    for order in persisted_objects[DriveWealthOrder]:
+        assert order in [args[0] for args, kwargs in handle_order_calls]

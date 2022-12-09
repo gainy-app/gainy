@@ -13,14 +13,14 @@ from trading.drivewealth.provider.collection import DriveWealthProviderCollectio
 from trading.drivewealth.provider.kyc import DriveWealthProviderKYC
 from trading.drivewealth.models import DriveWealthBankAccount, DriveWealthDeposit, \
     DriveWealthRedemption, DriveWealthAutopilotRun, BaseDriveWealthMoneyFlowModel, DriveWealthStatement, \
-    DriveWealthRedemptionStatus
+    DriveWealthRedemptionStatus, DriveWealthOrder
 from trading.drivewealth.api import DriveWealthApi
 from trading.drivewealth.repository import DriveWealthRepository
 
 from gainy.utils import get_logger
 from gainy.trading.models import FundingAccount, TradingAccount, TradingCollectionVersion, TradingMoneyFlowStatus
 from gainy.trading.drivewealth.models import DriveWealthAccount, DriveWealthUser, DriveWealthInstrument, \
-    DriveWealthInstrumentStatus
+    DriveWealthInstrumentStatus, DriveWealthPortfolio
 from trading.repository import TradingRepository
 
 logger = get_logger(__name__)
@@ -162,6 +162,7 @@ class DriveWealthProvider(DriveWealthProviderKYC,
         user = self._get_user(profile_id)
 
         self.sync_user(user.ref_id)
+        self.sync_kyc(user.ref_id)
         self.sync_profile_trading_accounts(profile_id)
         self._sync_autopilot_runs()
         self._sync_bank_accounts(user.ref_id)
@@ -348,3 +349,21 @@ class DriveWealthProvider(DriveWealthProviderKYC,
             return
 
         self.sync_trading_account(account_ref_id=ref_id, fetch_info=True)
+
+    def handle_order(self, order: DriveWealthOrder):
+        if not order.last_executed_at:
+            return
+
+        account: DriveWealthAccount = self.repository.find_one(
+            DriveWealthAccount, {"ref_id": order.account_id})
+        if not account:
+            return
+
+        portfolio: DriveWealthPortfolio = self.repository.find_one(
+            DriveWealthPortfolio, {"ref_id": account.portfolio_id})
+        if not portfolio:
+            return
+
+        if not portfolio.last_order_executed_at or order.last_executed_at > portfolio.last_order_executed_at:
+            portfolio.last_order_executed_at = order.last_executed_at
+            self.repository.persist(portfolio)
