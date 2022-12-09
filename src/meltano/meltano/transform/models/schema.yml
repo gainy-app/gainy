@@ -2568,7 +2568,7 @@ models:
           - type:
               type: 'boolean'
 
-  - name: stats_ttf_clicks
+  - name: top_global_collections
     columns:
       - name: collection_id
         tests:
@@ -2578,7 +2578,6 @@ models:
         tests:
           - type:
               type: 'integer'
-
 
   - name: trading_profile_ticker_status
     columns:
