@@ -26,7 +26,7 @@ with latest_price as
          ),
      tradeable_tickers as
          (
-             select public.normalize_drivewealth_symbol(symbol) as symbol
+             select distinct public.normalize_drivewealth_symbol(symbol) as symbol
              from {{ source('app', 'drivewealth_instruments') }}
              where status = 'ACTIVE'
          )
