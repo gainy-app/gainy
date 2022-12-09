@@ -41,7 +41,10 @@ select profile_holdings_normalized.holding_id_v2,
        portfolio_holding_gains.ltt_quantity_total,
        profile_holdings_normalized.name,
        profile_holdings_normalized.quantity,
-       (actual_value - absolute_gain_total) / quantity as avg_cost
+       case
+           when quantity > 0
+               then (actual_value - absolute_gain_total) / quantity
+           end                                    as avg_cost
 from {{ ref('profile_holdings_normalized') }}
          left join first_purchase_date using (holding_id_v2)
          left join {{ ref('portfolio_holding_gains') }} using (holding_id_v2)

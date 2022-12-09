@@ -88,6 +88,7 @@ with data as
         from {{ ref('drivewealth_holdings') }}
                  left join {{ ref('base_tickers') }} using (symbol)
                  left join {{ ref('portfolio_brokers') }} on portfolio_brokers.uniq_id = 'gainy_broker'
+        where abs(quantity) > 1e-3
 )
 select data.*
 from data
