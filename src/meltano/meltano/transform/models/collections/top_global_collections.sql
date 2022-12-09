@@ -21,5 +21,5 @@ with unique_collection_stats as
              group by collection_id
          )
 select collection_id,
-       row_number() over (order by clicks_count desc) as rank
+       (row_number() over (order by clicks_count desc))::int as rank
 from unique_collection_stats
