@@ -312,7 +312,7 @@ def test_handle_order(monkeypatch):
     order.account_id = account_id
 
     account = DriveWealthAccount()
-    order.portfolio_id = portfolio_id
+    account.portfolio_id = portfolio_id
 
     portfolio = DriveWealthPortfolio()
     portfolio.last_order_executed_at = last_order_executed_at
