@@ -15,6 +15,7 @@ sources:
       - name: gainy_countries
       - name: auto_ticker_industries
       - name: exchanges
+      - name: stats_ttf_clicks
       - name: ticker_collections
       - name: ticker_collections_weights
       - name: ticker_override
@@ -2557,6 +2558,17 @@ models:
         tests:
           - type:
               type: 'boolean'
+
+  - name: stats_ttf_clicks
+    columns:
+      - name: collection_id
+        tests:
+          - type:
+              type: 'integer'
+      - name: rank
+        tests:
+          - type:
+              type: 'integer'
 
 exposures:
   - name: ticker_search_index
