@@ -290,7 +290,7 @@ with tickers_and_options as
      realtime_chart_diff_with_historical as
          (
              select symbol,
-                    json_agg(json_build_array(period, datetime, diff)) as message
+                    json_agg(json_build_array(period, datetime, diff))::text as message
              from (
                       select *,
                              (realtime_daily_close_prices.adjusted_close - historical_prices.adjusted_close) /
