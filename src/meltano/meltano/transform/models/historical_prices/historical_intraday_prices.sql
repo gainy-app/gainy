@@ -69,7 +69,7 @@ with polygon_symbols as materialized
          (
              select symbol,
                     date,
-                    time,
+                    date_trunc('minute', time)::timestamp                                                                    as time,
                     (date_trunc('minute', time) - interval '1 minute' * mod(extract(minutes from time)::int, 3))::timestamp  as time_3min,
                     (date_trunc('minute', time) - interval '1 minute' * mod(extract(minutes from time)::int, 15))::timestamp as time_15min,
                     open,
@@ -148,7 +148,7 @@ with polygon_symbols as materialized
 
              select symbol,
                     date,
-                    close_at                         as time,
+                    close_at::timestamp              as time,
                     close_at - interval '3 minutes'  as time_3min,
                     close_at - interval '15 minutes' as time_15min,
                     open::double precision,
