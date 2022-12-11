@@ -25,7 +25,7 @@ with
          ),
      latest_known_prices as
          (
-             select symbol, adjusted_close
+             select symbol, adjusted_close, updated_at
              from max_date
              join {{ this }} using (symbol, datetime)
          ),
@@ -129,7 +129,17 @@ with
              where t.time_truncated < now() - interval '15 minutes'
              order by symbol, time_truncated, time, priority
          )
-select *
+select t3.id,
+       t3.symbol,
+       t3.date,
+       t3.datetime,
+       t3.open,
+       t3.high,
+       t3.low,
+       t3.close,
+       t3.adjusted_close,
+       t3.volume,
+       t3.updated_at
 from (
          select t2.symbol || '_' || t2.datetime                                            as id,
                 t2.symbol,
@@ -157,7 +167,12 @@ from (
                          latest_known_prices.adjusted_close,
                          historical_prices_aggregated_1d.adjusted_close)::double precision as adjusted_close,
                 coalesce(t2.volume, old_data.volume, 0)                                    as volume,
-                coalesce(t2.updated_at, old_data.updated_at)                               as updated_at
+                coalesce(t2.updated_at,
+                         old_data.updated_at,
+                         latest_known_prices.updated_at,
+                         historical_prices_aggregated_1d.updated_at)                       as updated_at,
+                old_data.updated_at                                                        as old_data_updated_at,
+                old_data.adjusted_close                                                    as old_data_adjusted_close
 {% else %}
                 coalesce(t2.open,
                          historical_prices_aggregated_1d.adjusted_close)::double precision as open,
@@ -170,7 +185,7 @@ from (
                 coalesce(t2.adjusted_close,
                          historical_prices_aggregated_1d.adjusted_close)::double precision as adjusted_close,
                 coalesce(t2.volume, 0)                                                     as volume,
-                t2.updated_at
+                coalesce(t2.updated_at, historical_prices_aggregated_1d.updated_at)        as updated_at
 {% endif %}
          from (
                    select symbol,
@@ -218,9 +233,11 @@ from (
                   left join {{ this }} old_data
                             on old_data.symbol = t2.symbol
                                 and old_data.datetime = t2.datetime
-         where (old_data.symbol is null -- no old data
-            or (t2.updated_at is not null and old_data.updated_at is null) -- old data is null and new is not
-            or t2.updated_at > old_data.updated_at) -- new data is newer than the old one
 {% endif %}
     ) t3
 where adjusted_close is not null
+{% if is_incremental() %}
+  and (old_data_updated_at is null -- no old data
+   or t3.updated_at > old_data_updated_at
+   or abs(t3.adjusted_close - old_data_adjusted_close) > 1e-3) -- new data is newer than the old one
+{% endif %}
