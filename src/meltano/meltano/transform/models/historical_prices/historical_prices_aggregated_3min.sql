@@ -139,7 +139,7 @@ select t3.id,
        t3.close,
        t3.adjusted_close,
        t3.volume,
-       t3.updated_at
+       t3.updated_at::timestamp
 from (
          select t2.symbol || '_' || t2.datetime                                            as id,
                 t2.symbol,
