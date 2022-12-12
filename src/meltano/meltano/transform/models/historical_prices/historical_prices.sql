@@ -255,7 +255,7 @@ select symbol,
 from all_rows
 {% if is_incremental() %}
     left join old_model_stats on true
-    where all_rows.max_updated_at >= old_model_stats.max_updated_at or old_model_stats.max_updated_at is null
+    where all_rows.updated_at >= old_model_stats.max_updated_at or old_model_stats.max_updated_at is null
 {% endif %}
     window wnd as (partition by symbol order by date rows between 1 preceding and current row)
 
