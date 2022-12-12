@@ -365,7 +365,8 @@ with tickers_and_options as
              where ticker_realtime_metrics.symbol is null
                 or ticker_daily_latest_chart_point.symbol is null
                 or ticker_realtime_metrics.previous_day_close_price < 1e-12
-                or abs(ticker_daily_latest_chart_point.adjusted_close / ticker_realtime_metrics.previous_day_close_price - 1) > 0.2
+                or (abs(ticker_daily_latest_chart_point.adjusted_close / ticker_realtime_metrics.previous_day_close_price - 1) > 0.2
+                 and ticker_daily_latest_chart_point.volume > 0)
          ),
 {% endif %}
      errors as
