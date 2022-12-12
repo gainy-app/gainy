@@ -69,7 +69,7 @@ with polygon_symbols as materialized
          (
              select symbol,
                     date,
-                    time,
+                    date_trunc('minute', time)::timestamp                                                                    as time,
                     (date_trunc('minute', time) - interval '1 minute' * mod(extract(minutes from time)::int, 3))::timestamp  as time_3min,
                     (date_trunc('minute', time) - interval '1 minute' * mod(extract(minutes from time)::int, 15))::timestamp as time_15min,
                     open,
@@ -86,14 +86,6 @@ with polygon_symbols as materialized
                      select symbol, date, time, open, high, low, close, volume
                      from raw_eod_intraday_prices
                   ) t
-{% if is_incremental() %}
-         ),
-     old_model_stats as
-         (
-             select symbol, max(time) as max_time
-             from {{ this }}
-             group by symbol
-{% endif %}
 {% if not var('realtime') %}
          ),
      daily_close_prices as
@@ -156,7 +148,7 @@ with polygon_symbols as materialized
 
              select symbol,
                     date,
-                    close_at                         as time,
+                    close_at::timestamp              as time,
                     close_at - interval '3 minutes'  as time_3min,
                     close_at - interval '15 minutes' as time_15min,
                     open::double precision,
@@ -171,26 +163,28 @@ with polygon_symbols as materialized
              {% endif %}
         )
 
-select distinct on (
-    symbol, time
-    ) symbol,
-      date,
-      time::timestamp,
-      time_3min::timestamp,
-      time_15min::timestamp,
-      open::double precision,
-      high::double precision,
-      low::double precision,
-      close::double precision,
-      volume::double precision,
-      adjusted_close::double precision,
-      now()::timestamp        as updated_at,
-      (symbol || '_' || time) as id
-from data
+select t.*
+from (
+         select distinct on (
+             symbol, time
+             ) symbol,
+               date,
+               time::timestamp,
+               time_3min::timestamp,
+               time_15min::timestamp,
+               open::double precision,
+               high::double precision,
+               low::double precision,
+               close::double precision,
+               volume::double precision,
+               adjusted_close::double precision,
+               now()::timestamp        as updated_at,
+               (symbol || '_' || time) as id
+         from data
+         order by symbol, time, priority desc
+     ) t
 
 {% if is_incremental() %}
-         left join old_model_stats using (symbol)
-where old_model_stats.max_time is null or data.time > max_time
+         left join {{ this }} old_data using (symbol, time)
+where old_data is null or abs(old_data.adjusted_close - t.adjusted_close) > 1e-3
 {% endif %}
-
-order by symbol, time, priority desc
