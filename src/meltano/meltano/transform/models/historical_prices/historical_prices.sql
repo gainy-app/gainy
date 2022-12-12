@@ -13,24 +13,101 @@
 }}
 
 
--- Execution Time: 152932.965 ms
+-- Execution Time: 450490.199 ms
 with
 {% if is_incremental() %}
 old_model_stats as (select max(updated_at) as max_updated_at from {{ this }} where relative_daily_gain is not null),
 {% endif %}
+
+polygon_symbols as materialized
+    (
+        select symbol
+        from {{ source('polygon', 'polygon_stocks_historical_prices')}}
+        group by symbol
+    ),
+raw_eod_historical_prices as
+    (
+        select code                                      as symbol,
+               date::date,
+               substr(date, 0, 5)                        as date_year,
+               (substr(date, 0, 8) || '-01')::timestamp  as date_month,
+               date_trunc('week', date::date)::timestamp as date_week,
+               open,
+               high,
+               low,
+               close,
+               adjusted_close,
+               volume,
+               _sdc_batched_at                           as updated_at
+        from {{ source('eod', 'eod_historical_prices')}}
+                 left join polygon_symbols
+                           on polygon_symbols.symbol = eod_historical_prices.code
+        where polygon_symbols.symbol is null
+          and eod_historical_prices.date >= eod_historical_prices.first_date
+          and eod_historical_prices.adjusted_close > 0
+),
+raw_polygon_stocks_historical_prices as
+    (
+        select symbol,
+               to_timestamp(t / 1000)::date                           as date,
+               extract(year from to_timestamp(t / 1000))::varchar     as date_year,
+               date_trunc('month', to_timestamp(t / 1000))::timestamp as date_month,
+               date_trunc('week', to_timestamp(t / 1000))::timestamp  as date_week,
+               o                                                      as open,
+               h                                                      as high,
+               l                                                      as low,
+               c                                                      as close,
+               c                                                      as adjusted_close,
+               v                                                      as volume,
+               _sdc_batched_at                                        as updated_at
+        from {{ source('polygon', 'polygon_stocks_historical_prices')}}
+                 join polygon_symbols using (symbol)
+),
+raw_historical_prices as materialized
+    (
+        select symbol,
+               date,
+               date_year,
+               date_month,
+               date_week,
+               open,
+               high,
+               low,
+               close,
+               adjusted_close,
+               volume,
+               updated_at
+        from raw_polygon_stocks_historical_prices
+
+        union all
+
+        select symbol,
+               date,
+               date_year,
+               date_month,
+               date_week,
+               open,
+               high,
+               low,
+               close,
+               adjusted_close,
+               volume,
+               updated_at
+        from raw_eod_historical_prices
+),
 polygon_crypto_tickers as
     (
         select symbol
         from {{ ref('tickers') }}
-        left join {{ source('eod', 'eod_historical_prices') }} on eod_historical_prices.code = tickers.symbol
-        where eod_historical_prices.code is null
+                 left join raw_historical_prices using (symbol)
+        where raw_historical_prices.symbol is null
     ),
 latest_stock_price_date as
     (
-        SELECT code as symbol, max(date) as date
-        from {{ source('eod', 'eod_historical_prices') }}
+        SELECT symbol, max(date) as date
+        from raw_historical_prices
         where adjusted_close > 0
-        group by code
+        group by symbol
     ),
 next_trading_session as
     (
@@ -47,7 +124,7 @@ next_trading_session as
     ),
 stocks_with_split as
     (
-        select symbol as code,
+        select symbol,
                split_to,
                split_from
         from {{ ref('base_tickers') }}
@@ -59,40 +136,39 @@ stocks_with_split as
     ),
 prices_with_split_rates as
     (
-        SELECT eod_historical_prices.code,
-               eod_historical_prices.date,
+        SELECT raw_historical_prices.symbol,
+               raw_historical_prices.date,
+               raw_historical_prices.date_year,
+               raw_historical_prices.date_month,
+               raw_historical_prices.date_week,
                case when close > 0 then adjusted_close / close end as split_rate,
                stocks_with_split.split_from::numeric /
                stocks_with_split.split_to::numeric                 as split_rate_next_day,
-               eod_historical_prices.open,
-               eod_historical_prices.high,
-               eod_historical_prices.low,
-               eod_historical_prices.adjusted_close,
-               eod_historical_prices.close,
-               eod_historical_prices.volume,
-               eod_historical_prices._sdc_batched_at
-        from {{ source('eod', 'eod_historical_prices') }}
-                 left join stocks_with_split using (code)
-        where eod_historical_prices.date >= eod_historical_prices.first_date
-          and eod_historical_prices.adjusted_close > 0
+               raw_historical_prices.open,
+               raw_historical_prices.high,
+               raw_historical_prices.low,
+               raw_historical_prices.adjusted_close,
+               raw_historical_prices.close,
+               raw_historical_prices.volume,
+               raw_historical_prices.updated_at
+        from raw_historical_prices
+                 left join stocks_with_split using (symbol)
     ),
 latest_day_split_rate as
     (
-        SELECT eod_historical_prices.code,
+        SELECT raw_historical_prices.symbol,
                first_value(adjusted_close / close) over wnd as latest_day_split_rate
-        from {{ source('eod', 'eod_historical_prices') }}
-                 join latest_stock_price_date
-                      on latest_stock_price_date.symbol = eod_historical_prices.code
-                          and latest_stock_price_date.date = eod_historical_prices.date
-          window wnd as (partition by code order by eod_historical_prices.date desc)
-    ),
+        from raw_historical_prices
+                 join latest_stock_price_date using (symbol, date)
+            window wnd as (partition by symbol order by raw_historical_prices.date desc)
+),
 prev_split as
     (
-        select code, max(date) as date
-        from {{ source('eod', 'eod_historical_prices') }}
-        where abs(close - eod_historical_prices.adjusted_close) > 1e-3
-        group by code
-    ),
+        select symbol, max(date) as date
+        from raw_historical_prices
+        where abs(close - adjusted_close) > 1e-3
+        group by symbol
+),
 wrongfully_adjusted_prices as
     (
         -- in case we get partially adjusted prices:
@@ -100,13 +176,13 @@ wrongfully_adjusted_prices as
         -- 0.173	0.173
         -- 0.1908	0.1908
         -- in this case we need to adjust the rows from this subquery twice
-        select code, date
+        select symbol, date
         from (
-                 select code,
+                 select symbol,
                         date,
                         adjusted_close,
-                        lag(adjusted_close) over (partition by code order by date) as prev_adjusted_close
-                 from {{ source('eod', 'eod_historical_prices') }}
+                        lag(adjusted_close) over (partition by symbol order by date) as prev_adjusted_close
+                 from raw_historical_prices
                  where date::date > now() - interval '1 week'
              ) t
         where adjusted_close > 0
@@ -115,16 +191,16 @@ wrongfully_adjusted_prices as
     ),
 all_rows as
     (
-    SELECT prices_with_split_rates.code,
+    SELECT prices_with_split_rates.symbol,
            case
                -- if there is no split tomorrow - just use the data from eod
                when split_rate_next_day is null
                    then adjusted_close
                -- latest split period, already adjusted
-               when prices_with_split_rates.date > prev_split.date and wrongfully_adjusted_prices.code is not null
+               when prices_with_split_rates.date > prev_split.date and wrongfully_adjusted_prices.symbol is not null
                    then adjusted_close
                -- latest split period, so we ignore split_rate and use 1.0
-               when prices_with_split_rates.date > prev_split.date and wrongfully_adjusted_prices.code is null
+               when prices_with_split_rates.date > prev_split.date and wrongfully_adjusted_prices.symbol is null
                    then split_rate_next_day * close
                -- if there is split tomorrow, but the prices are already adjusted
                when abs(latest_day_split_rate - split_rate_next_day) < 1e-3
@@ -133,52 +209,55 @@ all_rows as
                end                                                                        as adjusted_close,
            case
                -- latest split period, already adjusted
-               when prices_with_split_rates.date > prev_split.date and wrongfully_adjusted_prices.code is not null
+               when prices_with_split_rates.date > prev_split.date and wrongfully_adjusted_prices.symbol is not null
                    then adjusted_close / split_rate_next_day
                else prices_with_split_rates.close
                end                                                                        as close,
            case
                when split_rate_next_day is null
-                   then _sdc_batched_at
-               when prices_with_split_rates.date > prev_split.date and wrongfully_adjusted_prices.code is not null
-                   then _sdc_batched_at
+                   then updated_at
+               when prices_with_split_rates.date > prev_split.date and wrongfully_adjusted_prices.symbol is not null
+                   then updated_at
                else now()
-               end                                                                        as _sdc_batched_at,
+               end as updated_at,
            prices_with_split_rates.date,
+           prices_with_split_rates.date_year,
+           prices_with_split_rates.date_month,
+           prices_with_split_rates.date_week,
            prices_with_split_rates.high,
            prices_with_split_rates.low,
            prices_with_split_rates.open,
            prices_with_split_rates.volume
     from prices_with_split_rates
-             left join latest_day_split_rate using (code)
-             left join prev_split using (code)
+             left join latest_day_split_rate using (symbol)
+             left join prev_split using (symbol)
              left join wrongfully_adjusted_prices
-                       on wrongfully_adjusted_prices.code = prices_with_split_rates.code
+                       on wrongfully_adjusted_prices.symbol = prices_with_split_rates.symbol
                            and wrongfully_adjusted_prices.date = prices_with_split_rates.date
 )
-select code                                      as symbol,
-       (code || '_' || date)                     as id,
-       substr(date, 0, 5)                        as date_year,
-       (substr(date, 0, 8) || '-01')::timestamp  as date_month,
-       date_trunc('week', date::date)::timestamp as date_week,
+select symbol,
+       (symbol || '_' || date) as id,
+       date_year,
+       date_month,
+       date_week,
        adjusted_close,
        case
            when lag(adjusted_close) over wnd > 0
                then coalesce(adjusted_close / lag(adjusted_close) over wnd - 1, 0)
-           end                                   as relative_daily_gain,
+           end                 as relative_daily_gain,
        close,
        date::date,
        high,
        low,
        open,
        volume,
-       all_rows._sdc_batched_at                  as updated_at
+       all_rows.updated_at
 from all_rows
 {% if is_incremental() %}
     left join old_model_stats on true
     where all_rows._sdc_batched_at >= old_model_stats.max_updated_at or old_model_stats.max_updated_at is null
 {% endif %}
-    window wnd as (partition by code order by date rows between 1 preceding and current row)
+    window wnd as (partition by symbol order by date rows between 1 preceding and current row)
 
 union all
 

@@ -39,6 +39,7 @@ sources:
       - name: polygon_marketstatus_upcoming
       - name: polygon_options_historical_prices
       - name: polygon_crypto_historical_prices
+      - name: polygon_stocks_historical_prices
       - name: polygon_stock_splits
 
   - name: coingecko
