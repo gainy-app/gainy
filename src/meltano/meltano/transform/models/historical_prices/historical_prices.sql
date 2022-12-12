@@ -250,7 +250,7 @@ select symbol,
        high,
        low,
        open,
-       volume,
+       volume::numeric,
        all_rows.updated_at
 from all_rows
 {% if is_incremental() %}
@@ -276,7 +276,7 @@ SELECT contract_name                                                   as code,
        h                                                               as high,
        l                                                               as low,
        o                                                               as open,
-       v                                                               as volume,
+       v::numeric                                                      as volume,
        polygon_options_historical_prices._sdc_batched_at               as updated_at
 from {{ source('polygon', 'polygon_options_historical_prices') }}
 join {{ ref('ticker_options_monitored') }} using (contract_name)
@@ -303,7 +303,7 @@ SELECT polygon_crypto_tickers.symbol                                          as
        h                                                                      as high,
        l                                                                      as low,
        o                                                                      as open,
-       v                                                                      as volume,
+       v::numeric                                                             as volume,
        polygon_crypto_historical_prices._sdc_batched_at                       as updated_at
 from polygon_crypto_tickers
          join {{ source('polygon', 'polygon_crypto_historical_prices') }}
