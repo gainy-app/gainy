@@ -25,6 +25,7 @@ class SetRecommendationSettings(HasuraAction):
             'profile_id': profile_id,
             'interests': interests,
             'categories': categories,
+            'recommended_collections_count': recommended_collections_count,
         }
 
         logger.info('SetRecommendationSettings', extra=logging_extra)
@@ -35,7 +36,7 @@ class SetRecommendationSettings(HasuraAction):
         service = context_container.recommendation_service
         service.compute_match_score(profile_id)
 
-        if recommended_collections_count is not None:
+        if recommended_collections_count is not None and recommended_collections_count > 0:
             collections = service.get_recommended_collections(
                 profile_id, recommended_collections_count)
         else:
