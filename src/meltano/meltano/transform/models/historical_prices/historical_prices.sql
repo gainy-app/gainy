@@ -16,7 +16,7 @@
 -- Execution Time: 450490.199 ms
 with
 {% if is_incremental() %}
-old_model_stats as (select max(updated_at) as max_updated_at from {{ this }} where relative_daily_gain is not null),
+old_model_stats as (select symbol, max(updated_at) as max_updated_at from {{ this }} where relative_daily_gain is not null group by symbol),
 {% endif %}
 
 polygon_symbols as materialized
@@ -254,7 +254,7 @@ select symbol,
        all_rows.updated_at
 from all_rows
 {% if is_incremental() %}
-    left join old_model_stats on true
+    left join old_model_stats using (symbol)
     where all_rows.updated_at >= old_model_stats.max_updated_at or old_model_stats.max_updated_at is null
 {% endif %}
     window wnd as (partition by symbol order by date rows between 1 preceding and current row)
@@ -281,7 +281,7 @@ SELECT contract_name                                                   as symbol
 from {{ source('polygon', 'polygon_options_historical_prices') }}
 join {{ ref('ticker_options_monitored') }} using (contract_name)
 {% if is_incremental() %}
-    left join old_model_stats on true
+    left join old_model_stats on old_model_stats.symbol = contract_name
     where polygon_options_historical_prices._sdc_batched_at >= old_model_stats.max_updated_at or old_model_stats.max_updated_at is null
 {% endif %}
     window wnd as (partition by contract_name order by t rows between 1 preceding and current row)
@@ -309,7 +309,7 @@ from polygon_crypto_tickers
          join {{ source('polygon', 'polygon_crypto_historical_prices') }}
               on polygon_crypto_historical_prices.symbol = regexp_replace(polygon_crypto_tickers.symbol, '.CC$', 'USD')
 {% if is_incremental() %}
-    left join old_model_stats on true
+    left join old_model_stats on old_model_stats.symbol = polygon_crypto_tickers.symbol
     where polygon_crypto_historical_prices._sdc_batched_at >= old_model_stats.max_updated_at or old_model_stats.max_updated_at is null
 {% endif %}
     window wnd as (partition by polygon_crypto_tickers.symbol order by t rows between 1 preceding and current row)
