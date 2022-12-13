@@ -4,6 +4,7 @@
 - [Connect bank account](trading/connecting_bank_account.md)
 - [Deposits / withdrawals](trading/money_flow.md)
 - [Trading collections](trading/trading_collections.md)
+- [Trading stocks](trading/trading_stocks.md)
 - [Commissions](trading/commissions.md)
 
 ### History
@@ -13,7 +14,7 @@ query GetTradingHistory($profile_id: Int!, $types: [String!]!) {
     amount
     datetime
     name
-    tags # ["deposit", "withdraw", "pending", "error", "fee", "ttf", "buy", "sell", "cancelled"]
+    tags # ["deposit", "withdraw", "pending", "error", "fee", "ttf", "ticker", "buy", "sell", "cancelled"]
     type
     trading_collection_version { # for TTF orders
       trading_account{
@@ -32,10 +33,18 @@ query GetTradingHistory($profile_id: Int!, $types: [String!]!) {
       status # ["PENDING", "APPROVED", "SUCCESS", "FAILED"]
       amount
     }
+    trading_order { # for ticker orders
+      trading_account{
+        account_no
+      }
+      created_at
+      status # ["PENDING", "PENDING_EXECUTION", "EXECUTED_FULLY", "CANCELLED", "FAILED"]
+      target_amount_delta
+    }
   }
 }
 ```
-Available types: `["deposit", "withdraw", "trading_fee", "ttf_transaction"]`
+Available types: `["deposit", "withdraw", "trading_fee", "ttf_transaction", "ticker_transaction"]`
 
 May be queried by `money_flow_id`:
 ```graphql

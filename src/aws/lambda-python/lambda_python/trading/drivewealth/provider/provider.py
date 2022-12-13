@@ -1,12 +1,13 @@
-import os
 from decimal import Decimal
 
 from gainy.data_access.repository import MAX_TRANSACTION_SIZE
 from gainy.exceptions import NotFoundException, EntityNotFoundException
+from gainy.trading.drivewealth.config import DRIVEWEALTH_IS_UAT
 from gainy.trading.drivewealth.exceptions import DriveWealthApiException, BadMissingParametersBodyException
 from portfolio.plaid import PlaidService
 from gainy.plaid.models import PlaidAccessToken
 from services.notification import NotificationService
+from trading.exceptions import SymbolIsNotTradeableException
 from trading.models import TradingMoneyFlow, TradingStatement, ProfileKycStatus
 from trading.drivewealth.provider.collection import DriveWealthProviderCollection
 from trading.drivewealth.provider.kyc import DriveWealthProviderKYC
@@ -23,8 +24,6 @@ from gainy.trading.drivewealth.models import DriveWealthAccount, DriveWealthUser
 from trading.repository import TradingRepository
 
 logger = get_logger(__name__)
-
-IS_UAT = os.getenv("DRIVEWEALTH_IS_UAT", "true") != "false"
 
 
 class DriveWealthProvider(DriveWealthProviderKYC,
@@ -104,7 +103,7 @@ class DriveWealthProvider(DriveWealthProviderKYC,
         return entity
 
     def debug_add_money(self, trading_account_id, amount):
-        if not IS_UAT:
+        if not DRIVEWEALTH_IS_UAT:
             raise Exception('Not supported in production')
 
         account: DriveWealthAccount = self.repository.find_one(
@@ -125,7 +124,7 @@ class DriveWealthProvider(DriveWealthProviderKYC,
         self.repository.persist(money_flow)
 
     def debug_delete_data(self, profile_id):
-        if not IS_UAT:
+        if not DRIVEWEALTH_IS_UAT:
             raise Exception('Not supported in production')
 
         repository = self.repository
@@ -255,6 +254,14 @@ class DriveWealthProvider(DriveWealthProviderKYC,
             self.repository.persist(trading_statement)
             dw_statement.trading_statement_id = trading_statement.id
             self.repository.persist(dw_statement)
+
+    def check_tradeable_symbol(self, symbol: str):
+        try:
+            instrument = self.repository.get_instrument_by_symbol(symbol)
+            if instrument.status != DriveWealthInstrumentStatus.ACTIVE:
+                raise SymbolIsNotTradeableException(symbol)
+        except EntityNotFoundException:
+            raise SymbolIsNotTradeableException(symbol)
 
     def _sync_bank_accounts(self, user_ref_id):
         repository = self.repository

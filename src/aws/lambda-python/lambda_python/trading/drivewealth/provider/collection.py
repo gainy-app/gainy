@@ -17,7 +17,8 @@ class DriveWealthProviderCollection(GainyDriveWealthProvider):
 
     def get_actual_collection_data(self, profile_id: int,
                                    collection_id: int) -> CollectionStatus:
-        fund = self.get_fund(profile_id, collection_id)
+        fund = self.repository.get_profile_fund(profile_id,
+                                                collection_id=collection_id)
         if not fund:
             raise EntityNotFoundException(DriveWealthFund)
 

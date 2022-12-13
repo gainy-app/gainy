@@ -193,6 +193,14 @@ actions:
     definition:
       kind: synchronous
       handler: '{{AWS_LAMBDA_API_GATEWAY_ENDPOINT}}/hasuraAction'
+    permissions:
+      - role: user
+  - name: trading_create_stock_order
+    definition:
+      kind: synchronous
+      handler: '{{AWS_LAMBDA_API_GATEWAY_ENDPOINT}}/hasuraAction'
+    permissions:
+      - role: user
   - name: trading_delete_data
     definition:
       kind: synchronous
@@ -433,4 +441,6 @@ custom_types:
     - name: VerificationSendCodeOutput
     - name: KycValidateAddressOutput
     - name: SuggestedAddressOutput
+    - name: TradingCreateStockOrderOutput
+    - name: TradingCancelPendingOrderOutput
   scalars: []
