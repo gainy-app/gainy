@@ -77,4 +77,3 @@ Coverage:
 - dbt: all the exposed models
 - hasura: chart, collections, portfolio, interests, categories
 - lambda: recommended collections
-
