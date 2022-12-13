@@ -60,6 +60,7 @@ query TradingGetProfileStockStatus($profile_id: Int!, $symbol: String!) {
     id
     created_at
     target_amount_delta
+    status # cancel is possible only if this status is "PENDING"
     history{
       tags
     }
