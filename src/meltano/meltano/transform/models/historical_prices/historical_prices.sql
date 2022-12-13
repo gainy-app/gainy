@@ -288,7 +288,7 @@ join {{ ref('ticker_options_monitored') }} using (contract_name)
 
 union all
 
-SELECT polygon_crypto_tickers.symbol                                          as symbol,
+SELECT polygon_crypto_tickers.symbol,
        (polygon_crypto_tickers.symbol || '_' || to_timestamp(t / 1000)::date) as id,
        extract(year from to_timestamp(t / 1000))::varchar                     as date_year,
        date_trunc('month', to_timestamp(t / 1000))::timestamp                 as date_month,
