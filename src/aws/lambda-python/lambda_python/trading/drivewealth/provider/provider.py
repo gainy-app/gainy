@@ -1,8 +1,8 @@
-import os
 from decimal import Decimal
 
 from gainy.data_access.repository import MAX_TRANSACTION_SIZE
 from gainy.exceptions import NotFoundException, EntityNotFoundException
+from gainy.trading.drivewealth.config import DRIVEWEALTH_IS_UAT
 from gainy.trading.drivewealth.exceptions import DriveWealthApiException, BadMissingParametersBodyException
 from portfolio.plaid import PlaidService
 from gainy.plaid.models import PlaidAccessToken
@@ -24,8 +24,6 @@ from gainy.trading.drivewealth.models import DriveWealthAccount, DriveWealthUser
 from trading.repository import TradingRepository
 
 logger = get_logger(__name__)
-
-IS_UAT = os.getenv("DRIVEWEALTH_IS_UAT", "true") != "false"
 
 
 class DriveWealthProvider(DriveWealthProviderKYC,
@@ -105,7 +103,7 @@ class DriveWealthProvider(DriveWealthProviderKYC,
         return entity
 
     def debug_add_money(self, trading_account_id, amount):
-        if not IS_UAT:
+        if not DRIVEWEALTH_IS_UAT:
             raise Exception('Not supported in production')
 
         account: DriveWealthAccount = self.repository.find_one(
@@ -126,7 +124,7 @@ class DriveWealthProvider(DriveWealthProviderKYC,
         self.repository.persist(money_flow)
 
     def debug_delete_data(self, profile_id):
-        if not IS_UAT:
+        if not DRIVEWEALTH_IS_UAT:
             raise Exception('Not supported in production')
 
         repository = self.repository

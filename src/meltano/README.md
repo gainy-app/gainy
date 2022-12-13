@@ -6,7 +6,6 @@
 
 ## Force fetching all prices for symbols:
 ```postgresql
-
 with latest_jobs as
          (
              select distinct on (
