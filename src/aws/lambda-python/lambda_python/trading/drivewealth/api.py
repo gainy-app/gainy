@@ -5,6 +5,8 @@ import datetime
 from decimal import Decimal
 import os
 
+from gainy.trading.drivewealth.config import DRIVEWEALTH_WLP_ID, DRIVEWEALTH_PARENT_IBID, DRIVEWEALTH_RIA_ID, \
+    DRIVEWEALTH_RIA_PRODUCT_ID
 from trading.models import KycDocument, TradingStatementType
 from trading.drivewealth.repository import DriveWealthRepository
 from trading.drivewealth.models import DriveWealthBankAccount, DriveWealthKycStatus, DriveWealthRedemption, \
@@ -15,11 +17,6 @@ from gainy.trading.drivewealth import DriveWealthApi as GainyDriveWealthApi
 from gainy.trading.drivewealth.models import DriveWealthAccount
 
 logger = get_logger(__name__)
-
-DRIVEWEALTH_WLP_ID = os.getenv("DRIVEWEALTH_WLP_ID")
-DRIVEWEALTH_PARENT_IBID = os.getenv("DRIVEWEALTH_PARENT_IBID")
-DRIVEWEALTH_RIA_ID = os.getenv("DRIVEWEALTH_RIA_ID")
-DRIVEWEALTH_RIA_PRODUCT_ID = os.getenv("DRIVEWEALTH_RIA_PRODUCT_ID")
 
 
 def _hydrate_documents(account: DriveWealthAccount, type: TradingStatementType,
