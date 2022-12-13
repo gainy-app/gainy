@@ -42,6 +42,7 @@ with data as
                null                                                              as collection_id,
                portfolio_securities_normalized.type,
                portfolio_brokers.uniq_id                                         as broker_uniq_id,
+               false                                                             as is_app_trading,
                greatest(profile_holdings.updated_at,
                         portfolio_securities_normalized.updated_at,
                         base_tickers.updated_at)::timestamp                      as updated_at
@@ -59,27 +60,35 @@ with data as
         select case
                    when drivewealth_holdings.type = 'cash'
                        then profile_id || '_cash_' || symbol
-                   else 'ttf_' || profile_id || coalesce('_' || collection_id, '')
-                   end                                                                     as holding_group_id,
-               'ttf_' || profile_id || coalesce('_' || collection_id, '') || '_' || symbol as holding_id_v2,
-               null                                                                        as holding_id,
-               null                                                                        as plaid_access_token_id,
-               null                                                                        as security_id,
+                   when drivewealth_holdings.collection_id is null
+                       then 'ticker_' || profile_id || '_' || symbol
+                   else 'ttf_' || profile_id || '_' || collection_id
+                   end                                                as holding_group_id,
+               case
+                   when drivewealth_holdings.collection_id is null
+                       then 'dw_ticker_' || profile_id || '_' || symbol
+                   else 'dw_ttf_' || profile_id || '_' || collection_id || '_' || symbol
+                   end                                                as holding_id_v2,
+               null                                                   as holding_id,
+               null                                                   as plaid_access_token_id,
+               null                                                   as security_id,
                profile_id,
-               null                                                                        as account_id,
+               null                                                   as account_id,
                quantity,
                quantity_norm_for_valuation,
-               coalesce(base_tickers.name, drivewealth_holdings.name)                      as name,
+               coalesce(base_tickers.name, drivewealth_holdings.name) as name,
                symbol,
-               symbol                                                                      as ticker_symbol,
+               symbol                                                 as ticker_symbol,
                collection_id,
                drivewealth_holdings.type,
-               portfolio_brokers.uniq_id                                                   as broker_uniq_id,
+               portfolio_brokers.uniq_id                              as broker_uniq_id,
+               true                                                   as is_app_trading,
                greatest(drivewealth_holdings.updated_at,
-                        base_tickers.updated_at)::timestamp                                as updated_at
+                        base_tickers.updated_at)::timestamp           as updated_at
         from {{ ref('drivewealth_holdings') }}
                  left join {{ ref('base_tickers') }} using (symbol)
-                 left join {{ ref('portfolio_brokers') }} on portfolio_brokers.uniq_id = 'dw_ttf'
+                 left join {{ ref('portfolio_brokers') }} on portfolio_brokers.uniq_id = 'gainy_broker'
+        where abs(quantity) > 1e-3
 )
 select data.*
 from data

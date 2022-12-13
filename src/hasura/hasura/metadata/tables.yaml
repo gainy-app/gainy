@@ -1226,6 +1226,45 @@
             user_id:
               _eq: X-Hasura-User-Id
 - table:
+    name: trading_orders
+    schema: app
+  object_relationships:
+    - name: history
+      using:
+        manual_configuration:
+          column_mapping:
+            id: trading_order_id
+          insertion_order: null
+          remote_table:
+            name: trading_history
+            schema: public
+    - name: profile
+      using:
+        foreign_key_constraint_on: profile_id
+    - name: trading_account
+      using:
+        foreign_key_constraint_on: trading_account_id
+  select_permissions:
+    - role: user
+      permission:
+        columns:
+          - id
+          - profile_id
+          - symbol
+          - status
+          - target_amount_delta
+          - trading_account_id
+          - source
+          - fail_reason
+          - pending_execution_since
+          - executed_at
+          - created_at
+          - updated_at
+        filter:
+          profile:
+            user_id:
+              _eq: X-Hasura-User-Id
+- table:
     name: trading_statements
     schema: app
   object_relationships:
@@ -2880,22 +2919,23 @@
     - role: user
       permission:
         columns:
-          - symbol
-          - type
-          - name
+          - country_name
           - description
-          - phone
-          - logo_url
-          - web_url
-          - ipo_date
-          - sector
-          - industry
-          - gic_sector
           - gic_group
           - gic_industry
+          - gic_sector
           - gic_sub_industry
-          - country_name
+          - industry
+          - ipo_date
+          - is_trading_enabled
+          - logo_url
+          - name
+          - phone
+          - sector
+          - symbol
+          - type
           - updated_at
+          - web_url
         filter: {}
 - table:
     name: trading_history
@@ -2928,6 +2968,15 @@
           remote_table:
             name: trading_money_flow
             schema: app
+    - name: trading_order
+      using:
+        manual_configuration:
+          column_mapping:
+            trading_order_id: id
+          insertion_order: null
+          remote_table:
+            name: trading_orders
+            schema: app
   select_permissions:
     - role: user
       permission:
@@ -2939,6 +2988,7 @@
           - profile_id
           - tags
           - trading_collection_version_id
+          - trading_order_id
           - type
         filter:
           profile:
@@ -3001,6 +3051,35 @@
           - withdrawable_cash
           - pending_cash
           - buying_power
+        filter:
+          profile:
+            user_id:
+              _eq: X-Hasura-User-Id
+- table:
+    name: trading_profile_ticker_status
+    schema: public
+  object_relationships:
+    - name: profile
+      using:
+        manual_configuration:
+          column_mapping:
+            profile_id: id
+          insertion_order: null
+          remote_table:
+            name: profiles
+            schema: app
+  select_permissions:
+    - role: user
+      permission:
+        columns:
+          - profile_id
+          - symbol
+          - value_to_portfolio_value
+          - actual_value
+          - relative_gain_1d
+          - absolute_gain_1d
+          - relative_gain_total
+          - absolute_gain_total
         filter:
           profile:
             user_id:

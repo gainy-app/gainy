@@ -253,9 +253,18 @@ type Mutation {
 
 type Mutation {
   trading_cancel_pending_order(
-    profile_id: Int
+    profile_id: Int!
     trading_collection_version_id: Int
-  ): TradingCollectionVersionOutput
+    trading_order_id: Int
+  ): TradingCancelPendingOrderOutput
+}
+
+type Mutation {
+  trading_create_stock_order(
+    profile_id: Int!
+    symbol: String!
+    target_amount_delta: Float!
+  ): TradingCreateStockOrderOutput
 }
 
 type Mutation {
@@ -645,5 +654,14 @@ type SuggestedAddressOutput {
   province: String
   postal_code: String
   country: String
+}
+
+type TradingCreateStockOrderOutput {
+  trading_order_id: Int!
+}
+
+type TradingCancelPendingOrderOutput {
+  trading_collection_version_id: Int
+  trading_order_id: Int
 }
 

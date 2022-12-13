@@ -263,7 +263,7 @@ with plaid_transactions as
                                left join first_transaction_date using (profile_id)
                                left join expanded_transactions using (account_id, security_id)
                       where profile_holdings_normalized.type != 'cash'
-                        and profile_holdings_normalized.collection_id is null
+                        and not profile_holdings_normalized.is_app_trading
                       order by profile_holdings_normalized.account_id, profile_holdings_normalized.security_id,
                                expanded_transactions.row_num desc
                   ) t
@@ -276,28 +276,28 @@ with plaid_transactions as
              where diff > 0
              order by security_id, account_id, historical_prices.date desc
      ),
-     ttf_transactions as
+     dw_transactions as
          (
              with stats as
                       (
-                          select profile_id, collection_id, symbol, min(date) as min_date, max(date) as max_date
+                          select holding_id_v2, min(date) as min_date
                           from {{ ref('drivewealth_portfolio_historical_holdings') }}
-                          group by profile_id, collection_id, symbol
+                          group by holding_id_v2
                       )
-             select 'ttf_dw_' || profile_id || '_' || collection_id || '_' || symbol as uniq_id,
+             select holding_id_v2                    as uniq_id,
                     symbol,
                     profile_holdings_normalized.holding_id_v2,
-                    null::double precision                                           as quantity_norm,
-                    null::double precision                                           as price,
-                    min_date                                                         as datetime,
-                    'buy'                                                            as type,
-                    null::int                                                        as security_id,
+                    null::double precision           as quantity_norm,
+                    null::double precision           as price,
+                    min_date                         as datetime,
+                    'buy'                            as type,
+                    null::int                        as security_id,
                     profile_id,
-                    null::int                                                        as account_id,
-                    'ttf'                                                            as security_type,
+                    null::int                        as account_id,
+                    profile_holdings_normalized.type as security_type,
                     collection_id
              from stats
-                      left join {{ ref('profile_holdings_normalized') }} using (profile_id, collection_id, symbol)
+                      left join {{ ref('profile_holdings_normalized') }} using (holding_id_v2)
      ),
      groupped_expanded_transactions as
          (
@@ -314,6 +314,7 @@ with plaid_transactions as
                                             else 1 end)                       as quantity_norm_for_valuation, -- to multiple by price
                     max(uniq_id)::varchar                                     as transaction_uniq_id,
                     security_type,
+                    is_app_trading,
                     t.datetime
              from (
                       select id,
@@ -327,7 +328,8 @@ with plaid_transactions as
                              profile_id,
                              holding_id_v2,
                              null::int       as collection_id,
-                             quantity_norm::double precision
+                             quantity_norm::double precision,
+                             false           as is_app_trading
                       from mismatched_sell_transactions
 
                       union all
@@ -343,7 +345,8 @@ with plaid_transactions as
                              profile_id,
                              holding_id_v2,
                              null::int       as collection_id,
-                             quantity_norm::double precision
+                             quantity_norm::double precision,
+                             false           as is_app_trading
                       from mismatched_buy_transactions
 
                       union all
@@ -359,7 +362,8 @@ with plaid_transactions as
                              profile_id,
                              holding_id_v2,
                              null::int       as collection_id,
-                             quantity_norm::double precision
+                             quantity_norm::double precision,
+                             false           as is_app_trading
                       from mismatched_holdings_transactions
 
                       union all
@@ -375,12 +379,13 @@ with plaid_transactions as
                              profile_id,
                              holding_id_v2,
                              null::int       as collection_id,
-                             quantity_norm::double precision
+                             quantity_norm::double precision,
+                             false           as is_app_trading
                       from plaid_transactions
 
                       union all
 
-                      select null                  as id,
+                      select null                   as id,
                              uniq_id,
                              symbol,
                              null::double precision as amount,
@@ -391,15 +396,16 @@ with plaid_transactions as
                              profile_id,
                              holding_id_v2,
                              collection_id,
-                             quantity_norm::double precision
-                      from ttf_transactions
+                             quantity_norm::double precision,
+                             true                   as is_app_trading
+                      from dw_transactions
                   ) t
                       left join {{ ref('base_tickers') }} using (symbol)
                       left join {{ ref('ticker_options') }} on ticker_options.contract_name = t.symbol
              where t.type in ('buy', 'sell')
                and (base_tickers.symbol is not null or ticker_options.symbol is not null)
-             group by t.holding_id_v2, t.datetime, t.profile_id, t.symbol, t.security_type
-             having sum(abs(quantity_norm)) > 0 or security_type = 'ttf'
+             group by t.holding_id_v2, t.datetime, t.profile_id, t.symbol, t.security_type, t.is_app_trading
+             having sum(abs(quantity_norm)) > 0 or is_app_trading
 {% if is_incremental() %}
      ),
      profiles_to_update as
@@ -425,6 +431,7 @@ select groupped_expanded_transactions.symbol,
        groupped_expanded_transactions.transaction_uniq_id::text,
        groupped_expanded_transactions.datetime,
        groupped_expanded_transactions.security_type,
+       groupped_expanded_transactions.is_app_trading,
        now() as updated_at
 from groupped_expanded_transactions
 {% if is_incremental() %}

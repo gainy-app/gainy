@@ -20,9 +20,9 @@ with data as
 
          union all
 
-         select 'dw_ttf'  as uniq_id,
-                null::int as plaid_institution_id,
-                'Gainy TTFs'
+         select 'gainy_broker' as uniq_id,
+                null::int      as plaid_institution_id,
+                'Gainy'
     )
 select data.*
 from data
