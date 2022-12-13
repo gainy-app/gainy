@@ -98,6 +98,7 @@ query TradingGetProfileCollectionStatus($profile_id: Int!, $collection_id: Int!)
     id
     created_at
     target_amount_delta
+    status # cancel is possible only if this status is "PENDING"
     history{
       tags
     }
