@@ -44,16 +44,22 @@ dbt = BashOperator(
     trigger_rule="all_done",
     pool="dbt")
 
-clean = BashOperator(
-    task_id="clean",
-    bash_command=
-    f"cd {MELTANO_PROJECT_ROOT}; /venv/bin/python scripts/cleanup.py",
-    dag=dag)
+clean = BashOperator(task_id="clean",
+                     cwd=MELTANO_PROJECT_ROOT,
+                     bash_command="/venv/bin/python scripts/cleanup.py",
+                     dag=dag)
 
 generate_meltano_config = BashOperator(
     task_id="generate_meltano_config",
-    bash_command=
-    f"cd {MELTANO_PROJECT_ROOT}; /venv/bin/python scripts/generate_meltano_config.py",
+    cwd=MELTANO_PROJECT_ROOT,
+    bash_command="/venv/bin/python scripts/generate_meltano_config.py",
+    dag=dag)
+
+store_deployment_state = BashOperator(
+    task_id="store_deployment_state",
+    cwd=MELTANO_PROJECT_ROOT,
+    bash_command="scripts/store_deployment_state.sh",
     dag=dag)
 
 generate_meltano_config >> upstream >> dbt >> downstream >> clean
+dbt >> store_deployment_state

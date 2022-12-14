@@ -56,13 +56,16 @@ create table if not exists raw_data.stats_ttf_clicks
 
 create table if not exists deployment.public_schemas
 (
-    schema_name varchar   not null,
-    deployed_at timestamp not null,
-    deleted_at  timestamp,
+    schema_name     varchar not null,
+    deployed_at     timestamp,
+    deleted_at      timestamp,
+    dbt_state       text,
+    seed_data_state text,
 
     primary key (schema_name)
 );
-alter table deployment.public_schemas alter deployed_at drop not null;
+alter table deployment.public_schemas add column if not exists dbt_state text;
+alter table deployment.public_schemas add column if not exists seed_data_state text;
 
 create table if not exists deployment.realtime_listener_heartbeat
 (
