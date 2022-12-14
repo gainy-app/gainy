@@ -68,7 +68,7 @@ echo "$(date)" meltano invoke dbt run $DBT_RUN_FLAGS
 if meltano invoke dbt run $DBT_RUN_FLAGS; then
   $psql_auth -c "update deployment.public_schemas set deployed_at = now() where schema_name = '$DBT_TARGET_SCHEMA';"
 
-  scripts/store_deployment_state.sh
+  /bin/bash scripts/store_deployment_state.sh
 else
   echo 'Failed to seed public schema, exiting'
   exit 1
