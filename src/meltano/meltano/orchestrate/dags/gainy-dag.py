@@ -58,7 +58,7 @@ generate_meltano_config = BashOperator(
 store_deployment_state = BashOperator(
     task_id="store_deployment_state",
     cwd=MELTANO_PROJECT_ROOT,
-    bash_command="scripts/store_deployment_state.sh",
+    bash_command="/bin/bash scripts/store_deployment_state.sh",
     dag=dag)
 
 generate_meltano_config >> upstream >> dbt >> downstream >> clean
