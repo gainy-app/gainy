@@ -246,27 +246,21 @@ with tickers_and_options as
                              abs((adjusted_close - prev_adjusted_close) / least(adjusted_close, prev_adjusted_close)) as diff
                       from (
                                select symbol,
-                                      '1d'                                                             as period,
-                                      lag(adjusted_close) over (partition by symbol order by datetime) as prev_adjusted_close,
-                                      lag(volume) over (partition by symbol order by datetime)         as prev_volume,
+                                      '1d'                                                                      as period,
+                                      lag(adjusted_close) over (partition by symbol order by datetime)          as prev_adjusted_close,
+                                      lag(volume * adjusted_close) over (partition by symbol order by datetime) as prev_volume,
                                       datetime,
                                       adjusted_close,
-                                      volume
+                                      volume * adjusted_close                                                   as volume
                                from {{ ref('historical_prices_aggregated_3min') }}
-{% if var('realtime') %}
-                                    join {{ ref('week_trading_sessions') }} using (symbol)
-                               where week_trading_sessions.index = 0 and historical_prices_aggregated_3min.datetime between week_trading_sessions.open_at and week_trading_sessions.close_at
-                                 and datetime > least(now(), week_trading_sessions.close_at) - interval '1 hour'
-{% endif %}
                            ) t
                       where adjusted_close > 0
                         and prev_adjusted_close > 0
                   ) t
              where (prev_adjusted_close > 1e-1 or adjusted_close > 1e-1)
-               and ((diff > 0.1 and (volume + prev_volume) > 10000000)
-                 or (diff > 0.2 and (volume + prev_volume) > 1000000)
-                 or (diff > 0.6 and (volume + prev_volume) > 100000))
-
+               and ((diff > 0.2 and (volume + prev_volume) > 10000000)
+                 or (diff > 0.5 and (volume + prev_volume) > 1000000)
+                 or (diff > 1 and (volume + prev_volume) > 100000))
              group by symbol
          ),
      realtime_chart_diff_between_periods as
@@ -396,20 +390,20 @@ with tickers_and_options as
              union all
 
              select symbol,
-                    'realtime_chart_diff_with_prev_point' as code,
-                    'realtime' as period,
-                    message
-             from realtime_chart_diff_with_prev_point
-
-             union all
-
-             select symbol,
                     'realtime_chart_diff_between_periods' as code,
                     'realtime' as period,
                     message
              from realtime_chart_diff_between_periods
 
 {% if not var('realtime') %}
+             union all
+
+             select symbol,
+                    'realtime_chart_diff_with_prev_point' as code,
+                    'daily' as period,
+                    message
+             from realtime_chart_diff_with_prev_point
+
              union all
 
              select symbol,
