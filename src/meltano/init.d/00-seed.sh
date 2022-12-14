@@ -29,13 +29,6 @@ export DBT_RUN_FLAGS="--full-refresh"
 echo OLD_DBT_TARGET_SCHEMA "$OLD_DBT_TARGET_SCHEMA"
 
 if [ "$OLD_DBT_TARGET_SCHEMA" != "" ]; then
-  if [ "$OLD_DBT_TARGET_SCHEMA" != "$DBT_TARGET_SCHEMA" ]; then
-    echo "$(date)" Restoring schema "$OLD_DBT_TARGET_SCHEMA" to "$DBT_TARGET_SCHEMA"
-    $psql_auth -f scripts/clone_schema.sql
-    $psql_auth -c "call clone_schema('$OLD_DBT_TARGET_SCHEMA', '$DBT_TARGET_SCHEMA')"
-    echo "$(date)" Schema "$OLD_DBT_TARGET_SCHEMA" restored to  "$DBT_TARGET_SCHEMA"
-  fi
-
   # restore dbt state
   $psql_auth -c "select dbt_state from deployment.public_schemas where schema_name = '$OLD_DBT_TARGET_SCHEMA' and dbt_state is not null" -t --csv > /tmp/dbt_state
   if [ -s /tmp/dbt_state ]; then
@@ -43,6 +36,11 @@ if [ "$OLD_DBT_TARGET_SCHEMA" != "" ]; then
     tar -xzf /tmp/dbt_state.tgz -C $DBT_ARTIFACT_STATE_PATH
     if [ "$OLD_DBT_TARGET_SCHEMA" != "$DBT_TARGET_SCHEMA" ]; then
       find $DBT_ARTIFACT_STATE_PATH -type f -print0 | xargs -0 sed -i "s/$OLD_DBT_TARGET_SCHEMA/$DBT_TARGET_SCHEMA/g"
+
+      echo "$(date)" Restoring schema "$OLD_DBT_TARGET_SCHEMA" to "$DBT_TARGET_SCHEMA"
+      $psql_auth -f scripts/clone_schema.sql
+      $psql_auth -c "call clone_schema('$OLD_DBT_TARGET_SCHEMA', '$DBT_TARGET_SCHEMA')"
+      echo "$(date)" Schema "$OLD_DBT_TARGET_SCHEMA" restored to  "$DBT_TARGET_SCHEMA"
     fi
     export DBT_RUN_FLAGS="-s result:error+ state:modified+ source_status:fresher+ --defer"
   fi
