@@ -32,9 +32,7 @@ if [ "$OLD_DBT_TARGET_SCHEMA" != "" ]; then
   $psql_auth -c "select dbt_state from deployment.public_schemas where schema_name = '$OLD_DBT_TARGET_SCHEMA' and dbt_state is not null" -t --csv > /tmp/dbt_state
   if [ -s /tmp/dbt_state ]; then
     base64 -d /tmp/dbt_state > /tmp/dbt_state.tgz
-    ls -la $DBT_ARTIFACT_STATE_PATH
-    tar -xzf /tmp/dbt_state.tgz -C "$(dirname "$DBT_ARTIFACT_STATE_PATH")"
-    ls -la $DBT_ARTIFACT_STATE_PATH
+    tar -xvzf /tmp/dbt_state.tgz -C "$DBT_ARTIFACT_STATE_PATH"
     if [ "$OLD_DBT_TARGET_SCHEMA" != "$DBT_TARGET_SCHEMA" ]; then
       find $DBT_ARTIFACT_STATE_PATH -type f -print0 | xargs -0 sed -i "s/$OLD_DBT_TARGET_SCHEMA/$DBT_TARGET_SCHEMA/g"
 
