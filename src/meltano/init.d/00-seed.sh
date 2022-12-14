@@ -22,7 +22,6 @@ $psql_auth -c "GRANT USAGE ON SCHEMA raw_data TO ${PG_INTERNAL_SYNC_USERNAME};"
 $psql_auth -c "GRANT SELECT ON ALL TABLES IN SCHEMA raw_data TO ${PG_INTERNAL_SYNC_USERNAME};"
 $psql_auth -c "GRANT USAGE ON SCHEMA $DBT_TARGET_SCHEMA TO datadog;"
 
-export DBT_ARTIFACT_STATE_PATH=/project/.meltano/transformers/dbt/target/
 OLD_DBT_TARGET_SCHEMA=$( $psql_auth -c "select schema_name from deployment.public_schemas where deleted_at is null and deployed_at is not null order by deployed_at desc limit 1" -t --csv )
 export DBT_RUN_FLAGS="--full-refresh"
 
@@ -33,7 +32,7 @@ if [ "$OLD_DBT_TARGET_SCHEMA" != "" ]; then
   $psql_auth -c "select dbt_state from deployment.public_schemas where schema_name = '$OLD_DBT_TARGET_SCHEMA' and dbt_state is not null" -t --csv > /tmp/dbt_state
   if [ -s /tmp/dbt_state ]; then
     base64 -d /tmp/dbt_state > /tmp/dbt_state.tgz
-    tar -xzf /tmp/dbt_state.tgz -C $DBT_ARTIFACT_STATE_PATH
+    tar -xzf /tmp/dbt_state.tgz -C "$(dirname "$DBT_ARTIFACT_STATE_PATH")"
     if [ "$OLD_DBT_TARGET_SCHEMA" != "$DBT_TARGET_SCHEMA" ]; then
       find $DBT_ARTIFACT_STATE_PATH -type f -print0 | xargs -0 sed -i "s/$OLD_DBT_TARGET_SCHEMA/$DBT_TARGET_SCHEMA/g"
 
