@@ -155,7 +155,7 @@ with polygon_symbols as materialized
                     high::double precision,
                     low::double precision,
                     close::double precision,
-                    volume::double precision,
+                    0::double precision              as volume,
                     adjusted_close::double precision,
                     1                                as priority
              from {{ ref('historical_prices') }}

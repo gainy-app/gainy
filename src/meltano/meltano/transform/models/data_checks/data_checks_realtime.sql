@@ -262,11 +262,11 @@ with tickers_and_options as
                       where adjusted_close > 0
                         and prev_adjusted_close > 0
                   ) t
-             where (diff > 0.1 and (volume + prev_volume) > 10000000)
-                or (diff > 0.2 and (volume + prev_volume) > 1000000)
-                or (diff > 0.6 and (volume + prev_volume) > 100000)
-                or (diff > 1 and (volume + prev_volume) > 10000)
-                or (diff > 2 and (volume + prev_volume) > 1000)
+             where (prev_adjusted_close > 1e-1 or adjusted_close > 1e-1)
+               and ((diff > 0.1 and (volume + prev_volume) > 10000000)
+                 or (diff > 0.2 and (volume + prev_volume) > 1000000)
+                 or (diff > 0.6 and (volume + prev_volume) > 100000))
+
              group by symbol
          ),
      realtime_chart_diff_between_periods as
