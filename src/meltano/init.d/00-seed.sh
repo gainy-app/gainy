@@ -42,8 +42,7 @@ if [ "$OLD_DBT_TARGET_SCHEMA" != "" ]; then
       $psql_auth -c "call clone_schema('$OLD_DBT_TARGET_SCHEMA', '$DBT_TARGET_SCHEMA')"
       echo "$(date)" Schema "$OLD_DBT_TARGET_SCHEMA" restored to  "$DBT_TARGET_SCHEMA"
     fi
-    export DBT_RUN_FLAGS="-s result:error+ state:modified+ source_status:fresher+ --defer"
-    meltano invoke dbt compile
+    export DBT_RUN_FLAGS="-s result:error+ state:modified+ --defer"
   fi
 
   # restore seed data state
@@ -60,10 +59,8 @@ if [ ! -f /tmp/seed_data_state ] || ! md5sum -c /tmp/seed_data_state; then
   find seed/$ENV -maxdepth 1 -iname '*.sql' | sort | while read -r i; do
     $psql_auth -P pager -f "$i"
   done
+  export DBT_RUN_FLAGS="--full-refresh"
 fi
-
-echo "$(date)" meltano invoke dbt source freshness
-meltano invoke dbt source freshness
 
 echo "$(date)" meltano invoke dbt run $DBT_RUN_FLAGS
 if meltano invoke dbt run $DBT_RUN_FLAGS; then

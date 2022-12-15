@@ -1,12 +1,10 @@
 version: 2
 
+# todo introduce freshness when it works https://docs.getdbt.com/docs/deploy/about-state#the-source_status-status
 sources:
   - name: gainy
     description: Gainy in-house datasets such as collections, industries, interests, categories, etc
     schema: raw_data
-    freshness:
-      warn_after: {count: 24, period: hour}
-    loaded_at_field: _sdc_extracted_at
     tables:
       - name: blog_article_priority
       - name: crypto_ticker_industries
@@ -17,7 +15,6 @@ sources:
       - name: gainy_interests
       - name: gainy_countries
       - name: auto_ticker_industries
-        freshness: ~
       - name: exchanges
       - name: stats_ttf_clicks
       - name: ticker_collections
