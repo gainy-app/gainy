@@ -33,7 +33,7 @@ if [ "$OLD_DBT_TARGET_SCHEMA" != "" ]; then
   if [ -s /tmp/dbt_state ]; then
     base64 -d /tmp/dbt_state > /tmp/dbt_state.tgz
     mkdir -p "$DBT_ARTIFACT_STATE_PATH"
-    tar -xvzf /tmp/dbt_state.tgz -C "$DBT_ARTIFACT_STATE_PATH"
+    tar -xzf /tmp/dbt_state.tgz -C "$DBT_ARTIFACT_STATE_PATH"
     if [ "$OLD_DBT_TARGET_SCHEMA" != "$DBT_TARGET_SCHEMA" ]; then
       find $DBT_ARTIFACT_STATE_PATH -type f -print0 | xargs -0 sed -i "s/$OLD_DBT_TARGET_SCHEMA/$DBT_TARGET_SCHEMA/g"
 
