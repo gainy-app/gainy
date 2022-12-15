@@ -42,7 +42,7 @@ if [ "$OLD_DBT_TARGET_SCHEMA" != "" ]; then
       $psql_auth -c "call clone_schema('$OLD_DBT_TARGET_SCHEMA', '$DBT_TARGET_SCHEMA')"
       echo "$(date)" Schema "$OLD_DBT_TARGET_SCHEMA" restored to  "$DBT_TARGET_SCHEMA"
     fi
-    export DBT_RUN_FLAGS="-s result:error+ state:modified+ --defer"
+    export DBT_RUN_FLAGS="-s result:error+ state:modified+ --defer --full-refresh"
   fi
 
   # restore seed data state
