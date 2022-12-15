@@ -43,6 +43,7 @@ if [ "$OLD_DBT_TARGET_SCHEMA" != "" ]; then
       echo "$(date)" Schema "$OLD_DBT_TARGET_SCHEMA" restored to  "$DBT_TARGET_SCHEMA"
     fi
     export DBT_RUN_FLAGS="-s result:error+ state:modified+ source_status:fresher+ --defer"
+    meltano invoke dbt compile
   fi
 
   # restore seed data state
