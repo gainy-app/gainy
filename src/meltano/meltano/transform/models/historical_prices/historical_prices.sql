@@ -40,7 +40,7 @@ raw_eod_historical_prices as
                adjusted_close,
                volume,
                _sdc_batched_at                           as updated_at
-        from {{ source('eod', 'eod_historical_prices')}}
+        from {{ source('eod', 'eod_historical_prices') }}
                  left join polygon_symbols
                            on polygon_symbols.symbol = eod_historical_prices.code
         where polygon_symbols.symbol is null
@@ -61,7 +61,7 @@ raw_polygon_stocks_historical_prices as
                c                                                      as adjusted_close,
                v                                                      as volume,
                _sdc_batched_at                                        as updated_at
-        from {{ source('polygon', 'polygon_stocks_historical_prices')}}
+        from {{ source('polygon', 'polygon_stocks_historical_prices') }}
                  join polygon_symbols using (symbol)
 ),
 raw_historical_prices as materialized
