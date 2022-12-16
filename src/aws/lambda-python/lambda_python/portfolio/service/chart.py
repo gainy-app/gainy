@@ -287,7 +287,7 @@ class PortfolioChartService:
 
         join_clause.append(
             sql.SQL(
-                "join ticker_interests on ticker_interests.symbol = portfolio_expanded_transactions.symbol"
+                "join ticker_interests on ticker_interests.symbol = portfolio_expanded_transactions.ticker_symbol"
             ))
         where_clause.append(
             sql.SQL(
@@ -302,7 +302,7 @@ class PortfolioChartService:
 
         join_clause.append(
             sql.SQL(
-                "join ticker_categories on ticker_categories.symbol = portfolio_expanded_transactions.symbol"
+                "join ticker_categories on ticker_categories.symbol = portfolio_expanded_transactions.ticker_symbol",
             ))
         where_clause.append(
             sql.SQL(
