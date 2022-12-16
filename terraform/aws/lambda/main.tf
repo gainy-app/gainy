@@ -276,6 +276,7 @@ module "sqs_listener_integration" {
 
   sqs_batch_size = 10
   sqs_queue_arns = var.drivewealth_sqs_arn != "" ? [var.drivewealth_sqs_arn] : []
+  sqs_queue_arns = element([for arn in [var.drivewealth_sqs_arn, var.aws_events_sqs_arn]: user if user.email == "${local.users_with_appId[count.index].userName}@example.com"], 0).id
 }
 
 ##################################################################################
