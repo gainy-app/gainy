@@ -45,16 +45,18 @@ class DriveWealthApi(GainyDriveWealthApi):
             })
 
     def create_account(self, user_id: str):
-        return self._make_request(
-            "POST", "/accounts", {
-                "userID": user_id,
-                "accountType": "LIVE",
-                "accountManagementType": "RIA_MANAGED",
-                "tradingType": "CASH",
-                "ignoreMarketHoursForTest": env() != ENV_PRODUCTION,
-                "riaUserID": DRIVEWEALTH_RIA_ID,
-                "riaProductID": DRIVEWEALTH_RIA_PRODUCT_ID,
-            })
+        params = {
+            "userID": user_id,
+            "accountType": "LIVE",
+            "accountManagementType": "RIA_MANAGED",
+            "tradingType": "CASH",
+            "riaUserID": DRIVEWEALTH_RIA_ID,
+            "riaProductID": DRIVEWEALTH_RIA_PRODUCT_ID,
+        }
+        if env() != ENV_PRODUCTION:
+            params["ignoreMarketHoursForTest"] = True
+
+        return self._make_request("POST", "/accounts", params)
 
     def upload_document(self, user_id: str, document: KycDocument,
                         file_base64):
