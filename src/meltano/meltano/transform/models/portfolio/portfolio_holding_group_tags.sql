@@ -82,7 +82,7 @@ with ticker_selected_collection as
                              category_id,
                              null as interest_id,
                              sim_dif
-                      from {{ ref('ticker_categories_continuous') }}
+                      from {{ ref('ticker_categories') }}
 
                       union all
 
