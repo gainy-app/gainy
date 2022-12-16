@@ -113,7 +113,7 @@ union all
                         symbol,
                         sum(sim_dif + 1) as weight_interest_in_symbol_sum
                  from {{ ref('collection_ticker_actual_weights') }}
-                          join {{ ref('ticker_interests') }} using (symbol)
+                          join {{ ref('ticker_interests_continuous') }} using (symbol)
                  group by collection_uniq_id, symbol
              ),
          data as materialized
@@ -130,7 +130,7 @@ union all
                           left join {{ source('app', 'profiles') }} on profiles.id = profile_id
                           join collection_stats using (collection_uniq_id)
                           join collection_symbol_stats using (collection_uniq_id, symbol)
-                          join {{ ref('ticker_interests') }} using (symbol)
+                          join {{ ref('ticker_interests_continuous') }} using (symbol)
                  where weight_symbol_in_collection_sum > 0
                    and weight_interest_in_symbol_sum > 0
              ),

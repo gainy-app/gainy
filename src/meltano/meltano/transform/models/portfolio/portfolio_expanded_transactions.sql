@@ -302,7 +302,7 @@ with plaid_transactions as
      groupped_expanded_transactions as
          (
              select t.symbol,
-                    coalesce(ticker_options.symbol, base_tickers.symbol)      as ticker_symbol,
+                    max(coalesce(ticker_options.symbol, base_tickers.symbol)) as ticker_symbol,
                     sum(quantity_norm) * sum(abs(quantity_norm) * price) /
                     sum(abs(quantity_norm))                                   as amount,
                     sum(abs(quantity_norm) * price) / sum(abs(quantity_norm)) as price,
