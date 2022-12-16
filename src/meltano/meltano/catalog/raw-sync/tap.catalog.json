@@ -137,7 +137,7 @@
         {
           "breadcrumb": [],
           "metadata": {
-            "replication-key": "t",
+            "replication-key": "_sdc_extracted_at",
             "replication-method": "INCREMENTAL",
             "table-key-properties": [
               "symbol",
@@ -163,7 +163,7 @@
         {
           "breadcrumb": [],
           "metadata": {
-            "replication-key": "t",
+            "replication-key": "_sdc_extracted_at",
             "replication-method": "INCREMENTAL",
             "table-key-properties": [
               "contract_name",
@@ -189,7 +189,7 @@
         {
           "breadcrumb": [],
           "metadata": {
-            "replication-key": "t",
+            "replication-key": "_sdc_extracted_at",
             "replication-method": "INCREMENTAL",
             "table-key-properties": [
               "symbol",

@@ -263,7 +263,6 @@
   delete_permissions:
     - role: user
       permission:
-        backend_only: false
         filter:
           profile:
             user_id:
@@ -357,7 +356,6 @@
   delete_permissions:
     - role: user
       permission:
-        backend_only: false
         filter:
           profile:
             user_id:
@@ -458,7 +456,6 @@
   delete_permissions:
     - role: user
       permission:
-        backend_only: false
         filter:
           profile:
             user_id:
@@ -604,7 +601,6 @@
   delete_permissions:
     - role: user
       permission:
-        backend_only: false
         filter:
           profile:
             user_id:
@@ -650,7 +646,6 @@
   delete_permissions:
     - role: user
       permission:
-        backend_only: false
         filter:
           _and:
             - profile:
@@ -907,7 +902,6 @@
   delete_permissions:
     - role: user
       permission:
-        backend_only: false
         filter:
           profile:
             user_id:
@@ -956,7 +950,6 @@
   delete_permissions:
     - role: user
       permission:
-        backend_only: false
         filter:
           profile:
             user_id:
@@ -1083,7 +1076,6 @@
   delete_permissions:
     - role: user
       permission:
-        backend_only: false
         filter:
           user_id:
             _eq: X-Hasura-User-Id
