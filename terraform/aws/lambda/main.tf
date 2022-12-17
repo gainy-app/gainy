@@ -275,7 +275,14 @@ module "sqs_listener_integration" {
   aws_lambda_invoke_arn         = "${module.sqs_listener.arn}:${module.sqs_listener.version}"
 
   sqs_batch_size = 10
-  sqs_queue_arns = [for arn in [var.drivewealth_sqs_arn, var.aws_events_sqs_arn] : arn if arn != ""]
+  sqs_queue_arns = concat(
+    [
+      var.aws_events_sqs_arn,
+    ],
+    var.drivewealth_sqs_arn != "" ? [
+      var.drivewealth_sqs_arn,
+    ] : []
+  )
 }
 
 ##################################################################################
