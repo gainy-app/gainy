@@ -255,7 +255,7 @@ class DriveWealthOrder(BaseDriveWealthModel):
         self.account_id = data["accountID"]
         self.symbol = data["symbol"]
         if "lastExecuted" in data:
-            self.last_executed_at = data["lastExecuted"]
+            self.last_executed_at = dateutil.parser.parse(data["lastExecuted"])
         self.data = data
 
     @classproperty

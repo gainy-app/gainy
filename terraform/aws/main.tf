@@ -85,6 +85,7 @@ module "lambda" {
   codeartifact_pipy_url = var.codeartifact_pipy_url
   gainy_compute_version = var.gainy_compute_version
 
+  aws_events_sqs_arn    = module.cloudwatch.aws_events_sqs_arn
   s3_bucket_uploads_kyc = module.s3.uploads_kyc_bucket
   aws_access_key        = var.aws_access_key
   aws_secret_key        = var.aws_secret_key
@@ -244,6 +245,7 @@ module "cloudwatch" {
   env                 = var.env
   hasura_admin_secret = module.ecs-service.hasura_admin_secret
   hasura_url          = module.ecs-service.hasura_url
+  ecs_cluster_arn     = module.ecs.ecs_cluster.arn
 }
 
 output "bridge_instance_url" {
