@@ -2,23 +2,21 @@ resource "aws_cloudwatch_event_rule" "console" {
   name        = "event-listener-${var.env}"
   description = "AWS events listener ${var.env}"
 
-  event_pattern = <<EOF
-{
-  "source": [
-    "aws.ecs"
-  ],
-  "detail-type": [
-    "ECS Task State Change",
-    "ECS Container Instance State Change",
-    "ECS Deployment State Change"
-  ],
-  "detail": {
-    "clusterArn": [
-      ${var.ecs_cluster_arn}
-    ]
-  }
-}
-EOF
+  event_pattern = jsonencode({
+    "source" : [
+      "aws.ecs"
+    ],
+    "detail-type" : [
+      "ECS Task State Change",
+      "ECS Container Instance State Change",
+      "ECS Deployment State Change"
+    ],
+    "detail" : {
+      "clusterArn" : [
+        var.ecs_cluster_arn
+      ]
+    }
+  })
 }
 
 resource "aws_cloudwatch_event_target" "sns" {
