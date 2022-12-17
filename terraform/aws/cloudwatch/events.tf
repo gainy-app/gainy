@@ -49,3 +49,7 @@ data "aws_iam_policy_document" "sns_topic_policy" {
     resources = [aws_sns_topic.aws_events.arn]
   }
 }
+
+output "aws_events_sqs_arn" {
+  value = aws_sns_topic.aws_events.arn
+}
