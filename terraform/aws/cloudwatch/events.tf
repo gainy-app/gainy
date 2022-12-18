@@ -19,35 +19,20 @@ resource "aws_cloudwatch_event_rule" "console" {
   })
 }
 
-resource "aws_cloudwatch_event_target" "sns" {
-  rule      = aws_cloudwatch_event_rule.console.name
-  target_id = "SendToSNS"
-  arn       = aws_sns_topic.aws_events.arn
+resource "aws_cloudwatch_event_target" "sqs" {
+  rule = aws_cloudwatch_event_rule.console.name
+  arn  = aws_sqs_queue.aws_events.arn
 }
 
-resource "aws_sns_topic" "aws_events" {
-  name = "aws-events-${var.env}"
-}
+resource "aws_sqs_queue" "aws_events" {
+  name                      = "aws-events-${var.env}"
+  message_retention_seconds = 3600
 
-resource "aws_sns_topic_policy" "default" {
-  arn    = aws_sns_topic.aws_events.arn
-  policy = data.aws_iam_policy_document.sns_topic_policy.json
-}
-
-data "aws_iam_policy_document" "sns_topic_policy" {
-  statement {
-    effect  = "Allow"
-    actions = ["SNS:Publish"]
-
-    principals {
-      type        = "Service"
-      identifiers = ["events.amazonaws.com"]
-    }
-
-    resources = [aws_sns_topic.aws_events.arn]
+  tags = {
+    Environment = var.env
   }
 }
 
 output "aws_events_sqs_arn" {
-  value = aws_sns_topic.aws_events.arn
+  value = aws_sqs_queue.aws_events.arn
 }
