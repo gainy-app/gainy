@@ -89,6 +89,31 @@ resource "aws_iam_role_policy_attachment" "kyc_uploads" {
   policy_arn = aws_iam_policy.kyc_uploads.arn
 }
 
+resource "aws_iam_policy" "ecs_read" {
+  name        = "ecs_read_${var.env}"
+  description = "ECS read policy ${var.env}"
+
+  policy = jsonencode({
+    "Version" : "2012-10-17",
+    "Statement" : [
+      {
+        "Effect" : "Allow",
+        "Action" : [
+          "ecs:DescribeTaskDefinition"
+        ],
+        "Resource" : [
+          "*"
+        ]
+      }
+    ]
+  })
+}
+
+resource "aws_iam_role_policy_attachment" "ecs_read" {
+  role       = aws_iam_role.lambda_exec.name
+  policy_arn = aws_iam_policy.ecs_read.arn
+}
+
 resource "aws_iam_role_policy_attachment" "lambda_policy" {
   role       = aws_iam_role.lambda_exec.name
   policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
