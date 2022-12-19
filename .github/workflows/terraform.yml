@@ -162,7 +162,7 @@ jobs:
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
-            let branch_name = event.pull_request.title;
+            let branch_name = context.event.pull_request.title;
             console.log(branch_name);
             
             if (!branch_name){
