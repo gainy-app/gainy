@@ -266,7 +266,7 @@ module "sqs_listener" {
   timeout                = 30
   exec_role_arn          = aws_iam_role.lambda_exec.arn
   image_uri              = docker_registry_image.lambda_python.name
-  memory_size            = var.env == "production" ? 256 : 128
+  memory_size            = var.env == "production" ? 256 : 256
   env_vars               = local.env_vars
   vpc_security_group_ids = var.vpc_security_group_ids
   vpc_subnet_ids         = var.vpc_subnet_ids
