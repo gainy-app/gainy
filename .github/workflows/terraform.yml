@@ -158,6 +158,36 @@ jobs:
           echo "TF_VAR_codeartifact_pipy_url=$CODEARTIFACT_PIPY_URL" >> $GITHUB_ENV
           echo "TF_VAR_gainy_compute_version=$GAINY_COMPUTE_VERSION" >> $GITHUB_ENV
 
+      - uses: actions/github-script@0.9.0
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            let branch_name = "${{ github.event.pull_request.title }}";
+            console.log(branch_name);
+            
+            if (!branch_name){
+              let branchName = context.ref.replace('refs/heads/', '').replace('refs/tags/', '')
+              console.log(`${context.repo.repo}/${branchName}`);
+              const prs = await github.pulls.list({
+                head: `${context.repo.repo}/${branchName}`,
+                owner: context.repo.owner,
+                repo: context.repo.repo
+              })
+              if (prs && prs.length && prs[0].status === 200 && prs[0].data) {
+                branch_name = prs[0].data.title;
+                console.log(branch_name);
+              }
+            }
+            
+            if (branch_name){
+              const fs = require('fs')
+              fs.appendFile(process.env.GITHUB_ENV, `TF_VAR_source_code_branch_name=${branch_name}`, function (err) {
+                if (err) {
+                  throw Error(err)
+                }
+              })
+            }
+
       - name: Docker Registry Auth
         run: make docker-auth
 
@@ -215,8 +245,10 @@ jobs:
             console.log(branch_name);
             
             if (!branch_name){
-              const pr = await github.pulls.get({
-                pull_number: context.issue.number,
+              let branchName = context.ref.replace('refs/heads/', '').replace('refs/tags/', '')
+              console.log(`${context.repo.repo}/${branchName}`);
+              const prs = await github.pulls.list({
+                head: `${context.repo.repo}/${branchName}`,
                 owner: context.repo.owner,
                 repo: context.repo.repo
               })
