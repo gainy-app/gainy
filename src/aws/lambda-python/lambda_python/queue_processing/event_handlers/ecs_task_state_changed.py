@@ -17,33 +17,47 @@ class ECSTaskStateChangeEventHandler(AbstractAwsEventHandler):
         return event_type == "ECS Task State Change"
 
     def handle(self, event_payload: dict):
-        logger.info("ECSTaskStateChangeEventHandler", event_payload)
-        desired_status = event_payload["desiredStatus"]
-        last_status = event_payload["lastStatus"]
-        started_at = event_payload.get("startedAt")
+        logger_extra = {
+            "event_payload": event_payload,
+        }
+        try:
+            desired_status = event_payload["desiredStatus"]
+            last_status = event_payload["lastStatus"]
+            started_at = event_payload.get("startedAt")
 
-        ecs = ECS()
-        task_def = ecs.describe_task_definition(
-            event_payload["taskDefinitionArn"])
-        logger.info("task_def", task_def)
-        tags = {t["key"]: t["value"] for t in task_def.get("tags", [])}
-        env = tags.get("environment")
-        branch = tags.get("source_code_branch")
-        branch_name = tags.get("source_code_branch_name")
+            ecs = ECS()
+            task_def = ecs.describe_task_definition(
+                event_payload["taskDefinitionArn"])
 
-        if not env or not (branch_name or branch):
-            return
+            logger_extra["task_def"] = task_def
+            logger.info("ECSTaskStateChangeEventHandler", extra=logger_extra)
 
-        if last_status == "RUNNING":
-            message = f":green_apple: Branch {branch_name or branch} is running on {env}."
-        elif last_status == "STOPPED":
-            message = f":green_apple: Branch {branch_name or branch} is stopped on {env}."
-        elif started_at is not None and desired_status == "RUNNING" and last_status != "RUNNING":
-            message = f":tangerine: Branch {branch_name or branch} is unstable on {env} (desired_status: {desired_status}, last_status: {last_status})."
-        else:
-            return
+            tags = {t["key"]: t["value"] for t in task_def.get("tags", [])}
+            env = tags.get("environment")
+            branch = tags.get("source_code_branch")
+            branch_name = tags.get("source_code_branch_name")
 
-        self._send_message(message)
+            logger_extra["tags"] = tags
+            logger_extra["env"] = env
+            logger_extra["branch"] = branch
+            logger_extra["branch_name"] = branch_name
+
+            if not env or not (branch_name or branch):
+                return
+
+            if last_status == "RUNNING":
+                message = f":green_apple: Branch {branch_name or branch} is running on {env}."
+            elif last_status == "STOPPED":
+                message = f":green_apple: Branch {branch_name or branch} is stopped on {env}."
+            elif started_at is not None and desired_status == "RUNNING" and last_status != "RUNNING":
+                message = f":tangerine: Branch {branch_name or branch} is unstable on {env} (desired_status: {desired_status}, last_status: {last_status})."
+            else:
+                return
+
+            logger_extra["message"] = message
+            self._send_message(message)
+        finally:
+            logger.info("ECSTaskStateChangeEventHandler", extra=logger_extra)
 
     def _send_message(self, message):
         if not SLACK_BOT_TOKEN:
@@ -55,7 +69,9 @@ class ECSTaskStateChangeEventHandler(AbstractAwsEventHandler):
         client = WebClient(token=SLACK_BOT_TOKEN)
 
         try:
-            client.chat_postMessage(channel=SLACK_NOTIFICATIONS_CHANNEL,
-                                    text=message)
+            response = client.chat_postMessage(
+                channel=SLACK_NOTIFICATIONS_CHANNEL, text=message)
+            logger.info("ECSTaskStateChangeEventHandler _send_message",
+                        extra={"response": response})
         except SlackApiError as e:
             logger.exception(e)
