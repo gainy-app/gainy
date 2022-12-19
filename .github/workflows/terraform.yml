@@ -216,11 +216,11 @@ jobs:
             
             if (!branch_name){
               const prs = await github.pulls.list({
-                head: `${context.repo.repo}/${context.ref}`,
+                head: `${context.repo.owner}:${context.ref}`,
                 owner: context.repo.owner,
                 repo: context.repo.repo
               })
-              console.log(`${context.repo.repo}/${context.ref}`);
+              console.log(`${context.repo.owner}:${context.ref}`);
               console.log(prs);
               if (prs && prs.length && prs[0].status === 200 && prs[0].data) {
                 branch_name = pr.data.title;
