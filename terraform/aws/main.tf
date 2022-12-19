@@ -53,6 +53,7 @@ module "lambda" {
   stripe_api_key         = var.stripe_api_key
   stripe_publishable_key = var.stripe_publishable_key
   google_places_api_key  = var.google_places_api_key
+  slack_bot_token        = var.slack_bot_token
 
   base_image_registry_address = var.base_image_registry_address
   base_image_version          = var.base_image_version
@@ -237,6 +238,9 @@ module "ecs-service" {
   plaid_development_secret = var.plaid_development_secret
   plaid_sandbox_secret     = var.plaid_sandbox_secret
   plaid_env                = var.plaid_env
+
+  source_code_branch      = var.source_code_branch
+  source_code_branch_name = var.source_code_branch_name
 }
 
 

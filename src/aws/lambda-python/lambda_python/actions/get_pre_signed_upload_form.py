@@ -1,11 +1,9 @@
-import json
 import os
 import uuid
 from common.context_container import ContextContainer
 from common.hasura_function import HasuraAction
-from services import S3
-from psycopg2.extras import RealDictCursor
 from gainy.utils import get_logger
+from services.aws_s3 import S3
 
 logger = get_logger(__name__)
 
