@@ -33,6 +33,18 @@ variable "verification_code_ttl" {
   type    = number
   default = 300
 }
+variable "source_code_branch" {
+  type    = string
+  default = ""
+}
+variable "source_code_branch_name" {
+  type    = string
+  default = ""
+}
+variable "slack_bot_token" {
+  type    = string
+  default = ""
+}
 
 #################################### OneSignal ####################################
 

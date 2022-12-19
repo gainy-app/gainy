@@ -55,3 +55,4 @@ variable "twilio_account_sid" {}
 variable "twilio_auth_token" {}
 variable "sendgrid_api_key" {}
 variable "aws_events_sqs_arn" {}
+variable "slack_bot_token" {}

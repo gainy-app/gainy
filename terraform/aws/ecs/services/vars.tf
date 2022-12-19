@@ -74,3 +74,5 @@ variable "plaid_secret" {}
 variable "plaid_development_secret" {}
 variable "plaid_sandbox_secret" {}
 variable "plaid_env" {}
+variable "source_code_branch" {}
+variable "source_code_branch_name" {}
