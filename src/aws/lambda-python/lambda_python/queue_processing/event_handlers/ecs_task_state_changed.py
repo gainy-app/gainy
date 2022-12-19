@@ -1,4 +1,7 @@
+import datetime
 import os
+
+import dateutil.parser
 
 from gainy.utils import get_logger
 from queue_processing.event_handlers.abstract_aws_event_handler import AbstractAwsEventHandler
@@ -24,6 +27,13 @@ class ECSTaskStateChangeEventHandler(AbstractAwsEventHandler):
             desired_status = event_payload["desiredStatus"]
             last_status = event_payload["lastStatus"]
             started_at = event_payload.get("startedAt")
+            updated_at = event_payload.get("updatedAt")
+
+            updated_at_ago = datetime.datetime.now(
+                tz=datetime.timezone.utc) - dateutil.parser.parse(updated_at)
+            logger_extra["updated_at_ago"] = updated_at_ago
+            if updated_at_ago > datetime.timedelta(minutes=15):
+                return
 
             ecs = ECS()
             task_def = ecs.describe_task_definition(
@@ -46,11 +56,11 @@ class ECSTaskStateChangeEventHandler(AbstractAwsEventHandler):
                 return
 
             if last_status == "RUNNING":
-                message = f":green_apple: Branch {branch_name or branch} is running on {env}."
+                message = f":large_green_circle: Branch {branch_name or branch} is running on {env}."
             elif last_status == "STOPPED":
-                message = f":green_apple: Branch {branch_name or branch} is stopped on {env}."
+                message = f":large_green_circle: Branch {branch_name or branch} is stopped on {env}."
             elif started_at is not None and desired_status == "RUNNING" and last_status != "RUNNING":
-                message = f":tangerine: Branch {branch_name or branch} is unstable on {env} (desired_status: {desired_status}, last_status: {last_status})."
+                message = f":red_circle: Branch {branch_name or branch} is unstable on {env} (desired_status: {desired_status}, last_status: {last_status})."
             else:
                 return
 
