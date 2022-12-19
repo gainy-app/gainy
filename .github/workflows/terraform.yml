@@ -158,6 +158,17 @@ jobs:
           echo "TF_VAR_codeartifact_pipy_url=$CODEARTIFACT_PIPY_URL" >> $GITHUB_ENV
           echo "TF_VAR_gainy_compute_version=$GAINY_COMPUTE_VERSION" >> $GITHUB_ENV
 
+      - uses: actions/github-script@0.9.0
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const pr = await github.pulls.get({
+              pull_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo
+            })
+            console.log(pr)
+
       - name: Docker Registry Auth
         run: make docker-auth
 
