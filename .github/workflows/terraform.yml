@@ -212,7 +212,6 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
             let branch_name = "${{ github.event.pull_request.title }}";
-            console.log(branch_name);
             
             if (!branch_name){
               const prs = await github.pulls.list({
@@ -220,10 +219,8 @@ jobs:
                 owner: context.repo.owner,
                 repo: context.repo.repo
               })
-              console.log(`${context.repo.owner}:${context.ref}`);
-              console.log(prs);
-              if (prs && prs.length && prs[0].status === 200 && prs[0].data) {
-                branch_name = pr.data.title;
+              if (prs && prs.status === 200 && prs.data && prs.data.length) {
+                branch_name = prs.data[0].title;
                 console.log(branch_name);
               }
             }
