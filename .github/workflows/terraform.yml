@@ -162,23 +162,29 @@ jobs:
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
-            const pr = await github.pulls.get({
-              pull_number: context.issue.number,
-              owner: context.repo.owner,
-              repo: context.repo.repo
-            })
-            if (pr && pr.status === 200 && pr.data) {
-              console.log(pr.data.title)
-              console.log(process.env.GITHUB_ENV)
+            let branch_name = event.pull_request.title;
+            console.log(branch_name);
+            
+            if (!branch_name){
+              const pr = await github.pulls.get({
+                pull_number: context.issue.number,
+                owner: context.repo.owner,
+                repo: context.repo.repo
+              })
+              if (pr && pr.status === 200 && pr.data) {
+                branch_name = pr.data.title;
+                console.log(branch_name);
+              }
+            }
+            
+            if (branch_name){
               const fs = require('fs')
-              fs.appendFile(process.env.GITHUB_ENV, `TF_VAR_gainy_compute_version=${pr.data.title}`, function (err) {
+              fs.appendFile(process.env.GITHUB_ENV, `TF_VAR_source_code_branch_name=${branch_name}`, function (err) {
                 if (err) {
                   throw Error(err)
                 }
               })
             }
-
-      - run: cat $GITHUB_ENV
 
       - name: Docker Registry Auth
         run: make docker-auth
