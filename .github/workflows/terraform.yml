@@ -167,7 +167,18 @@ jobs:
               owner: context.repo.owner,
               repo: context.repo.repo
             })
-            console.log(pr)
+            if (pr && pr.status == 200 && pr.data) {
+              console.log(pr.data.title)
+              console.log(process.env.GITHUB_ENV)
+              const fs = require('fs')
+              fs.appendFile(process.env.GITHUB_ENV, `TF_VAR_gainy_compute_version=${pr.data.title}`, function (err) {
+                if (err) {
+                  raise Error(err)
+                }
+              })
+            }
+
+      - run: cat $GITHUB_ENV
 
       - name: Docker Registry Auth
         run: make docker-auth
