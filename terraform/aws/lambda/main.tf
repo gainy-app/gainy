@@ -173,7 +173,8 @@ locals {
     TWILIO_AUTH_TOKEN              = var.twilio_auth_token
     SENDGRID_API_KEY               = var.sendgrid_api_key
 
-    SLACK_BOT_TOKEN = var.slack_bot_token
+    SLACK_BOT_TOKEN    = var.slack_bot_token
+    AWS_EVENTS_SQS_ARN = var.aws_events_sqs_arn
 
     DW_MANAGER_EMAILS                               = "mikhail@gainy.app,mike@gainy.app"
     RECOMMENDATION_MANUALLY_SELECTED_COLLECTION_IDS = ""
