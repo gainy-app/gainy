@@ -32,7 +32,7 @@ class ECSTaskStateChangeEventHandler(AbstractAwsEventHandler):
             updated_at_ago = datetime.datetime.now(
                 tz=datetime.timezone.utc) - dateutil.parser.parse(updated_at)
             logger_extra["updated_at_ago"] = updated_at_ago
-            if updated_at_ago > datetime.timedelta(minutes=30):
+            if updated_at_ago > datetime.timedelta(minutes=60):
                 return
 
             ecs = ECS()
