@@ -43,7 +43,7 @@ if [ $($psql_auth -c "select count(*) from deployment.public_schemas where schem
         $psql_auth -c "call clone_schema('$OLD_DBT_TARGET_SCHEMA', '$DBT_TARGET_SCHEMA')"
         echo "$(date)" Schema "$OLD_DBT_TARGET_SCHEMA" restored to  "$DBT_TARGET_SCHEMA"
       fi
-      export DBT_RUN_FLAGS="-s result:error+ state:modified+ --defer --full-refresh"
+      export DBT_RUN_FLAGS="-s result:error+ state:modified+ config.materialized:view --defer --full-refresh"
     fi
 
     $psql_auth -c "select seed_data_state from deployment.public_schemas where schema_name = '$OLD_DBT_TARGET_SCHEMA' and seed_data_state is not null" -t --csv > /tmp/seed_data_state_base64

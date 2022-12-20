@@ -18,17 +18,6 @@ BEGIN
             COMMIT;
         END LOOP;
 
-    -- copy views
-    FOR query IN
-        SELECT 'create or replace view "' || dest_schema || '"."' || viewname || '" as ' ||
-               replace(definition, 'ON ' || source_schema || '.', 'ON ' || dest_schema || '.')
-        FROM pg_views
-        WHERE schemaname = source_schema
-        LOOP
-            EXECUTE query;
-            COMMIT;
-        END LOOP;
-
     -- copy indexes
     FOR query IN
         select replace(pg_get_indexdef(idx.oid), 'ON ' || source_schema || '.', 'ON ' || dest_schema || '.')
