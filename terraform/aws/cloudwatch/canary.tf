@@ -1,7 +1,3 @@
-variable "env" {}
-variable "hasura_url" {}
-variable "hasura_admin_secret" {}
-
 data "aws_region" "current" {}
 data "aws_caller_identity" "this" {}
 

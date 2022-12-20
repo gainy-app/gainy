@@ -11,6 +11,7 @@ variable "github_app_id" {}
 variable "github_app_installation_id" {}
 variable "github_app_private_key" {}
 variable "google_places_api_key" {}
+variable "slack_bot_token" {}
 
 variable "aws_region" {}
 variable "aws_access_key" {}
@@ -79,3 +80,6 @@ variable "twilio_messaging_service_id" {}
 variable "twilio_account_sid" {}
 variable "twilio_auth_token" {}
 variable "sendgrid_api_key" {}
+
+variable "source_code_branch" {}
+variable "source_code_branch_name" {}

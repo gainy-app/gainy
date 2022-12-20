@@ -1,4 +1,4 @@
-create table raw_data.polygon_stocks_historical_prices
+create table if not exists raw_data.polygon_stocks_historical_prices
 (
     _sdc_batched_at   timestamp,
     _sdc_deleted_at   varchar,

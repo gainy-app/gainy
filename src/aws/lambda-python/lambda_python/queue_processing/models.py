@@ -2,11 +2,12 @@ import datetime
 import json
 from typing import Optional
 
-from gainy.data_access.models import BaseModel, classproperty
+from gainy.data_access.db_lock import ResourceType
+from gainy.data_access.models import BaseModel, classproperty, ResourceVersion
 
 
-class QueueMessage(BaseModel):
-    id: str = None
+class QueueMessage(BaseModel, ResourceVersion):
+    id: int = None
     ref_id: str = None
     source_ref_id: str = None
     source_event_ref_id: Optional[str] = None
@@ -15,6 +16,7 @@ class QueueMessage(BaseModel):
     handled: bool = None
     created_at: datetime.datetime = None
     updated_at: datetime.datetime = None
+    version: int = 0
 
     key_fields = ["id"]
 
@@ -40,3 +42,18 @@ class QueueMessage(BaseModel):
             "body": json.dumps(self.body),
             "data": json.dumps(self.data),
         }
+
+    @property
+    def resource_type(self) -> ResourceType:
+        return ResourceType.QUEUE_MESSAGE
+
+    @property
+    def resource_id(self) -> int:
+        return self.id
+
+    @property
+    def resource_version(self):
+        return self.version
+
+    def update_version(self):
+        self.version = self.version + 1 if self.version else 1

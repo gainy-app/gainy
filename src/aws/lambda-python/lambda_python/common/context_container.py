@@ -7,6 +7,7 @@ from portfolio.plaid.service import PlaidService
 from portfolio.service import PortfolioService
 from portfolio.service.chart import PortfolioChartService
 from portfolio.repository import PortfolioRepository
+from queue_processing.aws_message_handler import AwsMessageHandler
 from queue_processing.dispatcher import QueueMessageDispatcher
 from services.cache import Cache, RedisCache, LocalCache
 from services.notification import NotificationService
@@ -135,5 +136,10 @@ class ContextContainer(GainyContextContainer):
                                               self.drivewealth_provider)
 
     @cached_property
+    def aws_message_handler(self) -> AwsMessageHandler:
+        return AwsMessageHandler()
+
+    @cached_property
     def queue_message_dispatcher(self) -> QueueMessageDispatcher:
-        return QueueMessageDispatcher([self.drivewealth_queue_message_handler])
+        return QueueMessageDispatcher(
+            [self.drivewealth_queue_message_handler, self.aws_message_handler])

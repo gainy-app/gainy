@@ -8,7 +8,7 @@ from gainy.exceptions import NotFoundException, BadRequestException
 from gainy.trading.drivewealth.models import CollectionStatus, CollectionHoldingStatus
 from gainy.plaid.common import handle_error
 from portfolio.plaid import PlaidService
-from services import S3
+from services.aws_s3 import S3
 from trading.drivewealth.provider import DriveWealthProvider
 from trading.exceptions import WrongTradingOrderStatusException
 from trading.kyc_form_validator import KycFormValidator
