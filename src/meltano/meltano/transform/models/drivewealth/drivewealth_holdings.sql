@@ -54,7 +54,7 @@ with latest_portfolio_status as
                              ('common stock', 'equity')
                   ) t (type, security_type)
      )
-select profile_id,
+select fund_holdings_distinct.profile_id,
        null                                           as account_id,
        fund_holdings_distinct.quantity                as quantity,
        fund_holdings_distinct.quantity                as quantity_norm_for_valuation,
@@ -66,11 +66,15 @@ select profile_id,
        null::timestamp                                as purchase_date,
        greatest(fund_holdings_distinct.updated_at,
                 base_tickers.updated_at)              as updated_at,
-       collection_id
+       profile_collections.uniq_id                    as collection_uniq_id,
+       fund_holdings_distinct.collection_id
 from fund_holdings_distinct
          left join {{ ref('base_tickers') }} using (symbol)
          left join base_tickers_type_to_security_type using (type)
          left join {{ ref('ticker_realtime_metrics') }} using (symbol)
+         join {{ ref('profile_collections') }}
+              on profile_collections.id = fund_holdings_distinct.collection_id
+                  and (profile_collections.profile_id = fund_holdings_distinct.profile_id or profile_collections.profile_id is null)
 
 union all
 
@@ -84,6 +88,7 @@ select profile_id,
        'cash'                                                      as type,
        null::timestamp                                             as purchase_date,
        max(updated_at)                                             as updated_at,
+       null                                                        as collection_uniq_id,
        null                                                        as collection_id
 from portfolio_funds
 where portfolio_holding_data ->> 'type' = 'CASH_RESERVE'

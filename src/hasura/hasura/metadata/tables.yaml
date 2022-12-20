@@ -2257,6 +2257,15 @@
     name: profile_holding_groups
     schema: public
   object_relationships:
+    - name: collection
+      using:
+        manual_configuration:
+          column_mapping:
+            collection_uniq_id: uniq_id
+          insertion_order: null
+          remote_table:
+            name: profile_collections
+            schema: public
     - name: details
       using:
         manual_configuration:
@@ -2317,6 +2326,7 @@
       permission:
         columns:
           - collection_id
+          - collection_uniq_id
           - profile_id
           - quantity
           - symbol
