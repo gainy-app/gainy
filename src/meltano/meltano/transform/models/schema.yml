@@ -1,5 +1,6 @@
 version: 2
 
+# todo introduce freshness when it works https://docs.getdbt.com/docs/deploy/about-state#the-source_status-status
 sources:
   - name: gainy
     description: Gainy in-house datasets such as collections, industries, interests, categories, etc
