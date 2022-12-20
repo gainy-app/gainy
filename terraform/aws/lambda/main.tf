@@ -89,6 +89,31 @@ resource "aws_iam_role_policy_attachment" "kyc_uploads" {
   policy_arn = aws_iam_policy.kyc_uploads.arn
 }
 
+resource "aws_iam_policy" "ecs_read" {
+  name        = "ecs_read_${var.env}"
+  description = "ECS read policy ${var.env}"
+
+  policy = jsonencode({
+    "Version" : "2012-10-17",
+    "Statement" : [
+      {
+        "Effect" : "Allow",
+        "Action" : [
+          "ecs:DescribeTaskDefinition"
+        ],
+        "Resource" : [
+          "*"
+        ]
+      }
+    ]
+  })
+}
+
+resource "aws_iam_role_policy_attachment" "ecs_read" {
+  role       = aws_iam_role.lambda_exec.name
+  policy_arn = aws_iam_policy.ecs_read.arn
+}
+
 resource "aws_iam_role_policy_attachment" "lambda_policy" {
   role       = aws_iam_role.lambda_exec.name
   policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
@@ -172,6 +197,9 @@ locals {
     TWILIO_ACCOUNT_SID             = var.twilio_account_sid
     TWILIO_AUTH_TOKEN              = var.twilio_auth_token
     SENDGRID_API_KEY               = var.sendgrid_api_key
+
+    SLACK_BOT_TOKEN    = var.slack_bot_token
+    AWS_EVENTS_SQS_ARN = var.aws_events_sqs_arn
 
     DW_MANAGER_EMAILS                               = "mikhail@gainy.app,mike@gainy.app"
     RECOMMENDATION_MANUALLY_SELECTED_COLLECTION_IDS = ""
@@ -263,7 +291,7 @@ module "sqs_listener" {
   timeout                = 30
   exec_role_arn          = aws_iam_role.lambda_exec.arn
   image_uri              = docker_registry_image.lambda_python.name
-  memory_size            = var.env == "production" ? 256 : 128
+  memory_size            = var.env == "production" ? 256 : 256
   env_vars               = local.env_vars
   vpc_security_group_ids = var.vpc_security_group_ids
   vpc_subnet_ids         = var.vpc_subnet_ids
@@ -275,7 +303,14 @@ module "sqs_listener_integration" {
   aws_lambda_invoke_arn         = "${module.sqs_listener.arn}:${module.sqs_listener.version}"
 
   sqs_batch_size = 10
-  sqs_queue_arns = var.drivewealth_sqs_arn != "" ? [var.drivewealth_sqs_arn] : []
+  sqs_queue_arns = concat(
+    [
+      var.aws_events_sqs_arn,
+    ],
+    var.drivewealth_sqs_arn != "" ? [
+      var.drivewealth_sqs_arn,
+    ] : []
+  )
 }
 
 ##################################################################################

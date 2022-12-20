@@ -6,10 +6,10 @@ variable "sqs_queue_arns" {
 }
 
 resource "aws_lambda_event_source_mapping" "lambda_via_sqs" {
-  for_each = toset(var.sqs_queue_arns)
+  count = length(var.sqs_queue_arns)
 
   batch_size       = var.sqs_batch_size
-  event_source_arn = each.key
+  event_source_arn = element(var.sqs_queue_arns, count.index)
   function_name    = var.aws_lambda_invoke_arn
 }
 

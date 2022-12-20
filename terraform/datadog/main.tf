@@ -376,7 +376,7 @@ resource "datadog_monitor" "logs" {
   {{log.link}}
 EOT
 
-  query = "logs(\"(error\\:*\\:* OR status:error) host:*production -@type:http-log\").index(\"*\").rollup(\"count\").by(\"host\").last(\"5m\") > 0"
+  query = "logs(\"status:error host:*production -@type:http-log\").index(\"*\").rollup(\"count\").by(\"host\").last(\"5m\") > 0"
 
   monitor_thresholds {
     critical = 0

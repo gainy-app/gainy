@@ -117,6 +117,9 @@ module "aws" {
   github_app_installation_id  = var.github_app_installation_id
   github_app_private_key      = var.github_app_private_key
   google_places_api_key       = var.google_places_api_key
+  source_code_branch          = var.source_code_branch
+  source_code_branch_name     = var.source_code_branch_name
+  slack_bot_token             = var.slack_bot_token
 
   stripe_api_key         = var.stripe_api_key
   stripe_publishable_key = var.stripe_publishable_key
