@@ -302,7 +302,7 @@ module "sqs_listener_integration" {
   aws_iam_role_lambda_exec_role = aws_iam_role.lambda_exec
   aws_lambda_invoke_arn         = "${module.sqs_listener.arn}:${module.sqs_listener.version}"
 
-  sqs_batch_size = 1
+  sqs_batch_size = 10
   sqs_queue_arns = concat(
     [
       var.aws_events_sqs_arn,
