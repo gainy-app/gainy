@@ -56,11 +56,11 @@ class ECSTaskStateChangeEventHandler(AbstractAwsEventHandler):
             logger_extra["branch_name"] = branch_name
 
             if last_status == "RUNNING" and (branch_name or branch):
-                message = f":large_green_circle: Branch {branch_name or branch} is deployed to {ENV} (task {task_arn_trimmed})."
+                message = f":large_green_circle: Branch {branch_name or branch} is deployed to *{ENV}* (task `{task_arn_trimmed}`)."
             elif last_status == "STOPPED":
-                message = f":large_blue_circle: Task {task_arn_trimmed} (started at {started_at}) is stopped on {ENV}."
+                message = f":large_blue_circle: Task `{task_arn_trimmed}` (started at {started_at}) is stopped on *{ENV}*."
             elif started_at is not None and desired_status == "RUNNING" and last_status != "RUNNING":
-                message = f":red_circle: Task {task_arn_trimmed} (started at {started_at}) is unstable on {ENV} (desired_status: {desired_status}, last_status: {last_status})."
+                message = f":red_circle: Task `{task_arn_trimmed}` (started at {started_at}) is unstable on *{ENV}* (desired_status: {desired_status}, last_status: {last_status})."
             else:
                 return
 
