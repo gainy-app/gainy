@@ -39,7 +39,7 @@ for schedule in schedules:
 
 dbt = BashOperator(
     task_id="dbt",
-    bash_command=get_meltano_command("invoke dbt run --exclude tag:view"),
+    bash_command=get_meltano_command("invoke dbt run --exclude config.materialized:view"),
     dag=dag,
     trigger_rule="all_done",
     pool="dbt")

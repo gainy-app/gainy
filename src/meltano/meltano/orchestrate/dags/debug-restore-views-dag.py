@@ -7,5 +7,5 @@ dag = create_dag(dag_id, tags=tags)
 
 dbt = BashOperator(
     task_id="dbt",
-    bash_command=get_meltano_command("invoke dbt run --model tag:view"),
+    bash_command=get_meltano_command("invoke dbt run --model config.materialized:view"),
     dag=dag)
