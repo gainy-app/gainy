@@ -2616,7 +2616,7 @@ models:
       - name: id
         tests:
           - type:
-              type: 'character varying'
+              type: 'text'
       - name: profile_id
         tests:
           - type:
