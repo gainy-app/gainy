@@ -1,6 +1,9 @@
 name: Terraform
 
 on:
+  release:
+    types:
+      - published
   workflow_dispatch:
     inputs:
       env:
@@ -211,23 +214,27 @@ jobs:
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
-            let branch_name = "${{ github.event.pull_request.title }}";
+            let branchName = "${{ github.event.pull_request.title }}";
             
-            if (!branch_name){
+            if (!branchName){
+              branchName = "${{ github.event.release.name }}";
+            }
+            
+            if (!branchName){
               const prs = await github.pulls.list({
                 head: `${context.repo.owner}:${context.ref}`,
                 owner: context.repo.owner,
                 repo: context.repo.repo
               })
               if (prs && prs.status === 200 && prs.data && prs.data.length) {
-                branch_name = prs.data[0].title;
-                console.log(branch_name);
+                branchName = prs.data[0].title;
               }
             }
             
-            if (branch_name){
+            if (branchName){
+              console.log(branchName);
               const fs = require('fs')
-              fs.appendFile(process.env.GITHUB_ENV, `TF_VAR_source_code_branch_name=${branch_name}`, function (err) {
+              fs.appendFile(process.env.GITHUB_ENV, `TF_VAR_source_code_branch_name=${branchName}`, function (err) {
                 if (err) {
                   throw Error(err)
                 }
