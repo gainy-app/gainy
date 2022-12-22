@@ -288,7 +288,7 @@ module "sqs_listener" {
   env                    = var.env
   function_name          = "sqsListener"
   handler                = "sqs_listener.handle"
-  timeout                = 30
+  timeout                = 10
   exec_role_arn          = aws_iam_role.lambda_exec.arn
   image_uri              = docker_registry_image.lambda_python.name
   memory_size            = var.env == "production" ? 256 : 256
