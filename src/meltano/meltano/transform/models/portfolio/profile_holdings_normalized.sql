@@ -9,6 +9,7 @@
       'create index if not exists "phn_profile_id_collection_id_symbol" ON {{ this }} (profile_id, collection_id, symbol)',
       fk('holding_id', 'app', 'profile_holdings', 'id'),
       fk('plaid_access_token_id', 'app', 'profile_plaid_access_tokens', 'id'),
+      fk('security_id', this.schema, 'portfolio_securities_normalized', 'id'),
       fk('profile_id', 'app', 'profiles', 'id'),
       fk('account_id', 'app', 'profile_portfolio_accounts', 'id'),
     ]
