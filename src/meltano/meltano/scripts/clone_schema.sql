@@ -41,7 +41,12 @@ BEGIN
     -- copy constraints
     FOR query, name IN
         select 'alter table "' || dest_schema || '"."' || tbl.relname || '" add constraint ' || conname || ' ' ||
-               replace(pg_get_constraintdef(c.oid), 'ON ' || source_schema || '.', 'ON ' || dest_schema || '.'),
+                regexp_replace(
+                        replace(pg_get_constraintdef(c.oid), 'ON ' || source_schema || '.', 'ON ' || dest_schema || '.'),
+                       'REFERENCES (\w*)\(',
+                       'REFERENCES ' || dest_schema || '.\1(',
+                       'i'
+                    ),
                conname
         from pg_constraint c
                  join pg_class tbl on tbl.oid = c.conrelid
