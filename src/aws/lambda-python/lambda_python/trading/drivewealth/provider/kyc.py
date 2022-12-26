@@ -217,7 +217,8 @@ class DriveWealthProviderKYC(GainyDriveWealthProvider):
     def _create_account(self, user: DriveWealthUser):
         repository = self.repository
 
-        account: DriveWealthAccount = repository.find_one(DriveWealthAccount, {"drivewealth_user_id": user.ref_id})
+        account: DriveWealthAccount = repository.find_one(
+            DriveWealthAccount, {"drivewealth_user_id": user.ref_id})
         if not account:
             account_data = self.api.create_account(user.ref_id)
             account = repository.upsert_user_account(user.ref_id, account_data)

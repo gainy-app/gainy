@@ -758,6 +758,7 @@
           - if_market_drops_20_i_will_buy
           - if_market_drops_40_i_will_buy
           - investment_horizon
+          - profile_id
           - risk_level
           - stock_market_risk_level
           - trading_experience
