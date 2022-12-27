@@ -1945,6 +1945,10 @@ models:
         tests:
           - type:
               type: 'text'
+      - name: collection_uniq_id
+        tests:
+          - type:
+              type: 'character varying'
 
   - name: portfolio_expanded_transactions
     columns:
@@ -2603,6 +2607,33 @@ models:
           - type:
               type: 'double precision'
       - name: absolute_gain_1d
+        tests:
+          - type:
+              type: 'double precision'
+
+  - name: profile_holding_groups
+    columns:
+      - name: id
+        tests:
+          - type:
+              type: 'text'
+      - name: profile_id
+        tests:
+          - type:
+              type: 'integer'
+      - name: symbol
+        tests:
+          - type:
+              type: 'character varying'
+      - name: collection_id
+        tests:
+          - type:
+              type: 'integer'
+      - name: collection_uniq_id
+        tests:
+          - type:
+              type: 'character varying'
+      - name: quantity
         tests:
           - type:
               type: 'double precision'
