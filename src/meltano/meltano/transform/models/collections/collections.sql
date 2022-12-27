@@ -59,7 +59,12 @@ with ticker_collections_weights as
      )
 select c.id::int,
        c.name,
-       c.description,
+       regexp_replace(
+               c.description,
+               '(\\r)?\\n',
+               E'\n',
+               'g'
+           )            as description,
        c.enabled,
        c.personalized,
        c.image_url,
