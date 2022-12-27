@@ -24,6 +24,7 @@ select profile_id,
        trading_funding_accounts.profile_id is not null                  as funding_account_connected,
        coalesce(deposited_funds, false)                                 as deposited_funds,
        coalesce(pending_cash, 0)::double precision                      as pending_cash,
+       coalesce(pending_order_stats.amount_sum, 0)::double precision    as pending_orders_amount,
        coalesce(withdrawable_cash, 0)::double precision                 as withdrawable_cash,
        coalesce(buying_power, 0)::double precision                      as buying_power
 from (
@@ -43,4 +44,19 @@ from (
                        select distinct on (profile_id) profile_id, account_no
                        from {{ ref('trading_account_status') }}
                    ) trading_accounts using (profile_id)
+         left join (
+                       select profile_id, sum(amount_sum) as amount_sum
+                       from (
+                                select profile_id, sum(abs(target_amount_delta)) as amount_sum
+                                from {{ source('app', 'trading_collection_versions') }}
+                                group by profile_id
+
+                                union all
+
+                                select profile_id, sum(abs(target_amount_delta)) as amount_sum
+                                from {{ source('app', 'trading_orders') }}
+                                group by profile_id
+                            ) t
+                       group by profile_id
+                   ) pending_order_stats using (profile_id)
          left join account_stats using (profile_id)

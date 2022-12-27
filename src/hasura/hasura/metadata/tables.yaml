@@ -3053,6 +3053,7 @@
           - deposited_funds
           - withdrawable_cash
           - pending_cash
+          - pending_orders_amount
           - buying_power
         filter:
           profile:
