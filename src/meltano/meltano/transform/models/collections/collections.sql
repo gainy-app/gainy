@@ -64,7 +64,7 @@ select c.id::int,
                '(\\r)?\\n',
                E'\n',
                'g'
-           )            as description,
+           )::varchar   as description,
        c.enabled,
        c.personalized,
        c.image_url,
