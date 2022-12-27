@@ -202,7 +202,6 @@ resource "aws_ecs_task_definition" "default" {
   requires_compatibilities = ["FARGATE"]
   cpu                      = local.main_cpu_credits
   memory                   = local.main_memory_credits
-  tags                     = {}
   task_role_arn            = aws_iam_role.task.arn
   execution_role_arn       = aws_iam_role.execution.arn
 
@@ -229,6 +228,12 @@ resource "aws_ecs_task_definition" "default" {
       ] : []
     )
   )
+
+  tags = {
+    environment             = var.env
+    source_code_branch      = var.source_code_branch
+    source_code_branch_name = var.source_code_branch_name
+  }
 }
 
 resource "aws_ecs_task_definition" "hasura" {

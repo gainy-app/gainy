@@ -47,6 +47,7 @@
     { "name": "COINGECKO_JOBS_COUNT",                "value": "${coingecko_jobs_count}" },
     { "name": "POLYGON_JOBS_COUNT",                  "value": "${polygon_jobs_count}" },
     { "name": "DBT_TARGET_SCHEMA",                   "value": "${pg_transform_schema}" },
+    { "name": "DBT_ARTIFACT_STATE_PATH",             "value": "/project/.meltano/transformers/dbt/target/" },
     { "name": "AWS_LAMBDA_API_GATEWAY_ENDPOINT",     "value": "${aws_lambda_api_gateway_endpoint}" }
   ],
   "links": [],

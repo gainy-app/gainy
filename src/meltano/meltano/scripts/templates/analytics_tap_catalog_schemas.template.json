@@ -245,6 +245,13 @@
         ]
       }
     },
+    "etf_metrics": {
+      "metadata": {
+        "table-key-properties": [
+          "symbol"
+        ]
+      }
+    },
     "financials_balance_sheet_quarterly": {
       "metadata": {
         "replication-key": "updated_at",

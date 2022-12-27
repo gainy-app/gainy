@@ -16,6 +16,7 @@ services:
       - ./src/meltano/meltano/orchestrate:/project/orchestrate
       - ./src/meltano/meltano/seed:/project/seed
       - ./src/meltano/meltano/catalog:/project/catalog
+      - ./src/meltano/init.d:/init.d
       - meltano_data:/project/.meltano
     depends_on:
       - postgres

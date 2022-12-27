@@ -53,6 +53,7 @@ module "lambda" {
   stripe_api_key         = var.stripe_api_key
   stripe_publishable_key = var.stripe_publishable_key
   google_places_api_key  = var.google_places_api_key
+  slack_bot_token        = var.slack_bot_token
 
   base_image_registry_address = var.base_image_registry_address
   base_image_version          = var.base_image_version
@@ -85,6 +86,7 @@ module "lambda" {
   codeartifact_pipy_url = var.codeartifact_pipy_url
   gainy_compute_version = var.gainy_compute_version
 
+  aws_events_sqs_arn    = module.cloudwatch.aws_events_sqs_arn
   s3_bucket_uploads_kyc = module.s3.uploads_kyc_bucket
   aws_access_key        = var.aws_access_key
   aws_secret_key        = var.aws_secret_key
@@ -236,6 +238,9 @@ module "ecs-service" {
   plaid_development_secret = var.plaid_development_secret
   plaid_sandbox_secret     = var.plaid_sandbox_secret
   plaid_env                = var.plaid_env
+
+  source_code_branch      = var.source_code_branch
+  source_code_branch_name = var.source_code_branch_name
 }
 
 
@@ -244,6 +249,7 @@ module "cloudwatch" {
   env                 = var.env
   hasura_admin_secret = module.ecs-service.hasura_admin_secret
   hasura_url          = module.ecs-service.hasura_url
+  ecs_cluster_arn     = module.ecs.ecs_cluster.arn
 }
 
 output "bridge_instance_url" {

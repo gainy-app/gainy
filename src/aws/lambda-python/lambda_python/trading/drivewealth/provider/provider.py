@@ -67,6 +67,8 @@ class DriveWealthProvider(DriveWealthProviderKYC,
     def delete_funding_account(self, funding_account_id: int):
         drivewealth_bank_account = self.repository.find_one(
             DriveWealthBankAccount, {"funding_account_id": funding_account_id})
+        if not drivewealth_bank_account:
+            return
         self.api.delete_bank_account(drivewealth_bank_account.ref_id)
         self.repository.delete(drivewealth_bank_account)
 

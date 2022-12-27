@@ -106,6 +106,7 @@
     { "name": "DBT_THREADS",                           "value": "${dbt_threads}" },
     { "name": "DBT_TARGET_SCHEMA",                     "value": "${pg_transform_schema}" },
     { "name": "DBT_TARGET",                            "value": "postgres" },
+    { "name": "DBT_ARTIFACT_STATE_PATH",               "value": "/project/.meltano/transformers/dbt/target/" },
 
     { "name": "ALGOLIA_APP_ID",                        "value": "${algolia_app_id}" },
     { "name": "ALGOLIA_TICKERS_INDEX",                 "value": "${algolia_tickers_index}" },

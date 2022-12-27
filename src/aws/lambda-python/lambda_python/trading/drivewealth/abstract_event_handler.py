@@ -1,20 +1,13 @@
-from abc import abstractmethod, ABC
+from abc import ABC
 
+from queue_processing.abstract_event_handler import EventHandlerInterface
 from trading.drivewealth.provider import DriveWealthProvider
 from trading.drivewealth.repository import DriveWealthRepository
 
 
-class AbstractDriveWealthEventHandler(ABC):
+class AbstractDriveWealthEventHandler(EventHandlerInterface, ABC):
 
     def __init__(self, repo: DriveWealthRepository,
                  provider: DriveWealthProvider):
         self.repo = repo
         self.provider = provider
-
-    @abstractmethod
-    def supports(self, event_type: str):
-        pass
-
-    @abstractmethod
-    def handle(self, event_payload: dict):
-        pass

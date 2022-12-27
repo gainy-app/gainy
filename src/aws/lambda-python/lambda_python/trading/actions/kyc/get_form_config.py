@@ -22,7 +22,8 @@ class KycGetFormConfig(HasuraAction):
                 })
             profile = cursor.fetchone()
 
-            cursor.execute("select * from raw_data.gainy_countries")
+            cursor.execute(
+                "select * from raw_data.gainy_countries order by name")
             countries = cursor.fetchall()
             cursor.execute(
                 "select * from raw_data.gainy_us_states order by name")
@@ -109,7 +110,7 @@ class KycGetFormConfig(HasuraAction):
                     },
                     {
                         "value": "SELF_EMPLOYED",
-                        "name": "Self Employed / Business Owner",
+                        "name": "Self-Employed / Business Owner",
                     },
                 ]
             },
