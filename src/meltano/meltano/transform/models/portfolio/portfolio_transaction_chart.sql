@@ -6,7 +6,6 @@
     post_hook=[
       pk('transaction_uniq_id, period, datetime'),
       index('id', true),
-      fk('transaction_uniq_id', this.schema, 'portfolio_expanded_transactions', 'transaction_uniq_id'),
     ],
   )
 }}
