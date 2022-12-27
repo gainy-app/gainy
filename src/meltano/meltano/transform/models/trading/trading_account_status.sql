@@ -9,14 +9,15 @@ with account_stats as
          (
              select profile_id,
                     sum(cash_balance)                  as cash_balance,
+                    sum(cash_available_for_trade)      as cash_available_for_trade,
                     sum(cash_available_for_withdrawal) as cash_available_for_withdrawal
              from (
                       select distinct on (
                           profile_id, drivewealth_accounts.ref_id
                           ) profile_id,
                             drivewealth_accounts_money.cash_balance,
+                            drivewealth_accounts_money.cash_available_for_trade,
                             drivewealth_accounts_money.cash_available_for_withdrawal
-
                       from {{ source('app', 'drivewealth_accounts_money') }}
                                join {{ source('app', 'drivewealth_accounts') }}
                                     on drivewealth_accounts.ref_id = drivewealth_accounts_money.drivewealth_account_id
@@ -67,13 +68,17 @@ select profile_id,
        coalesce(pending_cash, 0)::double precision       as pending_cash,
        coalesce(
 {% if var("drivewealth_is_uat") %}
-               account_stats.cash_balance
+               cash_available_for_trade
 {% else %}
                cash_available_for_withdrawal
 {% endif %}
            , 0)::double precision                        as withdrawable_cash,
        coalesce(
+{% if var("drivewealth_is_uat") %}
+                   cash_available_for_trade +
+{% else %}
                    coalesce(account_stats.cash_balance, cash_available_for_withdrawal) +
+{% endif %}
                    coalesce(pending_cash, 0)::double precision
            , 0)::double precision                        as buying_power
 from (

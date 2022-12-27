@@ -133,10 +133,8 @@ class TradingService(GainyTradingService):
                           funding_account: FundingAccount):
         repository = self.trading_repository
 
-        if amount > 0:
-            self.check_enough_withdrawable_cash(trading_account.id, amount)
-        else:
-            raise Exception('Amount must be a positive number.')
+        if amount < 0:
+            self.check_enough_withdrawable_cash(trading_account.id, -amount)
 
         money_flow = TradingMoneyFlow()
         money_flow.profile_id = profile_id
