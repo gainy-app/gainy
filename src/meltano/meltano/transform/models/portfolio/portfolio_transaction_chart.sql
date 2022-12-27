@@ -155,7 +155,7 @@ from (
          from {{ ref('drivewealth_portfolio_chart') }}
     ) t
 {% if is_incremental() %}
-         join {{ this }} old_data using (transaction_uniq_id, period, datetime)
+         left join {{ this }} old_data using (transaction_uniq_id, period, datetime)
 where old_data.transaction_uniq_id is null
    or abs(t.adjusted_close - old_data.adjusted_close) > 1e-3
 {% endif %}
