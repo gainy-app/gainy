@@ -48,13 +48,6 @@ union all
 union all
 
 (
-    with latest_open_trading_session as
-             (
-                 select symbol, max(date) as date
-                 from {{ ref('week_trading_sessions_static') }}
-                 where index = 0
-                 group by symbol
-             )
     select historical_prices_aggregated_1d.symbol,
            historical_prices_aggregated_1d.datetime::date as date,
            historical_prices_aggregated_1d.datetime,
@@ -68,20 +61,12 @@ union all
            historical_prices_aggregated_1d.volume,
            historical_prices_aggregated_1d.updated_at
     from {{ ref('historical_prices_aggregated_1d') }}
-             left join latest_open_trading_session using (symbol)
-    where historical_prices_aggregated_1d.datetime >= coalesce(latest_open_trading_session.date, now()) - interval '1 month'
+    where historical_prices_aggregated_1d.datetime >= now() - interval '1 month'
 )
 
 union all
 
 (
-    with latest_open_trading_session as
-             (
-                 select symbol, max(date) as date
-                 from {{ ref('week_trading_sessions_static') }}
-                 where index = 0
-                 group by symbol
-             )
     select historical_prices_aggregated_1d.symbol,
            historical_prices_aggregated_1d.datetime::date as date,
            historical_prices_aggregated_1d.datetime,
@@ -95,20 +80,12 @@ union all
            historical_prices_aggregated_1d.volume,
            historical_prices_aggregated_1d.updated_at
     from {{ ref('historical_prices_aggregated_1d') }}
-             left join latest_open_trading_session using (symbol)
-    where historical_prices_aggregated_1d.datetime >= coalesce(latest_open_trading_session.date, now()) - interval '3 month'
+    where historical_prices_aggregated_1d.datetime >= now() - interval '3 month'
 )
 
 union all
 
 (
-    with latest_open_trading_session as
-             (
-                 select symbol, max(date) as date
-                 from {{ ref('week_trading_sessions_static') }}
-                 where index = 0
-                 group by symbol
-             )
     select historical_prices_aggregated_1d.symbol,
            historical_prices_aggregated_1d.datetime::date as date,
            historical_prices_aggregated_1d.datetime,
@@ -122,20 +99,12 @@ union all
            historical_prices_aggregated_1d.volume,
            historical_prices_aggregated_1d.updated_at
     from {{ ref('historical_prices_aggregated_1d') }}
-             left join latest_open_trading_session using (symbol)
-    where historical_prices_aggregated_1d.datetime >= coalesce(latest_open_trading_session.date, now()) - interval '1 year'
+    where historical_prices_aggregated_1d.datetime >= now() - interval '1 year'
 )
 
 union all
 
 (
-    with latest_open_trading_session as
-             (
-                 select symbol, max(date) as date
-                 from {{ ref('week_trading_sessions_static') }}
-                 where index = 0
-                 group by symbol
-             )
     select historical_prices_aggregated_1w.symbol,
            historical_prices_aggregated_1w.datetime::date as date,
            historical_prices_aggregated_1w.datetime,
@@ -149,8 +118,7 @@ union all
            historical_prices_aggregated_1w.volume,
            historical_prices_aggregated_1w.updated_at
     from {{ ref('historical_prices_aggregated_1w') }}
-             left join latest_open_trading_session using (symbol)
-    where historical_prices_aggregated_1w.datetime >= coalesce(latest_open_trading_session.date, now()) - interval '5 year'
+    where historical_prices_aggregated_1w.datetime >= now() - interval '5 year'
 )
 
 union all
