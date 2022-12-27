@@ -294,6 +294,8 @@ schedules:
     transform: run
     interval: '@daily'
     start_date: 2021-09-03 13:52:48.598227
+    env:
+      TARGET_ENVS: '[]'
 
   - name: polygon-to-postgres
     extractor: tap-polygon

@@ -149,6 +149,28 @@
         ]
       }
     },
+    "analytics_drivewealth_collection_holdings": {
+      "metadata": {
+        "replication-key": "updated_at",
+        "replication-method": "INCREMENTAL",
+        "view-key-properties": [
+          "profile_id",
+          "date",
+          "collection_id"
+        ]
+      }
+    },
+    "analytics_drivewealth_holdings": {
+      "metadata": {
+        "replication-key": "updated_at",
+        "replication-method": "INCREMENTAL",
+        "view-key-properties": [
+          "profile_id",
+          "date",
+          "symbol"
+        ]
+      }
+    },
     "base_tickers": {
       "metadata": {
         "table-key-properties": [
@@ -220,6 +242,13 @@
         "table-key-properties": [
           "symbol",
           "date"
+        ]
+      }
+    },
+    "etf_metrics": {
+      "metadata": {
+        "table-key-properties": [
+          "symbol"
         ]
       }
     },

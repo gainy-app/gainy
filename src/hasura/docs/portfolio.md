@@ -283,6 +283,15 @@ query GetPlaidHoldings($profileId: Int!) {
                 symbol
                 time
             }
+            match_score{
+                match_score
+            }
+        }
+        collection {
+            name
+            match_score{
+                match_score
+            }
         }
     }
 }

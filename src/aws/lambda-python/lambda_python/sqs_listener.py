@@ -1,6 +1,7 @@
 from common.context_container import ContextContainer
 from gainy.utils import setup_exception_logger_hook, get_logger
 from queue_processing.exceptions import UnsupportedMessageException
+from queue_processing.locking_function import HandleMessage
 
 logger = get_logger(__name__)
 
@@ -20,8 +21,9 @@ def handle(event, context):
 
             try:
                 message = adapter.get_message(record)
-                dispatcher.handle(message)
-                repo.persist(message)
+
+                func = HandleMessage(repo, dispatcher, message)
+                func.execute()
             except UnsupportedMessageException as e:
                 logger.warning(e, extra=logger_extra)
             except Exception as e:
