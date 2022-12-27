@@ -15,8 +15,6 @@ with filtered_transactions as
                     filtered_transactions.symbol,
                     filtered_transactions.quantity_norm_for_valuation,
                     period,
-                    week_trading_session_index,
-                    latest_trading_time,
                     portfolio_transaction_chart.date,
                     portfolio_transaction_chart.datetime,
                     transaction_uniq_id,
@@ -34,8 +32,6 @@ with filtered_transactions as
          (
              select symbol,
                     period,
-                    min(week_trading_session_index)  as week_trading_session_index,
-                    min(latest_trading_time)         as latest_trading_time,
                     datetime,
                     min(date)                        as date,
                     sum(quantity_norm_for_valuation) as quantity,
@@ -50,17 +46,22 @@ with filtered_transactions as
          ),
      schedule as materialized
          (
-             select distinct period, datetime
+             select distinct on (
+                 period, datetime
+                 ) period,
+                   datetime,
+                   rank() over (partition by period order by date desc) = 1 as is_latest_day
              from (
                       select t.*,
                              max(cnt)
                              over (partition by period order by datetime rows between unbounded preceding and current row ) as cum_max_cnt
                       from (
                                select period,
+                                      date,
                                       datetime,
                                       count(distinct symbol) as cnt
                                from ticker_chart
-                               group by period, datetime
+                               group by period, date, datetime
                            ) t
                   ) t
              where cnt = cum_max_cnt
@@ -68,6 +69,7 @@ with filtered_transactions as
      ticker_chart_with_cash_adjustment as
          (
              select ticker_chart.*,
+                    is_latest_day,
                     case
                         when ticker_chart.quantity > 0
                             then ticker_chart.adjusted_close / ticker_chart.quantity *
@@ -116,12 +118,12 @@ with filtered_transactions as
                              max(date)     as date,
                              max(datetime) as datetime
                       from ticker_chart_with_cash_adjustment
-                      where (period != '1d' or week_trading_session_index > 0)
+                      where (period != '1d' or not is_latest_day)
                         and (period != '1w' or date < now() - interval '1 week')
-                        and (period != '1m' or datetime < latest_trading_time::date - interval '1 month')
-                        and (period != '3m' or datetime < latest_trading_time::date - interval '3 month')
-                        and (period != '1y' or datetime < latest_trading_time::date - interval '1 year')
-                        and (period != '5y' or datetime < latest_trading_time::date - interval '5 year')
+                        and (period != '1m' or datetime < now() - interval '1 month')
+                        and (period != '3m' or datetime < now() - interval '3 month')
+                        and (period != '1y' or datetime < now() - interval '1 year')
+                        and (period != '5y' or datetime < now() - interval '5 year')
                       group by period
                   ) t
                       left join ticker_chart_with_cash_adjustment using (period, date)

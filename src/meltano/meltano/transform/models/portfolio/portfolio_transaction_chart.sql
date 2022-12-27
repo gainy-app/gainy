@@ -6,7 +6,7 @@
     post_hook=[
       pk('transaction_uniq_id, period, datetime'),
       index('id', true),
-      fk2('transaction_uniq_id', ref('portfolio_expanded_transactions'), 'transaction_uniq_id'),
+      fk('transaction_uniq_id', this.schema, 'portfolio_expanded_transactions', 'transaction_uniq_id'),
     ],
   )
 }}
@@ -158,4 +158,5 @@ from (
 {% if is_incremental() %}
          join {{ this }} old_data using (transaction_uniq_id, period, datetime)
 where old_data.transaction_uniq_id is null
+   or abs(t.adjusted_close - old_data.adjusted_close) > 1e-3
 {% endif %}
