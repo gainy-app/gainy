@@ -15,9 +15,7 @@ select drivewealth_portfolio_historical_prices_aggregated.profile_id,
        drivewealth_portfolio_historical_prices_aggregated.high,
        drivewealth_portfolio_historical_prices_aggregated.low,
        drivewealth_portfolio_historical_prices_aggregated.close,
-       drivewealth_portfolio_historical_prices_aggregated.adjusted_close,
-       week_trading_sessions_static.index                                                 as week_trading_session_index,
-       null::timestamp                                                                    as latest_trading_time
+       drivewealth_portfolio_historical_prices_aggregated.adjusted_close
 from {{ ref('drivewealth_portfolio_historical_prices_aggregated') }}
          join {{ ref('week_trading_sessions_static') }} using (symbol)
 where drivewealth_portfolio_historical_prices_aggregated.period = '3min'
@@ -35,9 +33,7 @@ select drivewealth_portfolio_historical_prices_aggregated.profile_id,
        drivewealth_portfolio_historical_prices_aggregated.high,
        drivewealth_portfolio_historical_prices_aggregated.low,
        drivewealth_portfolio_historical_prices_aggregated.close,
-       drivewealth_portfolio_historical_prices_aggregated.adjusted_close,
-       week_trading_sessions_static.index                                                  as week_trading_session_index,
-       null::timestamp                                                                     as latest_trading_time
+       drivewealth_portfolio_historical_prices_aggregated.adjusted_close
 from {{ ref('drivewealth_portfolio_historical_prices_aggregated') }}
          join {{ ref('week_trading_sessions_static') }} using (symbol)
 where drivewealth_portfolio_historical_prices_aggregated.period = '15min'
@@ -55,9 +51,7 @@ select drivewealth_portfolio_historical_prices_aggregated.profile_id,
        drivewealth_portfolio_historical_prices_aggregated.high,
        drivewealth_portfolio_historical_prices_aggregated.low,
        drivewealth_portfolio_historical_prices_aggregated.close,
-       drivewealth_portfolio_historical_prices_aggregated.adjusted_close,
-       null::int                                                                      as week_trading_session_index,
-       ticker_realtime_metrics.time                                                   as latest_trading_time
+       drivewealth_portfolio_historical_prices_aggregated.adjusted_close
 from {{ ref('drivewealth_portfolio_historical_prices_aggregated') }}
          left join {{ ref('ticker_realtime_metrics') }} using (symbol)
 where drivewealth_portfolio_historical_prices_aggregated.period = '1d'
@@ -75,9 +69,7 @@ select drivewealth_portfolio_historical_prices_aggregated.profile_id,
        drivewealth_portfolio_historical_prices_aggregated.high,
        drivewealth_portfolio_historical_prices_aggregated.low,
        drivewealth_portfolio_historical_prices_aggregated.close,
-       drivewealth_portfolio_historical_prices_aggregated.adjusted_close,
-       null::int                                                                      as week_trading_session_index,
-       ticker_realtime_metrics.time                                                   as latest_trading_time
+       drivewealth_portfolio_historical_prices_aggregated.adjusted_close
 from {{ ref('drivewealth_portfolio_historical_prices_aggregated') }}
          left join {{ ref('ticker_realtime_metrics') }} using (symbol)
 where drivewealth_portfolio_historical_prices_aggregated.period = '1d'
@@ -95,9 +87,7 @@ select drivewealth_portfolio_historical_prices_aggregated.profile_id,
        drivewealth_portfolio_historical_prices_aggregated.high,
        drivewealth_portfolio_historical_prices_aggregated.low,
        drivewealth_portfolio_historical_prices_aggregated.close,
-       drivewealth_portfolio_historical_prices_aggregated.adjusted_close,
-       null::int                                                                      as week_trading_session_index,
-       ticker_realtime_metrics.time                                                   as latest_trading_time
+       drivewealth_portfolio_historical_prices_aggregated.adjusted_close
 from {{ ref('drivewealth_portfolio_historical_prices_aggregated') }}
          left join {{ ref('ticker_realtime_metrics') }} using (symbol)
 where drivewealth_portfolio_historical_prices_aggregated.period = '1d'
@@ -114,9 +104,7 @@ select drivewealth_portfolio_historical_prices_aggregated.profile_id,
        drivewealth_portfolio_historical_prices_aggregated.high,
        drivewealth_portfolio_historical_prices_aggregated.low,
        drivewealth_portfolio_historical_prices_aggregated.close,
-       drivewealth_portfolio_historical_prices_aggregated.adjusted_close,
-       null::int                                                                       as week_trading_session_index,
-       ticker_realtime_metrics.time                                                    as latest_trading_time
+       drivewealth_portfolio_historical_prices_aggregated.adjusted_close
 from {{ ref('drivewealth_portfolio_historical_prices_aggregated') }}
          left join {{ ref('ticker_realtime_metrics') }} using (symbol)
 where drivewealth_portfolio_historical_prices_aggregated.period = '1w'
@@ -133,9 +121,7 @@ select profile_id,
        high,
        low,
        close,
-       adjusted_close,
-       null::int                     as week_trading_session_index,
-       ticker_realtime_metrics.time  as latest_trading_time
+       adjusted_close
 from {{ ref('drivewealth_portfolio_historical_prices_aggregated') }}
          left join {{ ref('ticker_realtime_metrics') }} using (symbol)
 where drivewealth_portfolio_historical_prices_aggregated.period = '1m'
