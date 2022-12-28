@@ -31,6 +31,7 @@ if __name__ == '__main__':
             (os.path.join(base_path, 'data/collections.csv'), 'image_url'),
             (os.path.join(base_path, 'data/interests.csv'), 'icon_url'),
             (os.path.join(base_path, 'data/categories.csv'), 'icon_url'),
+            (os.path.join(base_path, 'data/countries.csv'), 'flag_w32_waving_url'),
             (os.path.join(base_path, 'data/countries.csv'), 'flag_w40_url'),
         ]
         results = []
