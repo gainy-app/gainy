@@ -43,7 +43,10 @@ with ticker_categories as
         )
 select tickers.symbol,
        tickers.name,
-       ticker_search_alternative_names.name as alternative_name,
+       coalesce(
+           ticker_search_alternative_names.name,
+           regexp_replace(symbol, '\.(CC|INDX)$', '')
+           )                               as alternative_name,
        tickers.description,
        ticker_industries.ticker_industries as tag_1,
        ticker_categories.ticker_categories as tag_2,
