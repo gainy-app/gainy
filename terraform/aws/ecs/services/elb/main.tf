@@ -51,8 +51,13 @@ resource "aws_alb_listener" "http" {
   port              = "80"
   protocol          = "HTTP"
   default_action {
-    target_group_arn = aws_alb_target_group.default.arn
-    type             = "forward"
+    type = "redirect"
+
+    redirect {
+      port        = "443"
+      protocol    = "HTTPS"
+      status_code = "HTTP_301"
+    }
   }
   tags = {
     Name = "${var.name}-${var.env}"
