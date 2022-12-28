@@ -2553,6 +2553,10 @@ models:
         tests:
           - type:
               type: 'character varying'
+      - name: flag_w32_waving_url
+        tests:
+          - type:
+              type: 'character varying'
       - name: flag_w40_url
         tests:
           - type:
