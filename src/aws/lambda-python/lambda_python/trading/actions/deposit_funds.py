@@ -27,11 +27,15 @@ class TradingDepositFunds(MoneyFlowAction):
 
         return {'trading_money_flow_id': money_flow.id}
 
-    def validate_amount(self, context_container: ContextContainer, profile_id, amount):
-        money_flow = context_container.trading_repository.find_one(TradingMoneyFlow, {"profile_id": profile_id})
+    def validate_amount(self, context_container: ContextContainer, profile_id,
+                        amount):
+        money_flow = context_container.trading_repository.find_one(
+            TradingMoneyFlow, {"profile_id": profile_id})
 
         if money_flow:
             return
 
         if amount < MIN_FIRST_DEPOSIT_AMOUNT:
-            raise BadRequestException(f"Minimal amount for the first deposit is ${MIN_FIRST_DEPOSIT_AMOUNT}.")
+            raise BadRequestException(
+                f"Minimal amount for the first deposit is ${MIN_FIRST_DEPOSIT_AMOUNT}."
+            )

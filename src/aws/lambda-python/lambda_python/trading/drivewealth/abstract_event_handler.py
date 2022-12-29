@@ -15,15 +15,18 @@ class AbstractDriveWealthEventHandler(EventHandlerInterface, ABC):
         self.repo = repo
         self.provider = provider
 
-    def sync_trading_account_balances(self, trading_account_ref_id: str) -> Optional[TradingAccount]:
+    def sync_trading_account_balances(
+            self, trading_account_ref_id: str) -> Optional[TradingAccount]:
         if not trading_account_ref_id:
             return
 
-        account: DriveWealthAccount = self.repo.find_one(DriveWealthAccount, {"ref_id": trading_account_ref_id})
+        account: DriveWealthAccount = self.repo.find_one(
+            DriveWealthAccount, {"ref_id": trading_account_ref_id})
         if not account or not account.trading_account_id:
             return
 
-        trading_account = self.repo.find_one(TradingAccount, {"id": account.trading_account_id})
+        trading_account = self.repo.find_one(
+            TradingAccount, {"id": account.trading_account_id})
         if not trading_account:
             return
 

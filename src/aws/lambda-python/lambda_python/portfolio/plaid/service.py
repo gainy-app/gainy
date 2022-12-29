@@ -57,7 +57,11 @@ class PlaidService(GainyPlaidService):
             # InvestmentsHoldingsGetResponse[]
             response = self.plaid_client.get_investment_holdings(
                 plaid_access_token["access_token"])
-            logger.info('plaid holdings', extra={"profile_id": plaid_access_token["profile_id"], "response": response})
+            logger.info('plaid holdings',
+                        extra={
+                            "profile_id": plaid_access_token["profile_id"],
+                            "response": response
+                        })
 
             holdings = [
                 self.__hydrate_holding_data(holding_data)
@@ -101,7 +105,11 @@ class PlaidService(GainyPlaidService):
                 start_date=datetime.date.today() -
                 datetime.timedelta(days=20 * 365),
                 end_date=datetime.date.today())
-            logger.info('plaid transactions', extra={"profile_id": plaid_access_token["profile_id"], "response": response})
+            logger.info('plaid transactions',
+                        extra={
+                            "profile_id": plaid_access_token["profile_id"],
+                            "response": response
+                        })
 
             transactions = [
                 self.__hydrate_transaction_data(transaction_data)

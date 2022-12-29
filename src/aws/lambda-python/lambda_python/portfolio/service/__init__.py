@@ -211,8 +211,10 @@ class PortfolioService:
 
             return [
                 dict(
-                    zip(['id', 'access_token', 'is_artificial', 'profile_id', 'service'],
-                        row + (SERVICE_PLAID, ))) for row in access_tokens
+                    zip([
+                        'id', 'access_token', 'is_artificial', 'profile_id',
+                        'service'
+                    ], row + (SERVICE_PLAID, ))) for row in access_tokens
             ]
 
     def _set_access_token_reauth(self, access_token):
