@@ -23,7 +23,10 @@ class RedemptionUpdatedEventHandler(AbstractDriveWealthEventHandler):
         self.provider.handle_redemption_status(redemption)
 
         if redemption.is_approved() and redemption.fees_total_amount is None:
-            # Todo fees in more cases?
             self.provider.sync_redemption(redemption.ref_id)
 
         self.provider.update_money_flow_from_dw(redemption)
+
+        trading_account = self.sync_trading_account_balances(redemption.trading_account_ref_id)
+        if trading_account:
+            self.provider.notify_low_balance(trading_account)
