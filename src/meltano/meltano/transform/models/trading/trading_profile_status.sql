@@ -49,12 +49,14 @@ from (
                        from (
                                 select profile_id, sum(abs(target_amount_delta)) as amount_sum
                                 from {{ source('app', 'trading_collection_versions') }}
+                                where status in ('PENDING_EXECUTION', 'PENDING')
                                 group by profile_id
 
                                 union all
 
                                 select profile_id, sum(abs(target_amount_delta)) as amount_sum
                                 from {{ source('app', 'trading_orders') }}
+                                where status in ('PENDING_EXECUTION', 'PENDING')
                                 group by profile_id
                             ) t
                        group by profile_id
