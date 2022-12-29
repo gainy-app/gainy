@@ -71,7 +71,7 @@ resource "cloudflare_record" "service" {
   name    = "${var.name}-${var.env}"
   value   = aws_alb.alb.dns_name
   type    = "CNAME"
-  proxied = true
+  proxied = false
   zone_id = var.cloudflare_zone_id
 }
 
