@@ -7,7 +7,7 @@ logger = get_logger(__name__)
 class UsersUpdatedEventHandler(AbstractDriveWealthEventHandler):
 
     def supports(self, event_type: str):
-        return event_type == ["users.updated", "users.created"]
+        return event_type in ["users.updated", "users.created"]
 
     def handle(self, event_payload: dict):
         user_id = event_payload["userID"]
