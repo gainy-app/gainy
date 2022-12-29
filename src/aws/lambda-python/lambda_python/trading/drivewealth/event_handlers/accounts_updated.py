@@ -1,3 +1,5 @@
+from typing import Optional
+
 from gainy.trading.drivewealth.models import DriveWealthAccount
 from gainy.trading.models import TradingAccount
 from gainy.utils import get_logger
@@ -22,13 +24,13 @@ class AccountsUpdatedEventHandler(AbstractDriveWealthEventHandler):
                 account.status = data["status"]['name']
                 self.repo.persist(account)
         else:
-            self.provider.sync_trading_account(account_ref_id=ref_id,
-                                               fetch_info=True)
+            account = self.provider.sync_trading_account(account_ref_id=ref_id,
+                                                         fetch_info=True)
 
         self.ensure_portfolio(account)
 
-    def ensure_portfolio(self, account: DriveWealthAccount):
-        if not account.trading_account_id:
+    def ensure_portfolio(self, account: Optional[DriveWealthAccount]):
+        if not account or not account.trading_account_id:
             return
 
         trading_account: TradingAccount = self.repo.find_one(
