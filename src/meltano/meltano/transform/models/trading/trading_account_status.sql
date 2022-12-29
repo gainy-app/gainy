@@ -52,14 +52,6 @@ with account_stats as
                       order by profile_id, drivewealth_portfolios.ref_id, drivewealth_portfolio_statuses.created_at desc
                   ) t
              group by profile_id
-     ),
-     trading_collection_versions_stats as
-         (
-             select profile_id,
-                    sum(target_amount_delta) as target_amount_delta
-             from {{ source('app', 'trading_collection_versions') }}
-             where status in ('PENDING', 'PENDING_EXECUTION')
-             group by profile_id
      )
 select profile_id,
        trading_account_id,
@@ -100,4 +92,3 @@ from (
          left join deposit_stats using (profile_id)
          left join account_stats using (profile_id)
          left join portfolio_stats using (profile_id)
-         left join trading_collection_versions_stats using (profile_id)
