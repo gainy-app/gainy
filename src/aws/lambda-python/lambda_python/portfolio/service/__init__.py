@@ -204,15 +204,17 @@ class PortfolioService:
     def __get_access_tokens(self, profile_id):
         with self.db_conn.cursor() as cursor:
             cursor.execute(
-                f"SELECT id, access_token, is_artificial FROM app.profile_plaid_access_tokens WHERE profile_id = %s and purpose = 'portfolio'",
+                f"SELECT id, access_token, is_artificial, profile_id FROM app.profile_plaid_access_tokens WHERE profile_id = %s and purpose = 'portfolio'",
                 (profile_id, ))
 
             access_tokens = cursor.fetchall()
 
             return [
                 dict(
-                    zip(['id', 'access_token', 'is_artificial', 'service'],
-                        row + (SERVICE_PLAID, ))) for row in access_tokens
+                    zip([
+                        'id', 'access_token', 'is_artificial', 'profile_id',
+                        'service'
+                    ], row + (SERVICE_PLAID, ))) for row in access_tokens
             ]
 
     def _set_access_token_reauth(self, access_token):
