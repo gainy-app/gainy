@@ -180,7 +180,7 @@ class DriveWealthProvider(DriveWealthProviderKYC,
 
         deposit_data = self.api.get_deposit(deposit_ref_id)
         entity.set_from_response(deposit_data)
-        self.ensure_account(entity.trading_account_ref_id)
+        self.ensure_account_exists(entity.trading_account_ref_id)
         repository.persist(entity)
 
         self.update_money_flow_from_dw(entity)
@@ -194,7 +194,7 @@ class DriveWealthProvider(DriveWealthProviderKYC,
 
         redemption_data = self.api.get_redemption(redemption_ref_id)
         entity.set_from_response(redemption_data)
-        self.ensure_account(entity.trading_account_ref_id)
+        self.ensure_account_exists(entity.trading_account_ref_id)
         repository.persist(entity)
 
         self.update_money_flow_from_dw(entity)
@@ -344,11 +344,29 @@ class DriveWealthProvider(DriveWealthProviderKYC,
         self.repository.persist(entities)
         self.create_trading_statements(entities, profile_id)
 
-    def ensure_account(self, ref_id):
+    def ensure_account_exists(self, ref_id: str):
         if self.repository.find_one(DriveWealthAccount, {"ref_id": ref_id}):
             return
 
         self.sync_trading_account(account_ref_id=ref_id, fetch_info=True)
+
+    def ensure_account_created(self, user: DriveWealthUser):
+        repository = self.repository
+
+        account: DriveWealthAccount = repository.find_one(
+            DriveWealthAccount, {"drivewealth_user_id": user.ref_id})
+        if not account:
+            account_data = self.api.create_account(user.ref_id)
+            account = repository.upsert_user_account(user.ref_id, account_data)
+
+        trading_account = TradingAccount()
+        trading_account.profile_id = user.profile_id
+        trading_account.name = account.nickname
+        account.update_trading_account(trading_account)
+        repository.persist(trading_account)
+
+        account.trading_account_id = trading_account.id
+        repository.persist(account)
 
     def handle_order(self, order: DriveWealthOrder):
         if not order.last_executed_at:
