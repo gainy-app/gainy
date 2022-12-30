@@ -23,7 +23,7 @@
     { "name": "HASURA_GRAPHQL_UNAUTHORIZED_ROLE",     "value": "anonymous" },
     { "name": "HASURA_GRAPHQL_METADATA_DATABASE_URL", "value": "postgres://${pg_username}:${pg_password}@${pg_host}:${pg_port}/${pg_dbname}" },
     { "name": "HASURA_GRAPHQL_LOG_LEVEL",             "value": "warn" },
-    { "name": "HASURA_GRAPHQL_ENABLED_LOG_TYPES",     "value": "startup,query-log,http-log,query-log" },
+    { "name": "HASURA_GRAPHQL_ENABLED_LOG_TYPES",     "value": "startup,webhook-log,websocket-log,http-log,query-log" },
     { "name": "HASURA_GRAPHQL_DATABASE_URL",          "value": "postgres://${pg_username}:${pg_password}@${pg_host}:${pg_port}/${pg_dbname}" },
     { "name": "HASURA_GRAPHQL_READ_REPLICA_URLS",     "value": "${pg_replica_uris}" },
     { "name": "HASURA_GRAPHQL_PUBLIC_SCHEMA_NAME",    "value": "${pg_transform_schema}" },
