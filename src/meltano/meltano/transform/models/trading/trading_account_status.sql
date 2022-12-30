@@ -66,12 +66,7 @@ select profile_id,
 {% endif %}
            , 0)::double precision                        as withdrawable_cash,
        coalesce(
-{% if var("drivewealth_is_uat") %}
-                   cash_available_for_trade +
-{% else %}
-                   coalesce(account_stats.cash_balance, cash_available_for_withdrawal) +
-{% endif %}
-                   coalesce(pending_cash, 0)::double precision
+           coalesce(portfolio_stats.cash_value, 0) + coalesce(pending_cash, 0)
            , 0)::double precision                        as buying_power
 from (
          select distinct on (
