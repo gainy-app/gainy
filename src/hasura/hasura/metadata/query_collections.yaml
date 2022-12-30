@@ -4,7 +4,7 @@
       - name: plaid_webhook
         query: |
           mutation plaid_webhook ($webhook_type: String!, $webhook_code: String!, $item_id: String!, $error: PlaidWebhookError, $new_holdings: Int, $updated_holdings: Int, $new_investments_transactions: Int, $cancelled_investments_transactions: Int, $environment: String) {
-            plaid_webhook(webhook_type: $webhook_type, webhook_code: $webhook_code, item_id: $item_id, error: $error, new_holdings: $new_holdings, updated_holdings: $updated_holdings, new_investments_transactions: $new_investments_transactions, cancelled_investments_transactions: $cancelled_investments_transactions, $environment) {
+            plaid_webhook(webhook_type: $webhook_type, webhook_code: $webhook_code, item_id: $item_id, error: $error, new_holdings: $new_holdings, updated_holdings: $updated_holdings, new_investments_transactions: $new_investments_transactions, cancelled_investments_transactions: $cancelled_investments_transactions, environment: $environment) {
               count
             }
           }
