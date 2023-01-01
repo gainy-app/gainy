@@ -35,7 +35,7 @@ class PortfolioChartService:
             "profile_id": profile_id,
             "include_cash": _should_include_cash(filter)
         }
-        transaction_where_clause = []
+        holding_where_clause = []
         chart_where_clause = []
         join_clause = []
 
@@ -43,30 +43,29 @@ class PortfolioChartService:
             return []
 
         self._filter_query_by_periods(params, chart_where_clause, None, filter)
-        self._filter_query_by_institution_ids(params, transaction_where_clause,
+        self._filter_query_by_institution_ids(params, holding_where_clause,
                                               join_clause, filter)
-        self._filter_query_by_access_token_ids(params,
-                                               transaction_where_clause,
+        self._filter_query_by_access_token_ids(params, holding_where_clause,
                                                join_clause, filter)
-        self._filter_query_by_broker_ids(params, transaction_where_clause,
+        self._filter_query_by_broker_ids(params, holding_where_clause,
                                          join_clause, filter)
-        self._filter_query_by_interest_ids(params, transaction_where_clause,
+        self._filter_query_by_interest_ids(params, holding_where_clause,
                                            join_clause, filter)
-        self._filter_query_by_category_ids(params, transaction_where_clause,
+        self._filter_query_by_category_ids(params, holding_where_clause,
                                            join_clause, filter)
-        self._filter_query_by_security_types(params, transaction_where_clause,
+        self._filter_query_by_security_types(params, holding_where_clause,
                                              join_clause, filter)
-        self._filter_query_by_ltt_only(params, transaction_where_clause,
+        self._filter_query_by_ltt_only(params, holding_where_clause,
                                        join_clause, filter)
 
-        if transaction_where_clause:
-            transaction_where_clause.insert(0, sql.SQL(""))
+        if holding_where_clause:
+            holding_where_clause.insert(0, sql.SQL(""))
         if chart_where_clause:
             chart_where_clause.insert(0, sql.SQL(""))
 
         rows = self._execute_query(
             params, {
-                "transaction_where_clause": transaction_where_clause,
+                "holding_where_clause": holding_where_clause,
                 "chart_where_clause": chart_where_clause,
             }, join_clause, query)
 
@@ -90,7 +89,7 @@ class PortfolioChartService:
             "profile_id": profile_id,
             "include_cash": _should_include_cash(filter)
         }
-        transaction_where_clause = []
+        holding_where_clause = []
         chart_where_clause = []
         join_clause = []
 
@@ -98,30 +97,29 @@ class PortfolioChartService:
             return []
 
         self._filter_query_by_periods(params, chart_where_clause, None, filter)
-        self._filter_query_by_institution_ids(params, transaction_where_clause,
+        self._filter_query_by_institution_ids(params, holding_where_clause,
                                               join_clause, filter)
-        self._filter_query_by_access_token_ids(params,
-                                               transaction_where_clause,
+        self._filter_query_by_access_token_ids(params, holding_where_clause,
                                                join_clause, filter)
-        self._filter_query_by_broker_ids(params, transaction_where_clause,
+        self._filter_query_by_broker_ids(params, holding_where_clause,
                                          join_clause, filter)
-        self._filter_query_by_interest_ids(params, transaction_where_clause,
+        self._filter_query_by_interest_ids(params, holding_where_clause,
                                            join_clause, filter)
-        self._filter_query_by_category_ids(params, transaction_where_clause,
+        self._filter_query_by_category_ids(params, holding_where_clause,
                                            join_clause, filter)
-        self._filter_query_by_security_types(params, transaction_where_clause,
+        self._filter_query_by_security_types(params, holding_where_clause,
                                              join_clause, filter)
-        self._filter_query_by_ltt_only(params, transaction_where_clause,
+        self._filter_query_by_ltt_only(params, holding_where_clause,
                                        join_clause, filter)
 
-        if transaction_where_clause:
-            transaction_where_clause.insert(0, sql.SQL(""))
+        if holding_where_clause:
+            holding_where_clause.insert(0, sql.SQL(""))
         if chart_where_clause:
             chart_where_clause.insert(0, sql.SQL(""))
 
         data = self._execute_query(
             params, {
-                "transaction_where_clause": transaction_where_clause,
+                "holding_where_clause": holding_where_clause,
                 "chart_where_clause": chart_where_clause,
             }, join_clause, query)
 
@@ -236,11 +234,6 @@ class PortfolioChartService:
         if not filter.institution_ids:
             return
 
-        s = sql.SQL(
-            "left join profile_holdings_normalized using (holding_id_v2)")
-        if s not in join_clause:
-            join_clause.append(s)
-
         join_clause.append(
             sql.SQL(
                 "left join app.profile_plaid_access_tokens on profile_plaid_access_tokens.id = profile_holdings_normalized.plaid_access_token_id"
@@ -255,11 +248,6 @@ class PortfolioChartService:
         if not filter.access_token_ids:
             return
 
-        s = sql.SQL(
-            "left join profile_holdings_normalized using (holding_id_v2)")
-        if s not in join_clause:
-            join_clause.append(s)
-
         where_clause.append(
             sql.SQL("plaid_access_token_id in %(access_token_ids)s"))
         params['access_token_ids'] = tuple(filter.access_token_ids)
@@ -268,11 +256,6 @@ class PortfolioChartService:
                                     filter: PortfolioChartFilter):
         if not filter.broker_ids:
             return
-
-        s = sql.SQL(
-            "left join profile_holdings_normalized using (holding_id_v2)")
-        if s not in join_clause:
-            join_clause.append(s)
 
         where_clause.append(
             sql.SQL(
@@ -287,7 +270,7 @@ class PortfolioChartService:
 
         join_clause.append(
             sql.SQL(
-                "join ticker_interests on ticker_interests.symbol = portfolio_expanded_transactions.symbol"
+                "join ticker_interests on ticker_interests.symbol = profile_holdings_normalized.ticker_symbol"
             ))
         where_clause.append(
             sql.SQL(
@@ -302,7 +285,7 @@ class PortfolioChartService:
 
         join_clause.append(
             sql.SQL(
-                "join ticker_categories on ticker_categories.symbol = portfolio_expanded_transactions.symbol"
+                "join ticker_categories on ticker_categories.symbol = profile_holdings_normalized.ticker_symbol"
             ))
         where_clause.append(
             sql.SQL(
@@ -317,9 +300,7 @@ class PortfolioChartService:
             return
 
         where_clause.append(
-            sql.SQL(
-                "portfolio_expanded_transactions.security_type in %(security_types)s"
-            ))
+            sql.SQL("profile_holdings_normalized.type in %(security_types)s"))
         params['security_types'] = tuple(filter.security_types)
 
     def _filter_query_by_ltt_only(self, params, where_clause, join_clause,

@@ -6,11 +6,19 @@
     post_hook=[
       pk('transaction_uniq_id, period, datetime'),
       index('id', true),
+      index('updated_at'),
     ],
   )
 }}
 
 
+{% if is_incremental() %}
+with old_stats as
+     (
+         select max(updated_at) as max_updated_at
+         from {{ this }}
+     )
+{% endif %}
 select t.*,
        transaction_uniq_id || '_' || period || '_' || datetime as id
 from (
@@ -23,12 +31,19 @@ from (
                 (portfolio_expanded_transactions.quantity_norm_for_valuation * hpa.high)           as high,
                 (portfolio_expanded_transactions.quantity_norm_for_valuation * hpa.low)            as low,
                 (portfolio_expanded_transactions.quantity_norm_for_valuation * hpa.close)          as close,
-                (portfolio_expanded_transactions.quantity_norm_for_valuation * hpa.adjusted_close) as adjusted_close
+                (portfolio_expanded_transactions.quantity_norm_for_valuation * hpa.adjusted_close) as adjusted_close,
+                greatest(hpa.updated_at, portfolio_expanded_transactions.updated_at)               as updated_at
          from {{ ref('portfolio_expanded_transactions') }}
                   join {{ ref('historical_prices_aggregated_3min') }} hpa using(symbol)
+{% if is_incremental() %}
+                  join old_stats on true
+{% endif %}
          where portfolio_expanded_transactions.is_app_trading = false
            and (hpa.datetime > portfolio_expanded_transactions.datetime - interval '3 minutes' or
                 portfolio_expanded_transactions.datetime is null)
+{% if is_incremental() %}
+           and (hpa.updated_at > max_updated_at or portfolio_expanded_transactions.updated_at > max_updated_at)
+{% endif %}
 
          union all
 
@@ -41,12 +56,19 @@ from (
                 (portfolio_expanded_transactions.quantity_norm_for_valuation * hpa.high)           as high,
                 (portfolio_expanded_transactions.quantity_norm_for_valuation * hpa.low)            as low,
                 (portfolio_expanded_transactions.quantity_norm_for_valuation * hpa.close)          as close,
-                (portfolio_expanded_transactions.quantity_norm_for_valuation * hpa.adjusted_close) as adjusted_close
+                (portfolio_expanded_transactions.quantity_norm_for_valuation * hpa.adjusted_close) as adjusted_close,
+                greatest(hpa.updated_at, portfolio_expanded_transactions.updated_at)               as updated_at
          from {{ ref('portfolio_expanded_transactions') }}
                   join {{ ref('historical_prices_aggregated_15min') }} hpa using(symbol)
+{% if is_incremental() %}
+                  join old_stats on true
+{% endif %}
          where portfolio_expanded_transactions.is_app_trading = false
            and (hpa.datetime > portfolio_expanded_transactions.datetime - interval '15 minutes' or
                 portfolio_expanded_transactions.datetime is null)
+{% if is_incremental() %}
+           and (hpa.updated_at > max_updated_at or portfolio_expanded_transactions.updated_at > max_updated_at)
+{% endif %}
 
          union all
 
@@ -59,13 +81,20 @@ from (
                 (portfolio_expanded_transactions.quantity_norm_for_valuation * hpa.high)           as high,
                 (portfolio_expanded_transactions.quantity_norm_for_valuation * hpa.low)            as low,
                 (portfolio_expanded_transactions.quantity_norm_for_valuation * hpa.close)          as close,
-                (portfolio_expanded_transactions.quantity_norm_for_valuation * hpa.adjusted_close) as adjusted_close
+                (portfolio_expanded_transactions.quantity_norm_for_valuation * hpa.adjusted_close) as adjusted_close,
+                greatest(hpa.updated_at, portfolio_expanded_transactions.updated_at)               as updated_at
          from {{ ref('portfolio_expanded_transactions') }}
                   join {{ ref('historical_prices_aggregated_1d') }} hpa using(symbol)
+{% if is_incremental() %}
+                  join old_stats on true
+{% endif %}
          where hpa.datetime >= now() - interval '1 month + 1 week'
            and portfolio_expanded_transactions.is_app_trading = false
            and (hpa.datetime > portfolio_expanded_transactions.datetime - interval '1 day' or
                 portfolio_expanded_transactions.datetime is null)
+{% if is_incremental() %}
+           and (hpa.updated_at > max_updated_at or portfolio_expanded_transactions.updated_at > max_updated_at)
+{% endif %}
 
          union all
 
@@ -78,13 +107,20 @@ from (
                 (portfolio_expanded_transactions.quantity_norm_for_valuation * hpa.high)           as high,
                 (portfolio_expanded_transactions.quantity_norm_for_valuation * hpa.low)            as low,
                 (portfolio_expanded_transactions.quantity_norm_for_valuation * hpa.close)          as close,
-                (portfolio_expanded_transactions.quantity_norm_for_valuation * hpa.adjusted_close) as adjusted_close
+                (portfolio_expanded_transactions.quantity_norm_for_valuation * hpa.adjusted_close) as adjusted_close,
+                greatest(hpa.updated_at, portfolio_expanded_transactions.updated_at)               as updated_at
          from {{ ref('portfolio_expanded_transactions') }}
                   join {{ ref('historical_prices_aggregated_1d') }} hpa using(symbol)
+{% if is_incremental() %}
+                  join old_stats on true
+{% endif %}
          where hpa.datetime >= now() - interval '3 month + 1 week'
            and portfolio_expanded_transactions.is_app_trading = false
            and (hpa.datetime > portfolio_expanded_transactions.datetime - interval '1 day' or
                 portfolio_expanded_transactions.datetime is null)
+{% if is_incremental() %}
+           and (hpa.updated_at > max_updated_at or portfolio_expanded_transactions.updated_at > max_updated_at)
+{% endif %}
 
          union all
 
@@ -97,12 +133,19 @@ from (
                 (portfolio_expanded_transactions.quantity_norm_for_valuation * hpa.high)           as high,
                 (portfolio_expanded_transactions.quantity_norm_for_valuation * hpa.low)            as low,
                 (portfolio_expanded_transactions.quantity_norm_for_valuation * hpa.close)          as close,
-                (portfolio_expanded_transactions.quantity_norm_for_valuation * hpa.adjusted_close) as adjusted_close
+                (portfolio_expanded_transactions.quantity_norm_for_valuation * hpa.adjusted_close) as adjusted_close,
+                greatest(hpa.updated_at, portfolio_expanded_transactions.updated_at)               as updated_at
          from {{ ref('portfolio_expanded_transactions') }}
                   join {{ ref('historical_prices_aggregated_1d') }} hpa using(symbol)
+{% if is_incremental() %}
+                  join old_stats on true
+{% endif %}
          where portfolio_expanded_transactions.is_app_trading = false
            and (hpa.datetime > portfolio_expanded_transactions.datetime - interval '1 day' or
                 portfolio_expanded_transactions.datetime is null)
+{% if is_incremental() %}
+           and (hpa.updated_at > max_updated_at or portfolio_expanded_transactions.updated_at > max_updated_at)
+{% endif %}
 
          union all
 
@@ -115,12 +158,19 @@ from (
                 (portfolio_expanded_transactions.quantity_norm_for_valuation * hpa.high)           as high,
                 (portfolio_expanded_transactions.quantity_norm_for_valuation * hpa.low)            as low,
                 (portfolio_expanded_transactions.quantity_norm_for_valuation * hpa.close)          as close,
-                (portfolio_expanded_transactions.quantity_norm_for_valuation * hpa.adjusted_close) as adjusted_close
+                (portfolio_expanded_transactions.quantity_norm_for_valuation * hpa.adjusted_close) as adjusted_close,
+                greatest(hpa.updated_at, portfolio_expanded_transactions.updated_at)               as updated_at
          from {{ ref('portfolio_expanded_transactions') }}
                   join {{ ref('historical_prices_aggregated_1w') }} hpa using(symbol)
+{% if is_incremental() %}
+                  join old_stats on true
+{% endif %}
          where portfolio_expanded_transactions.is_app_trading = false
            and (hpa.datetime > portfolio_expanded_transactions.datetime - interval '1 week' or
                 portfolio_expanded_transactions.datetime is null)
+{% if is_incremental() %}
+           and (hpa.updated_at > max_updated_at or portfolio_expanded_transactions.updated_at > max_updated_at)
+{% endif %}
 
          union all
 
@@ -133,12 +183,19 @@ from (
                 (portfolio_expanded_transactions.quantity_norm_for_valuation * hpa.high)           as high,
                 (portfolio_expanded_transactions.quantity_norm_for_valuation * hpa.low)            as low,
                 (portfolio_expanded_transactions.quantity_norm_for_valuation * hpa.close)          as close,
-                (portfolio_expanded_transactions.quantity_norm_for_valuation * hpa.adjusted_close) as adjusted_close
+                (portfolio_expanded_transactions.quantity_norm_for_valuation * hpa.adjusted_close) as adjusted_close,
+                greatest(hpa.updated_at, portfolio_expanded_transactions.updated_at)               as updated_at
          from {{ ref('portfolio_expanded_transactions') }}
                   join {{ ref('historical_prices_aggregated_1m') }} hpa using(symbol)
+{% if is_incremental() %}
+                  join old_stats on true
+{% endif %}
          where portfolio_expanded_transactions.is_app_trading = false
            and (hpa.datetime > portfolio_expanded_transactions.datetime - interval '1 month' or
                 portfolio_expanded_transactions.datetime is null)
+{% if is_incremental() %}
+           and (hpa.updated_at > max_updated_at or portfolio_expanded_transactions.updated_at > max_updated_at)
+{% endif %}
 
          union all
 
@@ -151,8 +208,13 @@ from (
                 high,
                 low,
                 close,
-                adjusted_close
+                adjusted_close,
+                updated_at
          from {{ ref('drivewealth_portfolio_chart') }}
+{% if is_incremental() %}
+                  join old_stats on true
+         where updated_at > max_updated_at
+{% endif %}
     ) t
 {% if is_incremental() %}
          left join {{ this }} old_data using (transaction_uniq_id, period, datetime)
