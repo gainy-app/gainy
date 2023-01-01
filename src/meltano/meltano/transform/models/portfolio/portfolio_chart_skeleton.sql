@@ -36,8 +36,7 @@ from (
                                         from {{ this }}
                                         group by profile_id, period
                                      ) old_stats using (profile_id, period)
-                  where period in ('1d', '1w')
-                    and (old_stats.max_datetime is null or datetime > max_datetime)
+                  where old_stats.max_datetime is null or datetime > max_datetime
 {% endif %}
 
                   group by profile_id, period, date, datetime
