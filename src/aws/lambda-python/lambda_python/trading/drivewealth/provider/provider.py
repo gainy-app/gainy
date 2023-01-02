@@ -17,11 +17,12 @@ from trading.drivewealth.models import DriveWealthBankAccount, DriveWealthDeposi
 from trading.drivewealth.api import DriveWealthApi
 from trading.drivewealth.repository import DriveWealthRepository
 
-from gainy.utils import get_logger
+from gainy.utils import get_logger, ENV_PRODUCTION, env
 from gainy.trading.models import FundingAccount, TradingAccount, TradingCollectionVersion, TradingMoneyFlowStatus
 from gainy.trading.drivewealth.models import DriveWealthAccount, DriveWealthUser, DriveWealthInstrument, \
     DriveWealthInstrumentStatus, DriveWealthPortfolio
 from trading.repository import TradingRepository
+from trading import MIN_FIRST_DEPOSIT_AMOUNT
 
 logger = get_logger(__name__)
 
@@ -226,6 +227,9 @@ class DriveWealthProvider(DriveWealthProviderKYC,
     def handle_instrument_status_change(self,
                                         instrument: DriveWealthInstrument,
                                         new_status: str):
+        if env() != ENV_PRODUCTION:
+            return
+
         if instrument.status != DriveWealthInstrumentStatus.ACTIVE:
             return
 
@@ -234,6 +238,17 @@ class DriveWealthProvider(DriveWealthProviderKYC,
 
         self.notification_service.notify_dw_instrument_status_changed(
             instrument.symbol, instrument.status, new_status)
+
+    def notify_low_balance(self, trading_account: TradingAccount):
+        if env() != ENV_PRODUCTION:
+            return
+
+        balance = trading_account.equity_value + trading_account.cash_balance
+        if balance >= MIN_FIRST_DEPOSIT_AMOUNT:
+            return
+
+        self.notification_service.notify_low_balance(
+            trading_account.profile_id, balance)
 
     def download_statement(self, statement: TradingStatement) -> str:
         dw_statement = self.repository.find_one(

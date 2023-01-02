@@ -1,3 +1,4 @@
+import base64
 import datetime
 import os
 
@@ -49,6 +50,10 @@ class ECSTaskStateChangeEventHandler(AbstractAwsEventHandler):
 
             branch = tags.get("source_code_branch")
             branch_name = tags.get("source_code_branch_name")
+            try:
+                branch_name = base64.b64decode(branch_name).decode('utf-8')
+            except:
+                pass
 
             logger_extra["tags"] = tags
             logger_extra["env"] = ENV

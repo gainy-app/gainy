@@ -133,6 +133,9 @@ class TradingService(GainyTradingService):
                           funding_account: FundingAccount):
         repository = self.trading_repository
 
+        if amount < 0:
+            self.check_enough_withdrawable_cash(trading_account.id, -amount)
+
         money_flow = TradingMoneyFlow()
         money_flow.profile_id = profile_id
         money_flow.amount = amount
@@ -223,6 +226,14 @@ class TradingService(GainyTradingService):
                            symbol: str, trading_account_id: int,
                            target_amount_delta: Decimal):
         self.check_tradeable_symbol(symbol)
+
+        if target_amount_delta > 0:
+            self.check_enough_buying_power(trading_account_id,
+                                           target_amount_delta)
+        else:
+            self.check_enough_holding_amount(trading_account_id,
+                                             -target_amount_delta,
+                                             symbol=symbol)
 
         collection_order = TradingOrder()
         collection_order.profile_id = profile_id

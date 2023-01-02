@@ -19,3 +19,4 @@ def test_profile_status():
     assert "withdrawable_cash" in data['trading_profile_status'][0]
     assert "buying_power" in data['trading_profile_status'][0]
     assert "pending_cash" in data['trading_profile_status'][0]
+    assert "pending_orders_amount" in data['trading_profile_status'][0]

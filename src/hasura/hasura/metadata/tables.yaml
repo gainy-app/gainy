@@ -1560,6 +1560,7 @@
         columns:
           - alpha2
           - alpha3
+          - flag_w32_waving_url
           - flag_w40_url
           - name
         filter: {}
@@ -1568,6 +1569,7 @@
         columns:
           - alpha2
           - alpha3
+          - flag_w32_waving_url
           - flag_w40_url
           - name
         filter: {}
@@ -3053,6 +3055,7 @@
           - deposited_funds
           - withdrawable_cash
           - pending_cash
+          - pending_orders_amount
           - buying_power
         filter:
           profile:

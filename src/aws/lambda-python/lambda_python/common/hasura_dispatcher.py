@@ -58,7 +58,13 @@ class HasuraDispatcher(ABC):
 
     def extract_request(self, event):
         if self.is_gateway_proxy:
-            return json.loads(event["body"])
+            body = json.loads(event["body"])
+            if "body" in body:
+                # God bless Hasura developers...
+                # Because in some cases, for REST endpoints, body is within the "body" key.
+                body = body["body"]
+
+            return body
         else:
             return json.loads(event) if isinstance(event, str) else event
 

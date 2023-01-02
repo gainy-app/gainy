@@ -232,7 +232,7 @@ resource "aws_ecs_task_definition" "default" {
   tags = {
     environment             = var.env
     source_code_branch      = var.source_code_branch
-    source_code_branch_name = var.source_code_branch_name
+    source_code_branch_name = base64encode(var.source_code_branch_name)
   }
 }
 

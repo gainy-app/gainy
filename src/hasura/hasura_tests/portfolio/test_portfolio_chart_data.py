@@ -26,7 +26,8 @@ def verify_portfolio_chart(portfolio_chart,
             symbol_chart_datetimes = symbol_chart_datetimes.union(new_dates)
             assert len(new_dates) - len(symbol_chart_datetimes) < 2
 
-    print(quantities, quantities_override)
+    print(quantities, quantities_override,
+          list(sorted(symbol_chart_datetimes)))
     portfolio_chart_index = 0
     for date in sorted(symbol_chart_datetimes):
         if datetime.datetime.now() - datetime.datetime.strptime(
