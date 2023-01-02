@@ -630,7 +630,7 @@ mutation VerificationVerifyCode($verification_code_id: String!, $user_input: Str
     name
     alpha2
     alpha3
-    flag_w40_url
+    flag_w32_waving_url
   }
 }
 ```

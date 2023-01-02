@@ -20,3 +20,10 @@ class NotificationService:
         self.sendgrid.send_email(to=DW_MANAGER_EMAILS,
                                  subject=subject,
                                  content_plain=text)
+
+    def notify_low_balance(self, profile_id, balance):
+        subject = 'Profile %d has low trading balance' % profile_id
+        text = 'Profile %d has low trading balance: %f' % (profile_id, balance)
+        self.sendgrid.send_email(to=DW_MANAGER_EMAILS,
+                                 subject=subject,
+                                 content_plain=text)

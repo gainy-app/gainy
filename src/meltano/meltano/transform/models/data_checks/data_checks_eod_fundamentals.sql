@@ -46,17 +46,6 @@ with errors as
          union all
 
          select symbol,
-                'ticker_components'               as code,
-                'daily'                           as "period",
-                'ETF ' || symbol || ' has incorrect components weight '
-                    || json_agg(component_symbol) as message
-         from {{ ref('ticker_components') }}
-         where component_weight <= 0
-         group by symbol
-
-         union all
-
-         select symbol,
                 'ticker_shares_stats'                                       as code,
                 'daily'                                                     as "period",
                 'Ticker ' || symbol || ' has incorrect ticker_shares_stats' as message

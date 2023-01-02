@@ -16,6 +16,9 @@ def test(monkeypatch):
     monkeypatch.setattr(repository, 'persist', mock_persist(persisted_objects))
 
     event_handler = RedemptionCreatedEventHandler(repository, provider)
+    sync_trading_account_balances_calls = []
+    monkeypatch.setattr(event_handler, 'sync_trading_account_balances',
+                        mock_record_calls(sync_trading_account_balances_calls))
 
     message = {
         "paymentID": "GYEK000001-1666639501262-RY7T6",
@@ -28,4 +31,7 @@ def test(monkeypatch):
     redemption = persisted_objects[DriveWealthRedemption][0]
     assert redemption in [
         args[0] for args, kwards in handle_redemption_status_calls
+    ]
+    assert message["accountID"] in [
+        args[0] for args, kwargs in sync_trading_account_balances_calls
     ]

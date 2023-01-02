@@ -6,6 +6,7 @@ import pytest
 from gainy.data_access.models import BaseModel
 from gainy.tests.mocks.repository_mocks import mock_find, mock_persist, mock_noop, mock_record_calls
 from gainy.trading.models import TradingMoneyFlowStatus
+from gainy.utils import ENV_PRODUCTION
 from services.notification import NotificationService
 from tests.trading.drivewealth.api_mocks import mock_create_deposit, mock_create_redemption, mock_get_deposit, \
     mock_get_redemption
@@ -296,6 +297,8 @@ def test_handle_instrument_status_change(monkeypatch):
 
     provider = DriveWealthProvider(repository, None, None, None,
                                    notification_service)
+
+    monkeypatch.setenv("ENV", ENV_PRODUCTION)
     provider.handle_instrument_status_change(instrument, new_status)
 
     assert (symbol, status, new_status) in [args for args, kwargs in calls]

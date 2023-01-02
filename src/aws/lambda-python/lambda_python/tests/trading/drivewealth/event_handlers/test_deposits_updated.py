@@ -29,6 +29,9 @@ def test_exists(monkeypatch):
     monkeypatch.setattr(repository, 'persist', mock_persist(persisted_objects))
 
     event_handler = DepositsUpdatedEventHandler(repository, provider)
+    sync_trading_account_balances_calls = []
+    monkeypatch.setattr(event_handler, 'sync_trading_account_balances',
+                        mock_record_calls(sync_trading_account_balances_calls))
 
     event_handler.handle(message)
 
@@ -36,6 +39,9 @@ def test_exists(monkeypatch):
     assert deposit in persisted_objects[DriveWealthDeposit]
     assert deposit in [
         args[0] for args, kwargs in update_money_flow_from_dw_calls
+    ]
+    assert message["accountID"] in [
+        args[0] for args, kwargs in sync_trading_account_balances_calls
     ]
     assert deposit.ref_id == message["paymentID"]
     assert deposit.trading_account_ref_id == message["accountID"]
@@ -58,6 +64,9 @@ def test_not_exists(monkeypatch):
     monkeypatch.setattr(repository, 'persist', mock_persist(persisted_objects))
 
     event_handler = DepositsUpdatedEventHandler(repository, provider)
+    sync_trading_account_balances_calls = []
+    monkeypatch.setattr(event_handler, 'sync_trading_account_balances',
+                        mock_record_calls(sync_trading_account_balances_calls))
 
     event_handler.handle(message)
 
@@ -65,4 +74,7 @@ def test_not_exists(monkeypatch):
     deposit = persisted_objects[DriveWealthDeposit][0]
     assert deposit in [
         args[0] for args, kwargs in update_money_flow_from_dw_calls
+    ]
+    assert message["accountID"] in [
+        args[0] for args, kwargs in sync_trading_account_balances_calls
     ]

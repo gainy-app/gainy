@@ -37,4 +37,38 @@ set payload = jsonb_set(payload::jsonb, array ['singer_state','bookmarks','eod_h
                         partitions)
 from filtered_partitions
 where filtered_partitions.id = runs.id;
+
+with latest_jobs as
+         (
+             select distinct on (
+                 job_name
+                 ) id,
+                   job_name,
+                   payload::json as payload
+             from meltano.runs
+             where job_name like 'polygon-to-postgres-%'
+             order by job_name, started_at desc
+         ),
+     partitions as
+         (
+             select id,
+                    json_array_elements(payload::json -> 'singer_state' -> 'bookmarks' ->
+                                        'polygon_stocks_historical_prices' ->
+                                        'partitions') as partition
+             from latest_jobs
+     ),
+     filtered_partitions as
+         (
+             select id,
+                    jsonb_agg(partition) as partitions
+             from partitions
+             where partition -> 'context' ->> 'symbol' not in (:symbols)
+             group by id
+     )
+update meltano.runs
+set payload = jsonb_set(payload::jsonb,
+                        array ['singer_state','bookmarks','polygon_stocks_historical_prices','partitions'],
+                        partitions)
+from filtered_partitions
+where filtered_partitions.id = runs.id;
 ```
