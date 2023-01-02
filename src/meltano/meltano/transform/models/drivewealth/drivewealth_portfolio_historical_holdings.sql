@@ -2,6 +2,7 @@
   config(
     materialized = "incremental",
     unique_key = "id",
+    tags = ["realtime"],
     post_hook=[
       pk('profile_id, holding_id_v2, symbol, date'),
       index('id', true),
@@ -16,10 +17,10 @@ with portfolio_statuses as
              select distinct on (profile_id, date) *
              from (
                       select profile_id,
-                             drivewealth_portfolio_statuses.created_at                               as updated_at,
-                             (drivewealth_portfolio_statuses.created_at - interval '20 hours')::date as date,
-                             cash_value / drivewealth_portfolio_statuses.cash_actual_weight          as value,
-                             drivewealth_portfolio_statuses.data -> 'holdings'                       as holdings
+                             drivewealth_portfolio_statuses.created_at                              as updated_at,
+                             (drivewealth_portfolio_statuses.created_at - interval '5 hours')::date as date,
+                             cash_value / drivewealth_portfolio_statuses.cash_actual_weight         as value,
+                             drivewealth_portfolio_statuses.data -> 'holdings'                      as holdings
                       from {{ source('app', 'drivewealth_portfolio_statuses')}}
                                join {{ source('app', 'drivewealth_portfolios')}}
                                     on drivewealth_portfolios.ref_id = drivewealth_portfolio_id

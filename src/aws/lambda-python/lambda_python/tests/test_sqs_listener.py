@@ -1,6 +1,6 @@
 from common.context_container import ContextContainer
 from gainy.data_access.repository import Repository
-from gainy.tests.mocks.repository_mocks import mock_persist, mock_record_calls
+from gainy.tests.mocks.repository_mocks import mock_persist, mock_record_calls, mock_noop
 from queue_processing.dispatcher import QueueMessageDispatcher
 from queue_processing.locking_function import HandleMessage
 from sqs_listener import handle
@@ -18,6 +18,7 @@ def test(monkeypatch):
 
     repository = Repository(None)
     monkeypatch.setattr(repository, "persist", mock_persist)
+    monkeypatch.setattr(repository, "commit", mock_noop)
     monkeypatch.setattr(ContextContainer, "queue_message_dispatcher",
                         queue_message_dispatcher)
 

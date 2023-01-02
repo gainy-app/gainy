@@ -8,8 +8,6 @@ class NoopEventHandler(AbstractDriveWealthEventHandler):
 
     def supports(self, event_type: str):
         return event_type in [
-            'accounts.created',
-            'users.created',
             'auth.tokens.created',
             'deposits.created',
             'kyc.created',

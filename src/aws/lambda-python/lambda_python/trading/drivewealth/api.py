@@ -139,14 +139,6 @@ class DriveWealthApi(GainyDriveWealthApi):
                                   })
         redemption.set_from_response(data)
 
-    def create_autopilot_run(self, account_ids: list):
-        return self._make_request(
-            "POST", f"/managed/autopilot/{DRIVEWEALTH_RIA_ID}", {
-                'reviewOnly': False,
-                'forceRebalance': True,
-                'subAccounts': account_ids,
-            })
-
     def get_autopilot_run(self, ref_id):
         return self._make_request("GET", f"/managed/autopilot/{ref_id}")
 

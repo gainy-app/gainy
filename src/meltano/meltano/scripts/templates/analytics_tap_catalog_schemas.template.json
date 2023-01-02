@@ -326,10 +326,19 @@
         ]
       }
     },
+    "collection_historical_values": {
+      "metadata": {
+        "table-key-properties": [
+          "collection_uniq_id",
+          "date"
+        ]
+      }
+    },
     "collection_ticker_weights": {
       "metadata": {
         "table-key-properties": [
           "collection_uniq_id",
+          "symbol",
           "date"
         ]
       }

@@ -1,20 +1,24 @@
+from gainy.tests.mocks.repository_mocks import mock_record_calls
+from gainy.trading.drivewealth.models import DriveWealthUser
 from trading.drivewealth.event_handlers import UsersUpdatedEventHandler
 from trading.drivewealth.provider import DriveWealthProvider
 
 
 def test(monkeypatch):
     user_id = "user_id"
-    sync_user_called = False
+
+    user = DriveWealthUser()
 
     provider = DriveWealthProvider(None, None, None, None, None)
 
     def mock_sync_user(_user_id):
         assert _user_id == user_id
-
-        nonlocal sync_user_called
-        sync_user_called = True
+        return user
 
     monkeypatch.setattr(provider, 'sync_user', mock_sync_user)
+    ensure_account_created_calls = []
+    monkeypatch.setattr(provider, 'ensure_account_created',
+                        mock_record_calls(ensure_account_created_calls))
 
     event_handler = UsersUpdatedEventHandler(None, provider)
 
@@ -23,4 +27,4 @@ def test(monkeypatch):
     }
     event_handler.handle(message)
 
-    assert sync_user_called
+    assert (user, ) in [args for args, kwargs in ensure_account_created_calls]

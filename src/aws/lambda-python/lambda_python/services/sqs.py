@@ -17,4 +17,5 @@ class SqsAdapter:
         message.body = json.loads(record["body"])
         message.data = record
         self.repo.persist(message)
+        self.repo.commit()
         return message
