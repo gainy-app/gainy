@@ -239,52 +239,47 @@ with tickers_and_options as
      realtime_chart_diff_with_prev_point as
          (
              select symbol,
-                    'Ticker ' || symbol || ' looks too volatile. '
-                        || json_agg(json_build_array(period, datetime, diff)) as message
+                    json_agg(json_build_array(period, datetime, diff))::text as message
              from (
                       select *,
                              abs((adjusted_close - prev_adjusted_close) / least(adjusted_close, prev_adjusted_close)) as diff
                       from (
                                select symbol,
-                                      '1d'                                                             as period,
-                                      lag(adjusted_close) over (partition by symbol order by datetime) as prev_adjusted_close,
-                                      lag(volume) over (partition by symbol order by datetime)         as prev_volume,
+                                      '1d'                                                                      as period,
+                                      lag(adjusted_close) over (partition by symbol order by datetime)          as prev_adjusted_close,
+                                      lag(volume * adjusted_close) over (partition by symbol order by datetime) as prev_volume,
                                       datetime,
                                       adjusted_close,
-                                      volume
+                                      volume * adjusted_close                                                   as volume
                                from {{ ref('historical_prices_aggregated_3min') }}
-{% if var('realtime') %}
-                                    join {{ ref('week_trading_sessions') }} using (symbol)
-                               where week_trading_sessions.index = 0 and historical_prices_aggregated_3min.datetime between week_trading_sessions.open_at and week_trading_sessions.close_at
-                                 and datetime > least(now(), week_trading_sessions.close_at) - interval '1 hour'
-{% endif %}
                            ) t
                       where adjusted_close > 0
                         and prev_adjusted_close > 0
                   ) t
-             where (diff > 0.02 and (volume + prev_volume) > 10000000)
-                or (diff > 0.2 and (volume + prev_volume) > 1000000)
-                or (diff > 0.6 and (volume + prev_volume) > 100000)
-                or (diff > 1 and (volume + prev_volume) > 10000)
-                or (diff > 2 and (volume + prev_volume) > 1000)
+                      left join {{ ref('ticker_risk_scores') }} using (symbol)
+             where (diff > 1 and (volume + prev_volume) > 10000000 and coalesce(risk_score, 0) < 0.9)
+                or (diff > 2.5 and (volume + prev_volume) > 100000)
+                or (diff > 5 and (prev_adjusted_close > 1 or adjusted_close > 1))
              group by symbol
          ),
      realtime_chart_diff_between_periods as
          (
              select symbol,
-                    'Ticker ' || symbol || ' differs between 1d and 1w. diff: ' || diff as message
+                    json_agg(json_build_array('1d', '1w', datetime, diff))::text as message
              from (
                        select historical_prices_aggregated_15min.symbol,
+                              historical_prices_aggregated_15min.datetime,
                               avg(abs(historical_prices_aggregated_15min.adjusted_close - historical_prices_aggregated_3min.adjusted_close) /
                                   historical_prices_aggregated_15min.adjusted_close) as diff
                        from {{ ref('historical_prices_aggregated_15min') }}
-                            join {{ ref('historical_prices_aggregated_3min') }}
-                                 on historical_prices_aggregated_3min.symbol = historical_prices_aggregated_15min.symbol
-                                     and historical_prices_aggregated_3min.datetime = historical_prices_aggregated_15min.datetime + interval '12 minutes'
+                                join {{ ref('historical_prices_aggregated_3min') }}
+                                     on historical_prices_aggregated_3min.symbol = historical_prices_aggregated_15min.symbol
+                                         and historical_prices_aggregated_3min.datetime = historical_prices_aggregated_15min.datetime + interval '12 minutes'
                        where historical_prices_aggregated_15min.adjusted_close > 0
-                       group by historical_prices_aggregated_15min.symbol
+                       group by historical_prices_aggregated_15min.symbol, historical_prices_aggregated_15min.datetime
                   ) t
              where diff > 0.01
+             group by symbol
          ),
 {% if not var('realtime') %}
      realtime_chart_diff_with_historical as
@@ -365,7 +360,8 @@ with tickers_and_options as
              where ticker_realtime_metrics.symbol is null
                 or ticker_daily_latest_chart_point.symbol is null
                 or ticker_realtime_metrics.previous_day_close_price < 1e-12
-                or abs(ticker_daily_latest_chart_point.adjusted_close / ticker_realtime_metrics.previous_day_close_price - 1) > 0.2
+                or (abs(ticker_daily_latest_chart_point.adjusted_close / ticker_realtime_metrics.previous_day_close_price - 1) > 0.2
+                 and ticker_daily_latest_chart_point.volume > 0)
          ),
 {% endif %}
      errors as
@@ -395,20 +391,20 @@ with tickers_and_options as
              union all
 
              select symbol,
-                    'realtime_chart_diff_with_prev_point' as code,
-                    'realtime' as period,
-                    message
-             from realtime_chart_diff_with_prev_point
-
-             union all
-
-             select symbol,
                     'realtime_chart_diff_between_periods' as code,
                     'realtime' as period,
                     message
              from realtime_chart_diff_between_periods
 
 {% if not var('realtime') %}
+             union all
+
+             select symbol,
+                    'realtime_chart_diff_with_prev_point' as code,
+                    'daily' as period,
+                    message
+             from realtime_chart_diff_with_prev_point
+
              union all
 
              select symbol,

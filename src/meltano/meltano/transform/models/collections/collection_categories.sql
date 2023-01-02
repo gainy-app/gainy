@@ -8,7 +8,8 @@ with inverted_category_frequency as (
 	select
         category_id,
         symbol, 1.0 / count(*) over (partition by symbol) as inverted_category_frequency
-	from {{ ref('ticker_categories') }}
+	from {{ ref('ticker_categories_continuous') }}
+    where sim_dif > 0
 )
 select c.id as collection_id,
        itf.category_id,

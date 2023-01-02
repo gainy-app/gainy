@@ -13,7 +13,7 @@ with t_cat_sim_dif as
      t_int_sim_dif as
          (
              select interest_id, symbol, sim_dif / 2 + 0.5 as sim_dif
-             from {{ ref('ticker_interests') }}
+             from {{ ref('ticker_interests_continuous') }}
          ),
      profile_collection_categories as
          (

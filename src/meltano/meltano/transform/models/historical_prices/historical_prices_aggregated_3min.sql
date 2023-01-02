@@ -43,7 +43,7 @@ with
                       join max_date using (symbol)
              where dd > max_date.datetime - interval '30 minutes'
 {% else %}
-             where dd > now() - interval '1 week'
+             where week_trading_sessions_static.date > now() - interval '1 week'
 {% endif %}
          ),
      expanded_intraday_prices as
@@ -56,7 +56,7 @@ with
                       join max_date using (symbol)
              where historical_intraday_prices.time_{{ minutes }}min > max_date.datetime - interval '30 minutes'
 {% else %}
-             where historical_intraday_prices.time_{{ minutes }}min > now() - interval '1 week'
+             where historical_intraday_prices.date > now() - interval '1 week'
 {% endif %}
          ),
      combined_intraday_prices as

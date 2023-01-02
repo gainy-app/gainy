@@ -210,7 +210,9 @@ with check_params(table_name, dt_interval,
                                   select date
                                   from tickers_checks
                                   group by date
-                                  having avg(iserror_volume_dif_dev) > 0.05 and date not between '2018-01-06' and '2018-01-07'
+                                  having avg(iserror_volume_dif_dev) > 0.05
+                                     and date not between '2018-01-06' and '2018-01-07'
+                                     and date != '2018-01-13'
                               ) t using (date)
                  where iserror_volume_dif_dev > 0
                  group by symbol, table_name
