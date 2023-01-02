@@ -35,14 +35,7 @@ class DriveWealthProviderKYC(GainyDriveWealthProvider):
         user.set_from_response(user_data)
         repository.persist(user)
 
-        user_ref_id = user.ref_id
-
-        # create or update account
-        accounts = repository.get_user_accounts(user_ref_id)
-        if not accounts:
-            self._create_account(user)
-
-        status = self.api.get_kyc_status(user_ref_id).get_profile_kyc_status()
+        status = self.api.get_kyc_status(user.ref_id).get_profile_kyc_status()
         status.profile_id = profile_id
         self.repository.persist(status)
         return status
@@ -213,21 +206,3 @@ class DriveWealthProviderKYC(GainyDriveWealthProvider):
                 }
             },
         ]
-
-    def _create_account(self, user: DriveWealthUser):
-        repository = self.repository
-
-        account: DriveWealthAccount = repository.find_one(
-            DriveWealthAccount, {"drivewealth_user_id": user.ref_id})
-        if not account:
-            account_data = self.api.create_account(user.ref_id)
-            account = repository.upsert_user_account(user.ref_id, account_data)
-
-        trading_account = TradingAccount()
-        trading_account.profile_id = user.profile_id
-        trading_account.name = account.nickname
-        account.update_trading_account(trading_account)
-        repository.persist(trading_account)
-
-        account.trading_account_id = trading_account.id
-        repository.persist(account)

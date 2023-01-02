@@ -175,6 +175,7 @@ type Mutation {
     updated_holdings: Int
     new_investments_transactions: Int
     cancelled_investments_transactions: Int
+    environment: String
   ): PlaidWebhookOutput
 }
 

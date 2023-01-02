@@ -125,15 +125,6 @@ actions:
       kind: synchronous
       handler: '{{AWS_LAMBDA_API_GATEWAY_ENDPOINT}}/hasuraAction'
       forward_client_headers: true
-      request_transform:
-        body:
-          action: transform
-          template: |-
-            {
-              "body": {{$body}}
-            }
-        template_engine: Kriti
-        version: 2
     permissions:
       - role: anonymous
   - name: rehandle_queue_messages
