@@ -5,6 +5,7 @@
     post_hook=[
       pk('symbol, datetime'),
       index('id', true),
+      'create index if not exists "hpa_1d_symbol__date" ON {{ this }} (symbol, date)',
       'create index if not exists "hpa_1d_datetime__symbol" ON {{ this }} (datetime, symbol)',
     ]
   )
@@ -92,18 +93,19 @@ with uniq_tickers as materialized
          (
              select tds.symbol || '_' || tds.date as id,
                     tds.symbol,
-                    tds.date::timestamp         as datetime,
+                    tds.date,
+                    tds.date::timestamp           as datetime,
                     hp.open,
                     hp.high,
                     hp.low,
                     hp.close,
                     coalesce(hp.adjusted_close,
                              LAST_VALUE_IGNORENULLS(hp.adjusted_close) over (lookback)
-                             )                           as adjusted_close,
+                             )                    as adjusted_close,
                     coalesce(hp.updated_at,
                              LAST_VALUE_IGNORENULLS(hp.updated_at) over (lookback)
-                             )                           as updated_at,
-                    coalesce(volume, 0)                  as volume
+                             )                    as updated_at,
+                    coalesce(volume, 0)           as volume
              from tickers_dates_skeleton tds
                       left join {{ ref('historical_prices') }} hp using (symbol, "date")
                  window
