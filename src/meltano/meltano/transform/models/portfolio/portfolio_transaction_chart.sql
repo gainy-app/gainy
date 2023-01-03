@@ -32,7 +32,7 @@ from (
                 (portfolio_expanded_transactions.quantity_norm_for_valuation * hpa.low)            as low,
                 (portfolio_expanded_transactions.quantity_norm_for_valuation * hpa.close)          as close,
                 (portfolio_expanded_transactions.quantity_norm_for_valuation * hpa.adjusted_close) as adjusted_close,
-                greatest(hpa.updated_at, portfolio_expanded_transactions.updated_at)               as updated_at
+                hpa.updated_at
          from {{ ref('portfolio_expanded_transactions') }}
                   join {{ ref('historical_prices_aggregated_3min') }} hpa using(symbol)
 {% if is_incremental() %}
@@ -57,7 +57,7 @@ from (
                 (portfolio_expanded_transactions.quantity_norm_for_valuation * hpa.low)            as low,
                 (portfolio_expanded_transactions.quantity_norm_for_valuation * hpa.close)          as close,
                 (portfolio_expanded_transactions.quantity_norm_for_valuation * hpa.adjusted_close) as adjusted_close,
-                greatest(hpa.updated_at, portfolio_expanded_transactions.updated_at)               as updated_at
+                hpa.updated_at
          from {{ ref('portfolio_expanded_transactions') }}
                   join {{ ref('historical_prices_aggregated_15min') }} hpa using(symbol)
 {% if is_incremental() %}
@@ -82,7 +82,7 @@ from (
                 (portfolio_expanded_transactions.quantity_norm_for_valuation * hpa.low)            as low,
                 (portfolio_expanded_transactions.quantity_norm_for_valuation * hpa.close)          as close,
                 (portfolio_expanded_transactions.quantity_norm_for_valuation * hpa.adjusted_close) as adjusted_close,
-                greatest(hpa.updated_at, portfolio_expanded_transactions.updated_at)               as updated_at
+                hpa.updated_at
          from {{ ref('portfolio_expanded_transactions') }}
                   join {{ ref('historical_prices_aggregated_1d') }} hpa using(symbol)
 {% if is_incremental() %}
@@ -108,7 +108,7 @@ from (
                 (portfolio_expanded_transactions.quantity_norm_for_valuation * hpa.low)            as low,
                 (portfolio_expanded_transactions.quantity_norm_for_valuation * hpa.close)          as close,
                 (portfolio_expanded_transactions.quantity_norm_for_valuation * hpa.adjusted_close) as adjusted_close,
-                greatest(hpa.updated_at, portfolio_expanded_transactions.updated_at)               as updated_at
+                hpa.updated_at
          from {{ ref('portfolio_expanded_transactions') }}
                   join {{ ref('historical_prices_aggregated_1d') }} hpa using(symbol)
 {% if is_incremental() %}
@@ -134,7 +134,7 @@ from (
                 (portfolio_expanded_transactions.quantity_norm_for_valuation * hpa.low)            as low,
                 (portfolio_expanded_transactions.quantity_norm_for_valuation * hpa.close)          as close,
                 (portfolio_expanded_transactions.quantity_norm_for_valuation * hpa.adjusted_close) as adjusted_close,
-                greatest(hpa.updated_at, portfolio_expanded_transactions.updated_at)               as updated_at
+                hpa.updated_at
          from {{ ref('portfolio_expanded_transactions') }}
                   join {{ ref('historical_prices_aggregated_1d') }} hpa using(symbol)
 {% if is_incremental() %}
@@ -159,7 +159,7 @@ from (
                 (portfolio_expanded_transactions.quantity_norm_for_valuation * hpa.low)            as low,
                 (portfolio_expanded_transactions.quantity_norm_for_valuation * hpa.close)          as close,
                 (portfolio_expanded_transactions.quantity_norm_for_valuation * hpa.adjusted_close) as adjusted_close,
-                greatest(hpa.updated_at, portfolio_expanded_transactions.updated_at)               as updated_at
+                hpa.updated_at
          from {{ ref('portfolio_expanded_transactions') }}
                   join {{ ref('historical_prices_aggregated_1w') }} hpa using(symbol)
 {% if is_incremental() %}
@@ -184,7 +184,7 @@ from (
                 (portfolio_expanded_transactions.quantity_norm_for_valuation * hpa.low)            as low,
                 (portfolio_expanded_transactions.quantity_norm_for_valuation * hpa.close)          as close,
                 (portfolio_expanded_transactions.quantity_norm_for_valuation * hpa.adjusted_close) as adjusted_close,
-                greatest(hpa.updated_at, portfolio_expanded_transactions.updated_at)               as updated_at
+                hpa.updated_at
          from {{ ref('portfolio_expanded_transactions') }}
                   join {{ ref('historical_prices_aggregated_1m') }} hpa using(symbol)
 {% if is_incremental() %}
