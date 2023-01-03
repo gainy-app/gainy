@@ -37,6 +37,8 @@ class ECSTaskStateChangeEventHandler(AbstractAwsEventHandler):
             if updated_at_ago > datetime.timedelta(minutes=15):
                 return
 
+            logger.info("ECSTaskStateChangeEventHandler", extra=logger_extra)
+
             ecs = ECS()
             task_arn = event_payload["taskArn"]
             task_arn_trimmed = task_arn.split(":")[-1]
