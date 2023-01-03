@@ -18,7 +18,7 @@ from trading.models import KycDocument, TradingMoneyFlow, ProfileKycStatus, Trad
 import plaid
 from gainy.utils import get_logger, env, ENV_PRODUCTION
 from gainy.trading.models import TradingAccount, TradingCollectionVersion, TradingOrderStatus, \
-    FundingAccount, TradingOrder, TradingOrderSource
+    FundingAccount, TradingOrder
 from gainy.trading.service import TradingService as GainyTradingService
 from trading.repository import TradingRepository
 from verification.models import VerificationCodeChannel
@@ -218,31 +218,3 @@ class TradingService(GainyTradingService):
 
     def download_statement(self, statement: TradingStatement) -> str:
         return self._get_provider_service().download_statement(statement)
-
-    def check_tradeable_symbol(self, symbol: str):
-        return self._get_provider_service().check_tradeable_symbol(symbol)
-
-    def create_stock_order(self, profile_id: int, source: TradingOrderSource,
-                           symbol: str, trading_account_id: int,
-                           target_amount_delta: Decimal):
-        self.check_tradeable_symbol(symbol)
-
-        if target_amount_delta > 0:
-            self.check_enough_buying_power(trading_account_id,
-                                           target_amount_delta)
-        else:
-            self.check_enough_holding_amount(trading_account_id,
-                                             -target_amount_delta,
-                                             symbol=symbol)
-
-        collection_order = TradingOrder()
-        collection_order.profile_id = profile_id
-        collection_order.source = source
-        collection_order.symbol = symbol
-        collection_order.status = TradingOrderStatus.PENDING
-        collection_order.target_amount_delta = target_amount_delta
-        collection_order.trading_account_id = trading_account_id
-
-        self.trading_repository.persist(collection_order)
-
-        return collection_order
