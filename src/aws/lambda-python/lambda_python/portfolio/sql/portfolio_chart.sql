@@ -1,9 +1,9 @@
 with filtered_holdings as
          (
              select distinct holding_id_v2
-             from profile_holdings_normalized
+             from profile_holdings_normalized_all
                       {join_clause}
-             where profile_holdings_normalized.profile_id = %(profile_id)s
+             where profile_holdings_normalized_all.profile_id = %(profile_id)s
                    {holding_where_clause}
          ),
     ticker_chart as
@@ -23,7 +23,7 @@ with filtered_holdings as
              from portfolio_holding_chart
                       left join filtered_holdings using (holding_id_v2)
              where profile_id = %(profile_id)s
-               and (filtered_holdings.holding_id_v2 is not null or portfolio_holding_chart.holding_id_v2 = 'undefined')
+               and filtered_holdings.holding_id_v2 is not null
                    {chart_where_clause}
          ),
      static_values as
@@ -34,14 +34,14 @@ with filtered_holdings as
                         end as cash_value
              from (
                       select distinct on (
-                          profile_holdings_normalized.holding_id_v2
+                          profile_holdings_normalized_all.holding_id_v2
                           ) profile_id,
                             case
                                 when type = 'cash' and ticker_symbol = 'CUR:USD'
                                     then quantity
                                 else 0
                                 end as value
-                      from profile_holdings_normalized
+                      from profile_holdings_normalized_all
                       where profile_id = %(profile_id)s
                         and type = 'cash'
                         and ticker_symbol = 'CUR:USD'

@@ -18,7 +18,7 @@ with
      holdings_to_update as
          (
              select distinct portfolio_expanded_transactions.profile_id,
-                             coalesce(holding_id_v2, 'undefined') as holding_id_v2
+                             holding_id_v2
              from {{ ref('portfolio_transaction_chart') }}
                       join {{ ref('portfolio_expanded_transactions') }} using (transaction_uniq_id)
                       left join (
@@ -36,7 +36,7 @@ with
              select t.*
              from (
                       select portfolio_transaction_chart.profile_id,
-                             coalesce(holding_id_v2, 'undefined')  as holding_id_v2,
+                             holding_id_v2,
                              period,
                              portfolio_transaction_chart.datetime,
                              min(portfolio_transaction_chart.date) as date,

@@ -24,11 +24,17 @@ class PortfolioChartService:
 
     def __init__(self, db_conn):
         self.db_conn = db_conn
+        with open(os.path.join(SCRIPT_DIR, "../sql/portfolio_chart.sql")) as f:
+            self.portfolio_chart_query = f.read()
+        with open(
+                os.path.join(SCRIPT_DIR,
+                             "../sql/portfolio_chart_prev_close.sql")) as f:
+            self.portfolio_chart_prev_close_query = f.read()
+        with open(os.path.join(SCRIPT_DIR,
+                               "../sql/portfolio_piechart.sql")) as f:
+            self.portfolio_piechart_query = f.read()
 
     def get_portfolio_chart(self, profile_id, filter: PortfolioChartFilter):
-        with open(os.path.join(SCRIPT_DIR, "../sql/portfolio_chart.sql")) as f:
-            query = f.read()
-
         params = {
             "profile_id": profile_id,
             "include_cash": _should_include_cash(filter)
@@ -65,7 +71,7 @@ class PortfolioChartService:
             params, {
                 "holding_where_clause": holding_where_clause,
                 "chart_where_clause": chart_where_clause,
-            }, join_clause, query)
+            }, join_clause, self.portfolio_chart_query)
 
         rows = list(self._filter_chart_by_transaction_count(rows))
         if not rows:
@@ -78,11 +84,6 @@ class PortfolioChartService:
 
     def get_portfolio_chart_previous_period_close(
             self, profile_id, filter: PortfolioChartFilter):
-        with open(
-                os.path.join(SCRIPT_DIR,
-                             "../sql/portfolio_chart_prev_close.sql")) as f:
-            query = f.read()
-
         params = {
             "profile_id": profile_id,
             "include_cash": _should_include_cash(filter)
@@ -119,7 +120,7 @@ class PortfolioChartService:
             params, {
                 "holding_where_clause": holding_where_clause,
                 "chart_where_clause": chart_where_clause,
-            }, join_clause, query)
+            }, join_clause, self.portfolio_chart_prev_close_query)
 
         if not data:
             return {
@@ -134,10 +135,6 @@ class PortfolioChartService:
         return data[0]
 
     def get_portfolio_piechart(self, profile_id, filter: PortfolioChartFilter):
-        with open(os.path.join(SCRIPT_DIR,
-                               "../sql/portfolio_piechart.sql")) as f:
-            query = f.read()
-
         params = {"profile_id": profile_id}
         where_clause = []
         join_clause = []
@@ -154,7 +151,7 @@ class PortfolioChartService:
             where_clause.insert(0, sql.SQL(""))
 
         rows = self._execute_query(params, {"where_clause": where_clause},
-                                   join_clause, query)
+                                   join_clause, self.portfolio_piechart_query)
 
         return rows
 
@@ -234,7 +231,7 @@ class PortfolioChartService:
 
         join_clause.append(
             sql.SQL(
-                "left join app.profile_plaid_access_tokens on profile_plaid_access_tokens.id = profile_holdings_normalized.plaid_access_token_id"
+                "left join app.profile_plaid_access_tokens on profile_plaid_access_tokens.id = profile_holdings_normalized_all.plaid_access_token_id"
             ))
 
         where_clause.append(sql.SQL("institution_id in %(institution_ids)s"))
@@ -257,8 +254,8 @@ class PortfolioChartService:
 
         where_clause.append(
             sql.SQL(
-                "profile_holdings_normalized.broker_uniq_id in %(broker_ids)s")
-        )
+                "profile_holdings_normalized_all.broker_uniq_id in %(broker_ids)s"
+            ))
         params['broker_ids'] = tuple(filter.broker_ids)
 
     def _filter_query_by_interest_ids(self, params, where_clause, join_clause,
@@ -268,7 +265,7 @@ class PortfolioChartService:
 
         join_clause.append(
             sql.SQL(
-                "join ticker_interests on ticker_interests.symbol = profile_holdings_normalized.ticker_symbol"
+                "join ticker_interests on ticker_interests.symbol = profile_holdings_normalized_all.ticker_symbol"
             ))
         where_clause.append(sql.SQL(f"interest_id in %(interest_ids)s"))
         params['interest_ids'] = tuple(filter.interest_ids)
@@ -280,7 +277,7 @@ class PortfolioChartService:
 
         join_clause.append(
             sql.SQL(
-                "join ticker_categories on ticker_categories.symbol = profile_holdings_normalized.ticker_symbol"
+                "join ticker_categories on ticker_categories.symbol = profile_holdings_normalized_all.ticker_symbol"
             ))
         where_clause.append(sql.SQL(f"category_id in %(category_ids)s"))
         params['category_ids'] = tuple(filter.category_ids)
@@ -292,7 +289,8 @@ class PortfolioChartService:
             return
 
         where_clause.append(
-            sql.SQL("profile_holdings_normalized.type in %(security_types)s"))
+            sql.SQL(
+                "profile_holdings_normalized_all.type in %(security_types)s"))
         params['security_types'] = tuple(filter.security_types)
 
     def _filter_query_by_ltt_only(self, params, where_clause, join_clause,

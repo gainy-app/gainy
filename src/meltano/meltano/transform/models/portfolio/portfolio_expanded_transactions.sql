@@ -29,14 +29,14 @@ with plaid_transactions as
                     profile_portfolio_transactions.price,
                     profile_portfolio_transactions.type,
                     profile_id,
-                    profile_holdings_normalized.holding_id_v2,
+                    profile_holdings_normalized_all.holding_id_v2,
                     (case
                          when profile_portfolio_transactions.type = 'sell'
                              then -1
                          else 1
                          end * abs(profile_portfolio_transactions.quantity))                     as quantity_norm
              from {{ source('app', 'profile_portfolio_transactions') }}
-                      left join {{ ref('profile_holdings_normalized') }} using (profile_id, security_id, account_id)
+                      left join {{ ref('profile_holdings_normalized_all') }} using (profile_id, security_id, account_id)
                       left join {{ ref('portfolio_securities_normalized') }} on portfolio_securities_normalized.id = profile_portfolio_transactions.security_id
          ),
      first_trade_date as (select symbol, date_all as first_trade_date from {{ ref('historical_prices_marked') }}),
@@ -154,9 +154,9 @@ with plaid_transactions as
                               ) security_id,
                                 account_id,
                                 profile_id,
-                                rolling_quantity - profile_holdings_normalized.quantity as quantity
+                                rolling_quantity - profile_holdings_normalized_all.quantity as quantity
                           from expanded_transactions0
-                                   left join {{ ref('profile_holdings_normalized') }} using (security_id, account_id, profile_id)
+                                   left join {{ ref('profile_holdings_normalized_all') }} using (security_id, account_id, profile_id)
                           order by security_id, account_id, profile_id, row_number desc
                   ),
                   -- match each buy transaction with appropriate sell transaction
@@ -284,20 +284,20 @@ with plaid_transactions as
                           from {{ ref('drivewealth_portfolio_historical_holdings') }}
                           group by holding_id_v2
                       )
-             select holding_id_v2                    as uniq_id,
+             select holding_id_v2                        as uniq_id,
                     symbol,
-                    profile_holdings_normalized.holding_id_v2,
-                    null::double precision           as quantity_norm,
-                    null::double precision           as price,
-                    min_date                         as datetime,
-                    'buy'                            as type,
-                    null::int                        as security_id,
+                    profile_holdings_normalized_all.holding_id_v2,
+                    null::double precision               as quantity_norm,
+                    null::double precision               as price,
+                    min_date                             as datetime,
+                    'buy'                                as type,
+                    null::int                            as security_id,
                     profile_id,
-                    null::int                        as account_id,
-                    profile_holdings_normalized.type as security_type,
+                    null::int                            as account_id,
+                    profile_holdings_normalized_all.type as security_type,
                     collection_id
              from stats
-                      left join {{ ref('profile_holdings_normalized') }} using (holding_id_v2)
+                      left join {{ ref('profile_holdings_normalized_all') }} using (holding_id_v2)
      ),
      groupped_expanded_transactions as
          (
