@@ -75,7 +75,7 @@ with
                    OVER (partition by symbol, time_truncated order by time, priority desc rows between current row and unbounded following) as adjusted_close,
                    (sum(volume)
                     OVER (partition by symbol, time_truncated order by time, priority desc rows between current row and unbounded following))::double precision          as volume,
-                   min(updated_at)
+                   max(updated_at)
                    OVER (partition by symbol, time_truncated order by time, priority desc rows between current row and unbounded following)                              as updated_at
              from (
                       select symbol,

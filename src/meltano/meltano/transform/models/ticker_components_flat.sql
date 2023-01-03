@@ -104,7 +104,7 @@ with
                     min(component_industry)                 as component_industry,
                     symbol || '_' || component_symbol       as id,
                     min(version)                            as version,
-                    min(updated_at)                         as updated_at
+                    max(updated_at)                         as updated_at
              from ticker_components_flat1
              group by symbol, component_symbol
          )

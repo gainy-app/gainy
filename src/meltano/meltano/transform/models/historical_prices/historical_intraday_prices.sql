@@ -154,6 +154,7 @@ with polygon_symbols as materialized
                     1                                as priority
              from {{ ref('historical_prices_aggregated_1d') }}
                       join {{ ref('week_trading_sessions_static') }} using (symbol, date)
+             where close_at < now()
              {% endif %}
         )
 
