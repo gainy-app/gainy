@@ -57,6 +57,20 @@ plugins:
           kind: array
         - name: split_id
         - name: split_num
+      config:
+        streams:
+          - polygon_marketstatus_upcoming
+          - polygon_stock_splits
+          - polygon_stocks_historical_prices
+          - polygon_options_historical_prices
+          - polygon_crypto_historical_prices
+          - polygon_intraday_prices_launchpad
+
+    - name: tap-polygon-intraday
+      inherit_from: tap-polygon
+      config:
+        streams:
+          - polygon_intraday_prices_launchpad
 
     - name: tap-coingecko
       namespace: tap_coingecko
@@ -305,6 +319,15 @@ schedules:
     start_date: 2021-09-03 13:52:48.598227
     env:
       TARGET_ENVS: '["production","local"]'
+
+  - name: polygon-intraday-to-postgres
+    extractor: tap-polygon-intraday
+    loader: target-postgres
+    transform: skip
+    interval: '@daily'
+    start_date: 2021-09-03 13:52:48.598227
+    env:
+      TARGET_ENVS: '[]'
 
   - name: bigquery-to-postgres
     extractor: tap-bigquery
