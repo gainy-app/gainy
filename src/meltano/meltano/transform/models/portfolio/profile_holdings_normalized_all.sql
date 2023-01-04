@@ -26,7 +26,8 @@ with data as
                    else 'ticker_' || profile_holdings.profile_id || '_' || portfolio_securities_normalized.ticker_symbol
                    end                                                           as holding_group_id,
                profile_holdings.profile_id ||
-               '_plaid_' || profile_holdings.id                                  as holding_id_v2,
+               '_plaid_' || profile_holdings.security_id ||
+               '_' || profile_holdings.account_id                                as holding_id_v2,
                profile_holdings.id                                               as holding_id,
                profile_holdings.plaid_access_token_id,
                profile_holdings.security_id,
