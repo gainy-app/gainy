@@ -204,10 +204,7 @@ from (
                                   first_value(adjusted_close)
                                   OVER (partition by symbol, grp order by datetime)) as adjusted_close,
                           volume,
-                          coalesce(
-                                  updated_at,
-                                  first_value(updated_at)
-                                  OVER (partition by symbol, grp order by datetime)) as updated_at
+                          updated_at
                    from (
                             select *,
                                    coalesce(sum(case when adjusted_close is not null then 1 end)
