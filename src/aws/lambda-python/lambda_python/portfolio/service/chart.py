@@ -156,20 +156,6 @@ class PortfolioChartService:
         return rows
 
     def _filter_chart_by_transaction_count(self, rows):
-        transaction_counts_1d = {}
-        for row in rows:
-            if row['period'] != '1d':
-                continue
-
-            if row['transaction_count'] not in transaction_counts_1d:
-                transaction_counts_1d[row['transaction_count']] = 0
-
-            transaction_counts_1d[row['transaction_count']] += 1
-
-        max_transaction_count_1d = max(
-            transaction_counts_1d, key=transaction_counts_1d.get
-        ) if len(transaction_counts_1d) > 0 else 0
-
         prev_row = None
         for row in sorted(rows,
                           key=lambda row: (row['period'], row['datetime'])):
@@ -177,18 +163,12 @@ class PortfolioChartService:
             transaction_count = row['transaction_count']
             period = row['period']
 
-            # during the day there is constant transaction_count, so we just pick all rows with max transaction_count
-            should_skip_1d = transaction_count != max_transaction_count_1d
-            if period == '1d' and should_skip_1d:
-                prev_row = row
-                continue
-
             # for other periods transactions count should not decrease, so we pick all rows that follow a non-decreasing transaction count pattern
             if prev_row is not None:
                 prev_transaction_count = prev_row['transaction_count']
                 prev_period = prev_row['period']
-                should_skip_other_periods = period == prev_period and transaction_count < prev_transaction_count
-                if period != '1d' and should_skip_other_periods:
+                should_skip = period == prev_period and transaction_count < prev_transaction_count
+                if should_skip:
                     continue
 
             prev_row = row
