@@ -91,21 +91,19 @@ with uniq_tickers as materialized
          ),
      all_rows as
          (
-             select tds.symbol || '_' || tds.date as id,
+             select tds.symbol || '_' || tds.date             as id,
                     tds.symbol,
                     tds.date,
-                    tds.date::timestamp           as datetime,
+                    tds.date::timestamp                       as datetime,
                     hp.open,
                     hp.high,
                     hp.low,
                     hp.close,
                     coalesce(hp.adjusted_close,
                              LAST_VALUE_IGNORENULLS(hp.adjusted_close) over (lookback)
-                             )                    as adjusted_close,
-                    coalesce(hp.updated_at,
-                             LAST_VALUE_IGNORENULLS(hp.updated_at) over (lookback)
-                             )                    as updated_at,
-                    coalesce(volume, 0)           as volume
+                             )                                as adjusted_close,
+                    coalesce(hp.updated_at, now())::timestamp as updated_at,
+                    coalesce(volume, 0)                       as volume
              from tickers_dates_skeleton tds
                       left join {{ ref('historical_prices') }} hp using (symbol, "date")
                  window

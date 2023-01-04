@@ -144,9 +144,8 @@ from (
                    )                  as adjusted_close,
                coalesce(
                        updated_at,
-                       first_value(updated_at)
-                       OVER (partition by symbol, grp order by date)
-                   )                  as updated_at,
+                       now()
+                   )::timestamp       as updated_at,
                coalesce(volume, 0.0)  as volume
          from (
                   select combined_daily_prices.*,
