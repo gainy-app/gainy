@@ -135,7 +135,7 @@ select t3.id,
        t3.close,
        t3.adjusted_close,
        t3.volume,
-       t3.updated_at::timestamp
+       coalesce(t3.updated_at, now())::timestamp as updated_at
 from (
          select t2.symbol || '_' || t2.datetime                                            as id,
                 t2.symbol,
@@ -163,11 +163,7 @@ from (
                          latest_known_prices.adjusted_close,
                          historical_prices_aggregated_1d.adjusted_close)::double precision as adjusted_close,
                 coalesce(t2.volume, old_data.volume, 0)                                    as volume,
-                coalesce(t2.updated_at,
-                         old_data.updated_at,
-                         latest_known_prices.updated_at,
-                         historical_prices_aggregated_1d.updated_at)                       as updated_at,
-                old_data.updated_at                                                        as old_data_updated_at,
+                t2.updated_at,
                 old_data.adjusted_close                                                    as old_data_adjusted_close
 {% else %}
                 coalesce(t2.open,
@@ -181,7 +177,7 @@ from (
                 coalesce(t2.adjusted_close,
                          historical_prices_aggregated_1d.adjusted_close)::double precision as adjusted_close,
                 coalesce(t2.volume, 0)                                                     as volume,
-                coalesce(t2.updated_at, historical_prices_aggregated_1d.updated_at)        as updated_at
+                t2.updated_at
 {% endif %}
          from (
                    select symbol,
@@ -233,7 +229,6 @@ from (
     ) t3
 where adjusted_close is not null
 {% if is_incremental() %}
-  and (old_data_updated_at is null -- no old data
-   or t3.updated_at > old_data_updated_at
+  and (old_data_adjusted_close is null -- no old data
    or abs(t3.adjusted_close - old_data_adjusted_close) > 1e-3) -- new data is newer than the old one
 {% endif %}
