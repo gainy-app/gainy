@@ -288,35 +288,29 @@ resource "aws_ecs_task_definition" "hasura" {
 ###### Create ALB ######
 
 module "meltano-elb" {
-  source                           = "./elb"
-  name                             = "meltano-airflow"
-  env                              = var.env
-  domain                           = var.domain
-  vpc_id                           = var.vpc_id
-  vpc_default_sg_id                = var.vpc_default_sg_id
-  public_https_sg_id               = var.public_https_sg_id
-  public_http_sg_id                = var.public_http_sg_id
-  public_subnet_ids                = var.public_subnet_ids
-  ecs_cluster_name                 = var.ecs_cluster_name
-  cloudflare_zone_id               = var.cloudflare_zone_id
-  aws_ecs_task_definition_family   = aws_ecs_task_definition.airflow.family
-  aws_ecs_task_definition_revision = aws_ecs_task_definition.airflow.revision
+  source             = "./elb"
+  name               = "meltano-airflow"
+  env                = var.env
+  domain             = var.domain
+  vpc_id             = var.vpc_id
+  vpc_default_sg_id  = var.vpc_default_sg_id
+  public_https_sg_id = var.public_https_sg_id
+  public_http_sg_id  = var.public_http_sg_id
+  public_subnet_ids  = var.public_subnet_ids
+  cloudflare_zone_id = var.cloudflare_zone_id
 }
 
 module "hasura-elb" {
-  source                           = "./elb"
-  name                             = "hasura"
-  env                              = var.env
-  domain                           = var.domain
-  vpc_id                           = var.vpc_id
-  vpc_default_sg_id                = var.vpc_default_sg_id
-  public_https_sg_id               = var.public_https_sg_id
-  public_http_sg_id                = var.public_http_sg_id
-  public_subnet_ids                = var.public_subnet_ids
-  ecs_cluster_name                 = var.ecs_cluster_name
-  cloudflare_zone_id               = var.cloudflare_zone_id
-  aws_ecs_task_definition_family   = aws_ecs_task_definition.hasura.family
-  aws_ecs_task_definition_revision = aws_ecs_task_definition.hasura.revision
+  source             = "./elb"
+  name               = "hasura"
+  env                = var.env
+  domain             = var.domain
+  vpc_id             = var.vpc_id
+  vpc_default_sg_id  = var.vpc_default_sg_id
+  public_https_sg_id = var.public_https_sg_id
+  public_http_sg_id  = var.public_http_sg_id
+  public_subnet_ids  = var.public_subnet_ids
+  cloudflare_zone_id = var.cloudflare_zone_id
 }
 
 /*
@@ -402,7 +396,7 @@ resource "aws_ecs_service" "hasura" {
 resource "aws_appautoscaling_target" "hasura" {
   max_capacity       = var.env == "production" ? 2 : 1
   min_capacity       = 1
-  resource_id        = "service/${var.ecs_cluster_name}/${aws_ecs_service.hasura[0].name}"
+  resource_id        = "service/${var.ecs_cluster_name}/${aws_ecs_service.hasura.name}"
   scalable_dimension = "ecs:service:DesiredCount"
   service_namespace  = "ecs"
 }
@@ -410,9 +404,9 @@ resource "aws_appautoscaling_target" "hasura" {
 resource "aws_appautoscaling_policy" "ecs_policy" {
   name               = "policy-gainy-hasura-${var.env}"
   policy_type        = "TargetTrackingScaling"
-  resource_id        = aws_appautoscaling_target.hasura[0].resource_id
-  scalable_dimension = aws_appautoscaling_target.hasura[0].scalable_dimension
-  service_namespace  = aws_appautoscaling_target.hasura[0].service_namespace
+  resource_id        = aws_appautoscaling_target.hasura.resource_id
+  scalable_dimension = aws_appautoscaling_target.hasura.scalable_dimension
+  service_namespace  = aws_appautoscaling_target.hasura.service_namespace
 
   target_tracking_scaling_policy_configuration {
     target_value       = 20000
