@@ -6,32 +6,13 @@
     post_hook=[
       pk('id'),
       index(['profile_id', 'holding_id_v2', 'period', 'datetime'], true),
-      index(['updated_at']),
     ],
   )
 }}
 
 
 -- Execution Time: 220791.001 ms
-with
-{% if is_incremental() %}
-     holdings_to_update as
-         (
-             select distinct portfolio_expanded_transactions.profile_id,
-                             holding_id_v2
-             from {{ ref('portfolio_transaction_chart') }}
-                      join {{ ref('portfolio_expanded_transactions') }} using (transaction_uniq_id)
-                      left join (
-                              select max(updated_at) as max_updated_at
-                              from {{ this }}
-                           ) old_stats on true
-             where portfolio_transaction_chart.updated_at > max_updated_at
-                or portfolio_expanded_transactions.updated_at > max_updated_at
-                or max_updated_at is null
-         ),
-{% endif %}
-
-     portfolio_holding_chart as
+with portfolio_holding_chart as
          (
              select t.*
              from (
@@ -58,9 +39,6 @@ with
                                period,
                                portfolio_transaction_chart.datetime
                   ) t
-{% if is_incremental() %}
-                      join holdings_to_update using (profile_id, holding_id_v2)
-{% endif %}
          )
 select portfolio_holding_chart.*,
        case
