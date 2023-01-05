@@ -122,7 +122,7 @@ with
                       from {{ ref('ticker_options_monitored') }}
                                join time_series using (symbol)
                   ) t
-             where t.time_truncated < now() - interval '15 minutes'
+             where t.time_truncated < now() - interval '15 minutes' - interval '15 minutes' -- close_datetime must be less than 15 minutes ago
              order by symbol, time_truncated, time, priority
          )
 select t3.id,
