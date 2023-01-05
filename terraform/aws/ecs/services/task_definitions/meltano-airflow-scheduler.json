@@ -47,6 +47,7 @@
     { "name": "EODHISTORICALDATA_PRICES_JOBS_COUNT",   "value": "${eodhistoricaldata_prices_jobs_count}" },
     { "name": "COINGECKO_JOBS_COUNT",                  "value": "${coingecko_jobs_count}" },
     { "name": "POLYGON_JOBS_COUNT",                    "value": "${polygon_jobs_count}" },
+    { "name": "POLYGON_INTRADAY_JOBS_COUNT",           "value": "${polygon_intraday_jobs_count}" },
     { "name": "TAP_EODHISTORICALDATA_API_TOKEN",       "value": "${eodhistoricaldata_api_token}" },
     { "name": "TAP_EODHISTORICALDATA_EXCHANGES",       "value": ${jsonencode(eodhistoricaldata_exchanges)} },
     { "name": "TAP_POLYGON_API_KEY",                   "value": "${polygon_api_token}" },

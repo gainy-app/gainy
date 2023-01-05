@@ -46,6 +46,7 @@
     { "name": "EODHISTORICALDATA_PRICES_JOBS_COUNT", "value": "${eodhistoricaldata_prices_jobs_count}" },
     { "name": "COINGECKO_JOBS_COUNT",                "value": "${coingecko_jobs_count}" },
     { "name": "POLYGON_JOBS_COUNT",                  "value": "${polygon_jobs_count}" },
+    { "name": "POLYGON_INTRADAY_JOBS_COUNT",         "value": "${polygon_intraday_jobs_count}" },
     { "name": "DBT_TARGET_SCHEMA",                   "value": "${pg_transform_schema}" },
     { "name": "DBT_ARTIFACT_STATE_PATH",             "value": "/project/.meltano/transformers/dbt/target/" },
     { "name": "AWS_LAMBDA_API_GATEWAY_ENDPOINT",     "value": "${aws_lambda_api_gateway_endpoint}" }
