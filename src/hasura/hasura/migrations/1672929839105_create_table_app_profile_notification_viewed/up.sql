@@ -1,0 +1,1 @@
+CREATE TABLE "app"."profile_notification_viewed" ("profile_id" integer NOT NULL, "notification_uuid" uuid NOT NULL, PRIMARY KEY ("profile_id","notification_uuid") , FOREIGN KEY ("profile_id") REFERENCES "app"."profiles"("id") ON UPDATE cascade ON DELETE cascade, FOREIGN KEY ("notification_uuid") REFERENCES "app"."notifications"("uuid") ON UPDATE cascade ON DELETE cascade);
