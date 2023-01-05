@@ -35,28 +35,135 @@ with
          (
              select t.*
              from (
-                      select portfolio_transaction_chart.profile_id,
+                      select profile_holdings_normalized_all.profile_id,
+                             portfolio_holding_chart_3min.holding_id_v2,
+                             week_trading_sessions_static.date,
+                             portfolio_holding_chart_3min.datetime,
+                             '1d'::varchar as period,
+                             portfolio_holding_chart_3min.open,
+                             portfolio_holding_chart_3min.high,
+                             portfolio_holding_chart_3min.low,
+                             portfolio_holding_chart_3min.close,
+                             portfolio_holding_chart_3min.adjusted_close,
+                             portfolio_holding_chart_3min.quantity,
+                             portfolio_holding_chart_3min.transaction_count,
+                             portfolio_holding_chart_3min.updated_at
+                      from {{ ref('portfolio_holding_chart_3min') }}
+                               join {{ ref('profile_holdings_normalized_all') }} using (holding_id_v2)
+                               join {{ ref('week_trading_sessions_static') }} using (symbol)
+                      where portfolio_holding_chart_3min.datetime between week_trading_sessions_static.open_at and week_trading_sessions_static.close_at - interval '1 microsecond'
+
+                      union all
+
+                      select profile_holdings_normalized_all.profile_id,
+                             portfolio_holding_chart_15min.holding_id_v2,
+                             week_trading_sessions_static.date,
+                             portfolio_holding_chart_15min.datetime,
+                             '1w'::varchar as period,
+                             portfolio_holding_chart_15min.open,
+                             portfolio_holding_chart_15min.high,
+                             portfolio_holding_chart_15min.low,
+                             portfolio_holding_chart_15min.close,
+                             portfolio_holding_chart_15min.adjusted_close,
+                             portfolio_holding_chart_15min.quantity,
+                             portfolio_holding_chart_15min.transaction_count,
+                             portfolio_holding_chart_15min.updated_at
+                      from {{ ref('portfolio_holding_chart_15min') }}
+                               join {{ ref('profile_holdings_normalized_all') }} using (holding_id_v2)
+                               join {{ ref('week_trading_sessions_static') }} using (symbol)
+                      where portfolio_holding_chart_15min.datetime between week_trading_sessions_static.open_at and week_trading_sessions_static.close_at - interval '1 microsecond'
+
+                      union all
+
+                      select profile_holdings_normalized_all.profile_id,
+                             portfolio_holding_chart_1d.holding_id_v2,
+                             portfolio_holding_chart_1d.date,
+                             portfolio_holding_chart_1d.date::timestamp as datetime,
+                             '1m'::varchar as period,
+                             portfolio_holding_chart_1d.open,
+                             portfolio_holding_chart_1d.high,
+                             portfolio_holding_chart_1d.low,
+                             portfolio_holding_chart_1d.close,
+                             portfolio_holding_chart_1d.adjusted_close,
+                             portfolio_holding_chart_1d.quantity,
+                             portfolio_holding_chart_1d.transaction_count,
+                             portfolio_holding_chart_1d.updated_at
+                      from {{ ref('portfolio_holding_chart_1d') }}
+                               join {{ ref('profile_holdings_normalized_all') }} using (holding_id_v2)
+                      where portfolio_holding_chart_1d.date >= now() - interval '1 month + 1 week'
+
+                      union all
+
+                      select profile_holdings_normalized_all.profile_id,
+                             portfolio_holding_chart_1d.holding_id_v2,
+                             portfolio_holding_chart_1d.date,
+                             portfolio_holding_chart_1d.date::timestamp as datetime,
+                             '3m'::varchar as period,
+                             portfolio_holding_chart_1d.open,
+                             portfolio_holding_chart_1d.high,
+                             portfolio_holding_chart_1d.low,
+                             portfolio_holding_chart_1d.close,
+                             portfolio_holding_chart_1d.adjusted_close,
+                             portfolio_holding_chart_1d.quantity,
+                             portfolio_holding_chart_1d.transaction_count,
+                             portfolio_holding_chart_1d.updated_at
+                      from {{ ref('portfolio_holding_chart_1d') }}
+                               join {{ ref('profile_holdings_normalized_all') }} using (holding_id_v2)
+                      where portfolio_holding_chart_1d.date >= now() - interval '3 month + 1 week'
+
+                      union all
+
+                      select profile_holdings_normalized_all.profile_id,
+                             portfolio_holding_chart_1d.holding_id_v2,
+                             portfolio_holding_chart_1d.date,
+                             portfolio_holding_chart_1d.date::timestamp as datetime,
+                             '1y'::varchar as period,
+                             portfolio_holding_chart_1d.open,
+                             portfolio_holding_chart_1d.high,
+                             portfolio_holding_chart_1d.low,
+                             portfolio_holding_chart_1d.close,
+                             portfolio_holding_chart_1d.adjusted_close,
+                             portfolio_holding_chart_1d.quantity,
+                             portfolio_holding_chart_1d.transaction_count,
+                             portfolio_holding_chart_1d.updated_at
+                      from {{ ref('portfolio_holding_chart_1d') }}
+                               join {{ ref('profile_holdings_normalized_all') }} using (holding_id_v2)
+
+                      union all
+
+                      select profile_holdings_normalized_all.profile_id,
+                             portfolio_holding_chart_1w.holding_id_v2,
+                             portfolio_holding_chart_1w.date,
+                             portfolio_holding_chart_1w.date::timestamp as datetime,
+                             '5y'::varchar as period,
+                             portfolio_holding_chart_1w.open,
+                             portfolio_holding_chart_1w.high,
+                             portfolio_holding_chart_1w.low,
+                             portfolio_holding_chart_1w.close,
+                             portfolio_holding_chart_1w.adjusted_close,
+                             portfolio_holding_chart_1w.quantity,
+                             portfolio_holding_chart_1w.transaction_count,
+                             portfolio_holding_chart_1w.updated_at
+                      from {{ ref('portfolio_holding_chart_1w') }}
+                               join {{ ref('profile_holdings_normalized_all') }} using (holding_id_v2)
+
+                      union all
+
+                      select profile_id,
                              holding_id_v2,
-                             period,
-                             portfolio_transaction_chart.datetime,
-                             min(portfolio_transaction_chart.date) as date,
-                             sum(quantity_norm_for_valuation)      as quantity,
-                             count(transaction_uniq_id)            as transaction_count,
-                             sum(open)                             as open,
-                             sum(high)                             as high,
-                             sum(low)                              as low,
-                             sum(close)                            as close,
-                             sum(adjusted_close)                   as adjusted_close,
-                             max(greatest(
-                                     portfolio_transaction_chart.updated_at,
-                                     portfolio_expanded_transactions.updated_at
-                                 ))                                as updated_at
-                      from {{ ref('portfolio_transaction_chart') }}
-                               join {{ ref('portfolio_expanded_transactions') }} using (transaction_uniq_id)
-                      group by portfolio_transaction_chart.profile_id,
-                               holding_id_v2,
-                               period,
-                               portfolio_transaction_chart.datetime
+                             date,
+                             date::timestamp as datetime,
+                             'all'::varchar  as period,
+                             open,
+                             high,
+                             low,
+                             close,
+                             adjusted_close,
+                             portfolio_holding_chart_1m.quantity,
+                             portfolio_holding_chart_1m.transaction_count,
+                             portfolio_holding_chart_1m.updated_at
+                      from {{ ref('portfolio_holding_chart_1m') }}
+                               join {{ ref('profile_holdings_normalized_all') }} using (holding_id_v2)
                   ) t
 {% if is_incremental() %}
                       join holdings_to_update using (profile_id, holding_id_v2)

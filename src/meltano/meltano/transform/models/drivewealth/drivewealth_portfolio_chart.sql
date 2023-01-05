@@ -56,7 +56,6 @@ select drivewealth_portfolio_historical_prices_aggregated.profile_id,
        drivewealth_portfolio_historical_prices_aggregated.adjusted_close,
        drivewealth_portfolio_historical_prices_aggregated.updated_at
 from {{ ref('drivewealth_portfolio_historical_prices_aggregated') }}
-         left join {{ ref('ticker_realtime_metrics') }} using (symbol)
 where drivewealth_portfolio_historical_prices_aggregated.period = '1d'
   and drivewealth_portfolio_historical_prices_aggregated.datetime >= now() - interval '1 month + 1 week'
 
@@ -75,7 +74,6 @@ select drivewealth_portfolio_historical_prices_aggregated.profile_id,
        drivewealth_portfolio_historical_prices_aggregated.adjusted_close,
        drivewealth_portfolio_historical_prices_aggregated.updated_at
 from {{ ref('drivewealth_portfolio_historical_prices_aggregated') }}
-         left join {{ ref('ticker_realtime_metrics') }} using (symbol)
 where drivewealth_portfolio_historical_prices_aggregated.period = '1d'
   and drivewealth_portfolio_historical_prices_aggregated.datetime >= now() - interval '3 month + 1 week'
 
@@ -94,7 +92,6 @@ select drivewealth_portfolio_historical_prices_aggregated.profile_id,
        drivewealth_portfolio_historical_prices_aggregated.adjusted_close,
        drivewealth_portfolio_historical_prices_aggregated.updated_at
 from {{ ref('drivewealth_portfolio_historical_prices_aggregated') }}
-         left join {{ ref('ticker_realtime_metrics') }} using (symbol)
 where drivewealth_portfolio_historical_prices_aggregated.period = '1d'
 
 union all
@@ -112,7 +109,6 @@ select drivewealth_portfolio_historical_prices_aggregated.profile_id,
        drivewealth_portfolio_historical_prices_aggregated.adjusted_close,
        drivewealth_portfolio_historical_prices_aggregated.updated_at
 from {{ ref('drivewealth_portfolio_historical_prices_aggregated') }}
-         left join {{ ref('ticker_realtime_metrics') }} using (symbol)
 where drivewealth_portfolio_historical_prices_aggregated.period = '1w'
 
 union all
@@ -130,5 +126,4 @@ select profile_id,
        adjusted_close,
        drivewealth_portfolio_historical_prices_aggregated.updated_at
 from {{ ref('drivewealth_portfolio_historical_prices_aggregated') }}
-         left join {{ ref('ticker_realtime_metrics') }} using (symbol)
 where drivewealth_portfolio_historical_prices_aggregated.period = '1m'
