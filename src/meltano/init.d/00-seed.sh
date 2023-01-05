@@ -40,10 +40,15 @@ if [ $($psql_auth -c "select count(*) from deployment.public_schemas where schem
 
         echo "$(date)" Restoring schema "$OLD_DBT_TARGET_SCHEMA" to "$DBT_TARGET_SCHEMA"
         $psql_auth -f scripts/clone_schema.sql
-        $psql_auth -c "call clone_schema('$OLD_DBT_TARGET_SCHEMA', '$DBT_TARGET_SCHEMA')"
-        echo "$(date)" Schema "$OLD_DBT_TARGET_SCHEMA" restored to  "$DBT_TARGET_SCHEMA"
+        if $psql_auth -c "call clone_schema('$OLD_DBT_TARGET_SCHEMA', '$DBT_TARGET_SCHEMA')"; then
+          echo "$(date)" Schema "$OLD_DBT_TARGET_SCHEMA" restored to "$DBT_TARGET_SCHEMA"
+          export DBT_RUN_FLAGS="-s result:error+ state:modified+ config.materialized:view --defer --full-refresh"
+        else
+          echo "$(date)" Failed to restore schema "$OLD_DBT_TARGET_SCHEMA" to "$DBT_TARGET_SCHEMA, doing full refresh"
+        fi
+      else
+        export DBT_RUN_FLAGS=""
       fi
-      export DBT_RUN_FLAGS="-s result:error+ state:modified+ config.materialized:view --defer --full-refresh"
     fi
 
     $psql_auth -c "select seed_data_state from deployment.public_schemas where schema_name = '$OLD_DBT_TARGET_SCHEMA' and seed_data_state is not null" -t --csv > /tmp/seed_data_state_base64
@@ -63,14 +68,16 @@ if [ $($psql_auth -c "select count(*) from deployment.public_schemas where schem
     export DBT_RUN_FLAGS="--full-refresh"
   fi
 
-  echo "$(date)" meltano invoke dbt run $DBT_RUN_FLAGS
-  if meltano invoke dbt run $DBT_RUN_FLAGS; then
-    $psql_auth -c "update deployment.public_schemas set deployed_at = now() where schema_name = '$DBT_TARGET_SCHEMA';"
+  if [ "$DBT_RUN_FLAGS" != "" ]; then
+    echo "$(date)" meltano invoke dbt run $DBT_RUN_FLAGS
+    if meltano invoke dbt run $DBT_RUN_FLAGS; then
+      $psql_auth -c "update deployment.public_schemas set deployed_at = now() where schema_name = '$DBT_TARGET_SCHEMA';"
 
-    /bin/bash scripts/store_deployment_state.sh
-  else
-    echo 'Failed to seed public schema, exiting'
-    exit 1
+      /bin/bash scripts/store_deployment_state.sh
+    else
+      echo 'Failed to seed public schema, exiting'
+      exit 1
+    fi
   fi
 fi
 
