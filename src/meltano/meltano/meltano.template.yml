@@ -13,8 +13,6 @@ plugins:
         - state
       settings:
         - name: api_token
-        - name: streams
-          kind: array
         - name: exchanges
           kind: array
         - name: exchange_symbols_limit
@@ -25,17 +23,15 @@ plugins:
         - name: split_id
         - name: split_num
         - name: full_refresh_symbols
-      config:
-        streams:
-          - eod_fundamentals
-          - eod_options
+      select:
+        - eod_fundamentals
+        - eod_options
 
     - name: tap-eodhistoricaldata-prices
       inherit_from: tap-eodhistoricaldata
-      config:
-        streams:
-          - eod_dividends
-          - eod_historical_prices
+      select:
+        - eod_dividends
+        - eod_historical_prices
 
     - name: tap-polygon
       namespace: tap_polygon
@@ -55,22 +51,21 @@ plugins:
           kind: array
         - name: stock_symbols
           kind: array
+        - name: realtime_symbols
+          kind: array
         - name: split_id
         - name: split_num
-      config:
-        streams:
-          - polygon_marketstatus_upcoming
-          - polygon_stock_splits
-          - polygon_stocks_historical_prices
-          - polygon_options_historical_prices
-          - polygon_crypto_historical_prices
-          - polygon_intraday_prices_launchpad
+      select:
+        - polygon_marketstatus_upcoming
+        - polygon_stock_splits
+        - polygon_stocks_historical_prices
+        - polygon_options_historical_prices
+        - polygon_crypto_historical_prices
 
     - name: tap-polygon-intraday
       inherit_from: tap-polygon
-      config:
-        streams:
-          - polygon_intraday_prices_launchpad
+      select:
+        - polygon_intraday_prices_launchpad
 
     - name: tap-coingecko
       namespace: tap_coingecko
