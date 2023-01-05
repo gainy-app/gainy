@@ -35,14 +35,14 @@ locals {
     drivewealth_api_password   = var.drivewealth_api_password
     drivewealth_api_url        = var.drivewealth_api_url
   }
-  meltano_airflow_ui_task_description = jsondecode(templatefile(
+  airflow_task_description = jsondecode(templatefile(
     "${path.module}/task_definitions/meltano-airflow-ui.json",
     merge(local.meltano_default_params, {
-      airflow_ui_cpu_credits    = local.meltano_ui_cpu_credits
-      airflow_ui_memory_credits = local.meltano_ui_memory_credits
+      airflow_ui_cpu_credits    = local.airflow_cpu_credits
+      airflow_ui_memory_credits = local.airflow_memory_credits
     })
   ))
-  meltano_airflow_scheduler_description = jsondecode(templatefile(
+  meltano_scheduler_description = jsondecode(templatefile(
     "${path.module}/task_definitions/meltano-airflow-scheduler.json",
     merge(local.meltano_default_params, {
       eodhistoricaldata_api_token          = var.eodhistoricaldata_api_token
