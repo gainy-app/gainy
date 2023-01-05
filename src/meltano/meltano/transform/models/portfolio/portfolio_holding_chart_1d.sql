@@ -73,7 +73,8 @@ with raw_data as materialized
              select distinct on (
                  holding_id_v2
                  ) holding_id_v2,
-                   profile_holdings_normalized_all.quantity_norm_for_valuation - raw_data.quantity as adjustment
+                   profile_holdings_normalized_all.quantity_norm_for_valuation -
+                   coalesce(raw_data.quantity, 0) as adjustment
              from raw_data
                       join {{ ref('profile_holdings_normalized_all') }} using (holding_id_v2)
              order by holding_id_v2, date desc

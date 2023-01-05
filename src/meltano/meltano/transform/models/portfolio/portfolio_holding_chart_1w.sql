@@ -25,12 +25,13 @@ with raw_data as materialized
                              adjusted_close,
                              updated_at,
                              sum(quantity)
-                             over (partition by holding_id_v2 order by date, quantity desc nulls last) as quantity,
+                             over (partition by holding_id_v2 order by close_date, quantity desc nulls last) as quantity,
                              sum(transaction_count)
-                             over (partition by holding_id_v2 order by date, quantity desc nulls last) as transaction_count
+                             over (partition by holding_id_v2 order by close_date, quantity desc nulls last) as transaction_count
                       from (
                                select holding_id_v2,
                                       date,
+                                      date as close_date,
                                       case
                                           when profile_portfolio_transactions.type = 'buy'
                                               then abs(profile_portfolio_transactions.quantity)
@@ -54,6 +55,7 @@ with raw_data as materialized
 
                                select holding_id_v2,
                                       datetime::date as date,
+                                      datetime::date + interval '1 week' as close_date,
                                       null as quantity,
                                       0    as transaction_count,
                                       open,
@@ -73,7 +75,8 @@ with raw_data as materialized
              select distinct on (
                  holding_id_v2
                  ) holding_id_v2,
-                   profile_holdings_normalized_all.quantity_norm_for_valuation - raw_data.quantity as adjustment
+                   profile_holdings_normalized_all.quantity_norm_for_valuation -
+                   coalesce(raw_data.quantity, 0) as adjustment
              from raw_data
                       join {{ ref('profile_holdings_normalized_all') }} using (holding_id_v2)
              order by holding_id_v2, date desc

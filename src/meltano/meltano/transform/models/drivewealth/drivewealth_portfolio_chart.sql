@@ -6,6 +6,7 @@
 
     
 select drivewealth_portfolio_historical_prices_aggregated.profile_id,
+       drivewealth_portfolio_historical_prices_aggregated.holding_id_v2,
        drivewealth_portfolio_historical_prices_aggregated.transaction_uniq_id,
        week_trading_sessions_static.date,
        drivewealth_portfolio_historical_prices_aggregated.datetime,
@@ -25,6 +26,7 @@ where drivewealth_portfolio_historical_prices_aggregated.period = '3min'
 union all
 
 select drivewealth_portfolio_historical_prices_aggregated.profile_id,
+       drivewealth_portfolio_historical_prices_aggregated.holding_id_v2,
        drivewealth_portfolio_historical_prices_aggregated.transaction_uniq_id,
        week_trading_sessions_static.date,
        drivewealth_portfolio_historical_prices_aggregated.datetime,
@@ -44,6 +46,7 @@ where drivewealth_portfolio_historical_prices_aggregated.period = '15min'
 union all
 
 select drivewealth_portfolio_historical_prices_aggregated.profile_id,
+       drivewealth_portfolio_historical_prices_aggregated.holding_id_v2,
        drivewealth_portfolio_historical_prices_aggregated.transaction_uniq_id,
        drivewealth_portfolio_historical_prices_aggregated.datetime::date as date,
        drivewealth_portfolio_historical_prices_aggregated.datetime,
@@ -62,6 +65,7 @@ where drivewealth_portfolio_historical_prices_aggregated.period = '1d'
 union all
 
 select drivewealth_portfolio_historical_prices_aggregated.profile_id,
+       drivewealth_portfolio_historical_prices_aggregated.holding_id_v2,
        drivewealth_portfolio_historical_prices_aggregated.transaction_uniq_id,
        drivewealth_portfolio_historical_prices_aggregated.datetime::date as date,
        drivewealth_portfolio_historical_prices_aggregated.datetime,
@@ -80,6 +84,7 @@ where drivewealth_portfolio_historical_prices_aggregated.period = '1d'
 union all
 
 select drivewealth_portfolio_historical_prices_aggregated.profile_id,
+       drivewealth_portfolio_historical_prices_aggregated.holding_id_v2,
        drivewealth_portfolio_historical_prices_aggregated.transaction_uniq_id,
        drivewealth_portfolio_historical_prices_aggregated.datetime::date as date,
        drivewealth_portfolio_historical_prices_aggregated.datetime,
@@ -97,6 +102,7 @@ where drivewealth_portfolio_historical_prices_aggregated.period = '1d'
 union all
 
 select drivewealth_portfolio_historical_prices_aggregated.profile_id,
+       drivewealth_portfolio_historical_prices_aggregated.holding_id_v2,
        drivewealth_portfolio_historical_prices_aggregated.transaction_uniq_id,
        drivewealth_portfolio_historical_prices_aggregated.datetime::date as date,
        drivewealth_portfolio_historical_prices_aggregated.datetime,
@@ -114,6 +120,7 @@ where drivewealth_portfolio_historical_prices_aggregated.period = '1w'
 union all
 
 select profile_id,
+       holding_id_v2,
        transaction_uniq_id,
        datetime::date                as date,
        datetime,

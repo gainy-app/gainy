@@ -49,5 +49,5 @@ from (
 {% if is_incremental() %}
          left join {{ this }} old_data using (holding_id_v2, datetime)
 where old_data.adjusted_close is null
-   or abs(data.quantity * t.adjusted_close - old_data.adjusted_close) > 1e-3
+   or abs(data.quantity * data.adjusted_close - old_data.adjusted_close) > 1e-3
 {% endif %}

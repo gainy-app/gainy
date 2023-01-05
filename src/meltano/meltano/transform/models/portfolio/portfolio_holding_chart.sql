@@ -15,19 +15,10 @@
 -- Execution Time: 220791.001 ms
 with
 {% if is_incremental() %}
-     holdings_to_update as
+     old_stats as
          (
-             select distinct portfolio_expanded_transactions.profile_id,
-                             holding_id_v2
-             from {{ ref('portfolio_transaction_chart') }}
-                      join {{ ref('portfolio_expanded_transactions') }} using (transaction_uniq_id)
-                      left join (
-                              select max(updated_at) as max_updated_at
-                              from {{ this }}
-                           ) old_stats on true
-             where portfolio_transaction_chart.updated_at > max_updated_at
-                or portfolio_expanded_transactions.updated_at > max_updated_at
-                or max_updated_at is null
+             select max(updated_at) as max_updated_at
+             from {{ this }}
          ),
 {% endif %}
 
@@ -52,6 +43,7 @@ with
                                join {{ ref('profile_holdings_normalized_all') }} using (holding_id_v2)
                                join {{ ref('week_trading_sessions_static') }} using (symbol)
                       where portfolio_holding_chart_3min.datetime between week_trading_sessions_static.open_at and week_trading_sessions_static.close_at - interval '1 microsecond'
+                        and not is_app_trading
 
                       union all
 
@@ -72,6 +64,7 @@ with
                                join {{ ref('profile_holdings_normalized_all') }} using (holding_id_v2)
                                join {{ ref('week_trading_sessions_static') }} using (symbol)
                       where portfolio_holding_chart_15min.datetime between week_trading_sessions_static.open_at and week_trading_sessions_static.close_at - interval '1 microsecond'
+                        and not is_app_trading
 
                       union all
 
@@ -91,6 +84,7 @@ with
                       from {{ ref('portfolio_holding_chart_1d') }}
                                join {{ ref('profile_holdings_normalized_all') }} using (holding_id_v2)
                       where portfolio_holding_chart_1d.date >= now() - interval '1 month + 1 week'
+                        and not is_app_trading
 
                       union all
 
@@ -110,6 +104,7 @@ with
                       from {{ ref('portfolio_holding_chart_1d') }}
                                join {{ ref('profile_holdings_normalized_all') }} using (holding_id_v2)
                       where portfolio_holding_chart_1d.date >= now() - interval '3 month + 1 week'
+                        and not is_app_trading
 
                       union all
 
@@ -128,6 +123,7 @@ with
                              portfolio_holding_chart_1d.updated_at
                       from {{ ref('portfolio_holding_chart_1d') }}
                                join {{ ref('profile_holdings_normalized_all') }} using (holding_id_v2)
+                      where not is_app_trading
 
                       union all
 
@@ -146,6 +142,7 @@ with
                              portfolio_holding_chart_1w.updated_at
                       from {{ ref('portfolio_holding_chart_1w') }}
                                join {{ ref('profile_holdings_normalized_all') }} using (holding_id_v2)
+                      where not is_app_trading
 
                       union all
 
@@ -164,9 +161,28 @@ with
                              portfolio_holding_chart_1m.updated_at
                       from {{ ref('portfolio_holding_chart_1m') }}
                                join {{ ref('profile_holdings_normalized_all') }} using (holding_id_v2)
+                      where not is_app_trading
+
+                      union all
+
+                      select profile_id,
+                             holding_id_v2,
+                             date::date,
+                             datetime::timestamp,
+                             period::varchar,
+                             open,
+                             high,
+                             low,
+                             close,
+                             adjusted_close,
+                             null as quantity,
+                             null as transaction_count,
+                             updated_at
+                      from {{ ref('drivewealth_portfolio_chart') }}
                   ) t
 {% if is_incremental() %}
-                      join holdings_to_update using (profile_id, holding_id_v2)
+                      left join old_stats on true
+             where old_stats.max_updated_at is null or t.updated_at > old_stats.max_updated_at
 {% endif %}
          )
 select portfolio_holding_chart.*,
