@@ -66,7 +66,7 @@ resource "aws_db_instance" "db_instance" {
   }
 
   lifecycle {
-    ignore_changes = [latest_restorable_time, status]
+    ignore_changes = [status]
   }
 }
 

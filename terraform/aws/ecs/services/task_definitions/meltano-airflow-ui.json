@@ -59,9 +59,6 @@
   "dockerLabels": null,
   "privileged": null,
   "memoryReservation": null,
-  "dependsOn": [
-    { "condition": "HEALTHY", "containerName": "meltano-airflow-scheduler" }
-  ],
   "healthCheck": {
     "command": [ "CMD-SHELL", "curl http://localhost:5001/health | python -c 'import sys, json; data = json.load(sys.stdin); assert data[\"scheduler\"][\"status\"] == \"healthy\"; assert data[\"metadatabase\"][\"status\"] == \"healthy\"'" ],
     "interval": 10,
