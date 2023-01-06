@@ -24,14 +24,14 @@ plugins:
         - name: split_num
         - name: full_refresh_symbols
       select:
-        - eod_fundamentals
-        - eod_options
+        - eod_fundamentals.*
+        - eod_options.*
 
     - name: tap-eodhistoricaldata-prices
       inherit_from: tap-eodhistoricaldata
       select:
-        - eod_dividends
-        - eod_historical_prices
+        - eod_dividends.*
+        - eod_historical_prices.*
 
     - name: tap-polygon
       namespace: tap_polygon
@@ -56,16 +56,16 @@ plugins:
         - name: split_id
         - name: split_num
       select:
-        - polygon_marketstatus_upcoming
-        - polygon_stock_splits
-        - polygon_stocks_historical_prices
-        - polygon_options_historical_prices
-        - polygon_crypto_historical_prices
+        - polygon_marketstatus_upcoming.*
+        - polygon_stock_splits.*
+        - polygon_stocks_historical_prices.*
+        - polygon_options_historical_prices.*
+        - polygon_crypto_historical_prices.*
 
     - name: tap-polygon-intraday
       inherit_from: tap-polygon
       select:
-        - polygon_intraday_prices_launchpad
+        - polygon_intraday_prices_launchpad.*
 
     - name: tap-coingecko
       namespace: tap_coingecko
