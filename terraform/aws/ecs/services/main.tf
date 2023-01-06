@@ -248,8 +248,8 @@ resource "aws_ecs_task_definition" "websockets" {
   family                   = "gainy-${var.env}"
   network_mode             = "awsvpc"
   requires_compatibilities = ["FARGATE"]
-  cpu                      = local.eod_websockets_cpu_credits + local.polygon_websockets_cpu_credits
-  memory                   = local.eod_websockets_memory_credits + local.polygon_websockets_memory_credits
+  cpu                      = max(256, local.eod_websockets_cpu_credits + local.polygon_websockets_cpu_credits)
+  memory                   = local.eod_websockets_memory_credits + local.polygon_websockets_memory_credits < 512 ? 512 : ceil((local.eod_websockets_memory_credits + local.polygon_websockets_memory_credits) / 1024) * 1024
   task_role_arn            = aws_iam_role.task.arn
   execution_role_arn       = aws_iam_role.execution.arn
 
@@ -323,7 +323,6 @@ resource "aws_ecs_service" "meltano_scheduler" {
   deployment_maximum_percent         = 200
   deployment_minimum_healthy_percent = 100
   launch_type                        = "FARGATE"
-  health_check_grace_period_seconds  = local.health_check_grace_period_seconds
   enable_execute_command             = true
 
   network_configuration {
@@ -430,7 +429,6 @@ resource "aws_ecs_service" "websockets" {
   deployment_maximum_percent         = 200
   deployment_minimum_healthy_percent = 100
   launch_type                        = "FARGATE"
-  health_check_grace_period_seconds  = local.health_check_grace_period_seconds
 
   network_configuration {
     subnets = var.private_subnet_ids

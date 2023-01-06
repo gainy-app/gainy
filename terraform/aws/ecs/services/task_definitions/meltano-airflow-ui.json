@@ -14,7 +14,7 @@
     }
   ],
   "hostname": null,
-  "essential": false,
+  "essential": true,
   "entryPoint": ["/wait.sh"],
   "mountPoints": [
     {
