@@ -197,7 +197,7 @@ resource "aws_efs_mount_target" "meltano_data_private_subnet" {
   subnet_id      = each.value
 }
 resource "aws_ecs_task_definition" "meltano_scheduler" {
-  family                   = "gainy-${var.env}"
+  family                   = "gainy-scheduler-${var.env}"
   network_mode             = "awsvpc"
   requires_compatibilities = ["FARGATE"]
   cpu                      = local.meltano_scheduler_cpu_credits
@@ -221,7 +221,7 @@ resource "aws_ecs_task_definition" "meltano_scheduler" {
 }
 
 resource "aws_ecs_task_definition" "airflow" {
-  family                   = "gainy-${var.env}"
+  family                   = "gainy-airflow-${var.env}"
   network_mode             = "awsvpc"
   requires_compatibilities = ["FARGATE"]
   cpu                      = local.airflow_cpu_credits
@@ -245,7 +245,7 @@ resource "aws_ecs_task_definition" "airflow" {
 }
 
 resource "aws_ecs_task_definition" "websockets" {
-  family                   = "gainy-${var.env}"
+  family                   = "gainy-websockets-${var.env}"
   network_mode             = "awsvpc"
   requires_compatibilities = ["FARGATE"]
   cpu                      = max(256, local.eod_websockets_cpu_credits + local.polygon_websockets_cpu_credits)

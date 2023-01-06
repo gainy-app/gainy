@@ -3,7 +3,7 @@ locals {
   eod_websockets_cpu_credits     = var.env == "production" ? 128 : 128
   polygon_websockets_cpu_credits = var.env == "production" ? 128 : 0
   hasura_cpu_credits             = var.env == "production" ? 512 : 256
-  airflow_cpu_credits            = var.env == "production" ? 256 : 128
+  airflow_cpu_credits            = var.env == "production" ? 256 : 256
   meltano_scheduler_cpu_credits  = var.env == "production" ? 3072 : 2048
 
   upstream_pool_size                  = var.env == "production" ? 3 : 1
