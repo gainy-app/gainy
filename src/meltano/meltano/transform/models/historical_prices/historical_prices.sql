@@ -15,10 +15,6 @@
 
 -- Execution Time: 450490.199 ms
 with
-{% if is_incremental() %}
-old_model_stats as (select symbol, max(updated_at) as max_updated_at from {{ this }} where relative_daily_gain is not null group by symbol),
-{% endif %}
-
 polygon_symbols as materialized
     (
         select symbol
@@ -303,7 +299,7 @@ from (
          from polygon_crypto_tickers
                   join {{ source('polygon', 'polygon_crypto_historical_prices') }}
                        on polygon_crypto_historical_prices.symbol = regexp_replace(polygon_crypto_tickers.symbol, '.CC$', 'USD')
-            window wnd as (partition by polygon_crypto_tickers.symbol order by t rows between 1 preceding and current row)
+             window wnd as (partition by polygon_crypto_tickers.symbol order by t rows between 1 preceding and current row)
       ) t
 {% if is_incremental() %}
          left join {{ this }} old_data using (symbol, date)
