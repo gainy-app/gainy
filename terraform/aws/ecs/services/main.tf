@@ -317,7 +317,7 @@ module "hasura-elb" {
  * Create Scheduler service
  */
 resource "aws_ecs_service" "meltano_scheduler" {
-  name                               = "gainy-${var.env}"
+  name                               = "gainy-scheduler-${var.env}"
   cluster                            = var.ecs_cluster_name
   desired_count                      = 1
   deployment_maximum_percent         = 200

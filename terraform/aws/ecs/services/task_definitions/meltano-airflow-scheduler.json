@@ -149,11 +149,6 @@
   "dockerLabels": null,
   "privileged": null,
   "memoryReservation": null,
-  "healthCheck": {
-    "command": [ "CMD-SHELL", "nc -z localhost 8793" ],
-    "interval": 10,
-    "retries": 2
-  },
   "logConfiguration": {
     "logDriver": "awslogs",
     "options": {
