@@ -6,7 +6,6 @@
     post_hook=[
       pk('id'),
       index(['profile_id', 'holding_id_v2', 'period', 'datetime'], true),
-      index(['updated_at']),
     ],
   )
 }}
