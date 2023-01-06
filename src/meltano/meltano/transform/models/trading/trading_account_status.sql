@@ -8,18 +8,18 @@
 with account_stats as
          (
              select trading_account_id,
-                    sum(cash_balance)                  as cash_balance,
-                    sum(cash_available_for_trade)      as cash_available_for_trade,
-                    sum(cash_available_for_withdrawal) as cash_available_for_withdrawal
+                    sum(t.cash_balance)                  as cash_balance,
+                    sum(t.cash_available_for_trade)      as cash_available_for_trade,
+                    sum(t.cash_available_for_withdrawal) as cash_available_for_withdrawal
              from (
                       select distinct on (
                           drivewealth_account_id
                           ) drivewealth_account_id,
-                            drivewealth_accounts_money.cash_balance,
-                            drivewealth_accounts_money.cash_available_for_trade,
-                            drivewealth_accounts_money.cash_available_for_withdrawal
+                            cash_balance,
+                            cash_available_for_trade,
+                            cash_available_for_withdrawal
                       from {{ source('app', 'drivewealth_accounts_money') }}
-                      order by drivewealth_account_id, drivewealth_accounts_money.created_at desc
+                      order by drivewealth_account_id, created_at desc
                   ) t
                       join {{ source('app', 'drivewealth_accounts') }}
                            on drivewealth_accounts.ref_id = t.drivewealth_account_id
@@ -58,7 +58,7 @@ select profile_id,
        trading_money_flow.trading_account_id is not null as deposited_funds,
        coalesce(pending_cash, 0)::double precision       as pending_cash,
        coalesce(
-{% if var("drivewealth_is_uat") %}
+{% if var("drivewealth_is_uat") == "true" %}
                cash_available_for_trade
 {% else %}
                cash_available_for_withdrawal
