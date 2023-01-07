@@ -4,9 +4,8 @@
     unique_key = "id",
     tags = ["realtime"],
     post_hook=[
-      pk('id'),
-      index(['holding_id_v2', 'date'], true),
-      index(['updated_at']),
+      pk('holding_id_v2, date'),
+      index('id', true),
     ],
   )
 }}
@@ -66,6 +65,7 @@ with raw_data as materialized
                                       historical_prices_aggregated_1w.updated_at
                                from {{ ref('profile_holdings_normalized_all') }}
                                         join {{ ref('historical_prices_aggregated_1w') }} using (symbol)
+                               where datetime >= holding_since or holding_since is null
                            ) t
                   ) t
              where adjusted_close is not null
@@ -103,9 +103,10 @@ select t.holding_id_v2,
 from (
          select raw_data.holding_id_v2,
                 date,
-                coalesce(quantity, 0) + greatest(
-                        coalesce(holding_value_adjustment.adjustment, 0),
-                        coalesce(min_value_adjustment.adjustment, 0)
+                greatest(
+                        0,
+                        coalesce(quantity, 0) +
+                        coalesce(holding_value_adjustment.adjustment, min_value_adjustment.adjustment, 0)
                     ) as quantity,
                 transaction_count,
                 open,
@@ -117,6 +118,7 @@ from (
          from raw_data
                   left join holding_value_adjustment using (holding_id_v2)
                   left join min_value_adjustment using (holding_id_v2)
+--          where quantity is not null or min_value_adjustment.adjustment is null
      ) t
 
 {% if is_incremental() %}
