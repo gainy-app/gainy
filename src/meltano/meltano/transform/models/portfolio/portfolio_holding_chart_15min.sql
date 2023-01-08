@@ -15,22 +15,24 @@ select data.*,
        data.holding_id_v2 || '_' || data.datetime as id
 from (
          select portfolio_holding_chart_1d.holding_id_v2,
+                portfolio_holding_chart_1d.date,
                 historical_prices_aggregated_15min.datetime,
-                sum(portfolio_holding_chart_1d.open * historical_prices_aggregated_15min.open /
-                    historical_prices_aggregated_1d.open) as open,
-                sum(portfolio_holding_chart_1d.open * historical_prices_aggregated_15min.high /
-                    historical_prices_aggregated_1d.open) as high,
-                sum(portfolio_holding_chart_1d.open * historical_prices_aggregated_15min.low /
-                    historical_prices_aggregated_1d.open) as low,
-                sum(portfolio_holding_chart_1d.open * historical_prices_aggregated_15min.close /
-                    historical_prices_aggregated_1d.open) as close,
-                sum(portfolio_holding_chart_1d.open * historical_prices_aggregated_15min.adjusted_close /
-                    historical_prices_aggregated_1d.open) as adjusted_close,
-                sum(portfolio_holding_chart_1d.quantity)            as quantity,
-                sum(portfolio_holding_chart_1d.transaction_count)   as transaction_count,
-                max(greatest(portfolio_holding_chart_1d.updated_at,
+                portfolio_holding_chart_1d.open * historical_prices_aggregated_15min.open /
+                    historical_prices_aggregated_1d.open           as open,
+                portfolio_holding_chart_1d.open * historical_prices_aggregated_15min.high /
+                    historical_prices_aggregated_1d.open           as high,
+                portfolio_holding_chart_1d.open * historical_prices_aggregated_15min.low /
+                    historical_prices_aggregated_1d.open           as low,
+                portfolio_holding_chart_1d.open * historical_prices_aggregated_15min.close /
+                    historical_prices_aggregated_1d.open           as close,
+                portfolio_holding_chart_1d.open * historical_prices_aggregated_15min.adjusted_close /
+                    historical_prices_aggregated_1d.open           as adjusted_close,
+                portfolio_holding_chart_1d.quantity                as quantity,
+                portfolio_holding_chart_1d.transaction_count::int,
+                historical_prices_aggregated_15min.relative_gain,
+                greatest(portfolio_holding_chart_1d.updated_at,
                     historical_prices_aggregated_1d.updated_at,
-                    historical_prices_aggregated_15min.updated_at)) as updated_at
+                    historical_prices_aggregated_15min.updated_at) as updated_at
          from {{ ref('portfolio_holding_chart_1d') }}
                   join {{ ref('profile_holdings_normalized_all') }} using (holding_id_v2)
                   join {{ ref('historical_prices_aggregated_1d') }}
@@ -39,7 +41,6 @@ from (
                   join {{ ref('historical_prices_aggregated_15min') }}
                        on historical_prices_aggregated_15min.symbol = profile_holdings_normalized_all.symbol
                            and historical_prices_aggregated_15min.date = portfolio_holding_chart_1d.date
-         group by portfolio_holding_chart_1d.holding_id_v2, historical_prices_aggregated_15min.datetime
     ) data
 
 {% if is_incremental() %}

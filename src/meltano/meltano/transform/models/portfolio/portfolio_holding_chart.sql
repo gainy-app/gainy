@@ -37,6 +37,7 @@ with
                              portfolio_holding_chart_3min.adjusted_close,
                              portfolio_holding_chart_3min.quantity,
                              portfolio_holding_chart_3min.transaction_count,
+                             portfolio_holding_chart_3min.relative_gain,
                              portfolio_holding_chart_3min.updated_at
                       from {{ ref('portfolio_holding_chart_3min') }}
                                join {{ ref('profile_holdings_normalized_all') }} using (holding_id_v2)
@@ -58,6 +59,7 @@ with
                              portfolio_holding_chart_15min.adjusted_close,
                              portfolio_holding_chart_15min.quantity,
                              portfolio_holding_chart_15min.transaction_count,
+                             portfolio_holding_chart_15min.relative_gain,
                              portfolio_holding_chart_15min.updated_at
                       from {{ ref('portfolio_holding_chart_15min') }}
                                join {{ ref('profile_holdings_normalized_all') }} using (holding_id_v2)
@@ -79,6 +81,7 @@ with
                              portfolio_holding_chart_1d.adjusted_close,
                              portfolio_holding_chart_1d.quantity,
                              portfolio_holding_chart_1d.transaction_count,
+                             portfolio_holding_chart_1d.relative_gain,
                              portfolio_holding_chart_1d.updated_at
                       from {{ ref('portfolio_holding_chart_1d') }}
                                join {{ ref('profile_holdings_normalized_all') }} using (holding_id_v2)
@@ -99,6 +102,7 @@ with
                              portfolio_holding_chart_1d.adjusted_close,
                              portfolio_holding_chart_1d.quantity,
                              portfolio_holding_chart_1d.transaction_count,
+                             portfolio_holding_chart_1d.relative_gain,
                              portfolio_holding_chart_1d.updated_at
                       from {{ ref('portfolio_holding_chart_1d') }}
                                join {{ ref('profile_holdings_normalized_all') }} using (holding_id_v2)
@@ -119,6 +123,7 @@ with
                              portfolio_holding_chart_1d.adjusted_close,
                              portfolio_holding_chart_1d.quantity,
                              portfolio_holding_chart_1d.transaction_count,
+                             portfolio_holding_chart_1d.relative_gain,
                              portfolio_holding_chart_1d.updated_at
                       from {{ ref('portfolio_holding_chart_1d') }}
                                join {{ ref('profile_holdings_normalized_all') }} using (holding_id_v2)
@@ -138,6 +143,7 @@ with
                              portfolio_holding_chart_1w.adjusted_close,
                              portfolio_holding_chart_1w.quantity,
                              portfolio_holding_chart_1w.transaction_count,
+                             portfolio_holding_chart_1w.relative_gain,
                              portfolio_holding_chart_1w.updated_at
                       from {{ ref('portfolio_holding_chart_1w') }}
                                join {{ ref('profile_holdings_normalized_all') }} using (holding_id_v2)
@@ -157,6 +163,7 @@ with
                              adjusted_close,
                              portfolio_holding_chart_1m.quantity,
                              portfolio_holding_chart_1m.transaction_count,
+                             portfolio_holding_chart_1m.relative_gain,
                              portfolio_holding_chart_1m.updated_at
                       from {{ ref('portfolio_holding_chart_1m') }}
                                join {{ ref('profile_holdings_normalized_all') }} using (holding_id_v2)
@@ -176,6 +183,7 @@ with
                              adjusted_close,
                              null as quantity,
                              null as transaction_count,
+                             relative_gain,
                              updated_at
                       from {{ ref('drivewealth_portfolio_chart') }}
                   ) t

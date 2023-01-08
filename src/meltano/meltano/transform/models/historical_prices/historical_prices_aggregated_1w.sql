@@ -24,23 +24,19 @@ with combined_daily_prices as materialized
                               date_week,
                               symbol
                               ) symbol as symbol,
-                                date_week                                                                                          as date,
-                                first_value(open)
-                                OVER (partition by date_week, symbol order by date rows between current row and unbounded following) as open,
-                                max(high)
-                                OVER (partition by date_week, symbol order by date rows between current row and unbounded following) as high,
-                                min(low)
-                                OVER (partition by date_week, symbol order by date rows between current row and unbounded following) as low,
-                                last_value(close)
-                                OVER (partition by date_week, symbol order by date rows between current row and unbounded following) as close,
-                                last_value(adjusted_close)
-                                OVER (partition by date_week, symbol order by date rows between current row and unbounded following) as adjusted_close,
-                                sum(volume)
-                                OVER (partition by date_week, symbol order by date rows between current row and unbounded following) as volume,
-                                0                                                                                                  as priority,
+                                date_week                                                       as date,
+                                first_value(open) over wnd                                      as open,
+                                max(high) over wnd                                              as high,
+                                min(low) over wnd                                               as low,
+                                last_value(close) over wnd                                      as close,
+                                last_value(adjusted_close) over wnd                             as adjusted_close,
+                                sum(volume) over wnd                                            as volume,
+                                exp(sum(ln(coalesce(relative_daily_gain, 0) + 1)) over wnd) - 1 as relative_gain,
+                                0                                                               as priority,
                                 updated_at
                           from {{ ref('historical_prices') }}
                           where date_week >= now() - interval '5 year' - interval '1 week'
+                                    window wnd as (partition by date_week, symbol order by date rows between current row and unbounded following)
                           order by date_week, symbol, date
                       )
                       union all
@@ -69,6 +65,7 @@ with combined_daily_prices as materialized
                                  null::double precision as close,
                                  null::double precision as adjusted_close,
                                  null::double precision as volume,
+                                 0                      as relative_gain,
                                  1                      as priority,
                                  null                   as updated_at
                           from filtered_base_tickers
@@ -101,6 +98,7 @@ with combined_daily_prices as materialized
                                  null::double precision as close,
                                  null::double precision as adjusted_close,
                                  null::double precision as volume,
+                                 0                      as relative_gain,
                                  1                      as priority,
                                  null                   as updated_at
                           from filtered_base_tickers
@@ -146,7 +144,8 @@ from (
                        updated_at,
                        now()
                    )::timestamp       as updated_at,
-               coalesce(volume, 0.0)  as volume
+               coalesce(volume, 0.0)  as volume,
+               relative_gain
          from (
                   select combined_daily_prices.*,
                          sum(case when close is not null then 1 end)

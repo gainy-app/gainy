@@ -109,14 +109,22 @@ with uniq_tickers as materialized
                  window
                      lookback as (partition by tds.symbol order by tds."date" asc)
          )
-select all_rows.*
+select all_rows.*,
+       case
+           when lag(adjusted_close) over wnd > 0
+               then coalesce(adjusted_close::numeric / (lag(adjusted_close) over wnd)::numeric - 1, 0)
+           end as relative_gain
 from all_rows
+
 {% if is_incremental() %}
          left join {{ this }} old_data using (symbol, datetime)
 where old_data.symbol is null -- no old data
    or (all_rows.updated_at is not null and old_data.updated_at is null) -- old data is null and new is not
    or all_rows.updated_at > old_data.updated_at -- new data is newer than the old one
 {% endif %}
+
+         window wnd as (partition by symbol order by date rows between 1 preceding and current row)
+
 -- Execution Time: 96290.198 ms
 -- OK created incremental model historical_prices_aggregated_1d SELECT 4385623 in 152.88s
 -- OK created incremental model historical_prices_aggregated_1d SELECT 4385623 in 143.39s

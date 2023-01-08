@@ -17,6 +17,7 @@ select drivewealth_portfolio_historical_prices_aggregated.profile_id,
        drivewealth_portfolio_historical_prices_aggregated.low,
        drivewealth_portfolio_historical_prices_aggregated.close,
        drivewealth_portfolio_historical_prices_aggregated.adjusted_close,
+       drivewealth_portfolio_historical_prices_aggregated.relative_gain,
        drivewealth_portfolio_historical_prices_aggregated.updated_at
 from {{ ref('drivewealth_portfolio_historical_prices_aggregated') }}
          join {{ ref('week_trading_sessions_static') }} using (symbol)
@@ -37,6 +38,7 @@ select drivewealth_portfolio_historical_prices_aggregated.profile_id,
        drivewealth_portfolio_historical_prices_aggregated.low,
        drivewealth_portfolio_historical_prices_aggregated.close,
        drivewealth_portfolio_historical_prices_aggregated.adjusted_close,
+       drivewealth_portfolio_historical_prices_aggregated.relative_gain,
        drivewealth_portfolio_historical_prices_aggregated.updated_at
 from {{ ref('drivewealth_portfolio_historical_prices_aggregated') }}
          join {{ ref('week_trading_sessions_static') }} using (symbol)
@@ -57,6 +59,7 @@ select drivewealth_portfolio_historical_prices_aggregated.profile_id,
        drivewealth_portfolio_historical_prices_aggregated.low,
        drivewealth_portfolio_historical_prices_aggregated.close,
        drivewealth_portfolio_historical_prices_aggregated.adjusted_close,
+       drivewealth_portfolio_historical_prices_aggregated.relative_gain,
        drivewealth_portfolio_historical_prices_aggregated.updated_at
 from {{ ref('drivewealth_portfolio_historical_prices_aggregated') }}
 where drivewealth_portfolio_historical_prices_aggregated.period = '1d'
@@ -76,6 +79,7 @@ select drivewealth_portfolio_historical_prices_aggregated.profile_id,
        drivewealth_portfolio_historical_prices_aggregated.low,
        drivewealth_portfolio_historical_prices_aggregated.close,
        drivewealth_portfolio_historical_prices_aggregated.adjusted_close,
+       drivewealth_portfolio_historical_prices_aggregated.relative_gain,
        drivewealth_portfolio_historical_prices_aggregated.updated_at
 from {{ ref('drivewealth_portfolio_historical_prices_aggregated') }}
 where drivewealth_portfolio_historical_prices_aggregated.period = '1d'
@@ -95,6 +99,7 @@ select drivewealth_portfolio_historical_prices_aggregated.profile_id,
        drivewealth_portfolio_historical_prices_aggregated.low,
        drivewealth_portfolio_historical_prices_aggregated.close,
        drivewealth_portfolio_historical_prices_aggregated.adjusted_close,
+       drivewealth_portfolio_historical_prices_aggregated.relative_gain,
        drivewealth_portfolio_historical_prices_aggregated.updated_at
 from {{ ref('drivewealth_portfolio_historical_prices_aggregated') }}
 where drivewealth_portfolio_historical_prices_aggregated.period = '1d'
@@ -113,6 +118,7 @@ select drivewealth_portfolio_historical_prices_aggregated.profile_id,
        drivewealth_portfolio_historical_prices_aggregated.low,
        drivewealth_portfolio_historical_prices_aggregated.close,
        drivewealth_portfolio_historical_prices_aggregated.adjusted_close,
+       drivewealth_portfolio_historical_prices_aggregated.relative_gain,
        drivewealth_portfolio_historical_prices_aggregated.updated_at
 from {{ ref('drivewealth_portfolio_historical_prices_aggregated') }}
 where drivewealth_portfolio_historical_prices_aggregated.period = '1w'
@@ -131,6 +137,7 @@ select profile_id,
        low,
        close,
        adjusted_close,
+       relative_gain,
        drivewealth_portfolio_historical_prices_aggregated.updated_at
 from {{ ref('drivewealth_portfolio_historical_prices_aggregated') }}
 where drivewealth_portfolio_historical_prices_aggregated.period = '1m'

@@ -23,6 +23,7 @@ with raw_data as materialized
                              close,
                              adjusted_close,
                              updated_at,
+                             relative_gain,
                              sum(quantity)
                              over (partition by holding_id_v2 order by close_date, quantity desc nulls last) as quantity,
                              sum(transaction_count)
@@ -41,14 +42,16 @@ with raw_data as materialized
                                                         then 100
                                                     else 1 end as quantity,
                                       1                        as transaction_count,
-                                      null                     as open,
-                                      null                     as high,
-                                      null                     as low,
-                                      null                     as close,
-                                      null                     as adjusted_close,
-                                      null                     as updated_at
+                                      null::double precision   as open,
+                                      null::double precision   as high,
+                                      null::double precision   as low,
+                                      null::double precision   as close,
+                                      null::double precision   as adjusted_close,
+                                      null::numeric            as relative_gain,
+                                      null::timestamp          as updated_at
                                from {{ ref('profile_holdings_normalized_all') }}
                                         join {{ source('app', 'profile_portfolio_transactions') }} using (account_id, security_id)
+                               where not is_app_trading
 
                                union all
 
@@ -62,10 +65,12 @@ with raw_data as materialized
                                       low,
                                       close,
                                       adjusted_close,
+                                      relative_gain,
                                       historical_prices_aggregated_1w.updated_at
                                from {{ ref('profile_holdings_normalized_all') }}
                                         join {{ ref('historical_prices_aggregated_1w') }} using (symbol)
-                               where datetime >= holding_since or holding_since is null
+                               where (datetime >= holding_since or holding_since is null)
+                                 and not is_app_trading
                            ) t
                   ) t
              where adjusted_close is not null
@@ -97,7 +102,8 @@ select t.holding_id_v2,
        t.quantity * t.close             as close,
        t.quantity * t.adjusted_close    as adjusted_close,
        t.quantity,
-       t.transaction_count,
+       t.transaction_count::int,
+       t.relative_gain,
        t.updated_at,
        t.holding_id_v2 || '_' || t.date as id
 from (
@@ -109,6 +115,7 @@ from (
                         coalesce(holding_value_adjustment.adjustment, min_value_adjustment.adjustment, 0)
                     ) as quantity,
                 transaction_count,
+                relative_gain,
                 open,
                 high,
                 low,
@@ -118,7 +125,6 @@ from (
          from raw_data
                   left join holding_value_adjustment using (holding_id_v2)
                   left join min_value_adjustment using (holding_id_v2)
---          where quantity is not null or min_value_adjustment.adjustment is null
      ) t
 
 {% if is_incremental() %}

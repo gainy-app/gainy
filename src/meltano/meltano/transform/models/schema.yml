@@ -1266,12 +1266,20 @@ models:
           - type:
               type: 'double precision'
 
-  - name: portfolio_transaction_chart
+  - name: portfolio_holding_chart
     columns:
-      - name: transaction_uniq_id
+      - name: profile_id
+        tests:
+          - type:
+              type: 'integer'
+      - name: holding_id_v2
         tests:
           - type:
               type: 'text'
+      - name: date
+        tests:
+          - type:
+              type: 'date'
       - name: datetime
         tests:
           - type:
@@ -1279,7 +1287,7 @@ models:
       - name: period
         tests:
           - type:
-              type: 'text'
+              type: 'character varying'
       - name: open
         tests:
           - type:
@@ -1297,6 +1305,18 @@ models:
           - type:
               type: 'double precision'
       - name: adjusted_close
+        tests:
+          - type:
+              type: 'double precision'
+      - name: quantity
+        tests:
+          - type:
+              type: 'double precision'
+      - name: transaction_count
+        tests:
+          - type:
+              type: 'integer'
+      - name: cash_adjustment
         tests:
           - type:
               type: 'double precision'
@@ -1951,46 +1971,6 @@ models:
         tests:
           - type:
               type: 'character varying'
-
-  - name: portfolio_expanded_transactions
-    columns:
-      - name: amount
-        tests:
-          - type:
-              type: 'double precision'
-      - name: price
-        tests:
-          - type:
-              type: 'double precision'
-      - name: quantity
-        tests:
-          - type:
-              type: 'double precision'
-      - name: profile_id
-        tests:
-          - type:
-              type: 'integer'
-      - name: quantity_norm
-        tests:
-          - type:
-              type: 'double precision'
-      - name: quantity_norm_for_valuation
-        tests:
-          - type:
-              type: 'double precision'
-      - name: updated_at
-        tests:
-          - type:
-              type: 'timestamp with time zone'
-      - name: transaction_uniq_id
-        tests:
-          - not_null
-          - type:
-              type: 'text'
-      - name: datetime
-        tests:
-          - type:
-              type: 'timestamp without time zone'
 
   - name: push_notifications
     columns:

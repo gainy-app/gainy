@@ -134,6 +134,10 @@ select t3.id,
        t3.low,
        t3.close,
        t3.adjusted_close,
+       case
+           when lag(t3.adjusted_close) over wnd > 0
+               then coalesce(t3.adjusted_close::numeric / (lag(t3.adjusted_close) over wnd)::numeric - 1, 0)
+           end                                                                             as relative_gain,
        t3.volume,
        coalesce(t3.updated_at, now())::timestamp as updated_at
 from (
@@ -225,6 +229,8 @@ from (
 {% endif %}
     ) t3
 where adjusted_close is not null
+             window wnd as (partition by t3.symbol order by t3.datetime rows between 1 preceding and current row)
+
 {% if is_incremental() %}
   and (old_data_adjusted_close is null -- no old data
    or abs(t3.adjusted_close - old_data_adjusted_close) > 1e-3) -- new data is newer than the old one
