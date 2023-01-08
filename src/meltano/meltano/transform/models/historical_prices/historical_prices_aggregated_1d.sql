@@ -123,7 +123,7 @@ where old_data.symbol is null -- no old data
    or all_rows.updated_at > old_data.updated_at -- new data is newer than the old one
 {% endif %}
 
-         window wnd as (partition by symbol order by date rows between 1 preceding and current row)
+         window wnd as (partition by symbol order by all_rows.date rows between 1 preceding and current row)
 
 -- Execution Time: 96290.198 ms
 -- OK created incremental model historical_prices_aggregated_1d SELECT 4385623 in 152.88s
