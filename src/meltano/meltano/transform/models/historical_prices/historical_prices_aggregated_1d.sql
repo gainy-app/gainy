@@ -111,8 +111,8 @@ with uniq_tickers as materialized
          )
 select all_rows.*,
        case
-           when lag(adjusted_close) over wnd > 0
-               then coalesce(adjusted_close::numeric / (lag(adjusted_close) over wnd)::numeric - 1, 0)
+           when lag(all_rows.adjusted_close) over wnd > 0
+               then coalesce(all_rows.adjusted_close::numeric / (lag(all_rows.adjusted_close) over wnd)::numeric - 1, 0)
            end as relative_gain
 from all_rows
 
