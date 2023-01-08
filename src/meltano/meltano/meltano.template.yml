@@ -53,17 +53,14 @@ plugins:
           kind: array
         - name: realtime_symbols
           kind: array
+        - name: realtime
         - name: split_id
         - name: split_num
-      select:
-        - polygon_marketstatus_upcoming.*
-        - polygon_stock_splits.*
-        - polygon_stocks_historical_prices.*
-        - polygon_options_historical_prices.*
-        - polygon_crypto_historical_prices.*
 
     - name: tap-polygon-intraday
       inherit_from: tap-polygon
+      config:
+        realtime: true
       select:
         - polygon_intraday_prices_launchpad.*
 
