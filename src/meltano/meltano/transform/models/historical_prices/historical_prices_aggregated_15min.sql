@@ -134,10 +134,7 @@ select t3.id,
        t3.low,
        t3.close,
        t3.adjusted_close,
-       case
-           when lag(t3.adjusted_close) over wnd > 0
-               then coalesce(t3.adjusted_close::numeric / (lag(t3.adjusted_close) over wnd)::numeric - 1, 0)
-           end                                                                             as relative_gain,
+       t3.relative_gain,
        t3.volume,
        coalesce(t3.updated_at, now())::timestamp as updated_at
 from (
@@ -145,6 +142,10 @@ from (
                 t2.symbol,
                 t2.date,
                 t2.datetime,
+                case
+                    when lag(t2.adjusted_close) over wnd > 0
+                        then coalesce(t2.adjusted_close::numeric / (lag(t2.adjusted_close) over wnd)::numeric - 1, 0)
+                    end                                                                    as relative_gain,
 {% if is_incremental() %}
                 coalesce(t2.open,
                          old_data.open,
@@ -168,7 +169,8 @@ from (
                          historical_prices_aggregated_1d.adjusted_close)::double precision as adjusted_close,
                 coalesce(t2.volume, old_data.volume, 0)                                    as volume,
                 t2.updated_at,
-                old_data.adjusted_close                                                    as old_data_adjusted_close
+                old_data.adjusted_close                                                    as old_data_adjusted_close,
+                old_data.relative_gain                                                     as old_data_relative_gain
 {% else %}
                 coalesce(t2.open,
                          historical_prices_aggregated_1d.adjusted_close)::double precision as open,
@@ -227,10 +229,11 @@ from (
                             on old_data.symbol = t2.symbol
                                 and old_data.datetime = t2.datetime
 {% endif %}
+                  window wnd as (partition by t2.symbol order by t2.datetime rows between 1 preceding and current row)
     ) t3
 where adjusted_close is not null
 {% if is_incremental() %}
   and (old_data_adjusted_close is null -- no old data
+   or (t3.relative_gain is not null and old_data_relative_gain is null)
    or abs(t3.adjusted_close - old_data_adjusted_close) > 1e-3) -- new data is newer than the old one
 {% endif %}
-         window wnd as (partition by t3.symbol order by t3.datetime rows between 1 preceding and current row)

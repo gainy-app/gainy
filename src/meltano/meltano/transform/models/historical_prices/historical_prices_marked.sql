@@ -127,14 +127,14 @@ with raw_data_0d as
              select distinct on (
                  raw_data_13m.symbol
                  ) raw_data_13m.*,
-                   historical_prices.date           as date_5y,
+                   historical_prices.date_week      as date_5y,
                    historical_prices.adjusted_close as price_5y
              from raw_data_13m
                       left join {{ ref('historical_prices') }}
                                 on historical_prices.symbol = raw_data_13m.symbol
-                                    and date < now()::date - interval '5 year'
-                                    and date > now()::date - interval '5 year' - interval '1 week'
-             order by symbol, date desc
+                                    and date_week < now()::date - interval '5 year'
+                                    and date_week > now()::date - interval '5 year' - interval '1 week'
+             order by symbol, date_week desc, date desc
          ),
      raw_data_all as
          (

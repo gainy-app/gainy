@@ -21,7 +21,7 @@ with
          ),
 {% endif %}
 
-     portfolio_holding_chart as
+     data as
          (
              select t.*
              from (
@@ -192,21 +192,22 @@ with
              where old_stats.max_updated_at is null or t.updated_at > old_stats.max_updated_at
 {% endif %}
          )
-select portfolio_holding_chart.*,
+select data.*,
        case
-           when portfolio_holding_chart.quantity > 0
-               then portfolio_holding_chart.adjusted_close /
-                    portfolio_holding_chart.quantity *
-                    (last_value(portfolio_holding_chart.quantity)
+           when data.quantity > 0
+               then data.adjusted_close /
+                    data.quantity *
+                    (last_value(data.quantity)
                         over (partition by profile_id, holding_id_v2, period order by datetime rows between current row and unbounded following) -
-                     portfolio_holding_chart.quantity)
+                     data.quantity)
            else 0
            end as cash_adjustment,
        profile_id || '_' || holding_id_v2 || '_' || period || '_' || datetime as id
-from portfolio_holding_chart
+from data
 
 {% if is_incremental() %}
          left join {{ this }} old_data using (profile_id, holding_id_v2, period, datetime)
 where old_data.adjusted_close is null
-   or abs(portfolio_holding_chart.adjusted_close - old_data.adjusted_close) > 1e-3
+   or (data.relative_gain is not null and old_data.relative_gain is null)
+   or abs(data.adjusted_close - old_data.adjusted_close) > 1e-3
 {% endif %}
