@@ -40,8 +40,12 @@ if [ $($psql_auth -c "select count(*) from deployment.public_schemas where schem
 
         echo "$(date)" Restoring schema "$OLD_DBT_TARGET_SCHEMA" to "$DBT_TARGET_SCHEMA"
         $psql_auth -f scripts/clone_schema.sql
-        $psql_auth -c "call clone_schema('$OLD_DBT_TARGET_SCHEMA', '$DBT_TARGET_SCHEMA')"
-        echo "$(date)" Schema "$OLD_DBT_TARGET_SCHEMA" restored to  "$DBT_TARGET_SCHEMA"
+        if $psql_auth -c "call clone_schema('$OLD_DBT_TARGET_SCHEMA', '$DBT_TARGET_SCHEMA')"; then
+          echo "$(date)" Schema "$OLD_DBT_TARGET_SCHEMA" restored to "$DBT_TARGET_SCHEMA"
+        else
+          echo "$(date)" Failed to restore schema "$OLD_DBT_TARGET_SCHEMA" to "$DBT_TARGET_SCHEMA, doing full refresh"
+          export DBT_RUN_FLAGS="--full-refresh"
+        fi
       fi
       export DBT_RUN_FLAGS="-s result:error+ state:modified+ config.materialized:view --defer --full-refresh"
     fi

@@ -2389,7 +2389,13 @@
   object_relationships:
     - name: access_token
       using:
-        foreign_key_constraint_on: plaid_access_token_id
+        manual_configuration:
+          column_mapping:
+            plaid_access_token_id: id
+          insertion_order: null
+          remote_table:
+            name: profile_plaid_access_tokens
+            schema: app
     - name: broker
       using:
         manual_configuration:

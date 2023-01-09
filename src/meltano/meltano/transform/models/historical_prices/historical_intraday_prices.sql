@@ -127,23 +127,17 @@ with polygon_symbols as materialized
                     volume::double precision,
 
              {% if not var('realtime') %}
-                    (close * split_rate)::double precision as adjusted_close,
+                    (close * coalesce(split_rate, 1))::double precision as adjusted_close,
              {% else %}
-                    close::double precision                as adjusted_close,
+                    close::double precision                             as adjusted_close,
              {% endif %}
-                    0                                      as priority
+                    0                                                   as priority
 
              from raw_intraday_prices
 
              {% if not var('realtime') %}
                       left join daily_adjustment_rate using (symbol, date)
-             {% endif %}
 
-             {% if is_incremental() and not var('realtime') %}
-             where abs(split_rate - 1) > 1e-3
-             {% endif %}
-
-             {% if not var('realtime') %}
              union all
 
              select symbol,
@@ -160,6 +154,7 @@ with polygon_symbols as materialized
                     1                                as priority
              from {{ ref('historical_prices_aggregated_1d') }}
                       join {{ ref('week_trading_sessions_static') }} using (symbol, date)
+             where close_at < now()
              {% endif %}
         )
 

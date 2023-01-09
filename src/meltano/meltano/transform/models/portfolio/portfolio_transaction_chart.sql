@@ -23,7 +23,8 @@ from (
                 (portfolio_expanded_transactions.quantity_norm_for_valuation * hpa.high)           as high,
                 (portfolio_expanded_transactions.quantity_norm_for_valuation * hpa.low)            as low,
                 (portfolio_expanded_transactions.quantity_norm_for_valuation * hpa.close)          as close,
-                (portfolio_expanded_transactions.quantity_norm_for_valuation * hpa.adjusted_close) as adjusted_close
+                (portfolio_expanded_transactions.quantity_norm_for_valuation * hpa.adjusted_close) as adjusted_close,
+                hpa.updated_at
          from {{ ref('portfolio_expanded_transactions') }}
                   join {{ ref('historical_prices_aggregated_3min') }} hpa using(symbol)
          where portfolio_expanded_transactions.is_app_trading = false
@@ -41,7 +42,8 @@ from (
                 (portfolio_expanded_transactions.quantity_norm_for_valuation * hpa.high)           as high,
                 (portfolio_expanded_transactions.quantity_norm_for_valuation * hpa.low)            as low,
                 (portfolio_expanded_transactions.quantity_norm_for_valuation * hpa.close)          as close,
-                (portfolio_expanded_transactions.quantity_norm_for_valuation * hpa.adjusted_close) as adjusted_close
+                (portfolio_expanded_transactions.quantity_norm_for_valuation * hpa.adjusted_close) as adjusted_close,
+                hpa.updated_at
          from {{ ref('portfolio_expanded_transactions') }}
                   join {{ ref('historical_prices_aggregated_15min') }} hpa using(symbol)
          where portfolio_expanded_transactions.is_app_trading = false
@@ -59,7 +61,8 @@ from (
                 (portfolio_expanded_transactions.quantity_norm_for_valuation * hpa.high)           as high,
                 (portfolio_expanded_transactions.quantity_norm_for_valuation * hpa.low)            as low,
                 (portfolio_expanded_transactions.quantity_norm_for_valuation * hpa.close)          as close,
-                (portfolio_expanded_transactions.quantity_norm_for_valuation * hpa.adjusted_close) as adjusted_close
+                (portfolio_expanded_transactions.quantity_norm_for_valuation * hpa.adjusted_close) as adjusted_close,
+                hpa.updated_at
          from {{ ref('portfolio_expanded_transactions') }}
                   join {{ ref('historical_prices_aggregated_1d') }} hpa using(symbol)
          where hpa.datetime >= now() - interval '1 month + 1 week'
@@ -78,7 +81,8 @@ from (
                 (portfolio_expanded_transactions.quantity_norm_for_valuation * hpa.high)           as high,
                 (portfolio_expanded_transactions.quantity_norm_for_valuation * hpa.low)            as low,
                 (portfolio_expanded_transactions.quantity_norm_for_valuation * hpa.close)          as close,
-                (portfolio_expanded_transactions.quantity_norm_for_valuation * hpa.adjusted_close) as adjusted_close
+                (portfolio_expanded_transactions.quantity_norm_for_valuation * hpa.adjusted_close) as adjusted_close,
+                hpa.updated_at
          from {{ ref('portfolio_expanded_transactions') }}
                   join {{ ref('historical_prices_aggregated_1d') }} hpa using(symbol)
          where hpa.datetime >= now() - interval '3 month + 1 week'
@@ -97,7 +101,8 @@ from (
                 (portfolio_expanded_transactions.quantity_norm_for_valuation * hpa.high)           as high,
                 (portfolio_expanded_transactions.quantity_norm_for_valuation * hpa.low)            as low,
                 (portfolio_expanded_transactions.quantity_norm_for_valuation * hpa.close)          as close,
-                (portfolio_expanded_transactions.quantity_norm_for_valuation * hpa.adjusted_close) as adjusted_close
+                (portfolio_expanded_transactions.quantity_norm_for_valuation * hpa.adjusted_close) as adjusted_close,
+                hpa.updated_at
          from {{ ref('portfolio_expanded_transactions') }}
                   join {{ ref('historical_prices_aggregated_1d') }} hpa using(symbol)
          where portfolio_expanded_transactions.is_app_trading = false
@@ -115,7 +120,8 @@ from (
                 (portfolio_expanded_transactions.quantity_norm_for_valuation * hpa.high)           as high,
                 (portfolio_expanded_transactions.quantity_norm_for_valuation * hpa.low)            as low,
                 (portfolio_expanded_transactions.quantity_norm_for_valuation * hpa.close)          as close,
-                (portfolio_expanded_transactions.quantity_norm_for_valuation * hpa.adjusted_close) as adjusted_close
+                (portfolio_expanded_transactions.quantity_norm_for_valuation * hpa.adjusted_close) as adjusted_close,
+                hpa.updated_at
          from {{ ref('portfolio_expanded_transactions') }}
                   join {{ ref('historical_prices_aggregated_1w') }} hpa using(symbol)
          where portfolio_expanded_transactions.is_app_trading = false
@@ -133,7 +139,8 @@ from (
                 (portfolio_expanded_transactions.quantity_norm_for_valuation * hpa.high)           as high,
                 (portfolio_expanded_transactions.quantity_norm_for_valuation * hpa.low)            as low,
                 (portfolio_expanded_transactions.quantity_norm_for_valuation * hpa.close)          as close,
-                (portfolio_expanded_transactions.quantity_norm_for_valuation * hpa.adjusted_close) as adjusted_close
+                (portfolio_expanded_transactions.quantity_norm_for_valuation * hpa.adjusted_close) as adjusted_close,
+                hpa.updated_at
          from {{ ref('portfolio_expanded_transactions') }}
                   join {{ ref('historical_prices_aggregated_1m') }} hpa using(symbol)
          where portfolio_expanded_transactions.is_app_trading = false
@@ -151,7 +158,8 @@ from (
                 high,
                 low,
                 close,
-                adjusted_close
+                adjusted_close,
+                updated_at
          from {{ ref('drivewealth_portfolio_chart') }}
     ) t
 {% if is_incremental() %}
