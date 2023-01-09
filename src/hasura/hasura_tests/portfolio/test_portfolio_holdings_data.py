@@ -129,16 +129,18 @@ def test_portfolio_holdings_data(user_id, quantities, quantities_override):
             if relative_portfolio_key in [
                     'relative_gain_1d', 'relative_gain_total'
             ]:
-                assert abs((holding_group['details'][relative_portfolio_key] or 0) -
-                           expected_relative_gain) < PRICE_EPS, (
-                               absolute_portfolio_key, symbol)
+                assert abs(
+                    (holding_group['details'][relative_portfolio_key] or 0) -
+                    expected_relative_gain) < PRICE_EPS, (
+                        absolute_portfolio_key, symbol)
             assert abs((gains[relative_portfolio_key] or 0) -
                        expected_relative_gain) < PRICE_EPS, (
                            absolute_portfolio_key, symbol)
             assert abs((gains[absolute_portfolio_key] or 0) -
                        holding_absolute_gain_sum) < PRICE_EPS, (
                            absolute_portfolio_key, symbol)
-            holding_group_absolute_gain_sum += gains[absolute_portfolio_key] or 0
+            holding_group_absolute_gain_sum += gains[
+                absolute_portfolio_key] or 0
 
         actual_value = portfolio_gains['actual_value']
         prev_value = actual_value - holding_group_absolute_gain_sum
