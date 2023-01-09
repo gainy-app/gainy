@@ -25,7 +25,7 @@ from (
                 case
                     when base_tickers.type = 'crypto'
                         then 'crypto'
-                    when portfolio_securities.type = 'derivative'
+                    when portfolio_securities.type = 'derivative' or ticker_options.contract_name is not null
                         then 'derivative'
                     when base_tickers.type = 'common stock'
                         then 'equity'
@@ -34,6 +34,8 @@ from (
                greatest(portfolio_securities.updated_at,
                         base_tickers.updated_at)             as updated_at
          from {{ source('app', 'portfolio_securities') }}
+                  left join {{ ref('ticker_options') }} 
+                            on ticker_options.contract_name = portfolio_securities.ticker_symbol
                   left join {{ ref('base_tickers') }}
                             -- crypto
                             on (portfolio_securities.type in ('crypto', 'cryptocurrency') and
