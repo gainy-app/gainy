@@ -233,9 +233,8 @@ from (
 {% endif %}
     ) t3
 where adjusted_close is not null
-             window wnd as (partition by t3.symbol order by t3.datetime rows between 1 preceding and current row)
-
 {% if is_incremental() %}
   and (old_data_adjusted_close is null -- no old data
    or abs(t3.adjusted_close - old_data_adjusted_close) > 1e-3) -- new data is newer than the old one
 {% endif %}
+         window wnd as (partition by t3.symbol order by t3.datetime rows between 1 preceding and current row)
