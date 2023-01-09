@@ -12,16 +12,7 @@
 
 
 -- Execution Time: 220791.001 ms
-with
-{% if is_incremental() %}
-     old_stats as
-         (
-             select max(updated_at) as max_updated_at
-             from {{ this }}
-         ),
-{% endif %}
-
-     data as
+with data as
          (
              select t.*
              from (
@@ -187,10 +178,6 @@ with
                              updated_at
                       from {{ ref('drivewealth_portfolio_chart') }}
                   ) t
-{% if is_incremental() %}
-                      left join old_stats on true
-             where old_stats.max_updated_at is null or t.updated_at > old_stats.max_updated_at
-{% endif %}
          )
 select data.*,
        case

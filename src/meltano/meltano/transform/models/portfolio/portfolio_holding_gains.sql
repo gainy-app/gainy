@@ -39,6 +39,16 @@ with long_term_tax_holdings as
                and datetime between open_at and close_at - interval '1 second'
              order by holding_id_v2, datetime desc
      ),
+    last_day_value as
+        (
+             select distinct on (
+                 holding_id_v2
+                 ) holding_id_v2,
+                   adjusted_close as last_day_value
+             from {{ ref('portfolio_holding_chart') }}
+             where period = '1m'
+             order by holding_id_v2, datetime desc
+     ),
     combined_gains as
         (
              with raw_data_0d as
@@ -142,24 +152,24 @@ select holding_group_id,
                then absolute_gain_1w / (actual_value - absolute_gain_1w)
            end::double precision       as relative_gain_1w,
        case
-           when abs(actual_value - absolute_gain_1m) > 1e-9
-               then absolute_gain_1m / (actual_value - absolute_gain_1m)
+           when abs(last_day_value - absolute_gain_1m) > 1e-9
+               then absolute_gain_1m / (last_day_value - absolute_gain_1m)
            end::double precision       as relative_gain_1m,
        case
-           when abs(actual_value - absolute_gain_3m) > 1e-9
-               then absolute_gain_3m / (actual_value - absolute_gain_3m)
+           when abs(last_day_value - absolute_gain_3m) > 1e-9
+               then absolute_gain_3m / (last_day_value - absolute_gain_3m)
            end::double precision       as relative_gain_3m,
        case
-           when abs(actual_value - absolute_gain_1y) > 1e-9
-               then absolute_gain_1y / (actual_value - absolute_gain_1y)
+           when abs(last_day_value - absolute_gain_1y) > 1e-9
+               then absolute_gain_1y / (last_day_value - absolute_gain_1y)
            end::double precision       as relative_gain_1y,
        case
-           when abs(actual_value - absolute_gain_5y) > 1e-9
-               then absolute_gain_5y / (actual_value - absolute_gain_5y)
+           when abs(last_day_value - absolute_gain_5y) > 1e-9
+               then absolute_gain_5y / (last_day_value - absolute_gain_5y)
            end::double precision       as relative_gain_5y,
        case
-           when abs(actual_value - absolute_gain_total) > 1e-9
-               then absolute_gain_total / (actual_value - absolute_gain_total)
+           when abs(last_day_value - absolute_gain_total) > 1e-9
+               then absolute_gain_total / (last_day_value - absolute_gain_total)
            end::double precision as relative_gain_total,
        absolute_gain_1d,
        absolute_gain_1w,
@@ -173,3 +183,4 @@ from {{ ref('profile_holdings_normalized') }}
          left join combined_gains using (holding_id_v2)
          left join long_term_tax_holdings using (holding_id_v2)
          left join actual_value using (holding_id_v2)
+         left join last_day_value using (holding_id_v2) -- todo: get rid of this and fix tests

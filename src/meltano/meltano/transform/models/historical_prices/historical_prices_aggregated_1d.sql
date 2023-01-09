@@ -83,7 +83,7 @@ with uniq_tickers as materialized
                               where type = 'crypto'
                           )
                  SELECT symbol, date_series::date as date
-                 FROM generate_series(now() - interval '1 year' - interval '1 week', now(), '1 day') date_series
+                 FROM generate_series(now() - interval '1 year' - interval '1 week', now() - interval '1 day', '1 day') date_series
                           join filtered_base_tickers on true
                           join uniq_tickers using (symbol)
                  where date_series::date >= min_date
