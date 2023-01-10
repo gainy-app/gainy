@@ -38,7 +38,7 @@ class ECSDeploymentStateChangeEventHandler(AbstractAwsEventHandler):
             service_arn = body["resources"][0]
 
             ecs = ECS()
-            services = ecs.describe_service(service_arn)
+            services = ecs.describe_service(service_arn)["services"]
             logger_extra["services"] = services
             task_def_arns = []
             for service in services:
