@@ -28,7 +28,8 @@ class StatementCreatedEventHandler(AbstractDriveWealthEventHandler):
         entity.account_id = event_payload["accountID"]
         entity.user_id = event_payload["userID"]
 
-        profile_id = self.provider.get_profile_id_by_user_id(entity.user_id)
-
         self.repo.persist(entity)
-        self.provider.create_trading_statements([entity], profile_id)
+
+        profile_id = self.provider.get_profile_id_by_user_id(entity.user_id)
+        if profile_id:
+            self.provider.create_trading_statements([entity], profile_id)
