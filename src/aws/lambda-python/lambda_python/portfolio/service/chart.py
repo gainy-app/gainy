@@ -93,7 +93,7 @@ class PortfolioChartService:
         join_clause = []
 
         if self._should_return_empty_result(filter):
-            return []
+            return {}
 
         self._filter_query_by_periods(params, chart_where_clause, None, filter)
         self._filter_query_by_institution_ids(params, holding_where_clause,
