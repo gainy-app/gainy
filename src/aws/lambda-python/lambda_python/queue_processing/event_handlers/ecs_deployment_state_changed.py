@@ -56,6 +56,10 @@ class ECSDeploymentStateChangeEventHandler(AbstractAwsEventHandler):
                 logger_extra["task_defs"] = task_defs
 
                 tags = {t["key"]: t["value"] for t in task_def.get("tags", [])}
+                task_def_env = tags.get("environment")
+                if task_def_env is None or task_def_env != ENV:
+                    continue
+
                 branch = tags.get("source_code_branch")
                 branch_name = tags.get("source_code_branch_name")
                 try:
