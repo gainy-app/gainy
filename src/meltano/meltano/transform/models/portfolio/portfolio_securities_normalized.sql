@@ -47,9 +47,11 @@ from (
                                     else portfolio_securities.ticker_symbol || '.CC'
                                     end)
                                 -- options
-                                or (portfolio_securities.type = 'derivative' and
+                                or ((portfolio_securities.type = 'derivative' or ticker_options.contract_name is not null) and
                                     base_tickers.symbol =
                                     case
+                                        when ticker_options.contract_name is not null
+                                            then ticker_options.symbol
                                         when portfolio_securities.ticker_symbol ~ '\d{6}[CP]\d{8}$'
                                             then regexp_replace(portfolio_securities.ticker_symbol, '\d{6}[CP]\d{8}$',
                                                                 '')
