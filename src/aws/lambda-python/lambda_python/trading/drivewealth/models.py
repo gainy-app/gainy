@@ -330,6 +330,7 @@ class DriveWealthStatement(BaseDriveWealthModel):
             return
         self.display_name = data["displayName"]
         self.file_key = data["fileKey"]
+        self.data = data
 
     @classproperty
     def table_name(self) -> str:
