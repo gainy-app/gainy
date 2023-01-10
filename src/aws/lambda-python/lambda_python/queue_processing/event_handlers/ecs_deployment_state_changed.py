@@ -24,7 +24,7 @@ class ECSDeploymentStateChangeEventHandler(AbstractAwsEventHandler):
         }
         try:
             event_name = event_payload["eventName"]
-            if event_name != "SERVICE_STEADY_STATE":
+            if event_name != "SERVICE_DEPLOYMENT_COMPLETED":
                 return
 
             updated_at = event_payload.get("updatedAt")
