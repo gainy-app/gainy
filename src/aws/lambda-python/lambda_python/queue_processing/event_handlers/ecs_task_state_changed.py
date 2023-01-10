@@ -1,16 +1,13 @@
 import base64
 import datetime
-import os
 
 import dateutil.parser
 
 from gainy.utils import get_logger, env
 from queue_processing.event_handlers.abstract_aws_event_handler import AbstractAwsEventHandler
 from services.aws_ecs import ECS
+from services.slack import Slack
 
-SLACK_BOT_TOKEN = os.getenv('SLACK_BOT_TOKEN')
-SLACK_NOTIFICATIONS_CHANNEL = os.getenv('SLACK_NOTIFICATIONS_CHANNEL',
-                                        "#build-release")
 ENV = env()
 
 logger = get_logger(__name__)
@@ -21,9 +18,10 @@ class ECSTaskStateChangeEventHandler(AbstractAwsEventHandler):
     def supports(self, event_type: str):
         return event_type == "ECS Task State Change"
 
-    def handle(self, event_payload: dict):
+    def handle(self, body: dict):
+        event_payload = body["detail"]
         logger_extra = {
-            "event_payload": event_payload,
+            "body": body,
         }
         try:
             desired_status = event_payload["desiredStatus"]
@@ -70,23 +68,8 @@ class ECSTaskStateChangeEventHandler(AbstractAwsEventHandler):
                 return
 
             logger_extra["message_text"] = message
-            self._send_message(message)
-        finally:
-            logger.info("ECSTaskStateChangeEventHandler", extra=logger_extra)
-
-    def _send_message(self, message):
-        if not SLACK_BOT_TOKEN:
-            return
-
-        from slack_sdk import WebClient
-        from slack_sdk.errors import SlackApiError
-
-        client = WebClient(token=SLACK_BOT_TOKEN)
-
-        try:
-            response = client.chat_postMessage(
-                channel=SLACK_NOTIFICATIONS_CHANNEL, text=message)
+            response = Slack().send_message(message)
             logger.info("ECSTaskStateChangeEventHandler _send_message",
                         extra={"response": response})
-        except SlackApiError as e:
-            logger.exception(e)
+        finally:
+            logger.info("ECSTaskStateChangeEventHandler", extra=logger_extra)
