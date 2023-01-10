@@ -261,62 +261,17 @@ with data as
 
             union all
 
-            -- Deal execution
             select profile_id,
-                   ('order_executed_' || uniq_id)                                                 as uniq_id,
-                   null::timestamp                                                                as send_at,
-                   null::json                                                                     as title,
-                   json_build_object('en', case when amount > 0 then 'Bought' else 'Sold' end ||
-                                           ' $' || round(abs(amount), 2) || ' of ' || asset_name) as text,
-                   null::json                                                                     as data,
-                   true                                                                           as is_test,
-                   true                                                                           as is_push,
-                   true                                                                           as is_shown_in_app,
-                   '094f1363-da90-4477-bc69-6c333d987a52'                                         as template_id
-            from (
-                     select profile_id,
-                            'trading_collection_versions_' || trading_collection_versions.id as uniq_id,
-                            target_amount_delta                                              as amount,
-                            collections.name                                                 as asset_name,
-                            executed_at
-                     from app.trading_collection_versions
-                              join collections on collections.id = trading_collection_versions.collection_id
-                     where source = 'MANUAL'
-                       and status = 'EXECUTED_FULLY'
-
-                     union all
-
-                     select profile_id,
-                            'trading_orders_' || id as uniq_id,
-                            target_amount_delta     as amount,
-                            symbol                  as asset_name,
-                            executed_at
-                     from app.trading_orders
-                     where source = 'MANUAL'
-                       and status = 'EXECUTED_FULLY'
-                 ) t
-            where executed_at between now() - interval '1 hours' and now()
-
-            union all
-
-            -- TTF rebalanced
-            select profile_id,
-                   ('ttf_rebalanced_' || profile_id || '_' || date_trunc('week', executed_at::date))    as uniq_id,
-                   null::timestamp as send_at,
-                   null::json                                                                           as title,
-                   json_build_object('en', 'Some TTFs in your portfolio were automatically rebalanced') as text,
-                   null::json                                                                           as data,
-                   true                                                                                 as is_test,
-                   true                                                                                 as is_push,
-                   true                                                                                 as is_shown_in_app,
-                   'beb30a52-a65b-496c-90bb-3d50c5e1aaf0'                                               as template_id
-            from (
-                     select profile_id, max(executed_at) as executed_at
-                     from app.trading_collection_versions
-                     where source = 'AUTOMATIC' and status = 'EXECUTED_FULLY'
-                     group by profile_id
-                ) t
-            where executed_at between now() - interval '1 hours' and now()
+                   uniq_id,
+                   send_at,
+                   title,
+                   text,
+                   data,
+                   is_test,
+                   is_push,
+                   is_shown_in_app,
+                   template_id
+            from {{ ref('trading_notifications') }}
         ),
     profiles as
         (

@@ -324,6 +324,7 @@ class DriveWealthStatement(BaseDriveWealthModel):
 
         if row and row["type"]:
             self.type = TradingStatementType(row["type"])
+        return self
 
     def set_from_response(self, data: dict = None):
         if not data:

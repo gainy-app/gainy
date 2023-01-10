@@ -29,6 +29,7 @@ class VerificationCode(BaseModel):
 
         if row and row["channel"]:
             self.channel = VerificationCodeChannel(row["channel"])
+        return self
 
     def to_dict(self) -> dict:
         return {
