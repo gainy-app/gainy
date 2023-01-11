@@ -314,7 +314,7 @@ class DriveWealthStatement(BaseDriveWealthModel):
     user_id: str = None
     created_at: datetime.datetime = None
 
-    key_fields = ["file_key"]
+    key_fields = ["account_id", "type", "file_key"]
 
     db_excluded_fields = ["created_at"]
     non_persistent_fields = ["created_at"]
@@ -330,6 +330,7 @@ class DriveWealthStatement(BaseDriveWealthModel):
             return
         self.display_name = data["displayName"]
         self.file_key = data["fileKey"]
+        self.data = data
 
     @classproperty
     def table_name(self) -> str:

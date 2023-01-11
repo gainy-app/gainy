@@ -21,4 +21,10 @@ upload_to_s3 = BashOperator(task_id="postgres-history-weekly-to-s3",
                                 "schedule run postgres-history-weekly-to-s3"),
                             dag=dag)
 
+upload_to_analytics = BashOperator(
+    task_id="postgres-to-analytics",
+    bash_command=get_meltano_command("schedule run postgres-to-analytics"),
+    dag=dag)
+
 gainy_recommendation >> upload_to_s3
+gainy_recommendation >> upload_to_analytics
