@@ -41,6 +41,10 @@ from (
                   join {{ ref('historical_prices_aggregated_15min') }}
                        on historical_prices_aggregated_15min.symbol = profile_holdings_normalized_all.symbol
                            and historical_prices_aggregated_15min.date = portfolio_holding_chart_1d.date
+                  join {{ ref('week_trading_sessions_static') }}
+                           on week_trading_sessions_static.symbol = profile_holdings_normalized_all.symbol
+                               and week_trading_sessions_static.date = historical_prices_aggregated_15min.date
+         where week_trading_sessions_static.index != 0
 
          union all
 
