@@ -1,13 +1,13 @@
 with holdings as
          (
-             select profile_holdings_normalized.profile_id,
+             select profile_holdings_normalized_all.profile_id,
                     holding_id_v2,
                     quantity_norm_for_valuation,
                     plaid_access_token_id,
-                    profile_holdings_normalized.ticker_symbol,
-                    profile_holdings_normalized.symbol,
-                    profile_holdings_normalized.type as security_type
-             from profile_holdings_normalized
+                    profile_holdings_normalized_all.ticker_symbol,
+                    profile_holdings_normalized_all.symbol,
+                    profile_holdings_normalized_all.type as security_type
+             from profile_holdings_normalized_all
              where profile_id = %(profile_id)s
                    {where_clause}
          ),

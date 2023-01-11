@@ -24,11 +24,12 @@ class VerificationCode(BaseModel):
     db_excluded_fields = ["created_at"]
     non_persistent_fields = ["id", "created_at"]
 
-    def __init__(self, row: dict = None):
-        super().__init__(row)
+    def set_from_dict(self, row: dict = None):
+        super().set_from_dict(row)
 
         if row and row["channel"]:
             self.channel = VerificationCodeChannel(row["channel"])
+        return self
 
     def to_dict(self) -> dict:
         return {

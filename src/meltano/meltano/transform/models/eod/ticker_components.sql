@@ -71,7 +71,7 @@ with
                     min(component_exchange)        as component_exchange,
                     min(component_industry)        as component_industry,
                     min(version)                   as version,
-                    min(updated_at)                as updated_at
+                    max(updated_at)                as updated_at
              from data
              group by symbol, component_symbol
          )

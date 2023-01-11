@@ -365,7 +365,17 @@ class DriveWealthProvider(DriveWealthProviderKYC,
             account_data = self.api.create_account(user.ref_id)
             account = repository.upsert_user_account(user.ref_id, account_data)
 
-        trading_account = TradingAccount()
+        if account.trading_account_id:
+            trading_account: TradingAccount = repository.find_one(
+                TradingAccount, {"id": account.trading_account_id})
+        elif user.profile_id:
+            trading_account: TradingAccount = repository.find_one(
+                TradingAccount, {"profile_id": user.profile_id})
+        else:
+            raise Exception('No profile_id assigned to the DW user.')
+
+        if not trading_account:
+            trading_account = TradingAccount()
         trading_account.profile_id = user.profile_id
         trading_account.name = account.nickname
         account.update_trading_account(trading_account)
