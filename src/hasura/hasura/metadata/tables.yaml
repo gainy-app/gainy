@@ -226,9 +226,6 @@
                     _is_null: true
         check: null
 - table:
-    name: notifications
-    schema: app
-- table:
     name: payment_methods
     schema: app
   object_relationships:
@@ -616,6 +613,23 @@
         num_retries: 1
         timeout_sec: 150
       webhook: '{{AWS_LAMBDA_API_GATEWAY_ENDPOINT}}/hasuraTrigger'
+- table:
+    name: profile_notification_viewed
+    schema: app
+  object_relationships:
+    - name: profile
+      using:
+        foreign_key_constraint_on: profile_id
+  insert_permissions:
+    - role: user
+      permission:
+        check:
+          profile:
+            user_id:
+              _eq: X-Hasura-User-Id
+        columns:
+          - notification_uuid
+          - profile_id
 - table:
     name: profile_plaid_access_tokens
     schema: app
@@ -1821,6 +1835,34 @@
           - sort_order
         filter: {}
 - table:
+    name: notifications
+    schema: public
+  object_relationships:
+    - name: profile
+      using:
+        manual_configuration:
+          column_mapping:
+            profile_id: id
+          insertion_order: null
+          remote_table:
+            name: profiles
+            schema: app
+  select_permissions:
+    - role: user
+      permission:
+        columns:
+          - profile_id
+          - notification_uuid
+          - title
+          - text
+          - data
+          - created_at
+          - is_viewed
+        filter:
+          profile:
+            user_id:
+              _eq: X-Hasura-User-Id
+- table:
     name: portfolio_brokers
     schema: public
   select_permissions:
@@ -2248,10 +2290,11 @@
     - role: user
       permission:
         columns:
-          - profile_id
           - is_personalization_enabled
           - is_region_changing_allowed
           - is_trading_enabled
+          - not_viewed_notifications_count
+          - profile_id
         filter:
           profile:
             user_id:
@@ -2346,7 +2389,13 @@
   object_relationships:
     - name: access_token
       using:
-        foreign_key_constraint_on: plaid_access_token_id
+        manual_configuration:
+          column_mapping:
+            plaid_access_token_id: id
+          insertion_order: null
+          remote_table:
+            name: profile_plaid_access_tokens
+            schema: app
     - name: broker
       using:
         manual_configuration:
@@ -2995,6 +3044,7 @@
           - trading_collection_version_id
           - trading_order_id
           - type
+          - uniq_id
         filter:
           profile:
             user_id:

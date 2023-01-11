@@ -79,6 +79,7 @@ sources:
       - name: profile_flags
       - name: profile_holdings
       - name: profile_interests
+      - name: profile_notification_viewed
       - name: profile_plaid_access_tokens
       - name: profile_portfolio_accounts
       - name: profile_portfolio_transactions
@@ -1991,7 +1992,7 @@ models:
           - type:
               type: 'timestamp without time zone'
 
-  - name: push_notifications
+  - name: notifications_to_send
     columns:
       - name: profile_id
         tests:
@@ -2016,6 +2017,14 @@ models:
           - type:
               type: 'json'
       - name: is_test
+        tests:
+          - type:
+              type: 'boolean'
+      - name: is_push
+        tests:
+          - type:
+              type: 'boolean'
+      - name: is_shown_in_app
         tests:
           - type:
               type: 'boolean'
@@ -2581,6 +2590,10 @@ models:
         tests:
           - type:
               type: 'boolean'
+      - name: not_viewed_notifications_count
+        tests:
+          - type:
+              type: 'integer'
 
   - name: top_global_collections
     columns:
@@ -2646,6 +2659,37 @@ models:
         tests:
           - type:
               type: 'double precision'
+
+  - name: notifications
+    columns:
+      - name: profile_id
+        tests:
+          - type:
+              type: 'integer'
+      - name: notification_uuid
+        tests:
+          - type:
+              type: 'uuid'
+      - name: title
+        tests:
+          - type:
+              type: 'json'
+      - name: text
+        tests:
+          - type:
+              type: 'json'
+      - name: data
+        tests:
+          - type:
+              type: 'json'
+      - name: created_at
+        tests:
+          - type:
+              type: 'timestamp with time zone'
+      - name: is_viewed
+        tests:
+          - type:
+              type: 'boolean'
 
 exposures:
   - name: ticker_search_index

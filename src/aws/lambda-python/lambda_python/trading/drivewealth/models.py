@@ -314,22 +314,24 @@ class DriveWealthStatement(BaseDriveWealthModel):
     user_id: str = None
     created_at: datetime.datetime = None
 
-    key_fields = ["file_key"]
+    key_fields = ["account_id", "type", "file_key"]
 
     db_excluded_fields = ["created_at"]
     non_persistent_fields = ["created_at"]
 
-    def __init__(self, row: dict = None):
-        super().__init__(row)
+    def set_from_dict(self, row: dict = None):
+        super().set_from_dict(row)
 
         if row and row["type"]:
             self.type = TradingStatementType(row["type"])
+        return self
 
     def set_from_response(self, data: dict = None):
         if not data:
             return
         self.display_name = data["displayName"]
         self.file_key = data["fileKey"]
+        self.data = data
 
     @classproperty
     def table_name(self) -> str:

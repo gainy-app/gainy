@@ -8,7 +8,7 @@ dag = create_dag(dag_id,
                  is_paused_upon_creation=True,
                  schedule_interval="0 7 1 * *")
 
-file_name = 'weights_{{ ts_nodash }}.csv'
+file_name = 'weights_{{ next_execution_date.strftime("%Y%m%dT%H%M%S") }}.csv'
 file_path = f'/tmp/{file_name}'
 
 sysinfo = BashOperator(

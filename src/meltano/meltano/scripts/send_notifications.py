@@ -155,16 +155,16 @@ def send_all(sender_id):
     with db_connect() as db_conn:
         with db_conn.cursor(cursor_factory=DictCursor) as cursor:
             cursor.execute(
-                """insert into app.notifications(profile_id, uniq_id, send_at, title, text, data, sender_id, is_test, template_id)
-                   select profile_id, uniq_id, send_at, title, text, data, %(sender_id)s, is_test, template_id
-                   from push_notifications
+                """insert into app.notifications(profile_id, uniq_id, title, text, data, sender_id, is_test, template_id, is_push, is_shown_in_app)
+                   select profile_id, uniq_id, title, text, data, %(sender_id)s, is_test, template_id, is_push, is_shown_in_app
+                   from notifications_to_send
                    where send_at <= now()
                    on conflict do nothing""", {"sender_id": sender_id})
             cursor.execute(
-                "update app.notifications set sender_id = %(sender_id)s where sender_id is null",
+                "update app.notifications set sender_id = %(sender_id)s where sender_id is null and is_push",
                 {"sender_id": sender_id})
             cursor.execute(
-                """select profiles.email, uuid, send_at, title, text, data, is_test, template_id
+                """select profiles.email, uuid, title, text, data, is_test, template_id
                    from app.notifications
                    left join app.profiles on profiles.id = notifications.profile_id
                    where sender_id = %(sender_id)s

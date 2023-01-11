@@ -27,7 +27,7 @@ def test(monkeypatch):
 
     monkeypatch.setattr(message_handler, '_get_handler', mock_get_handler)
 
-    message = QueueMessage(None)
+    message = QueueMessage()
     message.body = {
         "id": "id",
         "type": event_type,
