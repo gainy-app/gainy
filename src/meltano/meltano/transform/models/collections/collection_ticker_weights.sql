@@ -97,9 +97,9 @@ with raw_ticker_collections_weights as materialized
 {% if is_incremental() and var('realtime') %}
      old_stats as materialized
          (
-             select collection_uniq_id, symbol, max(date) as date
+             select collection_uniq_id, max(date) as date
              from {{ this }}
-             group by collection_uniq_id, symbol
+             group by collection_uniq_id
          ),
 {% endif %}
      ticker_collections_weights_expanded0 as materialized
@@ -127,7 +127,7 @@ with raw_ticker_collections_weights as materialized
                             historical_prices.updated_at) as updated_at
              from ticker_collections_weights
 {% if is_incremental() and var('realtime') %}
-                      left join old_stats using (collection_uniq_id, symbol)
+                      left join old_stats using (collection_uniq_id)
 {% endif %}
 
                       join {{ ref('historical_prices') }}
@@ -207,31 +207,22 @@ with raw_ticker_collections_weights as materialized
                     t.collection_id,
                     t.symbol,
                     coalesce(t.date, ticker_collections_next_date.date) as date,
-                    t.original_date,
-                    t.date as next_date,
                     t.weight,
-                    t.original_weight,
-                    t.weight_sum,
                     t.price,
                     t.optimized_at,
                     t.updated_at
              from (
                       select profile_id,
-                             ticker_collections_weights_expanded.collection_uniq_id,
+                             collection_uniq_id,
                              collection_id,
                              symbol,
-                             ticker_collections_weights_expanded.date as original_date,
-                             next_date                                as date,
-                             weight                                   as original_weight,
-                             weight_sum,
-                             weight / weight_sum                      as weight,
+                             next_date           as date,
+                             weight / weight_sum as weight,
                              price::numeric,
                              optimized_at,
                              updated_at
                       from ticker_collections_weights_expanded
-                               join ticker_collections_weights_stats
-                                   on ticker_collections_weights_stats.collection_uniq_id = ticker_collections_weights_expanded.collection_uniq_id
-                                       and ticker_collections_weights_stats.date = ticker_collections_weights_expanded.date
+                               join ticker_collections_weights_stats using (collection_uniq_id, date)
                   ) t
              left join ticker_collections_next_date using (symbol, collection_uniq_id)
          )
