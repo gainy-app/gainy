@@ -14,7 +14,7 @@ with raw_ticker_collections_weights as materialized
          (
              select collections.id    as collection_id,
                     symbol,
-                    date_trunc('month', ticker_collections_weights.date::date) as date,
+                    date_trunc('month', ticker_collections_weights.date)::date as date,
                     ticker_collections_weights.weight::numeric,
                     optimized_at::date,
                     _sdc_extracted_at as updated_at
