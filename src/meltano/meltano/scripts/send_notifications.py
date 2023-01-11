@@ -155,9 +155,9 @@ def send_all(sender_id):
     with db_connect() as db_conn:
         with db_conn.cursor(cursor_factory=DictCursor) as cursor:
             cursor.execute(
-                """insert into app.notifications(profile_id, uniq_id, title, text, data, sender_id, is_test, template_id, is_push)
-                   select profile_id, uniq_id, title, text, data, %(sender_id)s, is_test, template_id, true
-                   from push_notifications
+                """insert into app.notifications(profile_id, uniq_id, title, text, data, sender_id, is_test, template_id, is_push, is_shown_in_app)
+                   select profile_id, uniq_id, title, text, data, %(sender_id)s, is_test, template_id, is_push, is_shown_in_app
+                   from notifications_to_send
                    where send_at <= now()
                    on conflict do nothing""", {"sender_id": sender_id})
             cursor.execute(

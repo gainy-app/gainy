@@ -37,6 +37,7 @@ def fill_kyc_form(profile_id, profile_user_id):
         "address_country": "USA",
         "country": "USA",
         "citizenship": "USA",
+        "is_us_tax_payer": True,
         "tax_id_value": "123456789",
         "tax_id_type": "SSN",
         "employment_status": "UNEMPLOYED",

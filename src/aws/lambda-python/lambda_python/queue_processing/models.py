@@ -23,10 +23,8 @@ class QueueMessage(BaseModel, ResourceVersion):
     db_excluded_fields = ["created_at", "updated_at"]
     non_persistent_fields = ["id", "created_at", "updated_at"]
 
-    def __init__(self, row: dict = None):
+    def __init__(self):
         self.handled = False
-
-        super().__init__(row)
 
     @classproperty
     def schema_name(self) -> str:
