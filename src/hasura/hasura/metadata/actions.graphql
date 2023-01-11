@@ -583,7 +583,7 @@ type AccountInformation {
   iso_currency_code: String!
   mask: String!
   name: String!
-  official_name: String!
+  official_name: String
 }
 
 type TradingLinkBankAccountWithPlaidOutput {
