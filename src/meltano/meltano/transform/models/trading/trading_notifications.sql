@@ -88,7 +88,9 @@ select profile_id,
                        then 'Upload documents to open your trading account.'
                    end
            )                                  as text,
-       null::json                             as data,
+       json_build_object('t', 10,
+           'status', latest_kyc_status.status
+           )                                  as data,
        true                                   as is_test,
        true                                   as is_push,
        true                                   as is_shown_in_app,
