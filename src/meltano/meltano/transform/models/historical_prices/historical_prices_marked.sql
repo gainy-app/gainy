@@ -96,7 +96,9 @@ with raw_data_0d as
          ),
      raw_data_1y as
          (
-             select raw_data_3m.*,
+             select distinct on (
+                 raw_data_3m.symbol
+                 ) raw_data_3m.*,
                    historical_prices.date           as date_1y,
                    historical_prices.adjusted_close as price_1y
              from raw_data_3m
