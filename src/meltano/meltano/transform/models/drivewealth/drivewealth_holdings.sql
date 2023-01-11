@@ -55,7 +55,6 @@ with latest_portfolio_status as
                   ) t (type, security_type)
      )
 select fund_holdings_distinct.profile_id,
-       null                                           as account_id,
        fund_holdings_distinct.quantity                as quantity,
        fund_holdings_distinct.quantity                as quantity_norm_for_valuation,
        fund_holdings_distinct.quantity * actual_price as actual_value,
@@ -72,14 +71,13 @@ from fund_holdings_distinct
          left join {{ ref('base_tickers') }} using (symbol)
          left join base_tickers_type_to_security_type using (type)
          left join {{ ref('ticker_realtime_metrics') }} using (symbol)
-         join {{ ref('profile_collections') }}
-              on profile_collections.id = fund_holdings_distinct.collection_id
-                  and (profile_collections.profile_id = fund_holdings_distinct.profile_id or profile_collections.profile_id is null)
+         left join {{ ref('profile_collections') }}
+                   on profile_collections.id = fund_holdings_distinct.collection_id
+                       and (profile_collections.profile_id = fund_holdings_distinct.profile_id or profile_collections.profile_id is null)
 
 union all
 
 select profile_id,
-       null                                                        as account_id,
        sum((portfolio_holding_data ->> 'value')::double precision) as quantity,
        sum((portfolio_holding_data ->> 'value')::double precision) as quantity_norm_for_valuation,
        sum((portfolio_holding_data ->> 'value')::double precision) as actual_value,
