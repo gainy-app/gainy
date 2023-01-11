@@ -209,7 +209,6 @@ with raw_ticker_collections_weights as materialized
                     coalesce(t.date, ticker_collections_next_date.date) as date,
                     t.original_date,
                     t.date as next_date,
-                    ticker_collections_next_date.date as next_date2,
                     t.weight,
                     t.original_weight,
                     t.weight_sum,
@@ -218,19 +217,21 @@ with raw_ticker_collections_weights as materialized
                     t.updated_at
              from (
                       select profile_id,
-                             collection_uniq_id,
+                             ticker_collections_weights_expanded.collection_uniq_id,
                              collection_id,
                              symbol,
-                             date as original_date,
-                             next_date           as date,
-                             weight              as original_weight,
+                             ticker_collections_weights_expanded.date as original_date,
+                             next_date                                as date,
+                             weight                                   as original_weight,
                              weight_sum,
-                             weight / weight_sum as weight,
+                             weight / weight_sum                      as weight,
                              price::numeric,
                              optimized_at,
                              updated_at
                       from ticker_collections_weights_expanded
-                               join ticker_collections_weights_stats using (collection_uniq_id, date)
+                               join ticker_collections_weights_stats
+                                   on ticker_collections_weights_stats.collection_uniq_id = ticker_collections_weights_expanded.collection_uniq_id
+                                       and ticker_collections_weights_stats.date = ticker_collections_weights_expanded.date
                   ) t
              left join ticker_collections_next_date using (symbol, collection_uniq_id)
          )
