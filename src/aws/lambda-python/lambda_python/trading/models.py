@@ -55,11 +55,12 @@ class ProfileKycStatus(BaseModel):
     db_excluded_fields = ["created_at"]
     non_persistent_fields = ["id", "created_at"]
 
-    def __init__(self, row: dict = None):
-        super().__init__(row)
+    def set_from_dict(self, row: dict = None):
+        super().set_from_dict(row)
 
         if row and row["status"]:
             self.status = KycStatus(row["status"])
+        return self
 
     @classproperty
     def schema_name(self) -> str:
@@ -88,11 +89,12 @@ class TradingStatement(BaseModel):
     db_excluded_fields = ["created_at"]
     non_persistent_fields = ["id", "created_at"]
 
-    def __init__(self, row: dict = None):
-        super().__init__(row)
+    def set_from_dict(self, row: dict = None):
+        super().set_from_dict(row)
 
         if row and row["type"]:
             self.type = TradingStatementType(row["type"])
+        return self
 
     @classproperty
     def schema_name(self) -> str:
@@ -116,14 +118,15 @@ class KycDocument(BaseModel):
     db_excluded_fields = ["created_at", "updated_at"]
     non_persistent_fields = ["id", "created_at", "updated_at"]
 
-    def __init__(self, row: dict = None):
-        super().__init__(row)
+    def set_from_dict(self, row: dict = None):
+        super().set_from_dict(row)
 
         if row and row["type"]:
             self.type = KycDocumentType(row["type"])
 
         if row and row["side"]:
             self.side = KycDocumentSide(row["side"])
+        return self
 
     @classproperty
     def schema_name(self) -> str:
@@ -156,14 +159,15 @@ class TradingMoneyFlow(BaseModel):
     db_excluded_fields = ["created_at", "updated_at"]
     non_persistent_fields = ["id", "created_at", "updated_at"]
 
-    def __init__(self, row=None):
-        super().__init__(row)
+    def set_from_dict(self, row: dict = None):
+        super().set_from_dict(row)
 
         if not row:
-            return
+            return self
 
         self.status = TradingMoneyFlowStatus[
             row["status"]] if row["status"] else None
+        return self
 
     @classproperty
     def schema_name(self) -> str:

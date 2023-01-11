@@ -158,7 +158,7 @@ resource "datadog_monitor" "lambda_errors" {
   type    = "query alert"
   message = "Lambda Errors Monitor triggered. Notify: @slack-${var.slack_channel_name} <!channel>"
 
-  query = "sum(last_7d):sum:aws.lambda.errors{functionname:*_production} by {functionname}.rollup(sum, 3600) > 0.01"
+  query = "sum(last_1d):sum:aws.lambda.errors{functionname:*_production} by {functionname}.rollup(sum, 3600) > 0.01"
 
   monitor_thresholds {
     critical          = "0.01"
@@ -168,7 +168,7 @@ resource "datadog_monitor" "lambda_errors" {
   no_data_timeframe   = 120
   require_full_window = true
   notify_no_data      = false
-  renotify_interval   = 15
+  renotify_interval   = 1440
 
   tags = ["lambda"]
 }

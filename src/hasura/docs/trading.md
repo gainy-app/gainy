@@ -55,6 +55,15 @@ query GetTradingHistory($profile_id: Int!, $money_flow_id: Int!) {
 }
 ```
 
+May be queried by `uniq_id`:
+```graphql
+query GetTradingHistory($profile_id: Int!, $uniq_id: String!) {
+  trading_history(where: {profile_id: {_eq: $profile_id}, uniq_id: {_eq: $uniq_id}}) {
+    ...
+  }
+}
+```
+
 ### Get profile balances and pending transactions
 ```graphql
 query TradingGetProfileStatus($profile_id: Int!) {

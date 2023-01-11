@@ -1972,7 +1972,7 @@ models:
           - type:
               type: 'character varying'
 
-  - name: push_notifications
+  - name: notifications_to_send
     columns:
       - name: profile_id
         tests:
@@ -1997,6 +1997,14 @@ models:
           - type:
               type: 'json'
       - name: is_test
+        tests:
+          - type:
+              type: 'boolean'
+      - name: is_push
+        tests:
+          - type:
+              type: 'boolean'
+      - name: is_shown_in_app
         tests:
           - type:
               type: 'boolean'

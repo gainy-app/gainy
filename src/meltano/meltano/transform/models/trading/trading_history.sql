@@ -8,6 +8,7 @@
 with data as
          (
              select profile_id,
+                    'tmf_' || id                                            as uniq_id,
                     case when amount > 0 then 'deposit' else 'withdraw' end as type,
                     trading_money_flow.id,
                     null::int                                               as trading_collection_version_id,
@@ -26,6 +27,7 @@ with data as
              union all
 
              select profile_id,
+                    'i_' || id    as uniq_id,
                     'trading_fee' as type,
                     invoices.id,
                     null::int     as trading_collection_version_id,
@@ -43,6 +45,7 @@ with data as
              union all
 
              select profile_id,
+                    'tcv_' || trading_collection_versions.id        as uniq_id,
                     'ttf_transaction'                               as type,
                     trading_collection_versions.id,
                     trading_collection_versions.id                  as trading_collection_version_id,
@@ -64,6 +67,7 @@ with data as
              union all
 
              select profile_id,
+                    'to_' || trading_orders.id         as uniq_id,
                     'ticker_transaction'               as type,
                     trading_orders.id,
                     null::int                          as trading_collection_version_id,
@@ -83,6 +87,7 @@ with data as
                       left join {{ ref('base_tickers') }} on base_tickers.symbol = trading_orders.symbol
          )
 select data.profile_id,
+       data.uniq_id,
        data.trading_collection_version_id,
        data.trading_order_id,
        data.money_flow_id,

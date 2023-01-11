@@ -4,69 +4,8 @@
   )
 }}
 
-with all_push_notifications as
+with data as
         (
---             -- Daily movers in your TTFs or portfolio during the trading day
---             -- 1) 10 am daily 2) The 3 biggest gainers and losers in TTFs or portfolio you follow
---             -- 6 biggest changes in your portfolio[better do it after market opens ~10am EST]
---             -- Two separate notifications
---             -- / Top losers: +3% TSLA, +5% MDB ...
---             select profile_id,
---                    (profile_id || '_top_gainers_' || now()::date)                                              as uniq_id,
---                    min(exchange_schedule.open_at) + interval '30 minutes'                                      as send_at,
---                    json_build_object('en', 'Morning gainers: ' ||
---                                            string_agg(text, ', ' order by relative_daily_change desc, symbol)) as text,
---                    json_build_object('t', 0)                                                                   as data,
---                    false                                                                                       as is_test,
---                    'a6283759-d903-4abd-a964-65aba98154cd'                                                      as template_id
---             from (
---                      select relative_daily_change,
---                             symbol,
---                             profile_id,
---                             email,
---                             '+' || round(relative_daily_change * 100) || '% ' || symbol as text
---                      from {{ source('app', 'profiles')}}
---                               join {{ ref('profile_collection_tickers_performance_ranked') }}
---                                    on profile_collection_tickers_performance_ranked.profile_id = profiles.id
---                                        and gainer_rank <= 3
---                      where relative_daily_change > 0.01
---                      order by relative_daily_change desc
---                  ) t
---                      join {{ ref('exchange_schedule') }} on exchange_schedule.country_name = 'USA' and exchange_schedule.date = now()::date
---             where now() between exchange_schedule.open_at and exchange_schedule.close_at
---             group by profile_id
---             having count(symbol) > 0
---
---             union all
---
---             select profile_id,
---                    (profile_id || '_top_losers_' || now()::date)                                          as uniq_id,
---                    min(exchange_schedule.open_at) + interval '30 minutes'                                 as send_at,
---                    json_build_object('en', 'Morning losers: ' ||
---                                            string_agg(text, ', ' order by relative_daily_change, symbol)) as text,
---                    json_build_object('t', 0)                                                              as data,
---                    false                                                                                  as is_test,
---                    '40818fa7-10c7-41b3-9952-800e9eea1a06'                                                 as template_id
---             from (
---                      select relative_daily_change,
---                             symbol,
---                             profile_id,
---                             email,
---                             round(relative_daily_change * 100) || '% ' || symbol as text
---                      from {{ source('app', 'profiles')}}
---                               join {{ ref('profile_collection_tickers_performance_ranked') }}
---                                    on profile_collection_tickers_performance_ranked.profile_id = profiles.id
---                                        and loser_rank <= 3
---                      where relative_daily_change < -0.01
---                      order by relative_daily_change desc
---                  ) t
---                      join {{ ref('exchange_schedule') }} on exchange_schedule.country_name = 'USA' and exchange_schedule.date = now()::date
---             where now() between exchange_schedule.open_at and exchange_schedule.close_at
---             group by profile_id
---             having count(symbol) > 0
---
---             union all
-
             -- Daily TTF movers during the trading day
             -- 1) 10 am daily 2) The 3 biggest TTF gainers and losers
             -- Two separate notifications
@@ -80,6 +19,8 @@ with all_push_notifications as
                    json_build_object('en', string_agg('- ' || text, E'\n' order by relative_daily_change desc)) as text,
                    json_build_object('t', 1, 'id', min(collection_id))                                          as data,
                    false                                                                                        as is_test,
+                   true                                                                                         as is_push,
+                   false                                                                                        as is_shown_in_app,
                    '4c70442b-ff04-475f-9a63-97d442127707'                                                       as template_id
             from (
                      select first_value(profile_collections.id) over (order by relative_daily_change desc) as collection_id,
@@ -106,6 +47,8 @@ with all_push_notifications as
                    json_build_object('en', string_agg('- ' || text, E'\n' order by relative_daily_change)) as text,
                    json_build_object('t', 1, 'id', min(collection_id))                                     as data,
                    false                                                                                   as is_test,
+                   true                                                                                    as is_push,
+                   false                                                                                   as is_shown_in_app,
                    '4c806577-88db-4f1e-a4d1-232fac0aa58a'                                                  as template_id
             from (
                      select first_value(profile_collections.id) over (order by relative_daily_change) as collection_id,
@@ -136,6 +79,8 @@ with all_push_notifications as
                                            '%. Check it out!')     as text,
                    json_build_object('t', 1, 'id', collection_id)  as data,
                    false                                           as is_test,
+                   true                                            as is_push,
+                   false                                           as is_shown_in_app,
                    'e1b4dd4e-3310-403b-bdc8-b51f56f54045'          as template_id
             from (
                      select collection_uniq_id,
@@ -163,6 +108,8 @@ with all_push_notifications as
                        json_build_object('en', 'Read ' || trim(blogs.name))         as text,
                        json_build_object('t', 4, 'id', blogs.id)                    as data,
                        false                                                        as is_test,
+                       true                                                         as is_push,
+                       false                                                        as is_shown_in_app,
                        '07b00e92-a1ae-44ea-bde0-c0715a991f2f'                       as template_id
                 from {{ source('website', 'blogs') }}
                          left join {{ source('website', 'blogs') }} article_duplicate
@@ -193,10 +140,14 @@ with all_push_notifications as
                        'Free month granted!')                  as text,
                    json_build_object('t', 5)                   as data,
                    false                                       as is_test,
+                   true                                        as is_push,
+                   false                                       as is_shown_in_app,
                    'ed86815f-3391-498c-875a-ea974342dc46'      as template_id
             from {{ source('app', 'invitations') }}
             where created_at > now() - interval '1 hour'
+
             union all
+
             select to_profile_id                                 as profile_id,
                    ('invited_user_joined_' || id || '_receiver') as uniq_id,
                    now()                                         as send_at,
@@ -206,6 +157,8 @@ with all_push_notifications as
                        'Free month granted!')                    as text,
                    json_build_object('t', 5)                     as data,
                    false                                         as is_test,
+                   true                                          as is_push,
+                   false                                         as is_shown_in_app,
                    '3c5f6ae0-1c69-4dbe-bb73-0d7f07595c95'        as template_id
             from {{ source('app', 'invitations') }}
             where created_at > now() - interval '1 hour'
@@ -221,6 +174,8 @@ with all_push_notifications as
                    json_build_object('en', 'What’s the worst stock in your portfolio?') as text,
                    json_build_object('t', 6, 's', symbol)                               as data,
                    false                                                                as is_test,
+                   true                                                                 as is_push,
+                   false                                                                as is_shown_in_app,
                    'f4c2e5bb-5cff-4776-8abf-dd320f91800b'                               as template_id
             from (
                      select distinct on (
@@ -248,6 +203,8 @@ with all_push_notifications as
                             (relative_gain_total * 100)::int || '%. Maybe sell?') as text,
                    json_build_object('t', 7, 's', symbol)                         as data,
                    false                                                          as is_test,
+                   true                                                           as is_push,
+                   false                                                          as is_shown_in_app,
                    '11dc7a5a-aa96-4835-893a-cea11581ab6c'                         as template_id
             from (
                      select distinct on (
@@ -266,6 +223,20 @@ with all_push_notifications as
                 ) t
                      join {{ ref('exchange_schedule') }} on exchange_schedule.country_name = 'USA' and exchange_schedule.date = now()::date
             where now() between exchange_schedule.open_at + interval '2 hours' and exchange_schedule.close_at
+
+            union all
+
+            select profile_id,
+                   uniq_id,
+                   send_at,
+                   title,
+                   text,
+                   data,
+                   is_test,
+                   is_push,
+                   is_shown_in_app,
+                   template_id
+            from {{ ref('trading_notifications') }}
         ),
     profiles as
         (
@@ -276,16 +247,18 @@ with all_push_notifications as
                        or first_name ilike '%test%' as is_test
             FROM {{ source('app', 'profiles') }}
         )
-select all_push_notifications.profile_id,
-       all_push_notifications.uniq_id,
-       all_push_notifications.send_at,
-       all_push_notifications.title,
-       all_push_notifications.text,
-       all_push_notifications.data,
-       all_push_notifications.is_test,
-       all_push_notifications.template_id
-from all_push_notifications
-left join profiles using (profile_id)
-where all_push_notifications.profile_id is null -- send broadcast
-   or all_push_notifications.is_test = false -- send direct non-test
+select data.profile_id,
+       data.uniq_id,
+       data.send_at,
+       data.title,
+       data.text,
+       data.data,
+       data.is_test,
+       data.is_push,
+       data.is_shown_in_app,
+       data.template_id
+from data
+         left join profiles using (profile_id)
+where data.profile_id is null -- send broadcast
+   or data.is_test = false -- send direct non-test
    or profiles.is_test = true -- send direct test to test users

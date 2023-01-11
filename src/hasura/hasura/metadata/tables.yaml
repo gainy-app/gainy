@@ -3044,6 +3044,7 @@
           - trading_collection_version_id
           - trading_order_id
           - type
+          - uniq_id
         filter:
           profile:
             user_id:

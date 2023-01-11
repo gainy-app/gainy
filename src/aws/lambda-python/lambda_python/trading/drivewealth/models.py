@@ -319,11 +319,12 @@ class DriveWealthStatement(BaseDriveWealthModel):
     db_excluded_fields = ["created_at"]
     non_persistent_fields = ["created_at"]
 
-    def __init__(self, row: dict = None):
-        super().__init__(row)
+    def set_from_dict(self, row: dict = None):
+        super().set_from_dict(row)
 
         if row and row["type"]:
             self.type = TradingStatementType(row["type"])
+        return self
 
     def set_from_response(self, data: dict = None):
         if not data:
