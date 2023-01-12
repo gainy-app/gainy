@@ -54,12 +54,12 @@ with portfolio_statuses as
              select profile_id,
                     case
                         when collection_id is null
-                            then 'dw_ticker_' || profile_id || '_' || (fund_holding_data ->> 'symbol')
-                        else 'dw_ttf_' || profile_id || '_' || collection_id || '_' || (fund_holding_data ->> 'symbol')
-                        end                                    as holding_id_v2,
-                    (fund_holding_data ->> 'symbol')           as symbol,
+                            then 'dw_ticker_' || profile_id || '_' || normalize_drivewealth_symbol(fund_holding_data ->> 'symbol')
+                        else 'dw_ttf_' || profile_id || '_' || collection_id || '_' || normalize_drivewealth_symbol(fund_holding_data ->> 'symbol')
+                        end                                                         as holding_id_v2,
+                    normalize_drivewealth_symbol(fund_holding_data ->> 'symbol') as symbol,
                     date,
-                    (fund_holding_data ->> 'value')::numeric   as value,
+                    (fund_holding_data ->> 'value')::numeric                        as value,
                     updated_at
              from fund_holdings
      ),
