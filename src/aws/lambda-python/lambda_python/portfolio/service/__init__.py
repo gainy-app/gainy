@@ -205,7 +205,8 @@ class PortfolioService:
 
     def __get_access_tokens(self, profile_id):
         for service in self.services.values():
-            yield from service.get_access_tokens(profile_id=profile_id, purpose='portfolio')
+            yield from service.get_access_tokens(profile_id=profile_id,
+                                                 purpose='portfolio')
 
     def _set_access_token_reauth(self, access_token):
         with self.db_conn.cursor() as cursor:

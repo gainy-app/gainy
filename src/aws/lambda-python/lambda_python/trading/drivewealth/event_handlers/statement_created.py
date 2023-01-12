@@ -32,7 +32,8 @@ class StatementCreatedEventHandler(AbstractDriveWealthEventHandler):
         self.repo.persist(entity)
 
         try:
-            profile_id = self.provider.get_profile_id_by_user_id(entity.user_id)
+            profile_id = self.provider.get_profile_id_by_user_id(
+                entity.user_id)
         except NotFoundException:
             return
         self.provider.create_trading_statements([entity], profile_id)

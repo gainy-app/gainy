@@ -74,8 +74,7 @@ class PlaidService(GainyPlaidService):
                 for security in response.securities
             ]
             accounts = [
-                self.hydrate_account(account)
-                for account in response.accounts
+                self.hydrate_account(account) for account in response.accounts
             ]
 
             for i in holdings:
@@ -122,8 +121,7 @@ class PlaidService(GainyPlaidService):
                 for security in response.securities
             ]
             accounts = [
-                self.hydrate_account(account)
-                for account in response.accounts
+                self.hydrate_account(account) for account in response.accounts
             ]
 
             for i in transactions:
@@ -250,11 +248,11 @@ class PlaidService(GainyPlaidService):
         if id:
             where.append("id = %(id)s")
             params["id"] = id
-            
+
         query = "SELECT id, access_token, is_artificial, profile_id FROM app.profile_plaid_access_tokens"
         if where:
             query += " where " + " and ".join(where)
-            
+
         with self.db_conn.cursor(cursor_factory=RealDictCursor) as cursor:
             cursor.execute(query, params)
             row = cursor.fetchone()
@@ -264,7 +262,9 @@ class PlaidService(GainyPlaidService):
         row['service'] = SERVICE_PLAID
         return dict(row)
 
-    def get_access_tokens(self, profile_id=None, purpose=None) -> Iterable[dict]:
+    def get_access_tokens(self,
+                          profile_id=None,
+                          purpose=None) -> Iterable[dict]:
         where = []
         params = {}
         if profile_id:
@@ -273,11 +273,11 @@ class PlaidService(GainyPlaidService):
         if purpose:
             where.append("purpose = %(purpose)s")
             params["purpose"] = purpose
-            
+
         query = "SELECT id, access_token, is_artificial, profile_id FROM app.profile_plaid_access_tokens"
         if where:
             query += " where " + " and ".join(where)
-        
+
         with self.db_conn.cursor(cursor_factory=RealDictCursor) as cursor:
             cursor.execute(query, params)
 

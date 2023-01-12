@@ -53,7 +53,8 @@ class LinkPlaidAccount(HasuraAction):
             returned = cursor.fetchall()
             access_token_id = returned[0][0]
 
-        institution = portfolio_service.sync_institution(plaid_service.get_access_token(id=access_token_id))
+        institution = portfolio_service.sync_institution(
+            plaid_service.get_access_token(id=access_token_id))
 
         accounts = []
         if purpose == PURPOSE_TRADING:
@@ -75,7 +76,8 @@ class LinkPlaidAccount(HasuraAction):
                 account_entity.profile_id = profile_id
                 account_entity.plaid_access_token_id = access_token_id
                 account_entities.append(account_entity)
-            portfolio_repository.persist(portfolio_service.unique_entities(account_entities))
+            portfolio_repository.persist(
+                portfolio_service.unique_entities(account_entities))
 
             accounts = trading_service.filter_existing_funding_accounts(
                 accounts)
