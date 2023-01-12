@@ -103,7 +103,7 @@ locals {
     jsondecode(templatefile("${path.module}/task_definitions/meltano-airflow-ui.json", local.airflow_params)),
     {
       dependsOn = [
-        { "condition" : "SUCCESS", "containerName" : "meltano-airflow-scheduler" }
+        { "condition" : "HEALTHY", "containerName" : "meltano-airflow-scheduler" }
       ]
     }
   )
