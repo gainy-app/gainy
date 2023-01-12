@@ -1,5 +1,4 @@
 {
-  "name": "${name}",
   "cpu": ${airflow_scheduler_cpu_credits},
   "memory": ${airflow_scheduler_memory_credits},
   "extraHosts": null,
@@ -8,8 +7,6 @@
   "dnsSearchDomains": null,
   "portMappings": [],
   "hostname": null,
-  "essential": true,
-  "entryPoint": ${jsondecode(entrypoint)},
   "mountPoints": [
     {
       "containerPath" : "/project/.meltano/run/airflow",
@@ -144,14 +141,10 @@
   "workingDirectory": null,
   "readonlyRootFilesystem": null,
   "image": "${meltano_image}",
-  "command": ${jsondecode(command)},
   "user": null,
   "dockerLabels": null,
   "privileged": null,
   "memoryReservation": null,
-  "healthCheck": ${jsondecode(healthcheck)},
-  "essential": ${essential},
-  "dependsOn": ${jsondecode(depends_on)},
   "logConfiguration": {
     "logDriver": "awslogs",
     "options": {

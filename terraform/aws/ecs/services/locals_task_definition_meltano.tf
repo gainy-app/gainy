@@ -105,32 +105,33 @@ locals {
     "${path.module}/task_definitions/meltano-airflow-ui.json",
     airflow_params
   ))
-  meltano_scheduler_description = jsondecode(templatefile(
-    "${path.module}/task_definitions/meltano-airflow-scheduler.json",
-    merge(local.scheduler_params, {
+  meltano_scheduler_description = merge(
+    jsondecode(templatefile("${path.module}/task_definitions/meltano-airflow-scheduler.json", local.scheduler_params)),
+    {
       name       = "meltano-airflow-scheduler"
       essential  = true
-      entrypoint = jsonencode(["meltano"])
-      command    = jsonencode(["invoke", "airflow", "scheduler"])
-      healthcheck = jsonencode({
+      entrypoint = ["meltano"]
+      command    = ["invoke", "airflow", "scheduler"]
+      healthcheck = {
         "command" : ["CMD-SHELL", "nc -z localhost 8793"],
         "interval" : 10,
         "retries" : 2
-      })
-      depends_on = jsonencode([
-        { "condition" : "COMPLETE", "containerName" : "meltano-airflow-initializer" }
-      ])
-    })
-  ))
-  meltano_initializer_description = jsondecode(templatefile(
-    "${path.module}/task_definitions/meltano-airflow-scheduler.json",
-    merge(local.scheduler_params, {
+      }
+      depends_on = [
+        { "condition" : "SUCCESS", "containerName" : "meltano-airflow-initializer" }
+      ]
+    }
+  )
+
+  meltano_initializer_description = merge(
+    jsondecode(templatefile("${path.module}/task_definitions/meltano-airflow-scheduler.json", local.scheduler_params)),
+    {
       name        = "meltano-airflow-initializer"
       essential   = false
-      entrypoint  = jsonencode(["/init.sh"])
-      command     = jsonencode([])
-      healthcheck = jsonencode(null)
-      depends_on  = jsonencode([])
-    })
-  ))
+      entrypoint  = ["/init.sh"]
+      command     = []
+      healthcheck = null
+      depends_on  = []
+    }
+  )
 }
