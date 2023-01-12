@@ -37,11 +37,11 @@ with latest_portfolio_status as
          (
              select profile_id,
                     collection_id,
-                    fund_holding_data ->> 'symbol'                           as symbol,
-                    sum((fund_holding_data ->> 'openQty')::double precision) as quantity,
-                    max(updated_at)                                          as updated_at
+                    normalize_drivewealth_symbol(fund_holding_data ->> 'symbol') as symbol,
+                    sum((fund_holding_data ->> 'openQty')::double precision)        as quantity,
+                    max(updated_at)                                                 as updated_at
              from fund_holdings
-             group by profile_id, collection_id, fund_holding_data ->> 'symbol'
+             group by profile_id, collection_id, normalize_drivewealth_symbol(fund_holding_data ->> 'symbol')
      ),
      base_tickers_type_to_security_type as
          (

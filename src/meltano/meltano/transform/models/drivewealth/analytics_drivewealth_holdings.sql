@@ -29,11 +29,11 @@ with positions0 as
              from positions0
      )
 select profile_id,
-       position_data ->> 'symbol'                          as symbol,
+       normalize_drivewealth_symbol(position_data ->> 'symbol') as symbol,
        positions1.date,
-       (position_data ->> 'openQty')::double precision     as quantity,
-       (position_data ->> 'mktPrice')::double precision    as price,
-       (position_data ->> 'marketValue')::double precision as value,
-       (position_data ->> 'costBasis')::double precision   as cost,
+       (position_data ->> 'openQty')::double precision             as quantity,
+       (position_data ->> 'mktPrice')::double precision            as price,
+       (position_data ->> 'marketValue')::double precision         as value,
+       (position_data ->> 'costBasis')::double precision           as cost,
        updated_at
 from positions1
