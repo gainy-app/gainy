@@ -55,7 +55,7 @@ BEGIN
                           left join pg_namespace ns on ns.oid = tbl.relnamespace
                  where ns.nspname = source_schema
              ) t
-        order by query ilike '% references %'
+        order by t.query ilike '% references %'
         LOOP
             IF NOT EXISTS(
                     SELECT constraint_schema, constraint_name
