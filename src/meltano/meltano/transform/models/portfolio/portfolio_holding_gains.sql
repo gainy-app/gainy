@@ -27,17 +27,25 @@ with long_term_tax_holdings as
          ),
     actual_value as
         (
-             select distinct on (
-                 holding_id_v2
-                 ) holding_id_v2,
-                   adjusted_close as actual_value
-             from {{ ref('portfolio_holding_chart') }}
-                      join {{ ref('profile_holdings_normalized') }} using (holding_id_v2)
-                      join {{ ref('week_trading_sessions_static') }} using (symbol, date)
-             where period = '1d'
-               and week_trading_sessions_static.index = 0
-               and datetime between open_at and close_at - interval '1 second'
-             order by holding_id_v2, datetime desc
+            (
+                select distinct on (
+                    holding_id_v2
+                    ) holding_id_v2,
+                      adjusted_close as actual_value
+                from {{ ref('portfolio_holding_chart') }} join {{ ref('profile_holdings_normalized') }} using (holding_id_v2)
+                          join {{ ref('week_trading_sessions_static') }} using (symbol, date)
+                where period = '1d'
+                  and week_trading_sessions_static.index = 0
+                  and datetime between open_at
+                  and close_at - interval '1 second'
+                order by holding_id_v2, datetime desc
+            )
+
+            union all
+
+            select holding_id_v2, quantity as actual_value
+            from {{ ref('profile_holdings_normalized') }}
+            where symbol = 'CUR:USD'
      ),
     last_day_value as
         (
