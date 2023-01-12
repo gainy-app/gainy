@@ -1,6 +1,4 @@
 {
-  "cpu": ${airflow_scheduler_cpu_credits},
-  "memory": ${airflow_scheduler_memory_credits},
   "extraHosts": null,
   "dnsServers": null,
   "disableNetworking": null,

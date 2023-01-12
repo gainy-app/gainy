@@ -50,8 +50,6 @@ locals {
     pg_production_port                   = var.pg_production_port
     pg_production_internal_sync_username = var.pg_production_internal_sync_username
     pg_production_internal_sync_password = var.pg_production_internal_sync_password
-    airflow_scheduler_memory_credits     = local.meltano_scheduler_memory_credits
-    airflow_scheduler_cpu_credits        = local.meltano_scheduler_cpu_credits
     algolia_tickers_index                = var.algolia_tickers_index
     algolia_collections_index            = var.algolia_collections_index
     algolia_app_id                       = var.algolia_app_id
