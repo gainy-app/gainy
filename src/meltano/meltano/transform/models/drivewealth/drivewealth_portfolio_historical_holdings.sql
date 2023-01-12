@@ -83,14 +83,19 @@ with portfolio_statuses as
                     holding_id_v2,
                     symbol,
                     date,
-                    coalesce(relative_daily_gain, 0)                     as relative_daily_gain,
-                    exp(sum(ln(coalesce(relative_daily_gain, 0) + 1))
+                    coalesce(relative_daily_gain, 
+                             ticker_realtime_metrics.relative_daily_change, 
+                             0)                                          as relative_daily_gain,
+                    exp(sum(ln(coalesce(relative_daily_gain, 
+                                        ticker_realtime_metrics.relative_daily_change, 
+                                        0) + 1))
                         over (partition by holding_id_v2 order by date)) as cumulative_daily_relative_gain,
                     value                                                as value,
                     data.updated_at
              from schedule
                       left join data using (profile_id, holding_id_v2, symbol, date)
                       left join {{ ref('historical_prices') }} using (symbol, date)
+                      left join {{ ref('ticker_realtime_metrics') }} using (symbol, date)
      ),
      data_extended as
          (
