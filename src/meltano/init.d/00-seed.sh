@@ -49,7 +49,7 @@ if [ $($psql_auth -c "select count(*) from deployment.public_schemas where schem
 
       echo "$(date)" Restoring schema "$OLD_DBT_TARGET_SCHEMA" to "$DBT_TARGET_SCHEMA"
       $psql_auth -f scripts/clone_schema.sql
-      $psql_auth -c "DROP SCHEMA IF EXISTS $DBT_TARGET_SCHEMA;"
+      $psql_auth -c "DROP SCHEMA IF EXISTS $DBT_TARGET_SCHEMA CASCADE;"
       if $psql_auth -c "call clone_schema('$OLD_DBT_TARGET_SCHEMA', '$DBT_TARGET_SCHEMA')"; then
         echo "$(date)" Schema "$OLD_DBT_TARGET_SCHEMA" restored to "$DBT_TARGET_SCHEMA"
         export DBT_RUN_FLAGS="-s result:error+ state:modified+ config.materialized:view --defer --full-refresh"
