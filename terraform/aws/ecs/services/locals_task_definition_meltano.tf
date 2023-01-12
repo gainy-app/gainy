@@ -110,12 +110,12 @@ locals {
       essential  = true
       entrypoint = ["meltano"]
       command    = ["invoke", "airflow", "scheduler"]
-      healthcheck = {
+      healthCheck = {
         "command" : ["CMD-SHELL", "nc -z localhost 8793"],
         "interval" : 10,
         "retries" : 2
       }
-      depends_on = [
+      dependsOn = [
         { "condition" : "SUCCESS", "containerName" : "meltano-airflow-initializer" }
       ]
     }
@@ -128,8 +128,8 @@ locals {
       essential   = false
       entrypoint  = ["/init.sh"]
       command     = []
-      healthcheck = null
-      depends_on  = []
+      healthCheck = null
+      dependsOn   = []
     }
   )
 }
