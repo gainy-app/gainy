@@ -45,7 +45,7 @@ from (
          where source = 'MANUAL'
            and status = 'EXECUTED_FULLY'
      ) t
-where executed_at between now() - interval '1 hours' and now()
+where executed_at between now() - interval '1 day' and now()
 
 union all
 
@@ -68,7 +68,7 @@ from (
          where source = 'AUTOMATIC' and status = 'EXECUTED_FULLY'
          group by profile_id
     ) t
-where executed_at between now() - interval '1 hours' and now()
+where executed_at between now() - interval '1 day' and now()
 
 union all
 
@@ -120,7 +120,7 @@ from (
                    ) last_notified_status using (profile_id)
 where (last_notified_status.profile_id is null -- no notifications
     or last_notified_status.status != latest_kyc_status.status)
-  and latest_kyc_status.created_at between now() - interval '1 hours' and now()
+  and latest_kyc_status.created_at between now() - interval '1 day' and now()
 
 union all
 
@@ -146,4 +146,4 @@ from {{ source('app', 'trading_money_flow') }}
          left join {{ ref('trading_history') }}
              on trading_history.money_flow_id = trading_money_flow.id
 where status = 'SUCCESS'
-  and trading_money_flow.updated_at between now() - interval '1 hours' and now()
+  and trading_money_flow.updated_at between now() - interval '1 day' and now()
