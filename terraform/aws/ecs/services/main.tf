@@ -217,6 +217,7 @@ resource "aws_ecs_task_definition" "meltano_scheduler" {
 
   container_definitions = jsonencode([
     local.meltano_scheduler_description,
+    local.meltano_initializer_description,
   ])
 }
 
