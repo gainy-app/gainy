@@ -1,12 +1,13 @@
 import json
 import datetime
-from typing import Optional
+from typing import Optional, Iterable
 
 from plaid.model.account_base import AccountBase as PlaidAccount
 from plaid.model.holding import Holding as PlaidHolding
 from plaid.model.investment_transaction import InvestmentTransaction as PlaidTransaction
 from plaid.model.investments_transactions_get_response import InvestmentsTransactionsGetResponse
 from plaid.model.security import Security as PlaidSecurity
+from psycopg2.extras import RealDictCursor
 
 from gainy.plaid.service import PlaidService as GainyPlaidService
 from portfolio.plaid import PlaidClient
@@ -17,6 +18,7 @@ from gainy.utils import get_logger
 
 import plaid
 
+SERVICE_PLAID = 'plaid'
 logger = get_logger(__name__)
 
 
@@ -72,7 +74,7 @@ class PlaidService(GainyPlaidService):
                 for security in response.securities
             ]
             accounts = [
-                self.__hydrate_account(account)
+                self.hydrate_account(account)
                 for account in response.accounts
             ]
 
@@ -120,7 +122,7 @@ class PlaidService(GainyPlaidService):
                 for security in response.securities
             ]
             accounts = [
-                self.__hydrate_account(account)
+                self.hydrate_account(account)
                 for account in response.accounts
             ]
 
@@ -202,7 +204,7 @@ class PlaidService(GainyPlaidService):
 
         return model
 
-    def __hydrate_account(self, data: PlaidAccount) -> Account:
+    def hydrate_account(self, data: PlaidAccount) -> Account:
         model = Account()
         model.ref_id = data['account_id']
         model.balance_available = data['balances']['available']
@@ -238,3 +240,47 @@ class PlaidService(GainyPlaidService):
             raise AccessTokenLoginRequiredException(exc, access_token)
 
         raise AccessTokenApiException(exc, access_token)
+
+    def get_access_token(self, id=None, item_id=None):
+        where = []
+        params = {}
+        if item_id:
+            where.append("item_id = %(item_id)s")
+            params["item_id"] = item_id
+        if id:
+            where.append("id = %(id)s")
+            params["id"] = id
+            
+        query = "SELECT id, access_token, is_artificial, profile_id FROM app.profile_plaid_access_tokens"
+        if where:
+            query += " where " + " and ".join(where)
+            
+        with self.db_conn.cursor(cursor_factory=RealDictCursor) as cursor:
+            cursor.execute(query, params)
+            row = cursor.fetchone()
+        if not row:
+            return None
+
+        row['service'] = SERVICE_PLAID
+        return dict(row)
+
+    def get_access_tokens(self, profile_id=None, purpose=None) -> Iterable[dict]:
+        where = []
+        params = {}
+        if profile_id:
+            where.append("profile_id = %(profile_id)s")
+            params["profile_id"] = profile_id
+        if purpose:
+            where.append("purpose = %(purpose)s")
+            params["purpose"] = purpose
+            
+        query = "SELECT id, access_token, is_artificial, profile_id FROM app.profile_plaid_access_tokens"
+        if where:
+            query += " where " + " and ".join(where)
+        
+        with self.db_conn.cursor(cursor_factory=RealDictCursor) as cursor:
+            cursor.execute(query, params)
+
+            for row in cursor:
+                row['service'] = SERVICE_PLAID
+                yield dict(row)
