@@ -103,7 +103,7 @@ locals {
 
   airflow_task_description = jsondecode(templatefile(
     "${path.module}/task_definitions/meltano-airflow-ui.json",
-    airflow_params
+    local.airflow_params
   ))
   meltano_scheduler_description = merge(
     jsondecode(templatefile("${path.module}/task_definitions/meltano-airflow-scheduler.json", local.scheduler_params)),
