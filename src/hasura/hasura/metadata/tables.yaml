@@ -1494,6 +1494,11 @@
           - profile_id
           - relative_daily_change
           - updated_at
+          - value_change_1m
+          - value_change_1w
+          - value_change_1y
+          - value_change_3m
+          - value_change_5y
         filter:
           _or:
             - user_id:

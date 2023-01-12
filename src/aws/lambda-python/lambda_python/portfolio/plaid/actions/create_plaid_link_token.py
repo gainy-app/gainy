@@ -17,7 +17,7 @@ class CreatePlaidLinkToken(HasuraAction):
         self.client = PlaidClient()
 
     def apply(self, input_params, context_container: ContextContainer):
-        db_conn = context_container.db_conn
+        plaid_service = context_container.plaid_service
         profile_id = input_params["profile_id"]
         redirect_uri = input_params["redirect_uri"]
         env = input_params.get("env", DEFAULT_ENV)  # default for legacy app
@@ -28,17 +28,9 @@ class CreatePlaidLinkToken(HasuraAction):
 
         access_token = None
         if access_token_id is not None:
-            with db_conn.cursor() as cursor:
-                cursor.execute(
-                    "SELECT access_token FROM app.profile_plaid_access_tokens WHERE id = %(id)s and profile_id = %(profile_id)s",
-                    {
-                        "id": access_token_id,
-                        "profile_id": profile_id
-                    })
-
-                row = cursor.fetchone()
-                if row is not None:
-                    access_token = row[0]
+            access_token = plaid_service.get_access_token(id=access_token_id)
+            if access_token and access_token['profile_id'] != profile_id:
+                access_token = None
 
         try:
             response = self.client.create_link_token(profile_id, redirect_uri,
