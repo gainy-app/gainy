@@ -64,7 +64,7 @@ select profile_id,
                cash_available_for_withdrawal
 {% endif %}
            , 0)::double precision                        as withdrawable_cash,
-       coalesce(
+       greatest(
            coalesce(portfolio_stats.cash_value, 0) + coalesce(pending_cash, 0) - coalesce(pending_order_stats.amount_sum, 0)
            , 0)::double precision                        as buying_power
 from (

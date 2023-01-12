@@ -1,3 +1,4 @@
+from gainy.exceptions import NotFoundException
 from gainy.utils import get_logger
 from trading.drivewealth.abstract_event_handler import AbstractDriveWealthEventHandler
 from trading.drivewealth.models import DriveWealthStatement
@@ -30,6 +31,9 @@ class StatementCreatedEventHandler(AbstractDriveWealthEventHandler):
 
         self.repo.persist(entity)
 
-        profile_id = self.provider.get_profile_id_by_user_id(entity.user_id)
-        if profile_id:
-            self.provider.create_trading_statements([entity], profile_id)
+        try:
+            profile_id = self.provider.get_profile_id_by_user_id(
+                entity.user_id)
+        except NotFoundException:
+            return
+        self.provider.create_trading_statements([entity], profile_id)
