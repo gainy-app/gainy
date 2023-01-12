@@ -1,4 +1,4 @@
-from portfolio.service import SERVICE_PLAID
+from portfolio.plaid.service import SERVICE_PLAID
 from gainy.plaid.common import PURPOSE_PORTFOLIO
 from common.context_container import ContextContainer
 from common.hasura_function import HasuraTrigger

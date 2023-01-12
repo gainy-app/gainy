@@ -50,6 +50,7 @@ query LinkPlaidAccount(
   ){
     result
     plaid_access_token_id
+    institution_name
     accounts {
       account_id
       balance_available

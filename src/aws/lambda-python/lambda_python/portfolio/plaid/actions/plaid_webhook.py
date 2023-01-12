@@ -5,7 +5,6 @@ from jose import jwt
 
 from gainy.exceptions import HttpException
 from portfolio.plaid import PlaidClient
-from portfolio.service import SERVICE_PLAID
 
 from common.context_container import ContextContainer
 from common.hasura_function import HasuraAction
@@ -24,6 +23,7 @@ class PlaidWebhook(HasuraAction):
     def apply(self, input_params, context_container: ContextContainer):
         headers = context_container.headers
         portfolio_service = context_container.portfolio_service
+        plaid_service = context_container.plaid_service
         db_conn = context_container.db_conn
         item_id = input_params['item_id']
         logging_extra = {
@@ -33,24 +33,14 @@ class PlaidWebhook(HasuraAction):
         }
 
         try:
-            with db_conn.cursor() as cursor:
-                cursor.execute(
-                    "SELECT id, profile_id, access_token FROM app.profile_plaid_access_tokens WHERE item_id = %(item_id)s",
-                    {"item_id": item_id})
-
-                access_tokens = [
-                    dict(
-                        zip(['id', 'profile_id', 'access_token', 'service'],
-                            row + (SERVICE_PLAID, )))
-                    for row in cursor.fetchall()
-                ]
+            access_token = plaid_service.get_access_token(item_id=item_id)
 
             count = 0
-            if not len(access_tokens):
+            if not access_token:
                 return {'count': count}
 
-            token = access_tokens[0]['access_token']
-            logging_extra['profile_id'] = access_tokens[0]['profile_id']
+            token = access_token['access_token']
+            logging_extra['profile_id'] = access_token['profile_id']
 
             logger.info("[PLAID_WEBHOOK] invoke", extra=logging_extra)
 
@@ -62,14 +52,12 @@ class PlaidWebhook(HasuraAction):
                              extra=logging_extra)
 
             webhook_type = input_params['webhook_type']
-            for access_token in access_tokens:
-                portfolio_service.sync_institution(access_token)
-                if webhook_type == 'HOLDINGS':
-                    count += portfolio_service.sync_token_holdings(
-                        access_token)
-                elif webhook_type == 'INVESTMENTS_TRANSACTIONS':
-                    count += portfolio_service.sync_token_transactions(
-                        access_token)
+            portfolio_service.sync_institution(access_token)
+            if webhook_type == 'HOLDINGS':
+                count += portfolio_service.sync_token_holdings(access_token)
+            elif webhook_type == 'INVESTMENTS_TRANSACTIONS':
+                count += portfolio_service.sync_token_transactions(
+                    access_token)
 
             return {'count': count}
         except Exception as e:

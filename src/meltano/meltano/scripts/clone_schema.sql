@@ -43,8 +43,8 @@ BEGIN
         select 'alter table "' || dest_schema || '"."' || tbl.relname || '" add constraint ' || conname || ' ' ||
                 regexp_replace(
                         replace(pg_get_constraintdef(c.oid), 'ON ' || source_schema || '.', 'ON ' || dest_schema || '.'),
-                       'REFERENCES (\w*)\(',
-                       'REFERENCES ' || dest_schema || '.\1(',
+                       'REFERENCES (\w*\.)?(\w*)\(',
+                       'REFERENCES ' || dest_schema || '.\2(',
                        'i'
                     ),
                conname
