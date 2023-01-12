@@ -196,12 +196,12 @@ resource "aws_efs_mount_target" "meltano_data_private_subnet" {
   file_system_id = aws_efs_file_system.meltano_logs.id
   subnet_id      = each.value
 }
-resource "aws_ecs_task_definition" "meltano_scheduler" {
-  family                   = "gainy-scheduler-${var.env}"
+resource "aws_ecs_task_definition" "meltano" {
+  family                   = "gainy-meltano-${var.env}"
   network_mode             = "awsvpc"
   requires_compatibilities = ["FARGATE"]
-  cpu                      = local.meltano_scheduler_cpu_credits
-  memory                   = local.meltano_scheduler_memory_credits
+  cpu                      = local.meltano_cpu_credits
+  memory                   = local.meltano_memory_credits
   task_role_arn            = aws_iam_role.task.arn
   execution_role_arn       = aws_iam_role.execution.arn
 
@@ -216,32 +216,9 @@ resource "aws_ecs_task_definition" "meltano_scheduler" {
   }
 
   container_definitions = jsonencode([
+    local.airflow_task_description,
     local.meltano_scheduler_description,
     local.meltano_initializer_description,
-  ])
-}
-
-resource "aws_ecs_task_definition" "airflow" {
-  family                   = "gainy-airflow-${var.env}"
-  network_mode             = "awsvpc"
-  requires_compatibilities = ["FARGATE"]
-  cpu                      = local.airflow_cpu_credits
-  memory                   = local.airflow_memory_credits
-  task_role_arn            = aws_iam_role.task.arn
-  execution_role_arn       = aws_iam_role.execution.arn
-
-  volume {
-    name = "meltano-data"
-  }
-  volume {
-    name = "meltano-logs"
-    efs_volume_configuration {
-      file_system_id = aws_efs_file_system.meltano_logs.id
-    }
-  }
-
-  container_definitions = jsonencode([
-    local.airflow_task_description
   ])
 }
 
@@ -317,33 +294,14 @@ module "hasura-elb" {
 /*
  * Create Scheduler service
  */
-resource "aws_ecs_service" "meltano_scheduler" {
-  name                               = "gainy-scheduler-${var.env}"
+resource "aws_ecs_service" "meltano" {
+  name                               = "gainy-meltano-${var.env}"
   cluster                            = var.ecs_cluster_name
   desired_count                      = 1
   deployment_maximum_percent         = 200
   deployment_minimum_healthy_percent = 100
   launch_type                        = "FARGATE"
   enable_execute_command             = true
-
-  network_configuration {
-    subnets = var.private_subnet_ids
-  }
-
-  task_definition      = "${aws_ecs_task_definition.meltano_scheduler.family}:${aws_ecs_task_definition.meltano_scheduler.revision}"
-  force_new_deployment = true
-}
-
-/*
- * Create Airflow service
- */
-resource "aws_ecs_service" "airflow" {
-  name                               = "gainy-airflow-${var.env}"
-  cluster                            = var.ecs_cluster_name
-  desired_count                      = 1
-  deployment_maximum_percent         = 200
-  deployment_minimum_healthy_percent = 100
-  launch_type                        = "FARGATE"
   health_check_grace_period_seconds  = local.health_check_grace_period_seconds
 
   load_balancer {
@@ -356,12 +314,8 @@ resource "aws_ecs_service" "airflow" {
     subnets = var.private_subnet_ids
   }
 
-  task_definition      = "${aws_ecs_task_definition.airflow.family}:${aws_ecs_task_definition.airflow.revision}"
+  task_definition      = "${aws_ecs_task_definition.meltano.family}:${aws_ecs_task_definition.meltano.revision}"
   force_new_deployment = true
-
-  lifecycle {
-    ignore_changes = [desired_count]
-  }
 }
 
 /*

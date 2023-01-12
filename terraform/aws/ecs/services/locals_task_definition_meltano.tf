@@ -99,10 +99,14 @@ locals {
     pg_mlflow_schema         = "mlflow"
   })
 
-  airflow_task_description = jsondecode(templatefile(
-    "${path.module}/task_definitions/meltano-airflow-ui.json",
-    local.airflow_params
-  ))
+  airflow_task_description = merge(
+    jsondecode(templatefile("${path.module}/task_definitions/meltano-airflow-ui.json", local.airflow_params)),
+    {
+      dependsOn = [
+        { "condition" : "SUCCESS", "containerName" : "meltano-airflow-initializer" }
+      ]
+    }
+  )
   meltano_scheduler_description = merge(
     jsondecode(templatefile("${path.module}/task_definitions/meltano-airflow-scheduler.json", local.scheduler_params)),
     {
