@@ -99,21 +99,14 @@ locals {
     pg_mlflow_schema         = "mlflow"
   })
 
-  airflow_task_description = merge(
-    jsondecode(templatefile("${path.module}/task_definitions/meltano-airflow-ui.json", local.airflow_params)),
-    {
-      dependsOn = [
-        { "condition" : "HEALTHY", "containerName" : "meltano-airflow-scheduler" }
-      ]
-    }
-  )
+  airflow_task_description = jsondecode(templatefile("${path.module}/task_definitions/meltano-airflow-ui.json", local.airflow_params))
   meltano_scheduler_description = merge(
     jsondecode(templatefile("${path.module}/task_definitions/meltano-airflow-scheduler.json", local.scheduler_params)),
     {
       name       = "meltano-airflow-scheduler"
       essential  = true
       entrypoint = ["meltano"]
-      command    = ["invoke", "airflow", "scheduler"]
+      command    = ["/start-scheduler.sh"]
       healthCheck = {
         "command" : ["CMD-SHELL", "nc -z localhost 8793"],
         "interval" : 10,

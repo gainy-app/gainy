@@ -4,7 +4,7 @@ locals {
   polygon_websockets_cpu_credits = var.env == "production" ? 128 : 0
   hasura_cpu_credits             = var.env == "production" ? 512 : 256
   airflow_cpu_credits            = var.env == "production" ? 256 : 256
-  meltano_cpu_credits            = var.env == "production" ? 4096 : 4096
+  meltano_scheduler_cpu_credits  = var.env == "production" ? 4096 : 4096
 
   upstream_pool_size                  = var.env == "production" ? 3 : 1
   downstream_pool_size                = var.env == "production" ? 2 : 1
@@ -18,5 +18,5 @@ locals {
   polygon_websockets_memory_credits = var.env == "production" ? 1024 : 0
   hasura_memory_credits             = var.env == "production" ? 1024 : 1024
   airflow_memory_credits            = var.env == "production" ? 1024 : 1024
-  meltano_memory_credits            = var.env == "production" ? 8192 : 8192
+  meltano_scheduler_memory_credits  = var.env == "production" ? 8192 : 8192
 }
