@@ -20,4 +20,5 @@ class DepositsUpdatedEventHandler(AbstractDriveWealthEventHandler):
         deposit.set_from_response(event_payload)
         self.repo.persist(deposit)
         self.provider.update_money_flow_from_dw(deposit)
-        self.sync_trading_account_balances(deposit.trading_account_ref_id)
+        self.sync_trading_account_balances(deposit.trading_account_ref_id,
+                                           force=True)

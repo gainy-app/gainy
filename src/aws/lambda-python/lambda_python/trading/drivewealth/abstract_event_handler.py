@@ -16,7 +16,9 @@ class AbstractDriveWealthEventHandler(EventHandlerInterface, ABC):
         self.provider = provider
 
     def sync_trading_account_balances(
-            self, trading_account_ref_id: str) -> Optional[TradingAccount]:
+            self,
+            trading_account_ref_id: str,
+            force: bool = False) -> Optional[TradingAccount]:
         if not trading_account_ref_id:
             return
 
@@ -30,5 +32,5 @@ class AbstractDriveWealthEventHandler(EventHandlerInterface, ABC):
         if not trading_account:
             return
 
-        self.provider.sync_balances(trading_account)
+        self.provider.sync_balances(trading_account, force=force)
         return trading_account
