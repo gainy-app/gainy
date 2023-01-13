@@ -124,18 +124,25 @@ def _generate_schedules(env):
 
 
 def _generate_analytics_tap_catalog(schemas_filename, catalog_filename,
-                                    small_batch_catalog_filename):
+                                    small_batch_catalog_filename,
+                                    match_score_catalog_filename):
     with open(f"scripts/templates/{schemas_filename}", "r") as f:
         schemas = json.load(f)
 
     streams = {
         'default': [],
         'small-batch': [],
+        'match-score': [],
     }
 
     for schema_name, tables in schemas.items():
         for table_name, table_config in tables.items():
-            if table_config.get('isSmallBatch'):
+            if table_name in [
+                    'profile_collection_match_score',
+                    'profile_ticker_match_score'
+            ]:
+                stream_type = 'match-score'
+            elif table_config.get('isSmallBatch'):
                 stream_type = 'small-batch'
             else:
                 stream_type = 'default'
@@ -168,6 +175,11 @@ def _generate_analytics_tap_catalog(schemas_filename, catalog_filename,
     with open(f"catalog/analytics/{small_batch_catalog_filename}", "w") as f:
         json.dump({"streams": streams['small-batch']}, f)
 
+    if match_score_catalog_filename and streams['match-score']:
+        with open(f"catalog/analytics/{match_score_catalog_filename}",
+                  "w") as f:
+            json.dump({"streams": streams['match-score']}, f)
+
 
 #####   Configure and run   #####
 
@@ -191,10 +203,11 @@ with open("meltano.yml", "w") as f:
 
 _generate_analytics_tap_catalog("analytics_tap_catalog_schemas.template.json",
                                 "tap.catalog.json",
-                                "tap-small-batch.catalog.json")
+                                "tap-small-batch.catalog.json",
+                                "tap-match-score.catalog.json")
 _generate_analytics_tap_catalog(
     "analytics_tap_bigquery_catalog_schemas.template.json",
-    "tap-bigquery.catalog.json", "tap-bigquery-small-batch.catalog.json")
+    "tap-bigquery.catalog.json", "tap-bigquery-small-batch.catalog.json", None)
 
 if DBT_TARGET_SCHEMA != 'public':
     ### Algolia search mapping ###

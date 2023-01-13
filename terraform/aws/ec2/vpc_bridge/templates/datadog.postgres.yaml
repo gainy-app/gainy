@@ -13,7 +13,7 @@ instances:
         query: >
           with dags (dag_id, dag_interval) as (
                                                   values ('gainy-dag', interval '1 day'),
-                                                         ('realtime-dbt-dag', interval '5 minutes'),
+                                                         ('realtime-dbt-dag', interval '15 minutes'),
                                                          ('realtime-coingecko-dag', interval '15 minutes'),
                                                          ('realtime-website-dag', interval '5 minutes'),
                                                          ('send-notifications', interval '1 minute'),
