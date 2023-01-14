@@ -26,7 +26,7 @@ with data as
                    else 'ticker_' || profile_holdings.profile_id || '_' || portfolio_securities_normalized.ticker_symbol
                    end                                                           as holding_group_id,
                profile_holdings.profile_id ||
-               '_plaid_' || profile_holdings.security_id ||
+               '_plaid_' || portfolio_securities_normalized.ticker_symbol ||
                '_' || profile_holdings.account_id                                as holding_id_v2,
                profile_holdings.id                                               as holding_id,
                profile_holdings.plaid_access_token_id,
@@ -60,14 +60,15 @@ with data as
         union all
 
         select distinct on (
-            profile_id, security_id, account_id
+            profile_id, portfolio_securities_normalized.ticker_symbol, account_id
             ) case
                   when portfolio_securities_normalized.type = 'cash'
                       then profile_portfolio_transactions.profile_id || '_cash_' || portfolio_securities_normalized.ticker_symbol
                   else 'ticker_' || profile_portfolio_transactions.profile_id || '_' || portfolio_securities_normalized.ticker_symbol
                   end                                                           as holding_group_id,
               profile_portfolio_transactions.profile_id ||
-              '_plaid_' || security_id || '_' || account_id                     as holding_id_v2,
+              '_plaid_' || portfolio_securities_normalized.ticker_symbol ||
+              '_' || account_id                                                 as holding_id_v2,
               null::int                                                         as holding_id,
               profile_portfolio_transactions.plaid_access_token_id,
               profile_portfolio_transactions.security_id,
