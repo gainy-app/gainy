@@ -75,6 +75,7 @@ from (
 {% endif %}
 
 where t.type is not null
+  and t.original_ticker_symbol is not null
 
 {% if is_incremental() %}
   and old_portfolio_securities_normalized.id is null
