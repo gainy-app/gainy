@@ -40,18 +40,22 @@ BEGIN
 
     -- copy constraints
     FOR query, name IN
-        select 'alter table "' || dest_schema || '"."' || tbl.relname || '" add constraint ' || conname || ' ' ||
-                regexp_replace(
-                        replace(pg_get_constraintdef(c.oid), 'ON ' || source_schema || '.', 'ON ' || dest_schema || '.'),
-                       'REFERENCES (\w*\.)?(\w*)\(',
-                       'REFERENCES ' || dest_schema || '.\2(',
-                       'i'
-                    ),
-               conname
-        from pg_constraint c
-                 join pg_class tbl on tbl.oid = c.conrelid
-                 left join pg_namespace ns on ns.oid = tbl.relnamespace
-        where ns.nspname = source_schema
+        select t.*
+        from (
+                 select 'alter table "' || dest_schema || '"."' || tbl.relname || '" add constraint ' || conname || ' ' ||
+                         regexp_replace(
+                                 replace(pg_get_constraintdef(c.oid), 'ON ' || source_schema || '.', 'ON ' || dest_schema || '.'),
+                                'REFERENCES (public_\w*\.)?(\w*)\(',
+                                'REFERENCES ' || dest_schema || '.\2(',
+                                'i'
+                             ) as query,
+                        conname
+                 from pg_constraint c
+                          join pg_class tbl on tbl.oid = c.conrelid
+                          left join pg_namespace ns on ns.oid = tbl.relnamespace
+                 where ns.nspname = source_schema
+             ) t
+        order by t.query ilike '% references %'
         LOOP
             IF NOT EXISTS(
                     SELECT constraint_schema, constraint_name

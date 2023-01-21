@@ -16,12 +16,6 @@ done
 
 $psql_auth -c "insert into deployment.public_schemas(schema_name) values ('$DBT_TARGET_SCHEMA') on conflict(schema_name) do nothing;"
 
-$psql_auth -c "CREATE SCHEMA IF NOT EXISTS $DBT_TARGET_SCHEMA;"
-
-$psql_auth -c "GRANT USAGE ON SCHEMA raw_data TO ${PG_INTERNAL_SYNC_USERNAME};"
-$psql_auth -c "GRANT SELECT ON ALL TABLES IN SCHEMA raw_data TO ${PG_INTERNAL_SYNC_USERNAME};"
-$psql_auth -c "GRANT USAGE ON SCHEMA $DBT_TARGET_SCHEMA TO datadog;"
-
 if [ $($psql_auth -c "select count(*) from deployment.public_schemas where schema_name = '$DBT_TARGET_SCHEMA' and deployed_at is not null" -t --csv) == "0" ]; then
   export DBT_RUN_FLAGS="--full-refresh"
 
@@ -55,6 +49,7 @@ if [ $($psql_auth -c "select count(*) from deployment.public_schemas where schem
 
       echo "$(date)" Restoring schema "$OLD_DBT_TARGET_SCHEMA" to "$DBT_TARGET_SCHEMA"
       $psql_auth -f scripts/clone_schema.sql
+      $psql_auth -c "DROP SCHEMA IF EXISTS $DBT_TARGET_SCHEMA CASCADE;"
       if $psql_auth -c "call clone_schema('$OLD_DBT_TARGET_SCHEMA', '$DBT_TARGET_SCHEMA')"; then
         echo "$(date)" Schema "$OLD_DBT_TARGET_SCHEMA" restored to "$DBT_TARGET_SCHEMA"
         export DBT_RUN_FLAGS="-s result:error+ state:modified+ config.materialized:view --defer --full-refresh"
@@ -74,6 +69,10 @@ if [ $($psql_auth -c "select count(*) from deployment.public_schemas where schem
     exit 1
   fi
 fi
+
+$psql_auth -c "GRANT USAGE ON SCHEMA raw_data TO ${PG_INTERNAL_SYNC_USERNAME};"
+$psql_auth -c "GRANT SELECT ON ALL TABLES IN SCHEMA raw_data TO ${PG_INTERNAL_SYNC_USERNAME};"
+$psql_auth -c "GRANT USAGE ON SCHEMA $DBT_TARGET_SCHEMA TO datadog;"
 
 if [ "$ENV" != "local" ]; then
   nohup bash -c "meltano schedule run postgres-to-search --force" &> /dev/null &

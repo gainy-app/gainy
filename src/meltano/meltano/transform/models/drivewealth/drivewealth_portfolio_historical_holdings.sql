@@ -54,12 +54,12 @@ with portfolio_statuses as
              select profile_id,
                     case
                         when collection_id is null
-                            then 'dw_ticker_' || profile_id || '_' || (fund_holding_data ->> 'symbol')
-                        else 'dw_ttf_' || profile_id || '_' || collection_id || '_' || (fund_holding_data ->> 'symbol')
-                        end                                    as holding_id_v2,
-                    (fund_holding_data ->> 'symbol')           as symbol,
+                            then 'dw_ticker_' || profile_id || '_' || normalize_drivewealth_symbol(fund_holding_data ->> 'symbol')
+                        else 'dw_ttf_' || profile_id || '_' || collection_id || '_' || normalize_drivewealth_symbol(fund_holding_data ->> 'symbol')
+                        end                                                         as holding_id_v2,
+                    normalize_drivewealth_symbol(fund_holding_data ->> 'symbol') as symbol,
                     date,
-                    (fund_holding_data ->> 'value')::numeric   as value,
+                    (fund_holding_data ->> 'value')::numeric                        as value,
                     updated_at
              from fund_holdings
      ),
@@ -83,14 +83,19 @@ with portfolio_statuses as
                     holding_id_v2,
                     symbol,
                     date,
-                    coalesce(relative_daily_gain, 0)                     as relative_daily_gain,
-                    exp(sum(ln(coalesce(relative_daily_gain, 0) + 1))
+                    coalesce(relative_daily_gain, 
+                             ticker_realtime_metrics.relative_daily_change, 
+                             0)                                          as relative_daily_gain,
+                    exp(sum(ln(coalesce(relative_daily_gain, 
+                                        ticker_realtime_metrics.relative_daily_change, 
+                                        0) + 1))
                         over (partition by holding_id_v2 order by date)) as cumulative_daily_relative_gain,
                     value                                                as value,
                     data.updated_at
              from schedule
                       left join data using (profile_id, holding_id_v2, symbol, date)
                       left join {{ ref('historical_prices') }} using (symbol, date)
+                      left join {{ ref('ticker_realtime_metrics') }} using (symbol, date)
      ),
      data_extended as
          (
