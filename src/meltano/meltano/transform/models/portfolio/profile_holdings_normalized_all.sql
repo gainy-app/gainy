@@ -134,7 +134,7 @@ with data as
                  left join {{ ref('base_tickers') }} using (symbol)
                  left join {{ ref('portfolio_brokers') }} on portfolio_brokers.uniq_id = 'gainy_broker'
 )
-select data.*
+select distinct on (holding_id_v2) data.*
 from data
 
 {% if is_incremental() %}
