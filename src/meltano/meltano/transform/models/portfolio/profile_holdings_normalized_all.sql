@@ -20,7 +20,9 @@
 
 with data as
     (
-        select case
+        select distinct on (
+            profile_holdings.profile_id, portfolio_securities_normalized.original_ticker_symbol, profile_holdings.account_id
+            )  case
                    when portfolio_securities_normalized.type = 'cash'
                        then profile_holdings.profile_id || '_cash_' || portfolio_securities_normalized.ticker_symbol
                    else 'ticker_' || profile_holdings.profile_id || '_' || portfolio_securities_normalized.ticker_symbol
