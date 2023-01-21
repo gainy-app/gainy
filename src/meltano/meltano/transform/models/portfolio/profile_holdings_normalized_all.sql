@@ -22,8 +22,8 @@ with data as
     (
         select case
                    when portfolio_securities_normalized.type = 'cash'
-                       then profile_holdings.profile_id || '_cash_' || portfolio_securities_normalized.original_ticker_symbol
-                   else 'ticker_' || profile_holdings.profile_id || '_' || portfolio_securities_normalized.original_ticker_symbol
+                       then profile_holdings.profile_id || '_cash_' || portfolio_securities_normalized.ticker_symbol
+                   else 'ticker_' || profile_holdings.profile_id || '_' || portfolio_securities_normalized.ticker_symbol
                    end                                                           as holding_group_id,
                profile_holdings.profile_id ||
                '_plaid_' || portfolio_securities_normalized.original_ticker_symbol ||
@@ -63,8 +63,8 @@ with data as
             profile_id, portfolio_securities_normalized.original_ticker_symbol, account_id
             ) case
                   when portfolio_securities_normalized.type = 'cash'
-                      then profile_portfolio_transactions.profile_id || '_cash_' || portfolio_securities_normalized.original_ticker_symbol
-                  else 'ticker_' || profile_portfolio_transactions.profile_id || '_' || portfolio_securities_normalized.original_ticker_symbol
+                      then profile_portfolio_transactions.profile_id || '_cash_' || portfolio_securities_normalized.ticker_symbol
+                  else 'ticker_' || profile_portfolio_transactions.profile_id || '_' || portfolio_securities_normalized.ticker_symbol
                   end                                                           as holding_group_id,
               profile_portfolio_transactions.profile_id ||
               '_plaid_' || portfolio_securities_normalized.original_ticker_symbol ||
