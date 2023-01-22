@@ -149,7 +149,7 @@ with data as
                                 select holding_id_v2, min(date) as date from {{ ref('drivewealth_portfolio_historical_holdings') }} group by holding_id_v2
                             ) holding_since using(holding_id_v2)
 )
-select data.*
+select distinct on (holding_id_v2) data.*
 from data
 
 {% if is_incremental() %}
