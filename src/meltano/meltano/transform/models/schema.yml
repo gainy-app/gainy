@@ -1409,6 +1409,14 @@ models:
         tests:
           - type:
               type: 'bigint'
+      - name: performance_rank
+        tests:
+          - type:
+              type: 'integer'
+      - name: clicks_rank
+        tests:
+          - type:
+              type: 'integer'
       - name: updated_at
         tests:
           - type:
