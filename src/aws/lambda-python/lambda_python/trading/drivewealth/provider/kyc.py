@@ -74,7 +74,7 @@ class DriveWealthProviderKYC(GainyDriveWealthProvider):
     def get_profile_id_by_user_id(self, user_ref_id: str) -> int:
         user: DriveWealthUser = self.repository.find_one(
             DriveWealthUser, {"ref_id": user_ref_id})
-        if not user:
+        if not user or not user.profile_id:
             raise NotFoundException
 
         return user.profile_id
