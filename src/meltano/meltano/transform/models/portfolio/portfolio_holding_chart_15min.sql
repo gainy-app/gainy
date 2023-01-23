@@ -14,6 +14,16 @@
 select data.*,
        data.holding_id_v2 || '_' || data.datetime as id
 from (
+{% if var('realtime') %}
+         with stats as
+                  (
+                      select holding_id_v2,
+                             max(datetime)   as datetime,
+                             max(updated_at) as updated_at
+                      from {{ this }}
+                      group by holding_id_v2
+                  )
+{% endif %}
          select portfolio_holding_chart_1d.holding_id_v2,
                 portfolio_holding_chart_1d.date,
                 historical_prices_aggregated_15min.datetime,
@@ -44,7 +54,19 @@ from (
                   join {{ ref('week_trading_sessions_static') }}
                            on week_trading_sessions_static.symbol = profile_holdings_normalized_all.symbol
                                and week_trading_sessions_static.date = historical_prices_aggregated_15min.date
+{% if var('realtime') %}
+                  left join stats using (holding_id_v2)
+{% endif %}
+
          where week_trading_sessions_static.index != 0
+
+{% if var('realtime') %}
+           and (stats.holding_id_v2 is null
+             or historical_prices_aggregated_15min.datetime > stats.datetime
+             or portfolio_holding_chart_1d.updated_at> stats.updated_at
+             or historical_prices_aggregated_1d.updated_at> stats.updated_at
+             or historical_prices_aggregated_15min.updated_at > stats.updated_at)
+{% endif %}
 
          union all
 
@@ -78,7 +100,19 @@ from (
                   join {{ ref('historical_prices_aggregated_15min') }}
                        on historical_prices_aggregated_15min.symbol = profile_holdings_normalized_all.symbol
                            and historical_prices_aggregated_15min.date = week_trading_sessions_static.date
+{% if var('realtime') %}
+                  left join stats using (holding_id_v2)
+{% endif %}
+
          where week_trading_sessions_static.index = 0
+
+{% if var('realtime') %}
+           and (stats.holding_id_v2 is null
+             or historical_prices_aggregated_15min.datetime > stats.datetime
+             or portfolio_holding_chart_1d.updated_at> stats.updated_at
+             or historical_prices_aggregated_1d.updated_at> stats.updated_at
+             or historical_prices_aggregated_15min.updated_at > stats.updated_at)
+{% endif %}
     ) data
 
 {% if is_incremental() %}

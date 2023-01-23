@@ -1,6 +1,12 @@
 {{
   config(
-    materialized = "view",
+    materialized = "incremental",
+    unique_key = "id",
+    tags = ["realtime"],
+    post_hook=[
+      pk('id'),
+      index(['profile_id', 'holding_id_v2', 'period', 'datetime'], true),
+    ],
   )
 }}
 
@@ -181,5 +187,13 @@ select data.*,
                         over (partition by profile_id, holding_id_v2, period order by datetime rows between current row and unbounded following) -
                      data.quantity)
            else 0
-           end as cash_adjustment
+           end as cash_adjustment,
+       profile_id || '_' || holding_id_v2 || '_' || period || '_' || datetime as id
 from data
+
+{% if is_incremental() %}
+         left join {{ this }} old_data using (profile_id, holding_id_v2, period, datetime)
+where old_data.adjusted_close is null
+   or (data.relative_gain is not null and old_data.relative_gain is null)
+   or abs(data.adjusted_close - old_data.adjusted_close) > 1e-3
+{% endif %}

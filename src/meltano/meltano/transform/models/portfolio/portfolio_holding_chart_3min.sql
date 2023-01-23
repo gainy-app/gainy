@@ -14,6 +14,16 @@
 select data.*,
        data.holding_id_v2 || '_' || data.datetime as id
 from (
+{% if var('realtime') %}
+         with stats as
+                  (
+                      select holding_id_v2,
+                             max(datetime)   as datetime,
+                             max(updated_at) as updated_at
+                      from {{ this }}
+                      group by holding_id_v2
+                  )
+{% endif %}
          select portfolio_holding_chart_1d.holding_id_v2,
                 portfolio_holding_chart_1d.date,
                 historical_prices_aggregated_3min.datetime,
@@ -44,6 +54,14 @@ from (
                   join {{ ref('historical_prices_aggregated_3min') }}
                        on historical_prices_aggregated_3min.symbol = profile_holdings_normalized_all.symbol
                            and historical_prices_aggregated_3min.date = week_trading_sessions_static.date
+{% if var('realtime') %}
+                  left join stats using (holding_id_v2)
+         where stats.holding_id_v2 is null
+            or historical_prices_aggregated_3min.datetime > stats.datetime
+            or portfolio_holding_chart_1d.updated_at> stats.updated_at
+            or historical_prices_aggregated_1d.updated_at> stats.updated_at
+            or historical_prices_aggregated_3min.updated_at > stats.updated_at
+{% endif %}
     ) data
 
 {% if is_incremental() %}
