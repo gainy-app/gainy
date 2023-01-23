@@ -25,7 +25,6 @@ from (
          union all
 
          select profiles.profile_id, uuid as notification_uuid, title::json, text::json, data::json, created_at
-
          from {{ source('app', 'notifications') }}
                   join profiles on true
          where is_shown_in_app
