@@ -35,6 +35,7 @@ raw_eod_historical_prices as
                close,
                adjusted_close,
                volume,
+               'eod'                                     as source,
                _sdc_batched_at                           as updated_at
         from {{ source('eod', 'eod_historical_prices') }}
                  left join polygon_symbols
@@ -56,6 +57,7 @@ raw_polygon_stocks_historical_prices as
                c                                                      as close,
                c                                                      as adjusted_close,
                v                                                      as volume,
+               'polygon'                                              as source,
                _sdc_batched_at                                        as updated_at
         from {{ source('polygon', 'polygon_stocks_historical_prices') }}
                  join polygon_symbols using (symbol)
@@ -73,6 +75,7 @@ raw_historical_prices as materialized
                close,
                adjusted_close,
                volume,
+               source,
                updated_at
         from raw_polygon_stocks_historical_prices
 
@@ -89,6 +92,7 @@ raw_historical_prices as materialized
                close,
                adjusted_close,
                volume,
+               source,
                updated_at
         from raw_eod_historical_prices
 ),
@@ -139,8 +143,10 @@ prices_with_split_rates as
                raw_historical_prices.date_month,
                raw_historical_prices.date_week,
                case when close > 0 then adjusted_close / close end as split_rate,
-               stocks_with_split.split_from::numeric /
-               stocks_with_split.split_to::numeric                 as split_rate_next_day,
+               case
+                   when source = 'eod'
+                       then stocks_with_split.split_from::numeric / stocks_with_split.split_to::numeric
+                   end                                             as split_rate_next_day,
                raw_historical_prices.open,
                raw_historical_prices.high,
                raw_historical_prices.low,
@@ -153,16 +159,16 @@ prices_with_split_rates as
     ),
 latest_day_split_rate as
     (
-        SELECT raw_historical_prices.symbol,
+        SELECT raw_eod_historical_prices.symbol,
                first_value(adjusted_close / close) over wnd as latest_day_split_rate
-        from raw_historical_prices
+        from raw_eod_historical_prices
                  join latest_stock_price_date using (symbol, date)
-            window wnd as (partition by symbol order by raw_historical_prices.date desc)
+            window wnd as (partition by symbol order by raw_eod_historical_prices.date desc)
 ),
 prev_split as
     (
         select symbol, max(date) as date
-        from raw_historical_prices
+        from raw_eod_historical_prices
         where abs(close - adjusted_close) > 1e-3
         group by symbol
 ),
@@ -179,7 +185,7 @@ wrongfully_adjusted_prices as
                         date,
                         adjusted_close,
                         lag(adjusted_close) over (partition by symbol order by date) as prev_adjusted_close
-                 from raw_historical_prices
+                 from raw_eod_historical_prices
                  where date::date > now() - interval '1 week'
              ) t
         where adjusted_close > 0
