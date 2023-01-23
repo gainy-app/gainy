@@ -100,6 +100,7 @@ action_dispatcher = HasuraActionDispatcher(ACTIONS,
 
 
 def handle_action(event, context):
+    logger.info('handle_action', extra={"event": event, "context": context})
     return action_dispatcher.handle(event, context)
 
 
@@ -117,4 +118,5 @@ trigger_dispatcher = HasuraTriggerDispatcher(TRIGGERS,
 
 
 def handle_trigger(event, context):
+    logger.info('handle_trigger', extra={"event": event, "context": context})
     return trigger_dispatcher.handle(event, context)

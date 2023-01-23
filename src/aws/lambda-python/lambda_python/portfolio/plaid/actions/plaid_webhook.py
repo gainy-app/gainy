@@ -24,7 +24,6 @@ class PlaidWebhook(HasuraAction):
         headers = context_container.headers
         portfolio_service = context_container.portfolio_service
         plaid_service = context_container.plaid_service
-        db_conn = context_container.db_conn
         item_id = input_params['item_id']
         logging_extra = {
             'input_params': input_params,
@@ -54,15 +53,20 @@ class PlaidWebhook(HasuraAction):
             webhook_type = input_params['webhook_type']
             portfolio_service.sync_institution(access_token)
             if webhook_type == 'HOLDINGS':
-                count += portfolio_service.sync_token_holdings(access_token)
+                cnt = portfolio_service.sync_token_holdings(access_token)
+                count += cnt
+                logging_extra['holdings_count'] = cnt
             elif webhook_type == 'INVESTMENTS_TRANSACTIONS':
-                count += portfolio_service.sync_token_transactions(
-                    access_token)
+                cnt = portfolio_service.sync_token_transactions(access_token)
+                count += cnt
+                logging_extra['transactions_count'] = cnt
 
             return {'count': count}
         except Exception as e:
             logger.error("[PLAID_WEBHOOK] %s", e, extra=logging_extra)
             raise e
+        finally:
+            logger.info("[PLAID_WEBHOOK] finished", extra=logging_extra)
 
     def verify(self, body, headers, access_token):
         signed_jwt = headers.get('Plaid-Verification') or headers.get(

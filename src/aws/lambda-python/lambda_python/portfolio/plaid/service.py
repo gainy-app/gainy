@@ -1,5 +1,6 @@
 import json
 import datetime
+import time
 from typing import Optional, Iterable
 
 from plaid.model.account_base import AccountBase as PlaidAccount
@@ -47,23 +48,27 @@ class PlaidService(GainyPlaidService):
     def max_transactions_limit(self):
         return 500
 
-    def get_holdings(self, plaid_access_token):
-        if plaid_access_token.get("is_artificial"):
+    def get_holdings(self, access_token):
+        if access_token.get("is_artificial"):
             return {
                 'holdings': [],
                 'securities': [],
                 'accounts': [],
             }
 
+        logging_extra = {
+            'profile_id': access_token['profile_id'],
+            'access_token_id': access_token['id'],
+        }
+
         try:
             # InvestmentsHoldingsGetResponse[]
+            request_start = time.time()
             response = self.plaid_client.get_investment_holdings(
-                plaid_access_token["access_token"])
-            logger.info('plaid holdings',
-                        extra={
-                            "profile_id": plaid_access_token["profile_id"],
-                            "response": response
-                        })
+                access_token["access_token"])
+            request_end = time.time()
+            logging_extra['response'] = response
+            logging_extra['request_duration'] = request_end - request_start
 
             holdings = [
                 self.__hydrate_holding_data(holding_data)
@@ -78,9 +83,9 @@ class PlaidService(GainyPlaidService):
             ]
 
             for i in holdings:
-                i.plaid_access_token_id = plaid_access_token["id"]
+                i.plaid_access_token_id = access_token["id"]
             for i in accounts:
-                i.plaid_access_token_id = plaid_access_token["id"]
+                i.plaid_access_token_id = access_token["id"]
 
             return {
                 'holdings': holdings,
@@ -88,7 +93,9 @@ class PlaidService(GainyPlaidService):
                 'accounts': accounts,
             }
         except plaid.ApiException as e:
-            self._handle_api_exception(e, plaid_access_token)
+            self._handle_api_exception(e, access_token)
+        finally:
+            logger.info('get_holdings', extra=logging_extra)
 
     def get_transactions(self, plaid_access_token, count=100, offset=0):
         if plaid_access_token.get("is_artificial"):
@@ -137,16 +144,17 @@ class PlaidService(GainyPlaidService):
         except plaid.ApiException as e:
             self._handle_api_exception(e, plaid_access_token)
 
-    def get_institution(self, plaid_access_token) -> Optional[Institution]:
-        if plaid_access_token.get("is_artificial"):
+    def get_institution(self, access_token) -> Optional[Institution]:
+        logger.info('get_institution', {"access_token": access_token})
+        if access_token.get("is_artificial"):
             return None
 
         item_response = self.plaid_client.get_item(
-            plaid_access_token['access_token'])
+            access_token['access_token'])
         institution_id = item_response['item']['institution_id']
 
         institution_response = self.plaid_client.get_institution(
-            plaid_access_token['access_token'], institution_id)
+            access_token['access_token'], institution_id)
 
         return self.__hydrate_institution(institution_response['institution'])
 
