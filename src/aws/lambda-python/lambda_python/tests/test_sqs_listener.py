@@ -34,6 +34,11 @@ def test(monkeypatch):
     monkeypatch.setattr(HandleMessage, "execute",
                         mock_record_calls(execute_calls))
 
-    handle(event, namedtuple('Point', ['invoked_function_arn', 'log_stream_name', 'log_group_name', 'aws_request_id', 'memory_limit_in_mb'])(None, None, None, None, None))
+    handle(
+        event,
+        namedtuple('Point', [
+            'invoked_function_arn', 'log_stream_name', 'log_group_name',
+            'aws_request_id', 'memory_limit_in_mb'
+        ])(None, None, None, None, None))
 
     assert len(execute_calls) == 1
