@@ -33,6 +33,8 @@ query {
             absolute_daily_change
             relative_daily_change
             market_capitalization_sum
+            performance_rank
+            clicks_rank
             updated_at
         }
     }

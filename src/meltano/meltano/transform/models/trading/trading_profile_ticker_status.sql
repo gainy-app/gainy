@@ -16,3 +16,4 @@ select profile_holdings_normalized.profile_id,
 from {{ ref('profile_holdings_normalized') }}
          join {{ ref('portfolio_holding_gains') }} using (holding_id_v2)
 where profile_holdings_normalized.is_app_trading
+  and profile_holdings_normalized.collection_id is null

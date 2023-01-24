@@ -1488,8 +1488,10 @@
         columns:
           - absolute_daily_change
           - actual_price
+          - clicks_rank
           - collection_uniq_id
           - market_capitalization_sum
+          - performance_rank
           - previous_day_close_price
           - profile_id
           - relative_daily_change

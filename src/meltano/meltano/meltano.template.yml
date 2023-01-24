@@ -159,6 +159,10 @@ plugins:
       config:
         itersize: 1
 
+    - name: tap-postgres-analytics-match-score
+      inherit_from: tap-postgres-analytics
+      catalog: catalog/analytics/tap-match-score.catalog.json
+
     - name: tap-postgres-analytics-bigquery
       inherit_from: tap-postgres-analytics
       catalog: catalog/analytics/tap-bigquery.catalog.json
@@ -413,6 +417,16 @@ schedules:
     start_date: 2021-11-15 00:00:00.000000
     env:
       TARGET_ENVS: '["production","local"]'
+      INTEGRATION: 'DOWNSTREAM'
+
+  - name: postgres-to-analytics-match-score
+    extractor: tap-postgres-analytics-match-score
+    loader: target-postgres-analytics
+    transform: skip
+    interval: '@daily'
+    start_date: 2021-11-15 00:00:00.000000
+    env:
+      TARGET_ENVS: '[]'
       INTEGRATION: 'DOWNSTREAM'
 
   - name: postgres-to-bigquery

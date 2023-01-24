@@ -60,7 +60,7 @@ from (
 --                                 -- stocks
                                 or (portfolio_securities.type not in ('crypto', 'cryptocurrency', 'derivative') and
                                     base_tickers.symbol = portfolio_securities.ticker_symbol)
-         where true
+         where (portfolio_securities.ticker_symbol not like 'CUR:%' or portfolio_securities.type in ('crypto', 'cryptocurrency', 'cash'))
          {% if not var('portfolio_crypto_enabled') %}
             and not (base_tickers.type = 'crypto')
          {% endif %}
@@ -72,5 +72,11 @@ from (
 {% if is_incremental() %}
          left join {{ this }} old_portfolio_securities_normalized
                    using (id, name, ticker_symbol, original_ticker_symbol, type)
-where old_portfolio_securities_normalized.id is null
+{% endif %}
+
+where t.type is not null
+  and t.original_ticker_symbol is not null
+
+{% if is_incremental() %}
+  and old_portfolio_securities_normalized.id is null
 {% endif %}

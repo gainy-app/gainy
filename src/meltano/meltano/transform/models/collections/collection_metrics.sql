@@ -66,6 +66,23 @@ with collection_daily_latest_chart_point as
                         end - 1 as value_change_all,
                     updated_at
              from {{ ref('collection_historical_values_marked') }}
+     ),
+     ranked_performance as
+         (
+             select profile_collections.id                      as collection_id,
+                    rank() over (order by value_change_1m desc) as rank
+             from metrics
+                      join {{ ref('profile_collections') }} on profile_collections.uniq_id = collection_uniq_id
+             where profile_collections.enabled = '1'
+               and profile_collections.personalized = '0'
+         ),
+     ranked_clicks as
+         (
+             select distinct on (collection_id) collection_id, rank
+             from {{ ref('top_global_collections') }}
+                      join {{ ref('collections') }} on collections.id = top_global_collections.collection_id
+             where collections.enabled = '1'
+               and collections.personalized = '0'
      )
 select profile_collections.profile_id,
        profiles.user_id,
@@ -83,10 +100,14 @@ select profile_collections.profile_id,
        metrics.value_change_all,
        previous_day.adjusted_close::double precision                               as previous_day_close_price,
        ticker_metrics.market_capitalization_sum::bigint,
+       ranked_performance.rank::int                                                as performance_rank,
+       ranked_clicks.rank::int                                                     as clicks_rank,
        greatest(latest_day.updated_at, previous_day.updated_at,
            ticker_metrics.updated_at, metrics.updated_at)                          as updated_at
 from {{ ref('profile_collections') }}
          left join {{ source('app', 'profiles') }} on profiles.id = profile_collections.profile_id
+         left join ranked_performance on ranked_performance.collection_id = profile_collections.id
+         left join ranked_clicks on ranked_clicks.collection_id = profile_collections.id
          left join ticker_metrics
                    on ticker_metrics.collection_uniq_id = profile_collections.uniq_id
          left join metrics
