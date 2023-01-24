@@ -29,13 +29,8 @@ def test(monkeypatch):
     monkeypatch.setattr(trading_repository, 'update_kyc_form',
                         mock_record_calls(update_kyc_form_calls))
 
-    trading_service = TradingService(None, None, None, None, None)
-    handle_kyc_status_change_calls = []
-    monkeypatch.setattr(trading_service, 'handle_kyc_status_change',
-                        mock_record_calls(handle_kyc_status_change_calls))
-
     event_handler = KycUpdatedEventHandler(repository, provider,
-                                           trading_repository, trading_service)
+                                           trading_repository, None)
 
     message = {
         "userID": user_id,
@@ -63,7 +58,4 @@ def test(monkeypatch):
     ]
     assert (profile_id, KycStatus.INFO_REQUIRED) in [
         args for args, kwargs in update_kyc_form_calls
-    ]
-    assert (entity, ) in [
-        args for args, kwargs in handle_kyc_status_change_calls
     ]
