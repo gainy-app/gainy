@@ -2,4 +2,4 @@
 
 python scripts/generate_meltano_config.py
 
-meltano "$@"
+meltano invoke airflow scheduler "$@"

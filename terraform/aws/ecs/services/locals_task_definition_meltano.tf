@@ -105,8 +105,7 @@ locals {
     {
       name       = "meltano-airflow-scheduler"
       essential  = true
-      entrypoint = ["meltano"]
-      command    = ["/start-scheduler.sh"]
+      entrypoint = ["/start-scheduler.sh"]
       healthCheck = {
         "command" : ["CMD-SHELL", "nc -z localhost 8793"],
         "interval" : 10,
