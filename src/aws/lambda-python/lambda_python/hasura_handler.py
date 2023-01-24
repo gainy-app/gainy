@@ -14,6 +14,7 @@ from search.news_search import SearchNews
 from triggers import *
 from actions import *
 from trading.actions import *
+from trading.triggers import *
 from _stripe.actions import *
 from _stripe.triggers import *
 
@@ -111,6 +112,7 @@ TRIGGERS = [
     OnPlaidAccessTokenCreated(),
     OnInvitationCreatedOrUpdated(),
     StripeDeletePaymentMethod(),
+    OnNewKycStatus(),
 ]
 
 trigger_dispatcher = HasuraTriggerDispatcher(TRIGGERS,

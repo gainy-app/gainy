@@ -1,8 +1,10 @@
-from gainy.tests.mocks.repository_mocks import mock_persist
+from gainy.tests.mocks.repository_mocks import mock_persist, mock_record_calls
 from gainy.trading.drivewealth import DriveWealthRepository
 from trading.drivewealth.event_handlers.kyc_updated import KycUpdatedEventHandler
 from trading.drivewealth.provider import DriveWealthProvider
 from trading.models import ProfileKycStatus, KycStatus
+from trading.repository import TradingRepository
+from trading.service import TradingService
 
 
 def test(monkeypatch):
@@ -22,7 +24,18 @@ def test(monkeypatch):
     monkeypatch.setattr(provider, 'get_profile_id_by_user_id',
                         mock_get_profile_id_by_user_id)
 
-    event_handler = KycUpdatedEventHandler(repository, provider)
+    trading_repository = TradingRepository(None)
+    update_kyc_form_calls = []
+    monkeypatch.setattr(trading_repository, 'update_kyc_form',
+                        mock_record_calls(update_kyc_form_calls))
+
+    trading_service = TradingService(None, None, None, None, None)
+    handle_kyc_status_change_calls = []
+    monkeypatch.setattr(trading_service, 'handle_kyc_status_change',
+                        mock_record_calls(handle_kyc_status_change_calls))
+
+    event_handler = KycUpdatedEventHandler(repository, provider,
+                                           trading_repository, trading_service)
 
     message = {
         "userID": user_id,
@@ -47,4 +60,10 @@ def test(monkeypatch):
     assert entity.message == message["current"]["statusMessage"]
     assert entity.error_messages == [
         "No match found for Social Security Number"
+    ]
+    assert (profile_id, KycStatus.INFO_REQUIRED) in [
+        args for args, kwargs in update_kyc_form_calls
+    ]
+    assert (entity, ) in [
+        args for args, kwargs in handle_kyc_status_change_calls
     ]

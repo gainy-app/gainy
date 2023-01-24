@@ -11,15 +11,11 @@ class KycGetStatus(HasuraAction):
         super().__init__(action_name, "profile_id")
 
     def apply(self, input_params, context_container: ContextContainer):
-        trading_service = context_container.trading_service
         profile_id = input_params["profile_id"]
 
-        # TODO make async (with SQS)
-
         repository = context_container.trading_repository
+        kyc_status = repository.get_actual_kyc_status(profile_id)
 
-        kyc_status = trading_service.kyc_get_status(profile_id)
-        repository.update_kyc_form(profile_id, kyc_status.status)
         return {
             "status":
             kyc_status.status,

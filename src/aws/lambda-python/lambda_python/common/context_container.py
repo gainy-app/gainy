@@ -14,6 +14,7 @@ from services.notification import NotificationService
 from services.sendgrid import SendGridService
 from services.sqs import SqsAdapter
 from services.twilio import TwilioClient
+from services.uploaded_file_service import UploadedFileService
 from trading.drivewealth.queue_message_handler import DriveWealthQueueMessageHandler
 from trading.kyc_form_validator import KycFormValidator
 from trading.service import TradingService
@@ -57,6 +58,10 @@ class ContextContainer(GainyContextContainer):
             return RedisCache(REDIS_CACHE_HOST, REDIS_CACHE_PORT)
 
         return LocalCache()
+
+    @cached_property
+    def uploaded_file_service(self) -> UploadedFileService:
+        return UploadedFileService()
 
     # verification
     @cached_property
@@ -118,7 +123,8 @@ class ContextContainer(GainyContextContainer):
     def trading_service(self) -> TradingService:
         return TradingService(self.trading_repository,
                               self.drivewealth_provider, self.plaid_service,
-                              self.kyc_form_validator)
+                              self.kyc_form_validator,
+                              self.uploaded_file_service)
 
     @cached_property
     def trading_repository(self) -> TradingRepository:
@@ -133,7 +139,8 @@ class ContextContainer(GainyContextContainer):
     def drivewealth_queue_message_handler(
             self) -> DriveWealthQueueMessageHandler:
         return DriveWealthQueueMessageHandler(self.drivewealth_repository,
-                                              self.drivewealth_provider)
+                                              self.drivewealth_provider,
+                                              self.trading_repository)
 
     @cached_property
     def aws_message_handler(self) -> AwsMessageHandler:
