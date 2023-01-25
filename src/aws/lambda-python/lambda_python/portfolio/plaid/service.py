@@ -145,7 +145,7 @@ class PlaidService(GainyPlaidService):
             self._handle_api_exception(e, plaid_access_token)
 
     def get_institution(self, access_token) -> Optional[Institution]:
-        logger.info('get_institution', {"access_token": access_token})
+        logger.info('get_institution', extra={"access_token": access_token})
         if access_token.get("is_artificial"):
             return None
 
