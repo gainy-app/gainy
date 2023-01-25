@@ -169,7 +169,7 @@ class DriveWealthProvider(DriveWealthProviderKYC,
         self._sync_user_deposits(user.ref_id)
         self._sync_user_redemptions(user.ref_id)
         self.sync_portfolios(profile_id)
-        self._sync_statements(profile_id)
+        # self._sync_statements(profile_id)
 
     def sync_deposit(self, deposit_ref_id: str):
         repository = self.repository
