@@ -1,6 +1,10 @@
 {{
   config(
-    materialized = "view",
+    materialized = "incremental",
+    unique_key = "uniq_id",
+    post_hook=[
+      pk('uniq_id'),
+    ]
   )
 }}
 

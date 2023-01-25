@@ -7,9 +7,9 @@
       pk('holding_id_v2'),
       'delete from {{this}}
         using {{this}} AS t
-        LEFT OUTER JOIN {{ ref(\'profile_holdings_normalized\') }} using (holding_id_v2)
+        LEFT OUTER JOIN {{ ref(\'profile_holdings_normalized_all\') }} using (holding_id_v2)
         WHERE portfolio_holding_gains.holding_id_v2 = t.holding_id_v2
-          AND profile_holdings_normalized.holding_id_v2 is null',
+          AND profile_holdings_normalized_all.holding_id_v2 is null',
     ]
   )
 }}
@@ -32,20 +32,23 @@ with long_term_tax_holdings as
                     holding_id_v2
                     ) holding_id_v2,
                       adjusted_close as actual_value
-                from {{ ref('portfolio_holding_chart') }} join {{ ref('profile_holdings_normalized') }} using (holding_id_v2)
+                from {{ ref('portfolio_holding_chart') }}
+                          join {{ ref('profile_holdings_normalized_all') }} using (holding_id_v2)
                           join {{ ref('week_trading_sessions_static') }} using (symbol, date)
                 where period = '1d'
                   and week_trading_sessions_static.index = 0
                   and datetime between open_at
                   and close_at - interval '1 second'
+                  and not profile_holdings_normalized_all.is_hidden
                 order by holding_id_v2, datetime desc
             )
 
             union all
 
             select holding_id_v2, quantity as actual_value
-            from {{ ref('profile_holdings_normalized') }}
+            from {{ ref('profile_holdings_normalized_all') }}
             where symbol = 'CUR:USD'
+              and not profile_holdings_normalized_all.is_hidden
      ),
     last_day_value as
         (
@@ -64,11 +67,12 @@ with long_term_tax_holdings as
                           select holding_id_v2,
                                  sum(adjusted_close * relative_gain / (1 + relative_gain)) as absolute_gain_1d
                           from {{ ref('portfolio_holding_chart') }}
-                                   join {{ ref('profile_holdings_normalized') }} using (holding_id_v2)
+                                   join {{ ref('profile_holdings_normalized_all') }} using (holding_id_v2)
                                    join {{ ref('week_trading_sessions_static') }} using (symbol, date)
                           where period = '1d'
                             and week_trading_sessions_static.index = 0
                             and datetime between open_at and close_at - interval '1 second'
+                            and not profile_holdings_normalized_all.is_hidden
                           group by holding_id_v2
                       ),
                   raw_data_1w as
@@ -76,11 +80,12 @@ with long_term_tax_holdings as
                           select holding_id_v2,
                                  sum(adjusted_close * relative_gain / (1 + relative_gain)) as absolute_gain_1w
                           from {{ ref('portfolio_holding_chart') }}
-                                   join {{ ref('profile_holdings_normalized') }} using (holding_id_v2)
+                                   join {{ ref('profile_holdings_normalized_all') }} using (holding_id_v2)
                                    join {{ ref('week_trading_sessions_static') }} using (symbol, date)
                           where period = '1w'
                             and datetime > now()::date - interval '1 week'
                             and datetime between open_at and close_at - interval '1 second'
+                            and not profile_holdings_normalized_all.is_hidden
                           group by holding_id_v2
                   ),
                   raw_data_1m as
@@ -135,7 +140,7 @@ with long_term_tax_holdings as
                     absolute_gain_1y,
                     absolute_gain_5y,
                     absolute_gain_total
-             from {{ ref('profile_holdings_normalized') }}
+             from {{ ref('profile_holdings_normalized_all') }}
                       left join raw_data_0d using (holding_id_v2)
                       left join raw_data_1w using (holding_id_v2)
                       left join raw_data_1m using (holding_id_v2)
@@ -143,6 +148,7 @@ with long_term_tax_holdings as
                       left join raw_data_1y using (holding_id_v2)
                       left join raw_data_5y using (holding_id_v2)
                       left join raw_data_all using (holding_id_v2)
+             where not profile_holdings_normalized_all.is_hidden
     )
 select holding_group_id,
        holding_id_v2,
@@ -187,8 +193,9 @@ select holding_group_id,
        absolute_gain_5y,
        absolute_gain_total,
        coalesce(long_term_tax_holdings.quantity, 0) as ltt_quantity_total
-from {{ ref('profile_holdings_normalized') }}
+from {{ ref('profile_holdings_normalized_all') }}
          left join combined_gains using (holding_id_v2)
          left join long_term_tax_holdings using (holding_id_v2)
          left join actual_value using (holding_id_v2)
          left join last_day_value using (holding_id_v2) -- todo: get rid of this and fix tests
+where not profile_holdings_normalized_all.is_hidden

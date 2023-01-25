@@ -11,7 +11,7 @@
 
 with expanded_holdings as
          (
-             select profile_holdings_normalized.profile_id,
+             select profile_holdings_normalized_all.profile_id,
                     max(portfolio_holding_gains.updated_at)                         as updated_at,
                     sum(actual_value::numeric)                                      as actual_value,
                     sum(absolute_gain_1d::numeric)    as absolute_gain_1d,
@@ -22,8 +22,9 @@ with expanded_holdings as
                     sum(absolute_gain_5y::numeric)    as absolute_gain_5y,
                     sum(absolute_gain_total::numeric) as absolute_gain_total
              from {{ ref('portfolio_holding_gains') }}
-                      join {{ ref('profile_holdings_normalized') }} using (holding_id_v2)
-             group by profile_holdings_normalized.profile_id
+                      join {{ ref('profile_holdings_normalized_all') }} using (holding_id_v2)
+             where not profile_holdings_normalized_all.is_hidden
+             group by profile_holdings_normalized_all.profile_id
          )
 select profile_id,
        updated_at,
