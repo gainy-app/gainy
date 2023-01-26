@@ -80,11 +80,12 @@ from (
                 (high + greatest(0, cash_adjustment + coalesce(cash_value, 0)))::double precision           as high,
                 (low + greatest(0, cash_adjustment + coalesce(cash_value, 0)))::double precision            as low,
                 (close + greatest(0, cash_adjustment + coalesce(cash_value, 0)))::double precision          as close,
---                 (adjusted_close +
---                  greatest(0, cash_adjustment + coalesce(cash_value, 0)))::double precision                  as adjusted_close
-                relative_gain / adjusted_close                                                              as adjusted_close
+                (adjusted_close +
+                 greatest(0, cash_adjustment + coalesce(cash_value, 0)))::double precision                  as adjusted_close,
+                exp(sum(ln(coalesce(relative_gain / adjusted_close, 0) + 1)) over wnd) - 1                  as relative_gain
          from raw_chart
                   join portfolio_chart_skeleton using (profile_id, period, datetime)
                   left join static_values on true
+         window wnd as (partition by period order by datetime)
      ) t
 where (period != '1d' or is_latest_day)
