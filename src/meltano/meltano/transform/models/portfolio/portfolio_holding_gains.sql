@@ -32,7 +32,8 @@ with long_term_tax_holdings as
                     holding_id_v2
                     ) holding_id_v2,
                       adjusted_close as actual_value
-                from {{ ref('portfolio_holding_chart') }} join {{ ref('profile_holdings_normalized') }} using (holding_id_v2)
+                from {{ ref('portfolio_holding_chart') }}
+                          join {{ ref('profile_holdings_normalized') }} using (holding_id_v2)
                           join {{ ref('week_trading_sessions_static') }} using (symbol, date)
                 where period = '1d'
                   and week_trading_sessions_static.index = 0
@@ -40,12 +41,13 @@ with long_term_tax_holdings as
                   and close_at - interval '1 second'
                 order by holding_id_v2, datetime desc
             )
-
+{% if var('portfolio_cash_enabled') %}
             union all
 
             select holding_id_v2, quantity as actual_value
             from {{ ref('profile_holdings_normalized') }}
             where symbol = 'CUR:USD'
+{% endif %}
      ),
     last_day_value as
         (

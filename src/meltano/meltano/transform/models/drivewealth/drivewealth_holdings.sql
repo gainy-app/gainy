@@ -75,6 +75,7 @@ from fund_holdings_distinct
                    on profile_collections.id = fund_holdings_distinct.collection_id
                        and (profile_collections.profile_id = fund_holdings_distinct.profile_id or profile_collections.profile_id is null)
 
+{% if var('portfolio_cash_enabled') %}
 union all
 
 select profile_id,
@@ -91,3 +92,4 @@ select profile_id,
 from portfolio_funds
 where portfolio_holding_data ->> 'type' = 'CASH_RESERVE'
 group by profile_id
+{% endif %}
