@@ -57,12 +57,13 @@ from (
                                                                 '')
                                         else portfolio_securities.ticker_symbol
                                         end)
---                                 -- stocks
+                                -- stocks
                                 or (portfolio_securities.type not in ('crypto', 'cryptocurrency', 'derivative') and
                                     base_tickers.symbol = portfolio_securities.ticker_symbol)
          where (portfolio_securities.ticker_symbol not like 'CUR:%' or portfolio_securities.type in ('crypto', 'cryptocurrency', 'cash'))
          {% if not var('portfolio_crypto_enabled') %}
-            and not (base_tickers.type = 'crypto')
+            and (base_tickers.type is null or base_tickers.type != 'crypto')
+            and (portfolio_securities.type not in ('crypto', 'cryptocurrency'))
          {% endif %}
          {% if not var('portfolio_cash_enabled') %}
             and not (portfolio_securities.type = 'cash' or portfolio_securities.ticker_symbol like 'CUR:%')

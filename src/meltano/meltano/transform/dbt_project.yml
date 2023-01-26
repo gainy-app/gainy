@@ -25,6 +25,6 @@ vars:
   min_collection_size: "{{ env_var('MIN_COLLECTION_SIZE', 2) }}"
   realtime: false
   portfolio_cash_enabled: false
-  portfolio_crypto_enabled: true
+  portfolio_crypto_enabled: false
   search_crypto_enabled: true
   search_index_enabled: true
