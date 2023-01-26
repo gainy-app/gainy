@@ -103,6 +103,8 @@ query GetPortfolioChart(
         high
         low
         close
+        adjusted_close
+        relative_gain
     }
     get_portfolio_chart_previous_period_close(
         profile_id: $profileId,
