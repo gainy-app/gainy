@@ -10,7 +10,7 @@ SCRIPT_DIR = os.path.dirname(__file__)
 
 
 def _should_include_cash(filter: PortfolioChartFilter):
-    return False # per Portfolio v2 feature
+    return False  # per Portfolio v2 feature
 
     if filter.interest_ids:
         return False
