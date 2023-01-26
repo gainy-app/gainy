@@ -83,11 +83,10 @@ from (
                 (close + greatest(0, cash_adjustment + coalesce(cash_value, 0)))::double precision as close,
                 (adjusted_close +
                  greatest(0, cash_adjustment + coalesce(cash_value, 0)))::double precision         as adjusted_close,
-                case
-                    when adjusted_close_abs > 0
-                        then exp(sum(ln(coalesce(relative_gain / adjusted_close_abs, 0) + 1)) over wnd) - 1
-                    else 0
-                    end                                                                            as relative_gain
+                exp(sum(ln(coalesce(case
+                                        when adjusted_close_abs > 0
+                                            then relative_gain / adjusted_close_abs
+                                        end, 0) + 1)) over wnd) - 1                                as relative_gain
          from raw_chart
                   join portfolio_chart_skeleton using (profile_id, period, datetime)
                   left join static_values on true
