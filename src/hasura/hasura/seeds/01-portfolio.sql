@@ -51,7 +51,6 @@ from (
          select *
          from (
                   values ('AAPL 06/21/24 225.00 Call', 'AAPL240621C00225000', 'derivative'),
-                         ('Bitcoin', 'BTC', 'cryptocurrency'),
                          ('Apple Inc.', 'AAPL', 'equity'),
                          ('SPDR S&P 500', 'SPY', 'etf'),
                          ('PLTR 01/19/24 13.00 Put', 'PLTR240119P00013000', 'derivative')
@@ -74,8 +73,7 @@ select distinct on (
       'portfolio_demo_' || profile_id || '_' || ticker_symbol,
       profile_portfolio_accounts.plaid_access_token_id
 from (
-         values (1, 0.1, 'BTC'),
-                (1, 2, 'AAPL'),
+         values (1, 2, 'AAPL'),
                 (1, 3, 'SPY'),
                 (1, 1, 'PLTR240119P00013000')
      ) t ("profile_id", "quantity", "ticker_symbol")
@@ -104,8 +102,7 @@ select distinct on (
       t.profile_id,
       profile_portfolio_accounts.id
 from (
-         values (1, 341.2, '2018-12-08', 'BUY Bitcoin', 3412, 0.1, 'buy', 'buy', 'BTC'),
-                (1, 753.69, '2017-09-01', 'BUY SPY', 251.23, 3, 'buy', 'buy', 'SPY'),
+         values (1, 753.69, '2017-09-01', 'BUY SPY', 251.23, 3, 'buy', 'buy', 'SPY'),
                 (1, 297.94, '2021-09-10', 'BUY Apple Inc.', 148.97, 2, 'buy', 'buy', 'AAPL'),
                 (1, 2.65, '2021-11-29', 'BUY PLTR 01/19/24 13.00 Put', 2.65, 1, 'buy', 'buy', 'PLTR240119P00013000')
      ) t ("profile_id", "amount", "date", "name", "price", "quantity", "subtype", "type", "ticker_symbol")
