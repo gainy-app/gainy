@@ -1496,6 +1496,7 @@
           - profile_id
           - relative_daily_change
           - updated_at
+          - value_change_all
           - value_change_1m
           - value_change_1w
           - value_change_1y
