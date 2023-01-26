@@ -28,9 +28,11 @@ class CreatePlaidLinkToken(HasuraAction):
 
         access_token = None
         if access_token_id is not None:
-            access_token = plaid_service.get_access_token(id=access_token_id)
-            if access_token and access_token['profile_id'] != profile_id:
-                access_token = None
+            access_token_dict = plaid_service.get_access_token(
+                id=access_token_id)
+            if access_token_dict and access_token_dict[
+                    'profile_id'] == profile_id:
+                access_token = access_token_dict['access_token']
 
         try:
             response = self.client.create_link_token(profile_id, redirect_uri,

@@ -42,13 +42,14 @@ with long_term_tax_holdings as
                   and not profile_holdings_normalized_all.is_hidden
                 order by holding_id_v2, datetime desc
             )
-
+{% if var('portfolio_cash_enabled') %}
             union all
 
             select holding_id_v2, quantity as actual_value
             from {{ ref('profile_holdings_normalized_all') }}
             where symbol = 'CUR:USD'
               and not profile_holdings_normalized_all.is_hidden
+{% endif %}
      ),
     last_day_value as
         (
