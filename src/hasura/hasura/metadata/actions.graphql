@@ -382,6 +382,7 @@ type ChartDataPoint {
   close: Float
   adjusted_close: Float
   volume: Float
+  relative_gain: Float
 }
 
 type PieChartDataPoint {
