@@ -64,8 +64,8 @@ from (
          {% if not var('portfolio_crypto_enabled') %}
             and not (base_tickers.type = 'crypto')
          {% endif %}
-         {% if not var('portfolio_usd_enabled') %}
-            and not (portfolio_securities.type = 'cash' and portfolio_securities.ticker_symbol = 'CUR:USD')
+         {% if not var('portfolio_cash_enabled') %}
+            and not (portfolio_securities.type = 'cash' or portfolio_securities.ticker_symbol like 'CUR:%')
          {% endif %}
      ) t
 
