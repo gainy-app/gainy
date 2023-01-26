@@ -209,16 +209,17 @@ with data as
             from (
                      select distinct on (
                          profile_id
-                         ) profile_holdings_normalized.profile_id,
-                           profile_holdings_normalized.symbol,
+                         ) profile_holdings_normalized_all.profile_id,
+                           profile_holdings_normalized_all.symbol,
                            portfolio_holding_gains.relative_gain_total,
                            ticker_realtime_metrics.relative_daily_change
-                     from {{ ref('profile_holdings_normalized') }}
+                     from {{ ref('profile_holdings_normalized_all') }}
                               join {{ ref('portfolio_holding_gains') }} using (holding_id_v2)
                               join {{ ref('ticker_realtime_metrics') }} using (symbol)
-                     where relative_gain_total > 0.30
+                     where not profile_holdings_normalized_all.is_hidden
+                       and relative_gain_total > 0.30
                        and relative_daily_change < -0.05
-                       and profile_holdings_normalized.symbol is not null
+                       and profile_holdings_normalized_all.symbol is not null
                      order by profile_id, relative_daily_change
                 ) t
                      join {{ ref('exchange_schedule') }} on exchange_schedule.country_name = 'USA' and exchange_schedule.date = now()::date

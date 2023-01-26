@@ -14,9 +14,9 @@
 
 with holding_groups0 as
          (
-             select profile_holdings_normalized.holding_group_id,
+             select profile_holdings_normalized_all.holding_group_id,
                     greatest(max(portfolio_holding_gains.updated_at),
-                             max(profile_holdings_normalized.updated_at))     as updated_at,
+                             max(profile_holdings_normalized_all.updated_at)) as updated_at,
                     sum(portfolio_holding_gains.actual_value::numeric)        as actual_value,
                     sum(portfolio_holding_gains.ltt_quantity_total::numeric)  as ltt_quantity_total,
                     sum(portfolio_holding_gains.absolute_gain_1d::numeric)    as absolute_gain_1d,
@@ -27,9 +27,10 @@ with holding_groups0 as
                     sum(portfolio_holding_gains.absolute_gain_5y::numeric)    as absolute_gain_5y,
                     sum(portfolio_holding_gains.absolute_gain_total::numeric) as absolute_gain_total
              from {{ ref('portfolio_holding_gains') }}
-                      join {{ ref('profile_holdings_normalized') }} using (holding_id_v2)
-             where profile_holdings_normalized.holding_group_id is not null
-             group by profile_holdings_normalized.holding_group_id
+                      join {{ ref('profile_holdings_normalized_all') }} using (holding_id_v2)
+             where profile_holdings_normalized_all.holding_group_id is not null
+               and not profile_holdings_normalized_all.is_hidden
+             group by profile_holdings_normalized_all.holding_group_id
          ),
      holding_groups as
          (
