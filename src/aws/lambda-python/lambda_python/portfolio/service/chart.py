@@ -122,15 +122,15 @@ class PortfolioChartService:
                 "chart_where_clause": chart_where_clause,
             }, join_clause, self.portfolio_chart_prev_close_query)
 
-        if not data:
-            return {
-                'prev_close_1d': None,
-                'prev_close_1w': None,
-                'prev_close_1m': None,
-                'prev_close_3m': None,
-                'prev_close_1y': None,
-                'prev_close_5y': None,
-            }
+        # if not data:
+        return {
+            'prev_close_1d': None,
+            'prev_close_1w': None,
+            'prev_close_1m': None,
+            'prev_close_3m': None,
+            'prev_close_1y': None,
+            'prev_close_5y': None,
+        }
 
         return data[0]
 

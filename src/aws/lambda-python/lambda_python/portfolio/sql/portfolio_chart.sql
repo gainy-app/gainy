@@ -19,7 +19,8 @@ with filtered_holdings as
                     high,
                     low,
                     close,
-                    adjusted_close
+                    adjusted_close,
+                    relative_gain
              from portfolio_holding_chart
                       left join filtered_holdings using (holding_id_v2)
              where profile_id = %(profile_id)s
@@ -59,6 +60,7 @@ with filtered_holdings as
                     sum(low)               as low,
                     sum(close)             as close,
                     sum(adjusted_close)    as adjusted_close,
+                    sum(relative_gain * adjusted_close)    as relative_gain,
                     sum(cash_adjustment)   as cash_adjustment
              from ticker_chart
              group by profile_id, period, datetime
@@ -78,8 +80,9 @@ from (
                 (high + greatest(0, cash_adjustment + coalesce(cash_value, 0)))::double precision           as high,
                 (low + greatest(0, cash_adjustment + coalesce(cash_value, 0)))::double precision            as low,
                 (close + greatest(0, cash_adjustment + coalesce(cash_value, 0)))::double precision          as close,
-                (adjusted_close +
-                 greatest(0, cash_adjustment + coalesce(cash_value, 0)))::double precision                  as adjusted_close
+--                 (adjusted_close +
+--                  greatest(0, cash_adjustment + coalesce(cash_value, 0)))::double precision                  as adjusted_close
+                relative_gain / adjusted_close                                                              as adjusted_close
          from raw_chart
                   join portfolio_chart_skeleton using (profile_id, period, datetime)
                   left join static_values on true
