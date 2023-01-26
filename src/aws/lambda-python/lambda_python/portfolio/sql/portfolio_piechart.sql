@@ -6,7 +6,13 @@ with holdings as
                     plaid_access_token_id,
                     profile_holdings_normalized_all.ticker_symbol,
                     profile_holdings_normalized_all.symbol,
-                    profile_holdings_normalized_all.type as security_type
+                    case
+                        when is_app_trading and collection_id is not null
+                            then 'TTF'
+                        when profile_holdings_normalized_all.type = 'etf'
+                            then upper(profile_holdings_normalized_all.type)
+                            else initcap(profile_holdings_normalized_all.type)
+                        end as security_type
              from profile_holdings_normalized_all
              where profile_id = %(profile_id)s
                    {where_clause}
