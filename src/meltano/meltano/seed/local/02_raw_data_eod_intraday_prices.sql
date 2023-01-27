@@ -18,7 +18,12 @@ with exchanges as
                     (dd::date + exchanges.close_at::time) at time zone exchanges.timezone as close_at
              FROM generate_series(now() - interval '2 week', now(), interval '1 day') dd
                       join exchanges on true
+                      left join raw_data.polygon_marketstatus_upcoming
+                                ON polygon_marketstatus_upcoming.exchange = exchanges.name
+                                    and polygon_marketstatus_upcoming.date::date = dd::date
              where extract(isodow from dd) < 6
+               and (polygon_marketstatus_upcoming.status is null
+                or polygon_marketstatus_upcoming.status != 'closed')
      ),
      symbol_exchange as
          (
@@ -105,7 +110,12 @@ with exchanges as
                     (dd::date + exchanges.close_at::time) at time zone exchanges.timezone as close_at
              FROM generate_series(now() - interval '2 week', now(), interval '1 day') dd
                       join exchanges on true
+                      left join raw_data.polygon_marketstatus_upcoming
+                                ON polygon_marketstatus_upcoming.exchange = exchanges.name
+                                    and polygon_marketstatus_upcoming.date::date = dd::date
              where extract(isodow from dd) < 6
+               and (polygon_marketstatus_upcoming.status is null
+                or polygon_marketstatus_upcoming.status != 'closed')
      ),
      symbol_exchange as
          (

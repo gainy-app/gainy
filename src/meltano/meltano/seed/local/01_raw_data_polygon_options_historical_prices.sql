@@ -7,6 +7,11 @@ with latest_historical_prices as
          ),
      with_random as
          (
+             with exchanges as
+                      (select *
+                       from raw_data.exchanges
+                       where _sdc_extracted_at >
+                             (select max(_sdc_extracted_at) from raw_data.exchanges) - interval '1 minute')
              select latest_historical_prices.contract_name,
                     random() as r1,
                     random() as r2,
@@ -21,9 +26,15 @@ with latest_historical_prices as
                                       from latest_historical_prices
                                   ) + 86400 * 1000, extract(epoch from now() - interval '1 day')::numeric * 1000,
                                   86400 * 1000) dd
+                      join exchanges on true
+                      left join raw_data.polygon_marketstatus_upcoming
+                                ON polygon_marketstatus_upcoming.exchange = exchanges.name
+                                    and polygon_marketstatus_upcoming.date::date = to_timestamp(dd / 1000)::date
                       join latest_historical_prices on true
                       join (select random() as r) r on true
              where extract(isodow from to_timestamp(dd / 1000)) < 6
+               and (polygon_marketstatus_upcoming.status is null
+                or polygon_marketstatus_upcoming.status != 'closed')
      )
 select contract_name,
        t,
