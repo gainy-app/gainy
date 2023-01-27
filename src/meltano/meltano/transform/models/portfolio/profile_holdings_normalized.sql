@@ -7,4 +7,4 @@
 
 select *
 from {{ ref('profile_holdings_normalized_all') }}
-where abs(quantity) > 0
+where not is_hidden
