@@ -13,7 +13,7 @@ with account_stats as
                     sum(pending_orders_amount) as pending_orders_amount,
                     sum(withdrawable_cash)     as withdrawable_cash,
                     sum(buying_power)          as buying_power,
-                    max(account_no)            as account_no,
+                    max(account_no)::varchar   as account_no,
                     max(updated_at)            as updated_at
              from {{ ref('trading_account_status') }}
              group by profile_id
