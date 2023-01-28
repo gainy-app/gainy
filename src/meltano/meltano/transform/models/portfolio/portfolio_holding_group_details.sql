@@ -22,7 +22,7 @@ from (
          select profile_holdings_normalized_dynamic.holding_group_id,
                 profile_holdings_normalized_dynamic.profile_id,
                 profile_holdings_normalized_dynamic.collection_id,
-                min(profile_holdings_normalized_all.holding_sice) as purchase_date
+                min(profile_holdings_normalized_all.holding_since) as purchase_date
          from {{ ref('profile_holdings_normalized_dynamic') }}
                   left join {{ ref('profile_holdings_normalized_all') }} using (holding_id_v2)
          where collection_id is not null
@@ -38,7 +38,7 @@ select profile_holdings_normalized_dynamic.holding_group_id,
        profile_holdings_normalized_dynamic.profile_id,
        portfolio_securities_normalized.ticker_symbol,
        null::int as collection_id,
-       min(profile_holdings_normalized_all.holding_since)                as purchase_date,
+       min(profile_holdings_normalized_all.holding_since)          as purchase_date,
        min(portfolio_holding_group_gains.relative_gain_total)      as relative_gain_total,
        min(portfolio_holding_group_gains.relative_gain_1d)         as relative_gain_1d,
        min(portfolio_holding_group_gains.value_to_portfolio_value) as value_to_portfolio_value,
