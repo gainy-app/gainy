@@ -87,4 +87,4 @@ select profile_id,
        null                              as collection_uniq_id,
        null                              as collection_id
 from {{ ref('trading_profile_status') }}
-where buying_power > 0
+where buying_power + pending_orders_sum > 0
