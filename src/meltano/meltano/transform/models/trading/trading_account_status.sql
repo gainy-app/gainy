@@ -63,6 +63,8 @@ select profile_id,
        coalesce(pending_cash, 0)::double precision       as pending_cash,
        coalesce(pending_order_stats.abs_amount_sum,
            0)::double precision                          as pending_orders_amount,
+       coalesce(pending_order_stats.amount_sum,
+           0)::double precision                          as pending_orders_sum,
        coalesce(
 {% if var("drivewealth_is_uat") == "true" %}
                cash_available_for_trade

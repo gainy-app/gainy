@@ -77,14 +77,14 @@ from fund_holdings_distinct
 union all
 
 select profile_id,
-       buying_power    as quantity,
-       buying_power    as quantity_norm_for_valuation,
-       buying_power    as actual_value,
-       'U S Dollar'    as name,
-       'CUR:USD'       as symbol,
-       'cash'          as type,
-       updated_at      as updated_at,
-       null            as collection_uniq_id,
-       null            as collection_id
+       buying_power + pending_orders_sum as quantity,
+       buying_power + pending_orders_sum as quantity_norm_for_valuation,
+       buying_power + pending_orders_sum as actual_value,
+       'U S Dollar'                      as name,
+       'CUR:USD'                         as symbol,
+       'cash'                            as type,
+       updated_at                        as updated_at,
+       null                              as collection_uniq_id,
+       null                              as collection_id
 from {{ ref('trading_profile_status') }}
 where buying_power > 0
