@@ -414,6 +414,14 @@ with highlights as (select * from {{ ref('highlights') }}),
                       join latest_income_statement_yearly on latest_income_statement_yearly.symbol = base_tickers.symbol
                       join latest_balance_sheet_quarterly on latest_balance_sheet_quarterly.symbol = base_tickers.symbol
                       join expanded_income_statement_quarterly on expanded_income_statement_quarterly.symbol = base_tickers.symbol
+         ),
+     next_earnings_date as
+         (
+             select symbol,
+                    min(report_date) as date
+             from {{ ref('earnings_history') }}
+             where report_date >= now()
+             group by symbol
          )
 select DISTINCT ON
     (t.symbol) t.symbol,
@@ -493,6 +501,8 @@ select DISTINCT ON
                financials_metrics.ebitda_ttm::double precision,
                financials_metrics.net_debt::double precision,
 
+               next_earnings_date.date::date as next_earnings_date,
+
                now() as updated_at
 from all_tickers t
          left join highlights on t.symbol = highlights.symbol
@@ -504,3 +514,4 @@ from all_tickers t
          left join dividend_metrics on t.symbol = dividend_metrics.symbol
          left join earnings_metrics on t.symbol = earnings_metrics.symbol
          left join financials_metrics on t.symbol = financials_metrics.symbol
+         left join next_earnings_date on t.symbol = next_earnings_date.symbol
