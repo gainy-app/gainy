@@ -47,7 +47,7 @@ select profile_holdings_normalized_dynamic.holding_group_id,
        min(profile_holdings_normalized_dynamic.name)               as ticker_name,
        min(profile_holdings_normalized_dynamic.name)               as name,
        min(market_capitalization)                                  as market_capitalization,
-       min(next_earnings_date)                                     as next_earnings_date,
+       min(next_earnings_date)::timestamp                          as next_earnings_date,
        min(portfolio_holding_group_gains.ltt_quantity_total)       as ltt_quantity_total,
        now()                                                       as updated_at
 from {{ ref('profile_holdings_normalized_dynamic') }}

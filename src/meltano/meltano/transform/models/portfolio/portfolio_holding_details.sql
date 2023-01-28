@@ -1,6 +1,6 @@
 {{
   config(
-    materialized = "incremental",
+    materialized = "table",
     unique_key = "holding_id_v2",
     tags = ["realtime"],
     post_hook=[
