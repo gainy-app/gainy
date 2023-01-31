@@ -241,7 +241,7 @@ with data as
                      select *,
                             row_number() over (partition by profile_id, template_id) as rn
                      from {{ ref('trading_notifications') }}
-                 )
+                 ) t
             where rn < {{ var('max_notifications_per_template') }}
         ),
     profiles as
