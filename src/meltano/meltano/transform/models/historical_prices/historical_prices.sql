@@ -142,7 +142,10 @@ prices_with_split_rates as
                raw_historical_prices.date_year,
                raw_historical_prices.date_month,
                raw_historical_prices.date_week,
-               case when close > 0 then adjusted_close / close end as split_rate,
+               case
+                   when source = 'eod' and close > 0
+                       then adjusted_close / close
+                   end                                             as split_rate,
                case
                    when source = 'eod'
                        then stocks_with_split.split_from::numeric / stocks_with_split.split_to::numeric

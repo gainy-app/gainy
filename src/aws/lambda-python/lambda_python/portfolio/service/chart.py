@@ -148,6 +148,10 @@ class PortfolioChartService:
                                                join_clause, filter)
         self._filter_query_by_broker_ids(params, where_clause, join_clause,
                                          filter)
+        self._filter_query_by_interest_ids(params, where_clause, join_clause,
+                                           filter)
+        self._filter_query_by_category_ids(params, where_clause, join_clause,
+                                           filter)
 
         if where_clause:
             where_clause.insert(0, sql.SQL(""))
