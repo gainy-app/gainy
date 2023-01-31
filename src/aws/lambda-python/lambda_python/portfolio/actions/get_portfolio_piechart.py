@@ -22,6 +22,8 @@ class GetPortfolioPieChart(HasuraAction):
         _filter = PortfolioChartFilter()
         _filter.access_token_ids = input_params.get("access_token_ids")
         _filter.broker_ids = input_params.get("broker_ids")
+        _filter.interest_ids = input_params.get("interest_ids")
+        _filter.category_ids = input_params.get("category_ids")
 
         service = context_container.portfolio_chart_service
         return service.get_portfolio_piechart(profile_id, _filter)
