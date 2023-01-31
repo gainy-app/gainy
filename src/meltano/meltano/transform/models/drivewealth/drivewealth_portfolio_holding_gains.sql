@@ -18,7 +18,7 @@ select t.*,
        actual_value * (1 - 1 / (1 + relative_gain_5y)) as absolute_gain_5y,
        actual_value * (1 - 1 / (1 + relative_gain_total)) as absolute_gain_total
 from (
-         select holding_id_v2,
+         select drivewealth_holdings.holding_id_v2,
                 actual_value,
                 -- HP = EV / (BV + CF) - 1
                 case

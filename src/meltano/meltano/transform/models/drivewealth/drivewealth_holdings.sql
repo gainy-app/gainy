@@ -55,6 +55,11 @@ with latest_portfolio_status as
                   ) t (type, security_type)
      )
 select fund_holdings_distinct.profile_id,
+       case
+           when fund_holdings_distinct.collection_id is null
+               then 'dw_ticker_' || fund_holdings_distinct.profile_id || '_' || symbol
+           else 'dw_ttf_' || fund_holdings_distinct.profile_id || '_' || fund_holdings_distinct.collection_id || '_' || symbol
+           end                                        as holding_id_v2,
        fund_holdings_distinct.quantity                as quantity,
        fund_holdings_distinct.quantity                as quantity_norm_for_valuation,
        fund_holdings_distinct.quantity * actual_price as actual_value,
