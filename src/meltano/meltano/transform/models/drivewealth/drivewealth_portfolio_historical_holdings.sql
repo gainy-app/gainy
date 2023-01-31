@@ -17,7 +17,7 @@ with portfolio_statuses as
              select distinct on (profile_id, date) *
              from (
                       select profile_id,
-                             drivewealth_portfolio_statuses.created_at                              as updated_at,
+                             drivewealth_portfolio_statuses.created_at::timestamp                   as updated_at,
                              (drivewealth_portfolio_statuses.created_at - interval '5 hours')::date as date,
                              cash_value / drivewealth_portfolio_statuses.cash_actual_weight         as value,
                              drivewealth_portfolio_statuses.data -> 'holdings'                      as holdings
@@ -58,6 +58,7 @@ with portfolio_statuses as
                         else 'dw_ttf_' || profile_id || '_' || collection_id || '_' || normalize_drivewealth_symbol(fund_holding_data ->> 'symbol')
                         end                                                         as holding_id_v2,
                     normalize_drivewealth_symbol(fund_holding_data ->> 'symbol') as symbol,
+                    collection_id,
                     date,
                     (fund_holding_data ->> 'value')::numeric                        as value,
                     updated_at
@@ -81,14 +82,19 @@ with portfolio_statuses as
          (
              select profile_id,
                     holding_id_v2,
+                    LAST_VALUE_IGNORENULLS(collection_id) over wnd as collection_id,
                     symbol,
                     date,
+                    coalesce(relative_daily_gain,
+                             ticker_realtime_metrics.relative_daily_change,
+                             0)                                          as relative_daily_gain,
                     value                                                as value,
                     data.updated_at
              from schedule
                       left join data using (profile_id, holding_id_v2, symbol, date)
                       left join {{ ref('historical_prices') }} using (symbol, date)
                       left join {{ ref('ticker_realtime_metrics') }} using (symbol, date)
+             window wnd as (partition by profile_id, holding_id_v2 order by date)
      ),
      data_extended1 as
          (
@@ -97,7 +103,9 @@ with portfolio_statuses as
                           select profile_id,
                                  holding_id_v2,
                                  date,
+                                 collection_id,
                                  symbol,
+                                 relative_daily_gain,
                                  value,
                                  coalesce(lag(value) over wnd, 0) as prev_value,
                                  updated_at
@@ -111,12 +119,10 @@ with portfolio_statuses as
                                  symbol,
                                  case when drivewealth_orders.data ->> 'side' = 'SELL' then -1 else 1 end *
                                  abs((drivewealth_orders.data ->> 'totalOrderAmount')::numeric) as amount,
-                                 (drivewealth_orders.data ->> 'lastExecuted')::timestamptz      as last_executed_at,
-                                 ((drivewealth_orders.data ->> 'lastExecuted')::timestamptz AT TIME ZONE
-                                  'America/New_York')::date                                     as date,
-                                 drivewealth_orders.ref_id
+                                 last_executed_at,
+                                 (last_executed_at AT TIME ZONE 'America/New_York')::date       as date
                           from {{ source('app', 'drivewealth_orders') }}
-                                   join {{ source('app', 'drivewealth_accounts') }} on drivewealth_accounts.ref_id = account_id
+                                   join {{ source('app', 'drivewealth_accounts') }} on drivewealth_accounts.ref_id = drivewealth_orders.account_id
                                    join {{ source('app', 'drivewealth_users') }} on drivewealth_users.ref_id = drivewealth_accounts.drivewealth_user_id
                           where drivewealth_orders.status = 'FILLED'
                   ),
@@ -124,14 +130,12 @@ with portfolio_statuses as
                       (
                           select profile_id, symbol, date, sum(value) as value, sum(prev_value) as prev_value
                           from historical_holdings_extended
-                          where profile_id = 67
                           group by profile_id, symbol, date
                   ),
                   order_values_aggregated as
                       (
                           select profile_id, symbol, date, sum(amount) as amount
                           from filled_orders
-                          where profile_id = 67
                           group by profile_id, symbol, date
                   ),
                   ticker_stats as
@@ -145,8 +149,18 @@ with portfolio_statuses as
                           from ticker_values_aggregated
                                    left join order_values_aggregated using (profile_id, symbol, date)
                   )
-             select *,
+             select holding_id_v2,
+                    profile_id,
+                    collection_id,
+                    symbol,
+                    date,
+                    value,
+                    prev_value,
+                    cash_flow,
+                    updated_at,
                     case
+                        when value is null
+                            then relative_daily_gain
                         when prev_value + cash_flow > 0
                             then value / (prev_value + cash_flow) - 1
                         else 0
@@ -154,8 +168,10 @@ with portfolio_statuses as
              from (
                       select holding_id_v2,
                              profile_id,
+                             collection_id,
                              symbol,
                              date,
+                             relative_daily_gain,
                              value,
                              prev_value,
                              -- CF = EV / (HP + 1) - BV
@@ -172,19 +188,30 @@ with portfolio_statuses as
              from data_extended1
                  window wnd as (partition by holding_id_v2 order by date)
      ),
-     data_extended as
+     data_extended3 as
          (
              select profile_id,
                     holding_id_v2,
+                    collection_id,
                     symbol,
                     date,
                     cash_flow,
                     relative_daily_gain,
-                    cumulative_daily_relative_gain *
-                    (public.last_value_ignorenulls(value / cumulative_daily_relative_gain) over wnd) as value,
-                    public.last_value_ignorenulls(updated_at) over wnd                as updated_at
+                    coalesce(
+                            value,
+                            cumulative_daily_relative_gain *
+                            (public.last_value_ignorenulls(value / cumulative_daily_relative_gain) over wnd)
+                        )                                              as value,
+                    public.last_value_ignorenulls(updated_at) over wnd as updated_at
              from data_extended2
                  window wnd as (partition by profile_id, holding_id_v2 order by date rows between unbounded preceding and current row)
+     ),
+     data_extended as
+         (
+             select *,
+                    coalesce(lag(value) over wnd, 0) as prev_value
+             from data_extended3
+                 window wnd as (partition by profile_id, holding_id_v2 order by date)
      )
 select data_extended.*,
        date_trunc('week', date)::date                    as date_week,
