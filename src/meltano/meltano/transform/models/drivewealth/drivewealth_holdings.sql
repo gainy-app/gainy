@@ -84,6 +84,7 @@ from fund_holdings_distinct
 union all
 
 select profile_id,
+       'dw_ticker_' || profile_id || '_CUR:USD'                    as holding_id_v2,
        sum((portfolio_holding_data ->> 'value')::double precision) as quantity,
        sum((portfolio_holding_data ->> 'value')::double precision) as quantity_norm_for_valuation,
        sum((portfolio_holding_data ->> 'value')::double precision) as actual_value,
