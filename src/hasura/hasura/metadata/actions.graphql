@@ -84,6 +84,8 @@ type Query {
     profile_id: Int!
     access_token_ids: [Int]
     broker_ids: [String]
+    interest_ids: [Int]
+    category_ids: [Int]
   ): [PieChartDataPoint]
 }
 
