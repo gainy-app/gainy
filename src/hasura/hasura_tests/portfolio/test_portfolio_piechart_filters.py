@@ -66,7 +66,7 @@ def test_portfolio_piechart_filters(params):
             1 - piechart_sums[entity_type]['weight']) < PRICE_EPS, entity_type
 
         if entity_type not in ['category', 'interest', 'collection']:
-            # fix tests
+            # TODO fix tests
             # assert abs(portfolio_gains_data['absolute_gain_1d'] -
             #            piechart_sums[entity_type]['absolute_daily_change']
             #            ) < PRICE_EPS, entity_type

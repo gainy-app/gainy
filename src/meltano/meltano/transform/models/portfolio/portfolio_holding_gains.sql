@@ -34,11 +34,7 @@ with long_term_tax_holdings as
                        adjusted_close as actual_value
                  from {{ ref('portfolio_holding_chart') }}
                            join {{ ref('profile_holdings_normalized_all') }} using (holding_id_v2)
-                           join {{ ref('week_trading_sessions_static') }} using (symbol, date)
                  where period = '1d'
-                   and week_trading_sessions_static.index = 0
-                   and datetime between open_at
-                   and close_at - interval '1 second'
                    and not profile_holdings_normalized_all.is_hidden
                    and not profile_holdings_normalized_all.is_app_trading
                  order by holding_id_v2, datetime desc
