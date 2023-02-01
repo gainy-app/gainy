@@ -183,3 +183,66 @@ class TradingMoneyFlow(BaseModel):
             "status":
             self.status.name if self.status else None,
         }
+
+
+class KycForm(BaseModel):
+    profile_id = None
+    first_name = None
+    last_name = None
+    country = None
+    phone_number = None
+    email_address = None
+    language = None
+    employment_status = None
+    employment_company_name = None
+    employment_type = None
+    employment_position = None
+    employment_affiliated_with_a_broker = None
+    employment_is_director_of_a_public_company = None
+    investor_profile_experience = None
+    investor_profile_annual_income = None
+    investor_profile_net_worth_total = None
+    investor_profile_risk_tolerance = None
+    investor_profile_objectives = None
+    investor_profile_net_worth_liquid = None
+    disclosures_drivewealth_terms_of_use = None
+    disclosures_drivewealth_customer_agreement = None
+    disclosures_drivewealth_ira_agreement = None
+    disclosures_drivewealth_market_data_agreement = None
+    disclosures_rule14b = None
+    disclosures_drivewealth_privacy_policy = None
+    disclosures_drivewealth_data_sharing = None
+    disclosures_signed_by = None
+    disclosures_extended_hours_agreement = None
+    tax_id_value = None
+    tax_id_type = None
+    citizenship = None
+    is_us_tax_payer = None
+    tax_treaty_with_us = None
+    birthdate = None
+    politically_exposed_names = None
+    irs_backup_withholdings_notified = None
+    gender = None
+    marital_status = None
+    address_street1 = None
+    address_street2 = None
+    address_city = None
+    address_province = None
+    address_postal_code = None
+    address_country = None
+    status = None
+    created_at = None
+    updated_at = None
+
+    key_fields = ["profile_id"]
+
+    db_excluded_fields = ["created_at", "updated_at"]
+    non_persistent_fields = ["created_at", "updated_at"]
+
+    @classproperty
+    def schema_name(self) -> str:
+        return "app"
+
+    @classproperty
+    def table_name(self) -> str:
+        return "kyc_form"

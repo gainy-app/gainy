@@ -1,15 +1,15 @@
 from common.context_container import ContextContainer
-from gainy.utils import setup_exception_logger_hook, get_logger
+from gainy.utils import setup_exception_logger_hook, get_logger, setup_lambda_logging_middleware
 from queue_processing.exceptions import UnsupportedMessageException
 from queue_processing.locking_function import HandleMessage
-
-logger = get_logger(__name__)
 
 setup_exception_logger_hook()
 
 
 def handle(event, context):
-    logger.info('New message', extra={"event": event, "context": context})
+    setup_lambda_logging_middleware(context)
+    logger = get_logger(__name__)
+    logger.info('sqs_listener', extra={"event": event})
 
     with ContextContainer() as context_container:
         adapter = context_container.sqs_adapter

@@ -48,7 +48,8 @@ def test(monkeypatch, type):
     monkeypatch.setattr(provider, 'get_profile_id_by_user_id',
                         mock_get_profile_id_by_user_id)
 
-    event_handler = StatementCreatedEventHandler(repository, provider)
+    event_handler = StatementCreatedEventHandler(repository, provider, None,
+                                                 None)
 
     event_handler.handle(message)
 

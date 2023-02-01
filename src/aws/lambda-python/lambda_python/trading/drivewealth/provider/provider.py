@@ -7,7 +7,7 @@ from gainy.trading.drivewealth.exceptions import DriveWealthApiException, BadMis
 from portfolio.plaid import PlaidService
 from gainy.plaid.models import PlaidAccessToken
 from services.notification import NotificationService
-from trading.models import TradingMoneyFlow, TradingStatement, ProfileKycStatus
+from trading.models import TradingMoneyFlow, TradingStatement, ProfileKycStatus, KycForm
 from trading.drivewealth.provider.collection import DriveWealthProviderCollection
 from trading.drivewealth.provider.kyc import DriveWealthProviderKYC
 from trading.drivewealth.models import DriveWealthBankAccount, DriveWealthDeposit, \
@@ -84,14 +84,19 @@ class DriveWealthProvider(DriveWealthProviderKYC,
         if not bank_account:
             raise EntityNotFoundException(DriveWealthBankAccount)
 
-        if amount > 0:
-            response = self.api.create_deposit(amount, trading_account,
-                                               bank_account)
-            entity = DriveWealthDeposit()
-        else:
-            response = self.api.create_redemption(amount, trading_account,
-                                                  bank_account)
-            entity = DriveWealthRedemption()
+        try:
+            if amount > 0:
+                response = self.api.create_deposit(amount, trading_account,
+                                                   bank_account)
+                entity = DriveWealthDeposit()
+            else:
+                response = self.api.create_redemption(amount, trading_account,
+                                                      bank_account)
+                entity = DriveWealthRedemption()
+        except DriveWealthApiException as e:
+            money_flow.status = TradingMoneyFlowStatus.FAILED
+            logger.error(e)
+            return
 
         entity.set_from_response(response)
         entity.trading_account_ref_id = trading_account.ref_id
@@ -99,10 +104,6 @@ class DriveWealthProvider(DriveWealthProviderKYC,
         entity.money_flow_id = money_flow.id
         self.update_money_flow_from_dw(entity, money_flow)
         self.repository.persist(entity)
-
-        self._on_money_transfer(money_flow.profile_id, trading_account_id)
-
-        return entity
 
     def debug_add_money(self, trading_account_id, amount):
         if not DRIVEWEALTH_IS_UAT:
@@ -153,10 +154,11 @@ class DriveWealthProvider(DriveWealthProviderKYC,
                                           {"profile_id": profile_id}):
             repository.delete(entity)
 
-        with repository.db_conn.cursor() as cursor:
-            cursor.execute(
-                "update app.kyc_form set status = null where profile_id = %(profile_id)s",
-                {"profile_id": profile_id})
+        entity: KycForm = repository.find_one(KycForm,
+                                              {"profile_id": profile_id})
+        if entity:
+            entity.status = None
+            repository.persist(entity)
 
     def sync_data(self, profile_id):
         user = self._get_user(profile_id)
@@ -169,7 +171,7 @@ class DriveWealthProvider(DriveWealthProviderKYC,
         self._sync_user_deposits(user.ref_id)
         self._sync_user_redemptions(user.ref_id)
         self.sync_portfolios(profile_id)
-        self._sync_statements(profile_id)
+        # self._sync_statements(profile_id)
 
     def sync_deposit(self, deposit_ref_id: str):
         repository = self.repository

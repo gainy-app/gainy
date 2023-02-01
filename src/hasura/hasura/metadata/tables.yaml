@@ -226,6 +226,27 @@
                     _is_null: true
         check: null
 - table:
+    name: kyc_statuses
+    schema: app
+  event_triggers:
+    - name: on_new_kyc_status
+      definition:
+        enable_manual: false
+        insert:
+          columns: '*'
+      retry_conf:
+        interval_sec: 10
+        num_retries: 0
+        timeout_sec: 60
+      webhook: '{{AWS_LAMBDA_API_GATEWAY_ENDPOINT}}/hasuraTrigger'
+      cleanup_config:
+        batch_size: 10000
+        clean_invocation_logs: false
+        clear_older_than: 168
+        paused: true
+        schedule: 0 0 * * *
+        timeout: 60
+- table:
     name: payment_methods
     schema: app
   object_relationships:
@@ -1488,12 +1509,20 @@
         columns:
           - absolute_daily_change
           - actual_price
+          - clicks_rank
           - collection_uniq_id
           - market_capitalization_sum
+          - performance_rank
           - previous_day_close_price
           - profile_id
           - relative_daily_change
           - updated_at
+          - value_change_all
+          - value_change_1m
+          - value_change_1w
+          - value_change_1y
+          - value_change_3m
+          - value_change_5y
         filter:
           _or:
             - user_id:

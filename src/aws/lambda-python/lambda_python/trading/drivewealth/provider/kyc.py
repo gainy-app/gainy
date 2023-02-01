@@ -40,12 +40,6 @@ class DriveWealthProviderKYC(GainyDriveWealthProvider):
         self.repository.persist(status)
         return status
 
-    def kyc_get_status(self, profile_id: int) -> ProfileKycStatus:
-        user = self._get_user(profile_id)
-        user_ref_id = user.ref_id
-        self.sync_user(user_ref_id)
-        return self.sync_kyc(user_ref_id)
-
     def send_kyc_document(self, profile_id: int, document: KycDocument,
                           file_stream: io.BytesIO):
         file_base64 = base64.b64encode(file_stream.getvalue())
@@ -59,6 +53,7 @@ class DriveWealthProviderKYC(GainyDriveWealthProvider):
         repository.upsert_kyc_document(document.id, data)
 
     def sync_kyc(self, user_ref_id) -> ProfileKycStatus:
+        self.sync_user(user_ref_id)
         kyc_status = self.api.get_kyc_status(
             user_ref_id).get_profile_kyc_status()
         profile_id = self.get_profile_id_by_user_id(user_ref_id)
@@ -74,7 +69,7 @@ class DriveWealthProviderKYC(GainyDriveWealthProvider):
     def get_profile_id_by_user_id(self, user_ref_id: str) -> int:
         user: DriveWealthUser = self.repository.find_one(
             DriveWealthUser, {"ref_id": user_ref_id})
-        if not user:
+        if not user or not user.profile_id:
             raise NotFoundException
 
         return user.profile_id

@@ -1,13 +1,14 @@
 import time
+from typing import Optional
 
 from portfolio.exceptions import AccessTokenApiException, AccessTokenLoginRequiredException
+from portfolio.models import Institution
 from portfolio.plaid import PlaidService
+from portfolio.plaid.service import SERVICE_PLAID
 from portfolio.repository import PortfolioRepository
 from gainy.utils import get_logger
 
 logger = get_logger(__name__)
-
-SERVICE_PLAID = 'plaid'
 
 
 class PortfolioService:
@@ -130,7 +131,7 @@ class PortfolioService:
 
         return transactions_count
 
-    def sync_institution(self, access_token):
+    def sync_institution(self, access_token) -> Optional[Institution]:
         institution = self.__get_service(
             access_token['service']).get_institution(access_token)
 
@@ -141,6 +142,7 @@ class PortfolioService:
 
         self.__get_service(access_token['service']).set_token_institution(
             access_token, institution)
+        return institution
 
     def persist_holding_data(self, profile_id, securities, accounts, holdings):
         securities_dict = self.__persist_securities(securities)
@@ -150,7 +152,7 @@ class PortfolioService:
             and i.security_ref_id in securities_dict and i.account_ref_id
             is not None and i.account_ref_id in accounts_dict
         ]
-        holdings = self.__unique(holdings)
+        holdings = self.unique_entities(holdings)
 
         # persist holdings
         for entity in holdings:
@@ -172,7 +174,7 @@ class PortfolioService:
             and i.security_ref_id in securities_dict and i.account_ref_id
             is not None and i.account_ref_id in accounts_dict
         ]
-        transactions = self.__unique(transactions)
+        transactions = self.unique_entities(transactions)
 
         # persist transactions
         for entity in transactions:
@@ -188,34 +190,23 @@ class PortfolioService:
         return self.services[name]
 
     def __persist_securities(self, securities):
-        self.portfolio_repository.persist(self.__unique(securities))
+        self.portfolio_repository.persist(self.unique_entities(securities))
         return {security.ref_id: security.id for security in securities}
 
     def __persist_accounts(self, accounts, profile_id):
         for entity in accounts:
             entity.profile_id = profile_id
-        self.portfolio_repository.persist(self.__unique(accounts))
+        self.portfolio_repository.persist(self.unique_entities(accounts))
         return {account.ref_id: account.id for account in accounts}
 
-    def __unique(self, entities):
+    def unique_entities(self, entities):
         d = {entity.unique_id(): entity for entity in entities}
         return d.values()
 
     def __get_access_tokens(self, profile_id):
-        with self.db_conn.cursor() as cursor:
-            cursor.execute(
-                f"SELECT id, access_token, is_artificial, profile_id FROM app.profile_plaid_access_tokens WHERE profile_id = %s and purpose = 'portfolio'",
-                (profile_id, ))
-
-            access_tokens = cursor.fetchall()
-
-            return [
-                dict(
-                    zip([
-                        'id', 'access_token', 'is_artificial', 'profile_id',
-                        'service'
-                    ], row + (SERVICE_PLAID, ))) for row in access_tokens
-            ]
+        for service in self.services.values():
+            yield from service.get_access_tokens(profile_id=profile_id,
+                                                 purpose='portfolio')
 
     def _set_access_token_reauth(self, access_token):
         with self.db_conn.cursor() as cursor:

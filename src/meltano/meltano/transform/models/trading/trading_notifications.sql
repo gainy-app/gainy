@@ -13,7 +13,7 @@ select profile_id,
        json_build_object('en', case when amount > 0 then 'Buy' else 'Sell' end ||
                                ' $' || round(abs(amount), 2) || ' ' || asset_name) as text,
        json_build_object('t', 9, 'id', trading_history_uniq_id)                    as data,
-       true                                                                        as is_test,
+       false                                                                       as is_test,
        true                                                                        as is_push,
        true                                                                        as is_shown_in_app,
        '094f1363-da90-4477-bc69-6c333d987a52'                                      as template_id
@@ -45,7 +45,7 @@ from (
          where source = 'MANUAL'
            and status = 'EXECUTED_FULLY'
      ) t
-where executed_at between now() - interval '1 hours' and now()
+where executed_at between now() - interval '1 day' and now()
 
 union all
 
@@ -58,7 +58,7 @@ select profile_id,
                                'Now they match our optimized model portfolios. ' ||
                                'It is a standard procedure for Gainy’s portfolio management.') as text,
        json_build_object('t', 11)                                                              as data,
-       true                                                                                    as is_test,
+       false                                                                                   as is_test,
        true                                                                                    as is_push,
        true                                                                                    as is_shown_in_app,
        'beb30a52-a65b-496c-90bb-3d50c5e1aaf0'                                                  as template_id
@@ -68,7 +68,7 @@ from (
          where source = 'AUTOMATIC' and status = 'EXECUTED_FULLY'
          group by profile_id
     ) t
-where executed_at between now() - interval '1 hours' and now()
+where executed_at between now() - interval '1 day' and now()
 
 union all
 
@@ -91,7 +91,7 @@ select profile_id,
        json_build_object('t', 10,
            'status', latest_kyc_status.status
            )                                  as data,
-       true                                   as is_test,
+       false                                  as is_test,
        true                                   as is_push,
        true                                   as is_shown_in_app,
        'a79620ce-03f0-4c54-84a7-e66934c1c0d6' as template_id
@@ -120,7 +120,7 @@ from (
                    ) last_notified_status using (profile_id)
 where (last_notified_status.profile_id is null -- no notifications
     or last_notified_status.status != latest_kyc_status.status)
-  and latest_kyc_status.created_at between now() - interval '1 hours' and now()
+  and latest_kyc_status.created_at between now() - interval '1 day' and now()
 
 union all
 
@@ -138,7 +138,7 @@ select trading_money_flow.profile_id,
                    end
            )                                                    as text,
        json_build_object('t', 9, 'id', trading_history.uniq_id) as data,
-       true                                                     as is_test,
+       false                                                    as is_test,
        true                                                     as is_push,
        true                                                     as is_shown_in_app,
        '8c9d99c1-0df2-4b12-9ba4-bf40b6871265'                   as template_id
@@ -146,4 +146,4 @@ from {{ source('app', 'trading_money_flow') }}
          left join {{ ref('trading_history') }}
              on trading_history.money_flow_id = trading_money_flow.id
 where status = 'SUCCESS'
-  and trading_money_flow.updated_at between now() - interval '1 hours' and now()
+  and trading_money_flow.updated_at between now() - interval '1 day' and now()

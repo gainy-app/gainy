@@ -84,6 +84,8 @@ type Query {
     profile_id: Int!
     access_token_ids: [Int]
     broker_ids: [String]
+    interest_ids: [Int]
+    category_ids: [Int]
   ): [PieChartDataPoint]
 }
 
@@ -382,6 +384,7 @@ type ChartDataPoint {
   close: Float
   adjusted_close: Float
   volume: Float
+  relative_gain: Float
 }
 
 type PieChartDataPoint {
@@ -452,6 +455,7 @@ type MatchScore {
 type LinkPlaidAccountOutput {
   result: Boolean!
   plaid_access_token_id: Int
+  institution_name: String
   accounts: [AccountInformation]
 }
 
@@ -583,7 +587,7 @@ type AccountInformation {
   iso_currency_code: String!
   mask: String!
   name: String!
-  official_name: String!
+  official_name: String
 }
 
 type TradingLinkBankAccountWithPlaidOutput {

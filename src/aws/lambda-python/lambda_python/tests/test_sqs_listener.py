@@ -1,3 +1,5 @@
+from collections import namedtuple
+
 from common.context_container import ContextContainer
 from gainy.data_access.repository import Repository
 from gainy.tests.mocks.repository_mocks import mock_persist, mock_record_calls, mock_noop
@@ -32,6 +34,11 @@ def test(monkeypatch):
     monkeypatch.setattr(HandleMessage, "execute",
                         mock_record_calls(execute_calls))
 
-    handle(event, {})
+    handle(
+        event,
+        namedtuple('Point', [
+            'invoked_function_arn', 'log_stream_name', 'log_group_name',
+            'aws_request_id', 'memory_limit_in_mb'
+        ])(None, None, None, None, None))
 
     assert len(execute_calls) == 1

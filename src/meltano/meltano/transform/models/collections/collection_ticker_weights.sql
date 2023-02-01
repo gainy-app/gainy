@@ -14,7 +14,7 @@ with raw_ticker_collections_weights as materialized
          (
              select collections.id    as collection_id,
                     symbol,
-                    date_trunc('month', ticker_collections_weights.date::date) as date,
+                    date_trunc('month', ticker_collections_weights.date::date)::date as date,
                     ticker_collections_weights.weight::numeric,
                     optimized_at::date,
                     _sdc_extracted_at as updated_at
@@ -97,9 +97,9 @@ with raw_ticker_collections_weights as materialized
 {% if is_incremental() and var('realtime') %}
      old_stats as materialized
          (
-             select collection_uniq_id, symbol, max(date) as date
+             select collection_uniq_id, max(date) as date
              from {{ this }}
-             group by collection_uniq_id, symbol
+             group by collection_uniq_id
          ),
 {% endif %}
      ticker_collections_weights_expanded0 as materialized
@@ -127,7 +127,7 @@ with raw_ticker_collections_weights as materialized
                             historical_prices.updated_at) as updated_at
              from ticker_collections_weights
 {% if is_incremental() and var('realtime') %}
-                      left join old_stats using (collection_uniq_id, symbol)
+                      left join old_stats using (collection_uniq_id)
 {% endif %}
 
                       join {{ ref('historical_prices') }}

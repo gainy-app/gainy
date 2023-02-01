@@ -21,6 +21,7 @@ with chart_1w as
                     max(date)       as close_date,
                     max(value)      as high,
                     min(value)      as low,
+                    exp(sum(ln(coalesce(relative_daily_gain, 0) + 1))) - 1 as relative_gain,
                     max(updated_at) as updated_at
              from {{ ref('drivewealth_portfolio_historical_holdings') }}
              group by profile_id, holding_id_v2, symbol, date_week
@@ -36,6 +37,7 @@ with chart_1w as
                     max(date)       as close_date,
                     max(value)      as high,
                     min(value)      as low,
+                    exp(sum(ln(coalesce(relative_daily_gain, 0) + 1))) - 1 as relative_gain,
                     max(updated_at) as updated_at
              from {{ ref('drivewealth_portfolio_historical_holdings') }}
              group by profile_id, holding_id_v2, symbol, date_month
@@ -48,19 +50,20 @@ with chart_1w as
                     drivewealth_portfolio_historical_holdings.symbol,
                     '3min'                                              as period,
                     historical_prices_aggregated_3min.datetime,
-                    sum(drivewealth_portfolio_historical_holdings.value * historical_prices_aggregated_3min.open /
-                        historical_prices_aggregated_1d.adjusted_close) as open,
-                    sum(drivewealth_portfolio_historical_holdings.value * historical_prices_aggregated_3min.high /
-                        historical_prices_aggregated_1d.adjusted_close) as high,
-                    sum(drivewealth_portfolio_historical_holdings.value * historical_prices_aggregated_3min.low /
-                        historical_prices_aggregated_1d.adjusted_close) as low,
-                    sum(drivewealth_portfolio_historical_holdings.value * historical_prices_aggregated_3min.close /
-                        historical_prices_aggregated_1d.adjusted_close) as close,
-                    sum(drivewealth_portfolio_historical_holdings.value * historical_prices_aggregated_3min.adjusted_close /
-                        historical_prices_aggregated_1d.adjusted_close) as adjusted_close,
-                    max(greatest(drivewealth_portfolio_historical_holdings.updated_at,
+                    drivewealth_portfolio_historical_holdings.value * historical_prices_aggregated_3min.open /
+                        historical_prices_aggregated_1d.adjusted_close as open,
+                    drivewealth_portfolio_historical_holdings.value * historical_prices_aggregated_3min.high /
+                        historical_prices_aggregated_1d.adjusted_close as high,
+                    drivewealth_portfolio_historical_holdings.value * historical_prices_aggregated_3min.low /
+                        historical_prices_aggregated_1d.adjusted_close as low,
+                    drivewealth_portfolio_historical_holdings.value * historical_prices_aggregated_3min.close /
+                        historical_prices_aggregated_1d.adjusted_close as close,
+                    drivewealth_portfolio_historical_holdings.value * historical_prices_aggregated_3min.adjusted_close /
+                        historical_prices_aggregated_1d.adjusted_close as adjusted_close,
+                    historical_prices_aggregated_3min.relative_gain,
+                    greatest(drivewealth_portfolio_historical_holdings.updated_at,
                         historical_prices_aggregated_1d.updated_at,
-                        historical_prices_aggregated_3min.updated_at))  as updated_at
+                        historical_prices_aggregated_3min.updated_at)  as updated_at
              from {{ ref('drivewealth_portfolio_historical_holdings') }}
                       join {{ ref('historical_prices_aggregated_1d') }}
                            on historical_prices_aggregated_1d.symbol = drivewealth_portfolio_historical_holdings.symbol
@@ -71,8 +74,6 @@ with chart_1w as
                       join {{ ref('historical_prices_aggregated_3min') }}
                            on historical_prices_aggregated_3min.symbol = drivewealth_portfolio_historical_holdings.symbol
                                and historical_prices_aggregated_3min.date = week_trading_sessions_static.date
-             group by drivewealth_portfolio_historical_holdings.profile_id, drivewealth_portfolio_historical_holdings.holding_id_v2,
-                 drivewealth_portfolio_historical_holdings.symbol, historical_prices_aggregated_3min.datetime
 
              union all
 
@@ -81,19 +82,20 @@ with chart_1w as
                     drivewealth_portfolio_historical_holdings.symbol,
                     '15min'                                             as period,
                     historical_prices_aggregated_15min.datetime,
-                    sum(drivewealth_portfolio_historical_holdings.value * historical_prices_aggregated_15min.open /
-                        historical_prices_aggregated_1d.adjusted_close) as open,
-                    sum(drivewealth_portfolio_historical_holdings.value * historical_prices_aggregated_15min.high /
-                        historical_prices_aggregated_1d.adjusted_close) as high,
-                    sum(drivewealth_portfolio_historical_holdings.value * historical_prices_aggregated_15min.low /
-                        historical_prices_aggregated_1d.adjusted_close) as low,
-                    sum(drivewealth_portfolio_historical_holdings.value * historical_prices_aggregated_15min.close /
-                        historical_prices_aggregated_1d.adjusted_close) as close,
-                    sum(drivewealth_portfolio_historical_holdings.value * historical_prices_aggregated_15min.adjusted_close /
-                        historical_prices_aggregated_1d.adjusted_close) as adjusted_close,
-                    max(greatest(drivewealth_portfolio_historical_holdings.updated_at,
+                    drivewealth_portfolio_historical_holdings.value * historical_prices_aggregated_15min.open /
+                        historical_prices_aggregated_1d.adjusted_close as open,
+                    drivewealth_portfolio_historical_holdings.value * historical_prices_aggregated_15min.high /
+                        historical_prices_aggregated_1d.adjusted_close as high,
+                    drivewealth_portfolio_historical_holdings.value * historical_prices_aggregated_15min.low /
+                        historical_prices_aggregated_1d.adjusted_close as low,
+                    drivewealth_portfolio_historical_holdings.value * historical_prices_aggregated_15min.close /
+                        historical_prices_aggregated_1d.adjusted_close as close,
+                    drivewealth_portfolio_historical_holdings.value * historical_prices_aggregated_15min.adjusted_close /
+                        historical_prices_aggregated_1d.adjusted_close as adjusted_close,
+                    historical_prices_aggregated_15min.relative_gain,
+                    greatest(drivewealth_portfolio_historical_holdings.updated_at,
                         historical_prices_aggregated_1d.updated_at,
-                        historical_prices_aggregated_15min.updated_at)) as updated_at
+                        historical_prices_aggregated_15min.updated_at) as updated_at
              from {{ ref('drivewealth_portfolio_historical_holdings') }}
                       join {{ ref('historical_prices_aggregated_1d') }}
                            on historical_prices_aggregated_1d.symbol = drivewealth_portfolio_historical_holdings.symbol
@@ -104,23 +106,25 @@ with chart_1w as
                       join {{ ref('historical_prices_aggregated_15min') }}
                            on historical_prices_aggregated_15min.symbol = drivewealth_portfolio_historical_holdings.symbol
                                and historical_prices_aggregated_15min.date = week_trading_sessions_static.date
-             group by drivewealth_portfolio_historical_holdings.profile_id, drivewealth_portfolio_historical_holdings.holding_id_v2,
-                 drivewealth_portfolio_historical_holdings.symbol, historical_prices_aggregated_15min.datetime
 
              union all
 
-             select profile_id,
-                    holding_id_v2,
-                    symbol,
+             select data.profile_id,
+                    data.holding_id_v2,
+                    data.symbol,
                     '1d'  as period,
-                    date  as datetime,
-                    value as open,
-                    value as high,
-                    value as low,
-                    value as close,
-                    value as adjusted_close,
-                    updated_at
-             from {{ ref('drivewealth_portfolio_historical_holdings') }}
+                    data.date  as datetime,
+                    data.value as open,
+                    data.value as high,
+                    data.value as low,
+                    data.value as close,
+                    data.value as adjusted_close,
+                    data.relative_daily_gain as relative_gain,
+                    data.updated_at
+             from {{ ref('drivewealth_portfolio_historical_holdings') }} data
+                      join {{ ref('historical_prices_aggregated_1d') }}
+                           on historical_prices_aggregated_1d.symbol = data.symbol
+                               and historical_prices_aggregated_1d.datetime = data.date
 
              union all
 
@@ -134,6 +138,7 @@ with chart_1w as
                     data.low,
                     dhh_close.value as close,
                     dhh_close.value as adjusted_close,
+                    data.relative_gain,
                     data.updated_at
              from chart_1w data
                       join {{ ref('drivewealth_portfolio_historical_holdings') }} dhh_open
@@ -159,6 +164,7 @@ with chart_1w as
                     data.low,
                     dhh_close.value as close,
                     dhh_close.value as adjusted_close,
+                    data.relative_gain,
                     data.updated_at
              from chart_1m data
                       join {{ ref('drivewealth_portfolio_historical_holdings') }} dhh_open
