@@ -31,7 +31,8 @@ select profile_id,
            expanded_holdings.updated_at,
            trading_profile_status.updated_at
            )::timestamp                                                               as updated_at,
-       (actual_value + buying_power + pending_orders_sum)::double precision           as actual_value,
+       (actual_value + coalesce(buying_power, 0) +
+        coalesce(pending_orders_sum, 0))::double precision                            as actual_value,
        (absolute_gain_1d / (actual_value - absolute_gain_1d))::double precision       as relative_gain_1d,
        (absolute_gain_1w / (actual_value - absolute_gain_1w))::double precision       as relative_gain_1w,
        (absolute_gain_1m / (actual_value - absolute_gain_1m))::double precision       as relative_gain_1m,
