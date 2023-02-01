@@ -74,7 +74,7 @@ select case
        drivewealth_holdings.type,
        portfolio_brokers.uniq_id                              as broker_uniq_id,
        true                                                   as is_app_trading,
-       drivewealth_holdings.type = 'cash'                     as is_hidden,
+       false                                                  as is_hidden,
        greatest(drivewealth_holdings.updated_at,
                 base_tickers.updated_at)::timestamp           as updated_at
 from {{ ref('drivewealth_holdings') }}

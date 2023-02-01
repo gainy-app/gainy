@@ -62,7 +62,6 @@ select fund_holdings_distinct.profile_id,
        symbol,
        coalesce(base_tickers_type_to_security_type.security_type,
                 base_tickers.type)                    as type,
-       null::timestamp                                as purchase_date,
        greatest(fund_holdings_distinct.updated_at,
                 base_tickers.updated_at)              as updated_at,
        profile_collections.uniq_id                    as collection_uniq_id,
@@ -74,22 +73,3 @@ from fund_holdings_distinct
          left join {{ ref('profile_collections') }}
                    on profile_collections.id = fund_holdings_distinct.collection_id
                        and (profile_collections.profile_id = fund_holdings_distinct.profile_id or profile_collections.profile_id is null)
-
-{% if var('portfolio_cash_enabled') %}
-union all
-
-select profile_id,
-       sum((portfolio_holding_data ->> 'value')::double precision) as quantity,
-       sum((portfolio_holding_data ->> 'value')::double precision) as quantity_norm_for_valuation,
-       sum((portfolio_holding_data ->> 'value')::double precision) as actual_value,
-       'U S Dollar'                                                as name,
-       'CUR:USD'                                                   as symbol,
-       'cash'                                                      as type,
-       null::timestamp                                             as purchase_date,
-       max(updated_at)                                             as updated_at,
-       null                                                        as collection_uniq_id,
-       null                                                        as collection_id
-from portfolio_funds
-where portfolio_holding_data ->> 'type' = 'CASH_RESERVE'
-group by profile_id
-{% endif %}

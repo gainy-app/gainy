@@ -15,7 +15,8 @@ def test(monkeypatch):
     persisted_objects = {}
     monkeypatch.setattr(repository, 'persist', mock_persist(persisted_objects))
 
-    event_handler = RedemptionCreatedEventHandler(repository, provider)
+    event_handler = RedemptionCreatedEventHandler(repository, provider, None,
+                                                  None)
     sync_trading_account_balances_calls = []
     monkeypatch.setattr(event_handler, 'sync_trading_account_balances',
                         mock_record_calls(sync_trading_account_balances_calls))

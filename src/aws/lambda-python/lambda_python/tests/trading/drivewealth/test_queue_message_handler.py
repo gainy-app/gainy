@@ -10,7 +10,7 @@ def test(monkeypatch):
     event_payload = "event_payload"
     handle_called = False
 
-    event_handler = UsersUpdatedEventHandler(None, None)
+    event_handler = UsersUpdatedEventHandler(None, None, None, None)
 
     def mock_handle(_event_payload):
         nonlocal handle_called
@@ -19,7 +19,7 @@ def test(monkeypatch):
 
     monkeypatch.setattr(event_handler, 'handle', mock_handle)
 
-    message_handler = DriveWealthQueueMessageHandler(None, None)
+    message_handler = DriveWealthQueueMessageHandler(None, None, None, None)
 
     def mock_get_handler(_event_type):
         assert _event_type == event_type

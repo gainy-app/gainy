@@ -21,7 +21,7 @@ def test_exists(monkeypatch):
     persisted_objects = {}
     monkeypatch.setattr(repository, 'persist', mock_persist(persisted_objects))
 
-    event_handler = AccountsUpdatedEventHandler(repository, None)
+    event_handler = AccountsUpdatedEventHandler(repository, None, None, None)
     ensure_portfolio_calls = []
     monkeypatch.setattr(event_handler, 'ensure_portfolio',
                         mock_record_calls(ensure_portfolio_calls))
@@ -63,7 +63,8 @@ def test_not_exists(monkeypatch):
     monkeypatch.setattr(provider, 'sync_trading_account',
                         mock_sync_trading_account)
 
-    event_handler = AccountsUpdatedEventHandler(repository, provider)
+    event_handler = AccountsUpdatedEventHandler(repository, provider, None,
+                                                None)
     ensure_portfolio_calls = []
     monkeypatch.setattr(event_handler, 'ensure_portfolio',
                         mock_record_calls(ensure_portfolio_calls))
@@ -99,7 +100,8 @@ def test_ensure_portfolio(monkeypatch):
     monkeypatch.setattr(provider, 'ensure_portfolio',
                         mock_record_calls(ensure_portfolio_calls))
 
-    event_handler = AccountsUpdatedEventHandler(repository, provider)
+    event_handler = AccountsUpdatedEventHandler(repository, provider, None,
+                                                None)
     event_handler.ensure_portfolio(account)
 
     assert (profile_id, trading_account_id) in [

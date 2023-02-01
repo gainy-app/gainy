@@ -14,7 +14,7 @@ def test(monkeypatch):
     persisted_objects = {}
     monkeypatch.setattr(repo, 'persist', mock_persist(persisted_objects))
 
-    event_handler = InstrumentCreatedEventHandler(repo, None)
+    event_handler = InstrumentCreatedEventHandler(repo, None, None, None)
 
     message = {
         "instrumentID": instrument_id,

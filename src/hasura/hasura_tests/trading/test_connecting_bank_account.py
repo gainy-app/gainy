@@ -32,6 +32,7 @@ def test_full_flow():
 
     query = """INSERT INTO app.profile_plaid_access_tokens (profile_id, access_token, item_id, purpose)
     VALUES (%(profile_id)s, %(access_token)s, %(item_id)s, %(purpose)s)
+    on conflict do nothing 
     RETURNING id
     """
     with db_connect() as db_conn:
@@ -43,6 +44,9 @@ def test_full_flow():
                     "item_id": item_id,
                     "purpose": 'trading',
                 })
+            cursor.execute(
+                "select id from app.profile_plaid_access_tokens where item_id = %(item_id)s",
+                {"item_id": item_id})
             access_token_id = cursor.fetchone()[0]
 
     data = make_graphql_request(
