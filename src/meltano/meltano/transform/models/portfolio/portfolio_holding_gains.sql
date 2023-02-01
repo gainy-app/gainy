@@ -67,14 +67,16 @@ with long_term_tax_holdings as
              with raw_data_0d as
                       (
                           select holding_id_v2,
-                                 sum(adjusted_close * relative_gain / (1 + relative_gain)) as absolute_gain_1d
-                          from {{ ref('portfolio_holding_chart') }}
-                                   join {{ ref('profile_holdings_normalized_all') }} using (holding_id_v2)
-                                   join {{ ref('week_trading_sessions_static') }} using (symbol, date)
-                          where period = '1d'
-                            and week_trading_sessions_static.index = 0
-                            and datetime between open_at and close_at - interval '1 second'
-                            and not profile_holdings_normalized_all.is_hidden
+                                 sum(absolute_gain_1d) as absolute_gain_1d
+                          from (
+                                   select holding_id_v2,
+                                          rank() over (partition by profile_id, period order by date desc) = 1 as is_latest_day,
+                                          adjusted_close * relative_gain / (1 + relative_gain)                 as absolute_gain_1d
+                                   from portfolio_holding_chart
+                                            join portfolio_chart_skeleton using (profile_id, period, datetime)
+                                   where period = '1d'
+                               ) t
+                          where is_latest_day
                           group by holding_id_v2
                       ),
                   raw_data_1w as
@@ -82,12 +84,9 @@ with long_term_tax_holdings as
                           select holding_id_v2,
                                  sum(adjusted_close * relative_gain / (1 + relative_gain)) as absolute_gain_1w
                           from {{ ref('portfolio_holding_chart') }}
-                                   join {{ ref('profile_holdings_normalized_all') }} using (holding_id_v2)
-                                   join {{ ref('week_trading_sessions_static') }} using (symbol, date)
+                                   join {{ ref('portfolio_chart_skeleton') }} using (profile_id, period, datetime)
                           where period = '1w'
-                            and datetime > now()::date - interval '1 week'
-                            and datetime between open_at and close_at - interval '1 second'
-                            and not profile_holdings_normalized_all.is_hidden
+                            and date >= now()::date - interval '1 week'
                           group by holding_id_v2
                   ),
                   raw_data_1m as
@@ -155,36 +154,37 @@ with long_term_tax_holdings as
     ),
     plaid_gains as
          (
+             -- HP = EV / (BV + CF) - 1
              select holding_id_v2,
                     updated_at,
                     actual_value,
                     case
                         when abs(actual_value - absolute_gain_1d) > 1e-9
-                            then absolute_gain_1d / (actual_value - absolute_gain_1d)
-                        end::double precision       as relative_gain_1d,
+                            then actual_value / (actual_value - absolute_gain_1d) - 1
+                        end::double precision as relative_gain_1d,
                     case
                         when abs(actual_value - absolute_gain_1w) > 1e-9
-                            then absolute_gain_1w / (actual_value - absolute_gain_1w)
-                        end::double precision       as relative_gain_1w,
+                            then actual_value / (actual_value - absolute_gain_1w) - 1
+                        end::double precision as relative_gain_1w,
                     case
                         when abs(last_day_value - absolute_gain_1m) > 1e-9
-                            then absolute_gain_1m / (last_day_value - absolute_gain_1m)
-                        end::double precision       as relative_gain_1m,
+                            then last_day_value / (last_day_value - absolute_gain_1m) - 1
+                        end::double precision as relative_gain_1m,
                     case
                         when abs(last_day_value - absolute_gain_3m) > 1e-9
-                            then absolute_gain_3m / (last_day_value - absolute_gain_3m)
-                        end::double precision       as relative_gain_3m,
+                            then last_day_value / (last_day_value - absolute_gain_3m) - 1
+                        end::double precision as relative_gain_3m,
                     case
                         when abs(last_day_value - absolute_gain_1y) > 1e-9
-                            then absolute_gain_1y / (last_day_value - absolute_gain_1y)
-                        end::double precision       as relative_gain_1y,
+                            then last_day_value / (last_day_value - absolute_gain_1y) - 1
+                        end::double precision as relative_gain_1y,
                     case
                         when abs(last_day_value - absolute_gain_5y) > 1e-9
-                            then absolute_gain_5y / (last_day_value - absolute_gain_5y)
-                        end::double precision       as relative_gain_5y,
+                            then last_day_value / (last_day_value - absolute_gain_5y) - 1
+                        end::double precision as relative_gain_5y,
                     case
                         when abs(last_day_value - absolute_gain_total) > 1e-9
-                            then absolute_gain_total / (last_day_value - absolute_gain_total)
+                            then last_day_value / (last_day_value - absolute_gain_total) - 1
                         end::double precision as relative_gain_total,
                     absolute_gain_1d,
                     absolute_gain_1w,
@@ -249,3 +249,4 @@ from (
      ) t
          join {{ ref('profile_holdings_normalized_all') }} using (holding_id_v2)
          left join long_term_tax_holdings using (holding_id_v2)
+where not profile_holdings_normalized_all.is_hidden
