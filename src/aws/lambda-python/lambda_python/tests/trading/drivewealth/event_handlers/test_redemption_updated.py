@@ -34,7 +34,8 @@ def test_exists(monkeypatch):
     persisted_objects = {}
     monkeypatch.setattr(repository, 'persist', mock_persist(persisted_objects))
 
-    event_handler = RedemptionUpdatedEventHandler(repository, provider)
+    event_handler = RedemptionUpdatedEventHandler(repository, provider, None,
+                                                  None)
     sync_trading_account_balances_calls = []
     monkeypatch.setattr(event_handler, 'sync_trading_account_balances',
                         mock_record_calls(sync_trading_account_balances_calls))
@@ -78,7 +79,8 @@ def test_not_exists(monkeypatch):
     persisted_objects = {}
     monkeypatch.setattr(repository, 'persist', mock_persist(persisted_objects))
 
-    event_handler = RedemptionUpdatedEventHandler(repository, provider)
+    event_handler = RedemptionUpdatedEventHandler(repository, provider, None,
+                                                  None)
     sync_trading_account_balances_calls = []
     monkeypatch.setattr(event_handler, 'sync_trading_account_balances',
                         mock_record_calls(sync_trading_account_balances_calls))

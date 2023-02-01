@@ -27,3 +27,8 @@ class S3:
         logger.info('Downloading file %s %s', s3_bucket, s3_key)
 
         return self.s3_client.download_fileobj(s3_bucket, s3_key, destination)
+
+    def remove_file(self, s3_bucket, s3_key):
+        logger.info('Removing file %s %s', s3_bucket, s3_key)
+
+        return self.s3_client.delete_object(Bucket=s3_bucket, Key=s3_key)

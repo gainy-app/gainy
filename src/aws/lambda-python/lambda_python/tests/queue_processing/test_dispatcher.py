@@ -12,7 +12,7 @@ def test_drivewealth(monkeypatch):
     message = QueueMessage()
 
     handle_called = False
-    handler = DriveWealthQueueMessageHandler(None, None)
+    handler = DriveWealthQueueMessageHandler(None, None, None, None)
 
     def mock_handle(_message: QueueMessage):
         nonlocal handle_called

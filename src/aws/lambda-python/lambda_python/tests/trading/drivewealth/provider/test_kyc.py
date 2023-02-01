@@ -1,6 +1,6 @@
 import datetime
 
-from gainy.tests.mocks.repository_mocks import mock_persist
+from gainy.tests.mocks.repository_mocks import mock_persist, mock_noop
 from gainy.utils import DATETIME_ISO8601_FORMAT_TZ
 from trading.models import KycStatus, ProfileKycStatus
 from trading.drivewealth.models import DriveWealthKycStatus
@@ -56,6 +56,7 @@ def test_sync_kyc(monkeypatch):
 
     monkeypatch.setattr(service, "get_profile_id_by_user_id",
                         mock_get_profile_id_by_user_id)
+    monkeypatch.setattr(service, "sync_user", mock_noop)
     kyc_status = service.sync_kyc(user_ref_id)
 
     assert kyc_status.status == KycStatus.APPROVED

@@ -19,7 +19,7 @@ def test_exists(monkeypatch):
     persisted_objects = {}
     monkeypatch.setattr(repository, 'persist', mock_persist(persisted_objects))
 
-    event_handler = InstrumentUpdatedEventHandler(repository, None)
+    event_handler = InstrumentUpdatedEventHandler(repository, None, None, None)
 
     message = {
         "instrumentID": instrument_id,
@@ -51,7 +51,8 @@ def test_not_exists(monkeypatch):
 
     monkeypatch.setattr(provider, 'sync_instrument', mock_sync_instrument)
 
-    event_handler = InstrumentUpdatedEventHandler(repository, provider)
+    event_handler = InstrumentUpdatedEventHandler(repository, provider, None,
+                                                  None)
 
     message = {
         "instrumentID": instrument_id,

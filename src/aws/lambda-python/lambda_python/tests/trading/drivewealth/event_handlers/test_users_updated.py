@@ -20,7 +20,7 @@ def test(monkeypatch):
     monkeypatch.setattr(provider, 'ensure_account_created',
                         mock_record_calls(ensure_account_created_calls))
 
-    event_handler = UsersUpdatedEventHandler(None, provider)
+    event_handler = UsersUpdatedEventHandler(None, provider, None, None)
 
     message = {
         "userID": user_id,
