@@ -10,14 +10,16 @@ with account_stats as
              select trading_account_id,
                     sum(t.cash_balance)                  as cash_balance,
                     sum(t.cash_available_for_trade)      as cash_available_for_trade,
-                    sum(t.cash_available_for_withdrawal) as cash_available_for_withdrawal
+                    sum(t.cash_available_for_withdrawal) as cash_available_for_withdrawal,
+                    max(t.created_at)                    as updated_at
              from (
                       select distinct on (
                           drivewealth_account_id
                           ) drivewealth_account_id,
                             cash_balance,
                             cash_available_for_trade,
-                            cash_available_for_withdrawal
+                            cash_available_for_withdrawal,
+                            created_at
                       from {{ source('app', 'drivewealth_accounts_money') }}
                       order by drivewealth_account_id, created_at desc
                   ) t
@@ -37,12 +39,14 @@ with account_stats as
      portfolio_stats as
          (
              select trading_account_id,
-                    sum(cash_value) as cash_value
+                    sum(cash_value)   as cash_value,
+                    max(t.created_at) as updated_at
              from (
                       select distinct on (
                           drivewealth_portfolio_id
                           ) drivewealth_portfolio_id,
-                            cash_value
+                            cash_value,
+                            created_at
                       from {{ source('app', 'drivewealth_portfolio_statuses') }}
                       order by drivewealth_portfolio_id, created_at desc
                   ) t
@@ -57,6 +61,10 @@ select profile_id,
        trading_accounts.account_no,
        trading_money_flow.trading_account_id is not null as deposited_funds,
        coalesce(pending_cash, 0)::double precision       as pending_cash,
+       coalesce(pending_order_stats.abs_amount_sum,
+           0)::double precision                          as pending_orders_amount,
+       coalesce(pending_order_stats.amount_sum,
+           0)::double precision                          as pending_orders_sum,
        coalesce(
 {% if var("drivewealth_is_uat") == "true" %}
                cash_available_for_trade
@@ -64,33 +72,46 @@ select profile_id,
                cash_available_for_withdrawal
 {% endif %}
            , 0)::double precision                        as withdrawable_cash,
-       coalesce(
+       greatest(
            coalesce(portfolio_stats.cash_value, 0) + coalesce(pending_cash, 0) - coalesce(pending_order_stats.amount_sum, 0)
-           , 0)::double precision                        as buying_power
+           , 0)::double precision                        as buying_power,
+       greatest(trading_accounts.updated_at,
+           trading_money_flow.updated_at,
+           account_stats.updated_at,
+           portfolio_stats.updated_at,
+           pending_order_stats.updated_at)::timestamp    as updated_at
 from (
          select distinct on (
              profile_id
              ) profile_id,
                ref_no as account_no,
-               trading_account_id
+               trading_account_id,
+               drivewealth_accounts.updated_at
          from {{ source('app', 'drivewealth_accounts') }}
                   join {{ source('app', 'drivewealth_users') }}
                        on drivewealth_accounts.drivewealth_user_id = drivewealth_users.ref_id
          where drivewealth_accounts.status = 'OPEN'
      ) trading_accounts
          left join (
-                       select distinct trading_account_id
+                       select trading_account_id, max(updated_at) as updated_at
                        from {{ source('app', 'trading_money_flow') }}
                        where status != 'FAILED'
+                       group by trading_account_id
                    ) trading_money_flow using (trading_account_id)
          left join deposit_stats using (trading_account_id)
          left join account_stats using (trading_account_id)
          left join portfolio_stats using (trading_account_id)
          left join (
-                       select profile_id, sum(amount_sum) as amount_sum
+                       select profile_id,
+                              sum(amount_sum) as amount_sum,
+                              sum(abs_amount_sum) as abs_amount_sum,
+                              max(updated_at) as updated_at
                        from (
                                 -- todo link trading_collection_versions to trading_account
-                                select profile_id, sum(target_amount_delta) as amount_sum
+                                select profile_id,
+                                       sum(target_amount_delta)      as amount_sum,
+                                       sum(abs(target_amount_delta)) as abs_amount_sum,
+                                       max(updated_at)               as updated_at
                                 from {{ source('app', 'trading_collection_versions') }}
                                 where status in ('PENDING_EXECUTION', 'PENDING')
                                 group by profile_id
@@ -98,7 +119,10 @@ from (
                                 union all
 
                                 -- todo link trading_orders to trading_account
-                                select profile_id, sum(target_amount_delta) as amount_sum
+                                select profile_id,
+                                       sum(target_amount_delta)      as amount_sum,
+                                       sum(abs(target_amount_delta)) as abs_amount_sum,
+                                       max(updated_at)               as updated_at
                                 from {{ source('app', 'trading_orders') }}
                                 where status in ('PENDING_EXECUTION', 'PENDING')
                                 group by profile_id

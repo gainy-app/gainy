@@ -174,6 +174,29 @@ union all
                          or collection_metrics.previous_day_close_price < 1e-6
                          or abs(collection_daily_latest_chart_point.adjusted_close / collection_metrics.previous_day_close_price - 1) > 0.2)
                  )
+
+                 union all
+
+                 (
+                     with wrong_collection_ticker_weights as
+                              (
+                                  select collection_uniq_id,
+                                         json_agg(json_build_array(date, weight_sum)) as data
+                                  from (
+                                           select collection_uniq_id, date, sum(weight) as weight_sum
+                                           from {{ ref('collection_ticker_weights') }}
+                                           group by collection_uniq_id, date
+                                           having abs(sum(weight) - 1) > 1e-2
+                                       ) t
+                                  group by collection_uniq_id
+                              )
+                     select gainy_collections.id                                                     as collection_id,
+                            'collection_tickers_wrong_weight_sum'                                    as code,
+                            'TTF ' || gainy_collections.id || ' has wrong weights at dates ' || data as message,
+                            'daily'                                                                  as period
+                     from wrong_collection_ticker_weights
+                              join gainy_collections using (collection_uniq_id)
+                 )
              )
     select (code || '_' || collection_id) as id,
            null                           as symbol,

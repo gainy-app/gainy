@@ -6,17 +6,25 @@ from gainy.trading.models import TradingAccount
 from queue_processing.abstract_event_handler import EventHandlerInterface
 from trading.drivewealth.provider import DriveWealthProvider
 from trading.drivewealth.repository import DriveWealthRepository
+from trading.repository import TradingRepository
+from trading.service import TradingService
 
 
 class AbstractDriveWealthEventHandler(EventHandlerInterface, ABC):
 
     def __init__(self, repo: DriveWealthRepository,
-                 provider: DriveWealthProvider):
+                 provider: DriveWealthProvider,
+                 trading_repository: TradingRepository,
+                 trading_service: TradingService):
         self.repo = repo
         self.provider = provider
+        self.trading_repository = trading_repository
+        self.trading_service = trading_service
 
     def sync_trading_account_balances(
-            self, trading_account_ref_id: str) -> Optional[TradingAccount]:
+            self,
+            trading_account_ref_id: str,
+            force: bool = False) -> Optional[TradingAccount]:
         if not trading_account_ref_id:
             return
 
@@ -30,5 +38,5 @@ class AbstractDriveWealthEventHandler(EventHandlerInterface, ABC):
         if not trading_account:
             return
 
-        self.provider.sync_balances(trading_account)
+        self.provider.sync_balances(trading_account, force=force)
         return trading_account

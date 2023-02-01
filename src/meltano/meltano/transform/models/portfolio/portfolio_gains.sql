@@ -11,7 +11,7 @@
 
 with expanded_holdings as
          (
-             select profile_holdings_normalized.profile_id,
+             select profile_holdings_normalized_all.profile_id,
                     max(portfolio_holding_gains.updated_at)                         as updated_at,
                     sum(actual_value::numeric)                                      as actual_value,
                     sum(absolute_gain_1d::numeric)    as absolute_gain_1d,
@@ -22,12 +22,17 @@ with expanded_holdings as
                     sum(absolute_gain_5y::numeric)    as absolute_gain_5y,
                     sum(absolute_gain_total::numeric) as absolute_gain_total
              from {{ ref('portfolio_holding_gains') }}
-                      join {{ ref('profile_holdings_normalized') }} using (holding_id_v2)
-             group by profile_holdings_normalized.profile_id
+                      join {{ ref('profile_holdings_normalized_all') }} using (holding_id_v2)
+             where not profile_holdings_normalized_all.is_hidden
+             group by profile_holdings_normalized_all.profile_id
          )
 select profile_id,
-       updated_at,
-       actual_value::double precision,
+       greatest(
+           expanded_holdings.updated_at,
+           trading_profile_status.updated_at
+           )::timestamp                                                               as updated_at,
+       (actual_value + coalesce(buying_power, 0) +
+        coalesce(pending_orders_sum, 0))::double precision                            as actual_value,
        (absolute_gain_1d / (actual_value - absolute_gain_1d))::double precision       as relative_gain_1d,
        (absolute_gain_1w / (actual_value - absolute_gain_1w))::double precision       as relative_gain_1w,
        (absolute_gain_1m / (actual_value - absolute_gain_1m))::double precision       as relative_gain_1m,
@@ -43,3 +48,4 @@ select profile_id,
        absolute_gain_5y::double precision,
        absolute_gain_total::double precision
 from expanded_holdings
+         left join {{ ref('trading_profile_status') }} using (profile_id)

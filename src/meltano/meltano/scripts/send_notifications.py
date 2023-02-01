@@ -19,7 +19,10 @@ SEGMENTS = {
     ENV_LOCAL: [],
 }
 EMAILS_LOCAL = json.loads(os.environ.get('ONESIGNAL_EMAILS_LOCAL', '[]'))
-MAX_NOTIFICATIONS_PER_TEMPLATE = 1
+MAX_NOTIFICATIONS_PER_TEMPLATE = os.environ.get(
+    'MAX_NOTIFICATIONS_PER_TEMPLATE')
+MAX_NOTIFICATIONS_PER_TEMPLATE = int(
+    MAX_NOTIFICATIONS_PER_TEMPLATE) if MAX_NOTIFICATIONS_PER_TEMPLATE else None
 
 logger = get_logger(__name__)
 
@@ -117,6 +120,9 @@ def send_one(db_conn, notification):
 
 
 def check_malfunctioning_notifications(notifications_to_send):
+    if MAX_NOTIFICATIONS_PER_TEMPLATE is None:
+        return
+
     notification_stats = {
         'email': {},
         'segments': {},
@@ -158,7 +164,7 @@ def send_all(sender_id):
                 """insert into app.notifications(profile_id, uniq_id, title, text, data, sender_id, is_test, template_id, is_push, is_shown_in_app)
                    select profile_id, uniq_id, title, text, data, %(sender_id)s, is_test, template_id, is_push, is_shown_in_app
                    from notifications_to_send
-                   where send_at <= now()
+                   where send_at <= now() or send_at is null
                    on conflict do nothing""", {"sender_id": sender_id})
             cursor.execute(
                 "update app.notifications set sender_id = %(sender_id)s where sender_id is null and is_push",

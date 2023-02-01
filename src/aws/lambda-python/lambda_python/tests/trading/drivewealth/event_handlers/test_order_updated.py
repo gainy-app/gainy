@@ -30,7 +30,7 @@ def test_exists(monkeypatch):
     monkeypatch.setattr(provider, 'handle_order',
                         mock_record_calls(handle_order_calls))
 
-    event_handler = OrderUpdatedEventHandler(repository, provider)
+    event_handler = OrderUpdatedEventHandler(repository, provider, None, None)
 
     event_handler.handle(message)
 
@@ -54,7 +54,7 @@ def test_not_exists(monkeypatch):
     monkeypatch.setattr(provider, 'handle_order',
                         mock_record_calls(handle_order_calls))
 
-    event_handler = OrderUpdatedEventHandler(repository, provider)
+    event_handler = OrderUpdatedEventHandler(repository, provider, None, None)
 
     event_handler.handle(message)
 

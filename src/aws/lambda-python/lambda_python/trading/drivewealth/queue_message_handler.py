@@ -7,6 +7,8 @@ from queue_processing.models import QueueMessage
 from trading.drivewealth.abstract_event_handler import AbstractDriveWealthEventHandler
 from trading.drivewealth.provider import DriveWealthProvider
 from trading.drivewealth.repository import DriveWealthRepository
+from trading.repository import TradingRepository
+from trading.service import TradingService
 
 DRIVEWEALTH_SQS_ARN = os.getenv("DRIVEWEALTH_SQS_ARN")
 
@@ -15,10 +17,12 @@ class DriveWealthQueueMessageHandler(AbstractMessageHandler):
     handlers: List[AbstractDriveWealthEventHandler]
 
     def __init__(self, repo: DriveWealthRepository,
-                 provider: DriveWealthProvider):
+                 provider: DriveWealthProvider,
+                 trading_repository: TradingRepository,
+                 trading_service: TradingService):
         self.handlers = [
-            cls(repo, provider) for cls in self._iterate_module_classes(
-                trading.drivewealth.event_handlers)
+            cls(repo, provider, trading_repository, trading_service) for cls in
+            self._iterate_module_classes(trading.drivewealth.event_handlers)
             if issubclass(cls, AbstractDriveWealthEventHandler)
         ]
 

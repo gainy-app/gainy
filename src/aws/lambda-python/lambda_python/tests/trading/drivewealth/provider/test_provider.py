@@ -83,15 +83,15 @@ def test_transfer_money(monkeypatch, amount):
 
     service = DriveWealthProvider(drivewealth_repository, api, None, None,
                                   None)
-    monkeypatch.setattr(service, "_on_money_transfer", mock_noop)
-    entity = service.transfer_money(money_flow, amount, trading_account_id,
-                                    funding_account_id)
+    service.transfer_money(money_flow, amount, trading_account_id,
+                           funding_account_id)
 
     if amount > 0:
-        assert entity.__class__ == DriveWealthDeposit
+        entity_class = DriveWealthDeposit
     else:
-        assert entity.__class__ == DriveWealthRedemption
-    assert entity.__class__ in persisted_objects
+        entity_class = DriveWealthRedemption
+    assert entity_class in persisted_objects
+    entity = persisted_objects[entity_class][0]
 
     assert entity.ref_id == transfer_ref_id
     assert entity.status == status
