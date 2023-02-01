@@ -17,10 +17,10 @@ with polygon_symbols as materialized
          (
              select symbol,
                     week_trading_sessions_static.date
-             from {{ source('polygon', 'polygon_intraday_prices') }}
+             from {{ source('polygon', 'polygon_intraday_prices_launchpad') }}
                       join {{ ref('week_trading_sessions_static') }} using (symbol)
-             where polygon_intraday_prices.time >= week_trading_sessions_static.open_at
-               and polygon_intraday_prices.time < week_trading_sessions_static.close_at
+             where polygon_intraday_prices_launchpad.t >= extract(epoch from week_trading_sessions_static.open_at)
+               and polygon_intraday_prices_launchpad.t < extract(epoch from week_trading_sessions_static.close_at)
 {% if var('realtime') %}
                and week_trading_sessions_static.index = 0
 {% endif %}
@@ -48,19 +48,19 @@ with polygon_symbols as materialized
          ),
      raw_polygon_intraday_prices as
          (
-             select polygon_intraday_prices.symbol,
+             select symbol,
                     week_trading_sessions_static.date,
-                    time,
-                    open,
-                    high,
-                    low,
-                    close,
-                    volume
-             from {{ source('polygon', 'polygon_intraday_prices') }}
+                    to_timestamp(t / 1000) as time,
+                    o                      as open,
+                    h                      as high,
+                    l                      as low,
+                    c                      as close,
+                    v                      as volume
+             from {{ source('polygon', 'polygon_intraday_prices_launchpad') }}
                       join {{ ref('week_trading_sessions_static') }} using (symbol)
                       join polygon_symbols using (symbol, date)
-             where time >= week_trading_sessions_static.open_at
-               and time < week_trading_sessions_static.close_at
+             where t >= extract(epoch from week_trading_sessions_static.open_at)
+               and t < extract(epoch from week_trading_sessions_static.close_at)
 {% if var('realtime') %}
                and week_trading_sessions_static.index = 0
 {% endif %}

@@ -36,7 +36,7 @@ sources:
     description: Financial data from https://polygon.io/
     schema: raw_data
     tables:
-      - name: polygon_intraday_prices
+      - name: polygon_intraday_prices_launchpad
       - name: polygon_marketstatus_upcoming
       - name: polygon_options_historical_prices
       - name: polygon_crypto_historical_prices
