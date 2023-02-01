@@ -84,14 +84,19 @@ class DriveWealthProvider(DriveWealthProviderKYC,
         if not bank_account:
             raise EntityNotFoundException(DriveWealthBankAccount)
 
-        if amount > 0:
-            response = self.api.create_deposit(amount, trading_account,
-                                               bank_account)
-            entity = DriveWealthDeposit()
-        else:
-            response = self.api.create_redemption(amount, trading_account,
-                                                  bank_account)
-            entity = DriveWealthRedemption()
+        try:
+            if amount > 0:
+                response = self.api.create_deposit(amount, trading_account,
+                                                   bank_account)
+                entity = DriveWealthDeposit()
+            else:
+                response = self.api.create_redemption(amount, trading_account,
+                                                      bank_account)
+                entity = DriveWealthRedemption()
+        except DriveWealthApiException as e:
+            money_flow.status = TradingMoneyFlowStatus.FAILED
+            logger.error(e)
+            return
 
         entity.set_from_response(response)
         entity.trading_account_ref_id = trading_account.ref_id
@@ -99,10 +104,6 @@ class DriveWealthProvider(DriveWealthProviderKYC,
         entity.money_flow_id = money_flow.id
         self.update_money_flow_from_dw(entity, money_flow)
         self.repository.persist(entity)
-
-        self._on_money_transfer(money_flow.profile_id, trading_account_id)
-
-        return entity
 
     def debug_add_money(self, trading_account_id, amount):
         if not DRIVEWEALTH_IS_UAT:

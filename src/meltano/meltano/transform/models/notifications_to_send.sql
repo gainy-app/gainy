@@ -195,65 +195,31 @@ with data as
             -- Stock that you own falls sharp. You have already made 30%+. Maybe sell? (=trailing stop loss)
             select profile_id,
                    ('portfolio_stock_falls_sharp' || profile_id || '_' ||
-                        date_trunc('week', now()::date))                             as uniq_id,
-                   exchange_schedule.open_at + interval '1 hour'                     as send_at,
-                   null::json                                                        as title,
+                        date_trunc('week', now()::date))                          as uniq_id,
+                   exchange_schedule.open_at + interval '1 hour'                  as send_at,
+                   null::json                                                     as title,
                    json_build_object('en', symbol || ' is ' || (relative_daily_change * 100)::int ||
                             '% today. You have already made ' ||
-                            (relative_position_gain * 100)::int || '%. Maybe sell?') as text,
-                   json_build_object('t', 7, 's', symbol)                            as data,
-                   false                                                             as is_test,
-                   true                                                              as is_push,
-                   false                                                             as is_shown_in_app,
-                   '11dc7a5a-aa96-4835-893a-cea11581ab6c'                            as template_id
+                            (relative_gain_total * 100)::int || '%. Maybe sell?') as text,
+                   json_build_object('t', 7, 's', symbol)                         as data,
+                   false                                                          as is_test,
+                   true                                                           as is_push,
+                   false                                                          as is_shown_in_app,
+                   '11dc7a5a-aa96-4835-893a-cea11581ab6c'                         as template_id
             from (
-                     with raw_positions as
-                              (
-                                  select portfolio_expanded_transactions.profile_id,
-                                         portfolio_expanded_transactions.datetime,
-                                         quantity_norm,
-                                         portfolio_expanded_transactions.symbol,
-                                         sum(case when quantity_norm > 0 then abs(amount) end) over wnd as cost_sum,
-                                         sum(case when quantity_norm < 0 then abs(amount) end) over wnd as take_profit_sum,
-                                         sum(quantity_norm) over wnd                                    as quantity_sum,
-                                         sum((transaction_uniq_id like 'auto%')::int) over wnd          as auto_cnt
-                                  from {{ ref('portfolio_expanded_transactions') }}
-                                           join {{ ref('profile_holdings_normalized') }} using (holding_id_v2)
-                                  window wnd as (partition by portfolio_expanded_transactions.profile_id, portfolio_expanded_transactions.symbol
-                                                 order by portfolio_expanded_transactions.datetime, quantity_norm desc)
-                              ),
-                          distinct_positions as
-                              (
-                                  select distinct on (
-                                      profile_id, symbol
-                                      ) profile_id,
-                                        symbol,
-                                        cost_sum,
-                                        take_profit_sum,
-                                        quantity_sum,
-                                        auto_cnt
-                                  from raw_positions
-                                  order by profile_id, symbol, datetime desc, quantity_norm
-                              ),
-                         positions_with_profit as
-                             (
-                                 select distinct_positions.profile_id,
-                                        distinct_positions.symbol,
-                                        cost_sum                                                                        as cost,
-                                        coalesce(take_profit_sum, 0) + quantity_sum * historical_prices_marked.price_0d as profit,
-                                        (coalesce(take_profit_sum, 0) + quantity_sum * historical_prices_marked.price_0d - cost_sum) / cost_sum as relative_position_gain,
-                                        ticker_realtime_metrics.relative_daily_change
-                                 from distinct_positions
-                                          join {{ ref('historical_prices_marked') }} using (symbol)
-                                          join {{ ref('ticker_realtime_metrics') }} using (symbol)
-                                 where auto_cnt = 0
-                                   and cost_sum > 0
-                                   and quantity_sum > 0
-                             )
-                     select distinct on (profile_id) *
-                     from positions_with_profit
-                     where relative_position_gain > 0.30
+                     select distinct on (
+                         profile_id
+                         ) profile_holdings_normalized_all.profile_id,
+                           profile_holdings_normalized_all.symbol,
+                           portfolio_holding_gains.relative_gain_total,
+                           ticker_realtime_metrics.relative_daily_change
+                     from {{ ref('profile_holdings_normalized_all') }}
+                              join {{ ref('portfolio_holding_gains') }} using (holding_id_v2)
+                              join {{ ref('ticker_realtime_metrics') }} using (symbol)
+                     where not profile_holdings_normalized_all.is_hidden
+                       and relative_gain_total > 0.30
                        and relative_daily_change < -0.05
+                       and profile_holdings_normalized_all.symbol is not null
                      order by profile_id, relative_daily_change
                 ) t
                      join {{ ref('exchange_schedule') }} on exchange_schedule.country_name = 'USA' and exchange_schedule.date = now()::date
@@ -271,7 +237,12 @@ with data as
                    is_push,
                    is_shown_in_app,
                    template_id
-            from {{ ref('trading_notifications') }}
+            from (
+                     select *,
+                            row_number() over (partition by profile_id, template_id) as rn
+                     from {{ ref('trading_notifications') }}
+                 ) t
+            where rn < {{ var('max_notifications_per_template') }}
         ),
     profiles as
         (

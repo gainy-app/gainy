@@ -75,11 +75,11 @@ INSERT INTO app.profile_portfolio_transactions (amount, date, fees, name, price,
 select distinct on (
     profile_id,
     ticker_symbol
-    ) quantity * coalesce(eod_historical_prices.adjusted_close, polygon_options_historical_prices.c),
-      coalesce(eod_historical_prices.date::date, to_timestamp(polygon_options_historical_prices.t / 1000)::date),
+    ) quantity * coalesce(polygon_stocks_historical_prices.c, polygon_options_historical_prices.c),
+      coalesce(to_timestamp(polygon_stocks_historical_prices.t / 1000)::date, to_timestamp(polygon_options_historical_prices.t / 1000)::date),
       1.5,
       'BUY ' || ticker_symbol || ' Inc.',
-      coalesce(eod_historical_prices.adjusted_close, polygon_options_historical_prices.c),
+      coalesce(polygon_stocks_historical_prices.c, polygon_options_historical_prices.c),
       quantity,
       'buy',
       'buy',
@@ -96,14 +96,15 @@ from app.profile_portfolio_accounts
                   from app.portfolio_securities
                   where ticker_symbol in ('AAPL', 'AAPL240621C00225000')
               ) t on true
-         left join raw_data.eod_historical_prices
-              on eod_historical_prices.code = ticker_symbol and eod_historical_prices.date::date between now()::date - interval '8 days' and now()::date - interval '5 days'
+         left join raw_data.polygon_stocks_historical_prices
+              on polygon_stocks_historical_prices.symbol = ticker_symbol
+                     and floor(polygon_stocks_historical_prices.t / 86400000) * 86400000 between extract(epoch from now()::date - interval '8 days') * 1000 and extract(epoch from now()::date - interval '5 days') * 1000
          left join raw_data.polygon_options_historical_prices
               on polygon_options_historical_prices.contract_name = ticker_symbol
                      and floor(polygon_options_historical_prices.t / 86400000) * 86400000 between extract(epoch from now()::date - interval '8 days') * 1000 and extract(epoch from now()::date - interval '5 days') * 1000
 where email in ('portfolio-test-2@gainy.app', 'portfolio-test-15@gainy.app')
   and profile_portfolio_accounts.type = 'primary'
-order by profile_id, ticker_symbol, coalesce(eod_historical_prices.date::date, to_timestamp(polygon_options_historical_prices.t / 1000)::date) desc
+order by profile_id, ticker_symbol, coalesce(to_timestamp(polygon_stocks_historical_prices.t / 1000)::date, to_timestamp(polygon_options_historical_prices.t / 1000)::date) desc
 on conflict do nothing;
 
 -- profile 3 with holdings with one sell transaction on the primary account
@@ -114,11 +115,11 @@ INSERT INTO app.profile_portfolio_transactions (amount, date, fees, name, price,
 select distinct on (
     profile_id,
     ticker_symbol
-    ) quantity * coalesce(eod_historical_prices.adjusted_close, polygon_options_historical_prices.c),
-      coalesce(eod_historical_prices.date::date, to_timestamp(polygon_options_historical_prices.t / 1000)::date),
+    ) quantity * coalesce(polygon_stocks_historical_prices.c, polygon_options_historical_prices.c),
+      coalesce(to_timestamp(polygon_stocks_historical_prices.t / 1000)::date, to_timestamp(polygon_options_historical_prices.t / 1000)::date),
       1.5,
       'SELL ' || ticker_symbol || ' Inc.',
-      coalesce(eod_historical_prices.adjusted_close, polygon_options_historical_prices.c),
+      coalesce(polygon_stocks_historical_prices.c, polygon_options_historical_prices.c),
       quantity,
       'sell',
       'sell',
@@ -135,14 +136,15 @@ from app.profile_portfolio_accounts
                   from app.portfolio_securities
                   where ticker_symbol in ('AAPL', 'AAPL240621C00225000')
               ) t on true
-         left join raw_data.eod_historical_prices
-              on eod_historical_prices.code = ticker_symbol and eod_historical_prices.date::date between now()::date - interval '8 days' and now()::date - interval '5 days'
+         left join raw_data.polygon_stocks_historical_prices
+              on polygon_stocks_historical_prices.symbol = ticker_symbol
+                     and floor(polygon_stocks_historical_prices.t / 86400000) * 86400000 between extract(epoch from now()::date - interval '8 days') * 1000 and extract(epoch from now()::date - interval '5 days') * 1000
          left join raw_data.polygon_options_historical_prices
               on polygon_options_historical_prices.contract_name = ticker_symbol
                      and floor(polygon_options_historical_prices.t / 86400000) * 86400000 between extract(epoch from now()::date - interval '8 days') * 1000 and extract(epoch from now()::date - interval '5 days') * 1000
 where email in ('portfolio-test-3@gainy.app', 'portfolio-test-16@gainy.app')
   and profile_portfolio_accounts.type = 'primary'
-order by profile_id, ticker_symbol, coalesce(eod_historical_prices.date::date, to_timestamp(polygon_options_historical_prices.t / 1000)::date) desc
+order by profile_id, ticker_symbol, coalesce(to_timestamp(polygon_stocks_historical_prices.t / 1000)::date, to_timestamp(polygon_options_historical_prices.t / 1000)::date) desc
 on conflict do nothing;
 
 -- profile 4 with holdings with one buy transaction on the secondary account
@@ -153,11 +155,11 @@ INSERT INTO app.profile_portfolio_transactions (amount, date, fees, name, price,
 select distinct on (
     profile_id,
     ticker_symbol
-    ) quantity * coalesce(eod_historical_prices.adjusted_close, polygon_options_historical_prices.c),
-      coalesce(eod_historical_prices.date::date, to_timestamp(polygon_options_historical_prices.t / 1000)::date),
+    ) quantity * coalesce(polygon_stocks_historical_prices.c, polygon_options_historical_prices.c),
+      coalesce(to_timestamp(polygon_stocks_historical_prices.t / 1000)::date, to_timestamp(polygon_options_historical_prices.t / 1000)::date),
       1.5,
       'BUY ' || ticker_symbol || ' Inc.',
-      coalesce(eod_historical_prices.adjusted_close, polygon_options_historical_prices.c),
+      coalesce(polygon_stocks_historical_prices.c, polygon_options_historical_prices.c),
       quantity,
       'buy',
       'buy',
@@ -174,14 +176,15 @@ from app.profile_portfolio_accounts
                   from app.portfolio_securities
                   where ticker_symbol in ('AAPL', 'AAPL240621C00225000')
               ) t on true
-         left join raw_data.eod_historical_prices
-              on eod_historical_prices.code = ticker_symbol and eod_historical_prices.date::date between now()::date - interval '8 days' and now()::date - interval '5 days'
+         left join raw_data.polygon_stocks_historical_prices
+              on polygon_stocks_historical_prices.symbol = ticker_symbol
+                     and floor(polygon_stocks_historical_prices.t / 86400000) * 86400000 between extract(epoch from now()::date - interval '8 days') * 1000 and extract(epoch from now()::date - interval '5 days') * 1000
          left join raw_data.polygon_options_historical_prices
               on polygon_options_historical_prices.contract_name = ticker_symbol
                      and floor(polygon_options_historical_prices.t / 86400000) * 86400000 between extract(epoch from now()::date - interval '8 days') * 1000 and extract(epoch from now()::date - interval '5 days') * 1000
 where email in ('portfolio-test-4@gainy.app', 'portfolio-test-17@gainy.app')
   and profile_portfolio_accounts.type = 'secondary'
-order by profile_id, ticker_symbol, coalesce(eod_historical_prices.date::date, to_timestamp(polygon_options_historical_prices.t / 1000)::date) desc
+order by profile_id, ticker_symbol, coalesce(to_timestamp(polygon_stocks_historical_prices.t / 1000)::date, to_timestamp(polygon_options_historical_prices.t / 1000)::date) desc
 on conflict do nothing;
 
 -- profile 5 with holdings with one sell transaction on the secondary account
@@ -192,11 +195,11 @@ INSERT INTO app.profile_portfolio_transactions (amount, date, fees, name, price,
 select distinct on (
     profile_id,
     ticker_symbol
-    ) quantity * coalesce(eod_historical_prices.adjusted_close, polygon_options_historical_prices.c),
-      coalesce(eod_historical_prices.date::date, to_timestamp(polygon_options_historical_prices.t / 1000)::date),
+    ) quantity * coalesce(polygon_stocks_historical_prices.c, polygon_options_historical_prices.c),
+      coalesce(to_timestamp(polygon_stocks_historical_prices.t / 1000)::date, to_timestamp(polygon_options_historical_prices.t / 1000)::date),
       1.5,
       'SELL ' || ticker_symbol || ' Inc.',
-      coalesce(eod_historical_prices.adjusted_close, polygon_options_historical_prices.c),
+      coalesce(polygon_stocks_historical_prices.c, polygon_options_historical_prices.c),
       quantity,
       'sell',
       'sell',
@@ -213,14 +216,15 @@ from app.profile_portfolio_accounts
                   from app.portfolio_securities
                   where ticker_symbol in ('AAPL', 'AAPL240621C00225000')
               ) t on true
-         left join raw_data.eod_historical_prices
-              on eod_historical_prices.code = ticker_symbol and eod_historical_prices.date::date between now()::date - interval '8 days' and now()::date - interval '5 days'
+         left join raw_data.polygon_stocks_historical_prices
+              on polygon_stocks_historical_prices.symbol = ticker_symbol
+                     and floor(polygon_stocks_historical_prices.t / 86400000) * 86400000 between extract(epoch from now()::date - interval '8 days') * 1000 and extract(epoch from now()::date - interval '5 days') * 1000
          left join raw_data.polygon_options_historical_prices
               on polygon_options_historical_prices.contract_name = ticker_symbol
                      and floor(polygon_options_historical_prices.t / 86400000) * 86400000 between extract(epoch from now()::date - interval '8 days') * 1000 and extract(epoch from now()::date - interval '5 days') * 1000
 where email in ('portfolio-test-5@gainy.app', 'portfolio-test-18@gainy.app')
   and profile_portfolio_accounts.type = 'secondary'
-order by profile_id, ticker_symbol, coalesce(eod_historical_prices.date::date, to_timestamp(polygon_options_historical_prices.t / 1000)::date) desc
+order by profile_id, ticker_symbol, coalesce(to_timestamp(polygon_stocks_historical_prices.t / 1000)::date, to_timestamp(polygon_options_historical_prices.t / 1000)::date) desc
 on conflict do nothing;
 
 -- profile 6 with holdings with buy-sell transactions on the primary account
@@ -231,11 +235,11 @@ INSERT INTO app.profile_portfolio_transactions (amount, date, fees, name, price,
 select distinct on (
     profile_id,
     ticker_symbol
-    ) quantity * coalesce(eod_historical_prices.adjusted_close, polygon_options_historical_prices.c),
-      coalesce(eod_historical_prices.date::date, to_timestamp(polygon_options_historical_prices.t / 1000)::date),
+    ) quantity * coalesce(polygon_stocks_historical_prices.c, polygon_options_historical_prices.c),
+      coalesce(to_timestamp(polygon_stocks_historical_prices.t / 1000)::date, to_timestamp(polygon_options_historical_prices.t / 1000)::date),
       1.5,
       'BUY ' || ticker_symbol || ' Inc.',
-      coalesce(eod_historical_prices.adjusted_close, polygon_options_historical_prices.c),
+      coalesce(polygon_stocks_historical_prices.c, polygon_options_historical_prices.c),
       quantity,
       'buy',
       'buy',
@@ -252,14 +256,15 @@ from app.profile_portfolio_accounts
                   from app.portfolio_securities
                   where ticker_symbol in ('AAPL', 'AAPL240621C00225000')
               ) t on true
-         left join raw_data.eod_historical_prices
-              on eod_historical_prices.code = ticker_symbol and eod_historical_prices.date::date between now()::date - interval '8 days' and now()::date - interval '5 days'
+         left join raw_data.polygon_stocks_historical_prices
+              on polygon_stocks_historical_prices.symbol = ticker_symbol
+                     and floor(polygon_stocks_historical_prices.t / 86400000) * 86400000 between extract(epoch from now()::date - interval '8 days') * 1000 and extract(epoch from now()::date - interval '5 days') * 1000
          left join raw_data.polygon_options_historical_prices
               on polygon_options_historical_prices.contract_name = ticker_symbol
                      and floor(polygon_options_historical_prices.t / 86400000) * 86400000 between extract(epoch from now()::date - interval '8 days') * 1000 and extract(epoch from now()::date - interval '5 days') * 1000
 where email in ('portfolio-test-6@gainy.app', 'portfolio-test-19@gainy.app')
   and profile_portfolio_accounts.type = 'primary'
-order by profile_id, ticker_symbol, coalesce(eod_historical_prices.date::date, to_timestamp(polygon_options_historical_prices.t / 1000)::date) desc
+order by profile_id, ticker_symbol, coalesce(to_timestamp(polygon_stocks_historical_prices.t / 1000)::date, to_timestamp(polygon_options_historical_prices.t / 1000)::date) desc
 on conflict do nothing;
 
 INSERT INTO app.profile_portfolio_transactions (amount, date, fees, name, price, quantity,
@@ -268,11 +273,11 @@ INSERT INTO app.profile_portfolio_transactions (amount, date, fees, name, price,
 select distinct on (
     profile_portfolio_accounts.profile_id,
     ticker_symbol
-    ) t.quantity * coalesce(eod_historical_prices.adjusted_close, polygon_options_historical_prices.c),
-      coalesce(eod_historical_prices.date::date, to_timestamp(polygon_options_historical_prices.t / 1000)::date),
+    ) t.quantity * coalesce(polygon_stocks_historical_prices.c, polygon_options_historical_prices.c),
+      coalesce(to_timestamp(polygon_stocks_historical_prices.t / 1000)::date, to_timestamp(polygon_options_historical_prices.t / 1000)::date),
       1.5,
       'SELL ' || ticker_symbol || ' Inc.',
-      coalesce(eod_historical_prices.adjusted_close, polygon_options_historical_prices.c),
+      coalesce(polygon_stocks_historical_prices.c, polygon_options_historical_prices.c),
       t.quantity,
       'sell',
       'sell',
@@ -293,14 +298,15 @@ from app.profile_portfolio_accounts
          join app.profile_portfolio_transactions buy_tx
               on buy_tx.ref_id =
                  'portfolio-test-' || profile_portfolio_accounts.profile_id || '-' || ticker_symbol || '-0'
-         left join raw_data.eod_historical_prices
-                   on eod_historical_prices.code = ticker_symbol and eod_historical_prices.date::date > buy_tx.date
+         left join raw_data.polygon_stocks_historical_prices
+                   on polygon_stocks_historical_prices.symbol = ticker_symbol
+                       and to_timestamp(polygon_stocks_historical_prices.t / 1000)::date > buy_tx.date
          left join raw_data.polygon_options_historical_prices
                    on polygon_options_historical_prices.contract_name = ticker_symbol
                        and to_timestamp(polygon_options_historical_prices.t / 1000)::date > buy_tx.date
 where email in ('portfolio-test-6@gainy.app', 'portfolio-test-19@gainy.app')
   and profile_portfolio_accounts.type = 'primary'
-order by profile_id, ticker_symbol, coalesce(eod_historical_prices.date::date, to_timestamp(polygon_options_historical_prices.t / 1000)::date)
+order by profile_id, ticker_symbol, coalesce(to_timestamp(polygon_stocks_historical_prices.t / 1000)::date, to_timestamp(polygon_options_historical_prices.t / 1000)::date)
 on conflict do nothing;
 
 -- profile 7 with holdings with buy-sell transactions on the primary-secondary account
@@ -311,11 +317,11 @@ INSERT INTO app.profile_portfolio_transactions (amount, date, fees, name, price,
 select distinct on (
     profile_id,
     ticker_symbol
-    ) quantity * coalesce(eod_historical_prices.adjusted_close, polygon_options_historical_prices.c),
-      coalesce(eod_historical_prices.date::date, to_timestamp(polygon_options_historical_prices.t / 1000)::date),
+    ) quantity * coalesce(polygon_stocks_historical_prices.c, polygon_options_historical_prices.c),
+      coalesce(to_timestamp(polygon_stocks_historical_prices.t / 1000)::date, to_timestamp(polygon_options_historical_prices.t / 1000)::date),
       1.5,
       'BUY ' || ticker_symbol || ' Inc.',
-      coalesce(eod_historical_prices.adjusted_close, polygon_options_historical_prices.c),
+      coalesce(polygon_stocks_historical_prices.c, polygon_options_historical_prices.c),
       quantity,
       'buy',
       'buy',
@@ -332,14 +338,15 @@ from app.profile_portfolio_accounts
                   from app.portfolio_securities
                   where ticker_symbol in ('AAPL', 'AAPL240621C00225000')
               ) t on true
-         left join raw_data.eod_historical_prices
-              on eod_historical_prices.code = ticker_symbol and eod_historical_prices.date::date between now()::date - interval '8 days' and now()::date - interval '5 days'
+         left join raw_data.polygon_stocks_historical_prices
+              on polygon_stocks_historical_prices.symbol = ticker_symbol
+                     and floor(polygon_stocks_historical_prices.t / 86400000) * 86400000 between extract(epoch from now()::date - interval '8 days') * 1000 and extract(epoch from now()::date - interval '5 days') * 1000
          left join raw_data.polygon_options_historical_prices
               on polygon_options_historical_prices.contract_name = ticker_symbol
                      and floor(polygon_options_historical_prices.t / 86400000) * 86400000 between extract(epoch from now()::date - interval '8 days') * 1000 and extract(epoch from now()::date - interval '5 days') * 1000
 where email in ('portfolio-test-7@gainy.app', 'portfolio-test-20@gainy.app')
   and profile_portfolio_accounts.type = 'primary'
-order by profile_id, ticker_symbol, coalesce(eod_historical_prices.date::date, to_timestamp(polygon_options_historical_prices.t / 1000)::date) desc
+order by profile_id, ticker_symbol, coalesce(to_timestamp(polygon_stocks_historical_prices.t / 1000)::date, to_timestamp(polygon_options_historical_prices.t / 1000)::date) desc
 on conflict do nothing;
 
 INSERT INTO app.profile_portfolio_transactions (amount, date, fees, name, price, quantity,
@@ -348,11 +355,11 @@ INSERT INTO app.profile_portfolio_transactions (amount, date, fees, name, price,
 select distinct on (
     profile_portfolio_accounts.profile_id,
     ticker_symbol
-    ) t.quantity * coalesce(eod_historical_prices.adjusted_close, polygon_options_historical_prices.c),
-      coalesce(eod_historical_prices.date::date, to_timestamp(polygon_options_historical_prices.t / 1000)::date),
+    ) t.quantity * coalesce(polygon_stocks_historical_prices.c, polygon_options_historical_prices.c),
+      coalesce(to_timestamp(polygon_stocks_historical_prices.t / 1000)::date, to_timestamp(polygon_options_historical_prices.t / 1000)::date),
       1.5,
       'SELL ' || ticker_symbol || ' Inc.',
-      coalesce(eod_historical_prices.adjusted_close, polygon_options_historical_prices.c),
+      coalesce(polygon_stocks_historical_prices.c, polygon_options_historical_prices.c),
       t.quantity,
       'sell',
       'sell',
@@ -373,14 +380,15 @@ from app.profile_portfolio_accounts
          join app.profile_portfolio_transactions buy_tx
               on buy_tx.ref_id =
                  'portfolio-test-' || profile_portfolio_accounts.profile_id || '-' || ticker_symbol || '-0'
-         left join raw_data.eod_historical_prices
-                   on eod_historical_prices.code = ticker_symbol and eod_historical_prices.date::date > buy_tx.date
+         left join raw_data.polygon_stocks_historical_prices
+                   on polygon_stocks_historical_prices.symbol = ticker_symbol
+                       and to_timestamp(polygon_stocks_historical_prices.t / 1000)::date > buy_tx.date
          left join raw_data.polygon_options_historical_prices
                    on polygon_options_historical_prices.contract_name = ticker_symbol
                        and to_timestamp(polygon_options_historical_prices.t / 1000)::date > buy_tx.date
 where email in ('portfolio-test-7@gainy.app', 'portfolio-test-20@gainy.app')
   and profile_portfolio_accounts.type = 'secondary'
-order by profile_id, ticker_symbol, coalesce(eod_historical_prices.date::date, to_timestamp(polygon_options_historical_prices.t / 1000)::date)
+order by profile_id, ticker_symbol, coalesce(to_timestamp(polygon_stocks_historical_prices.t / 1000)::date, to_timestamp(polygon_options_historical_prices.t / 1000)::date)
 on conflict do nothing;
 
 -- profile 8 with holdings with buy-sell transactions on the secondary-primary account
@@ -391,11 +399,11 @@ INSERT INTO app.profile_portfolio_transactions (amount, date, fees, name, price,
 select distinct on (
     profile_id,
     ticker_symbol
-    ) quantity * coalesce(eod_historical_prices.adjusted_close, polygon_options_historical_prices.c),
-      coalesce(eod_historical_prices.date::date, to_timestamp(polygon_options_historical_prices.t / 1000)::date),
+    ) quantity * coalesce(polygon_stocks_historical_prices.c, polygon_options_historical_prices.c),
+      coalesce(to_timestamp(polygon_stocks_historical_prices.t / 1000)::date, to_timestamp(polygon_options_historical_prices.t / 1000)::date),
       1.5,
       'BUY ' || ticker_symbol || ' Inc.',
-      coalesce(eod_historical_prices.adjusted_close, polygon_options_historical_prices.c),
+      coalesce(polygon_stocks_historical_prices.c, polygon_options_historical_prices.c),
       quantity,
       'buy',
       'buy',
@@ -412,14 +420,15 @@ from app.profile_portfolio_accounts
                   from app.portfolio_securities
                   where ticker_symbol in ('AAPL', 'AAPL240621C00225000')
               ) t on true
-         left join raw_data.eod_historical_prices
-              on eod_historical_prices.code = ticker_symbol and eod_historical_prices.date::date between now()::date - interval '8 days' and now()::date - interval '5 days'
+         left join raw_data.polygon_stocks_historical_prices
+              on polygon_stocks_historical_prices.symbol = ticker_symbol
+                     and floor(polygon_stocks_historical_prices.t / 86400000) * 86400000 between extract(epoch from now()::date - interval '8 days') * 1000 and extract(epoch from now()::date - interval '5 days') * 1000
          left join raw_data.polygon_options_historical_prices
               on polygon_options_historical_prices.contract_name = ticker_symbol
                      and floor(polygon_options_historical_prices.t / 86400000) * 86400000 between extract(epoch from now()::date - interval '8 days') * 1000 and extract(epoch from now()::date - interval '5 days') * 1000
 where email in ('portfolio-test-8@gainy.app', 'portfolio-test-21@gainy.app')
   and profile_portfolio_accounts.type = 'secondary'
-order by profile_id, ticker_symbol, coalesce(eod_historical_prices.date::date, to_timestamp(polygon_options_historical_prices.t / 1000)::date) desc
+order by profile_id, ticker_symbol, coalesce(to_timestamp(polygon_stocks_historical_prices.t / 1000)::date, to_timestamp(polygon_options_historical_prices.t / 1000)::date) desc
 on conflict do nothing;
 
 INSERT INTO app.profile_portfolio_transactions (amount, date, fees, name, price, quantity,
@@ -428,11 +437,11 @@ INSERT INTO app.profile_portfolio_transactions (amount, date, fees, name, price,
 select distinct on (
     profile_portfolio_accounts.profile_id,
     ticker_symbol
-    ) t.quantity * coalesce(eod_historical_prices.adjusted_close, polygon_options_historical_prices.c),
-      coalesce(eod_historical_prices.date::date, to_timestamp(polygon_options_historical_prices.t / 1000)::date),
+    ) t.quantity * coalesce(polygon_stocks_historical_prices.c, polygon_options_historical_prices.c),
+      coalesce(to_timestamp(polygon_stocks_historical_prices.t / 1000)::date, to_timestamp(polygon_options_historical_prices.t / 1000)::date),
       1.5,
       'SELL ' || ticker_symbol || ' Inc.',
-      coalesce(eod_historical_prices.adjusted_close, polygon_options_historical_prices.c),
+      coalesce(polygon_stocks_historical_prices.c, polygon_options_historical_prices.c),
       t.quantity,
       'sell',
       'sell',
@@ -453,14 +462,15 @@ from app.profile_portfolio_accounts
          join app.profile_portfolio_transactions buy_tx
               on buy_tx.ref_id =
                  'portfolio-test-' || profile_portfolio_accounts.profile_id || '-' || ticker_symbol || '-0'
-         left join raw_data.eod_historical_prices
-                   on eod_historical_prices.code = ticker_symbol and eod_historical_prices.date::date > buy_tx.date
+         left join raw_data.polygon_stocks_historical_prices
+                   on polygon_stocks_historical_prices.symbol = ticker_symbol
+                       and to_timestamp(polygon_stocks_historical_prices.t / 1000)::date > buy_tx.date
          left join raw_data.polygon_options_historical_prices
                    on polygon_options_historical_prices.contract_name = ticker_symbol
                        and to_timestamp(polygon_options_historical_prices.t / 1000)::date > buy_tx.date
 where email in ('portfolio-test-8@gainy.app', 'portfolio-test-21@gainy.app')
   and profile_portfolio_accounts.type = 'primary'
-order by profile_id, ticker_symbol, coalesce(eod_historical_prices.date::date, to_timestamp(polygon_options_historical_prices.t / 1000)::date)
+order by profile_id, ticker_symbol, coalesce(to_timestamp(polygon_stocks_historical_prices.t / 1000)::date, to_timestamp(polygon_options_historical_prices.t / 1000)::date)
 on conflict do nothing;
 
 -- profile 9 with holdings with buy-sell transactions on the secondary account
@@ -471,11 +481,11 @@ INSERT INTO app.profile_portfolio_transactions (amount, date, fees, name, price,
 select distinct on (
     profile_id,
     ticker_symbol
-    ) quantity * coalesce(eod_historical_prices.adjusted_close, polygon_options_historical_prices.c),
-      coalesce(eod_historical_prices.date::date, to_timestamp(polygon_options_historical_prices.t / 1000)::date),
+    ) quantity * coalesce(polygon_stocks_historical_prices.c, polygon_options_historical_prices.c),
+      coalesce(to_timestamp(polygon_stocks_historical_prices.t / 1000)::date, to_timestamp(polygon_options_historical_prices.t / 1000)::date),
       1.5,
       'BUY ' || ticker_symbol || ' Inc.',
-      coalesce(eod_historical_prices.adjusted_close, polygon_options_historical_prices.c),
+      coalesce(polygon_stocks_historical_prices.c, polygon_options_historical_prices.c),
       quantity,
       'buy',
       'buy',
@@ -492,8 +502,9 @@ from app.profile_portfolio_accounts
                   from app.portfolio_securities
                   where ticker_symbol in ('AAPL', 'AAPL240621C00225000')
               ) t on true
-         left join raw_data.eod_historical_prices
-              on eod_historical_prices.code = ticker_symbol and eod_historical_prices.date::date between now()::date - interval '8 days' and now()::date - interval '5 days'
+         left join raw_data.polygon_stocks_historical_prices
+              on polygon_stocks_historical_prices.symbol = ticker_symbol
+                     and floor(polygon_stocks_historical_prices.t / 86400000) * 86400000 between extract(epoch from now()::date - interval '8 days') * 1000 and extract(epoch from now()::date - interval '5 days') * 1000
          left join raw_data.polygon_options_historical_prices
               on polygon_options_historical_prices.contract_name = ticker_symbol
                      and floor(polygon_options_historical_prices.t / 86400000) * 86400000 between extract(epoch from now()::date - interval '8 days') * 1000 and extract(epoch from now()::date - interval '5 days') * 1000
@@ -506,7 +517,7 @@ from app.profile_portfolio_accounts
               on true
 where email in ('portfolio-test-9@gainy.app', 'portfolio-test-22@gainy.app')
   and profile_portfolio_accounts.type = 'secondary'
-order by profile_id, ticker_symbol, coalesce(eod_historical_prices.date::date, to_timestamp(polygon_options_historical_prices.t / 1000)::date) desc
+order by profile_id, ticker_symbol, coalesce(to_timestamp(polygon_stocks_historical_prices.t / 1000)::date, to_timestamp(polygon_options_historical_prices.t / 1000)::date) desc
 on conflict do nothing;
 
 INSERT INTO app.profile_portfolio_transactions (amount, date, fees, name, price, quantity,
@@ -515,11 +526,11 @@ INSERT INTO app.profile_portfolio_transactions (amount, date, fees, name, price,
 select distinct on (
     profile_portfolio_accounts.profile_id,
     ticker_symbol
-    ) t.quantity * coalesce(eod_historical_prices.adjusted_close, polygon_options_historical_prices.c),
-      coalesce(eod_historical_prices.date::date, to_timestamp(polygon_options_historical_prices.t / 1000)::date),
+    ) t.quantity * coalesce(polygon_stocks_historical_prices.c, polygon_options_historical_prices.c),
+      coalesce(to_timestamp(polygon_stocks_historical_prices.t / 1000)::date, to_timestamp(polygon_options_historical_prices.t / 1000)::date),
       1.5,
       'SELL ' || ticker_symbol || ' Inc.',
-      coalesce(eod_historical_prices.adjusted_close, polygon_options_historical_prices.c),
+      coalesce(polygon_stocks_historical_prices.c, polygon_options_historical_prices.c),
       t.quantity,
       'sell',
       'sell',
@@ -540,14 +551,15 @@ from app.profile_portfolio_accounts
          join app.profile_portfolio_transactions buy_tx
               on buy_tx.ref_id =
                  'portfolio-test-' || profile_portfolio_accounts.profile_id || '-' || ticker_symbol || '-0'
-         left join raw_data.eod_historical_prices
-                   on eod_historical_prices.code = ticker_symbol and eod_historical_prices.date::date > buy_tx.date
+         left join raw_data.polygon_stocks_historical_prices
+                   on polygon_stocks_historical_prices.symbol = ticker_symbol
+                       and to_timestamp(polygon_stocks_historical_prices.t / 1000)::date > buy_tx.date
          left join raw_data.polygon_options_historical_prices
                    on polygon_options_historical_prices.contract_name = ticker_symbol
                        and to_timestamp(polygon_options_historical_prices.t / 1000)::date > buy_tx.date
 where email in ('portfolio-test-9@gainy.app', 'portfolio-test-22@gainy.app')
   and profile_portfolio_accounts.type = 'secondary'
-order by profile_id, ticker_symbol, coalesce(eod_historical_prices.date::date, to_timestamp(polygon_options_historical_prices.t / 1000)::date)
+order by profile_id, ticker_symbol, coalesce(to_timestamp(polygon_stocks_historical_prices.t / 1000)::date, to_timestamp(polygon_options_historical_prices.t / 1000)::date)
 on conflict do nothing;
 
 -- profile 10 with holdings with sell-buy transactions on the primary account
@@ -558,11 +570,11 @@ INSERT INTO app.profile_portfolio_transactions (amount, date, fees, name, price,
 select distinct on (
     profile_id,
     ticker_symbol
-    ) quantity * coalesce(eod_historical_prices.adjusted_close, polygon_options_historical_prices.c),
-      coalesce(eod_historical_prices.date::date, to_timestamp(polygon_options_historical_prices.t / 1000)::date),
+    ) quantity * coalesce(polygon_stocks_historical_prices.c, polygon_options_historical_prices.c),
+      coalesce(to_timestamp(polygon_stocks_historical_prices.t / 1000)::date, to_timestamp(polygon_options_historical_prices.t / 1000)::date),
       1.5,
       'SELL ' || ticker_symbol || ' Inc.',
-      coalesce(eod_historical_prices.adjusted_close, polygon_options_historical_prices.c),
+      coalesce(polygon_stocks_historical_prices.c, polygon_options_historical_prices.c),
       quantity,
       'sell',
       'sell',
@@ -579,14 +591,15 @@ from app.profile_portfolio_accounts
                   from app.portfolio_securities
                   where ticker_symbol in ('AAPL', 'AAPL240621C00225000')
               ) t on true
-         left join raw_data.eod_historical_prices
-              on eod_historical_prices.code = ticker_symbol and eod_historical_prices.date::date between now()::date - interval '8 days' and now()::date - interval '5 days'
+         left join raw_data.polygon_stocks_historical_prices
+              on polygon_stocks_historical_prices.symbol = ticker_symbol
+                     and floor(polygon_stocks_historical_prices.t / 86400000) * 86400000 between extract(epoch from now()::date - interval '8 days') * 1000 and extract(epoch from now()::date - interval '5 days') * 1000
          left join raw_data.polygon_options_historical_prices
               on polygon_options_historical_prices.contract_name = ticker_symbol
                      and floor(polygon_options_historical_prices.t / 86400000) * 86400000 between extract(epoch from now()::date - interval '8 days') * 1000 and extract(epoch from now()::date - interval '5 days') * 1000
 where email in ('portfolio-test-10@gainy.app', 'portfolio-test-23@gainy.app')
   and profile_portfolio_accounts.type = 'primary'
-order by profile_id, ticker_symbol, coalesce(eod_historical_prices.date::date, to_timestamp(polygon_options_historical_prices.t / 1000)::date) desc
+order by profile_id, ticker_symbol, coalesce(to_timestamp(polygon_stocks_historical_prices.t / 1000)::date, to_timestamp(polygon_options_historical_prices.t / 1000)::date) desc
 on conflict do nothing;
 
 INSERT INTO app.profile_portfolio_transactions (amount, date, fees, name, price, quantity,
@@ -595,11 +608,11 @@ INSERT INTO app.profile_portfolio_transactions (amount, date, fees, name, price,
 select distinct on (
     profile_portfolio_accounts.profile_id,
     ticker_symbol
-    ) t.quantity * coalesce(eod_historical_prices.adjusted_close, polygon_options_historical_prices.c),
-      coalesce(eod_historical_prices.date::date, to_timestamp(polygon_options_historical_prices.t / 1000)::date),
+    ) t.quantity * coalesce(polygon_stocks_historical_prices.c, polygon_options_historical_prices.c),
+      coalesce(to_timestamp(polygon_stocks_historical_prices.t / 1000)::date, to_timestamp(polygon_options_historical_prices.t / 1000)::date),
       1.5,
       'BUY ' || ticker_symbol || ' Inc.',
-      coalesce(eod_historical_prices.adjusted_close, polygon_options_historical_prices.c),
+      coalesce(polygon_stocks_historical_prices.c, polygon_options_historical_prices.c),
       t.quantity,
       'buy',
       'buy',
@@ -620,14 +633,15 @@ from app.profile_portfolio_accounts
          join app.profile_portfolio_transactions sell_tx
               on sell_tx.ref_id =
                  'portfolio-test-' || profile_portfolio_accounts.profile_id || '-' || ticker_symbol || '-0'
-         left join raw_data.eod_historical_prices
-                   on eod_historical_prices.code = ticker_symbol and eod_historical_prices.date::date > sell_tx.date
+         left join raw_data.polygon_stocks_historical_prices
+                   on polygon_stocks_historical_prices.symbol = ticker_symbol
+                       and to_timestamp(polygon_stocks_historical_prices.t / 1000)::date > sell_tx.date
          left join raw_data.polygon_options_historical_prices
                    on polygon_options_historical_prices.contract_name = ticker_symbol
                        and to_timestamp(polygon_options_historical_prices.t / 1000)::date > sell_tx.date
 where email in ('portfolio-test-10@gainy.app', 'portfolio-test-23@gainy.app')
   and profile_portfolio_accounts.type = 'primary'
-order by profile_id, ticker_symbol, coalesce(eod_historical_prices.date::date, to_timestamp(polygon_options_historical_prices.t / 1000)::date)
+order by profile_id, ticker_symbol, coalesce(to_timestamp(polygon_stocks_historical_prices.t / 1000)::date, to_timestamp(polygon_options_historical_prices.t / 1000)::date)
 on conflict do nothing;
 
 -- profile 11 with holdings with sell-buy transactions on the primary-secondary account
@@ -638,11 +652,11 @@ INSERT INTO app.profile_portfolio_transactions (amount, date, fees, name, price,
 select distinct on (
     profile_id,
     ticker_symbol
-    ) quantity * coalesce(eod_historical_prices.adjusted_close, polygon_options_historical_prices.c),
-      coalesce(eod_historical_prices.date::date, to_timestamp(polygon_options_historical_prices.t / 1000)::date),
+    ) quantity * coalesce(polygon_stocks_historical_prices.c, polygon_options_historical_prices.c),
+      coalesce(to_timestamp(polygon_stocks_historical_prices.t / 1000)::date, to_timestamp(polygon_options_historical_prices.t / 1000)::date),
       1.5,
       'SELL ' || ticker_symbol || ' Inc.',
-      coalesce(eod_historical_prices.adjusted_close, polygon_options_historical_prices.c),
+      coalesce(polygon_stocks_historical_prices.c, polygon_options_historical_prices.c),
       quantity,
       'sell',
       'sell',
@@ -659,14 +673,15 @@ from app.profile_portfolio_accounts
                   from app.portfolio_securities
                   where ticker_symbol in ('AAPL', 'AAPL240621C00225000')
               ) t on true
-         left join raw_data.eod_historical_prices
-              on eod_historical_prices.code = ticker_symbol and eod_historical_prices.date::date between now()::date - interval '8 days' and now()::date - interval '5 days'
+         left join raw_data.polygon_stocks_historical_prices
+              on polygon_stocks_historical_prices.symbol = ticker_symbol
+                     and floor(polygon_stocks_historical_prices.t / 86400000) * 86400000 between extract(epoch from now()::date - interval '8 days') * 1000 and extract(epoch from now()::date - interval '5 days') * 1000
          left join raw_data.polygon_options_historical_prices
               on polygon_options_historical_prices.contract_name = ticker_symbol
                      and floor(polygon_options_historical_prices.t / 86400000) * 86400000 between extract(epoch from now()::date - interval '8 days') * 1000 and extract(epoch from now()::date - interval '5 days') * 1000
 where email in ('portfolio-test-11@gainy.app', 'portfolio-test-24@gainy.app')
   and profile_portfolio_accounts.type = 'primary'
-order by profile_id, ticker_symbol, coalesce(eod_historical_prices.date::date, to_timestamp(polygon_options_historical_prices.t / 1000)::date) desc
+order by profile_id, ticker_symbol, coalesce(to_timestamp(polygon_stocks_historical_prices.t / 1000)::date, to_timestamp(polygon_options_historical_prices.t / 1000)::date) desc
 on conflict do nothing;
 
 INSERT INTO app.profile_portfolio_transactions (amount, date, fees, name, price, quantity,
@@ -675,11 +690,11 @@ INSERT INTO app.profile_portfolio_transactions (amount, date, fees, name, price,
 select distinct on (
     profile_portfolio_accounts.profile_id,
     ticker_symbol
-    ) t.quantity * coalesce(eod_historical_prices.adjusted_close, polygon_options_historical_prices.c),
-      coalesce(eod_historical_prices.date::date, to_timestamp(polygon_options_historical_prices.t / 1000)::date),
+    ) t.quantity * coalesce(polygon_stocks_historical_prices.c, polygon_options_historical_prices.c),
+      coalesce(to_timestamp(polygon_stocks_historical_prices.t / 1000)::date, to_timestamp(polygon_options_historical_prices.t / 1000)::date),
       1.5,
       'BUY ' || ticker_symbol || ' Inc.',
-      coalesce(eod_historical_prices.adjusted_close, polygon_options_historical_prices.c),
+      coalesce(polygon_stocks_historical_prices.c, polygon_options_historical_prices.c),
       t.quantity,
       'buy',
       'buy',
@@ -700,14 +715,15 @@ from app.profile_portfolio_accounts
          join app.profile_portfolio_transactions sell_tx
               on sell_tx.ref_id =
                  'portfolio-test-' || profile_portfolio_accounts.profile_id || '-' || ticker_symbol || '-0'
-         left join raw_data.eod_historical_prices
-                   on eod_historical_prices.code = ticker_symbol and eod_historical_prices.date::date > sell_tx.date
+         left join raw_data.polygon_stocks_historical_prices
+                   on polygon_stocks_historical_prices.symbol = ticker_symbol
+                       and to_timestamp(polygon_stocks_historical_prices.t / 1000)::date > sell_tx.date
          left join raw_data.polygon_options_historical_prices
                    on polygon_options_historical_prices.contract_name = ticker_symbol
                        and to_timestamp(polygon_options_historical_prices.t / 1000)::date > sell_tx.date
 where email in ('portfolio-test-11@gainy.app', 'portfolio-test-24@gainy.app')
   and profile_portfolio_accounts.type = 'secondary'
-order by profile_id, ticker_symbol, coalesce(eod_historical_prices.date::date, to_timestamp(polygon_options_historical_prices.t / 1000)::date)
+order by profile_id, ticker_symbol, coalesce(to_timestamp(polygon_stocks_historical_prices.t / 1000)::date, to_timestamp(polygon_options_historical_prices.t / 1000)::date)
 on conflict do nothing;
 
 -- profile 12 with holdings with sell-buy transactions on the secondary-primary account
@@ -718,11 +734,11 @@ INSERT INTO app.profile_portfolio_transactions (amount, date, fees, name, price,
 select distinct on (
     profile_id,
     ticker_symbol
-    ) quantity * coalesce(eod_historical_prices.adjusted_close, polygon_options_historical_prices.c),
-      coalesce(eod_historical_prices.date::date, to_timestamp(polygon_options_historical_prices.t / 1000)::date),
+    ) quantity * coalesce(polygon_stocks_historical_prices.c, polygon_options_historical_prices.c),
+      coalesce(to_timestamp(polygon_stocks_historical_prices.t / 1000)::date, to_timestamp(polygon_options_historical_prices.t / 1000)::date),
       1.5,
       'SELL ' || ticker_symbol || ' Inc.',
-      coalesce(eod_historical_prices.adjusted_close, polygon_options_historical_prices.c),
+      coalesce(polygon_stocks_historical_prices.c, polygon_options_historical_prices.c),
       quantity,
       'sell',
       'sell',
@@ -739,14 +755,15 @@ from app.profile_portfolio_accounts
                   from app.portfolio_securities
                   where ticker_symbol in ('AAPL', 'AAPL240621C00225000')
               ) t on true
-         left join raw_data.eod_historical_prices
-              on eod_historical_prices.code = ticker_symbol and eod_historical_prices.date::date between now()::date - interval '8 days' and now()::date - interval '5 days'
+         left join raw_data.polygon_stocks_historical_prices
+              on polygon_stocks_historical_prices.symbol = ticker_symbol
+                     and floor(polygon_stocks_historical_prices.t / 86400000) * 86400000 between extract(epoch from now()::date - interval '8 days') * 1000 and extract(epoch from now()::date - interval '5 days') * 1000
          left join raw_data.polygon_options_historical_prices
               on polygon_options_historical_prices.contract_name = ticker_symbol
                      and floor(polygon_options_historical_prices.t / 86400000) * 86400000 between extract(epoch from now()::date - interval '8 days') * 1000 and extract(epoch from now()::date - interval '5 days') * 1000
 where email in ('portfolio-test-12@gainy.app', 'portfolio-test-25@gainy.app')
   and profile_portfolio_accounts.type = 'secondary'
-order by profile_id, ticker_symbol, coalesce(eod_historical_prices.date::date, to_timestamp(polygon_options_historical_prices.t / 1000)::date) desc
+order by profile_id, ticker_symbol, coalesce(to_timestamp(polygon_stocks_historical_prices.t / 1000)::date, to_timestamp(polygon_options_historical_prices.t / 1000)::date) desc
 on conflict do nothing;
 
 INSERT INTO app.profile_portfolio_transactions (amount, date, fees, name, price, quantity,
@@ -755,11 +772,11 @@ INSERT INTO app.profile_portfolio_transactions (amount, date, fees, name, price,
 select distinct on (
     profile_portfolio_accounts.profile_id,
     ticker_symbol
-    ) t.quantity * coalesce(eod_historical_prices.adjusted_close, polygon_options_historical_prices.c),
-      coalesce(eod_historical_prices.date::date, to_timestamp(polygon_options_historical_prices.t / 1000)::date),
+    ) t.quantity * coalesce(polygon_stocks_historical_prices.c, polygon_options_historical_prices.c),
+      coalesce(to_timestamp(polygon_stocks_historical_prices.t / 1000)::date, to_timestamp(polygon_options_historical_prices.t / 1000)::date),
       1.5,
       'BUY ' || ticker_symbol || ' Inc.',
-      coalesce(eod_historical_prices.adjusted_close, polygon_options_historical_prices.c),
+      coalesce(polygon_stocks_historical_prices.c, polygon_options_historical_prices.c),
       t.quantity,
       'buy',
       'buy',
@@ -780,14 +797,15 @@ from app.profile_portfolio_accounts
          join app.profile_portfolio_transactions sell_tx
               on sell_tx.ref_id =
                  'portfolio-test-' || profile_portfolio_accounts.profile_id || '-' || ticker_symbol || '-0'
-         left join raw_data.eod_historical_prices
-                   on eod_historical_prices.code = ticker_symbol and eod_historical_prices.date::date > sell_tx.date
+         left join raw_data.polygon_stocks_historical_prices
+                   on polygon_stocks_historical_prices.symbol = ticker_symbol
+                       and to_timestamp(polygon_stocks_historical_prices.t / 1000)::date > sell_tx.date
          left join raw_data.polygon_options_historical_prices
                    on polygon_options_historical_prices.contract_name = ticker_symbol
                        and to_timestamp(polygon_options_historical_prices.t / 1000)::date > sell_tx.date
 where email in ('portfolio-test-12@gainy.app', 'portfolio-test-25@gainy.app')
   and profile_portfolio_accounts.type = 'primary'
-order by profile_id, ticker_symbol, coalesce(eod_historical_prices.date::date, to_timestamp(polygon_options_historical_prices.t / 1000)::date)
+order by profile_id, ticker_symbol, coalesce(to_timestamp(polygon_stocks_historical_prices.t / 1000)::date, to_timestamp(polygon_options_historical_prices.t / 1000)::date)
 on conflict do nothing;
 
 -- profile 13 with holdings with sell-buy transactions on the secondary account
@@ -798,11 +816,11 @@ INSERT INTO app.profile_portfolio_transactions (amount, date, fees, name, price,
 select distinct on (
     profile_id,
     ticker_symbol
-    ) quantity * coalesce(eod_historical_prices.adjusted_close, polygon_options_historical_prices.c),
-      coalesce(eod_historical_prices.date::date, to_timestamp(polygon_options_historical_prices.t / 1000)::date),
+    ) quantity * coalesce(polygon_stocks_historical_prices.c, polygon_options_historical_prices.c),
+      coalesce(to_timestamp(polygon_stocks_historical_prices.t / 1000)::date, to_timestamp(polygon_options_historical_prices.t / 1000)::date),
       1.5,
       'SELL ' || ticker_symbol || ' Inc.',
-      coalesce(eod_historical_prices.adjusted_close, polygon_options_historical_prices.c),
+      coalesce(polygon_stocks_historical_prices.c, polygon_options_historical_prices.c),
       quantity,
       'sell',
       'sell',
@@ -819,14 +837,15 @@ from app.profile_portfolio_accounts
                   from app.portfolio_securities
                   where ticker_symbol in ('AAPL', 'AAPL240621C00225000')
               ) t on true
-         left join raw_data.eod_historical_prices
-              on eod_historical_prices.code = ticker_symbol and eod_historical_prices.date::date between now()::date - interval '8 days' and now()::date - interval '5 days'
+         left join raw_data.polygon_stocks_historical_prices
+              on polygon_stocks_historical_prices.symbol = ticker_symbol
+                     and floor(polygon_stocks_historical_prices.t / 86400000) * 86400000 between extract(epoch from now()::date - interval '8 days') * 1000 and extract(epoch from now()::date - interval '5 days') * 1000
          left join raw_data.polygon_options_historical_prices
               on polygon_options_historical_prices.contract_name = ticker_symbol
                      and floor(polygon_options_historical_prices.t / 86400000) * 86400000 between extract(epoch from now()::date - interval '8 days') * 1000 and extract(epoch from now()::date - interval '5 days') * 1000
 where email in ('portfolio-test-13@gainy.app', 'portfolio-test-26@gainy.app')
   and profile_portfolio_accounts.type = 'secondary'
-order by profile_id, ticker_symbol, coalesce(eod_historical_prices.date::date, to_timestamp(polygon_options_historical_prices.t / 1000)::date) desc
+order by profile_id, ticker_symbol, coalesce(to_timestamp(polygon_stocks_historical_prices.t / 1000)::date, to_timestamp(polygon_options_historical_prices.t / 1000)::date) desc
 on conflict do nothing;
 
 INSERT INTO app.profile_portfolio_transactions (amount, date, fees, name, price, quantity,
@@ -835,11 +854,11 @@ INSERT INTO app.profile_portfolio_transactions (amount, date, fees, name, price,
 select distinct on (
     profile_portfolio_accounts.profile_id,
     ticker_symbol
-    ) t.quantity * coalesce(eod_historical_prices.adjusted_close, polygon_options_historical_prices.c),
-      coalesce(eod_historical_prices.date::date, to_timestamp(polygon_options_historical_prices.t / 1000)::date),
+    ) t.quantity * coalesce(polygon_stocks_historical_prices.c, polygon_options_historical_prices.c),
+      coalesce(to_timestamp(polygon_stocks_historical_prices.t / 1000)::date, to_timestamp(polygon_options_historical_prices.t / 1000)::date),
       1.5,
       'BUY ' || ticker_symbol || ' Inc.',
-      coalesce(eod_historical_prices.adjusted_close, polygon_options_historical_prices.c),
+      coalesce(polygon_stocks_historical_prices.c, polygon_options_historical_prices.c),
       t.quantity,
       'buy',
       'buy',
@@ -860,12 +879,13 @@ from app.profile_portfolio_accounts
          join app.profile_portfolio_transactions sell_tx
               on sell_tx.ref_id =
                  'portfolio-test-' || profile_portfolio_accounts.profile_id || '-' || ticker_symbol || '-0'
-         left join raw_data.eod_historical_prices
-                   on eod_historical_prices.code = ticker_symbol and eod_historical_prices.date::date > sell_tx.date
+         left join raw_data.polygon_stocks_historical_prices
+                   on polygon_stocks_historical_prices.symbol = ticker_symbol
+                       and to_timestamp(polygon_stocks_historical_prices.t / 1000)::date > sell_tx.date
          left join raw_data.polygon_options_historical_prices
                    on polygon_options_historical_prices.contract_name = ticker_symbol
                        and to_timestamp(polygon_options_historical_prices.t / 1000)::date > sell_tx.date
 where email in ('portfolio-test-13@gainy.app', 'portfolio-test-26@gainy.app')
   and profile_portfolio_accounts.type = 'secondary'
-order by profile_id, ticker_symbol, coalesce(eod_historical_prices.date::date, to_timestamp(polygon_options_historical_prices.t / 1000)::date)
+order by profile_id, ticker_symbol, coalesce(to_timestamp(polygon_stocks_historical_prices.t / 1000)::date, to_timestamp(polygon_options_historical_prices.t / 1000)::date)
 on conflict do nothing;

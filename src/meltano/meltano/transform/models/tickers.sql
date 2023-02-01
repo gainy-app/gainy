@@ -16,6 +16,13 @@ with latest_price as
              from {{ source('eod', 'eod_historical_prices') }}
              where date::date >= now() - interval '7 days'
              group by code
+
+             union distinct
+
+             select symbol
+             from {{ source('polygon', 'polygon_stocks_historical_prices') }}
+             where t >= extract(epoch from now() - interval '7 days') * 1000
+             group by symbol
          ),
      latest_crypto_price as
          (
