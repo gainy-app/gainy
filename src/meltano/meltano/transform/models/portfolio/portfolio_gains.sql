@@ -29,7 +29,7 @@ with expanded_holdings as
 select profile_id,
        greatest(
            expanded_holdings.updated_at,
-           expanded_holdings.trading_profile_status
+           trading_profile_status.updated_at
            )::timestamp                                                               as updated_at,
        (actual_value + buying_power + pending_orders_sum)::double precision           as actual_value,
        (absolute_gain_1d / (actual_value - absolute_gain_1d))::double precision       as relative_gain_1d,
