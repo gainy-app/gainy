@@ -31,7 +31,7 @@ from (
              profile_holdings_normalized_dynamic.profile_id,
              profile_holdings_normalized_dynamic.collection_id
      ) t
-         join {{ ref('portfolio_holding_group_gains') }} using (profile_id, collection_id)
+         left join {{ ref('portfolio_holding_group_gains') }} using (profile_id, collection_id)
          join {{ ref('collections') }} on collections.id = t.collection_id
 
 union all
@@ -51,13 +51,14 @@ select profile_holdings_normalized_dynamic.holding_group_id,
        min(portfolio_holding_group_gains.ltt_quantity_total)       as ltt_quantity_total,
        now()                                                       as updated_at
 from {{ ref('profile_holdings_normalized_dynamic') }}
-         join {{ ref('profile_holdings_normalized_all') }} using (holding_id_v2)
-         join {{ ref('portfolio_holding_group_gains') }}
+         left join {{ ref('profile_holdings_normalized_all') }} using (holding_id_v2)
+         left join {{ ref('portfolio_holding_group_gains') }}
               on portfolio_holding_group_gains.profile_id = profile_holdings_normalized_dynamic.profile_id
                   and portfolio_holding_group_gains.ticker_symbol = profile_holdings_normalized_dynamic.ticker_symbol
-        left join {{ ref('base_tickers') }}
+         left join {{ ref('base_tickers') }}
               on base_tickers.symbol = profile_holdings_normalized_dynamic.ticker_symbol
-        left join {{ ref('ticker_metrics') }}
+         left join {{ ref('ticker_metrics') }}
               on ticker_metrics.symbol = profile_holdings_normalized_dynamic.ticker_symbol
-where not profile_holdings_normalized_dynamic.is_hidden
+where profile_holdings_normalized_dynamic.collection_id is null
+  and not profile_holdings_normalized_dynamic.is_hidden
 group by profile_holdings_normalized_dynamic.holding_group_id, profile_holdings_normalized_dynamic.profile_id, profile_holdings_normalized_dynamic.ticker_symbol
