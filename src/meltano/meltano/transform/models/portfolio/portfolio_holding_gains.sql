@@ -72,8 +72,8 @@ with long_term_tax_holdings as
                                    select holding_id_v2,
                                           rank() over (partition by profile_id, period order by date desc) = 1 as is_latest_day,
                                           adjusted_close * relative_gain / (1 + relative_gain)                 as absolute_gain_1d
-                                   from portfolio_holding_chart
-                                            join portfolio_chart_skeleton using (profile_id, period, datetime)
+                                   from {{ ref('portfolio_holding_chart') }}
+                                            join {{ ref('portfolio_chart_skeleton') }} using (profile_id, period, datetime)
                                    where period = '1d'
                                ) t
                           where is_latest_day
