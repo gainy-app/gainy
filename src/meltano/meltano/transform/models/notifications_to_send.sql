@@ -237,7 +237,12 @@ with data as
                    is_push,
                    is_shown_in_app,
                    template_id
-            from {{ ref('trading_notifications') }}
+            from (
+                     select *,
+                            row_number() over (partition by profile_id, template_id) as rn
+                     from {{ ref('trading_notifications') }}
+                 ) t
+            where rn < {{ var('max_notifications_per_template') }}
         ),
     profiles as
         (

@@ -126,16 +126,20 @@ query GetPortfolioChart(
 
 ### Pie Chart
 
-entity_type = ticker | category | interest | security_type
+entity_type = ticker | category | interest | security_type | asset
 
 ```graphql
 query GetPortfolioPieChart(
     $profileId: Int!,
     $broker_ids: [String]
+    $interest_ids: [Int]
+    $category_ids: [Int]
 ) {
     get_portfolio_piechart(
         profile_id: $profileId,
         broker_ids: $broker_ids
+        interest_ids: $interestIds,
+        category_ids: $categoryIds
     ) {
         weight
         entity_type
