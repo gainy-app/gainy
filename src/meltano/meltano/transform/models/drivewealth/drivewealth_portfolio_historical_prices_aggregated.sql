@@ -109,19 +109,22 @@ with chart_1w as
 
              union all
 
-             select profile_id,
-                    holding_id_v2,
-                    symbol,
+             select data.profile_id,
+                    data.holding_id_v2,
+                    data.symbol,
                     '1d'  as period,
-                    date  as datetime,
-                    value as open,
-                    value as high,
-                    value as low,
-                    value as close,
-                    value as adjusted_close,
-                    relative_daily_gain as relative_gain,
-                    updated_at
-             from {{ ref('drivewealth_portfolio_historical_holdings') }}
+                    data.date  as datetime,
+                    data.value as open,
+                    data.value as high,
+                    data.value as low,
+                    data.value as close,
+                    data.value as adjusted_close,
+                    data.relative_daily_gain as relative_gain,
+                    data.updated_at
+             from {{ ref('drivewealth_portfolio_historical_holdings') }} data
+                      join {{ ref('historical_prices_aggregated_1d') }}
+                           on historical_prices_aggregated_1d.symbol = data.symbol
+                               and historical_prices_aggregated_1d.datetime = data.date
 
              union all
 
