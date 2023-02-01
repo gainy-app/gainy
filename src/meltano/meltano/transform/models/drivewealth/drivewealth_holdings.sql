@@ -73,18 +73,3 @@ from fund_holdings_distinct
          left join {{ ref('profile_collections') }}
                    on profile_collections.id = fund_holdings_distinct.collection_id
                        and (profile_collections.profile_id = fund_holdings_distinct.profile_id or profile_collections.profile_id is null)
-
-union all
-
-select profile_id,
-       buying_power + pending_orders_sum as quantity,
-       buying_power + pending_orders_sum as quantity_norm_for_valuation,
-       buying_power + pending_orders_sum as actual_value,
-       'U S Dollar'                      as name,
-       'CUR:USD'                         as symbol,
-       'cash'                            as type,
-       updated_at                        as updated_at,
-       null                              as collection_uniq_id,
-       null                              as collection_id
-from {{ ref('trading_profile_status') }}
-where buying_power + pending_orders_sum > 0
