@@ -27,8 +27,12 @@ with expanded_holdings as
              group by profile_holdings_normalized_all.profile_id
          )
 select profile_id,
-       updated_at,
-       actual_value::double precision,
+       greatest(
+           expanded_holdings.updated_at,
+           trading_profile_status.updated_at
+           )::timestamp                                                               as updated_at,
+       (actual_value + coalesce(buying_power, 0) +
+        coalesce(pending_orders_sum, 0))::double precision                            as actual_value,
        (absolute_gain_1d / (actual_value - absolute_gain_1d))::double precision       as relative_gain_1d,
        (absolute_gain_1w / (actual_value - absolute_gain_1w))::double precision       as relative_gain_1w,
        (absolute_gain_1m / (actual_value - absolute_gain_1m))::double precision       as relative_gain_1m,
@@ -44,3 +48,4 @@ select profile_id,
        absolute_gain_5y::double precision,
        absolute_gain_total::double precision
 from expanded_holdings
+         left join {{ ref('trading_profile_status') }} using (profile_id)

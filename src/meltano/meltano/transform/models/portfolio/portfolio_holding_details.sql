@@ -22,14 +22,14 @@ select profile_holdings_normalized_all.holding_id_v2,
        profile_holdings_normalized_all.holding_id,
        profile_holdings_normalized_all.symbol         as ticker_symbol,   -- deprecated
        profile_holdings_normalized_all.account_id,                        -- deprecated
-       holding_since                              as purchase_date,
+       holding_since                                  as purchase_date,
        relative_gain_total,                                               -- deprecated
        relative_gain_1d,                                                  -- deprecated
        portfolio_holding_gains.value_to_portfolio_value,                  -- deprecated
        coalesce(ticker_options.name, base_tickers.name,
                 profile_holdings_normalized_all.name) as ticker_name,     -- deprecated
        ticker_metrics.market_capitalization,                              -- deprecated
-       next_earnings_date.date::timestamp         as next_earnings_date,  -- deprecated
+       next_earnings_date.date::timestamp             as next_earnings_date,  -- deprecated
        profile_holdings_normalized_all.type           as security_type,   -- deprecated
        portfolio_holding_gains.ltt_quantity_total,                        -- deprecated
        profile_holdings_normalized_all.name,                              -- deprecated

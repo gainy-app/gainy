@@ -33,6 +33,7 @@ select distinct on (
        portfolio_securities_normalized.type,
        portfolio_brokers.uniq_id                                         as broker_uniq_id,
        false                                                             as is_app_trading,
+       false                                                             as is_hidden,
        greatest(profile_holdings.updated_at,
                 portfolio_securities_normalized.updated_at,
                 base_tickers.updated_at)::timestamp                      as updated_at
@@ -73,6 +74,7 @@ select case
        drivewealth_holdings.type,
        portfolio_brokers.uniq_id                              as broker_uniq_id,
        true                                                   as is_app_trading,
+       false                                                  as is_hidden,
        greatest(drivewealth_holdings.updated_at,
                 base_tickers.updated_at)::timestamp           as updated_at
 from {{ ref('drivewealth_holdings') }}

@@ -43,7 +43,7 @@ with data as
                         type,
                         broker_uniq_id,
                         is_app_trading,
-                        false as is_hidden,
+                        is_hidden,
                         updated_at
                  from {{ ref('profile_holdings_normalized_dynamic') }}
 
