@@ -27,7 +27,10 @@ with expanded_holdings as
              group by profile_holdings_normalized_all.profile_id
          )
 select profile_id,
-       updated_at,
+       greatest(
+           expanded_holdings.updated_at,
+           expanded_holdings.trading_profile_status
+           )::timestamp                                                               as updated_at,
        (actual_value + buying_power + pending_orders_sum)::double precision           as actual_value,
        (absolute_gain_1d / (actual_value - absolute_gain_1d))::double precision       as relative_gain_1d,
        (absolute_gain_1w / (actual_value - absolute_gain_1w))::double precision       as relative_gain_1w,
