@@ -54,11 +54,7 @@ select case
                then 'ticker_' || profile_id || '_' || symbol
            else 'ttf_' || profile_id || '_' || collection_id
            end                                                as holding_group_id,
-       case
-           when drivewealth_holdings.collection_id is null
-               then 'dw_ticker_' || profile_id || '_' || symbol
-           else 'dw_ttf_' || profile_id || '_' || collection_id || '_' || symbol
-           end                                                as holding_id_v2,
+       holding_id_v2,
        null::int                                              as holding_id,
        null::int                                              as plaid_access_token_id,
        null::int                                              as security_id,
