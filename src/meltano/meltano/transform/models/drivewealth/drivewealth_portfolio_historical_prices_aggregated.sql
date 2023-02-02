@@ -21,7 +21,7 @@ with chart_1w as
                     max(date)       as close_date,
                     max(value)      as high,
                     min(value)      as low,
-                    exp(sum(ln(coalesce(relative_daily_gain, 0) + 1))) - 1 as relative_gain,
+                    exp(sum(ln(coalesce(relative_daily_gain, 0) + 1 + 1e-10))) - 1 as relative_gain,
                     max(updated_at) as updated_at
              from {{ ref('drivewealth_portfolio_historical_holdings') }}
              group by profile_id, holding_id_v2, symbol, date_week
@@ -37,7 +37,7 @@ with chart_1w as
                     max(date)       as close_date,
                     max(value)      as high,
                     min(value)      as low,
-                    exp(sum(ln(coalesce(relative_daily_gain, 0) + 1))) - 1 as relative_gain,
+                    exp(sum(ln(coalesce(relative_daily_gain, 0) + 1 + 1e-10))) - 1 as relative_gain,
                     max(updated_at) as updated_at
              from {{ ref('drivewealth_portfolio_historical_holdings') }}
              group by profile_id, holding_id_v2, symbol, date_month
