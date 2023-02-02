@@ -71,7 +71,7 @@ with long_term_tax_holdings as
                           from (
                                    select holding_id_v2,
                                           rank() over (partition by profile_id, period order by date desc) = 1 as is_latest_day,
-                                          adjusted_close * relative_gain / (1 + relative_gain)                 as absolute_gain_1d
+                                          adjusted_close * relative_gain / case when 1 + relative_gain > 0 then 1 + relative_gain end as absolute_gain_1d
                                    from {{ ref('portfolio_holding_chart') }}
                                             join {{ ref('portfolio_chart_skeleton') }} using (profile_id, period, datetime)
                                    where period = '1d'
@@ -82,7 +82,7 @@ with long_term_tax_holdings as
                   raw_data_1w as
                       (
                           select holding_id_v2,
-                                 sum(adjusted_close * relative_gain / (1 + relative_gain)) as absolute_gain_1w
+                                 sum(adjusted_close * relative_gain / case when 1 + relative_gain > 0 then 1 + relative_gain end) as absolute_gain_1w
                           from {{ ref('portfolio_holding_chart') }}
                                    join {{ ref('portfolio_chart_skeleton') }} using (profile_id, period, datetime)
                           where period = '1w'
@@ -92,7 +92,7 @@ with long_term_tax_holdings as
                   raw_data_1m as
                       (
                           select holding_id_v2,
-                                 sum(adjusted_close * relative_gain / (1 + relative_gain)) as absolute_gain_1m
+                                 sum(adjusted_close * relative_gain / case when 1 + relative_gain > 0 then 1 + relative_gain end) as absolute_gain_1m
                           from {{ ref('portfolio_holding_chart') }}
                           where period = '1m'
                             and date >= now()::date - interval '1 month'
@@ -101,7 +101,7 @@ with long_term_tax_holdings as
                   raw_data_3m as
                       (
                           select holding_id_v2,
-                                 sum(adjusted_close * relative_gain / (1 + relative_gain)) as absolute_gain_3m
+                                 sum(adjusted_close * relative_gain / case when 1 + relative_gain > 0 then 1 + relative_gain end) as absolute_gain_3m
                           from {{ ref('portfolio_holding_chart') }}
                           where period = '3m'
                             and date >= now()::date - interval '3 month'
@@ -110,7 +110,7 @@ with long_term_tax_holdings as
                   raw_data_1y as
                       (
                           select holding_id_v2,
-                                 sum(adjusted_close * relative_gain / (1 + relative_gain)) as absolute_gain_1y
+                                 sum(adjusted_close * relative_gain / case when 1 + relative_gain > 0 then 1 + relative_gain end) as absolute_gain_1y
                           from {{ ref('portfolio_holding_chart') }}
                           where period = '1y'
                             and date >= now()::date - interval '1 year'
@@ -119,7 +119,7 @@ with long_term_tax_holdings as
                   raw_data_5y as
                       (
                           select holding_id_v2,
-                                 sum(adjusted_close * relative_gain / (1 + relative_gain)) as absolute_gain_5y
+                                 sum(adjusted_close * relative_gain / case when 1 + relative_gain > 0 then 1 + relative_gain end) as absolute_gain_5y
                           from {{ ref('portfolio_holding_chart') }}
                           where period = '5y'
                             and date >= now()::date - interval '5 year'
@@ -128,7 +128,7 @@ with long_term_tax_holdings as
                   raw_data_all as
                       (
                           select holding_id_v2,
-                                 sum(adjusted_close * relative_gain / (1 + relative_gain)) as absolute_gain_total
+                                 sum(adjusted_close * relative_gain / case when 1 + relative_gain > 0 then 1 + relative_gain end) as absolute_gain_total
                           from {{ ref('portfolio_holding_chart') }}
                           where period = 'all'
                           group by holding_id_v2
