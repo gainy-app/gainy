@@ -105,8 +105,6 @@ with portfolio_statuses as
                     data.updated_at
              from schedule
                       left join data using (profile_id, holding_id_v2, symbol, date)
-                      left join {{ ref('historical_prices') }} using (symbol, date)
-                      left join {{ ref('ticker_realtime_metrics') }} using (symbol, date)
              window wnd as (partition by profile_id, holding_id_v2 order by date)
      ),
      data_extended1 as
