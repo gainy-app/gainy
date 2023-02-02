@@ -89,9 +89,6 @@ def _generate_schedules(env):
             schedule['env']['TAP_POLYGON_OPTION_CONTRACT_NAMES'] = json.dumps(
                 option_contract_names)
 
-            # realtime_symbols = [f"O:{i}" for i in option_contract_names] + get_polygon_realtime_tickers()
-            # schedule['env']['TAP_POLYGON_REALTIME_SYMBOLS'] = json.dumps(realtime_symbols)
-
     return schedules
 
 
