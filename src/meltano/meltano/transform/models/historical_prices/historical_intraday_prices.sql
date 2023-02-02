@@ -19,8 +19,8 @@ with polygon_symbols as materialized
                     week_trading_sessions_static.date
              from {{ source('polygon', 'polygon_intraday_prices_launchpad') }}
                       join {{ ref('week_trading_sessions_static') }} using (symbol)
-             where polygon_intraday_prices_launchpad.t >= extract(epoch from week_trading_sessions_static.open_at)
-               and polygon_intraday_prices_launchpad.t < extract(epoch from week_trading_sessions_static.close_at)
+             where polygon_intraday_prices_launchpad.t >= extract(epoch from week_trading_sessions_static.open_at) * 1000
+               and polygon_intraday_prices_launchpad.t < extract(epoch from week_trading_sessions_static.close_at) * 1000
 {% if var('realtime') %}
                and week_trading_sessions_static.index = 0
 {% endif %}
@@ -59,8 +59,8 @@ with polygon_symbols as materialized
              from {{ source('polygon', 'polygon_intraday_prices_launchpad') }}
                       join {{ ref('week_trading_sessions_static') }} using (symbol)
                       join polygon_symbols using (symbol, date)
-             where t >= extract(epoch from week_trading_sessions_static.open_at)
-               and t < extract(epoch from week_trading_sessions_static.close_at)
+             where t >= extract(epoch from week_trading_sessions_static.open_at) * 1000
+               and t < extract(epoch from week_trading_sessions_static.close_at) * 1000
 {% if var('realtime') %}
                and week_trading_sessions_static.index = 0
 {% endif %}

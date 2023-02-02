@@ -170,7 +170,7 @@ with tickers_and_options as
                                  (base_tickers.exchange_canonical is null and base_tickers.country_name = 'United States') or
                                  (base_tickers.exchange_canonical is null and base_tickers.country_name is null))
                             and week_trading_sessions_static.index = 1
-                            and polygon_intraday_prices_launchpad.t between extract(epoch from open_at) and extract(epoch from close_at - interval '1 second')
+                            and polygon_intraday_prices_launchpad.t between extract(epoch from open_at) * 1000 and extract(epoch from close_at - interval '1 second') * 1000
                       ),
                   previous_trading_day_intraday_prices_unique_symbols as
                       (
@@ -203,7 +203,7 @@ with tickers_and_options as
                                  (base_tickers.exchange_canonical is null and base_tickers.country_name = 'United States') or
                                  (base_tickers.exchange_canonical is null and base_tickers.country_name is null))
                             and week_trading_sessions_static.index = 0
-                            and polygon_intraday_prices_launchpad.t between extract(epoch from open_at) and extract(epoch from close_at - interval '1 second')
+                            and polygon_intraday_prices_launchpad.t between extract(epoch from open_at) * 1000 and extract(epoch from close_at - interval '1 second') * 1000
                       ),
                   latest_trading_day_intraday_prices_stats as
                       (
