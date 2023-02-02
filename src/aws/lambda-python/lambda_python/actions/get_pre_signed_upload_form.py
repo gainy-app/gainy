@@ -3,6 +3,7 @@ import uuid
 from common.context_container import ContextContainer
 from common.hasura_function import HasuraAction
 from gainy.utils import get_logger
+from models import UploadedFile
 from services.aws_s3 import S3
 
 logger = get_logger(__name__)
@@ -30,20 +31,15 @@ class GetPreSignedUploadForm(HasuraAction):
         s3_key = str(uuid.uuid4())
         url = service.get_pre_signed_upload_form(s3_bucket, s3_key)
 
-        with context_container.db_conn.cursor() as cursor:
-            cursor.execute(
-                """insert into app.uploaded_files(profile_id, s3_bucket, s3_key, content_type)
-                values (%(profile_id)s, %(s3_bucket)s, %(s3_key)s, %(content_type)s)
-                returning id""", {
-                    "profile_id": profile_id,
-                    "s3_bucket": s3_bucket,
-                    "s3_key": s3_key,
-                    "content_type": content_type,
-                })
-            file_id = cursor.fetchone()[0]
+        uploaded_file = UploadedFile()
+        uploaded_file.profile_id = profile_id
+        uploaded_file.s3_bucket = s3_bucket
+        uploaded_file.s3_key = s3_key
+        uploaded_file.content_type = content_type
+        context_container.get_repository().persist(uploaded_file)
 
         return {
-            'id': file_id,
+            'id': uploaded_file.id,
             'method': 'put',
             'url': url,
         }

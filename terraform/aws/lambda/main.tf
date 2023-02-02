@@ -65,6 +65,7 @@ resource "aws_iam_policy" "kyc_uploads" {
         "Effect" : "Allow",
         "Action" : [
           "s3:PutObject",
+          "s3:DeleteObject",
           "s3:GetObject"
         ],
         "Resource" : [
