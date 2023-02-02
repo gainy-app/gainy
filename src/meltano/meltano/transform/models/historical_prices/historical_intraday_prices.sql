@@ -13,18 +13,11 @@
 }}
 
 
-with polygon_symbols as materialized
+with polygon_symbols as
          (
-             select symbol,
-                    week_trading_sessions_static.date
+             select symbol
              from {{ source('polygon', 'polygon_intraday_prices_launchpad') }}
-                      join {{ ref('week_trading_sessions_static') }} using (symbol)
-             where polygon_intraday_prices_launchpad.t >= extract(epoch from week_trading_sessions_static.open_at) * 1000
-               and polygon_intraday_prices_launchpad.t < extract(epoch from week_trading_sessions_static.close_at) * 1000
-{% if var('realtime') %}
-               and week_trading_sessions_static.index = 0
-{% endif %}
-             group by symbol, week_trading_sessions_static.date
+             group by symbol
          ),
      raw_eod_intraday_prices as
          (
@@ -38,7 +31,7 @@ with polygon_symbols as materialized
                     volume
              from {{ source('eod', 'eod_intraday_prices') }}
                       join {{ ref('week_trading_sessions_static') }} using (symbol)
-                      left join polygon_symbols using (symbol, date)
+                      left join polygon_symbols using (symbol)
              where polygon_symbols.symbol is null
                and time >= week_trading_sessions_static.open_at
                and time < week_trading_sessions_static.close_at
@@ -58,9 +51,8 @@ with polygon_symbols as materialized
                     v                      as volume
              from {{ source('polygon', 'polygon_intraday_prices_launchpad') }}
                       join {{ ref('week_trading_sessions_static') }} using (symbol)
-                      join polygon_symbols using (symbol, date)
-             where t >= extract(epoch from week_trading_sessions_static.open_at) * 1000
-               and t < extract(epoch from week_trading_sessions_static.close_at) * 1000
+             where t >= week_trading_sessions_static.open_at_t
+               and t < week_trading_sessions_static.close_at_t
 {% if var('realtime') %}
                and week_trading_sessions_static.index = 0
 {% endif %}
