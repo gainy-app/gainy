@@ -70,7 +70,7 @@ select case
        drivewealth_holdings.type,
        portfolio_brokers.uniq_id                              as broker_uniq_id,
        true                                                   as is_app_trading,
-       false                                                  as is_hidden,
+       (drivewealth_holdings.actual_value < 1e-3)             as is_hidden,
        greatest(drivewealth_holdings.updated_at,
                 base_tickers.updated_at)::timestamp           as updated_at
 from {{ ref('drivewealth_holdings') }}
