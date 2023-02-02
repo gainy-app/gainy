@@ -83,16 +83,15 @@ with uniq_tickers as materialized
                               where type = 'crypto'
                           )
                  SELECT symbol, date_series::date as date
-                 FROM generate_series(now() - interval '1 year' - interval '1 week', now(), '1 day') date_series
+                 FROM generate_series(now() - interval '1 year' - interval '1 week', now() - interval '1 day', '1 day') date_series
                           join filtered_base_tickers on true
                           join uniq_tickers using (symbol)
                  where date_series::date >= min_date
              )
          ),
-     all_rows as
+     data0 as
          (
-             select tds.symbol || '_' || tds.date             as id,
-                    tds.symbol,
+             select tds.symbol,
                     tds.date,
                     tds.date::timestamp                       as datetime,
                     hp.open,
@@ -108,15 +107,27 @@ with uniq_tickers as materialized
                       left join {{ ref('historical_prices') }} hp using (symbol, "date")
                  window
                      lookback as (partition by tds.symbol order by tds."date" asc)
+         ),
+     data as
+         (
+             select data0.*,
+                    case
+                        when lag(adjusted_close) over lookback > 0
+                            then coalesce(adjusted_close::numeric / (lag(adjusted_close) over lookback)::numeric - 1, 0)
+                        end                                   as relative_gain
+             from data0
+                 window lookback as (partition by symbol order by "date" asc)
          )
-select all_rows.*
-from all_rows
+select data.*,
+       data.symbol || '_' || data.date as id
+from data
 {% if is_incremental() %}
          left join {{ this }} old_data using (symbol, datetime)
 where old_data.symbol is null -- no old data
-   or (all_rows.updated_at is not null and old_data.updated_at is null) -- old data is null and new is not
-   or all_rows.updated_at > old_data.updated_at -- new data is newer than the old one
+   or (data.updated_at is not null and old_data.updated_at is null) -- old data is null and new is not
+   or data.updated_at > old_data.updated_at -- new data is newer than the old one
 {% endif %}
+
 -- Execution Time: 96290.198 ms
 -- OK created incremental model historical_prices_aggregated_1d SELECT 4385623 in 152.88s
 -- OK created incremental model historical_prices_aggregated_1d SELECT 4385623 in 143.39s

@@ -16,11 +16,12 @@ with data as materialized
          (
              select symbol,
                     date_month,
-                    min(date)   as open_date,
-                    max(date)   as close_date,
-                    max(high)   as high,
-                    min(low)    as low,
-                    sum(volume) as volume
+                    min(date)                                              as open_date,
+                    max(date)                                              as close_date,
+                    max(high)                                              as high,
+                    min(low)                                               as low,
+                    sum(volume)                                            as volume,
+                    exp(sum(ln(coalesce(relative_daily_gain, 0) + 1))) - 1 as relative_gain
              from {{ ref('historical_prices') }}
              group by symbol, date_month
          )
@@ -33,7 +34,8 @@ select data.symbol || '_' || data.date_month as id,
        hp_close.close,
        hp_close.adjusted_close,
        hp_close.updated_at,
-       data.volume
+       data.volume,
+       data.relative_gain
 from data
          join {{ ref('historical_prices') }} hp_open on hp_open.symbol = data.symbol and hp_open.date = data.open_date
          join {{ ref('historical_prices') }} hp_close on hp_close.symbol = data.symbol and hp_close.date = data.close_date

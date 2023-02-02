@@ -5,9 +5,17 @@ with holdings as
                     quantity_norm_for_valuation,
                     plaid_access_token_id,
                     profile_holdings_normalized_all.ticker_symbol,
+                    profile_holdings_normalized_all.collection_id,
                     profile_holdings_normalized_all.symbol,
-                    profile_holdings_normalized_all.type as security_type
+                    case
+                        when is_app_trading and collection_id is not null
+                            then 'TTF'
+                        when profile_holdings_normalized_all.type = 'etf'
+                            then upper(profile_holdings_normalized_all.type)
+                            else initcap(profile_holdings_normalized_all.type)
+                        end as security_type
              from profile_holdings_normalized_all
+                   {join_clause}
              where profile_id = %(profile_id)s
                    {where_clause}
          ),
@@ -57,8 +65,8 @@ union all
     with data as materialized
              (
                  select holdings.profile_id,
-                        ticker_symbol as symbol,
-                        sim_dif + 1   as weight_category_in_symbol,
+                        holding_id_v2,
+                        sim_dif + 1 as weight_category_in_holding,
                         category_id,
                         holdings.quantity_norm_for_valuation,
                         actual_value,
@@ -67,7 +75,7 @@ union all
                         previous_day_close_price
                  from holdings
                           join portfolio_holding_gains using (holding_id_v2)
-                          join ticker_categories_continuous on ticker_categories_continuous.symbol = ticker_symbol
+                          left join ticker_categories_continuous on ticker_categories_continuous.symbol = ticker_symbol
                           join ticker_realtime_metrics on ticker_realtime_metrics.symbol = holdings.symbol
              ),
          portfolio_stats as
@@ -77,9 +85,9 @@ union all
                  from (
                           select distinct on (
                               profile_id,
-                              symbol
+                              holding_id_v2
                               ) profile_id,
-                                symbol,
+                                holding_id_v2,
                                 actual_value
                           from data
                       ) t
@@ -88,17 +96,19 @@ union all
          portfolio_symbol_stats as
              (
                  select profile_id,
-                        symbol,
-                        sum(weight_category_in_symbol) as weight_category_in_symbol_sum
+                        holding_id_v2,
+                        sum(weight_category_in_holding) as weight_category_in_holding_sum
                  from data
-                 group by profile_id, symbol
+                 group by profile_id, holding_id_v2
          ),
          data2 as
              (
                  select profile_id,
-                        symbol,
-                        actual_value / actual_value_sum                           as weight_symbol_in_portfolio,
-                        weight_category_in_symbol / weight_category_in_symbol_sum as weight_category_in_symbol,
+                        holding_id_v2,
+                        actual_value / actual_value_sum as weight_holding_in_portfolio,
+                        coalesce(
+                                    weight_category_in_holding / weight_category_in_holding_sum,
+                                    1)                  as weight_category_in_holding,
                         category_id,
                         quantity_norm_for_valuation,
                         absolute_daily_change,
@@ -106,30 +116,30 @@ union all
                         previous_day_close_price
                  from data
                           join portfolio_stats using (profile_id)
-                          join portfolio_symbol_stats using (profile_id, symbol)
+                          join portfolio_symbol_stats using (profile_id, holding_id_v2)
                  where actual_value_sum > 0
-                   and weight_category_in_symbol_sum > 0
+                   and (weight_category_in_holding_sum > 0 or weight_category_in_holding_sum is null)
          ),
          data3 as
              (
                  select profile_id,
-                        sum(weight_symbol_in_portfolio * weight_category_in_symbol)                 as weight,
+                        sum(weight_holding_in_portfolio * weight_category_in_holding)                 as weight,
                         category_id,
-                        sum(quantity_norm_for_valuation * weight_category_in_symbol *
+                        sum(quantity_norm_for_valuation * weight_category_in_holding *
                             absolute_daily_change)                                                  as absolute_daily_change,
-                        sum(quantity_norm_for_valuation * weight_category_in_symbol * actual_price) as actual_price,
-                        sum(quantity_norm_for_valuation * weight_category_in_symbol *
+                        sum(quantity_norm_for_valuation * weight_category_in_holding * actual_price) as actual_price,
+                        sum(quantity_norm_for_valuation * weight_category_in_holding *
                             coalesce(previous_day_close_price, actual_price))                       as previous_day_close_price,
-                        sum(quantity_norm_for_valuation * weight_category_in_symbol * actual_price) as absolute_value
+                        sum(quantity_norm_for_valuation * weight_category_in_holding * actual_price) as absolute_value
                  from data2
                  group by profile_id, category_id
-                 having sum(weight_symbol_in_portfolio * weight_category_in_symbol) > 0
+                 having sum(weight_holding_in_portfolio * weight_category_in_holding) > 0
          )
     select profile_id,
            weight::double precision,
            'category'::varchar        as entity_type,
            category_id::varchar       as entity_id,
-           name                       as entity_name,
+           coalesce(name, 'Other')    as entity_name,
            absolute_daily_change::double precision,
            (case
                 when previous_day_close_price > 0
@@ -138,7 +148,7 @@ union all
                end)::double precision as relative_daily_change,
            absolute_value::double precision
     from data3
-             join categories on categories.id = category_id
+             left join categories on categories.id = category_id
 )
 
 union all
@@ -147,8 +157,8 @@ union all
     with data as materialized
              (
                  select holdings.profile_id,
-                        ticker_symbol as symbol,
-                        sim_dif + 1   as weight_interest_in_symbol,
+                        holding_id_v2,
+                        sim_dif + 1 as weight_interest_in_holding,
                         interest_id,
                         holdings.quantity_norm_for_valuation,
                         actual_value,
@@ -157,7 +167,7 @@ union all
                         previous_day_close_price
                  from holdings
                           join portfolio_holding_gains using (holding_id_v2)
-                          join ticker_interests on ticker_interests.symbol = ticker_symbol
+                          left join ticker_interests on ticker_interests.symbol = ticker_symbol
                           join ticker_realtime_metrics on ticker_realtime_metrics.symbol = holdings.symbol
              ),
          portfolio_stats as
@@ -167,9 +177,9 @@ union all
                  from (
                           select distinct on (
                               profile_id,
-                              symbol
+                              holding_id_v2
                               ) profile_id,
-                                symbol,
+                                holding_id_v2,
                                 actual_value
                           from data
                       ) t
@@ -178,17 +188,19 @@ union all
          portfolio_symbol_stats as
              (
                  select profile_id,
-                        symbol,
-                        sum(weight_interest_in_symbol) as weight_interest_in_symbol_sum
+                        holding_id_v2,
+                        sum(weight_interest_in_holding) as weight_interest_in_holding_sum
                  from data
-                 group by profile_id, symbol
+                 group by profile_id, holding_id_v2
          ),
          data2 as
              (
                  select profile_id,
-                        symbol,
-                        actual_value / actual_value_sum                           as weight_symbol_in_portfolio,
-                        weight_interest_in_symbol / weight_interest_in_symbol_sum as weight_interest_in_symbol,
+                        holding_id_v2,
+                        actual_value / actual_value_sum as weight_holding_in_portfolio,
+                        coalesce(
+                                    weight_interest_in_holding / weight_interest_in_holding_sum,
+                                    1)                  as weight_interest_in_holding,
                         interest_id,
                         quantity_norm_for_valuation,
                         absolute_daily_change,
@@ -196,30 +208,30 @@ union all
                         previous_day_close_price
                  from data
                           join portfolio_stats using (profile_id)
-                          join portfolio_symbol_stats using (profile_id, symbol)
+                          join portfolio_symbol_stats using (profile_id, holding_id_v2)
                  where actual_value_sum > 0
-                   and weight_interest_in_symbol_sum > 0
+                   and (weight_interest_in_holding_sum > 0 or weight_interest_in_holding_sum is null)
          ),
          data3 as
              (
                  select profile_id,
-                        sum(weight_symbol_in_portfolio * weight_interest_in_symbol)                 as weight,
+                        sum(weight_holding_in_portfolio * weight_interest_in_holding)                 as weight,
                         interest_id,
-                        sum(quantity_norm_for_valuation * weight_interest_in_symbol *
+                        sum(quantity_norm_for_valuation * weight_interest_in_holding *
                             absolute_daily_change)                                                  as absolute_daily_change,
-                        sum(quantity_norm_for_valuation * weight_interest_in_symbol * actual_price) as actual_price,
-                        sum(quantity_norm_for_valuation * weight_interest_in_symbol *
+                        sum(quantity_norm_for_valuation * weight_interest_in_holding * actual_price) as actual_price,
+                        sum(quantity_norm_for_valuation * weight_interest_in_holding *
                             coalesce(previous_day_close_price, actual_price))                       as previous_day_close_price,
-                        sum(quantity_norm_for_valuation * weight_interest_in_symbol * actual_price) as absolute_value
+                        sum(quantity_norm_for_valuation * weight_interest_in_holding * actual_price) as absolute_value
                  from data2
                  group by profile_id, interest_id
-                 having sum(weight_symbol_in_portfolio * weight_interest_in_symbol) > 0
+                 having sum(weight_holding_in_portfolio * weight_interest_in_holding) > 0
          )
     select profile_id,
            weight::double precision,
            'interest'::varchar        as entity_type,
            interest_id::varchar       as entity_id,
-           name                       as entity_name,
+           coalesce(name, 'Other')    as entity_name,
            absolute_daily_change::double precision,
            (case
                 when previous_day_close_price > 0
@@ -228,7 +240,7 @@ union all
                end)::double precision as relative_daily_change,
            absolute_value::double precision
     from data3
-             join interests on interests.id = interest_id
+             left join interests on interests.id = interest_id
 )
 
 union all
@@ -285,89 +297,56 @@ union all
 union all
 
 (
-    with data as materialized
+    with portfolio_assets as materialized
              (
                  select holdings.profile_id,
-                        ticker_symbol as symbol,
-                        weight        as weight_collection_in_symbol,
-                        collection_id,
-                        holdings.quantity_norm_for_valuation,
-                        actual_value,
-                        absolute_daily_change,
-                        actual_price,
-                        previous_day_close_price
+                        'ticker:' || holdings.ticker_symbol as entity_id,
+                        ticker_name                         as entity_name,
+                        sum(actual_value)                   as weight,
+                        sum(absolute_gain_1d)               as absolute_daily_change,
+                        sum(actual_value)                   as absolute_value
                  from holdings
                           join portfolio_holding_gains using (holding_id_v2)
-                          join collection_ticker_actual_weights on collection_ticker_actual_weights.symbol = ticker_symbol
-                          join ticker_realtime_metrics on ticker_realtime_metrics.symbol = holdings.symbol
-             ),
-         portfolio_stats as
+                          join portfolio_holding_details using (holding_id_v2)
+                 where collection_id is null
+                 group by holdings.profile_id, holdings.ticker_symbol, ticker_name
+
+                 union all
+
+                 select holdings.profile_id,
+                        'collection:' || holdings.collection_id as entity_id,
+                        collections.name                        as entity_name,
+                        sum(actual_value)                       as weight,
+                        sum(absolute_gain_1d)                   as absolute_daily_change,
+                        sum(actual_value)                       as absolute_value
+                 from holdings
+                          join portfolio_holding_gains using (holding_id_v2)
+                          join portfolio_holding_details using (holding_id_v2)
+                          join collections on collections.id = collection_id
+                 where collection_id is not null
+                 group by holdings.profile_id, holdings.collection_id, collections.name
+         ),
+         portfolio_assets_weight_sum as
              (
                  select profile_id,
-                        sum(actual_value) as actual_value_sum
-                 from (
-                          select distinct on (
-                              profile_id,
-                              symbol
-                              ) profile_id,
-                                symbol,
-                                actual_value
-                          from data
-                      ) t
+                        sum(weight)                as weight_sum,
+                        sum(absolute_daily_change) as absolute_daily_change_sum
+                 from portfolio_assets
                  group by profile_id
-         ),
-         portfolio_symbol_stats as
-             (
-                 select profile_id,
-                        symbol,
-                        sum(weight_collection_in_symbol) as weight_collection_in_symbol_sum
-                 from data
-                 group by profile_id, symbol
-         ),
-         data2 as
-             (
-                 select profile_id,
-                        symbol,
-                        actual_value / actual_value_sum                               as weight_symbol_in_portfolio,
-                        weight_collection_in_symbol / weight_collection_in_symbol_sum as weight_collection_in_symbol,
-                        collection_id,
-                        quantity_norm_for_valuation,
-                        absolute_daily_change,
-                        actual_price,
-                        previous_day_close_price
-                 from data
-                          join portfolio_stats using (profile_id)
-                          join portfolio_symbol_stats using (profile_id, symbol)
-                 where actual_value_sum > 0
-                   and weight_collection_in_symbol_sum > 0
-         ),
-         data3 as
-             (
-                 select profile_id,
-                        sum(weight_symbol_in_portfolio * weight_collection_in_symbol)                 as weight,
-                        collection_id,
-                        sum(quantity_norm_for_valuation * weight_collection_in_symbol *
-                            absolute_daily_change)                                                    as absolute_daily_change,
-                        sum(quantity_norm_for_valuation * weight_collection_in_symbol * actual_price) as actual_price,
-                        sum(quantity_norm_for_valuation * weight_collection_in_symbol *
-                            coalesce(previous_day_close_price, actual_price))                         as previous_day_close_price,
-                        sum(quantity_norm_for_valuation * weight_collection_in_symbol * actual_price) as absolute_value
-                 from data2
-                 group by profile_id, collection_id
-                 having sum(weight_symbol_in_portfolio * weight_collection_in_symbol) > 0
          )
-    select profile_id,
-           weight::double precision,
-           'collection'::varchar      as entity_type,
-           collection_id::varchar     as entity_id,
-           name                       as entity_name,
-           absolute_daily_change::double precision,
-           (case
-                when previous_day_close_price > 0
-                    then actual_price / previous_day_close_price - 1
-                else 0
-               end)::double precision as relative_daily_change,
-           absolute_value::double precision
-    from data3
-             join collections on collections.id = collection_id
+    select portfolio_assets.profile_id,
+           weight / weight_sum                as weight,
+           'asset'::varchar                   as entity_type,
+           entity_id,
+           entity_name,
+           coalesce(absolute_daily_change, 0) as absolute_daily_change,
+           case
+               when abs(absolute_value - absolute_daily_change) > 0
+                   then absolute_value / (absolute_value - absolute_daily_change) - 1
+               end                            as relative_daily_change,
+           absolute_value
+    from portfolio_assets
+             join portfolio_assets_weight_sum using (profile_id)
+    where weight is not null
+      and weight_sum > 0
 )

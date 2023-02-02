@@ -1,6 +1,6 @@
 import os
 
-from gainy.utils import setup_exception_logger_hook
+from gainy.utils import setup_exception_logger_hook, setup_lambda_logging_middleware, get_logger
 
 from common.hasura_dispatcher import HasuraActionDispatcher, HasuraTriggerDispatcher
 from recommendation.match_score_action import GetMatchScoreByCollection, GetMatchScoreByTicker, \
@@ -14,8 +14,9 @@ from search.news_search import SearchNews
 from triggers import *
 from actions import *
 from trading.actions import *
-from _stripe.actions import *
-from _stripe.triggers import *
+from trading.triggers import *
+from _stripe.actions import StripeGetCheckoutUrl, StripeGetPaymentSheetData, StripeWebhook
+from _stripe.triggers import StripeDeletePaymentMethod
 
 setup_exception_logger_hook()
 
@@ -100,7 +101,9 @@ action_dispatcher = HasuraActionDispatcher(ACTIONS,
 
 
 def handle_action(event, context):
-    logger.info('handle_action', extra={"event": event, "context": context})
+    setup_lambda_logging_middleware(context)
+    logger = get_logger(__name__)
+    logger.info('handle_action', extra={"event": event})
     return action_dispatcher.handle(event, context)
 
 
@@ -111,6 +114,7 @@ TRIGGERS = [
     OnPlaidAccessTokenCreated(),
     OnInvitationCreatedOrUpdated(),
     StripeDeletePaymentMethod(),
+    OnNewKycStatus(),
 ]
 
 trigger_dispatcher = HasuraTriggerDispatcher(TRIGGERS,
@@ -118,5 +122,7 @@ trigger_dispatcher = HasuraTriggerDispatcher(TRIGGERS,
 
 
 def handle_trigger(event, context):
-    logger.info('handle_trigger', extra={"event": event, "context": context})
+    setup_lambda_logging_middleware(context)
+    logger = get_logger(__name__)
+    logger.info('handle_trigger', extra={"event": event})
     return trigger_dispatcher.handle(event, context)

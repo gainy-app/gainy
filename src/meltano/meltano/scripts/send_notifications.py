@@ -19,7 +19,10 @@ SEGMENTS = {
     ENV_LOCAL: [],
 }
 EMAILS_LOCAL = json.loads(os.environ.get('ONESIGNAL_EMAILS_LOCAL', '[]'))
-MAX_NOTIFICATIONS_PER_TEMPLATE = 1
+MAX_NOTIFICATIONS_PER_TEMPLATE = os.environ.get(
+    'MAX_NOTIFICATIONS_PER_TEMPLATE')
+MAX_NOTIFICATIONS_PER_TEMPLATE = int(
+    MAX_NOTIFICATIONS_PER_TEMPLATE) if MAX_NOTIFICATIONS_PER_TEMPLATE else None
 
 logger = get_logger(__name__)
 
@@ -117,6 +120,9 @@ def send_one(db_conn, notification):
 
 
 def check_malfunctioning_notifications(notifications_to_send):
+    if MAX_NOTIFICATIONS_PER_TEMPLATE is None:
+        return
+
     notification_stats = {
         'email': {},
         'segments': {},

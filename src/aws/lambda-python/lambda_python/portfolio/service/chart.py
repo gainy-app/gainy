@@ -10,6 +10,8 @@ SCRIPT_DIR = os.path.dirname(__file__)
 
 
 def _should_include_cash(filter: PortfolioChartFilter):
+    return False  # per Portfolio v2 feature
+
     if filter.interest_ids:
         return False
     if filter.category_ids:
@@ -93,7 +95,7 @@ class PortfolioChartService:
         join_clause = []
 
         if self._should_return_empty_result(filter):
-            return []
+            return {}
 
         self._filter_query_by_periods(params, chart_where_clause, None, filter)
         self._filter_query_by_institution_ids(params, holding_where_clause,
@@ -146,6 +148,10 @@ class PortfolioChartService:
                                                join_clause, filter)
         self._filter_query_by_broker_ids(params, where_clause, join_clause,
                                          filter)
+        self._filter_query_by_interest_ids(params, where_clause, join_clause,
+                                           filter)
+        self._filter_query_by_category_ids(params, where_clause, join_clause,
+                                           filter)
 
         if where_clause:
             where_clause.insert(0, sql.SQL(""))
@@ -160,12 +166,12 @@ class PortfolioChartService:
         for row in sorted(rows,
                           key=lambda row: (row['period'], row['datetime'])):
 
-            transaction_count = row['transaction_count']
+            transaction_count = row['transaction_count'] or 0
             period = row['period']
 
-            # for other periods transactions count should not decrease, so we pick all rows that follow a non-decreasing transaction count pattern
+            # transactions count should not decrease, so we pick all rows that follow a non-decreasing transaction count pattern
             if prev_row is not None:
-                prev_transaction_count = prev_row['transaction_count']
+                prev_transaction_count = prev_row['transaction_count'] or 0
                 prev_period = prev_row['period']
                 should_skip = period == prev_period and transaction_count < prev_transaction_count
                 if should_skip:

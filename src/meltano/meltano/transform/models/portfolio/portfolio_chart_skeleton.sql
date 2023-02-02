@@ -44,12 +44,6 @@ from (
                          datetime,
                          count(distinct holding_id_v2) as holding_count
                   from {{ ref('portfolio_holding_chart') }}
-
-{% if is_incremental() %}
-                           left join old_stats using (profile_id, period)
-                  where old_stats.max_datetime is null or datetime > max_datetime
-{% endif %}
-
                   group by profile_id, period, date, datetime
 
 {% if is_incremental() %}

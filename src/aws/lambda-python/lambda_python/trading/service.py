@@ -7,18 +7,20 @@ from gainy.data_access.operators import OperatorIn
 from gainy.exceptions import NotFoundException, BadRequestException
 from gainy.trading.drivewealth.models import CollectionStatus, CollectionHoldingStatus
 from gainy.plaid.common import handle_error
+from models import UploadedFile
 from portfolio.plaid import PlaidService
 from services.aws_s3 import S3
+from services.uploaded_file_service import UploadedFileService
 from trading.drivewealth.provider import DriveWealthProvider
 from trading.exceptions import WrongTradingOrderStatusException
 from trading.kyc_form_validator import KycFormValidator
 from gainy.plaid.models import PlaidAccessToken, PlaidAccount
-from trading.models import KycDocument, TradingMoneyFlow, ProfileKycStatus, TradingStatement
+from trading.models import KycDocument, TradingMoneyFlow, ProfileKycStatus, TradingStatement, KycStatus
 
 import plaid
 from gainy.utils import get_logger, env, ENV_PRODUCTION
 from gainy.trading.models import TradingAccount, TradingCollectionVersion, TradingOrderStatus, \
-    FundingAccount, TradingOrder
+    FundingAccount, TradingOrder, TradingMoneyFlowStatus
 from gainy.trading.service import TradingService as GainyTradingService
 from trading.repository import TradingRepository
 from verification.models import VerificationCodeChannel
@@ -27,45 +29,40 @@ logger = get_logger(__name__)
 
 
 class TradingService(GainyTradingService):
+    trading_repository: TradingRepository
 
     def __init__(self, trading_repository: TradingRepository,
                  drivewealth_provider: DriveWealthProvider,
                  plaid_service: PlaidService,
-                 kyc_form_validator: KycFormValidator):
+                 kyc_form_validator: KycFormValidator,
+                 file_service: UploadedFileService):
         super().__init__(trading_repository, drivewealth_provider,
                          plaid_service)
         self.kyc_form_validator = kyc_form_validator
+        self.file_service = file_service
 
     def kyc_send_form(self, kyc_form: dict) -> ProfileKycStatus:
         if not kyc_form:
             raise Exception('kyc_form is null')
         return self._get_provider_service().kyc_send_form(kyc_form)
 
-    def kyc_get_status(self, profile_id: int) -> ProfileKycStatus:
-        return self._get_provider_service().kyc_get_status(profile_id)
-
     def send_kyc_document(self, profile_id: int, document: KycDocument):
         document.validate()
 
-        with self.trading_repository.db_conn.cursor() as cursor:
-            cursor.execute(
-                """select s3_bucket, s3_key, content_type from app.uploaded_files
-                where profile_id = %(profile_id)s and id = %(id)s""", {
-                    "profile_id": profile_id,
-                    "id": document.uploaded_file_id,
-                })
-            row = cursor.fetchone()
-
-        if row is None:
+        uploaded_file: UploadedFile = self.trading_repository.find_one(
+            UploadedFile, {
+                "profile_id": profile_id,
+                "id": document.uploaded_file_id,
+            })
+        if not uploaded_file:
             raise NotFoundException('File not Found')
-        (s3_bucket, s3_key, content_type) = row
-        document.content_type = content_type
+        document.content_type = uploaded_file.content_type
         document.profile_id = profile_id
 
         self.trading_repository.persist(document)
 
         file_stream = io.BytesIO()
-        S3().download_file(s3_bucket, s3_key, file_stream)
+        self.file_service.download_to_stream(uploaded_file, file_stream)
 
         return self._get_provider_service().send_kyc_document(
             profile_id, document, file_stream)
@@ -138,6 +135,7 @@ class TradingService(GainyTradingService):
 
         money_flow = TradingMoneyFlow()
         money_flow.profile_id = profile_id
+        money_flow.status = TradingMoneyFlowStatus.PENDING
         money_flow.amount = amount
         money_flow.trading_account_id = trading_account.id
         money_flow.funding_account_id = funding_account.id
@@ -218,3 +216,26 @@ class TradingService(GainyTradingService):
 
     def download_statement(self, statement: TradingStatement) -> str:
         return self._get_provider_service().download_statement(statement)
+
+    def handle_kyc_status_change(self, status: ProfileKycStatus):
+        if status.status == KycStatus.APPROVED:
+            self.remove_sensitive_kyc_data(status.profile_id)
+            self.trading_repository.remove_sensitive_kyc_data(
+                status.profile_id)
+
+    def remove_sensitive_kyc_data(self, profile_id):
+        # remove documents from s3
+        for document in self.trading_repository.iterate_all(
+                KycDocument, {"profile_id": profile_id}):
+            document: KycDocument
+            if not document.uploaded_file_id:
+                continue
+
+            uploaded_file: UploadedFile = self.trading_repository.find_one(
+                UploadedFile, {"id": document.uploaded_file_id})
+            if not uploaded_file:
+                continue
+
+            self.file_service.remove_file(uploaded_file)
+            self.trading_repository.delete(document)
+            self.trading_repository.delete(uploaded_file)
