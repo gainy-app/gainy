@@ -51,4 +51,10 @@ class TradingCreateStockOrder(HasuraAction):
             target_amount_delta=target_amount_delta,
             target_amount_delta_relative=target_amount_delta_relative)
 
+        if target_amount_delta_relative:
+            holding_amount = context_container.trading_repository.get_ticker_holding_value(
+                profile_id, symbol)
+            trading_order.target_amount_delta = target_amount_delta_relative * holding_amount
+            context_container.trading_repository.persist(trading_order)
+
         return {'trading_order_id': trading_order.id}

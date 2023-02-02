@@ -36,10 +36,6 @@ class TradingReconfigureCollectionHoldings(HasuraAction):
                 raise BadRequestException(
                     'target_amount_delta_relative must be within [-1, 1].')
 
-            holding_amount = context_container.trading_repository.get_collection_holding_value(
-                profile_id, collection_id)
-            target_amount_delta = target_amount_delta_relative * holding_amount
-
         trading_account_id = context_container.trading_repository.get_trading_account(
             profile_id).id
 
@@ -53,5 +49,12 @@ class TradingReconfigureCollectionHoldings(HasuraAction):
             weights=weights,
             target_amount_delta=target_amount_delta,
             target_amount_delta_relative=target_amount_delta_relative)
+
+        if target_amount_delta_relative:
+            holding_amount = context_container.trading_repository.get_collection_holding_value(
+                profile_id, collection_id)
+            trading_collection_version.target_amount_delta = target_amount_delta_relative * holding_amount
+            context_container.trading_repository.persist(
+                trading_collection_version)
 
         return {'trading_collection_version_id': trading_collection_version.id}
