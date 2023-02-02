@@ -64,10 +64,6 @@ resource "aws_db_instance" "db_instance" {
   tags = {
     Environment = var.env
   }
-
-  lifecycle {
-    ignore_changes = [status]
-  }
 }
 
 resource "aws_db_instance" "db_replica" {

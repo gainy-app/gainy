@@ -9,11 +9,6 @@ resource "aws_cloudwatch_event_rule" "ecs_events" {
     "detail-type" : [
       "ECS Deployment State Change",
     ]
-    #    "detail" : {
-    #      "clusterArn" : [
-    #        var.ecs_cluster_arn
-    #      ]
-    #    }
   })
 }
 
