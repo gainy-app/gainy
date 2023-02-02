@@ -19,10 +19,14 @@ with portfolio_statuses as
                       select profile_id,
                              drivewealth_portfolio_statuses.created_at::timestamp                   as updated_at,
                              (drivewealth_portfolio_statuses.created_at - interval '5 hours')::date as date,
-                             cash_value / drivewealth_portfolio_statuses.cash_actual_weight         as value,
+                             case
+                                 when drivewealth_portfolio_statuses.cash_actual_weight > 0
+                                     then cash_value / drivewealth_portfolio_statuses.cash_actual_weight
+                                 else drivewealth_portfolio_statuses.equity_value
+                                 end                                                                as value,
                              drivewealth_portfolio_statuses.data -> 'holdings'                      as holdings
-                      from {{ source('app', 'drivewealth_portfolio_statuses')}}
-                               join {{ source('app', 'drivewealth_portfolios')}}
+                      from {{ source('app', 'drivewealth_portfolio_statuses') }}
+                               join {{ source('app', 'drivewealth_portfolios') }}
                                     on drivewealth_portfolios.ref_id = drivewealth_portfolio_id
                   ) t
              order by profile_id, date desc, updated_at desc
@@ -45,7 +49,7 @@ with portfolio_statuses as
                     portfolio_holding_data,
                     json_array_elements(portfolio_holding_data -> 'holdings') as fund_holding_data
              from portfolio_status_funds
-                      join {{ source('app', 'drivewealth_funds')}}
+                      join {{ source('app', 'drivewealth_funds') }}
                            on drivewealth_funds.ref_id = portfolio_holding_data ->> 'id'
              where portfolio_holding_data ->> 'type' != 'CASH_RESERVE'
      ),
@@ -66,17 +70,28 @@ with portfolio_statuses as
      ),
      schedule as
          (
-             select profile_id, holding_id_v2, symbol, dd::date as date
-             from (
-                      select profile_id,
-                             holding_id_v2,
-                             symbol,
-                             min(date) as min_date
-                      from data
-                      group by profile_id, holding_id_v2, symbol
-                  ) t
+             with min_holding_date as materialized
+                      (
+                          select profile_id,
+                                 holding_id_v2,
+                                 symbol,
+                                 min(date) as min_date
+                          from data
+                          group by profile_id, holding_id_v2, symbol
+                      )
+             select profile_id, holding_id_v2, symbol, date, relative_daily_gain
+             from min_holding_date
+                      join {{ ref('historical_prices') }} using (symbol)
+             where date >= min_date
+
+             union all
+
+             select profile_id, holding_id_v2, symbol, date, relative_daily_change as relative_daily_gain
+             from min_holding_date
                       join {{ ref('ticker_realtime_metrics') }} using (symbol)
-                      join generate_series(min_date, ticker_realtime_metrics.time::date, interval '1 day') dd on true
+                      left join {{ ref('historical_prices') }} using (symbol, date)
+             where date >= min_date
+               and historical_prices.symbol is null
      ),
      data_extended0 as
          (
@@ -85,15 +100,11 @@ with portfolio_statuses as
                     LAST_VALUE_IGNORENULLS(collection_id) over wnd as collection_id,
                     symbol,
                     date,
-                    coalesce(relative_daily_gain,
-                             ticker_realtime_metrics.relative_daily_change,
-                             0)                                          as relative_daily_gain,
+                    relative_daily_gain,
                     value                                                as value,
                     data.updated_at
              from schedule
                       left join data using (profile_id, holding_id_v2, symbol, date)
-                      left join {{ ref('historical_prices') }} using (symbol, date)
-                      left join {{ ref('ticker_realtime_metrics') }} using (symbol, date)
              window wnd as (partition by profile_id, holding_id_v2 order by date)
      ),
      data_extended1 as
@@ -144,8 +155,10 @@ with portfolio_statuses as
                                  symbol,
                                  date,
                                  -- HP = EV / (BV + CF) - 1
-                                 ticker_values_aggregated.value /
-                                 (ticker_values_aggregated.prev_value + order_values_aggregated.amount) - 1 as gain
+                                 case
+                                     when ticker_values_aggregated.prev_value + order_values_aggregated.amount > 0
+                                         then ticker_values_aggregated.value / (ticker_values_aggregated.prev_value + order_values_aggregated.amount) - 1
+                                     end as gain
                           from ticker_values_aggregated
                                    left join order_values_aggregated using (profile_id, symbol, date)
                   )
@@ -184,7 +197,7 @@ with portfolio_statuses as
      data_extended2 as
          (
              select *,
-                    exp(sum(ln(relative_daily_gain + 1)) over wnd) as cumulative_daily_relative_gain
+                    exp(sum(ln(relative_daily_gain + 1 + 1e-10)) over wnd) as cumulative_daily_relative_gain
              from data_extended1
                  window wnd as (partition by holding_id_v2 order by date)
      ),
