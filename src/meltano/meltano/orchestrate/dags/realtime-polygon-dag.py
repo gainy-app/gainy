@@ -22,6 +22,7 @@ for schedule in schedules:
 
     operator = BashOperator(
         task_id=schedule['name'],
+        pool="polygon",
         bash_command=get_meltano_command(
             f"schedule run {schedule['name']} --transform=skip"),
         dag=dag)

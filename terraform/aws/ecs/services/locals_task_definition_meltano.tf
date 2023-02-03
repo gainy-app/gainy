@@ -15,6 +15,7 @@ locals {
     airflow_port                        = 5001
     upstream_pool_size                  = local.upstream_pool_size
     downstream_pool_size                = local.downstream_pool_size
+    polygon_pool_size                   = local.polygon_pool_size
     eodhistoricaldata_jobs_count        = local.eodhistoricaldata_jobs_count
     eodhistoricaldata_prices_jobs_count = local.eodhistoricaldata_prices_jobs_count
     coingecko_jobs_count                = local.coingecko_jobs_count
@@ -105,7 +106,8 @@ locals {
       healthCheck = {
         "command" : ["CMD-SHELL", "nc -z localhost 8793"],
         "interval" : 10,
-        "retries" : 2
+        "retries" : 2,
+        "startPeriod": 10
       }
       dependsOn = [
         { "condition" : "SUCCESS", "containerName" : "meltano-airflow-initializer" }

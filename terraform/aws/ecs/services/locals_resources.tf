@@ -8,6 +8,7 @@ locals {
 
   upstream_pool_size                  = var.env == "production" ? 3 : 1
   downstream_pool_size                = var.env == "production" ? 2 : 1
+  polygon_pool_size                   = var.env == "production" ? 5 : 5
   eodhistoricaldata_jobs_count        = 3
   eodhistoricaldata_prices_jobs_count = 4
   coingecko_jobs_count                = 1
