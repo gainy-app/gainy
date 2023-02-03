@@ -22,7 +22,7 @@ with polygon_symbols as
      raw_eod_intraday_prices as
          (
              select eod_intraday_prices.symbol,
-                    week_trading_sessions_static.date,
+                    t.date,
                     time,
                     open,
                     high,
@@ -30,14 +30,17 @@ with polygon_symbols as
                     close,
                     volume
              from {{ source('eod', 'eod_intraday_prices') }}
-                      join {{ ref('week_trading_sessions_static') }} using (symbol)
-                      left join polygon_symbols using (symbol)
-             where polygon_symbols.symbol is null
-               and time >= week_trading_sessions_static.open_at
-               and time < week_trading_sessions_static.close_at
+                      join (
+                               select symbol, date, open_at, close_at
+                               from {{ ref('week_trading_sessions_static') }}
+                                        left join polygon_symbols using (symbol)
+                               where polygon_symbols.symbol is null
 {% if var('realtime') %}
-               and week_trading_sessions_static.index = 0
+                                 and week_trading_sessions_static.index = 0
 {% endif %}
+                           ) t using (symbol)
+             where time >= open_at
+               and time < close_at
          ),
      raw_polygon_intraday_prices as
          (
