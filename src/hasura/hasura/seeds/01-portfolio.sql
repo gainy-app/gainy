@@ -73,7 +73,7 @@ select distinct on (
       'portfolio_demo_' || profile_id || '_' || ticker_symbol,
       profile_portfolio_accounts.plaid_access_token_id
 from (
-         values (1, 2, 'AAPL'),
+         values (1, 10, 'AAPL'),
                 (1, 3, 'SPY'),
                 (1, 1, 'PLTR240119P00013000')
      ) t ("profile_id", "quantity", "ticker_symbol")
