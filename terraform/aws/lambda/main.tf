@@ -100,7 +100,8 @@ resource "aws_iam_policy" "ecs_read" {
       {
         "Effect" : "Allow",
         "Action" : [
-          "ecs:DescribeTaskDefinition"
+          "ecs:DescribeTaskDefinition",
+          "ecs:DescribeServices"
         ],
         "Resource" : [
           "*"

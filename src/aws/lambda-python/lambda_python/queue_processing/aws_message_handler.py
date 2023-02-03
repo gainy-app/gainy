@@ -28,7 +28,6 @@ class AwsMessageHandler(AbstractMessageHandler):
 
         message.source_event_ref_id = body["id"]
         event_type = body["detail-type"]
-        event_payload = body["detail"]
 
-        self._get_handler(event_type).handle(event_payload)
+        self._get_handler(event_type).handle(body)
         message.handled = True

@@ -196,12 +196,12 @@ resource "aws_efs_mount_target" "meltano_data_private_subnet" {
   file_system_id = aws_efs_file_system.meltano_logs.id
   subnet_id      = each.value
 }
-resource "aws_ecs_task_definition" "default" {
-  family                   = "gainy-${var.env}"
+resource "aws_ecs_task_definition" "meltano_scheduler" {
+  family                   = "gainy-scheduler-${var.env}"
   network_mode             = "awsvpc"
   requires_compatibilities = ["FARGATE"]
-  cpu                      = local.main_cpu_credits
-  memory                   = local.main_memory_credits
+  cpu                      = local.meltano_scheduler_cpu_credits
+  memory                   = local.meltano_scheduler_memory_credits
   task_role_arn            = aws_iam_role.task.arn
   execution_role_arn       = aws_iam_role.execution.arn
 
@@ -215,12 +215,48 @@ resource "aws_ecs_task_definition" "default" {
     }
   }
 
+  container_definitions = jsonencode([
+    local.meltano_scheduler_description,
+    local.meltano_initializer_description,
+  ])
+}
+
+resource "aws_ecs_task_definition" "airflow" {
+  family                   = "gainy-airflow-${var.env}"
+  network_mode             = "awsvpc"
+  requires_compatibilities = ["FARGATE"]
+  cpu                      = local.airflow_cpu_credits
+  memory                   = local.airflow_memory_credits
+  task_role_arn            = aws_iam_role.task.arn
+  execution_role_arn       = aws_iam_role.execution.arn
+
+  volume {
+    name = "meltano-data"
+  }
+  volume {
+    name = "meltano-logs"
+    efs_volume_configuration {
+      file_system_id = aws_efs_file_system.meltano_logs.id
+    }
+  }
+
+  container_definitions = jsonencode([
+    local.airflow_task_description
+  ])
+}
+
+resource "aws_ecs_task_definition" "websockets" {
+  family                   = "gainy-websockets-${var.env}"
+  network_mode             = "awsvpc"
+  requires_compatibilities = ["FARGATE"]
+  cpu                      = max(256, local.eod_websockets_cpu_credits + local.polygon_websockets_cpu_credits)
+  memory                   = local.eod_websockets_memory_credits + local.polygon_websockets_memory_credits < 512 ? 512 : ceil((local.eod_websockets_memory_credits + local.polygon_websockets_memory_credits) / 1024) * 1024
+  task_role_arn            = aws_iam_role.task.arn
+  execution_role_arn       = aws_iam_role.execution.arn
+
   container_definitions = jsonencode(
     concat(
       [
-        local.hasura_task_description,
-        local.meltano_airflow_ui_task_description,
-        local.meltano_airflow_scheduler_description,
         local.websockets_eod_task_description,
       ],
       var.env == "production" ? [
@@ -228,12 +264,6 @@ resource "aws_ecs_task_definition" "default" {
       ] : []
     )
   )
-
-  tags = {
-    environment             = var.env
-    source_code_branch      = var.source_code_branch
-    source_code_branch_name = base64encode(var.source_code_branch_name)
-  }
 }
 
 resource "aws_ecs_task_definition" "hasura" {
@@ -242,61 +272,79 @@ resource "aws_ecs_task_definition" "hasura" {
   requires_compatibilities = ["FARGATE"]
   cpu                      = local.hasura_cpu_credits
   memory                   = local.hasura_memory_credits
-  tags                     = {}
   task_role_arn            = aws_iam_role.task.arn
   execution_role_arn       = aws_iam_role.execution.arn
 
   container_definitions = jsonencode([
     local.hasura_replica_task_description
   ])
+
+  tags = {
+    environment             = var.env
+    source_code_branch      = var.source_code_branch
+    source_code_branch_name = base64encode(var.source_code_branch_name)
+  }
 }
 
 ###### Create ALB ######
 
 module "meltano-elb" {
-  source                           = "./elb"
-  name                             = "meltano-airflow"
-  env                              = var.env
-  domain                           = var.domain
-  vpc_id                           = var.vpc_id
-  vpc_default_sg_id                = var.vpc_default_sg_id
-  public_https_sg_id               = var.public_https_sg_id
-  public_http_sg_id                = var.public_http_sg_id
-  public_subnet_ids                = var.public_subnet_ids
-  ecs_cluster_name                 = var.ecs_cluster_name
-  cloudflare_zone_id               = var.cloudflare_zone_id
-  aws_ecs_task_definition_family   = aws_ecs_task_definition.default.family
-  aws_ecs_task_definition_revision = aws_ecs_task_definition.default.revision
+  source             = "./elb"
+  name               = "meltano-airflow"
+  env                = var.env
+  domain             = var.domain
+  vpc_id             = var.vpc_id
+  vpc_default_sg_id  = var.vpc_default_sg_id
+  public_https_sg_id = var.public_https_sg_id
+  public_http_sg_id  = var.public_http_sg_id
+  public_subnet_ids  = var.public_subnet_ids
+  cloudflare_zone_id = var.cloudflare_zone_id
 }
 
 module "hasura-elb" {
-  source                           = "./elb"
-  name                             = "hasura"
-  env                              = var.env
-  domain                           = var.domain
-  vpc_id                           = var.vpc_id
-  vpc_default_sg_id                = var.vpc_default_sg_id
-  public_https_sg_id               = var.public_https_sg_id
-  public_http_sg_id                = var.public_http_sg_id
-  public_subnet_ids                = var.public_subnet_ids
-  ecs_cluster_name                 = var.ecs_cluster_name
-  cloudflare_zone_id               = var.cloudflare_zone_id
-  aws_ecs_task_definition_family   = aws_ecs_task_definition.default.family
-  aws_ecs_task_definition_revision = aws_ecs_task_definition.default.revision
+  source             = "./elb"
+  name               = "hasura"
+  env                = var.env
+  domain             = var.domain
+  vpc_id             = var.vpc_id
+  vpc_default_sg_id  = var.vpc_default_sg_id
+  public_https_sg_id = var.public_https_sg_id
+  public_http_sg_id  = var.public_http_sg_id
+  public_subnet_ids  = var.public_subnet_ids
+  cloudflare_zone_id = var.cloudflare_zone_id
 }
 
 /*
- * Create the main service
+ * Create Scheduler service
  */
-resource "aws_ecs_service" "service" {
-  name                               = "gainy-${var.env}"
+resource "aws_ecs_service" "meltano_scheduler" {
+  name                               = "gainy-scheduler-${var.env}"
+  cluster                            = var.ecs_cluster_name
+  desired_count                      = 1
+  deployment_maximum_percent         = 200
+  deployment_minimum_healthy_percent = 100
+  launch_type                        = "FARGATE"
+  enable_execute_command             = true
+
+  network_configuration {
+    subnets = var.private_subnet_ids
+  }
+
+  task_definition      = "${aws_ecs_task_definition.meltano_scheduler.family}:${aws_ecs_task_definition.meltano_scheduler.revision}"
+  force_new_deployment = true
+}
+
+/*
+ * Create Airflow service
+ */
+resource "aws_ecs_service" "airflow" {
+  name                               = "gainy-airflow-${var.env}"
   cluster                            = var.ecs_cluster_name
   desired_count                      = 1
   deployment_maximum_percent         = 200
   deployment_minimum_healthy_percent = 100
   launch_type                        = "FARGATE"
   health_check_grace_period_seconds  = local.health_check_grace_period_seconds
-  enable_execute_command             = true
 
   load_balancer {
     target_group_arn = module.meltano-elb.aws_alb_target_group.arn
@@ -304,25 +352,18 @@ resource "aws_ecs_service" "service" {
     container_port   = 5001
   }
 
-  load_balancer {
-    target_group_arn = module.hasura-elb.aws_alb_target_group.arn
-    container_name   = "hasura"
-    container_port   = 8080
-  }
-
   network_configuration {
     subnets = var.private_subnet_ids
   }
 
-  task_definition      = "${aws_ecs_task_definition.default.family}:${aws_ecs_task_definition.default.revision}"
+  task_definition      = "${aws_ecs_task_definition.airflow.family}:${aws_ecs_task_definition.airflow.revision}"
   force_new_deployment = true
 }
 
 /*
- * Create Hasura autoscaling service
+ * Create Hasura service
  */
 resource "aws_ecs_service" "hasura" {
-  count                              = var.env == "production" ? 1 : 0
   name                               = "gainy-hasura-${var.env}"
   cluster                            = var.ecs_cluster_name
   desired_count                      = 0
@@ -349,21 +390,19 @@ resource "aws_ecs_service" "hasura" {
   }
 }
 resource "aws_appautoscaling_target" "hasura" {
-  count              = var.env == "production" ? 1 : 0
-  max_capacity       = 4
+  max_capacity       = var.env == "production" ? 2 : 1
   min_capacity       = 1
-  resource_id        = "service/${var.ecs_cluster_name}/${aws_ecs_service.hasura[0].name}"
+  resource_id        = "service/${var.ecs_cluster_name}/${aws_ecs_service.hasura.name}"
   scalable_dimension = "ecs:service:DesiredCount"
   service_namespace  = "ecs"
 }
 
 resource "aws_appautoscaling_policy" "ecs_policy" {
-  count              = var.env == "production" ? 1 : 0
   name               = "policy-gainy-hasura-${var.env}"
   policy_type        = "TargetTrackingScaling"
-  resource_id        = aws_appautoscaling_target.hasura[0].resource_id
-  scalable_dimension = aws_appautoscaling_target.hasura[0].scalable_dimension
-  service_namespace  = aws_appautoscaling_target.hasura[0].service_namespace
+  resource_id        = aws_appautoscaling_target.hasura.resource_id
+  scalable_dimension = aws_appautoscaling_target.hasura.scalable_dimension
+  service_namespace  = aws_appautoscaling_target.hasura.service_namespace
 
   target_tracking_scaling_policy_configuration {
     target_value       = 20000
@@ -374,6 +413,29 @@ resource "aws_appautoscaling_policy" "ecs_policy" {
       predefined_metric_type = "ALBRequestCountPerTarget"
       resource_label         = "${module.hasura-elb.aws_alb.arn_suffix}/${module.hasura-elb.aws_alb_target_group.arn_suffix}"
     }
+  }
+}
+
+/*
+ * Create Websockets service
+ */
+resource "aws_ecs_service" "websockets" {
+  name                               = "gainy-websockets-${var.env}"
+  cluster                            = var.ecs_cluster_name
+  desired_count                      = 1
+  deployment_maximum_percent         = 200
+  deployment_minimum_healthy_percent = 100
+  launch_type                        = "FARGATE"
+
+  network_configuration {
+    subnets = var.private_subnet_ids
+  }
+
+  task_definition      = "${aws_ecs_task_definition.websockets.family}:${aws_ecs_task_definition.websockets.revision}"
+  force_new_deployment = true
+
+  lifecycle {
+    ignore_changes = [desired_count]
   }
 }
 
@@ -390,10 +452,6 @@ output "hasura_url" {
 output "hasura_admin_secret" {
   value     = random_password.hasura.result
   sensitive = true
-}
-
-output "name" {
-  value = aws_ecs_service.service.name
 }
 
 output "public_schema_name" {

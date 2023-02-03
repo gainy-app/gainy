@@ -1,7 +1,5 @@
 {
   "name": "meltano-airflow-ui",
-  "cpu": ${airflow_ui_cpu_credits},
-  "memory": ${airflow_ui_memory_credits},
   "extraHosts": null,
   "dnsServers": null,
   "disableNetworking": null,
@@ -14,7 +12,7 @@
     }
   ],
   "hostname": null,
-  "essential": false,
+  "essential": true,
   "entryPoint": ["/wait.sh"],
   "mountPoints": [
     {
@@ -60,9 +58,6 @@
   "dockerLabels": null,
   "privileged": null,
   "memoryReservation": null,
-  "dependsOn": [
-    { "condition": "HEALTHY", "containerName": "meltano-airflow-scheduler" }
-  ],
   "healthCheck": {
     "command": [ "CMD-SHELL", "curl http://localhost:5001/health | python -c 'import sys, json; data = json.load(sys.stdin); assert data[\"scheduler\"][\"status\"] == \"healthy\"; assert data[\"metadatabase\"][\"status\"] == \"healthy\"'" ],
     "interval": 10,

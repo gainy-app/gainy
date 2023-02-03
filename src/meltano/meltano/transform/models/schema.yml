@@ -60,6 +60,7 @@ sources:
       - name: drivewealth_accounts_positions
       - name: drivewealth_instruments
       - name: drivewealth_funds
+      - name: drivewealth_orders
       - name: drivewealth_users
       - name: drivewealth_portfolio_statuses
       - name: drivewealth_portfolios
