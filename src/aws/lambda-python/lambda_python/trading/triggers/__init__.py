@@ -1,0 +1,1 @@
+from .on_invitation_created_or_updated import OnNewKycStatus

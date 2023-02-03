@@ -15,7 +15,7 @@ def test(monkeypatch):
     monkeypatch.setattr(provider, 'handle_order',
                         mock_record_calls(handle_order_calls))
 
-    event_handler = OrderCreatedEventHandler(repository, provider)
+    event_handler = OrderCreatedEventHandler(repository, provider, None, None)
 
     message = {
         "id": "JK.7f6bbe0d-9341-437a-abf2-f028c2e7eb02",

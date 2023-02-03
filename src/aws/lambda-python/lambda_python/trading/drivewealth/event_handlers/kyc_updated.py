@@ -217,3 +217,4 @@ class KycUpdatedEventHandler(AbstractDriveWealthEventHandler):
         entity = _get_profile_kyc_status(event_payload['current'])
         entity.profile_id = profile_id
         self.repo.persist(entity)
+        self.trading_repository.update_kyc_form(profile_id, entity.status)
