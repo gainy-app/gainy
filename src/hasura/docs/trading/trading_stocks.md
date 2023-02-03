@@ -18,12 +18,14 @@ Generate the trades to make user's TTF holdings look like input params.
 mutation TradingCreateStockOrder(
     $profile_id: Int!
     $symbol: String!
-    $target_amount_delta: Float!
+    $target_amount_delta: Float
+    $target_amount_delta_relative: Float
 ) {
   trading_create_stock_order(
     profile_id: $profile_id
     symbol: $symbol
     target_amount_delta: $target_amount_delta
+    target_amount_delta_relative: $target_amount_delta_relative
   ){
     trading_order_id
   }
