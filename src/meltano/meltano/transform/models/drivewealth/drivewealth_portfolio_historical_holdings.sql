@@ -188,7 +188,11 @@ with portfolio_statuses as
                              value,
                              prev_value,
                              -- CF = EV / (HP + 1) - BV
-                             coalesce(value / (gain + 1) - prev_value, 0) as cash_flow,
+                             case
+                                 when gain > -1
+                                     then coalesce(value / (gain + 1) - prev_value, 0)
+                                 else 0
+                                 end as cash_flow,
                              updated_at
                       from historical_holdings_extended
                                left join ticker_stats using (profile_id, symbol, date)
