@@ -7,13 +7,8 @@ resource "aws_cloudwatch_event_rule" "ecs_events" {
       "aws.ecs"
     ],
     "detail-type" : [
-      "ECS Task State Change",
+      "ECS Deployment State Change",
     ]
-    "detail" : {
-      "clusterArn" : [
-        var.ecs_cluster_arn
-      ]
-    }
   })
 }
 

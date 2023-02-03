@@ -1,15 +1,10 @@
 {
-  "name": "meltano-airflow-scheduler",
-  "cpu": ${airflow_scheduler_cpu_credits},
-  "memory": ${airflow_scheduler_memory_credits},
   "extraHosts": null,
   "dnsServers": null,
   "disableNetworking": null,
   "dnsSearchDomains": null,
   "portMappings": [],
   "hostname": null,
-  "essential": true,
-  "entryPoint": ["/init.sh"],
   "mountPoints": [
     {
       "containerPath" : "/project/.meltano/run/airflow",
@@ -146,16 +141,10 @@
   "workingDirectory": null,
   "readonlyRootFilesystem": null,
   "image": "${meltano_image}",
-  "command": ["invoke", "airflow", "scheduler"],
   "user": null,
   "dockerLabels": null,
   "privileged": null,
   "memoryReservation": null,
-  "healthCheck": {
-    "command": [ "CMD-SHELL", "nc -z localhost 8793" ],
-    "interval": 10,
-    "retries": 2
-  },
   "logConfiguration": {
     "logDriver": "awslogs",
     "options": {

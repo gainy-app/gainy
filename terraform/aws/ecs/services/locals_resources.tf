@@ -1,17 +1,10 @@
 # https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task-cpu-memory-error.html
 locals {
-  eod_websockets_cpu_credits     = var.env == "production" ? 128 : 0
+  eod_websockets_cpu_credits     = var.env == "production" ? 128 : 128
   polygon_websockets_cpu_credits = var.env == "production" ? 128 : 0
   hasura_cpu_credits             = var.env == "production" ? 512 : 256
-  meltano_ui_cpu_credits         = var.env == "production" ? 256 : 128
-  meltano_scheduler_cpu_credits  = var.env == "production" ? 2560 : 1536
-  main_cpu_credits = ceil(sum([
-    local.eod_websockets_cpu_credits,
-    local.polygon_websockets_cpu_credits,
-    local.hasura_cpu_credits,
-    local.meltano_ui_cpu_credits,
-    local.meltano_scheduler_cpu_credits,
-  ]) / 1024) * 1024
+  airflow_cpu_credits            = var.env == "production" ? 256 : 256
+  meltano_scheduler_cpu_credits  = var.env == "production" ? 4096 : 4096
 
   upstream_pool_size                  = var.env == "production" ? 3 : 1
   downstream_pool_size                = var.env == "production" ? 2 : 1
@@ -25,13 +18,6 @@ locals {
   eod_websockets_memory_credits     = var.env == "production" ? 512 : 256
   polygon_websockets_memory_credits = var.env == "production" ? 1024 : 0
   hasura_memory_credits             = var.env == "production" ? 1024 : 1024
-  meltano_ui_memory_credits         = var.env == "production" ? 1024 : 1024
-  meltano_scheduler_memory_credits  = var.env == "production" ? 5632 : 3840
-  main_memory_credits = ceil(sum([
-    local.hasura_memory_credits,
-    local.meltano_ui_memory_credits,
-    local.meltano_scheduler_memory_credits,
-    local.eod_websockets_memory_credits,
-    local.polygon_websockets_memory_credits,
-  ]) / 1024) * 1024
+  airflow_memory_credits            = var.env == "production" ? 1024 : 1024
+  meltano_scheduler_memory_credits  = var.env == "production" ? 8192 : 8192
 }
