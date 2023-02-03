@@ -17,14 +17,14 @@ with portfolio_statuses as
              select distinct on (profile_id, date) *
              from (
                       select profile_id,
-                             drivewealth_portfolio_statuses.created_at::timestamp                   as updated_at,
-                             (drivewealth_portfolio_statuses.created_at - interval '5 hours')::date as date,
+                             drivewealth_portfolio_statuses.created_at         as updated_at,
+                             drivewealth_portfolio_statuses.date,
                              case
                                  when drivewealth_portfolio_statuses.cash_actual_weight > 0
                                      then cash_value / drivewealth_portfolio_statuses.cash_actual_weight
                                  else drivewealth_portfolio_statuses.equity_value
-                                 end                                                                as value,
-                             drivewealth_portfolio_statuses.data -> 'holdings'                      as holdings
+                                 end                                           as value,
+                             drivewealth_portfolio_statuses.data -> 'holdings' as holdings
                       from {{ source('app', 'drivewealth_portfolio_statuses') }}
                                join {{ source('app', 'drivewealth_portfolios') }}
                                     on drivewealth_portfolios.ref_id = drivewealth_portfolio_id
@@ -125,13 +125,10 @@ with portfolio_statuses as
                       ),
                   filled_orders as
                       (
-                          -- todo refactor orders
                           select profile_id,
                                  symbol,
-                                 case when drivewealth_orders.data ->> 'side' = 'SELL' then -1 else 1 end *
-                                 abs((drivewealth_orders.data ->> 'totalOrderAmount')::numeric) as amount,
-                                 last_executed_at,
-                                 (last_executed_at AT TIME ZONE 'America/New_York')::date       as date
+                                 total_order_amount_normalized as amount,
+                                 drivewealth_orders.date
                           from {{ source('app', 'drivewealth_orders') }}
                                    join {{ source('app', 'drivewealth_accounts') }} on drivewealth_accounts.ref_id = drivewealth_orders.account_id
                                    join {{ source('app', 'drivewealth_users') }} on drivewealth_users.ref_id = drivewealth_accounts.drivewealth_user_id

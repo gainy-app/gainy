@@ -1,16 +1,12 @@
 {{
   config(
-    materialized = "incremental",
-    unique_key = "holding_id_v2",
-    tags = ["realtime"],
-    post_hook=[
-      pk('holding_id_v2'),
-    ]
+    materialized = "view",
   )
 }}
 
 -- HP = EV / (BV + CF) - 1
-select drivewealth_holdings.holding_id_v2,
+select drivewealth_holdings.profile_id,
+       drivewealth_holdings.holding_id_v2,
        actual_value,
        case
            when prev_value_1d + cash_flow_sum_1d > 0
@@ -47,6 +43,7 @@ select drivewealth_holdings.holding_id_v2,
                then actual_value / cash_flow_sum_total - 1
            end                                         as relative_gain_total,
        actual_value - cash_flow_sum_total              as absolute_gain_total,
+       0                                               as ltt_quantity_total, -- TODO calculate
        drivewealth_portfolio_historical_holdings_marked.updated_at
 from {{ ref('drivewealth_holdings') }}
          left join {{ ref('drivewealth_portfolio_historical_holdings_marked') }}

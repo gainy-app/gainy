@@ -11,7 +11,7 @@
 
 with expanded_holdings as
          (
-             select profile_holdings_normalized_all.profile_id,
+             select profile_id,
                     max(portfolio_holding_gains.updated_at) as updated_at,
                     sum(actual_value::numeric)              as actual_value,
                     sum(absolute_gain_1d::numeric)          as absolute_gain_1d,
@@ -22,25 +22,51 @@ with expanded_holdings as
                     sum(absolute_gain_5y::numeric)          as absolute_gain_5y,
                     sum(absolute_gain_total::numeric)       as absolute_gain_total
              from {{ ref('portfolio_holding_gains') }}
-                      join {{ ref('profile_holdings_normalized_all') }} using (holding_id_v2)
-             where not profile_holdings_normalized_all.is_hidden
-             group by profile_holdings_normalized_all.profile_id
+             group by profile_id
          )
 -- HP = EV / (BV + CF) - 1
 select profile_id,
        greatest(
            expanded_holdings.updated_at,
            trading_profile_status.updated_at
-           )::timestamp                                                               as updated_at,
+           )::timestamp                                    as updated_at,
        (actual_value + coalesce(buying_power, 0) +
-        coalesce(pending_orders_sum, 0))::double precision                            as actual_value,
-       (actual_value / (actual_value - absolute_gain_1d) - 1)::double precision    as relative_gain_1d,
-       (actual_value / (actual_value - absolute_gain_1w) - 1)::double precision    as relative_gain_1w,
-       (actual_value / (actual_value - absolute_gain_1m) - 1)::double precision    as relative_gain_1m,
-       (actual_value / (actual_value - absolute_gain_3m) - 1)::double precision    as relative_gain_3m,
-       (actual_value / (actual_value - absolute_gain_1y) - 1)::double precision    as relative_gain_1y,
-       (actual_value / (actual_value - absolute_gain_5y) - 1)::double precision    as relative_gain_5y,
-       (actual_value / (actual_value - absolute_gain_total) - 1)::double precision as relative_gain_total,
+        coalesce(pending_orders_sum, 0))::double precision as actual_value,
+       case
+           when abs(actual_value - absolute_gain_1d) < 1e-3
+               then 1
+           else actual_value / (actual_value - absolute_gain_1d) - 1
+           end::double precision                           as relative_gain_1d,
+       case
+           when abs(actual_value - absolute_gain_1w) < 1e-3
+               then 1
+           else actual_value / (actual_value - absolute_gain_1w) - 1
+           end::double precision                           as relative_gain_1w,
+       case
+           when abs(actual_value - absolute_gain_1m) < 1e-3
+               then 1
+           else actual_value / (actual_value - absolute_gain_1m) - 1
+           end::double precision                           as relative_gain_1m,
+       case
+           when abs(actual_value - absolute_gain_3m) < 1e-3
+               then 1
+           else actual_value / (actual_value - absolute_gain_3m) - 1
+           end::double precision                           as relative_gain_3m,
+       case
+           when abs(actual_value - absolute_gain_1y) < 1e-3
+               then 1
+           else actual_value / (actual_value - absolute_gain_1y) - 1
+           end::double precision                           as relative_gain_1y,
+       case
+           when abs(actual_value - absolute_gain_5y) < 1e-3
+               then 1
+           else actual_value / (actual_value - absolute_gain_5y) - 1
+           end::double precision                           as relative_gain_5y,
+       case
+           when abs(actual_value - absolute_gain_total) < 1e-3
+               then 1
+           else actual_value / (actual_value - absolute_gain_total) - 1
+           end::double precision                           as relative_gain_total,
        absolute_gain_1d::double precision,
        absolute_gain_1w::double precision,
        absolute_gain_1m::double precision,
