@@ -107,7 +107,7 @@ locals {
         "command" : ["CMD-SHELL", "nc -z localhost 8793"],
         "interval" : 10,
         "retries" : 2,
-        "startPeriod": 10
+        "startPeriod" : 10
       }
       dependsOn = [
         { "condition" : "SUCCESS", "containerName" : "meltano-airflow-initializer" }
