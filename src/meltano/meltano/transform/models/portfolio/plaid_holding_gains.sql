@@ -8,7 +8,7 @@
       'delete from {{this}}
         using {{this}} AS t
         LEFT OUTER JOIN {{ ref(\'profile_holdings_normalized_all\') }} using (holding_id_v2)
-        WHERE portfolio_holding_gains.holding_id_v2 = t.holding_id_v2
+        WHERE profile_holdings_normalized_all.holding_id_v2 = t.holding_id_v2
           AND profile_holdings_normalized_all.holding_id_v2 is null',
     ]
   )

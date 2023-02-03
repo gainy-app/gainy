@@ -9,11 +9,10 @@ with latest_portfolio_status as
          (
              select distinct on (
                  drivewealth_portfolio_id,
-                 created_at::date
-                 ) created_at::date as date,
-                   drivewealth_portfolio_statuses.*
+                 date
+                 ) drivewealth_portfolio_statuses.*
              from {{ source('app', 'drivewealth_portfolio_statuses') }}
-             order by drivewealth_portfolio_id, created_at::date, created_at desc
+             order by drivewealth_portfolio_id, date, created_at desc
          ),
      portfolio_funds as
          (
