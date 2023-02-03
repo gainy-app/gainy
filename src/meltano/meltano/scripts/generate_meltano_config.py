@@ -20,28 +20,6 @@ def _split_schedule(tap: str, tap_canonical: str, template, env, split_id,
     return new_schedule
 
 
-def get_polygon_realtime_tickers() -> list:
-    full_refresh_symbols = set()
-    try:
-        with db_connect() as db_conn:
-            with db_conn.cursor() as cursor:
-                cursor.execute("""
-                    select case
-                        when type = 'crypto'
-                            then regexp_replace(symbol, '^(\w*)\.CC$', 'X:\1')
-                            else regexp_replace(symbol, '-P', 'p')
-                    end as symbol
-                    from base_tickers
-                    where type != 'index'
-                """)
-                symbols = map(itemgetter(0), cursor.fetchall())
-                full_refresh_symbols.update(symbols)
-    except psycopg2.errors.UndefinedTable:
-        pass
-
-    return list(full_refresh_symbols)
-
-
 def _generate_schedules(env):
     schedules = config['schedules']
     for tap in [
