@@ -28,7 +28,7 @@ from (
                 relative_gain_5y,
                 relative_gain_total,
                 ltt_quantity_total,
-                updated_at
+                updated_at::timestamp
          from {{ ref('plaid_holding_gains') }}
 
          union all
@@ -50,7 +50,7 @@ from (
                 relative_gain_5y,
                 relative_gain_total,
                 ltt_quantity_total,
-                updated_at
+                updated_at::timestamp
          from {{ ref('drivewealth_portfolio_holding_gains') }}
      ) t
          join {{ ref('profile_holdings_normalized_all') }} using (holding_id_v2)
