@@ -13,8 +13,6 @@ plugins:
         - state
       settings:
         - name: api_token
-        - name: streams
-          kind: array
         - name: exchanges
           kind: array
         - name: exchange_symbols_limit
@@ -25,17 +23,15 @@ plugins:
         - name: split_id
         - name: split_num
         - name: full_refresh_symbols
-      config:
-        streams:
-          - eod_fundamentals
-          - eod_options
+      select:
+        - eod_fundamentals.*
+        - eod_options.*
 
     - name: tap-eodhistoricaldata-prices
       inherit_from: tap-eodhistoricaldata
-      config:
-        streams:
-          - eod_dividends
-          - eod_historical_prices
+      select:
+        - eod_dividends.*
+        - eod_historical_prices.*
 
     - name: tap-polygon
       namespace: tap_polygon
@@ -55,8 +51,18 @@ plugins:
           kind: array
         - name: stock_symbols
           kind: array
+        - name: realtime_symbols
+          kind: array
+        - name: realtime
         - name: split_id
         - name: split_num
+
+    - name: tap-polygon-intraday
+      inherit_from: tap-polygon
+      config:
+        realtime: true
+      select:
+        - polygon_intraday_prices_launchpad.*
 
     - name: tap-coingecko
       namespace: tap_coingecko
@@ -272,14 +278,14 @@ plugins:
 
   transformers:
     - name: dbt
-      pip_url: dbt-postgres==1.2.1
+      pip_url: dbt-postgres==1.3.1
       config:
         target: postgres
         models: '*'
 
   orchestrators:
     - name: airflow
-      pip_url: psycopg2-binary==2.9.3 apache-airflow==2.4.1 --constraint https://raw.githubusercontent.com/apache/airflow/constraints-2.4.1/constraints-${MELTANO__PYTHON_VERSION}.txt
+      pip_url: psycopg2-binary==2.9.5 apache-airflow==2.5.0 --constraint https://raw.githubusercontent.com/apache/airflow/constraints-2.5.0/constraints-${MELTANO__PYTHON_VERSION}.txt
       config:
         core:
           sql_alchemy_conn: $AIRFLOW_DATABASE_URI
@@ -309,6 +315,15 @@ schedules:
     start_date: 2021-09-03 13:52:48.598227
     env:
       TARGET_ENVS: '["production","local"]'
+
+  - name: polygon-intraday-to-postgres
+    extractor: tap-polygon-intraday
+    loader: target-postgres
+    transform: skip
+    interval: '@daily'
+    start_date: 2021-09-03 13:52:48.598227
+    env:
+      TARGET_ENVS: '[]'
 
   - name: bigquery-to-postgres
     extractor: tap-bigquery

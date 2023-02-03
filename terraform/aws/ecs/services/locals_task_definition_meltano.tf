@@ -19,6 +19,7 @@ locals {
     eodhistoricaldata_prices_jobs_count = local.eodhistoricaldata_prices_jobs_count
     coingecko_jobs_count                = local.coingecko_jobs_count
     polygon_jobs_count                  = local.polygon_jobs_count
+    polygon_intraday_jobs_count         = local.polygon_intraday_jobs_count
     pg_transform_schema                 = local.public_schema_name
     meltano_image                       = docker_registry_image.meltano.name
     aws_log_group_name                  = aws_cloudwatch_log_group.meltano.name
@@ -39,7 +40,6 @@ locals {
     eodhistoricaldata_api_token          = var.eodhistoricaldata_api_token
     eodhistoricaldata_exchanges          = jsonencode(["NASDAQ", "NYSE", "CC", "INDX"])
     polygon_crypto_symbols               = jsonencode(["CRVUSD"])
-    polygon_stock_exchanges              = jsonencode(["XNAS", "XNYS"])
     pg_load_schema                       = "raw_data"
     dbt_threads                          = 3
     pg_production_host                   = var.pg_production_host
