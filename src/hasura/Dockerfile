@@ -9,4 +9,4 @@ COPY hasura_tests /hasura_tests
 FROM production as test
 
 RUN apt update && apt install -y libpq-dev
-RUN pip3 install psycopg2-binary==2.9.3
+RUN pip3 install psycopg2-binary==2.9.5

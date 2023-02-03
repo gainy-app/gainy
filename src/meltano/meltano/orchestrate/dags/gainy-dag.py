@@ -8,12 +8,13 @@ tags = {
 }
 
 # DAG
+is_paused_upon_creation = ENV == "local"
 dag_id = "gainy-dag"
 dag = create_dag(
     dag_id,
     tags=list(tags),
     schedule_interval="0 4 * * *" if ENV == "production" else "0 6 * * *",
-    is_paused_upon_creation=True)
+    is_paused_upon_creation=is_paused_upon_creation)
 
 # Operators
 upstream = []
@@ -21,7 +22,9 @@ downstream = []
 
 for schedule in schedules:
     pool = None
-    if not schedule['downstream']:
+    if schedule['name'].startswith('polygon'):
+        pool = "polygon"
+    elif not schedule['downstream']:
         pool = "upstream"
 
     operator = BashOperator(

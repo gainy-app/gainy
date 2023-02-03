@@ -62,7 +62,7 @@ def get_meltano_command(meltano_cmd: str) -> str:
     return f"cd {MELTANO_PROJECT_ROOT}; {get_meltano_bin()} {meltano_cmd}"
 
 
-def get_schedules():
+def get_schedules(include_skipped=False):
     result = subprocess.run(
         [get_meltano_bin(), "schedule", "list", "--format=json"],
         cwd=MELTANO_PROJECT_ROOT,
@@ -84,5 +84,8 @@ def get_schedules():
 
         schedule['downstream'] = "DOWNSTREAM" == env.get(
             'INTEGRATION', 'UPSTREAM')
+
+    if include_skipped:
+        return schedules
 
     return list(filter(lambda schedule: not schedule['skipped'], schedules))
