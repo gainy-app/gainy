@@ -10,6 +10,8 @@ message = {
     "accountID": "7b746acb-0afa-42c3-9c94-1bc8c16ce7b2.1661277115494",
     "symbol": "GOOG",
     "lastExecuted": "2022-11-07T14:31:20.187Z",
+    "side": "BUY",
+    "totalOrderAmount": 1,
 }
 
 
