@@ -266,7 +266,8 @@ type Mutation {
   trading_create_stock_order(
     profile_id: Int!
     symbol: String!
-    target_amount_delta: Float!
+    target_amount_delta: Float
+    target_amount_delta_relative: Float
   ): TradingCreateStockOrderOutput
 }
 
@@ -326,7 +327,8 @@ type Mutation {
     profile_id: Int!
     collection_id: Int!
     weights: [TickerWeight]
-    target_amount_delta: Float!
+    target_amount_delta: Float
+    target_amount_delta_relative: Float
   ): TradingCollectionVersionOutput
 }
 
