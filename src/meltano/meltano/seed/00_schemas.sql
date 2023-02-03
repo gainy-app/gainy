@@ -14,9 +14,9 @@ create table if not exists raw_data.eod_intraday_prices
     close       numeric,
     volume      numeric,
     granularity int,
-    constraint intraday_prices_pk
-        primary key (time, symbol)
+    primary key (symbol, time)
 );
+create index if not exists "eod_intraday_prices_time" on raw_data.eod_intraday_prices (time);
 
 create table if not exists raw_data.polygon_intraday_prices_launchpad
 (
@@ -35,6 +35,7 @@ create table if not exists raw_data.polygon_intraday_prices_launchpad
     vw                double precision,
     primary key (symbol, t)
 );
+create index if not exists "polygon_intraday_prices_launchpad_time" on raw_data.polygon_intraday_prices_launchpad (t);
 
 create table if not exists raw_data.auto_ticker_industries
 (

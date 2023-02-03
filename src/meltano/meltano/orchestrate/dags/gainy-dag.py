@@ -22,7 +22,9 @@ downstream = []
 
 for schedule in schedules:
     pool = None
-    if not schedule['downstream']:
+    if schedule['name'].startswith('polygon'):
+        pool = "polygon"
+    elif not schedule['downstream']:
         pool = "upstream"
 
     operator = BashOperator(
