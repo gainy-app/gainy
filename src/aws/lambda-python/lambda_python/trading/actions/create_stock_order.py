@@ -34,10 +34,6 @@ class TradingCreateStockOrder(HasuraAction):
                 raise BadRequestException(
                     'target_amount_delta_relative must be within [-1, 1].')
 
-            holding_amount = context_container.trading_repository.get_ticker_holding_value(
-                profile_id, symbol)
-            target_amount_delta = target_amount_delta_relative * holding_amount
-
         trading_account_id = context_container.trading_repository.get_trading_account(
             profile_id).id
 
