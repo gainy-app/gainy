@@ -38,7 +38,16 @@ with
                     interval '1 minute' *
                     mod(extract(minutes from dd)::int, {{ minutes }}) as time_truncated
              from {{ ref('week_trading_sessions_static') }}
-                      join generate_series(open_at, least(now(), close_at - interval '1 second'), interval '{{ minutes }} minutes') dd on true
+                      join generate_series(open_at,
+                                           least(
+                                                   now(),
+                                                   close_at - interval '1 second',
+                                                   (
+                                                       select to_timestamp(max(t) / 1000)
+                                                       from {{ source('polygon', 'polygon_intraday_prices_launchpad') }}
+                                                   )
+                                               ),
+                                           interval '{{ minutes }} minutes') dd on true
 {% if is_incremental() and var('realtime') %}
                       join max_date using (symbol)
              where dd > max_date.datetime - interval '30 minutes'
