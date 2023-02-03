@@ -1,1 +1,2 @@
 from .ecs_task_state_changed import ECSTaskStateChangeEventHandler
+from .ecs_deployment_state_changed import ECSDeploymentStateChangeEventHandler
