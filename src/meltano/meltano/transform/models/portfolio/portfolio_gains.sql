@@ -1,11 +1,6 @@
 {{
   config(
-    materialized = "incremental",
-    unique_key = "profile_id",
-    tags = ["realtime"],
-    post_hook=[
-      index('profile_id', true),
-    ]
+    materialized = "view",
   )
 }}
 

@@ -1,36 +1,26 @@
 {{
   config(
-    materialized = "incremental",
-    unique_key = "holding_group_id",
-    tags = ["realtime"],
-    post_hook=[
-      pk('holding_group_id'),
-      'create index if not exists "profile_id__ticker_symbol" ON {{ this }} (profile_id, ticker_symbol)',
-      'create index if not exists "profile_id__collection_id" ON {{ this }} (profile_id, collection_id)',
-    ]
+    materialized = "view",
   )
 }}
 
 
 with holding_groups0 as
          (
-             select profile_holdings_normalized_all.holding_group_id,
-                    greatest(max(portfolio_holding_gains.updated_at),
-                             max(profile_holdings_normalized_all.updated_at)) as updated_at,
-                    sum(portfolio_holding_gains.actual_value::numeric)        as actual_value,
-                    sum(portfolio_holding_gains.ltt_quantity_total::numeric)  as ltt_quantity_total,
-                    sum(portfolio_holding_gains.absolute_gain_1d::numeric)    as absolute_gain_1d,
-                    sum(portfolio_holding_gains.absolute_gain_1w::numeric)    as absolute_gain_1w,
-                    sum(portfolio_holding_gains.absolute_gain_1m::numeric)    as absolute_gain_1m,
-                    sum(portfolio_holding_gains.absolute_gain_3m::numeric)    as absolute_gain_3m,
-                    sum(portfolio_holding_gains.absolute_gain_1y::numeric)    as absolute_gain_1y,
-                    sum(portfolio_holding_gains.absolute_gain_5y::numeric)    as absolute_gain_5y,
-                    sum(portfolio_holding_gains.absolute_gain_total::numeric) as absolute_gain_total
+             select holding_group_id,
+                    max(updated_at)                   as updated_at,
+                    sum(actual_value::numeric)        as actual_value,
+                    sum(ltt_quantity_total::numeric)  as ltt_quantity_total,
+                    sum(absolute_gain_1d::numeric)    as absolute_gain_1d,
+                    sum(absolute_gain_1w::numeric)    as absolute_gain_1w,
+                    sum(absolute_gain_1m::numeric)    as absolute_gain_1m,
+                    sum(absolute_gain_3m::numeric)    as absolute_gain_3m,
+                    sum(absolute_gain_1y::numeric)    as absolute_gain_1y,
+                    sum(absolute_gain_5y::numeric)    as absolute_gain_5y,
+                    sum(absolute_gain_total::numeric) as absolute_gain_total
              from {{ ref('portfolio_holding_gains') }}
-                      join {{ ref('profile_holdings_normalized_all') }} using (holding_id_v2)
-             where profile_holdings_normalized_all.holding_group_id is not null
-               and not profile_holdings_normalized_all.is_hidden
-             group by profile_holdings_normalized_all.holding_group_id
+             where portfolio_holding_gains.holding_group_id is not null
+             group by portfolio_holding_gains.holding_group_id
          ),
      holding_groups as
          (

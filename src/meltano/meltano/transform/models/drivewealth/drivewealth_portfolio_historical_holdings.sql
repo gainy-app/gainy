@@ -6,11 +6,14 @@
     post_hook=[
       pk('profile_id, holding_id_v2, symbol, date'),
       index('id', true),
+      index('portfolio_status_id', false),
       'create index if not exists "dphh_profile_id_holding_id_v2_symbol_date_week" ON {{ this }} (profile_id, holding_id_v2, symbol, date_week)',
       'create index if not exists "dphh_profile_id_holding_id_v2_symbol_date_month" ON {{ this }} (profile_id, holding_id_v2, symbol, date_month)',
     ]
   )
 }}
+
+-- IF CHANGED - CHANGE drivewealth_latest_cashflow.SQL AS WELL
 
 with portfolio_statuses as
          (
@@ -18,6 +21,7 @@ with portfolio_statuses as
              from (
                       select profile_id,
                              drivewealth_portfolio_statuses.created_at         as updated_at,
+                             drivewealth_portfolio_statuses.id                 as portfolio_status_id,
                              drivewealth_portfolio_statuses.date,
                              case
                                  when drivewealth_portfolio_statuses.cash_actual_weight > 0
@@ -34,6 +38,7 @@ with portfolio_statuses as
      portfolio_status_funds as
          (
              select profile_id,
+                    portfolio_status_id,
                     date,
                     value,
                     updated_at,
@@ -45,6 +50,7 @@ with portfolio_statuses as
              select portfolio_status_funds.profile_id,
                     portfolio_status_funds.date,
                     drivewealth_funds.collection_id,
+                    portfolio_status_id,
                     portfolio_status_funds.updated_at,
                     portfolio_holding_data,
                     json_array_elements(portfolio_holding_data -> 'holdings') as fund_holding_data
@@ -63,6 +69,7 @@ with portfolio_statuses as
                         end                                                         as holding_id_v2,
                     normalize_drivewealth_symbol(fund_holding_data ->> 'symbol') as symbol,
                     collection_id,
+                    portfolio_status_id,
                     date,
                     (fund_holding_data ->> 'value')::numeric                        as value,
                     updated_at
@@ -97,7 +104,8 @@ with portfolio_statuses as
          (
              select profile_id,
                     holding_id_v2,
-                    LAST_VALUE_IGNORENULLS(collection_id) over wnd as collection_id,
+                    LAST_VALUE_IGNORENULLS(portfolio_status_id) over wnd as portfolio_status_id,
+                    LAST_VALUE_IGNORENULLS(collection_id) over wnd       as collection_id,
                     symbol,
                     date,
                     relative_daily_gain,
@@ -116,6 +124,7 @@ with portfolio_statuses as
                                  date,
                                  collection_id,
                                  symbol,
+                                 portfolio_status_id,
                                  relative_daily_gain,
                                  value,
                                  coalesce(lag(value) over wnd, 0) as prev_value,
@@ -163,6 +172,7 @@ with portfolio_statuses as
                     profile_id,
                     collection_id,
                     symbol,
+                    portfolio_status_id,
                     date,
                     value,
                     prev_value,
@@ -180,6 +190,7 @@ with portfolio_statuses as
                              profile_id,
                              collection_id,
                              symbol,
+                             portfolio_status_id,
                              date,
                              relative_daily_gain,
                              value,
@@ -205,6 +216,7 @@ with portfolio_statuses as
      data_extended3 as
          (
              select profile_id,
+                    portfolio_status_id,
                     holding_id_v2,
                     collection_id,
                     symbol,
