@@ -107,25 +107,41 @@ from (
                               sum(abs_amount_sum) as abs_amount_sum,
                               max(updated_at) as updated_at
                        from (
-                                -- todo link trading_collection_versions to trading_account
                                 select profile_id,
-                                       sum(target_amount_delta)      as amount_sum,
-                                       sum(abs(target_amount_delta)) as abs_amount_sum,
-                                       max(updated_at)               as updated_at
-                                from {{ source('app', 'trading_collection_versions') }}
-                                where status in ('PENDING_EXECUTION', 'PENDING')
-                                group by profile_id
+                                       greatest(t.amount_sum, -trading_profile_collection_status.actual_value) as amount_sum,
+                                       t.abs_amount_sum,
+                                       t.updated_at
+                                from (
+                                         -- todo link trading_collection_versions to trading_account
+                                         select profile_id,
+                                                collection_id,
+                                                sum(target_amount_delta)      as amount_sum,
+                                                sum(abs(target_amount_delta)) as abs_amount_sum,
+                                                max(updated_at)               as updated_at
+                                         from {{ source('app', 'trading_collection_versions') }}
+                                         where status in ('PENDING_EXECUTION', 'PENDING')
+                                         group by profile_id, collection_id
+                                     ) t
+                                         join {{ ref('trading_profile_collection_status') }} using (profile_id, collection_id)
 
                                 union all
 
-                                -- todo link trading_orders to trading_account
                                 select profile_id,
-                                       sum(target_amount_delta)      as amount_sum,
-                                       sum(abs(target_amount_delta)) as abs_amount_sum,
-                                       max(updated_at)               as updated_at
-                                from {{ source('app', 'trading_orders') }}
-                                where status in ('PENDING_EXECUTION', 'PENDING')
-                                group by profile_id
+                                       greatest(t.amount_sum, -trading_profile_ticker_status.actual_value) as amount_sum,
+                                       t.abs_amount_sum,
+                                       t.updated_at
+                                from (
+                                         -- todo link trading_orders to trading_account
+                                         select profile_id,
+                                                symbol,
+                                                sum(target_amount_delta)      as amount_sum,
+                                                sum(abs(target_amount_delta)) as abs_amount_sum,
+                                                max(updated_at)               as updated_at
+                                         from {{ source('app', 'trading_orders') }}
+                                         where status in ('PENDING_EXECUTION', 'PENDING')
+                                         group by profile_id, symbol
+                                     ) t
+                                         join {{ ref('trading_profile_ticker_status') }} using (profile_id, symbol)
                             ) t
                        group by profile_id
                    ) pending_order_stats using (profile_id)
