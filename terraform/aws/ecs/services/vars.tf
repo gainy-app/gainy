@@ -34,6 +34,7 @@ variable "algolia_indexing_key" {}
 variable "datadog_api_key" {}
 variable "datadog_app_key" {}
 variable "polygon_api_token" {}
+variable "polygon_api_token_websockets" {}
 variable "coingecko_api_key" {}
 variable "private_subnet_ids" {}
 variable "pg_external_access_host" {}
