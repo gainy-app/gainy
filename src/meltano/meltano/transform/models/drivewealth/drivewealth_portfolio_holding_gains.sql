@@ -40,7 +40,8 @@ select profile_id,
                then (actual_value - cash_flow_sum_5y) / prev_value_5y - 1
            end                                         as relative_gain_5y,
        null::double precision                          as relative_gain_total,
-       0                                               as ltt_quantity_total -- TODO calculate
+       0                                               as ltt_quantity_total, -- TODO calculate
+       now()::timestamp                                as updated_at
 from (
     select drivewealth_holdings.profile_id,
            drivewealth_holdings.holding_id_v2,
