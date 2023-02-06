@@ -6,6 +6,7 @@
     post_hook=[
       pk('symbol, time'),
       index('id', true),
+      index('time'),
       'create index if not exists "symbol__time_3min" ON {{ this }} (symbol, time_3min)',
       'create index if not exists "symbol__time_15min" ON {{ this }} (symbol, time_15min)',
     ]

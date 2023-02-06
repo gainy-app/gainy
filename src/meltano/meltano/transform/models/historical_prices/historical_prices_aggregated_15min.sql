@@ -42,10 +42,7 @@ with
                                            least(
                                                    now(),
                                                    close_at - interval '1 second',
-                                                   (
-                                                       select to_timestamp(max(t) / 1000)
-                                                       from {{ source('polygon', 'polygon_intraday_prices_launchpad') }}
-                                                   )
+                                                   (select max(time) from {{ ref('historical_intraday_prices') }})
                                                ),
                                            interval '{{ minutes }} minutes') dd on true
 {% if is_incremental() and var('realtime') %}
