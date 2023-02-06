@@ -907,10 +907,6 @@ models:
 
   - name: portfolio_holding_gains
     columns:
-      - name: holding_id
-        tests:
-          - type:
-              type: 'integer'
       - name: holding_id_v2
         tests:
           - type:
@@ -999,10 +995,6 @@ models:
         tests:
           - type:
               type: 'integer'
-      - name: ticker_symbol
-        tests:
-          - type:
-              type: 'text'
       - name: updated_at
         tests:
           - type:
@@ -2133,10 +2125,6 @@ models:
         tests:
           - type:
               type: 'text'
-      - name: is_realtime
-        tests:
-          - type:
-              type: 'boolean'
 
   - name: historical_intraday_prices
     columns:

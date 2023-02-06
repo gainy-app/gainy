@@ -108,7 +108,7 @@ from (
                               max(updated_at) as updated_at
                        from (
                                 select profile_id,
-                                       greatest(t.amount_sum, -trading_profile_collection_status.actual_value) as amount_sum,
+                                       t.amount_sum,
                                        t.abs_amount_sum,
                                        t.updated_at
                                 from (
@@ -122,12 +122,11 @@ from (
                                          where status in ('PENDING_EXECUTION', 'PENDING')
                                          group by profile_id, collection_id
                                      ) t
-                                         join {{ ref('trading_profile_collection_status') }} using (profile_id, collection_id)
 
                                 union all
 
                                 select profile_id,
-                                       greatest(t.amount_sum, -trading_profile_ticker_status.actual_value) as amount_sum,
+                                       t.amount_sum,
                                        t.abs_amount_sum,
                                        t.updated_at
                                 from (
@@ -141,7 +140,6 @@ from (
                                          where status in ('PENDING_EXECUTION', 'PENDING')
                                          group by profile_id, symbol
                                      ) t
-                                         join {{ ref('trading_profile_ticker_status') }} using (profile_id, symbol)
                             ) t
                        group by profile_id
                    ) pending_order_stats using (profile_id)

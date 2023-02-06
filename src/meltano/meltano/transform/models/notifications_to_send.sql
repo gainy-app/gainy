@@ -179,12 +179,14 @@ with data as
                    'f4c2e5bb-5cff-4776-8abf-dd320f91800b'                               as template_id
             from (
                      select distinct on (
-                         profile_id
-                         ) profile_id,
+                         portfolio_holding_group_gains.profile_id
+                         ) portfolio_holding_group_gains.profile_id,
                            ticker_symbol as symbol
                      from {{ ref('portfolio_holding_group_gains') }}
+                              join {{ ref('portfolio_holding_group_details') }} using (holding_group_id)
                      where relative_gain_1m < 0
-                     order by profile_id, relative_gain_1m
+                       and ticker_symbol is not null
+                     order by portfolio_holding_group_gains.profile_id, relative_gain_1m
                 ) t
                      join {{ source('app', 'profiles') }} on profiles.id = t.profile_id
                      join {{ ref('exchange_schedule') }} on exchange_schedule.country_name = 'USA' and exchange_schedule.date = now()::date

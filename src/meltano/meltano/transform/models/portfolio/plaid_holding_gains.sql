@@ -5,6 +5,7 @@
     tags = ["realtime"],
     post_hook=[
       pk('holding_id_v2'),
+      index(['profile_id', 'holding_id_v2'], false),
       'delete from {{this}}
         using {{this}} AS t
         LEFT OUTER JOIN {{ ref(\'profile_holdings_normalized_all\') }} using (holding_id_v2)
@@ -154,7 +155,8 @@ with long_term_tax_holdings as
     )
 -- HP = EV / (BV + CF) - 1
 select holding_id_v2,
-       updated_at,
+       profile_id,
+       updated_at::timestamp,
        actual_value,
        case
            when abs(actual_value - absolute_gain_1d) > 1e-9

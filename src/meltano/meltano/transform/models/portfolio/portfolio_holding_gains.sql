@@ -6,12 +6,10 @@
 
 
 select t.*,
-       holding_group_id,
-       holding_id,
-       profile_id,
        (actual_value / (1e-9 + sum(actual_value) over (partition by profile_id)))::double precision as value_to_portfolio_value
 from (
-         select holding_id_v2,
+         select plaid_holding_gains.profile_id,
+                holding_id_v2,
                 actual_value,
                 absolute_gain_1d,
                 absolute_gain_1w,
@@ -28,12 +26,15 @@ from (
                 relative_gain_5y,
                 relative_gain_total,
                 ltt_quantity_total,
-                updated_at::timestamp
+                plaid_holding_gains.updated_at
          from {{ ref('plaid_holding_gains') }}
+                  join {{ ref('profile_holdings_normalized_all') }} using (holding_id_v2)
+         where not profile_holdings_normalized_all.is_hidden
 
          union all
 
-         select holding_id_v2,
+         select profile_id,
+                holding_id_v2,
                 actual_value,
                 absolute_gain_1d,
                 absolute_gain_1w,
@@ -53,5 +54,3 @@ from (
                 updated_at::timestamp
          from {{ ref('drivewealth_portfolio_holding_gains') }}
      ) t
-         join {{ ref('profile_holdings_normalized_all') }} using (holding_id_v2)
-where not profile_holdings_normalized_all.is_hidden
