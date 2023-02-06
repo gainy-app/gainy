@@ -212,8 +212,9 @@ module "ecs-service" {
   datadog_api_key = var.datadog_api_key
   datadog_app_key = var.datadog_app_key
 
-  polygon_api_token = var.polygon_api_token
-  coingecko_api_key = var.coingecko_api_key
+  polygon_api_token            = var.polygon_api_token
+  polygon_api_token_websockets = var.polygon_api_token_websockets
+  coingecko_api_key            = var.coingecko_api_key
 
   mlflow_artifact_bucket  = module.s3.mlflow_artifact_bucket
   codeartifact_pipy_url   = var.codeartifact_pipy_url

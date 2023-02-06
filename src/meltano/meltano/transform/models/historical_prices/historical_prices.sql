@@ -19,7 +19,8 @@ polygon_symbols as materialized
     (
         select symbol
         from {{ source('polygon', 'polygon_stocks_historical_prices') }}
-        where t >= (select max(t) from {{ source('polygon', 'polygon_stocks_historical_prices') }})
+        where t >= (select max(t) from {{ source('polygon', 'polygon_stocks_historical_prices') }} where symbol not like 'C:%')
+          and symbol not like 'C:%'
         group by symbol
     ),
 raw_eod_historical_prices as

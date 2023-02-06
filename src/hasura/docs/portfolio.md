@@ -138,8 +138,8 @@ query GetPortfolioPieChart(
     get_portfolio_piechart(
         profile_id: $profileId,
         broker_ids: $broker_ids
-        interest_ids: $interestIds,
-        category_ids: $categoryIds
+        interest_ids: $interest_ids,
+        category_ids: $category_ids
     ) {
         weight
         entity_type

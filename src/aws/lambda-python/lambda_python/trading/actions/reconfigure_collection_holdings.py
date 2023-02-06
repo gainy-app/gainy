@@ -32,9 +32,9 @@ class TradingReconfigureCollectionHoldings(HasuraAction):
                 raise BadRequestException(
                     'Only one of target_amount_delta and target_amount_delta_relative must be specified.'
                 )
-            if target_amount_delta_relative < -1 or target_amount_delta_relative > 1:
+            if target_amount_delta_relative < -1 or target_amount_delta_relative >= 0:
                 raise BadRequestException(
-                    'target_amount_delta_relative must be within [-1, 1].')
+                    'target_amount_delta_relative must be within [-1, 0).')
 
         trading_account_id = context_container.trading_repository.get_trading_account(
             profile_id).id

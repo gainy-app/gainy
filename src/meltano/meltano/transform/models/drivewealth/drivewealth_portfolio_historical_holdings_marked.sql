@@ -13,16 +13,15 @@
 with raw_data_1d as
          (
              select holding_id_v2,
-                    date          as date_1d,
-                    prev_value    as prev_value_1d,
-                    cash_flow_sum as cash_flow_sum_1d,
+                    date       as date_1d,
+                    prev_value as prev_value_1d,
+                    cash_flow  as cash_flow_sum_1d,
                     drivewealth_portfolio_historical_holdings.updated_at
              from (
                       select profile_id,
                              holding_id_v2,
                              symbol,
-                             max(date)      as date,
-                             sum(cash_flow) as cash_flow_sum
+                             max(date) as date
                       from {{ ref('drivewealth_portfolio_historical_holdings') }}
                       where date > now()::date - interval '1 week'
                       group by profile_id, holding_id_v2, symbol
