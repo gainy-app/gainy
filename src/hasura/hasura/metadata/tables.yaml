@@ -1793,9 +1793,7 @@
     - role: user
       permission:
         columns:
-          - holding_id
           - ticker_symbol
-          - account_id
           - purchase_date
           - relative_gain_total
           - relative_gain_1d
@@ -1841,7 +1839,6 @@
           - absolute_gain_5y
           - absolute_gain_total
           - actual_value
-          - holding_id
           - ltt_quantity_total
           - relative_gain_1d
           - relative_gain_1m
@@ -2289,10 +2286,7 @@
     - role: user
       permission:
         columns:
-          - holding_id
-          - security_id
           - profile_id
-          - account_id
           - quantity
           - name
           - ticker_symbol
