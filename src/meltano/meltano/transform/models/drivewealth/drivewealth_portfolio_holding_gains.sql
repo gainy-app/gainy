@@ -19,41 +19,41 @@ select profile_id,
            when prev_value_1d > 0
                then (actual_value - cash_flow_sum_1d) / prev_value_1d - 1
            when cash_flow_positive_sum_total > 0
-               then (actual_value - cash_flow_negative_sum_total) / cash_flow_positive_sum_total
+               then (actual_value - cash_flow_negative_sum_total) / cash_flow_positive_sum_total - 1
            end                                         as relative_gain_1d,
        case
            when prev_value_1w > 0
                then (actual_value - cash_flow_sum_1w) / prev_value_1w - 1
            when cash_flow_positive_sum_total > 0
-               then (actual_value - cash_flow_negative_sum_total) / cash_flow_positive_sum_total
+               then (actual_value - cash_flow_negative_sum_total) / cash_flow_positive_sum_total - 1
            end                                         as relative_gain_1w,
        case
            when prev_value_1m > 0
                then (actual_value - cash_flow_sum_1m) / prev_value_1m - 1
            when cash_flow_positive_sum_total > 0
-               then (actual_value - cash_flow_negative_sum_total) / cash_flow_positive_sum_total
+               then (actual_value - cash_flow_negative_sum_total) / cash_flow_positive_sum_total - 1
            end                                         as relative_gain_1m,
        case
            when prev_value_3m > 0
               then (actual_value - cash_flow_sum_3m) / prev_value_3m - 1
            when cash_flow_positive_sum_total > 0
-               then (actual_value - cash_flow_negative_sum_total) / cash_flow_positive_sum_total
+               then (actual_value - cash_flow_negative_sum_total) / cash_flow_positive_sum_total - 1
            end                                         as relative_gain_3m,
        case
            when prev_value_1y > 0
                then (actual_value - cash_flow_sum_1y) / prev_value_1y - 1
            when cash_flow_positive_sum_total > 0
-               then (actual_value - cash_flow_negative_sum_total) / cash_flow_positive_sum_total
+               then (actual_value - cash_flow_negative_sum_total) / cash_flow_positive_sum_total - 1
            end                                         as relative_gain_1y,
        case
            when prev_value_5y > 0
                then (actual_value - cash_flow_sum_5y) / prev_value_5y - 1
            when cash_flow_positive_sum_total > 0
-               then (actual_value - cash_flow_negative_sum_total) / cash_flow_positive_sum_total
+               then (actual_value - cash_flow_negative_sum_total) / cash_flow_positive_sum_total - 1
            end                                         as relative_gain_5y,
        case
            when cash_flow_positive_sum_total > 0
-               then (actual_value - cash_flow_negative_sum_total) / cash_flow_positive_sum_total
+               then (actual_value - cash_flow_negative_sum_total) / cash_flow_positive_sum_total - 1
            end                                         as relative_gain_total,
        0                                               as ltt_quantity_total, -- TODO calculate
        now()::timestamp                                as updated_at
