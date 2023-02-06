@@ -7,6 +7,7 @@
       pk('profile_id, holding_id_v2, symbol, date'),
       index('id', true),
       index('portfolio_status_id', false),
+      index('last_order_updated_at', false),
       'create index if not exists "dphh_profile_id_holding_id_v2_symbol_date_week" ON {{ this }} (profile_id, holding_id_v2, symbol, date_week)',
       'create index if not exists "dphh_profile_id_holding_id_v2_symbol_date_month" ON {{ this }} (profile_id, holding_id_v2, symbol, date_month)',
     ]
@@ -137,6 +138,7 @@ with portfolio_statuses as
                           select profile_id,
                                  symbol,
                                  total_order_amount_normalized as amount,
+                                 drivewealth_orders.updated_at,
                                  drivewealth_orders.date
                           from {{ source('app', 'drivewealth_orders') }}
                                    join {{ source('app', 'drivewealth_accounts') }} on drivewealth_accounts.ref_id = drivewealth_orders.account_id
@@ -151,7 +153,7 @@ with portfolio_statuses as
                   ),
                   order_values_aggregated as
                       (
-                          select profile_id, symbol, date, sum(amount) as amount
+                          select profile_id, symbol, date, sum(amount) as amount, max(updated_at) as last_order_updated_at
                           from filled_orders
                           group by profile_id, symbol, date
                   ),
@@ -160,6 +162,7 @@ with portfolio_statuses as
                           select profile_id,
                                  symbol,
                                  date,
+                                 last_order_updated_at,
                                  -- HP = EV / (BV + CF) - 1
                                  case
                                      when ticker_values_aggregated.prev_value + order_values_aggregated.amount > 0
@@ -173,6 +176,7 @@ with portfolio_statuses as
                     collection_id,
                     symbol,
                     portfolio_status_id,
+                    last_order_updated_at,
                     date,
                     value,
                     prev_value,
@@ -191,6 +195,7 @@ with portfolio_statuses as
                              collection_id,
                              symbol,
                              portfolio_status_id,
+                             last_order_updated_at,
                              date,
                              relative_daily_gain,
                              value,
@@ -217,6 +222,7 @@ with portfolio_statuses as
          (
              select profile_id,
                     portfolio_status_id,
+                    last_order_updated_at,
                     holding_id_v2,
                     collection_id,
                     symbol,

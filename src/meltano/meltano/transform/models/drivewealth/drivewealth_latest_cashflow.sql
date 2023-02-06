@@ -68,60 +68,30 @@ with portfolio_statuses as
                     updated_at
              from fund_holdings
      ),
-     schedule as
-         (
-             with min_holding_date as materialized
-                      (
-                          select profile_id,
-                                 holding_id_v2,
-                                 symbol,
-                                 min(date) as min_date
-                          from data
-                          group by profile_id, holding_id_v2, symbol
-                      )
-             select profile_id, holding_id_v2, symbol, date, relative_daily_gain
-             from min_holding_date
-                      join {{ ref('historical_prices') }} using (symbol)
-             where date >= min_date
-
-             union all
-
-             select profile_id, holding_id_v2, symbol, date, relative_daily_change as relative_daily_gain
-             from min_holding_date
-                      join {{ ref('ticker_realtime_metrics') }} using (symbol)
-                      left join {{ ref('historical_prices') }} using (symbol, date)
-             where date >= min_date
-               and historical_prices.symbol is null
-     ),
-     data_extended0 as
-         (
-             select profile_id,
-                    holding_id_v2,
-                    LAST_VALUE_IGNORENULLS(portfolio_status_id) over wnd as portfolio_status_id,
-                    LAST_VALUE_IGNORENULLS(collection_id) over wnd       as collection_id,
-                    symbol,
-                    date,
-                    relative_daily_gain,
-                    value                                                as value,
-                    data.updated_at
-             from schedule
-                      left join data using (profile_id, holding_id_v2, symbol, date)
-             window wnd as (partition by profile_id, holding_id_v2 order by date)
-     ),
      historical_holdings_extended as
          (
-             select profile_id,
-                    holding_id_v2,
-                    date,
-                    collection_id,
-                    symbol,
-                    portfolio_status_id,
-                    relative_daily_gain,
-                    value,
-                    coalesce(lag(value) over wnd, 0) as prev_value,
-                    updated_at
-             from data_extended0
-                 window wnd as (partition by holding_id_v2 order by date)
+             select data.profile_id,
+                    data.holding_id_v2,
+                    data.date,
+                    data.collection_id,
+                    data.symbol,
+                    data.portfolio_status_id,
+                    relative_daily_change as relative_daily_gain,
+                    data.value,
+                    t.value as prev_value,
+                    data.updated_at
+             from data
+                      join {{ ref('ticker_realtime_metrics') }} using (symbol, date)
+                      join (
+                               select distinct on (
+                                   profile_id, holding_id_v2, symbol
+                                   ) profile_id,
+                                     holding_id_v2,
+                                     symbol,
+                                     value
+                               from {{ ref('drivewealth_portfolio_historical_holdings') }}
+                               order by profile_id desc, holding_id_v2 desc, symbol desc, date desc
+                           ) t using (holding_id_v2)
          ),
      filled_orders as
          (
@@ -133,6 +103,7 @@ with portfolio_statuses as
                       join {{ source('app', 'drivewealth_accounts') }} on drivewealth_accounts.ref_id = drivewealth_orders.account_id
                       join {{ source('app', 'drivewealth_users') }} on drivewealth_users.ref_id = drivewealth_accounts.drivewealth_user_id
              where drivewealth_orders.status = 'FILLED'
+               and drivewealth_orders.updated_at > (select max(last_order_updated_at) from drivewealth_portfolio_historical_holdings)
      ),
      ticker_values_aggregated as
          (
