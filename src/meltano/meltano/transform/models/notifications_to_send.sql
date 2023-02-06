@@ -165,35 +165,6 @@ with data as
 
             union all
 
-            -- Worst portfolio stock
-            select profile_id,
-                   ('worst_portfolio_stock' || profile_id || '_' ||
-                        date_trunc('month', now()::date))                               as uniq_id,
-                   now()                                                                as send_at,
-                   null::json                                                           as title,
-                   json_build_object('en', 'What’s the worst stock in your portfolio?') as text,
-                   json_build_object('t', 6, 's', symbol)                               as data,
-                   false                                                                as is_test,
-                   true                                                                 as is_push,
-                   false                                                                as is_shown_in_app,
-                   'f4c2e5bb-5cff-4776-8abf-dd320f91800b'                               as template_id
-            from (
-                     select distinct on (
-                         portfolio_holding_group_gains.profile_id
-                         ) portfolio_holding_group_gains.profile_id,
-                           ticker_symbol as symbol
-                     from {{ ref('portfolio_holding_group_gains') }}
-                              join {{ ref('portfolio_holding_group_details') }} using (holding_group_id)
-                     where relative_gain_1m < 0
-                       and ticker_symbol is not null
-                     order by portfolio_holding_group_gains.profile_id, relative_gain_1m
-                ) t
-                     join {{ source('app', 'profiles') }} on profiles.id = t.profile_id
-                     join {{ ref('exchange_schedule') }} on exchange_schedule.country_name = 'USA' and exchange_schedule.date = now()::date
-            where now() between exchange_schedule.open_at + interval '2 hours' and exchange_schedule.close_at
-
-            union all
-
             -- Stock that you own falls sharp. You have already made 30%+. Maybe sell? (=trailing stop loss)
             select profile_id,
                    ('portfolio_stock_falls_sharp' || profile_id || '_' ||
