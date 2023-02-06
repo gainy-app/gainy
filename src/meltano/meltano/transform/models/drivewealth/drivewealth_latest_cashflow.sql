@@ -103,7 +103,7 @@ with portfolio_statuses as
                       join {{ source('app', 'drivewealth_accounts') }} on drivewealth_accounts.ref_id = drivewealth_orders.account_id
                       join {{ source('app', 'drivewealth_users') }} on drivewealth_users.ref_id = drivewealth_accounts.drivewealth_user_id
              where drivewealth_orders.status = 'FILLED'
-               and drivewealth_orders.updated_at > (select max(last_order_updated_at) from drivewealth_portfolio_historical_holdings)
+               and drivewealth_orders.updated_at > (select max(last_order_updated_at) from {{ ref('drivewealth_portfolio_historical_holdings') }})
      ),
      ticker_values_aggregated as
          (
