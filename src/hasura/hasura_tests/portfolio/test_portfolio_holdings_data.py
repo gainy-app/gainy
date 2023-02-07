@@ -91,7 +91,9 @@ def test_portfolio_holdings_data(user_id, quantities, quantities_override):
             for holding in holding_group['holdings']:
                 gains = holding['gains']
                 holding_absolute_gain_sum += gains[absolute_portfolio_key] or 0
-                holding_relative_gain_sum += (gains[relative_portfolio_key] or 0) * gains["value_to_portfolio_value"]
+                holding_relative_gain_sum += (
+                    gains[relative_portfolio_key]
+                    or 0) * gains["value_to_portfolio_value"]
 
             symbol = holding_group['details']['ticker_symbol']
             gains = holding_group['gains']
@@ -103,8 +105,9 @@ def test_portfolio_holdings_data(user_id, quantities, quantities_override):
                            absolute_portfolio_key, symbol)
             holding_group_absolute_gain_sum += gains[
                 absolute_portfolio_key] or 0
-            holding_group_relative_gain_sum += (gains[
-                relative_portfolio_key] or 0) * gains["value_to_portfolio_value"]
+            holding_group_relative_gain_sum += (
+                gains[relative_portfolio_key]
+                or 0) * gains["value_to_portfolio_value"]
 
         assert abs((portfolio_gains[relative_portfolio_key] or 0) -
                    holding_group_relative_gain_sum) < PRICE_EPS
