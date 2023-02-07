@@ -6,7 +6,7 @@
     post_hook=[
       pk('symbol, time'),
       index('id', true),
-      index('time'),
+      index(['time', 'source']),
       'create index if not exists "symbol__time_3min" ON {{ this }} (symbol, time_3min)',
       'create index if not exists "symbol__time_15min" ON {{ this }} (symbol, time_15min)',
     ]
@@ -29,7 +29,8 @@ with polygon_symbols as
                     high,
                     low,
                     close,
-                    volume
+                    volume,
+                    'eod' as source
              from {{ source('eod', 'eod_intraday_prices') }}
                       join (
                                select symbol, date, open_at, close_at
@@ -52,7 +53,8 @@ with polygon_symbols as
                     h                      as high,
                     l                      as low,
                     c                      as close,
-                    v                      as volume
+                    v                      as volume,
+                    'polygon'              as source
              from {{ source('polygon', 'polygon_intraday_prices_launchpad') }}
                       join {{ ref('week_trading_sessions_static') }} using (symbol)
              where t >= week_trading_sessions_static.open_at_t
@@ -72,14 +74,15 @@ with polygon_symbols as
                     high,
                     low,
                     close,
-                    volume
+                    volume,
+                    source
              from (
-                     select symbol, date, time, open, high, low, close, volume
+                     select symbol, date, time, open, high, low, close, volume, source
                      from raw_polygon_intraday_prices
 
                      union all
 
-                     select symbol, date, time, open, high, low, close, volume
+                     select symbol, date, time, open, high, low, close, volume, source
                      from raw_eod_intraday_prices
                   ) t
 {% if not var('realtime') %}
@@ -121,6 +124,7 @@ with polygon_symbols as
                     low::double precision,
                     close::double precision,
                     volume::double precision,
+                    source,
 
              {% if not var('realtime') %}
                     (close * coalesce(split_rate, 1))::double precision as adjusted_close,
@@ -146,6 +150,7 @@ with polygon_symbols as
                     low::double precision,
                     close::double precision,
                     0::double precision              as volume,
+                    'historical_prices'              as source,
                     adjusted_close::double precision,
                     1                                as priority
              from {{ ref('historical_prices_aggregated_1d') }}
