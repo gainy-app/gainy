@@ -35,40 +35,35 @@ def get_test_portfolio_data(only_with_holdings=False):
     # -- profile 2 with holdings with one buy transaction on the primary account
     user_id = 'user_id_portfolio_test_2'
     quantities_override = [
-        (None,
-         transaction_stats[PROFILE_IDS[user_id]]['min_date'], 0),
+        (None, transaction_stats[PROFILE_IDS[user_id]]['min_date'], 0),
     ]
     yield (user_id, quantities, quantities_override)
 
     # -- profile 3 with holdings with one sell transaction on the primary account
     user_id = 'user_id_portfolio_test_3'
     quantities_override = [
-        (None,
-         transaction_stats[PROFILE_IDS[user_id]]['min_date'], 0),
+        (None, transaction_stats[PROFILE_IDS[user_id]]['min_date'], 0),
     ]
     yield (user_id, quantities, quantities_override)
 
     # -- profile 4 with holdings with one buy transaction on the secondary account
     user_id = 'user_id_portfolio_test_4'
     quantities_override = [
-        (None,
-         transaction_stats[PROFILE_IDS[user_id]]['min_date'], 0),
+        (None, transaction_stats[PROFILE_IDS[user_id]]['min_date'], 0),
     ]
     yield (user_id, quantities, quantities_override)
 
     # -- profile 5 with holdings with one sell transaction on the secondary account
     user_id = 'user_id_portfolio_test_5'
     quantities_override = [
-        (None,
-         transaction_stats[PROFILE_IDS[user_id]]['min_date'], 0),
+        (None, transaction_stats[PROFILE_IDS[user_id]]['min_date'], 0),
     ]
     yield (user_id, quantities, quantities_override)
 
     # -- profile 6 with holdings with buy-sell transactions on the primary account
     user_id = 'user_id_portfolio_test_6'
     quantities_override = [
-        (None,
-         transaction_stats[PROFILE_IDS[user_id]]['min_date'], 0),
+        (None, transaction_stats[PROFILE_IDS[user_id]]['min_date'], 0),
         (transaction_stats[PROFILE_IDS[user_id]]['min_date'],
          transaction_stats[PROFILE_IDS[user_id]]['max_date'], quantities2),
     ]
@@ -77,8 +72,7 @@ def get_test_portfolio_data(only_with_holdings=False):
     # -- profile 7 with holdings with buy-sell transactions on the primary-secondary account
     user_id = 'user_id_portfolio_test_7'
     quantities_override = [
-        (None,
-         transaction_stats[PROFILE_IDS[user_id]]['min_date'], 0),
+        (None, transaction_stats[PROFILE_IDS[user_id]]['min_date'], 0),
         (transaction_stats[PROFILE_IDS[user_id]]['min_date'],
          transaction_stats[PROFILE_IDS[user_id]]['max_date'], quantities2),
     ]
@@ -87,8 +81,7 @@ def get_test_portfolio_data(only_with_holdings=False):
     # -- profile 8 with holdings with buy-sell transactions on the secondary-primary account
     user_id = 'user_id_portfolio_test_8'
     quantities_override = [
-        (None,
-         transaction_stats[PROFILE_IDS[user_id]]['min_date'], 0),
+        (None, transaction_stats[PROFILE_IDS[user_id]]['min_date'], 0),
         (transaction_stats[PROFILE_IDS[user_id]]['min_date'],
          transaction_stats[PROFILE_IDS[user_id]]['max_date'], quantities2),
     ]
@@ -97,8 +90,7 @@ def get_test_portfolio_data(only_with_holdings=False):
     # -- profile 9 with holdings with buy-sell transactions on the secondary account
     user_id = 'user_id_portfolio_test_9'
     quantities_override = [
-        (None,
-         transaction_stats[PROFILE_IDS[user_id]]['min_date'], 0),
+        (None, transaction_stats[PROFILE_IDS[user_id]]['min_date'], 0),
         (transaction_stats[PROFILE_IDS[user_id]]['min_date'],
          transaction_stats[PROFILE_IDS[user_id]]['max_date'], quantities2),
     ]
@@ -107,32 +99,28 @@ def get_test_portfolio_data(only_with_holdings=False):
     # -- profile 10 with holdings with sell-buy transactions on the primary account
     user_id = 'user_id_portfolio_test_10'
     quantities_override = [
-        (None,
-         transaction_stats[PROFILE_IDS[user_id]]['max_date'], 0),
+        (None, transaction_stats[PROFILE_IDS[user_id]]['max_date'], 0),
     ]
     yield (user_id, quantities, quantities_override)
 
     # -- profile 11 with holdings with sell-buy transactions on the primary-secondary account
     user_id = 'user_id_portfolio_test_11'
     quantities_override = [
-        (None,
-         transaction_stats[PROFILE_IDS[user_id]]['min_date'], 0),
+        (None, transaction_stats[PROFILE_IDS[user_id]]['min_date'], 0),
     ]
     yield (user_id, quantities, quantities_override)
 
     # -- profile 12 with holdings with sell-buy transactions on the secondary-primary account
     user_id = 'user_id_portfolio_test_12'
     quantities_override = [
-        (None,
-         transaction_stats[PROFILE_IDS[user_id]]['max_date'], 0),
+        (None, transaction_stats[PROFILE_IDS[user_id]]['max_date'], 0),
     ]
     yield (user_id, quantities, quantities_override)
 
     # -- profile 13 with holdings with sell-buy transactions on the secondary account
     user_id = 'user_id_portfolio_test_13'
     quantities_override = [
-        (None,
-         transaction_stats[PROFILE_IDS[user_id]]['min_date'], 0),
+        (None, transaction_stats[PROFILE_IDS[user_id]]['min_date'], 0),
     ]
     yield (user_id, quantities, quantities_override)
 
@@ -159,7 +147,9 @@ def get_test_portfolio_data(only_with_holdings=False):
             yield ('user_id_portfolio_test_' + str(i), quantities, [])
         else:
             quantities_override = [
-                (transaction_stats[PROFILE_IDS[user_id]]['min_date'], transaction_stats[PROFILE_IDS[user_id]]['max_date'], quantities3),
+                (transaction_stats[PROFILE_IDS[user_id]]['min_date'],
+                 transaction_stats[PROFILE_IDS[user_id]]['max_date'],
+                 quantities3),
             ]
             yield ('user_id_portfolio_test_' + str(i), quantities,
                    quantities_override)
