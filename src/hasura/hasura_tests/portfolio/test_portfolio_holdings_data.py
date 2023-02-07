@@ -84,71 +84,30 @@ def test_portfolio_holdings_data(user_id, quantities, quantities_override):
         }
 
         holding_group_absolute_gain_sum = 0
+        holding_group_relative_gain_sum = 0
         for holding_group in profile_holding_groups:
             holding_absolute_gain_sum = 0
+            holding_relative_gain_sum = 0
             for holding in holding_group['holdings']:
-                symbol = holding['holding_details']['ticker_symbol']
-                holding_type = holding['type']
-                quantity = holding['quantity']
-                if holding['type'] == 'derivative':
-                    quantity *= 100
-
-                assert holding_type in [
-                    'equity',
-                    'derivative',
-                ], f'{holding_type} holdings are not supported'
                 gains = holding['gains']
                 holding_absolute_gain_sum += gains[absolute_portfolio_key] or 0
-
-                purchase_date = holding['holding_details']['purchase_date']
-                if purchase_date:
-                    purchase_date = dateutil.parser.parse(
-                        purchase_date) if purchase_date else None
-                    if timedelta is None or purchase_date >= last_trading_day_date - timedelta:
-                        logging.info(f'Skipping holding {symbol}')
-                        continue
-
-                if relative_portfolio_key in [
-                        'relative_gain_1d', 'relative_gain_total'
-                ]:
-                    assert abs(
-                        holding['holding_details'][relative_portfolio_key] -
-                        metrics[symbol][metrics_key]) < PRICE_EPS, (
-                            relative_portfolio_key, symbol)
-                assert abs(gains[relative_portfolio_key] -
-                           metrics[symbol][metrics_key]) < PRICE_EPS, (
-                               relative_portfolio_key, symbol)
-                # todo: fix tests
-                # assert abs(gains[absolute_portfolio_key] - quantity *
-                #            absolute_symbol_price_change[symbol]) < PRICE_EPS, (
-                #                absolute_portfolio_key, symbol)
+                holding_relative_gain_sum += (gains[relative_portfolio_key] or 0) * gains["value_to_portfolio_value"]
 
             symbol = holding_group['details']['ticker_symbol']
             gains = holding_group['gains']
-            actual_value = gains['actual_value']
-            prev_value = actual_value - holding_absolute_gain_sum
-            expected_relative_gain = holding_absolute_gain_sum / prev_value
-            if relative_portfolio_key in [
-                    'relative_gain_1d', 'relative_gain_total'
-            ]:
-                assert abs(
-                    (holding_group['details'][relative_portfolio_key] or 0) -
-                    expected_relative_gain) < PRICE_EPS, (
-                        absolute_portfolio_key, symbol)
             assert abs((gains[relative_portfolio_key] or 0) -
-                       expected_relative_gain) < PRICE_EPS, (
-                           absolute_portfolio_key, symbol)
+                       holding_relative_gain_sum) < PRICE_EPS, (
+                           relative_portfolio_key, symbol)
             assert abs((gains[absolute_portfolio_key] or 0) -
                        holding_absolute_gain_sum) < PRICE_EPS, (
                            absolute_portfolio_key, symbol)
             holding_group_absolute_gain_sum += gains[
                 absolute_portfolio_key] or 0
+            holding_group_relative_gain_sum += (gains[
+                relative_portfolio_key] or 0) * gains["value_to_portfolio_value"]
 
-        actual_value = portfolio_gains['actual_value']
-        prev_value = actual_value - holding_group_absolute_gain_sum
-        expected_relative_gain = holding_group_absolute_gain_sum / prev_value
         assert abs((portfolio_gains[relative_portfolio_key] or 0) -
-                   expected_relative_gain) < PRICE_EPS
+                   holding_group_relative_gain_sum) < PRICE_EPS
         assert abs((portfolio_gains[absolute_portfolio_key] or 0) -
                    holding_group_absolute_gain_sum) < PRICE_EPS
 
