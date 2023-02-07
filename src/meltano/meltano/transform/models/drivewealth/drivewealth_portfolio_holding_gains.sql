@@ -56,10 +56,13 @@ select profile_id,
                then (actual_value - cash_flow_negative_sum_total) / cash_flow_positive_sum_total - 1
            end                                         as relative_gain_total,
        0                                               as ltt_quantity_total, -- TODO calculate
+       cash_flow_sum_total,
        now()::timestamp                                as updated_at
 from (
     select drivewealth_holdings.profile_id,
            drivewealth_holdings.holding_id_v2,
+           drivewealth_holdings.symbol,
+           drivewealth_holdings.collection_id,
            drivewealth_holdings.actual_value,
            prev_value_1d                                                                           as prev_value_1d,
            prev_value_1w                                                                           as prev_value_1w,
