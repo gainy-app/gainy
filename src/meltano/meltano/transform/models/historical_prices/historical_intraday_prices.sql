@@ -174,6 +174,7 @@ from (
                close::double precision,
                volume::double precision,
                adjusted_close::double precision,
+               source,
                now()::timestamp        as updated_at,
                (symbol || '_' || time) as id
          from data
