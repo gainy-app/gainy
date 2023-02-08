@@ -46,6 +46,13 @@ with filtered_holdings as
                       where profile_id = %(profile_id)s
                         and type = 'cash'
                         and ticker_symbol = 'CUR:USD'
+
+                      union all
+
+                      select profile_id,
+                             coalesce(buying_power, 0) + coalesce(pending_orders_sum, 0) as value
+                      from trading_profile_status
+                      where profile_id = %(profile_id)s
                   ) t
          ),
      raw_chart as materialized
