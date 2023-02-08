@@ -24,7 +24,7 @@ for schedule in schedules:
         task_id=schedule['name'],
         pool="polygon",
         bash_command=get_meltano_command(
-            f"schedule run {schedule['name']} --transform=skip"),
+            f"schedule run {schedule['name']} --transform=skip --force"),
         dag=dag)
 
     generate_meltano_config >> operator

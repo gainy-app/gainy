@@ -42,7 +42,7 @@ with
                                            least(
                                                    now(),
                                                    close_at - interval '1 second',
-                                                   (select max(time) from {{ ref('historical_intraday_prices') }} where source = 'polygon')
+                                                   (select max(time) - interval '3 minutes' from {{ ref('historical_intraday_prices') }} where source = 'polygon')
                                                ),
                                            interval '{{ minutes }} minutes') dd on true
 {% if is_incremental() and var('realtime') %}
