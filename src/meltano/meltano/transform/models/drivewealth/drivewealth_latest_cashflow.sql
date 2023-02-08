@@ -125,7 +125,7 @@ with portfolio_statuses as
                     -- HP = EV / (BV + CF) - 1
                     case
                         when ticker_values_aggregated.prev_value + order_values_aggregated.amount > 0
-                            then ticker_values_aggregated.value / (ticker_values_aggregated.prev_value + order_values_aggregated.amount) - 1
+                            then coalesce(ticker_values_aggregated.value, 0) / (ticker_values_aggregated.prev_value + order_values_aggregated.amount) - 1
                         end as gain
              from ticker_values_aggregated
                       left join order_values_aggregated using (profile_id, symbol, date)
@@ -136,34 +136,11 @@ select holding_id_v2,
        symbol,
        portfolio_status_id,
        date,
-       value,
-       prev_value,
-       cash_flow,
-       updated_at,
+       -- CF = EV / (HP + 1) - BV
        case
-           when value is null
-               then relative_daily_gain
-           when prev_value + cash_flow > 0
-               then value / (prev_value + cash_flow) - 1
-           else 0
-           end as relative_daily_gain
-from (
-         select holding_id_v2,
-                profile_id,
-                collection_id,
-                symbol,
-                portfolio_status_id,
-                date,
-                relative_daily_gain,
-                value,
-                prev_value,
-                -- CF = EV / (HP + 1) - BV
-                case
-                    when gain > -1
-                        then coalesce(value / (gain + 1) - prev_value, 0)
-                    else 0
-                    end as cash_flow,
-                updated_at
-         from historical_holdings_extended
-                  left join ticker_stats using (profile_id, symbol, date)
-     ) t
+           when gain > -1
+               then coalesce(value / (gain + 1) - prev_value, 0)
+           else prev_value * gain
+           end as cash_flow
+from historical_holdings_extended
+         left join ticker_stats using (profile_id, symbol, date)

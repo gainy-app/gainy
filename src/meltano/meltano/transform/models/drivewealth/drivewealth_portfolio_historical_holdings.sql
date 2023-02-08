@@ -165,7 +165,7 @@ with portfolio_statuses as
                                  -- HP = EV / (BV + CF) - 1
                                  case
                                      when ticker_values_aggregated.prev_value + order_values_aggregated.amount > 0
-                                         then ticker_values_aggregated.value / (ticker_values_aggregated.prev_value + order_values_aggregated.amount) - 1
+                                         then coalesce(ticker_values_aggregated.value, 0) / (ticker_values_aggregated.prev_value + order_values_aggregated.amount) - 1
                                      end as gain
                           from ticker_values_aggregated
                                    left join order_values_aggregated using (profile_id, symbol, date)
@@ -174,19 +174,20 @@ with portfolio_statuses as
                     profile_id,
                     collection_id,
                     symbol,
-                    portfolio_status_id,
+                    t.portfolio_status_id,
                     last_order_updated_at,
                     date,
-                    value,
+                    t.value,
                     prev_value,
                     cash_flow,
-                    updated_at,
+                    t.updated_at,
                     case
-                        when value is null
+                        when t.value is not null and prev_value + cash_flow > 0
+                            then t.value / (prev_value + cash_flow) - 1
+                        when t.value is null and prev_value > 0 and portfolio_statuses.profile_id is not null
+                            then -1
+                        when portfolio_statuses.profile_id is null
                             then relative_daily_gain
-                        when prev_value + cash_flow > 0
-                            then value / (prev_value + cash_flow) - 1
-                        else 0
                         end as relative_daily_gain
              from (
                       select holding_id_v2,
@@ -203,12 +204,13 @@ with portfolio_statuses as
                              case
                                  when gain > -1
                                      then coalesce(value / (gain + 1) - prev_value, 0)
-                                 else 0
+                                 else prev_value * gain
                                  end as cash_flow,
                              updated_at
                       from historical_holdings_extended
                                left join ticker_stats using (profile_id, symbol, date)
                   ) t
+                      left join portfolio_statuses using (profile_id, date)
      ),
      data_extended2 as
          (
@@ -234,6 +236,7 @@ with portfolio_statuses as
                         when portfolio_statuses.profile_id is null
                             then cumulative_daily_relative_gain *
                                  (public.last_value_ignorenulls(data.value / cumulative_daily_relative_gain) over wnd)
+                        else 0
                         end                                                 as value,
                     public.last_value_ignorenulls(data.updated_at) over wnd as updated_at
              from data_extended2 data
@@ -245,7 +248,6 @@ with portfolio_statuses as
              select *,
                     coalesce(lag(value) over wnd, 0) as prev_value
              from data_extended3
-             where value is not null
                  window wnd as (partition by profile_id, holding_id_v2 order by date)
      )
 select data_extended.*,
