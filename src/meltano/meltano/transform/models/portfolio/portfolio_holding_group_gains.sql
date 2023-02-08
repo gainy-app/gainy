@@ -26,6 +26,6 @@ select portfolio_holding_gains.profile_id,
        sum(value_to_portfolio_value * relative_gain_total) as relative_gain_total,
        sum(value_to_portfolio_value)                       as value_to_portfolio_value
 from {{ ref('portfolio_holding_gains') }}
-         join {{ ref('profile_holdings_normalized_all') }} using (holding_id_v2)
+         join {{ ref('profile_holdings_normalized_dynamic') }} using (holding_id_v2)
 where holding_group_id is not null
 group by portfolio_holding_gains.profile_id, holding_group_id

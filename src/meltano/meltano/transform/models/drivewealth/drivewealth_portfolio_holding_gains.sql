@@ -118,7 +118,8 @@ select profile_id,
        relative_gain_1y,
        relative_gain_5y,
        relative_gain_total,
-       0                                               as ltt_quantity_total, -- TODO calculate
+       cash_flow_sum_total,
+       0::double precision                             as ltt_quantity_total, -- TODO calculate
        now()::timestamp                                as updated_at
 from (
          select drivewealth_holdings.profile_id,
