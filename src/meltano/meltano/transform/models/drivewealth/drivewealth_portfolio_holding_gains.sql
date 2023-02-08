@@ -103,6 +103,8 @@ with relative_gains as
          )
 select profile_id,
        holding_id_v2,
+       symbol,
+       collection_id,
        actual_value,
        actual_value - prev_value_1d - cash_flow_sum_1d as absolute_gain_1d,
        actual_value - prev_value_1w - cash_flow_sum_1w as absolute_gain_1w,

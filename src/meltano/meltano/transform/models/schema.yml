@@ -2679,6 +2679,14 @@ models:
         tests:
           - type:
               type: 'text'
+      - name: symbol
+        tests:
+          - type:
+              type: 'character varying'
+      - name: collection_id
+        tests:
+          - type:
+              type: 'integer'
       - name: actual_value
         tests:
           - type:
