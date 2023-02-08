@@ -6,7 +6,10 @@
       pk('holding_id_v2'),
       index('profile_id'),
       index('portfolio_status_id'),
-      'delete from {{this}} where updated_at < (select max(updated_at) from {{this}})',
+      'delete from {{this}}
+        using (select profile_id, max(updated_at) as max_updated_at from {{this}} group by profile_id) stats
+        where stats.profile_id = {{this}}.profile_id
+        and {{this}}.updated_at < stats.max_updated_at',
     ]
   )
 }}
