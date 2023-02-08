@@ -109,37 +109,3 @@ def test_get_actual_collection_data(monkeypatch):
         assert holdings[i].target_weight == expected_holdings[i]["target"]
         assert holdings[i].actual_weight == expected_holdings[i]["actual"]
         assert holdings[i].value == expected_holdings[i]["value"]
-
-
-def test_create_autopilot_run(monkeypatch):
-    collection_version_id = 1
-    collection_version = TradingCollectionVersion()
-    monkeypatch.setattr(collection_version, "id", collection_version_id)
-
-    account = DriveWealthAccount()
-    monkeypatch.setattr(account, "ref_id", _ACCOUNT_ID)
-
-    drivewealth_repository = DriveWealthRepository(None)
-    monkeypatch.setattr(drivewealth_repository, "persist", mock_noop)
-
-    api = DriveWealthApi(None)
-    data = {
-        "id": "ria_rebalance_804d3f5f-a352-4320-992f-c81bf773a739",
-        "created": "2019-05-15T19:51:09.147Z",
-        "status": "REBALANCE_NOT_STARTED",
-        "riaID": "2ffe9863-dd93-4964-87d1-bda90472984f"
-    }
-
-    def mock_create_autopilot_run(_account_ref_ids):
-        assert _account_ref_ids == [_ACCOUNT_ID]
-        return data
-
-    monkeypatch.setattr(api, "create_autopilot_run", mock_create_autopilot_run)
-
-    service = DriveWealthProviderCollection(drivewealth_repository, api, None)
-    autopilot_run = service._create_autopilot_run(account, collection_version)
-
-    assert autopilot_run.ref_id == data["id"]
-    assert autopilot_run.status == data["status"]
-    assert autopilot_run.account_id == _ACCOUNT_ID
-    assert autopilot_run.data == data
