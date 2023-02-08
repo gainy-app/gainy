@@ -10,5 +10,5 @@ dag = create_dag(dag_id,
 
 operator = BashOperator(
     task_id="rebalance-portfolios",
-    bash_command="gainy_rebalance_portfolios &> /proc/1/fd/1",
+    bash_command="gainy_rebalance_portfolios 2>&1 | tee /proc/1/fd/1",
     dag=dag)
