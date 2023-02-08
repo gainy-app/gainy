@@ -92,7 +92,7 @@ with relative_gains as
                     relative_gain_1y,
                     relative_gain_5y,
                     relative_gain_total
-             from profile_holdings_normalized_all
+             from {{ ref('profile_holdings_normalized_all') }}
                       left join raw_data_0d using (profile_id, holding_id_v2)
                       left join raw_data_1w using (profile_id, holding_id_v2)
                       left join raw_data_1m using (profile_id, holding_id_v2)
