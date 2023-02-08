@@ -62,6 +62,7 @@ sources:
       - name: drivewealth_funds
       - name: drivewealth_orders
       - name: drivewealth_users
+      - name: drivewealth_portfolio_holdings
       - name: drivewealth_portfolio_statuses
       - name: drivewealth_portfolios
       - name: influencers
