@@ -8,6 +8,7 @@ dag = create_dag(dag_id,
                  is_paused_upon_creation=True,
                  schedule_interval="*/15 12-21 * * Mon-Fri")
 
-operator = BashOperator(task_id="rebalance-portfolios",
-                        bash_command="gainy_rebalance_portfolios",
-                        dag=dag)
+operator = BashOperator(
+    task_id="rebalance-portfolios",
+    bash_command="gainy_rebalance_portfolios &> /proc/1/fd/1",
+    dag=dag)
