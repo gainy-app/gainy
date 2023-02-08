@@ -185,7 +185,6 @@ with chart_1w as
      )
 
 select data.*,
-       holding_id_v2                                     as transaction_uniq_id,
        holding_id_v2 || '_' || period || '_' || datetime as id
 from data
 

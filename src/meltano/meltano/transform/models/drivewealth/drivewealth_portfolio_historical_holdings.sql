@@ -18,23 +18,22 @@
 
 with portfolio_statuses as
          (
-             select distinct on (profile_id, date) *
-             from (
-                      select profile_id,
-                             drivewealth_portfolio_statuses.created_at         as updated_at,
-                             drivewealth_portfolio_statuses.id                 as portfolio_status_id,
-                             drivewealth_portfolio_statuses.date,
-                             case
-                                 when drivewealth_portfolio_statuses.cash_actual_weight > 0
-                                     then cash_value / drivewealth_portfolio_statuses.cash_actual_weight
-                                 else drivewealth_portfolio_statuses.equity_value
-                                 end                                           as value,
-                             drivewealth_portfolio_statuses.data -> 'holdings' as holdings
-                      from {{ source('app', 'drivewealth_portfolio_statuses') }}
-                               join {{ source('app', 'drivewealth_portfolios') }}
-                                    on drivewealth_portfolios.ref_id = drivewealth_portfolio_id
-                  ) t
-             order by profile_id, date desc, updated_at desc
+             select distinct on (
+                 profile_id, date
+                 ) profile_id,
+                   drivewealth_portfolio_statuses.created_at         as updated_at,
+                   drivewealth_portfolio_statuses.id                 as portfolio_status_id,
+                   drivewealth_portfolio_statuses.date,
+                   case
+                       when drivewealth_portfolio_statuses.cash_actual_weight > 0
+                           then cash_value / drivewealth_portfolio_statuses.cash_actual_weight
+                       else drivewealth_portfolio_statuses.equity_value
+                       end                                           as value,
+                   drivewealth_portfolio_statuses.data -> 'holdings' as holdings
+             from {{ source('app', 'drivewealth_portfolio_statuses') }}
+                      join {{ source('app', 'drivewealth_portfolios') }}
+                           on drivewealth_portfolios.ref_id = drivewealth_portfolio_id
+             order by profile_id desc, date desc, drivewealth_portfolio_statuses.created_at desc
          ),
      portfolio_status_funds as
          (
@@ -221,7 +220,7 @@ with portfolio_statuses as
      data_extended3 as
          (
              select profile_id,
-                    portfolio_status_id,
+                    data.portfolio_status_id,
                     last_order_updated_at,
                     holding_id_v2,
                     collection_id,
@@ -229,13 +228,16 @@ with portfolio_statuses as
                     date,
                     cash_flow,
                     relative_daily_gain,
-                    coalesce(
-                            value,
-                            cumulative_daily_relative_gain *
-                            (public.last_value_ignorenulls(value / cumulative_daily_relative_gain) over wnd)
-                        )                                              as value,
-                    public.last_value_ignorenulls(updated_at) over wnd as updated_at
-             from data_extended2
+                    case
+                        when data.value is not null
+                            then data.value
+                        when portfolio_statuses.profile_id is null
+                            then cumulative_daily_relative_gain *
+                                 (public.last_value_ignorenulls(data.value / cumulative_daily_relative_gain) over wnd)
+                        end                                                 as value,
+                    public.last_value_ignorenulls(data.updated_at) over wnd as updated_at
+             from data_extended2 data
+                      left join portfolio_statuses using (profile_id, date)
                  window wnd as (partition by profile_id, holding_id_v2 order by date rows between unbounded preceding and current row)
      ),
      data_extended as
@@ -243,6 +245,7 @@ with portfolio_statuses as
              select *,
                     coalesce(lag(value) over wnd, 0) as prev_value
              from data_extended3
+             where value is not null
                  window wnd as (partition by profile_id, holding_id_v2 order by date)
      )
 select data_extended.*,

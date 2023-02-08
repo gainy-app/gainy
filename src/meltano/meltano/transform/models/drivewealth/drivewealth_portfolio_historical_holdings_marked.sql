@@ -125,17 +125,13 @@ with raw_data_1d as
                     holding_id_v2,
                     symbol,
                     date as date_total,
-                    cash_flow_sum_total,
-                    cash_flow_positive_sum_total,
-                    cash_flow_negative_sum_total
+                    cash_flow_sum_total
              from (
                       select profile_id,
                              holding_id_v2,
                              symbol,
-                             min(date)                                     as date,
-                             sum(cash_flow)                                as cash_flow_sum_total,
-                             sum(cash_flow) filter ( where cash_flow > 0 ) as cash_flow_positive_sum_total,
-                             sum(cash_flow) filter ( where cash_flow < 0 ) as cash_flow_negative_sum_total
+                             min(date)      as date,
+                             sum(cash_flow) as cash_flow_sum_total
                       from {{ ref('drivewealth_portfolio_historical_holdings') }}
                       group by profile_id, holding_id_v2, symbol
                   ) t
@@ -162,8 +158,6 @@ select profile_id, holding_id_v2, collection_id, symbol,
        cash_flow_sum_5y,
        date_total,
        cash_flow_sum_total,
-       cash_flow_positive_sum_total,
-       cash_flow_negative_sum_total,
        updated_at
 from raw_data_all
          left join raw_data_1d using (holding_id_v2)
