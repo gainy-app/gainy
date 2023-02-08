@@ -51,7 +51,7 @@ with filtered_holdings as
 
                       select profile_id,
                              coalesce(buying_power, 0) + coalesce(pending_orders_sum, 0) as value
-                      from {{ ref('trading_profile_status') }}
+                      from trading_profile_status
                       where profile_id = %(profile_id)s
                   ) t
          ),
