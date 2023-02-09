@@ -124,8 +124,8 @@ with portfolio_statuses as
                     date,
                     -- HP = EV / (BV + CF) - 1
                     case
-                        when ticker_values_aggregated.prev_value + order_values_aggregated.amount > 0
-                            then coalesce(ticker_values_aggregated.value, 0) / (ticker_values_aggregated.prev_value + order_values_aggregated.amount) - 1
+                        when ticker_values_aggregated.prev_value + coalesce(order_values_aggregated.amount, 0) > 0
+                            then coalesce(ticker_values_aggregated.value, 0) / (ticker_values_aggregated.prev_value + coalesce(order_values_aggregated.amount, 0)) - 1
                         end as gain
              from ticker_values_aggregated
                       left join order_values_aggregated using (profile_id, symbol, date)

@@ -164,8 +164,8 @@ with portfolio_statuses as
                                  last_order_updated_at,
                                  -- HP = EV / (BV + CF) - 1
                                  case
-                                     when ticker_values_aggregated.prev_value + order_values_aggregated.amount > 0
-                                         then coalesce(ticker_values_aggregated.value, 0) / (ticker_values_aggregated.prev_value + order_values_aggregated.amount) - 1
+                                     when ticker_values_aggregated.prev_value + coalesce(order_values_aggregated.amount, 0) > 0
+                                         then coalesce(ticker_values_aggregated.value, 0) / (ticker_values_aggregated.prev_value + coalesce(order_values_aggregated.amount, 0)) - 1
                                      end as gain
                           from ticker_values_aggregated
                                    left join order_values_aggregated using (profile_id, symbol, date)
@@ -182,8 +182,12 @@ with portfolio_statuses as
                     cash_flow,
                     t.updated_at,
                     case
-                        when t.value is not null and prev_value + cash_flow > 0
-                            then t.value / (prev_value + cash_flow) - 1
+--                         when t.value is not null and prev_value + cash_flow > 0
+--                             then t.value / (prev_value + cash_flow) - 1
+                        when t.value is not null and prev_value > 1
+                            then (t.value - cash_flow) / prev_value - 1
+                        when t.value is not null and cash_flow > 0
+                            then t.value / cash_flow - 1
                         when t.value is null and prev_value > 0 and portfolio_statuses.profile_id is not null
                             then -1
                         when portfolio_statuses.profile_id is null
