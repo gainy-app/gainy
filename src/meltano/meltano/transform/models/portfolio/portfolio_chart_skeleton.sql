@@ -11,7 +11,7 @@
 }}
 
 
--- Execution Time: 143330.918 ms
+-- Execution Time: 44214.629 ms
 {% if is_incremental() %}
 with old_stats as materialized
      (
@@ -27,43 +27,57 @@ with old_stats as materialized
      )
 {% endif %}
 
-select distinct on (
-    profile_id, period, datetime
-    ) profile_id,
-      period,
-      datetime,
-      t.holding_count,
-      profile_id || '_' || period || '_' || datetime as id
+select t.*,
+       profile_id || '_' || period || '_' || datetime as id
 from (
-         select t.*,
-                max(holding_count)
-                over (partition by profile_id, period order by datetime rows between unbounded preceding and current row ) as cum_max_holding_count
+         select distinct on (
+             profile_id, period, datetime
+             ) profile_id,
+               period,
+               datetime,
+               t.holding_count
          from (
-                  select profile_id,
-                         period,
-                         datetime,
-                         count(distinct holding_id_v2) as holding_count
-                  from {{ ref('portfolio_holding_chart') }}
-                  group by profile_id, period, date, datetime
+                  select t.*,
+                         max(holding_count)
+                         over (partition by profile_id, period order by datetime rows between unbounded preceding and current row ) as cum_max_holding_count
+                  from (
+                           select profile_id,
+                                  period,
+                                  datetime,
+                                  count(distinct holding_id_v2) as holding_count
+                           from {{ ref('portfolio_holding_chart') }}
+                           where period in ('1m', '3m', '1y', '5y', 'all')
+                           group by profile_id, period, date, datetime
 
 {% if is_incremental() %}
-                  union all
+                           union all
 
-                  select profile_id,
-                         period,
-                         max_datetime  as datetime,
-                         holding_count
-                  from old_stats
+                           select profile_id,
+                                  period,
+                                  max_datetime  as datetime,
+                                  holding_count
+                           from old_stats
 {% endif %}
+                       ) t
               ) t
+         where t.holding_count = cum_max_holding_count
+
+         union all
+
+         select distinct on (
+             profile_id, period, datetime
+             ) profile_id,
+               period,
+               datetime,
+               null::int as holding_count
+         from {{ ref('portfolio_holding_chart') }}
+                  join {{ ref('profile_holdings_normalized_all') }} using (profile_id, holding_id_v2)
+                  join {{ ref('week_trading_sessions_static') }} using (symbol, date)
+         where period in ('1d', '1w')
+           and datetime between open_at and close_at - interval '1 second'
      ) t
 
 {% if is_incremental() %}
          left join {{ this }} old_data using (profile_id, period, datetime)
-{% endif %}
-
-where t.holding_count = cum_max_holding_count
-
-{% if is_incremental() %}
-  and old_data.profile_id is null
+where old_data.profile_id is null
 {% endif %}

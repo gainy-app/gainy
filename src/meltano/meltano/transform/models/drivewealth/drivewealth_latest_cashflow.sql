@@ -92,44 +92,7 @@ with portfolio_statuses as
                                from {{ ref('drivewealth_portfolio_historical_holdings') }}
                                order by profile_id desc, holding_id_v2 desc, symbol desc, date desc
                            ) t using (holding_id_v2)
-         ),
-     filled_orders as
-         (
-             select profile_id,
-                    symbol,
-                    total_order_amount_normalized as amount,
-                    drivewealth_orders.date
-             from {{ source('app', 'drivewealth_orders') }}
-                      join {{ source('app', 'drivewealth_accounts') }} on drivewealth_accounts.ref_id = drivewealth_orders.account_id
-                      join {{ source('app', 'drivewealth_users') }} on drivewealth_users.ref_id = drivewealth_accounts.drivewealth_user_id
-             where drivewealth_orders.status = 'FILLED'
-               and drivewealth_orders.updated_at > (select max(last_order_updated_at) from {{ ref('drivewealth_portfolio_historical_holdings') }})
-     ),
-     ticker_values_aggregated as
-         (
-             select profile_id, symbol, date, sum(value) as value, sum(prev_value) as prev_value
-             from historical_holdings_extended
-             group by profile_id, symbol, date
-     ),
-     order_values_aggregated as
-         (
-             select profile_id, symbol, date, sum(amount) as amount
-             from filled_orders
-             group by profile_id, symbol, date
-     ),
-     ticker_stats as
-         (
-             select profile_id,
-                    symbol,
-                    date,
-                    -- HP = EV / (BV + CF) - 1
-                    case
-                        when ticker_values_aggregated.prev_value + coalesce(order_values_aggregated.amount, 0) > 0
-                            then coalesce(ticker_values_aggregated.value, 0) / (ticker_values_aggregated.prev_value + coalesce(order_values_aggregated.amount, 0)) - 1
-                        end as gain
-             from ticker_values_aggregated
-                      left join order_values_aggregated using (profile_id, symbol, date)
-     )
+         )
 select holding_id_v2,
        profile_id,
        collection_id,
@@ -138,9 +101,9 @@ select holding_id_v2,
        date,
        -- CF = EV / (HP + 1) - BV
        case
-           when gain > -1
-               then coalesce(value / (gain + 1) - prev_value, 0)
-           else prev_value * gain
-           end as cash_flow
+           when relative_daily_gain > -1
+               then coalesce(value / (relative_daily_gain + 1) - prev_value, 0)
+           else prev_value * relative_daily_gain
+           end as cash_flow,
+       historical_holdings_extended.updated_at
 from historical_holdings_extended
-         left join ticker_stats using (profile_id, symbol, date)
