@@ -182,8 +182,8 @@ with portfolio_statuses as
                     cash_flow,
                     t.updated_at,
                     case
---                         when t.value is not null and prev_value + cash_flow > 0
---                             then t.value / (prev_value + cash_flow) - 1
+                        when t.value is not null and prev_value + cash_flow > 0 and t.value < cash_flow
+                            then t.value / (prev_value + cash_flow) - 1
                         when t.value is not null and prev_value > 1
                             then (t.value - cash_flow) / prev_value - 1
                         when t.value is not null and cash_flow > 0
