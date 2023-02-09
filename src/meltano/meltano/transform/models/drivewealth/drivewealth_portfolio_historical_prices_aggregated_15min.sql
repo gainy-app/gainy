@@ -14,26 +14,31 @@
     
 with portfolio_statuses as
          (
-             select profile_id,
-                    (date_trunc('minute', drivewealth_portfolio_statuses.created_at) -
-                     interval '1 minute' * mod(extract(minutes from drivewealth_portfolio_statuses.created_at)::int, 15)
-                        )::timestamp                                  as datetime,
-                    drivewealth_portfolio_statuses.created_at         as updated_at,
-                    drivewealth_portfolio_statuses.id                 as portfolio_status_id,
-                    drivewealth_portfolio_statuses.date,
-                    case
-                        when drivewealth_portfolio_statuses.cash_actual_weight > 0
-                            then cash_value / drivewealth_portfolio_statuses.cash_actual_weight
-                        else drivewealth_portfolio_statuses.equity_value
-                        end                                           as value,
-                    drivewealth_portfolio_statuses.data -> 'holdings' as holdings
-             from {{ source('app', 'drivewealth_portfolio_statuses') }}
-                      join {{ source('app', 'drivewealth_portfolios') }}
-                           on drivewealth_portfolios.ref_id = drivewealth_portfolio_id
-             where drivewealth_portfolio_statuses.created_at > now() - interval '10 days'
+             select distinct on (profile_id, datetime) *
+             from (
+                      select profile_id,
+                             (date_trunc('minute', drivewealth_portfolio_statuses.created_at) -
+                              interval '1 minute' *
+                              mod(extract(minutes from drivewealth_portfolio_statuses.created_at)::int, 15)
+                                 )::timestamp                                  as datetime,
+                             drivewealth_portfolio_statuses.created_at         as updated_at,
+                             drivewealth_portfolio_statuses.id                 as portfolio_status_id,
+                             drivewealth_portfolio_statuses.date,
+                             case
+                                 when drivewealth_portfolio_statuses.cash_actual_weight > 0
+                                     then cash_value / drivewealth_portfolio_statuses.cash_actual_weight
+                                 else drivewealth_portfolio_statuses.equity_value
+                                 end                                           as value,
+                             drivewealth_portfolio_statuses.data -> 'holdings' as holdings
+                      from {{ source('app', 'drivewealth_portfolio_statuses') }}
+                               join {{ source('app', 'drivewealth_portfolios') }}
+                                    on drivewealth_portfolios.ref_id = drivewealth_portfolio_id
+                      where drivewealth_portfolio_statuses.created_at > now() - interval '10 days'
 {% if var('realtime') %}
-               and drivewealth_portfolio_statuses.id > (select max(portfolio_status_id) from {{ this }})
+                        and drivewealth_portfolio_statuses.id > (select max(portfolio_status_id) from {{ this }})
 {% endif %}
+                  ) t
+             order by profile_id, datetime, updated_at desc
          ),
      portfolio_status_funds as
          (
