@@ -115,9 +115,9 @@ from (
                                          -- todo link trading_collection_versions to trading_account
                                          select profile_id,
                                                 collection_id,
-                                                sum(target_amount_delta)      as amount_sum,
-                                                sum(abs(target_amount_delta)) as abs_amount_sum,
-                                                max(updated_at)               as updated_at
+                                                sum(target_amount_delta - coalesce(executed_amount, 0))      as amount_sum,
+                                                sum(abs(target_amount_delta - coalesce(executed_amount, 0))) as abs_amount_sum,
+                                                max(updated_at)                                              as updated_at
                                          from {{ source('app', 'trading_collection_versions') }}
                                          where status in ('PENDING_EXECUTION', 'PENDING')
                                          group by profile_id, collection_id
@@ -133,9 +133,9 @@ from (
                                          -- todo link trading_orders to trading_account
                                          select profile_id,
                                                 symbol,
-                                                sum(target_amount_delta)      as amount_sum,
-                                                sum(abs(target_amount_delta)) as abs_amount_sum,
-                                                max(updated_at)               as updated_at
+                                                sum(target_amount_delta - coalesce(executed_amount, 0))      as amount_sum,
+                                                sum(abs(target_amount_delta - coalesce(executed_amount, 0))) as abs_amount_sum,
+                                                max(updated_at)                                              as updated_at
                                          from {{ source('app', 'trading_orders') }}
                                          where status in ('PENDING_EXECUTION', 'PENDING')
                                          group by profile_id, symbol
