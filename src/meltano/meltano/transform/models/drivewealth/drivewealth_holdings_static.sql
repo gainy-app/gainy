@@ -81,6 +81,8 @@ with latest_portfolio_status as
 select fund_holdings_distinct.profile_id,
        portfolio_status_id,
        case
+           when symbol like 'CUR:%'
+               then profile_id || '_cash_' || symbol
            when fund_holdings_distinct.collection_id is null
                then 'dw_ticker_' || fund_holdings_distinct.profile_id || '_' || symbol
            else 'dw_ttf_' || fund_holdings_distinct.profile_id || '_' || fund_holdings_distinct.collection_id || '_' || symbol

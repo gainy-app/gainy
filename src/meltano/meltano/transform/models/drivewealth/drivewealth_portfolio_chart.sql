@@ -5,37 +5,37 @@
 }}
 
     
-select drivewealth_portfolio_historical_prices_aggregated.profile_id,
-       drivewealth_portfolio_historical_prices_aggregated.holding_id_v2,
-       week_trading_sessions_static.date,
-       drivewealth_portfolio_historical_prices_aggregated.datetime,
-       drivewealth_portfolio_historical_prices_aggregated.datetime + interval '3 minutes' as close_datetime,
+select profile_id,
+       holding_id_v2,
+       date,
+       datetime,
+       datetime + interval '3 minutes' as close_datetime,
        '1d'::varchar as period,
-       drivewealth_portfolio_historical_prices_aggregated.open,
-       drivewealth_portfolio_historical_prices_aggregated.high,
-       drivewealth_portfolio_historical_prices_aggregated.low,
-       drivewealth_portfolio_historical_prices_aggregated.close,
-       drivewealth_portfolio_historical_prices_aggregated.adjusted_close,
-       drivewealth_portfolio_historical_prices_aggregated.relative_gain,
-       drivewealth_portfolio_historical_prices_aggregated.updated_at
+       open,
+       high,
+       low,
+       close,
+       adjusted_close,
+       relative_gain,
+       updated_at
 from {{ ref('drivewealth_portfolio_historical_prices_aggregated') }}
 where drivewealth_portfolio_historical_prices_aggregated.period = '3min'
 
 union all
 
-select drivewealth_portfolio_historical_prices_aggregated.profile_id,
-       drivewealth_portfolio_historical_prices_aggregated.holding_id_v2,
-       week_trading_sessions_static.date,
-       drivewealth_portfolio_historical_prices_aggregated.datetime,
-       drivewealth_portfolio_historical_prices_aggregated.datetime + interval '15 minutes' as close_datetime,
+select profile_id,
+       holding_id_v2,
+       date,
+       datetime,
+       datetime + interval '15 minutes' as close_datetime,
        '1w'::varchar as period,
-       drivewealth_portfolio_historical_prices_aggregated.open,
-       drivewealth_portfolio_historical_prices_aggregated.high,
-       drivewealth_portfolio_historical_prices_aggregated.low,
-       drivewealth_portfolio_historical_prices_aggregated.close,
-       drivewealth_portfolio_historical_prices_aggregated.adjusted_close,
-       drivewealth_portfolio_historical_prices_aggregated.relative_gain,
-       drivewealth_portfolio_historical_prices_aggregated.updated_at
+       open,
+       high,
+       low,
+       close,
+       adjusted_close,
+       relative_gain,
+       updated_at
 from {{ ref('drivewealth_portfolio_historical_prices_aggregated') }}
 where drivewealth_portfolio_historical_prices_aggregated.period = '15min'
 

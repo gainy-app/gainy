@@ -65,7 +65,7 @@ with chart_1w as
                                                                              when data.symbol like 'CUR:%'
                                                                                  then 'SPY'
                                                                              else data.symbol end
-             where drivewealth_portfolio_historical_prices_aggregated.datetime between week_trading_sessions_static.open_at and week_trading_sessions_static.close_at - interval '1 microsecond'
+             where data.datetime between week_trading_sessions_static.open_at and week_trading_sessions_static.close_at - interval '1 microsecond'
 
              union all
 
@@ -89,7 +89,7 @@ with chart_1w as
                                                                              when data.symbol like 'CUR:%'
                                                                                  then 'SPY'
                                                                              else data.symbol end
-             where drivewealth_portfolio_historical_prices_aggregated.datetime between week_trading_sessions_static.open_at and week_trading_sessions_static.close_at - interval '1 microsecond'
+             where data.datetime between week_trading_sessions_static.open_at and week_trading_sessions_static.close_at - interval '1 microsecond'
 
              union all
 
