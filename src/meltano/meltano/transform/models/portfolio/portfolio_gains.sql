@@ -67,9 +67,8 @@ select profile_id,
        greatest(
            expanded_holdings.updated_at,
            trading_profile_status.updated_at
-           )::timestamp                                    as updated_at,
-       (actual_value + coalesce(buying_power, 0) +
-        coalesce(pending_orders_sum, 0))::double precision as actual_value,
+           )::timestamp                                             as updated_at,
+       (actual_value + coalesce(pending_cash, 0))::double precision as actual_value,
        relative_gain_1d::double precision,
        relative_gain_1w::double precision,
        relative_gain_1m::double precision,

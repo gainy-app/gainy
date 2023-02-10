@@ -46,6 +46,7 @@ with filtered_holdings as
                       where profile_id = %(profile_id)s
                         and type = 'cash'
                         and ticker_symbol = 'CUR:USD'
+                        and not is_app_trading
 
                       union all
 
