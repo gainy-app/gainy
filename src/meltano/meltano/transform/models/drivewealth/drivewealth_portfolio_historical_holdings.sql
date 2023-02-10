@@ -194,6 +194,68 @@ with portfolio_statuses as
              from data_extended1 data
                       left join portfolio_statuses using (profile_id, date)
      ),
+     cash_flow_first_guess as materialized
+         (
+             select holding_id_v2,
+                    profile_id,
+                    collection_id,
+                    symbol,
+                    portfolio_status_id,
+                    date,
+                    relative_daily_gain,
+                    value,
+                    prev_value,
+                    -- CF = EV / (HP + 1) - BV
+                    case
+                        when relative_daily_gain > -1
+                            then coalesce(value / (relative_daily_gain + 1) - prev_value, 0)
+                        else prev_value * relative_daily_gain
+                        end as cash_flow,
+                    data_extended2.updated_at
+             from data_extended2
+         ),
+     cash_flow as
+         (
+             select holding_id_v2,
+                    profile_id,
+                    collection_id,
+                    symbol,
+                    portfolio_status_id,
+                    date,
+                    relative_daily_gain,
+                    value,
+                    prev_value,
+                    case
+                        when symbol = 'CUR:USD'
+                            then value - prev_value
+                        when abs(equity_cf_sum) > 0 and order_cf_sum is not null
+                            then cash_flow / equity_cf_sum * order_cf_sum
+                        else 0
+                        end as cash_flow,
+                    updated_at
+             from cash_flow_first_guess
+                      left join (
+                                    select profile_id,
+                                           normalize_drivewealth_symbol(symbol) as symbol,
+                                           date,
+                                           sum(total_order_amount_normalized)   as order_cf_sum
+                                    from {{ source('app', 'drivewealth_orders') }}
+                                             join {{ source('app', 'drivewealth_accounts') }}
+                                                  on drivewealth_accounts.ref_id = drivewealth_orders.account_id
+                                             join {{ source('app', 'drivewealth_users') }}
+                                                  on drivewealth_users.ref_id = drivewealth_accounts.drivewealth_user_id
+                                    group by profile_id, normalize_drivewealth_symbol(symbol), date
+                                ) order_stats using (profile_id, symbol, date)
+                      left join (
+                                    select profile_id,
+                                           symbol,
+                                           date,
+                                           sum(cash_flow) as equity_cf_sum
+                                    from cash_flow_first_guess
+                                    where symbol != 'CUR:USD'
+                                    group by profile_id, symbol, date
+                                ) equity_cf_sum using (profile_id, symbol, date)
+         ),
      data_extended3 as
          (
              select holding_id_v2,
@@ -217,25 +279,7 @@ with portfolio_statuses as
                         when prev_value > 0 -- and t.value = 0
                             then -1
                         end as relative_daily_gain
-             from (
-                      select holding_id_v2,
-                             profile_id,
-                             collection_id,
-                             symbol,
-                             portfolio_status_id,
-                             date,
-                             relative_daily_gain,
-                             value,
-                             prev_value,
-                             -- CF = EV / (HP + 1) - BV
-                             case
-                                 when relative_daily_gain > -1
-                                     then coalesce(value / (relative_daily_gain + 1) - prev_value, 0)
-                                 else prev_value * relative_daily_gain
-                                 end as cash_flow,
-                             data_extended2.updated_at
-                      from data_extended2
-                  ) t
+             from cash_flow t
                       left join portfolio_statuses using (profile_id, date)
      ),
      data_extended4 as
