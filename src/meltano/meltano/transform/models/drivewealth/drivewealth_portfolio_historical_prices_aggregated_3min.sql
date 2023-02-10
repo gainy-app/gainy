@@ -106,7 +106,8 @@ with portfolio_statuses as
                           select profile_id,
                                  holding_id_v2,
                                  symbol,
-                                 min(date) as min_date
+                                 min(date)     as min_date,
+                                 min(datetime) as min_datetime
                           from data
                           group by profile_id, holding_id_v2, symbol
                       ),
@@ -115,7 +116,11 @@ with portfolio_statuses as
                           select profile_id, holding_id_v2, symbol, date, datetime, relative_gain, updated_at
                           from min_holding_date
                                    join {{ ref('historical_prices_aggregated_3min') }} using (symbol)
+{% if var('realtime') %}
+                          where historical_prices_aggregated_3min.datetime >= min_datetime
+{% else %}
                           where historical_prices_aggregated_3min.date >= min_date
+{% endif %}
                   )
              select profile_id, holding_id_v2, symbol, date, datetime, relative_gain, updated_at
              from ticker_schedule
