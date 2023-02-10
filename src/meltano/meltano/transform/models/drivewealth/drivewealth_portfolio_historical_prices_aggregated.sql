@@ -45,7 +45,6 @@ with chart_1w as
 
      data as
          (
-
              select data.profile_id,
                     data.holding_id_v2,
                     data.symbol,
@@ -60,7 +59,13 @@ with chart_1w as
                     data.relative_gain,
                     data.updated_at
              from {{ ref('drivewealth_portfolio_historical_prices_aggregated_3min') }} data
-                      join {{ ref('week_trading_sessions_static') }} using (symbol, date)
+                      join {{ ref('week_trading_sessions_static') }}
+                           on week_trading_sessions_static.date = data.date
+                               and week_trading_sessions_static.symbol = case
+                                                                             when data.symbol like 'CUR:%'
+                                                                                 then 'SPY'
+                                                                             else data.symbol end
+             where drivewealth_portfolio_historical_prices_aggregated.datetime between week_trading_sessions_static.open_at and week_trading_sessions_static.close_at - interval '1 microsecond'
 
              union all
 
@@ -78,7 +83,13 @@ with chart_1w as
                     data.relative_gain,
                     data.updated_at
              from {{ ref('drivewealth_portfolio_historical_prices_aggregated_15min') }} data
-                      join {{ ref('week_trading_sessions_static') }} using (symbol, date)
+                      join {{ ref('week_trading_sessions_static') }}
+                           on week_trading_sessions_static.date = data.date
+                               and week_trading_sessions_static.symbol = case
+                                                                             when data.symbol like 'CUR:%'
+                                                                                 then 'SPY'
+                                                                             else data.symbol end
+             where drivewealth_portfolio_historical_prices_aggregated.datetime between week_trading_sessions_static.open_at and week_trading_sessions_static.close_at - interval '1 microsecond'
 
              union all
 

@@ -39,8 +39,7 @@ with latest_portfolio_status as
              select portfolio_funds.profile_id,
                     drivewealth_funds.collection_id,
                     portfolio_status_id,
-                    greatest(portfolio_funds.updated_at,
-                             drivewealth_funds.updated_at)                    as updated_at,
+                    portfolio_funds.updated_at,
                     json_array_elements(portfolio_holding_data -> 'holdings') as fund_holding_data
              from portfolio_funds
                       join {{ source('app', 'drivewealth_funds') }} on drivewealth_funds.ref_id = portfolio_holding_data ->> 'id'
@@ -98,8 +97,7 @@ select fund_holdings_distinct.profile_id,
        coalesce(case when symbol like 'CUR:%' then 'cash' end,
                 base_tickers_type_to_security_type.security_type,
                 base_tickers.type)                  as type,
-       greatest(fund_holdings_distinct.updated_at,
-                base_tickers.updated_at)            as updated_at,
+       fund_holdings_distinct.updated_at,
        '0_' || fund_holdings_distinct.collection_id as collection_uniq_id,
        fund_holdings_distinct.collection_id
 from fund_holdings_distinct

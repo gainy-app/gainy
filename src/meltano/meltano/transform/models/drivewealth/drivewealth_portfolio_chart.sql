@@ -19,9 +19,7 @@ select drivewealth_portfolio_historical_prices_aggregated.profile_id,
        drivewealth_portfolio_historical_prices_aggregated.relative_gain,
        drivewealth_portfolio_historical_prices_aggregated.updated_at
 from {{ ref('drivewealth_portfolio_historical_prices_aggregated') }}
-         join {{ ref('week_trading_sessions_static') }} using (symbol)
 where drivewealth_portfolio_historical_prices_aggregated.period = '3min'
-  and drivewealth_portfolio_historical_prices_aggregated.datetime between week_trading_sessions_static.open_at and week_trading_sessions_static.close_at - interval '1 microsecond'
 
 union all
 
@@ -39,9 +37,7 @@ select drivewealth_portfolio_historical_prices_aggregated.profile_id,
        drivewealth_portfolio_historical_prices_aggregated.relative_gain,
        drivewealth_portfolio_historical_prices_aggregated.updated_at
 from {{ ref('drivewealth_portfolio_historical_prices_aggregated') }}
-         join {{ ref('week_trading_sessions_static') }} using (symbol)
 where drivewealth_portfolio_historical_prices_aggregated.period = '15min'
-  and drivewealth_portfolio_historical_prices_aggregated.datetime between week_trading_sessions_static.open_at and week_trading_sessions_static.close_at - interval '1 microsecond'
 
 union all
 
