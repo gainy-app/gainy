@@ -56,6 +56,17 @@ with latest_portfolio_status as
                     max(updated_at)                                                 as updated_at
              from fund_holdings
              group by profile_id, collection_id, normalize_drivewealth_symbol(fund_holding_data ->> 'symbol')
+
+             union all
+
+             select profile_id,
+                    null                                          as collection_id,
+                    portfolio_status_id,
+                    'CUR:USD'                                     as symbol,
+                    (portfolio_holding_data ->> 'value')::numeric as quantity,
+                    updated_at
+             from portfolio_funds
+             where portfolio_holding_data ->> 'type' = 'CASH_RESERVE'
      ),
      base_tickers_type_to_security_type as
          (
@@ -74,17 +85,22 @@ select fund_holdings_distinct.profile_id,
            when fund_holdings_distinct.collection_id is null
                then 'dw_ticker_' || fund_holdings_distinct.profile_id || '_' || symbol
            else 'dw_ttf_' || fund_holdings_distinct.profile_id || '_' || fund_holdings_distinct.collection_id || '_' || symbol
-           end                                        as holding_id_v2,
-       fund_holdings_distinct.quantity                as quantity,
-       fund_holdings_distinct.quantity                as quantity_norm_for_valuation,
-       fund_holdings_distinct.quantity * actual_price as actual_value,
-       base_tickers.name                              as name,
+           end                                      as holding_id_v2,
+       fund_holdings_distinct.quantity              as quantity,
+       fund_holdings_distinct.quantity              as quantity_norm_for_valuation,
+       case
+           when symbol like 'CUR:USD'
+               then 1
+           else actual_price
+           end * fund_holdings_distinct.quantity    as actual_value,
+       base_tickers.name                            as name,
        symbol,
-       coalesce(base_tickers_type_to_security_type.security_type,
-                base_tickers.type)                    as type,
+       coalesce(case when symbol like 'CUR:%' then 'cash' end,
+                base_tickers_type_to_security_type.security_type,
+                base_tickers.type)                  as type,
        greatest(fund_holdings_distinct.updated_at,
-                base_tickers.updated_at)              as updated_at,
-       '0_' || fund_holdings_distinct.collection_id   as collection_uniq_id,
+                base_tickers.updated_at)            as updated_at,
+       '0_' || fund_holdings_distinct.collection_id as collection_uniq_id,
        fund_holdings_distinct.collection_id
 from fund_holdings_distinct
          left join {{ ref('base_tickers') }} using (symbol)

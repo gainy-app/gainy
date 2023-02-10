@@ -96,9 +96,6 @@ with chart_1w as
                     data.relative_daily_gain as relative_gain,
                     data.updated_at
              from {{ ref('drivewealth_portfolio_historical_holdings') }} data
-                      join {{ ref('historical_prices_aggregated_1d') }}
-                           on historical_prices_aggregated_1d.symbol = data.symbol
-                               and historical_prices_aggregated_1d.datetime = data.date
 
              union all
 

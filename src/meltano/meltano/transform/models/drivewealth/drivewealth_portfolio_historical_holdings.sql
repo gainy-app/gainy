@@ -73,6 +73,19 @@ with portfolio_statuses as
                     (fund_holding_data ->> 'value')::numeric                        as value,
                     updated_at
              from fund_holdings
+
+             union all
+
+             select profile_id,
+                    profile_id || '_cash_CUR:USD'                 as holding_id_v2,
+                    'CUR:USD'                                     as symbol,
+                    null                                          as collection_id,
+                    portfolio_status_id,
+                    date,
+                    (portfolio_holding_data ->> 'value')::numeric as value,
+                    updated_at
+             from portfolio_status_funds
+             where portfolio_holding_data ->> 'type' = 'CASH_RESERVE'
      ),
      schedule as
          (
@@ -84,11 +97,35 @@ with portfolio_statuses as
                                  min(date) as min_date
                           from data
                           group by profile_id, holding_id_v2, symbol
+                      ),
+                  ticker_schedule as materialized
+                      (
+                          select profile_id, holding_id_v2, symbol, date, relative_daily_gain
+                          from min_holding_date
+                                   join {{ ref('historical_prices') }} using (symbol)
+                          where date >= min_date
+                      ),
+                  cash_schedule as materialized
+                      (
+                          select profile_id, date
+                          from ticker_schedule
+                          group by profile_id, date
                       )
              select profile_id, holding_id_v2, symbol, date, relative_daily_gain
-             from min_holding_date
-                      join {{ ref('historical_prices') }} using (symbol)
-             where date >= min_date
+             from ticker_schedule
+
+             union all
+
+             select profile_id, profile_id || '_cash_CUR:USD' as holding_id_v2, 'CUR:USD' as symbol, date, 0 as relative_daily_gain
+             from cash_schedule
+
+             union all
+
+             select profile_id, profile_id || '_cash_CUR:USD' as holding_id_v2, 'CUR:USD' as symbol, date, 0 as relative_daily_gain
+             from (select profile_id, 'SPY' as symbol from ticker_schedule group by profile_id) t
+                      join {{ ref('ticker_realtime_metrics') }} using (symbol)
+                      left join {{ ref('historical_prices') }} using (symbol, date)
+             where historical_prices.symbol is null
 
              union all
 

@@ -84,6 +84,20 @@ with portfolio_statuses as
                     updated_at,
                     (fund_holding_data ->> 'value')::numeric                        as value
              from fund_holdings
+
+             union all
+
+             select profile_id,
+                    profile_id || '_cash_CUR:USD'                 as holding_id_v2,
+                    'CUR:USD'                                     as symbol,
+                    null                                          as collection_id,
+                    portfolio_status_id,
+                    date,
+                    datetime,
+                    updated_at,
+                    (portfolio_holding_data ->> 'value')::numeric as value
+             from portfolio_status_funds
+             where portfolio_holding_data ->> 'type' = 'CASH_RESERVE'
      ),
      schedule as
          (
@@ -95,11 +109,25 @@ with portfolio_statuses as
                                  min(date) as min_date
                           from data
                           group by profile_id, holding_id_v2, symbol
-                      )
+                      ),
+                  ticker_schedule as materialized
+                      (
+                          select profile_id, holding_id_v2, symbol, date, datetime, relative_gain, updated_at
+                          from min_holding_date
+                                   join {{ ref('historical_prices_aggregated_3min') }} using (symbol)
+                          where historical_prices_aggregated_3min.date >= min_date
+                  )
              select profile_id, holding_id_v2, symbol, date, datetime, relative_gain, updated_at
-             from min_holding_date
-                      join {{ ref('historical_prices_aggregated_3min') }} using (symbol)
-             where historical_prices_aggregated_3min.date >= min_date
+             from ticker_schedule
+
+             union all
+
+             select profile_id, profile_id || '_cash_CUR:USD' as holding_id_v2, 'CUR:USD' as symbol, date, datetime, 0 as relative_gain, updated_at
+             from (
+                      select profile_id, date, datetime, max(updated_at) as updated_at
+                      from ticker_schedule
+                      group by profile_id, date, datetime
+                  ) t
      ),
      data_extended0 as
          (

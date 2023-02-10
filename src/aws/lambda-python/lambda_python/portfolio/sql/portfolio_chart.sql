@@ -50,7 +50,7 @@ with filtered_holdings as
                       union all
 
                       select profile_id,
-                             coalesce(buying_power, 0) + coalesce(pending_orders_sum, 0) as value
+                             coalesce(pending_cash, 0) as value
                       from trading_profile_status
                       where profile_id = %(profile_id)s
                   ) t
