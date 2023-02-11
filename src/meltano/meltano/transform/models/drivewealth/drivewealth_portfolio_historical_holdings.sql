@@ -151,7 +151,7 @@ with portfolio_statuses as
                       left join data using (profile_id, holding_id_v2, symbol, date)
              window wnd as (partition by profile_id, holding_id_v2 order by date)
      ),
-     data_extended1 as
+     data_extended1 as -- calculate cumulative_daily_relative_gain
          (
              select profile_id,
                     holding_id_v2,
@@ -161,12 +161,12 @@ with portfolio_statuses as
                     portfolio_status_id,
                     relative_daily_gain,
                     value,
-                    coalesce(lag(value) over wnd, 0) as prev_value,
+                    exp(sum(ln(relative_daily_gain + 1 + 1e-10)) over wnd) as cumulative_daily_relative_gain,
                     updated_at
              from data_extended0
                  window wnd as (partition by holding_id_v2 order by date)
      ),
-     data_extended2 as
+     data_extended2 as -- fill missing values
          (
              select data.profile_id,
                     data.holding_id_v2,
@@ -174,25 +174,41 @@ with portfolio_statuses as
                     data.collection_id,
                     data.symbol,
                     data.date,
-                    data.prev_value,
+                    data.relative_daily_gain,
                     case
                         when data.value is not null
                             then data.value
                         -- if value is null but no portfolio_statuses exist in this day - then we assume there is value, just it's record is missing
-                        when portfolio_statuses.profile_id is null and data.prev_value > 0
-                            then prev_value * (1 + data.relative_daily_gain)
+                        when portfolio_statuses.profile_id is null
+                            then cumulative_daily_relative_gain *
+                                 (public.last_value_ignorenulls(data.value / cumulative_daily_relative_gain) over wnd)
                         else 0
                         end as value,
-                    case
-                        when data.value is not null or (portfolio_statuses.profile_id is null and data.prev_value > 0)
-                            then data.relative_daily_gain
-                        when data.prev_value > 0
-                            then -1
-                        else 0
-                        end as relative_daily_gain,
                     data.updated_at
              from data_extended1 data
                       left join portfolio_statuses using (profile_id, date)
+                 window wnd as (partition by holding_id_v2 order by date)
+     ),
+     data_extended3 as -- recalculate relative_daily_gain
+         (
+             select profile_id,
+                    holding_id_v2,
+                    portfolio_status_id,
+                    collection_id,
+                    symbol,
+                    date,
+                    coalesce(lag(value) over wnd, 0) as prev_value,
+                    value,
+                    case
+                        when value > 0
+                            then relative_daily_gain
+                        when coalesce(lag(value) over wnd, 0) > 0
+                            then -1
+                        else 0
+                        end as relative_daily_gain,
+                    updated_at
+             from data_extended2
+                 window wnd as (partition by holding_id_v2 order by date)
      ),
      cash_flow_first_guess as materialized
          (
@@ -211,8 +227,8 @@ with portfolio_statuses as
                             then coalesce(value / (relative_daily_gain + 1) - prev_value, 0)
                         else prev_value * relative_daily_gain
                         end as cash_flow,
-                    data_extended2.updated_at
-             from data_extended2
+                    updated_at
+             from data_extended3
          ),
      cash_flow as
          (
@@ -256,68 +272,31 @@ with portfolio_statuses as
                                     group by profile_id, symbol, date
                                 ) equity_cf_sum using (profile_id, symbol, date)
          ),
-     data_extended3 as
+     data_extended as
          (
              select holding_id_v2,
                     profile_id,
                     collection_id,
                     symbol,
-                    t.portfolio_status_id,
+                    portfolio_status_id,
                     date,
-                    t.value,
+                    value,
                     prev_value,
                     cash_flow,
-                    t.updated_at,
+                    updated_at,
                     case
                         -- whole day
-                        when t.value > 0 and t.prev_value > 0
+                        when value > 0 and prev_value > 0
                             then relative_daily_gain
                         -- Post CF
-                        when t.value > 0 and cash_flow > 0 -- and t.prev_value = 0
-                            then t.value / cash_flow - 1
+                        when value > 0 and cash_flow > 0 -- and t.prev_value = 0
+                            then value / cash_flow - 1
                         -- Pre CF
                         when prev_value > 0 -- and t.value = 0
                             then -1
-                        end as relative_daily_gain
-             from cash_flow t
-                      left join portfolio_statuses using (profile_id, date)
-     ),
-     data_extended4 as
-         (
-             select *,
-                    exp(sum(ln(relative_daily_gain + 1 + 1e-10)) over wnd) as cumulative_daily_relative_gain
-             from data_extended3
-                 window wnd as (partition by holding_id_v2 order by date)
-     ),
-     data_extended5 as
-         (
-             select profile_id,
-                    data.portfolio_status_id,
-                    holding_id_v2,
-                    collection_id,
-                    symbol,
-                    date,
-                    cash_flow,
-                    relative_daily_gain,
-                    case
-                        when data.value is not null
-                            then data.value
-                        when portfolio_statuses.profile_id is null
-                            then cumulative_daily_relative_gain *
-                                 (last_value_ignorenulls(data.value / cumulative_daily_relative_gain) over wnd)
                         else 0
-                        end                                                 as value,
-                    last_value_ignorenulls(data.updated_at) over wnd as updated_at
-             from data_extended4 data
-                      left join portfolio_statuses using (profile_id, date)
-                 window wnd as (partition by profile_id, holding_id_v2 order by date rows between unbounded preceding and current row)
-     ),
-     data_extended as
-         (
-             select *,
-                    coalesce(lag(value) over wnd, 0) as prev_value
-             from data_extended5
-                 window wnd as (partition by profile_id, holding_id_v2 order by date)
+                        end as relative_daily_gain
+             from cash_flow
      )
 select data_extended.*,
        date_trunc('week', date)::date                    as date_week,
