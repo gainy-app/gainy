@@ -180,7 +180,7 @@ with portfolio_statuses as
                             then data.value
                         -- if value is null but no portfolio_statuses exist in this day - then we assume there is value, just it's record is missing
                         when portfolio_statuses.profile_id is null and data.prev_value > 0
-                            then prev_value * data.relative_daily_gain
+                            then prev_value * (1 + data.relative_daily_gain)
                         else 0
                         end as value,
                     case
