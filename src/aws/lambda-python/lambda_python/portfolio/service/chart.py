@@ -257,8 +257,9 @@ class PortfolioChartService:
             ))
 
         filter_clause = sql.SQL("""
-            ((profile_holdings_normalized_all.collection_id is null and ticker_interests.interest_id in %(interest_ids)s) or 
-             (profile_holdings_normalized_all.collection_id is not null and collection_interests.interest_id in %(interest_ids)s and collection_interests.sim_dif > 0))""") 
+            ((profile_holdings_normalized_all.collection_id is null and ticker_interests.interest_id is not null and ticker_interests.interest_id in %(interest_ids)s) or 
+             (profile_holdings_normalized_all.collection_id is not null and collection_interests.interest_id is not null and collection_interests.interest_id in %(interest_ids)s and collection_interests.sim_dif > 0))"""
+                                )
         where_clause.append(filter_clause)
         params['interest_ids'] = tuple(filter.interest_ids)
 
@@ -277,8 +278,9 @@ class PortfolioChartService:
             ))
 
         filter_clause = sql.SQL("""
-            ((profile_holdings_normalized_all.collection_id is null and ticker_categories.category_id in %(category_ids)s) or 
-             (profile_holdings_normalized_all.collection_id is not null and collection_categories.category_id in %(category_ids)s and collection_categories.sim_dif > 0))""") 
+            ((profile_holdings_normalized_all.collection_id is null and ticker_categories.category_id is not null and ticker_categories.category_id in %(category_ids)s) or 
+             (profile_holdings_normalized_all.collection_id is not null and collection_categories.category_id is not null and collection_categories.category_id in %(category_ids)s and collection_categories.sim_dif > 0))"""
+                                )
         where_clause.append(filter_clause)
         params['category_ids'] = tuple(filter.category_ids)
 
