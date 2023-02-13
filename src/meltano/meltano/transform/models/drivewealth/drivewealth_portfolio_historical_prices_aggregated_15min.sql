@@ -98,6 +98,20 @@ with portfolio_statuses as
                     (portfolio_holding_data ->> 'value')::numeric as value
              from portfolio_status_funds
              where portfolio_holding_data ->> 'type' = 'CASH_RESERVE'
+
+             union all
+
+             select profile_id,
+                    holding_id_v2,
+                    symbol,
+                    collection_id,
+                    t.portfolio_status_id,
+                    (date + interval '1 day') as date,
+                    (date + interval '1 day')::timestamp as datetime,
+                    t.updated_at,
+                    t.value
+             from {{ ref('drivewealth_portfolio_historical_holdings') }} t
+             where date > now() - interval '10 days'
      ),
      schedule as
          (
@@ -106,14 +120,22 @@ with portfolio_statuses as
                           select profile_id,
                                  holding_id_v2,
                                  symbol,
+                                 collection_id,
                                  min(date)     as min_date,
                                  min(datetime) as min_datetime
                           from data
-                          group by profile_id, holding_id_v2, symbol
+                          group by profile_id, holding_id_v2, collection_id, symbol
                       ),
                   ticker_schedule as materialized
                       (
-                          select profile_id, holding_id_v2, symbol, date, datetime, relative_gain, updated_at
+                          select profile_id,
+                                 holding_id_v2,
+                                 collection_id,
+                                 symbol,
+                                 date,
+                                 datetime,
+                                 relative_gain,
+                                 updated_at
                           from min_holding_date
                                    join {{ ref('historical_prices_aggregated_15min') }} using (symbol)
 {% if var('realtime') %}
@@ -122,95 +144,132 @@ with portfolio_statuses as
                           where historical_prices_aggregated_15min.date >= min_date
 {% endif %}
                   )
-             select profile_id, holding_id_v2, symbol, date, datetime, relative_gain, updated_at
+             select profile_id,
+                    holding_id_v2,
+                    collection_id,
+                    symbol,
+                    date,
+                    datetime,
+                    relative_gain,
+                    updated_at
              from ticker_schedule
 
              union all
 
-             select profile_id, profile_id || '_cash_CUR:USD' as holding_id_v2, 'CUR:USD' as symbol, date, datetime, 0 as relative_gain, updated_at
+             select profile_id,
+                    profile_id || '_cash_CUR:USD' as holding_id_v2,
+                    null                          as collection_id,
+                    'CUR:USD'                     as symbol,
+                    date,
+                    datetime,
+                    0                             as relative_gain,
+                    updated_at
              from (
                       select profile_id, date, datetime, max(updated_at) as updated_at
                       from ticker_schedule
                       group by profile_id, date, datetime
                   ) t
      ),
-     data_extended0 as
+     data_combined as
          (
              select profile_id,
                     holding_id_v2,
-                    LAST_VALUE_IGNORENULLS(portfolio_status_id) over wnd as portfolio_status_id,
-                    LAST_VALUE_IGNORENULLS(collection_id) over wnd       as collection_id,
                     symbol,
-                    schedule.date,
+                    collection_id,
+                    portfolio_status_id,
+                    date,
                     datetime,
+                    updated_at,
+                    value,
+                    null  as relative_gain,
+                    false as is_scheduled
+             from data
+
+             union all
+
+             select profile_id,
+                    holding_id_v2,
+                    symbol,
+                    collection_id,
+                    null as portfolio_status_id,
+                    date,
+                    datetime,
+                    updated_at,
+                    null as value,
                     relative_gain,
-                    value                                                as value,
-                    greatest(schedule.updated_at, data.updated_at)       as updated_at
+                    true as is_scheduled
              from schedule
-                      left join data using (profile_id, holding_id_v2, symbol, datetime)
+     ),
+     data_combined1 as
+         (
+             select profile_id,
+                    holding_id_v2,
+                    symbol,
+                    collection_id,
+                    public.LAST_VALUE_IGNORENULLS(portfolio_status_id) over wnd as portfolio_status_id,
+                    date,
+                    datetime,
+                    value,
+                    updated_at,
+                    relative_gain,
+                    exp(sum(ln(relative_gain + 1 + 1e-10)) over wnd)            as cumulative_relative_gain,
+                    is_scheduled
+             from data_combined
                  window wnd as (partition by profile_id, holding_id_v2 order by datetime)
      ),
-     data_extended2 as
-         (
-             select *,
-                    exp(sum(ln(relative_gain + 1 + 1e-10)) over wnd) as cumulative_daily_relative_gain
-             from data_extended0
-                 window wnd as (partition by holding_id_v2 order by datetime)
-     ),
-     data_extended3 as
+    data_combined2 as
          (
              select profile_id,
-                    portfolio_status_id,
                     holding_id_v2,
-                    collection_id,
                     symbol,
-                    date,
+                    collection_id,
+                    t.portfolio_status_id,
+                    t.date,
                     datetime,
+                    t.updated_at,
                     relative_gain,
-                    cumulative_daily_relative_gain,
-                    updated_at,
                     case
-                        when value is not null
-                            then value
-                        when exists(select profile_id
-                                    from portfolio_statuses
-                                    where portfolio_statuses.profile_id = data.profile_id
-                                      and portfolio_statuses.datetime = data.datetime)
-                            then 0
-                        end as value
-             from data_extended2 data
-     ),
-     data_extended4 as
-         (
-             select profile_id,
-                    portfolio_status_id,
-                    holding_id_v2,
-                    collection_id,
-                    symbol,
-                    date,
-                    datetime,
-                    relative_gain,
-                    updated_at,
-                    coalesce(value, cumulative_daily_relative_gain *
-                                    (public.last_value_ignorenulls(value / cumulative_daily_relative_gain)
-                                     over wnd)
-                        ) as value
-             from data_extended3
+                        when t.value is not null
+                            then t.value
+                        -- if value is null but no portfolio_statuses exist in this day - then we assume there is value, just it's record is missing
+                        when portfolio_statuses.profile_id is null
+                            then cumulative_relative_gain *
+                                 (public.last_value_ignorenulls(t.value / cumulative_relative_gain) over wnd)
+                        else 0
+                        end as value,
+                    is_scheduled
+             from data_combined1 t
+                      left join portfolio_statuses using (profile_id, datetime)
                  window wnd as (partition by profile_id, holding_id_v2 order by datetime)
      ),
      data_extended as
          (
              select *,
                     coalesce(lag(value) over wnd, 0) as prev_value
-             from data_extended4
+             from data_combined2
                  window wnd as (partition by profile_id, holding_id_v2 order by datetime)
      )
-select data_extended.*,
+select data_extended.profile_id,
+       data_extended.holding_id_v2,
+       data_extended.symbol,
+       data_extended.collection_id,
+       data_extended.portfolio_status_id,
+       data_extended.date,
+       data_extended.datetime,
+       data_extended.updated_at,
+       data_extended.relative_gain,
+       data_extended.value,
+       data_extended.prev_value,
        profile_id || '_' || holding_id_v2 || '_' || datetime as id
 from data_extended
 
 {% if is_incremental() %}
          left join {{ this }} old_data using (profile_id, holding_id_v2, symbol, datetime)
-where old_data.profile_id is null
-   or data_extended.updated_at > old_data.updated_at
+{% endif %}
+
+where is_scheduled
+
+{% if is_incremental() %}
+  and (old_data.profile_id is null
+   or data_extended.updated_at > old_data.updated_at)
 {% endif %}

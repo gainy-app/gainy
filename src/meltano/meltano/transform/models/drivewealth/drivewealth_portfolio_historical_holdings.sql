@@ -153,16 +153,8 @@ with portfolio_statuses as
      ),
      data_extended1 as -- calculate cumulative_daily_relative_gain
          (
-             select profile_id,
-                    holding_id_v2,
-                    date,
-                    collection_id,
-                    symbol,
-                    portfolio_status_id,
-                    relative_daily_gain,
-                    value,
-                    exp(sum(ln(relative_daily_gain + 1 + 1e-10)) over wnd) as cumulative_daily_relative_gain,
-                    updated_at
+             select *,
+                    exp(sum(ln(relative_daily_gain + 1 + 1e-10)) over wnd) as cumulative_daily_relative_gain
              from data_extended0
                  window wnd as (partition by holding_id_v2 order by date)
      ),
