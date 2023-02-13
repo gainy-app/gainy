@@ -5,16 +5,15 @@
 }}
 
 with collection_category_tags as (
-    select
-        cc.collection_id,
-        c."name" as tag,
-        case
-            when category_grade >= 0.5 then 2
-            else 4
-        end as priority
-        from {{ ref('collection_categories') }} cc
-            join {{ ref('categories') }} c
-                on cc.category_id = c.id
+    select collection_categories.collection_id,
+           categories.name as tag,
+           case
+               when sim_dif > 0.25 then 2
+           else 4
+           end             as priority
+    from {{ ref('collection_categories') }}
+             join {{ ref('categories') }} on collection_categories.category_id = categories.id
+    where sim_dif > 0
 ),
 collection_industry_tags as (
     select
