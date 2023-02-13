@@ -189,16 +189,17 @@ with portfolio_statuses as
 
              select profile_id,
                     holding_id_v2,
-                    symbol,
-                    collection_id,
-                    null as portfolio_status_id,
-                    date,
+                    schedule.symbol,
+                    schedule.collection_id,
+                    data.portfolio_status_id,
+                    schedule.date,
                     datetime,
-                    updated_at,
-                    null as value,
+                    schedule.updated_at,
+                    data.value,
                     relative_gain,
                     true as is_scheduled
              from schedule
+                      left join data using (profile_id, holding_id_v2, datetime)
      ),
      data_combined1 as
          (
@@ -244,32 +245,27 @@ with portfolio_statuses as
      ),
      data_extended as
          (
-             select *,
+             select profile_id,
+                    holding_id_v2,
+                    symbol,
+                    collection_id,
+                    portfolio_status_id,
+                    date,
+                    datetime,
+                    updated_at,
+                    relative_gain,
+                    value,
                     coalesce(lag(value) over wnd, 0) as prev_value
              from data_combined2
+             where is_scheduled
                  window wnd as (partition by profile_id, holding_id_v2 order by datetime)
      )
-select data_extended.profile_id,
-       data_extended.holding_id_v2,
-       data_extended.symbol,
-       data_extended.collection_id,
-       data_extended.portfolio_status_id,
-       data_extended.date,
-       data_extended.datetime,
-       data_extended.updated_at,
-       data_extended.relative_gain,
-       data_extended.value,
-       data_extended.prev_value,
+select data_extended.*,
        profile_id || '_' || holding_id_v2 || '_' || datetime as id
 from data_extended
 
 {% if is_incremental() %}
          left join {{ this }} old_data using (profile_id, holding_id_v2, symbol, datetime)
-{% endif %}
-
-where is_scheduled
-
-{% if is_incremental() %}
-  and (old_data.profile_id is null
-   or data_extended.updated_at > old_data.updated_at)
+where old_data.profile_id is null
+   or data_extended.updated_at > old_data.updated_at
 {% endif %}
