@@ -8,7 +8,7 @@ with holdings as
                     profile_holdings_normalized_all.collection_id,
                     profile_holdings_normalized_all.symbol,
                     case
-                        when is_app_trading and collection_id is not null
+                        when is_app_trading and profile_holdings_normalized_all.collection_id is not null
                             then 'TTF'
                         when profile_holdings_normalized_all.type = 'etf'
                             then upper(profile_holdings_normalized_all.type)

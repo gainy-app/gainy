@@ -255,8 +255,7 @@ class PortfolioChartService:
             sql.SQL(
                 "left join collection_interests on collection_interests.collection_id = profile_holdings_normalized_all.collection_id"
             ))
-        where_clause.append(sql.SQL("interest_id in %(interest_ids)s"))
-        
+
         filter_clause = sql.SQL("""
             ((profile_holdings_normalized_all.collection_id is null and ticker_interests.interest_id in %(interest_ids)s) or 
              (profile_holdings_normalized_all.collection_id is not null and collection_interests.interest_id in %(interest_ids)s and collection_interests.sim_dif > 0))""") 
@@ -276,8 +275,7 @@ class PortfolioChartService:
             sql.SQL(
                 "left join collection_categories on collection_categories.collection_id = profile_holdings_normalized_all.collection_id"
             ))
-        where_clause.append(sql.SQL("category_id in %(category_ids)s"))
-        
+
         filter_clause = sql.SQL("""
             ((profile_holdings_normalized_all.collection_id is null and ticker_categories.category_id in %(category_ids)s) or 
              (profile_holdings_normalized_all.collection_id is not null and collection_categories.category_id in %(category_ids)s and collection_categories.sim_dif > 0))""") 
