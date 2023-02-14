@@ -207,7 +207,7 @@ with portfolio_statuses as
                     holding_id_v2,
                     symbol,
                     collection_id,
-                    public.LAST_VALUE_IGNORENULLS(portfolio_status_id) over wnd as portfolio_status_id,
+                    LAST_VALUE_IGNORENULLS(portfolio_status_id) over wnd as portfolio_status_id,
                     date,
                     datetime,
                     value,
@@ -235,7 +235,7 @@ with portfolio_statuses as
                         -- if value is null but no portfolio_statuses exist in this day - then we assume there is value, just it's record is missing
                         when portfolio_statuses.profile_id is null
                             then cumulative_relative_gain *
-                                 (public.last_value_ignorenulls(t.value / coalesce(cumulative_relative_gain, 1)) over wnd)
+                                 (last_value_ignorenulls(t.value / coalesce(cumulative_relative_gain, 1)) over wnd)
                         else 0
                         end as value,
                     is_scheduled
