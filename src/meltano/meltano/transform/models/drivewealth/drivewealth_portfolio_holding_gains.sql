@@ -28,9 +28,16 @@ with relative_gains as
                                  exp(sum(ln(coalesce(relative_gain, 0) + 1 + 1e-10))) - 1 as relative_gain_1w
                           from {{ ref('drivewealth_portfolio_historical_prices_aggregated') }}
                                    join {{ ref('portfolio_chart_skeleton') }} using (profile_id, datetime)
+                                   left join (
+                                                 select profile_id, holding_id_v2, max(date) as last_selloff_date
+                                                 from {{ ref('drivewealth_portfolio_historical_holdings') }}
+                                                 where date >= now()::date - interval '1 week'
+                                                   and value < 1e-3
+                                                 group by profile_id, holding_id_v2
+                                             ) last_selloff_date using (profile_id, holding_id_v2)
                           where drivewealth_portfolio_historical_prices_aggregated.period = '15min'
                             and portfolio_chart_skeleton.period = '1w'
-                            and date >= now()::date - interval '1 week'
+                            and date >= coalesce(last_selloff_date, now()::date - interval '1 week')
                           group by profile_id, holding_id_v2
                   ),
                   raw_data_1m as
@@ -39,8 +46,15 @@ with relative_gains as
                                  holding_id_v2,
                                  exp(sum(ln(coalesce(relative_gain, 0) + 1 + 1e-10))) - 1 as relative_gain_1m
                           from {{ ref('drivewealth_portfolio_historical_prices_aggregated') }}
+                                   left join (
+                                                 select profile_id, holding_id_v2, max(date) as last_selloff_date
+                                                 from {{ ref('drivewealth_portfolio_historical_holdings') }}
+                                                 where date >= now()::date - interval '1 month'
+                                                   and value < 1e-3
+                                                 group by profile_id, holding_id_v2
+                                             ) last_selloff_date using (profile_id, holding_id_v2)
                           where period = '1d'
-                            and date >= now()::date - interval '1 month'
+                            and date >= coalesce(last_selloff_date, now()::date - interval '1 month')
                           group by profile_id, holding_id_v2
                   ),
                   raw_data_3m as
@@ -49,8 +63,15 @@ with relative_gains as
                                  holding_id_v2,
                                  exp(sum(ln(coalesce(relative_gain, 0) + 1 + 1e-10))) - 1 as relative_gain_3m
                           from {{ ref('drivewealth_portfolio_historical_prices_aggregated') }}
+                                   left join (
+                                                 select profile_id, holding_id_v2, max(date) as last_selloff_date
+                                                 from {{ ref('drivewealth_portfolio_historical_holdings') }}
+                                                 where date >= now()::date - interval '3 month'
+                                                   and value < 1e-3
+                                                 group by profile_id, holding_id_v2
+                                             ) last_selloff_date using (profile_id, holding_id_v2)
                           where period = '1d'
-                            and date >= now()::date - interval '3 month'
+                            and date >= coalesce(last_selloff_date, now()::date - interval '3 month')
                           group by profile_id, holding_id_v2
                   ),
                   raw_data_1y as
@@ -59,8 +80,15 @@ with relative_gains as
                                  holding_id_v2,
                                  exp(sum(ln(coalesce(relative_gain, 0) + 1 + 1e-10))) - 1 as relative_gain_1y
                           from {{ ref('drivewealth_portfolio_historical_prices_aggregated') }}
+                                   left join (
+                                                 select profile_id, holding_id_v2, max(date) as last_selloff_date
+                                                 from {{ ref('drivewealth_portfolio_historical_holdings') }}
+                                                 where date >= now()::date - interval '1 year'
+                                                   and value < 1e-3
+                                                 group by profile_id, holding_id_v2
+                                             ) last_selloff_date using (profile_id, holding_id_v2)
                           where period = '1d'
-                            and date >= now()::date - interval '1 year'
+                            and date >= coalesce(last_selloff_date, now()::date - interval '1 year')
                           group by profile_id, holding_id_v2
                   ),
                   raw_data_5y as
@@ -69,8 +97,15 @@ with relative_gains as
                                  holding_id_v2,
                                  exp(sum(ln(coalesce(relative_gain, 0) + 1 + 1e-10))) - 1 as relative_gain_5y
                           from {{ ref('drivewealth_portfolio_historical_prices_aggregated') }}
+                                   left join (
+                                                 select profile_id, holding_id_v2, max(date) as last_selloff_date
+                                                 from {{ ref('drivewealth_portfolio_historical_holdings') }}
+                                                 where date >= now()::date - interval '5 year'
+                                                   and value < 1e-3
+                                                 group by profile_id, holding_id_v2
+                                             ) last_selloff_date using (profile_id, holding_id_v2)
                           where period = '1w'
-                            and date >= now()::date - interval '5 year'
+                            and date >= coalesce(last_selloff_date, now()::date - interval '5 year')
                           group by profile_id, holding_id_v2
                   ),
                   raw_data_all as
@@ -79,7 +114,15 @@ with relative_gains as
                                  holding_id_v2,
                                  exp(sum(ln(coalesce(relative_gain, 0) + 1 + 1e-10))) - 1 as relative_gain_total
                           from {{ ref('drivewealth_portfolio_historical_prices_aggregated') }}
+                                   left join (
+                                                 select profile_id, holding_id_v2, max(date) as last_selloff_date
+                                                 from {{ ref('drivewealth_portfolio_historical_holdings') }}
+                                                 where date >= now()::date - interval '1 month'
+                                                   and value < 1e-3
+                                                 group by profile_id, holding_id_v2
+                                             ) last_selloff_date using (profile_id, holding_id_v2)
                           where period = '1m'
+                            and (date >= last_selloff_date or last_selloff_date is null)
                           group by profile_id, holding_id_v2
                   )
              select profile_id,

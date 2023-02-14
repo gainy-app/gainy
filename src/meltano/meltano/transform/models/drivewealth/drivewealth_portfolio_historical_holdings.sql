@@ -173,7 +173,7 @@ with portfolio_statuses as
                         -- if value is null but no portfolio_statuses exist in this day - then we assume there is value, just it's record is missing
                         when portfolio_statuses.profile_id is null
                             then cumulative_daily_relative_gain *
-                                 (public.last_value_ignorenulls(data.value / cumulative_daily_relative_gain) over wnd)
+                                 (last_value_ignorenulls(data.value / cumulative_daily_relative_gain) over wnd)
                         else 0
                         end as value,
                     data.updated_at
@@ -192,10 +192,8 @@ with portfolio_statuses as
                     coalesce(lag(value) over wnd, 0) as prev_value,
                     value,
                     case
-                        when value > 0
+                        when value > 0 or coalesce(lag(value) over wnd, 0) > 0
                             then relative_daily_gain
-                        when coalesce(lag(value) over wnd, 0) > 0
-                            then -1
                         else 0
                         end as relative_daily_gain,
                     updated_at
@@ -215,7 +213,7 @@ with portfolio_statuses as
                     prev_value,
                     -- CF = EV / (HP + 1) - BV
                     case
-                        when relative_daily_gain > -1
+                        when relative_daily_gain is not null and relative_daily_gain > -1
                             then coalesce(value / (relative_daily_gain + 1) - prev_value, 0)
                         else prev_value * relative_daily_gain
                         end as cash_flow,
@@ -285,7 +283,7 @@ with portfolio_statuses as
                             then value / cash_flow - 1
                         -- Pre CF
                         when prev_value > 0 -- and t.value = 0
-                            then -1
+                            then -cash_flow / prev_value - 1
                         else 0
                         end as relative_daily_gain
              from cash_flow
