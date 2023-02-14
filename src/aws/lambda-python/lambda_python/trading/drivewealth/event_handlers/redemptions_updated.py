@@ -18,7 +18,10 @@ class RedemptionUpdatedEventHandler(AbstractDriveWealthEventHandler):
         if not redemption:
             redemption = DriveWealthRedemption()
 
+        old_status = redemption.status
         redemption.set_from_response(event_payload)
+        self.provider.handle_money_flow_status_change(redemption, old_status)
+
         self.repo.persist(redemption)
         self.provider.handle_redemption_status(redemption)
 
