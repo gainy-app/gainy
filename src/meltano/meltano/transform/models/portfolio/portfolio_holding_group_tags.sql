@@ -1,6 +1,12 @@
 {{
   config(
-    materialized = "view",
+    materialized = "table",
+    unique_key = "id",
+    tags = ["realtime"],
+    post_hook=[
+      pk('id'),
+      index('holding_group_id'),
+    ]
   )
 }}
 
@@ -59,7 +65,9 @@ select distinct on (
       null::text as collection_uniq_id,
       category_id,
       interest_id,
-      priority
+      priority,
+      (holding_group_id || '_' || coalesce(category_id, 0) || '_' || coalesce(interest_id, 0)
+          )      as id
 from (
          select profile_id,
                 holding_group_id,
