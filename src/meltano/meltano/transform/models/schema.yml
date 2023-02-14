@@ -2101,10 +2101,6 @@ models:
         tests:
           - type:
               type: 'integer'
-      - name: symbol
-        tests:
-          - type:
-              type: 'character varying'
       - name: collection_id
         tests:
           - type:
@@ -2125,18 +2121,6 @@ models:
         tests:
           - type:
               type: 'integer'
-      - name: updated_at
-        tests:
-          - type:
-              type: 'timestamp with time zone'
-      - name: id
-        tests:
-          - type:
-              type: 'text'
-      - name: is_realtime
-        tests:
-          - type:
-              type: 'boolean'
 
   - name: historical_intraday_prices
     columns:
@@ -2679,6 +2663,39 @@ models:
         tests:
           - type:
               type: 'boolean'
+
+  - name: portfolio_interests
+    columns:
+      - name: profile_id
+        tests:
+          - type:
+              type: 'integer'
+      - name: interest_id
+        tests:
+          - type:
+              type: 'integer'
+
+  - name: portfolio_categories
+    columns:
+      - name: profile_id
+        tests:
+          - type:
+              type: 'integer'
+      - name: category_id
+        tests:
+          - type:
+              type: 'integer'
+
+  - name: profile_brokers
+    columns:
+      - name: profile_id
+        tests:
+          - type:
+              type: 'integer'
+      - name: broker_uniq_id
+        tests:
+          - type:
+              type: 'text'
 
 exposures:
   - name: ticker_search_index

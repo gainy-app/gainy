@@ -303,3 +303,27 @@ query GetPlaidHoldings($profileId: Int!) {
 }
 ```
 
+### Get portfolio filters
+
+```GraphQL
+query GetPortfolioFilters($profile_id: Int!) {
+  profile_brokers(where: {profile_id: {_eq: $profile_id}}) {
+    broker {
+      uniq_id
+      name
+    }
+  }
+  portfolio_interests(where: {profile_id: {_eq: $profile_id}}) {
+    interest {
+      id
+      name
+    }
+  }
+  portfolio_categories(where: {profile_id: {_eq: $profile_id}}) {
+    category {
+      id
+      name
+    }
+  }
+}
+```
