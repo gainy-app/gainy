@@ -38,6 +38,7 @@ class DriveWealthBankAccount(BaseDriveWealthModel):
     drivewealth_user_id = None
     funding_account_id = None
     plaid_access_token_id = None
+    plaid_account_id = None
     status = None
     bank_account_nickname = None
     bank_account_number = None

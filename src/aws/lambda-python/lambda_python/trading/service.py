@@ -7,6 +7,7 @@ from gainy.data_access.operators import OperatorIn
 from gainy.exceptions import NotFoundException, BadRequestException
 from gainy.trading.drivewealth.models import CollectionStatus, CollectionHoldingStatus
 from gainy.plaid.common import handle_error
+from gainy.trading.exceptions import InsufficientFundsException
 from models import UploadedFile
 from portfolio.plaid import PlaidService
 from services.aws_s3 import S3
@@ -130,7 +131,9 @@ class TradingService(GainyTradingService):
                           funding_account: FundingAccount):
         repository = self.trading_repository
 
-        if amount < 0:
+        if amount > 0:
+            self.check_enough_funds_to_deposit(funding_account, amount)
+        else:
             self.check_enough_withdrawable_cash(trading_account.id, -amount)
 
         money_flow = TradingMoneyFlow()
@@ -239,3 +242,19 @@ class TradingService(GainyTradingService):
             self.file_service.remove_file(uploaded_file)
             self.trading_repository.delete(document)
             self.trading_repository.delete(uploaded_file)
+
+    def check_enough_funds_to_deposit(self, funding_account: FundingAccount,
+                                      amount: Decimal):
+        try:
+            self.update_funding_accounts_balance([funding_account])
+        except Exception as e:
+            logger.exception(
+                'Exception while updating funding account balance',
+                extra={
+                    "e": e,
+                    "profile_id": funding_account.profile_id,
+                    "funding_account_id": funding_account.id,
+                })
+
+        if Decimal(funding_account.balance) < amount:
+            raise InsufficientFundsException()

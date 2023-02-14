@@ -95,8 +95,8 @@ class DriveWealthProvider(DriveWealthProviderKYC,
                 entity = DriveWealthRedemption()
         except DriveWealthApiException as e:
             money_flow.status = TradingMoneyFlowStatus.FAILED
-            logger.error(e)
-            return
+            logger.exception(e)
+            raise Exception('Request failed, please try again later.')
 
         entity.set_from_response(response)
         entity.trading_account_ref_id = trading_account.ref_id
