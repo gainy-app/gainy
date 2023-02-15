@@ -134,7 +134,7 @@ with base_tickers_type_to_security_type as
                                 base_tickers.updated_at)::timestamp as updated_at
                  from (
                           select profile_id, holding_id_v2, collection_id, symbol, max(updated_at) as updated_at
-                          from drivewealth_portfolio_historical_holdings
+                          from {{ ref('drivewealth_portfolio_historical_holdings') }}
                           group by profile_id, holding_id_v2, collection_id, symbol
                       ) t
                            left join {{ ref('drivewealth_holdings') }} using (profile_id, holding_id_v2, symbol)
