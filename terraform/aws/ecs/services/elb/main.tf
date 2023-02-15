@@ -1,3 +1,6 @@
+data "aws_region" "current" {}
+data "aws_caller_identity" "current" {}
+data "aws_elb_service_account" "main" {}
 data "aws_acm_certificate" "sslcert" {
   domain = "*.${var.domain}"
 }
@@ -8,6 +11,55 @@ resource "aws_s3_bucket" "lb_logs" {
   tags = {
     Name = "Load balancer logs"
   }
+}
+
+resource "aws_s3_bucket_policy" "lb-bucket-policy" {
+  bucket = aws_s3_bucket.lb_logs.id
+
+  policy = <<POLICY
+{
+    "Id": "Policy",
+    "Version": "2012-10-17",
+    "Statement": [{
+            "Effect": "Allow",
+            "Principal": {
+                "AWS": [
+                    "${data.aws_elb_service_account.main.arn}"
+                ]
+            },
+            "Action": [
+                "s3:PutObject"
+            ],
+            "Resource": "${aws_s3_bucket.lb_logs.arn}/AWSLogs/${data.aws_caller_identity.current.account_id}/*"
+        },
+        {
+            "Effect": "Allow",
+            "Principal": {
+                "Service": "delivery.logs.amazonaws.com"
+            },
+            "Action": [
+                "s3:PutObject"
+            ],
+            "Resource": "${aws_s3_bucket.lb_logs.arn}/AWSLogs/${data.aws_caller_identity.current.account_id}/*",
+            "Condition": {
+                "StringEquals": {
+                    "s3:x-amz-acl": "bucket-owner-full-control"
+                }
+            }
+        },
+        {
+            "Effect": "Allow",
+            "Principal": {
+                "Service": "delivery.logs.amazonaws.com"
+            },
+            "Action": [
+                "s3:GetBucketAcl"
+            ],
+            "Resource": "${aws_s3_bucket.lb_logs.arn}"
+        }
+    ]
+}
+POLICY
 }
 
 /*
