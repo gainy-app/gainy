@@ -15,7 +15,20 @@
 
 -- IF CHANGED - CHANGE drivewealth_latest_cashflow.SQL AS WELL
 
-with portfolio_statuses as
+with order_stats as materialized
+         (
+             select profile_id,
+                    normalize_drivewealth_symbol(symbol) as symbol,
+                    date,
+                    sum(total_order_amount_normalized)   as order_cf_sum
+             from {{ source('app', 'drivewealth_orders') }}
+                      join {{ source('app', 'drivewealth_accounts') }}
+                           on drivewealth_accounts.ref_id = drivewealth_orders.account_id
+                      join {{ source('app', 'drivewealth_users') }}
+                           on drivewealth_users.ref_id = drivewealth_accounts.drivewealth_user_id
+             group by profile_id, public.normalize_drivewealth_symbol(symbol), date
+         ),
+     portfolio_statuses as
          (
              select distinct on (
                  profile_id, date
@@ -174,7 +187,6 @@ with portfolio_statuses as
                         when portfolio_statuses.profile_id is null
                             then cumulative_daily_relative_gain *
                                  (last_value_ignorenulls(data.value / cumulative_daily_relative_gain) over wnd)
-                        else 0
                         end as value,
                     data.updated_at
              from data_extended1 data
@@ -189,13 +201,13 @@ with portfolio_statuses as
                     collection_id,
                     symbol,
                     date,
-                    coalesce(lag(value) over wnd, 0) as prev_value,
+                    lag(value) over wnd as prev_value,
                     value,
                     case
                         when value > 0 or coalesce(lag(value) over wnd, 0) > 0
                             then relative_daily_gain
                         else 0
-                        end as relative_daily_gain,
+                        end             as relative_daily_gain,
                     updated_at
              from data_extended2
                  window wnd as (partition by holding_id_v2 order by date)
@@ -219,7 +231,51 @@ with portfolio_statuses as
                         end as cash_flow,
                     updated_at
              from data_extended3
-         ),
+     ),
+     cash_flow_first_guess_filled as
+         (
+             select *,
+                    lag(value) over wnd as prev_value
+             from (
+                      select holding_id_v2,
+                             profile_id,
+                             collection_id,
+                             symbol,
+                             portfolio_status_id,
+                             date,
+                             relative_daily_gain,
+                             case
+                                 when value is null and (prev_value_sum is null or prev_value_sum < 1e-10)
+                                    then 0
+                                 when value is null
+                                     -- EV = (CF + BV) * (HP + 1)
+                                     then ((order_cf_sum - equity_cf_sum) * prev_value / prev_value_sum + prev_value) *
+                                          (1 + relative_daily_gain)
+                                 else value
+                                 end as value,
+                             case
+                                 when value is null and (prev_value_sum is null or prev_value_sum < 1e-10)
+                                    then 0
+                                 when value is null
+                                     then (order_cf_sum - equity_cf_sum) * prev_value / prev_value_sum
+                                 else cash_flow
+                                 end as cash_flow,
+                             updated_at
+                      from cash_flow_first_guess
+                               left join order_stats using (profile_id, symbol, date)
+                               left join (
+                                             select profile_id,
+                                                    symbol,
+                                                    date,
+                                                    sum(cash_flow)  as equity_cf_sum,
+                                                    sum(prev_value) as prev_value_sum
+                                             from cash_flow_first_guess
+                                             where symbol != 'CUR:USD'
+                                             group by profile_id, symbol, date
+                                         ) equity_cf_sum using (profile_id, symbol, date)
+                  ) t
+                 window wnd as (partition by holding_id_v2 order by date)
+     ),
      cash_flow as
          (
              select holding_id_v2,
@@ -229,7 +285,7 @@ with portfolio_statuses as
                     portfolio_status_id,
                     date,
                     relative_daily_gain,
-                    value,
+                    coalesce(value, 0) as value,
                     prev_value,
                     case
                         when symbol = 'CUR:USD'
@@ -237,27 +293,16 @@ with portfolio_statuses as
                         when abs(equity_cf_sum) > 0 and order_cf_sum is not null
                             then cash_flow / equity_cf_sum * order_cf_sum
                         else 0
-                        end as cash_flow,
+                        end            as cash_flow,
                     updated_at
-             from cash_flow_first_guess
-                      left join (
-                                    select profile_id,
-                                           normalize_drivewealth_symbol(symbol) as symbol,
-                                           date,
-                                           sum(total_order_amount_normalized)   as order_cf_sum
-                                    from {{ source('app', 'drivewealth_orders') }}
-                                             join {{ source('app', 'drivewealth_accounts') }}
-                                                  on drivewealth_accounts.ref_id = drivewealth_orders.account_id
-                                             join {{ source('app', 'drivewealth_users') }}
-                                                  on drivewealth_users.ref_id = drivewealth_accounts.drivewealth_user_id
-                                    group by profile_id, normalize_drivewealth_symbol(symbol), date
-                                ) order_stats using (profile_id, symbol, date)
+             from cash_flow_first_guess_filled
+                      left join order_stats using (profile_id, symbol, date)
                       left join (
                                     select profile_id,
                                            symbol,
                                            date,
                                            sum(cash_flow) as equity_cf_sum
-                                    from cash_flow_first_guess
+                                    from cash_flow_first_guess_filled
                                     where symbol != 'CUR:USD'
                                     group by profile_id, symbol, date
                                 ) equity_cf_sum using (profile_id, symbol, date)
