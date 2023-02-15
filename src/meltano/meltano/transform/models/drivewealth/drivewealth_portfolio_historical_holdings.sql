@@ -201,13 +201,13 @@ with order_stats as materialized
                     collection_id,
                     symbol,
                     date,
-                    lag(value) over wnd as prev_value,
+                    coalesce(lag(value) over wnd, 0) as prev_value,
                     value,
                     case
                         when value > 0 or coalesce(lag(value) over wnd, 0) > 0
                             then relative_daily_gain
                         else 0
-                        end             as relative_daily_gain,
+                        end                          as relative_daily_gain,
                     updated_at
              from data_extended2
                  window wnd as (partition by holding_id_v2 order by date)
@@ -235,7 +235,7 @@ with order_stats as materialized
      cash_flow_first_guess_filled as
          (
              select *,
-                    lag(value) over wnd as prev_value
+                    coalesce(lag(value) over wnd, 0) as prev_value
              from (
                       select holding_id_v2,
                              profile_id,
