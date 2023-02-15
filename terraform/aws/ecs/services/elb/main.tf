@@ -16,22 +16,20 @@ resource "aws_s3_bucket" "lb_logs" {
 resource "aws_s3_bucket_policy" "lb-bucket-policy" {
   bucket = aws_s3_bucket.lb_logs.id
   # https://docs.aws.amazon.com/elasticloadbalancing/latest/application/enable-access-logging.html#attach-bucket-policy
-  policy = <<POLICY
-{
-  "Version": "2012-10-17",
-  "Statement": [
-    {
-      "Effect": "Allow",
-      "Principal": {
-        "AWS": "arn:aws:iam::127311923021:root"
-      },
-      "Action": "s3:PutObject",
-      "Resource": "arn:aws:s3:::bucket-name/prefix/AWSLogs/your-aws-account-id/*"
-      "Resource": "${aws_s3_bucket.lb_logs.arn}/AWSLogs/${data.aws_caller_identity.current.account_id}/*"
-    }
-  ]
-}
-POLICY
+  policy = jsonencode({
+    "Version" : "2012-10-17",
+    "Statement" : [
+      {
+        "Effect" : "Allow",
+        "Principal" : {
+          "AWS" : "arn:aws:iam::127311923021:root"
+        },
+        "Action" : "s3:PutObject",
+        "Resource" : "arn:aws:s3:::bucket-name/prefix/AWSLogs/your-aws-account-id/*"
+        "Resource" : "${aws_s3_bucket.lb_logs.arn}/AWSLogs/${data.aws_caller_identity.current.account_id}/*"
+      }
+    ]
+  })
 }
 
 /*
