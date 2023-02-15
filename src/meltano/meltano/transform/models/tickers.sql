@@ -64,15 +64,15 @@ from {{ ref('base_tickers') }}
 where ((base_tickers.description is not null and length(base_tickers.description) >= 5) or type = 'index')
   and (latest_price.symbol is not null or latest_crypto_price.symbol is not null)
   and type in (
-         'fund',
-         'etf',
-         'mutual fund',
-         'preferred stock',
-         'common stock',
 {% if var('crypto_enabled') %}
          'crypto',
 {% endif %}
 {% if var('index_enabled') %}
-         'index'
+         'index',
 {% endif %}
+         'fund',
+         'etf',
+         'mutual fund',
+         'preferred stock',
+         'common stock'
         )
