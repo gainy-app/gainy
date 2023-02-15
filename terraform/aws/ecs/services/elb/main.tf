@@ -1,5 +1,3 @@
-data "aws_region" "current" {}
-data "aws_caller_identity" "current" {}
 data "aws_elb_service_account" "main" {}
 data "aws_acm_certificate" "sslcert" {
   domain = "*.${var.domain}"
@@ -7,9 +5,22 @@ data "aws_acm_certificate" "sslcert" {
 
 resource "aws_s3_bucket" "lb_logs" {
   bucket = "loadbalancer-${var.name}-${var.env}"
-
   tags = {
     Name = "Load balancer logs"
+  }
+}
+resource "aws_s3_bucket_ownership_controls" "lb_logs" {
+  bucket = aws_s3_bucket.lb_logs.bucket
+  rule {
+    object_ownership = "BucketOwnerEnforced"
+  }
+}
+resource "aws_s3_bucket_server_side_encryption_configuration" "lb_logs" {
+  bucket = aws_s3_bucket.lb_logs.bucket
+  rule {
+    apply_server_side_encryption_by_default {
+      sse_algorithm = "AES256"
+    }
   }
 }
 
@@ -24,17 +35,7 @@ resource "aws_s3_bucket_policy" "lb-bucket-policy" {
           "AWS" : data.aws_elb_service_account.main.arn
         },
         "Action" : "s3:PutObject",
-        "Resource" : "${aws_s3_bucket.lb_logs.arn}/AWSLogs/${data.aws_caller_identity.current.account_id}/*"
-      },
-      {
-        "Effect" : "Allow",
-        "Principal" : {
-          "Service" : "delivery.logs.amazonaws.com"
-        },
-        "Action" : [
-          "s3:GetBucketAcl"
-        ],
-        "Resource" : aws_s3_bucket.lb_logs.arn
+        "Resource" : "${aws_s3_bucket.lb_logs.arn}/*"
       }
     ]
   })
