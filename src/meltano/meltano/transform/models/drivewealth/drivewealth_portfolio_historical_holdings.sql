@@ -249,8 +249,7 @@ with order_stats as materialized
                                     then 0
                                  when value is null
                                      -- EV = (CF + BV) * (HP + 1)
-                                     then ((order_cf_sum - equity_cf_sum) * prev_value / prev_value_sum + prev_value) *
-                                          (1 + relative_daily_gain)
+                                     then greatest(0, ((order_cf_sum - equity_cf_sum) * prev_value / prev_value_sum + prev_value) * (1 + relative_daily_gain))
                                  else value
                                  end as value,
                              case
@@ -267,12 +266,20 @@ with order_stats as materialized
                                              select profile_id,
                                                     symbol,
                                                     date,
-                                                    sum(cash_flow)  as equity_cf_sum,
-                                                    sum(prev_value) as prev_value_sum
+                                                    sum(cash_flow)  as equity_cf_sum
                                              from cash_flow_first_guess
                                              where symbol != 'CUR:USD'
                                              group by profile_id, symbol, date
                                          ) equity_cf_sum using (profile_id, symbol, date)
+                               left join (
+                                             select profile_id,
+                                                    symbol,
+                                                    date,
+                                                    sum(prev_value) as prev_value_sum
+                                             from cash_flow_first_guess
+                                             where symbol != 'CUR:USD' and value is null
+                                             group by profile_id, symbol, date
+                                         ) prev_value_sum using (profile_id, symbol, date)
                   ) t
                  window wnd as (partition by holding_id_v2 order by date)
      ),

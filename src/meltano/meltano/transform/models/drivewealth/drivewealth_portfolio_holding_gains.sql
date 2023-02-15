@@ -104,7 +104,7 @@ with relative_gains as
                                                    and value < 1e-3
                                                  group by profile_id, holding_id_v2
                                              ) last_selloff_date using (profile_id, holding_id_v2)
-                          where period = '1w'
+                          where period = '1d'
                             and date >= coalesce(last_selloff_date, now()::date - interval '5 year')
                           group by profile_id, holding_id_v2
                   ),
@@ -117,11 +117,10 @@ with relative_gains as
                                    left join (
                                                  select profile_id, holding_id_v2, max(date) as last_selloff_date
                                                  from {{ ref('drivewealth_portfolio_historical_holdings') }}
-                                                 where date >= now()::date - interval '1 month'
-                                                   and value < 1e-3
+                                                 where value < 1e-3
                                                  group by profile_id, holding_id_v2
                                              ) last_selloff_date using (profile_id, holding_id_v2)
-                          where period = '1m'
+                          where period = '1d'
                             and (date >= last_selloff_date or last_selloff_date is null)
                           group by profile_id, holding_id_v2
                   )
