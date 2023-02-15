@@ -2,14 +2,6 @@ data "aws_acm_certificate" "sslcert" {
   domain = "*.${var.domain}"
 }
 
-resource "aws_s3_bucket" "lb_logs" {
-  bucket = "loadbalancer-${var.name}-${var.env}"
-
-  tags = {
-    Name = "Load balancer logs"
-  }
-}
-
 /*
  * Create application load balancer
  */
@@ -18,12 +10,6 @@ resource "aws_alb" "alb" {
   internal        = false
   security_groups = [var.vpc_default_sg_id, var.public_https_sg_id, var.public_http_sg_id]
   subnets         = var.public_subnet_ids
-
-  access_logs {
-    bucket  = aws_s3_bucket.lb_logs.bucket
-    prefix  = "${var.name}-${var.env}"
-    enabled = true
-  }
 }
 /*
  * Create target group for ALB
