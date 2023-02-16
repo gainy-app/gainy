@@ -78,9 +78,14 @@ class DriveWealthBankAccount(BaseDriveWealthModel):
         return "drivewealth_bank_accounts"
 
 
+class DriveWealthAccountStatus(str, enum.Enum):
+    OPEN = 'OPEN'
+
+
 class DriveWealthRedemptionStatus(str, enum.Enum):
     RIA_Pending = 'RIA_Pending'
     RIA_Approved = 'RIA_Approved'
+    Successful = 'Successful'
 
 
 class BaseDriveWealthMoneyFlowModel(BaseDriveWealthModel, ABC):

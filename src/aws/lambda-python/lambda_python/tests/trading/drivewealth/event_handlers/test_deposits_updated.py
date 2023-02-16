@@ -12,12 +12,19 @@ message = {
 
 
 def test_exists(monkeypatch):
+    old_status = 'old_status'
+
     deposit = DriveWealthDeposit()
+    deposit.status = old_status
 
     provider = DriveWealthProvider(None, None, None, None, None)
     update_money_flow_from_dw_calls = []
     monkeypatch.setattr(provider, 'update_money_flow_from_dw',
                         mock_record_calls(update_money_flow_from_dw_calls))
+    handle_money_flow_status_change_calls = []
+    monkeypatch.setattr(
+        provider, 'handle_money_flow_status_change',
+        mock_record_calls(handle_money_flow_status_change_calls))
 
     repository = DriveWealthRepository(None)
     monkeypatch.setattr(
@@ -47,6 +54,9 @@ def test_exists(monkeypatch):
     assert deposit.ref_id == message["paymentID"]
     assert deposit.trading_account_ref_id == message["accountID"]
     assert deposit.status == message["statusMessage"]
+    assert (deposit, old_status) in [
+        args for args, kwargs in handle_money_flow_status_change_calls
+    ]
 
 
 def test_not_exists(monkeypatch):
