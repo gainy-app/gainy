@@ -35,7 +35,7 @@
     { "name": "MELTANO_ELT_BUFFER_SIZE",               "value": "314572800" },
     { "name": "AIRFLOW_PASSWORD",                      "value": "${airflow_password}" },
     { "name": "AIRFLOW_DATABASE_URI",                  "value": "postgresql://${pg_username}:${pg_password}@${pg_host}:${pg_port}/${pg_dbname}?options=-csearch_path=${pg_airflow_schema}" },
-    { "name": "AIRFLOW_LOG_LEVEL",                     "value": "INFO" },
+    { "name": "AIRFLOW_LOG_LEVEL",                     "value": "WARNING" },
     { "name": "UPSTREAM_POOL_SIZE",                    "value": "${upstream_pool_size}" },
     { "name": "DOWNSTREAM_POOL_SIZE",                  "value": "${downstream_pool_size}" },
     { "name": "POLYGON_POOL_SIZE",                     "value": "${polygon_pool_size}" },

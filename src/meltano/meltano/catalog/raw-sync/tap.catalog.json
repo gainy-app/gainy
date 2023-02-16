@@ -79,32 +79,6 @@
       "selected": true
     },
     {
-      "table_name": "polygon_intraday_prices",
-      "stream": "polygon_intraday_prices",
-      "metadata": [
-        {
-          "breadcrumb": [],
-          "metadata": {
-            "replication-key": "time",
-            "replication-method": "INCREMENTAL",
-            "table-key-properties": [
-              "symbol",
-              "time"
-            ],
-            "schema-name": "raw_data",
-            "database-name": "gainy",
-            "selected": true
-          }
-        }
-      ],
-      "tap_stream_id": "raw_data-polygon_intraday_prices",
-      "schema": {
-        "type": "object",
-        "properties": {}
-      },
-      "selected": true
-    },
-    {
       "table_name": "polygon_marketstatus_upcoming",
       "stream": "polygon_marketstatus_upcoming",
       "metadata": [

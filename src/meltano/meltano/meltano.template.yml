@@ -366,7 +366,7 @@ schedules:
     interval: '@daily'
     start_date: 2021-06-17 10:40:58.742133
     env:
-      TARGET_ENVS: '["production","local"]'
+      TARGET_ENVS: '[]'
 
   - name: coingecko-realtime-to-postgres
     extractor: tap-coingecko-realtime
