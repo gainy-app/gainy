@@ -81,9 +81,9 @@ with tickers_and_options as
                                  date_trunc('minute', eod_intraday_prices.time) -
                                  interval '1 minute' *
                                  mod(extract(minutes from eod_intraday_prices.time)::int, 15) - open_at as time
-                          from {{ ref('base_tickers') }}
+                          from {{ source('eod', 'eod_intraday_prices') }}
+                                   join {{ ref('base_tickers') }} using (symbol)
                                    join {{ ref('week_trading_sessions_static') }} using (symbol)
-                                   join {{ source('eod', 'eod_intraday_prices') }} using (symbol)
                           where (base_tickers.exchange_canonical in ('NYSE', 'NASDAQ') or
                                  (base_tickers.exchange_canonical is null and base_tickers.country_name = 'United States') or
                                  (base_tickers.exchange_canonical is null and base_tickers.country_name is null))
@@ -114,9 +114,9 @@ with tickers_and_options as
                                  interval '1 minute' *
                                  mod(extract(minutes from eod_intraday_prices.time)::int, 15) - open_at as time,
                                  open_at
-                          from {{ ref('base_tickers') }}
+                          from {{ source('eod', 'eod_intraday_prices') }}
+                                   join {{ ref('base_tickers') }} using (symbol)
                                    join {{ ref('week_trading_sessions_static') }} using (symbol)
-                                   join {{ source('eod', 'eod_intraday_prices') }} using (symbol)
                           where (base_tickers.exchange_canonical in ('NYSE', 'NASDAQ') or
                                  (base_tickers.exchange_canonical is null and base_tickers.country_name = 'United States') or
                                  (base_tickers.exchange_canonical is null and base_tickers.country_name is null))
@@ -160,17 +160,17 @@ with tickers_and_options as
                       (
                           select symbol,
                                  type,
-                                 date_trunc('minute', polygon_intraday_prices.time) -
+                                 to_timestamp((polygon_intraday_prices_launchpad.t / 1000 / 60)::int * 60) -
                                  interval '1 minute' *
-                                 mod(extract(minutes from polygon_intraday_prices.time)::int, 15) - open_at as time
-                          from {{ ref('base_tickers') }}
+                                 mod((polygon_intraday_prices_launchpad.t / 1000 / 60)::int, 15) - open_at as time
+                          from {{ source('polygon', 'polygon_intraday_prices_launchpad') }}
+                                   join {{ ref('base_tickers') }} using (symbol)
                                    join {{ ref('week_trading_sessions_static') }} using (symbol)
-                                   join {{ source('polygon', 'polygon_intraday_prices') }} using (symbol)
                           where (base_tickers.exchange_canonical in ('NYSE', 'NASDAQ') or
                                  (base_tickers.exchange_canonical is null and base_tickers.country_name = 'United States') or
                                  (base_tickers.exchange_canonical is null and base_tickers.country_name is null))
                             and week_trading_sessions_static.index = 1
-                            and polygon_intraday_prices.time between open_at and close_at - interval '1 second'
+                            and polygon_intraday_prices_launchpad.t between open_at_t and close_at_t
                       ),
                   previous_trading_day_intraday_prices_unique_symbols as
                       (
@@ -192,18 +192,18 @@ with tickers_and_options as
                       (
                           select symbol,
                                  type,
-                                 date_trunc('minute', polygon_intraday_prices.time) -
+                                 to_timestamp((polygon_intraday_prices_launchpad.t / 1000 / 60)::int * 60) -
                                  interval '1 minute' *
-                                 mod(extract(minutes from polygon_intraday_prices.time)::int, 15) - open_at as time,
+                                 mod((polygon_intraday_prices_launchpad.t / 1000 / 60)::int, 15) - open_at as time,
                                  open_at
-                          from {{ ref('base_tickers') }}
+                          from {{ source('polygon', 'polygon_intraday_prices_launchpad') }}
+                                   join {{ ref('base_tickers') }} using (symbol)
                                    join {{ ref('week_trading_sessions_static') }} using (symbol)
-                                   join {{ source('polygon', 'polygon_intraday_prices') }} using (symbol)
                           where (base_tickers.exchange_canonical in ('NYSE', 'NASDAQ') or
                                  (base_tickers.exchange_canonical is null and base_tickers.country_name = 'United States') or
                                  (base_tickers.exchange_canonical is null and base_tickers.country_name is null))
                             and week_trading_sessions_static.index = 0
-                            and polygon_intraday_prices.time between open_at and close_at - interval '1 second'
+                            and polygon_intraday_prices_launchpad.t between extract(epoch from open_at) * 1000 and extract(epoch from close_at - interval '1 second') * 1000
                       ),
                   latest_trading_day_intraday_prices_stats as
                       (
@@ -225,7 +225,7 @@ with tickers_and_options as
                                 previous_trading_day_intraday_prices_stats.cnt as diff
                           from previous_trading_day_intraday_prices_stats
                                    left join latest_trading_day_intraday_prices_stats using (type, time)
-                          where latest_trading_day_intraday_prices_stats.open_at + time < now() - interval '30 minutes' -- Polygon delay is 15 minutes
+                          where latest_trading_day_intraday_prices_stats.open_at + time < now() - interval '15 minutes'
                             and previous_trading_day_intraday_prices_stats.cnt > 0
                           order by type, time desc
                       )
