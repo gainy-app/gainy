@@ -3,7 +3,7 @@ from common import create_dag, get_meltano_command, ENV, get_schedules, MELTANO_
 
 dag_id = "realtime-polygon-dag"
 tags = ["meltano"]
-schedule_interval = "*/15 * * * *" if ENV == "production" else "*/60 * * * *"
+schedule_interval = "*/5 * * * *"
 dag = create_dag(dag_id,
                  tags=tags,
                  schedule_interval=schedule_interval,
@@ -24,7 +24,7 @@ for schedule in schedules:
         task_id=schedule['name'],
         pool="polygon",
         bash_command=get_meltano_command(
-            f"schedule run {schedule['name']} --transform=skip"),
+            f"schedule run {schedule['name']} --transform=skip --force"),
         dag=dag)
 
     generate_meltano_config >> operator

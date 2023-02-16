@@ -38,7 +38,13 @@ with
                     interval '1 minute' *
                     mod(extract(minutes from dd)::int, {{ minutes }}) as time_truncated
              from {{ ref('week_trading_sessions_static') }}
-                      join generate_series(open_at, least(now(), close_at - interval '1 second'), interval '{{ minutes }} minutes') dd on true
+                      join generate_series(open_at,
+                                           least(
+                                                   now(),
+                                                   close_at - interval '1 second',
+                                                   (select max(time) - interval '15 minutes' from {{ ref('historical_intraday_prices') }} where source = 'polygon')
+                                               ),
+                                           interval '{{ minutes }} minutes') dd on true
 {% if is_incremental() and var('realtime') %}
                       join max_date using (symbol)
              where dd > max_date.datetime - interval '30 minutes'
@@ -122,7 +128,7 @@ with
                       from {{ ref('ticker_options_monitored') }}
                                join time_series using (symbol)
                   ) t
-             where t.time_truncated < now() - interval '15 minutes' - interval '15 minutes' -- close_datetime must be less than 15 minutes ago
+             where t.time_truncated < now() - interval '15 minutes' -- close_datetime must be less than 15 minutes ago
              order by symbol, time_truncated, time, priority
          )
 select t3.id,
