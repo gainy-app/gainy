@@ -22,7 +22,9 @@ class AccountsUpdatedEventHandler(AbstractDriveWealthEventHandler):
         if account:
             data = event_payload.get('current', {})
             if "status" in data:
+                old_status = account.status
                 account.status = data["status"]['name']
+                self.provider.handle_account_status_change(account, old_status)
                 self.repo.persist(account)
         else:
             account = self.provider.sync_trading_account(account_ref_id=ref_id,

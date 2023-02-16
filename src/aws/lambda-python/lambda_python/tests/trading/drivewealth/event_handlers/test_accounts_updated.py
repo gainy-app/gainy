@@ -9,8 +9,10 @@ from trading.drivewealth.repository import DriveWealthRepository
 def test_exists(monkeypatch):
     account_id = "account_id"
     status_name = "status_name"
+    old_status = "old_status"
 
     account = DriveWealthAccount()
+    account.status = old_status
 
     repository = DriveWealthRepository(None)
     monkeypatch.setattr(
@@ -21,7 +23,13 @@ def test_exists(monkeypatch):
     persisted_objects = {}
     monkeypatch.setattr(repository, 'persist', mock_persist(persisted_objects))
 
-    event_handler = AccountsUpdatedEventHandler(repository, None, None, None)
+    provider = DriveWealthProvider(None, None, None, None, None)
+    handle_account_status_change_calls = []
+    monkeypatch.setattr(provider, 'handle_account_status_change',
+                        mock_record_calls(handle_account_status_change_calls))
+
+    event_handler = AccountsUpdatedEventHandler(repository, provider, None,
+                                                None)
     ensure_portfolio_calls = []
     monkeypatch.setattr(event_handler, 'ensure_portfolio',
                         mock_record_calls(ensure_portfolio_calls))
@@ -40,6 +48,9 @@ def test_exists(monkeypatch):
     assert account in persisted_objects[DriveWealthAccount]
     assert (account, ) in [args for args, kwargs in ensure_portfolio_calls]
     assert account.status == status_name
+    assert (account, old_status) in [
+        args for args, kwargs in handle_account_status_change_calls
+    ]
 
 
 def test_not_exists(monkeypatch):
