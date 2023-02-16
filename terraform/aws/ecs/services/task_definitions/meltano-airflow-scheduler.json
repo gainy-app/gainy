@@ -55,6 +55,7 @@
     { "name": "GITHUB_APP_ID",                         "value": "${github_app_id}" },
     { "name": "GITHUB_APP_INSTALLATION_ID",            "value": "${github_app_installation_id}" },
     { "name": "GITHUB_APP_PRIVATE_KEY",                "value": ${jsonencode(github_app_private_key)} },
+    { "name": "AMPLITUDE_API_KEY",                     "value": "${amplitude_api_key}" },
 
     { "name": "TARGET_POSTGRES_HOST",                  "value": "${pg_host}" },
     { "name": "TARGET_POSTGRES_PORT",                  "value": "${pg_port}" },
