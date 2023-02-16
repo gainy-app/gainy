@@ -415,24 +415,6 @@
     }
   },
   "raw_data": {
-    "coingecko_coin": {
-      "metadata": {
-        "replication-key": "_sdc_extracted_at",
-        "replication-method": "INCREMENTAL",
-        "table-key-properties": [
-          "id"
-        ]
-      }
-    },
-    "coingecko_market_realtime": {
-      "metadata": {
-        "replication-key": "_sdc_extracted_at",
-        "replication-method": "INCREMENTAL",
-        "table-key-properties": [
-          "id"
-        ]
-      }
-    },
     "eod_dividends": {
       "metadata": {
         "replication-key": "_sdc_extracted_at",
