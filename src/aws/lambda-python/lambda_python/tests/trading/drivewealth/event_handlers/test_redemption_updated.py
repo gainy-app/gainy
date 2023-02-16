@@ -12,6 +12,8 @@ message = {
 
 
 def test_exists(monkeypatch):
+    old_status = 'old_status'
+
     provider = DriveWealthProvider(None, None, None, None, None)
     handle_redemption_status_calls = []
     monkeypatch.setattr(provider, 'handle_redemption_status',
@@ -22,8 +24,13 @@ def test_exists(monkeypatch):
     sync_redemption_calls = []
     monkeypatch.setattr(provider, 'sync_redemption',
                         mock_record_calls(sync_redemption_calls))
+    handle_money_flow_status_change_calls = []
+    monkeypatch.setattr(
+        provider, 'handle_money_flow_status_change',
+        mock_record_calls(handle_money_flow_status_change_calls))
 
     redemption = DriveWealthRedemption()
+    redemption.status = old_status
 
     repository = DriveWealthRepository(None)
     monkeypatch.setattr(
@@ -56,6 +63,9 @@ def test_exists(monkeypatch):
     assert redemption.ref_id == message["paymentID"]
     assert redemption.trading_account_ref_id == message["accountID"]
     assert redemption.status == message["statusMessage"]
+    assert (redemption, old_status) in [
+        args for args, kwargs in handle_money_flow_status_change_calls
+    ]
 
 
 def test_not_exists(monkeypatch):
