@@ -32,7 +32,7 @@ with profiles as
                       union all
                       select distinct profile_id, type
                       from {{ source('app', 'trading_orders') }}
-                               join base_tickers using (symbol)
+                               join {{ ref('base_tickers') }} using (symbol)
                       where status = 'EXECUTED_FULLY'
                   ) t
              group by profile_id
