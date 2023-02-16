@@ -4,7 +4,7 @@ from common import create_dag, get_meltano_command, ENV
 dag_id = "realtime-coingecko-dag"
 tags = ["meltano"]
 schedule_interval = "*/15 * * * *" if ENV == "production" else "*/60 * * * *"
-is_paused_upon_creation = ENV != "production"
+is_paused_upon_creation = True
 dag = create_dag(dag_id,
                  tags=tags,
                  schedule_interval=schedule_interval,

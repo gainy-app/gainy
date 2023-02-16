@@ -3,7 +3,7 @@ from common import create_dag, get_meltano_command, ENV, get_schedules, MELTANO_
 
 dag_id = "realtime-polygon-dag"
 tags = ["meltano"]
-schedule_interval = "*/10 * * * *"
+schedule_interval = "*/5 * * * *"
 dag = create_dag(dag_id,
                  tags=tags,
                  schedule_interval=schedule_interval,
