@@ -86,6 +86,7 @@ sources:
       - name: profile_portfolio_transactions
       - name: profile_scoring_settings
       - name: profile_ticker_match_score
+      - name: profile_watchlist_tickers
       - name: profiles
       - name: subscriptions
       - name: trading_collection_versions
@@ -2679,6 +2680,137 @@ models:
         tests:
           - type:
               type: 'boolean'
+
+  - name: analytics_profile_attributes
+    columns:
+      - name: profile_id
+        tests:
+          - type:
+              type: 'integer'
+      - name: user_email
+        tests:
+          - type:
+              type: 'character varying'
+      - name: interests
+        tests:
+          - type:
+              type: 'json'
+      - name: categories
+        tests:
+          - type:
+              type: 'json'
+      - name: ms_created
+        tests:
+          - type:
+              type: 'boolean'
+      - name: dw_account_opened
+        tests:
+          - type:
+              type: 'boolean'
+      - name: funding_acc_connected
+        tests:
+          - type:
+              type: 'boolean'
+      - name: product_type_purchased
+        tests:
+          - type:
+              type: 'json'
+      - name: total_invested_ttfs
+        tests:
+          - type:
+              type: 'numeric'
+      - name: total_invested_tickers
+        tests:
+          - type:
+              type: 'numeric'
+      - name: total_wishlist_ttfs
+        tests:
+          - type:
+              type: 'numeric'
+      - name: total_wishlist_ticker
+        tests:
+          - type:
+              type: 'numeric'
+      - name: total_transactions
+        tests:
+          - type:
+              type: 'numeric'
+      - name: total_deposits
+        tests:
+          - type:
+              type: 'numeric'
+      - name: total_withdraws
+        tests:
+          - type:
+              type: 'numeric'
+      - name: total_invests
+        tests:
+          - type:
+              type: 'numeric'
+      - name: total_sells
+        tests:
+          - type:
+              type: 'numeric'
+      - name: total_trades
+        tests:
+          - type:
+              type: 'numeric'
+      - name: total_amount_deposit
+        tests:
+          - type:
+              type: 'numeric'
+      - name: total_amount_invest
+        tests:
+          - type:
+              type: 'numeric'
+      - name: total_amount_sell
+        tests:
+          - type:
+              type: 'numeric'
+      - name: first_purchased_date
+        tests:
+          - type:
+              type: 'timestamp with time zone'
+      - name: first_sell_date
+        tests:
+          - type:
+              type: 'timestamp with time zone'
+      - name: last_purchased_date
+        tests:
+          - type:
+              type: 'timestamp with time zone'
+      - name: last_sell_date
+        tests:
+          - type:
+              type: 'timestamp with time zone'
+      - name: kyc_invest_experience
+        tests:
+          - type:
+              type: 'character varying'
+      - name: kyc_income
+        tests:
+          - type:
+              type: 'bigint'
+      - name: kyc_net_worth
+        tests:
+          - type:
+              type: 'bigint'
+      - name: kyc_invest_horizont
+        tests:
+          - type:
+              type: 'real'
+      - name: kyc_risk_tolerance
+        tests:
+          - type:
+              type: 'character varying'
+      - name: kyc_employment_status
+        tests:
+          - type:
+              type: 'character varying'
+      - name: kyc_source_of_funds
+        tests:
+          - type:
+              type: 'character varying'
 
 exposures:
   - name: ticker_search_index
