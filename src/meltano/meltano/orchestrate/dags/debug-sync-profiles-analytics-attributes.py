@@ -7,6 +7,5 @@ dag = create_dag(dag_id, tags=tags)
 
 industry_assignments_generator = BashOperator(
     task_id="sync-profiles-analytics-attributes",
-    bash_command=
-    "gainy_sync_profiles_analytics_attributes 2>&1 | tee /proc/1/fd/1",
+    bash_command="gainy_sync_profiles_analytics_attributes",
     dag=dag)
