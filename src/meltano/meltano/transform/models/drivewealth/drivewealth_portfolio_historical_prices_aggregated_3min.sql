@@ -108,11 +108,16 @@ with portfolio_statuses as
              from {{ ref('drivewealth_portfolio_historical_holdings') }} t
              where date > now() - interval '5 days'
      ),
-     global_schedule as
+     profile_date_threshold as
          (
-             select datetime
-             from {{ ref('historical_prices_aggregated_3min') }}
-             where symbol = 'SPY'
+             select profile_id, min(datetime) as datetime_threshold
+             from (
+                      select profile_id, max(datetime) as datetime
+                      from {{ ref('drivewealth_holdings') }}
+                               join {{ ref('historical_prices_aggregated_3min') }} using (symbol)
+                      group by profile_id, symbol
+                  ) t
+             group by profile_id
      ),
      schedule as
          (
@@ -138,12 +143,13 @@ with portfolio_statuses as
                                  coalesce(relative_gain, 0) as relative_gain,
                                  updated_at
                           from min_holding_date
-                                   join global_schedule on true
-                                   left join {{ ref('historical_prices_aggregated_3min') }} using (symbol, datetime)
+                                   join profile_date_threshold using (profile_id)
+                                   left join {{ ref('historical_prices_aggregated_3min') }} using (symbol)
+                          where historical_prices_aggregated_3min.datetime <= datetime_threshold
 {% if var('realtime') %}
-                          where historical_prices_aggregated_3min.datetime >= min_datetime
+                            and historical_prices_aggregated_3min.datetime >= min_datetime
 {% else %}
-                          where historical_prices_aggregated_3min.date >= min_date
+                            and historical_prices_aggregated_3min.date >= min_date
 {% endif %}
                   )
              select profile_id,

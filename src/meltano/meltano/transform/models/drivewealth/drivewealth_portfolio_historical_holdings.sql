@@ -338,16 +338,32 @@ with order_stats as materialized
                         else 0
                         end as relative_daily_gain
              from cash_flow
+     ),
+     profile_date_threshold as
+         (
+             select profile_id, min(date) as max_date
+             from (
+                      select profile_id, max(date) as date
+                      from data_extended
+                      group by profile_id, holding_id_v2
+                  ) t
+             group by profile_id
      )
 select data_extended.*,
        date_trunc('week', date)::date                    as date_week,
        date_trunc('month', date)::date                   as date_month,
        profile_id || '_' || holding_id_v2 || '_' || date as id
 from data_extended
+         left join profile_date_threshold using (profile_id)
 
 {% if is_incremental() %}
          left join {{ this }} old_data using (profile_id, holding_id_v2, symbol, date)
-where old_data.profile_id is null
+{% endif %}
+
+where data_extended.date <= profile_date_threshold.max_date
+
+{% if is_incremental() %}
+  and (old_data.profile_id is null
    or abs(data_extended.relative_daily_gain - old_data.relative_daily_gain) > 1e-3
-   or abs(data_extended.value - old_data.value) > 1e-3
+   or abs(data_extended.value - old_data.value) > 1e-3)
 {% endif %}
