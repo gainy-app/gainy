@@ -16,7 +16,7 @@
 ### Get recommended TTF weights
 ```graphql
 query GetCollectionTickerActualWeights($collection_id: Int!){
-  collection_ticker_actual_weights(where: {collection_id: {_eq: $collection_id}}){
+  trading_collection_tickers(where: {collection_id: {_eq: $collection_id}}){
     symbol
     weight
   }
