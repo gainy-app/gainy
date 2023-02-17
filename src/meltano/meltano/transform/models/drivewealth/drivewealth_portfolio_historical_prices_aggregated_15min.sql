@@ -6,7 +6,7 @@
     post_hook=[
       pk('profile_id, holding_id_v2, symbol, datetime'),
       index('id', true),
-      index('portfolio_status_id'),
+      index('updated_at'),
     ]
   )
 }}
@@ -22,7 +22,6 @@ with portfolio_statuses as
                               mod(extract(minutes from drivewealth_portfolio_statuses.created_at)::int, 15)
                                  )::timestamp                                  as datetime,
                              drivewealth_portfolio_statuses.created_at         as updated_at,
-                             drivewealth_portfolio_statuses.id                 as portfolio_status_id,
                              drivewealth_portfolio_statuses.date,
                              case
                                  when drivewealth_portfolio_statuses.cash_actual_weight > 0
@@ -33,9 +32,10 @@ with portfolio_statuses as
                       from {{ source('app', 'drivewealth_portfolio_statuses') }}
                                join {{ source('app', 'drivewealth_portfolios') }}
                                     on drivewealth_portfolios.ref_id = drivewealth_portfolio_id
-                      where drivewealth_portfolio_statuses.created_at > now() - interval '10 days'
 {% if var('realtime') %}
-                        and drivewealth_portfolio_statuses.id > (select max(portfolio_status_id) from {{ this }})
+                      where drivewealth_portfolio_statuses.created_at > (select max(updated_at) from {{ this }}) - interval '1 hour'
+{% else %}
+                      where drivewealth_portfolio_statuses.created_at > now() - interval '10 days'
 {% endif %}
                   ) t
              order by profile_id, datetime, updated_at desc
@@ -43,7 +43,6 @@ with portfolio_statuses as
      portfolio_status_funds as
          (
              select profile_id,
-                    portfolio_status_id,
                     date,
                     datetime,
                     value,
@@ -58,7 +57,6 @@ with portfolio_statuses as
                     portfolio_status_funds.datetime,
                     portfolio_status_funds.updated_at,
                     drivewealth_funds.collection_id,
-                    portfolio_status_id,
                     portfolio_holding_data,
                     json_array_elements(portfolio_holding_data -> 'holdings') as fund_holding_data
              from portfolio_status_funds
@@ -78,7 +76,6 @@ with portfolio_statuses as
                         end                                                         as holding_id_v2,
                     normalize_drivewealth_symbol(fund_holding_data ->> 'symbol') as symbol,
                     collection_id,
-                    portfolio_status_id,
                     date,
                     datetime,
                     updated_at,
@@ -91,7 +88,6 @@ with portfolio_statuses as
                     profile_id || '_cash_CUR:USD'                 as holding_id_v2,
                     'CUR:USD'                                     as symbol,
                     null                                          as collection_id,
-                    portfolio_status_id,
                     date,
                     datetime,
                     updated_at,
@@ -105,13 +101,18 @@ with portfolio_statuses as
                     holding_id_v2,
                     symbol,
                     collection_id,
-                    t.portfolio_status_id,
                     (date + interval '1 day') as date,
                     (date + interval '1 day')::timestamp as datetime,
                     t.updated_at,
                     t.value
              from {{ ref('drivewealth_portfolio_historical_holdings') }} t
              where date > now() - interval '10 days'
+     ),
+     global_schedule as
+         (
+             select datetime
+             from {{ ref('historical_prices_aggregated_15min') }}
+             where symbol = 'SPY'
      ),
      schedule as
          (
@@ -134,10 +135,11 @@ with portfolio_statuses as
                                  symbol,
                                  date,
                                  datetime,
-                                 relative_gain,
+                                 coalesce(relative_gain, 0) as relative_gain,
                                  updated_at
                           from min_holding_date
-                                   join {{ ref('historical_prices_aggregated_15min') }} using (symbol)
+                                   join global_schedule on true
+                                   left join {{ ref('historical_prices_aggregated_15min') }} using (symbol, datetime)
 {% if var('realtime') %}
                           where historical_prices_aggregated_15min.datetime >= min_datetime
 {% else %}
@@ -176,7 +178,6 @@ with portfolio_statuses as
                     holding_id_v2,
                     symbol,
                     collection_id,
-                    portfolio_status_id,
                     date,
                     datetime,
                     updated_at,
@@ -191,10 +192,9 @@ with portfolio_statuses as
                     holding_id_v2,
                     schedule.symbol,
                     schedule.collection_id,
-                    data.portfolio_status_id,
                     schedule.date,
                     datetime,
-                    schedule.updated_at,
+                    coalesce(data.updated_at, schedule.updated_at) as updated_at,
                     data.value,
                     relative_gain,
                     true as is_scheduled
@@ -207,13 +207,12 @@ with portfolio_statuses as
                     holding_id_v2,
                     symbol,
                     collection_id,
-                    LAST_VALUE_IGNORENULLS(portfolio_status_id) over wnd as portfolio_status_id,
                     date,
                     datetime,
                     value,
                     updated_at,
                     relative_gain,
-                    exp(sum(ln(relative_gain + 1 + 1e-10)) over wnd)     as cumulative_relative_gain,
+                    exp(sum(ln(relative_gain + 1 + 1e-10)) over wnd) as cumulative_relative_gain,
                     is_scheduled
              from data_combined
                  window wnd as (partition by profile_id, holding_id_v2 order by datetime)
@@ -224,7 +223,6 @@ with portfolio_statuses as
                     holding_id_v2,
                     symbol,
                     collection_id,
-                    t.portfolio_status_id,
                     t.date,
                     datetime,
                     t.updated_at,
@@ -249,7 +247,6 @@ with portfolio_statuses as
                     holding_id_v2,
                     symbol,
                     collection_id,
-                    portfolio_status_id,
                     date,
                     datetime,
                     updated_at,

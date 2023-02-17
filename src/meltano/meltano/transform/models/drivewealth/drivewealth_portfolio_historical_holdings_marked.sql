@@ -14,6 +14,7 @@ with raw_data_1d as
          (
              select holding_id_v2,
                     date       as date_1d,
+                    value      as actual_value,
                     prev_value as prev_value_1d,
                     cash_flow  as cash_flow_sum_1d,
                     drivewealth_portfolio_historical_holdings.updated_at
@@ -138,6 +139,7 @@ with raw_data_1d as
                  join {{ ref('drivewealth_portfolio_historical_holdings') }} using (profile_id, holding_id_v2, symbol, date)
      )
 select profile_id, holding_id_v2, collection_id, symbol,
+       actual_value,
        date_1d,
        prev_value_1d,
        cash_flow_sum_1d,

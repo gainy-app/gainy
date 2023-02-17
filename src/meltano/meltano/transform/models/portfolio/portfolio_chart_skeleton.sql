@@ -12,21 +12,6 @@
 
 
 -- Execution Time: 44214.629 ms
-{% if is_incremental() %}
-with old_stats as materialized
-     (
-         select distinct on (
-             profile_id,
-             period
-             ) profile_id,
-               period,
-               datetime as max_datetime,
-               holding_count
-         from {{ this }}
-         order by profile_id desc, period desc, datetime desc
-     )
-{% endif %}
-
 select t.*,
        profile_id || '_' || period || '_' || datetime as id
 from (
@@ -47,17 +32,7 @@ from (
                                   count(distinct holding_id_v2) as holding_count
                            from {{ ref('portfolio_holding_chart') }}
                            where period in ('1m', '3m', '1y', '5y', 'all')
-                           group by profile_id, period, date, datetime
-
-{% if is_incremental() %}
-                           union all
-
-                           select profile_id,
-                                  period,
-                                  max_datetime  as datetime,
-                                  holding_count
-                           from old_stats
-{% endif %}
+                           group by profile_id, period, datetime
                        ) t
               ) t
          where t.holding_count = cum_max_holding_count

@@ -13,7 +13,6 @@
   )
 }}
 
--- IF CHANGED - CHANGE drivewealth_latest_cashflow.SQL AS WELL
 
 with order_stats as materialized
          (
