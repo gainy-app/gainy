@@ -64,5 +64,12 @@ store_deployment_state = BashOperator(
     bash_command='{{"/bin/bash scripts/store_deployment_state.sh"}}',
     dag=dag)
 
+gainy_sync_profiles_analytics_attributes = BashOperator(
+    task_id="gainy_sync_profiles_analytics_attributes",
+    cwd=MELTANO_PROJECT_ROOT,
+    bash_command='gainy_sync_profiles_analytics_attributes',
+    dag=dag)
+
 generate_meltano_config >> upstream >> dbt >> downstream >> clean
 dbt >> store_deployment_state
+dbt >> gainy_sync_profiles_analytics_attributes

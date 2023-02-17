@@ -42,8 +42,14 @@ variable "source_code_branch_name" {
   default = ""
 }
 variable "slack_bot_token" {
-  type    = string
-  default = ""
+  type      = string
+  sensitive = true
+  default   = ""
+}
+variable "amplitude_api_key" {
+  type      = string
+  sensitive = true
+  default   = ""
 }
 
 #################################### OneSignal ####################################
