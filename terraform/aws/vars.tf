@@ -12,6 +12,7 @@ variable "github_app_installation_id" {}
 variable "github_app_private_key" {}
 variable "google_places_api_key" {}
 variable "slack_bot_token" {}
+variable "amplitude_api_key" {}
 
 variable "aws_region" {}
 variable "aws_access_key" {}

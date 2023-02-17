@@ -1,3 +1,5 @@
+import subprocess
+
 import boto3
 import datetime
 import json
@@ -227,3 +229,10 @@ if AWS_LAMBDA_API_GATEWAY_ENDPOINT is not None:
 
         clean_api_gateway(api_id, version)
         clean_lambda(api_id, env)
+
+MELTANO_PROJECT_ROOT = os.getenv("MELTANO_PROJECT_ROOT", os.getcwd())
+subprocess.run([
+    "find", f"{MELTANO_PROJECT_ROOT}/.meltano/run/airflow/logs", "-mindepth",
+    "1", "-mtime", "+21", "-delete"
+])
+logger.warning('Removed old logs')
