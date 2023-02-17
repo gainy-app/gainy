@@ -2711,6 +2711,14 @@ models:
         tests:
           - type:
               type: 'boolean'
+      - name: number_of_funding_acc
+        tests:
+          - type:
+              type: 'integer'
+      - name: bank_funding_acc
+        tests:
+          - type:
+              type: 'json'
       - name: product_type_purchased
         tests:
           - type:
@@ -2718,55 +2726,55 @@ models:
       - name: total_invested_ttfs
         tests:
           - type:
-              type: 'numeric'
+              type: 'integer'
       - name: total_invested_tickers
         tests:
           - type:
-              type: 'numeric'
+              type: 'integer'
       - name: total_wishlist_ttfs
         tests:
           - type:
-              type: 'numeric'
+              type: 'integer'
       - name: total_wishlist_ticker
         tests:
           - type:
-              type: 'numeric'
+              type: 'integer'
       - name: total_transactions
         tests:
           - type:
-              type: 'numeric'
+              type: 'integer'
       - name: total_deposits
         tests:
           - type:
-              type: 'numeric'
+              type: 'integer'
       - name: total_withdraws
         tests:
           - type:
-              type: 'numeric'
+              type: 'integer'
       - name: total_invests
         tests:
           - type:
-              type: 'numeric'
+              type: 'integer'
       - name: total_sells
         tests:
           - type:
-              type: 'numeric'
+              type: 'integer'
       - name: total_trades
         tests:
           - type:
-              type: 'numeric'
+              type: 'integer'
       - name: total_amount_deposit
         tests:
           - type:
-              type: 'numeric'
+              type: 'double precision'
       - name: total_amount_invest
         tests:
           - type:
-              type: 'numeric'
+              type: 'double precision'
       - name: total_amount_sell
         tests:
           - type:
-              type: 'numeric'
+              type: 'double precision'
       - name: first_purchased_date
         tests:
           - type:
@@ -2795,19 +2803,15 @@ models:
         tests:
           - type:
               type: 'bigint'
-      - name: kyc_invest_horizont
+      - name: kyc_net_liquid
         tests:
           - type:
-              type: 'real'
+              type: 'bigint'
       - name: kyc_risk_tolerance
         tests:
           - type:
               type: 'character varying'
       - name: kyc_employment_status
-        tests:
-          - type:
-              type: 'character varying'
-      - name: kyc_source_of_funds
         tests:
           - type:
               type: 'character varying'

@@ -5,11 +5,17 @@ with profiles as
          ),
      profile_interests as
          (
-             select profile_id, json_agg(interest_id) as interests from {{ source('app', 'profile_interests') }} group by profile_id
+             select profile_id, json_agg(name) as interests
+             from {{ source('app', 'profile_interests') }}
+                      join {{ ref('interests') }} on interests.id = interest_id
+             group by profile_id
      ),
      profile_categories as
          (
-             select profile_id, json_agg(category_id) as categories from {{ source('app', 'profile_categories') }} group by profile_id
+             select profile_id, json_agg(name) as categories
+             from {{ source('app', 'profile_categories') }}
+                      join {{ ref('categories') }} on profile_categories.category_id = categories.id
+             group by profile_id
      ),
      profile_flags as
          (
@@ -21,6 +27,19 @@ with profiles as
                     (account_no is not null)  as dw_account_opened,
                     funding_account_connected as funding_acc_connected
              from {{ ref('trading_profile_status') }}
+     ),
+     trading_funding_accounts as
+         (
+             select trading_funding_accounts.profile_id,
+                    count(*)                                             as number_of_funding_acc,
+                    json_agg(plaid_institutions.name)
+                    filter ( where plaid_institutions.name is not null ) as bank_funding_acc
+             from {{ source('app', 'trading_funding_accounts') }}
+                      left join {{ source('app', 'profile_plaid_access_tokens') }}
+                                on profile_plaid_access_tokens.id = trading_funding_accounts.plaid_access_token_id
+                      left join {{ source('app', 'plaid_institutions') }}
+                                on plaid_institutions.id = profile_plaid_access_tokens.institution_id
+             group by trading_funding_accounts.profile_id
      ),
      product_type_purchased as
          (
@@ -124,10 +143,10 @@ with profiles as
                     max(max_datetime) as last_sell_date
              from (
                       select distinct profile_id,
-                                      count(*)                   as cnt,
-                                      count(target_amount_delta) as amount,
-                                      min(created_at)            as min_datetime,
-                                      max(created_at)            as max_datetime
+                                      count(*)                 as cnt,
+                                      sum(target_amount_delta) as amount,
+                                      min(created_at)          as min_datetime,
+                                      max(created_at)          as max_datetime
                       from {{ source('app', 'trading_orders') }}
                       where status = 'EXECUTED_FULLY'
                         and target_amount_delta is not null
@@ -137,10 +156,10 @@ with profiles as
                       union all
 
                       select distinct profile_id,
-                                      count(*)                   as cnt,
-                                      count(target_amount_delta) as amount,
-                                      min(created_at)            as min_datetime,
-                                      max(created_at)            as max_datetime
+                                      count(*)                 as cnt,
+                                      sum(target_amount_delta) as amount,
+                                      min(created_at)          as min_datetime,
+                                      max(created_at)          as max_datetime
                       from {{ source('app', 'trading_collection_versions') }}
                       where status = 'EXECUTED_FULLY'
                         and target_amount_delta is not null
@@ -152,41 +171,38 @@ with profiles as
      kyc as
          (
              select profile_id,
-                    investor_profile_experience      as kyc_invest_experience,
-                    investor_profile_annual_income   as kyc_income,
-                    investor_profile_net_worth_total as kyc_net_worth,
-                    investor_profile_risk_tolerance  as kyc_risk_tolerance,
-                    employment_status                as kyc_employment_status
+                    investor_profile_experience       as kyc_invest_experience,
+                    investor_profile_annual_income    as kyc_income,
+                    investor_profile_net_worth_total  as kyc_net_worth,
+                    investor_profile_net_worth_liquid as kyc_net_liquid,
+                    investor_profile_risk_tolerance   as kyc_risk_tolerance,
+                    employment_status                 as kyc_employment_status
              from {{ source('app', 'kyc_form') }}
-     ),
-     profile_scoring_settings as
-         (
-             select profile_id,
-                    investment_horizon as kyc_invest_horizont
-             from {{ source('app', 'profile_scoring_settings') }}
      )
 select profile_id,
        user_email,
-       coalesce(interests, '[]'::json)              as interests,
-       coalesce(categories, '[]'::json)             as categories,
+       coalesce(interests, '[]'::json)                              as interests,
+       coalesce(categories, '[]'::json)                             as categories,
        ms_created,
        dw_account_opened,
        funding_acc_connected,
-       coalesce(product_type_purchased, '[]'::json) as product_type_purchased,
-       coalesce(total_invested_ttfs, 0)::numeric    as total_invested_ttfs,
-       coalesce(total_invested_tickers, 0)::numeric as total_invested_tickers,
-       coalesce(total_wishlist_ttfs, 0)::numeric    as total_wishlist_ttfs,
-       coalesce(total_wishlist_ticker, 0)::numeric  as total_wishlist_ticker,
+       number_of_funding_acc::int,
+       bank_funding_acc,
+       coalesce(product_type_purchased, '[]'::json)                 as product_type_purchased,
+       coalesce(total_invested_ttfs, 0)::int                        as total_invested_ttfs,
+       coalesce(total_invested_tickers, 0)::int                     as total_invested_tickers,
+       coalesce(total_wishlist_ttfs, 0)::int                        as total_wishlist_ttfs,
+       coalesce(total_wishlist_ticker, 0)::int                      as total_wishlist_ticker,
        (coalesce(total_withdraws, 0) + coalesce(total_deposits, 0) + coalesce(total_invests, 0) +
-        coalesce(total_sells, 0))::numeric          as total_transactions,
-       coalesce(total_withdraws, 0)::numeric        as total_withdraws,
-       coalesce(total_deposits, 0)::numeric         as total_deposits,
-       coalesce(total_invests, 0)::numeric          as total_invests,
-       coalesce(total_sells, 0)::numeric            as total_sells,
-       null::numeric                                as total_trades,
-       coalesce(total_amount_deposit, 0)::numeric   as total_amount_deposit,
-       coalesce(total_amount_invest, 0)::numeric    as total_amount_invest,
-       coalesce(total_amount_sell, 0)::numeric      as total_amount_sell,
+        coalesce(total_sells, 0))::int                              as total_transactions,
+       coalesce(total_withdraws, 0)::int                            as total_withdraws,
+       coalesce(total_deposits, 0)::int                             as total_deposits,
+       coalesce(total_invests, 0)::int                              as total_invests,
+       coalesce(total_sells, 0)::int                                as total_sells,
+       (coalesce(total_invests, 0) + coalesce(total_sells, 0))::int as total_trades,
+       coalesce(total_amount_deposit, 0)::double precision          as total_amount_deposit,
+       coalesce(total_amount_invest, 0)::double precision           as total_amount_invest,
+       coalesce(total_amount_sell, 0)::double precision             as total_amount_sell,
        first_purchased_date,
        first_sell_date,
        last_purchased_date,
@@ -194,15 +210,15 @@ select profile_id,
        kyc_invest_experience,
        kyc_income,
        kyc_net_worth,
-       kyc_invest_horizont,
+       kyc_net_liquid,
        kyc_risk_tolerance,
-       kyc_employment_status,
-       null::varchar                                as kyc_source_of_funds
+       kyc_employment_status
 from profiles
          left join profile_interests using (profile_id)
          left join profile_categories using (profile_id)
          left join profile_flags using (profile_id)
          left join trading_profile_status using (profile_id)
+         left join trading_funding_accounts using (profile_id)
          left join product_type_purchased using (profile_id)
          left join total_invested_ttfs using (profile_id)
          left join total_invested_tickers using (profile_id)
@@ -213,4 +229,3 @@ from profiles
          left join buys using (profile_id)
          left join sells using (profile_id)
          left join kyc using (profile_id)
-         left join profile_scoring_settings using (profile_id)
