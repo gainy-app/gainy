@@ -1,4 +1,5 @@
 from decimal import Decimal
+from typing import Optional
 
 from gainy.data_access.repository import MAX_TRANSACTION_SIZE
 from gainy.exceptions import NotFoundException, EntityNotFoundException
@@ -12,7 +13,7 @@ from trading.drivewealth.provider.collection import DriveWealthProviderCollectio
 from trading.drivewealth.provider.kyc import DriveWealthProviderKYC
 from trading.drivewealth.models import DriveWealthBankAccount, DriveWealthDeposit, \
     DriveWealthRedemption, DriveWealthAutopilotRun, BaseDriveWealthMoneyFlowModel, DriveWealthStatement, \
-    DriveWealthRedemptionStatus, DriveWealthOrder
+    DriveWealthRedemptionStatus, DriveWealthOrder, DriveWealthAccountStatus
 from trading.drivewealth.api import DriveWealthApi
 from trading.drivewealth.repository import DriveWealthRepository
 
@@ -231,7 +232,9 @@ class DriveWealthProvider(DriveWealthProviderKYC,
         if env() != ENV_PRODUCTION:
             return
 
-        if instrument.status != DriveWealthInstrumentStatus.ACTIVE:
+        if DriveWealthInstrumentStatus.ACTIVE not in [
+                instrument.status, new_status
+        ]:
             return
 
         if not self.repository.symbol_is_in_collection(instrument.symbol):
@@ -239,6 +242,34 @@ class DriveWealthProvider(DriveWealthProviderKYC,
 
         self.notification_service.notify_dw_instrument_status_changed(
             instrument.symbol, instrument.status, new_status)
+
+    def handle_money_flow_status_change(
+            self, money_flow: BaseDriveWealthMoneyFlowModel,
+            old_status: Optional[str]):
+        if env() != ENV_PRODUCTION:
+            return
+
+        if old_status != DriveWealthRedemptionStatus.Successful:
+            return
+        if old_status == money_flow.status:
+            return
+
+        self.notification_service.notify_dw_money_flow_status_changed(
+            money_flow.__class__.__name__, money_flow.ref_id, old_status,
+            money_flow.status)
+
+    def handle_account_status_change(self, account: DriveWealthAccount,
+                                     old_status: Optional[str]):
+        if env() != ENV_PRODUCTION:
+            return
+
+        if old_status != DriveWealthAccountStatus.OPEN:
+            return
+        if old_status == account.status:
+            return
+
+        self.notification_service.notify_dw_account_status_changed(
+            account.ref_id, old_status, account.status)
 
     def notify_low_balance(self, trading_account: TradingAccount):
         if env() != ENV_PRODUCTION:

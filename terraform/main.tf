@@ -121,6 +121,7 @@ module "aws" {
   source_code_branch           = var.source_code_branch
   source_code_branch_name      = var.source_code_branch_name
   slack_bot_token              = var.slack_bot_token
+  amplitude_api_key            = var.amplitude_api_key
 
   stripe_api_key         = var.stripe_api_key
   stripe_publishable_key = var.stripe_publishable_key

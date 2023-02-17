@@ -18,19 +18,24 @@ create table if not exists raw_data.eod_intraday_prices
 );
 create index if not exists "eod_intraday_prices_time" on raw_data.eod_intraday_prices (time);
 
-create table if not exists raw_data.polygon_intraday_prices
+create table if not exists raw_data.polygon_intraday_prices_launchpad
 (
-    symbol      varchar,
-    time        timestamp,
-    open        numeric,
-    high        numeric,
-    low         numeric,
-    close       numeric,
-    volume      numeric,
-    granularity int,
-    primary key (symbol, time)
+    _sdc_batched_at   timestamp,
+    _sdc_deleted_at   varchar,
+    _sdc_extracted_at timestamp,
+    symbol            varchar not null,
+    t                 numeric not null,
+    c                 double precision,
+    first_t           numeric,
+    h                 double precision,
+    l                 double precision,
+    n                 numeric,
+    o                 double precision,
+    v                 double precision,
+    vw                double precision,
+    primary key (symbol, t)
 );
-create index if not exists "polygon_intraday_prices_time" on raw_data.polygon_intraday_prices (time);
+create index if not exists "polygon_intraday_prices_launchpad_time" on raw_data.polygon_intraday_prices_launchpad (t);
 
 create table if not exists raw_data.auto_ticker_industries
 (
