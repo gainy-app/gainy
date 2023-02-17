@@ -2687,6 +2687,14 @@ models:
         tests:
           - type:
               type: 'integer'
+      - name: age
+        tests:
+          - type:
+              type: 'integer'
+      - name: birthday_year
+        tests:
+          - type:
+              type: 'integer'
       - name: user_email
         tests:
           - type:
