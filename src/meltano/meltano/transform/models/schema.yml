@@ -2816,6 +2816,21 @@ models:
           - type:
               type: 'character varying'
 
+  - name: trading_collection_tickers
+    columns:
+      - name: collection_id
+        tests:
+          - type:
+              type: 'integer'
+      - name: symbol
+        tests:
+          - type:
+              type: 'character varying'
+      - name: weight
+        tests:
+          - type:
+              type: 'numeric'
+
 exposures:
   - name: ticker_search_index
     type: application
