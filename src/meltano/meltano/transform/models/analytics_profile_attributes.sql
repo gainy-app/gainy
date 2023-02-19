@@ -171,16 +171,20 @@ with profiles as
      kyc as
          (
              select profile_id,
-                    investor_profile_experience       as kyc_invest_experience,
-                    investor_profile_annual_income    as kyc_income,
-                    investor_profile_net_worth_total  as kyc_net_worth,
-                    investor_profile_net_worth_liquid as kyc_net_liquid,
-                    investor_profile_risk_tolerance   as kyc_risk_tolerance,
-                    employment_status                 as kyc_employment_status
+                    investor_profile_experience            as kyc_invest_experience,
+                    investor_profile_annual_income         as kyc_income,
+                    investor_profile_net_worth_total       as kyc_net_worth,
+                    investor_profile_net_worth_liquid      as kyc_net_liquid,
+                    investor_profile_risk_tolerance        as kyc_risk_tolerance,
+                    employment_status                      as kyc_employment_status,
+                    extract(year from age(birthdate))::int as age,
+                    extract(year from birthdate)::int      as birthday_year
              from {{ source('app', 'kyc_form') }}
      )
 select profile_id,
        user_email,
+       age,
+       birthday_year,
        coalesce(interests, '[]'::json)                              as interests,
        coalesce(categories, '[]'::json)                             as categories,
        ms_created,
