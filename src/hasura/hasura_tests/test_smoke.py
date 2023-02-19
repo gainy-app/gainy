@@ -1,5 +1,5 @@
 import logging
-from hasura_tests.common import make_graphql_request, MIN_COLLECTIONS_COUNT, MIN_INTEREST_COUNT, MIN_CATEGORIES_COUNT
+from hasura_tests.common import make_graphql_request, MIN_COLLECTIONS_COUNT
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
