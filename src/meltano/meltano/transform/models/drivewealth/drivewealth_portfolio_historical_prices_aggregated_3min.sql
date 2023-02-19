@@ -197,7 +197,7 @@ with portfolio_statuses as
                     schedule.collection_id,
                     schedule.date,
                     datetime,
-                    coalesce(data.updated_at, schedule.updated_at) as updated_at,
+                    data.updated_at,
                     data.value,
                     relative_gain,
                     true as is_scheduled
