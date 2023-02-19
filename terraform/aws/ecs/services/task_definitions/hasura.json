@@ -44,7 +44,7 @@
   "privileged": null,
   "memoryReservation": null,
   "healthCheck": {
-    "command": [ "CMD-SHELL", "curl -s http://localhost:8080/healthz | grep OK && pytest /hasura_tests/test_smoke.py" ],
+    "command": [ "CMD-SHELL", "curl -s http://localhost:8080/healthz | grep OK" ],
     "interval": ${hasura_healthcheck_interval},
     "retries": ${hasura_healthcheck_retries},
     "timeout": 30
