@@ -103,7 +103,7 @@ with portfolio_statuses as
                     collection_id,
                     (date + interval '1 day') as date,
                     (date + interval '1 day')::timestamp as datetime,
-                    t.updated_at,
+                    null as updated_at,
                     t.value
              from {{ ref('drivewealth_portfolio_historical_holdings') }} t
              where date > now() - interval '5 days'
@@ -140,8 +140,7 @@ with portfolio_statuses as
                                  symbol,
                                  date,
                                  datetime,
-                                 coalesce(relative_gain, 0) as relative_gain,
-                                 updated_at
+                                 coalesce(relative_gain, 0) as relative_gain
                           from min_holding_date
                                    join profile_date_threshold using (profile_id)
                                    left join {{ ref('historical_prices_aggregated_3min') }} using (symbol)
@@ -158,8 +157,7 @@ with portfolio_statuses as
                     symbol,
                     date,
                     datetime,
-                    relative_gain,
-                    updated_at
+                    relative_gain
              from ticker_schedule
 
              union all
@@ -170,10 +168,9 @@ with portfolio_statuses as
                     'CUR:USD'                     as symbol,
                     date,
                     datetime,
-                    0                             as relative_gain,
-                    updated_at
+                    0                             as relative_gain
              from (
-                      select profile_id, date, datetime, max(updated_at) as updated_at
+                      select profile_id, date, datetime
                       from ticker_schedule
                       group by profile_id, date, datetime
                   ) t
@@ -255,7 +252,7 @@ with portfolio_statuses as
                     collection_id,
                     date,
                     datetime,
-                    updated_at,
+                    coalesce(updated_at, now()) as updated_at,
                     relative_gain,
                     value,
                     coalesce(lag(value) over wnd, 0) as prev_value
@@ -270,5 +267,7 @@ from data_extended
 {% if is_incremental() %}
          left join {{ this }} old_data using (profile_id, holding_id_v2, symbol, datetime)
 where old_data.profile_id is null
-   or data_extended.updated_at > old_data.updated_at
+   or abs(data_extended.value - old_data.value) > 1e-3
+   or abs(data_extended.prev_value - old_data.prev_value) > 1e-3
+   or abs(data_extended.relative_gain - old_data.relative_gain) > 1e-5
 {% endif %}
