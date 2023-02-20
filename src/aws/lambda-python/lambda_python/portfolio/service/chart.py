@@ -277,9 +277,18 @@ class PortfolioChartService:
 
         join_clause.append(
             sql.SQL(
-                "join ticker_interests on ticker_interests.symbol = profile_holdings_normalized_all.ticker_symbol"
+                "left join ticker_interests on ticker_interests.symbol = profile_holdings_normalized_all.ticker_symbol"
             ))
-        where_clause.append(sql.SQL(f"interest_id in %(interest_ids)s"))
+        join_clause.append(
+            sql.SQL(
+                "left join collection_interests on collection_interests.collection_id = profile_holdings_normalized_all.collection_id"
+            ))
+
+        filter_clause = sql.SQL("""
+            ((profile_holdings_normalized_all.collection_id is null and ticker_interests.interest_id is not null and ticker_interests.interest_id in %(interest_ids)s) or 
+             (profile_holdings_normalized_all.collection_id is not null and collection_interests.interest_id is not null and collection_interests.interest_id in %(interest_ids)s and collection_interests.sim_dif > 0))"""
+                                )
+        where_clause.append(filter_clause)
         params['interest_ids'] = tuple(filter.interest_ids)
 
     def _filter_query_by_category_ids(self, params, where_clause, join_clause,
@@ -289,9 +298,18 @@ class PortfolioChartService:
 
         join_clause.append(
             sql.SQL(
-                "join ticker_categories on ticker_categories.symbol = profile_holdings_normalized_all.ticker_symbol"
+                "left join ticker_categories on ticker_categories.symbol = profile_holdings_normalized_all.ticker_symbol"
             ))
-        where_clause.append(sql.SQL(f"category_id in %(category_ids)s"))
+        join_clause.append(
+            sql.SQL(
+                "left join collection_categories on collection_categories.collection_id = profile_holdings_normalized_all.collection_id"
+            ))
+
+        filter_clause = sql.SQL("""
+            ((profile_holdings_normalized_all.collection_id is null and ticker_categories.category_id is not null and ticker_categories.category_id in %(category_ids)s) or 
+             (profile_holdings_normalized_all.collection_id is not null and collection_categories.category_id is not null and collection_categories.category_id in %(category_ids)s and collection_categories.sim_dif > 0))"""
+                                )
+        where_clause.append(filter_clause)
         params['category_ids'] = tuple(filter.category_ids)
 
     def _filter_query_by_security_types(self, params, where_clause,

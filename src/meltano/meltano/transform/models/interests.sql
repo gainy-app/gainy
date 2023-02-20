@@ -42,3 +42,4 @@ SELECT id::int,
        now()::timestamp as updated_at
 FROM {{ source('gainy', 'gainy_interests') }}
 where _sdc_extracted_at > (select max(_sdc_extracted_at) from {{ source('gainy', 'gainy_interests') }}) - interval '1 minute'
+  and enabled = '1'
