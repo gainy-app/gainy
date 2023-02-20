@@ -351,14 +351,14 @@ class DriveWealthProvider(DriveWealthProviderKYC,
                 continue
 
             for data in self.api.iterate_user_transactions(account):
-                if "orderID" not in data:
+                order_id = data.get("orderID")
+                if order_id:
                     transaction = DriveWealthTransaction()
                     transaction.account_id = account.ref_id
                     transaction.set_from_response(data)
                     self.repository.persist(transaction)
                     continue
 
-                order_id = data["orderID"]
                 order: DriveWealthOrder = self.repository.find_one(
                     DriveWealthOrder, {"ref_id": order_id})
                 if order and order.is_filled(
