@@ -280,7 +280,7 @@ class DriveWealthOrder(BaseDriveWealthModel):
 class DriveWealthTransaction(BaseDriveWealthModel):
     ref_id = None
     account_id = None
-    type = None  # CSR, DIV, DIVTAX, MERGER_ACQUISITION, SLIP, SPUR, SSAL
+    type = None  # CSR, DIV, DIVTAX, MERGER_ACQUISITION, SLIP
     symbol = None
     account_amount_delta: Decimal = None
     datetime = None
