@@ -61,7 +61,9 @@ from (
                 lag(trading_sessions.date) over (partition by symbol order by date) as prev_date,
                 trading_sessions.index::int,
                 trading_sessions.open_at,
-                trading_sessions.close_at
+                trading_sessions.close_at,
+                extract(epoch from trading_sessions.open_at)::numeric * 1000        as open_at_t,
+                extract(epoch from trading_sessions.close_at)::numeric * 1000       as close_at_t
          from symbols
                   join trading_sessions
                        on case

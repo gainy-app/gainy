@@ -3116,6 +3116,17 @@
           - web_url
         filter: {}
 - table:
+    name: trading_collection_tickers
+    schema: public
+  select_permissions:
+    - role: user
+      permission:
+        columns:
+          - symbol
+          - collection_id
+          - weight
+        filter: {}
+- table:
     name: trading_history
     schema: public
   object_relationships:

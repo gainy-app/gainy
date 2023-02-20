@@ -1,3 +1,5 @@
+import subprocess
+
 import boto3
 import datetime
 import json
@@ -198,6 +200,7 @@ def clean_obsolete_data(db_conn):
     queries = [
         "delete from raw_data.eod_intraday_prices where time < now() - interval '2 weeks'",
         "delete from raw_data.polygon_intraday_prices where time < now() - interval '2 weeks'",
+        "delete from raw_data.polygon_intraday_prices_launchpad where t < extract(epoch from now() - interval '2 weeks') * 1000",
         "delete from deployment.realtime_listener_heartbeat where time < now() - interval '1 hour'",
     ] + [
         "delete from meltano.runs where id in (select id from meltano.runs where ended_at < now() - interval '1 month' limit 10)"
@@ -226,3 +229,10 @@ if AWS_LAMBDA_API_GATEWAY_ENDPOINT is not None:
 
         clean_api_gateway(api_id, version)
         clean_lambda(api_id, env)
+
+MELTANO_PROJECT_ROOT = os.getenv("MELTANO_PROJECT_ROOT", os.getcwd())
+subprocess.run([
+    "find", f"{MELTANO_PROJECT_ROOT}/.meltano/run/airflow/logs", "-mindepth",
+    "1", "-mtime", "+21", "-delete"
+])
+logger.warning('Removed old logs')

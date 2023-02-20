@@ -36,7 +36,7 @@ sources:
     description: Financial data from https://polygon.io/
     schema: raw_data
     tables:
-      - name: polygon_intraday_prices
+      - name: polygon_intraday_prices_launchpad
       - name: polygon_marketstatus_upcoming
       - name: polygon_options_historical_prices
       - name: polygon_crypto_historical_prices
@@ -86,6 +86,7 @@ sources:
       - name: profile_portfolio_transactions
       - name: profile_scoring_settings
       - name: profile_ticker_match_score
+      - name: profile_watchlist_tickers
       - name: profiles
       - name: subscriptions
       - name: trading_collection_versions
@@ -2663,6 +2664,164 @@ models:
         tests:
           - type:
               type: 'boolean'
+
+  - name: analytics_profile_attributes
+    columns:
+      - name: profile_id
+        tests:
+          - type:
+              type: 'integer'
+      - name: age
+        tests:
+          - type:
+              type: 'integer'
+      - name: birthday_year
+        tests:
+          - type:
+              type: 'integer'
+      - name: user_email
+        tests:
+          - type:
+              type: 'character varying'
+      - name: interests
+        tests:
+          - type:
+              type: 'json'
+      - name: categories
+        tests:
+          - type:
+              type: 'json'
+      - name: ms_created
+        tests:
+          - type:
+              type: 'boolean'
+      - name: dw_account_opened
+        tests:
+          - type:
+              type: 'boolean'
+      - name: funding_acc_connected
+        tests:
+          - type:
+              type: 'boolean'
+      - name: number_of_funding_acc
+        tests:
+          - type:
+              type: 'integer'
+      - name: bank_funding_acc
+        tests:
+          - type:
+              type: 'json'
+      - name: product_type_purchased
+        tests:
+          - type:
+              type: 'json'
+      - name: total_invested_ttfs
+        tests:
+          - type:
+              type: 'integer'
+      - name: total_invested_tickers
+        tests:
+          - type:
+              type: 'integer'
+      - name: total_wishlist_ttfs
+        tests:
+          - type:
+              type: 'integer'
+      - name: total_wishlist_ticker
+        tests:
+          - type:
+              type: 'integer'
+      - name: total_transactions
+        tests:
+          - type:
+              type: 'integer'
+      - name: total_deposits
+        tests:
+          - type:
+              type: 'integer'
+      - name: total_withdraws
+        tests:
+          - type:
+              type: 'integer'
+      - name: total_invests
+        tests:
+          - type:
+              type: 'integer'
+      - name: total_sells
+        tests:
+          - type:
+              type: 'integer'
+      - name: total_trades
+        tests:
+          - type:
+              type: 'integer'
+      - name: total_amount_deposit
+        tests:
+          - type:
+              type: 'double precision'
+      - name: total_amount_invest
+        tests:
+          - type:
+              type: 'double precision'
+      - name: total_amount_sell
+        tests:
+          - type:
+              type: 'double precision'
+      - name: first_purchased_date
+        tests:
+          - type:
+              type: 'timestamp with time zone'
+      - name: first_sell_date
+        tests:
+          - type:
+              type: 'timestamp with time zone'
+      - name: last_purchased_date
+        tests:
+          - type:
+              type: 'timestamp with time zone'
+      - name: last_sell_date
+        tests:
+          - type:
+              type: 'timestamp with time zone'
+      - name: kyc_invest_experience
+        tests:
+          - type:
+              type: 'character varying'
+      - name: kyc_income
+        tests:
+          - type:
+              type: 'bigint'
+      - name: kyc_net_worth
+        tests:
+          - type:
+              type: 'bigint'
+      - name: kyc_net_liquid
+        tests:
+          - type:
+              type: 'bigint'
+      - name: kyc_risk_tolerance
+        tests:
+          - type:
+              type: 'character varying'
+      - name: kyc_employment_status
+        tests:
+          - type:
+              type: 'character varying'
+
+  - name: trading_collection_tickers
+    columns:
+      - name: collection_id
+        tests:
+          - type:
+              type: 'integer'
+      - name: symbol
+        tests:
+          - type:
+              type: 'character varying'
+      - name: weight
+        tests:
+          - type:
+              type: 'numeric'
 
   - name: portfolio_interests
     columns:

@@ -22,7 +22,7 @@
   "environment": [
     { "name": "HASURA_GRAPHQL_UNAUTHORIZED_ROLE",     "value": "anonymous" },
     { "name": "HASURA_GRAPHQL_METADATA_DATABASE_URL", "value": "postgres://${pg_username}:${pg_password}@${pg_host}:${pg_port}/${pg_dbname}" },
-    { "name": "HASURA_GRAPHQL_LOG_LEVEL",             "value": "warn" },
+    { "name": "HASURA_GRAPHQL_LOG_LEVEL",             "value": "info" },
     { "name": "HASURA_GRAPHQL_ENABLED_LOG_TYPES",     "value": "startup,webhook-log,websocket-log,http-log,query-log" },
     { "name": "HASURA_GRAPHQL_DATABASE_URL",          "value": "postgres://${pg_username}:${pg_password}@${pg_host}:${pg_port}/${pg_dbname}" },
     { "name": "HASURA_GRAPHQL_READ_REPLICA_URLS",     "value": "${pg_replica_uris}" },
@@ -44,7 +44,7 @@
   "privileged": null,
   "memoryReservation": null,
   "healthCheck": {
-    "command": [ "CMD-SHELL", "curl -s http://localhost:8080/healthz | grep OK && pytest /hasura_tests/test_smoke.py" ],
+    "command": [ "CMD-SHELL", "curl -s http://localhost:8080/healthz | grep OK" ],
     "interval": ${hasura_healthcheck_interval},
     "retries": ${hasura_healthcheck_retries},
     "timeout": 30

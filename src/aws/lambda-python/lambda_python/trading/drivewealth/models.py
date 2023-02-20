@@ -38,6 +38,7 @@ class DriveWealthBankAccount(BaseDriveWealthModel):
     drivewealth_user_id = None
     funding_account_id = None
     plaid_access_token_id = None
+    plaid_account_id = None
     status = None
     bank_account_nickname = None
     bank_account_number = None
@@ -78,9 +79,14 @@ class DriveWealthBankAccount(BaseDriveWealthModel):
         return "drivewealth_bank_accounts"
 
 
+class DriveWealthAccountStatus(str, enum.Enum):
+    OPEN = 'OPEN'
+
+
 class DriveWealthRedemptionStatus(str, enum.Enum):
     RIA_Pending = 'RIA_Pending'
     RIA_Approved = 'RIA_Approved'
+    Successful = 'Successful'
 
 
 class BaseDriveWealthMoneyFlowModel(BaseDriveWealthModel, ABC):

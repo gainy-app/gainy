@@ -171,6 +171,7 @@ module "ecs-service" {
   github_app_id              = var.github_app_id
   github_app_installation_id = var.github_app_installation_id
   github_app_private_key     = var.github_app_private_key
+  amplitude_api_key          = var.amplitude_api_key
 
   aws_lambda_api_gateway_endpoint = "${module.lambda.aws_apigatewayv2_api_endpoint}/${local.deployment_key}"
   hasura_enable_console           = "true"

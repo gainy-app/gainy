@@ -63,4 +63,16 @@ from {{ ref('base_tickers') }}
          left join tradeable_tickers using (symbol)
 where ((base_tickers.description is not null and length(base_tickers.description) >= 5) or type = 'index')
   and (latest_price.symbol is not null or latest_crypto_price.symbol is not null)
-  and type in ('fund', 'etf', 'mutual fund', 'preferred stock', 'common stock', 'crypto', 'index')
+  and type in (
+{% if var('crypto_enabled') %}
+         'crypto',
+{% endif %}
+{% if var('index_enabled') %}
+         'index',
+{% endif %}
+         'fund',
+         'etf',
+         'mutual fund',
+         'preferred stock',
+         'common stock'
+        )
