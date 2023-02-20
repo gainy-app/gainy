@@ -18,7 +18,18 @@
 }}
 
 
-with data as
+with base_tickers_type_to_security_type as
+     (
+         select *
+         from (
+                  values ('index', 'equity'),
+                         ('fund', 'equity'),
+                         ('preferred stock', 'equity'),
+                         ('note', 'equity'),
+                         ('common stock', 'equity')
+              ) t (type, security_type)
+     ),
+     data as
     (
         select t.*,
                coalesce(
@@ -87,6 +98,50 @@ with data as
                           left join {{ source('app', 'profile_plaid_access_tokens') }} on profile_plaid_access_tokens.id = profile_portfolio_transactions.plaid_access_token_id
                           left join {{ ref('portfolio_brokers') }} on portfolio_brokers.plaid_institution_id = profile_plaid_access_tokens.institution_id
                  where profile_holdings.profile_id is null
+
+                 union all
+
+                 select distinct on (
+                     profile_id, holding_id_v2
+                     ) case
+                           when symbol like 'CUR:%'
+                               then profile_id || '_cash_' || symbol
+                           when t.collection_id is null
+                               then 'ticker_' || profile_id || '_' || symbol
+                           else 'ttf_' || profile_id || '_' ||
+                                t.collection_id
+                           end                                      as holding_group_id,
+                       holding_id_v2,
+                       null::int                                    as holding_id,
+                       null::int                                    as plaid_access_token_id,
+                       null::int                                    as security_id,
+                       profile_id,
+                       null::int                                    as account_id,
+                       0::double precision                          as quantity,
+                       0::double precision                          as quantity_norm_for_valuation,
+                       base_tickers.name                            as name,
+                       symbol,
+                       symbol                                       as ticker_symbol,
+                       t.collection_id,
+                       '0_' || t.collection_id                      as collection_uniq_id,
+                       coalesce(case when symbol like 'CUR:%' then 'cash' end,
+                                base_tickers_type_to_security_type.security_type,
+                                base_tickers.type)                  as type,
+                       portfolio_brokers.uniq_id                    as broker_uniq_id,
+                       true                                         as is_app_trading,
+                       true                                         as is_hidden,
+                       greatest(t.updated_at,
+                                base_tickers.updated_at)::timestamp as updated_at
+                 from (
+                          select profile_id, holding_id_v2, collection_id, symbol, max(updated_at) as updated_at
+                          from {{ ref('drivewealth_portfolio_historical_holdings') }}
+                          group by profile_id, holding_id_v2, collection_id, symbol
+                      ) t
+                           left join {{ ref('drivewealth_holdings') }} using (profile_id, holding_id_v2, symbol)
+                           left join {{ ref('base_tickers') }} using (symbol)
+                           left join base_tickers_type_to_security_type on base_tickers_type_to_security_type.type = base_tickers.type
+                           left join {{ ref('portfolio_brokers') }} on portfolio_brokers.uniq_id = 'gainy_broker'
+                  where drivewealth_holdings.profile_id is null
              ) t
                  left join (
                         select profile_id, min(date) as date from {{ source('app', 'profile_portfolio_transactions') }} group by profile_id

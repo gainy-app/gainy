@@ -42,19 +42,6 @@ class DriveWealthProviderCollection(GainyDriveWealthProvider):
 
         return fund_status.get_collection_status()
 
-    def _create_autopilot_run(self, account: DriveWealthAccount,
-                              collection_version: TradingCollectionVersion):
-        data = self.api.create_autopilot_run([account.ref_id])
-        entity = DriveWealthAutopilotRun()
-        entity.set_from_response(data)
-        entity.account_id = account.ref_id
-        self.repository.persist(entity)
-
-        entity.update_trading_collection_version(collection_version)
-        self.repository.persist(collection_version)
-
-        return entity
-
     def _on_money_transfer(self, profile_id: int, trading_account_id: int):
         repository = self.repository
         portfolio = repository.get_profile_portfolio(profile_id,

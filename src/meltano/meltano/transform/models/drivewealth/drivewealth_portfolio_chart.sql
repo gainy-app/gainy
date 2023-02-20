@@ -5,51 +5,44 @@
 }}
 
     
-select drivewealth_portfolio_historical_prices_aggregated.profile_id,
-       drivewealth_portfolio_historical_prices_aggregated.holding_id_v2,
-       drivewealth_portfolio_historical_prices_aggregated.transaction_uniq_id,
-       week_trading_sessions_static.date,
-       drivewealth_portfolio_historical_prices_aggregated.datetime,
-       drivewealth_portfolio_historical_prices_aggregated.datetime + interval '3 minutes' as close_datetime,
+select profile_id,
+       holding_id_v2,
+       date,
+       datetime,
+       datetime + interval '3 minutes' as close_datetime,
        '1d'::varchar as period,
-       drivewealth_portfolio_historical_prices_aggregated.open,
-       drivewealth_portfolio_historical_prices_aggregated.high,
-       drivewealth_portfolio_historical_prices_aggregated.low,
-       drivewealth_portfolio_historical_prices_aggregated.close,
-       drivewealth_portfolio_historical_prices_aggregated.adjusted_close,
-       drivewealth_portfolio_historical_prices_aggregated.relative_gain,
-       drivewealth_portfolio_historical_prices_aggregated.updated_at
+       open,
+       high,
+       low,
+       close,
+       adjusted_close,
+       relative_gain,
+       updated_at
 from {{ ref('drivewealth_portfolio_historical_prices_aggregated') }}
-         join {{ ref('week_trading_sessions_static') }} using (symbol)
 where drivewealth_portfolio_historical_prices_aggregated.period = '3min'
-  and drivewealth_portfolio_historical_prices_aggregated.datetime between week_trading_sessions_static.open_at and week_trading_sessions_static.close_at - interval '1 microsecond'
 
 union all
 
-select drivewealth_portfolio_historical_prices_aggregated.profile_id,
-       drivewealth_portfolio_historical_prices_aggregated.holding_id_v2,
-       drivewealth_portfolio_historical_prices_aggregated.transaction_uniq_id,
-       week_trading_sessions_static.date,
-       drivewealth_portfolio_historical_prices_aggregated.datetime,
-       drivewealth_portfolio_historical_prices_aggregated.datetime + interval '15 minutes' as close_datetime,
+select profile_id,
+       holding_id_v2,
+       date,
+       datetime,
+       datetime + interval '15 minutes' as close_datetime,
        '1w'::varchar as period,
-       drivewealth_portfolio_historical_prices_aggregated.open,
-       drivewealth_portfolio_historical_prices_aggregated.high,
-       drivewealth_portfolio_historical_prices_aggregated.low,
-       drivewealth_portfolio_historical_prices_aggregated.close,
-       drivewealth_portfolio_historical_prices_aggregated.adjusted_close,
-       drivewealth_portfolio_historical_prices_aggregated.relative_gain,
-       drivewealth_portfolio_historical_prices_aggregated.updated_at
+       open,
+       high,
+       low,
+       close,
+       adjusted_close,
+       relative_gain,
+       updated_at
 from {{ ref('drivewealth_portfolio_historical_prices_aggregated') }}
-         join {{ ref('week_trading_sessions_static') }} using (symbol)
 where drivewealth_portfolio_historical_prices_aggregated.period = '15min'
-  and drivewealth_portfolio_historical_prices_aggregated.datetime between week_trading_sessions_static.open_at and week_trading_sessions_static.close_at - interval '1 microsecond'
 
 union all
 
 select drivewealth_portfolio_historical_prices_aggregated.profile_id,
        drivewealth_portfolio_historical_prices_aggregated.holding_id_v2,
-       drivewealth_portfolio_historical_prices_aggregated.transaction_uniq_id,
        drivewealth_portfolio_historical_prices_aggregated.datetime::date as date,
        drivewealth_portfolio_historical_prices_aggregated.datetime,
        drivewealth_portfolio_historical_prices_aggregated.datetime + interval '1 day' as close_datetime,
@@ -69,7 +62,6 @@ union all
 
 select drivewealth_portfolio_historical_prices_aggregated.profile_id,
        drivewealth_portfolio_historical_prices_aggregated.holding_id_v2,
-       drivewealth_portfolio_historical_prices_aggregated.transaction_uniq_id,
        drivewealth_portfolio_historical_prices_aggregated.datetime::date as date,
        drivewealth_portfolio_historical_prices_aggregated.datetime,
        drivewealth_portfolio_historical_prices_aggregated.datetime + interval '1 day' as close_datetime,
@@ -89,7 +81,6 @@ union all
 
 select drivewealth_portfolio_historical_prices_aggregated.profile_id,
        drivewealth_portfolio_historical_prices_aggregated.holding_id_v2,
-       drivewealth_portfolio_historical_prices_aggregated.transaction_uniq_id,
        drivewealth_portfolio_historical_prices_aggregated.datetime::date as date,
        drivewealth_portfolio_historical_prices_aggregated.datetime,
        drivewealth_portfolio_historical_prices_aggregated.datetime + interval '1 day' as close_datetime,
@@ -108,7 +99,6 @@ union all
 
 select drivewealth_portfolio_historical_prices_aggregated.profile_id,
        drivewealth_portfolio_historical_prices_aggregated.holding_id_v2,
-       drivewealth_portfolio_historical_prices_aggregated.transaction_uniq_id,
        drivewealth_portfolio_historical_prices_aggregated.datetime::date as date,
        drivewealth_portfolio_historical_prices_aggregated.datetime,
        drivewealth_portfolio_historical_prices_aggregated.datetime + interval '1 week' as close_datetime,
@@ -127,7 +117,6 @@ union all
 
 select profile_id,
        holding_id_v2,
-       transaction_uniq_id,
        datetime::date                as date,
        datetime,
        datetime + interval '1 month' as close_datetime,

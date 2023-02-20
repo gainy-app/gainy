@@ -321,38 +321,6 @@ custom_types:
             schema: app
           source: default
           type: object
-        - field_mapping:
-            security_id: id
-          name: security
-          remote_table:
-            name: portfolio_securities
-            schema: app
-          source: default
-          type: array
-        - field_mapping:
-            account_id: id
-          name: account
-          remote_table:
-            name: profile_portfolio_accounts
-            schema: app
-          source: default
-          type: object
-        - field_mapping:
-            id: holding_id
-          name: holding_details
-          remote_table:
-            name: portfolio_holding_details
-            schema: public
-          source: default
-          type: object
-        - field_mapping:
-            id: id
-          name: holding
-          remote_table:
-            name: profile_holdings
-            schema: app
-          source: default
-          type: object
     - name: PortfolioTransaction
       relationships:
         - field_mapping:
@@ -360,30 +328,6 @@ custom_types:
           name: profile
           remote_table:
             name: profiles
-            schema: app
-          source: default
-          type: object
-        - field_mapping:
-            account_id: id
-          name: account
-          remote_table:
-            name: profile_portfolio_accounts
-            schema: app
-          source: default
-          type: object
-        - field_mapping:
-            security_id: id
-          name: security
-          remote_table:
-            name: portfolio_securities
-            schema: app
-          source: default
-          type: object
-        - field_mapping:
-            id: id
-          name: transaction
-          remote_table:
-            name: profile_portfolio_transactions
             schema: app
           source: default
           type: object

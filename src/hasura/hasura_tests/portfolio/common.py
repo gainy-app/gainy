@@ -1,4 +1,6 @@
-from hasura_tests.common import make_graphql_request
+from psycopg2.extras import RealDictCursor
+
+from hasura_tests.common import make_graphql_request, db_connect
 
 PROFILES = make_graphql_request("{app_profiles{id, user_id}}",
                                 user_id=None)['data']['app_profiles']
@@ -6,7 +8,17 @@ PROFILE_IDS = {profile['user_id']: profile['id'] for profile in PROFILES}
 
 
 def get_test_portfolio_data(only_with_holdings=False):
-    transaction_stats_query = "query transaction_stats($profileId: Int!) {app_profile_portfolio_transactions_aggregate(where: {profile_id: {_eq: $profileId}}) {aggregate{min{date} max{date}}}}"
+    query = "select profile_id, min(date) as min_date, max(date) as max_date from app.profile_portfolio_transactions group by profile_id"
+    transaction_stats = {}
+    with db_connect() as db_conn:
+        with db_conn.cursor(cursor_factory=RealDictCursor) as cursor:
+            cursor.execute(query)
+            for row in cursor:
+                transaction_stats[row["profile_id"]] = {
+                    'min_date': row['min_date'].strftime('%Y-%m-%d'),
+                    'max_date': row['max_date'].strftime('%Y-%m-%d'),
+                }
+
     quantities = {"AAPL": 100, "AAPL240621C00225000": 200}
     quantities2 = {"AAPL": 110, "AAPL240621C00225000": 300}
     quantities3 = {"AAPL": 10, "AAPL240621C00225000": 100}
@@ -22,161 +34,93 @@ def get_test_portfolio_data(only_with_holdings=False):
 
     # -- profile 2 with holdings with one buy transaction on the primary account
     user_id = 'user_id_portfolio_test_2'
-    transaction_stats = make_graphql_request(
-        transaction_stats_query, {"profileId": PROFILE_IDS[user_id]},
-        user_id=None)['data']
     quantities_override = [
-        (None,
-         transaction_stats['app_profile_portfolio_transactions_aggregate']
-         ['aggregate']['min']['date'], 0),
+        (None, transaction_stats[PROFILE_IDS[user_id]]['min_date'], 0),
     ]
     yield (user_id, quantities, quantities_override)
 
     # -- profile 3 with holdings with one sell transaction on the primary account
     user_id = 'user_id_portfolio_test_3'
-    transaction_stats = make_graphql_request(
-        transaction_stats_query, {"profileId": PROFILE_IDS[user_id]},
-        user_id=None)['data']
     quantities_override = [
-        (None,
-         transaction_stats['app_profile_portfolio_transactions_aggregate']
-         ['aggregate']['min']['date'], 0),
+        (None, transaction_stats[PROFILE_IDS[user_id]]['min_date'], 0),
     ]
     yield (user_id, quantities, quantities_override)
 
     # -- profile 4 with holdings with one buy transaction on the secondary account
     user_id = 'user_id_portfolio_test_4'
-    transaction_stats = make_graphql_request(
-        transaction_stats_query, {"profileId": PROFILE_IDS[user_id]},
-        user_id=None)['data']
     quantities_override = [
-        (None,
-         transaction_stats['app_profile_portfolio_transactions_aggregate']
-         ['aggregate']['min']['date'], 0),
+        (None, transaction_stats[PROFILE_IDS[user_id]]['min_date'], 0),
     ]
     yield (user_id, quantities, quantities_override)
 
     # -- profile 5 with holdings with one sell transaction on the secondary account
     user_id = 'user_id_portfolio_test_5'
-    transaction_stats = make_graphql_request(
-        transaction_stats_query, {"profileId": PROFILE_IDS[user_id]},
-        user_id=None)['data']
     quantities_override = [
-        (None,
-         transaction_stats['app_profile_portfolio_transactions_aggregate']
-         ['aggregate']['min']['date'], 0),
+        (None, transaction_stats[PROFILE_IDS[user_id]]['min_date'], 0),
     ]
     yield (user_id, quantities, quantities_override)
 
     # -- profile 6 with holdings with buy-sell transactions on the primary account
     user_id = 'user_id_portfolio_test_6'
-    transaction_stats = make_graphql_request(
-        transaction_stats_query, {"profileId": PROFILE_IDS[user_id]},
-        user_id=None)['data']
     quantities_override = [
-        (None,
-         transaction_stats['app_profile_portfolio_transactions_aggregate']
-         ['aggregate']['min']['date'], 0),
-        (transaction_stats['app_profile_portfolio_transactions_aggregate']
-         ['aggregate']['min']['date'],
-         transaction_stats['app_profile_portfolio_transactions_aggregate']
-         ['aggregate']['max']['date'], quantities2),
+        (None, transaction_stats[PROFILE_IDS[user_id]]['min_date'], 0),
+        (transaction_stats[PROFILE_IDS[user_id]]['min_date'],
+         transaction_stats[PROFILE_IDS[user_id]]['max_date'], quantities2),
     ]
     yield (user_id, quantities, quantities_override)
 
     # -- profile 7 with holdings with buy-sell transactions on the primary-secondary account
     user_id = 'user_id_portfolio_test_7'
-    transaction_stats = make_graphql_request(
-        transaction_stats_query, {"profileId": PROFILE_IDS[user_id]},
-        user_id=None)['data']
     quantities_override = [
-        (None,
-         transaction_stats['app_profile_portfolio_transactions_aggregate']
-         ['aggregate']['min']['date'], 0),
-        (transaction_stats['app_profile_portfolio_transactions_aggregate']
-         ['aggregate']['min']['date'],
-         transaction_stats['app_profile_portfolio_transactions_aggregate']
-         ['aggregate']['max']['date'], quantities2),
+        (None, transaction_stats[PROFILE_IDS[user_id]]['min_date'], 0),
+        (transaction_stats[PROFILE_IDS[user_id]]['min_date'],
+         transaction_stats[PROFILE_IDS[user_id]]['max_date'], quantities2),
     ]
     yield (user_id, quantities, quantities_override)
 
     # -- profile 8 with holdings with buy-sell transactions on the secondary-primary account
     user_id = 'user_id_portfolio_test_8'
-    transaction_stats = make_graphql_request(
-        transaction_stats_query, {"profileId": PROFILE_IDS[user_id]},
-        user_id=None)['data']
     quantities_override = [
-        (None,
-         transaction_stats['app_profile_portfolio_transactions_aggregate']
-         ['aggregate']['min']['date'], 0),
-        (transaction_stats['app_profile_portfolio_transactions_aggregate']
-         ['aggregate']['min']['date'],
-         transaction_stats['app_profile_portfolio_transactions_aggregate']
-         ['aggregate']['max']['date'], quantities2),
+        (None, transaction_stats[PROFILE_IDS[user_id]]['min_date'], 0),
+        (transaction_stats[PROFILE_IDS[user_id]]['min_date'],
+         transaction_stats[PROFILE_IDS[user_id]]['max_date'], quantities2),
     ]
     yield (user_id, quantities, quantities_override)
 
     # -- profile 9 with holdings with buy-sell transactions on the secondary account
     user_id = 'user_id_portfolio_test_9'
-    transaction_stats = make_graphql_request(
-        transaction_stats_query, {"profileId": PROFILE_IDS[user_id]},
-        user_id=None)['data']
     quantities_override = [
-        (None,
-         transaction_stats['app_profile_portfolio_transactions_aggregate']
-         ['aggregate']['min']['date'], 0),
-        (transaction_stats['app_profile_portfolio_transactions_aggregate']
-         ['aggregate']['min']['date'],
-         transaction_stats['app_profile_portfolio_transactions_aggregate']
-         ['aggregate']['max']['date'], quantities2),
+        (None, transaction_stats[PROFILE_IDS[user_id]]['min_date'], 0),
+        (transaction_stats[PROFILE_IDS[user_id]]['min_date'],
+         transaction_stats[PROFILE_IDS[user_id]]['max_date'], quantities2),
     ]
     yield (user_id, quantities, quantities_override)
 
     # -- profile 10 with holdings with sell-buy transactions on the primary account
     user_id = 'user_id_portfolio_test_10'
-    transaction_stats = make_graphql_request(
-        transaction_stats_query, {"profileId": PROFILE_IDS[user_id]},
-        user_id=None)['data']
     quantities_override = [
-        (None,
-         transaction_stats['app_profile_portfolio_transactions_aggregate']
-         ['aggregate']['max']['date'], 0),
+        (None, transaction_stats[PROFILE_IDS[user_id]]['max_date'], 0),
     ]
     yield (user_id, quantities, quantities_override)
 
     # -- profile 11 with holdings with sell-buy transactions on the primary-secondary account
     user_id = 'user_id_portfolio_test_11'
-    transaction_stats = make_graphql_request(
-        transaction_stats_query, {"profileId": PROFILE_IDS[user_id]},
-        user_id=None)['data']
     quantities_override = [
-        (None,
-         transaction_stats['app_profile_portfolio_transactions_aggregate']
-         ['aggregate']['min']['date'], 0),
+        (None, transaction_stats[PROFILE_IDS[user_id]]['min_date'], 0),
     ]
     yield (user_id, quantities, quantities_override)
 
     # -- profile 12 with holdings with sell-buy transactions on the secondary-primary account
     user_id = 'user_id_portfolio_test_12'
-    transaction_stats = make_graphql_request(
-        transaction_stats_query, {"profileId": PROFILE_IDS[user_id]},
-        user_id=None)['data']
     quantities_override = [
-        (None,
-         transaction_stats['app_profile_portfolio_transactions_aggregate']
-         ['aggregate']['max']['date'], 0),
+        (None, transaction_stats[PROFILE_IDS[user_id]]['max_date'], 0),
     ]
     yield (user_id, quantities, quantities_override)
 
     # -- profile 13 with holdings with sell-buy transactions on the secondary account
     user_id = 'user_id_portfolio_test_13'
-    transaction_stats = make_graphql_request(
-        transaction_stats_query, {"profileId": PROFILE_IDS[user_id]},
-        user_id=None)['data']
     quantities_override = [
-        (None,
-         transaction_stats['app_profile_portfolio_transactions_aggregate']
-         ['aggregate']['min']['date'], 0),
+        (None, transaction_stats[PROFILE_IDS[user_id]]['min_date'], 0),
     ]
     yield (user_id, quantities, quantities_override)
 
@@ -202,15 +146,10 @@ def get_test_portfolio_data(only_with_holdings=False):
         if i < 19 or i > 22:
             yield ('user_id_portfolio_test_' + str(i), quantities, [])
         else:
-            transaction_stats = make_graphql_request(
-                transaction_stats_query, {"profileId": PROFILE_IDS[user_id]},
-                user_id=None)['data']
             quantities_override = [
-                (transaction_stats[
-                    'app_profile_portfolio_transactions_aggregate']
-                 ['aggregate']['min']['date'], transaction_stats[
-                     'app_profile_portfolio_transactions_aggregate']
-                 ['aggregate']['max']['date'], quantities3),
+                (transaction_stats[PROFILE_IDS[user_id]]['min_date'],
+                 transaction_stats[PROFILE_IDS[user_id]]['max_date'],
+                 quantities3),
             ]
             yield ('user_id_portfolio_test_' + str(i), quantities,
                    quantities_override)

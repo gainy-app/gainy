@@ -1,5 +1,6 @@
 from typing import Optional
 
+from gainy.trading.drivewealth.exceptions import TradingAccountNotOpenException
 from gainy.trading.drivewealth.models import DriveWealthAccount
 from gainy.trading.models import TradingAccount
 from gainy.utils import get_logger
@@ -40,5 +41,8 @@ class AccountsUpdatedEventHandler(AbstractDriveWealthEventHandler):
         if not trading_account:
             return
 
-        self.provider.ensure_portfolio(trading_account.profile_id,
-                                       trading_account.id)
+        try:
+            self.provider.ensure_portfolio(trading_account.profile_id,
+                                           trading_account.id)
+        except TradingAccountNotOpenException:
+            pass

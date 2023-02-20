@@ -22,6 +22,8 @@ def test(monkeypatch):
         "status": "NEW",
         "accountID": "7b746acb-0afa-42c3-9c94-1bc8c16ce7b2.1661277115494",
         "symbol": "GOOG",
+        "side": "BUY",
+        "totalOrderAmount": 1,
     }
     event_handler.handle(message)
 

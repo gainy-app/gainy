@@ -16,7 +16,7 @@ select t.holding_group_id,
        collections.name                                       as name,
        null                                                   as market_capitalization,
        null                                                   as next_earnings_date,
-       null                                                   as ltt_quantity_total,
+       null::double precision                                 as ltt_quantity_total,
        now()                                                  as updated_at
 from (
          select profile_holdings_normalized_dynamic.holding_group_id,
@@ -31,7 +31,7 @@ from (
              profile_holdings_normalized_dynamic.profile_id,
              profile_holdings_normalized_dynamic.collection_id
      ) t
-         left join {{ ref('portfolio_holding_group_gains') }} using (profile_id, collection_id)
+         left join {{ ref('portfolio_holding_group_gains') }} using (profile_id, holding_group_id)
          join {{ ref('collections') }} on collections.id = t.collection_id
 
 union all
@@ -54,7 +54,7 @@ from {{ ref('profile_holdings_normalized_dynamic') }}
          left join {{ ref('profile_holdings_normalized_all') }} using (holding_id_v2)
          left join {{ ref('portfolio_holding_group_gains') }}
               on portfolio_holding_group_gains.profile_id = profile_holdings_normalized_dynamic.profile_id
-                  and portfolio_holding_group_gains.ticker_symbol = profile_holdings_normalized_dynamic.ticker_symbol
+                  and portfolio_holding_group_gains.holding_group_id = profile_holdings_normalized_dynamic.holding_group_id
          left join {{ ref('base_tickers') }}
               on base_tickers.symbol = profile_holdings_normalized_dynamic.ticker_symbol
          left join {{ ref('ticker_metrics') }}

@@ -30,9 +30,27 @@ class PortfolioChartService:
                 os.path.join(SCRIPT_DIR,
                              "../sql/portfolio_chart_prev_close.sql")) as f:
             self.portfolio_chart_prev_close_query = f.read()
-        with open(os.path.join(SCRIPT_DIR,
-                               "../sql/portfolio_piechart.sql")) as f:
-            self.portfolio_piechart_query = f.read()
+        with open(
+                os.path.join(SCRIPT_DIR,
+                             "../sql/portfolio_piechart_asset.sql")) as f:
+            self.portfolio_piechart_asset_query = f.read()
+        with open(
+                os.path.join(SCRIPT_DIR,
+                             "../sql/portfolio_piechart_category.sql")) as f:
+            self.portfolio_piechart_category_query = f.read()
+        with open(
+                os.path.join(SCRIPT_DIR,
+                             "../sql/portfolio_piechart_interest.sql")) as f:
+            self.portfolio_piechart_interest_query = f.read()
+        with open(
+                os.path.join(
+                    SCRIPT_DIR,
+                    "../sql/portfolio_piechart_security_type.sql")) as f:
+            self.portfolio_piechart_security_type_query = f.read()
+        with open(
+                os.path.join(SCRIPT_DIR,
+                             "../sql/portfolio_piechart_ticker.sql")) as f:
+            self.portfolio_piechart_ticker_query = f.read()
 
     def get_portfolio_chart(self, profile_id, filter: PortfolioChartFilter):
         params = {
@@ -154,8 +172,18 @@ class PortfolioChartService:
         if where_clause:
             where_clause.insert(0, sql.SQL(""))
 
-        rows = self._execute_query(params, {"where_clause": where_clause},
-                                   join_clause, self.portfolio_piechart_query)
+        rows = self._execute_query(
+            params, {"where_clause": where_clause}, join_clause,
+            self.portfolio_piechart_asset_query) + self._execute_query(
+                params, {"where_clause": where_clause}, join_clause,
+                self.portfolio_piechart_category_query) + self._execute_query(
+                    params, {"where_clause": where_clause}, join_clause, self.
+                    portfolio_piechart_interest_query) + self._execute_query(
+                        params, {"where_clause": where_clause}, join_clause,
+                        self.portfolio_piechart_security_type_query
+                    ) + self._execute_query(
+                        params, {"where_clause": where_clause}, join_clause,
+                        self.portfolio_piechart_ticker_query)
 
         return rows
 

@@ -215,7 +215,7 @@ def check_chart():
 def check_portfolio():
     with open(
             os.path.join(os.path.dirname(__file__),
-                         'queries/GetPlaidHoldings.graphql'), 'r') as f:
+                         'queries/GetPortfolioHoldings.graphql'), 'r') as f:
         query = f.read()
 
     data = make_graphql_request(query, {"profileId": PROFILE_ID})['data']

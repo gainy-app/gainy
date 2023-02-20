@@ -46,11 +46,12 @@ with filtered_holdings as
                       where profile_id = %(profile_id)s
                         and type = 'cash'
                         and ticker_symbol = 'CUR:USD'
+                        and not is_app_trading
 
                       union all
 
                       select profile_id,
-                             coalesce(buying_power, 0) + coalesce(pending_orders_sum, 0) as value
+                             coalesce(pending_cash, 0) as value
                       from trading_profile_status
                       where profile_id = %(profile_id)s
                   ) t

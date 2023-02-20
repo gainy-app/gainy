@@ -62,6 +62,7 @@ sources:
       - name: drivewealth_funds
       - name: drivewealth_orders
       - name: drivewealth_users
+      - name: drivewealth_portfolio_holdings
       - name: drivewealth_portfolio_statuses
       - name: drivewealth_portfolios
       - name: influencers
@@ -908,10 +909,6 @@ models:
 
   - name: portfolio_holding_gains
     columns:
-      - name: holding_id
-        tests:
-          - type:
-              type: 'integer'
       - name: holding_id_v2
         tests:
           - type:
@@ -1000,10 +997,6 @@ models:
         tests:
           - type:
               type: 'integer'
-      - name: ticker_symbol
-        tests:
-          - type:
-              type: 'text'
       - name: updated_at
         tests:
           - type:
@@ -2855,6 +2848,97 @@ models:
         tests:
           - type:
               type: 'text'
+
+  - name: drivewealth_portfolio_holding_gains
+    columns:
+      - name: profile_id
+        tests:
+          - type:
+              type: 'integer'
+      - name: holding_id_v2
+        tests:
+          - type:
+              type: 'text'
+      - name: symbol
+        tests:
+          - type:
+              type: 'character varying'
+      - name: collection_id
+        tests:
+          - type:
+              type: 'integer'
+      - name: actual_value
+        tests:
+          - type:
+              type: 'double precision'
+      - name: absolute_gain_1d
+        tests:
+          - type:
+              type: 'double precision'
+      - name: absolute_gain_1w
+        tests:
+          - type:
+              type: 'double precision'
+      - name: absolute_gain_1m
+        tests:
+          - type:
+              type: 'double precision'
+      - name: absolute_gain_3m
+        tests:
+          - type:
+              type: 'double precision'
+      - name: absolute_gain_1y
+        tests:
+          - type:
+              type: 'double precision'
+      - name: absolute_gain_5y
+        tests:
+          - type:
+              type: 'double precision'
+      - name: absolute_gain_total
+        tests:
+          - type:
+              type: 'double precision'
+      - name: relative_gain_1d
+        tests:
+          - type:
+              type: 'double precision'
+      - name: relative_gain_1w
+        tests:
+          - type:
+              type: 'double precision'
+      - name: relative_gain_1m
+        tests:
+          - type:
+              type: 'double precision'
+      - name: relative_gain_3m
+        tests:
+          - type:
+              type: 'double precision'
+      - name: relative_gain_1y
+        tests:
+          - type:
+              type: 'double precision'
+      - name: relative_gain_5y
+        tests:
+          - type:
+              type: 'double precision'
+      - name: relative_gain_total
+        tests:
+          - type:
+              type: 'double precision'
+      - name: cash_flow_sum_total
+        tests:
+          - type:
+              type: 'double precision'
+      - name: ltt_quantity_total
+        tests:
+          - type:
+              type: 'double precision'
+      - name: updated_at
+        tests:
+          - type:
+              type: 'timestamp without time zone'
 
 exposures:
   - name: ticker_search_index

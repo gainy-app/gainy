@@ -6,6 +6,7 @@ from abc import ABC
 from decimal import Decimal
 
 import dateutil.parser
+import pytz
 
 from gainy.data_access.models import classproperty
 from gainy.trading.drivewealth.models import BaseDriveWealthModel
@@ -245,6 +246,8 @@ class DriveWealthOrder(BaseDriveWealthModel):
     symbol = None
     data = None
     last_executed_at = None
+    total_order_amount_normalized: Decimal = None
+    date: datetime.date = None
     created_at = None
     updated_at = None
 
@@ -262,6 +265,11 @@ class DriveWealthOrder(BaseDriveWealthModel):
         self.symbol = data["symbol"]
         if "lastExecuted" in data:
             self.last_executed_at = dateutil.parser.parse(data["lastExecuted"])
+            self.date = self.last_executed_at.astimezone(
+                pytz.timezone('America/New_York')).date()
+        self.total_order_amount_normalized = abs(
+            Decimal(data['totalOrderAmount'])) * (-1 if data['side'] == 'SELL'
+                                                  else 1)
         self.data = data
 
     @classproperty
