@@ -2095,10 +2095,6 @@ models:
         tests:
           - type:
               type: 'integer'
-      - name: symbol
-        tests:
-          - type:
-              type: 'character varying'
       - name: collection_id
         tests:
           - type:
