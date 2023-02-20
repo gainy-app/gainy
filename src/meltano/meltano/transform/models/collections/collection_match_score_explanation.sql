@@ -115,6 +115,7 @@ select profile_id,
        collection_uniq_id,
        category_id,
        interest_id,
-       user_id
+       user_id,
+       -row_num as priority
 from profile_collection_matches_ranked
 where row_num <= 5
