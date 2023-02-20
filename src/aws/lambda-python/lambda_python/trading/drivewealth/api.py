@@ -10,9 +10,9 @@ from gainy.trading.drivewealth.config import DRIVEWEALTH_WLP_ID, DRIVEWEALTH_PAR
 from trading.models import KycDocument, TradingStatementType
 from trading.drivewealth.repository import DriveWealthRepository
 from trading.drivewealth.models import DriveWealthBankAccount, DriveWealthKycStatus, DriveWealthRedemption, \
-    DriveWealthStatement
+    DriveWealthStatement, DriveWealthTransaction
 
-from gainy.utils import get_logger, env, DATETIME_ISO8601_FORMAT_TZ, ENV_PRODUCTION
+from gainy.utils import get_logger, env, DATETIME_ISO8601_FORMAT_TZ, ENV_PRODUCTION, DATE_ISO8601_FORMAT
 from gainy.trading.drivewealth import DriveWealthApi as GainyDriveWealthApi
 from gainy.trading.drivewealth.models import DriveWealthAccount
 
@@ -207,3 +207,22 @@ class DriveWealthApi(GainyDriveWealthApi):
         return list(
             _hydrate_documents(account, TradingStatementType.MONTHLY_STATEMENT,
                                data))
+
+    def iterate_user_transactions(
+            self, account: DriveWealthAccount) -> Iterable[dict]:
+        start_date = account.created_at.date()
+        now = datetime.date.today()
+        while start_date <= now:
+            end_date = start_date + datetime.timedelta(weeks=1)
+            params = {
+                "from": start_date.strftime(DATE_ISO8601_FORMAT),
+                "to": end_date.strftime(DATE_ISO8601_FORMAT),
+            }
+
+            yield from self._make_request(
+                "GET", f"/accounts/{account.ref_id}/transactions", params)
+
+            start_date = end_date
+
+    def get_order(self, order_id):
+        return self._make_request("GET", f"/orders/{order_id}")
