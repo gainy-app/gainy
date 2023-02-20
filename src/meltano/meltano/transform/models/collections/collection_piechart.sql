@@ -113,4 +113,4 @@ from (
                       left join {{ ref('interests') }} on data.interest_id = interests.id
          )
      ) t
-         left join app.profiles on profiles.id = profile_id
+         left join {{ source('app', 'profiles') }} on profiles.id = profile_id
