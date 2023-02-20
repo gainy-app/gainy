@@ -352,7 +352,7 @@ class DriveWealthProvider(DriveWealthProviderKYC,
 
             for data in self.api.iterate_user_transactions(account):
                 order_id = data.get("orderID")
-                if order_id:
+                if not order_id:
                     transaction = DriveWealthTransaction()
                     transaction.account_id = account.ref_id
                     transaction.set_from_response(data)
