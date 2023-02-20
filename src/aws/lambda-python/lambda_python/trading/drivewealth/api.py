@@ -10,9 +10,9 @@ from gainy.trading.drivewealth.config import DRIVEWEALTH_WLP_ID, DRIVEWEALTH_PAR
 from trading.models import KycDocument, TradingStatementType
 from trading.drivewealth.repository import DriveWealthRepository
 from trading.drivewealth.models import DriveWealthBankAccount, DriveWealthKycStatus, DriveWealthRedemption, \
-    DriveWealthStatement, DriveWealthTransaction
+    DriveWealthStatement
 
-from gainy.utils import get_logger, env, DATETIME_ISO8601_FORMAT_TZ, ENV_PRODUCTION, DATE_ISO8601_FORMAT
+from gainy.utils import get_logger, env, ENV_PRODUCTION, DATE_ISO8601_FORMAT
 from gainy.trading.drivewealth import DriveWealthApi as GainyDriveWealthApi
 from gainy.trading.drivewealth.models import DriveWealthAccount
 
@@ -143,11 +143,8 @@ class DriveWealthApi(GainyDriveWealthApi):
         return self._make_request("GET", f"/managed/autopilot/{ref_id}")
 
     def get_autopilot_runs(self) -> list:
-        get_data = {}
         return self._make_request(
-            "GET",
-            f"/users/{DRIVEWEALTH_RIA_ID}/managed/autopilot",
-            get_data=get_data)
+            "GET", f"/users/{DRIVEWEALTH_RIA_ID}/managed/autopilot")
 
     def add_money(self, account_id, amount):
         return self._make_request(
@@ -166,14 +163,16 @@ class DriveWealthApi(GainyDriveWealthApi):
 
     def get_documents_trading_confirmations(
             self, account: DriveWealthAccount) -> List[DriveWealthStatement]:
-        data = self._make_request(
-            "GET", f"/accounts/{account.ref_id}/confirms", {
-                "from":
-                account.created_at.strftime(DATETIME_ISO8601_FORMAT_TZ),
-                "to":
-                datetime.datetime.now(tz=datetime.timezone.utc).strftime(
-                    DATETIME_ISO8601_FORMAT_TZ),
-            })
+        start_date = account.created_at.date()
+        end_date = datetime.date.today() + datetime.timedelta(days=1)
+        get_data = {
+            "from": start_date.strftime(DATE_ISO8601_FORMAT),
+            "to": end_date.strftime(DATE_ISO8601_FORMAT),
+        }
+
+        data = self._make_request("GET",
+                                  f"/accounts/{account.ref_id}/confirms",
+                                  get_data=get_data)
 
         return list(
             _hydrate_documents(account,
@@ -181,28 +180,32 @@ class DriveWealthApi(GainyDriveWealthApi):
 
     def get_documents_tax(
             self, account: DriveWealthAccount) -> List[DriveWealthStatement]:
-        data = self._make_request(
-            "GET", f"/accounts/{account.ref_id}/taxforms", {
-                "from":
-                account.created_at.strftime(DATETIME_ISO8601_FORMAT_TZ),
-                "to":
-                datetime.datetime.now(tz=datetime.timezone.utc).strftime(
-                    DATETIME_ISO8601_FORMAT_TZ),
-            })
+        start_date = account.created_at.date()
+        end_date = datetime.date.today() + datetime.timedelta(days=1)
+        get_data = {
+            "from": start_date.strftime(DATE_ISO8601_FORMAT),
+            "to": end_date.strftime(DATE_ISO8601_FORMAT),
+        }
+
+        data = self._make_request("GET",
+                                  f"/accounts/{account.ref_id}/taxforms",
+                                  get_data=get_data)
 
         return list(_hydrate_documents(account, TradingStatementType.TAX,
                                        data))
 
     def get_documents_statements(
             self, account: DriveWealthAccount) -> List[DriveWealthStatement]:
-        data = self._make_request(
-            "GET", f"/accounts/{account.ref_id}/statements", {
-                "from":
-                account.created_at.strftime(DATETIME_ISO8601_FORMAT_TZ),
-                "to":
-                datetime.datetime.now(tz=datetime.timezone.utc).strftime(
-                    DATETIME_ISO8601_FORMAT_TZ),
-            })
+        start_date = account.created_at.date()
+        end_date = datetime.date.today() + datetime.timedelta(days=1)
+        get_data = {
+            "from": start_date.strftime(DATE_ISO8601_FORMAT),
+            "to": end_date.strftime(DATE_ISO8601_FORMAT),
+        }
+
+        data = self._make_request("GET",
+                                  f"/accounts/{account.ref_id}/statements",
+                                  get_data=get_data)
 
         return list(
             _hydrate_documents(account, TradingStatementType.MONTHLY_STATEMENT,
@@ -220,7 +223,9 @@ class DriveWealthApi(GainyDriveWealthApi):
             }
 
             yield from self._make_request(
-                "GET", f"/accounts/{account.ref_id}/transactions", params)
+                "GET",
+                f"/accounts/{account.ref_id}/transactions",
+                get_data=params)
 
             start_date = end_date
 
