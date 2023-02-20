@@ -4,7 +4,7 @@
   )
 }}
 
-select *,
+select t.*,
        user_id
 from (
          select profile_id,
