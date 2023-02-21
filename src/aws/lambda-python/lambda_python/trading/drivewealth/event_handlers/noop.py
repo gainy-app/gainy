@@ -11,7 +11,6 @@ class NoopEventHandler(AbstractDriveWealthEventHandler):
             'auth.tokens.created',
             'deposits.created',
             'kyc.created',
-            'transactions.created',
             'mam.allocationlist.accepted',
             'mam.allocationlist.complete',
         ]
