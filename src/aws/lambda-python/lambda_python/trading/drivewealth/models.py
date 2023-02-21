@@ -302,6 +302,12 @@ class DriveWealthTransaction(BaseDriveWealthModel):
         if "instrument" in data:
             self.symbol = data["instrument"]["symbol"]
 
+        if "tranWhen" in data:
+            self.datetime = dateutil.parser.parse(data["tranWhen"])
+        else:
+            self.datetime = datetime.datetime.now(tz=datetime.timezone.utc)
+        self.date = self.datetime.date()
+
         self.account_amount_delta = Decimal(data["accountAmount"])
 
         self.data = data
