@@ -116,36 +116,18 @@ with order_stats as materialized
                           from min_holding_date
                                    join {{ ref('historical_prices') }} using (symbol)
                           where date >= min_date
-                      ),
-                  cash_schedule as materialized
-                      (
-                          select profile_id, date
-                          from ticker_schedule
-                          group by profile_id, date
                       )
              select profile_id, holding_id_v2, symbol, date, relative_daily_gain
              from ticker_schedule
 
              union all
 
-             select profile_id, profile_id || '_cash_CUR:USD' as holding_id_v2, 'CUR:USD' as symbol, date, 0 as relative_daily_gain
-             from cash_schedule
-
-             union all
-
-             select profile_id, profile_id || '_cash_CUR:USD' as holding_id_v2, 'CUR:USD' as symbol, date, 0 as relative_daily_gain
-             from (select profile_id, 'SPY' as symbol from ticker_schedule group by profile_id) t
-                      join {{ ref('ticker_realtime_metrics') }} using (symbol)
-                      left join {{ ref('historical_prices') }} using (symbol, date)
-             where historical_prices.symbol is null
-
-             union all
-
-             select profile_id, holding_id_v2, symbol, date, relative_daily_change as relative_daily_gain
+             select profile_id, holding_id_v2, symbol, date, coalesce(relative_daily_change, 0) as relative_daily_gain
              from min_holding_date
-                      join {{ ref('ticker_realtime_metrics') }} using (symbol)
+                      join {{ ref('exchange_schedule') }} on exchange_schedule.exchange_name = 'NYSE'
+                      left join {{ ref('ticker_realtime_metrics') }} using (symbol, date)
                       left join {{ ref('historical_prices') }} using (symbol, date)
-             where date >= min_date
+             where date between min_date and now()::date
                and historical_prices.symbol is null
      ),
      data_extended0 as
@@ -341,32 +323,16 @@ with order_stats as materialized
                         else 0
                         end as relative_daily_gain
              from cash_flow
-     ),
-     profile_date_threshold as
-         (
-             select profile_id, min(date) as max_date
-             from (
-                      select profile_id, max(date) as date
-                      from data_extended
-                      group by profile_id, holding_id_v2
-                  ) t
-             group by profile_id
      )
 select data_extended.*,
        date_trunc('week', date)::date                    as date_week,
        date_trunc('month', date)::date                   as date_month,
        profile_id || '_' || holding_id_v2 || '_' || date as id
 from data_extended
-         left join profile_date_threshold using (profile_id)
-
 {% if is_incremental() %}
          left join {{ this }} old_data using (profile_id, holding_id_v2, symbol, date)
-{% endif %}
-
-where data_extended.date <= profile_date_threshold.max_date
-
-{% if is_incremental() %}
-  and (old_data.profile_id is null
+where (old_data.profile_id is null
    or abs(data_extended.relative_daily_gain - old_data.relative_daily_gain) > 1e-3
+   or abs(data_extended.cash_flow - old_data.cash_flow) > 1e-3
    or abs(data_extended.value - old_data.value) > 1e-3)
 {% endif %}
