@@ -298,6 +298,8 @@ with order_stats as materialized
                             then value - prev_value
                         when abs(equity_cf_sum) > 0 and order_cf_sum is not null
                             then cash_flow / equity_cf_sum * order_cf_sum
+                        when order_cf_sum is not null and holdings_cnt > 0
+                            then order_cf_sum / holdings_cnt
                         else 0
                         end            as cash_flow,
                     updated_at
@@ -307,6 +309,7 @@ with order_stats as materialized
                                     select profile_id,
                                            symbol,
                                            date,
+                                           count(distinct holding_id_v2) as holdings_cnt,
                                            sum(cash_flow) as equity_cf_sum
                                     from cash_flow_first_guess_filled
                                     where symbol != 'CUR:USD'
