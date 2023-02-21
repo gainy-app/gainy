@@ -13,7 +13,7 @@ from trading.drivewealth.provider.collection import DriveWealthProviderCollectio
 from trading.drivewealth.provider.kyc import DriveWealthProviderKYC
 from trading.drivewealth.models import DriveWealthBankAccount, DriveWealthDeposit, \
     DriveWealthRedemption, DriveWealthAutopilotRun, BaseDriveWealthMoneyFlowModel, DriveWealthStatement, \
-    DriveWealthRedemptionStatus, DriveWealthOrder, DriveWealthAccountStatus
+    DriveWealthRedemptionStatus, DriveWealthOrder, DriveWealthAccountStatus, DriveWealthTransaction
 from trading.drivewealth.api import DriveWealthApi
 from trading.drivewealth.repository import DriveWealthRepository
 
@@ -172,7 +172,8 @@ class DriveWealthProvider(DriveWealthProviderKYC,
         self._sync_user_deposits(user.ref_id)
         self._sync_user_redemptions(user.ref_id)
         self.sync_portfolios(profile_id)
-        # self._sync_statements(profile_id)
+        self._sync_transactions(user.ref_id)
+        self._sync_statements(profile_id)
 
     def sync_deposit(self, deposit_ref_id: str):
         repository = self.repository
@@ -341,6 +342,36 @@ class DriveWealthProvider(DriveWealthProviderKYC,
             repository.persist(entity)
 
             self.update_money_flow_from_dw(entity)
+
+    def _sync_transactions(self, user_ref_id: str):
+        for account in self.repository.iterate_all(
+                DriveWealthAccount, {"drivewealth_user_id": user_ref_id}):
+            account: DriveWealthAccount
+            if not account.is_open():
+                continue
+
+            for data in self.api.iterate_user_transactions(account):
+                order_id = data.get("orderID")
+                if not order_id or order_id == "0":
+                    transaction = DriveWealthTransaction()
+                    transaction.account_id = account.ref_id
+                    transaction.set_from_response(data)
+                    self.repository.persist(transaction)
+                    continue
+
+                order: DriveWealthOrder = self.repository.find_one(
+                    DriveWealthOrder, {"ref_id": order_id})
+                if order and order.is_filled(
+                ) and order.last_executed_at and order.total_order_amount_normalized:
+                    continue
+                if order and order.is_rejected():
+                    continue
+
+                data = self.api.get_order(order_id)
+                if not order:
+                    order = DriveWealthOrder()
+                order.set_from_response(data)
+                self.repository.persist(order)
 
     def _sync_autopilot_runs(self):
         repository = self.repository

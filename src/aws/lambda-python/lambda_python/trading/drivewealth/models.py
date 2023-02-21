@@ -9,7 +9,7 @@ import dateutil.parser
 import pytz
 
 from gainy.data_access.models import classproperty
-from gainy.trading.drivewealth.models import BaseDriveWealthModel
+from gainy.trading.drivewealth.models import BaseDriveWealthModel, DriveWealthRedemptionStatus
 from trading.models import ProfileKycStatus, KycStatus, TradingStatementType
 from gainy.trading.models import TradingCollectionVersion, TradingOrderStatus, TradingMoneyFlowStatus
 
@@ -84,12 +84,6 @@ class DriveWealthAccountStatus(str, enum.Enum):
     OPEN = 'OPEN'
 
 
-class DriveWealthRedemptionStatus(str, enum.Enum):
-    RIA_Pending = 'RIA_Pending'
-    RIA_Approved = 'RIA_Approved'
-    Successful = 'Successful'
-
-
 class BaseDriveWealthMoneyFlowModel(BaseDriveWealthModel, ABC):
     ref_id = None
     trading_account_ref_id = None
@@ -122,13 +116,13 @@ class BaseDriveWealthMoneyFlowModel(BaseDriveWealthModel, ABC):
 
     def is_pending(self) -> bool:
         return self.status in [
-            'Started', DriveWealthRedemptionStatus.RIA_Pending, 'Pending',
+            'Started', DriveWealthRedemptionStatus.RIA_Pending.name, 'Pending',
             'Other', 'On Hold'
         ]
 
     def is_approved(self) -> bool:
         return self.status in [
-            'Approved', DriveWealthRedemptionStatus.RIA_Approved
+            'Approved', DriveWealthRedemptionStatus.RIA_Approved.name
         ]
 
     def get_money_flow_status(self) -> TradingMoneyFlowStatus:
@@ -152,7 +146,7 @@ class BaseDriveWealthMoneyFlowModel(BaseDriveWealthModel, ABC):
             return TradingMoneyFlowStatus.PENDING
         if self.is_approved():
             return TradingMoneyFlowStatus.APPROVED
-        if self.status in ['Successful']:
+        if self.status == DriveWealthRedemptionStatus.Successful.name:
             return TradingMoneyFlowStatus.SUCCESS
         return TradingMoneyFlowStatus.FAILED
 
@@ -275,6 +269,52 @@ class DriveWealthOrder(BaseDriveWealthModel):
     @classproperty
     def table_name(self) -> str:
         return "drivewealth_orders"
+
+    def is_filled(self) -> bool:
+        return self.status == "FILLED"
+
+    def is_rejected(self):
+        return self.status == "REJECTED"
+
+
+class DriveWealthTransaction(BaseDriveWealthModel):
+    ref_id = None
+    account_id = None
+    type = None  # CSR, DIV, DIVTAX, MERGER_ACQUISITION, SLIP
+    symbol = None
+    account_amount_delta: Decimal = None
+    datetime = None
+    date = None
+    data = None
+    created_at = None
+
+    key_fields = ["ref_id"]
+
+    db_excluded_fields = ["created_at"]
+    non_persistent_fields = ["created_at"]
+
+    def set_from_response(self, data: dict = None):
+        if not data:
+            return
+
+        self.ref_id = data["finTranID"]
+        self.type = data["finTranTypeID"]
+        if "instrument" in data:
+            self.symbol = data["instrument"]["symbol"]
+
+        if "tranWhen" in data:
+            self.datetime = dateutil.parser.parse(data["tranWhen"])
+        else:
+            self.datetime = datetime.datetime.now(tz=datetime.timezone.utc)
+        self.date = self.datetime.date()
+
+        self.account_amount_delta = Decimal(data["accountAmount"])
+
+        self.data = data
+
+    @classproperty
+    def table_name(self) -> str:
+        return "drivewealth_transactions"
 
 
 class DriveWealthKycStatus:
