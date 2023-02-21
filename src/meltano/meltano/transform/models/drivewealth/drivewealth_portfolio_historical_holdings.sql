@@ -126,9 +126,9 @@ with order_stats as materialized
              from min_holding_date
                       join {{ ref('exchange_schedule') }} on exchange_schedule.exchange_name = 'NYSE'
                       left join {{ ref('ticker_realtime_metrics') }} using (symbol, date)
-                      left join {{ ref('historical_prices') }} using (symbol, date)
-             where date between min_date and now()::date
-               and historical_prices.symbol is null
+                      left join ticker_schedule using (profile_id, holding_id_v2, symbol, date)
+             where ticker_schedule.profile_id is null
+               and date between min_date and now()::date
      ),
      data_extended0 as
          (
