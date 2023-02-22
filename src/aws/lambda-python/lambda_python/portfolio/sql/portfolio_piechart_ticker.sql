@@ -4,6 +4,7 @@ with holdings as
                     holding_id_v2,
                     quantity_norm_for_valuation,
                     plaid_access_token_id,
+                    type,
                     profile_holdings_normalized_all.ticker_symbol,
                     profile_holdings_normalized_all.collection_id,
                     profile_holdings_normalized_all.symbol
@@ -17,16 +18,20 @@ with holdings as
          (
              select holdings.profile_id,
                     holdings.ticker_symbol                    as symbol,
-                    ticker_name,
+                    case
+                        when type = 'cash'
+                            then 'Cash'
+                        else ticker_name
+                        end                                   as ticker_name,
                     sum(actual_value)                         as weight,
                     sum(ticker_realtime_metrics.absolute_daily_change *
                         holdings.quantity_norm_for_valuation) as absolute_daily_change,
                     sum(actual_value)                         as absolute_value
              from holdings
                       join portfolio_holding_gains using (holding_id_v2)
-                      join portfolio_holding_details using (holding_id_v2)
+                      left join portfolio_holding_details using (holding_id_v2)
                       left join ticker_realtime_metrics on ticker_realtime_metrics.symbol = holdings.ticker_symbol
-             group by holdings.profile_id, holdings.ticker_symbol, ticker_name
+             group by holdings.profile_id, holdings.ticker_symbol, ticker_name, type
      ),
      portfolio_tickers_weight_sum as
          (
