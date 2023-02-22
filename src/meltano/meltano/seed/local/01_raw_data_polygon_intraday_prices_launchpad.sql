@@ -9,14 +9,16 @@ with latest_historical_prices as
 
              union all
 
-             select distinct on (symbol) symbol, t, o, h, l, c, v
-             from raw_data.polygon_stocks_historical_prices
-             order by symbol, t desc
+             (
+                 select distinct on (symbol) symbol, t, o, h, l, c, v
+                 from raw_data.polygon_stocks_historical_prices
+                 order by symbol, t desc
+             )
          ),
     with_random as
         (
               select latest_historical_prices.symbol,
-                     dd::timestamp as time,
+                     date_trunc('minute', dd::timestamp) as time,
                      random() as r1,
                      random() as r2,
                      latest_historical_prices.o,
