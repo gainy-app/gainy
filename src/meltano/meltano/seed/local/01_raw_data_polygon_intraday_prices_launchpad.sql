@@ -29,7 +29,7 @@ with latest_historical_prices as
               where extract(isodow from dd) < 6
      )
 select symbol,
-       time,
+       extract(epoch from time) * 1000 as t,
        o * (r1 / 10 + 1) as o,
        h * (r1 / 10 + 1) as h,
        l * (r1 / 10 + 1) as l,
