@@ -57,7 +57,7 @@ union all
            now()                                              as updated_at
     from transaction_stats
              left join cash_flow_stats using (profile_id)
-    where abs(transactions_sum - coalesce(cash_flow_sum, 0)) > 1;
+    where abs(transactions_sum - coalesce(cash_flow_sum, 0)) > 1
 )
 
 union all
