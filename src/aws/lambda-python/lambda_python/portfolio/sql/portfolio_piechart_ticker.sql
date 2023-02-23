@@ -31,7 +31,6 @@ with holdings as
              from holdings
                       join portfolio_holding_gains using (holding_id_v2)
                       left join portfolio_holding_details using (holding_id_v2)
-                      left join ticker_realtime_metrics on ticker_realtime_metrics.symbol = holdings.ticker_symbol
              group by holdings.profile_id, holdings.ticker_symbol, ticker_name, type
      ),
      portfolio_tickers_weight_sum as
