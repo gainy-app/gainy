@@ -99,7 +99,7 @@ with collection_daily_latest_chart_point as
      )
 select profile_collections.profile_id,
        profiles.user_id,
-       profile_collections.uniq_id::test  as collection_uniq_id,
+       profile_collections.uniq_id::text  as collection_uniq_id,
        metrics.actual_price,
        metrics.absolute_daily_change,
        metrics.relative_daily_change,
