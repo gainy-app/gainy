@@ -73,11 +73,11 @@ with filtered_holdings as
                     sum(cash_adjustment)                as cash_adjustment
              from ticker_chart
              group by profile_id, period, datetime
-             having (period != '1w' or max(date) >= now() - interval '1 week')
-                and (period != '1m' or max(date) >= now() - interval '1 month')
-                and (period != '3m' or max(date) >= now() - interval '3 month')
-                and (period != '1y' or max(date) >= now() - interval '1 year')
-                and (period != '5y' or max(date) >= now() - interval '5 year')
+             having (period != '1w' or max(date) >= now()::date - interval '1 week')
+                and (period != '1m' or max(date) >= now()::date - interval '1 month')
+                and (period != '3m' or max(date) >= now()::date - interval '3 month')
+                and (period != '1y' or max(date) >= now()::date - interval '1 year')
+                and (period != '5y' or max(date) >= now()::date - interval '5 year')
          )
 select *
 from (
