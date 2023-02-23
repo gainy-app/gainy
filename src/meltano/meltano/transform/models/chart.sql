@@ -61,7 +61,7 @@ union all
            historical_prices_aggregated_1d.volume,
            historical_prices_aggregated_1d.updated_at
     from {{ ref('historical_prices_aggregated_1d') }}
-    where historical_prices_aggregated_1d.datetime >= now() - interval '1 month'
+    where historical_prices_aggregated_1d.datetime >= now()::date - interval '1 month'
 )
 
 union all
@@ -80,7 +80,7 @@ union all
            historical_prices_aggregated_1d.volume,
            historical_prices_aggregated_1d.updated_at
     from {{ ref('historical_prices_aggregated_1d') }}
-    where historical_prices_aggregated_1d.datetime >= now() - interval '3 month'
+    where historical_prices_aggregated_1d.datetime >= now()::date - interval '3 month'
 )
 
 union all
@@ -99,7 +99,7 @@ union all
            historical_prices_aggregated_1d.volume,
            historical_prices_aggregated_1d.updated_at
     from {{ ref('historical_prices_aggregated_1d') }}
-    where historical_prices_aggregated_1d.datetime >= now() - interval '1 year'
+    where historical_prices_aggregated_1d.datetime >= now()::date - interval '1 year'
 )
 
 union all
@@ -118,7 +118,7 @@ union all
            historical_prices_aggregated_1w.volume,
            historical_prices_aggregated_1w.updated_at
     from {{ ref('historical_prices_aggregated_1w') }}
-    where historical_prices_aggregated_1w.datetime >= now() - interval '5 year'
+    where historical_prices_aggregated_1w.datetime >= now()::date - interval '5 year'
 )
 
 union all
