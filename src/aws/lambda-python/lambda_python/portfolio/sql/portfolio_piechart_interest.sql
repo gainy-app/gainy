@@ -30,7 +30,22 @@ with holdings as
              from holdings
                       join portfolio_holding_gains using (holding_id_v2)
                       left join ticker_interests on ticker_interests.symbol = ticker_symbol
-                      left join ticker_realtime_metrics on ticker_realtime_metrics.symbol = holdings.symbol
+             where collection_id is null
+
+             union all
+
+             select holdings.profile_id,
+                    holding_id_v2,
+                    null        as name,
+                    sim_dif + 1 as weight_interest_in_holding,
+                    interest_id,
+                    actual_value,
+                    absolute_gain_1d,
+                    relative_gain_1d
+             from holdings
+                      join portfolio_holding_gains using (holding_id_v2)
+                      join collection_interests using (collection_id)
+             where collection_id is not null
      ),
      portfolio_stats as
          (
