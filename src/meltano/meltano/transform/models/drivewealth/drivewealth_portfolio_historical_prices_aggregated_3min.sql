@@ -109,8 +109,8 @@ with portfolio_statuses as
 {% if var('realtime') %}
                       left join (
                                     select profile_id, max(date) as max_date
-                                    from app.drivewealth_portfolio_statuses
-                                             join app.drivewealth_portfolios
+                                    from {{ source('app', 'drivewealth_portfolio_statuses') }}
+                                             join {{ source('app', 'drivewealth_portfolios') }}
                                                   on drivewealth_portfolios.ref_id = drivewealth_portfolio_id
                                     group by profile_id
                                 ) last_portfolio_update using (profile_id)
