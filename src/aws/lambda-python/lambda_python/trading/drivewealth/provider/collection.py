@@ -41,12 +41,3 @@ class DriveWealthProviderCollection(GainyDriveWealthProvider):
             raise EntityNotFoundException(DriveWealthPortfolioStatusHolding)
 
         return fund_status.get_collection_status()
-
-    def _on_money_transfer(self, profile_id: int, trading_account_id: int):
-        repository = self.repository
-        portfolio = repository.get_profile_portfolio(profile_id,
-                                                     trading_account_id)
-        if not portfolio:
-            return
-
-        self.sync_portfolio_status(portfolio)
