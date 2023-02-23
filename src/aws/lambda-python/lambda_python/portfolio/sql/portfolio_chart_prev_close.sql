@@ -69,11 +69,11 @@ with filtered_holdings as
                                    join portfolio_chart_skeleton using (profile_id, period, datetime)
                            ) t
                       where (period != '1d' or not is_latest_day)
-                        and (period != '1w' or date < now() - interval '1 week')
-                        and (period != '1m' or datetime < now() - interval '1 month')
-                        and (period != '3m' or datetime < now() - interval '3 month')
-                        and (period != '1y' or datetime < now() - interval '1 year')
-                        and (period != '5y' or datetime < now() - interval '5 year')
+                        and (period != '1w' or date < now()::date - interval '1 week')
+                        and (period != '1m' or datetime < now()::date - interval '1 month')
+                        and (period != '3m' or datetime < now()::date - interval '3 month')
+                        and (period != '1y' or datetime < now()::date - interval '1 year')
+                        and (period != '5y' or datetime < now()::date - interval '5 year')
                       group by period
                   ) t
                       left join ticker_chart using (period, date)
