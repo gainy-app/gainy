@@ -1,8 +1,9 @@
 with holdings as
          (
-             select profile_holdings_normalized_all.profile_id,
+             select distinct on (
+                 holding_id_v2
+                 )  profile_holdings_normalized_all.profile_id,
                     holding_id_v2,
-                    quantity_norm_for_valuation,
                     plaid_access_token_id,
                     type,
                     profile_holdings_normalized_all.ticker_symbol,
@@ -23,12 +24,9 @@ with holdings as
                         end     as name,
                     sim_dif + 1 as weight_category_in_holding,
                     category_id,
-                    holdings.quantity_norm_for_valuation,
                     actual_value,
-                    absolute_daily_change,
-                    relative_daily_change,
-                    actual_price,
-                    previous_day_close_price
+                    absolute_gain_1d,
+                    relative_gain_1d
              from holdings
                       join portfolio_holding_gains using (holding_id_v2)
                       left join ticker_categories on ticker_categories.symbol = ticker_symbol
@@ -60,18 +58,15 @@ with holdings as
      data2 as
          (
              select profile_id,
-                    holding_id_v2,
                     name,
+                    actual_value,
                     actual_value / actual_value_sum as weight_holding_in_portfolio,
                     coalesce(
                                 weight_category_in_holding / weight_category_in_holding_sum,
                                 1)                  as weight_category_in_holding,
                     category_id,
-                    quantity_norm_for_valuation,
-                    absolute_daily_change,
-                    relative_daily_change,
-                    actual_price,
-                    previous_day_close_price
+                    absolute_gain_1d,
+                    relative_gain_1d
              from data
                       join portfolio_stats using (profile_id)
                       join portfolio_symbol_stats using (profile_id, holding_id_v2)
@@ -83,15 +78,11 @@ with holdings as
              select profile_id,
                     category_id,
                     name,
-                    sum(weight_holding_in_portfolio * weight_category_in_holding)                as weight,
-                    sum(quantity_norm_for_valuation * weight_category_in_holding *
-                        absolute_daily_change)                                                   as absolute_daily_change,
-                    sum(quantity_norm_for_valuation * weight_category_in_holding *
-                        relative_daily_change)                                                   as relative_daily_change,
-                    sum(quantity_norm_for_valuation * weight_category_in_holding * actual_price) as actual_price,
-                    sum(quantity_norm_for_valuation * weight_category_in_holding *
-                        coalesce(previous_day_close_price, actual_price))                        as previous_day_close_price,
-                    sum(quantity_norm_for_valuation * weight_category_in_holding * actual_price) as absolute_value
+                    sum(weight_holding_in_portfolio * weight_category_in_holding) as weight,
+                    sum(weight_category_in_holding * absolute_gain_1d)            as absolute_daily_change,
+                    sum(weight_holding_in_portfolio * weight_category_in_holding *
+                        relative_gain_1d)                                         as relative_daily_change,
+                    sum(weight_category_in_holding * actual_value)                as absolute_value
              from data2
              group by profile_id, category_id, name
              having sum(weight_holding_in_portfolio * weight_category_in_holding) > 0

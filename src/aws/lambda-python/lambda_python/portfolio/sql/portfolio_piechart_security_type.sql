@@ -1,8 +1,9 @@
 with holdings as
          (
-             select profile_holdings_normalized_all.profile_id,
+             select distinct on (
+                 holding_id_v2
+                 )  profile_holdings_normalized_all.profile_id,
                     holding_id_v2,
-                    quantity_norm_for_valuation,
                     plaid_access_token_id,
                     profile_holdings_normalized_all.ticker_symbol,
                     profile_holdings_normalized_all.collection_id,
