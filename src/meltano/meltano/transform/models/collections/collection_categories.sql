@@ -1,12 +1,21 @@
 {{
   config(
-    materialized = "view",
+    materialized = "incremental",
+    unique_key = "id",
+    post_hook=[
+      pk('collection_id, category_id'),
+      index('id', true),
+      'delete from {{this}} where updated_at < (select max(updated_at) from {{this}})',
+    ]
   )
 }}
 
+
 select collection_id,
        category_id,
-       sum(weight * sim_dif) as sim_dif
+       sum(weight * sim_dif)                 as sim_dif,
+       (collection_id || '_' || category_id) as id,
+       now()                                 as updated_at
 from {{ ref('collections') }}
          join {{ ref('collection_ticker_actual_weights') }}
               on collection_ticker_actual_weights.collection_id = collections.id
