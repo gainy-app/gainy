@@ -1,6 +1,6 @@
+from gainy.trading.drivewealth.models import DriveWealthTransaction
 from gainy.utils import get_logger
 from trading.drivewealth.abstract_event_handler import AbstractDriveWealthEventHandler
-from trading.drivewealth.models import DriveWealthTransaction
 
 logger = get_logger(__name__)
 
