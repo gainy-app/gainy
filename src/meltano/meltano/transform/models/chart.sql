@@ -41,7 +41,7 @@ union all
            historical_prices_aggregated_15min.updated_at
     from {{ ref('historical_prices_aggregated_15min') }}
              join {{ ref('week_trading_sessions') }} using (symbol)
-    where week_trading_sessions.date >= now() - interval '1 week'
+    where week_trading_sessions.date >= now()::date - interval '1 week'
       and historical_prices_aggregated_15min.datetime between week_trading_sessions.open_at and week_trading_sessions.close_at - interval '1 microsecond'
 )
 
@@ -61,7 +61,7 @@ union all
            historical_prices_aggregated_1d.volume,
            historical_prices_aggregated_1d.updated_at
     from {{ ref('historical_prices_aggregated_1d') }}
-    where historical_prices_aggregated_1d.datetime >= now() - interval '1 month'
+    where historical_prices_aggregated_1d.datetime >= now()::date - interval '1 month'
 )
 
 union all
@@ -80,7 +80,7 @@ union all
            historical_prices_aggregated_1d.volume,
            historical_prices_aggregated_1d.updated_at
     from {{ ref('historical_prices_aggregated_1d') }}
-    where historical_prices_aggregated_1d.datetime >= now() - interval '3 month'
+    where historical_prices_aggregated_1d.datetime >= now()::date - interval '3 month'
 )
 
 union all
@@ -99,7 +99,7 @@ union all
            historical_prices_aggregated_1d.volume,
            historical_prices_aggregated_1d.updated_at
     from {{ ref('historical_prices_aggregated_1d') }}
-    where historical_prices_aggregated_1d.datetime >= now() - interval '1 year'
+    where historical_prices_aggregated_1d.datetime >= now()::date - interval '1 year'
 )
 
 union all
@@ -118,7 +118,7 @@ union all
            historical_prices_aggregated_1w.volume,
            historical_prices_aggregated_1w.updated_at
     from {{ ref('historical_prices_aggregated_1w') }}
-    where historical_prices_aggregated_1w.datetime >= now() - interval '5 year'
+    where historical_prices_aggregated_1w.datetime >= now()::date - interval '5 year'
 )
 
 union all
