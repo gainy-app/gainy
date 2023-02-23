@@ -30,7 +30,6 @@ with holdings as
                     sum(actual_value)                    as absolute_value
              from holdings
                       join portfolio_holding_gains using (holding_id_v2)
-                      left join ticker_realtime_metrics using (symbol)
              group by holdings.profile_id, holdings.security_type
          ),
      portfolio_security_types_weight_sum as

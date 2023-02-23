@@ -30,7 +30,6 @@ with holdings as
              from holdings
                       join portfolio_holding_gains using (holding_id_v2)
                       left join ticker_categories on ticker_categories.symbol = ticker_symbol
-                      left join ticker_realtime_metrics on ticker_realtime_metrics.symbol = holdings.symbol
      ),
      portfolio_stats as
          (
