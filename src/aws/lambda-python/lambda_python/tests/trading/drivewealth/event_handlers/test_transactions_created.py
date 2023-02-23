@@ -1,6 +1,6 @@
-from gainy.tests.mocks.repository_mocks import mock_persist, mock_record_calls
+from gainy.tests.mocks.repository_mocks import mock_persist
+from gainy.trading.drivewealth.models import DriveWealthTransaction
 from trading.drivewealth.event_handlers.transactions_created import TransactionsCreatedEventHandler
-from trading.drivewealth.models import DriveWealthTransaction
 from trading.drivewealth.provider import DriveWealthProvider
 from trading.drivewealth.repository import DriveWealthRepository
 

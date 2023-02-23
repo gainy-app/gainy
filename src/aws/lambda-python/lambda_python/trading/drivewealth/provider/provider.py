@@ -13,14 +13,14 @@ from trading.drivewealth.provider.collection import DriveWealthProviderCollectio
 from trading.drivewealth.provider.kyc import DriveWealthProviderKYC
 from trading.drivewealth.models import DriveWealthBankAccount, DriveWealthDeposit, \
     DriveWealthRedemption, DriveWealthAutopilotRun, BaseDriveWealthMoneyFlowModel, DriveWealthStatement, \
-    DriveWealthRedemptionStatus, DriveWealthOrder, DriveWealthAccountStatus, DriveWealthTransaction
+    DriveWealthRedemptionStatus, DriveWealthOrder, DriveWealthAccountStatus
 from trading.drivewealth.api import DriveWealthApi
 from trading.drivewealth.repository import DriveWealthRepository
 
 from gainy.utils import get_logger, ENV_PRODUCTION, env
 from gainy.trading.models import FundingAccount, TradingAccount, TradingCollectionVersion, TradingMoneyFlowStatus
 from gainy.trading.drivewealth.models import DriveWealthAccount, DriveWealthUser, DriveWealthInstrument, \
-    DriveWealthInstrumentStatus, DriveWealthPortfolio
+    DriveWealthInstrumentStatus, DriveWealthPortfolio, DriveWealthTransaction
 from trading.repository import TradingRepository
 from trading import MIN_FIRST_DEPOSIT_AMOUNT
 

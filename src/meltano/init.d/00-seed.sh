@@ -4,6 +4,7 @@ psql_auth="psql -h $PG_HOST -p $PG_PORT -U $PG_USERNAME $PG_DBNAME"
 $psql_auth -c "create user datadog with password '${PG_DATADOG_PASSWORD}';" || $psql_auth -c "alter user datadog with password '${PG_DATADOG_PASSWORD}';"
 $psql_auth -c "grant pg_monitor to datadog;"
 $psql_auth -c "grant SELECT ON pg_stat_database to datadog;"
+$psql_auth -c "create schema if not exists airflow"
 $psql_auth -c "GRANT USAGE ON SCHEMA airflow TO datadog;"
 $psql_auth -c "GRANT SELECT ON ALL TABLES IN SCHEMA airflow TO datadog;"
 
