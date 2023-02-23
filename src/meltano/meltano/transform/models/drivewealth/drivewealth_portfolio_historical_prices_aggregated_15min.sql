@@ -106,7 +106,19 @@ with portfolio_statuses as
                     null as updated_at,
                     t.value
              from {{ ref('drivewealth_portfolio_historical_holdings') }} t
-             where date > now() - interval '10 days'
+{% if var('realtime') %}
+                      left join (
+                                    select profile_id, max(date) as max_date
+                                    from app.drivewealth_portfolio_statuses
+                                             join app.drivewealth_portfolios
+                                                  on drivewealth_portfolios.ref_id = drivewealth_portfolio_id
+                                    group by profile_id
+                                ) last_portfolio_update using (profile_id)
+             where date >= coalesce(greatest(last_portfolio_update.max_date, now() - interval '5 days'),
+                                    now() - interval '5 days')
+{% else %}
+             where date >= now() - interval '10 days'
+{% endif %}
      ),
      profile_date_threshold as
          (
@@ -252,7 +264,7 @@ with portfolio_statuses as
                     collection_id,
                     date,
                     datetime,
-                    coalesce(updated_at, now()) as updated_at,
+                    LAST_VALUE_IGNORENULLS(updated_at) over wnd as updated_at,
                     relative_gain,
                     value,
                     coalesce(lag(value) over wnd, 0) as prev_value
