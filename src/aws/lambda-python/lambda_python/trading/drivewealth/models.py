@@ -277,46 +277,6 @@ class DriveWealthOrder(BaseDriveWealthModel):
         return self.status == "REJECTED"
 
 
-class DriveWealthTransaction(BaseDriveWealthModel):
-    ref_id = None
-    account_id = None
-    type = None  # CSR, DIV, DIVTAX, MERGER_ACQUISITION, SLIP
-    symbol = None
-    account_amount_delta: Decimal = None
-    datetime = None
-    date = None
-    data = None
-    created_at = None
-
-    key_fields = ["ref_id"]
-
-    db_excluded_fields = ["created_at"]
-    non_persistent_fields = ["created_at"]
-
-    def set_from_response(self, data: dict = None):
-        if not data:
-            return
-
-        self.ref_id = data["finTranID"]
-        self.type = data["finTranTypeID"]
-        if "instrument" in data:
-            self.symbol = data["instrument"]["symbol"]
-
-        if "tranWhen" in data:
-            self.datetime = dateutil.parser.parse(data["tranWhen"])
-        else:
-            self.datetime = datetime.datetime.now(tz=datetime.timezone.utc)
-        self.date = self.datetime.date()
-
-        self.account_amount_delta = Decimal(data["accountAmount"])
-
-        self.data = data
-
-    @classproperty
-    def table_name(self) -> str:
-        return "drivewealth_transactions"
-
-
 class DriveWealthKycStatus:
     data = None
 
