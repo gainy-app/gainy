@@ -36,7 +36,24 @@ with latest_price as
              select distinct public.normalize_drivewealth_symbol(symbol) as symbol
              from {{ source('app', 'drivewealth_instruments') }}
              where status = 'ACTIVE'
-         )
+         ),
+     ms_enabled_tickers as
+         (
+             SELECT distinct symbol
+             FROM {{ ref('base_tickers') }}
+                      LEFT JOIN {{ ref('ticker_metrics') }} using (symbol)
+             WHERE type IN ('common stock', 'preferred stock')
+               AND market_capitalization >= 100000000
+               AND avg_volume_90d_money > 500000
+
+             union distinct
+
+             SELECT distinct symbol
+             FROM {{ ref('base_tickers') }}
+                      LEFT JOIN {{ ref('ticker_metrics') }} using (symbol)
+             WHERE type IN ('etf', 'fund', 'mutual fund')
+               AND avg_volume_90d_money > 500000
+     )
 select base_tickers.symbol,
        base_tickers.type,
        base_tickers.name,
@@ -54,13 +71,15 @@ select base_tickers.symbol,
        base_tickers.exchange,
        base_tickers.exchange_canonical,
        base_tickers.country_name,
-       tradeable_tickers.symbol is not null as is_trading_enabled,
-       now()::timestamp                     as updated_at
+       tradeable_tickers.symbol is not null  as is_trading_enabled,
+       ms_enabled_tickers.symbol is not null as ms_enabled,
+       now()::timestamp                      as updated_at
 from {{ ref('base_tickers') }}
          join (select symbol from {{ ref('week_trading_sessions_static') }} group by symbol) t using (symbol)
          left join latest_price using (symbol)
          left join latest_crypto_price using (symbol)
          left join tradeable_tickers using (symbol)
+         left join ms_enabled_tickers using (symbol)
 where ((base_tickers.description is not null and length(base_tickers.description) >= 5) or type = 'index')
   and (latest_price.symbol is not null or latest_crypto_price.symbol is not null)
   and type in (
