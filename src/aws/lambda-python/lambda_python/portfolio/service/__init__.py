@@ -1,7 +1,7 @@
 import time
 from typing import Optional
 
-from portfolio.exceptions import AccessTokenApiException, AccessTokenLoginRequiredException
+from gainy.plaid.exceptions import AccessTokenApiException, AccessTokenLoginRequiredException
 from portfolio.models import Institution
 from portfolio.plaid import PlaidService
 from portfolio.plaid.service import SERVICE_PLAID
@@ -32,7 +32,7 @@ class PortfolioService:
                 securities += token_data['securities']
                 accounts += token_data['accounts']
             except AccessTokenLoginRequiredException as e:
-                self._set_access_token_reauth(e.access_token)
+                pass
 
         self.persist_holding_data(profile_id, securities, accounts, holdings)
 
@@ -49,7 +49,6 @@ class PortfolioService:
 
             return len(holdings)
         except AccessTokenLoginRequiredException as e:
-            self._set_access_token_reauth(e.access_token)
             return 0
 
     def get_transactions(self, profile_id, count=500, offset=0):
@@ -69,7 +68,7 @@ class PortfolioService:
                 securities += token_data['securities']
                 accounts += token_data['accounts']
             except AccessTokenLoginRequiredException as e:
-                self._set_access_token_reauth(e.access_token)
+                pass
 
         self.persist_transaction_data(profile_id, securities, accounts,
                                       transactions)
@@ -120,9 +119,7 @@ class PortfolioService:
                 transactions_count += cur_tx_cnt
                 if cur_tx_cnt < count:
                     break
-        except AccessTokenLoginRequiredException as e:
-            self._set_access_token_reauth(e.access_token)
-        except AccessTokenApiException as e:
+        except (AccessTokenLoginRequiredException, AccessTokenApiException):
             pass
 
         # cleanup
@@ -207,9 +204,3 @@ class PortfolioService:
         for service in self.services.values():
             yield from service.get_access_tokens(profile_id=profile_id,
                                                  purpose='portfolio')
-
-    def _set_access_token_reauth(self, access_token):
-        with self.db_conn.cursor() as cursor:
-            cursor.execute(
-                "update app.profile_plaid_access_tokens set needs_reauth_since = now() where id = %(access_token_id)s",
-                {"access_token_id": access_token['id']})

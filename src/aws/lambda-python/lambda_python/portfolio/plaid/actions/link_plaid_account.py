@@ -4,6 +4,7 @@ from gainy.exceptions import BadRequestException
 from gainy.plaid.common import PURPOSE_TRADING, DEFAULT_ENV, get_purpose
 from common.context_container import ContextContainer
 from common.hasura_function import HasuraAction
+from gainy.plaid.models import PlaidAccessToken
 from gainy.utils import get_logger
 from portfolio.models import Account
 
@@ -28,7 +29,7 @@ class LinkPlaidAccount(HasuraAction):
         purpose = get_purpose(input_params)
 
         response = plaid_service.exchange_public_token(public_token, env)
-        access_token = response['access_token']
+        access_token: str = response['access_token']
 
         parameters = {
             "profile_id": profile_id,
@@ -53,12 +54,15 @@ class LinkPlaidAccount(HasuraAction):
             returned = cursor.fetchall()
             access_token_id = returned[0][0]
 
+        access_token_entity = portfolio_repository.find_one(
+            PlaidAccessToken, {"id": access_token_id})
+
         institution = portfolio_service.sync_institution(
             plaid_service.get_access_token(id=access_token_id))
 
         accounts = []
         if purpose == PURPOSE_TRADING:
-            accounts = plaid_service.get_item_accounts(access_token)
+            accounts = plaid_service.get_item_accounts(access_token_entity)
 
             account_entities = []
             for account in accounts:
