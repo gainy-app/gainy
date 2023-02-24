@@ -30,6 +30,22 @@ with holdings as
              from holdings
                       join portfolio_holding_gains using (holding_id_v2)
                       left join ticker_categories on ticker_categories.symbol = ticker_symbol
+             where collection_id is null
+
+             union all
+
+             select holdings.profile_id,
+                    holding_id_v2,
+                    null        as name,
+                    sim_dif + 1 as weight_category_in_holding,
+                    category_id,
+                    actual_value,
+                    absolute_gain_1d,
+                    relative_gain_1d
+             from holdings
+                      join portfolio_holding_gains using (holding_id_v2)
+                      join collection_categories using (collection_id)
+             where collection_id is not null
      ),
      portfolio_stats as
          (
