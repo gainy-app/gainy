@@ -1,4 +1,3 @@
-import json
 import datetime
 import time
 from typing import Optional, Iterable
@@ -14,7 +13,6 @@ from gainy.plaid.service import PlaidService as GainyPlaidService
 from portfolio.plaid import PlaidClient
 from gainy.plaid.common import handle_error
 from portfolio.models import HoldingData, Security, Account, TransactionData, Institution
-from portfolio.exceptions import AccessTokenApiException, AccessTokenLoginRequiredException
 from gainy.utils import get_logger
 
 import plaid
@@ -26,7 +24,7 @@ logger = get_logger(__name__)
 class PlaidService(GainyPlaidService):
 
     def __init__(self, db_conn):
-        self.db_conn = db_conn
+        super().__init__(db_conn)
         self.plaid_client = PlaidClient()
 
     def exchange_public_token(self, public_token, env):
@@ -231,21 +229,6 @@ class PlaidService(GainyPlaidService):
         model.name = data['name']
 
         return model
-
-    def _handle_api_exception(self, exc: plaid.ApiException,
-                              access_token: dict):
-
-        if exc.body and isinstance(exc.body, dict):
-            body = exc.body
-        elif exc.body and isinstance(exc.body, str):
-            body = json.loads(exc.body)
-        else:
-            body = {}
-
-        if body.get("error_code") == "ITEM_LOGIN_REQUIRED":
-            raise AccessTokenLoginRequiredException(exc, access_token)
-
-        raise AccessTokenApiException(exc, access_token)
 
     def get_access_token(self, id=None, item_id=None):
         where = []
