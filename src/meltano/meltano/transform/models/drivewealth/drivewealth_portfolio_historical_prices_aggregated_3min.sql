@@ -11,7 +11,7 @@
   )
 }}
 
-    
+
 with portfolio_statuses as
          (
              select distinct on (profile_id, datetime) *
@@ -22,6 +22,7 @@ with portfolio_statuses as
                               mod(extract(minutes from drivewealth_portfolio_statuses.created_at)::int, 3)
                                  )::timestamp                                  as datetime,
                              drivewealth_portfolio_statuses.created_at         as updated_at,
+                             drivewealth_portfolio_statuses.id                 as portfolio_status_id,
                              drivewealth_portfolio_statuses.date,
                              case
                                  when drivewealth_portfolio_statuses.cash_actual_weight > 0
@@ -45,6 +46,7 @@ with portfolio_statuses as
              select profile_id,
                     date,
                     datetime,
+                    portfolio_status_id,
                     value,
                     updated_at,
                     json_array_elements(holdings) as portfolio_holding_data
@@ -55,6 +57,7 @@ with portfolio_statuses as
              select portfolio_status_funds.profile_id,
                     portfolio_status_funds.date,
                     portfolio_status_funds.datetime,
+                    portfolio_status_id,
                     portfolio_status_funds.updated_at,
                     drivewealth_funds.collection_id,
                     portfolio_holding_data,
@@ -74,6 +77,7 @@ with portfolio_statuses as
                         else 'dw_ttf_' || profile_id || '_' || collection_id || '_' ||
                              normalize_drivewealth_symbol(fund_holding_data ->> 'symbol')
                         end                                                         as holding_id_v2,
+                    portfolio_status_id,
                     normalize_drivewealth_symbol(fund_holding_data ->> 'symbol') as symbol,
                     collection_id,
                     date,
@@ -86,6 +90,7 @@ with portfolio_statuses as
 
              select profile_id,
                     profile_id || '_cash_CUR:USD'                 as holding_id_v2,
+                    portfolio_status_id,
                     'CUR:USD'                                     as symbol,
                     null                                          as collection_id,
                     date,
@@ -99,6 +104,7 @@ with portfolio_statuses as
 
              select profile_id,
                     holding_id_v2,
+                    portfolio_status_id,
                     symbol,
                     collection_id,
                     (date + interval '1 day') as date,
@@ -187,10 +193,11 @@ with portfolio_statuses as
                       group by profile_id, date, datetime
                   ) t
      ),
-     data_combined as
+     data_combined as materialized
          (
              select profile_id,
                     holding_id_v2,
+                    portfolio_status_id,
                     symbol,
                     collection_id,
                     date,
@@ -205,6 +212,7 @@ with portfolio_statuses as
 
              select profile_id,
                     holding_id_v2,
+                    last_value_ignorenulls(portfolio_status_id) over wnd as portfolio_status_id,
                     schedule.symbol,
                     schedule.collection_id,
                     schedule.date,
@@ -215,11 +223,13 @@ with portfolio_statuses as
                     true as is_scheduled
              from schedule
                       left join data using (profile_id, holding_id_v2, datetime)
+                 window wnd as (partition by profile_id, holding_id_v2 order by datetime)
      ),
      data_combined1 as
          (
              select profile_id,
                     holding_id_v2,
+                    portfolio_status_id,
                     symbol,
                     collection_id,
                     date,
@@ -245,15 +255,19 @@ with portfolio_statuses as
                     case
                         when t.value is not null
                             then t.value
-                        -- if value is null but no portfolio_statuses exist in this day - then we assume there is value, just it's record is missing
-                        when portfolio_statuses.profile_id is null
+                        when (portfolio_status_id = latest_portfolio_status_id) or (portfolio_status_id is null and latest_portfolio_status_id is null)
                             then cumulative_relative_gain *
                                  (last_value_ignorenulls(t.value / coalesce(cumulative_relative_gain, 1)) over wnd)
                         else 0
                         end as value,
                     is_scheduled
              from data_combined1 t
-                      left join portfolio_statuses using (profile_id, datetime)
+                      left join (
+                                    select profile_id, datetime, max(portfolio_status_id) as latest_portfolio_status_id
+                                    from data_combined
+                                    group by profile_id, datetime
+                                ) stats using (profile_id, datetime)
+             where portfolio_status_id = latest_portfolio_status_id or is_scheduled
                  window wnd as (partition by profile_id, holding_id_v2 order by datetime)
      ),
      data_extended as
