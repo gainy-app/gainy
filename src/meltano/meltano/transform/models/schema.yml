@@ -65,6 +65,7 @@ sources:
       - name: drivewealth_portfolio_holdings
       - name: drivewealth_portfolio_statuses
       - name: drivewealth_portfolios
+      - name: drivewealth_transactions
       - name: influencers
       - name: invitations
       - name: invoices
