@@ -108,38 +108,26 @@ from (
                               max(updated_at) as updated_at
                        from (
                                 select trading_account_id,
-                                       t.amount_sum,
-                                       t.abs_amount_sum,
-                                       t.updated_at
-                                from (
-                                         select trading_account_id,
-                                                collection_id,
-                                                sum(target_amount_delta - coalesce(executed_amount, 0))
-                                                filter ( where target_amount_delta > 0 )                     as amount_sum,
-                                                sum(abs(target_amount_delta - coalesce(executed_amount, 0))) as abs_amount_sum,
-                                                max(updated_at)                                              as updated_at
-                                         from {{ source('app', 'trading_collection_versions') }}
-                                         where status in ('PENDING_EXECUTION', 'PENDING')
-                                         group by trading_account_id, collection_id
-                                     ) t
+                                       collection_id,
+                                       sum(target_amount_delta - coalesce(executed_amount, 0))
+                                       filter ( where target_amount_delta > 0 )                     as amount_sum,
+                                       sum(abs(target_amount_delta - coalesce(executed_amount, 0))) as abs_amount_sum,
+                                       max(updated_at)                                              as updated_at
+                                from {{ source('app', 'trading_collection_versions') }}
+                                where status in ('PENDING_EXECUTION', 'PENDING')
+                                group by trading_account_id
 
                                 union all
 
-                                select profile_id,
-                                       t.amount_sum,
-                                       t.abs_amount_sum,
-                                       t.updated_at
-                                from (
-                                         select trading_account_id,
-                                                symbol,
-                                                sum(target_amount_delta - coalesce(executed_amount, 0))
-                                                filter ( where target_amount_delta > 0 )                     as amount_sum,
-                                                sum(abs(target_amount_delta - coalesce(executed_amount, 0))) as abs_amount_sum,
-                                                max(updated_at)                                              as updated_at
-                                         from {{ source('app', 'trading_orders') }}
-                                         where status in ('PENDING_EXECUTION', 'PENDING')
-                                         group by trading_account_id, symbol
-                                     ) t
+                                select trading_account_id,
+                                       symbol,
+                                       sum(target_amount_delta - coalesce(executed_amount, 0))
+                                       filter ( where target_amount_delta > 0 )                     as amount_sum,
+                                       sum(abs(target_amount_delta - coalesce(executed_amount, 0))) as abs_amount_sum,
+                                       max(updated_at)                                              as updated_at
+                                from {{ source('app', 'trading_orders') }}
+                                where status in ('PENDING_EXECUTION', 'PENDING')
+                                group by trading_account_id
                             ) t
                        group by trading_account_id
                    ) pending_order_stats using (trading_account_id)
