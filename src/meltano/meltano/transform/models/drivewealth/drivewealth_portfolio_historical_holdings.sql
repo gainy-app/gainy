@@ -25,7 +25,7 @@ with order_stats as materialized
                            on drivewealth_accounts.ref_id = drivewealth_orders.account_id
                       join {{ source('app', 'drivewealth_users') }}
                            on drivewealth_users.ref_id = drivewealth_accounts.drivewealth_user_id
-             group by profile_id, public.normalize_drivewealth_symbol(symbol), date
+             group by profile_id, normalize_drivewealth_symbol(symbol), date
          ),
      portfolio_statuses as
          (
