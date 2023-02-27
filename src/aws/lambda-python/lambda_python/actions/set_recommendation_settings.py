@@ -21,15 +21,6 @@ class SetRecommendationSettings(HasuraAction):
         recommended_collections_count = input_params.get(
             "recommended_collections_count")
 
-        logging_extra = {
-            'profile_id': profile_id,
-            'interests': interests,
-            'categories': categories,
-            'recommended_collections_count': recommended_collections_count,
-        }
-
-        logger.info('SetRecommendationSettings', extra=logging_extra)
-
         self.set_interests(db_conn, profile_id, interests)
         self.set_categories(db_conn, profile_id, categories)
 
