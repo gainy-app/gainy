@@ -108,7 +108,6 @@ from (
                               max(updated_at) as updated_at
                        from (
                                 select trading_account_id,
-                                       collection_id,
                                        sum(target_amount_delta - coalesce(executed_amount, 0))
                                        filter ( where target_amount_delta > 0 )                     as amount_sum,
                                        sum(abs(target_amount_delta - coalesce(executed_amount, 0))) as abs_amount_sum,
@@ -120,7 +119,6 @@ from (
                                 union all
 
                                 select trading_account_id,
-                                       symbol,
                                        sum(target_amount_delta - coalesce(executed_amount, 0))
                                        filter ( where target_amount_delta > 0 )                     as amount_sum,
                                        sum(abs(target_amount_delta - coalesce(executed_amount, 0))) as abs_amount_sum,
