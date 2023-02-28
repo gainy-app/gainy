@@ -4,13 +4,13 @@ from decimal import Decimal
 import pytest
 
 from gainy.data_access.models import BaseModel
-from gainy.tests.mocks.repository_mocks import mock_find, mock_persist, mock_noop, mock_record_calls
-from gainy.trading.models import TradingMoneyFlowStatus
+from gainy.tests.mocks.repository_mocks import mock_find, mock_persist, mock_record_calls
+from gainy.trading.models import TradingMoneyFlowStatus, TradingMoneyFlow
 from gainy.utils import ENV_PRODUCTION
 from services.notification import NotificationService
 from tests.trading.drivewealth.api_mocks import mock_create_deposit, mock_create_redemption, mock_get_deposit, \
     mock_get_redemption
-from trading.models import TradingMoneyFlow, TradingStatement
+from trading.models import TradingStatement
 from trading.drivewealth.models import DriveWealthBankAccount, DriveWealthDeposit, DriveWealthRedemption, \
     DriveWealthStatement, DriveWealthOrder
 from trading.drivewealth.api import DriveWealthApi

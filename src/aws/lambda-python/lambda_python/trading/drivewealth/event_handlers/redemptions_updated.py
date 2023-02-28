@@ -1,3 +1,4 @@
+from gainy.trading.models import TradingMoneyFlowStatus
 from gainy.utils import get_logger
 from trading.drivewealth.abstract_event_handler import AbstractDriveWealthEventHandler
 from trading.drivewealth.models import DriveWealthRedemption
@@ -18,6 +19,7 @@ class RedemptionUpdatedEventHandler(AbstractDriveWealthEventHandler):
         if not redemption:
             redemption = DriveWealthRedemption()
 
+        old_mf_status = redemption.get_money_flow_status()
         old_status = redemption.status
         redemption.set_from_response(event_payload)
         self.provider.handle_money_flow_status_change(redemption, old_status)
@@ -28,9 +30,14 @@ class RedemptionUpdatedEventHandler(AbstractDriveWealthEventHandler):
         if redemption.is_approved() and redemption.fees_total_amount is None:
             self.provider.sync_redemption(redemption.ref_id)
 
-        self.provider.update_money_flow_from_dw(redemption)
+        money_flow = self.provider.update_money_flow_from_dw(redemption)
 
         trading_account = self.sync_trading_account_balances(
             redemption.trading_account_ref_id, force=True)
         if trading_account:
             self.provider.notify_low_balance(trading_account)
+
+        if money_flow and redemption.get_money_flow_status(
+        ) == TradingMoneyFlowStatus.SUCCESS and old_mf_status != TradingMoneyFlowStatus.SUCCESS:
+            self.analytics_service.on_dw_withdraw_success(
+                money_flow.profile_id, -money_flow.amount)

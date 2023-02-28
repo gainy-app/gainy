@@ -16,12 +16,12 @@ from trading.drivewealth.provider import DriveWealthProvider
 from trading.exceptions import WrongTradingOrderStatusException
 from trading.kyc_form_validator import KycFormValidator
 from gainy.plaid.models import PlaidAccessToken, PlaidAccount
-from trading.models import KycDocument, TradingMoneyFlow, ProfileKycStatus, TradingStatement, KycStatus
+from trading.models import KycDocument, ProfileKycStatus, TradingStatement, KycStatus
 
 import plaid
 from gainy.utils import get_logger, env, ENV_PRODUCTION
 from gainy.trading.models import TradingAccount, TradingCollectionVersion, TradingOrderStatus, \
-    FundingAccount, TradingOrder, TradingMoneyFlowStatus
+    FundingAccount, TradingOrder, TradingMoneyFlowStatus, TradingMoneyFlow
 from gainy.trading.service import TradingService as GainyTradingService
 from trading.repository import TradingRepository
 from verification.models import VerificationCodeChannel

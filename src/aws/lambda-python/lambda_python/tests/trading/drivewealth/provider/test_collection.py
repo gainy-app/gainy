@@ -97,7 +97,8 @@ def test_get_actual_collection_data(monkeypatch):
         assert _portfolio == portfolio
         return portfolio_status
 
-    service = DriveWealthProviderCollection(drivewealth_repository, None, None)
+    service = DriveWealthProviderCollection(drivewealth_repository, None, None,
+                                            None)
     monkeypatch.setattr(service, "sync_portfolio_status",
                         mock_sync_portfolio_status)
     holdings = service.get_actual_collection_data(profile_id,
