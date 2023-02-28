@@ -209,10 +209,6 @@ variable "polygon_api_token" {
   type      = string
   sensitive = true
 }
-variable "polygon_api_token_websockets" {
-  type      = string
-  sensitive = true
-}
 
 #################################### CoinGecko ####################################
 
