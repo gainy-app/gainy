@@ -117,7 +117,6 @@ env:
   TF_VAR_algolia_admin_api_key: ${{ secrets.ALGOLIA_ADMIN_API_KEY }}
   TF_VAR_hubspot_api_key: ${{ secrets.HUBSPOT_API_KEY }}
   TF_VAR_polygon_api_token: ${{ secrets.POLYGON_API_TOKEN }}
-  TF_VAR_polygon_api_token_websockets: ${{ secrets.POLYGON_API_TOKEN_WEBSOCKETS }}
   TF_VAR_coingecko_api_key: ${{ secrets.COINGECKO_API_KEY }}
   TF_VAR_onesignal_app_id: ${{ secrets.ONESIGNAL_APP_ID }}
   TF_VAR_onesignal_api_key: ${{ secrets.ONESIGNAL_API_KEY }}
