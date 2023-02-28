@@ -52,6 +52,23 @@ variable "amplitude_api_key" {
   default   = ""
 }
 
+variable "billing_equity_value_fee_multiplier" {
+  type    = string
+  default = ""
+}
+variable "billing_min_yearly_fee" {
+  type    = string
+  default = ""
+}
+variable "billing_enabled_profiles" {
+  type    = string
+  default = ""
+}
+variable "billing_min_date" {
+  type    = string
+  default = ""
+}
+
 #################################### OneSignal ####################################
 
 variable "onesignal_app_id" {
@@ -124,6 +141,9 @@ variable "drivewealth_api_url" {
   sensitive = true
 }
 variable "drivewealth_sqs_arn" {
+  type = string
+}
+variable "drivewealth_house_account_no" {
   type = string
 }
 

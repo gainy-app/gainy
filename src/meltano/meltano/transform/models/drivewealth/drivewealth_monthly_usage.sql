@@ -42,7 +42,7 @@ with usage as
                             0
                         )                                                                  as equity_value,
                     date_trunc('month', date)                                              as period_start,
-                    (date_trunc('month', date + interval '1 month') - interval '1 second') as period_end
+                    date_trunc('month', date + interval '1 month') as period_end
              from profiles
                       join generate_series(first_period_datetime, now(), interval '1 day') date on true
                       left join daily_usage using (profile_id, date)

@@ -1,5 +1,6 @@
-from typing import Optional
+import datetime
 
+from gainy.billing.models import PaymentMethod, PaymentMethodProvider
 from gainy.trading.drivewealth.exceptions import TradingAccountNotOpenException
 from gainy.trading.drivewealth.models import DriveWealthAccount, DriveWealthUser
 from gainy.trading.models import TradingAccount
@@ -32,24 +33,40 @@ class AccountsUpdatedEventHandler(AbstractDriveWealthEventHandler):
             account = self.provider.sync_trading_account(account_ref_id=ref_id,
                                                          fetch_info=True)
 
-        if account:
+        if account and account.is_open() and account.drivewealth_user_id:
             self.ensure_portfolio(account)
-            self.send_event(account, was_open)
 
-    def send_event(self, account: DriveWealthAccount, was_open: bool):
-        if was_open or not account.is_open(
-        ) or not account.drivewealth_user_id:
+            user: DriveWealthUser = self.repo.find_one(
+                DriveWealthUser, {"ref_id": account.drivewealth_user_id})
+            if not user or not user.profile_id:
+                return
+
+            self.send_event(user.profile_id, was_open)
+            self.create_payment_method(account, user.profile_id)
+
+    def send_event(self, profile_id: int, was_open: bool):
+        if was_open:
             return
 
-        user: DriveWealthUser = self.repo.find_one(
-            DriveWealthUser, {"ref_id": account.drivewealth_user_id})
-        if not user or not user.profile_id:
+        self.analytics_service.on_dw_brokerage_account_opened(profile_id)
+
+    def create_payment_method(self, account: DriveWealthAccount,
+                              profile_id: int):
+        if account.payment_method_id:
             return
 
-        self.analytics_service.on_dw_brokerage_account_opened(user.profile_id)
+        payment_method = PaymentMethod()
+        payment_method.profile_id = profile_id
+        payment_method.provider = PaymentMethodProvider.DRIVEWEALTH
+        payment_method.name = f"Trading Account {account.ref_no}"
+        payment_method.set_active_at = datetime.datetime.now()
+        self.repo.persist(payment_method)
+
+        account.payment_method_id = payment_method.id
+        self.repo.persist(account)
 
     def ensure_portfolio(self, account: DriveWealthAccount):
-        if not account.trading_account_id or not account.is_open():
+        if not account.trading_account_id:
             return
 
         trading_account: TradingAccount = self.repo.find_one(

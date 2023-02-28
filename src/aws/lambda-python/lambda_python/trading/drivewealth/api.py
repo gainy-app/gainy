@@ -3,18 +3,18 @@ from typing import List, Iterable
 import datetime
 
 from decimal import Decimal
-import os
 
 from gainy.trading.drivewealth.config import DRIVEWEALTH_WLP_ID, DRIVEWEALTH_PARENT_IBID, DRIVEWEALTH_RIA_ID, \
     DRIVEWEALTH_RIA_PRODUCT_ID
 from trading.models import KycDocument, TradingStatementType
 from trading.drivewealth.repository import DriveWealthRepository
-from trading.drivewealth.models import DriveWealthBankAccount, DriveWealthKycStatus, DriveWealthRedemption, \
+from trading.drivewealth.models import DriveWealthKycStatus, \
     DriveWealthStatement
 
 from gainy.utils import get_logger, env, ENV_PRODUCTION, DATE_ISO8601_FORMAT
 from gainy.trading.drivewealth import DriveWealthApi as GainyDriveWealthApi
-from gainy.trading.drivewealth.models import DriveWealthAccount
+from gainy.trading.drivewealth.models import DriveWealthAccount, DriveWealthBankAccount, DriveWealthRedemption, \
+    DriveWealthDeposit
 
 logger = get_logger(__name__)
 
@@ -108,9 +108,10 @@ class DriveWealthApi(GainyDriveWealthApi):
         return self._make_request("GET",
                                   f"/funding/redemptions/{redemption_id}")
 
-    def create_deposit(self, amount: Decimal, account: DriveWealthAccount,
-                       bank_account: DriveWealthBankAccount):
-        return self._make_request(
+    def create_deposit(
+            self, amount: Decimal, account: DriveWealthAccount,
+            bank_account: DriveWealthBankAccount) -> DriveWealthDeposit:
+        response = self._make_request(
             "POST", "/funding/deposits", {
                 'accountNo': account.ref_no,
                 'amount': amount,
@@ -118,16 +119,9 @@ class DriveWealthApi(GainyDriveWealthApi):
                 'type': 'ACH',
                 'bankAccountID': bank_account.ref_id,
             })
-
-    def create_redemption(self, amount: Decimal, account, bank_account):
-        return self._make_request(
-            "POST", "/funding/redemptions", {
-                'accountNo': account.ref_no,
-                'amount': amount,
-                'currency': 'USD',
-                'type': 'ACH',
-                'bankAccountID': bank_account.ref_id,
-            })
+        entity = DriveWealthDeposit()
+        entity.set_from_response(response)
+        return entity
 
     def update_redemption(self, redemption: DriveWealthRedemption,
                           status: str):

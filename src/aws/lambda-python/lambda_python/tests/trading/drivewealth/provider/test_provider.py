@@ -11,14 +11,13 @@ from services.notification import NotificationService
 from tests.trading.drivewealth.api_mocks import mock_create_deposit, mock_create_redemption, mock_get_deposit, \
     mock_get_redemption
 from trading.models import TradingStatement
-from trading.drivewealth.models import DriveWealthBankAccount, DriveWealthDeposit, DriveWealthRedemption, \
-    DriveWealthStatement, DriveWealthOrder
+from trading.drivewealth.models import DriveWealthStatement, DriveWealthOrder
 from trading.drivewealth.api import DriveWealthApi
 from trading.drivewealth.provider import DriveWealthProvider
 from trading.drivewealth.repository import DriveWealthRepository
 
 from gainy.trading.drivewealth.models import DriveWealthAccount, DriveWealthInstrument, DriveWealthInstrumentStatus, \
-    DriveWealthPortfolio
+    DriveWealthPortfolio, DriveWealthBankAccount, DriveWealthDeposit, DriveWealthRedemption
 
 
 def get_test_transfer_money_amounts():

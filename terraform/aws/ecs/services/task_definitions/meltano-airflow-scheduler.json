@@ -127,6 +127,7 @@
     { "name": "DRIVEWEALTH_API_USERNAME",              "value": "${drivewealth_api_username}" },
     { "name": "DRIVEWEALTH_API_PASSWORD",              "value": "${drivewealth_api_password}" },
     { "name": "DRIVEWEALTH_API_URL",                   "value": "${drivewealth_api_url}" },
+    { "name": "DRIVEWEALTH_HOUSE_ACCOUNT_NO",          "value": "${drivewealth_house_account_no}" },
 
     { "name": "PLAID_CLIENT_ID",                       "value": "${plaid_client_id}" },
     { "name": "PLAID_SECRET",                          "value": "${plaid_secret}" },
@@ -135,7 +136,12 @@
     { "name": "PLAID_ENV",                             "value": "${plaid_env}" },
 
     { "name": "MLFLOW_ARTIFACT_LOCATION",              "value": "${mlflow_artifact_location}" },
-    { "name": "MLFLOW_TRACKING_URI",                   "value": "postgresql://${pg_username}:${pg_password}@${pg_host}:${pg_port}/${pg_dbname}?options=-csearch_path=${pg_mlflow_schema}" }
+    { "name": "MLFLOW_TRACKING_URI",                   "value": "postgresql://${pg_username}:${pg_password}@${pg_host}:${pg_port}/${pg_dbname}?options=-csearch_path=${pg_mlflow_schema}" },
+
+    { "name": "BILLING_EQUITY_VALUE_FEE_MULTIPLIER",   "value": "${billing_equity_value_fee_multiplier}" },
+    { "name": "BILLING_MIN_YEARLY_FEE",                "value": "${billing_min_yearly_fee}" },
+    { "name": "BILLING_ENABLED_PROFILES",              "value": "${billing_enabled_profiles}" },
+    { "name": "BILLING_MIN_DATE",                      "value": "${billing_min_date}" }
   ],
   "links": [],
   "workingDirectory": null,

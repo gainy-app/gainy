@@ -27,15 +27,16 @@ locals {
     aws_log_region                      = var.aws_log_region
     aws_lambda_api_gateway_endpoint     = var.aws_lambda_api_gateway_endpoint
 
-    drivewealth_is_uat         = var.drivewealth_is_uat
-    drivewealth_app_key        = var.drivewealth_app_key
-    drivewealth_wlp_id         = var.drivewealth_wlp_id
-    drivewealth_parent_ibid    = var.drivewealth_parent_ibid
-    drivewealth_ria_id         = var.drivewealth_ria_id
-    drivewealth_ria_product_id = var.drivewealth_ria_product_id
-    drivewealth_api_username   = var.drivewealth_api_username
-    drivewealth_api_password   = var.drivewealth_api_password
-    drivewealth_api_url        = var.drivewealth_api_url
+    drivewealth_is_uat           = var.drivewealth_is_uat
+    drivewealth_app_key          = var.drivewealth_app_key
+    drivewealth_wlp_id           = var.drivewealth_wlp_id
+    drivewealth_parent_ibid      = var.drivewealth_parent_ibid
+    drivewealth_ria_id           = var.drivewealth_ria_id
+    drivewealth_ria_product_id   = var.drivewealth_ria_product_id
+    drivewealth_api_username     = var.drivewealth_api_username
+    drivewealth_api_password     = var.drivewealth_api_password
+    drivewealth_api_url          = var.drivewealth_api_url
+    drivewealth_house_account_no = var.drivewealth_house_account_no
   }
   scheduler_params = merge(local.meltano_default_params, {
     eodhistoricaldata_api_token          = var.eodhistoricaldata_api_token
@@ -95,6 +96,11 @@ locals {
     aws_secret_key           = var.aws_secret_key
     mlflow_artifact_location = "s3://${var.mlflow_artifact_bucket}"
     pg_mlflow_schema         = "mlflow"
+
+    billing_equity_value_fee_multiplier = var.billing_equity_value_fee_multiplier
+    billing_min_yearly_fee              = var.billing_min_yearly_fee
+    billing_enabled_profiles            = var.billing_enabled_profiles
+    billing_min_date                    = var.billing_min_date
   })
 
   airflow_task_description = jsondecode(templatefile("${path.module}/task_definitions/meltano-airflow-ui.json", local.meltano_default_params))

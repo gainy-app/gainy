@@ -69,6 +69,7 @@ on:
       DRIVEWEALTH_API_PASSWORD: { required: true }
       DRIVEWEALTH_API_URL: { required: true }
       DRIVEWEALTH_SQS_ARN: { required: false }
+      DRIVEWEALTH_HOUSE_ACCOUNT_NO: { required: false }
       GH_APP_ID: { required: true }
       GH_APP_INSTALLATION_ID: { required: true }
       GH_APP_PRIVATE_KEY: { required: true }
@@ -79,6 +80,10 @@ on:
       SENDGRID_API_KEY: { required: true }
       SLACK_BOT_TOKEN: { required: false }
       AMPLITUDE_API_KEY: { required: true }
+      BILLING_EQUITY_VALUE_FEE_MULTIPLIER: { required: true }
+      BILLING_MIN_YEARLY_FEE: { required: true }
+      BILLING_ENABLED_PROFILES: { required: false }
+      BILLING_MIN_DATE: { required: false }
 
 env:
   AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
@@ -134,6 +139,7 @@ env:
   TF_VAR_drivewealth_api_password: ${{ secrets.DRIVEWEALTH_API_PASSWORD }}
   TF_VAR_drivewealth_api_url: ${{ secrets.DRIVEWEALTH_API_URL }}
   TF_VAR_drivewealth_sqs_arn: ${{ secrets.DRIVEWEALTH_SQS_ARN }}
+  TF_VAR_drivewealth_house_account_no: ${{ secrets.DRIVEWEALTH_HOUSE_ACCOUNT_NO }}
   TF_VAR_github_app_id: ${{ secrets.GH_APP_ID }}
   TF_VAR_github_app_installation_id: ${{ secrets.GH_APP_INSTALLATION_ID }}
   TF_VAR_github_app_private_key: ${{ secrets.GH_APP_PRIVATE_KEY }}
@@ -144,6 +150,10 @@ env:
   TF_VAR_sendgrid_api_key: ${{ secrets.SENDGRID_API_KEY }}
   TF_VAR_slack_bot_token: ${{ secrets.SLACK_BOT_TOKEN }}
   TF_VAR_amplitude_api_key: ${{ secrets.AMPLITUDE_API_KEY }}
+  TF_VAR_billing_equity_value_fee_multiplier: ${{ secrets.BILLING_EQUITY_VALUE_FEE_MULTIPLIER }}
+  TF_VAR_billing_min_yearly_fee: ${{ secrets.BILLING_MIN_YEARLY_FEE }}
+  TF_VAR_billing_enabled_profiles: ${{ secrets.BILLING_ENABLED_PROFILES }}
+  TF_VAR_billing_min_date: ${{ secrets.BILLING_MIN_DATE }}
 
 jobs:
   test:

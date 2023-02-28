@@ -42,6 +42,7 @@ variable "drivewealth_api_username" {}
 variable "drivewealth_api_password" {}
 variable "drivewealth_api_url" {}
 variable "drivewealth_sqs_arn" {}
+variable "drivewealth_house_account_no" {}
 variable "s3_bucket_uploads_kyc" {}
 variable "aws_access_key" {}
 variable "aws_secret_key" {}
@@ -56,3 +57,7 @@ variable "twilio_auth_token" {}
 variable "sendgrid_api_key" {}
 variable "aws_events_sqs_arn" {}
 variable "slack_bot_token" {}
+variable "billing_equity_value_fee_multiplier" {}
+variable "billing_min_yearly_fee" {}
+variable "billing_enabled_profiles" {}
+variable "billing_min_date" {}
