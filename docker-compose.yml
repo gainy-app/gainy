@@ -151,17 +151,6 @@ services:
     deploy:
       replicas: 0
 
-  websockets-polygon:
-    image: gainy-websockets:latest
-    volumes:
-      - ./src/websockets:/srv
-    command: ["client_polygon.py"]
-    env_file:
-      - .env.global
-      - .env.local
-    deploy:
-      replicas: 0
-
 volumes:
   db_data:
   meltano_data:

@@ -249,21 +249,12 @@ resource "aws_ecs_task_definition" "websockets" {
   family                   = "gainy-websockets-${var.env}"
   network_mode             = "awsvpc"
   requires_compatibilities = ["FARGATE"]
-  cpu                      = max(256, local.eod_websockets_cpu_credits + local.polygon_websockets_cpu_credits)
-  memory                   = local.eod_websockets_memory_credits + local.polygon_websockets_memory_credits < 512 ? 512 : ceil((local.eod_websockets_memory_credits + local.polygon_websockets_memory_credits) / 1024) * 1024
+  cpu                      = max(256, local.eod_websockets_cpu_credits)
+  memory                   = local.eod_websockets_memory_credits < 512 ? 512 : ceil(local.eod_websockets_memory_credits / 1024) * 1024
   task_role_arn            = aws_iam_role.task.arn
   execution_role_arn       = aws_iam_role.execution.arn
 
-  container_definitions = jsonencode(
-    concat(
-      [
-        local.websockets_eod_task_description,
-      ],
-      var.env == "production" ? [
-        local.websockets_polygon_task_description,
-      ] : []
-    )
-  )
+  container_definitions = jsonencode([local.websockets_eod_task_description])
 }
 
 resource "aws_ecs_task_definition" "hasura" {

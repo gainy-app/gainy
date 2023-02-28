@@ -106,22 +106,21 @@ module "aws" {
     "audience" = module.firebase.google_project_id,
     "issuer"   = "https://securetoken.google.com/${module.firebase.google_project_id}"
   })
-  base_image_registry_address  = var.base_image_registry_address
-  base_image_version           = var.base_image_version
-  datadog_api_key              = var.datadog_api_key
-  datadog_app_key              = var.datadog_app_key
-  hubspot_api_key              = var.hubspot_api_key
-  polygon_api_token            = var.polygon_api_token
-  polygon_api_token_websockets = var.polygon_api_token_websockets
-  coingecko_api_key            = var.coingecko_api_key
-  github_app_id                = var.github_app_id
-  github_app_installation_id   = var.github_app_installation_id
-  github_app_private_key       = var.github_app_private_key
-  google_places_api_key        = var.google_places_api_key
-  source_code_branch           = var.source_code_branch
-  source_code_branch_name      = var.source_code_branch_name
-  slack_bot_token              = var.slack_bot_token
-  amplitude_api_key            = var.amplitude_api_key
+  base_image_registry_address = var.base_image_registry_address
+  base_image_version          = var.base_image_version
+  datadog_api_key             = var.datadog_api_key
+  datadog_app_key             = var.datadog_app_key
+  hubspot_api_key             = var.hubspot_api_key
+  polygon_api_token           = var.polygon_api_token
+  coingecko_api_key           = var.coingecko_api_key
+  github_app_id               = var.github_app_id
+  github_app_installation_id  = var.github_app_installation_id
+  github_app_private_key      = var.github_app_private_key
+  google_places_api_key       = var.google_places_api_key
+  source_code_branch          = var.source_code_branch
+  source_code_branch_name     = var.source_code_branch_name
+  slack_bot_token             = var.slack_bot_token
+  amplitude_api_key           = var.amplitude_api_key
 
   stripe_api_key         = var.stripe_api_key
   stripe_publishable_key = var.stripe_publishable_key

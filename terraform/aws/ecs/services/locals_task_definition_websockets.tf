@@ -25,13 +25,4 @@ locals {
       symbols_limit                 = local.eod_symbols_limit
     })
   ))
-  websockets_polygon_task_description = jsondecode(templatefile(
-    "${path.module}/task_definitions/websockets-polygon.json",
-    merge(local.websockets_default_params, {
-      polygon_websockets_cpu_credits    = local.polygon_websockets_cpu_credits
-      polygon_websockets_memory_credits = local.polygon_websockets_memory_credits
-      polygon_api_token                 = var.polygon_api_token_websockets
-      polygon_realtime_streaming_host   = "delayed.polygon.io" # socket.polygon.io for real-time
-    })
-  ))
 }

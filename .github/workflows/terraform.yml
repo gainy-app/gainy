@@ -52,7 +52,6 @@ on:
       ALGOLIA_ADMIN_API_KEY: { required: true }
       HUBSPOT_API_KEY: { required: true }
       POLYGON_API_TOKEN: { required: true }
-      POLYGON_API_TOKEN_WEBSOCKETS: { required: true }
       COINGECKO_API_KEY: { required: true }
       ONESIGNAL_APP_ID: { required: true }
       ONESIGNAL_API_KEY: { required: true }
