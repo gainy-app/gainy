@@ -9,6 +9,7 @@ with accounts as
                       join app.drivewealth_users
                            on drivewealth_accounts.drivewealth_user_id = drivewealth_users.ref_id
              where drivewealth_accounts.status = 'OPEN'
+               and profile_id is not null
                and payment_method_id is null
          ),
      new_payment_methods as
