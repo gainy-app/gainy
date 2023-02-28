@@ -2,7 +2,7 @@ from decimal import Decimal
 from typing import Optional
 
 from gainy.analytics.service import AnalyticsService
-from gainy.billing.models import PaymentTransaction, TransactionStatus, Invoice
+from gainy.billing.models import PaymentTransaction, TransactionStatus, Invoice, InvoiceStatus
 from gainy.data_access.repository import MAX_TRANSACTION_SIZE
 from gainy.exceptions import NotFoundException, EntityNotFoundException
 from gainy.trading.drivewealth.config import DRIVEWEALTH_IS_UAT
@@ -489,3 +489,7 @@ class DriveWealthProvider(DriveWealthProviderKYC,
             Invoice, {"id": payment_transaction.invoice_id})
         invoice.on_new_transaction(payment_transaction)
         self.repository.persist(invoice)
+
+        if invoice.status == InvoiceStatus.PAID:
+            self.analytics_service.on_commission_withdrawn(
+                invoice.profile_id, float(invoice.amount))
