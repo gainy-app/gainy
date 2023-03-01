@@ -12,7 +12,7 @@ with relative_gains as
                               profile_id, holding_id_v2
                               ) profile_id,
                                 holding_id_v2,
-                                date,
+                                drivewealth_portfolio_historical_prices_aggregated.date,
                                 exp(sum(ln(coalesce(relative_gain, 0) + 1 + 1e-10))) - 1 as relative_gain_1d
                           from {{ ref('drivewealth_portfolio_historical_prices_aggregated') }}
                                    join {{ ref('portfolio_chart_skeleton') }} using (profile_id, datetime)
@@ -20,8 +20,7 @@ with relative_gains as
                             and portfolio_chart_skeleton.period = '1d'
                             and adjusted_close is not null
                             and adjusted_close > 0
-                          group by profile_id, holding_id_v2, symbol, date
-                          order by profile_id, holding_id_v2, symbol, date desc
+                          group by profile_id, holding_id_v2, symbol, drivewealth_portfolio_historical_prices_aggregated.date
                       ),
                   raw_data_1w as
                       (
@@ -39,7 +38,7 @@ with relative_gains as
                                              ) last_selloff_date using (profile_id, holding_id_v2)
                           where drivewealth_portfolio_historical_prices_aggregated.period = '15min'
                             and portfolio_chart_skeleton.period = '1w'
-                            and date >= coalesce(last_selloff_date, now()::date - interval '1 week')
+                            and drivewealth_portfolio_historical_prices_aggregated.date >= coalesce(last_selloff_date, now()::date - interval '1 week')
                             and adjusted_close is not null
                             and adjusted_close > 0
                           group by profile_id, holding_id_v2
