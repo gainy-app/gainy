@@ -129,3 +129,13 @@ query  {
     }
 }
 ```
+
+### Get ticker latest trading session (for the "market has just opened" disclaimer)
+```graphql
+query GetTickerLatestTradingSession($symbol: String!) {
+  ticker_latest_trading_session(where: {symbol: {_eq: $symbol}}) {
+    date
+    open_at
+  }
+}
+```

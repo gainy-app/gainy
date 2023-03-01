@@ -327,3 +327,14 @@ query GetPortfolioFilters($profile_id: Int!) {
   }
 }
 ```
+
+### Get portfolio latest trading session (for the "market has just opened" disclaimer)
+
+```graphql
+query GetPortfolioLatestTradingSession($profile_id: Int!) {
+  portfolio_latest_trading_session(where: {profile_id: {_eq: $profile_id}}) {
+    date
+    open_at
+  }
+}
+```
