@@ -10,3 +10,4 @@ from .redemptions_created import RedemptionCreatedEventHandler
 from .redemptions_updated import RedemptionUpdatedEventHandler
 from .statement_created import StatementCreatedEventHandler
 from .users_updated import UsersUpdatedEventHandler
+from .transactions_created import TransactionsCreatedEventHandler
