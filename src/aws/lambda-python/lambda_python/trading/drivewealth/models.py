@@ -8,6 +8,7 @@ import pytz
 
 from gainy.data_access.models import classproperty
 from gainy.trading.drivewealth.models import BaseDriveWealthModel
+from gainy.trading.drivewealth.provider.base import normalize_symbol
 from trading.models import ProfileKycStatus, KycStatus, TradingStatementType
 from gainy.trading.models import TradingCollectionVersion, TradingOrderStatus
 
@@ -93,6 +94,7 @@ class DriveWealthOrder(BaseDriveWealthModel):
     status = None  # NEW, PARTIAL_FILL, CANCELLED, REJECTED, FILLED
     account_id = None
     symbol = None
+    symbol_normalized = None
     data = None
     last_executed_at = None
     total_order_amount_normalized: Decimal = None
@@ -112,6 +114,7 @@ class DriveWealthOrder(BaseDriveWealthModel):
         self.status = data["status"]
         self.account_id = data["accountID"]
         self.symbol = data["symbol"]
+        self.symbol_normalized = normalize_symbol(data["symbol"])
         if "lastExecuted" in data:
             self.last_executed_at = dateutil.parser.parse(data["lastExecuted"])
             self.date = self.last_executed_at.astimezone(

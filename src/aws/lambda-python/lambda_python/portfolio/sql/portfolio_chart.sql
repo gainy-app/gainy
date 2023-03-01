@@ -82,7 +82,7 @@ with filtered_holdings as
 select *
 from (
          select period,
-                rank() over (partition by profile_id, period order by date desc) = 1               as is_latest_day,
+                rank() over (partition by profile_id, period order by raw_chart.date desc) = 1     as is_latest_day,
                 datetime,
                 transaction_count,
                 (open + greatest(0, cash_adjustment + coalesce(cash_value, 0)))::double precision  as open,

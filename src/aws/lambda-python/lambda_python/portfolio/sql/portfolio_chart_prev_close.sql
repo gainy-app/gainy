@@ -64,7 +64,7 @@ with filtered_holdings as
                              max(datetime) as datetime
                       from (
                                select ticker_chart.*,
-                                      rank() over (partition by profile_id, period order by date desc) = 1 as is_latest_day
+                                      rank() over (partition by profile_id, period order by ticker_chart.date desc) = 1 as is_latest_day
                                from ticker_chart
                                    join portfolio_chart_skeleton using (profile_id, period, datetime)
                            ) t
