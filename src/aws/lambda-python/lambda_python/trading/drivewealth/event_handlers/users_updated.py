@@ -14,4 +14,5 @@ class UsersUpdatedEventHandler(AbstractDriveWealthEventHandler):
         user = self.provider.sync_user(user_id)
 
         # create or update account
-        self.provider.ensure_account_created(user)
+        if user.profile_id:
+            self.provider.ensure_account_created(user)
