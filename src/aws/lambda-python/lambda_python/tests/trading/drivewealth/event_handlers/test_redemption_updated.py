@@ -1,9 +1,8 @@
 from gainy.analytics.service import AnalyticsService
-from gainy.trading.drivewealth.models import DriveWealthRedemptionStatus
+from gainy.trading.drivewealth.models import DriveWealthRedemptionStatus, DriveWealthRedemption
 from gainy.tests.mocks.repository_mocks import mock_find, mock_persist, mock_record_calls
 from gainy.trading.models import TradingMoneyFlow
 from trading.drivewealth.event_handlers import RedemptionUpdatedEventHandler
-from trading.drivewealth.models import DriveWealthRedemption
 from trading.drivewealth.provider import DriveWealthProvider
 from trading.drivewealth.repository import DriveWealthRepository
 

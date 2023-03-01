@@ -12,9 +12,7 @@ from services.notification import NotificationService
 from trading.models import TradingStatement, ProfileKycStatus, KycForm
 from trading.drivewealth.provider.collection import DriveWealthProviderCollection
 from trading.drivewealth.provider.kyc import DriveWealthProviderKYC
-from trading.drivewealth.models import DriveWealthBankAccount, DriveWealthDeposit, \
-    DriveWealthRedemption, DriveWealthAutopilotRun, BaseDriveWealthMoneyFlowModel, DriveWealthStatement, \
-    DriveWealthRedemptionStatus, DriveWealthOrder, DriveWealthAccountStatus
+from trading.drivewealth.models import DriveWealthBankAccount, DriveWealthAutopilotRun, DriveWealthStatement, DriveWealthOrder, DriveWealthAccountStatus
 from trading.drivewealth.api import DriveWealthApi
 from trading.drivewealth.repository import DriveWealthRepository
 
@@ -22,7 +20,8 @@ from gainy.utils import get_logger, ENV_PRODUCTION, env
 from gainy.trading.models import FundingAccount, TradingAccount, TradingCollectionVersion, TradingMoneyFlowStatus, \
     TradingMoneyFlow
 from gainy.trading.drivewealth.models import DriveWealthAccount, DriveWealthUser, DriveWealthInstrument, \
-    DriveWealthInstrumentStatus, DriveWealthPortfolio, DriveWealthTransaction
+    DriveWealthInstrumentStatus, DriveWealthPortfolio, DriveWealthTransaction, DriveWealthDeposit, \
+    DriveWealthRedemption, DriveWealthRedemptionStatus, BaseDriveWealthMoneyFlowModel
 from trading.repository import TradingRepository
 from trading import MIN_FIRST_DEPOSIT_AMOUNT
 

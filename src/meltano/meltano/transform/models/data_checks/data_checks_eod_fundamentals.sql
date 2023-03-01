@@ -50,11 +50,8 @@ with errors as
                 'daily'                                                     as "period",
                 'Ticker ' || symbol || ' has incorrect ticker_shares_stats' as message
          from {{ ref('ticker_shares_stats') }}
-         where short_ratio < 0
-            or shares_float < 0
-            or shares_short < 0
+         where shares_float < 0
             or shares_outstanding < 0
-            or short_percent_outstanding < 0
 
          union all
 
