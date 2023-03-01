@@ -71,7 +71,7 @@ with long_term_tax_holdings as
                                  sum(absolute_gain_1d) as absolute_gain_1d
                           from (
                                    select holding_id_v2,
-                                          rank() over (partition by profile_id, period order by date desc) = 1 as is_latest_day,
+                                          rank() over (partition by profile_id, period order by portfolio_holding_chart.date desc) = 1 as is_latest_day,
                                           adjusted_close * relative_gain / case when 1 + relative_gain > 0 then 1 + relative_gain end as absolute_gain_1d
                                    from {{ ref('portfolio_holding_chart') }}
                                             join {{ ref('portfolio_chart_skeleton') }} using (profile_id, period, datetime)
@@ -87,7 +87,7 @@ with long_term_tax_holdings as
                           from {{ ref('portfolio_holding_chart') }}
                                    join {{ ref('portfolio_chart_skeleton') }} using (profile_id, period, datetime)
                           where period = '1w'
-                            and date >= now()::date - interval '1 week'
+                            and portfolio_holding_chart.date >= now()::date - interval '1 week'
                           group by holding_id_v2
                   ),
                   raw_data_1m as
