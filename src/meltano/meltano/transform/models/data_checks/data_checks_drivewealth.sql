@@ -39,6 +39,7 @@ union all
                  from {{ source('app', 'drivewealth_transactions') }}
                           join {{ source('app', 'drivewealth_accounts') }} on drivewealth_accounts.ref_id = account_id
                           join {{ source('app', 'drivewealth_users') }} on drivewealth_users.ref_id = drivewealth_accounts.drivewealth_user_id
+                 where profile_id is not null
                  group by profile_id
              ),
          cash_flow_stats as
