@@ -1,7 +1,7 @@
+from gainy.trading.drivewealth.models import DriveWealthRedemption, DriveWealthPortfolio, DW_WEIGHT_THRESHOLD
 from gainy.trading.models import TradingMoneyFlowStatus
 from gainy.utils import get_logger
 from trading.drivewealth.abstract_event_handler import AbstractDriveWealthEventHandler
-from trading.drivewealth.models import DriveWealthRedemption
 
 logger = get_logger(__name__)
 
@@ -19,6 +19,7 @@ class RedemptionUpdatedEventHandler(AbstractDriveWealthEventHandler):
         if not redemption:
             redemption = DriveWealthRedemption()
 
+        was_approved = redemption.is_approved()
         old_mf_status = redemption.get_money_flow_status()
         old_status = redemption.status
         redemption.set_from_response(event_payload)
@@ -26,6 +27,20 @@ class RedemptionUpdatedEventHandler(AbstractDriveWealthEventHandler):
 
         self.repo.persist(redemption)
         self.provider.handle_redemption_status(redemption)
+
+        if redemption.is_approved() and not was_approved:
+            # update cash weight in linked portfolio
+            # todo thread-safe
+            portfolio: DriveWealthPortfolio = self.repo.find_one(
+                DriveWealthPortfolio,
+                {"drivewealth_account_id": redemption.trading_account_ref_id})
+            if portfolio:
+                prev_cash_target_weight = portfolio.cash_target_weight
+                self.provider.actualize_portfolio(portfolio)
+                if abs(prev_cash_target_weight -
+                       portfolio.cash_target_weight) > DW_WEIGHT_THRESHOLD:
+                    portfolio.normalize_weights()
+                    self.provider.send_portfolio_to_api(portfolio)
 
         if redemption.is_approved() and redemption.fees_total_amount is None:
             self.provider.sync_redemption(redemption.ref_id)

@@ -1,7 +1,7 @@
+from gainy.trading.drivewealth.models import DriveWealthDeposit
 from gainy.trading.models import TradingMoneyFlowStatus
 from gainy.utils import get_logger
 from trading.drivewealth.abstract_event_handler import AbstractDriveWealthEventHandler
-from trading.drivewealth.models import DriveWealthDeposit
 
 logger = get_logger(__name__)
 
