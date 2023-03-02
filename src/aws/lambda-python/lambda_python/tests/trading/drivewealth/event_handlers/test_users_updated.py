@@ -8,6 +8,7 @@ def test(monkeypatch):
     user_id = "user_id"
 
     user = DriveWealthUser()
+    user.profile_id = 1
 
     provider = DriveWealthProvider(None, None, None, None, None)
 
