@@ -17,19 +17,26 @@ with holdings as
      portfolio_tickers as
          (
              select holdings.profile_id,
-                    holdings.ticker_symbol as symbol,
+                    holdings.ticker_symbol      as symbol,
                     case
                         when type = 'cash'
                             then 'Cash'
                         else ticker_name
-                        end                as ticker_name,
-                    sum(actual_value)      as weight,
+                        end                     as ticker_name,
+                    sum(coalesce(case
+                        when type = 'cash'
+                            then pending_cash
+                        end, 0) + actual_value) as weight,
                     sum(portfolio_holding_gains.relative_gain_1d *
-                        actual_value)      as relative_daily_change,
-                    sum(absolute_gain_1d)  as absolute_daily_change,
-                    sum(actual_value)      as absolute_value
+                        actual_value)           as relative_daily_change,
+                    sum(absolute_gain_1d)       as absolute_daily_change,
+                    sum(coalesce(case
+                        when type = 'cash'
+                            then pending_cash
+                        end, 0) + actual_value) as absolute_value
              from holdings
-                      join portfolio_holding_gains using (holding_id_v2)
+                      join portfolio_holding_gains using (holding_id_v2, profile_id)
+                      left join trading_profile_status using (profile_id)
                       left join portfolio_holding_details using (holding_id_v2)
              group by holdings.profile_id, holdings.ticker_symbol, ticker_name, type
      ),
