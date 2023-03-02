@@ -472,3 +472,19 @@ class DriveWealthProvider(DriveWealthProviderKYC,
         if not portfolio.last_order_executed_at or order.last_executed_at > portfolio.last_order_executed_at:
             portfolio.last_order_executed_at = order.last_executed_at
             self.repository.persist(portfolio)
+
+    def on_new_transaction(self, account_ref_id: str):
+        # todo thread-safe
+        portfolio: DriveWealthPortfolio = self.repository.find_one(
+            DriveWealthPortfolio, {"drivewealth_account_id": account_ref_id})
+        if not portfolio:
+            return
+
+        portfolio_status = self.sync_portfolio_status(portfolio, force=True)
+        portfolio_changed = self.actualize_portfolio(portfolio,
+                                                     portfolio_status)
+        if not portfolio_changed:
+            return
+
+        portfolio.normalize_weights()
+        self.send_portfolio_to_api(portfolio)
