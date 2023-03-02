@@ -30,19 +30,7 @@ class RedemptionUpdatedEventHandler(AbstractDriveWealthEventHandler):
 
         if redemption.is_approved() and not was_approved:
             # update cash weight in linked portfolio
-            # todo thread-safe
-            portfolio: DriveWealthPortfolio = self.repo.find_one(
-                DriveWealthPortfolio,
-                {"drivewealth_account_id": redemption.trading_account_ref_id})
-            if portfolio:
-                prev_cash_target_weight = portfolio.cash_target_weight
-                portfolio_status = self.provider.sync_portfolio_status(
-                    portfolio, force=True)
-                portfolio_changed = self.provider.actualize_portfolio(
-                    portfolio, portfolio_status)
-                if portfolio_changed:
-                    portfolio.normalize_weights()
-                    self.provider.send_portfolio_to_api(portfolio)
+            self.provider.on_new_transaction(redemption.trading_account_ref_id)
 
         if redemption.is_approved() and redemption.fees_total_amount is None:
             self.provider.sync_redemption(redemption.ref_id)
