@@ -28,7 +28,7 @@ class RedemptionUpdatedEventHandler(AbstractDriveWealthEventHandler):
         self.repo.persist(redemption)
         self.provider.handle_redemption_status(redemption)
 
-        if redemption.is_approved() and not was_approved:
+        if redemption.is_approved() != was_approved:
             # update cash weight in linked portfolio
             self.provider.on_new_transaction(redemption.trading_account_ref_id)
 

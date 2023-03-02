@@ -14,7 +14,7 @@ message = {
 
 
 def test_exists(monkeypatch):
-    old_status = DriveWealthRedemptionStatus.RIA_Pending
+    old_status = DriveWealthRedemptionStatus.RIA_Approved
     new_status = message["statusMessage"]
     profile_id = 1
     amount = 2
@@ -27,6 +27,9 @@ def test_exists(monkeypatch):
     handle_redemption_status_calls = []
     monkeypatch.setattr(provider, 'handle_redemption_status',
                         mock_record_calls(handle_redemption_status_calls))
+    on_new_transaction_calls = []
+    monkeypatch.setattr(provider, 'on_new_transaction',
+                        mock_record_calls(on_new_transaction_calls))
 
     def mock_update_money_flow_from_dw(_redemption):
         assert redemption == _redemption
@@ -82,6 +85,8 @@ def test_exists(monkeypatch):
     assert (redemption, old_status) in [
         args for args, kwargs in handle_money_flow_status_change_calls
     ]
+    assert ((redemption.trading_account_ref_id, ),
+            {}) in on_new_transaction_calls
     assert ((profile_id, -amount), {}) in on_dw_withdraw_success_calls
 
 
