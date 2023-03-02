@@ -63,6 +63,7 @@ select profile_id,
        coalesce(pending_cash, 0)::double precision       as pending_cash,
        coalesce(pending_order_stats.abs_amount_sum,
            0)::double precision                          as pending_orders_amount,
+       coalesce(pending_order_stats.cnt, 0)::int         as pending_orders_count,
        coalesce(pending_order_stats.amount_sum,
            0)::double precision                          as pending_orders_sum,
        coalesce(
@@ -105,12 +106,14 @@ from (
                        select trading_account_id,
                               sum(amount_sum) as amount_sum,
                               sum(abs_amount_sum) as abs_amount_sum,
+                              sum(cnt) as cnt,
                               max(updated_at) as updated_at
                        from (
                                 select trading_account_id,
                                        sum(target_amount_delta - coalesce(executed_amount, 0))
                                        filter ( where target_amount_delta > 0 )                     as amount_sum,
                                        sum(abs(target_amount_delta - coalesce(executed_amount, 0))) as abs_amount_sum,
+                                       count(*)                                                     as cnt,
                                        max(updated_at)                                              as updated_at
                                 from {{ source('app', 'trading_collection_versions') }}
                                 where status in ('PENDING_EXECUTION', 'PENDING')
@@ -122,6 +125,7 @@ from (
                                        sum(target_amount_delta - coalesce(executed_amount, 0))
                                        filter ( where target_amount_delta > 0 )                     as amount_sum,
                                        sum(abs(target_amount_delta - coalesce(executed_amount, 0))) as abs_amount_sum,
+                                       count(*)                                                     as cnt,
                                        max(updated_at)                                              as updated_at
                                 from {{ source('app', 'trading_orders') }}
                                 where status in ('PENDING_EXECUTION', 'PENDING')
