@@ -15,3 +15,7 @@ class TransactionsCreatedEventHandler(AbstractDriveWealthEventHandler):
         transaction.account_id = event_payload["accountID"]
         transaction.set_from_response(event_payload["transaction"])
         self.repo.persist(transaction)
+
+        self.provider.on_new_transaction(transaction.account_id)
+
+        self.sync_trading_account_balances(transaction.account_id, force=True)

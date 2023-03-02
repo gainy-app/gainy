@@ -3,18 +3,16 @@ from typing import List, Iterable
 import datetime
 
 from decimal import Decimal
-import os
 
 from gainy.trading.drivewealth.config import DRIVEWEALTH_WLP_ID, DRIVEWEALTH_PARENT_IBID, DRIVEWEALTH_RIA_ID, \
     DRIVEWEALTH_RIA_PRODUCT_ID
 from trading.models import KycDocument, TradingStatementType
 from trading.drivewealth.repository import DriveWealthRepository
-from trading.drivewealth.models import DriveWealthBankAccount, DriveWealthKycStatus, DriveWealthRedemption, \
-    DriveWealthStatement
+from trading.drivewealth.models import DriveWealthBankAccount, DriveWealthKycStatus, DriveWealthStatement
 
 from gainy.utils import get_logger, env, ENV_PRODUCTION, DATE_ISO8601_FORMAT
 from gainy.trading.drivewealth import DriveWealthApi as GainyDriveWealthApi
-from gainy.trading.drivewealth.models import DriveWealthAccount
+from gainy.trading.drivewealth.models import DriveWealthAccount, DriveWealthRedemption
 
 logger = get_logger(__name__)
 

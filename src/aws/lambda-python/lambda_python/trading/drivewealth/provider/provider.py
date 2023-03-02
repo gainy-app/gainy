@@ -1,6 +1,7 @@
 from decimal import Decimal
 from typing import Optional
 
+from gainy.analytics.service import AnalyticsService
 from gainy.data_access.repository import MAX_TRANSACTION_SIZE
 from gainy.exceptions import NotFoundException, EntityNotFoundException
 from gainy.trading.drivewealth.config import DRIVEWEALTH_IS_UAT
@@ -8,19 +9,19 @@ from gainy.trading.drivewealth.exceptions import DriveWealthApiException, BadMis
 from portfolio.plaid import PlaidService
 from gainy.plaid.models import PlaidAccessToken
 from services.notification import NotificationService
-from trading.models import TradingMoneyFlow, TradingStatement, ProfileKycStatus, KycForm
+from trading.models import TradingStatement, ProfileKycStatus, KycForm
 from trading.drivewealth.provider.collection import DriveWealthProviderCollection
 from trading.drivewealth.provider.kyc import DriveWealthProviderKYC
-from trading.drivewealth.models import DriveWealthBankAccount, DriveWealthDeposit, \
-    DriveWealthRedemption, DriveWealthAutopilotRun, BaseDriveWealthMoneyFlowModel, DriveWealthStatement, \
-    DriveWealthRedemptionStatus, DriveWealthOrder, DriveWealthAccountStatus
+from trading.drivewealth.models import DriveWealthBankAccount, DriveWealthAutopilotRun, DriveWealthStatement, DriveWealthOrder, DriveWealthAccountStatus
 from trading.drivewealth.api import DriveWealthApi
 from trading.drivewealth.repository import DriveWealthRepository
 
 from gainy.utils import get_logger, ENV_PRODUCTION, env
-from gainy.trading.models import FundingAccount, TradingAccount, TradingCollectionVersion, TradingMoneyFlowStatus
+from gainy.trading.models import FundingAccount, TradingAccount, TradingCollectionVersion, TradingMoneyFlowStatus, \
+    TradingMoneyFlow
 from gainy.trading.drivewealth.models import DriveWealthAccount, DriveWealthUser, DriveWealthInstrument, \
-    DriveWealthInstrumentStatus, DriveWealthPortfolio, DriveWealthTransaction
+    DriveWealthInstrumentStatus, DriveWealthPortfolio, DriveWealthTransaction, DriveWealthDeposit, \
+    DriveWealthRedemption, DriveWealthRedemptionStatus, BaseDriveWealthMoneyFlowModel
 from trading.repository import TradingRepository
 from trading import MIN_FIRST_DEPOSIT_AMOUNT
 
@@ -30,11 +31,15 @@ logger = get_logger(__name__)
 class DriveWealthProvider(DriveWealthProviderKYC,
                           DriveWealthProviderCollection):
 
-    def __init__(self, repository: DriveWealthRepository, api: DriveWealthApi,
+    def __init__(self,
+                 repository: DriveWealthRepository,
+                 api: DriveWealthApi,
                  trading_repository: TradingRepository,
                  plaid_service: PlaidService,
-                 notification_service: NotificationService):
-        super().__init__(repository, api, trading_repository)
+                 notification_service: NotificationService,
+                 analytics_service: AnalyticsService = None):
+        super().__init__(repository, api, trading_repository,
+                         analytics_service)
         self.plaid_service = plaid_service
         self.notification_service = notification_service
 
@@ -388,9 +393,10 @@ class DriveWealthProvider(DriveWealthProviderKYC,
         finally:
             repository.persist(entities)
 
-    def update_money_flow_from_dw(self,
-                                  entity: BaseDriveWealthMoneyFlowModel,
-                                  money_flow: TradingMoneyFlow = None):
+    def update_money_flow_from_dw(
+            self,
+            entity: BaseDriveWealthMoneyFlowModel,
+            money_flow: TradingMoneyFlow = None) -> Optional[TradingMoneyFlow]:
         if not money_flow:
             if not entity.money_flow_id:
                 return
@@ -403,6 +409,7 @@ class DriveWealthProvider(DriveWealthProviderKYC,
         money_flow.status = entity.get_money_flow_status()
         money_flow.fees_total_amount = entity.fees_total_amount
         self.repository.persist(money_flow)
+        return money_flow
 
     def _sync_statements(self, profile_id):
         user = self._get_user(profile_id)
@@ -465,3 +472,19 @@ class DriveWealthProvider(DriveWealthProviderKYC,
         if not portfolio.last_order_executed_at or order.last_executed_at > portfolio.last_order_executed_at:
             portfolio.last_order_executed_at = order.last_executed_at
             self.repository.persist(portfolio)
+
+    def on_new_transaction(self, account_ref_id: str):
+        # todo thread-safe
+        portfolio: DriveWealthPortfolio = self.repository.find_one(
+            DriveWealthPortfolio, {"drivewealth_account_id": account_ref_id})
+        if not portfolio:
+            return
+
+        portfolio_status = self.sync_portfolio_status(portfolio, force=True)
+        portfolio_changed = self.actualize_portfolio(portfolio,
+                                                     portfolio_status)
+        if not portfolio_changed:
+            return
+
+        portfolio.normalize_weights()
+        self.send_portfolio_to_api(portfolio)

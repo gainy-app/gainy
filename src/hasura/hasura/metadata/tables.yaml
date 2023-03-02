@@ -1242,6 +1242,17 @@
                 user_id:
                   _eq: X-Hasura-User-Id
 - table:
+    name: collection_latest_trading_session
+    schema: public
+  select_permissions:
+    - role: user
+      permission:
+        columns:
+          - date
+          - collection_uniq_id
+          - open_at
+        filter: {}
+- table:
     name: collection_match_score
     schema: public
   object_relationships:
@@ -2058,6 +2069,33 @@
             user_id:
               _eq: X-Hasura-User-Id
 - table:
+    name: portfolio_latest_trading_session
+    schema: public
+  object_relationships:
+    - name: profile
+      using:
+        manual_configuration:
+          column_mapping:
+            profile_id: id
+          insertion_order: null
+          remote_table:
+            name: profiles
+            schema: app
+  select_permissions:
+    - role: user
+      permission:
+        columns:
+          - profile_id
+          - date
+          - open_at
+        filter:
+          profile:
+            _or:
+              - user_id:
+                  _eq: X-Hasura-User-Id
+              - id:
+                  _eq: 1
+- table:
     name: profile_brokers
     schema: public
   object_relationships:
@@ -2586,6 +2624,17 @@
           - symbol
         filter: {}
 - table:
+    name: ticker_latest_trading_session
+    schema: public
+  select_permissions:
+    - role: user
+      permission:
+        columns:
+          - symbol
+          - date
+          - open_at
+        filter: {}
+- table:
     name: ticker_metrics
     schema: public
   object_relationships:
@@ -3050,6 +3099,7 @@
           - withdrawable_cash
           - pending_cash
           - pending_orders_amount
+          - pending_orders_count
           - buying_power
         filter:
           profile:

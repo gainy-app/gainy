@@ -6,6 +6,7 @@
     post_hook=[
       pk('profile_id, period, datetime'),
       index('id', true),
+      index(['profile_id', 'period', 'date', 'datetime'], true),
     ],
   )
 }}
@@ -19,6 +20,7 @@ from (
              profile_id, period, datetime
              ) profile_id,
                period,
+               date,
                datetime,
                t.holding_count
          from (
@@ -28,11 +30,12 @@ from (
                   from (
                            select profile_id,
                                   period,
+                                  date,
                                   datetime,
                                   count(distinct holding_id_v2) as holding_count
                            from {{ ref('portfolio_holding_chart') }}
                            where period in ('1m', '3m', '1y', '5y', 'all')
-                           group by profile_id, period, datetime
+                           group by profile_id, period, datetime, date
                        ) t
               ) t
          where t.holding_count = cum_max_holding_count
@@ -43,6 +46,7 @@ from (
              profile_id, period, datetime
              ) profile_id,
                period,
+               date,
                datetime,
                null::int as holding_count
          from {{ ref('portfolio_holding_chart') }}

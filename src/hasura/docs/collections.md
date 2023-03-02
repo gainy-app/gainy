@@ -173,3 +173,13 @@ query GetCollectionMatchScore($collectionUniqId: String!, $profileId: Int!) {
     }
 }
 ```
+
+### Get collection latest trading session (for the "market has just opened" disclaimer)
+```graphql
+query GetCollectionLatestTradingSession($collection_uniq_id: String!) {
+  collection_latest_trading_session(where: {collection_uniq_id: {_eq: $collection_uniq_id}}) {
+    date
+    open_at
+  }
+}
+```

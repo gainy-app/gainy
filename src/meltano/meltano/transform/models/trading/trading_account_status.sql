@@ -63,6 +63,7 @@ select profile_id,
        coalesce(pending_cash, 0)::double precision       as pending_cash,
        coalesce(pending_order_stats.abs_amount_sum,
            0)::double precision                          as pending_orders_amount,
+       coalesce(pending_order_stats.cnt, 0)::int         as pending_orders_count,
        coalesce(pending_order_stats.amount_sum,
            0)::double precision                          as pending_orders_sum,
        coalesce(
@@ -102,44 +103,33 @@ from (
          left join account_stats using (trading_account_id)
          left join portfolio_stats using (trading_account_id)
          left join (
-                       select profile_id,
+                       select trading_account_id,
                               sum(amount_sum) as amount_sum,
                               sum(abs_amount_sum) as abs_amount_sum,
+                              sum(cnt) as cnt,
                               max(updated_at) as updated_at
                        from (
-                                select profile_id,
-                                       t.amount_sum,
-                                       t.abs_amount_sum,
-                                       t.updated_at
-                                from (
-                                         -- todo link trading_collection_versions to trading_account
-                                         select profile_id,
-                                                collection_id,
-                                                sum(target_amount_delta - coalesce(executed_amount, 0))      as amount_sum,
-                                                sum(abs(target_amount_delta - coalesce(executed_amount, 0))) as abs_amount_sum,
-                                                max(updated_at)                                              as updated_at
-                                         from {{ source('app', 'trading_collection_versions') }}
-                                         where status in ('PENDING_EXECUTION', 'PENDING')
-                                         group by profile_id, collection_id
-                                     ) t
+                                select trading_account_id,
+                                       sum(target_amount_delta - coalesce(executed_amount, 0))
+                                       filter ( where target_amount_delta > 0 )                     as amount_sum,
+                                       sum(abs(target_amount_delta - coalesce(executed_amount, 0))) as abs_amount_sum,
+                                       count(*)                                                     as cnt,
+                                       max(updated_at)                                              as updated_at
+                                from {{ source('app', 'trading_collection_versions') }}
+                                where status in ('PENDING_EXECUTION', 'PENDING')
+                                group by trading_account_id
 
                                 union all
 
-                                select profile_id,
-                                       t.amount_sum,
-                                       t.abs_amount_sum,
-                                       t.updated_at
-                                from (
-                                         -- todo link trading_orders to trading_account
-                                         select profile_id,
-                                                symbol,
-                                                sum(target_amount_delta - coalesce(executed_amount, 0))      as amount_sum,
-                                                sum(abs(target_amount_delta - coalesce(executed_amount, 0))) as abs_amount_sum,
-                                                max(updated_at)                                              as updated_at
-                                         from {{ source('app', 'trading_orders') }}
-                                         where status in ('PENDING_EXECUTION', 'PENDING')
-                                         group by profile_id, symbol
-                                     ) t
+                                select trading_account_id,
+                                       sum(target_amount_delta - coalesce(executed_amount, 0))
+                                       filter ( where target_amount_delta > 0 )                     as amount_sum,
+                                       sum(abs(target_amount_delta - coalesce(executed_amount, 0))) as abs_amount_sum,
+                                       count(*)                                                     as cnt,
+                                       max(updated_at)                                              as updated_at
+                                from {{ source('app', 'trading_orders') }}
+                                where status in ('PENDING_EXECUTION', 'PENDING')
+                                group by trading_account_id
                             ) t
-                       group by profile_id
-                   ) pending_order_stats using (profile_id)
+                       group by trading_account_id
+                   ) pending_order_stats using (trading_account_id)
