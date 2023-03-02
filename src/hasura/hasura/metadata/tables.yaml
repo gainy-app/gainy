@@ -3099,6 +3099,7 @@
           - withdrawable_cash
           - pending_cash
           - pending_orders_amount
+          - pending_orders_count
           - buying_power
         filter:
           profile:
