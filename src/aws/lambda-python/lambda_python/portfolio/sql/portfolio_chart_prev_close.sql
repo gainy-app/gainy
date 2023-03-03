@@ -38,13 +38,21 @@ with filtered_holdings as
                           ) profile_id,
                             case
                                 when type = 'cash' and ticker_symbol = 'CUR:USD'
-                                    then quantity::numeric
+                                    then quantity
                                 else 0
                                 end as value
                       from profile_holdings_normalized_all
                       where profile_id = %(profile_id)s
                         and type = 'cash'
                         and ticker_symbol = 'CUR:USD'
+                        and not is_app_trading
+
+                      union all
+
+                      select profile_id,
+                             coalesce(pending_cash, 0) as value
+                      from trading_profile_status
+                      where profile_id = %(profile_id)s
                   ) t
      ),
      raw_data as
