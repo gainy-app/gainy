@@ -24,11 +24,15 @@ with holdings as
                         end     as name,
                     sim_dif + 1 as weight_category_in_holding,
                     category_id,
-                    actual_value,
+                    coalesce(case
+                        when type = 'cash'
+                            then pending_cash
+                        end, 0) + actual_value as actual_value,
                     absolute_gain_1d,
                     relative_gain_1d
              from holdings
-                      join portfolio_holding_gains using (holding_id_v2)
+                      join portfolio_holding_gains using (holding_id_v2, profile_id)
+                      left join trading_profile_status using (profile_id)
                       left join ticker_categories on ticker_categories.symbol = ticker_symbol
              where collection_id is null
 

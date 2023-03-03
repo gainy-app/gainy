@@ -24,12 +24,19 @@ with holdings as
          (
              select holdings.profile_id,
                     holdings.security_type,
-                    sum(actual_value)                    as weight,
+                    sum(coalesce(case
+                        when security_type = 'Cash'
+                            then pending_cash
+                        end, 0) + actual_value)          as weight,
                     sum(relative_gain_1d * actual_value) as relative_daily_change,
                     sum(absolute_gain_1d)                as absolute_daily_change,
-                    sum(actual_value)                    as absolute_value
+                    sum(coalesce(case
+                        when security_type = 'Cash'
+                            then pending_cash
+                        end, 0) + actual_value)          as absolute_value
              from holdings
-                      join portfolio_holding_gains using (holding_id_v2)
+                      join portfolio_holding_gains using (holding_id_v2, profile_id)
+                      left join trading_profile_status using (profile_id)
              group by holdings.profile_id, holdings.security_type
          ),
      portfolio_security_types_weight_sum as
