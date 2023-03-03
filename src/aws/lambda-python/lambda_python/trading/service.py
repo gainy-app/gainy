@@ -256,5 +256,10 @@ class TradingService(GainyTradingService):
                     "funding_account_id": funding_account.id,
                 })
 
+        logger.info('check_enough_funds_to_deposit',
+                    extra={
+                        "profile_id": funding_account.profile_id,
+                        "funding_account": funding_account.to_dict(),
+                    })
         if Decimal(funding_account.balance) < amount:
             raise InsufficientFundsException()
