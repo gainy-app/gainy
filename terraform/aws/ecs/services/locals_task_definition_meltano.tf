@@ -39,7 +39,7 @@ locals {
   }
   scheduler_params = merge(local.meltano_default_params, {
     eodhistoricaldata_api_token          = var.eodhistoricaldata_api_token
-    eodhistoricaldata_exchanges          = jsonencode(["NASDAQ", "NYSE", "CC", "INDX"])
+    eodhistoricaldata_exchanges          = jsonencode(["NASDAQ", "NYSE"])
     polygon_crypto_symbols               = jsonencode(["CRVUSD"])
     pg_load_schema                       = "raw_data"
     dbt_threads                          = 3
