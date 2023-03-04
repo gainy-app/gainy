@@ -46,9 +46,9 @@ def test_exists(monkeypatch):
     monkeypatch.setattr(repository, 'persist', mock_persist(persisted_objects))
 
     analytics_service = AnalyticsService(None, None, None)
-    on_dw_deposit_success_calls = []
-    monkeypatch.setattr(analytics_service, 'on_dw_deposit_success',
-                        mock_record_calls(on_dw_deposit_success_calls))
+    on_deposit_success_calls = []
+    monkeypatch.setattr(analytics_service, 'on_deposit_success',
+                        mock_record_calls(on_deposit_success_calls))
 
     event_handler = DepositsUpdatedEventHandler(repository, provider, None,
                                                 analytics_service)
@@ -69,7 +69,7 @@ def test_exists(monkeypatch):
     assert (deposit, old_status) in [
         args for args, kwargs in handle_money_flow_status_change_calls
     ]
-    assert ((money_flow, ), {}) in on_dw_deposit_success_calls
+    assert ((money_flow, ), {}) in on_deposit_success_calls
 
 
 def test_not_exists(monkeypatch):

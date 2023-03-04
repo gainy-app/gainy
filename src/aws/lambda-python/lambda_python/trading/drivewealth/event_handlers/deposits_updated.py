@@ -31,4 +31,4 @@ class DepositsUpdatedEventHandler(AbstractDriveWealthEventHandler):
 
         if money_flow and deposit.get_money_flow_status(
         ) == TradingMoneyFlowStatus.SUCCESS and old_mf_status != TradingMoneyFlowStatus.SUCCESS:
-            self.analytics_service.on_dw_deposit_success(money_flow)
+            self.analytics_service.on_deposit_success(money_flow)
