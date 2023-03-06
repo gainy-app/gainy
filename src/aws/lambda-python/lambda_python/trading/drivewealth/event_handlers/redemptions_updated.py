@@ -42,6 +42,14 @@ class RedemptionUpdatedEventHandler(AbstractDriveWealthEventHandler):
         if trading_account:
             self.provider.notify_low_balance(trading_account)
 
+        logger.info("Considering sending event on_withdraw_success",
+                    extra={
+                        "money_flow":
+                        money_flow.to_dict() if money_flow else None,
+                        "current_mf_status":
+                        redemption.get_money_flow_status(),
+                        "prev_mf_status": old_mf_status,
+                    })
         if money_flow and redemption.get_money_flow_status(
         ) == TradingMoneyFlowStatus.SUCCESS and old_mf_status != TradingMoneyFlowStatus.SUCCESS:
             self.analytics_service.on_withdraw_success(money_flow.profile_id,

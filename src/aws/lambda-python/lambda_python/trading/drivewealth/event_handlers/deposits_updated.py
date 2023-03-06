@@ -29,6 +29,13 @@ class DepositsUpdatedEventHandler(AbstractDriveWealthEventHandler):
         self.sync_trading_account_balances(deposit.trading_account_ref_id,
                                            force=True)
 
+        logger.info("Considering sending event on_deposit_success",
+                    extra={
+                        "money_flow":
+                        money_flow.to_dict() if money_flow else None,
+                        "current_mf_status": deposit.get_money_flow_status(),
+                        "prev_mf_status": old_mf_status,
+                    })
         if money_flow and deposit.get_money_flow_status(
         ) == TradingMoneyFlowStatus.SUCCESS and old_mf_status != TradingMoneyFlowStatus.SUCCESS:
             self.analytics_service.on_deposit_success(money_flow)
