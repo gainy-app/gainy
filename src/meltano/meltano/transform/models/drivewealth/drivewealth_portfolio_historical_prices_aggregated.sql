@@ -170,5 +170,6 @@ from data
 {% if is_incremental() %}
          left join {{ this }} old_data using (profile_id, holding_id_v2, period, symbol, datetime)
 where old_data.profile_id is null
-   or data.updated_at > old_data.updated_at
+   or abs(data.relative_daily_gain - old_data.relative_daily_gain) > 1e-3
+   or abs(data.adjusted_close - old_data.adjusted_close) > 1e-3)
 {% endif %}

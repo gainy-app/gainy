@@ -418,6 +418,10 @@ class DriveWealthProvider(DriveWealthProviderKYC,
         entities += self.api.get_documents_trading_confirmations(account)
         entities += self.api.get_documents_tax(account)
         entities += self.api.get_documents_statements(account)
+
+        for i in entities:
+            self.repository.refresh(i)
+
         self.repository.persist(entities)
         self.create_trading_statements(entities, profile_id)
 
