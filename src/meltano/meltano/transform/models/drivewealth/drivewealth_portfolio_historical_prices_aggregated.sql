@@ -171,5 +171,5 @@ from data
          left join {{ this }} old_data using (profile_id, holding_id_v2, period, symbol, datetime)
 where old_data.profile_id is null
    or abs(data.relative_daily_gain - old_data.relative_daily_gain) > 1e-3
-   or abs(data.adjusted_close - old_data.adjusted_close) > 1e-3)
+   or abs(data.adjusted_close - old_data.adjusted_close) > 1e-3
 {% endif %}
