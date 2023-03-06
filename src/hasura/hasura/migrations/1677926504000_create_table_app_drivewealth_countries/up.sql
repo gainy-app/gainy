@@ -1,6 +1,6 @@
 create table app.drivewealth_countries
 (
-    ref_id     varchar     not null primary key,
+    ref_id     varchar     not null,
     code2      varchar     not null,
     code3      varchar     not null,
     name       varchar     not null,
