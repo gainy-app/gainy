@@ -35,7 +35,6 @@ class PricesListener(AbstractPriceListener):
                               self.start_timestamp, self.symbols)
 
     def get_symbols(self):
-        print("get_symbols")
         with self.db_connect() as db_conn:
             max_symbols_count = SYMBOLS_LIMIT - len(MANDATORY_SYMBOLS)
             max_symbols_count -= self.get_active_listeners_symbols_count(
