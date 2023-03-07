@@ -5,13 +5,9 @@
 }}
 
 
-select profile_id, date, min(datetime) as open_at
-from {{ ref('portfolio_chart_skeleton') }}
-         join (
-                  select profile_id, max(date) as date
-                  from {{ ref('portfolio_chart_skeleton') }}
-                  where period = '1d'
-                  group by profile_id
-              ) t using (profile_id, date)
-where period = '1d'
-group by profile_id, date
+select profile_id, max(week_trading_sessions.date) as date, max(open_at)::timestamp as open_at
+from {{ ref('profile_holdings_normalized') }}
+         join {{ ref('week_trading_sessions') }}
+              on week_trading_sessions.symbol = profile_holdings_normalized.ticker_symbol
+where week_trading_sessions.index = 0
+group by profile_id
