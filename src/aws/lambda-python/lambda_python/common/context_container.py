@@ -112,7 +112,8 @@ class ContextContainer(GainyContextContainer):
         return DriveWealthProvider(self.drivewealth_repository,
                                    self.drivewealth_api,
                                    self.trading_repository, self.plaid_service,
-                                   self.notification_service)
+                                   self.notification_service,
+                                   self.analytics_service)
 
     # trading
     @cached_property
@@ -141,7 +142,7 @@ class ContextContainer(GainyContextContainer):
         return DriveWealthQueueMessageHandler(self.drivewealth_repository,
                                               self.drivewealth_provider,
                                               self.trading_repository,
-                                              self.trading_service)
+                                              self.analytics_service)
 
     @cached_property
     def aws_message_handler(self) -> AwsMessageHandler:

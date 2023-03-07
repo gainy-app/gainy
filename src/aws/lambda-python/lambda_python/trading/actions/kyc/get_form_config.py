@@ -23,14 +23,14 @@ class KycGetFormConfig(HasuraAction):
             profile = cursor.fetchone()
 
             cursor.execute(
-                "select * from raw_data.gainy_countries order by name")
+                "select * from app.drivewealth_countries order by name")
             countries = cursor.fetchall()
             cursor.execute(
                 "select * from raw_data.gainy_us_states order by name")
             us_states = cursor.fetchall()
 
         country_choices = [{
-            "value": country["alpha-3"],
+            "value": country["code3"],
             "name": country["name"],
         } for country in countries]
 

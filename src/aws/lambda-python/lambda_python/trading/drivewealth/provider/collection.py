@@ -15,6 +15,7 @@ class DriveWealthProviderCollection(GainyDriveWealthProvider):
     repository: DriveWealthRepository = None
     api: DriveWealthApi = None
 
+    # TODO deprecated ?
     def get_actual_collection_data(self, profile_id: int,
                                    collection_id: int) -> CollectionStatus:
         fund = self.repository.get_profile_fund(profile_id,
@@ -41,12 +42,3 @@ class DriveWealthProviderCollection(GainyDriveWealthProvider):
             raise EntityNotFoundException(DriveWealthPortfolioStatusHolding)
 
         return fund_status.get_collection_status()
-
-    def _on_money_transfer(self, profile_id: int, trading_account_id: int):
-        repository = self.repository
-        portfolio = repository.get_profile_portfolio(profile_id,
-                                                     trading_account_id)
-        if not portfolio:
-            return
-
-        self.sync_portfolio_status(portfolio)

@@ -1,13 +1,10 @@
 import datetime
 import json
-from decimal import Decimal
 
-from typing import Optional, List
 import enum
 
 from gainy.data_access.models import BaseModel, classproperty
 from gainy.exceptions import BadRequestException
-from gainy.trading.models import TradingMoneyFlowStatus
 
 
 class TradingStatementType(str, enum.Enum):
@@ -82,6 +79,7 @@ class TradingStatement(BaseModel):
     profile_id: int = None
     type: TradingStatementType = None
     display_name: str = None
+    date: datetime.date = None
     created_at: datetime.datetime = None
 
     key_fields = ["id"]
@@ -141,48 +139,6 @@ class KycDocument(BaseModel):
                          ] and self.side == KycDocumentSide.BACK:
             raise BadRequestException(
                 f"Document of type {self.type} can't have BACK side")
-
-
-class TradingMoneyFlow(BaseModel):
-    id = None
-    profile_id = None
-    status: TradingMoneyFlowStatus = None
-    amount = None
-    trading_account_id = None
-    funding_account_id = None
-    fees_total_amount: Decimal = None
-    created_at = None
-    updated_at = None
-
-    key_fields = ["id"]
-
-    db_excluded_fields = ["created_at", "updated_at"]
-    non_persistent_fields = ["id", "created_at", "updated_at"]
-
-    def set_from_dict(self, row: dict = None):
-        super().set_from_dict(row)
-
-        if not row:
-            return self
-
-        self.status = TradingMoneyFlowStatus[
-            row["status"]] if row["status"] else None
-        return self
-
-    @classproperty
-    def schema_name(self) -> str:
-        return "app"
-
-    @classproperty
-    def table_name(self) -> str:
-        return "trading_money_flow"
-
-    def to_dict(self) -> dict:
-        return {
-            **super().to_dict(),
-            "status":
-            self.status.name if self.status else None,
-        }
 
 
 class KycForm(BaseModel):

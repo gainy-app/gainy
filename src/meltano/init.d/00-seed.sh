@@ -4,6 +4,7 @@ psql_auth="psql -h $PG_HOST -p $PG_PORT -U $PG_USERNAME $PG_DBNAME"
 $psql_auth -c "create user datadog with password '${PG_DATADOG_PASSWORD}';" || $psql_auth -c "alter user datadog with password '${PG_DATADOG_PASSWORD}';"
 $psql_auth -c "grant pg_monitor to datadog;"
 $psql_auth -c "grant SELECT ON pg_stat_database to datadog;"
+$psql_auth -c "create schema if not exists airflow"
 $psql_auth -c "GRANT USAGE ON SCHEMA airflow TO datadog;"
 $psql_auth -c "GRANT SELECT ON ALL TABLES IN SCHEMA airflow TO datadog;"
 
@@ -64,8 +65,13 @@ if [ $($psql_auth -c "select count(*) from deployment.public_schemas where schem
   echo "$(date)" meltano invoke dbt run $DBT_RUN_FLAGS
   if meltano invoke dbt run $DBT_RUN_FLAGS; then
     $psql_auth -c "update deployment.public_schemas set deployed_at = now() where schema_name = '$DBT_TARGET_SCHEMA';"
-
     /bin/bash scripts/store_deployment_state.sh
+
+    echo "$(date) meltano invoke dbt run --vars '{\"realtime\": true}' --select tag:realtime"
+    if ! meltano invoke dbt run --vars '{"realtime": true}' --select tag:realtime; then
+      echo 'Failed to run realtime dbt, exiting'
+      exit 1
+    fi
   else
     echo 'Failed to seed public schema, exiting'
     exit 1

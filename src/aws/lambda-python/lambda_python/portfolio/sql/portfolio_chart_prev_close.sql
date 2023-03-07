@@ -38,13 +38,21 @@ with filtered_holdings as
                           ) profile_id,
                             case
                                 when type = 'cash' and ticker_symbol = 'CUR:USD'
-                                    then quantity::numeric
+                                    then quantity
                                 else 0
                                 end as value
                       from profile_holdings_normalized_all
                       where profile_id = %(profile_id)s
                         and type = 'cash'
                         and ticker_symbol = 'CUR:USD'
+                        and not is_app_trading
+
+                      union all
+
+                      select profile_id,
+                             coalesce(pending_cash, 0) as value
+                      from trading_profile_status
+                      where profile_id = %(profile_id)s
                   ) t
      ),
      raw_data as
@@ -64,16 +72,16 @@ with filtered_holdings as
                              max(datetime) as datetime
                       from (
                                select ticker_chart.*,
-                                      rank() over (partition by profile_id, period order by date desc) = 1 as is_latest_day
+                                      rank() over (partition by profile_id, period order by ticker_chart.date desc) = 1 as is_latest_day
                                from ticker_chart
                                    join portfolio_chart_skeleton using (profile_id, period, datetime)
                            ) t
                       where (period != '1d' or not is_latest_day)
-                        and (period != '1w' or date < now() - interval '1 week')
-                        and (period != '1m' or datetime < now() - interval '1 month')
-                        and (period != '3m' or datetime < now() - interval '3 month')
-                        and (period != '1y' or datetime < now() - interval '1 year')
-                        and (period != '5y' or datetime < now() - interval '5 year')
+                        and (period != '1w' or date < now()::date - interval '1 week')
+                        and (period != '1m' or datetime < now()::date - interval '1 month')
+                        and (period != '3m' or datetime < now()::date - interval '3 month')
+                        and (period != '1y' or datetime < now()::date - interval '1 year')
+                        and (period != '5y' or datetime < now()::date - interval '5 year')
                       group by period
                   ) t
                       left join ticker_chart using (period, date)

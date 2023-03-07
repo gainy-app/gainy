@@ -14,20 +14,7 @@
 }}
 
 
-with order_stats as materialized
-         (
-             select profile_id,
-                    normalize_drivewealth_symbol(symbol) as symbol,
-                    date,
-                    sum(total_order_amount_normalized)   as order_cf_sum
-             from {{ source('app', 'drivewealth_orders') }}
-                      join {{ source('app', 'drivewealth_accounts') }}
-                           on drivewealth_accounts.ref_id = drivewealth_orders.account_id
-                      join {{ source('app', 'drivewealth_users') }}
-                           on drivewealth_users.ref_id = drivewealth_accounts.drivewealth_user_id
-             group by profile_id, public.normalize_drivewealth_symbol(symbol), date
-         ),
-     portfolio_statuses as
+with portfolio_statuses as
          (
              select distinct on (
                  profile_id, date
@@ -45,6 +32,22 @@ with order_stats as materialized
                       join {{ source('app', 'drivewealth_portfolios') }}
                            on drivewealth_portfolios.ref_id = drivewealth_portfolio_id
              order by profile_id desc, date desc, drivewealth_portfolio_statuses.created_at desc
+         ),
+     order_stats as materialized
+         (
+             select profile_id,
+                    symbol_normalized as symbol,
+                    date,
+                    sum(total_order_amount_normalized)   as order_cf_sum
+             from {{ source('app', 'drivewealth_orders') }}
+                      join {{ source('app', 'drivewealth_accounts') }}
+                           on drivewealth_accounts.ref_id = drivewealth_orders.account_id
+                      join {{ source('app', 'drivewealth_users') }}
+                           on drivewealth_users.ref_id = drivewealth_accounts.drivewealth_user_id
+                      join (select profile_id, max(updated_at) as created_at from portfolio_statuses group by profile_id) last_portfolio_status
+                           using (profile_id)
+             where drivewealth_orders.last_executed_at < last_portfolio_status.created_at
+             group by profile_id, symbol_normalized, date
          ),
      portfolio_status_funds as
          (

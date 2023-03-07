@@ -4,21 +4,20 @@ from decimal import Decimal
 import pytest
 
 from gainy.data_access.models import BaseModel
-from gainy.tests.mocks.repository_mocks import mock_find, mock_persist, mock_noop, mock_record_calls
-from gainy.trading.models import TradingMoneyFlowStatus
+from gainy.tests.mocks.repository_mocks import mock_find, mock_persist, mock_record_calls
+from gainy.trading.models import TradingMoneyFlowStatus, TradingMoneyFlow
 from gainy.utils import ENV_PRODUCTION
 from services.notification import NotificationService
 from tests.trading.drivewealth.api_mocks import mock_create_deposit, mock_create_redemption, mock_get_deposit, \
     mock_get_redemption
-from trading.models import TradingMoneyFlow, TradingStatement
-from trading.drivewealth.models import DriveWealthBankAccount, DriveWealthDeposit, DriveWealthRedemption, \
-    DriveWealthStatement, DriveWealthOrder
+from trading.models import TradingStatement
+from trading.drivewealth.models import DriveWealthBankAccount, DriveWealthStatement, DriveWealthOrder
 from trading.drivewealth.api import DriveWealthApi
 from trading.drivewealth.provider import DriveWealthProvider
 from trading.drivewealth.repository import DriveWealthRepository
 
 from gainy.trading.drivewealth.models import DriveWealthAccount, DriveWealthInstrument, DriveWealthInstrumentStatus, \
-    DriveWealthPortfolio
+    DriveWealthPortfolio, DriveWealthDeposit, DriveWealthRedemption, DriveWealthPortfolioStatus
 
 
 def get_test_transfer_money_amounts():
@@ -209,6 +208,8 @@ def test_create_trading_statements(monkeypatch):
     entity2.display_name = "display_name2"
     entity2.trading_statement_id = trading_statement_id2
 
+    trading_statement2 = TradingStatement()
+
     entities = [entity1, entity2]
 
     repository = DriveWealthRepository(None)
@@ -224,25 +225,41 @@ def test_create_trading_statements(monkeypatch):
                 entities = [entities]
 
             for entity in entities:
-                if isinstance(entity, TradingStatement):
+                if entity == trading_statement2:
+                    entity.id = trading_statement_id2
+                elif isinstance(entity, TradingStatement):
                     entity.id = trading_statement_id1
 
         return mock
 
     monkeypatch.setattr(repository, "persist",
                         custom_mock_persist(persisted_objects))
+    monkeypatch.setattr(
+        repository, "find_one",
+        mock_find([(TradingStatement, {
+            "id": trading_statement_id2
+        }, trading_statement2)]))
 
     provider = DriveWealthProvider(repository, None, None, None, None)
     provider.create_trading_statements(entities, profile_id)
 
     assert entity1 in persisted_objects[DriveWealthStatement]
-    assert entity2 not in persisted_objects[DriveWealthStatement]
-    assert len(persisted_objects[TradingStatement]) == 1
-    trading_statement = persisted_objects[TradingStatement][0]
-    assert trading_statement.profile_id == profile_id
-    assert trading_statement.type == entity1.type
-    assert trading_statement.display_name == entity1.display_name
+    assert entity2 in persisted_objects[DriveWealthStatement]
+
+    assert len(persisted_objects[TradingStatement]) == 2
+    assert trading_statement2 in persisted_objects[TradingStatement]
+
+    trading_statement1 = next(i for i in persisted_objects[TradingStatement]
+                              if i != trading_statement2)
+    assert trading_statement1.profile_id == profile_id
+    assert trading_statement1.type == entity1.type
+    assert trading_statement1.display_name == entity1.display_name
     assert entity1.trading_statement_id == trading_statement_id1
+
+    assert trading_statement2.profile_id == profile_id
+    assert trading_statement2.type == entity2.type
+    assert trading_statement2.display_name == entity2.display_name
+    assert entity2.trading_statement_id == trading_statement_id2
 
 
 def test_download_statement(monkeypatch):
@@ -340,3 +357,60 @@ def test_handle_order(monkeypatch):
     assert DriveWealthPortfolio in persisted_objects
     assert portfolio in persisted_objects[DriveWealthPortfolio]
     assert portfolio.last_order_executed_at == order_executed_at
+
+
+def get_test_on_new_transaction_portfolio_changed():
+    return [True, False]
+
+
+@pytest.mark.parametrize("portfolio_changed",
+                         get_test_on_new_transaction_portfolio_changed())
+def test_on_new_transaction(monkeypatch, portfolio_changed):
+    account_ref_id = "account_ref_id"
+
+    portfolio_status = DriveWealthPortfolioStatus()
+
+    portfolio = DriveWealthPortfolio()
+    normalize_weights_calls = []
+    monkeypatch.setattr(portfolio, "normalize_weights",
+                        mock_record_calls(normalize_weights_calls))
+
+    repository = DriveWealthRepository(None)
+    monkeypatch.setattr(
+        repository, "find_one",
+        mock_find([
+            (DriveWealthPortfolio, {
+                "drivewealth_account_id": account_ref_id
+            }, portfolio),
+        ]))
+
+    provider = DriveWealthProvider(repository, None, None, None, None)
+
+    def mock_sync_portfolio_status(_portfolio, force=None):
+        assert _portfolio == portfolio
+        assert force
+        return portfolio_status
+
+    monkeypatch.setattr(provider, "sync_portfolio_status",
+                        mock_sync_portfolio_status)
+
+    def mock_actualize_portfolio(_portfolio, _portfolio_status):
+        assert _portfolio == portfolio
+        assert _portfolio_status == portfolio_status
+        return portfolio_changed
+
+    monkeypatch.setattr(provider, "actualize_portfolio",
+                        mock_actualize_portfolio)
+
+    send_portfolio_to_api_calls = []
+    monkeypatch.setattr(provider, "send_portfolio_to_api",
+                        mock_record_calls(send_portfolio_to_api_calls))
+
+    provider.on_new_transaction(account_ref_id)
+
+    if portfolio_changed:
+        assert normalize_weights_calls
+        assert ((portfolio, ), {}) in send_portfolio_to_api_calls
+    else:
+        assert not normalize_weights_calls
+        assert not send_portfolio_to_api_calls

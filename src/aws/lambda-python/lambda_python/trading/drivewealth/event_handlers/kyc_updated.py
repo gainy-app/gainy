@@ -2,7 +2,7 @@ from gainy.exceptions import NotFoundException
 from gainy.utils import get_logger
 from trading.drivewealth.abstract_event_handler import AbstractDriveWealthEventHandler
 from trading.drivewealth.models import DriveWealthKycStatus
-from trading.models import ProfileKycStatus
+from trading.models import ProfileKycStatus, KycStatus
 
 logger = get_logger(__name__)
 
@@ -214,7 +214,17 @@ class KycUpdatedEventHandler(AbstractDriveWealthEventHandler):
         except NotFoundException:
             return
 
+        try:
+            old_entity = self.trading_repository.get_actual_kyc_status(
+                profile_id)
+        except NotFoundException:
+            old_entity = None
+
         entity = _get_profile_kyc_status(event_payload['current'])
         entity.profile_id = profile_id
         self.repo.persist(entity)
         self.trading_repository.update_kyc_form(profile_id, entity.status)
+
+        if entity.status == KycStatus.DENIED and (
+                not old_entity or old_entity.status != KycStatus.DENIED):
+            self.analytics_service.on_dw_kyc_status_rejected(profile_id)

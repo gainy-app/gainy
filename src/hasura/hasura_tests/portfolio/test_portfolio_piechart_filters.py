@@ -31,11 +31,24 @@ def test_portfolio_piechart_filters(params):
     with open(query_file, 'r') as f:
         query = f.read()
 
-    portfolio_gains_data = make_graphql_request(
-        "query GetPortfolioHoldings($profileId: Int!) {portfolio_gains (where:{profile_id: {_eq: $profileId}}) { absolute_gain_1d actual_value } }",
-        {
+    gains_data = make_graphql_request(
+        """query GetPortfolioHoldings($profileId: Int!) {
+            portfolio_gains (where:{profile_id: {_eq: $profileId}}) { absolute_gain_1d actual_value } 
+            profile_holding_groups(where: {profile_id: {_eq: $profileId}}) { 
+                details {
+                  ticker_symbol
+                  collection_id
+                }
+                gains {
+                  absolute_gain_1d
+                  actual_value
+                  relative_gain_1d
+                } } 
+            }""", {
             "profileId": PROFILE_ID,
-        })['data']['portfolio_gains'][0]
+        })['data']
+    portfolio_gains_data = gains_data['portfolio_gains'][0]
+    portfolio_holding_group_gains_data = gains_data['profile_holding_groups']
 
     data = make_graphql_request(query, {
         "profileId": PROFILE_ID,
@@ -50,10 +63,29 @@ def test_portfolio_piechart_filters(params):
         if entity_type not in piechart_sums:
             piechart_sums[entity_type] = {}
 
-        expected_relative_daily_change = row['absolute_value'] / (
-            row['absolute_value'] - row['absolute_daily_change']) - 1
-        assert abs(expected_relative_daily_change -
-                   row['relative_daily_change']) < PRICE_EPS, row
+        if row["entity_type"] == "asset":
+            if row['entity_id'].startswith("ticker:"):
+                symbol = row['entity_id'].split("ticker:")[1]
+                filtered_gains = [
+                    i for i in portfolio_holding_group_gains_data
+                    if i["details"]["ticker_symbol"] == symbol
+                ]
+                relative_gain_1d = filtered_gains[0]["gains"][
+                    "relative_gain_1d"]
+            elif row['entity_id'].startswith("collection:"):
+                collection_id = row['entity_id'].split("collection:")[1]
+                filtered_gains = [
+                    i for i in portfolio_holding_group_gains_data
+                    if i["details"]["collection_id"] == collection_id
+                ]
+                relative_gain_1d = filtered_gains[0]["gains"][
+                    "relative_gain_1d"]
+            else:
+                raise Exception("unknown entity_id " + row['entity_id'])
+
+            expected_relative_daily_change = relative_gain_1d * row["weight"]
+            assert abs(expected_relative_daily_change -
+                       row['relative_daily_change']) < PRICE_EPS, row
         for field in ['weight', 'absolute_daily_change', 'absolute_value']:
             if field not in piechart_sums[entity_type]:
                 piechart_sums[entity_type][field] = 0

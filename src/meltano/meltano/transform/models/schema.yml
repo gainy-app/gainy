@@ -65,6 +65,7 @@ sources:
       - name: drivewealth_portfolio_holdings
       - name: drivewealth_portfolio_statuses
       - name: drivewealth_portfolios
+      - name: drivewealth_transactions
       - name: influencers
       - name: invitations
       - name: invoices
@@ -2480,6 +2481,10 @@ models:
         tests:
           - type:
               type: 'double precision'
+      - name: pending_orders_count
+        tests:
+          - type:
+              type: 'integer'
       - name: withdrawable_cash
         tests:
           - type:
@@ -2936,6 +2941,51 @@ models:
           - type:
               type: 'double precision'
       - name: updated_at
+        tests:
+          - type:
+              type: 'timestamp without time zone'
+
+  - name: portfolio_latest_trading_session
+    columns:
+      - name: profile_id
+        tests:
+          - type:
+              type: 'integer'
+      - name: date
+        tests:
+          - type:
+              type: 'date'
+      - name: open_at
+        tests:
+          - type:
+              type: 'timestamp without time zone'
+
+  - name: ticker_latest_trading_session
+    columns:
+      - name: symbol
+        tests:
+          - type:
+              type: 'character varying'
+      - name: date
+        tests:
+          - type:
+              type: 'date'
+      - name: open_at
+        tests:
+          - type:
+              type: 'timestamp without time zone'
+
+  - name: collection_latest_trading_session
+    columns:
+      - name: collection_uniq_id
+        tests:
+          - type:
+              type: 'text'
+      - name: date
+        tests:
+          - type:
+              type: 'date'
+      - name: open_at
         tests:
           - type:
               type: 'timestamp without time zone'

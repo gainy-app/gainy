@@ -76,7 +76,7 @@ query TradingGetProfileStatus($profile_id: Int!) {
     kyc_status # NOT_READY, READY, PROCESSING, APPROVED, INFO_REQUIRED, DOC_REQUIRED, MANUAL_REVIEW, DENIED
     kyc_message
     kyc_error_messages
-    pending_orders_amount
+    pending_orders_count
     withdrawable_cash
     pending_cash
   }
@@ -91,10 +91,11 @@ query TradingGetProfileStatus($profile_id: Int!) {
 #### List:
 ```graphql
 query TradingGetStatements($profile_id: Int!) {
-  app_trading_statements(where: {profile_id: {_eq: $profile_id}}) {
+  app_trading_statements(where: {profile_id: {_eq: $profile_id}}, order_by: {date: desc}) {
     display_name
     type
     id
+    date
   }
 }
 ```

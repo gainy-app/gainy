@@ -1,5 +1,6 @@
+from gainy.analytics.service import AnalyticsService
 from gainy.tests.mocks.repository_mocks import mock_find, mock_persist, mock_record_calls
-from gainy.trading.drivewealth.models import DriveWealthAccount
+from gainy.trading.drivewealth.models import DriveWealthAccount, DriveWealthUser
 from gainy.trading.models import TradingAccount
 from trading.drivewealth.event_handlers.accounts_updated import AccountsUpdatedEventHandler
 from trading.drivewealth.provider import DriveWealthProvider
@@ -10,9 +11,11 @@ def test_exists(monkeypatch):
     account_id = "account_id"
     status_name = "status_name"
     old_status = "old_status"
+    was_open = True
 
     account = DriveWealthAccount()
     account.status = old_status
+    monkeypatch.setattr(account, 'is_open', lambda: was_open)
 
     repository = DriveWealthRepository(None)
     monkeypatch.setattr(
@@ -33,6 +36,9 @@ def test_exists(monkeypatch):
     ensure_portfolio_calls = []
     monkeypatch.setattr(event_handler, 'ensure_portfolio',
                         mock_record_calls(ensure_portfolio_calls))
+    send_event_calls = []
+    monkeypatch.setattr(event_handler, 'send_event',
+                        mock_record_calls(send_event_calls))
 
     message = {
         "accountID": account_id,
@@ -51,6 +57,7 @@ def test_exists(monkeypatch):
     assert (account, old_status) in [
         args for args, kwargs in handle_account_status_change_calls
     ]
+    assert (account, was_open) in [args for args, kwargs in send_event_calls]
 
 
 def test_not_exists(monkeypatch):
@@ -79,6 +86,9 @@ def test_not_exists(monkeypatch):
     ensure_portfolio_calls = []
     monkeypatch.setattr(event_handler, 'ensure_portfolio',
                         mock_record_calls(ensure_portfolio_calls))
+    send_event_calls = []
+    monkeypatch.setattr(event_handler, 'send_event',
+                        mock_record_calls(send_event_calls))
 
     message = {
         "accountID": account_id,
@@ -86,6 +96,7 @@ def test_not_exists(monkeypatch):
     event_handler.handle(message)
 
     assert (account, ) in [args for args, kwargs in ensure_portfolio_calls]
+    assert (account, False) in [args for args, kwargs in send_event_calls]
 
 
 def test_ensure_portfolio(monkeypatch):
@@ -94,6 +105,7 @@ def test_ensure_portfolio(monkeypatch):
 
     account = DriveWealthAccount()
     account.trading_account_id = trading_account_id
+    monkeypatch.setattr(account, "is_open", lambda: True)
 
     trading_account = TradingAccount()
     trading_account.profile_id = profile_id
@@ -118,3 +130,34 @@ def test_ensure_portfolio(monkeypatch):
     assert (profile_id, trading_account_id) in [
         args for args, kwargs in ensure_portfolio_calls
     ]
+
+
+def test_send_event(monkeypatch):
+    drivewealth_user_id = "drivewealth_user_id"
+    profile_id = 2
+
+    drivewealth_user = DriveWealthUser()
+    drivewealth_user.profile_id = profile_id
+
+    account = DriveWealthAccount()
+    account.drivewealth_user_id = drivewealth_user_id
+    monkeypatch.setattr(account, "is_open", lambda: True)
+
+    repository = DriveWealthRepository(None)
+    monkeypatch.setattr(
+        repository, 'find_one',
+        mock_find([(DriveWealthUser, {
+            "ref_id": drivewealth_user_id
+        }, drivewealth_user)]))
+
+    analytics_service = AnalyticsService(None, None, None)
+    on_dw_brokerage_account_opened_calls = []
+    monkeypatch.setattr(
+        analytics_service, 'on_dw_brokerage_account_opened',
+        mock_record_calls(on_dw_brokerage_account_opened_calls))
+
+    event_handler = AccountsUpdatedEventHandler(repository, None, None,
+                                                analytics_service)
+    event_handler.send_event(account, False)
+
+    assert ((profile_id, ), {}) in on_dw_brokerage_account_opened_calls

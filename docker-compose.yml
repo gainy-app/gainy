@@ -148,17 +148,8 @@ services:
     env_file:
       - .env.global
       - .env.local
-    deploy:
-      replicas: 0
-
-  websockets-polygon:
-    image: gainy-websockets:latest
-    volumes:
-      - ./src/websockets:/srv
-    command: ["client_polygon.py"]
-    env_file:
-      - .env.global
-      - .env.local
+    environment:
+      SYMBOLS_LIMIT: 10
     deploy:
       replicas: 0
 
