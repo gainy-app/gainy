@@ -91,10 +91,11 @@ query TradingGetProfileStatus($profile_id: Int!) {
 #### List:
 ```graphql
 query TradingGetStatements($profile_id: Int!) {
-  app_trading_statements(where: {profile_id: {_eq: $profile_id}}) {
+  app_trading_statements(where: {profile_id: {_eq: $profile_id}}, order_by: {date: desc}) {
     display_name
     type
     id
+    date
   }
 }
 ```

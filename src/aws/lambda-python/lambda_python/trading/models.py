@@ -79,6 +79,7 @@ class TradingStatement(BaseModel):
     profile_id: int = None
     type: TradingStatementType = None
     display_name: str = None
+    date: datetime.date = None
     created_at: datetime.datetime = None
 
     key_fields = ["id"]

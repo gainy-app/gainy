@@ -208,6 +208,8 @@ def test_create_trading_statements(monkeypatch):
     entity2.display_name = "display_name2"
     entity2.trading_statement_id = trading_statement_id2
 
+    trading_statement2 = TradingStatement()
+
     entities = [entity1, entity2]
 
     repository = DriveWealthRepository(None)
@@ -223,25 +225,41 @@ def test_create_trading_statements(monkeypatch):
                 entities = [entities]
 
             for entity in entities:
-                if isinstance(entity, TradingStatement):
+                if entity == trading_statement2:
+                    entity.id = trading_statement_id2
+                elif isinstance(entity, TradingStatement):
                     entity.id = trading_statement_id1
 
         return mock
 
     monkeypatch.setattr(repository, "persist",
                         custom_mock_persist(persisted_objects))
+    monkeypatch.setattr(
+        repository, "find_one",
+        mock_find([(TradingStatement, {
+            "id": trading_statement_id2
+        }, trading_statement2)]))
 
     provider = DriveWealthProvider(repository, None, None, None, None)
     provider.create_trading_statements(entities, profile_id)
 
     assert entity1 in persisted_objects[DriveWealthStatement]
-    assert entity2 not in persisted_objects[DriveWealthStatement]
-    assert len(persisted_objects[TradingStatement]) == 1
-    trading_statement = persisted_objects[TradingStatement][0]
-    assert trading_statement.profile_id == profile_id
-    assert trading_statement.type == entity1.type
-    assert trading_statement.display_name == entity1.display_name
+    assert entity2 in persisted_objects[DriveWealthStatement]
+
+    assert len(persisted_objects[TradingStatement]) == 2
+    assert trading_statement2 in persisted_objects[TradingStatement]
+
+    trading_statement1 = next(i for i in persisted_objects[TradingStatement]
+                              if i != trading_statement2)
+    assert trading_statement1.profile_id == profile_id
+    assert trading_statement1.type == entity1.type
+    assert trading_statement1.display_name == entity1.display_name
     assert entity1.trading_statement_id == trading_statement_id1
+
+    assert trading_statement2.profile_id == profile_id
+    assert trading_statement2.type == entity2.type
+    assert trading_statement2.display_name == entity2.display_name
+    assert entity2.trading_statement_id == trading_statement_id2
 
 
 def test_download_statement(monkeypatch):
