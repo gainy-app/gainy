@@ -190,6 +190,7 @@ locals {
     STRIPE_API_KEY             = var.stripe_api_key
     STRIPE_PUBLISHABLE_KEY     = var.stripe_publishable_key
     GOOGLE_PLACES_API_KEY      = var.google_places_api_key
+    AMPLITUDE_API_KEY          = var.amplitude_api_key
 
     VERIFICATION_CODE_COOLDOWN = var.verification_code_cooldown
     VERIFICATION_CODE_TTL      = var.verification_code_ttl
