@@ -114,6 +114,10 @@ class AbstractPriceListener(ABC):
         return datetime.datetime.now().timestamp()
 
     @abstractmethod
+    def get_symbols(self):
+        pass
+
+    @abstractmethod
     async def listen(self):
         pass
 

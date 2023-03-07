@@ -1131,6 +1131,7 @@
           - id
           - profile_id
           - type
+          - date
           - display_name
           - created_at
         filter:
