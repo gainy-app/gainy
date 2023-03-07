@@ -299,13 +299,18 @@ class DriveWealthProvider(DriveWealthProviderKYC,
     def create_trading_statements(self, entities: list[DriveWealthStatement],
                                   profile_id):
         for dw_statement in entities:
+            trading_statement = None
             if dw_statement.trading_statement_id:
-                continue
+                trading_statement = self.repository.find_one(
+                    TradingStatement,
+                    {"id": dw_statement.trading_statement_id})
+            if not trading_statement:
+                trading_statement = TradingStatement()
 
-            trading_statement = TradingStatement()
             trading_statement.profile_id = profile_id
             trading_statement.type = dw_statement.type
             trading_statement.display_name = dw_statement.display_name
+            trading_statement.date = dw_statement.date
             self.repository.persist(trading_statement)
             dw_statement.trading_statement_id = trading_statement.id
             self.repository.persist(dw_statement)

@@ -3,6 +3,7 @@ import enum
 
 import re
 from decimal import Decimal
+from typing import Optional
 
 import dateutil.parser
 import pytz
@@ -10,10 +11,12 @@ import pytz
 from gainy.data_access.models import classproperty
 from gainy.trading.drivewealth.models import BaseDriveWealthModel
 from gainy.trading.drivewealth.provider.base import normalize_symbol
+from gainy.utils import get_logger
 from trading.models import ProfileKycStatus, KycStatus, TradingStatementType
 from gainy.trading.models import TradingCollectionVersion, TradingOrderStatus
 
 PRECISION = 1e-3
+logger = get_logger(__name__)
 
 
 class DriveWealthDocument(BaseDriveWealthModel):
@@ -259,3 +262,15 @@ class DriveWealthStatement(BaseDriveWealthModel):
     @classproperty
     def table_name(self) -> str:
         return "drivewealth_statements"
+
+    @property
+    def date(self) -> Optional[datetime.date]:
+        if not self.file_key:
+            return None
+
+        try:
+            return datetime.datetime.strptime(self.file_key[:8],
+                                              "%Y%m%d").date()
+        except Exception as e:
+            logger.exception(e, extra={"file_key": self.file_key})
+            return None
