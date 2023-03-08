@@ -120,18 +120,36 @@ with portfolio_statuses as
                                    join {{ ref('historical_prices') }} using (symbol)
                           where date >= min_date
                       )
+             -- historical schedule for tickers with historical chart
              select profile_id, holding_id_v2, symbol, date, relative_daily_gain
              from ticker_schedule
 
              union all
 
-             select profile_id, holding_id_v2, symbol, date, coalesce(relative_daily_change, 0) as relative_daily_gain
+             -- historical schedule for tickers without historical chart
+             select profile_id, holding_id_v2, symbol, t.date, 0 as relative_daily_gain
              from min_holding_date
                       join (select date from {{ ref('historical_prices') }} where symbol = 'SPY') t on true
-                      left join {{ ref('ticker_realtime_metrics') }} using (symbol, date)
-                      left join ticker_schedule using (profile_id, holding_id_v2, symbol, date)
-             where ticker_schedule.profile_id is null
-               and date between min_date and now()::date
+                      left join {{ ref('ticker_realtime_metrics') }} using (symbol)
+             where ticker_realtime_metrics.symbol is null
+
+             union all
+
+             -- realtime schedule for tickers with historical chart
+             select profile_id, holding_id_v2, symbol, date, relative_daily_change
+             from min_holding_date
+                      join {{ ref('ticker_realtime_metrics') }} using (symbol)
+                      left join {{ ref('historical_prices') }} using (symbol, date)
+             where historical_prices.symbol is null
+
+             union all
+
+             -- realtime schedule for tickers without historical chart
+             select profile_id, holding_id_v2, symbol, t.date, 0 as relative_daily_change
+             from min_holding_date
+                      join (select date from {{ ref('ticker_realtime_metrics') }} where symbol = 'SPY') t on true
+                      left join {{ ref('ticker_realtime_metrics') }} using (symbol)
+             where ticker_realtime_metrics.symbol is null
      ),
      data_extended0 as
          (
