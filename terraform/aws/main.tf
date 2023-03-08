@@ -54,6 +54,7 @@ module "lambda" {
   stripe_publishable_key = var.stripe_publishable_key
   google_places_api_key  = var.google_places_api_key
   slack_bot_token        = var.slack_bot_token
+  amplitude_api_key      = var.amplitude_api_key
 
   base_image_registry_address = var.base_image_registry_address
   base_image_version          = var.base_image_version

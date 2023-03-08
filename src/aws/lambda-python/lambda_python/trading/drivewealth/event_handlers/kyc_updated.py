@@ -225,6 +225,12 @@ class KycUpdatedEventHandler(AbstractDriveWealthEventHandler):
         self.repo.persist(entity)
         self.trading_repository.update_kyc_form(profile_id, entity.status)
 
+        logger.info("Considering sending event on_dw_kyc_status_rejected",
+                    extra={
+                        "current_status": entity.status,
+                        "prev_status":
+                        old_entity.status if old_entity else None,
+                    })
         if entity.status == KycStatus.DENIED and (
                 not old_entity or old_entity.status != KycStatus.DENIED):
             self.analytics_service.on_dw_kyc_status_rejected(profile_id)
