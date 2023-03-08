@@ -119,37 +119,19 @@ with portfolio_statuses as
                           from min_holding_date
                                    join {{ ref('historical_prices') }} using (symbol)
                           where date >= min_date
-                      ),
-                  cash_schedule as materialized
-                      (
-                          select profile_id, date
-                          from ticker_schedule
-                          group by profile_id, date
                       )
              select profile_id, holding_id_v2, symbol, date, relative_daily_gain
              from ticker_schedule
 
              union all
 
-             select profile_id, profile_id || '_cash_CUR:USD' as holding_id_v2, 'CUR:USD' as symbol, date, 0 as relative_daily_gain
-             from cash_schedule
-
-             union all
-
-             select profile_id, profile_id || '_cash_CUR:USD' as holding_id_v2, 'CUR:USD' as symbol, date, 0 as relative_daily_gain
-             from (select profile_id, 'SPY' as symbol from ticker_schedule group by profile_id) t
-                      join {{ ref('ticker_realtime_metrics') }} using (symbol)
-                      left join {{ ref('historical_prices') }} using (symbol, date)
-             where historical_prices.symbol is null
-
-             union all
-
-             select profile_id, holding_id_v2, symbol, date, relative_daily_change as relative_daily_gain
+             select profile_id, holding_id_v2, symbol, date, coalesce(relative_daily_change, 0) as relative_daily_gain
              from min_holding_date
-                      join {{ ref('ticker_realtime_metrics') }} using (symbol)
-                      left join {{ ref('historical_prices') }} using (symbol, date)
-             where date >= min_date
-               and historical_prices.symbol is null
+                      join (select date from {{ ref('historical_prices') }} where symbol = 'SPY') t on true
+                      left join {{ ref('ticker_realtime_metrics') }} using (symbol, date)
+                      left join ticker_schedule using (profile_id, holding_id_v2, symbol, date)
+             where ticker_schedule.profile_id is null
+               and date between min_date and now()::date
      ),
      data_extended0 as
          (
@@ -204,7 +186,7 @@ with portfolio_statuses as
                     symbol,
                     date,
                     coalesce(lag(value) over wnd, 0) as prev_value,
-                    value,
+                    coalesce(value, 0)               as value,
                     case
                         when value > 0 or coalesce(lag(value) over wnd, 0) > 0
                             then relative_daily_gain
@@ -226,15 +208,53 @@ with portfolio_statuses as
                     value,
                     prev_value,
                     -- CF = EV / (HP + 1) - BV
+                    -- CF = EV - (HP + 1) * BV
                     case
-                        when relative_daily_gain is not null and relative_daily_gain > -1
-                            then coalesce(value / (relative_daily_gain + 1) - prev_value, 0)
-                        else prev_value * relative_daily_gain
+                        when abs(coalesce(order_cf_sum, 0) + prev_value_sum) > 0 and value_sum > 0 and abs(computed_relative_daily_gain + 1) > 0
+                            then value / (computed_relative_daily_gain + 1) - prev_value
+                        when value_sum < 1e-10 and prev_value_sum > 0
+                            then value - (computed_relative_daily_gain + 1) * prev_value
+                        else value - prev_value
                         end as cash_flow,
                     updated_at
-             from data_extended3
+             from (
+                      select holding_id_v2,
+                             profile_id,
+                             collection_id,
+                             symbol,
+                             portfolio_status_id,
+                             date,
+                             relative_daily_gain,
+                             value_sum,
+                             coalesce(order_cf_sum, 0) as order_cf_sum,
+                             prev_value_sum,
+
+                             -- HP = EV_sum / (CF_sum + BV_sum) - 1
+                             -- HP = (EV_sum - CF_sum) / BV_sum - 1
+                             case
+                                 when abs(coalesce(order_cf_sum, 0) + prev_value_sum) > 0 and value_sum > 0
+                                     then value_sum / (coalesce(order_cf_sum, 0) + prev_value_sum) - 1
+                                 when value_sum < 1e-10 and prev_value_sum > 0
+                                     then (value_sum - coalesce(order_cf_sum, 0)) / prev_value_sum - 1
+                                 end as computed_relative_daily_gain,
+                             value,
+                             prev_value,
+                             updated_at
+                      from data_extended3
+                               left join order_stats using (profile_id, symbol, date)
+                               left join (
+                                             select profile_id,
+                                                    symbol,
+                                                    date,
+                                                    sum(value)      as value_sum,
+                                                    sum(prev_value) as prev_value_sum
+                                             from data_extended3
+                                             where symbol != 'CUR:USD'
+                                             group by profile_id, symbol, date
+                                         ) prev_value_sum using (profile_id, symbol, date)
+                  ) t
      ),
-     cash_flow_first_guess_filled as
+     cash_flow as
          (
              select *,
                     coalesce(lag(value) over wnd, 0) as prev_value
@@ -248,7 +268,7 @@ with portfolio_statuses as
                              relative_daily_gain,
                              case
                                  when value is null and (prev_value_sum is null or prev_value_sum < 1e-10)
-                                    then 0
+                                     then 0
                                  when value is null
                                      -- EV = (CF + BV) * (HP + 1)
                                      then greatest(0, ((order_cf_sum - equity_cf_sum) * prev_value / prev_value_sum + prev_value) * (1 + relative_daily_gain))
@@ -256,7 +276,7 @@ with portfolio_statuses as
                                  end as value,
                              case
                                  when value is null and (prev_value_sum is null or prev_value_sum < 1e-10)
-                                    then 0
+                                     then 0
                                  when value is null
                                      then (order_cf_sum - equity_cf_sum) * prev_value / prev_value_sum
                                  else cash_flow
@@ -268,7 +288,7 @@ with portfolio_statuses as
                                              select profile_id,
                                                     symbol,
                                                     date,
-                                                    sum(cash_flow)  as equity_cf_sum
+                                                    sum(cash_flow) as equity_cf_sum
                                              from cash_flow_first_guess
                                              where symbol != 'CUR:USD'
                                              group by profile_id, symbol, date
@@ -285,40 +305,6 @@ with portfolio_statuses as
                   ) t
                  window wnd as (partition by holding_id_v2 order by date)
      ),
-     cash_flow as
-         (
-             select holding_id_v2,
-                    profile_id,
-                    collection_id,
-                    symbol,
-                    portfolio_status_id,
-                    date,
-                    relative_daily_gain,
-                    coalesce(value, 0) as value,
-                    prev_value,
-                    case
-                        when symbol = 'CUR:USD'
-                            then value - prev_value
-                        when abs(equity_cf_sum) > 0 and order_cf_sum is not null
-                            then cash_flow / equity_cf_sum * order_cf_sum
-                        when order_cf_sum is not null and holdings_cnt > 0
-                            then order_cf_sum / holdings_cnt
-                        else 0
-                        end            as cash_flow,
-                    updated_at
-             from cash_flow_first_guess_filled
-                      left join order_stats using (profile_id, symbol, date)
-                      left join (
-                                    select profile_id,
-                                           symbol,
-                                           date,
-                                           count(distinct holding_id_v2) as holdings_cnt,
-                                           sum(cash_flow) as equity_cf_sum
-                                    from cash_flow_first_guess_filled
-                                    where symbol != 'CUR:USD'
-                                    group by profile_id, symbol, date
-                                ) equity_cf_sum using (profile_id, symbol, date)
-         ),
      data_extended as
          (
              select holding_id_v2,
@@ -344,32 +330,16 @@ with portfolio_statuses as
                         else 0
                         end as relative_daily_gain
              from cash_flow
-     ),
-     profile_date_threshold as
-         (
-             select profile_id, min(date) as max_date
-             from (
-                      select profile_id, max(date) as date
-                      from data_extended
-                      group by profile_id, holding_id_v2
-                  ) t
-             group by profile_id
      )
 select data_extended.*,
        date_trunc('week', date)::date                    as date_week,
        date_trunc('month', date)::date                   as date_month,
        profile_id || '_' || holding_id_v2 || '_' || date as id
 from data_extended
-         left join profile_date_threshold using (profile_id)
-
 {% if is_incremental() %}
          left join {{ this }} old_data using (profile_id, holding_id_v2, symbol, date)
-{% endif %}
-
-where data_extended.date <= profile_date_threshold.max_date
-
-{% if is_incremental() %}
-  and (old_data.profile_id is null
+where (old_data.profile_id is null
    or abs(data_extended.relative_daily_gain - old_data.relative_daily_gain) > 1e-3
+   or abs(data_extended.cash_flow - old_data.cash_flow) > 1e-3
    or abs(data_extended.value - old_data.value) > 1e-3)
 {% endif %}
