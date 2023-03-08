@@ -2805,6 +2805,38 @@ models:
         tests:
           - type:
               type: 'character varying'
+      - name: kyc_status
+        tests:
+          - type:
+              type: 'character varying'
+      - name: investment_goal
+        tests:
+          - type:
+              type: 'real'
+      - name: average_market_return
+        tests:
+          - type:
+              type: 'integer'
+      - name: invest_horizon
+        tests:
+          - type:
+              type: 'real'
+      - name: urgent_money_source
+        tests:
+          - type:
+              type: 'character varying'
+      - name: damage_of_failure
+        tests:
+          - type:
+              type: 'real'
+      - name: stock_market_risks
+        tests:
+          - type:
+              type: 'character varying'
+      - name: trading_experience
+        tests:
+          - type:
+              type: 'character varying'
 
   - name: trading_collection_tickers
     columns:

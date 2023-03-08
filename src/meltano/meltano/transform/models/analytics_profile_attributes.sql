@@ -185,6 +185,7 @@ with profiles as
      profile_scoring_settings as
          (
              select profile_id,
+                    risk_level                  as investment_goal,
                     average_market_return,
                     investment_horizon          as invest_horizon,
                     unexpected_purchases_source as urgent_money_source,
@@ -230,6 +231,7 @@ select profile_id,
        kyc_risk_tolerance,
        kyc_employment_status,
        kyc_status,
+       investment_goal,
        average_market_return,
        invest_horizon,
        urgent_money_source,
