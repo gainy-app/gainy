@@ -25,6 +25,7 @@ with raw_data_1d as
                              max(date) as date
                       from {{ ref('drivewealth_portfolio_historical_holdings') }}
                       where date > now()::date - interval '1 week'
+                        and date <= (select max(date) from {{ ref('exchange_schedule') }} where exchange_name = 'NYSE' and open_at < now())
                       group by profile_id, holding_id_v2, symbol
                   ) t
                  join {{ ref('drivewealth_portfolio_historical_holdings') }} using (profile_id, holding_id_v2, symbol, date)
