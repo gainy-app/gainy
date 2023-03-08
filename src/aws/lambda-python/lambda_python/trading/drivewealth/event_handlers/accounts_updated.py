@@ -37,6 +37,12 @@ class AccountsUpdatedEventHandler(AbstractDriveWealthEventHandler):
             self.send_event(account, was_open)
 
     def send_event(self, account: DriveWealthAccount, was_open: bool):
+        logger.info("Considering sending event on_dw_brokerage_account_opened",
+                    extra={
+                        "was_open": was_open,
+                        "is_open": account.is_open(),
+                        "drivewealth_user_id": account.drivewealth_user_id,
+                    })
         if was_open or not account.is_open(
         ) or not account.drivewealth_user_id:
             return
