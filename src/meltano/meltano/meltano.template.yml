@@ -300,6 +300,8 @@ plugins:
           logging_level: $AIRFLOW_LOG_LEVEL
         scheduler:
           scheduler_health_check_threshold: 120
+          enable_health_check: true
+          scheduler_health_check_server_port: 8974
         webserver:
           warn_deployment_exposure: false
 

@@ -29,6 +29,7 @@ class StatementCreatedEventHandler(AbstractDriveWealthEventHandler):
         entity.account_id = event_payload["accountID"]
         entity.user_id = event_payload["userID"]
 
+        self.repo.refresh(entity)
         self.repo.persist(entity)
 
         try:
