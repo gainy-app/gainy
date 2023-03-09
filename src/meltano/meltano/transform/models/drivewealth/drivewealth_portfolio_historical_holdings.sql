@@ -154,6 +154,8 @@ with portfolio_statuses as
                                where symbol = 'SPY'
                                  and historical_prices.symbol is null
                            ) t on true
+                      left join {{ ref('ticker_realtime_metrics') }} using (symbol)
+             where ticker_realtime_metrics.symbol is null
      ),
      data_extended0 as
          (
