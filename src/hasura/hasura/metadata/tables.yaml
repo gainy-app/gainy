@@ -1837,6 +1837,7 @@
     - role: user
       permission:
         columns:
+          - ticker_symbol
           - purchase_date
           - ticker_name
           - name
