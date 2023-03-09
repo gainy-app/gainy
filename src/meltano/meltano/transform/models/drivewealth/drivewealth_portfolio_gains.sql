@@ -173,16 +173,16 @@ with profile_stats as materialized
                                 sum(prev_value)::numeric         as prev_value,
                                 sum(case when is_last_date.profile_id is null then 0 else value end -
                                     cash_flow)::numeric as cash_flow
-                         from profile_holdings_normalized
-                                  join drivewealth_portfolio_historical_holdings using (profile_id, holding_id_v2)
+                         from {{ ref('profile_holdings_normalized') }}
+                                  join {{ ref('drivewealth_portfolio_historical_holdings') }} using (profile_id, holding_id_v2)
                                   left join (
                                                 select profile_id, holding_id_v2, max(date) as date
-                                                from drivewealth_portfolio_historical_holdings
+                                                from {{ ref('drivewealth_portfolio_historical_holdings') }}
                                                 group by profile_id, holding_id_v2
                                             ) is_last_date using (holding_id_v2, profile_id, date)
                                   left join (
                                                 select profile_id, holding_id_v2, max(date) as last_selloff_date
-                                                from drivewealth_portfolio_historical_holdings
+                                                from {{ ref('drivewealth_portfolio_historical_holdings') }}
                                                 where value < 1e-3
                                                 group by profile_id, holding_id_v2
                                             ) last_selloff_date using (profile_id, holding_id_v2)
