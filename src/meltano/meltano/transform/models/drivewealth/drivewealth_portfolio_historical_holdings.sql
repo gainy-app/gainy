@@ -147,9 +147,13 @@ with portfolio_statuses as
              -- realtime schedule for tickers without historical chart
              select profile_id, holding_id_v2, symbol, t.date, 0 as relative_daily_change
              from min_holding_date
-                      join (select date from {{ ref('ticker_realtime_metrics') }} where symbol = 'SPY') t on true
-                      left join {{ ref('ticker_realtime_metrics') }} using (symbol)
-             where ticker_realtime_metrics.symbol is null
+                      join (
+                               select date
+                               from {{ ref('ticker_realtime_metrics') }}
+                                        left join {{ ref('historical_prices') }} using (symbol, date)
+                               where symbol = 'SPY'
+                                 and historical_prices.symbol is null
+                           ) t on true
      ),
      data_extended0 as
          (
