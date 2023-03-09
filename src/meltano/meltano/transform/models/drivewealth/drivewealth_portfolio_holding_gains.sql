@@ -161,6 +161,7 @@ select drivewealth_holdings.profile_id,
        drivewealth_holdings.symbol,
        drivewealth_holdings.collection_id,
        drivewealth_holdings.actual_value,
+       -- it's important to use actual_value from drivewealth_portfolio_historical_holdings_marked, otherwise gains may be inconsistent
        drivewealth_portfolio_historical_holdings_marked.actual_value -
        prev_value_1d - cash_flow_sum_1d as absolute_gain_1d,
        drivewealth_portfolio_historical_holdings_marked.actual_value -

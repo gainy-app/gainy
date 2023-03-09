@@ -80,3 +80,56 @@ create or replace function normalize_drivewealth_symbol(s varchar) returns varch
 $$
 select regexp_replace(regexp_replace($1, '\.([AB])$', '-\1'), '\.(.*)$', '');
 $$ language sql;
+
+
+create or replace function npv(cf numeric[], d date[], rate numeric) returns numeric
+    language sql as
+$$
+select sum(cf / (1 + rate) ^ ((u.d - first_d)::numeric / 365))
+from (
+         select u.cf, u.d, first_value(u.d) over (order by u.d) as first_d
+         from unnest(cf, d) u(cf, d)
+     ) u
+$$;
+
+-- https://www.investopedia.com/terms/i/irr.asp
+create or replace function xirr(cf numeric[], d date[], minrate numeric= -1.0, maxrate numeric=100.0) returns numeric
+    language plpgsql as
+$$
+declare
+    minv     numeric;
+    maxv     numeric;
+    prec     numeric = 1e-5;
+    l        numeric = minrate;
+    r        numeric = maxrate;
+    s        numeric;
+    prev_npv numeric;
+    npv      numeric;
+begin
+    select min(unnest) from unnest($1) into minv;
+    select max(unnest) from unnest($1) into maxv;
+    if maxv < 0 or minv > 0 then
+        return null;
+    else
+        prev_npv = 0;
+        while true
+            loop
+                s = (l + r) * 0.5;
+                npv = npv($1, $2, s);
+--                 raise notice 'l: % p: % s % npv: %',l,r,s,npv;
+
+                if abs(npv) < prec or abs(npv - prev_npv) < prec then
+                    return s;
+                end if;
+
+                prev_npv = npv;
+                if npv > 0 then
+                    l = s;
+                else
+                    r = s;
+                end if;
+            end loop;
+        return s;
+    end if;
+end
+$$;
