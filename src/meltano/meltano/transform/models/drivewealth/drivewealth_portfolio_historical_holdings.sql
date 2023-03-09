@@ -129,7 +129,7 @@ with portfolio_statuses as
              -- historical schedule for tickers without historical chart
              select profile_id, holding_id_v2, symbol, t.date, 0 as relative_daily_gain
              from min_holding_date
-                      join (select date from {{ ref('historical_prices') }} where symbol = 'SPY') t on true
+                      join (select date from {{ ref('historical_prices') }} where symbol = 'SPY') t on t.date >= min_date
                       left join ticker_schedule using (profile_id, holding_id_v2, symbol, date)
              where ticker_schedule.profile_id is null
 
