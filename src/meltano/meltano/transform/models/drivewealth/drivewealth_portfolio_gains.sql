@@ -173,8 +173,7 @@ with profile_stats as materialized
                                 sum(prev_value)::numeric         as prev_value,
                                 sum(case when is_last_date.profile_id is null then 0 else value end -
                                     cash_flow)::numeric as cash_flow
-                         from {{ ref('profile_holdings_normalized') }}
-                                  join {{ ref('drivewealth_portfolio_historical_holdings') }} using (profile_id, holding_id_v2)
+                         from {{ ref('drivewealth_portfolio_historical_holdings') }}
                                   left join (
                                                 select profile_id, holding_id_v2, max(date) as date
                                                 from {{ ref('drivewealth_portfolio_historical_holdings') }}
