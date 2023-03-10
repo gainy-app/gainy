@@ -33,6 +33,7 @@ with latest_historical_prices as
                       join latest_historical_prices on true
                       join (select random() as r) r on true
              where extract(isodow from to_timestamp(dd / 1000)) < 6
+               and dd> latest_historical_prices.t
                and (polygon_marketstatus_upcoming.status is null
                 or polygon_marketstatus_upcoming.status != 'closed')
      )
