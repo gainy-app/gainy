@@ -35,7 +35,7 @@ with profile_stats as materialized
                                    select profile_id,
                                           max(date) as date
                                    from profile_stats
-                                   where date > now()::date - interval '1 week'
+                                   where date >= now()::date - interval '1 week'
                                    group by profile_id
                                ) t
                                    join profile_stats using (profile_id, date)
@@ -50,7 +50,7 @@ with profile_stats as materialized
                                           min(date)      as date,
                                           sum(cash_flow) as cash_flow_sum
                                    from profile_stats
-                                   where date > now()::date - interval '1 week'
+                                   where date >= now()::date - interval '1 week'
                                    group by profile_id
                                ) t
                                    join profile_stats using (profile_id, date)
@@ -65,7 +65,7 @@ with profile_stats as materialized
                                           min(date)      as date,
                                           sum(cash_flow) as cash_flow_sum
                                    from profile_stats
-                                   where date > now()::date - interval '1 month'
+                                   where date >= now()::date - interval '1 month'
                                    group by profile_id
                                ) t
                                    join profile_stats using (profile_id, date)
@@ -80,7 +80,7 @@ with profile_stats as materialized
                                           min(date)      as date,
                                           sum(cash_flow) as cash_flow_sum
                                    from profile_stats
-                                   where date > now()::date - interval '3 month'
+                                   where date >= now()::date - interval '3 month'
                                    group by profile_id
                                ) t
                                    join profile_stats using (profile_id, date)
@@ -95,7 +95,7 @@ with profile_stats as materialized
                                           min(date)      as date,
                                           sum(cash_flow) as cash_flow_sum
                                    from profile_stats
-                                   where date > now()::date - interval '1 year'
+                                   where date >= now()::date - interval '1 year'
                                    group by profile_id
                                ) t
                                    join profile_stats using (profile_id, date)
@@ -110,7 +110,7 @@ with profile_stats as materialized
                                           min(date)      as date,
                                           sum(cash_flow) as cash_flow_sum
                                    from profile_stats
-                                   where date > now()::date - interval '5 years'
+                                   where date >= now()::date - interval '5 years'
                                    group by profile_id
                                ) t
                                    join profile_stats using (profile_id, date)

@@ -28,7 +28,7 @@ with last_selloff_date as materialized
                       select holding_id_v2,
                              max(date) as date
                       from {{ ref('drivewealth_portfolio_historical_holdings') }}
-                      where date > now()::date - interval '1 week'
+                      where date >= now()::date - interval '1 week'
                         and date <= (select max(date) from {{ ref('exchange_schedule') }} where exchange_name = 'NYSE' and open_at < now())
                       group by holding_id_v2
                   ) t
@@ -47,7 +47,7 @@ with last_selloff_date as materialized
                       from {{ ref('drivewealth_portfolio_historical_holdings') }}
                                left join last_selloff_date using (holding_id_v2)
                       where (date > last_selloff_date or last_selloff_date is null)
-                        and date > now()::date - interval '1 week'
+                        and date >= now()::date - interval '1 week'
                       group by holding_id_v2
                   ) t
                  join {{ ref('drivewealth_portfolio_historical_holdings') }} using (holding_id_v2, date)
@@ -65,7 +65,7 @@ with last_selloff_date as materialized
                       from {{ ref('drivewealth_portfolio_historical_holdings') }}
                                left join last_selloff_date using (holding_id_v2)
                       where (date > last_selloff_date or last_selloff_date is null)
-                        and date > now()::date - interval '1 month'
+                        and date >= now()::date - interval '1 month'
                       group by holding_id_v2
                   ) t
                  join {{ ref('drivewealth_portfolio_historical_holdings') }} using (holding_id_v2, date)
@@ -83,7 +83,7 @@ with last_selloff_date as materialized
                       from {{ ref('drivewealth_portfolio_historical_holdings') }}
                                left join last_selloff_date using (holding_id_v2)
                       where (date > last_selloff_date or last_selloff_date is null)
-                        and date > now()::date - interval '3 month'
+                        and date >= now()::date - interval '3 month'
                       group by holding_id_v2
                   ) t
                  join {{ ref('drivewealth_portfolio_historical_holdings') }} using (holding_id_v2, date)
@@ -101,7 +101,7 @@ with last_selloff_date as materialized
                       from {{ ref('drivewealth_portfolio_historical_holdings') }}
                                left join last_selloff_date using (holding_id_v2)
                       where (date > last_selloff_date or last_selloff_date is null)
-                        and date > now()::date - interval '1 year'
+                        and date >= now()::date - interval '1 year'
                       group by holding_id_v2
                   ) t
                  join {{ ref('drivewealth_portfolio_historical_holdings') }} using (holding_id_v2, date)
@@ -119,7 +119,7 @@ with last_selloff_date as materialized
                       from {{ ref('drivewealth_portfolio_historical_holdings') }}
                                left join last_selloff_date using (holding_id_v2)
                       where (date > last_selloff_date or last_selloff_date is null)
-                        and date > now()::date - interval '5 years'
+                        and date >= now()::date - interval '5 years'
                       group by holding_id_v2
                   ) t
                  join {{ ref('drivewealth_portfolio_historical_holdings') }} using (holding_id_v2, date)
