@@ -106,10 +106,10 @@ with base_tickers_type_to_security_type as
                      ) case
                            when symbol like 'CUR:%'
                                then profile_id || '_cash_' || symbol
-                           when t.collection_id is null
+                           when drivewealth_holdings.collection_id is null
                                then 'ticker_' || profile_id || '_' || symbol
                            else 'ttf_' || profile_id || '_' ||
-                                t.collection_id
+                                drivewealth_holdings.collection_id
                            end                                      as holding_group_id,
                        holding_id_v2,
                        null::int                                    as holding_id,
@@ -122,8 +122,8 @@ with base_tickers_type_to_security_type as
                        base_tickers.name                            as name,
                        symbol,
                        symbol                                       as ticker_symbol,
-                       t.collection_id,
-                       '0_' || t.collection_id                      as collection_uniq_id,
+                       drivewealth_holdings.collection_id,
+                       '0_' || drivewealth_holdings.collection_id   as collection_uniq_id,
                        coalesce(case when symbol like 'CUR:%' then 'cash' end,
                                 base_tickers_type_to_security_type.security_type,
                                 base_tickers.type)                  as type,
@@ -133,11 +133,11 @@ with base_tickers_type_to_security_type as
                        greatest(t.updated_at,
                                 base_tickers.updated_at)::timestamp as updated_at
                  from (
-                          select profile_id, holding_id_v2, collection_id, symbol, max(updated_at) as updated_at
+                          select profile_id, holding_id_v2, max(updated_at) as updated_at
                           from {{ ref('drivewealth_portfolio_historical_holdings') }}
-                          group by profile_id, holding_id_v2, collection_id, symbol
+                          group by profile_id, holding_id_v2
                       ) t
-                           left join {{ ref('drivewealth_holdings') }} using (profile_id, holding_id_v2, symbol)
+                           left join {{ ref('drivewealth_holdings') }} using (profile_id, holding_id_v2)
                            left join {{ ref('base_tickers') }} using (symbol)
                            left join base_tickers_type_to_security_type on base_tickers_type_to_security_type.type = base_tickers.type
                            left join {{ ref('portfolio_brokers') }} on portfolio_brokers.uniq_id = 'gainy_broker'

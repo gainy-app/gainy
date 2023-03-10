@@ -171,20 +171,15 @@ with profile_stats as materialized
                                 date,
                                 sum(value)              as value,
                                 sum(prev_value)::numeric         as prev_value,
-                                sum(case when is_last_date.profile_id is null then 0 else value end -
+                                sum(case when is_last_date.holding_id_v2 is null then 0 else value end -
                                     cash_flow)::numeric as cash_flow
                          from {{ ref('drivewealth_portfolio_historical_holdings') }}
                                   left join (
-                                                select profile_id, holding_id_v2, max(date) as date
+                                                select holding_id_v2, max(date) as date
                                                 from {{ ref('drivewealth_portfolio_historical_holdings') }}
-                                                group by profile_id, holding_id_v2
-                                            ) is_last_date using (holding_id_v2, profile_id, date)
-                                  left join (
-                                                select profile_id, holding_id_v2, max(date) as last_selloff_date
-                                                from {{ ref('drivewealth_portfolio_historical_holdings') }}
-                                                where value < 1e-3
-                                                group by profile_id, holding_id_v2
-                                            ) last_selloff_date using (profile_id, holding_id_v2)
+                                                group by holding_id_v2
+                                            ) is_last_date using (holding_id_v2, date)
+                                  left join {{ ref('drivewealth_portfolio_historical_holdings_marked') }} using (holding_id_v2)
                          where date > last_selloff_date
                             or last_selloff_date is null
                          group by profile_id, date
