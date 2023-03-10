@@ -94,7 +94,7 @@ $$;
 
 -- https://www.investopedia.com/terms/i/irr.asp
 create or replace function xirr(cf numeric[], d date[], minrate numeric= -1.0, maxrate numeric=100.0) returns numeric
-    language plpgsql as
+    language plpgsql IMMUTABLE PARALLEL SAFE COST 10000 as
 $$
 declare
     minv     numeric;
