@@ -32,6 +32,7 @@ def _check_can_send(cache: Cache, user_id):
     last_sent = cache.get(_get_cache_key(user_id))
     if last_sent is None:
         return
+    last_sent = float(last_sent.decode())
 
     threshold_timestamp = (
         datetime.datetime.now() -
