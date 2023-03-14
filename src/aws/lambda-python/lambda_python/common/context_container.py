@@ -11,7 +11,6 @@ from queue_processing.aws_message_handler import AwsMessageHandler
 from queue_processing.dispatcher import QueueMessageDispatcher
 from services.cache import Cache, RedisCache, LocalCache
 from services.notification import NotificationService
-from services.sendgrid import SendGridService
 from services.sqs import SqsAdapter
 from services.twilio import TwilioClient
 from services.uploaded_file_service import UploadedFileService
@@ -45,12 +44,9 @@ class ContextContainer(GainyContextContainer):
         return TwilioClient()
 
     @cached_property
-    def sendgrid_service(self) -> SendGridService:
-        return SendGridService()
-
-    @cached_property
     def notification_service(self) -> NotificationService:
-        return NotificationService(self.sendgrid_service)
+        return NotificationService(self.get_repository(),
+                                   self.sendgrid_service)
 
     @cached_property
     def cache(self) -> Cache:
@@ -142,7 +138,8 @@ class ContextContainer(GainyContextContainer):
         return DriveWealthQueueMessageHandler(self.drivewealth_repository,
                                               self.drivewealth_provider,
                                               self.trading_repository,
-                                              self.analytics_service)
+                                              self.analytics_service,
+                                              self.notification_service)
 
     @cached_property
     def aws_message_handler(self) -> AwsMessageHandler:

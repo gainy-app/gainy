@@ -1,6 +1,7 @@
 from gainy.analytics.service import AnalyticsService
 from gainy.tests.mocks.repository_mocks import mock_persist, mock_record_calls
 from gainy.trading.drivewealth import DriveWealthRepository
+from services.notification import NotificationService
 from trading.drivewealth.event_handlers.kyc_updated import KycUpdatedEventHandler
 from trading.drivewealth.provider import DriveWealthProvider
 from trading.models import ProfileKycStatus, KycStatus
@@ -16,9 +17,16 @@ def test(monkeypatch):
     monkeypatch.setattr(repository, 'persist', mock_persist(persisted_objects))
 
     analytics_service = AnalyticsService(None, None, None)
-    on_dw_kyc_status_rejected_calls = []
-    monkeypatch.setattr(analytics_service, 'on_dw_kyc_status_rejected',
-                        mock_record_calls(on_dw_kyc_status_rejected_calls))
+    analytics_service_on_kyc_status_rejected_calls = []
+    monkeypatch.setattr(
+        analytics_service, 'on_kyc_status_rejected',
+        mock_record_calls(analytics_service_on_kyc_status_rejected_calls))
+
+    notification_service = NotificationService(None, None)
+    notification_service_on_kyc_status_rejected_calls = []
+    monkeypatch.setattr(
+        notification_service, 'on_kyc_status_rejected',
+        mock_record_calls(notification_service_on_kyc_status_rejected_calls))
 
     provider = DriveWealthProvider(None, None, None, None, None)
 
@@ -43,7 +51,8 @@ def test(monkeypatch):
 
     event_handler = KycUpdatedEventHandler(repository, provider,
                                            trading_repository,
-                                           analytics_service)
+                                           analytics_service,
+                                           notification_service)
 
     message = {
         "userID": user_id,
@@ -72,4 +81,7 @@ def test(monkeypatch):
     assert (profile_id, KycStatus.DENIED) in [
         args for args, kwargs in update_kyc_form_calls
     ]
-    assert ((profile_id, ), {}) in on_dw_kyc_status_rejected_calls
+    assert ((profile_id, ),
+            {}) in analytics_service_on_kyc_status_rejected_calls
+    assert ((profile_id, ),
+            {}) in notification_service_on_kyc_status_rejected_calls

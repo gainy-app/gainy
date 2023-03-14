@@ -202,6 +202,12 @@ def _get_profile_kyc_status(data) -> ProfileKycStatus:
     return entity
 
 
+def _status_changed_to(entity: ProfileKycStatus, old_entity: ProfileKycStatus,
+                       status: KycStatus):
+    return entity.status == status and (not old_entity
+                                        or old_entity.status != status)
+
+
 class KycUpdatedEventHandler(AbstractDriveWealthEventHandler):
 
     def supports(self, event_type: str):
@@ -225,12 +231,23 @@ class KycUpdatedEventHandler(AbstractDriveWealthEventHandler):
         self.repo.persist(entity)
         self.trading_repository.update_kyc_form(profile_id, entity.status)
 
-        logger.info("Considering sending event on_dw_kyc_status_rejected",
+        logger.info("KYC updated",
                     extra={
+                        "profile_id": profile_id,
                         "current_status": entity.status,
                         "prev_status":
                         old_entity.status if old_entity else None,
                     })
-        if entity.status == KycStatus.DENIED and (
-                not old_entity or old_entity.status != KycStatus.DENIED):
-            self.analytics_service.on_dw_kyc_status_rejected(profile_id)
+
+        if _status_changed_to(entity, old_entity, KycStatus.APPROVED):
+            self.notification_service.on_kyc_status_approved(profile_id)
+
+        if _status_changed_to(entity, old_entity, KycStatus.DENIED):
+            self.analytics_service.on_kyc_status_rejected(profile_id)
+            self.notification_service.on_kyc_status_rejected(profile_id)
+
+        if _status_changed_to(entity, old_entity, KycStatus.INFO_REQUIRED):
+            self.notification_service.on_kyc_status_info_required(profile_id)
+
+        if _status_changed_to(entity, old_entity, KycStatus.DOC_REQUIRED):
+            self.notification_service.on_kyc_status_doc_required(profile_id)

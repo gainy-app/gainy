@@ -306,7 +306,7 @@ def test_handle_instrument_status_change(monkeypatch):
     monkeypatch.setattr(repository, "symbol_is_in_collection",
                         mock_symbol_is_in_collection)
 
-    notification_service = NotificationService(None)
+    notification_service = NotificationService(None, None)
     calls = []
     monkeypatch.setattr(notification_service,
                         "notify_dw_instrument_status_changed",

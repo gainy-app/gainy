@@ -5,6 +5,7 @@ import trading.drivewealth.event_handlers
 from gainy.analytics.service import AnalyticsService
 from queue_processing.abstract_message_handler import AbstractMessageHandler
 from queue_processing.models import QueueMessage
+from services.notification import NotificationService
 from trading.drivewealth.abstract_event_handler import AbstractDriveWealthEventHandler
 from trading.drivewealth.provider import DriveWealthProvider
 from trading.drivewealth.repository import DriveWealthRepository
@@ -19,10 +20,12 @@ class DriveWealthQueueMessageHandler(AbstractMessageHandler):
     def __init__(self, repo: DriveWealthRepository,
                  provider: DriveWealthProvider,
                  trading_repository: TradingRepository,
-                 analytics_service: AnalyticsService):
+                 analytics_service: AnalyticsService,
+                 notification_service: NotificationService):
         self.handlers = [
-            cls(repo, provider, trading_repository, analytics_service) for cls
-            in self._iterate_module_classes(trading.drivewealth.event_handlers)
+            cls(repo, provider, trading_repository, analytics_service,
+                notification_service) for cls in self._iterate_module_classes(
+                    trading.drivewealth.event_handlers)
             if issubclass(cls, AbstractDriveWealthEventHandler)
         ]
 

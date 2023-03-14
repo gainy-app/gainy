@@ -63,6 +63,7 @@ locals {
     github_app_installation_id           = var.github_app_installation_id
     github_app_private_key               = var.github_app_private_key
     amplitude_api_key                    = var.amplitude_api_key
+    sendgrid_api_key                     = var.sendgrid_api_key
 
     pg_external_access_host     = var.pg_external_access_host
     pg_external_access_port     = var.pg_external_access_port

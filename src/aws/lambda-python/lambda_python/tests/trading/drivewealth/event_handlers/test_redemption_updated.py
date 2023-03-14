@@ -2,6 +2,7 @@ from gainy.analytics.service import AnalyticsService
 from gainy.trading.drivewealth.models import DriveWealthRedemptionStatus, DriveWealthRedemption
 from gainy.tests.mocks.repository_mocks import mock_find, mock_persist, mock_record_calls
 from gainy.trading.models import TradingMoneyFlow
+from services.notification import NotificationService
 from trading.drivewealth.event_handlers import RedemptionUpdatedEventHandler
 from trading.drivewealth.provider import DriveWealthProvider
 from trading.drivewealth.repository import DriveWealthRepository
@@ -59,12 +60,20 @@ def test_exists(monkeypatch):
     monkeypatch.setattr(repository, 'persist', mock_persist(persisted_objects))
 
     analytics_service = AnalyticsService(None, None, None)
-    on_withdraw_success_calls = []
-    monkeypatch.setattr(analytics_service, 'on_withdraw_success',
-                        mock_record_calls(on_withdraw_success_calls))
+    analytics_service_on_withdraw_success_calls = []
+    monkeypatch.setattr(
+        analytics_service, 'on_withdraw_success',
+        mock_record_calls(analytics_service_on_withdraw_success_calls))
+
+    notification_service = NotificationService(None, None)
+    notification_service_on_withdraw_success_calls = []
+    monkeypatch.setattr(
+        notification_service, 'on_withdraw_success',
+        mock_record_calls(notification_service_on_withdraw_success_calls))
 
     event_handler = RedemptionUpdatedEventHandler(repository, provider, None,
-                                                  analytics_service)
+                                                  analytics_service,
+                                                  notification_service)
     sync_trading_account_balances_calls = []
     monkeypatch.setattr(event_handler, 'sync_trading_account_balances',
                         mock_record_calls(sync_trading_account_balances_calls))
@@ -87,7 +96,10 @@ def test_exists(monkeypatch):
     ]
     assert ((redemption.trading_account_ref_id, ),
             {}) in on_new_transaction_calls
-    assert ((profile_id, -amount), {}) in on_withdraw_success_calls
+    assert ((profile_id, -amount),
+            {}) in analytics_service_on_withdraw_success_calls
+    assert ((profile_id, ),
+            {}) in notification_service_on_withdraw_success_calls
 
 
 def test_not_exists(monkeypatch):

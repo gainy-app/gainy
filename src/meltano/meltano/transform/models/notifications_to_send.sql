@@ -20,8 +20,9 @@ with data as
                    json_build_object('t', 1, 'id', min(collection_id))                                          as data,
                    false                                                                                        as is_test,
                    true                                                                                         as is_push,
+                   false                                                                                        as is_email,
                    false                                                                                        as is_shown_in_app,
-                   '4c70442b-ff04-475f-9a63-97d442127707'                                                       as template_id
+                   '4c70442b-ff04-475f-9a63-97d442127707'                                                       as onesignal_template_id
             from (
                      select first_value(profile_collections.id) over (order by relative_daily_change desc) as collection_id,
                             relative_daily_change,
@@ -48,8 +49,9 @@ with data as
                    json_build_object('t', 1, 'id', min(collection_id))                                     as data,
                    false                                                                                   as is_test,
                    true                                                                                    as is_push,
+                   false                                                                                   as is_email,
                    false                                                                                   as is_shown_in_app,
-                   '4c806577-88db-4f1e-a4d1-232fac0aa58a'                                                  as template_id
+                   '4c806577-88db-4f1e-a4d1-232fac0aa58a'                                                  as onesignal_template_id
             from (
                      select first_value(profile_collections.id) over (order by relative_daily_change) as collection_id,
                             relative_daily_change,
@@ -80,8 +82,9 @@ with data as
                    json_build_object('t', 1, 'id', collection_id)  as data,
                    false                                           as is_test,
                    true                                            as is_push,
+                   false                                           as is_email,
                    false                                           as is_shown_in_app,
-                   'e1b4dd4e-3310-403b-bdc8-b51f56f54045'          as template_id
+                   'e1b4dd4e-3310-403b-bdc8-b51f56f54045'          as onesignal_template_id
             from (
                      select collection_uniq_id,
                             profile_collections.id as collection_id,
@@ -109,8 +112,9 @@ with data as
                        json_build_object('t', 4, 'id', blogs.id)                    as data,
                        false                                                        as is_test,
                        true                                                         as is_push,
+                       false                                                        as is_email,
                        false                                                        as is_shown_in_app,
-                       '07b00e92-a1ae-44ea-bde0-c0715a991f2f'                       as template_id
+                       '07b00e92-a1ae-44ea-bde0-c0715a991f2f'                       as onesignal_template_id
                 from {{ source('website', 'blogs') }}
                          left join {{ source('website', 'blogs') }} article_duplicate
                                    on (article_duplicate.id = blogs.id or article_duplicate.name = blogs.name or article_duplicate.slug = blogs.slug)
@@ -141,8 +145,9 @@ with data as
                    json_build_object('t', 5)                   as data,
                    false                                       as is_test,
                    true                                        as is_push,
+                   false                                       as is_email,
                    false                                       as is_shown_in_app,
-                   'ed86815f-3391-498c-875a-ea974342dc46'      as template_id
+                   'ed86815f-3391-498c-875a-ea974342dc46'      as onesignal_template_id
             from {{ source('app', 'invitations') }}
             where created_at > now() - interval '1 hour'
 
@@ -158,8 +163,9 @@ with data as
                    json_build_object('t', 5)                     as data,
                    false                                         as is_test,
                    true                                          as is_push,
+                   false                                         as is_email,
                    false                                         as is_shown_in_app,
-                   '3c5f6ae0-1c69-4dbe-bb73-0d7f07595c95'        as template_id
+                   '3c5f6ae0-1c69-4dbe-bb73-0d7f07595c95'        as onesignal_template_id
             from {{ source('app', 'invitations') }}
             where created_at > now() - interval '1 hour'
 
@@ -177,8 +183,9 @@ with data as
                    json_build_object('t', 7, 's', symbol)                         as data,
                    false                                                          as is_test,
                    true                                                           as is_push,
+                   false                                                          as is_email,
                    false                                                          as is_shown_in_app,
-                   '11dc7a5a-aa96-4835-893a-cea11581ab6c'                         as template_id
+                   '11dc7a5a-aa96-4835-893a-cea11581ab6c'                         as onesignal_template_id
             from (
                      select distinct on (
                          profile_id
@@ -208,8 +215,9 @@ with data as
                    data,
                    is_test,
                    is_push,
+                   is_email,
                    is_shown_in_app,
-                   template_id
+                   onesignal_template_id
             from {{ ref('trading_notifications') }}
         ),
     profiles as
@@ -229,8 +237,9 @@ select data.profile_id,
        data.data,
        data.is_test,
        data.is_push,
+       data.is_email,
        data.is_shown_in_app,
-       data.template_id
+       data.onesignal_template_id
 from data
          left join profiles using (profile_id)
 where data.profile_id is null -- send broadcast

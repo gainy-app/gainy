@@ -4,6 +4,9 @@ import psycopg2
 from psycopg2.extras import DictCursor
 import requests
 import uuid
+
+from gainy.exceptions import EmailNotSentException
+from gainy.services.sendgrid import SendGridService
 from gainy.utils import db_connect, get_logger, env, ENV_PRODUCTION, ENV_TEST, ENV_LOCAL
 
 psycopg2.extras.register_uuid()
@@ -60,8 +63,8 @@ def send_push_notification(notification):
     if notification['title']:
         payload["headings"] = notification['title']
 
-    if notification['template_id']:
-        payload['template_id'] = notification['template_id']
+    if notification['onesignal_template_id']:
+        payload['template_id'] = notification['onesignal_template_id']
 
     (emails, segments) = pick_target(notification)
 
@@ -86,7 +89,7 @@ def send_push_notification(notification):
                          data=json.dumps(payload))
 
 
-def send_one(db_conn, notification):
+def send_one_push(db_conn, notification):
     response = None
     try:
         response = send_push_notification(notification)
@@ -106,7 +109,7 @@ def send_one(db_conn, notification):
 
         with db_conn.cursor() as update_cursor:
             update_cursor.execute(
-                """update app.notifications set response = %(response)s
+                """update app.notifications set push_response = %(response)s
                    where uuid = %(notification_uuid)s""", {
                     "response": json.dumps(response_serialized),
                     "notification_uuid": notification["uuid"]
@@ -117,6 +120,29 @@ def send_one(db_conn, notification):
                          response.status_code, response.text)
 
         logger.exception(e)
+
+
+def send_one_email(db_conn, notification):
+    mailer = SendGridService()
+    try:
+        response = mailer.send_email(notification['email'],
+                                     notification['email_subject'])
+    except EmailNotSentException as e:
+        logger.exception("Failed to send notification: %s", notification)
+        return
+
+    response_serialized = {
+        "status_code": response.status_code,
+        "data": response.json()
+    }
+
+    with db_conn.cursor() as update_cursor:
+        update_cursor.execute(
+            """update app.notifications set email_response = %(response)s
+               where uuid = %(notification_uuid)s""", {
+                "response": json.dumps(response_serialized),
+                "notification_uuid": notification["uuid"]
+            })
 
 
 def check_malfunctioning_notifications(notifications_to_send):
@@ -130,7 +156,7 @@ def check_malfunctioning_notifications(notifications_to_send):
 
     for notification in notifications_to_send:
         (emails, segments) = pick_target(notification)
-        template_id = notification['template_id']
+        template_id = notification['onesignal_template_id']
 
         if emails:
             targets = emails
@@ -161,27 +187,40 @@ def send_all(sender_id):
     with db_connect() as db_conn:
         with db_conn.cursor(cursor_factory=DictCursor) as cursor:
             cursor.execute(
-                """insert into app.notifications(profile_id, uniq_id, title, text, data, sender_id, is_test, template_id, is_push, is_shown_in_app)
-                   select profile_id, uniq_id, title, text, data, %(sender_id)s, is_test, template_id, is_push, is_shown_in_app
+                """insert into app.notifications(profile_id, uniq_id, title, text, data, sender_id, is_test, onesignal_template_id, is_push, is_email, is_shown_in_app)
+                   select profile_id, uniq_id, title, text, data, %(sender_id)s, is_test, onesignal_template_id, is_push, is_email, is_shown_in_app
                    from notifications_to_send
                    where send_at <= now() or send_at is null
                    on conflict do nothing""", {"sender_id": sender_id})
             cursor.execute(
-                "update app.notifications set sender_id = %(sender_id)s where sender_id is null and is_push",
+                "update app.notifications set sender_id = %(sender_id)s where sender_id is null and (is_push or is_email)",
                 {"sender_id": sender_id})
+
+            # push
             cursor.execute(
-                """select profiles.email, uuid, title, text, data, is_test, template_id
+                """select profiles.email, uuid, title, text, data, is_test, onesignal_template_id
                    from app.notifications
                    left join app.profiles on profiles.id = notifications.profile_id
                    where sender_id = %(sender_id)s
-                     and response is null""", {"sender_id": sender_id})
-
+                     and is_push
+                     and push_response is null""", {"sender_id": sender_id})
             notifications_to_send = list(cursor.fetchall())
-
             check_malfunctioning_notifications(notifications_to_send)
-
             for row in notifications_to_send:
-                send_one(db_conn, row)
+                send_one_push(db_conn, row)
+
+            # email
+            cursor.execute(
+                """select profiles.email, uuid, title, text, data, is_test
+                   from app.notifications
+                   left join app.profiles on profiles.id = notifications.profile_id
+                   where sender_id = %(sender_id)s
+                     and is_email
+                     and email_response is null""", {"sender_id": sender_id})
+            notifications_to_send = list(cursor.fetchall())
+            # check_malfunctioning_notifications(notifications_to_send)
+            for row in notifications_to_send:
+                send_one_email(db_conn, row)
 
 
 send_all(uuid.uuid4())

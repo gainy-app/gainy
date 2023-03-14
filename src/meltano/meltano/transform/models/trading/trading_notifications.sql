@@ -15,8 +15,9 @@ select profile_id,
        json_build_object('t', 9, 'id', trading_history_uniq_id)                    as data,
        false                                                                       as is_test,
        true                                                                        as is_push,
+       false                                                                       as is_email,
        true                                                                        as is_shown_in_app,
-       '094f1363-da90-4477-bc69-6c333d987a52'                                      as template_id
+       '094f1363-da90-4477-bc69-6c333d987a52'                                      as onesignal_template_id
 from (
          select trading_collection_versions.profile_id,
                 'trading_collection_versions_' || trading_collection_versions.id as uniq_id,
@@ -60,8 +61,9 @@ select profile_id,
        json_build_object('t', 11)                                                              as data,
        false                                                                                   as is_test,
        true                                                                                    as is_push,
+       false                                                                                   as is_email,
        true                                                                                    as is_shown_in_app,
-       'beb30a52-a65b-496c-90bb-3d50c5e1aaf0'                                                  as template_id
+       'beb30a52-a65b-496c-90bb-3d50c5e1aaf0'                                                  as onesignal_template_id
 from (
          select profile_id, max(executed_at) as executed_at
          from {{ source('app', 'trading_collection_versions') }}
@@ -93,8 +95,9 @@ select profile_id,
            )                                  as data,
        false                                  as is_test,
        true                                   as is_push,
+       false                                  as is_email,
        true                                   as is_shown_in_app,
-       'a79620ce-03f0-4c54-84a7-e66934c1c0d6' as template_id
+       'a79620ce-03f0-4c54-84a7-e66934c1c0d6' as onesignal_template_id
 from (
          select distinct on (
              profile_id
@@ -140,10 +143,29 @@ select trading_money_flow.profile_id,
        json_build_object('t', 9, 'id', trading_history.uniq_id) as data,
        false                                                    as is_test,
        true                                                     as is_push,
+       false                                                    as is_email,
        true                                                     as is_shown_in_app,
-       '8c9d99c1-0df2-4b12-9ba4-bf40b6871265'                   as template_id
+       '8c9d99c1-0df2-4b12-9ba4-bf40b6871265'                   as onesignal_template_id
 from {{ source('app', 'trading_money_flow') }}
          left join {{ ref('trading_history') }}
              on trading_history.money_flow_id = trading_money_flow.id
 where status = 'SUCCESS'
   and trading_money_flow.updated_at between now() - interval '1 day' and now()
+
+union all
+
+-- Abandoned KYC form
+select profile_id,
+       ('kyc_abandoned_' || profile_id)                         as uniq_id,
+       null::timestamp                                          as send_at,
+       null::json                                               as title,
+       null::json                                               as text,
+       null::json                                               as data,
+       false                                                    as is_test,
+       false                                                    as is_push,
+       true                                                     as is_email,
+       false                                                    as is_shown_in_app,
+       null                                                     as onesignal_template_id
+from {{ source('app', 'kyc_form') }}
+where status is null
+  and kyc_form.updated_at between now() - interval '2 day' and now() - interval '2 day'

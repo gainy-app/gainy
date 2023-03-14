@@ -6,7 +6,7 @@ tags = ["trading", "drivewealth"]
 dag = create_dag(dag_id,
                  tags=tags,
                  is_paused_upon_creation=True,
-                 schedule_interval="*/15 12-21 * * Mon-Fri")
+                 schedule_interval="*/5 12-21 * * Mon-Fri")
 
 operator = BashOperator(
     task_id="rebalance-portfolios",

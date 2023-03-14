@@ -19,7 +19,8 @@ def test(monkeypatch):
 
     monkeypatch.setattr(event_handler, 'handle', mock_handle)
 
-    message_handler = DriveWealthQueueMessageHandler(None, None, None, None)
+    message_handler = DriveWealthQueueMessageHandler(None, None, None, None,
+                                                     None)
 
     def mock_get_handler(_event_type):
         assert _event_type == event_type
