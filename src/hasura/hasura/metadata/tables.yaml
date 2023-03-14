@@ -1839,17 +1839,8 @@
         columns:
           - ticker_symbol
           - purchase_date
-          - relative_gain_total
-          - relative_gain_1d
-          - value_to_portfolio_value
           - ticker_name
-          - market_capitalization
-          - next_earnings_date
-          - security_type
-          - ltt_quantity_total
           - name
-          - quantity
-          - avg_cost
         filter:
           holding:
             profile:
