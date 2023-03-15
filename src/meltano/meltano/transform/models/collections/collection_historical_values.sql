@@ -51,26 +51,25 @@ with data as materialized
          ),
      annual_stats as
          (
-             select symbol,
-                    date_year,
+             select date_year,
                     count(date) as trading_dates_cnt
              from {{ ref('historical_prices') }}
-             group by symbol, date_year
+             where symbol = 'SPY'
+             group by date_year
          ),
      collection_symbol_stats as
          (
-             select collection_uniq_id, symbol, min(date) as min_date
+             select collection_uniq_id, min(date) as min_date
              from {{ ref('collection_ticker_weights') }}
-             group by collection_uniq_id, symbol
+             group by collection_uniq_id
      ),
      fee_schedule as
          (
              select collection_uniq_id,
-                    symbol,
-                    date, {{ var('annual_fee') }}::numeric * total_dates_cnt / max_dates_cnt / trading_dates_cnt as fee_pct
+                    date,
+                    {{ var('annual_fee') }}::numeric * total_dates_cnt / max_dates_cnt / trading_dates_cnt as fee_pct
              from (
                       select collection_uniq_id,
-                             symbol,
                              date,
                              trading_dates_cnt::numeric,
                              extract(days from
@@ -80,10 +79,13 @@ with data as materialized
                                      least(now(), (date_year || '-01-01')::date + interval '1 year') -
                                      greatest(min_date, (date_year || '-01-01')::date)
                                  )::numeric as total_dates_cnt
-                      from {{ ref('collection_ticker_weights') }}
-                               join {{ ref('historical_prices') }} using (symbol, date)
-                               join annual_stats using (symbol, date_year)
-                               join collection_symbol_stats using (collection_uniq_id, symbol)
+                      from (
+                               select collection_uniq_id, date, extract(year from date)::varchar as date_year
+                               from {{ ref('collection_ticker_weights') }}
+                               group by collection_uniq_id, date
+                           ) t
+                               join annual_stats using (date_year)
+                               join collection_symbol_stats using (collection_uniq_id)
                   ) t
      ),
      fees_cumulative as
