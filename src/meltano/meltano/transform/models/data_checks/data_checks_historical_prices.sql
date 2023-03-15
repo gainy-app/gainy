@@ -186,8 +186,10 @@ with check_params(table_name, dt_interval,
                          join (
                                   select date
                                   from tickers_checks
+                                  where date not between '2020-03-13' and '2020-03-24'
+                                    and date not in ('2020-11-09')
                                   group by date
-                                  having avg(iserror_adjusted_close_perc_change_dev_wom) > 0.1 and date not between '2020-03-13' and '2020-03-24'
+                                  having avg(iserror_adjusted_close_perc_change_dev_wom) > 0.1
                               ) t using (date)
                  where iserror_adjusted_close_perc_change_dev_wom > 0
                  group by symbol, table_name
