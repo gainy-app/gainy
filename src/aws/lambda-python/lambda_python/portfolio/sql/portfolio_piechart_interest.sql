@@ -14,6 +14,15 @@ with holdings as
              where profile_id = %(profile_id)s
                    {where_clause}
          ),
+     portfolio_holding_gains as
+         (
+             select holding_id_v2,
+                    sum(actual_value)                                            as actual_value,
+                    sum(portfolio_holding_gains.relative_gain_1d * actual_value) as relative_gain_1d,
+                    sum(absolute_gain_1d)                                        as absolute_gain_1d
+             from portfolio_holding_gains
+             group by holding_id_v2
+     ),
      data as materialized
          (
              select holdings.profile_id,
@@ -31,7 +40,7 @@ with holdings as
                     absolute_gain_1d,
                     relative_gain_1d
              from holdings
-                      join portfolio_holding_gains using (holding_id_v2, profile_id)
+                      join portfolio_holding_gains using (holding_id_v2)
                       left join trading_profile_status using (profile_id)
                       left join ticker_interests on ticker_interests.symbol = ticker_symbol
              where collection_id is null

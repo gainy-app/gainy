@@ -14,27 +14,36 @@ with holdings as
              where profile_id = %(profile_id)s
                    {where_clause}
          ),
+     portfolio_holding_gains as
+         (
+             select holding_id_v2,
+                    sum(actual_value)                                            as actual_value,
+                    sum(portfolio_holding_gains.relative_gain_1d * actual_value) as relative_daily_change,
+                    sum(absolute_gain_1d)                                        as absolute_daily_change
+             from portfolio_holding_gains
+             group by holding_id_v2
+     ),
      portfolio_assets as materialized
          (
              select holdings.profile_id,
-                    'ticker:' || holdings.ticker_symbol                          as entity_id,
+                    'ticker:' || holdings.ticker_symbol                as entity_id,
                     case
                         when type = 'cash'
                             then 'Cash'
                         else ticker_name
-                        end                                                      as entity_name,
+                        end                                            as entity_name,
                     sum(coalesce(case
                         when type = 'cash'
                             then pending_cash
-                        end, 0) + actual_value)                                  as weight,
-                    sum(portfolio_holding_gains.relative_gain_1d * actual_value) as relative_daily_change,
-                    sum(absolute_gain_1d)                                        as absolute_daily_change,
+                        end, 0) + actual_value)                        as weight,
+                    sum(portfolio_holding_gains.relative_daily_change) as relative_daily_change,
+                    sum(portfolio_holding_gains.absolute_daily_change) as absolute_daily_change,
                     sum(coalesce(case
                         when type = 'cash'
                             then pending_cash
-                        end, 0) + actual_value)                                  as absolute_value
+                        end, 0) + actual_value)                        as absolute_value
              from holdings
-                      left join portfolio_holding_gains using (holding_id_v2, profile_id)
+                      left join portfolio_holding_gains using (holding_id_v2)
                       left join portfolio_holding_details using (holding_id_v2)
                       left join trading_profile_status using (profile_id)
              where collection_id is null
@@ -43,12 +52,12 @@ with holdings as
              union all
 
              select holdings.profile_id,
-                    'collection:' || holdings.collection_id                      as entity_id,
-                    collections.name                                             as entity_name,
-                    sum(actual_value)                                            as weight,
-                    sum(portfolio_holding_gains.relative_gain_1d * actual_value) as relative_daily_change,
-                    sum(absolute_gain_1d)                                        as absolute_daily_change,
-                    sum(actual_value)                                            as absolute_value
+                    'collection:' || holdings.collection_id            as entity_id,
+                    collections.name                                   as entity_name,
+                    sum(actual_value)                                  as weight,
+                    sum(portfolio_holding_gains.relative_daily_change) as relative_daily_change,
+                    sum(portfolio_holding_gains.absolute_daily_change) as absolute_daily_change,
+                    sum(actual_value)                                  as absolute_value
              from holdings
                       join portfolio_holding_gains using (holding_id_v2)
                       join portfolio_holding_details using (holding_id_v2)

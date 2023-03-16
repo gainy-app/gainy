@@ -62,7 +62,7 @@ with profiles as
              select distinct profile_id, count(distinct collection_id) as total_invested_ttfs
              from {{ source('app', 'trading_collection_versions') }}
              where status = 'EXECUTED_FULLY'
-               and target_amount_delta is not null
+               and source = 'MANUAL'
              group by profile_id
      ),
      total_invested_tickers as
@@ -70,7 +70,7 @@ with profiles as
              select distinct profile_id, count(distinct symbol) as total_invested_tickers
              from {{ source('app', 'trading_orders') }}
              where status = 'EXECUTED_FULLY'
-               and target_amount_delta is not null
+               and source = 'MANUAL'
              group by profile_id
      ),
      total_wishlist_ttfs as
@@ -116,7 +116,7 @@ with profiles as
                                       max(created_at)          as max_datetime
                       from {{ source('app', 'trading_orders') }}
                       where status = 'EXECUTED_FULLY'
-                        and target_amount_delta is not null
+                        and source = 'MANUAL'
                         and target_amount_delta > 0
                       group by profile_id
 
@@ -129,7 +129,7 @@ with profiles as
                                       max(created_at)          as max_datetime
                       from {{ source('app', 'trading_collection_versions') }}
                       where status = 'EXECUTED_FULLY'
-                        and target_amount_delta is not null
+                        and source = 'MANUAL'
                         and target_amount_delta > 0
                       group by profile_id
                   ) t
@@ -150,7 +150,7 @@ with profiles as
                                       max(created_at)          as max_datetime
                       from {{ source('app', 'trading_orders') }}
                       where status = 'EXECUTED_FULLY'
-                        and target_amount_delta is not null
+                        and source = 'MANUAL'
                         and target_amount_delta < 0
                       group by profile_id
 
@@ -163,7 +163,7 @@ with profiles as
                                       max(created_at)          as max_datetime
                       from {{ source('app', 'trading_collection_versions') }}
                       where status = 'EXECUTED_FULLY'
-                        and target_amount_delta is not null
+                        and source = 'MANUAL'
                         and target_amount_delta < 0
                       group by profile_id
                   ) t
