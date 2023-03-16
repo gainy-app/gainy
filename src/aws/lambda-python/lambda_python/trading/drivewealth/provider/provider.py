@@ -522,7 +522,7 @@ class DriveWealthProvider(DriveWealthProviderKYC,
             return
 
         redemption.update_payment_transaction(payment_transaction)
-        self.repository.persist(redemption)
+        self.repository.persist(payment_transaction)
 
         invoice: Invoice = self.repository.find_one(
             Invoice, {"id": payment_transaction.invoice_id})
