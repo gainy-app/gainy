@@ -17,11 +17,17 @@ with holdings as
      portfolio_holding_gains as
          (
              select holding_id_v2,
-                    sum(actual_value)                                            as actual_value,
-                    sum(portfolio_holding_gains.relative_gain_1d * actual_value) as relative_gain_1d,
-                    sum(absolute_gain_1d)                                        as absolute_gain_1d
-             from portfolio_holding_gains
-             group by holding_id_v2
+                    actual_value,
+                    relative_gain_1d / actual_value as relative_gain_1d,
+                    absolute_gain_1d
+             from (
+                      select holding_id_v2,
+                             sum(actual_value)                                            as actual_value,
+                             sum(portfolio_holding_gains.relative_gain_1d * actual_value) as relative_gain_1d,
+                             sum(relative_gain_1d)                                        as absolute_gain_1d
+                      from portfolio_holding_gains
+                      group by holding_id_v2
+                  ) t
      ),
      data as materialized
          (
