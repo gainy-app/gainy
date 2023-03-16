@@ -20,6 +20,15 @@ with holdings as
              where profile_id = %(profile_id)s
                    {where_clause}
          ),
+     portfolio_holding_gains as
+         (
+             select holding_id_v2,
+                    sum(actual_value)                                            as actual_value,
+                    sum(portfolio_holding_gains.relative_gain_1d * actual_value) as relative_daily_change,
+                    sum(absolute_gain_1d)                                        as absolute_daily_change
+             from portfolio_holding_gains
+             group by holding_id_v2
+     ),
      portfolio_security_types as
          (
              select holdings.profile_id,
@@ -27,15 +36,15 @@ with holdings as
                     sum(coalesce(case
                         when security_type = 'Cash'
                             then pending_cash
-                        end, 0) + actual_value)          as weight,
-                    sum(relative_gain_1d * actual_value) as relative_daily_change,
-                    sum(absolute_gain_1d)                as absolute_daily_change,
+                        end, 0) + actual_value)                        as weight,
+                    sum(portfolio_holding_gains.relative_daily_change) as relative_daily_change,
+                    sum(portfolio_holding_gains.absolute_daily_change) as absolute_daily_change,
                     sum(coalesce(case
                         when security_type = 'Cash'
                             then pending_cash
-                        end, 0) + actual_value)          as absolute_value
+                        end, 0) + actual_value)                        as absolute_value
              from holdings
-                      join portfolio_holding_gains using (holding_id_v2, profile_id)
+                      join portfolio_holding_gains using (holding_id_v2)
                       left join trading_profile_status using (profile_id)
              group by holdings.profile_id, holdings.security_type
          ),
