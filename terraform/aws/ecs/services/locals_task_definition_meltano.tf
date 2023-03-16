@@ -40,7 +40,7 @@ locals {
   }
   scheduler_params = merge(local.meltano_default_params, {
     eodhistoricaldata_api_token          = var.eodhistoricaldata_api_token
-    eodhistoricaldata_exchanges          = jsonencode(["NASDAQ", "NYSE", "CC", "INDX"])
+    eodhistoricaldata_exchanges          = jsonencode(["NASDAQ", "NYSE", "BATS"])
     polygon_crypto_symbols               = jsonencode(["CRVUSD"])
     pg_load_schema                       = "raw_data"
     dbt_threads                          = 3
@@ -111,7 +111,7 @@ locals {
       essential  = true
       entrypoint = ["/start-scheduler.sh"]
       healthCheck = {
-        "command" : ["CMD-SHELL", "nc -z localhost 8793"],
+        "command" : ["CMD-SHELL", "curl -s http://127.0.0.1:8974/health"],
         "interval" : 10,
         "retries" : 2,
         "startPeriod" : 20

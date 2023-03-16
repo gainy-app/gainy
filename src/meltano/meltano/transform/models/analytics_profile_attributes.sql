@@ -24,6 +24,7 @@ with profiles as
      trading_profile_status as
          (
              select profile_id,
+                    kyc_status,
                     (account_no is not null)  as dw_account_opened,
                     funding_account_connected as funding_acc_connected
              from {{ ref('trading_profile_status') }}
@@ -180,6 +181,18 @@ with profiles as
                     extract(year from age(birthdate))::int as age,
                     extract(year from birthdate)::int      as birthday_year
              from {{ source('app', 'kyc_form') }}
+     ),
+     profile_scoring_settings as
+         (
+             select profile_id,
+                    risk_level                  as investment_goal,
+                    average_market_return,
+                    investment_horizon          as invest_horizon,
+                    unexpected_purchases_source as urgent_money_source,
+                    damage_of_failure,
+                    stock_market_risk_level     as stock_market_risks,
+                    trading_experience
+             from {{ source('app', 'profile_scoring_settings') }}
      )
 select profile_id,
        user_email,
@@ -216,7 +229,15 @@ select profile_id,
        kyc_net_worth,
        kyc_net_liquid,
        kyc_risk_tolerance,
-       kyc_employment_status
+       kyc_employment_status,
+       kyc_status,
+       investment_goal,
+       average_market_return,
+       invest_horizon,
+       urgent_money_source,
+       damage_of_failure,
+       stock_market_risks,
+       trading_experience
 from profiles
          left join profile_interests using (profile_id)
          left join profile_categories using (profile_id)
@@ -233,3 +254,4 @@ from profiles
          left join buys using (profile_id)
          left join sells using (profile_id)
          left join kyc using (profile_id)
+         left join profile_scoring_settings using (profile_id)

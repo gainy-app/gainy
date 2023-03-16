@@ -45,6 +45,11 @@ class AccountsUpdatedEventHandler(AbstractDriveWealthEventHandler):
             self.create_payment_method(account, user.profile_id)
 
     def send_event(self, profile_id: int, was_open: bool):
+        logger.info("Considering sending event on_dw_brokerage_account_opened",
+                    extra={
+                        "was_open": was_open,
+                        "profile_id": profile_id,
+                    })
         if was_open:
             return
 

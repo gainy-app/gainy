@@ -1,3 +1,4 @@
+import datetime
 from decimal import Decimal
 from typing import Optional
 
@@ -6,7 +7,8 @@ from gainy.billing.models import PaymentTransaction, Invoice, InvoiceStatus
 from gainy.data_access.repository import MAX_TRANSACTION_SIZE
 from gainy.exceptions import NotFoundException, EntityNotFoundException
 from gainy.trading.drivewealth.config import DRIVEWEALTH_IS_UAT
-from gainy.trading.drivewealth.exceptions import DriveWealthApiException, BadMissingParametersBodyException
+from gainy.trading.drivewealth.exceptions import DriveWealthApiException, BadMissingParametersBodyException, \
+    InvalidDriveWealthPortfolioStatusException
 from portfolio.plaid import PlaidService
 from gainy.plaid.models import PlaidAccessToken
 from services.notification import NotificationService
@@ -298,13 +300,18 @@ class DriveWealthProvider(DriveWealthProviderKYC,
     def create_trading_statements(self, entities: list[DriveWealthStatement],
                                   profile_id):
         for dw_statement in entities:
+            trading_statement = None
             if dw_statement.trading_statement_id:
-                continue
+                trading_statement = self.repository.find_one(
+                    TradingStatement,
+                    {"id": dw_statement.trading_statement_id})
+            if not trading_statement:
+                trading_statement = TradingStatement()
 
-            trading_statement = TradingStatement()
             trading_statement.profile_id = profile_id
             trading_statement.type = dw_statement.type
             trading_statement.display_name = dw_statement.display_name
+            trading_statement.date = dw_statement.date
             self.repository.persist(trading_statement)
             dw_statement.trading_statement_id = trading_statement.id
             self.repository.persist(dw_statement)
@@ -417,6 +424,10 @@ class DriveWealthProvider(DriveWealthProviderKYC,
         entities += self.api.get_documents_trading_confirmations(account)
         entities += self.api.get_documents_tax(account)
         entities += self.api.get_documents_statements(account)
+
+        for i in entities:
+            self.repository.refresh(i)
+
         self.repository.persist(entities)
         self.create_trading_statements(entities, profile_id)
 
@@ -473,13 +484,25 @@ class DriveWealthProvider(DriveWealthProviderKYC,
             self.repository.persist(portfolio)
 
     def on_new_transaction(self, account_ref_id: str):
-        # todo thread-safe
+        #todo thread-safe
         portfolio: DriveWealthPortfolio = self.repository.find_one(
             DriveWealthPortfolio, {"drivewealth_account_id": account_ref_id})
         if not portfolio:
             return
 
-        portfolio_status = self.sync_portfolio_status(portfolio, force=True)
+        try:
+            portfolio_status = self.sync_portfolio_status(portfolio,
+                                                          force=True)
+        except InvalidDriveWealthPortfolioStatusException as e:
+            portfolio_status = self.get_latest_portfolio_status(
+                portfolio.ref_id)
+
+            # in case we received an invalid portfolio status - look for a valid one, which is not more than an hour old
+            min_created_at = datetime.datetime.now(
+                datetime.timezone.utc) - datetime.timedelta(hours=1)
+            if not portfolio_status or portfolio_status.created_at < min_created_at:
+                raise e
+
         portfolio_changed = self.actualize_portfolio(portfolio,
                                                      portfolio_status)
         if not portfolio_changed:

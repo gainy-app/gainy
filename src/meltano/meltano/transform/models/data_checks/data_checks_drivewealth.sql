@@ -1,6 +1,7 @@
 {{
   config(
     materialized = "incremental",
+    tags = ["realtime"],
     unique_key = "id",
     post_hook=[
       pk('id'),

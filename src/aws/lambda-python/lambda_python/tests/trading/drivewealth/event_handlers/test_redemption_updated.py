@@ -60,9 +60,9 @@ def test_exists(monkeypatch):
     monkeypatch.setattr(repository, 'persist', mock_persist(persisted_objects))
 
     analytics_service = AnalyticsService(None, None, None)
-    on_dw_withdraw_success_calls = []
-    monkeypatch.setattr(analytics_service, 'on_dw_withdraw_success',
-                        mock_record_calls(on_dw_withdraw_success_calls))
+    on_withdraw_success_calls = []
+    monkeypatch.setattr(analytics_service, 'on_withdraw_success',
+                        mock_record_calls(on_withdraw_success_calls))
 
     event_handler = RedemptionUpdatedEventHandler(repository, provider, None,
                                                   analytics_service)
@@ -88,7 +88,7 @@ def test_exists(monkeypatch):
     ]
     assert ((redemption.trading_account_ref_id, ),
             {}) in on_new_transaction_calls
-    assert ((profile_id, -amount), {}) in on_dw_withdraw_success_calls
+    assert ((profile_id, -amount), {}) in on_withdraw_success_calls
 
 
 def test_not_exists(monkeypatch):
