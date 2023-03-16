@@ -19,7 +19,9 @@ class ReHandleQueueMessages(HasuraAction):
     def apply(self, input_params, context_container: ContextContainer):
         ids = input_params["ids"]
         force = input_params.get("force", False)
-        _filter = {"id": OperatorIn(ids), "handled": False}
+        _filter = {"id": OperatorIn(ids)}
+        if not force:
+            _filter["handled"] = False
 
         dispatcher = context_container.queue_message_dispatcher
         repo = context_container.get_repository()
