@@ -18,7 +18,10 @@ class ReHandleQueueMessages(HasuraAction):
 
     def apply(self, input_params, context_container: ContextContainer):
         ids = input_params["ids"]
-        _filter = {"id": OperatorIn(ids), "handled": False}
+        force = input_params.get("force", False)
+        _filter = {"id": OperatorIn(ids)}
+        if not force:
+            _filter["handled"] = False
 
         dispatcher = context_container.queue_message_dispatcher
         repo = context_container.get_repository()
@@ -29,6 +32,9 @@ class ReHandleQueueMessages(HasuraAction):
             start = time.time()
             message: QueueMessage
             logger_extra = {"queue_message_id": message.id}
+
+            if force:
+                message.handled = False
 
             try:
                 dispatcher.handle(message)
