@@ -4,11 +4,12 @@
     unique_key = "id",
     tags = ["realtime"],
     post_hook=[
-      pk('profile_id, holding_id_v2, symbol, date'),
+      pk('holding_id_v2, date'),
       index('id', true),
+      index(['holding_id_v2', 'date_week'], false),
+      index(['holding_id_v2', 'date_month'], false),
+      index(['profile_id', 'date'], false),
       index('portfolio_status_id', false),
-      'create index if not exists "dphh_profile_id_holding_id_v2_symbol_date_week" ON {{ this }} (profile_id, holding_id_v2, symbol, date_week)',
-      'create index if not exists "dphh_profile_id_holding_id_v2_symbol_date_month" ON {{ this }} (profile_id, holding_id_v2, symbol, date_month)',
     ]
   )
 }}
