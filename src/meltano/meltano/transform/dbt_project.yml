@@ -27,4 +27,4 @@ vars:
   portfolio_cash_enabled: false
   crypto_enabled: false
   index_enabled: false
-  annual_fee: 0.01
+  annual_fee: "{{ env_var('BILLING_EQUITY_VALUE_FEE_MULTIPLIER', 0.01) }}"

@@ -135,7 +135,9 @@
     { "name": "PLAID_ENV",                             "value": "${plaid_env}" },
 
     { "name": "MLFLOW_ARTIFACT_LOCATION",              "value": "${mlflow_artifact_location}" },
-    { "name": "MLFLOW_TRACKING_URI",                   "value": "postgresql://${pg_username}:${pg_password}@${pg_host}:${pg_port}/${pg_dbname}?options=-csearch_path=${pg_mlflow_schema}" }
+    { "name": "MLFLOW_TRACKING_URI",                   "value": "postgresql://${pg_username}:${pg_password}@${pg_host}:${pg_port}/${pg_dbname}?options=-csearch_path=${pg_mlflow_schema}" },
+
+    { "name": "BILLING_EQUITY_VALUE_FEE_MULTIPLIER",   "value": "${billing_equity_value_fee_multiplier}" }
   ],
   "links": [],
   "workingDirectory": null,

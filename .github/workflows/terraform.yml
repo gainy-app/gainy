@@ -79,6 +79,7 @@ on:
       SENDGRID_API_KEY: { required: true }
       SLACK_BOT_TOKEN: { required: false }
       AMPLITUDE_API_KEY: { required: true }
+      BILLING_EQUITY_VALUE_FEE_MULTIPLIER: { required: true }
 
 env:
   AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
@@ -144,6 +145,7 @@ env:
   TF_VAR_sendgrid_api_key: ${{ secrets.SENDGRID_API_KEY }}
   TF_VAR_slack_bot_token: ${{ secrets.SLACK_BOT_TOKEN }}
   TF_VAR_amplitude_api_key: ${{ secrets.AMPLITUDE_API_KEY }}
+  TF_VAR_billing_equity_value_fee_multiplier: ${{ secrets.BILLING_EQUITY_VALUE_FEE_MULTIPLIER }}
 
 jobs:
   test:

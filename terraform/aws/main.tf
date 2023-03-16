@@ -243,6 +243,8 @@ module "ecs-service" {
 
   source_code_branch      = var.source_code_branch
   source_code_branch_name = var.source_code_branch_name
+
+  billing_equity_value_fee_multiplier = var.billing_equity_value_fee_multiplier
 }
 
 

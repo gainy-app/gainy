@@ -95,6 +95,8 @@ locals {
     aws_secret_key           = var.aws_secret_key
     mlflow_artifact_location = "s3://${var.mlflow_artifact_bucket}"
     pg_mlflow_schema         = "mlflow"
+
+    billing_equity_value_fee_multiplier = var.billing_equity_value_fee_multiplier
   })
 
   airflow_task_description = jsondecode(templatefile("${path.module}/task_definitions/meltano-airflow-ui.json", local.meltano_default_params))
