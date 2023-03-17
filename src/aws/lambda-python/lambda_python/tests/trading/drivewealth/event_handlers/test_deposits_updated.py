@@ -1,7 +1,7 @@
 from gainy.analytics.service import AnalyticsService
 from gainy.tests.mocks.repository_mocks import mock_find, mock_persist, mock_record_calls
 from gainy.trading.drivewealth.models import DriveWealthDeposit
-from gainy.trading.models import TradingMoneyFlow
+from gainy.trading.models import TradingMoneyFlow, FundingAccount
 from services.notification import NotificationService
 from trading.drivewealth.event_handlers import DepositsUpdatedEventHandler
 from trading.drivewealth.provider import DriveWealthProvider
@@ -18,12 +18,20 @@ def test_exists(monkeypatch):
     old_status = 'Pending'
     new_status = message["statusMessage"]
     profile_id = 1
+    funding_account_id = 2
+    amount = 3
+    account_mask = "account_mask"
 
     deposit = DriveWealthDeposit()
     deposit.status = old_status
 
     money_flow = TradingMoneyFlow()
     money_flow.profile_id = profile_id
+    money_flow.funding_account_id = funding_account_id
+    money_flow.amount = amount
+
+    funding_account = FundingAccount()
+    funding_account.mask = account_mask
 
     provider = DriveWealthProvider(None, None, None, None, None)
 
@@ -44,7 +52,10 @@ def test_exists(monkeypatch):
         repository, 'find_one',
         mock_find([(DriveWealthDeposit, {
             "ref_id": message["paymentID"]
-        }, deposit)]))
+        }, deposit),
+                   (FundingAccount, {
+                       "id": funding_account_id
+                   }, funding_account)]))
     persisted_objects = {}
     monkeypatch.setattr(repository, 'persist', mock_persist(persisted_objects))
 
@@ -81,7 +92,7 @@ def test_exists(monkeypatch):
         args for args, kwargs in handle_money_flow_status_change_calls
     ]
     assert ((money_flow, ), {}) in analytics_service_on_deposit_success_calls
-    assert ((profile_id, ),
+    assert ((profile_id, amount, account_mask),
             {}) in notification_service_on_deposit_success_calls
 
 

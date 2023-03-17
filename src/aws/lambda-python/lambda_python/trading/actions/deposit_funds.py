@@ -25,7 +25,8 @@ class TradingDepositFunds(MoneyFlowAction):
                                                        trading_account,
                                                        funding_account)
 
-        context_container.notification_service.on_deposit_initiated(profile_id)
+        context_container.notification_service.on_deposit_initiated(
+            profile_id, money_flow.amount)
 
         return {'trading_money_flow_id': money_flow.id}
 

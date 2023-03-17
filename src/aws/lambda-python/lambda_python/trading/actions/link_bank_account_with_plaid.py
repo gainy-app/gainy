@@ -30,6 +30,6 @@ class TradingLinkBankAccountWithPlaid(HasuraAction):
             access_token, account_name, account_id)
 
         context_container.notification_service.on_funding_account_linked(
-            profile_id)
+            profile_id, funding_account.mask, funding_account.name)
 
         return {'id': funding_account.id}

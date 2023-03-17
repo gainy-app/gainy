@@ -22,7 +22,7 @@ def test_exists(monkeypatch):
 
     money_flow = TradingMoneyFlow()
     money_flow.profile_id = profile_id
-    money_flow.amount = amount
+    money_flow.amount = -amount
 
     provider = DriveWealthProvider(None, None, None, None, None)
     handle_redemption_status_calls = []
@@ -98,7 +98,7 @@ def test_exists(monkeypatch):
             {}) in on_new_transaction_calls
     assert ((profile_id, -amount),
             {}) in analytics_service_on_withdraw_success_calls
-    assert ((profile_id, ),
+    assert ((profile_id, amount),
             {}) in notification_service_on_withdraw_success_calls
 
 
