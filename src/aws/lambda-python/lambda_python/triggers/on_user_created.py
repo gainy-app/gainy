@@ -30,6 +30,9 @@ class OnUserCreated(HasuraTrigger):
         profile_id = payload['id']
         email = payload["email"]
 
+        with context_container.db_conn.cursor() as cursor:
+            cursor.execute_query("insert into app.profile_flags(profile_id) values (%(profile_id)s)")
+
         if re.search(r'@gainy.app$', email) is not None:
             return
 
