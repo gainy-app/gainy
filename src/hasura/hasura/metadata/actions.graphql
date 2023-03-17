@@ -184,6 +184,7 @@ type Mutation {
 type Mutation {
   rehandle_queue_messages(
     ids: [Int]!
+    force: Boolean
   ): ReHandleQueueMessagesOutput
 }
 

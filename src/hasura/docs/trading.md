@@ -153,8 +153,8 @@ mutation TradingDeleteData($profile_id: Int!) {
 ```
 Re-handle queue messages
 ```graphql
-mutation ReHandleQueueMessages($ids: [Int]!) {
-  rehandle_queue_messages(ids: $ids) {
+mutation ReHandleQueueMessages($ids: [Int]!, $force: Boolean) {
+  rehandle_queue_messages(ids: $ids, force: $force) {
     success
     unsupported
     error
