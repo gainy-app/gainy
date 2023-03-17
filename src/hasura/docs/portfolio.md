@@ -246,15 +246,7 @@ query GetPlaidHoldings($profileId: Int!) {
                 name
             }
             holding_details {
-                purchase_date
                 ticker_symbol
-                ticker_name
-                market_capitalization
-                next_earnings_date
-                ltt_quantity_total
-                security_type
-                relative_gain_1d
-                relative_gain_total
             }
             gains {
                 absolute_gain_1d

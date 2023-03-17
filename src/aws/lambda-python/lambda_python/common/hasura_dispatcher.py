@@ -25,18 +25,29 @@ class HasuraDispatcher(ABC):
             context_container.headers = headers
             try:
                 response = self.apply(context_container)
-
-                return self.format_response(200, response)
+                response = self.format_response(200, response)
+                logger.info('HasuraDispatcher',
+                            extra={
+                                "request": request,
+                                "response": response
+                            })
+                return response
             except HttpException as he:
-                logger.warning(f"{he.http_code} {he.message}. event: {event}")
-
+                logger.warning('HasuraDispatcher',
+                               extra={
+                                   "request": request,
+                                   "exception": he
+                               })
                 return self.format_response(he.http_code, {
                     "message": he.message,
                     "code": he.http_code
                 })
             except Exception as e:
-                logger.exception("Event: %s", event)
-
+                logger.exception('HasuraDispatcher',
+                                 extra={
+                                     "request": request,
+                                     "exception": e
+                                 })
                 return self.format_response(500, {
                     "message": str(e),
                     "code": 500

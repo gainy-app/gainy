@@ -328,9 +328,9 @@ class PortfolioChartService:
         if not filter.ltt_only:
             return
         join_clause.append(
-            sql.SQL("join portfolio_holding_details using (holding_id_v2)"))
+            sql.SQL("join portfolio_holding_gains using (holding_id_v2)"))
         where_clause.append(
-            sql.SQL("portfolio_holding_details.ltt_quantity_total > 0"))
+            sql.SQL("portfolio_holding_gains.ltt_quantity_total > 0"))
 
     def _execute_query(self, params, where_clauses: dict, join_clause, query):
         format_params = {
