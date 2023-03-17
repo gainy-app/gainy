@@ -96,7 +96,7 @@ def test_exists(monkeypatch):
     ]
     assert ((redemption.trading_account_ref_id, ),
             {}) in on_new_transaction_calls
-    assert ((profile_id, -amount),
+    assert ((profile_id, amount),
             {}) in analytics_service_on_withdraw_success_calls
     assert ((profile_id, amount),
             {}) in notification_service_on_withdraw_success_calls
