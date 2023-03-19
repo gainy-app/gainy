@@ -147,6 +147,7 @@ class TradingService(GainyTradingService):
         self._get_provider_service().transfer_money(money_flow, amount,
                                                     trading_account.id,
                                                     funding_account.id)
+        repository.persist(money_flow)
 
         return money_flow
 
