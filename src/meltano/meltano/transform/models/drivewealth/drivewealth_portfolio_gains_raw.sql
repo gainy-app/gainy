@@ -21,6 +21,16 @@ with profile_stats as materialized
                       from {{ ref('drivewealth_portfolio_historical_holdings') }}
                       group by profile_id, date
                   ) t
+                      join (
+                               select profile_id, min(date) as max_date
+                               from (
+                                        select profile_id, max(date) as date
+                                        from {{ ref('drivewealth_portfolio_historical_holdings') }}
+                                        group by profile_id, holding_id_v2
+                                    ) t
+                               group by profile_id
+                           ) date_threshold using (profile_id)
+             where t.date <= date_threshold.max_date
                  window wnd as (partition by profile_id order by date)
      ),
      profile_values_marked as
