@@ -53,3 +53,4 @@ select profile_id,
        avg(equity_value) as equity_value
 from daily_usage_expanded
 group by profile_id, period_start, period_end
+having sum(equity_value) > 0
