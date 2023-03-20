@@ -136,27 +136,20 @@ with portfolio_statuses as
 
              union all
 
-             -- realtime schedule for tickers with historical chart
-             select profile_id, holding_id_v2, symbol, date, relative_daily_change
-             from min_holding_date
-                      join {{ ref('ticker_realtime_metrics') }} using (symbol)
-                      left join {{ ref('historical_prices') }} using (symbol, date)
-             where historical_prices.symbol is null
-
-             union all
-
-             -- realtime schedule for tickers without historical chart
-             select profile_id, holding_id_v2, symbol, t.date, 0 as relative_daily_change
+             -- realtime schedule
+             select profile_id, holding_id_v2, symbol, date, coalesce(relative_daily_change, 0) as relative_daily_gain
              from min_holding_date
                       join (
-                               select date
-                               from {{ ref('ticker_realtime_metrics') }}
-                                        left join {{ ref('historical_prices') }} using (symbol, date)
-                               where symbol = 'SPY'
-                                 and historical_prices.symbol is null
+                               select min(date) as date
+                               from {{ ref('exchange_schedule') }}
+                               where exchange_name = 'NYSE'
+                                 and date > (
+                                                select max(date) as max_known_date
+                                                from {{ ref('historical_prices') }}
+                                                where symbol = 'SPY'
+                                            )
                            ) t on true
-                      left join {{ ref('ticker_realtime_metrics') }} using (symbol)
-             where ticker_realtime_metrics.symbol is null
+                      left join {{ ref('ticker_realtime_metrics') }} using (symbol, date)
      ),
      data_extended0 as
          (
