@@ -133,16 +133,16 @@ with chart_1w as
                       select holding_id_v2,
                              max(datetime)                                            as datetime,
                              exp(sum(ln(coalesce(relative_gain, 0) + 1 + 1e-10))) - 1 as relative_gain
-                      from drivewealth_portfolio_historical_prices_aggregated_3min data
+                      from {{ ref('drivewealth_portfolio_historical_prices_aggregated_3min') }} data
                                join (
                                         select holding_id_v2, max(updated_at) as max_updated_at
-                                        from drivewealth_portfolio_historical_holdings
+                                        from {{ ref('drivewealth_portfolio_historical_holdings') }}
                                         group by holding_id_v2
                                     ) t using (holding_id_v2)
                       where data.datetime > max_updated_at
                       group by holding_id_v2
                   ) t
-                      join drivewealth_portfolio_historical_prices_aggregated_3min data using (holding_id_v2, datetime)
+                      join {{ ref('drivewealth_portfolio_historical_prices_aggregated_3min') }} data using (holding_id_v2, datetime)
      ),
      latest_data as
          (
