@@ -188,7 +188,7 @@ with chart_1w as
 select profile_id,
        holding_id_v2,
        period,
-       date,
+       data.date,
        datetime,
        coalesce(latest_data.value, data.value)           as value,
        coalesce((1 + data.relative_gain) * (1 + latest_data.relative_gain) - 1,
