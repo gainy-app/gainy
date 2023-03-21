@@ -4,7 +4,7 @@
     unique_key = "id",
     tags = ["realtime"],
     post_hook=[
-      pk('profile_id, holding_id_v2, period, datetime'),
+      pk('holding_id_v2, period, datetime'),
       index('id', true),
     ]
   )
@@ -45,14 +45,10 @@ with chart_1w as
          (
              select data.profile_id,
                     data.holding_id_v2,
-                    '3min'     as period,
+                    '3min' as period,
                     data.date,
                     data.datetime,
-                    data.value as open,
-                    data.value as high,
-                    data.value as low,
-                    data.value as close,
-                    data.value as adjusted_close,
+                    data.value,
                     data.relative_gain,
                     data.updated_at
              from {{ ref('drivewealth_portfolio_historical_prices_aggregated_3min') }} data
@@ -68,14 +64,10 @@ with chart_1w as
 
              select data.profile_id,
                     data.holding_id_v2,
-                    '15min'    as period,
+                    '15min' as period,
                     data.date,
                     data.datetime,
-                    data.value as open,
-                    data.value as high,
-                    data.value as low,
-                    data.value as close,
-                    data.value as adjusted_close,
+                    data.value,
                     data.relative_gain,
                     data.updated_at
              from {{ ref('drivewealth_portfolio_historical_prices_aggregated_15min') }} data
@@ -91,14 +83,10 @@ with chart_1w as
 
              select data.profile_id,
                     data.holding_id_v2,
-                    '1d'  as period,
+                    '1d'       as period,
                     data.date,
                     data.date  as datetime,
-                    data.value as open,
-                    data.value as high,
-                    data.value as low,
-                    data.value as close,
-                    data.value as adjusted_close,
+                    data.value,
                     data.relative_daily_gain as relative_gain,
                     data.updated_at
              from {{ ref('drivewealth_portfolio_historical_holdings') }} data
@@ -107,21 +95,13 @@ with chart_1w as
 
              select data.profile_id,
                     data.holding_id_v2,
-                    '1w'            as period,
-                    data.date_week  as date,
-                    data.date_week  as datetime,
-                    dhh_open.value  as open,
-                    data.high,
-                    data.low,
-                    dhh_close.value as close,
-                    dhh_close.value as adjusted_close,
+                    '1w'           as period,
+                    data.date_week as date,
+                    data.date_week as datetime,
+                    dhh_close.value,
                     data.relative_gain,
                     data.updated_at
              from chart_1w data
-                      join {{ ref('drivewealth_portfolio_historical_holdings') }} dhh_open
-                           on dhh_open.profile_id = data.profile_id
-                               and dhh_open.holding_id_v2 = data.holding_id_v2
-                               and dhh_open.date = data.open_date
                       join {{ ref('drivewealth_portfolio_historical_holdings') }} dhh_close
                            on dhh_close.profile_id = data.profile_id
                                and dhh_close.holding_id_v2 = data.holding_id_v2
@@ -134,31 +114,93 @@ with chart_1w as
                     '1m'            as period,
                     data.date_month as date,
                     data.date_month as datetime,
-                    dhh_open.value  as open,
-                    data.high,
-                    data.low,
-                    dhh_close.value as close,
-                    dhh_close.value as adjusted_close,
+                    dhh_close.value,
                     data.relative_gain,
                     data.updated_at
              from chart_1m data
-                      join {{ ref('drivewealth_portfolio_historical_holdings') }} dhh_open
-                           on dhh_open.profile_id = data.profile_id
-                               and dhh_open.holding_id_v2 = data.holding_id_v2
-                               and dhh_open.date = data.open_date
                       join {{ ref('drivewealth_portfolio_historical_holdings') }} dhh_close
                            on dhh_close.profile_id = data.profile_id
                                and dhh_close.holding_id_v2 = data.holding_id_v2
                                and dhh_close.date = data.close_date
-     )
+     ),
+     latest_3min_data as
+         (
+             select t.*,
+                    data.date,
+                    data.value,
+                    data.updated_at
+             from (
+                      select holding_id_v2,
+                             max(datetime)                                            as datetime,
+                             exp(sum(ln(coalesce(relative_gain, 0) + 1 + 1e-10))) - 1 as relative_gain
+                      from drivewealth_portfolio_historical_prices_aggregated_3min data
+                               join (
+                                        select holding_id_v2, max(updated_at) as max_updated_at
+                                        from drivewealth_portfolio_historical_holdings
+                                        group by holding_id_v2
+                                    ) t using (holding_id_v2)
+                      where data.datetime > max_updated_at
+                      group by holding_id_v2
+                  ) t
+                      join drivewealth_portfolio_historical_prices_aggregated_3min data using (holding_id_v2, datetime)
+     ),
+     latest_data as
+         (
+             select holding_id_v2,
+                    '15min'                                                                         as period,
+                    (date_trunc('minute', datetime) -
+                     interval '1 minute' * mod(extract(minutes from datetime)::int, 15))::timestamp as datetime,
+                    relative_gain,
+                    value,
+                    updated_at
+             from latest_3min_data
 
-select data.*,
+             union all
+
+             select holding_id_v2,
+                    '1d'            as period,
+                    date::timestamp as datetime,
+                    relative_gain,
+                    value,
+                    updated_at
+             from latest_3min_data
+
+             union all
+
+             select holding_id_v2,
+                    '1w'                                      as period,
+                    date_trunc('week', date::date)::timestamp as datetime,
+                    relative_gain,
+                    value,
+                    updated_at
+             from latest_3min_data
+
+             union all
+
+             select holding_id_v2,
+                    '1m'                                       as period,
+                    date_trunc('month', date::date)::timestamp as datetime,
+                    relative_gain,
+                    value,
+                    updated_at
+             from latest_3min_data
+     )
+select profile_id,
+       holding_id_v2,
+       period,
+       date,
+       datetime,
+       coalesce(latest_data.value, data.value)           as value,
+       coalesce((1 + data.relative_gain) * (1 + latest_data.relative_gain) - 1,
+                data.relative_gain)                      as relative_gain,
+       coalesce(latest_data.updated_at, data.updated_at) as updated_at,
        holding_id_v2 || '_' || period || '_' || datetime as id
 from data
+         left join latest_data using (holding_id_v2, period, datetime)
 
 {% if is_incremental() %}
          left join {{ this }} old_data using (profile_id, holding_id_v2, period, datetime)
 where old_data.profile_id is null
    or abs(data.relative_gain - old_data.relative_gain) > 1e-3
-   or abs(data.adjusted_close - old_data.adjusted_close) > 1e-3
+   or abs(data.value - old_data.value) > 1e-3
 {% endif %}

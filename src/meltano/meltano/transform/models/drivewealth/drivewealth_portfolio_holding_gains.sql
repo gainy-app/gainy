@@ -18,8 +18,8 @@ with relative_gains as
                                    join {{ ref('portfolio_chart_skeleton') }} using (profile_id, datetime)
                           where drivewealth_portfolio_historical_prices_aggregated.period = '3min'
                             and portfolio_chart_skeleton.period = '1d'
-                            and adjusted_close is not null
-                            and adjusted_close > 0
+                            and value is not null
+                            and value > 0
                           group by profile_id, holding_id_v2, drivewealth_portfolio_historical_prices_aggregated.date
                       ),
                   raw_data_1w as
@@ -34,8 +34,8 @@ with relative_gains as
                             and portfolio_chart_skeleton.period = '1w'
                             and (drivewealth_portfolio_historical_prices_aggregated.date >= last_selloff_date or last_selloff_date is null)
                             and drivewealth_portfolio_historical_prices_aggregated.date >= now()::date - interval '1 week'
-                            and adjusted_close is not null
-                            and adjusted_close > 0
+                            and value is not null
+                            and value > 0
                           group by profile_id, holding_id_v2
                   ),
                   raw_data_1m as
@@ -48,8 +48,8 @@ with relative_gains as
                           where period = '1d'
                             and (date >= last_selloff_date or last_selloff_date is null)
                             and date >= now()::date - interval '1 month'
-                            and adjusted_close is not null
-                            and adjusted_close > 0
+                            and value is not null
+                            and value > 0
                           group by profile_id, holding_id_v2
                   ),
                   raw_data_3m as
@@ -62,8 +62,8 @@ with relative_gains as
                           where period = '1d'
                             and (date >= last_selloff_date or last_selloff_date is null)
                             and date >= now()::date - interval '3 month'
-                            and adjusted_close is not null
-                            and adjusted_close > 0
+                            and value is not null
+                            and value > 0
                           group by profile_id, holding_id_v2
                   ),
                   raw_data_1y as
@@ -76,8 +76,8 @@ with relative_gains as
                           where period = '1d'
                             and (date >= last_selloff_date or last_selloff_date is null)
                             and date >= now()::date - interval '1 year'
-                            and adjusted_close is not null
-                            and adjusted_close > 0
+                            and value is not null
+                            and value > 0
                           group by profile_id, holding_id_v2
                   ),
                   raw_data_5y as
@@ -90,8 +90,8 @@ with relative_gains as
                           where period = '1d'
                             and (date >= last_selloff_date or last_selloff_date is null)
                             and date >= now()::date - interval '5 year'
-                            and adjusted_close is not null
-                            and adjusted_close > 0
+                            and value is not null
+                            and value > 0
                           group by profile_id, holding_id_v2
                   ),
                   raw_data_all as
@@ -103,8 +103,8 @@ with relative_gains as
                                    left join {{ ref('drivewealth_portfolio_historical_holdings_marked') }} using (holding_id_v2)
                           where period = '1d'
                             and (date >= last_selloff_date or last_selloff_date is null)
-                            and adjusted_close is not null
-                            and adjusted_close > 0
+                            and value is not null
+                            and value > 0
                           group by profile_id, holding_id_v2
                   )
              select profile_id,

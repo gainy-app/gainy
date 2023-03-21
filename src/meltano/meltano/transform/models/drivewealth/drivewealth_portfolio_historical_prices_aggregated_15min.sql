@@ -4,7 +4,7 @@
     unique_key = "id",
     tags = ["realtime"],
     post_hook=[
-      pk('profile_id, holding_id_v2, symbol, datetime'),
+      pk('holding_id_v2, datetime'),
       index('id', true),
       index('updated_at'),
     ]
@@ -107,7 +107,7 @@ with portfolio_statuses as
                     portfolio_status_id,
                     symbol,
                     collection_id,
-                    (date + interval '1 day') as date,
+                    (date + interval '1 day')::date      as date,
                     (date + interval '1 day')::timestamp as datetime,
                     null as updated_at,
                     t.value
