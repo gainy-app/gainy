@@ -57,7 +57,7 @@ with last_selloff_date as materialized
                       where (date > last_selloff_date or last_selloff_date is null)
                         and date < now()::date - interval '1 week'
                       group by holding_id_v2
-                  ) t using (holding_id_v2)
+                  ) t2 using (holding_id_v2)
                  join {{ ref('drivewealth_portfolio_historical_holdings') }} using (holding_id_v2, date)
      ),
      raw_data_1m as
