@@ -29,5 +29,7 @@ mutation SendAppLink($phone_number: String!, $query_string: String) {
   }
 }
 ```
+Example: `{"phone_number": "+...", "query_string": "af_js_web=true&af_ss_ver=2_2_0&pid=website_google_organictest&c=campaign_name"}`
+
 ## Development
 Note: do not use foreign key relationships - all relationship should be of manual type (otherwise hasura fails during pipeline run).
