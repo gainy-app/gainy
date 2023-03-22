@@ -51,6 +51,11 @@ variable "amplitude_api_key" {
   sensitive = true
   default   = ""
 }
+variable "rebrandly_api_key" {
+  type      = string
+  sensitive = true
+  default   = ""
+}
 
 #################################### OneSignal ####################################
 

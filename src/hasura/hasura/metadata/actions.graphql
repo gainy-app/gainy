@@ -207,6 +207,7 @@ type Query {
 type Mutation {
   send_app_link(
     phone_number: String!
+    query_string: String
   ): OkOutput
 }
 

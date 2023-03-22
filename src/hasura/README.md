@@ -20,9 +20,10 @@ This repo contains Gainy's GraphQL API server built with [Hasura](https://hasura
 
 ### 
 ```graphql
-mutation SendAppLink($phone_number: String!) {
+mutation SendAppLink($phone_number: String!, $query_string: String) {
   send_app_link(
     phone_number: $phone_number
+    query_string: $query_string
   ){
     ok
   }
