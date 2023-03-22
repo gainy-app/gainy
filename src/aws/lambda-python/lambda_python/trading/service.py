@@ -147,6 +147,7 @@ class TradingService(GainyTradingService):
         self._get_provider_service().transfer_money(money_flow, amount,
                                                     trading_account.id,
                                                     funding_account.id)
+        repository.persist(money_flow)
 
         return money_flow
 
@@ -261,5 +262,6 @@ class TradingService(GainyTradingService):
                         "profile_id": funding_account.profile_id,
                         "funding_account": funding_account.to_dict(),
                     })
-        if Decimal(funding_account.balance) < amount:
+        if funding_account.balance is None or Decimal(
+                funding_account.balance) < amount:
             raise InsufficientFundsException()

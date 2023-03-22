@@ -22,12 +22,29 @@ with raw_data_0d as
                            ) t
                            using (symbol, date)
          ),
-     raw_data_1w as
+     raw_data_1d as
          (
              select raw_data_0d.*,
+                    historical_prices.date           as date_1d,
+                    historical_prices.adjusted_close as price_1d
+             from raw_data_0d
+                      left join (
+                                    select symbol,
+                                           max(historical_prices.date) as date
+                                    from {{ ref('historical_prices') }}
+                                             join raw_data_0d using (symbol)
+                                    where date < date_0d
+                                    group by symbol
+                                ) t
+                                using (symbol)
+                      left join {{ ref('historical_prices') }} using (symbol, date)
+         ),
+     raw_data_1w as
+         (
+             select raw_data_1d.*,
                     historical_prices.date           as date_1w,
                     historical_prices.adjusted_close as price_1w
-             from raw_data_0d
+             from raw_data_1d
                       left join (
                                     select symbol,
                                            max(historical_prices.date) as date
@@ -127,8 +144,8 @@ with raw_data_0d as
              select distinct on (
                  raw_data_13m.symbol
                  ) raw_data_13m.*,
-                   historical_prices.date_week      as date_5y,
-                   historical_prices.adjusted_close as price_5y
+                   historical_prices.date_week::date as date_5y,
+                   historical_prices.adjusted_close  as price_5y
              from raw_data_13m
                       left join {{ ref('historical_prices') }}
                                 on historical_prices.symbol = raw_data_13m.symbol
@@ -154,6 +171,8 @@ with raw_data_0d as
 select symbol,
        date_0d,
        price_0d,
+       date_1d,
+       price_1d,
        date_1w,
        price_1w,
        date_10d,
