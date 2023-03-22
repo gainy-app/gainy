@@ -36,6 +36,13 @@ query {
             performance_rank
             clicks_rank
             updated_at
+            previous_day_close_price
+            prev_value_1w
+            prev_value_1m
+            prev_value_3m
+            prev_value_1y
+            prev_value_5y
+            prev_value_total
         }
     }
 }
