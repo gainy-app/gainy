@@ -42,7 +42,6 @@ with last_selloff_date as materialized
                     cash_flow_sum as cash_flow_sum_1w
              from (
                       select holding_id_v2,
-                             min(date)      as date,
                              sum(cash_flow) as cash_flow_sum
                       from {{ ref('drivewealth_portfolio_historical_holdings') }}
                                left join last_selloff_date using (holding_id_v2)
@@ -50,6 +49,15 @@ with last_selloff_date as materialized
                         and date >= now()::date - interval '1 week'
                       group by holding_id_v2
                   ) t
+                 join (
+                      select holding_id_v2,
+                             max(date) as date
+                      from {{ ref('drivewealth_portfolio_historical_holdings') }}
+                               left join last_selloff_date using (holding_id_v2)
+                      where (date > last_selloff_date or last_selloff_date is null)
+                        and date < now()::date - interval '1 week'
+                      group by holding_id_v2
+                  ) t2 using (holding_id_v2)
                  join {{ ref('drivewealth_portfolio_historical_holdings') }} using (holding_id_v2, date)
      ),
      raw_data_1m as
