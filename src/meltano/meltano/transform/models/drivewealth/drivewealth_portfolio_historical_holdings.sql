@@ -122,13 +122,13 @@ with portfolio_statuses as
                           where date >= min_date
                       )
              -- historical schedule for tickers with historical chart
-             select profile_id, holding_id_v2, symbol, date, relative_daily_gain
+             select profile_id, holding_id_v2, symbol, date, relative_daily_gain, false as is_premarket
              from ticker_schedule
 
              union all
 
              -- historical schedule for tickers without historical chart
-             select profile_id, holding_id_v2, symbol, t.date, 0 as relative_daily_gain
+             select profile_id, holding_id_v2, symbol, t.date, 0 as relative_daily_gain, false as is_premarket
              from min_holding_date
                       join (select date from {{ ref('historical_prices') }} where symbol = 'SPY') t on t.date >= min_date
                       left join ticker_schedule using (profile_id, holding_id_v2, symbol, date)
@@ -137,7 +137,12 @@ with portfolio_statuses as
              union all
 
              -- realtime schedule
-             select profile_id, holding_id_v2, symbol, date, coalesce(relative_daily_change, 0) as relative_daily_gain
+             select profile_id,
+                    holding_id_v2,
+                    symbol,
+                    date,
+                    coalesce(relative_daily_change, 0)     as relative_daily_gain,
+                    ticker_realtime_metrics.symbol is null as is_premarket
              from min_holding_date
                       join (
                                select min(date) as date
@@ -160,7 +165,8 @@ with portfolio_statuses as
                     symbol,
                     date,
                     relative_daily_gain,
-                    value                                                as value,
+                    value,
+                    is_premarket,
                     data.updated_at
              from schedule
                       left join data using (profile_id, holding_id_v2, symbol, date)
@@ -186,7 +192,7 @@ with portfolio_statuses as
                         when data.value is not null
                             then data.value
                         -- if value is null but no portfolio_statuses exist in this day - then we assume there is value, just it's record is missing
-                        when portfolio_statuses.profile_id is null
+                        when portfolio_statuses.profile_id is null and not is_premarket
                             then cumulative_daily_relative_gain *
                                  (last_value_ignorenulls(data.value / cumulative_daily_relative_gain) over wnd)
                         end as value,
