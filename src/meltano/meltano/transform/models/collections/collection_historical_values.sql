@@ -40,7 +40,7 @@ with data as materialized
      collection_symbol_stats as
          (
              select collection_uniq_id, min(date) as min_date, max(date) as max_date
-             from collection_ticker_weights
+             from {{ ref('collection_ticker_weights') }}
              group by collection_uniq_id
      ),
      schedule as
