@@ -133,15 +133,6 @@ class DriveWealthAutopilotRun(BaseDriveWealthModel):
         """
         return re.search(r'(FAILED|TIMEDOUT|ABORTED)$', self.status)
 
-    def update_trading_collection_version(
-            self, trading_collection_version: TradingCollectionVersion):
-
-        if self.is_successful():
-            trading_collection_version.set_status(
-                TradingOrderStatus.EXECUTED_FULLY)
-        elif self.is_failed():
-            trading_collection_version.set_status(TradingOrderStatus.FAILED)
-
 
 class DriveWealthOrder(BaseDriveWealthModel):
     ref_id = None
