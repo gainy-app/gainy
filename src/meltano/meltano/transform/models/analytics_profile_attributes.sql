@@ -1,3 +1,10 @@
+{{
+  config(
+    materialized = "view",
+  )
+}}
+
+
 with profiles as
          (
              select id as profile_id, email as user_email
