@@ -160,7 +160,7 @@ union all
                  where id > last_selloff_id or last_selloff_id is null
                  group by profile_id, symbol
              )
-    select 'dw_wrong_holding_group_gain_' || profile_id                                        as id,
+    select 'dw_wrong_holding_group_gain_' || holding_group_id                                  as id,
            null                                                                                as symbol,
            'dw_wrong_holding_group_gain'                                                       as code,
            'realtime'                                                                          as period,
