@@ -1,13 +1,5 @@
 {
   "app": {
-    "analytics_profiles": {
-      "metadata": {
-        "view-key-properties": [
-          "id"
-        ],
-        "is-view": true
-      }
-    },
     "analytics_profile_plaid_access_tokens": {
       "metadata": {
         "view-key-properties": [
