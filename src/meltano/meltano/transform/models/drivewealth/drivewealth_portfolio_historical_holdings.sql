@@ -175,6 +175,7 @@ with portfolio_statuses as
      data_extended1 as -- calculate cumulative_daily_relative_gain
          (
              select *,
+                    lag(value) over wnd                                    as prev_value,
                     exp(sum(ln(relative_daily_gain + 1 + 1e-10)) over wnd) as cumulative_daily_relative_gain
              from data_extended0
                  window wnd as (partition by holding_id_v2 order by date)
@@ -192,7 +193,7 @@ with portfolio_statuses as
                         when data.value is not null
                             then data.value
                         -- if value is null but no portfolio_statuses exist in this day - then we assume there is value, just it's record is missing
-                        when portfolio_statuses.profile_id is null and not is_premarket
+                        when portfolio_statuses.profile_id is null and not (is_premarket and prev_value is null)
                             then cumulative_daily_relative_gain *
                                  (last_value_ignorenulls(data.value / cumulative_daily_relative_gain) over wnd)
                         end as value,
