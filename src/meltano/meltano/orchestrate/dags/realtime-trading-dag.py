@@ -10,5 +10,6 @@ dag = create_dag(dag_id,
 
 operator = BashOperator(
     task_id="update-account-balances",
-    bash_command="gainy_update_account_balances --realtime 2>&1 | tee /proc/1/fd/1",
+    bash_command=
+    "gainy_update_account_balances --realtime 2>&1 | tee /proc/1/fd/1",
     dag=dag)
