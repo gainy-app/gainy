@@ -140,15 +140,6 @@
     }
   },
   "public": {
-    "analyst_ratings": {
-      "metadata": {
-        "replication-key": "updated_at",
-        "replication-method": "INCREMENTAL",
-        "table-key-properties": [
-          "symbol"
-        ]
-      }
-    },
     "analytics_drivewealth_collection_holdings": {
       "metadata": {
         "replication-key": "updated_at",
@@ -168,6 +159,33 @@
           "profile_id",
           "date",
           "symbol"
+        ]
+      }
+    },
+    "analytics_profiles": {
+      "metadata": {
+        "replication-key": "updated_at",
+        "replication-method": "INCREMENTAL",
+        "table-key-properties": [
+          "profile_id"
+        ]
+      }
+    },
+    "analyst_ratings": {
+      "metadata": {
+        "replication-key": "updated_at",
+        "replication-method": "INCREMENTAL",
+        "table-key-properties": [
+          "symbol"
+        ]
+      }
+    },
+    "analytics_trading_aggregated": {
+      "metadata": {
+        "replication-key": "date",
+        "replication-method": "INCREMENTAL",
+        "table-key-properties": [
+          "date"
         ]
       }
     },
