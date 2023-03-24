@@ -178,10 +178,10 @@ module "aws" {
   twilio_auth_token              = var.twilio_auth_token
   sendgrid_api_key               = var.sendgrid_api_key
 
-  billing_equity_value_fee_multiplier = var.billing_equity_value_fee_multiplier
-  billing_min_yearly_fee              = var.billing_min_yearly_fee
-  billing_enabled_profiles            = var.billing_enabled_profiles
-  billing_min_date                    = var.billing_min_date
+  billing_value_fee_multiplier = var.billing_value_fee_multiplier
+  billing_min_yearly_fee       = var.billing_min_yearly_fee
+  billing_enabled_profiles     = var.billing_enabled_profiles
+  billing_min_date             = var.billing_min_date
 }
 
 module "datadog" {

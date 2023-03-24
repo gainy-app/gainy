@@ -7,14 +7,23 @@
 
 with usage as
          (
-             select profile_id,
-                    equity_value,
-                    drivewealth_accounts_positions.created_at::date as date
-             from {{ source('app', 'drivewealth_accounts_positions') }}
+             select profile_id, date, sum(value) as value
+             from (
+                      select drivewealth_account_id,
+                             equity_value                                                                      as value,
+                             (drivewealth_accounts_positions.created_at at time zone 'America/New_York')::date as date
+                      from {{ source('app', 'drivewealth_accounts_positions') }}
+                      union all
+                      select drivewealth_account_id,
+                             cash_balance                                                                  as value,
+                             (drivewealth_accounts_money.created_at at time zone 'America/New_York')::date as date
+                      from {{ source('app', 'drivewealth_accounts_money') }}
+                  ) t
                       join {{ source('app', 'drivewealth_accounts') }}
-                           on drivewealth_accounts.ref_id = drivewealth_accounts_positions.drivewealth_account_id
+                           on drivewealth_accounts.ref_id = t.drivewealth_account_id
                       join {{ source('app', 'drivewealth_users') }}
                            on drivewealth_users.ref_id = drivewealth_accounts.drivewealth_user_id
+             group by profile_id, date
          ),
      profiles as
          (
@@ -25,7 +34,7 @@ with usage as
      daily_usage as
          (
              select profile_id,
-                    max(equity_value) as equity_value,
+                    max(value) as value,
                     date
              from usage
              group by profile_id, date
@@ -36,11 +45,11 @@ with usage as
              select profile_id,
                     date,
                     coalesce(
-                            equity_value,
-                            LAST_VALUE_IGNORENULLS(equity_value)
+                            value,
+                            LAST_VALUE_IGNORENULLS(value)
                             over (partition by profile_id order by date rows between unbounded preceding and current row),
                             0
-                        )                                                                  as equity_value,
+                        )                                                                  as value,
                     date_trunc('month', date)                                              as period_start,
                     date_trunc('month', date + interval '1 month') as period_end
              from profiles
@@ -50,7 +59,7 @@ with usage as
 select profile_id,
        period_start,
        period_end,
-       avg(equity_value) as equity_value
+       avg(value) as value
 from daily_usage_expanded
 group by profile_id, period_start, period_end
-having sum(equity_value) > 0
+having sum(value) > 0

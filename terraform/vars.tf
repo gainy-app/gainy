@@ -57,7 +57,7 @@ variable "rebrandly_api_key" {
   default   = ""
 }
 
-variable "billing_equity_value_fee_multiplier" {
+variable "billing_value_fee_multiplier" {
   type    = string
   default = ""
 }

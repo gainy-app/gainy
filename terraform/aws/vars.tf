@@ -87,7 +87,7 @@ variable "sendgrid_api_key" {}
 variable "source_code_branch" {}
 variable "source_code_branch_name" {}
 
-variable "billing_equity_value_fee_multiplier" {}
+variable "billing_value_fee_multiplier" {}
 variable "billing_min_yearly_fee" {}
 variable "billing_enabled_profiles" {}
 variable "billing_min_date" {}
