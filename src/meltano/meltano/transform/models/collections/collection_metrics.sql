@@ -70,8 +70,13 @@ with collection_daily_latest_chart_point as
                             then value_all
                         end - 1                                                                 as value_change_all,
                     previous_day.adjusted_close::double precision                               as previous_day_close_price,
-                    greatest(latest_day.updated_at, previous_day.updated_at,
-                        collection_historical_values_marked.updated_at)                         as updated_at
+                    value_1w                                                                    as prev_value_1w,
+                    value_1m                                                                    as prev_value_1m,
+                    value_3m                                                                    as prev_value_3m,
+                    value_1y                                                                    as prev_value_1y,
+                    value_5y                                                                    as prev_value_5y,
+                    value_all                                                                   as prev_value_total,
+                    greatest(latest_day.updated_at, previous_day.updated_at)                    as updated_at
              from {{ ref('collection_historical_values_marked') }}
                       left join collection_daily_latest_chart_point latest_day
                                 on latest_day.collection_uniq_id = collection_historical_values_marked.collection_uniq_id
@@ -110,6 +115,12 @@ select profile_collections.profile_id,
        metrics.value_change_5y,
        metrics.value_change_all,
        metrics.previous_day_close_price,
+       metrics.prev_value_1w::double precision,
+       metrics.prev_value_1m::double precision,
+       metrics.prev_value_3m::double precision,
+       metrics.prev_value_1y::double precision,
+       metrics.prev_value_5y::double precision,
+       metrics.prev_value_total::double precision,
        ticker_metrics.market_capitalization_sum::bigint,
        ranked_performance.rank::int       as performance_rank,
        ranked_clicks.rank::int            as clicks_rank,

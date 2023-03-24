@@ -101,6 +101,14 @@
             total_assets
             ebitda_ttm
             net_debt
+            
+            prev_price_1d
+            prev_price_1w
+            prev_price_1m
+            prev_price_3m
+            prev_price_1y
+            prev_price_5y
+            prev_price_all
         }
         ticker_industries {
             industry_order

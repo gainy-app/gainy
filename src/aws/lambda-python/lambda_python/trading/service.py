@@ -262,5 +262,6 @@ class TradingService(GainyTradingService):
                         "profile_id": funding_account.profile_id,
                         "funding_account": funding_account.to_dict(),
                     })
-        if Decimal(funding_account.balance) < amount:
+        if funding_account.balance is None or Decimal(
+                funding_account.balance) < amount:
             raise InsufficientFundsException()

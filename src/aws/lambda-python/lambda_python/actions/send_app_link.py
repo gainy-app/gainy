@@ -1,5 +1,6 @@
 import datetime
 import os
+import requests
 
 from common.context_container import ContextContainer
 from common.hasura_function import HasuraAction
@@ -11,6 +12,7 @@ from verification.exceptions import CooldownException
 
 logger = get_logger(__name__)
 
+REBRANDLY_API_KEY = os.getenv("REBRANDLY_API_KEY")
 APP_STORE_LINK = os.getenv("APP_STORE_LINK", "https://go.gainy.app/ZOFw")
 APP_STORE_LINK_COOLDOWN = 30
 
@@ -19,8 +21,29 @@ def _validate_phone_number(twilio_client: TwilioClient, phone_number: str):
     twilio_client.validate_phone_number(phone_number)
 
 
-def _send(twilio_client: TwilioClient, phone_number):
-    if not twilio_client.send_sms(phone_number, APP_STORE_LINK):
+def shorten_url(url):
+    payload = {"destination": url}
+    headers = {
+        "accept": "application/json",
+        "content-type": "application/json",
+        "apikey": REBRANDLY_API_KEY
+    }
+    response = requests.post("https://api.rebrandly.com/v1/links",
+                             headers=headers,
+                             json=payload)
+    return "https://" + response.json()["shortUrl"]
+
+
+def _send(twilio_client: TwilioClient, phone_number, query_string):
+    url = APP_STORE_LINK
+    if query_string:
+        url += f"?{query_string}"
+        try:
+            url = shorten_url(url)
+        except Exception as e:
+            logger.exception(e)
+
+    if not twilio_client.send_sms(phone_number, f"Download Gainy app: {url}"):
         raise Exception('Failed to send link.')
 
 
@@ -59,6 +82,7 @@ class SendAppLink(HasuraAction):
         user_id = context_container.request["session_variables"][
             "x-hasura-user-id"]
         phone_number = input_params["phone_number"]
+        query_string = input_params.get("query_string")
 
         cache = context_container.cache
         twilio_client = context_container.twilio_client
@@ -66,7 +90,7 @@ class SendAppLink(HasuraAction):
         try:
             _check_can_send(cache, user_id)
             _validate_phone_number(twilio_client, phone_number)
-            _send(twilio_client, phone_number)
+            _send(twilio_client, phone_number, query_string)
             _mark_sent(cache, user_id)
         except CooldownException:
             raise BadRequestException(
