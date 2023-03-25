@@ -52,7 +52,7 @@ class RedemptionUpdatedEventHandler(AbstractDriveWealthEventHandler):
                     })
         if money_flow and redemption.get_money_flow_status(
         ) == TradingMoneyFlowStatus.SUCCESS and old_mf_status != TradingMoneyFlowStatus.SUCCESS:
-            self.analytics_service.on_withdraw_success(money_flow.profile_id,
-                                                       -money_flow.amount)
+            self.analytics_service.on_withdraw_success(
+                money_flow.profile_id, float(-money_flow.amount))
             self.notification_service.on_withdraw_success(
                 money_flow.profile_id, -money_flow.amount)

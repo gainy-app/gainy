@@ -18,7 +18,7 @@ with holdings as
          (
              select holding_id_v2,
                     actual_value,
-                    relative_gain_1d / actual_value as relative_gain_1d,
+                    case when actual_value > 0 then relative_gain_1d / actual_value end as relative_gain_1d,
                     absolute_gain_1d
              from (
                       select holding_id_v2,

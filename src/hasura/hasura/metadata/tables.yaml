@@ -1351,6 +1351,12 @@
           - market_capitalization_sum
           - performance_rank
           - previous_day_close_price
+          - prev_value_1w
+          - prev_value_1m
+          - prev_value_3m
+          - prev_value_1y
+          - prev_value_5y
+          - prev_value_total
           - profile_id
           - relative_daily_change
           - updated_at
@@ -2747,6 +2753,13 @@
           - price_change_3m
           - price_change_5y
           - price_change_all
+          - prev_price_1d
+          - prev_price_1w
+          - prev_price_1m
+          - prev_price_3m
+          - prev_price_1y
+          - prev_price_5y
+          - prev_price_all
           - price_to_book_value
           - price_to_earnings_ttm
           - price_to_sales_ttm

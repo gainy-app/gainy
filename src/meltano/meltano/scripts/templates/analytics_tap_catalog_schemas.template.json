@@ -1,13 +1,5 @@
 {
   "app": {
-    "analytics_profiles": {
-      "metadata": {
-        "view-key-properties": [
-          "id"
-        ],
-        "is-view": true
-      }
-    },
     "analytics_profile_plaid_access_tokens": {
       "metadata": {
         "view-key-properties": [
@@ -140,15 +132,6 @@
     }
   },
   "public": {
-    "analyst_ratings": {
-      "metadata": {
-        "replication-key": "updated_at",
-        "replication-method": "INCREMENTAL",
-        "table-key-properties": [
-          "symbol"
-        ]
-      }
-    },
     "analytics_drivewealth_collection_holdings": {
       "metadata": {
         "replication-key": "updated_at",
@@ -169,6 +152,35 @@
           "date",
           "symbol"
         ]
+      }
+    },
+    "analytics_profiles": {
+      "metadata": {
+        "replication-key": "updated_at",
+        "replication-method": "INCREMENTAL",
+        "view-key-properties": [
+          "profile_id"
+        ],
+        "is-view": true
+      }
+    },
+    "analyst_ratings": {
+      "metadata": {
+        "replication-key": "updated_at",
+        "replication-method": "INCREMENTAL",
+        "table-key-properties": [
+          "symbol"
+        ]
+      }
+    },
+    "analytics_trading_aggregated": {
+      "metadata": {
+        "replication-key": "date",
+        "replication-method": "INCREMENTAL",
+        "view-key-properties": [
+          "date"
+        ],
+        "is-view": true
       }
     },
     "base_tickers": {
