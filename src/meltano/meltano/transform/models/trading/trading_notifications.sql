@@ -17,7 +17,8 @@ select profile_id,
        true                                                                        as is_push,
        true                                                                        as is_shown_in_app,
        '094f1363-da90-4477-bc69-6c333d987a52'                                      as onesignal_template_id,
-       null::text                                                                  as notification_method
+       null::text                                                                  as notification_method,
+       null::json                                                                  as notification_params
 from (
          select trading_collection_versions.profile_id,
                 'trading_collection_versions_' || trading_collection_versions.id as uniq_id,
@@ -63,7 +64,8 @@ select profile_id,
        true                                                                                    as is_push,
        true                                                                                    as is_shown_in_app,
        'beb30a52-a65b-496c-90bb-3d50c5e1aaf0'                                                  as onesignal_template_id,
-       null::text                                                                              as notification_method
+       null::text                                                                              as notification_method,
+       null::json                                                                              as notification_params
 from (
          select profile_id, max(executed_at) as executed_at
          from {{ source('app', 'trading_collection_versions') }}
@@ -97,7 +99,8 @@ select profile_id,
        true                                   as is_push,
        true                                   as is_shown_in_app,
        'a79620ce-03f0-4c54-84a7-e66934c1c0d6' as onesignal_template_id,
-       null::text                             as notification_method
+       null::text                             as notification_method,
+       null::json                             as notification_params
 from (
          select distinct on (
              profile_id
@@ -145,7 +148,8 @@ select trading_money_flow.profile_id,
        true                                                     as is_push,
        true                                                     as is_shown_in_app,
        '8c9d99c1-0df2-4b12-9ba4-bf40b6871265'                   as onesignal_template_id,
-       null::text                                               as notification_method
+       null::text                                               as notification_method,
+       null::json                                               as notification_params
 from {{ source('app', 'trading_money_flow') }}
          left join {{ ref('trading_history') }}
              on trading_history.money_flow_id = trading_money_flow.id
@@ -165,7 +169,8 @@ select profile_id,
        false                                                    as is_push,
        false                                                    as is_shown_in_app,
        null                                                     as onesignal_template_id,
-       'on_kyc_form_abandoned'                                  as notification_method
+       'on_kyc_form_abandoned'                                  as notification_method,
+       json_build_object('profile_id', profile_id)              as notification_params
 from {{ source('app', 'kyc_form') }}
 where status is null
-  and kyc_form.updated_at between now() - interval '2 day' and now() - interval '2 day'
+  and kyc_form.updated_at between now() - interval '2 day' and now() - interval '1 day'

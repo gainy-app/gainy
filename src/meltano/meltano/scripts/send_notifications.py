@@ -195,7 +195,7 @@ def send_all(sender_id):
                    where send_at <= now() or send_at is null
                    on conflict do nothing""", {"sender_id": sender_id})
             cursor.execute(
-                "update app.notifications set sender_id = %(sender_id)s where sender_id is null and (is_push or notification_method)",
+                "update app.notifications set sender_id = %(sender_id)s where sender_id is null and (is_push or notification_method is not null)",
                 {"sender_id": sender_id})
 
             # push

@@ -21,6 +21,7 @@ with data as
                    false                                                                                        as is_test,
                    true                                                                                         as is_push,
                    null::text                                                                                   as notification_method,
+                   null::json                                                                                   as notification_params,
                    false                                                                                        as is_shown_in_app,
                    '4c70442b-ff04-475f-9a63-97d442127707'                                                       as onesignal_template_id
             from (
@@ -50,6 +51,7 @@ with data as
                    false                                                                                   as is_test,
                    true                                                                                    as is_push,
                    null::text                                                                              as notification_method,
+                   null::json                                                                              as notification_params,
                    false                                                                                   as is_shown_in_app,
                    '4c806577-88db-4f1e-a4d1-232fac0aa58a'                                                  as onesignal_template_id
             from (
@@ -83,6 +85,7 @@ with data as
                    false                                           as is_test,
                    true                                            as is_push,
                    null::text                                      as notification_method,
+                   null::json                                      as notification_params,
                    false                                           as is_shown_in_app,
                    'e1b4dd4e-3310-403b-bdc8-b51f56f54045'          as onesignal_template_id
             from (
@@ -113,6 +116,7 @@ with data as
                        false                                                        as is_test,
                        true                                                         as is_push,
                        null::text                                                   as notification_method,
+                       null::json                                                   as notification_params,
                        false                                                        as is_shown_in_app,
                        '07b00e92-a1ae-44ea-bde0-c0715a991f2f'                       as onesignal_template_id
                 from {{ source('website', 'blogs') }}
@@ -146,6 +150,7 @@ with data as
                    false                                       as is_test,
                    true                                        as is_push,
                    null::text                                  as notification_method,
+                   null::json                                  as notification_params,
                    false                                       as is_shown_in_app,
                    'ed86815f-3391-498c-875a-ea974342dc46'      as onesignal_template_id
             from {{ source('app', 'invitations') }}
@@ -164,6 +169,7 @@ with data as
                    false                                         as is_test,
                    true                                          as is_push,
                    null::text                                    as notification_method,
+                   null::json                                    as notification_params,
                    false                                         as is_shown_in_app,
                    '3c5f6ae0-1c69-4dbe-bb73-0d7f07595c95'        as onesignal_template_id
             from {{ source('app', 'invitations') }}
@@ -184,6 +190,7 @@ with data as
                    false                                                          as is_test,
                    true                                                           as is_push,
                    null::text                                                     as notification_method,
+                   null::json                                                     as notification_params,
                    false                                                          as is_shown_in_app,
                    '11dc7a5a-aa96-4835-893a-cea11581ab6c'                         as onesignal_template_id
             from (
@@ -216,6 +223,7 @@ with data as
                    is_test,
                    is_push,
                    notification_method,
+                   notification_params,
                    is_shown_in_app,
                    onesignal_template_id
             from {{ ref('trading_notifications') }}
@@ -229,17 +237,7 @@ with data as
                        or first_name ilike '%test%' as is_test
             FROM {{ source('app', 'profiles') }}
         )
-select data.profile_id,
-       data.uniq_id,
-       data.send_at,
-       data.title,
-       data.text,
-       data.data,
-       data.is_test,
-       data.is_push,
-       data.notification_method,
-       data.is_shown_in_app,
-       data.onesignal_template_id
+select data.*
 from data
          left join profiles using (profile_id)
 where data.profile_id is null -- send broadcast
