@@ -3,5 +3,6 @@ alter table app.notifications
 alter table app.notifications
     rename column push_response to response;
 alter table app.notifications
-    drop column is_email,
-    drop column email_response;
+    drop column notification_method,
+    drop column notification_params,
+    drop column notification_sent;

@@ -5,7 +5,7 @@ from gainy.analytics.service import AnalyticsService
 from gainy.trading.drivewealth.models import DriveWealthAccount
 from gainy.trading.models import TradingAccount
 from queue_processing.abstract_event_handler import EventHandlerInterface
-from services.notification import NotificationService
+from gainy.services.notification import NotificationService
 from trading.drivewealth.provider import DriveWealthProvider
 from trading.drivewealth.repository import DriveWealthRepository
 from trading.repository import TradingRepository

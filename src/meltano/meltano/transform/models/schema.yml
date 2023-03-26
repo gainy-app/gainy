@@ -2004,10 +2004,10 @@ models:
         tests:
           - type:
               type: 'boolean'
-      - name: is_email
+      - name: notification_method
         tests:
           - type:
-              type: 'boolean'
+              type: 'text'
       - name: is_shown_in_app
         tests:
           - type:

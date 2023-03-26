@@ -1,7 +1,7 @@
 from gainy.analytics.service import AnalyticsService
 from gainy.tests.mocks.repository_mocks import mock_persist, mock_record_calls
 from gainy.trading.drivewealth import DriveWealthRepository
-from services.notification import NotificationService
+from gainy.services.notification import NotificationService
 from trading.drivewealth.event_handlers.kyc_updated import KycUpdatedEventHandler
 from trading.drivewealth.provider import DriveWealthProvider
 from trading.models import ProfileKycStatus, KycStatus

@@ -5,6 +5,7 @@ from psycopg2.extras import DictCursor
 import requests
 import uuid
 
+from gainy.context_container import ContextContainer
 from gainy.exceptions import EmailNotSentException
 from gainy.services.sendgrid import SendGridService
 from gainy.utils import db_connect, get_logger, env, ENV_PRODUCTION, ENV_TEST, ENV_LOCAL
@@ -184,16 +185,17 @@ def check_malfunctioning_notifications(notifications_to_send):
 
 
 def send_all(sender_id):
-    with db_connect() as db_conn:
+    with ContextContainer() as context_container:
+        db_conn = context_container.db_conn
         with db_conn.cursor(cursor_factory=DictCursor) as cursor:
             cursor.execute(
-                """insert into app.notifications(profile_id, uniq_id, title, text, data, sender_id, is_test, onesignal_template_id, is_push, is_email, is_shown_in_app)
-                   select profile_id, uniq_id, title, text, data, %(sender_id)s, is_test, onesignal_template_id, is_push, is_email, is_shown_in_app
+                """insert into app.notifications(profile_id, uniq_id, title, text, data, sender_id, is_test, onesignal_template_id, is_push, is_shown_in_app, notification_method, notification_params)
+                   select profile_id, uniq_id, title, text, data, %(sender_id)s, is_test, onesignal_template_id, is_push, is_shown_in_app, notification_method, notification_params
                    from notifications_to_send
                    where send_at <= now() or send_at is null
                    on conflict do nothing""", {"sender_id": sender_id})
             cursor.execute(
-                "update app.notifications set sender_id = %(sender_id)s where sender_id is null and (is_push or is_email)",
+                "update app.notifications set sender_id = %(sender_id)s where sender_id is null and (is_push or notification_method)",
                 {"sender_id": sender_id})
 
             # push
@@ -211,16 +213,26 @@ def send_all(sender_id):
 
             # email
             cursor.execute(
-                """select profiles.email, uuid, title, text, data, is_test
+                """select uuid, notification_method, notification_params
                    from app.notifications
                    left join app.profiles on profiles.id = notifications.profile_id
                    where sender_id = %(sender_id)s
-                     and is_email
-                     and email_response is null""", {"sender_id": sender_id})
+                     and notification_method is not null
+                     and not notification_sent""", {"sender_id": sender_id})
             notifications_to_send = list(cursor.fetchall())
-            # check_malfunctioning_notifications(notifications_to_send)
+            notification_service = context_container.notification_service
             for row in notifications_to_send:
-                send_one_email(db_conn, row)
+                method = row["notification_method"]
+                params = row["notification_params"]
+                try:
+                    getattr(notification_service, method)(**params)
+
+                    cursor.execute(
+                        """update app.notifications set notification_sent = true
+                           where uuid = %(notification_uuid)s""",
+                        {"notification_uuid": row["uuid"]})
+                except Exception as e:
+                    logger.exception(e)
 
 
 send_all(uuid.uuid4())

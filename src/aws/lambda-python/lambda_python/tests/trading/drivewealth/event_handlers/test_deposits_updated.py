@@ -2,7 +2,7 @@ from gainy.analytics.service import AnalyticsService
 from gainy.tests.mocks.repository_mocks import mock_find, mock_persist, mock_record_calls
 from gainy.trading.drivewealth.models import DriveWealthDeposit
 from gainy.trading.models import TradingMoneyFlow, FundingAccount
-from services.notification import NotificationService
+from gainy.services.notification import NotificationService
 from trading.drivewealth.event_handlers import DepositsUpdatedEventHandler
 from trading.drivewealth.provider import DriveWealthProvider
 from trading.drivewealth.repository import DriveWealthRepository
