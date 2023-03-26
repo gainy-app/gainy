@@ -2004,11 +2004,15 @@ models:
         tests:
           - type:
               type: 'boolean'
+      - name: notification_method
+        tests:
+          - type:
+              type: 'text'
       - name: is_shown_in_app
         tests:
           - type:
               type: 'boolean'
-      - name: template_id
+      - name: onesignal_template_id
         tests:
           - type:
               type: 'text'
