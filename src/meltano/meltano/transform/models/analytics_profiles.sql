@@ -11,6 +11,7 @@ select profile_id,
        last_name,
        profile_scoring_settings.created_at as questionaire_completed_at,
        kyc_status,
+       kyc_start_date,
        last_deposit_at,
        total_deposit_amount,
        actual_value                        as account_balance,
@@ -41,3 +42,6 @@ from (
                        where amount > 0
                        group by profile_id
                    ) deposit_stats using (profile_id)
+         left join (
+                       select profile_id, min(created_at) as kyc_start_date from {{ source('app', 'kyc_statuses') }} group by profile_id
+                   ) kyc_stats using (profile_id)
