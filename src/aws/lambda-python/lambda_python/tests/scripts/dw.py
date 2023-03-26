@@ -121,7 +121,6 @@ from gainy.trading.models import TradingCollectionVersion, TradingAccount
 # fund_ref_id = 'fund_c09626e9-9d6f-4762-82a4-282c245b55e9'
 # target_amount_delta = Decimal(1.4300000000000068)
 
-
 with ContextContainer() as context_container:
     provider = context_container.drivewealth_provider
     api = context_container.drivewealth_api
@@ -135,7 +134,7 @@ with ContextContainer() as context_container:
         provider.sync_user(account.drivewealth_user_id)
 
     trading_repository.persist(account)
-    account:DriveWealthAccount = trading_repository.refresh(account)
+    account: DriveWealthAccount = trading_repository.refresh(account)
     if not account.trading_account_id:
         trading_account = TradingAccount()
         trading_account.profile_id = profile_id
@@ -160,7 +159,8 @@ with ContextContainer() as context_container:
     fund.ref_id = fund_ref_id
 
     helper = DriveWealthProviderRebalanceHelper(provider, trading_repository)
-    helper.handle_cash_amount_change(collection_version, portfolio, fund, False)
+    helper.handle_cash_amount_change(collection_version, portfolio, fund,
+                                     False)
 
     portfolio.normalize_weights()
     provider.send_portfolio_to_api(portfolio)
