@@ -129,6 +129,53 @@ union all
 
 union all
 
+(
+    with order_stats as
+             (
+                 select profile_id,
+                        'ttf_' || profile_id || '_' || collection_id as holding_group_id,
+                        sum(executed_amount)                         as executed_amount
+                 from {{ source('app', 'trading_collection_versions') }}
+                          left join (
+                                        select profile_id, collection_id, max(id) as last_selloff_id
+                                        from {{ source('app', 'trading_collection_versions') }}
+                                        where target_amount_delta_relative = -1
+                                        group by profile_id, collection_id
+                               ) t using (profile_id, collection_id)
+                 where id > last_selloff_id or last_selloff_id is null
+                 group by profile_id, collection_id
+
+                 union all
+
+                 select profile_id,
+                        'ticker_' || profile_id || '_' || symbol as holding_group_id,
+                        sum(executed_amount)                     as executed_amount
+                 from {{ source('app', 'trading_orders') }}
+                          left join (
+                                        select profile_id, symbol, max(id) as last_selloff_id
+                                        from {{ source('app', 'trading_orders') }}
+                                        where target_amount_delta_relative = -1
+                                        group by profile_id, symbol
+                               ) t using (profile_id, symbol)
+                 where id > last_selloff_id or last_selloff_id is null
+                 group by profile_id, symbol
+             )
+    select 'dw_wrong_holding_group_gain_' || holding_group_id                                  as id,
+           null                                                                                as symbol,
+           'dw_wrong_holding_group_gain'                                                       as code,
+           'realtime'                                                                          as period,
+           'Profile ' || profile_id ||
+           ' has wrong total portfolio gain, diff: ' ||
+           abs(executed_amount + coalesce(absolute_gain_total, 0) - coalesce(actual_value, 0)) as message,
+           now()                                                                               as updated_at
+    from order_stats
+             left join {{ ref('drivewealth_portfolio_holding_group_gains') }} using (profile_id, holding_group_id)
+    where profile_id > 1
+      and abs(executed_amount + coalesce(absolute_gain_total, 0) - coalesce(actual_value, 0)) > 1
+)
+
+union all
+
 -- add one fake record to allow post_hook above to clean other rows
 select 'fake_row_allowing_deletion' as id,
        null                         as symbol,
