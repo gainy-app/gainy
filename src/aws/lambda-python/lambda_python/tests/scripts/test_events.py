@@ -29,8 +29,7 @@ def run():
     with ContextContainer() as context_container:
         context_container.analytics_service.on_dw_brokerage_account_opened(
             profile_id)
-        context_container.analytics_service.on_dw_kyc_status_rejected(
-            profile_id)
+        context_container.analytics_service.on_kyc_status_rejected(profile_id)
         context_container.analytics_service.on_deposit_success(money_flow)
         context_container.analytics_service.on_withdraw_success(
             profile_id, amount)

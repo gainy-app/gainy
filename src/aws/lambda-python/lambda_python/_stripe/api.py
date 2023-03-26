@@ -12,8 +12,7 @@ from stripe.api_resources.refund import Refund
 from stripe.api_resources.setup_intent import SetupIntent
 from gainy.billing.stripe.api import StripeApi as GainyStripeApi
 from gainy.utils import get_logger
-
-from models import Profile
+from gainy.models import Profile
 
 logger = get_logger(__name__)
 

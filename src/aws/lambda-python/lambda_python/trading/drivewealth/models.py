@@ -13,7 +13,8 @@ from gainy.trading.drivewealth.models import BaseDriveWealthModel
 from gainy.trading.drivewealth.provider.base import normalize_symbol
 from gainy.utils import get_logger
 from trading.models import ProfileKycStatus, KycStatus, TradingStatementType
-from gainy.trading.models import TradingCollectionVersion, TradingOrderStatus
+from gainy.trading.models import TradingCollectionVersion, TradingOrderStatus, AbstractProviderBankAccount, \
+    FundingAccount
 
 PRECISION = 1e-3
 logger = get_logger(__name__)
@@ -37,7 +38,8 @@ class DriveWealthDocument(BaseDriveWealthModel):
         return "drivewealth_documents"
 
 
-class DriveWealthBankAccount(BaseDriveWealthModel):
+class DriveWealthBankAccount(AbstractProviderBankAccount,
+                             BaseDriveWealthModel):
     ref_id = None
     drivewealth_user_id = None
     funding_account_id = None
@@ -77,6 +79,9 @@ class DriveWealthBankAccount(BaseDriveWealthModel):
                 data["userDetails"]['firstName'],
                 data["userDetails"]['lastName']
             ])
+
+    def fill_funding_account_details(self, funding_account: FundingAccount):
+        funding_account.mask = self.bank_account_number
 
     @classproperty
     def table_name(self) -> str:
