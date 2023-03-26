@@ -123,29 +123,6 @@ def send_one_push(db_conn, notification):
         logger.exception(e)
 
 
-def send_one_email(db_conn, notification):
-    mailer = SendGridService()
-    try:
-        response = mailer.send_email(notification['email'],
-                                     notification['email_subject'])
-    except EmailNotSentException as e:
-        logger.exception("Failed to send notification: %s", notification)
-        return
-
-    response_serialized = {
-        "status_code": response.status_code,
-        "data": response.json()
-    }
-
-    with db_conn.cursor() as update_cursor:
-        update_cursor.execute(
-            """update app.notifications set email_response = %(response)s
-               where uuid = %(notification_uuid)s""", {
-                "response": json.dumps(response_serialized),
-                "notification_uuid": notification["uuid"]
-            })
-
-
 def check_malfunctioning_notifications(notifications_to_send):
     if MAX_NOTIFICATIONS_PER_TEMPLATE is None:
         return
