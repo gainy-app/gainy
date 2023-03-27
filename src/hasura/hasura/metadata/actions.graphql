@@ -207,6 +207,7 @@ type Query {
 type Mutation {
   send_app_link(
     phone_number: String!
+    query_string: String
   ): OkOutput
 }
 
@@ -585,7 +586,7 @@ type LinkBankAccountWithPlaidOutput {
 
 type AccountInformation {
   account_id: String!
-  balance_available: Float!
+  balance_available: Float
   balance_current: Float!
   iso_currency_code: String!
   mask: String!

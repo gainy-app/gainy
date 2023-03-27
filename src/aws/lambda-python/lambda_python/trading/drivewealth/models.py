@@ -12,7 +12,6 @@ from gainy.trading.drivewealth.models import BaseDriveWealthModel
 from gainy.trading.drivewealth.provider.base import normalize_symbol
 from gainy.utils import get_logger
 from trading.models import ProfileKycStatus, KycStatus, TradingStatementType
-from gainy.trading.models import TradingCollectionVersion, TradingOrderStatus
 
 PRECISION = 1e-3
 logger = get_logger(__name__)
@@ -81,15 +80,6 @@ class DriveWealthAutopilotRun(BaseDriveWealthModel):
         REBALANCE_ABORTED                 rebalance has been cancelled
         """
         return re.search(r'(FAILED|TIMEDOUT|ABORTED)$', self.status)
-
-    def update_trading_collection_version(
-            self, trading_collection_version: TradingCollectionVersion):
-
-        if self.is_successful():
-            trading_collection_version.set_status(
-                TradingOrderStatus.EXECUTED_FULLY)
-        elif self.is_failed():
-            trading_collection_version.set_status(TradingOrderStatus.FAILED)
 
 
 class DriveWealthOrder(BaseDriveWealthModel):

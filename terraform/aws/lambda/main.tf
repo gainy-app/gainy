@@ -192,6 +192,7 @@ locals {
     STRIPE_PUBLISHABLE_KEY       = var.stripe_publishable_key
     GOOGLE_PLACES_API_KEY        = var.google_places_api_key
     AMPLITUDE_API_KEY            = var.amplitude_api_key
+    REBRANDLY_API_KEY            = var.rebrandly_api_key
 
     VERIFICATION_CODE_COOLDOWN = var.verification_code_cooldown
     VERIFICATION_CODE_TTL      = var.verification_code_ttl
@@ -209,10 +210,10 @@ locals {
     RECOMMENDATION_MANUALLY_SELECTED_COLLECTION_IDS = ""
     APP_STORE_LINK                                  = "https://go.gainy.app/ZOFw/Webp"
 
-    BILLING_EQUITY_VALUE_FEE_MULTIPLIER = var.billing_equity_value_fee_multiplier
-    BILLING_MIN_YEARLY_FEE              = var.billing_min_yearly_fee
-    BILLING_ENABLED_PROFILES            = var.billing_enabled_profiles
-    BILLING_MIN_DATE                    = var.billing_min_date
+    BILLING_VALUE_FEE_MULTIPLIER = var.billing_value_fee_multiplier
+    BILLING_MIN_YEARLY_FEE       = var.billing_min_yearly_fee
+    BILLING_ENABLED_PROFILES     = var.billing_enabled_profiles
+    BILLING_MIN_DATE             = var.billing_min_date
   }
 }
 

@@ -1,6 +1,7 @@
 from gainy.analytics.service import AnalyticsService
 from gainy.trading.drivewealth.models import DriveWealthRedemptionStatus, DriveWealthRedemption
 from gainy.tests.mocks.repository_mocks import mock_find, mock_persist, mock_record_calls
+from gainy.services.notification import NotificationService
 from gainy.trading.models import TradingMoneyFlow, TradingMoneyFlowStatus
 from trading.drivewealth.event_handlers import RedemptionUpdatedEventHandler
 from trading.drivewealth.provider import DriveWealthProvider
@@ -21,7 +22,7 @@ def test_exists(monkeypatch):
 
     money_flow = TradingMoneyFlow()
     money_flow.profile_id = profile_id
-    money_flow.amount = amount
+    money_flow.amount = -amount
     money_flow.status = TradingMoneyFlowStatus.SUCCESS
 
     provider = DriveWealthProvider(None, None, None, None, None)
@@ -60,12 +61,20 @@ def test_exists(monkeypatch):
     monkeypatch.setattr(repository, 'persist', mock_persist(persisted_objects))
 
     analytics_service = AnalyticsService(None, None, None)
-    on_withdraw_success_calls = []
-    monkeypatch.setattr(analytics_service, 'on_withdraw_success',
-                        mock_record_calls(on_withdraw_success_calls))
+    analytics_service_on_withdraw_success_calls = []
+    monkeypatch.setattr(
+        analytics_service, 'on_withdraw_success',
+        mock_record_calls(analytics_service_on_withdraw_success_calls))
+
+    notification_service = NotificationService(None, None)
+    notification_service_on_withdraw_success_calls = []
+    monkeypatch.setattr(
+        notification_service, 'on_withdraw_success',
+        mock_record_calls(notification_service_on_withdraw_success_calls))
 
     event_handler = RedemptionUpdatedEventHandler(repository, provider, None,
-                                                  analytics_service)
+                                                  analytics_service,
+                                                  notification_service)
     sync_trading_account_balances_calls = []
     monkeypatch.setattr(event_handler, 'sync_trading_account_balances',
                         mock_record_calls(sync_trading_account_balances_calls))
@@ -88,7 +97,10 @@ def test_exists(monkeypatch):
     ]
     assert ((redemption.trading_account_ref_id, ),
             {}) in on_new_transaction_calls
-    assert ((profile_id, -amount), {}) in on_withdraw_success_calls
+    assert ((profile_id, amount),
+            {}) in analytics_service_on_withdraw_success_calls
+    assert ((profile_id, amount),
+            {}) in notification_service_on_withdraw_success_calls
 
 
 def test_not_exists(monkeypatch):

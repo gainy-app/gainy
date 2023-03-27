@@ -33,7 +33,8 @@ class HasuraDispatcher(ABC):
                             })
                 return response
             except HttpException as he:
-                logger.warning('HasuraDispatcher',
+                logger.warning('HasuraDispatcher: %s',
+                               he,
                                extra={
                                    "request": request,
                                    "exception": he
@@ -43,7 +44,8 @@ class HasuraDispatcher(ABC):
                     "code": he.http_code
                 })
             except Exception as e:
-                logger.exception('HasuraDispatcher',
+                logger.exception('HasuraDispatcher: %s',
+                                 e,
                                  extra={
                                      "request": request,
                                      "exception": e

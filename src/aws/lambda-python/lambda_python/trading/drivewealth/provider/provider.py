@@ -11,7 +11,7 @@ from gainy.trading.drivewealth.exceptions import DriveWealthApiException, BadMis
     InvalidDriveWealthPortfolioStatusException
 from portfolio.plaid import PlaidService
 from gainy.plaid.models import PlaidAccessToken
-from services.notification import NotificationService
+from gainy.services.notification import NotificationService
 from trading.models import TradingStatement, ProfileKycStatus, KycForm
 from trading.drivewealth.provider.collection import DriveWealthProviderCollection
 from trading.drivewealth.provider.kyc import DriveWealthProviderKYC
@@ -103,6 +103,7 @@ class DriveWealthProvider(DriveWealthProviderKYC,
                                                     bank_account)
         except DriveWealthApiException as e:
             money_flow.status = TradingMoneyFlowStatus.FAILED
+            self.repository.persist(money_flow)
             logger.exception(e)
             raise Exception('Request failed, please try again later.')
 

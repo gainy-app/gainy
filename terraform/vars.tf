@@ -51,8 +51,13 @@ variable "amplitude_api_key" {
   sensitive = true
   default   = ""
 }
+variable "rebrandly_api_key" {
+  type      = string
+  sensitive = true
+  default   = ""
+}
 
-variable "billing_equity_value_fee_multiplier" {
+variable "billing_value_fee_multiplier" {
   type    = string
   default = ""
 }

@@ -316,6 +316,13 @@ with highlights as (select * from {{ ref('highlights') }}),
                         when historical_prices_marked.price_all > 0
                             then historical_prices_marked.price_all
                         end - 1          as price_change_all,
+                   historical_prices_marked.price_1d  as prev_price_1d,
+                   historical_prices_marked.price_1w  as prev_price_1w,
+                   historical_prices_marked.price_1m  as prev_price_1m,
+                   historical_prices_marked.price_3m  as prev_price_3m,
+                   historical_prices_marked.price_1y  as prev_price_1y,
+                   historical_prices_marked.price_5y  as prev_price_5y,
+                   historical_prices_marked.price_all as prev_price_all,
                     stddev_3_years.value as stddev_3_years
              from all_tickers
                       left join historical_prices_marked using (symbol)
@@ -472,6 +479,13 @@ select DISTINCT ON
                momentum_metrics.price_change_1y,
                momentum_metrics.price_change_5y,
                momentum_metrics.price_change_all,
+               momentum_metrics.prev_price_1d,
+               momentum_metrics.prev_price_1w,
+               momentum_metrics.prev_price_1m,
+               momentum_metrics.prev_price_3m,
+               momentum_metrics.prev_price_1y,
+               momentum_metrics.prev_price_5y,
+               momentum_metrics.prev_price_all,
                momentum_metrics.stddev_3_years,
 
                dividend_metrics.dividend_yield,

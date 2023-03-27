@@ -20,13 +20,16 @@ This repo contains Gainy's GraphQL API server built with [Hasura](https://hasura
 
 ### 
 ```graphql
-mutation SendAppLink($phone_number: String!) {
+mutation SendAppLink($phone_number: String!, $query_string: String) {
   send_app_link(
     phone_number: $phone_number
+    query_string: $query_string
   ){
     ok
   }
 }
 ```
+Example: `{"phone_number": "+...", "query_string": "af_js_web=true&af_ss_ver=2_2_0&pid=website_google_organictest&c=campaign_name"}`
+
 ## Development
 Note: do not use foreign key relationships - all relationship should be of manual type (otherwise hasura fails during pipeline run).

@@ -13,6 +13,7 @@ variable "github_app_private_key" {}
 variable "google_places_api_key" {}
 variable "slack_bot_token" {}
 variable "amplitude_api_key" {}
+variable "rebrandly_api_key" {}
 
 variable "aws_region" {}
 variable "aws_access_key" {}
@@ -86,7 +87,7 @@ variable "sendgrid_api_key" {}
 variable "source_code_branch" {}
 variable "source_code_branch_name" {}
 
-variable "billing_equity_value_fee_multiplier" {}
+variable "billing_value_fee_multiplier" {}
 variable "billing_min_yearly_fee" {}
 variable "billing_enabled_profiles" {}
 variable "billing_min_date" {}
