@@ -33,7 +33,7 @@ with profile_scoring_settings_stats as
      ),
      aum_stats as
          (
-             select date, sum(value) as value
+             select date, sum(value) as aum_amount
              from (
                       (
                           select distinct on (
