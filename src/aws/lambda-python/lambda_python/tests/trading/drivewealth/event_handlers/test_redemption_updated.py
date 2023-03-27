@@ -73,6 +73,7 @@ def test_exists(monkeypatch):
         mock_record_calls(notification_service_on_withdraw_success_calls))
 
     event_handler = RedemptionUpdatedEventHandler(repository, provider, None,
+                                                  analytics_service,
                                                   notification_service)
     sync_trading_account_balances_calls = []
     monkeypatch.setattr(event_handler, 'sync_trading_account_balances',
