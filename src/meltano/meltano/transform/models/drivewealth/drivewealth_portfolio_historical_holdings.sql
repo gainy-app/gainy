@@ -214,6 +214,7 @@ with portfolio_statuses as
                     prev_value,
                     case when not is_premarket or prev_value > 0 then value else 0 end as value,
                     relative_daily_gain,
+                    is_premarket,
                     updated_at
              from (
                       select profile_id,
@@ -255,6 +256,7 @@ with portfolio_statuses as
                             then value - (computed_relative_daily_gain + 1) * prev_value
                         else value - prev_value
                         end as cash_flow,
+                    is_premarket,
                     updated_at
              from (
                       select holding_id_v2,
@@ -320,6 +322,7 @@ with portfolio_statuses as
                                      then (order_cf_sum - equity_cf_sum) * prev_value / prev_value_sum
                                  else cash_flow
                                  end as cash_flow,
+                             is_premarket,
                              updated_at
                       from cash_flow_first_guess
                                left join order_stats using (profile_id, symbol, date)
@@ -355,7 +358,6 @@ with portfolio_statuses as
                     value,
                     prev_value,
                     cash_flow,
-                    updated_at,
                     case
                         -- whole day
                         when value > 0 and prev_value > 0
@@ -367,7 +369,9 @@ with portfolio_statuses as
                         when prev_value > 0 -- and t.value = 0
                             then -cash_flow / prev_value - 1
                         else 0
-                        end as relative_daily_gain
+                        end as relative_daily_gain,
+                    is_premarket,
+                    updated_at
              from cash_flow
      )
 select data_extended.*,

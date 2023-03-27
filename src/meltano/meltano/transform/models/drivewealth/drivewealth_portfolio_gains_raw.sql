@@ -26,6 +26,7 @@ with profile_stats as materialized
                                from (
                                         select profile_id, max(date) as date
                                         from {{ ref('drivewealth_portfolio_historical_holdings') }}
+                                        where not is_premarket
                                         group by profile_id, holding_id_v2
                                     ) t
                                group by profile_id

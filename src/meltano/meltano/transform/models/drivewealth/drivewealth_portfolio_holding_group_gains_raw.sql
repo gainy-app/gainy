@@ -27,8 +27,8 @@ with data as
                                     group by holding_id_v2
                                 ) is_last_date using (holding_id_v2, date)
                       left join {{ ref('drivewealth_portfolio_historical_holdings_marked') }} using (holding_id_v2)
-             where date > last_selloff_date
-                or last_selloff_date is null
+             where not is_premarket
+               and (date > last_selloff_date or last_selloff_date is null)
              group by profile_holdings_normalized.profile_id, holding_group_id, date
          ),
      data_1d as
