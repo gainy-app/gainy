@@ -24,6 +24,7 @@ with data as
                       left join (
                                     select holding_id_v2, max(date) as date
                                     from {{ ref('drivewealth_portfolio_historical_holdings') }}
+                                    where not is_premarket
                                     group by holding_id_v2
                                 ) is_last_date using (holding_id_v2, date)
                       left join {{ ref('drivewealth_portfolio_historical_holdings_marked') }} using (holding_id_v2)
