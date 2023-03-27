@@ -9,15 +9,33 @@ with usage as
          (
              select profile_id, date, sum(value) as value
              from (
-                      select drivewealth_account_id,
-                             equity_value                                                                      as value,
-                             (drivewealth_accounts_positions.created_at at time zone 'America/New_York')::date as date
-                      from {{ source('app', 'drivewealth_accounts_positions') }}
+                      (
+                          select distinct on (
+                              drivewealth_account_id,
+                              (created_at at time zone 'America/New_York')::date
+                              ) drivewealth_account_id,
+                                equity_value                                       as value,
+                                (created_at at time zone 'America/New_York')::date as date
+                          from {{ source('app', 'drivewealth_accounts_positions') }}
+                          order by drivewealth_account_id desc,
+                                   (created_at at time zone 'America/New_York')::date desc,
+                                   created_at desc
+                      )
+
                       union all
-                      select drivewealth_account_id,
-                             cash_balance                                                                  as value,
-                             (drivewealth_accounts_money.created_at at time zone 'America/New_York')::date as date
-                      from {{ source('app', 'drivewealth_accounts_money') }}
+
+                      (
+                          select distinct on (
+                              drivewealth_account_id,
+                              (created_at at time zone 'America/New_York')::date
+                              ) drivewealth_account_id,
+                                cash_balance                                       as value,
+                                (created_at at time zone 'America/New_York')::date as date
+                          from {{ source('app', 'drivewealth_accounts_money') }}
+                          order by drivewealth_account_id desc,
+                                   (created_at at time zone 'America/New_York')::date desc,
+                                   created_at desc
+                      )
                   ) t
                       join {{ source('app', 'drivewealth_accounts') }}
                            on drivewealth_accounts.ref_id = t.drivewealth_account_id

@@ -33,9 +33,35 @@ with profile_scoring_settings_stats as
      ),
      aum_stats as
          (
-             select period_start::date as date, sum(value) as aum_amount
-             from {{ ref('drivewealth_monthly_usage') }}
-             group by period_start::date
+             select date, sum(value) as value
+             from (
+                      (
+                          select distinct on (
+                              drivewealth_account_id,
+                              (created_at at time zone 'America/New_York')::date
+                              ) equity_value                                       as value,
+                                (created_at at time zone 'America/New_York')::date as date
+                          from {{ source('app', 'drivewealth_accounts_positions') }}
+                          order by drivewealth_account_id desc,
+                                   (created_at at time zone 'America/New_York')::date desc,
+                                   created_at desc
+                      )
+
+                      union all
+
+                      (
+                          select distinct on (
+                              drivewealth_account_id,
+                              (created_at at time zone 'America/New_York')::date
+                              ) cash_balance                                       as value,
+                                (created_at at time zone 'America/New_York')::date as date
+                          from {{ source('app', 'drivewealth_accounts_money') }}
+                          order by drivewealth_account_id desc,
+                                   (created_at at time zone 'America/New_York')::date desc,
+                                   created_at desc
+                      )
+                  ) t
+             group by date
      )
 select date,
        coalesce(questionaire_completed_cnt, 0) as questionaire_completed_cnt,
