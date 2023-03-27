@@ -189,11 +189,12 @@ with portfolio_statuses as
                     data.symbol,
                     data.date,
                     data.relative_daily_gain,
+                    is_premarket,
                     case
                         when data.value is not null
                             then data.value
                         -- if value is null but no portfolio_statuses exist in this day - then we assume there is value, just it's record is missing
-                        when portfolio_statuses.profile_id is null and not (is_premarket and prev_value is null)
+                        when portfolio_statuses.profile_id is null
                             then cumulative_daily_relative_gain *
                                  (last_value_ignorenulls(data.value / cumulative_daily_relative_gain) over wnd)
                         end as value,
@@ -210,16 +211,30 @@ with portfolio_statuses as
                     collection_id,
                     symbol,
                     date,
-                    coalesce(lag(value) over wnd, 0) as prev_value,
-                    coalesce(value, 0)               as value,
-                    case
-                        when value > 0 or coalesce(lag(value) over wnd, 0) > 0
-                            then relative_daily_gain
-                        else 0
-                        end                          as relative_daily_gain,
+                    prev_value,
+                    case when not is_premarket or prev_value > 0 then value else 0 end as value,
+                    relative_daily_gain,
+                    is_premarket,
                     updated_at
-             from data_extended2
-                 window wnd as (partition by holding_id_v2 order by date)
+             from (
+                      select profile_id,
+                             holding_id_v2,
+                             portfolio_status_id,
+                             collection_id,
+                             symbol,
+                             date,
+                             coalesce(lag(value) over wnd, 0) as prev_value,
+                             coalesce(value, 0)               as value,
+                             case
+                                 when value > 0 or coalesce(lag(value) over wnd, 0) > 0
+                                     then relative_daily_gain
+                                 else 0
+                                 end                          as relative_daily_gain,
+                             is_premarket,
+                             updated_at
+                      from data_extended2
+                          window wnd as (partition by holding_id_v2 order by date)
+                  ) t
      ),
      cash_flow_first_guess as materialized
          (
@@ -241,6 +256,7 @@ with portfolio_statuses as
                             then value - (computed_relative_daily_gain + 1) * prev_value
                         else value - prev_value
                         end as cash_flow,
+                    is_premarket,
                     updated_at
              from (
                       select holding_id_v2,
@@ -264,6 +280,7 @@ with portfolio_statuses as
                                  end as computed_relative_daily_gain,
                              value,
                              prev_value,
+                             is_premarket,
                              updated_at
                       from data_extended3
                                left join order_stats using (profile_id, symbol, date)
@@ -306,6 +323,7 @@ with portfolio_statuses as
                                      then (order_cf_sum - equity_cf_sum) * prev_value / prev_value_sum
                                  else cash_flow
                                  end as cash_flow,
+                             is_premarket,
                              updated_at
                       from cash_flow_first_guess
                                left join order_stats using (profile_id, symbol, date)
@@ -341,7 +359,6 @@ with portfolio_statuses as
                     value,
                     prev_value,
                     cash_flow,
-                    updated_at,
                     case
                         -- whole day
                         when value > 0 and prev_value > 0
@@ -353,7 +370,9 @@ with portfolio_statuses as
                         when prev_value > 0 -- and t.value = 0
                             then -cash_flow / prev_value - 1
                         else 0
-                        end as relative_daily_gain
+                        end as relative_daily_gain,
+                    is_premarket,
+                    updated_at
              from cash_flow
      )
 select data_extended.*,
