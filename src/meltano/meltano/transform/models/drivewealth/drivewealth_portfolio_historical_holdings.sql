@@ -280,6 +280,7 @@ with portfolio_statuses as
                                  end as computed_relative_daily_gain,
                              value,
                              prev_value,
+                             is_premarket,
                              updated_at
                       from data_extended3
                                left join order_stats using (profile_id, symbol, date)
