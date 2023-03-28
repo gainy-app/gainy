@@ -2,7 +2,7 @@ import plaid
 
 from portfolio.plaid import PlaidClient
 
-from gainy.plaid.common import handle_error, DEFAULT_ENV, get_purpose, get_purpose_products
+from gainy.plaid.common import handle_error, DEFAULT_ENV, get_purpose, get_purpose_products, get_account_filters
 from common.context_container import ContextContainer
 from common.hasura_function import HasuraAction
 from gainy.utils import get_logger
@@ -25,6 +25,7 @@ class CreatePlaidLinkToken(HasuraAction):
 
         purpose = get_purpose(input_params)
         products = get_purpose_products(purpose)
+        account_filters = get_account_filters(purpose)
 
         access_token = None
         if access_token_id is not None:
@@ -37,7 +38,8 @@ class CreatePlaidLinkToken(HasuraAction):
         try:
             response = self.client.create_link_token(profile_id, redirect_uri,
                                                      products, env,
-                                                     access_token)
+                                                     access_token,
+                                                     account_filters)
 
             return {'link_token': response['link_token']}
         except plaid.ApiException as e:
