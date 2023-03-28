@@ -57,6 +57,11 @@ variable "rebrandly_api_key" {
   default   = ""
 }
 
+variable "billing_equity_value_fee_multiplier" {
+  type    = number
+  default = 0.01
+}
+
 #################################### OneSignal ####################################
 
 variable "onesignal_app_id" {
