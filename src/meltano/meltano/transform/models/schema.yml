@@ -907,6 +907,34 @@ models:
         tests:
           - type:
               type: 'double precision'
+      - name: prev_price_1d
+        tests:
+          - type:
+              type: 'double precision'
+      - name: prev_price_1w
+        tests:
+          - type:
+              type: 'double precision'
+      - name: prev_price_1m
+        tests:
+          - type:
+              type: 'double precision'
+      - name: prev_price_3m
+        tests:
+          - type:
+              type: 'double precision'
+      - name: prev_price_1y
+        tests:
+          - type:
+              type: 'double precision'
+      - name: prev_price_5y
+        tests:
+          - type:
+              type: 'double precision'
+      - name: prev_price_all
+        tests:
+          - type:
+              type: 'double precision'
 
   - name: portfolio_holding_gains
     columns:
@@ -1381,6 +1409,30 @@ models:
         tests:
           - type:
               type: 'timestamp with time zone'
+      - name: prev_value_1w
+        tests:
+          - type:
+              type: 'double precision'
+      - name: prev_value_1m
+        tests:
+          - type:
+              type: 'double precision'
+      - name: prev_value_3m
+        tests:
+          - type:
+              type: 'double precision'
+      - name: prev_value_1y
+        tests:
+          - type:
+              type: 'double precision'
+      - name: prev_value_5y
+        tests:
+          - type:
+              type: 'double precision'
+      - name: prev_value_total
+        tests:
+          - type:
+              type: 'double precision'
 
   - name: profile_collection_tickers_performance_ranked
     columns:
@@ -1952,11 +2004,15 @@ models:
         tests:
           - type:
               type: 'boolean'
+      - name: notification_method
+        tests:
+          - type:
+              type: 'text'
       - name: is_shown_in_app
         tests:
           - type:
               type: 'boolean'
-      - name: template_id
+      - name: onesignal_template_id
         tests:
           - type:
               type: 'text'

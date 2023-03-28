@@ -121,6 +121,7 @@ module "aws" {
   source_code_branch_name     = var.source_code_branch_name
   slack_bot_token             = var.slack_bot_token
   amplitude_api_key           = var.amplitude_api_key
+  rebrandly_api_key           = var.rebrandly_api_key
 
   stripe_api_key         = var.stripe_api_key
   stripe_publishable_key = var.stripe_publishable_key
@@ -175,6 +176,8 @@ module "aws" {
   twilio_account_sid             = var.twilio_account_sid
   twilio_auth_token              = var.twilio_auth_token
   sendgrid_api_key               = var.sendgrid_api_key
+
+  billing_equity_value_fee_multiplier = var.billing_equity_value_fee_multiplier
 }
 
 module "datadog" {

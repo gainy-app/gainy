@@ -55,6 +55,7 @@ module "lambda" {
   google_places_api_key  = var.google_places_api_key
   slack_bot_token        = var.slack_bot_token
   amplitude_api_key      = var.amplitude_api_key
+  rebrandly_api_key      = var.rebrandly_api_key
 
   base_image_registry_address = var.base_image_registry_address
   base_image_version          = var.base_image_version
@@ -173,6 +174,7 @@ module "ecs-service" {
   github_app_installation_id = var.github_app_installation_id
   github_app_private_key     = var.github_app_private_key
   amplitude_api_key          = var.amplitude_api_key
+  sendgrid_api_key           = var.sendgrid_api_key
 
   aws_lambda_api_gateway_endpoint = "${module.lambda.aws_apigatewayv2_api_endpoint}/${local.deployment_key}"
   hasura_enable_console           = "true"
@@ -243,6 +245,8 @@ module "ecs-service" {
 
   source_code_branch      = var.source_code_branch
   source_code_branch_name = var.source_code_branch_name
+
+  billing_equity_value_fee_multiplier = var.billing_equity_value_fee_multiplier
 }
 
 

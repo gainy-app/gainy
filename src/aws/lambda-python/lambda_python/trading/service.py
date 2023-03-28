@@ -21,7 +21,7 @@ from trading.models import KycDocument, ProfileKycStatus, TradingStatement, KycS
 import plaid
 from gainy.utils import get_logger, env, ENV_PRODUCTION
 from gainy.trading.models import TradingAccount, TradingCollectionVersion, TradingOrderStatus, \
-    FundingAccount, TradingOrder, TradingMoneyFlowStatus, TradingMoneyFlow
+    FundingAccount, TradingOrder, TradingMoneyFlowStatus, TradingMoneyFlow, AbstractProviderBankAccount
 from gainy.trading.service import TradingService as GainyTradingService
 from trading.repository import TradingRepository
 from verification.models import VerificationCodeChannel
@@ -72,7 +72,7 @@ class TradingService(GainyTradingService):
                                      account_name,
                                      account_id) -> FundingAccount:
         try:
-            provider_bank_account = self._get_provider_service(
+            provider_bank_account: AbstractProviderBankAccount = self._get_provider_service(
             ).link_bank_account_with_plaid(access_token, account_id,
                                            account_name)
         except plaid.ApiException as e:
@@ -97,6 +97,7 @@ class TradingService(GainyTradingService):
         funding_account.plaid_access_token_id = access_token.id
         funding_account.plaid_account_id = account_id
         funding_account.name = account_name
+        provider_bank_account.fill_funding_account_details(funding_account)
         repository.persist(funding_account)
 
         self.update_funding_accounts_balance([funding_account])
@@ -262,5 +263,6 @@ class TradingService(GainyTradingService):
                         "profile_id": funding_account.profile_id,
                         "funding_account": funding_account.to_dict(),
                     })
-        if Decimal(funding_account.balance) < amount:
+        if funding_account.balance is None or Decimal(
+                funding_account.balance) < amount:
             raise InsufficientFundsException()

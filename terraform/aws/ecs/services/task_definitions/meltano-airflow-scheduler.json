@@ -55,6 +55,7 @@
     { "name": "GITHUB_APP_INSTALLATION_ID",            "value": "${github_app_installation_id}" },
     { "name": "GITHUB_APP_PRIVATE_KEY",                "value": ${jsonencode(github_app_private_key)} },
     { "name": "AMPLITUDE_API_KEY",                     "value": "${amplitude_api_key}" },
+    { "name": "SENDGRID_API_KEY",                      "value": "${sendgrid_api_key}" },
 
     { "name": "TARGET_POSTGRES_HOST",                  "value": "${pg_host}" },
     { "name": "TARGET_POSTGRES_PORT",                  "value": "${pg_port}" },
@@ -135,7 +136,9 @@
     { "name": "PLAID_ENV",                             "value": "${plaid_env}" },
 
     { "name": "MLFLOW_ARTIFACT_LOCATION",              "value": "${mlflow_artifact_location}" },
-    { "name": "MLFLOW_TRACKING_URI",                   "value": "postgresql://${pg_username}:${pg_password}@${pg_host}:${pg_port}/${pg_dbname}?options=-csearch_path=${pg_mlflow_schema}" }
+    { "name": "MLFLOW_TRACKING_URI",                   "value": "postgresql://${pg_username}:${pg_password}@${pg_host}:${pg_port}/${pg_dbname}?options=-csearch_path=${pg_mlflow_schema}" },
+
+    { "name": "BILLING_EQUITY_VALUE_FEE_MULTIPLIER",   "value": "${billing_equity_value_fee_multiplier}" }
   ],
   "links": [],
   "workingDirectory": null,
