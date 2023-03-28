@@ -2952,6 +2952,33 @@ models:
           - type:
               type: 'character varying'
 
+  - name: drivewealth_daily_fees
+    columns:
+      - name: profile_id
+        tests:
+          - type:
+              type: 'integer'
+      - name: date
+        tests:
+          - type:
+              type: 'date'
+      - name: value
+        tests:
+          - type:
+              type: 'numeric'
+      - name: period_start
+        tests:
+          - type:
+              type: 'date'
+      - name: period_end
+        tests:
+          - type:
+              type: 'date'
+      - name: fee
+        tests:
+          - type:
+              type: 'numeric'
+
 exposures:
   - name: ticker_search_index
     type: application
