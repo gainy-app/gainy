@@ -63,7 +63,7 @@ with holdings as
                     relative_gain_1d
              from holdings
                       join portfolio_holding_gains using (holding_id_v2)
-                      join collection_categories using (collection_id)
+                      left join collection_categories using (collection_id)
              where collection_id is not null
      ),
      portfolio_stats as
