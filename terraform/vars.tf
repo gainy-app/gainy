@@ -58,8 +58,8 @@ variable "rebrandly_api_key" {
 }
 
 variable "billing_value_fee_multiplier" {
-  type    = string
-  default = ""
+  type    = number
+  default = 0.01
 }
 variable "billing_min_yearly_fee" {
   type    = string
