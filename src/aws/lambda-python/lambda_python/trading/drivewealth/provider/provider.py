@@ -10,7 +10,7 @@ from gainy.trading.drivewealth.exceptions import DriveWealthApiException, BadMis
     InvalidDriveWealthPortfolioStatusException
 from portfolio.plaid import PlaidService
 from gainy.plaid.models import PlaidAccessToken
-from services.notification import NotificationService
+from gainy.services.notification import NotificationService
 from trading.models import TradingStatement, ProfileKycStatus, KycForm
 from trading.drivewealth.provider.collection import DriveWealthProviderCollection
 from trading.drivewealth.provider.kyc import DriveWealthProviderKYC

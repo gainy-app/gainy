@@ -77,4 +77,5 @@ variable "plaid_env" {}
 variable "source_code_branch" {}
 variable "source_code_branch_name" {}
 variable "amplitude_api_key" {}
+variable "sendgrid_api_key" {}
 variable "billing_equity_value_fee_multiplier" {}
