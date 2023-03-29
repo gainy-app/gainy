@@ -61,23 +61,29 @@ with usage as
          (
 
              select profile_id,
-                    date,
+                    date::date,
                     coalesce(
                             value,
                             LAST_VALUE_IGNORENULLS(value)
                             over (partition by profile_id order by date rows between unbounded preceding and current row),
                             0
-                        )                                                                  as value,
-                    date_trunc('month', date)                                              as period_start,
-                    date_trunc('month', date + interval '1 month') as period_end
+                        )                                                as value,
+                    date_trunc('month', date)::date                      as period_start,
+                    date_trunc('month', date + interval '1 month')::date as period_end,
+                    extract(days from
+                            date_trunc('year', date) + interval '1 year' -
+                            date_trunc('year', date))::int               as year_days
              from profiles
                       join generate_series(first_period_datetime, now(), interval '1 day') date on true
                       left join daily_usage using (profile_id, date)
      )
 select profile_id,
+       date,
+       value,
        period_start,
        period_end,
-       avg(value) as value
+       case
+           when value > 0
+               then greatest({{ var('billing_min_annual_fee') }}, value * {{ var('billing_value_fee_multiplier') }}) / year_days
+           else 0 end as fee
 from daily_usage_expanded
-group by profile_id, period_start, period_end
-having sum(value) > 0

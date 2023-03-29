@@ -41,6 +41,13 @@ query GetTradingHistory($profile_id: Int!, $types: [String!]!) {
       status # ["PENDING", "PENDING_EXECUTION", "EXECUTED_FULLY", "CANCELLED", "FAILED"]
       target_amount_delta
     }
+    payment_transaction {
+      status # ["PENDING", "SUCCESS", "FAILED"]
+      payment_method {
+        account_no
+        provider
+      }
+    }
   }
 }
 ```

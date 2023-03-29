@@ -74,7 +74,7 @@ with data as materialized
                              sum(fee) over (partition by collection_uniq_id, grp) as fee
                       from (
                                select *,
-                                      {{ var('annual_fee') }}::numeric * total_dates_cnt /
+                                      {{ var('billing_value_fee_multiplier') }}::numeric * total_dates_cnt /
                                       max_dates_cnt / trading_dates_cnt                         as fee,
                                       t.date is null                                            as is_holiday,
                                       sum(case when t.date is not null then 1 end)

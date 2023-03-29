@@ -74,6 +74,7 @@ variable "drivewealth_api_username" {}
 variable "drivewealth_api_password" {}
 variable "drivewealth_api_url" {}
 variable "drivewealth_sqs_arn" {}
+variable "drivewealth_house_account_no" {}
 
 variable "verification_code_cooldown" {}
 variable "verification_code_ttl" {}
@@ -86,4 +87,7 @@ variable "sendgrid_api_key" {}
 variable "source_code_branch" {}
 variable "source_code_branch_name" {}
 
-variable "billing_equity_value_fee_multiplier" {}
+variable "billing_value_fee_multiplier" {}
+variable "billing_min_annual_fee" {}
+variable "billing_enabled_profiles" {}
+variable "billing_min_date" {}

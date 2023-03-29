@@ -3,6 +3,7 @@ from decimal import Decimal
 from typing import Optional
 
 from gainy.analytics.service import AnalyticsService
+from gainy.billing.models import PaymentTransaction, Invoice, InvoiceStatus
 from gainy.data_access.repository import MAX_TRANSACTION_SIZE
 from gainy.exceptions import NotFoundException, EntityNotFoundException
 from gainy.trading.drivewealth.config import DRIVEWEALTH_IS_UAT
@@ -14,7 +15,7 @@ from gainy.services.notification import NotificationService
 from trading.models import TradingStatement, ProfileKycStatus, KycForm
 from trading.drivewealth.provider.collection import DriveWealthProviderCollection
 from trading.drivewealth.provider.kyc import DriveWealthProviderKYC
-from trading.drivewealth.models import DriveWealthBankAccount, DriveWealthAutopilotRun, DriveWealthStatement, DriveWealthOrder, DriveWealthAccountStatus
+from trading.drivewealth.models import DriveWealthAutopilotRun, DriveWealthStatement, DriveWealthOrder
 from trading.drivewealth.api import DriveWealthApi
 from trading.drivewealth.repository import DriveWealthRepository
 
@@ -22,8 +23,9 @@ from gainy.utils import get_logger, ENV_PRODUCTION, env
 from gainy.trading.models import FundingAccount, TradingAccount, TradingCollectionVersion, TradingMoneyFlowStatus, \
     TradingMoneyFlow
 from gainy.trading.drivewealth.models import DriveWealthAccount, DriveWealthUser, DriveWealthInstrument, \
-    DriveWealthInstrumentStatus, DriveWealthPortfolio, DriveWealthTransaction, DriveWealthDeposit, \
-    DriveWealthRedemption, DriveWealthRedemptionStatus, BaseDriveWealthMoneyFlowModel
+    DriveWealthInstrumentStatus, DriveWealthPortfolio, DriveWealthTransaction, DriveWealthAccountStatus, \
+    DriveWealthBankAccount, DriveWealthDeposit, DriveWealthRedemption, DriveWealthRedemptionStatus, \
+    BaseDriveWealthMoneyFlowModel
 from trading.repository import TradingRepository
 from trading import MIN_FIRST_DEPOSIT_AMOUNT
 
@@ -94,20 +96,17 @@ class DriveWealthProvider(DriveWealthProviderKYC,
 
         try:
             if amount > 0:
-                response = self.api.create_deposit(amount, trading_account,
-                                                   bank_account)
-                entity = DriveWealthDeposit()
+                entity = self.api.create_deposit(amount, trading_account,
+                                                 bank_account)
             else:
-                response = self.api.create_redemption(amount, trading_account,
-                                                      bank_account)
-                entity = DriveWealthRedemption()
+                entity = self.api.create_redemption(amount, trading_account,
+                                                    bank_account)
         except DriveWealthApiException as e:
             money_flow.status = TradingMoneyFlowStatus.FAILED
             self.repository.persist(money_flow)
             logger.exception(e)
             raise Exception('Request failed, please try again later.')
 
-        entity.set_from_response(response)
         entity.trading_account_ref_id = trading_account.ref_id
         entity.bank_account_ref_id = bank_account.ref_id
         entity.money_flow_id = money_flow.id
@@ -512,3 +511,25 @@ class DriveWealthProvider(DriveWealthProviderKYC,
 
         portfolio.normalize_weights()
         self.send_portfolio_to_api(portfolio)
+
+    def update_payment_transaction_from_dw(self,
+                                           redemption: DriveWealthRedemption):
+        if redemption.payment_transaction_id is None:
+            return
+
+        payment_transaction: PaymentTransaction = self.repository.find_one(
+            PaymentTransaction, {"id": redemption.payment_transaction_id})
+        if not payment_transaction:
+            return
+
+        redemption.update_payment_transaction(payment_transaction)
+        self.repository.persist(payment_transaction)
+
+        invoice: Invoice = self.repository.find_one(
+            Invoice, {"id": payment_transaction.invoice_id})
+        invoice.on_new_transaction(payment_transaction)
+        self.repository.persist(invoice)
+
+        if invoice.status == InvoiceStatus.PAID:
+            self.analytics_service.on_commission_withdrawn(
+                invoice.profile_id, float(invoice.amount))

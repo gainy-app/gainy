@@ -140,11 +140,16 @@ on conflict do nothing;
 select setval('app.drivewealth_accounts_positions_id_seq', (select max(id)+1 from app.drivewealth_accounts_positions), false);
 
 -- Commissions
-insert into app.payment_methods (id, profile_id, name, provider)
-values  (1, 2, 'card visa 4242', 'STRIPE')
-on conflict do nothing;
-ALTER SEQUENCE app.payment_methods_id_seq RESTART WITH 2;
+insert into app.payment_methods (profile_id, name, provider, set_active_at)
+select t.profile_id, t.name, t.provider, t.set_active_at
+from (values (2, 'Trading Account GYEK000001', 'DRIVEWEALTH', now() + interval '1 hour')) t(profile_id, name, provider, set_active_at)
+         left join app.payment_methods using (profile_id, provider)
+where payment_methods is null;
 
-insert into app.stripe_payment_methods (ref_id, customer_ref_id, payment_method_id, name, data)
-values  ('pm_1LhEWuD1LH0kYxao7AOiSejL', 'cus_MQ4gYGmV5H4WcR', 1, 'card visa 4242', '{"id": "pm_1LhEWuD1LH0kYxao7AOiSejL", "object": "payment_method", "billing_details": {"address": {"city": null, "country": null, "line1": null, "line2": null, "postal_code": null, "state": null}, "email": null, "name": null, "phone": null}, "card": {"brand": "visa", "checks": {"address_line1_check": null, "address_postal_code_check": null, "cvc_check": null}, "country": "US", "exp_month": 9, "exp_year": 2023, "fingerprint": "4iC4R4MJWP7lXxKu", "funding": "credit", "generated_from": null, "last4": "4242", "networks": {"available": ["visa"], "preferred": null}, "three_d_secure_usage": {"supported": true}, "wallet": null}, "created": 1662996396, "customer": "cus_MQ4gYGmV5H4WcR", "livemode": false, "metadata": {}, "type": "card"}')
-on conflict do nothing;
+update app.drivewealth_accounts
+set payment_method_id = id
+from app.payment_methods, app.drivewealth_users
+where drivewealth_users.ref_id = drivewealth_accounts.drivewealth_user_id
+  and payment_methods.profile_id = drivewealth_users.profile_id
+  and payment_methods.provider = 'DRIVEWEALTH';
+

@@ -72,6 +72,8 @@ sources:
       - name: kyc_form
       - name: kyc_statuses
       - name: notifications
+      - name: payment_methods
+      - name: payment_transactions
       - name: personalized_collection_sizes
       - name: personalized_ticker_collections
       - name: plaid_institutions
@@ -2930,6 +2932,52 @@ models:
         tests:
           - type:
               type: 'timestamp without time zone'
+
+  - name: payment_methods
+    columns:
+      - name: id
+        tests:
+          - type:
+              type: 'integer'
+      - name: profile_id
+        tests:
+          - type:
+              type: 'integer'
+      - name: provider
+        tests:
+          - type:
+              type: 'character varying'
+      - name: account_no
+        tests:
+          - type:
+              type: 'character varying'
+
+  - name: drivewealth_daily_fees
+    columns:
+      - name: profile_id
+        tests:
+          - type:
+              type: 'integer'
+      - name: date
+        tests:
+          - type:
+              type: 'date'
+      - name: value
+        tests:
+          - type:
+              type: 'numeric'
+      - name: period_start
+        tests:
+          - type:
+              type: 'date'
+      - name: period_end
+        tests:
+          - type:
+              type: 'date'
+      - name: fee
+        tests:
+          - type:
+              type: 'numeric'
 
 exposures:
   - name: ticker_search_index

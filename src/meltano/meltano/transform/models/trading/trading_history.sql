@@ -10,10 +10,10 @@ with data as
              select profile_id,
                     'tmf_' || id                                            as uniq_id,
                     case when amount > 0 then 'deposit' else 'withdraw' end as type,
-                    trading_money_flow.id,
                     null::int                                               as trading_collection_version_id,
                     null::int                                               as trading_order_id,
                     trading_money_flow.id                                   as money_flow_id,
+                    null::int                                               as payment_transaction_id,
                     case when amount > 0 then 'Deposit' else 'Withdraw' end as name,
                     created_at                                              as datetime,
                     amount,
@@ -26,31 +26,32 @@ with data as
 
              union all
 
-             select profile_id,
-                    'i_' || id    as uniq_id,
-                    'trading_fee' as type,
-                    invoices.id,
-                    null::int     as trading_collection_version_id,
-                    null::int     as trading_order_id,
-                    null::int     as money_flow_id,
-                    'Service fee' as name,
-                    created_at    as datetime,
-                    amount,
+             select payment_transactions.profile_id,
+                    'pt_' || payment_transactions.id as uniq_id,
+                    'trading_fee'                    as type,
+                    null::int                        as trading_collection_version_id,
+                    null::int                        as trading_order_id,
+                    null::int                        as money_flow_id,
+                    payment_transactions.id          as payment_transaction_id,
+                    'Service fee'                    as name,
+                    payment_transactions.created_at  as datetime,
+                    amount::double precision,
                     json_build_object('fee', true,
-                                      'pending', status = 'PENDING' or status is null,
-                                      'error', coalesce(status, '') = 'FAILED'
-                        )         as tags
-             from {{ source('app', 'invoices') }}
+                                      'pending', payment_transactions.status = 'PENDING' or payment_transactions.status is null,
+                                      'error', coalesce(payment_transactions.status, '') = 'FAILED'
+                        )                            as tags
+             from {{ source('app', 'payment_transactions') }}
+                      join {{ source('app', 'invoices') }} on invoices.id = payment_transactions.invoice_id
 
              union all
 
              select profile_id,
                     'tcv_' || trading_collection_versions.id        as uniq_id,
                     'ttf_transaction'                               as type,
-                    trading_collection_versions.id,
                     trading_collection_versions.id                  as trading_collection_version_id,
                     null::int                                       as trading_order_id,
                     null::int                                       as money_flow_id,
+                    null::int                                       as payment_transaction_id,
                     collections.name,
                     created_at                                      as datetime,
                     trading_collection_versions.target_amount_delta as amount,
@@ -70,10 +71,10 @@ with data as
              select profile_id,
                     'to_' || trading_orders.id         as uniq_id,
                     'ticker_transaction'               as type,
-                    trading_orders.id,
                     null::int                          as trading_collection_version_id,
                     trading_orders.id                  as trading_order_id,
                     null::int                          as money_flow_id,
+                    null::int                          as payment_transaction_id,
                     base_tickers.name,
                     created_at                         as datetime,
                     trading_orders.target_amount_delta as amount,
@@ -93,6 +94,7 @@ select data.profile_id,
        data.trading_collection_version_id,
        data.trading_order_id,
        data.money_flow_id,
+       data.payment_transaction_id,
        data.type,
        data.name,
        data.datetime,

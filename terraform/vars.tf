@@ -57,9 +57,21 @@ variable "rebrandly_api_key" {
   default   = ""
 }
 
-variable "billing_equity_value_fee_multiplier" {
+variable "billing_value_fee_multiplier" {
   type    = number
-  default = 0.01
+  default = 0.096
+}
+variable "billing_min_annual_fee" {
+  type    = number
+  default = 96
+}
+variable "billing_enabled_profiles" {
+  type    = string
+  default = ""
+}
+variable "billing_min_date" {
+  type    = string
+  default = ""
 }
 
 #################################### OneSignal ####################################
@@ -134,6 +146,9 @@ variable "drivewealth_api_url" {
   sensitive = true
 }
 variable "drivewealth_sqs_arn" {
+  type = string
+}
+variable "drivewealth_house_account_no" {
   type = string
 }
 
