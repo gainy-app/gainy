@@ -1,4 +1,34 @@
 - table:
+    name: analytics_profile_data
+    schema: app
+  object_relationships:
+    - name: profile
+      using:
+        foreign_key_constraint_on: profile_id
+  insert_permissions:
+    - role: user
+      permission:
+        check:
+          profile:
+            user_id:
+              _eq: X-Hasura-User-Id
+        columns:
+          - metadata
+          - profile_id
+          - service_name
+  select_permissions:
+    - role: user
+      permission:
+        columns:
+          - profile_id
+          - service_name
+          - metadata
+          - created_at
+        filter:
+          profile:
+            user_id:
+              _eq: X-Hasura-User-Id
+- table:
     name: invitations
     schema: app
   object_relationships:
