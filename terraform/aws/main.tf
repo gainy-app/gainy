@@ -71,16 +71,17 @@ module "lambda" {
   algolia_app_id            = var.algolia_app_id
   algolia_search_key        = var.algolia_search_key
 
-  drivewealth_is_uat         = var.drivewealth_is_uat
-  drivewealth_app_key        = var.drivewealth_app_key
-  drivewealth_wlp_id         = var.drivewealth_wlp_id
-  drivewealth_parent_ibid    = var.drivewealth_parent_ibid
-  drivewealth_ria_id         = var.drivewealth_ria_id
-  drivewealth_ria_product_id = var.drivewealth_ria_product_id
-  drivewealth_api_username   = var.drivewealth_api_username
-  drivewealth_api_password   = var.drivewealth_api_password
-  drivewealth_api_url        = var.drivewealth_api_url
-  drivewealth_sqs_arn        = var.drivewealth_sqs_arn
+  drivewealth_is_uat           = var.drivewealth_is_uat
+  drivewealth_app_key          = var.drivewealth_app_key
+  drivewealth_wlp_id           = var.drivewealth_wlp_id
+  drivewealth_parent_ibid      = var.drivewealth_parent_ibid
+  drivewealth_ria_id           = var.drivewealth_ria_id
+  drivewealth_ria_product_id   = var.drivewealth_ria_product_id
+  drivewealth_api_username     = var.drivewealth_api_username
+  drivewealth_api_password     = var.drivewealth_api_password
+  drivewealth_api_url          = var.drivewealth_api_url
+  drivewealth_sqs_arn          = var.drivewealth_sqs_arn
+  drivewealth_house_account_no = var.drivewealth_house_account_no
 
   redis_cache_host = module.elasticache.redis_cache_host
   redis_cache_port = module.elasticache.redis_cache_port
@@ -102,6 +103,9 @@ module "lambda" {
   twilio_account_sid             = var.twilio_account_sid
   twilio_auth_token              = var.twilio_auth_token
   sendgrid_api_key               = var.sendgrid_api_key
+
+  billing_enabled_profiles = var.billing_enabled_profiles
+  billing_min_date         = var.billing_min_date
 }
 
 module "ecs" {
@@ -227,15 +231,16 @@ module "ecs-service" {
   bigquery_google_project = var.bigquery_google_project
   bigquery_credentials    = var.bigquery_credentials
 
-  drivewealth_is_uat         = var.drivewealth_is_uat
-  drivewealth_app_key        = var.drivewealth_app_key
-  drivewealth_wlp_id         = var.drivewealth_wlp_id
-  drivewealth_parent_ibid    = var.drivewealth_parent_ibid
-  drivewealth_ria_id         = var.drivewealth_ria_id
-  drivewealth_ria_product_id = var.drivewealth_ria_product_id
-  drivewealth_api_username   = var.drivewealth_api_username
-  drivewealth_api_password   = var.drivewealth_api_password
-  drivewealth_api_url        = var.drivewealth_api_url
+  drivewealth_is_uat           = var.drivewealth_is_uat
+  drivewealth_app_key          = var.drivewealth_app_key
+  drivewealth_wlp_id           = var.drivewealth_wlp_id
+  drivewealth_parent_ibid      = var.drivewealth_parent_ibid
+  drivewealth_ria_id           = var.drivewealth_ria_id
+  drivewealth_ria_product_id   = var.drivewealth_ria_product_id
+  drivewealth_api_username     = var.drivewealth_api_username
+  drivewealth_api_password     = var.drivewealth_api_password
+  drivewealth_api_url          = var.drivewealth_api_url
+  drivewealth_house_account_no = var.drivewealth_house_account_no
 
   plaid_client_id          = var.plaid_client_id
   plaid_secret             = var.plaid_secret
@@ -246,7 +251,10 @@ module "ecs-service" {
   source_code_branch      = var.source_code_branch
   source_code_branch_name = var.source_code_branch_name
 
-  billing_equity_value_fee_multiplier = var.billing_equity_value_fee_multiplier
+  billing_value_fee_multiplier = var.billing_value_fee_multiplier
+  billing_min_annual_fee       = var.billing_min_annual_fee
+  billing_enabled_profiles     = var.billing_enabled_profiles
+  billing_min_date             = var.billing_min_date
 }
 
 

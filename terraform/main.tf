@@ -148,16 +148,17 @@ module "aws" {
   algolia_indexing_key      = module.algolia.algolia_indexing_key
   algolia_search_key        = module.algolia.algolia_search_key
 
-  drivewealth_is_uat         = var.drivewealth_is_uat
-  drivewealth_app_key        = var.drivewealth_app_key
-  drivewealth_wlp_id         = var.drivewealth_wlp_id
-  drivewealth_parent_ibid    = var.drivewealth_parent_ibid
-  drivewealth_ria_id         = var.drivewealth_ria_id
-  drivewealth_ria_product_id = var.drivewealth_ria_product_id
-  drivewealth_api_username   = var.drivewealth_api_username
-  drivewealth_api_password   = var.drivewealth_api_password
-  drivewealth_api_url        = var.drivewealth_api_url
-  drivewealth_sqs_arn        = var.drivewealth_sqs_arn
+  drivewealth_is_uat           = var.drivewealth_is_uat
+  drivewealth_app_key          = var.drivewealth_app_key
+  drivewealth_wlp_id           = var.drivewealth_wlp_id
+  drivewealth_parent_ibid      = var.drivewealth_parent_ibid
+  drivewealth_ria_id           = var.drivewealth_ria_id
+  drivewealth_ria_product_id   = var.drivewealth_ria_product_id
+  drivewealth_api_username     = var.drivewealth_api_username
+  drivewealth_api_password     = var.drivewealth_api_password
+  drivewealth_api_url          = var.drivewealth_api_url
+  drivewealth_sqs_arn          = var.drivewealth_sqs_arn
+  drivewealth_house_account_no = var.drivewealth_house_account_no
 
   codeartifact_pipy_url = var.codeartifact_pipy_url
   gainy_compute_version = var.gainy_compute_version
@@ -177,7 +178,10 @@ module "aws" {
   twilio_auth_token              = var.twilio_auth_token
   sendgrid_api_key               = var.sendgrid_api_key
 
-  billing_equity_value_fee_multiplier = var.billing_equity_value_fee_multiplier
+  billing_value_fee_multiplier = var.billing_value_fee_multiplier
+  billing_min_annual_fee       = var.billing_min_annual_fee
+  billing_enabled_profiles     = var.billing_enabled_profiles
+  billing_min_date             = var.billing_min_date
 }
 
 module "datadog" {

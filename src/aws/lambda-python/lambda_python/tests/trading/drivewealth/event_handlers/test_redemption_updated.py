@@ -1,8 +1,8 @@
 from gainy.analytics.service import AnalyticsService
 from gainy.trading.drivewealth.models import DriveWealthRedemptionStatus, DriveWealthRedemption
 from gainy.tests.mocks.repository_mocks import mock_find, mock_persist, mock_record_calls
-from gainy.trading.models import TradingMoneyFlow
 from gainy.services.notification import NotificationService
+from gainy.trading.models import TradingMoneyFlow, TradingMoneyFlowStatus
 from trading.drivewealth.event_handlers import RedemptionUpdatedEventHandler
 from trading.drivewealth.provider import DriveWealthProvider
 from trading.drivewealth.repository import DriveWealthRepository
@@ -23,6 +23,7 @@ def test_exists(monkeypatch):
     money_flow = TradingMoneyFlow()
     money_flow.profile_id = profile_id
     money_flow.amount = -amount
+    money_flow.status = TradingMoneyFlowStatus.SUCCESS
 
     provider = DriveWealthProvider(None, None, None, None, None)
     handle_redemption_status_calls = []
