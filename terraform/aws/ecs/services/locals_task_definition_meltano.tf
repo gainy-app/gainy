@@ -99,7 +99,7 @@ locals {
     pg_mlflow_schema         = "mlflow"
 
     billing_value_fee_multiplier = var.billing_value_fee_multiplier
-    billing_min_yearly_fee       = var.billing_min_yearly_fee
+    billing_min_annual_fee       = var.billing_min_annual_fee
     billing_enabled_profiles     = var.billing_enabled_profiles
     billing_min_date             = var.billing_min_date
   })

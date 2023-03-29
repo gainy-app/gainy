@@ -139,8 +139,8 @@
     { "name": "MLFLOW_ARTIFACT_LOCATION",              "value": "${mlflow_artifact_location}" },
     { "name": "MLFLOW_TRACKING_URI",                   "value": "postgresql://${pg_username}:${pg_password}@${pg_host}:${pg_port}/${pg_dbname}?options=-csearch_path=${pg_mlflow_schema}" },
 
-    { "name": "BILLING_VALUE_FEE_MULTIPLIER",   "value": "${billing_value_fee_multiplier}" },
-    { "name": "BILLING_MIN_YEARLY_FEE",                "value": "${billing_min_yearly_fee}" },
+    { "name": "BILLING_VALUE_FEE_MULTIPLIER",          "value": "${billing_value_fee_multiplier}" },
+    { "name": "BILLING_MIN_ANNUAL_FEE",                "value": "${billing_min_annual_fee}" },
     { "name": "BILLING_ENABLED_PROFILES",              "value": "${billing_enabled_profiles}" },
     { "name": "BILLING_MIN_DATE",                      "value": "${billing_min_date}" }
   ],

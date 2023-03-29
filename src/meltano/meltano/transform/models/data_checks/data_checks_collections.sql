@@ -209,6 +209,53 @@ union all
 
 union all
 
+(
+     with collection_ticker_weights_expanded as
+              (
+
+                  select collection_id,
+                         symbol,
+                         date,
+                         weight,
+                         price,
+                         next_weight,
+                         weight / price * next_price as new_weight,
+                         rnk = 1 as is_last_day_before_rebalance
+                  from (
+                           select *,
+                                  rank() over wnd2 as rnk,
+                                  lag(weight) over wnd as next_weight,
+                                  lag(price) over wnd  as next_price
+                           from {{ ref('collection_ticker_weights') }}
+                               window wnd as (partition by collection_id, symbol order by date desc),
+                                   wnd2 as (partition by collection_id, symbol, period_id order by date desc)
+                       ) t
+          )
+     select ('collection_tickers_wrong_weight_' || collection_id ||
+             '_' || symbol || '_' || date)         as id,
+            symbol,
+            'collection_tickers_wrong_weight',
+            'daily'                                as period,
+            json_build_array(next_weight,
+                new_weight / new_weight_sum)::text as message,
+            now()                                  as updated_at
+     from collection_ticker_weights_expanded
+              join (
+                       select *,
+                              lag(symbols_cnt) over (partition by collection_id order by date desc) as next_symbols_cnt
+                       from (
+                                select collection_id, date, count(*) as symbols_cnt, sum(new_weight) as new_weight_sum
+                                from collection_ticker_weights_expanded
+                                group by collection_id, date
+                            ) t
+                   ) t using (collection_id, date)
+     where abs(next_weight - new_weight / new_weight_sum) > 1e-6
+       and not is_last_day_before_rebalance
+       and t.symbols_cnt = t.next_symbols_cnt
+)
+
+union all
+
 -- add one fake record to allow post_hook above to clean other rows
 select 'fake_row_allowing_deletion' as id,
        null                         as symbol,
