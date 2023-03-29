@@ -16,6 +16,18 @@
           - metadata
           - profile_id
           - service_name
+  select_permissions:
+    - role: user
+      permission:
+        columns:
+          - profile_id
+          - service_name
+          - metadata
+          - created_at
+        filter:
+          profile:
+            user_id:
+              _eq: X-Hasura-User-Id
 - table:
     name: invitations
     schema: app

@@ -321,3 +321,13 @@ mutation InsertAnalyticsProfileData($profile_id: Int!, $service_name: String!, $
 Supported schemas:
 1. `{"profile_id": 1, "service_name": "APPSFLYER", "metadata": {"appsflyer_id": "test"}}`
 2. `{"profile_id": 1, "service_name": "FIREBASE", "metadata": {"app_instance_id": "test"}}`
+
+On start up, this data should be fetched and used to initialize analytics SDKs (if possible):
+```graphql
+query GetAnalyticsProfileData($profile_id: Int!) {
+  app_analytics_profile_data(where: {profile_id: {_eq: $profile_id}}) {
+    service_name
+    metadata
+  }
+}
+```
