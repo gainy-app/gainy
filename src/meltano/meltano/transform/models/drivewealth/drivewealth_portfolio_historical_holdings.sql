@@ -141,8 +141,8 @@ with portfolio_statuses as
                     holding_id_v2,
                     symbol,
                     date,
-                    coalesce(relative_daily_change, 0)     as relative_daily_gain,
-                    ticker_realtime_metrics.symbol is null as is_premarket
+                    coalesce(relative_daily_change, 0)                               as relative_daily_gain,
+                    (ticker_realtime_metrics.symbol is null and symbol != 'CUR:USD') as is_premarket
              from min_holding_date
                       join (
                                select min(date) as date
