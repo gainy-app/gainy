@@ -67,6 +67,8 @@ locals {
     sendgrid_api_key                     = var.sendgrid_api_key
     firebase_app_id                      = var.firebase_app_id
     firebase_api_secret                  = var.firebase_api_secret
+    appsflyer_app_id                     = var.appsflyer_app_id
+    appsflyer_dev_key                    = var.appsflyer_dev_key
 
     pg_external_access_host     = var.pg_external_access_host
     pg_external_access_port     = var.pg_external_access_port
