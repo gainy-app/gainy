@@ -122,6 +122,8 @@ module "aws" {
   slack_bot_token             = var.slack_bot_token
   amplitude_api_key           = var.amplitude_api_key
   rebrandly_api_key           = var.rebrandly_api_key
+  firebase_app_id             = var.firebase_app_id
+  firebase_api_secret         = var.firebase_api_secret
 
   stripe_api_key         = var.stripe_api_key
   stripe_publishable_key = var.stripe_publishable_key
