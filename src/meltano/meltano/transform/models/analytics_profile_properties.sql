@@ -275,6 +275,8 @@ from profiles
          left join trading_profile_status using (profile_id)
          left join trading_funding_accounts using (profile_id)
          left join product_type_purchased using (profile_id)
+         left join ttf_purchased using (profile_id)
+         left join ticker_purchased using (profile_id)
          left join total_invested_ttfs using (profile_id)
          left join total_invested_tickers using (profile_id)
          left join total_wishlist_ttfs using (profile_id)
