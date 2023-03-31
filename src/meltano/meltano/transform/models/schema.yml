@@ -54,7 +54,6 @@ sources:
     description: Mobile App data, managed by hasura
     schema: app
     tables:
-      - name: analytics_profiles
       - name: drivewealth_accounts
       - name: drivewealth_accounts_money
       - name: drivewealth_accounts_positions
@@ -2679,6 +2678,10 @@ models:
         tests:
           - type:
               type: 'integer'
+      - name: user_type
+        tests:
+          - type:
+              type: 'text'
       - name: user_email
         tests:
           - type:

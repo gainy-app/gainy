@@ -7,7 +7,21 @@
 
 with profiles as
          (
-             select id as profile_id, email as user_email
+             select id      as profile_id,
+                    email   as user_email,
+                    case
+                        when '{{ var('env') }}' != 'production'
+                            then 'test'
+                        when array_position(string_to_array('{{ var('gainy_employee_profile_ids') }}', ','), id::text) is not null
+                          or array_position(string_to_array('{{ var('gainy_employee_emails') }}', ','), email::text) is not null
+                            then 'gainy'
+                        when email ilike '%gainy.app'
+                            or email ilike '%test%'
+                            or last_name ilike '%test%'
+                            or first_name ilike '%test%'
+                            then 'test'
+                        else 'customer'
+                        end as user_type
              from {{ source('app', 'profiles') }}
          ),
      profile_interests as
@@ -223,6 +237,7 @@ with profiles as
              from {{ source('app', 'profile_scoring_settings') }}
      )
 select profile_id,
+       user_type,
        user_email,
        age,
        birthday_year,
