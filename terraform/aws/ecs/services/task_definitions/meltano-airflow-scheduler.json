@@ -58,6 +58,8 @@
     { "name": "SENDGRID_API_KEY",                      "value": "${sendgrid_api_key}" },
     { "name": "FIREBASE_APP_ID",                       "value": "${firebase_app_id}" },
     { "name": "FIREBASE_API_SECRET",                   "value": "${firebase_api_secret}" },
+    { "name": "APPSFLYER_APP_ID",                      "value": "${appsflyer_app_id}" },
+    { "name": "APPSFLYER_DEV_KEY",                     "value": "${appsflyer_dev_key}" },
 
     { "name": "TARGET_POSTGRES_HOST",                  "value": "${pg_host}" },
     { "name": "TARGET_POSTGRES_PORT",                  "value": "${pg_port}" },

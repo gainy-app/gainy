@@ -61,5 +61,7 @@ variable "amplitude_api_key" {}
 variable "rebrandly_api_key" {}
 variable "firebase_app_id" {}
 variable "firebase_api_secret" {}
+variable "appsflyer_app_id" {}
+variable "appsflyer_dev_key" {}
 variable "billing_enabled_profiles" {}
 variable "billing_min_date" {}

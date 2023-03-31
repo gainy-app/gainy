@@ -195,6 +195,8 @@ locals {
     REBRANDLY_API_KEY            = var.rebrandly_api_key
     FIREBASE_APP_ID              = var.firebase_app_id
     FIREBASE_API_SECRET          = var.firebase_api_secret
+    APPSFLYER_APP_ID             = var.appsflyer_app_id
+    APPSFLYER_DEV_KEY            = var.appsflyer_dev_key
 
     VERIFICATION_CODE_COOLDOWN = var.verification_code_cooldown
     VERIFICATION_CODE_TTL      = var.verification_code_ttl

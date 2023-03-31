@@ -56,6 +56,13 @@ variable "rebrandly_api_key" {
   sensitive = true
   default   = ""
 }
+variable "appsflyer_app_id" {
+  type = string
+}
+variable "appsflyer_dev_key" {
+  type      = string
+  sensitive = true
+}
 
 variable "billing_value_fee_multiplier" {
   type    = number
