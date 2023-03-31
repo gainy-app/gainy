@@ -84,20 +84,29 @@ class TradingService(GainyTradingService):
                 FundingAccount,
                 {"id": provider_bank_account.funding_account_id})
 
-        funding_account = repository.find_one(
-            FundingAccount, {
-                "plaid_access_token_id": access_token.id,
-                "plaid_account_id": account_id
-            })
-        if funding_account:
-            raise BadRequestException('Account already connected.')
-
         funding_account = FundingAccount()
         funding_account.profile_id = access_token.profile_id
         funding_account.plaid_access_token_id = access_token.id
         funding_account.plaid_account_id = account_id
         funding_account.name = account_name
         provider_bank_account.fill_funding_account_details(funding_account)
+
+        existing_funding_accounts: Iterable[
+            FundingAccount] = repository.find_all(
+                FundingAccount, {
+                    "profile_id": funding_account.profile_id,
+                    "mask": funding_account.mask,
+                    "name": funding_account.name,
+                })
+        for fa in existing_funding_accounts:
+            at: PlaidAccessToken = repository.find_one(
+                PlaidAccessToken, {
+                    "id": fa.plaid_access_token_id,
+                })
+
+            if at and at.institution_id == access_token.institution_id:
+                raise BadRequestException('Account already connected.')
+
         repository.persist(funding_account)
 
         self.update_funding_accounts_balance([funding_account])
