@@ -64,6 +64,27 @@ with profiles as
                   ) t
              group by profile_id
      ),
+     ttf_purchased as
+         (
+             select profile_id, json_agg(name) as ttf_purchased
+             from (
+                      select distinct profile_id, collections.name
+                      from {{ source('app', 'drivewealth_portfolio_holdings') }}
+                               join {{ ref('collections') }} on collections.id = collection_id
+                  ) t
+             group by profile_id
+     ),
+     ticker_purchased as
+         (
+             select profile_id, json_agg(symbol) as ticker_purchased
+             from (
+                      select distinct profile_id, symbol
+                      from {{ source('app', 'drivewealth_portfolio_holdings') }}
+                      where collection_id is null
+                        and symbol != 'CUR:USD'
+                  ) t
+             group by profile_id
+     ),
      total_invested_ttfs as
          (
              select distinct profile_id, count(distinct collection_id) as total_invested_ttfs
@@ -213,6 +234,8 @@ select profile_id,
        number_of_funding_acc::int,
        bank_funding_acc,
        coalesce(product_type_purchased, '[]'::json)                 as product_type_purchased,
+       coalesce(ttf_purchased, '[]'::json)                          as ttf_purchased,
+       coalesce(ticker_purchased, '[]'::json)                       as ticker_purchased,
        coalesce(total_invested_ttfs, 0)::int                        as total_invested_ttfs,
        coalesce(total_invested_tickers, 0)::int                     as total_invested_tickers,
        coalesce(total_wishlist_ttfs, 0)::int                        as total_wishlist_ttfs,
@@ -252,6 +275,8 @@ from profiles
          left join trading_profile_status using (profile_id)
          left join trading_funding_accounts using (profile_id)
          left join product_type_purchased using (profile_id)
+         left join ttf_purchased using (profile_id)
+         left join ticker_purchased using (profile_id)
          left join total_invested_ttfs using (profile_id)
          left join total_invested_tickers using (profile_id)
          left join total_wishlist_ttfs using (profile_id)

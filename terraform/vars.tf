@@ -194,6 +194,13 @@ variable "google_places_api_key" {
   type      = string
   sensitive = true
 }
+variable "firebase_app_id" {
+  type = string
+}
+variable "firebase_api_secret" {
+  type      = string
+  sensitive = true
+}
 
 #################################### Cloudflare ####################################
 
