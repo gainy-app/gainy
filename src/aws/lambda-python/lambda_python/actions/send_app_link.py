@@ -79,8 +79,8 @@ class SendAppLink(HasuraAction):
         super().__init__(action_name)
 
     def apply(self, input_params, context_container: ContextContainer):
-        user_id = context_container.request["session_variables"][
-            "x-hasura-user-id"]
+        user_id = context_container.request["session_variables"].get(
+            "x-hasura-user-id")
         phone_number = input_params["phone_number"]
         query_string = input_params.get("query_string")
 
@@ -88,10 +88,12 @@ class SendAppLink(HasuraAction):
         twilio_client = context_container.twilio_client
 
         try:
-            _check_can_send(cache, user_id)
+            if user_id is not None:
+                _check_can_send(cache, user_id)
             _validate_phone_number(twilio_client, phone_number)
             _send(twilio_client, phone_number, query_string)
-            _mark_sent(cache, user_id)
+            if user_id is not None:
+                _mark_sent(cache, user_id)
         except CooldownException:
             raise BadRequestException(
                 'You have requested a link too soon from the previous one.')
