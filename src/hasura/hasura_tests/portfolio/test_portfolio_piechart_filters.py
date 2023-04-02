@@ -83,8 +83,7 @@ def test_portfolio_piechart_filters(params):
             else:
                 raise Exception("unknown entity_id " + row['entity_id'])
 
-            expected_relative_daily_change = relative_gain_1d * row["weight"]
-            assert abs(expected_relative_daily_change -
+            assert abs(relative_gain_1d -
                        row['relative_daily_change']) < PRICE_EPS, row
         for field in ['weight', 'absolute_daily_change', 'absolute_value']:
             if field not in piechart_sums[entity_type]:
