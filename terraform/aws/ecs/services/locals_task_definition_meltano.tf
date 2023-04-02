@@ -116,7 +116,7 @@ locals {
       essential  = true
       entrypoint = ["/start-scheduler.sh"]
       healthCheck = {
-        "command" : ["CMD-SHELL", "curl -s http://127.0.0.1:8974/health || exit 1"],
+        "command" : ["CMD-SHELL", "curl http://127.0.0.1:8974/health || exit 1"],
         "interval" : 10,
         "retries" : 2,
         "startPeriod" : 20
