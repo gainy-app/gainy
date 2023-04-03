@@ -955,10 +955,6 @@ models:
         tests:
           - type:
               type: 'double precision'
-      - name: ltt_quantity_total
-        tests:
-          - type:
-              type: 'double precision'
 
   - name: portfolio_holding_group_gains
     columns:
