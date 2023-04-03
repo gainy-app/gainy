@@ -17,15 +17,27 @@ with min_period_date as materialized
          ),
      data_1d as
          (
+             select collection_uniq_id,
+                    date  as date_1d,
+                    value as value_1d
+             from {{ ref('collection_historical_values') }}
+                      join (
+                               select collection_uniq_id,
+                                      max(date) as date
+                               from {{ ref('collection_historical_values') }}
+                               group by collection_uniq_id
+                           ) t using (collection_uniq_id, date)
+     ),
+     data_2d as
+         (
              select distinct on (
                  collection_uniq_id
                  ) collection_uniq_id,
-                   date  as date_1d,
-                   value as value_1d
+                   date  as date_2d,
+                   value as value_2d
              from {{ ref('collection_historical_values') }}
-                      join min_period_date using (collection_uniq_id)
-             where {{ ref('collection_historical_values') }}.date < min_date
-               and period = '1d'
+                      join data_1d using (collection_uniq_id)
+             where collection_historical_values.date < date_1d
              order by collection_uniq_id desc, date desc
      ),
      data_1w as
@@ -105,6 +117,7 @@ with min_period_date as materialized
      )
 select *
 from data_1d
+         left join data_2d using (collection_uniq_id)
          left join data_1w using (collection_uniq_id)
          left join data_1m using (collection_uniq_id)
          left join data_3m using (collection_uniq_id)
