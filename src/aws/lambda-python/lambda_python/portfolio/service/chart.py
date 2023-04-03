@@ -73,8 +73,6 @@ class PortfolioChartService:
                                            join_clause, filter)
         self._filter_query_by_security_types(params, holding_where_clause,
                                              join_clause, filter)
-        self._filter_query_by_ltt_only(params, holding_where_clause,
-                                       join_clause, filter)
 
         if holding_where_clause:
             holding_where_clause.insert(0, sql.SQL(""))
@@ -122,8 +120,6 @@ class PortfolioChartService:
                                            join_clause, filter)
         self._filter_query_by_security_types(params, holding_where_clause,
                                              join_clause, filter)
-        self._filter_query_by_ltt_only(params, holding_where_clause,
-                                       join_clause, filter)
 
         if holding_where_clause:
             holding_where_clause.insert(0, sql.SQL(""))
@@ -318,15 +314,6 @@ class PortfolioChartService:
             sql.SQL(
                 "profile_holdings_normalized_all.type in %(security_types)s"))
         params['security_types'] = tuple(filter.security_types)
-
-    def _filter_query_by_ltt_only(self, params, where_clause, join_clause,
-                                  filter: PortfolioChartFilter):
-        if not filter.ltt_only:
-            return
-        join_clause.append(
-            sql.SQL("join portfolio_holding_gains using (holding_id_v2)"))
-        where_clause.append(
-            sql.SQL("portfolio_holding_gains.ltt_quantity_total > 0"))
 
     def _execute_query(self, params, where_clauses: dict, join_clause, query):
         format_params = {
