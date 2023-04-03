@@ -11,9 +11,17 @@ class RedemptionCreatedEventHandler(AbstractDriveWealthEventHandler):
         return event_type == 'redemptions.created'
 
     def handle(self, event_payload: dict):
-        redemption = DriveWealthRedemption()
-        redemption.set_from_response(event_payload)
-        self.repo.persist(redemption)
+        ref_id = event_payload["paymentID"]
+        redemption: DriveWealthRedemption = self.repo.find_one(
+            DriveWealthRedemption, {"ref_id": ref_id})
+
+        if redemption:
+            redemption = self.provider.sync_redemption(redemption.ref_id)
+        else:
+            redemption = DriveWealthRedemption()
+            redemption.set_from_response(event_payload)
+            self.repo.persist(redemption)
+
         self.provider.handle_redemption_status(redemption)
         self.sync_trading_account_balances(redemption.trading_account_ref_id,
                                            force=True)

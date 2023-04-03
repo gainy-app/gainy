@@ -41,8 +41,13 @@ def test_exists(monkeypatch):
     monkeypatch.setattr(provider, 'update_money_flow_from_dw',
                         mock_update_money_flow_from_dw)
     sync_redemption_calls = []
-    monkeypatch.setattr(provider, 'sync_redemption',
-                        mock_record_calls(sync_redemption_calls))
+
+    def mock_sync_redemption(ref_id):
+        mock_record_calls(sync_redemption_calls)(ref_id)
+        redemption.set_from_response(message)
+        return redemption
+
+    monkeypatch.setattr(provider, 'sync_redemption', mock_sync_redemption)
     handle_money_flow_status_change_calls = []
     monkeypatch.setattr(
         provider, 'handle_money_flow_status_change',
