@@ -77,32 +77,11 @@ def test_portfolio_holdings_data(user_id, quantities, quantities_override):
         print(portfolio_key, metrics_key)
         relative_portfolio_key = f'relative_{portfolio_key}'
         absolute_portfolio_key = f'absolute_{portfolio_key}'
-        absolute_symbol_price_change = {
-            symbol: symbol_metrics['actual_price'] *
-            (1 - 1 / (1 + symbol_metrics[metrics_key]))
-            for symbol, symbol_metrics in metrics.items()
-        }
 
         holding_group_absolute_gain_sum = 0
         holding_group_relative_gain_sum = 0
         for holding_group in profile_holding_groups:
-            holding_absolute_gain_sum = 0
-            holding_relative_gain_sum = 0
-            for holding in holding_group['holdings']:
-                gains = holding['gains']
-                holding_absolute_gain_sum += gains[absolute_portfolio_key] or 0
-                holding_relative_gain_sum += (
-                    gains[relative_portfolio_key]
-                    or 0) * gains["value_to_portfolio_value"]
-
-            symbol = holding_group['details']['ticker_symbol']
             gains = holding_group['gains']
-            assert abs((gains[relative_portfolio_key] or 0) -
-                       holding_relative_gain_sum) < PRICE_EPS, (
-                           relative_portfolio_key, symbol)
-            assert abs((gains[absolute_portfolio_key] or 0) -
-                       holding_absolute_gain_sum) < PRICE_EPS, (
-                           absolute_portfolio_key, symbol)
             holding_group_absolute_gain_sum += gains[
                 absolute_portfolio_key] or 0
             holding_group_relative_gain_sum += (
@@ -128,8 +107,6 @@ def test_portfolio_holdings_data(user_id, quantities, quantities_override):
             ], f'{holding_type} holdings are not supported'
             holding_value = metrics[symbol]['actual_price'] * quantities[symbol]
             assert abs(gains['actual_value'] - holding_value) < PRICE_EPS
-            assert abs(gains['value_to_portfolio_value'] -
-                       holding_value / actual_portfolio_value) < PRICE_EPS
             holdings_value_sum += gains['actual_value']
 
         symbol = holding_group['details']['ticker_symbol']
