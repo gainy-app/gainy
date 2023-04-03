@@ -191,6 +191,7 @@ with profile_stats as materialized
                                                 from {{ ref('drivewealth_portfolio_historical_holdings') }}
                                                 group by holding_id_v2
                                             ) is_last_date using (holding_id_v2, date)
+                         where not is_premarket
                          group by profile_id, date
                      ),
                  data_1d as
