@@ -105,6 +105,8 @@ declare
     s        numeric;
     prev_npv numeric;
     npv      numeric;
+    op_cnt   int     = 1;
+    max_ops  int     = 300;
 begin
     select min(unnest) from unnest($1) into minv;
     select max(unnest) from unnest($1) into maxv;
@@ -114,12 +116,16 @@ begin
         prev_npv = 0;
         while true
             loop
+                op_cnt = op_cnt + 1;
                 s = (l + r) * 0.5;
                 npv = npv($1, $2, s);
---                 raise notice 'l: % p: % s % npv: %',l,r,s,npv;
+--                 raise notice 'l: % r: % s % npv: %',l,r,s,npv;
 
                 if abs(npv) < prec or abs(npv - prev_npv) < prec then
                     return s;
+                end if;
+                if op_cnt > max_ops then
+                    raise exception 'Series diverges. l: % r: % s % npv: %',l,r,s,npv;
                 end if;
 
                 prev_npv = npv;
