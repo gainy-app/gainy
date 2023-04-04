@@ -7,7 +7,7 @@ from gainy.billing.models import PaymentMethod, PaymentMethodProvider
 from gainy.billing.stripe.models import StripePaymentMethod, StripePaymentIntent
 from gainy.exceptions import HttpException
 from gainy.utils import get_logger
-from models import Profile
+from gainy.models import Profile
 
 logger = get_logger(__name__)
 

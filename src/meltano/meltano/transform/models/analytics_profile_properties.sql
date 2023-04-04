@@ -1,6 +1,27 @@
+{{
+  config(
+    materialized = "view",
+  )
+}}
+
+
 with profiles as
          (
-             select id as profile_id, email as user_email
+             select id      as profile_id,
+                    email   as user_email,
+                    case
+                        when '{{ var('env') }}' != 'production'
+                            then 'test'
+                        when array_position(string_to_array('{{ var('gainy_employee_profile_ids') }}', ','), id::text) is not null
+                          or array_position(string_to_array('{{ var('gainy_employee_emails') }}', ','), email::text) is not null
+                            then 'gainy'
+                        when email ilike '%gainy.app'
+                            or email ilike '%test%'
+                            or last_name ilike '%test%'
+                            or first_name ilike '%test%'
+                            then 'test'
+                        else 'customer'
+                        end as user_type
              from {{ source('app', 'profiles') }}
          ),
      profile_interests as
@@ -24,6 +45,7 @@ with profiles as
      trading_profile_status as
          (
              select profile_id,
+                    kyc_status,
                     (account_no is not null)  as dw_account_opened,
                     funding_account_connected as funding_acc_connected
              from {{ ref('trading_profile_status') }}
@@ -53,6 +75,27 @@ with profiles as
                       from {{ source('app', 'trading_orders') }}
                                join {{ ref('base_tickers') }} using (symbol)
                       where status = 'EXECUTED_FULLY'
+                  ) t
+             group by profile_id
+     ),
+     ttf_purchased as
+         (
+             select profile_id, json_agg(name) as ttf_purchased
+             from (
+                      select distinct profile_id, collections.name
+                      from {{ source('app', 'drivewealth_portfolio_holdings') }}
+                               join {{ ref('collections') }} on collections.id = collection_id
+                  ) t
+             group by profile_id
+     ),
+     ticker_purchased as
+         (
+             select profile_id, json_agg(symbol) as ticker_purchased
+             from (
+                      select distinct profile_id, symbol
+                      from {{ source('app', 'drivewealth_portfolio_holdings') }}
+                      where collection_id is null
+                        and symbol != 'CUR:USD'
                   ) t
              group by profile_id
      ),
@@ -180,8 +223,21 @@ with profiles as
                     extract(year from age(birthdate))::int as age,
                     extract(year from birthdate)::int      as birthday_year
              from {{ source('app', 'kyc_form') }}
+     ),
+     profile_scoring_settings as
+         (
+             select profile_id,
+                    risk_level                  as investment_goal,
+                    average_market_return,
+                    investment_horizon          as invest_horizon,
+                    unexpected_purchases_source as urgent_money_source,
+                    damage_of_failure,
+                    stock_market_risk_level     as stock_market_risks,
+                    trading_experience
+             from {{ source('app', 'profile_scoring_settings') }}
      )
 select profile_id,
+       user_type,
        user_email,
        age,
        birthday_year,
@@ -193,6 +249,8 @@ select profile_id,
        number_of_funding_acc::int,
        bank_funding_acc,
        coalesce(product_type_purchased, '[]'::json)                 as product_type_purchased,
+       coalesce(ttf_purchased, '[]'::json)                          as ttf_purchased,
+       coalesce(ticker_purchased, '[]'::json)                       as ticker_purchased,
        coalesce(total_invested_ttfs, 0)::int                        as total_invested_ttfs,
        coalesce(total_invested_tickers, 0)::int                     as total_invested_tickers,
        coalesce(total_wishlist_ttfs, 0)::int                        as total_wishlist_ttfs,
@@ -216,7 +274,15 @@ select profile_id,
        kyc_net_worth,
        kyc_net_liquid,
        kyc_risk_tolerance,
-       kyc_employment_status
+       kyc_employment_status,
+       kyc_status,
+       investment_goal,
+       average_market_return,
+       invest_horizon,
+       urgent_money_source,
+       damage_of_failure,
+       stock_market_risks,
+       trading_experience
 from profiles
          left join profile_interests using (profile_id)
          left join profile_categories using (profile_id)
@@ -224,6 +290,8 @@ from profiles
          left join trading_profile_status using (profile_id)
          left join trading_funding_accounts using (profile_id)
          left join product_type_purchased using (profile_id)
+         left join ttf_purchased using (profile_id)
+         left join ticker_purchased using (profile_id)
          left join total_invested_ttfs using (profile_id)
          left join total_invested_tickers using (profile_id)
          left join total_wishlist_ttfs using (profile_id)
@@ -233,3 +301,4 @@ from profiles
          left join buys using (profile_id)
          left join sells using (profile_id)
          left join kyc using (profile_id)
+         left join profile_scoring_settings using (profile_id)

@@ -97,8 +97,8 @@ insert into app.drivewealth_portfolios (ref_id, profile_id, drivewealth_account_
 values  ('portfolio_d7dd65da-96aa-4009-a935-4c2ea5e21130', 2, 'bf98c335-57ad-4337-ae9f-ed1fcfb447af.1662377145557', '{"fund_3dc895e3-a923-4c37-8a91-eac748120215": 0.0061}', '{"id": "portfolio_d7dd65da-96aa-4009-a935-4c2ea5e21130", "name": "Gainy profile #2''s portfolio", "description": "Gainy profile #2''s portfolio", "clientPortfolioID": "2", "holdings": [{"type": "CASH_RESERVE", "target": 0.9939}, {"id": "fund_3dc895e3-a923-4c37-8a91-eac748120215", "name": "Gainy bf98c335-57ad-4337-ae9f-ed1fcfb447af''s fund for collection 89", "type": "FUND", "clientFundID": "2_89", "description": "Gainy bf98c335-57ad-4337-ae9f-ed1fcfb447af''s fund for collection 89", "target": 0.0061, "holdings": [{"instrumentID": "a67422af-8504-43df-9e63-7361eb0bd99e", "target": 1}], "triggers": []}], "userID": "7b746acb-0afa-42c3-9c94-1bc8c16ce7b2", "triggers": [], "isFundTargetsChanged": false, "fundTargetsChanged": false}', 0.9939)
 on conflict do nothing;
 
-insert into app.drivewealth_portfolio_statuses (drivewealth_portfolio_id, cash_value, cash_actual_weight, data, created_at)
-values  ('portfolio_d7dd65da-96aa-4009-a935-4c2ea5e21130', 29570.98, 0.981700000000000027711166694643907248973846435546875, '{"id": "portfolio_d7dd65da-96aa-4009-a935-4c2ea5e21130", "equity": 29570.98, "totalDrift": 0.0001, "rebalanceRequired": false, "nextPortfolioRebalance": "2022-10-18T13:30:00.000Z", "lastPortfolioRebalance": "2022-10-17T13:32:17.053Z", "holdings": [{"id": "CASH", "type": "CASH_RESERVE", "name": null, "target": 0.9818, "actual": 0.9817, "value": 29758.93, "rebalanceRequired": false, "holdings": null}, {"id": "fund_3dc895e3-a923-4c37-8a91-eac748120215", "type": "FUND", "name": "Gainy bf98c335-57ad-4337-ae9f-ed1fcfb447af''s fund for collection 89", "target": 0.006, "actual": 0.0062, "value": 187.95, "rebalanceRequired": false, "holdings": [{"instrumentID": "a67422af-8504-43df-9e63-7361eb0bd99e", "symbol": "AAPL", "target": 1, "actual": 1.0, "openQty": 1.31979237, "value": 187.95}]}, {"id": "fund_0fd8d413-6e53-47f0-80ee-f9071d59cd32", "type": "FUND", "name": "Gainy bf98c335-57ad-4337-ae9f-ed1fcfb447af''s fund for symbol AAPL", "target": 0.012, "actual": 0.012, "value": 375.9, "rebalanceRequired": false, "holdings": [{"instrumentID": "a67422af-8504-43df-9e63-7361eb0bd99e", "symbol": "AAPL", "target": 1, "actual": 1.0, "openQty": 2.63958474, "value": 375.9}]}]}', '2022-10-17 13:32:17.053000 +00:00'::timestamptz);
+insert into app.drivewealth_portfolio_statuses (drivewealth_portfolio_id, cash_value, cash_actual_weight, data, created_at, date, equity_value, cash_target_weight)
+values  ('portfolio_d7dd65da-96aa-4009-a935-4c2ea5e21130', 29570.98, 0.981700000000000027711166694643907248973846435546875, '{"id": "portfolio_d7dd65da-96aa-4009-a935-4c2ea5e21130", "equity": 29570.98, "totalDrift": 0.0001, "rebalanceRequired": false, "nextPortfolioRebalance": "2022-10-18T13:30:00.000Z", "lastPortfolioRebalance": "2022-10-17T13:32:17.053Z", "holdings": [{"id": "CASH", "type": "CASH_RESERVE", "name": null, "target": 0.9818, "actual": 0.9817, "value": 29758.93, "rebalanceRequired": false, "holdings": null}, {"id": "fund_3dc895e3-a923-4c37-8a91-eac748120215", "type": "FUND", "name": "Gainy bf98c335-57ad-4337-ae9f-ed1fcfb447af''s fund for collection 89", "target": 0.006, "actual": 0.0062, "value": 187.95, "rebalanceRequired": false, "holdings": [{"instrumentID": "a67422af-8504-43df-9e63-7361eb0bd99e", "symbol": "AAPL", "target": 1, "actual": 1.0, "openQty": 1.31979237, "value": 187.95}]}, {"id": "fund_0fd8d413-6e53-47f0-80ee-f9071d59cd32", "type": "FUND", "name": "Gainy bf98c335-57ad-4337-ae9f-ed1fcfb447af''s fund for symbol AAPL", "target": 0.012, "actual": 0.012, "value": 375.9, "rebalanceRequired": false, "holdings": [{"instrumentID": "a67422af-8504-43df-9e63-7361eb0bd99e", "symbol": "AAPL", "target": 1, "actual": 1.0, "openQty": 2.63958474, "value": 375.9}]}]}', '2022-10-17 13:32:17.053000 +00:00'::timestamptz, '2022-10-17'::date, 29570.98, 0.9818);
 
 insert into app.drivewealth_orders (ref_id, status, account_id, symbol, symbol_normalized, data, last_executed_at)
 values  ('JL.c971a04d-e4e6-49b0-a91e-6a3315538da7', 'FILLED', 'bf98c335-57ad-4337-ae9f-ed1fcfb447af.1662377145557', 'AAPL', 'AAPL', '{"side": "BUY", "totalOrderAmount": 563.85}', '2022-10-17 13:32:17.053 +00:00')
@@ -140,11 +140,16 @@ on conflict do nothing;
 select setval('app.drivewealth_accounts_positions_id_seq', (select max(id)+1 from app.drivewealth_accounts_positions), false);
 
 -- Commissions
-insert into app.payment_methods (id, profile_id, name, provider)
-values  (1, 2, 'card visa 4242', 'STRIPE')
-on conflict do nothing;
-ALTER SEQUENCE app.payment_methods_id_seq RESTART WITH 2;
+insert into app.payment_methods (profile_id, name, provider, set_active_at)
+select t.profile_id, t.name, t.provider, t.set_active_at
+from (values (2, 'Trading Account GYEK000001', 'DRIVEWEALTH', now() + interval '1 hour')) t(profile_id, name, provider, set_active_at)
+         left join app.payment_methods using (profile_id, provider)
+where payment_methods is null;
 
-insert into app.stripe_payment_methods (ref_id, customer_ref_id, payment_method_id, name, data)
-values  ('pm_1LhEWuD1LH0kYxao7AOiSejL', 'cus_MQ4gYGmV5H4WcR', 1, 'card visa 4242', '{"id": "pm_1LhEWuD1LH0kYxao7AOiSejL", "object": "payment_method", "billing_details": {"address": {"city": null, "country": null, "line1": null, "line2": null, "postal_code": null, "state": null}, "email": null, "name": null, "phone": null}, "card": {"brand": "visa", "checks": {"address_line1_check": null, "address_postal_code_check": null, "cvc_check": null}, "country": "US", "exp_month": 9, "exp_year": 2023, "fingerprint": "4iC4R4MJWP7lXxKu", "funding": "credit", "generated_from": null, "last4": "4242", "networks": {"available": ["visa"], "preferred": null}, "three_d_secure_usage": {"supported": true}, "wallet": null}, "created": 1662996396, "customer": "cus_MQ4gYGmV5H4WcR", "livemode": false, "metadata": {}, "type": "card"}')
-on conflict do nothing;
+update app.drivewealth_accounts
+set payment_method_id = id
+from app.payment_methods, app.drivewealth_users
+where drivewealth_users.ref_id = drivewealth_accounts.drivewealth_user_id
+  and payment_methods.profile_id = drivewealth_users.profile_id
+  and payment_methods.provider = 'DRIVEWEALTH';
+

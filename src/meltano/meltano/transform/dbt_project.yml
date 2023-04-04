@@ -21,9 +21,14 @@ clean-targets:
 models:
   +on_schema_change: "sync_all_columns"
 vars:
+  env: "{{ env_var('ENV') }}"
   drivewealth_is_uat: "{{ env_var('DRIVEWEALTH_IS_UAT', false) }}"
   min_collection_size: "{{ env_var('MIN_COLLECTION_SIZE', 2) }}"
   realtime: false
   portfolio_cash_enabled: false
   crypto_enabled: false
   index_enabled: false
+  billing_value_fee_multiplier: "{{ env_var('BILLING_VALUE_FEE_MULTIPLIER', 0.0096) }}"
+  billing_min_annual_fee: "{{ env_var('BILLING_MIN_ANNUAL_FEE', 96) }}"
+  gainy_employee_profile_ids: "{{ env_var('GAINY_EMPLOYEE_PROFILE_IDS', '') }}"
+  gainy_employee_emails: "{{ env_var('GAINY_EMPLOYEE_EMAILS', '') }}"

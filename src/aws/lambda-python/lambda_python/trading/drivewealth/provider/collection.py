@@ -15,6 +15,7 @@ class DriveWealthProviderCollection(GainyDriveWealthProvider):
     repository: DriveWealthRepository = None
     api: DriveWealthApi = None
 
+    # TODO deprecated ?
     def get_actual_collection_data(self, profile_id: int,
                                    collection_id: int) -> CollectionStatus:
         fund = self.repository.get_profile_fund(profile_id,

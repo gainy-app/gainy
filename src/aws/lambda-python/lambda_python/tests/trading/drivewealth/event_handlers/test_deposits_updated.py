@@ -1,7 +1,8 @@
 from gainy.analytics.service import AnalyticsService
 from gainy.tests.mocks.repository_mocks import mock_find, mock_persist, mock_record_calls
 from gainy.trading.drivewealth.models import DriveWealthDeposit
-from gainy.trading.models import TradingMoneyFlow
+from gainy.trading.models import TradingMoneyFlow, FundingAccount
+from gainy.services.notification import NotificationService
 from trading.drivewealth.event_handlers import DepositsUpdatedEventHandler
 from trading.drivewealth.provider import DriveWealthProvider
 from trading.drivewealth.repository import DriveWealthRepository
@@ -16,11 +17,21 @@ message = {
 def test_exists(monkeypatch):
     old_status = 'Pending'
     new_status = message["statusMessage"]
+    profile_id = 1
+    funding_account_id = 2
+    amount = 3
+    account_mask = "account_mask"
 
     deposit = DriveWealthDeposit()
     deposit.status = old_status
 
     money_flow = TradingMoneyFlow()
+    money_flow.profile_id = profile_id
+    money_flow.funding_account_id = funding_account_id
+    money_flow.amount = amount
+
+    funding_account = FundingAccount()
+    funding_account.mask = account_mask
 
     provider = DriveWealthProvider(None, None, None, None, None)
 
@@ -41,17 +52,28 @@ def test_exists(monkeypatch):
         repository, 'find_one',
         mock_find([(DriveWealthDeposit, {
             "ref_id": message["paymentID"]
-        }, deposit)]))
+        }, deposit),
+                   (FundingAccount, {
+                       "id": funding_account_id
+                   }, funding_account)]))
     persisted_objects = {}
     monkeypatch.setattr(repository, 'persist', mock_persist(persisted_objects))
 
     analytics_service = AnalyticsService(None, None, None)
-    on_dw_deposit_success_calls = []
-    monkeypatch.setattr(analytics_service, 'on_dw_deposit_success',
-                        mock_record_calls(on_dw_deposit_success_calls))
+    analytics_service_on_deposit_success_calls = []
+    monkeypatch.setattr(
+        analytics_service, 'on_deposit_success',
+        mock_record_calls(analytics_service_on_deposit_success_calls))
+
+    notification_service = NotificationService(None, None)
+    notification_service_on_deposit_success_calls = []
+    monkeypatch.setattr(
+        notification_service, 'on_deposit_success',
+        mock_record_calls(notification_service_on_deposit_success_calls))
 
     event_handler = DepositsUpdatedEventHandler(repository, provider, None,
-                                                analytics_service)
+                                                analytics_service,
+                                                notification_service)
     sync_trading_account_balances_calls = []
     monkeypatch.setattr(event_handler, 'sync_trading_account_balances',
                         mock_record_calls(sync_trading_account_balances_calls))
@@ -69,7 +91,9 @@ def test_exists(monkeypatch):
     assert (deposit, old_status) in [
         args for args, kwargs in handle_money_flow_status_change_calls
     ]
-    assert ((money_flow, ), {}) in on_dw_deposit_success_calls
+    assert ((money_flow, ), {}) in analytics_service_on_deposit_success_calls
+    assert ((profile_id, amount, account_mask),
+            {}) in notification_service_on_deposit_success_calls
 
 
 def test_not_exists(monkeypatch):

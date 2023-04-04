@@ -3,6 +3,7 @@ with holdings as
              select distinct on (
                  holding_id_v2
                  )  profile_holdings_normalized_all.profile_id,
+                    holding_group_id,
                     holding_id_v2,
                     plaid_access_token_id,
                     type,
@@ -24,11 +25,18 @@ with holdings as
                         end     as name,
                     sim_dif + 1 as weight_category_in_holding,
                     category_id,
-                    actual_value,
-                    absolute_gain_1d,
-                    relative_gain_1d
+                    coalesce(case
+                        when type = 'cash'
+                            then pending_cash
+                        end, 0) + portfolio_holding_gains.actual_value as actual_value,
+                    portfolio_holding_group_gains.absolute_gain_1d * portfolio_holding_gains.actual_value /
+                    portfolio_holding_group_gains.actual_value         as absolute_gain_1d,
+                    portfolio_holding_group_gains.relative_gain_1d * portfolio_holding_gains.actual_value /
+                    portfolio_holding_group_gains.actual_value         as relative_gain_1d
              from holdings
-                      join portfolio_holding_gains using (holding_id_v2)
+                      join portfolio_holding_gains using (profile_id, holding_id_v2)
+                      left join portfolio_holding_group_gains using (profile_id, holding_group_id)
+                      left join trading_profile_status using (profile_id)
                       left join ticker_categories on ticker_categories.symbol = ticker_symbol
              where collection_id is null
 
@@ -39,12 +47,15 @@ with holdings as
                     null        as name,
                     sim_dif + 1 as weight_category_in_holding,
                     category_id,
-                    actual_value,
-                    absolute_gain_1d,
-                    relative_gain_1d
+                    portfolio_holding_gains.actual_value,
+                    portfolio_holding_group_gains.absolute_gain_1d * portfolio_holding_gains.actual_value /
+                    portfolio_holding_group_gains.actual_value as absolute_gain_1d,
+                    portfolio_holding_group_gains.relative_gain_1d * portfolio_holding_gains.actual_value /
+                    portfolio_holding_group_gains.actual_value as relative_gain_1d
              from holdings
-                      join portfolio_holding_gains using (holding_id_v2)
-                      join collection_categories using (collection_id)
+                      join portfolio_holding_gains using (profile_id, holding_id_v2)
+                      left join portfolio_holding_group_gains using (profile_id, holding_group_id)
+                      left join collection_categories using (collection_id)
              where collection_id is not null
      ),
      portfolio_stats as
@@ -95,8 +106,7 @@ with holdings as
                     name,
                     sum(weight_holding_in_portfolio * weight_category_in_holding) as weight,
                     sum(weight_category_in_holding * absolute_gain_1d)            as absolute_daily_change,
-                    sum(weight_holding_in_portfolio * weight_category_in_holding *
-                        relative_gain_1d)                                         as relative_daily_change,
+                    sum(weight_category_in_holding * relative_gain_1d)            as relative_daily_change,
                     sum(weight_category_in_holding * actual_value)                as absolute_value
              from data2
              group by profile_id, category_id, name

@@ -1,5 +1,5 @@
 from gainy.trading.drivewealth.models import DriveWealthDeposit
-from gainy.trading.models import TradingMoneyFlowStatus
+from gainy.trading.models import TradingMoneyFlowStatus, FundingAccount
 from gainy.utils import get_logger
 from trading.drivewealth.abstract_event_handler import AbstractDriveWealthEventHandler
 
@@ -29,6 +29,28 @@ class DepositsUpdatedEventHandler(AbstractDriveWealthEventHandler):
         self.sync_trading_account_balances(deposit.trading_account_ref_id,
                                            force=True)
 
+        if money_flow:
+            funding_account: FundingAccount = self.repo.find_one(
+                FundingAccount, {"id": money_flow.funding_account_id})
+        else:
+            funding_account = None
+
+        logger.info("Considering sending event on_deposit_success",
+                    extra={
+                        "money_flow":
+                        money_flow.to_dict() if money_flow else None,
+                        "current_mf_status": deposit.get_money_flow_status(),
+                        "prev_mf_status": old_mf_status,
+                    })
         if money_flow and deposit.get_money_flow_status(
         ) == TradingMoneyFlowStatus.SUCCESS and old_mf_status != TradingMoneyFlowStatus.SUCCESS:
-            self.analytics_service.on_dw_deposit_success(money_flow)
+            self.analytics_service.on_deposit_success(money_flow)
+            if funding_account:
+                self.notification_service.on_deposit_success(
+                    money_flow.profile_id, money_flow.amount,
+                    funding_account.mask)
+
+        if money_flow and deposit.get_money_flow_status(
+        ) == TradingMoneyFlowStatus.FAILED and old_mf_status != TradingMoneyFlowStatus.FAILED and funding_account:
+            self.notification_service.on_deposit_failed(
+                money_flow.profile_id, money_flow.amount, funding_account.mask)

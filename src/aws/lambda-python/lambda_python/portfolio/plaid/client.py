@@ -1,9 +1,9 @@
 import os
 
-from plaid.model.investments_transactions_get_response import InvestmentsTransactionsGetResponse
-
 from gainy.plaid.client import PlaidClient as GainyPlaidClient
+from gainy.utils import get_logger
 
+from plaid.model.investments_transactions_get_response import InvestmentsTransactionsGetResponse
 from plaid.model.country_code import CountryCode
 from plaid.model.products import Products
 from plaid.model.link_token_create_request import LinkTokenCreateRequest
@@ -16,7 +16,6 @@ from plaid.model.webhook_verification_key_get_request import WebhookVerification
 from plaid.model.item_get_request import ItemGetRequest
 from plaid.model.institutions_get_by_id_request import InstitutionsGetByIdRequest
 from plaid.model.processor_token_create_request import ProcessorTokenCreateRequest
-from gainy.utils import get_logger
 
 logger = get_logger(__name__)
 
@@ -31,7 +30,8 @@ class PlaidClient(GainyPlaidClient):
                           redirect_uri,
                           products,
                           env=None,
-                          access_token=None):
+                          access_token=None,
+                          account_filters=None):
         #TODO when we have verified phone number, we can implement https://plaid.com/docs/link/returning-user/#enabling-the-returning-user-experience
         params = {
             "client_name": "Gainy",
@@ -46,6 +46,9 @@ class PlaidClient(GainyPlaidClient):
             params['products'] = [Products(i) for i in products]
         else:
             params['access_token'] = access_token
+
+        if account_filters:
+            params['account_filters'] = account_filters
 
         request = LinkTokenCreateRequest(**params)
         response = self.get_client(env).link_token_create(request)

@@ -51,6 +51,35 @@ variable "amplitude_api_key" {
   sensitive = true
   default   = ""
 }
+variable "rebrandly_api_key" {
+  type      = string
+  sensitive = true
+  default   = ""
+}
+variable "appsflyer_app_id" {
+  type = string
+}
+variable "appsflyer_dev_key" {
+  type      = string
+  sensitive = true
+}
+
+variable "billing_value_fee_multiplier" {
+  type    = number
+  default = 0.096
+}
+variable "billing_min_annual_fee" {
+  type    = number
+  default = 96
+}
+variable "billing_enabled_profiles" {
+  type    = string
+  default = ""
+}
+variable "billing_min_date" {
+  type    = string
+  default = ""
+}
 
 #################################### OneSignal ####################################
 
@@ -126,6 +155,9 @@ variable "drivewealth_api_url" {
 variable "drivewealth_sqs_arn" {
   type = string
 }
+variable "drivewealth_house_account_no" {
+  type = string
+}
 
 #################################### AWS ####################################
 
@@ -166,6 +198,13 @@ variable "google_billing_id" {}
 variable "google_user" {}
 variable "google_organization_id" {}
 variable "google_places_api_key" {
+  type      = string
+  sensitive = true
+}
+variable "firebase_app_id" {
+  type = string
+}
+variable "firebase_api_secret" {
   type      = string
   sensitive = true
 }

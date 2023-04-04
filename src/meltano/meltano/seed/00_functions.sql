@@ -81,6 +81,64 @@ $$
 select regexp_replace(regexp_replace($1, '\.([AB])$', '-\1'), '\.(.*)$', '');
 $$ language sql;
 
+create or replace function npv(cf numeric[], d date[], rate numeric) returns numeric
+    language sql as
+$$
+select sum(cf / (1 + rate) ^ ((u.d - first_d)::numeric / 365))
+from (
+         select u.cf, u.d, first_value(u.d) over (order by u.d) as first_d
+         from unnest(cf, d) u(cf, d)
+     ) u
+$$;
+
+-- https://www.investopedia.com/terms/i/irr.asp
+create or replace function xirr(cf numeric[], d date[], minrate numeric= -1.0, maxrate numeric=100.0) returns numeric
+    language plpgsql IMMUTABLE PARALLEL SAFE COST 10000 as
+$$
+declare
+    minv     numeric;
+    maxv     numeric;
+    prec     numeric = 1e-5;
+    l        numeric = minrate;
+    r        numeric = maxrate;
+    s        numeric;
+    prev_npv numeric;
+    npv      numeric;
+    op_cnt   int     = 1;
+    max_ops  int     = 300;
+begin
+    select min(unnest) from unnest($1) into minv;
+    select max(unnest) from unnest($1) into maxv;
+    if maxv < 0 or minv > 0 then
+        return null;
+    else
+        prev_npv = 0;
+        while true
+            loop
+                op_cnt = op_cnt + 1;
+                s = (l + r) * 0.5;
+                npv = npv($1, $2, s);
+--                 raise notice 'l: % r: % s % npv: %',l,r,s,npv;
+
+                if abs(npv) < prec or abs(npv - prev_npv) < prec then
+                    return s;
+                end if;
+                if op_cnt > max_ops then
+                    raise exception 'Series diverges. l: % r: % s % npv: %',l,r,s,npv;
+                end if;
+
+                prev_npv = npv;
+                if npv > 0 then
+                    l = s;
+                else
+                    r = s;
+                end if;
+            end loop;
+        return s;
+    end if;
+end
+$$;
+
 create or replace function sigmoid(x double precision, beta double precision) returns double precision as
 $$
 select 1 / (1 + ((x + 1e-10) / (1 - x + 1e-10)) ^ (-beta));

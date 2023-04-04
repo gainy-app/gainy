@@ -1,3 +1,6 @@
+from gainy.trading.drivewealth.models import DriveWealthRedemption, DriveWealthDeposit
+
+
 def _get_deposit_data(ref_id=None, account_ref_id=None, status=None):
     return {
         "id": ref_id,
@@ -38,7 +41,11 @@ def mock_create_deposit(amount,
         assert _amount == amount
         assert _account == account
         assert _bank_account == bank_account
-        return _get_deposit_data(ref_id=ref_id, status=status)
+
+        entity = DriveWealthDeposit()
+        entity.set_from_response(
+            _get_deposit_data(ref_id=ref_id, status=status))
+        return entity
 
     return mock
 
@@ -53,7 +60,9 @@ def mock_create_redemption(amount,
         assert _amount == amount
         assert _account == account
         assert _bank_account == bank_account
-        return {
+
+        entity = DriveWealthRedemption()
+        entity.set_from_response({
             "id": ref_id,
             "status": {
                 "id": 1,
@@ -61,7 +70,8 @@ def mock_create_redemption(amount,
                 "updated": "2017-11-10T14:43:26.497Z"
             },
             "created": "2017-11-10T14:43:26.497Z"
-        }
+        })
+        return entity
 
     return mock
 

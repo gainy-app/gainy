@@ -41,6 +41,13 @@ query GetTradingHistory($profile_id: Int!, $types: [String!]!) {
       status # ["PENDING", "PENDING_EXECUTION", "EXECUTED_FULLY", "CANCELLED", "FAILED"]
       target_amount_delta
     }
+    payment_transaction {
+      status # ["PENDING", "SUCCESS", "FAILED"]
+      payment_method {
+        account_no
+        provider
+      }
+    }
   }
 }
 ```
@@ -91,10 +98,11 @@ query TradingGetProfileStatus($profile_id: Int!) {
 #### List:
 ```graphql
 query TradingGetStatements($profile_id: Int!) {
-  app_trading_statements(where: {profile_id: {_eq: $profile_id}}) {
+  app_trading_statements(where: {profile_id: {_eq: $profile_id}}, order_by: {date: desc}) {
     display_name
     type
     id
+    date
   }
 }
 ```
@@ -145,8 +153,8 @@ mutation TradingDeleteData($profile_id: Int!) {
 ```
 Re-handle queue messages
 ```graphql
-mutation ReHandleQueueMessages($ids: [Int]!) {
-  rehandle_queue_messages(ids: $ids) {
+mutation ReHandleQueueMessages($ids: [Int]!, $force: Boolean) {
+  rehandle_queue_messages(ids: $ids, force: $force) {
     success
     unsupported
     error

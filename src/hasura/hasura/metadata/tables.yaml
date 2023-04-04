@@ -1,4 +1,34 @@
 - table:
+    name: analytics_profile_data
+    schema: app
+  object_relationships:
+    - name: profile
+      using:
+        foreign_key_constraint_on: profile_id
+  insert_permissions:
+    - role: user
+      permission:
+        check:
+          profile:
+            user_id:
+              _eq: X-Hasura-User-Id
+        columns:
+          - metadata
+          - profile_id
+          - service_name
+  select_permissions:
+    - role: user
+      permission:
+        columns:
+          - profile_id
+          - service_name
+          - metadata
+          - created_at
+        filter:
+          profile:
+            user_id:
+              _eq: X-Hasura-User-Id
+- table:
     name: invitations
     schema: app
   object_relationships:
@@ -281,6 +311,34 @@
   delete_permissions:
     - role: user
       permission:
+        filter:
+          profile:
+            user_id:
+              _eq: X-Hasura-User-Id
+- table:
+    name: payment_transactions
+    schema: app
+  object_relationships:
+    - name: payment_method
+      using:
+        manual_configuration:
+          column_mapping:
+            payment_method_id: id
+          insertion_order: null
+          remote_table:
+            name: payment_methods
+            schema: public
+    - name: profile
+      using:
+        foreign_key_constraint_on: profile_id
+  select_permissions:
+    - role: user
+      permission:
+        columns:
+          - invoice_id
+          - payment_method_id
+          - profile_id
+          - status
         filter:
           profile:
             user_id:
@@ -1131,6 +1189,7 @@
           - id
           - profile_id
           - type
+          - date
           - display_name
           - created_at
         filter:
@@ -1350,6 +1409,12 @@
           - market_capitalization_sum
           - performance_rank
           - previous_day_close_price
+          - prev_value_1w
+          - prev_value_1m
+          - prev_value_3m
+          - prev_value_1y
+          - prev_value_5y
+          - prev_value_total
           - profile_id
           - relative_daily_change
           - updated_at
@@ -1728,6 +1793,31 @@
             user_id:
               _eq: X-Hasura-User-Id
 - table:
+    name: payment_methods
+    schema: public
+  object_relationships:
+    - name: profile
+      using:
+        manual_configuration:
+          column_mapping:
+            profile_id: id
+          insertion_order: null
+          remote_table:
+            name: profiles
+            schema: app
+  select_permissions:
+    - role: user
+      permission:
+        columns:
+          - id
+          - profile_id
+          - provider
+          - account_no
+        filter:
+          profile:
+            user_id:
+              _eq: X-Hasura-User-Id
+- table:
     name: portfolio_brokers
     schema: public
   select_permissions:
@@ -1838,17 +1928,8 @@
         columns:
           - ticker_symbol
           - purchase_date
-          - relative_gain_total
-          - relative_gain_1d
-          - value_to_portfolio_value
           - ticker_name
-          - market_capitalization
-          - next_earnings_date
-          - security_type
-          - ltt_quantity_total
           - name
-          - quantity
-          - avg_cost
         filter:
           holding:
             profile:
@@ -1874,24 +1955,8 @@
     - role: user
       permission:
         columns:
-          - absolute_gain_1d
-          - absolute_gain_1m
-          - absolute_gain_1w
-          - absolute_gain_1y
-          - absolute_gain_3m
-          - absolute_gain_5y
-          - absolute_gain_total
           - actual_value
-          - ltt_quantity_total
-          - relative_gain_1d
-          - relative_gain_1m
-          - relative_gain_1w
-          - relative_gain_1y
-          - relative_gain_3m
-          - relative_gain_5y
-          - relative_gain_total
           - updated_at
-          - value_to_portfolio_value
         filter:
           holding:
             profile:
@@ -2755,6 +2820,13 @@
           - price_change_3m
           - price_change_5y
           - price_change_all
+          - prev_price_1d
+          - prev_price_1w
+          - prev_price_1m
+          - prev_price_3m
+          - prev_price_1y
+          - prev_price_5y
+          - prev_price_all
           - price_to_book_value
           - price_to_earnings_ttm
           - price_to_sales_ttm
@@ -2988,6 +3060,15 @@
     name: trading_history
     schema: public
   object_relationships:
+    - name: payment_transaction
+      using:
+        manual_configuration:
+          column_mapping:
+            payment_transaction_id: id
+          insertion_order: null
+          remote_table:
+            name: payment_transactions
+            schema: app
     - name: profile
       using:
         manual_configuration:
@@ -3032,6 +3113,7 @@
           - datetime
           - money_flow_id
           - name
+          - payment_transaction_id
           - profile_id
           - tags
           - trading_collection_version_id

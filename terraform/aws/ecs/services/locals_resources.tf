@@ -14,7 +14,7 @@ locals {
   polygon_jobs_count                  = 6
   polygon_intraday_jobs_count         = 10
 
-  eod_symbols_limit                = var.env == "production" ? 14000 : 20
+  eod_symbols_limit                = var.env == "production" ? 900 : 20
   eod_websockets_memory_credits    = var.env == "production" ? 512 : 256
   hasura_memory_credits            = var.env == "production" ? 1024 : 1024
   airflow_memory_credits           = var.env == "production" ? 1024 : 1024

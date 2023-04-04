@@ -70,6 +70,20 @@ gainy_sync_profiles_analytics_attributes = BashOperator(
     bash_command='gainy_sync_profiles_analytics_attributes',
     dag=dag)
 
+gainy_fetch_drivewealth_countries = BashOperator(
+    task_id="gainy_fetch_drivewealth_countries",
+    cwd=MELTANO_PROJECT_ROOT,
+    bash_command='gainy_fetch_drivewealth_countries',
+    dag=dag)
+
+gainy_update_account_balances = BashOperator(
+    task_id="update-account-balances",
+    bash_command="gainy_update_account_balances 2>&1 | tee /proc/1/fd/1",
+    skip_exit_code=1,
+    dag=dag)
+
 generate_meltano_config >> upstream >> dbt >> downstream >> clean
 dbt >> store_deployment_state
 dbt >> gainy_sync_profiles_analytics_attributes
+generate_meltano_config >> gainy_fetch_drivewealth_countries
+generate_meltano_config >> gainy_update_account_balances >> dbt

@@ -54,7 +54,6 @@ sources:
     description: Mobile App data, managed by hasura
     schema: app
     tables:
-      - name: analytics_profiles
       - name: drivewealth_accounts
       - name: drivewealth_accounts_money
       - name: drivewealth_accounts_positions
@@ -72,6 +71,8 @@ sources:
       - name: kyc_form
       - name: kyc_statuses
       - name: notifications
+      - name: payment_methods
+      - name: payment_transactions
       - name: personalized_collection_sizes
       - name: personalized_ticker_collections
       - name: plaid_institutions
@@ -911,6 +912,34 @@ models:
         tests:
           - type:
               type: 'double precision'
+      - name: prev_price_1d
+        tests:
+          - type:
+              type: 'double precision'
+      - name: prev_price_1w
+        tests:
+          - type:
+              type: 'double precision'
+      - name: prev_price_1m
+        tests:
+          - type:
+              type: 'double precision'
+      - name: prev_price_3m
+        tests:
+          - type:
+              type: 'double precision'
+      - name: prev_price_1y
+        tests:
+          - type:
+              type: 'double precision'
+      - name: prev_price_5y
+        tests:
+          - type:
+              type: 'double precision'
+      - name: prev_price_all
+        tests:
+          - type:
+              type: 'double precision'
 
   - name: portfolio_holding_gains
     columns:
@@ -930,66 +959,6 @@ models:
         tests:
           - type:
               type: 'double precision'
-      - name: relative_gain_1d
-        tests:
-          - type:
-              type: 'double precision'
-      - name: relative_gain_1w
-        tests:
-          - type:
-              type: 'double precision'
-      - name: relative_gain_1m
-        tests:
-          - type:
-              type: 'double precision'
-      - name: relative_gain_3m
-        tests:
-          - type:
-              type: 'double precision'
-      - name: relative_gain_1y
-        tests:
-          - type:
-              type: 'double precision'
-      - name: relative_gain_5y
-        tests:
-          - type:
-              type: 'double precision'
-      - name: relative_gain_total
-        tests:
-          - type:
-              type: 'double precision'
-      - name: absolute_gain_1d
-        tests:
-          - type:
-              type: 'double precision'
-      - name: absolute_gain_1w
-        tests:
-          - type:
-              type: 'double precision'
-      - name: absolute_gain_1m
-        tests:
-          - type:
-              type: 'double precision'
-      - name: absolute_gain_3m
-        tests:
-          - type:
-              type: 'double precision'
-      - name: absolute_gain_1y
-        tests:
-          - type:
-              type: 'double precision'
-      - name: absolute_gain_5y
-        tests:
-          - type:
-              type: 'double precision'
-      - name: absolute_gain_total
-        tests:
-          - type:
-              type: 'double precision'
-      - name: ltt_quantity_total
-        tests:
-          - type:
-              type: 'double precision'
 
   - name: portfolio_holding_group_gains
     columns:
@@ -1002,10 +971,6 @@ models:
         tests:
           - type:
               type: 'integer'
-      - name: updated_at
-        tests:
-          - type:
-              type: 'timestamp without time zone'
       - name: actual_value
         tests:
           - type:
@@ -1089,58 +1054,6 @@ models:
         tests:
           - type:
               type: 'character varying'
-      - name: account_id
-        tests:
-          - type:
-              type: 'integer'
-      - name: purchase_date
-        tests:
-          - type:
-              type: 'timestamp without time zone'
-      - name: relative_gain_total
-        tests:
-          - type:
-              type: 'double precision'
-      - name: relative_gain_1d
-        tests:
-          - type:
-              type: 'double precision'
-      - name: value_to_portfolio_value
-        tests:
-          - type:
-              type: 'double precision'
-      - name: ticker_name
-        tests:
-          - type:
-              type: 'text'
-      - name: market_capitalization
-        tests:
-          - type:
-              type: 'bigint'
-      - name: next_earnings_date
-        tests:
-          - type:
-              type: 'timestamp without time zone'
-      - name: security_type
-        tests:
-          - type:
-              type: 'character varying'
-      - name: ltt_quantity_total
-        tests:
-          - type:
-              type: 'double precision'
-      - name: name
-        tests:
-          - type:
-              type: 'character varying'
-      - name: quantity
-        tests:
-          - type:
-              type: 'double precision'
-      - name: avg_cost
-        tests:
-          - type:
-              type: 'double precision'
 
   - name: portfolio_holding_group_details
     columns:
@@ -1441,6 +1354,30 @@ models:
         tests:
           - type:
               type: 'timestamp with time zone'
+      - name: prev_value_1w
+        tests:
+          - type:
+              type: 'double precision'
+      - name: prev_value_1m
+        tests:
+          - type:
+              type: 'double precision'
+      - name: prev_value_3m
+        tests:
+          - type:
+              type: 'double precision'
+      - name: prev_value_1y
+        tests:
+          - type:
+              type: 'double precision'
+      - name: prev_value_5y
+        tests:
+          - type:
+              type: 'double precision'
+      - name: prev_value_total
+        tests:
+          - type:
+              type: 'double precision'
 
   - name: profile_collection_tickers_performance_ranked
     columns:
@@ -2012,11 +1949,15 @@ models:
         tests:
           - type:
               type: 'boolean'
+      - name: notification_method
+        tests:
+          - type:
+              type: 'text'
       - name: is_shown_in_app
         tests:
           - type:
               type: 'boolean'
-      - name: template_id
+      - name: onesignal_template_id
         tests:
           - type:
               type: 'text'
@@ -2591,7 +2532,7 @@ models:
       - name: symbol
         tests:
           - type:
-              type: 'character varying'
+              type: 'text'
       - name: value_to_portfolio_value
         tests:
           - type:
@@ -2667,7 +2608,7 @@ models:
           - type:
               type: 'boolean'
 
-  - name: analytics_profile_attributes
+  - name: analytics_profile_properties
     columns:
       - name: profile_id
         tests:
@@ -2681,6 +2622,10 @@ models:
         tests:
           - type:
               type: 'integer'
+      - name: user_type
+        tests:
+          - type:
+              type: 'text'
       - name: user_email
         tests:
           - type:
@@ -2714,6 +2659,14 @@ models:
           - type:
               type: 'json'
       - name: product_type_purchased
+        tests:
+          - type:
+              type: 'json'
+      - name: ttf_purchased
+        tests:
+          - type:
+              type: 'json'
+      - name: ticker_purchased
         tests:
           - type:
               type: 'json'
@@ -2809,6 +2762,38 @@ models:
         tests:
           - type:
               type: 'character varying'
+      - name: kyc_status
+        tests:
+          - type:
+              type: 'character varying'
+      - name: investment_goal
+        tests:
+          - type:
+              type: 'real'
+      - name: average_market_return
+        tests:
+          - type:
+              type: 'integer'
+      - name: invest_horizon
+        tests:
+          - type:
+              type: 'real'
+      - name: urgent_money_source
+        tests:
+          - type:
+              type: 'character varying'
+      - name: damage_of_failure
+        tests:
+          - type:
+              type: 'real'
+      - name: stock_market_risks
+        tests:
+          - type:
+              type: 'character varying'
+      - name: trading_experience
+        tests:
+          - type:
+              type: 'character varying'
 
   - name: trading_collection_tickers
     columns:
@@ -2858,97 +2843,6 @@ models:
           - type:
               type: 'text'
 
-  - name: drivewealth_portfolio_holding_gains
-    columns:
-      - name: profile_id
-        tests:
-          - type:
-              type: 'integer'
-      - name: holding_id_v2
-        tests:
-          - type:
-              type: 'text'
-      - name: symbol
-        tests:
-          - type:
-              type: 'character varying'
-      - name: collection_id
-        tests:
-          - type:
-              type: 'integer'
-      - name: actual_value
-        tests:
-          - type:
-              type: 'double precision'
-      - name: absolute_gain_1d
-        tests:
-          - type:
-              type: 'double precision'
-      - name: absolute_gain_1w
-        tests:
-          - type:
-              type: 'double precision'
-      - name: absolute_gain_1m
-        tests:
-          - type:
-              type: 'double precision'
-      - name: absolute_gain_3m
-        tests:
-          - type:
-              type: 'double precision'
-      - name: absolute_gain_1y
-        tests:
-          - type:
-              type: 'double precision'
-      - name: absolute_gain_5y
-        tests:
-          - type:
-              type: 'double precision'
-      - name: absolute_gain_total
-        tests:
-          - type:
-              type: 'double precision'
-      - name: relative_gain_1d
-        tests:
-          - type:
-              type: 'double precision'
-      - name: relative_gain_1w
-        tests:
-          - type:
-              type: 'double precision'
-      - name: relative_gain_1m
-        tests:
-          - type:
-              type: 'double precision'
-      - name: relative_gain_3m
-        tests:
-          - type:
-              type: 'double precision'
-      - name: relative_gain_1y
-        tests:
-          - type:
-              type: 'double precision'
-      - name: relative_gain_5y
-        tests:
-          - type:
-              type: 'double precision'
-      - name: relative_gain_total
-        tests:
-          - type:
-              type: 'double precision'
-      - name: cash_flow_sum_total
-        tests:
-          - type:
-              type: 'double precision'
-      - name: ltt_quantity_total
-        tests:
-          - type:
-              type: 'double precision'
-      - name: updated_at
-        tests:
-          - type:
-              type: 'timestamp without time zone'
-
   - name: portfolio_latest_trading_session
     columns:
       - name: profile_id
@@ -2993,6 +2887,52 @@ models:
         tests:
           - type:
               type: 'timestamp without time zone'
+
+  - name: payment_methods
+    columns:
+      - name: id
+        tests:
+          - type:
+              type: 'integer'
+      - name: profile_id
+        tests:
+          - type:
+              type: 'integer'
+      - name: provider
+        tests:
+          - type:
+              type: 'character varying'
+      - name: account_no
+        tests:
+          - type:
+              type: 'character varying'
+
+  - name: drivewealth_daily_fees
+    columns:
+      - name: profile_id
+        tests:
+          - type:
+              type: 'integer'
+      - name: date
+        tests:
+          - type:
+              type: 'date'
+      - name: value
+        tests:
+          - type:
+              type: 'numeric'
+      - name: period_start
+        tests:
+          - type:
+              type: 'date'
+      - name: period_end
+        tests:
+          - type:
+              type: 'date'
+      - name: fee
+        tests:
+          - type:
+              type: 'numeric'
 
 exposures:
   - name: ticker_search_index

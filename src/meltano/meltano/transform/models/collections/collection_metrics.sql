@@ -9,17 +9,12 @@
   )
 }}
 
-with collection_daily_latest_chart_point as
+with latest_day as
          (
-             select collection_chart.*,
-                    row_number() over (partition by collection_uniq_id order by t.date desc) as idx
-             from (
-                      select collection_uniq_id, period, date, max(datetime) as datetime
-                      from {{ ref('collection_chart') }}
-                      where period = '1w'
-                      group by collection_uniq_id, period, date
-                  ) t
-                      join {{ ref('collection_chart') }} using (collection_uniq_id, period, datetime)
+             select distinct on (collection_uniq_id) collection_uniq_id, adjusted_close, date, updated_at
+             from {{ ref('collection_chart') }}
+             where period = '1d'
+             order by collection_uniq_id, datetime desc
      ),
      ticker_metrics as
          (
@@ -34,51 +29,63 @@ with collection_daily_latest_chart_point as
      metrics as
          (
              select collection_historical_values_marked.collection_uniq_id,
-                    latest_day.adjusted_close::double precision                                 as actual_price,
-                    (latest_day.adjusted_close - previous_day.adjusted_close)::double precision as absolute_daily_change,
+                    latest_day.adjusted_close::double precision as actual_price,
+                    (latest_day.adjusted_close - case
+                                                     when latest_day.date = collection_historical_values_marked.date_1d
+                                                         then value_2d
+                                                     else value_1d
+                        end)::double precision                  as absolute_daily_change,
                     (latest_day.adjusted_close /
-                     case when previous_day.adjusted_close > 0 then previous_day.adjusted_close end - 1
-                        )::double precision                                                     as relative_daily_change,
+                     case
+                         when latest_day.date = collection_historical_values_marked.date_1d
+                             then case when value_2d > 0 then value_2d end
+                         else case when value_1d > 0 then value_1d end
+                         end - 1
+                        )::double precision                     as relative_daily_change,
                     latest_day.adjusted_close /
                     case
                         when coalesce(value_1w, value_all) > 0
                             then coalesce(value_1w, value_all)
-                        end - 1                                                                 as value_change_1w,
+                        end - 1                                 as value_change_1w,
                     latest_day.adjusted_close /
                     case
                         when coalesce(value_1m, value_all) > 0
                             then coalesce(value_1m, value_all)
-                        end - 1                                                                 as value_change_1m,
+                        end - 1                                 as value_change_1m,
                     latest_day.adjusted_close /
                     case
                         when coalesce(value_3m, value_all) > 0
                             then coalesce(value_3m, value_all)
-                        end - 1                                                                 as value_change_3m,
+                        end - 1                                 as value_change_3m,
                     latest_day.adjusted_close /
                     case
                         when coalesce(value_1y, value_all) > 0
                             then coalesce(value_1y, value_all)
-                        end - 1                                                                 as value_change_1y,
+                        end - 1                                 as value_change_1y,
                     latest_day.adjusted_close /
                     case
                         when coalesce(value_5y, value_all) > 0
                             then coalesce(value_5y, value_all)
-                        end - 1                                                                 as value_change_5y,
+                        end - 1                                 as value_change_5y,
                     latest_day.adjusted_close /
                     case
                         when value_all > 0
                             then value_all
-                        end - 1                                                                 as value_change_all,
-                    previous_day.adjusted_close::double precision                               as previous_day_close_price,
-                    greatest(latest_day.updated_at, previous_day.updated_at,
-                        collection_historical_values_marked.updated_at)                         as updated_at
+                        end - 1                                 as value_change_all,
+                    case
+                        when latest_day.date = collection_historical_values_marked.date_1d
+                            then value_2d
+                        else value_1d
+                        end::double precision                   as previous_day_close_price,
+                    value_1w                                    as prev_value_1w,
+                    value_1m                                    as prev_value_1m,
+                    value_3m                                    as prev_value_3m,
+                    value_1y                                    as prev_value_1y,
+                    value_5y                                    as prev_value_5y,
+                    value_all                                   as prev_value_total,
+                    latest_day.updated_at
              from {{ ref('collection_historical_values_marked') }}
-                      left join collection_daily_latest_chart_point latest_day
-                                on latest_day.collection_uniq_id = collection_historical_values_marked.collection_uniq_id
-                                    and latest_day.idx = 1
-                      left join collection_daily_latest_chart_point previous_day
-                                on previous_day.collection_uniq_id = collection_historical_values_marked.collection_uniq_id
-                                    and previous_day.idx = 2
+                      left join latest_day using (collection_uniq_id)
      ),
      ranked_performance as
          (
@@ -110,6 +117,12 @@ select profile_collections.profile_id,
        metrics.value_change_5y,
        metrics.value_change_all,
        metrics.previous_day_close_price,
+       metrics.prev_value_1w::double precision,
+       metrics.prev_value_1m::double precision,
+       metrics.prev_value_3m::double precision,
+       metrics.prev_value_1y::double precision,
+       metrics.prev_value_5y::double precision,
+       metrics.prev_value_total::double precision,
        ticker_metrics.market_capitalization_sum::bigint,
        ranked_performance.rank::int       as performance_rank,
        ranked_clicks.rank::int            as clicks_rank,

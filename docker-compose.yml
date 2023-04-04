@@ -148,6 +148,8 @@ services:
     env_file:
       - .env.global
       - .env.local
+    environment:
+      SYMBOLS_LIMIT: 10
     deploy:
       replicas: 0
 

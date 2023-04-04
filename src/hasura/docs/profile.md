@@ -7,6 +7,7 @@
 7. [Metrics settings for a collection](#metrics-settings-for-a-collection)
 8. [Delete user](#delete-user)
 9. [Profile flags](#profile-flags)
+10. [Analytics](#analytics)
 
 ### Create profile
 
@@ -297,6 +298,36 @@ mutation UpdateProfileFlags($profile_id: Int!, $is_trading_enabled: Boolean) {
       on_conflict: {constraint: profile_flags_pkey, update_columns: is_trading_enabled}
   ) {
     profile_id
+  }
+}
+```
+
+### Analytics
+Store client metadata for a user.
+```graphql
+mutation InsertAnalyticsProfileData($profile_id: Int!, $service_name: String!, $metadata: jsonb!) {
+  insert_app_analytics_profile_data(
+    objects: {
+      profile_id: $profile_id, 
+      service_name: $service_name, 
+      metadata: $metadata
+    }, 
+    on_conflict: {constraint: analytics_profile_data_pkey}
+  ) {
+    affected_rows
+  }
+}
+```
+Supported schemas:
+1. `{"profile_id": 1, "service_name": "APPSFLYER", "metadata": {"appsflyer_id": "test"}}`
+2. `{"profile_id": 1, "service_name": "FIREBASE", "metadata": {"app_instance_id": "test"}}`
+
+On start up, this data should be fetched and used to initialize analytics SDKs (if possible):
+```graphql
+query GetAnalyticsProfileData($profile_id: Int!) {
+  app_analytics_profile_data(where: {profile_id: {_eq: $profile_id}}) {
+    service_name
+    metadata
   }
 }
 ```

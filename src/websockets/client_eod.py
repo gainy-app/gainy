@@ -8,13 +8,7 @@ from decimal import Decimal
 from common import run, AbstractPriceListener
 
 EOD_API_TOKEN = os.environ["EOD_API_TOKEN"]
-MANDATORY_SYMBOLS = [
-    'DJI.INDX', 'GSPC.INDX', 'IXIC.INDX', 'BTC.CC', 'ETH.CC', 'USDT.CC',
-    'DOGE.CC', 'BNB.CC', 'XRP.CC', 'DOT.CC', 'SOL.CC', 'ADA.CC', 'LINK.CC',
-    'ATOM.CC', 'CRV.CC', 'MATIC.CC', 'DAI.CC', 'SHIB.CC', 'STEPN.CC', 'TRX.CC',
-    'UNI.CC', 'USDC.CC', 'AFRM', 'BILL', 'COIN', 'FISV', 'HOOD', 'INTU',
-    'NVEI', 'PYPL', 'SOFI', 'SQ', 'UPST', 'WDAY'
-]
+MANDATORY_SYMBOLS = []
 SYMBOLS_LIMIT = int(os.getenv('SYMBOLS_LIMIT', len(MANDATORY_SYMBOLS)))
 
 
@@ -34,8 +28,7 @@ class PricesListener(AbstractPriceListener):
 
         if self.endpoint is None:
             self.sub_listeners = [
-                PricesListener(instance_key, endpoint)
-                for endpoint in ['us', 'crypto', 'index']
+                PricesListener(instance_key, endpoint) for endpoint in ['us']
             ]
         else:
             self.logger.debug("[%s] started at %d for symbols %s", endpoint,
@@ -52,11 +45,13 @@ class PricesListener(AbstractPriceListener):
             if count_to_fetch > 0:
                 query = """
                     SELECT symbol
-                    FROM base_tickers
+                    FROM tickers
+                             left join (select symbol from raw_data.polygon_intraday_prices_launchpad group by symbol) t using (symbol)
                              left join ticker_metrics using (symbol)
-                    where (lower(exchange) similar to '(nyse|nasdaq)%%' and symbol not like '%%-%%')
-                       or (type = 'crypto' and symbol in ('1INCHB.CC', '1INCH.CC', 'AAVEB.CC', 'AAVEDOWN.CC', 'AAVEUP.CC', 'AAVE.CC', 'ACMB.CC', 'ACM.CC', 'ADAB.CC', 'ADADOWN.CC', 'ADAT.CC', 'ADAUP.CC', 'ADA.CC', 'AERGOB.CC', 'AIONB.CC', 'AION.CC', 'AKRO.CC', 'ALGOB.CC', 'ALGOT.CC', 'ALGO.CC', 'ALICEB.CC', 'ALICE.CC', 'ALPHAB.CC', 'ALPHA.CC', 'ANKRT.CC', 'ANKR.CC', 'ANTB.CC', 'ANT.CC', 'ARDR.CC', 'ARPA.CC', 'ASR.CC', 'ATM.CC', 'ATOMB.CC', 'ATOMT.CC', 'ATOM.CC', 'AUCTIONB.CC', 'AUDB.CC', 'AUDIOB.CC', 'AUDIO.CC', 'AUD.CC', 'AUTOB.CC', 'AUTO.CC', 'AVAB.CC', 'AVA.CC', 'AVAXB.CC', 'AVAX.CC', 'AXSB.CC', 'AXS.CC', 'BADGERB.CC', 'BADGER.CC', 'BAKEB.CC', 'BALB.CC', 'BAL.CC', 'BANDB.CC', 'BAND.CC', 'BATB.CC', 'BATT.CC', 'BAT.CC', 'BCC.CC', 'BCHABCB.CC', 'BCHABCT.CC', 'BCHABC.CC', 'BCHAB.CC', 'BCHB.CC', 'BCHDOWN.CC', 'BCHSVT.CC', 'BCHSV.CC', 'BCHT.CC', 'BCHUP.CC', 'BCH.CC', 'BCPTT.CC', 'BEAM.CC', 'BEARB.CC', 'BEAR.CC', 'BELB.CC', 'BEL.CC', 'BIFIB.CC', 'BKRWB.CC', 'BKRW.CC', 'BLZB.CC', 'BLZ.CC', 'BNBBEARB.CC', 'BNBBEAR.CC', 'BNBBULLB.CC', 'BNBBULL.CC', 'BNBB.CC', 'BNBDOWN.CC', 'BNBT.CC', 'BNBUP.CC', 'BNB.CC', 'BNTB.CC', 'BNT.CC', 'BOTB.CC', 'BTCB.CC', 'BTCDOWN.CC', 'BTCSTB.CC', 'BTCT.CC', 'BTCUP.CC', 'BTC.CC', 'BTSB.CC', 'BTS.CC', 'BTTB.CC', 'BTTT.CC', 'BTT.CC', 'BULLB.CC', 'BULL.CC', 'BUSD.CC', 'BZRXB.CC', 'BZRX.CC', 'CAKEB.CC', 'CAKE.CC', 'CELO.CC', 'CELR.CC', 'CFXB.CC', 'CFX.CC', 'CHR.CC', 'CHZB.CC', 'CHZ.CC', 'CKBB.CC', 'CKB.CC', 'COCOS.CC', 'COMPB.CC', 'COMP.CC', 'COS.CC', 'COTI.CC', 'COVERB.CC', 'CREAMB.CC', 'CRVB.CC', 'CRV.CC', 'CTKB.CC', 'CTK.CC', 'CTSIB.CC', 'CTSI.CC', 'CTXC.CC', 'CVC.CC', 'CVPB.CC', 'DAIB.CC', 'DAI.CC', 'DASHB.CC', 'DASH.CC', 'DATAB.CC', 'DATA.CC', 'DCRB.CC', 'DCR.CC', 'DEGOB.CC', 'DEGO.CC', 'DEXEB.CC', 'DGBB.CC', 'DGB.CC', 'DIAB.CC', 'DIA.CC', 'DNTB.CC', 'DNT.CC', 'DOCK.CC', 'DODOB.CC', 'DODO.CC', 'DOGEB.CC', 'DOGE.CC', 'DOTB.CC', 'DOTDOWN.CC', 'DOTUP.CC', 'DOT.CC', 'DREP.CC', 'DUSK.CC', 'EGLDB.CC', 'EGLD.CC', 'ENJB.CC', 'ENJ.CC', 'EOSBEARB.CC', 'EOSBEAR.CC', 'EOSBULLB.CC', 'EOSBULL.CC', 'EOSB.CC', 'EOSDOWN.CC', 'EOST.CC', 'EOSUP.CC', 'EOS.CC', 'EPSB.CC', 'EPS.CC', 'ERDB.CC', 'ERD.CC', 'ETCB.CC', 'ETCT.CC', 'ETC.CC', 'ETHBEARB.CC', 'ETHBEAR.CC', 'ETHBULLB.CC', 'ETHBULL.CC', 'ETHB.CC', 'ETHDOWN.CC', 'ETHT.CC', 'ETHUP.CC', 'ETH.CC', 'EURB.CC', 'EUR.CC', 'FET.CC', 'FILB.CC', 'FILDOWN.CC', 'FILUP.CC', 'FIL.CC', 'FIOB.CC', 'FIO.CC', 'FIRO.CC', 'FISB.CC', 'FIS.CC', 'FLMB.CC', 'FLM.CC', 'FORB.CC', 'FRONTB.CC', 'FTMT.CC', 'FTM.CC', 'FTT.CC', 'FUN.CC', 'FXSB.CC', 'GBPB.CC', 'GBP.CC', 'GHSTB.CC', 'GRTB.CC', 'GRT.CC', 'GTOT.CC', 'GTO.CC', 'GXS.CC', 'HARDB.CC', 'HARD.CC', 'HBARB.CC', 'HBAR.CC', 'HC.CC', 'HEGICB.CC', 'HIVE.CC', 'HNT.CC', 'HOT.CC', 'ICXB.CC', 'ICX.CC', 'IDEXB.CC', 'INJB.CC', 'INJ.CC', 'IOSTB.CC', 'IOTAB.CC', 'IOTA.CC', 'IOTX.CC', 'IRISB.CC', 'IRIS.CC', 'JSTB.CC', 'JST.CC', 'JUVB.CC', 'JUV.CC', 'KAVA.CC', 'KEY.CC', 'KMDB.CC', 'KMD.CC', 'KNCB.CC', 'KNC.CC', 'KP3RB.CC', 'KSMB.CC', 'KSM.CC', 'LENDB.CC', 'LEND.CC', 'LINAB.CC', 'LINA.CC', 'LINKB.CC', 'LINKDOWN.CC', 'LINKT.CC', 'LINKUP.CC', 'LINK.CC', 'LITB.CC', 'LIT.CC', 'LRCB.CC', 'LRC.CC', 'LSK.CC', 'LTCB.CC', 'LTCDOWN.CC', 'LTCT.CC', 'LTCUP.CC', 'LTC.CC', 'LTO.CC', 'LUNAB.CC', 'LUNA.CC', 'MANAB.CC', 'MANA.CC', 'MATICB.CC', 'MATIC.CC', 'MBL.CC', 'MCO.CC', 'MDT.CC', 'MFT.CC', 'MITH.CC', 'MKRB.CC', 'MKR.CC', 'MTL.CC', 'NANOB.CC', 'NANO.CC', 'NBS.CC', 'NEARB.CC', 'NEAR.CC', 'NEOB.CC', 'NEOT.CC', 'NEO.CC', 'NKN.CC', 'NMRB.CC', 'NMR.CC', 'NPXS.CC', 'NULS.CC', 'OCEANB.CC', 'OCEAN.CC', 'OGN.CC', 'OG.CC', 'OMGB.CC', 'OMG.CC', 'OM.CC', 'ONEB.CC', 'ONET.CC', 'ONE.CC', 'ONG.CC', 'ONTB.CC', 'ONT.CC', 'ORN.CC', 'OXT.CC', 'PAXB.CC', 'PAXGB.CC', 'PAXG.CC', 'PAXT.CC', 'PAX.CC', 'PERL.CC', 'PERPB.CC', 'PERP.CC', 'PHAB.CC', 'PHBT.CC', 'PNT.CC', 'PONDB.CC', 'POND.CC', 'PROMB.CC', 'PSGB.CC', 'PSG.CC', 'QTUMB.CC', 'QTUM.CC', 'RAMPB.CC', 'RAMP.CC', 'REEFB.CC', 'REEF.CC', 'REN.CC', 'REPB.CC', 'REP.CC', 'RIF.CC', 'RLC.CC', 'ROSEB.CC', 'ROSE.CC', 'RSRB.CC', 'RSR.CC', 'RUNEB.CC', 'RUNE.CC', 'RVNB.CC', 'RVN.CC', 'SANDB.CC', 'SAND.CC', 'SC.CC', 'SFPB.CC', 'SFP.CC', 'SKLB.CC', 'SKL.CC', 'SNXB.CC', 'SNX.CC', 'SOLB.CC', 'SOL.CC', 'SRMB.CC', 'SRM.CC', 'STMX.CC', 'STORJB.CC', 'STORJ.CC', 'STORM.CC', 'STRATB.CC', 'STRAXB.CC', 'STRAX.CC', 'STX.CC', 'SUN.CC', 'SUPERB.CC', 'SUPER.CC', 'SUSD.CC', 'SUSHIB.CC', 'SUSHIDOWN.CC', 'SUSHIUP.CC', 'SUSHI.CC', 'SWRVB.CC', 'SXPB.CC', 'SXPDOWN.CC', 'SXPUP.CC', 'SXP.CC', 'SYSB.CC', 'TCT.CC', 'TFUELT.CC', 'TFUEL.CC', 'THETA.CC', 'TKOB.CC', 'TKO.CC', 'TOMOB.CC', 'TOMO.CC', 'TRBB.CC', 'TRB.CC', 'TROY.CC', 'TRUB.CC', 'TRU.CC', 'TRXB.CC', 'TRXDOWN.CC', 'TRXT.CC', 'TRXUP.CC', 'TRX.CC', 'TUSDBT.CC', 'TUSDB.CC', 'TUSD.CC', 'TVKB.CC', 'TWTB.CC', 'TWT.CC', 'UFTB.CC', 'UMA.CC', 'UNFIB.CC', 'UNFI.CC', 'UNIB.CC', 'UNIDOWN.CC', 'UNIUP.CC', 'UNI.CC', 'UTK.CC', 'VEN.CC', 'VETB.CC', 'VET.CC', 'VIDTB.CC', 'VITE.CC', 'VTHOB.CC', 'VTHO.CC', 'WAN.CC', 'WAVESB.CC', 'WAVEST.CC', 'WAVES.CC', 'WINGB.CC', 'WING.CC', 'WIN.CC', 'WNXMB.CC', 'WNXM.CC', 'WRXB.CC', 'WRX.CC', 'WTC.CC', 'XEM.CC', 'XLMB.CC', 'XLMDOWN.CC', 'XLMT.CC', 'XLMUP.CC', 'XLM.CC', 'XMRB.CC', 'XMR.CC', 'XRPBEARB.CC', 'XRPBEAR.CC', 'XRPBULLB.CC', 'XRPBULL.CC', 'XRPB.CC', 'XRPDOWN.CC', 'XRPT.CC', 'XRPUP.CC', 'XRP.CC', 'XTZB.CC', 'XTZDOWN.CC', 'XTZUP.CC', 'XTZ.CC', 'XVGB.CC', 'XVSB.CC', 'XVS.CC', 'XZC.CC', 'YFIB.CC', 'YFIDOWN.CC', 'YFIIB.CC', 'YFII.CC', 'YFIUP.CC', 'YFI.CC', 'ZECB.CC', 'ZECT.CC', 'ZEC.CC', 'ZEN.CC', 'ZILB.CC', 'ZIL.CC', 'ZRXB.CC', 'ZRX.CC'))
-                    order by type = 'crypto' desc, market_capitalization desc nulls last
+                    where t.symbol is null
+                      and type != 'crypto'
+                      and type != 'index'
+                    order by market_capitalization desc nulls last
                     limit %(count)s
                 """
 

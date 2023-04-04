@@ -47,10 +47,6 @@ class PortfolioChartService:
                     SCRIPT_DIR,
                     "../sql/portfolio_piechart_security_type.sql")) as f:
             self.portfolio_piechart_security_type_query = f.read()
-        with open(
-                os.path.join(SCRIPT_DIR,
-                             "../sql/portfolio_piechart_ticker.sql")) as f:
-            self.portfolio_piechart_ticker_query = f.read()
 
     def get_portfolio_chart(self, profile_id, filter: PortfolioChartFilter):
         params = {
@@ -77,8 +73,6 @@ class PortfolioChartService:
                                            join_clause, filter)
         self._filter_query_by_security_types(params, holding_where_clause,
                                              join_clause, filter)
-        self._filter_query_by_ltt_only(params, holding_where_clause,
-                                       join_clause, filter)
 
         if holding_where_clause:
             holding_where_clause.insert(0, sql.SQL(""))
@@ -126,8 +120,6 @@ class PortfolioChartService:
                                            join_clause, filter)
         self._filter_query_by_security_types(params, holding_where_clause,
                                              join_clause, filter)
-        self._filter_query_by_ltt_only(params, holding_where_clause,
-                                       join_clause, filter)
 
         if holding_where_clause:
             holding_where_clause.insert(0, sql.SQL(""))
@@ -172,18 +164,18 @@ class PortfolioChartService:
         if where_clause:
             where_clause.insert(0, sql.SQL(""))
 
-        rows = self._execute_query(
+        rows = self._execute_query(params, {"where_clause": where_clause},
+                                   join_clause,
+                                   self.portfolio_piechart_asset_query)
+        rows += self._execute_query(params, {"where_clause": where_clause},
+                                    join_clause,
+                                    self.portfolio_piechart_category_query)
+        rows += self._execute_query(params, {"where_clause": where_clause},
+                                    join_clause,
+                                    self.portfolio_piechart_interest_query)
+        rows += self._execute_query(
             params, {"where_clause": where_clause}, join_clause,
-            self.portfolio_piechart_asset_query) + self._execute_query(
-                params, {"where_clause": where_clause}, join_clause,
-                self.portfolio_piechart_category_query) + self._execute_query(
-                    params, {"where_clause": where_clause}, join_clause, self.
-                    portfolio_piechart_interest_query) + self._execute_query(
-                        params, {"where_clause": where_clause}, join_clause,
-                        self.portfolio_piechart_security_type_query
-                    ) + self._execute_query(
-                        params, {"where_clause": where_clause}, join_clause,
-                        self.portfolio_piechart_ticker_query)
+            self.portfolio_piechart_security_type_query)
 
         return rows
 
@@ -322,15 +314,6 @@ class PortfolioChartService:
             sql.SQL(
                 "profile_holdings_normalized_all.type in %(security_types)s"))
         params['security_types'] = tuple(filter.security_types)
-
-    def _filter_query_by_ltt_only(self, params, where_clause, join_clause,
-                                  filter: PortfolioChartFilter):
-        if not filter.ltt_only:
-            return
-        join_clause.append(
-            sql.SQL("join portfolio_holding_details using (holding_id_v2)"))
-        where_clause.append(
-            sql.SQL("portfolio_holding_details.ltt_quantity_total > 0"))
 
     def _execute_query(self, params, where_clauses: dict, join_clause, query):
         format_params = {

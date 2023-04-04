@@ -55,6 +55,13 @@
     { "name": "GITHUB_APP_INSTALLATION_ID",            "value": "${github_app_installation_id}" },
     { "name": "GITHUB_APP_PRIVATE_KEY",                "value": ${jsonencode(github_app_private_key)} },
     { "name": "AMPLITUDE_API_KEY",                     "value": "${amplitude_api_key}" },
+    { "name": "SENDGRID_API_KEY",                      "value": "${sendgrid_api_key}" },
+    { "name": "FIREBASE_APP_ID",                       "value": "${firebase_app_id}" },
+    { "name": "FIREBASE_API_SECRET",                   "value": "${firebase_api_secret}" },
+    { "name": "APPSFLYER_APP_ID",                      "value": "${appsflyer_app_id}" },
+    { "name": "APPSFLYER_DEV_KEY",                     "value": "${appsflyer_dev_key}" },
+    { "name": "GAINY_EMPLOYEE_PROFILE_IDS",            "value": "1,2,3,4,5,6,7,8,10,11,13,17,20,21,28,30,32,34,40,41,67,21190,22945,22243,22856" },
+    { "name": "GAINY_EMPLOYEE_EMAILS",                 "value": "dus.boris@gmail.com,qurazor1@gmail.com,dus.boris.us@gmail.com,polinamedian@gmail.com,boris@gainy.app,i.omelchuk@ukr.net,avoncocks@gmail.com,ali@gainy.app" },
 
     { "name": "TARGET_POSTGRES_HOST",                  "value": "${pg_host}" },
     { "name": "TARGET_POSTGRES_PORT",                  "value": "${pg_port}" },
@@ -127,6 +134,7 @@
     { "name": "DRIVEWEALTH_API_USERNAME",              "value": "${drivewealth_api_username}" },
     { "name": "DRIVEWEALTH_API_PASSWORD",              "value": "${drivewealth_api_password}" },
     { "name": "DRIVEWEALTH_API_URL",                   "value": "${drivewealth_api_url}" },
+    { "name": "DRIVEWEALTH_HOUSE_ACCOUNT_NO",          "value": "${drivewealth_house_account_no}" },
 
     { "name": "PLAID_CLIENT_ID",                       "value": "${plaid_client_id}" },
     { "name": "PLAID_SECRET",                          "value": "${plaid_secret}" },
@@ -135,7 +143,12 @@
     { "name": "PLAID_ENV",                             "value": "${plaid_env}" },
 
     { "name": "MLFLOW_ARTIFACT_LOCATION",              "value": "${mlflow_artifact_location}" },
-    { "name": "MLFLOW_TRACKING_URI",                   "value": "postgresql://${pg_username}:${pg_password}@${pg_host}:${pg_port}/${pg_dbname}?options=-csearch_path=${pg_mlflow_schema}" }
+    { "name": "MLFLOW_TRACKING_URI",                   "value": "postgresql://${pg_username}:${pg_password}@${pg_host}:${pg_port}/${pg_dbname}?options=-csearch_path=${pg_mlflow_schema}" },
+
+    { "name": "BILLING_VALUE_FEE_MULTIPLIER",          "value": "${billing_value_fee_multiplier}" },
+    { "name": "BILLING_MIN_ANNUAL_FEE",                "value": "${billing_min_annual_fee}" },
+    { "name": "BILLING_ENABLED_PROFILES",              "value": "${billing_enabled_profiles}" },
+    { "name": "BILLING_MIN_DATE",                      "value": "${billing_min_date}" }
   ],
   "links": [],
   "workingDirectory": null,

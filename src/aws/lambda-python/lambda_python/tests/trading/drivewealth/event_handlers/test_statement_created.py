@@ -35,6 +35,9 @@ def test(monkeypatch, type):
     repository = DriveWealthRepository(None)
     persisted_objects = {}
     monkeypatch.setattr(repository, 'persist', mock_persist(persisted_objects))
+    refresh_calls = []
+    monkeypatch.setattr(repository, 'refresh',
+                        mock_record_calls(refresh_calls))
 
     provider = DriveWealthProvider(None, None, None, None, None)
     create_trading_statements_calls = []
@@ -56,6 +59,7 @@ def test(monkeypatch, type):
     assert DriveWealthStatement in persisted_objects
     statement: DriveWealthStatement = persisted_objects[DriveWealthStatement][
         0]
+    assert ((statement, ), {}) in refresh_calls
     assert statement.file_key == message[type]["fileKey"]
     assert statement.type == type_enum
     assert statement.display_name == message[type]["displayName"]
