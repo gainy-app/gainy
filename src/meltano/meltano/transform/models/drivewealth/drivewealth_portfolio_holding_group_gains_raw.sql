@@ -10,27 +10,56 @@
 }}
 
 
-with data as
+with dphh_groupped as
          (
-             select profile_holdings_normalized.profile_id,
+             select *,
+                    case
+                        when symbol like 'CUR:%'
+                            then profile_id || '_cash_' || symbol
+                        when collection_id is null
+                            then 'ticker_' || profile_id || '_' || symbol
+                        else 'ttf_' || profile_id || '_' || collection_id
+                        end as holding_group_id
+             from {{ ref('drivewealth_portfolio_historical_holdings') }}
+         ),
+     last_selloff_date as materialized
+         (
+             select holding_group_id,
+                    case
+                        when bool_or(last_selloff_date is null)
+                            then null
+                        else min(last_selloff_date)
+                        end as last_selloff_date
+             from (
+                      select holding_group_id, holding_id_v2, max(date) as last_selloff_date
+                      from dphh_groupped
+                      where value < 1e-3
+                      group by holding_group_id, holding_id_v2
+                  ) t
+                      join {{ ref('drivewealth_holdings') }} using (holding_id_v2)
+             group by holding_group_id
+     ),
+     data as
+         (
+             select dphh_groupped.profile_id,
                     holding_group_id,
                     date,
                     sum(value)               as value,
                     sum(prev_value)::numeric as prev_value,
                     sum(case when is_last_date.holding_id_v2 is null then 0 else value end -
-                        cash_flow)::numeric  as cash_flow
-             from {{ ref('profile_holdings_normalized') }}
-                      join {{ ref('drivewealth_portfolio_historical_holdings') }} using (holding_id_v2)
+                        cash_flow)::numeric  as cash_flow,
+                    sum(cash_flow)::numeric  as cash_flow_sum
+             from dphh_groupped
                       left join (
                                     select holding_id_v2, max(date) as date
                                     from {{ ref('drivewealth_portfolio_historical_holdings') }}
                                     where not is_premarket
                                     group by holding_id_v2
                                 ) is_last_date using (holding_id_v2, date)
-                      left join {{ ref('drivewealth_portfolio_historical_holdings_marked') }} using (holding_id_v2)
+                      left join last_selloff_date using (holding_group_id)
              where not is_premarket
                and (date > last_selloff_date or last_selloff_date is null)
-             group by profile_holdings_normalized.profile_id, holding_group_id, date
+             group by dphh_groupped.profile_id, holding_group_id, date
          ),
      data_1d as
          (
@@ -44,7 +73,8 @@ with data as
                            then value / (prev_value + (value - cash_flow)) - 1
                        when prev_value > 0
                            then (value - (value - cash_flow)) / prev_value - 1
-                       end as relative_gain_1d
+                       end as relative_gain_1d,
+                   value - prev_value - cash_flow as absolute_gain_1d
              from data
              where date >= now()::date - interval '1 week'
              order by profile_id desc, holding_group_id desc, date desc
@@ -54,7 +84,8 @@ with data as
              select profile_id,
                     holding_group_id,
                     (1 + xirr(array_agg(cash_flow order by date), array_agg(date order by date))) ^
-                    (count(date) / 365.0) - 1 as relative_gain_1w
+                    (count(date) / 365.0) - 1 as relative_gain_1w,
+                    sum(cash_flow)            as absolute_gain_1w
              from (
                       select profile_id,
                              holding_group_id,
@@ -74,7 +105,8 @@ with data as
              select profile_id,
                     holding_group_id,
                     (1 + xirr(array_agg(cash_flow order by date), array_agg(date order by date))) ^
-                    (count(date) / 365.0) - 1 as relative_gain_1m
+                    (count(date) / 365.0) - 1 as relative_gain_1m,
+                    sum(cash_flow)            as absolute_gain_1m
              from (
                       select profile_id,
                              holding_group_id,
@@ -94,7 +126,8 @@ with data as
              select profile_id,
                     holding_group_id,
                     (1 + xirr(array_agg(cash_flow order by date), array_agg(date order by date))) ^
-                    (count(date) / 365.0) - 1 as relative_gain_3m
+                    (count(date) / 365.0) - 1 as relative_gain_3m,
+                    sum(cash_flow)            as absolute_gain_3m
              from (
                       select profile_id,
                              holding_group_id,
@@ -114,7 +147,8 @@ with data as
              select profile_id,
                     holding_group_id,
                     (1 + xirr(array_agg(cash_flow order by date), array_agg(date order by date))) ^
-                    (count(date) / 365.0) - 1 as relative_gain_1y
+                    (count(date) / 365.0) - 1 as relative_gain_1y,
+                    sum(cash_flow)            as absolute_gain_1y
              from (
                       select profile_id,
                              holding_group_id,
@@ -134,7 +168,8 @@ with data as
              select profile_id,
                     holding_group_id,
                     (1 + xirr(array_agg(cash_flow order by date), array_agg(date order by date))) ^
-                    (count(date) / 365.0) - 1 as relative_gain_5y
+                    (count(date) / 365.0) - 1 as relative_gain_5y,
+                    sum(cash_flow)            as absolute_gain_5y
              from (
                       select profile_id,
                              holding_group_id,
@@ -154,25 +189,10 @@ with data as
              select profile_id,
                     holding_group_id,
                     (1 + xirr(array_agg(cash_flow order by date), array_agg(date order by date))) ^
-                    (count(date) / 365.0) - 1 as relative_gain_total
+                    (count(date) / 365.0) - 1 as relative_gain_total,
+                    sum(cash_flow)            as absolute_gain_total
              from data
              group by profile_id, holding_group_id
-     ),
-     absolute_gains as
-         (
-             select profile_holdings_normalized.profile_id,
-                    holding_group_id,
-                    -- it's important to use actual_value from drivewealth_portfolio_historical_holdings_marked, otherwise gains may be inconsistent
-                    sum(drivewealth_portfolio_historical_holdings_marked.actual_value - prev_value_1d - cash_flow_sum_1d) as absolute_gain_1d,
-                    sum(drivewealth_portfolio_historical_holdings_marked.actual_value - prev_value_1w - cash_flow_sum_1w) as absolute_gain_1w,
-                    sum(drivewealth_portfolio_historical_holdings_marked.actual_value - prev_value_1m - cash_flow_sum_1m) as absolute_gain_1m,
-                    sum(drivewealth_portfolio_historical_holdings_marked.actual_value - prev_value_3m - cash_flow_sum_3m) as absolute_gain_3m,
-                    sum(drivewealth_portfolio_historical_holdings_marked.actual_value - prev_value_1y - cash_flow_sum_1y) as absolute_gain_1y,
-                    sum(drivewealth_portfolio_historical_holdings_marked.actual_value - prev_value_5y - cash_flow_sum_5y) as absolute_gain_5y,
-                    sum(drivewealth_portfolio_historical_holdings_marked.actual_value - cash_flow_sum_total)              as absolute_gain_total
-             from {{ ref('profile_holdings_normalized') }}
-                      left join {{ ref('drivewealth_portfolio_historical_holdings_marked') }} using (holding_id_v2)
-             group by profile_holdings_normalized.profile_id, holding_group_id
      )
 
 select profile_id,
@@ -201,4 +221,3 @@ from data_total
          left join data_3m using (profile_id, holding_group_id)
          left join data_1y using (profile_id, holding_group_id)
          left join data_5y using (profile_id, holding_group_id)
-         left join absolute_gains using (profile_id, holding_group_id)
