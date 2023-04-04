@@ -1,7 +1,6 @@
 {{
   config(
     materialized = "incremental",
-    tags = ["realtime"],
     unique_key = "id",
     post_hook=[
       pk('collection_uniq_id, symbol, date'),
@@ -128,8 +127,7 @@ with raw_ticker_collections_weights as materialized
                                       null     as updated_at
                                from {{ ref('week_trading_sessions_static') }}
                                         join {{ ref('historical_prices_marked') }} using (symbol)
-                               where week_trading_sessions_static.index = 0
-                                 and week_trading_sessions_static.date > historical_prices_marked.date_0d
+                               where week_trading_sessions_static.date > historical_prices_marked.date_0d
                            ) hp
                            on hp.symbol = ticker_collections_weights.symbol
                                and hp.date >= ticker_collections_weights.date

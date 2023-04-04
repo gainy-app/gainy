@@ -47,7 +47,12 @@ with
                                            interval '{{ minutes }} minutes') dd on true
 {% if is_incremental() and var('realtime') %}
                       join max_date using (symbol)
-             where dd > max_date.datetime - interval '30 minutes'
+{% endif %}
+
+             where week_trading_sessions_static.index >= 0
+
+{% if is_incremental() and var('realtime') %}
+               and dd > max_date.datetime - interval '30 minutes'
 {% endif %}
          ),
      expanded_intraday_prices as
@@ -59,6 +64,7 @@ with
 {% if is_incremental() and var('realtime') %}
                       join max_date using (symbol)
              where historical_intraday_prices.time_{{ minutes }}min > max_date.datetime - interval '30 minutes'
+               and week_trading_sessions_static.index >= 0
 {% endif %}
          ),
      combined_intraday_prices as
@@ -235,6 +241,7 @@ from (
                             on old_data.symbol = t2.symbol
                                 and old_data.datetime = t2.datetime
 {% endif %}
+         where week_trading_sessions_static.index >= 0
                   window wnd as (partition by t2.symbol order by t2.datetime rows between 1 preceding and current row)
     ) t3
 where adjusted_close is not null
