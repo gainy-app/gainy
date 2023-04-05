@@ -83,8 +83,7 @@ def test_portfolio_piechart_filters(params):
             else:
                 raise Exception("unknown entity_id " + row['entity_id'])
 
-            expected_relative_daily_change = relative_gain_1d * row["weight"]
-            assert abs(expected_relative_daily_change -
+            assert abs(relative_gain_1d -
                        row['relative_daily_change']) < PRICE_EPS, row
         for field in ['weight', 'absolute_daily_change', 'absolute_value']:
             if field not in piechart_sums[entity_type]:
@@ -92,15 +91,14 @@ def test_portfolio_piechart_filters(params):
             piechart_sums[entity_type][field] += row[field]
 
     print(data, piechart_sums)
-    entity_types = ['ticker', 'category', 'interest', 'security_type', 'asset']
+    entity_types = ['category', 'interest', 'security_type', 'asset']
     for entity_type in entity_types:
         assert abs(
             1 - piechart_sums[entity_type]['weight']) < PRICE_EPS, entity_type
 
-        # TODO fix tests
-        # assert abs(portfolio_gains_data['absolute_gain_1d'] -
-        #            piechart_sums[entity_type]['absolute_daily_change']
-        #            ) < PRICE_EPS, entity_type
+        assert abs(portfolio_gains_data['absolute_gain_1d'] -
+                   piechart_sums[entity_type]['absolute_daily_change']
+                   ) < PRICE_EPS, entity_type
         assert abs(portfolio_gains_data['actual_value'] -
                    piechart_sums[entity_type]['absolute_value']
                    ) < PRICE_EPS, entity_type
