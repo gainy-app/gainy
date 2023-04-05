@@ -47,8 +47,7 @@ with dphh_groupped as
                     sum(value)               as value,
                     sum(prev_value)::numeric as prev_value,
                     sum(case when is_last_date.holding_id_v2 is null then 0 else value end -
-                        cash_flow)::numeric  as cash_flow,
-                    sum(cash_flow)::numeric  as cash_flow_sum
+                        cash_flow)::numeric  as cash_flow
              from dphh_groupped
                       left join (
                                     select holding_id_v2, max(date) as date
@@ -74,7 +73,7 @@ with dphh_groupped as
                        when prev_value > 0
                            then (value - (value - cash_flow)) / prev_value - 1
                        end as relative_gain_1d,
-                   value - prev_value - cash_flow as absolute_gain_1d
+                   cash_flow - prev_value as absolute_gain_1d
              from data
              where date >= now()::date - interval '1 week'
              order by profile_id desc, holding_group_id desc, date desc
