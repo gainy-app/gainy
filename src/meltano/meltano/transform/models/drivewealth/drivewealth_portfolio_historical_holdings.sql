@@ -139,10 +139,14 @@ with portfolio_statuses as
              -- realtime schedule
              select profile_id,
                     holding_id_v2,
-                    symbol,
-                    date,
-                    coalesce(relative_daily_change, 0)     as relative_daily_gain,
-                    ticker_realtime_metrics.symbol is null as is_premarket
+                    min_holding_date.symbol,
+                    t.date,
+                    coalesce(ticker_realtime_metrics.relative_daily_change, 0) as relative_daily_gain,
+                    (case
+                         when min_holding_date.symbol = 'CUR:USD'
+                             then spy_realtime_metrics.symbol is null
+                         else ticker_realtime_metrics.symbol is null
+                        end)                                                   as is_premarket
              from min_holding_date
                       join (
                                select min(date) as date
@@ -155,6 +159,8 @@ with portfolio_statuses as
                                             )
                            ) t on true
                       left join {{ ref('ticker_realtime_metrics') }} using (symbol, date)
+                      left join {{ ref('ticker_realtime_metrics') }} spy_realtime_metrics
+                                on spy_realtime_metrics.symbol = 'SPY' and spy_realtime_metrics.date = t.date
      ),
      data_extended0 as
          (
@@ -383,6 +389,7 @@ from data_extended
 {% if is_incremental() %}
          left join {{ this }} old_data using (profile_id, holding_id_v2, symbol, date)
 where (old_data.profile_id is null
+   or data_extended.is_premarket != old_data.is_premarket
    or data_extended.updated_at > old_data.updated_at
    or abs(data_extended.relative_daily_gain - old_data.relative_daily_gain) > 1e-3
    or abs(data_extended.cash_flow - old_data.cash_flow) > 1e-3

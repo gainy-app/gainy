@@ -195,18 +195,17 @@ with data as
                    '11dc7a5a-aa96-4835-893a-cea11581ab6c'                         as onesignal_template_id
             from (
                      select distinct on (
-                         profile_id
-                         ) profile_holdings_normalized_all.profile_id,
-                           profile_holdings_normalized_all.symbol,
-                           portfolio_holding_gains.relative_gain_total,
+                         profile_holding_groups.profile_id
+                         ) profile_holding_groups.profile_id,
+                           profile_holding_groups.symbol,
+                           profile_holding_groups.collection_id,
+                           portfolio_holding_group_gains.relative_gain_total,
                            ticker_realtime_metrics.relative_daily_change
-                     from {{ ref('profile_holdings_normalized_all') }}
-                              join {{ ref('portfolio_holding_gains') }} using (holding_id_v2)
+                     from {{ ref('profile_holding_groups') }}
+                              join {{ ref('portfolio_holding_group_gains') }} on holding_group_id = profile_holding_groups.id
                               join {{ ref('ticker_realtime_metrics') }} using (symbol)
-                     where not profile_holdings_normalized_all.is_hidden
-                       and relative_gain_total > 0.30
+                     where relative_gain_total > 0.30
                        and relative_daily_change < -0.05
-                       and profile_holdings_normalized_all.symbol is not null
                      order by profile_id, relative_daily_change
                 ) t
                      join {{ ref('exchange_schedule') }} on exchange_schedule.country_name = 'USA' and exchange_schedule.date = now()::date

@@ -60,7 +60,7 @@
   "privileged": null,
   "memoryReservation": null,
   "healthCheck": {
-    "command": [ "CMD-SHELL", "curl http://localhost:5001/health | python -c 'import sys, json; data = json.load(sys.stdin); assert data[\"scheduler\"][\"status\"] == \"healthy\"; assert data[\"metadatabase\"][\"status\"] == \"healthy\"'" ],
+    "command": [ "CMD-SHELL", "curl http://127.0.0.1:5001/health | python -c 'import sys, json; data = json.load(sys.stdin); assert data[\"scheduler\"][\"status\"] == \"healthy\"; assert data[\"metadatabase\"][\"status\"] == \"healthy\"' || exit 1" ],
     "interval": 10,
     "retries": 2
   },

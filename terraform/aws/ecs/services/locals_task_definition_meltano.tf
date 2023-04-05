@@ -65,6 +65,10 @@ locals {
     github_app_private_key               = var.github_app_private_key
     amplitude_api_key                    = var.amplitude_api_key
     sendgrid_api_key                     = var.sendgrid_api_key
+    firebase_app_id                      = var.firebase_app_id
+    firebase_api_secret                  = var.firebase_api_secret
+    appsflyer_app_id                     = var.appsflyer_app_id
+    appsflyer_dev_key                    = var.appsflyer_dev_key
 
     pg_external_access_host     = var.pg_external_access_host
     pg_external_access_port     = var.pg_external_access_port
@@ -112,7 +116,7 @@ locals {
       essential  = true
       entrypoint = ["/start-scheduler.sh"]
       healthCheck = {
-        "command" : ["CMD-SHELL", "curl -s http://127.0.0.1:8974/health"],
+        "command" : ["CMD-SHELL", "curl http://127.0.0.1:8974/health || exit 1"],
         "interval" : 10,
         "retries" : 2,
         "startPeriod" : 20

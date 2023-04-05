@@ -7,6 +7,7 @@
 
 select profile_id,
        profiles.created_at                 as sign_up_at,
+       email,
        first_name,
        last_name,
        profile_scoring_settings.created_at as questionaire_completed_at,
@@ -25,7 +26,7 @@ select profile_id,
            portfolio_gains.updated_at,
            last_deposit_at)                as updated_at
 from (
-         select id as profile_id, first_name, last_name, created_at
+         select id as profile_id, email, first_name, last_name, created_at
          from {{ source('app', 'profiles') }}
      ) profiles
          left join {{ source('app', 'profile_scoring_settings') }} using (profile_id)

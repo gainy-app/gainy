@@ -79,6 +79,10 @@ variable "source_code_branch" {}
 variable "source_code_branch_name" {}
 variable "amplitude_api_key" {}
 variable "sendgrid_api_key" {}
+variable "firebase_app_id" {}
+variable "firebase_api_secret" {}
+variable "appsflyer_app_id" {}
+variable "appsflyer_dev_key" {}
 variable "billing_value_fee_multiplier" {}
 variable "billing_min_annual_fee" {}
 variable "billing_enabled_profiles" {}

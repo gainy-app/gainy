@@ -83,6 +83,10 @@ variable "twilio_messaging_service_id" {}
 variable "twilio_account_sid" {}
 variable "twilio_auth_token" {}
 variable "sendgrid_api_key" {}
+variable "firebase_app_id" {}
+variable "firebase_api_secret" {}
+variable "appsflyer_app_id" {}
+variable "appsflyer_dev_key" {}
 
 variable "source_code_branch" {}
 variable "source_code_branch_name" {}

@@ -4,6 +4,7 @@ with holdings as
                  holding_id_v2
                  )  profile_holdings_normalized_all.profile_id,
                     holding_id_v2,
+                    holding_group_id,
                     plaid_access_token_id,
                     profile_holdings_normalized_all.ticker_symbol,
                     profile_holdings_normalized_all.collection_id,
@@ -20,15 +21,6 @@ with holdings as
              where profile_id = %(profile_id)s
                    {where_clause}
          ),
-     portfolio_holding_gains as
-         (
-             select holding_id_v2,
-                    sum(actual_value)                                            as actual_value,
-                    sum(portfolio_holding_gains.relative_gain_1d * actual_value) as relative_daily_change,
-                    sum(absolute_gain_1d)                                        as absolute_daily_change
-             from portfolio_holding_gains
-             group by holding_id_v2
-     ),
      portfolio_security_types as
          (
              select holdings.profile_id,
@@ -36,15 +28,22 @@ with holdings as
                     sum(coalesce(case
                         when security_type = 'Cash'
                             then pending_cash
-                        end, 0) + actual_value)                        as weight,
-                    sum(portfolio_holding_gains.relative_daily_change) as relative_daily_change,
-                    sum(portfolio_holding_gains.absolute_daily_change) as absolute_daily_change,
+                        end, 0) +
+                        portfolio_holding_gains.actual_value)       as weight,
+                    sum(portfolio_holding_group_gains.relative_gain_1d *
+                        portfolio_holding_gains.actual_value /
+                        portfolio_holding_group_gains.actual_value) as relative_daily_change,
+                    sum(portfolio_holding_group_gains.absolute_gain_1d *
+                        portfolio_holding_gains.actual_value /
+                        portfolio_holding_group_gains.actual_value) as absolute_daily_change,
                     sum(coalesce(case
-                        when security_type = 'Cash'
-                            then pending_cash
-                        end, 0) + actual_value)                        as absolute_value
+                                     when security_type = 'Cash'
+                                         then pending_cash
+                                     end, 0) +
+                        portfolio_holding_gains.actual_value)       as absolute_value
              from holdings
-                      join portfolio_holding_gains using (holding_id_v2)
+                      join portfolio_holding_gains using (profile_id, holding_id_v2)
+                      left join portfolio_holding_group_gains using (profile_id, holding_group_id)
                       left join trading_profile_status using (profile_id)
              group by holdings.profile_id, holdings.security_type
          ),
@@ -56,12 +55,12 @@ with holdings as
              group by profile_id
      )
 select portfolio_security_types.profile_id,
-       weight / weight_sum                             as weight,
-       'security_type'                                 as entity_type,
-       security_type                                   as entity_id,
-       security_type                                   as entity_name,
-       coalesce(absolute_daily_change, 0)              as absolute_daily_change,
-       coalesce(relative_daily_change / weight_sum, 0) as relative_daily_change,
+       weight / weight_sum                as weight,
+       'security_type'                    as entity_type,
+       security_type                      as entity_id,
+       security_type                      as entity_name,
+       coalesce(absolute_daily_change, 0) as absolute_daily_change,
+       coalesce(relative_daily_change, 0) as relative_daily_change,
        absolute_value
 from portfolio_security_types
          join portfolio_security_types_weight_sum using (profile_id)
