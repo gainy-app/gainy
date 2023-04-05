@@ -476,6 +476,10 @@ models:
         tests:
           - type:
               type: 'boolean'
+      - name: ms_enabled
+        tests:
+          - type:
+              type: 'boolean'
       - name: updated_at
         tests:
           - type:
