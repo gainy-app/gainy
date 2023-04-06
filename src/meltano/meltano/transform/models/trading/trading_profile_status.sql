@@ -34,7 +34,10 @@ select profile_id,
        pending_orders_sum,
        coalesce(withdrawable_cash, 0)::double precision                 as withdrawable_cash,
        coalesce(buying_power, 0)::double precision -
-       coalesce(pending_fees, 0)::double precision                      as buying_power,
+       coalesce(pending_fees, 0)::double precision                      as buying_power_minus_pending_fees,
+       greatest(0,
+                coalesce(buying_power, 0)::double precision -
+                coalesce(pending_fees, 0)::double precision)            as buying_power,
        coalesce(pending_fees, 0)::double precision                      as pending_fees,
        greatest(kyc_status.created_at,
            trading_funding_accounts.updated_at,
