@@ -379,9 +379,10 @@
     },
     "ticker_metrics": {
       "metadata": {
-        "table-key-properties": [
+        "view-key-properties": [
           "symbol"
-        ]
+        ],
+        "is-view": true
       }
     },
     "ticker_options": {
@@ -395,9 +396,10 @@
     },
     "ticker_realtime_metrics": {
       "metadata": {
-        "table-key-properties": [
+        "view-key-properties": [
           "symbol"
-        ]
+        ],
+        "is-view": true
       }
     },
     "ticker_risk_scores": {
