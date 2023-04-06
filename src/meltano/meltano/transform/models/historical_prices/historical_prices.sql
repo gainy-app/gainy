@@ -100,7 +100,7 @@ raw_historical_prices as materialized
 polygon_crypto_tickers as
     (
         select symbol
-        from {{ ref('tickers') }}
+        from {{ ref('base_tickers') }}
                  left join raw_historical_prices using (symbol)
         where raw_historical_prices.symbol is null
     ),
