@@ -54,7 +54,6 @@ sources:
     description: Mobile App data, managed by hasura
     schema: app
     tables:
-      - name: analytics_profiles
       - name: drivewealth_accounts
       - name: drivewealth_accounts_money
       - name: drivewealth_accounts_positions
@@ -474,6 +473,10 @@ models:
           - type:
               type: 'text'
       - name: is_trading_enabled
+        tests:
+          - type:
+              type: 'boolean'
+      - name: ms_enabled
         tests:
           - type:
               type: 'boolean'
@@ -953,66 +956,6 @@ models:
           - type:
               type: 'double precision'
       - name: value_to_portfolio_value
-        tests:
-          - type:
-              type: 'double precision'
-      - name: relative_gain_1d
-        tests:
-          - type:
-              type: 'double precision'
-      - name: relative_gain_1w
-        tests:
-          - type:
-              type: 'double precision'
-      - name: relative_gain_1m
-        tests:
-          - type:
-              type: 'double precision'
-      - name: relative_gain_3m
-        tests:
-          - type:
-              type: 'double precision'
-      - name: relative_gain_1y
-        tests:
-          - type:
-              type: 'double precision'
-      - name: relative_gain_5y
-        tests:
-          - type:
-              type: 'double precision'
-      - name: relative_gain_total
-        tests:
-          - type:
-              type: 'double precision'
-      - name: absolute_gain_1d
-        tests:
-          - type:
-              type: 'double precision'
-      - name: absolute_gain_1w
-        tests:
-          - type:
-              type: 'double precision'
-      - name: absolute_gain_1m
-        tests:
-          - type:
-              type: 'double precision'
-      - name: absolute_gain_3m
-        tests:
-          - type:
-              type: 'double precision'
-      - name: absolute_gain_1y
-        tests:
-          - type:
-              type: 'double precision'
-      - name: absolute_gain_5y
-        tests:
-          - type:
-              type: 'double precision'
-      - name: absolute_gain_total
-        tests:
-          - type:
-              type: 'double precision'
-      - name: ltt_quantity_total
         tests:
           - type:
               type: 'double precision'
@@ -2593,7 +2536,7 @@ models:
       - name: symbol
         tests:
           - type:
-              type: 'character varying'
+              type: 'text'
       - name: value_to_portfolio_value
         tests:
           - type:
@@ -2669,7 +2612,7 @@ models:
           - type:
               type: 'boolean'
 
-  - name: analytics_profile_attributes
+  - name: analytics_profile_properties
     columns:
       - name: profile_id
         tests:
@@ -2683,6 +2626,10 @@ models:
         tests:
           - type:
               type: 'integer'
+      - name: user_type
+        tests:
+          - type:
+              type: 'text'
       - name: user_email
         tests:
           - type:
@@ -2716,6 +2663,14 @@ models:
           - type:
               type: 'json'
       - name: product_type_purchased
+        tests:
+          - type:
+              type: 'json'
+      - name: ttf_purchased
+        tests:
+          - type:
+              type: 'json'
+      - name: ticker_purchased
         tests:
           - type:
               type: 'json'

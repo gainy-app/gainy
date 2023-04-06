@@ -189,8 +189,10 @@ with profile_stats as materialized
                                   left join (
                                                 select holding_id_v2, max(date) as date
                                                 from {{ ref('drivewealth_portfolio_historical_holdings') }}
+                                                where not is_premarket
                                                 group by holding_id_v2
                                             ) is_last_date using (holding_id_v2, date)
+                         where not is_premarket
                          group by profile_id, date
                      ),
                  data_1d as

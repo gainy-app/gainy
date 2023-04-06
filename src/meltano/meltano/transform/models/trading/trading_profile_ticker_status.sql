@@ -5,15 +5,14 @@
 }}
 
 
-select profile_holdings_normalized_dynamic.profile_id,
-       profile_holdings_normalized_dynamic.symbol,
+select profile_holding_groups.profile_id,
+       profile_holding_groups.symbol,
        value_to_portfolio_value,
        actual_value,
        relative_gain_1d,
        absolute_gain_1d,
        relative_gain_total,
        absolute_gain_total
-from {{ ref('profile_holdings_normalized_dynamic') }}
-         join {{ ref('portfolio_holding_gains') }} using (holding_id_v2)
-where profile_holdings_normalized_dynamic.is_app_trading
-  and profile_holdings_normalized_dynamic.collection_id is null
+from {{ ref('profile_holding_groups') }}
+         join {{ ref('portfolio_holding_group_gains') }} on portfolio_holding_group_gains.holding_group_id = profile_holding_groups.id
+where profile_holding_groups.collection_id is null

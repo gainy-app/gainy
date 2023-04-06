@@ -40,6 +40,6 @@ select symbol,
        (technicals ->> 'ShortRatio')::float            as short_ratio,
        (technicals ->> 'ShortPercent')::float          as short_percent
 from {{ source('eod', 'eod_fundamentals') }}
-         JOIN {{ ref('tickers') }} ON tickers.symbol = eod_fundamentals.code
+         JOIN {{ ref('base_tickers') }} ON base_tickers.symbol = eod_fundamentals.code
          LEFT JOIN downside_deviation using (code)
-where tickers.type != 'crypto'
+where base_tickers.type != 'crypto'

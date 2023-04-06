@@ -56,6 +56,10 @@ module "lambda" {
   slack_bot_token        = var.slack_bot_token
   amplitude_api_key      = var.amplitude_api_key
   rebrandly_api_key      = var.rebrandly_api_key
+  firebase_app_id        = var.firebase_app_id
+  firebase_api_secret    = var.firebase_api_secret
+  appsflyer_app_id       = var.appsflyer_app_id
+  appsflyer_dev_key      = var.appsflyer_dev_key
 
   base_image_registry_address = var.base_image_registry_address
   base_image_version          = var.base_image_version
@@ -179,6 +183,10 @@ module "ecs-service" {
   github_app_private_key     = var.github_app_private_key
   amplitude_api_key          = var.amplitude_api_key
   sendgrid_api_key           = var.sendgrid_api_key
+  firebase_app_id            = var.firebase_app_id
+  firebase_api_secret        = var.firebase_api_secret
+  appsflyer_app_id           = var.appsflyer_app_id
+  appsflyer_dev_key          = var.appsflyer_dev_key
 
   aws_lambda_api_gateway_endpoint = "${module.lambda.aws_apigatewayv2_api_endpoint}/${local.deployment_key}"
   hasura_enable_console           = "true"

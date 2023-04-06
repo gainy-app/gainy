@@ -139,10 +139,14 @@ with portfolio_statuses as
              -- realtime schedule
              select profile_id,
                     holding_id_v2,
-                    symbol,
-                    date,
-                    coalesce(relative_daily_change, 0)     as relative_daily_gain,
-                    ticker_realtime_metrics.symbol is null as is_premarket
+                    min_holding_date.symbol,
+                    t.date,
+                    coalesce(ticker_realtime_metrics.relative_daily_change, 0) as relative_daily_gain,
+                    (case
+                         when ticker_realtime_metrics is null
+                             then spy_realtime_metrics.symbol is null
+                         else ticker_realtime_metrics.date < t.date
+                        end)                                                   as is_premarket
              from min_holding_date
                       join (
                                select min(date) as date
@@ -154,7 +158,9 @@ with portfolio_statuses as
                                                 where symbol = 'SPY'
                                             )
                            ) t on true
-                      left join {{ ref('ticker_realtime_metrics') }} using (symbol, date)
+                      left join {{ ref('ticker_realtime_metrics') }} using (symbol)
+                      left join {{ ref('ticker_realtime_metrics') }} spy_realtime_metrics
+                                on spy_realtime_metrics.symbol = 'SPY' and spy_realtime_metrics.date = t.date
      ),
      data_extended0 as
          (
@@ -199,7 +205,27 @@ with portfolio_statuses as
                                  (last_value_ignorenulls(data.value / cumulative_daily_relative_gain) over wnd)
                         end as value,
                     data.updated_at
-             from data_extended1 data
+             from (
+                      select data.profile_id,
+                             data.holding_id_v2,
+                             data.portfolio_status_id,
+                             data.collection_id,
+                             data.symbol,
+                             data.date,
+                             data.relative_daily_gain,
+                             is_premarket,
+                             cumulative_daily_relative_gain,
+                             case
+                                 when data.value is not null
+                                     then data.value
+                                 -- if value is null and some portfolio_statuses exist in this day - then we assume there is no value
+                                 when portfolio_statuses.profile_id is not null
+                                     then 0
+                                 end as value,
+                             data.updated_at
+                      from data_extended1 data
+                               left join portfolio_statuses using (profile_id, date)
+                  ) data
                       left join portfolio_statuses using (profile_id, date)
                  window wnd as (partition by holding_id_v2 order by date)
      ),
@@ -383,6 +409,7 @@ from data_extended
 {% if is_incremental() %}
          left join {{ this }} old_data using (profile_id, holding_id_v2, symbol, date)
 where (old_data.profile_id is null
+   or data_extended.is_premarket != old_data.is_premarket
    or abs(data_extended.relative_daily_gain - old_data.relative_daily_gain) > 1e-3
    or abs(data_extended.cash_flow - old_data.cash_flow) > 1e-3
    or abs(data_extended.value - old_data.value) > 1e-3)

@@ -81,6 +81,10 @@ on:
       SLACK_BOT_TOKEN: { required: false }
       AMPLITUDE_API_KEY: { required: true }
       REBRANDLY_API_KEY: { required: true }
+      FIREBASE_APP_ID: { required: true }
+      FIREBASE_API_SECRET: { required: true }
+      APPSFLYER_APP_ID: { required: true }
+      APPSFLYER_DEV_KEY: { required: true }
       BILLING_VALUE_FEE_MULTIPLIER: { required: true }
       BILLING_MIN_ANNUAL_FEE: { required: true }
       BILLING_ENABLED_PROFILES: { required: false }
@@ -152,6 +156,10 @@ env:
   TF_VAR_slack_bot_token: ${{ secrets.SLACK_BOT_TOKEN }}
   TF_VAR_amplitude_api_key: ${{ secrets.AMPLITUDE_API_KEY }}
   TF_VAR_rebrandly_api_key: ${{ secrets.REBRANDLY_API_KEY }}
+  TF_VAR_firebase_app_id: ${{ secrets.FIREBASE_APP_ID }}
+  TF_VAR_firebase_api_secret: ${{ secrets.FIREBASE_API_SECRET }}
+  TF_VAR_appsflyer_app_id: ${{ secrets.APPSFLYER_APP_ID }}
+  TF_VAR_appsflyer_dev_key: ${{ secrets.APPSFLYER_DEV_KEY }}
   TF_VAR_billing_value_fee_multiplier: ${{ secrets.BILLING_VALUE_FEE_MULTIPLIER }}
   TF_VAR_billing_min_annual_fee: ${{ secrets.BILLING_MIN_ANNUAL_FEE }}
   TF_VAR_billing_enabled_profiles: ${{ secrets.BILLING_ENABLED_PROFILES }}
