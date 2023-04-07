@@ -58,13 +58,13 @@ with data as
                     json_build_object('ttf', true,
                                       'buy', target_amount_delta > 0,
                                       'sell', target_amount_delta < 0,
-                                      'is_manual', source = 'MANUAL',
                                       'pending', status in ('PENDING', 'PENDING_EXECUTION') or status is null,
                                       'cancelled', coalesce(status, '') = 'CANCELLED',
                                       'error', coalesce(status, '') = 'FAILED'
                         )                                           as tags
              from {{ source('app', 'trading_collection_versions') }}
                       join {{ ref('collections') }} on collections.id = trading_collection_versions.collection_id
+             where source = 'MANUAL'
 
              union all
 
@@ -81,13 +81,13 @@ with data as
                     json_build_object('ticker', true,
                                       'buy', target_amount_delta > 0,
                                       'sell', target_amount_delta < 0,
-                                      'is_manual', source = 'MANUAL',
                                       'pending', status in ('PENDING', 'PENDING_EXECUTION') or status is null,
                                       'cancelled', coalesce(status, '') = 'CANCELLED',
                                       'error', coalesce(status, '') = 'FAILED'
                         )                              as tags
              from {{ source('app', 'trading_orders') }}
                       left join {{ ref('base_tickers') }} on base_tickers.symbol = trading_orders.symbol
+             where source = 'MANUAL'
          )
 select data.profile_id,
        data.uniq_id,
