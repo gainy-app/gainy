@@ -56,6 +56,7 @@
     { "name": "GITHUB_APP_PRIVATE_KEY",                "value": ${jsonencode(github_app_private_key)} },
     { "name": "AMPLITUDE_API_KEY",                     "value": "${amplitude_api_key}" },
     { "name": "SENDGRID_API_KEY",                      "value": "${sendgrid_api_key}" },
+    { "name": "SENDGRID_FROM_EMAIL",                   "value": "${sendgrid_from_email}" },
     { "name": "FIREBASE_APP_ID",                       "value": "${firebase_app_id}" },
     { "name": "FIREBASE_API_SECRET",                   "value": "${firebase_api_secret}" },
     { "name": "APPSFLYER_APP_ID",                      "value": "${appsflyer_app_id}" },

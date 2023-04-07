@@ -107,6 +107,7 @@ module "lambda" {
   twilio_account_sid             = var.twilio_account_sid
   twilio_auth_token              = var.twilio_auth_token
   sendgrid_api_key               = var.sendgrid_api_key
+  sendgrid_from_email            = var.sendgrid_from_email
 
   billing_enabled_profiles = var.billing_enabled_profiles
   billing_min_date         = var.billing_min_date
@@ -183,6 +184,7 @@ module "ecs-service" {
   github_app_private_key     = var.github_app_private_key
   amplitude_api_key          = var.amplitude_api_key
   sendgrid_api_key           = var.sendgrid_api_key
+  sendgrid_from_email        = var.sendgrid_from_email
   firebase_app_id            = var.firebase_app_id
   firebase_api_secret        = var.firebase_api_secret
   appsflyer_app_id           = var.appsflyer_app_id
