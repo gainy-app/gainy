@@ -58,7 +58,7 @@ from (
                   left join stats using (holding_id_v2)
 {% endif %}
 
-         where week_trading_sessions_static.index != 0
+         where week_trading_sessions_static.index > 0
 
 {% if var('realtime') %}
            and (stats.holding_id_v2 is null
