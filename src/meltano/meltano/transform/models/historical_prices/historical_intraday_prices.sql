@@ -39,6 +39,8 @@ with polygon_symbols as
                                where polygon_symbols.symbol is null
 {% if var('realtime') %}
                                  and week_trading_sessions_static.index = 0
+{% else %}
+                                 and week_trading_sessions_static.index >= 0
 {% endif %}
                            ) t using (symbol)
              where time >= open_at
@@ -61,6 +63,8 @@ with polygon_symbols as
                and t < week_trading_sessions_static.close_at_t
 {% if var('realtime') %}
                and week_trading_sessions_static.index = 0
+{% else %}
+               and week_trading_sessions_static.index >= 0
 {% endif %}
          ),
      raw_intraday_prices as materialized
@@ -156,6 +160,7 @@ with polygon_symbols as
              from {{ ref('historical_prices_aggregated_1d') }}
                       join {{ ref('week_trading_sessions_static') }} using (symbol, date)
              where close_at < now()
+               and week_trading_sessions_static.index >= 0
              {% endif %}
         )
 

@@ -527,9 +527,10 @@ class DriveWealthProvider(DriveWealthProviderKYC,
 
         invoice: Invoice = self.repository.find_one(
             Invoice, {"id": payment_transaction.invoice_id})
+        prev_invoice_status = invoice.status
         invoice.on_new_transaction(payment_transaction)
         self.repository.persist(invoice)
 
-        if invoice.status == InvoiceStatus.PAID:
+        if invoice.status == InvoiceStatus.PAID and prev_invoice_status != InvoiceStatus.PAID:
             self.analytics_service.on_commission_withdrawn(
                 invoice.profile_id, float(invoice.amount))

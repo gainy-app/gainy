@@ -51,6 +51,7 @@ with
 {% else %}
              where week_trading_sessions_static.date > now() - interval '1 week'
 {% endif %}
+               and week_trading_sessions_static.index >= 0
          ),
      expanded_intraday_prices as
          (
@@ -64,6 +65,7 @@ with
 {% else %}
              where historical_intraday_prices.date > now() - interval '1 week'
 {% endif %}
+               and week_trading_sessions_static.index >= 0
          ),
      combined_intraday_prices as
          (
@@ -239,6 +241,7 @@ from (
                             on old_data.symbol = t2.symbol
                                 and old_data.datetime = t2.datetime
 {% endif %}
+         where week_trading_sessions_static.index >= 0
                   window wnd as (partition by t2.symbol order by t2.datetime rows between 1 preceding and current row)
     ) t3
 where adjusted_close is not null

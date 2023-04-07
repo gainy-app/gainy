@@ -12,10 +12,26 @@ with trading_sessions as
                     country_name,
                     open_at,
                     close_at,
-                    row_number() over (partition by exchange_name, country_name order by date desc) - 1 as index,
-                    null                                                                                as type
+                    row_number() over (partition by exchange_name, country_name order by date desc) - 1 as index
              from {{ ref('exchange_schedule') }}
              where open_at between now() - interval '2 weeks' and now()
+
+             union all
+
+             (
+                 select distinct on (
+                     exchange_name,
+                     country_name
+                     ) date,
+                       exchange_name,
+                       country_name,
+                       open_at,
+                       close_at,
+                       -1 as index
+                 from {{ ref('exchange_schedule') }}
+                 where open_at > now()
+                 order by exchange_name, country_name, date
+             )
          ),
      symbols as
          (

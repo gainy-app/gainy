@@ -206,6 +206,7 @@ locals {
     TWILIO_ACCOUNT_SID             = var.twilio_account_sid
     TWILIO_AUTH_TOKEN              = var.twilio_auth_token
     SENDGRID_API_KEY               = var.sendgrid_api_key
+    SENDGRID_FROM_EMAIL            = var.sendgrid_from_email
 
     SLACK_BOT_TOKEN    = var.slack_bot_token
     AWS_EVENTS_SQS_ARN = var.aws_events_sqs_arn

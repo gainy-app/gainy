@@ -329,3 +329,6 @@ variable "sendgrid_api_key" {
   type      = string
   sensitive = true
 }
+variable "sendgrid_from_email" {
+  type = string
+}
