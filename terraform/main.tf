@@ -183,10 +183,10 @@ module "aws" {
   sendgrid_api_key               = var.sendgrid_api_key
   sendgrid_from_email            = var.sendgrid_from_email
 
-  billing_value_fee_multiplier = var.billing_value_fee_multiplier
-  billing_min_annual_fee       = var.billing_min_annual_fee
-  billing_enabled_profiles     = var.billing_enabled_profiles
-  billing_min_date             = var.billing_min_date
+  billing_value_fee_multiplier      = var.billing_value_fee_multiplier
+  billing_min_annual_fee            = var.billing_min_annual_fee
+  billing_autosell_enabled_profiles = var.billing_autosell_enabled_profiles
+  billing_min_date                  = var.billing_min_date
 }
 
 module "datadog" {

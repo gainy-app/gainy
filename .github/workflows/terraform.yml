@@ -89,6 +89,7 @@ on:
       BILLING_VALUE_FEE_MULTIPLIER: { required: true }
       BILLING_MIN_ANNUAL_FEE: { required: true }
       BILLING_ENABLED_PROFILES: { required: false }
+      BILLING_AUTOSELL_ENABLED_PROFILES: { required: false }
       BILLING_MIN_DATE: { required: false }
 
 env:
@@ -165,6 +166,7 @@ env:
   TF_VAR_billing_value_fee_multiplier: ${{ secrets.BILLING_VALUE_FEE_MULTIPLIER }}
   TF_VAR_billing_min_annual_fee: ${{ secrets.BILLING_MIN_ANNUAL_FEE }}
   TF_VAR_billing_enabled_profiles: ${{ secrets.BILLING_ENABLED_PROFILES }}
+  TF_VAR_billing_autosell_enabled_profiles: ${{ secrets.BILLING_AUTOSELL_ENABLED_PROFILES }}
   TF_VAR_billing_min_date: ${{ secrets.BILLING_MIN_DATE }}
 
 jobs:

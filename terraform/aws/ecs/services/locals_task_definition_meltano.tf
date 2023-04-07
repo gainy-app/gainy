@@ -103,10 +103,11 @@ locals {
     mlflow_artifact_location = "s3://${var.mlflow_artifact_bucket}"
     pg_mlflow_schema         = "mlflow"
 
-    billing_value_fee_multiplier = var.billing_value_fee_multiplier
-    billing_min_annual_fee       = var.billing_min_annual_fee
-    billing_enabled_profiles     = var.billing_enabled_profiles
-    billing_min_date             = var.billing_min_date
+    billing_value_fee_multiplier      = var.billing_value_fee_multiplier
+    billing_min_annual_fee            = var.billing_min_annual_fee
+    billing_enabled_profiles          = var.billing_enabled_profiles
+    billing_autosell_enabled_profiles = var.billing_autosell_enabled_profiles
+    billing_min_date                  = var.billing_min_date
   })
 
   airflow_task_description = jsondecode(templatefile("${path.module}/task_definitions/meltano-airflow-ui.json", local.meltano_default_params))
