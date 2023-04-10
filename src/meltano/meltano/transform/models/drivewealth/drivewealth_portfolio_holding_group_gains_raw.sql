@@ -30,12 +30,13 @@ with dphh_groupped as
                             then null
                         else min(last_selloff_date)
                         end as last_selloff_date
-             from (
-                      select holding_group_id, holding_id_v2, max(date) as last_selloff_date
-                      from dphh_groupped
-                      where value < 1e-3
-                      group by holding_group_id, holding_id_v2
-                  ) t
+             from (select holding_group_id, holding_id_v2 from dphh_groupped group by holding_group_id, holding_id_v2) t1
+                      left join (
+                                    select holding_group_id, holding_id_v2, max(date) as last_selloff_date
+                                    from dphh_groupped
+                                    where value < 1e-3
+                                    group by holding_group_id, holding_id_v2
+                                ) t2 using (holding_group_id, holding_id_v2)
                       join {{ ref('drivewealth_holdings') }} using (holding_id_v2)
              group by holding_group_id
      ),
