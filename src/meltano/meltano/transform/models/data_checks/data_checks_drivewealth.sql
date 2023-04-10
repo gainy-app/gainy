@@ -165,7 +165,7 @@ union all
            'dw_wrong_holding_group_gain'                                                       as code,
            'realtime'                                                                          as period,
            'Profile ' || profile_id ||
-           ' has wrong total portfolio gain, diff: ' ||
+           ' has wrong holding group gain, diff: ' ||
            abs(executed_amount + coalesce(absolute_gain_total, 0) - coalesce(actual_value, 0)) as message,
            now()                                                                               as updated_at
     from order_stats
