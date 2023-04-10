@@ -23,6 +23,7 @@ with chart_1w as
                     exp(sum(ln(coalesce(relative_daily_gain, 0) + 1 + 1e-10))) - 1 as relative_gain,
                     max(updated_at) as updated_at
              from {{ ref('drivewealth_portfolio_historical_holdings') }}
+             where not is_premarket
              group by profile_id, holding_id_v2, date_week
      ),
 
@@ -38,6 +39,7 @@ with chart_1w as
                     exp(sum(ln(coalesce(relative_daily_gain, 0) + 1 + 1e-10))) - 1 as relative_gain,
                     max(updated_at) as updated_at
              from {{ ref('drivewealth_portfolio_historical_holdings') }}
+             where not is_premarket
              group by profile_id, holding_id_v2, date_month
      ),
 
@@ -104,6 +106,7 @@ with chart_1w as
                     data.relative_daily_gain as relative_gain,
                     data.updated_at
              from {{ ref('drivewealth_portfolio_historical_holdings') }} data
+             where not is_premarket
 
              union all
 
