@@ -55,7 +55,7 @@ union all
           date,
           datetime,
           datetime + interval '1 day' as close_datetime,
-          '3m'::varchar as period,
+          '1m'::varchar as period,
           open,
           high,
           low,
@@ -250,7 +250,7 @@ union all
                              adjusted_close,
                              volume,
                              updated_at,
-                             0              as priority
+                             1              as priority
                       from {{ ref('historical_prices_aggregated_1w') }}
                       where historical_prices_aggregated_1w.datetime >= now()::date - interval '5 year'
 
@@ -266,10 +266,10 @@ union all
                              actual_price                        as adjusted_close,
                              null                                as volume,
                              updated_at,
-                             1                                   as priority
+                             0                                   as priority
                       from {{ ref('ticker_realtime_metrics') }}
                   ) t
-             order by symbol, date, priority desc
+             order by symbol, date, priority
          ) t
              join (
                       with symbols as
@@ -327,7 +327,7 @@ union all
                     adjusted_close,
                     volume,
                     updated_at,
-                    0              as priority
+                    1              as priority
              from {{ ref('historical_prices_aggregated_1m') }}
 
              union all
@@ -342,9 +342,9 @@ union all
                     actual_price                         as adjusted_close,
                     null                                 as volume,
                     updated_at,
-                    1                                    as priority
+                    0                                    as priority
              from {{ ref('ticker_realtime_metrics') }}
          ) t
              join symbols using (symbol)
-    order by symbol, date, priority desc
+    order by symbol, date, priority
 )
