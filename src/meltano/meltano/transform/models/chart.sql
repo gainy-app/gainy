@@ -49,39 +49,101 @@ union all
 union all
 
 (
-    select historical_prices_aggregated_1d.symbol,
-           historical_prices_aggregated_1d.datetime::date as date,
-           historical_prices_aggregated_1d.datetime,
-           historical_prices_aggregated_1d.datetime + interval '1 day' as close_datetime,
-           '1m'::varchar as period,
-           historical_prices_aggregated_1d.open,
-           historical_prices_aggregated_1d.high,
-           historical_prices_aggregated_1d.low,
-           historical_prices_aggregated_1d.close,
-           historical_prices_aggregated_1d.adjusted_close,
-           historical_prices_aggregated_1d.volume,
-           historical_prices_aggregated_1d.updated_at
-    from {{ ref('historical_prices_aggregated_1d') }}
-    where historical_prices_aggregated_1d.datetime >= now()::date - interval '1 month'
+    select distinct on (
+        symbol, date
+        ) symbol,
+          date,
+          datetime,
+          datetime + interval '1 day' as close_datetime,
+          '3m'::varchar as period,
+          open,
+          high,
+          low,
+          close,
+          adjusted_close,
+          volume,
+          updated_at
+    from (
+             select symbol,
+                    date,
+                    datetime,
+                    open,
+                    high,
+                    low,
+                    close,
+                    adjusted_close,
+                    volume,
+                    updated_at,
+                    0 as priority
+             from {{ ref('historical_prices_aggregated_1d') }}
+             where datetime >= now()::date - interval '1 month'
+
+             union all
+
+             select symbol,
+                    date::date,
+                    date::timestamp as datetime,
+                    null            as open,
+                    null            as high,
+                    null            as low,
+                    null            as close,
+                    actual_price    as adjusted_close,
+                    null            as volume,
+                    updated_at,
+                    1               as priority
+             from {{ ref('ticker_realtime_metrics') }}
+         ) t
+    order by symbol, date, priority
 )
 
 union all
 
 (
-    select historical_prices_aggregated_1d.symbol,
-           historical_prices_aggregated_1d.datetime::date as date,
-           historical_prices_aggregated_1d.datetime,
-           historical_prices_aggregated_1d.datetime + interval '1 day' as close_datetime,
-           '3m'::varchar as period,
-           historical_prices_aggregated_1d.open,
-           historical_prices_aggregated_1d.high,
-           historical_prices_aggregated_1d.low,
-           historical_prices_aggregated_1d.close,
-           historical_prices_aggregated_1d.adjusted_close,
-           historical_prices_aggregated_1d.volume,
-           historical_prices_aggregated_1d.updated_at
-    from {{ ref('historical_prices_aggregated_1d') }}
-    where historical_prices_aggregated_1d.datetime >= now()::date - interval '3 month'
+    select distinct on (
+        symbol, date
+        ) symbol,
+          date,
+          datetime,
+          datetime + interval '1 day' as close_datetime,
+          '3m'::varchar as period,
+          open,
+          high,
+          low,
+          close,
+          adjusted_close,
+          volume,
+          updated_at
+    from (
+             select symbol,
+                    date,
+                    datetime,
+                    open,
+                    high,
+                    low,
+                    close,
+                    adjusted_close,
+                    volume,
+                    updated_at,
+                    0 as priority
+             from {{ ref('historical_prices_aggregated_1d') }}
+             where datetime >= now()::date - interval '3 month'
+
+             union all
+
+             select symbol,
+                    date::date,
+                    date::timestamp as datetime,
+                    null            as open,
+                    null            as high,
+                    null            as low,
+                    null            as close,
+                    actual_price    as adjusted_close,
+                    null            as volume,
+                    updated_at,
+                    1               as priority
+             from {{ ref('ticker_realtime_metrics') }}
+         ) t
+    order by symbol, date, priority
 )
 
 union all
@@ -115,7 +177,7 @@ union all
                              volume,
                              updated_at,
                              0 as priority
-                      from historical_prices_aggregated_1d
+                      from {{ ref('historical_prices_aggregated_1d') }}
                       where datetime >= now()::date - interval '1 year'
 
                       union all
@@ -131,15 +193,15 @@ union all
                              null            as volume,
                              updated_at,
                              1               as priority
-                      from ticker_realtime_metrics
+                      from {{ ref('ticker_realtime_metrics') }}
                   ) t
-             order by symbol, date, priority desc
+             order by symbol, date, priority
          ) t
              join (
                       with symbols as
                                (
                                    select symbol
-                                   from historical_prices_aggregated_1d
+                                   from {{ ref('historical_prices_aggregated_1d') }}
                                    group by symbol
                                )
                       select symbol, '1y'::varchar as period
@@ -149,7 +211,7 @@ union all
 
                       select symbol, period::varchar
                       from (
-                               select symbol from historical_prices_aggregated_1w group by symbol having count(*) < 3
+                               select symbol from {{ ref('historical_prices_aggregated_1w') }} group by symbol having count(*) < 3
                            ) t
                                join symbols using (symbol)
                                join (
