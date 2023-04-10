@@ -57,6 +57,7 @@ from (
 {% if var('realtime') %}
                   left join stats using (holding_id_v2)
          where stats.holding_id_v2 is null
+           and week_trading_sessions_static.index >= 0
             or historical_prices_aggregated_3min.datetime > stats.datetime
             or portfolio_holding_chart_1d.updated_at> stats.updated_at
             or historical_prices_aggregated_1d.updated_at> stats.updated_at

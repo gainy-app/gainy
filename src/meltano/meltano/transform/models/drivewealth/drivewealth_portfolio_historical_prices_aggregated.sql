@@ -59,6 +59,7 @@ with chart_1w as
                                                                                  then 'SPY'
                                                                              else data.symbol end
              where data.datetime between week_trading_sessions_static.open_at and week_trading_sessions_static.close_at - interval '1 microsecond'
+               and week_trading_sessions_static.index >= 0
 
              union all
 
@@ -78,6 +79,7 @@ with chart_1w as
                                                                                  then 'SPY'
                                                                              else data.symbol end
              where data.datetime between week_trading_sessions_static.open_at and week_trading_sessions_static.close_at - interval '1 microsecond'
+               and week_trading_sessions_static.index >= 0
 
              union all
 

@@ -160,17 +160,57 @@ union all
 
 -- Abandoned KYC form
 select profile_id,
-       ('kyc_abandoned_' || profile_id)                         as uniq_id,
-       null::timestamp                                          as send_at,
-       null::json                                               as title,
-       null::json                                               as text,
-       null::json                                               as data,
-       false                                                    as is_test,
-       false                                                    as is_push,
-       false                                                    as is_shown_in_app,
-       null                                                     as onesignal_template_id,
-       'on_kyc_form_abandoned'                                  as notification_method,
-       json_build_object('profile_id', profile_id)              as notification_params
+       ('kyc_abandoned_' || profile_id)            as uniq_id,
+       null::timestamp                             as send_at,
+       null::json                                  as title,
+       null::json                                  as text,
+       null::json                                  as data,
+       false                                       as is_test,
+       false                                       as is_push,
+       false                                       as is_shown_in_app,
+       null                                        as onesignal_template_id,
+       'on_kyc_form_abandoned'                     as notification_method,
+       json_build_object('profile_id', profile_id) as notification_params
 from {{ source('app', 'kyc_form') }}
 where status is null
   and kyc_form.updated_at between now() - interval '2 day' and now() - interval '1 day'
+
+union all
+
+-- CTA deposit funds in 1 day after KYC
+select profile_id,
+       ('kyc_passed1_' || profile_id)              as uniq_id,
+       null::timestamp                             as send_at,
+       null::json                                  as title,
+       null::json                                  as text,
+       null::json                                  as data,
+       false                                       as is_test,
+       false                                       as is_push,
+       false                                       as is_shown_in_app,
+       null                                        as onesignal_template_id,
+       'on_kyc_passed1'                            as notification_method,
+       json_build_object('profile_id', profile_id) as notification_params
+from {{ ref('trading_profile_status') }}
+where kyc_done
+  and not deposited_funds
+  and kyc_passed_at between now() - interval '1 week' and now() - interval '1 day'
+
+union all
+
+-- CTA deposit funds in 1 week after KYC
+select profile_id,
+       ('kyc_passed2_' || profile_id)              as uniq_id,
+       null::timestamp                             as send_at,
+       null::json                                  as title,
+       null::json                                  as text,
+       null::json                                  as data,
+       false                                       as is_test,
+       false                                       as is_push,
+       false                                       as is_shown_in_app,
+       null                                        as onesignal_template_id,
+       'on_kyc_passed2'                            as notification_method,
+       json_build_object('profile_id', profile_id) as notification_params
+from {{ ref('trading_profile_status') }}
+where kyc_done
+  and not deposited_funds
+  and kyc_passed_at < now() - interval '1 week'

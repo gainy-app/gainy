@@ -23,6 +23,10 @@ with account_stats as
 select profile_id,
        account_no,
        kyc_status.status is not null and kyc_status.status = 'APPROVED' as kyc_done,
+       case
+           when kyc_status.status is not null and kyc_status.status = 'APPROVED'
+            then kyc_status.created_at
+           end                                                          as kyc_passed_at,
        kyc_status.status                                                as kyc_status,
        kyc_status.message                                               as kyc_message,
        kyc_status.error_messages                                        as kyc_error_messages,

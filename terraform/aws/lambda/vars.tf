@@ -55,6 +55,7 @@ variable "twilio_messaging_service_id" {}
 variable "twilio_account_sid" {}
 variable "twilio_auth_token" {}
 variable "sendgrid_api_key" {}
+variable "sendgrid_from_email" {}
 variable "aws_events_sqs_arn" {}
 variable "slack_bot_token" {}
 variable "amplitude_api_key" {}

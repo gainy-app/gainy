@@ -33,6 +33,7 @@ with data as
                                join {{ ref('profile_holdings_normalized_all') }} using (holding_id_v2)
                                join {{ ref('week_trading_sessions_static') }} using (symbol)
                       where portfolio_holding_chart_3min.datetime between week_trading_sessions_static.open_at and week_trading_sessions_static.close_at - interval '1 microsecond'
+                        and week_trading_sessions_static.index >= 0
                         and not is_app_trading
 
                       union all
@@ -55,6 +56,7 @@ with data as
                                join {{ ref('profile_holdings_normalized_all') }} using (holding_id_v2)
                                join {{ ref('week_trading_sessions_static') }} using (symbol)
                       where portfolio_holding_chart_15min.datetime between week_trading_sessions_static.open_at and week_trading_sessions_static.close_at - interval '1 microsecond'
+                        and week_trading_sessions_static.index >= 0
                         and not is_app_trading
 
                       union all
