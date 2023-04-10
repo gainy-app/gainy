@@ -502,7 +502,9 @@ class DriveWealthProvider(DriveWealthProviderKYC,
             min_created_at = datetime.datetime.now(
                 datetime.timezone.utc) - datetime.timedelta(hours=1)
             if not portfolio_status or portfolio_status.created_at < min_created_at:
-                raise e
+                logger.exception(e)
+                # use invalid portfolio status anyway, what choice do we have?..
+                portfolio_status = e.portfolio_status
 
         portfolio_changed = self.actualize_portfolio(portfolio,
                                                      portfolio_status)
