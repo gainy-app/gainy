@@ -4,7 +4,7 @@
     unique_key = "id",
     tags = ["realtime"],
     post_hook=[
-      pk('profile_id, holding_id_v2, period, datetime'),
+      pk('holding_id_v2, period, datetime'),
       index('id', true),
     ]
   )
@@ -16,7 +16,6 @@ with chart_1w as
              select profile_id,
                     holding_id_v2,
                     date_week,
-                    min(date)       as open_date,
                     max(date)       as close_date,
                     max(value)      as high,
                     min(value)      as low,
@@ -32,7 +31,6 @@ with chart_1w as
              select profile_id,
                     holding_id_v2,
                     date_month,
-                    min(date)       as open_date,
                     max(date)       as close_date,
                     max(value)      as high,
                     min(value)      as low,
@@ -47,14 +45,10 @@ with chart_1w as
          (
              select data.profile_id,
                     data.holding_id_v2,
-                    '3min'     as period,
+                    '3min' as period,
                     data.date,
                     data.datetime,
-                    data.value as open,
-                    data.value as high,
-                    data.value as low,
-                    data.value as close,
-                    data.value as adjusted_close,
+                    data.value,
                     data.relative_gain,
                     data.updated_at
              from {{ ref('drivewealth_portfolio_historical_prices_aggregated_3min') }} data
@@ -71,14 +65,10 @@ with chart_1w as
 
              select data.profile_id,
                     data.holding_id_v2,
-                    '15min'    as period,
+                    '15min' as period,
                     data.date,
                     data.datetime,
-                    data.value as open,
-                    data.value as high,
-                    data.value as low,
-                    data.value as close,
-                    data.value as adjusted_close,
+                    data.value,
                     data.relative_gain,
                     data.updated_at
              from {{ ref('drivewealth_portfolio_historical_prices_aggregated_15min') }} data
@@ -95,14 +85,10 @@ with chart_1w as
 
              select data.profile_id,
                     data.holding_id_v2,
-                    '1d'  as period,
+                    '1d'       as period,
                     data.date,
                     data.date  as datetime,
-                    data.value as open,
-                    data.value as high,
-                    data.value as low,
-                    data.value as close,
-                    data.value as adjusted_close,
+                    data.value,
                     data.relative_daily_gain as relative_gain,
                     data.updated_at
              from {{ ref('drivewealth_portfolio_historical_holdings') }} data
@@ -112,21 +98,13 @@ with chart_1w as
 
              select data.profile_id,
                     data.holding_id_v2,
-                    '1w'            as period,
-                    data.date_week  as date,
-                    data.date_week  as datetime,
-                    dhh_open.value  as open,
-                    data.high,
-                    data.low,
-                    dhh_close.value as close,
-                    dhh_close.value as adjusted_close,
+                    '1w'           as period,
+                    data.date_week as date,
+                    data.date_week as datetime,
+                    dhh_close.value,
                     data.relative_gain,
                     data.updated_at
              from chart_1w data
-                      join {{ ref('drivewealth_portfolio_historical_holdings') }} dhh_open
-                           on dhh_open.profile_id = data.profile_id
-                               and dhh_open.holding_id_v2 = data.holding_id_v2
-                               and dhh_open.date = data.open_date
                       join {{ ref('drivewealth_portfolio_historical_holdings') }} dhh_close
                            on dhh_close.profile_id = data.profile_id
                                and dhh_close.holding_id_v2 = data.holding_id_v2
@@ -139,18 +117,10 @@ with chart_1w as
                     '1m'            as period,
                     data.date_month as date,
                     data.date_month as datetime,
-                    dhh_open.value  as open,
-                    data.high,
-                    data.low,
-                    dhh_close.value as close,
-                    dhh_close.value as adjusted_close,
+                    dhh_close.value,
                     data.relative_gain,
                     data.updated_at
              from chart_1m data
-                      join {{ ref('drivewealth_portfolio_historical_holdings') }} dhh_open
-                           on dhh_open.profile_id = data.profile_id
-                               and dhh_open.holding_id_v2 = data.holding_id_v2
-                               and dhh_open.date = data.open_date
                       join {{ ref('drivewealth_portfolio_historical_holdings') }} dhh_close
                            on dhh_close.profile_id = data.profile_id
                                and dhh_close.holding_id_v2 = data.holding_id_v2
@@ -165,5 +135,5 @@ from data
          left join {{ this }} old_data using (profile_id, holding_id_v2, period, datetime)
 where old_data.profile_id is null
    or abs(data.relative_gain - old_data.relative_gain) > 1e-3
-   or abs(data.adjusted_close - old_data.adjusted_close) > 1e-3
+   or abs(data.value - old_data.value) > 1e-3
 {% endif %}

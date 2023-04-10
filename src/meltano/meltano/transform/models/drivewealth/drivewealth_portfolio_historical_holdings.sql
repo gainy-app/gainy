@@ -173,7 +173,7 @@ with portfolio_statuses as
                     relative_daily_gain,
                     value,
                     is_premarket,
-                    data.updated_at
+                    LAST_VALUE_IGNORENULLS(updated_at) over wnd          as updated_at
              from schedule
                       left join data using (profile_id, holding_id_v2, symbol, date)
              window wnd as (partition by profile_id, holding_id_v2 order by date)
@@ -410,6 +410,7 @@ from data_extended
          left join {{ this }} old_data using (profile_id, holding_id_v2, symbol, date)
 where (old_data.profile_id is null
    or data_extended.is_premarket != old_data.is_premarket
+   or data_extended.updated_at > old_data.updated_at
    or abs(data_extended.relative_daily_gain - old_data.relative_daily_gain) > 1e-3
    or abs(data_extended.cash_flow - old_data.cash_flow) > 1e-3
    or abs(data_extended.value - old_data.value) > 1e-3)

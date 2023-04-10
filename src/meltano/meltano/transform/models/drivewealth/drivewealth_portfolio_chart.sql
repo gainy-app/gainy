@@ -22,11 +22,7 @@ with latest_price_row as materialized
           date,
           datetime,
           '1d'::varchar as period,
-          open,
-          high,
-          low,
-          close,
-          adjusted_close,
+          value,
           relative_gain,
           updated_at
     from (
@@ -34,11 +30,7 @@ with latest_price_row as materialized
                     holding_id_v2,
                     date,
                     datetime,
-                    open,
-                    high,
-                    low,
-                    close,
-                    adjusted_close,
+                    value,
                     relative_gain,
                     updated_at,
                     0 as priority
@@ -53,11 +45,7 @@ with latest_price_row as materialized
                     date_trunc('minute', updated_at) -
                     interval '1 minute' *
                     mod(extract(minutes from updated_at)::int, 3) as datetime,
-                    null                                          as open,
-                    null                                          as high,
-                    null                                          as low,
-                    null                                          as close,
-                    value                                         as adjusted_close,
+                    value,
                     null                                          as relative_gain,
                     updated_at,
                     1                                             as priority
@@ -76,11 +64,7 @@ union all
           date,
           datetime,
           '1w'::varchar as period,
-          open,
-          high,
-          low,
-          close,
-          adjusted_close,
+          value,
           relative_gain,
           updated_at
     from (
@@ -88,11 +72,7 @@ union all
                     holding_id_v2,
                     date,
                     datetime,
-                    open,
-                    high,
-                    low,
-                    close,
-                    adjusted_close,
+                    value,
                     relative_gain,
                     updated_at,
                     0 as priority
@@ -107,11 +87,7 @@ union all
                     date_trunc('minute', updated_at) -
                     interval '1 minute' *
                     mod(extract(minutes from updated_at)::int, 15) as datetime,
-                    null                                           as open,
-                    null                                           as high,
-                    null                                           as low,
-                    null                                           as close,
-                    value                                          as adjusted_close,
+                    value,
                     null                                           as relative_gain,
                     updated_at,
                     1                                              as priority
@@ -127,11 +103,7 @@ select drivewealth_portfolio_historical_prices_aggregated.profile_id,
        drivewealth_portfolio_historical_prices_aggregated.datetime::date as date,
        drivewealth_portfolio_historical_prices_aggregated.datetime,
        '1m'::varchar as period,
-       drivewealth_portfolio_historical_prices_aggregated.open,
-       drivewealth_portfolio_historical_prices_aggregated.high,
-       drivewealth_portfolio_historical_prices_aggregated.low,
-       drivewealth_portfolio_historical_prices_aggregated.close,
-       drivewealth_portfolio_historical_prices_aggregated.adjusted_close,
+       drivewealth_portfolio_historical_prices_aggregated.value,
        drivewealth_portfolio_historical_prices_aggregated.relative_gain,
        drivewealth_portfolio_historical_prices_aggregated.updated_at
 from {{ ref('drivewealth_portfolio_historical_prices_aggregated') }}
@@ -145,11 +117,7 @@ select drivewealth_portfolio_historical_prices_aggregated.profile_id,
        drivewealth_portfolio_historical_prices_aggregated.datetime::date as date,
        drivewealth_portfolio_historical_prices_aggregated.datetime,
        '3m'::varchar as period,
-       drivewealth_portfolio_historical_prices_aggregated.open,
-       drivewealth_portfolio_historical_prices_aggregated.high,
-       drivewealth_portfolio_historical_prices_aggregated.low,
-       drivewealth_portfolio_historical_prices_aggregated.close,
-       drivewealth_portfolio_historical_prices_aggregated.adjusted_close,
+       drivewealth_portfolio_historical_prices_aggregated.value,
        drivewealth_portfolio_historical_prices_aggregated.relative_gain,
        drivewealth_portfolio_historical_prices_aggregated.updated_at
 from {{ ref('drivewealth_portfolio_historical_prices_aggregated') }}
@@ -163,11 +131,7 @@ select drivewealth_portfolio_historical_prices_aggregated.profile_id,
        drivewealth_portfolio_historical_prices_aggregated.datetime::date as date,
        drivewealth_portfolio_historical_prices_aggregated.datetime,
        '1y'::varchar as period,
-       drivewealth_portfolio_historical_prices_aggregated.open,
-       drivewealth_portfolio_historical_prices_aggregated.high,
-       drivewealth_portfolio_historical_prices_aggregated.low,
-       drivewealth_portfolio_historical_prices_aggregated.close,
-       drivewealth_portfolio_historical_prices_aggregated.adjusted_close,
+       drivewealth_portfolio_historical_prices_aggregated.value,
        drivewealth_portfolio_historical_prices_aggregated.relative_gain,
        drivewealth_portfolio_historical_prices_aggregated.updated_at
 from {{ ref('drivewealth_portfolio_historical_prices_aggregated') }}
@@ -180,11 +144,7 @@ select drivewealth_portfolio_historical_prices_aggregated.profile_id,
        drivewealth_portfolio_historical_prices_aggregated.datetime::date as date,
        drivewealth_portfolio_historical_prices_aggregated.datetime,
        '5y'::varchar as period,
-       drivewealth_portfolio_historical_prices_aggregated.open,
-       drivewealth_portfolio_historical_prices_aggregated.high,
-       drivewealth_portfolio_historical_prices_aggregated.low,
-       drivewealth_portfolio_historical_prices_aggregated.close,
-       drivewealth_portfolio_historical_prices_aggregated.adjusted_close,
+       drivewealth_portfolio_historical_prices_aggregated.value,
        drivewealth_portfolio_historical_prices_aggregated.relative_gain,
        drivewealth_portfolio_historical_prices_aggregated.updated_at
 from {{ ref('drivewealth_portfolio_historical_prices_aggregated') }}
@@ -197,11 +157,7 @@ select profile_id,
        datetime::date                as date,
        datetime,
        'all'::varchar                as period,
-       open,
-       high,
-       low,
-       close,
-       adjusted_close,
+       value,
        relative_gain,
        drivewealth_portfolio_historical_prices_aggregated.updated_at
 from {{ ref('drivewealth_portfolio_historical_prices_aggregated') }}
