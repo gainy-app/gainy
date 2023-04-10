@@ -43,11 +43,6 @@ class RedemptionUpdatedEventHandler(AbstractDriveWealthEventHandler):
 
         money_flow = self.provider.update_money_flow_from_dw(redemption)
 
-        trading_account = self.sync_trading_account_balances(
-            redemption.trading_account_ref_id, force=True)
-        if trading_account:
-            self.provider.notify_low_balance(trading_account)
-
         if money_flow:
             logger.info("Considering sending event on_withdraw_success",
                         extra={

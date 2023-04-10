@@ -23,5 +23,3 @@ class RedemptionCreatedEventHandler(AbstractDriveWealthEventHandler):
             self.repo.persist(redemption)
 
         self.provider.handle_redemption_status(redemption)
-        self.sync_trading_account_balances(redemption.trading_account_ref_id,
-                                           force=True)
