@@ -18,4 +18,7 @@ class TransactionsCreatedEventHandler(AbstractDriveWealthEventHandler):
 
         self.provider.on_new_transaction(transaction.account_id)
 
-        self.sync_trading_account_balances(transaction.account_id, force=True)
+        trading_account = self.sync_trading_account_balances(
+            transaction.account_id, force=True)
+        if trading_account:
+            self.provider.notify_low_balance(trading_account)
