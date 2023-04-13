@@ -23,16 +23,21 @@ class KycGetFormConfig(HasuraAction):
             profile = cursor.fetchone()
 
             cursor.execute(
-                "select * from app.drivewealth_countries order by name")
+                "select * from raw_data.gainy_countries where citizenship_allowed = 'yes' order by name"
+            )
             countries = cursor.fetchall()
             cursor.execute(
                 "select * from raw_data.gainy_us_states order by name")
             us_states = cursor.fetchall()
 
-        country_choices = [{
-            "value": country["code3"],
+        citizenship_country_choices = [{
+            "value": country["alpha-3"],
             "name": country["name"],
         } for country in countries]
+        residenship_country_choices = [{
+            "value": "USA",
+            "name": "United States of America",
+        }]
 
         us_state_choices = [{
             "value": state["abbreviation"],
@@ -54,7 +59,7 @@ class KycGetFormConfig(HasuraAction):
             "country": {
                 "required": True,
                 "placeholder": "USA",
-                "choices": country_choices
+                "choices": residenship_country_choices
             },
             "address_province": {
                 "required": True,
@@ -684,7 +689,7 @@ class KycGetFormConfig(HasuraAction):
             "citizenship": {
                 "required": True,
                 "placeholder": "USA",
-                "choices": country_choices
+                "choices": citizenship_country_choices
             },
             "gender": {
                 "placeholder":
@@ -743,7 +748,7 @@ class KycGetFormConfig(HasuraAction):
             "address_country": {
                 "required": True,
                 "placeholder": "USA",
-                "choices": country_choices
+                "choices": residenship_country_choices
             }
         }
 
