@@ -34,7 +34,7 @@ class KycGetFormConfig(HasuraAction):
             "value": country["alpha-3"],
             "name": country["name"],
         } for country in countries]
-        residenship_country_choices = [{
+        residentship_country_choices = [{
             "value": "USA",
             "name": "United States of America",
         }]
@@ -59,7 +59,7 @@ class KycGetFormConfig(HasuraAction):
             "country": {
                 "required": True,
                 "placeholder": "USA",
-                "choices": residenship_country_choices
+                "choices": residentship_country_choices
             },
             "address_province": {
                 "required": True,
@@ -748,7 +748,7 @@ class KycGetFormConfig(HasuraAction):
             "address_country": {
                 "required": True,
                 "placeholder": "USA",
-                "choices": residenship_country_choices
+                "choices": residentship_country_choices
             }
         }
 
