@@ -34,10 +34,12 @@ class KycGetFormConfig(HasuraAction):
             "value": country["alpha-3"],
             "name": country["name"],
         } for country in countries]
-        residentship_country_choices = [{
-            "value": "USA",
-            "name": "United States of America",
-        }]
+        residentship_country_choices = citizenship_country_choices
+        # todo enable when the app handles residentship field options separately
+        # residentship_country_choices = [{
+        #     "value": "USA",
+        #     "name": "United States of America",
+        # }]
 
         us_state_choices = [{
             "value": state["abbreviation"],
