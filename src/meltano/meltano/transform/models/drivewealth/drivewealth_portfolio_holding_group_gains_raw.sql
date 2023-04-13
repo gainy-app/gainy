@@ -32,11 +32,15 @@ with dphh_groupped as
                         end as last_selloff_date
              from (select holding_group_id, holding_id_v2 from dphh_groupped group by holding_group_id, holding_id_v2) t1
                       left join (
-                                    select holding_group_id, holding_id_v2, max(date) as last_selloff_date
-                                    from dphh_groupped
-                                    where value < 1e-3
-                                    group by holding_group_id, holding_id_v2
-                                ) t2 using (holding_group_id, holding_id_v2)
+                                    select holding_group_id, max(date) as last_selloff_date
+                                    from (
+                                             select holding_group_id, date
+                                             from dphh_groupped
+                                             group by holding_group_id, date
+                                             having sum(value) < 1e-3
+                                         ) t
+                                    group by holding_group_id
+                                ) t2 using (holding_group_id)
                       join {{ ref('drivewealth_holdings') }} using (holding_id_v2)
              group by holding_group_id
      ),
@@ -83,6 +87,7 @@ with dphh_groupped as
          (
              select profile_id,
                     holding_group_id,
+                    count(date)               as count_1w,
                     (1 + xirr(array_agg(cash_flow order by date), array_agg(date order by date))) ^
                     (count(date) / 365.0) - 1 as relative_gain_1w,
                     sum(cash_flow)            as absolute_gain_1w
@@ -199,12 +204,42 @@ select profile_id,
        holding_group_id,
        actual_value,
        relative_gain_1d,
-       relative_gain_1w,
-       relative_gain_1m,
-       relative_gain_3m,
-       relative_gain_1y,
-       relative_gain_5y,
-       relative_gain_total,
+       case
+           when relative_gain_1w is not null
+               then relative_gain_1w
+           when abs(actual_value - absolute_gain_1d) > 0 and count_1w = 1
+               then relative_gain_1d
+           end             as relative_gain_1w,
+       case
+           when relative_gain_1m is not null
+               then relative_gain_1m
+           when abs(actual_value - absolute_gain_1d) > 0 and count_1w = 1
+               then relative_gain_1d
+           end             as relative_gain_1m,
+       case
+           when relative_gain_3m is not null
+               then relative_gain_3m
+           when abs(actual_value - absolute_gain_1d) > 0 and count_1w = 1
+               then relative_gain_1d
+           end             as relative_gain_3m,
+       case
+           when relative_gain_1y is not null
+               then relative_gain_1y
+           when abs(actual_value - absolute_gain_1d) > 0 and count_1w = 1
+               then relative_gain_1d
+           end             as relative_gain_1y,
+       case
+           when relative_gain_5y is not null
+               then relative_gain_5y
+           when abs(actual_value - absolute_gain_1d) > 0 and count_1w = 1
+               then relative_gain_1d
+           end             as relative_gain_5y,
+       case
+           when relative_gain_total is not null
+               then relative_gain_total
+           when abs(actual_value - absolute_gain_1d) > 0 and count_1w = 1
+               then relative_gain_1d
+           end             as relative_gain_total,
        absolute_gain_1d,
        absolute_gain_1w,
        absolute_gain_1m,
