@@ -66,7 +66,7 @@ from (
                                 left join (
                                               select distinct invoice_id
                                               from {{ source('app', 'payment_transactions') }}
-                                              where payment_transactions.status = 'PENDING_WITHDRAWN'
+                                              where payment_transactions.status = 'PENDING'
                                           ) payment_transactions
                                           on payment_transactions.invoice_id = invoices.id
                        where status = 'PENDING'
