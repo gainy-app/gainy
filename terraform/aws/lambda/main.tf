@@ -215,8 +215,9 @@ locals {
     RECOMMENDATION_MANUALLY_SELECTED_COLLECTION_IDS = ""
     APP_STORE_LINK                                  = "https://go.gainy.app/ZOFw/Webp"
 
-    BILLING_ENABLED_PROFILES = var.billing_enabled_profiles
-    BILLING_MIN_DATE         = var.billing_min_date
+    BILLING_ENABLED_PROFILES          = var.billing_enabled_profiles
+    BILLING_AUTOSELL_ENABLED_PROFILES = var.billing_autosell_enabled_profiles
+    BILLING_MIN_DATE                  = var.billing_min_date
   }
 }
 
