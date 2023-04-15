@@ -80,19 +80,12 @@ def test_exists(monkeypatch):
     event_handler = RedemptionUpdatedEventHandler(repository, provider, None,
                                                   analytics_service,
                                                   notification_service)
-    sync_trading_account_balances_calls = []
-    monkeypatch.setattr(event_handler, 'sync_trading_account_balances',
-                        mock_record_calls(sync_trading_account_balances_calls))
-
     event_handler.handle(message)
 
     assert DriveWealthRedemption in persisted_objects
     assert redemption in persisted_objects[DriveWealthRedemption]
     assert redemption in [
         args[0] for args, kwards in handle_redemption_status_calls
-    ]
-    assert message["accountID"] in [
-        args[0] for args, kwargs in sync_trading_account_balances_calls
     ]
     assert redemption.ref_id == message["paymentID"]
     assert redemption.trading_account_ref_id == message["accountID"]
@@ -131,10 +124,6 @@ def test_not_exists(monkeypatch):
 
     event_handler = RedemptionUpdatedEventHandler(repository, provider, None,
                                                   None)
-    sync_trading_account_balances_calls = []
-    monkeypatch.setattr(event_handler, 'sync_trading_account_balances',
-                        mock_record_calls(sync_trading_account_balances_calls))
-
     event_handler.handle(message)
 
     assert DriveWealthRedemption in persisted_objects
@@ -144,9 +133,6 @@ def test_not_exists(monkeypatch):
     ]
     assert redemption in [
         args[0] for args, kwargs in update_money_flow_from_dw_calls
-    ]
-    assert message["accountID"] in [
-        args[0] for args, kwargs in sync_trading_account_balances_calls
     ]
     assert redemption.ref_id == message["paymentID"]
     assert redemption.trading_account_ref_id == message["accountID"]

@@ -76,6 +76,10 @@ variable "billing_enabled_profiles" {
   type    = string
   default = ""
 }
+variable "billing_autosell_enabled_profiles" {
+  type    = string
+  default = ""
+}
 variable "billing_min_date" {
   type    = string
   default = ""
