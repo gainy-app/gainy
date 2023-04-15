@@ -411,7 +411,7 @@ def test_on_new_transaction(monkeypatch, portfolio_changed):
 
     provider.on_new_transaction(account_ref_id)
 
-    assert ((portfolio,), {}) in sync_portfolio_calls
+    assert ((portfolio, ), {}) in sync_portfolio_calls
     if portfolio_changed:
         assert normalize_weights_calls
         assert ((portfolio, ), {}) in send_portfolio_to_api_calls
