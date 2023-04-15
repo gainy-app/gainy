@@ -37,7 +37,7 @@ with dphh_groupped as
                                              select holding_group_id, date
                                              from dphh_groupped
                                              group by holding_group_id, date
-                                             having sum(value) < 1e-3
+                                             having sum(value) < {{ var('price_precision') }}
                                          ) t
                                     group by holding_group_id
                                 ) t2 using (holding_group_id)

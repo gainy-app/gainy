@@ -19,8 +19,7 @@ polygon_symbols as materialized
     (
         select symbol
         from {{ source('polygon', 'polygon_stocks_historical_prices') }}
-        where t >= (select max(t) from {{ source('polygon', 'polygon_stocks_historical_prices') }} where symbol not like 'C:%')
-          and symbol not like 'C:%'
+        where symbol not like 'C:%' and symbol not like 'X:%'
         group by symbol
     ),
 raw_eod_historical_prices as
@@ -315,6 +314,6 @@ from (
          left join {{ this }} old_data using (symbol, date)
 where old_data.symbol is null
    or (old_data.relative_daily_gain is null and t.relative_daily_gain is not null)
-   or abs(t.adjusted_close - old_data.adjusted_close) > 1e-3
-   or abs(t.relative_daily_gain - old_data.relative_daily_gain) > 1e-3
+   or abs(t.adjusted_close - old_data.adjusted_close) > {{ var('price_precision') }}
+   or abs(t.relative_daily_gain - old_data.relative_daily_gain) > {{ var('gain_precision') }}
 {% endif %}

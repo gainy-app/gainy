@@ -485,12 +485,13 @@ class DriveWealthProvider(DriveWealthProviderKYC,
             self.repository.persist(portfolio)
 
     def on_new_transaction(self, account_ref_id: str):
-        #todo thread-safe
+        #todo thread-safe!
         portfolio: DriveWealthPortfolio = self.repository.find_one(
             DriveWealthPortfolio, {"drivewealth_account_id": account_ref_id})
         if not portfolio:
             return
 
+        self.sync_portfolio(portfolio)
         try:
             portfolio_status = self.sync_portfolio_status(portfolio,
                                                           force=True)
