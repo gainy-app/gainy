@@ -2,6 +2,7 @@ from gainy.tests.mocks.repository_mocks import mock_record_calls
 from gainy.trading.drivewealth.models import DriveWealthUser
 from trading.drivewealth.event_handlers import UsersUpdatedEventHandler
 from trading.drivewealth.provider import DriveWealthProvider
+from trading.drivewealth.repository import DriveWealthRepository
 
 
 def test(monkeypatch):
@@ -21,7 +22,10 @@ def test(monkeypatch):
     monkeypatch.setattr(provider, 'ensure_account_created',
                         mock_record_calls(ensure_account_created_calls))
 
-    event_handler = UsersUpdatedEventHandler(None, provider, None, None)
+    repository = DriveWealthRepository(None)
+    monkeypatch.setattr(repository, 'refresh', lambda x: x)
+
+    event_handler = UsersUpdatedEventHandler(repository, provider, None, None)
 
     message = {
         "userID": user_id,
