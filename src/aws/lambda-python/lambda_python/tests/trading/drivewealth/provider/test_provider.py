@@ -405,9 +405,13 @@ def test_on_new_transaction(monkeypatch, portfolio_changed):
     send_portfolio_to_api_calls = []
     monkeypatch.setattr(provider, "send_portfolio_to_api",
                         mock_record_calls(send_portfolio_to_api_calls))
+    sync_portfolio_calls = []
+    monkeypatch.setattr(provider, "sync_portfolio",
+                        mock_record_calls(sync_portfolio_calls))
 
     provider.on_new_transaction(account_ref_id)
 
+    assert ((portfolio, ), {}) in sync_portfolio_calls
     if portfolio_changed:
         assert normalize_weights_calls
         assert ((portfolio, ), {}) in send_portfolio_to_api_calls
