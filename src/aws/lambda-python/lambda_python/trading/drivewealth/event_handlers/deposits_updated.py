@@ -26,8 +26,6 @@ class DepositsUpdatedEventHandler(AbstractDriveWealthEventHandler):
 
         self.repo.persist(deposit)
         money_flow = self.provider.update_money_flow_from_dw(deposit)
-        self.sync_trading_account_balances(deposit.trading_account_ref_id,
-                                           force=True)
 
         if money_flow:
             funding_account: FundingAccount = self.repo.find_one(

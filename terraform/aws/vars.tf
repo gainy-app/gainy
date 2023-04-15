@@ -95,4 +95,5 @@ variable "source_code_branch_name" {}
 variable "billing_value_fee_multiplier" {}
 variable "billing_min_annual_fee" {}
 variable "billing_enabled_profiles" {}
+variable "billing_autosell_enabled_profiles" {}
 variable "billing_min_date" {}
