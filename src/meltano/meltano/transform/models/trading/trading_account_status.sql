@@ -117,6 +117,7 @@ from (
                                        max(updated_at)                                              as updated_at
                                 from {{ source('app', 'trading_collection_versions') }}
                                 where status in ('PENDING_EXECUTION', 'PENDING')
+                                  and source = 'MANUAL'
                                 group by trading_account_id
 
                                 union all
@@ -129,6 +130,7 @@ from (
                                        max(updated_at)                                              as updated_at
                                 from {{ source('app', 'trading_orders') }}
                                 where status in ('PENDING_EXECUTION', 'PENDING')
+                                  and source = 'MANUAL'
                                 group by trading_account_id
                             ) t
                        group by trading_account_id

@@ -37,7 +37,12 @@ select profile_id,
        pending_orders_count::int,
        pending_orders_sum,
        coalesce(withdrawable_cash, 0)::double precision                 as withdrawable_cash,
-       coalesce(buying_power, 0)::double precision                      as buying_power,
+       coalesce(buying_power, 0)::double precision -
+       coalesce(pending_fees, 0)::double precision                      as buying_power_minus_pending_fees,
+       greatest(0,
+                coalesce(buying_power, 0)::double precision -
+                coalesce(pending_fees, 0)::double precision)            as buying_power,
+       coalesce(pending_fees, 0)::double precision                      as pending_fees,
        greatest(kyc_status.created_at,
            trading_funding_accounts.updated_at,
            account_stats.updated_at)::timestamp                         as updated_at
@@ -55,4 +60,17 @@ from (
                        from {{ source('app', 'trading_funding_accounts') }}
                        group by profile_id
                    ) trading_funding_accounts using (profile_id)
+         left join (
+                       select profile_id, sum(amount) as pending_fees
+                       from {{ source('app', 'invoices') }}
+                                left join (
+                                              select distinct invoice_id
+                                              from {{ source('app', 'payment_transactions') }}
+                                              where payment_transactions.status = 'PENDING'
+                                          ) payment_transactions
+                                          on payment_transactions.invoice_id = invoices.id
+                       where status = 'PENDING'
+                         and payment_transactions.invoice_id is null -- no already withdrawn tx
+                       group by profile_id
+                   ) invoices using (profile_id)
          left join account_stats using (profile_id)

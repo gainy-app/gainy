@@ -149,6 +149,7 @@
     { "name": "BILLING_VALUE_FEE_MULTIPLIER",          "value": "${billing_value_fee_multiplier}" },
     { "name": "BILLING_MIN_ANNUAL_FEE",                "value": "${billing_min_annual_fee}" },
     { "name": "BILLING_ENABLED_PROFILES",              "value": "${billing_enabled_profiles}" },
+    { "name": "BILLING_AUTOSELL_ENABLED_PROFILES",     "value": "${billing_autosell_enabled_profiles}" },
     { "name": "BILLING_MIN_DATE",                      "value": "${billing_min_date}" }
   ],
   "links": [],
