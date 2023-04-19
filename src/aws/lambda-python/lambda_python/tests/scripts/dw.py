@@ -56,6 +56,10 @@ select order_stats.profile_id,
        drivewealth_portfolios.ref_id                                                  as portfolio_ref_id,
        drivewealth_funds.ref_id                                                       as fund_ref_id,
        executed_amount + coalesce(absolute_gain_total, 0) - coalesce(actual_value, 0) as target_amount_delta,
+       executed_amount,
+       absolute_gain_total,
+       actual_value,
+       drivewealth_portfolio_holding_group_gains.updated_at,
        last_rebalance_at
 from order_stats
          left join drivewealth_portfolio_holding_group_gains using (profile_id, holding_group_id)
@@ -69,6 +73,8 @@ order by profile_id, order_stats.collection_id, order_stats.symbol, executed_amo
 '''
 
 data = []
+
+accounts_to_rebalance = set()
 
 with ContextContainer() as context_container:
     for row in data:
@@ -110,12 +116,28 @@ with ContextContainer() as context_container:
         portfolio.profile_id = profile_id
         portfolio.drivewealth_account_id = account_ref_id
         portfolio.ref_id = portfolio_ref_id
-        data = api.get_portfolio(portfolio)
-        portfolio.set_from_response(data)
+        portfolio_data = api.get_portfolio(portfolio)
+        portfolio.set_from_response(portfolio_data)
         trading_repository.persist(portfolio)
 
+        portfolio_status = provider.sync_portfolio_status(portfolio,
+                                                          force=True)
+        fund_holdings = portfolio_status.get_fund(fund_ref_id)
+
+        if not fund_holdings:
+            # TODO really continue?
+            continue
+
+        fund_weight_delta = target_amount_delta / portfolio_status.equity_value
+        new_target_weight = fund_holdings.actual_weight + fund_weight_delta
+        new_target_amount_delta = (
+            new_target_weight -
+            fund_holdings.target_weight) * portfolio_status.equity_value
+        print('>>>>>>> ', new_target_weight, new_target_amount_delta, row,
+              fund_holdings.data)
+
         collection_version = TradingCollectionVersion()
-        collection_version.target_amount_delta = target_amount_delta
+        collection_version.target_amount_delta = new_target_amount_delta
 
         fund = DriveWealthFund()
         fund.ref_id = fund_ref_id
@@ -131,4 +153,6 @@ with ContextContainer() as context_container:
 
         portfolio.normalize_weights()
         provider.send_portfolio_to_api(portfolio)
-        provider.api.create_autopilot_run([portfolio.drivewealth_account_id])
+        accounts_to_rebalance.add(row["account_ref_id"])
+
+    provider.api.create_autopilot_run(list(accounts_to_rebalance))
