@@ -63,6 +63,7 @@ if [ $($psql_auth -c "select count(*) from deployment.public_schemas where schem
   echo "$(date)" meltano invoke dbt run $DBT_RUN_FLAGS
   if meltano invoke dbt run $DBT_RUN_FLAGS; then
     $psql_auth -c "update deployment.public_schemas set deployed_at = now() where schema_name = '$DBT_TARGET_SCHEMA';"
+    $psql_auth -c "update deployment.public_schemas set sqs_listener_lambda_arn = '$SQS_LISTENER_LAMBDA_ARN' where schema_name = '$DBT_TARGET_SCHEMA';"
     /bin/bash scripts/store_deployment_state.sh
 
     echo "$(date) meltano invoke dbt run --vars '{\"realtime\": true}' --select tag:realtime"

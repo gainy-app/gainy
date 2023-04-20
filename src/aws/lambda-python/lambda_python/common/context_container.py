@@ -7,13 +7,10 @@ from portfolio.plaid.service import PlaidService
 from portfolio.service import PortfolioService
 from portfolio.service.chart import PortfolioChartService
 from portfolio.repository import PortfolioRepository
-from queue_processing.aws_message_handler import AwsMessageHandler
-from queue_processing.dispatcher import QueueMessageDispatcher
 from services.cache import Cache, RedisCache, LocalCache
 from services.sqs import SqsAdapter
 from services.twilio import TwilioClient
 from services.uploaded_file_service import UploadedFileService
-from trading.drivewealth.queue_message_handler import DriveWealthQueueMessageHandler
 from trading.kyc_form_validator import KycFormValidator
 from trading.service import TradingService
 from trading.repository import TradingRepository
@@ -125,21 +122,3 @@ class ContextContainer(GainyContextContainer):
     @cached_property
     def sqs_adapter(self) -> SqsAdapter:
         return SqsAdapter(self.get_repository())
-
-    @cached_property
-    def drivewealth_queue_message_handler(
-            self) -> DriveWealthQueueMessageHandler:
-        return DriveWealthQueueMessageHandler(self.drivewealth_repository,
-                                              self.drivewealth_provider,
-                                              self.trading_repository,
-                                              self.analytics_service,
-                                              self.notification_service)
-
-    @cached_property
-    def aws_message_handler(self) -> AwsMessageHandler:
-        return AwsMessageHandler()
-
-    @cached_property
-    def queue_message_dispatcher(self) -> QueueMessageDispatcher:
-        return QueueMessageDispatcher(
-            [self.drivewealth_queue_message_handler, self.aws_message_handler])

@@ -333,3 +333,7 @@ output "aws_apigatewayv2_api_endpoint" {
   value      = "${aws_apigatewayv2_api.lambda.api_endpoint}/${aws_apigatewayv2_stage.lambda.name}"
   depends_on = [module.hasura_action, module.hasura_trigger]
 }
+
+output "sqs_listener_arn" {
+  value = "${module.sqs_listener.arn}:${module.sqs_listener.version}"
+}

@@ -2,8 +2,8 @@ from collections import namedtuple
 
 from common.context_container import ContextContainer
 from gainy.data_access.repository import Repository
+from gainy.queue_processing.dispatcher import QueueMessageDispatcher
 from gainy.tests.mocks.repository_mocks import mock_persist, mock_record_calls, mock_noop
-from queue_processing.dispatcher import QueueMessageDispatcher
 from queue_processing.locking_function import HandleMessage
 from sqs_listener import handle
 
@@ -33,6 +33,7 @@ def test(monkeypatch):
     execute_calls = []
     monkeypatch.setattr(HandleMessage, "execute",
                         mock_record_calls(execute_calls))
+    monkeypatch.setattr('sqs_listener.check_can_run', lambda x, y: True)
 
     handle(
         event,

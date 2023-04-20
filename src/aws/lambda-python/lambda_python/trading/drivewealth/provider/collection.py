@@ -1,12 +1,11 @@
 from gainy.exceptions import EntityNotFoundException
 from gainy.trading.models import TradingCollectionVersion
-from trading.drivewealth.models import DriveWealthAutopilotRun
 from trading.drivewealth.api import DriveWealthApi
 from trading.drivewealth.repository import DriveWealthRepository
 from gainy.utils import get_logger
-from gainy.trading.drivewealth.models import DriveWealthAccount, DriveWealthFund, DriveWealthPortfolio, \
+from gainy.trading.drivewealth.models import DriveWealthFund, DriveWealthPortfolio, \
     DriveWealthPortfolioStatusHolding, CollectionStatus
-from gainy.trading.drivewealth.provider import DriveWealthProvider as GainyDriveWealthProvider
+from gainy.trading.drivewealth import DriveWealthProvider as GainyDriveWealthProvider
 
 logger = get_logger(__name__)
 
