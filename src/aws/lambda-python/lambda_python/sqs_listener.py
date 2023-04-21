@@ -1,3 +1,5 @@
+import json
+
 from typing import Optional
 
 from psycopg2._psycopg import connection
@@ -50,8 +52,8 @@ def listen(event, context):
             except Exception as e:
                 logger.exception(e, extra=logger_extra)
 
-    AWSLambda().invoke(handler_function_arn, {"message_ids": message_ids},
-                       sync=False)
+    payload = json.dumps({"message_ids": message_ids})
+    AWSLambda().invoke(handler_function_arn, payload, sync=False)
 
 
 def handle(event, context):
