@@ -1101,13 +1101,14 @@
     - role: user
       permission:
         columns:
-          - id
-          - profile_id
-          - plaid_access_token_id
-          - plaid_account_id
-          - name
           - balance
           - created_at
+          - id
+          - name
+          - needs_reauth
+          - plaid_access_token_id
+          - plaid_account_id
+          - profile_id
           - updated_at
         filter:
           profile:
