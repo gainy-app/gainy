@@ -27,6 +27,7 @@ def test_listen(monkeypatch):
                         lambda *args: repository)
 
     invoke_calls = []
+    monkeypatch.setattr(AWSLambda, "__init__", mock_noop)
     monkeypatch.setattr(AWSLambda, "invoke", mock_record_calls(invoke_calls))
 
     listen(

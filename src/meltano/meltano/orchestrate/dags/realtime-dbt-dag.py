@@ -18,7 +18,7 @@ clean = BashOperator(
 
 rehandle_failed_events = BashOperator(
     task_id="rehandle_failed_events",
-    bash_command="gainy_rehandle_failed_events --max-count 100",
+    bash_command="gainy_rehandle_failed_events --max-count 500",
     dag=dag)
 
 vars = '{"realtime": true}'
