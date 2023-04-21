@@ -16,6 +16,11 @@ clean = BashOperator(
     f"cd {MELTANO_PROJECT_ROOT}; find .meltano/logs .meltano/run/elt -type f -mmin +480 -delete",
     dag=dag)
 
+rehandle_failed_events = BashOperator(
+    task_id="rehandle_failed_events",
+    bash_command="gainy_rehandle_failed_events --max-count 100",
+    dag=dag)
+
 vars = '{"realtime": true}'
 dbt = BashOperator(
     task_id="dbt-realtime",
