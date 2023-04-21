@@ -341,6 +341,28 @@ module "sqs_listener" {
   vpc_subnet_ids         = var.vpc_subnet_ids
 }
 
+data "aws_iam_policy_document" "lambda_sqs_listener_policy_document" {
+  statement {
+    sid = "InvokeLambda"
+
+    actions = [
+      "lambda:InvokeFunction",
+      "lambda:InvokeAsync",
+    ]
+
+    resources = [
+      "${module.sqs_handler.arn}:*"
+    ]
+  }
+}
+
+resource "aws_iam_role_policy" "lambda_sqs_listener_policy" {
+  name   = "lambda_sqs_listener_policy"
+  role   = aws_iam_role.lambda_exec.name
+  policy = data.aws_iam_policy_document.lambda_sqs_listener_policy_document.json
+}
+
+
 ##################################################################################
 
 output "aws_apigatewayv2_api_endpoint" {
