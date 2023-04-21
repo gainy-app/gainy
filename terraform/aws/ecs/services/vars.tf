@@ -90,3 +90,5 @@ variable "billing_enabled_profiles" {}
 variable "billing_autosell_enabled_profiles" {}
 variable "billing_min_date" {}
 variable "sqs_handler_lambda_arn" {}
+variable "drivewealth_sqs_arn" {}
+variable "aws_events_sqs_arn" {}
