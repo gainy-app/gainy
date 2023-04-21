@@ -89,4 +89,4 @@ variable "billing_min_annual_fee" {}
 variable "billing_enabled_profiles" {}
 variable "billing_autosell_enabled_profiles" {}
 variable "billing_min_date" {}
-variable "sqs_listener_lambda_arn" {}
+variable "sqs_handler_lambda_arn" {}

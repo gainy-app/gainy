@@ -72,7 +72,8 @@ create table if not exists deployment.public_schemas
 );
 alter table deployment.public_schemas add column if not exists dbt_state text;
 alter table deployment.public_schemas add column if not exists seed_data_state text;
-alter table deployment.public_schemas add column if not exists sqs_listener_lambda_arn text;
+alter table deployment.public_schemas add column if not exists sqs_handler_lambda_arn text;
+alter table deployment.public_schemas add column if not exists set_active_at timestamp;
 
 create table if not exists deployment.realtime_listener_heartbeat
 (

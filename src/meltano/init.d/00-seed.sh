@@ -76,7 +76,8 @@ if [ $($psql_auth -c "select count(*) from deployment.public_schemas where schem
   fi
 fi
 
-$psql_auth -c "update deployment.public_schemas set sqs_listener_lambda_arn = '$SQS_LISTENER_LAMBDA_ARN' where schema_name = '$DBT_TARGET_SCHEMA';"
+$psql_auth -c "update deployment.public_schemas set sqs_handler_lambda_arn = '$SQS_HANDLER_LAMBDA_ARN' where schema_name = '$DBT_TARGET_SCHEMA';"
+$psql_auth -c "update deployment.public_schemas set set_active_at = now() where schema_name = '$DBT_TARGET_SCHEMA';"
 
 $psql_auth -c "GRANT USAGE ON SCHEMA raw_data TO ${PG_INTERNAL_SYNC_USERNAME};"
 $psql_auth -c "GRANT SELECT ON ALL TABLES IN SCHEMA raw_data TO ${PG_INTERNAL_SYNC_USERNAME};"
