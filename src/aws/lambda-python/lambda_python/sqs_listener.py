@@ -37,7 +37,8 @@ def listen(event, context):
 
     with ContextContainer() as context_container:
         adapter = context_container.sqs_adapter
-        handler_function_arn = get_handler_function_arn(context_container.db_conn)
+        handler_function_arn = get_handler_function_arn(
+            context_container.db_conn)
 
         message_ids = []
         for record in event["Records"]:
@@ -48,7 +49,6 @@ def listen(event, context):
                 message_ids.append(message.id)
             except Exception as e:
                 logger.exception(e, extra=logger_extra)
-
 
     AWSLambda().invoke(handler_function_arn, {"message_ids": message_ids},
                        sync=False)
