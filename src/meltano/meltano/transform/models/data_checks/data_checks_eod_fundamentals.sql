@@ -38,6 +38,7 @@ with errors as
              'daily'                                        as "period",
              'Ticker '||symbol||' has incorrect highlights' as message
          from {{ ref('highlights') }}
+                  join {{ ref('tickers') }} using (symbol)
          where market_capitalization <= 0
             or dividend_yield < 0
             or dividend_share < 0

@@ -20,7 +20,7 @@ with chart_1w as
                     max(date)       as close_date,
                     max(value)      as high,
                     min(value)      as low,
-                    exp(sum(ln(coalesce(relative_daily_gain, 0) + 1 + 1e-10))) - 1 as relative_gain,
+                    exp(sum(ln(coalesce(relative_daily_gain, 0) + 1 + {{ var('epsilon') }}))) - 1 as relative_gain,
                     max(updated_at) as updated_at
              from {{ ref('drivewealth_portfolio_historical_holdings') }}
              group by profile_id, holding_id_v2, date_week
@@ -35,7 +35,7 @@ with chart_1w as
                     max(date)       as close_date,
                     max(value)      as high,
                     min(value)      as low,
-                    exp(sum(ln(coalesce(relative_daily_gain, 0) + 1 + 1e-10))) - 1 as relative_gain,
+                    exp(sum(ln(coalesce(relative_daily_gain, 0) + 1 + {{ var('epsilon') }}))) - 1 as relative_gain,
                     max(updated_at) as updated_at
              from {{ ref('drivewealth_portfolio_historical_holdings') }}
              group by profile_id, holding_id_v2, date_month
@@ -161,6 +161,6 @@ from data
 {% if is_incremental() %}
          left join {{ this }} old_data using (profile_id, holding_id_v2, period, datetime)
 where old_data.profile_id is null
-   or abs(data.relative_gain - old_data.relative_gain) > 1e-3
-   or abs(data.adjusted_close - old_data.adjusted_close) > 1e-3
+   or abs(data.relative_gain - old_data.relative_gain) > {{ var('gain_precision') }}
+   or abs(data.adjusted_close - old_data.adjusted_close) > {{ var('price_precision') }}
 {% endif %}

@@ -7,6 +7,7 @@
       pk('holding_id_v2'),
       index('profile_id'),
       index('portfolio_status_id'),
+      fk('profile_id', 'app', 'profiles', 'id'),
       'delete from {{this}}
         using (select profile_id, max(updated_at) as max_updated_at from {{this}} group by profile_id) stats
         where stats.profile_id = {{this}}.profile_id

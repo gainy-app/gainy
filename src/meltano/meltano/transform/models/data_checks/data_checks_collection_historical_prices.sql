@@ -118,10 +118,10 @@ with check_params(table_name, dt_interval,
              select *,
                     value - value_pre                                              as value_dif,
                     (value - value_pre)
-                        / (1e-30 + abs(value_pre))                                 as value_perc_change,
-                    (value - value_pre) / (1e-30 + abs(value_pre))
+                        / ({{ var('epsilon') }} + abs(value_pre))                                 as value_perc_change,
+                    (value - value_pre) / ({{ var('epsilon') }} + abs(value_pre))
                         - (intrpl_symbol_asmarket_adjusted_close - intrpl_symbol_asmarket_adjusted_close_pre)
-                        / (1e-30 + abs(intrpl_symbol_asmarket_adjusted_close_pre)) as value_perc_change_wom
+                        / ({{ var('epsilon') }} + abs(intrpl_symbol_asmarket_adjusted_close_pre)) as value_perc_change_wom
              from collections_lag
      ), -- select * from collections_difs;
 
