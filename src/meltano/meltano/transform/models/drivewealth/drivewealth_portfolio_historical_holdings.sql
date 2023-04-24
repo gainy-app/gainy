@@ -10,6 +10,7 @@
       index(['holding_id_v2', 'date_month'], false),
       index(['profile_id', 'date'], false),
       index('portfolio_status_id', false),
+      fk('profile_id', 'app', 'profiles', 'id'),
     ]
   )
 }}
