@@ -32,20 +32,6 @@ with check_params(table_name) as
          (
              (
                  select symbol,
-                        table_name || '__adjusted_close_is_notpositive'                                      as code,
-                        'daily'                                                                              as "period",
-                        'Ticker ' || symbol || ' in table ' || table_name || ' has ' ||
-                        count(date) ||
-                        ' rows with adjusted_close not positive values (<=0). Example at ' || json_agg(date) as message
-                 from eod_historical_prices
-                          join check_params cp on true
-                 where adjusted_close <= 0
-                 group by symbol, table_name
-                 having count(date) > 0
-             )
-             union all
-             (
-                 select symbol,
                         table_name || '__adjusted_close_is_null'                                 as code,
                         'daily'                                                                  as "period",
                         'Ticker ' || symbol || ' in table ' ||

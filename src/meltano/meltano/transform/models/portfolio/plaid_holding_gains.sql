@@ -159,31 +159,31 @@ select holding_id_v2,
        updated_at::timestamp,
        actual_value,
        case
-           when abs(actual_value - absolute_gain_1d) > 1e-9
+           when abs(actual_value - absolute_gain_1d) > {{ var('gain_precision') }}
                then actual_value / (actual_value - absolute_gain_1d) - 1
            end::double precision as relative_gain_1d,
        case
-           when abs(actual_value - absolute_gain_1w) > 1e-9
+           when abs(actual_value - absolute_gain_1w) > {{ var('gain_precision') }}
                then actual_value / (actual_value - absolute_gain_1w) - 1
            end::double precision as relative_gain_1w,
        case
-           when abs(last_day_value - absolute_gain_1m) > 1e-9
+           when abs(last_day_value - absolute_gain_1m) > {{ var('gain_precision') }}
                then last_day_value / (last_day_value - absolute_gain_1m) - 1
            end::double precision as relative_gain_1m,
        case
-           when abs(last_day_value - absolute_gain_3m) > 1e-9
+           when abs(last_day_value - absolute_gain_3m) > {{ var('gain_precision') }}
                then last_day_value / (last_day_value - absolute_gain_3m) - 1
            end::double precision as relative_gain_3m,
        case
-           when abs(last_day_value - absolute_gain_1y) > 1e-9
+           when abs(last_day_value - absolute_gain_1y) > {{ var('gain_precision') }}
                then last_day_value / (last_day_value - absolute_gain_1y) - 1
            end::double precision as relative_gain_1y,
        case
-           when abs(last_day_value - absolute_gain_5y) > 1e-9
+           when abs(last_day_value - absolute_gain_5y) > {{ var('gain_precision') }}
                then last_day_value / (last_day_value - absolute_gain_5y) - 1
            end::double precision as relative_gain_5y,
        case
-           when abs(last_day_value - absolute_gain_total) > 1e-9
+           when abs(last_day_value - absolute_gain_total) > {{ var('gain_precision') }}
                then last_day_value / (last_day_value - absolute_gain_total) - 1
            end::double precision as relative_gain_total,
        absolute_gain_1d,

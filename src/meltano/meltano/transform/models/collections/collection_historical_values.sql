@@ -133,5 +133,5 @@ from daily_collection_gain_cumulative
 {% if is_incremental() %}
          left join {{ this }} old_data using (collection_uniq_id, date)
 where old_data.collection_uniq_id is null
-   or abs(coalesce(cumulative_daily_relative_gain, 1) - old_data.value) > 1e-6
+   or abs(coalesce(cumulative_daily_relative_gain, 1) - old_data.value) > {{ var('price_precision') }}
 {% endif %}

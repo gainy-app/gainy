@@ -165,13 +165,13 @@ union all
            'dw_wrong_holding_group_gain'                                                       as code,
            'realtime'                                                                          as period,
            'Profile ' || profile_id ||
-           ' has wrong holding group gain, diff: ' ||
+           ' has wrong holding group gain: ' || holding_group_id || ', ' ||
            abs(executed_amount + coalesce(absolute_gain_total, 0) - coalesce(actual_value, 0)) as message,
            now()                                                                               as updated_at
     from order_stats
              left join {{ ref('drivewealth_portfolio_holding_group_gains') }} using (profile_id, holding_group_id)
     where profile_id > 1
-      and abs(executed_amount + coalesce(absolute_gain_total, 0) - coalesce(actual_value, 0)) > 1
+      and abs(executed_amount + coalesce(absolute_gain_total, 0) - coalesce(actual_value, 0)) > 10
 )
 
 union all

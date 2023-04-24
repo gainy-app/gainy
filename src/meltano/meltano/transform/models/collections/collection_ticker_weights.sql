@@ -205,8 +205,8 @@ where date is not null
 
 {% if is_incremental() %}
   and (old_data.collection_uniq_id is null
-    or abs(ticker_collections_weights_normalized.weight - old_data.weight) > 1e-6
-    or abs(ticker_collections_weights_normalized.price - old_data.price) > 1e-3)
+    or abs(ticker_collections_weights_normalized.weight - old_data.weight) > {{ var('weight_precision') }}
+    or abs(ticker_collections_weights_normalized.price - old_data.price) > {{ var('price_precision') }})
 {% endif %}
 
 -- TODO make it historical for personalized collections
