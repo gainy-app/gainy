@@ -1,6 +1,3 @@
-import psycopg2
-
-from gainy.exceptions import BadRequestException
 from gainy.plaid.common import PURPOSE_TRADING, DEFAULT_ENV, get_purpose
 from common.context_container import ContextContainer
 from common.hasura_function import HasuraAction
@@ -21,7 +18,6 @@ class LinkPlaidAccount(HasuraAction):
         plaid_service = context_container.plaid_service
         portfolio_service = context_container.portfolio_service
         portfolio_repository = context_container.portfolio_repository
-        db_conn = context_container.db_conn
         profile_id = input_params["profile_id"]
         public_token = input_params["public_token"]
         env = input_params.get("env", DEFAULT_ENV)  # default for legacy app
@@ -31,38 +27,31 @@ class LinkPlaidAccount(HasuraAction):
         response = plaid_service.exchange_public_token(public_token, env)
         access_token: str = response['access_token']
 
-        parameters = {
-            "profile_id": profile_id,
-            "access_token": access_token,
-            "item_id": response['item_id'],
-            "purpose": purpose,
-        }
         if access_token_id is None:
-            query = """INSERT INTO app.profile_plaid_access_tokens(profile_id, access_token, item_id, purpose)
-                    VALUES (%(profile_id)s, %(access_token)s, %(item_id)s, %(purpose)s) RETURNING id"""
+            entity = PlaidAccessToken()
+            entity.profile_id = profile_id
         else:
-            query = """update app.profile_plaid_access_tokens set access_token = %(access_token)s, item_id = %(item_id)s, needs_reauth_since = null
-                    where profile_id = %(profile_id)s and id = %(access_token_id)s RETURNING id"""
-            parameters["access_token_id"] = access_token_id
+            entity = portfolio_repository.find_one(
+                PlaidAccessToken,
+                {"id": access_token_id}) or PlaidAccessToken()
+        entity.access_token = access_token
+        entity.item_id = response['item_id']
+        entity.purpose = purpose
+        portfolio_repository.persist(entity)
 
-        with db_conn.cursor() as cursor:
-            try:
-                cursor.execute(query, parameters)
-            except psycopg2.errors.UniqueViolation:
-                raise BadRequestException('Access token already exists.')
+        if access_token_id:
+            context_container.plaid_service.set_access_token_reauth(
+                entity, False)
+            entity = portfolio_repository.refresh(entity)
 
-            returned = cursor.fetchall()
-            access_token_id = returned[0][0]
-
-        access_token_entity = portfolio_repository.find_one(
-            PlaidAccessToken, {"id": access_token_id})
+        access_token_id = entity.id
 
         institution = portfolio_service.sync_institution(
             plaid_service.get_access_token(id=access_token_id))
 
         accounts = []
         if purpose == PURPOSE_TRADING:
-            accounts = plaid_service.get_item_accounts(access_token_entity)
+            accounts = plaid_service.get_item_accounts(entity)
 
             account_entities = []
             for account in accounts:
