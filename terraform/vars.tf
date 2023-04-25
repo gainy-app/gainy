@@ -17,7 +17,7 @@ variable "base_image_registry_address" {
 variable "base_image_version" {
   type = string
 }
-variable "hubspot_api_key" {
+variable "hubspot_app_token" {
   type      = string
   sensitive = true
 }

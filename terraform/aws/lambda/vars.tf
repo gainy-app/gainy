@@ -22,7 +22,7 @@ variable "algolia_collections_index" {}
 variable "algolia_app_id" {}
 variable "algolia_search_key" {}
 variable "hasura_url" {}
-variable "hubspot_api_key" {}
+variable "hubspot_app_token" {}
 variable "deployment_key" {}
 variable "redis_cache_host" {}
 variable "redis_cache_port" {}
