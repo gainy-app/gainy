@@ -93,7 +93,7 @@ with common_stocks as
      ticker_industries_nrmlzd as (
        select tiu.symbol,
             tiu.industry_id,
-            tiu.sim/(1e-30 + max(tiu.sim)over(partition by tiu.industry_id)) as sim,
+            tiu.sim/({{ var('epsilon') }} + max(tiu.sim)over(partition by tiu.industry_id)) as sim,
             tiu.industry_preorder
        from ticker_industries_union tiu
      )

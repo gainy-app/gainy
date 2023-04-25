@@ -1,7 +1,7 @@
 from common.context_container import ContextContainer
 from common.hasura_function import HasuraTrigger
+from gainy.trading.models import ProfileKycStatus
 from gainy.utils import get_logger
-from trading.models import ProfileKycStatus
 
 logger = get_logger(__name__)
 

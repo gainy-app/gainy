@@ -272,6 +272,8 @@ with tickers_and_options as
                               avg(abs(historical_prices_aggregated_15min.adjusted_close - historical_prices_aggregated_3min.adjusted_close) /
                                   historical_prices_aggregated_15min.adjusted_close) as diff
                        from {{ ref('historical_prices_aggregated_15min') }}
+                                join (select symbol, max(date) as date from {{ ref('historical_prices_aggregated_3min') }} group by symbol) t
+                                     using (symbol, date)
                                 join {{ ref('historical_prices_aggregated_3min') }}
                                      on historical_prices_aggregated_3min.symbol = historical_prices_aggregated_15min.symbol
                                          and historical_prices_aggregated_3min.datetime = historical_prices_aggregated_15min.datetime + interval '12 minutes'
@@ -359,7 +361,7 @@ with tickers_and_options as
                       left join ticker_daily_latest_chart_point using (symbol)
              where ticker_realtime_metrics.symbol is null
                 or ticker_daily_latest_chart_point.symbol is null
-                or ticker_realtime_metrics.previous_day_close_price < 1e-12
+                or ticker_realtime_metrics.previous_day_close_price < {{ var('price_precision') }}
                 or (abs(ticker_daily_latest_chart_point.adjusted_close / ticker_realtime_metrics.previous_day_close_price - 1) > 0.2
                  and ticker_daily_latest_chart_point.volume > 0)
          ),

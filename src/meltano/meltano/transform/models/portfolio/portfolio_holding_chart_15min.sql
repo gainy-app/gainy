@@ -119,5 +119,5 @@ from (
          left join {{ this }} old_data using (holding_id_v2, datetime)
 where old_data.adjusted_close is null
    or (data.relative_gain is not null and old_data.relative_gain is null)
-   or abs(data.quantity * data.adjusted_close - old_data.adjusted_close) > 1e-3
+   or abs(data.quantity * data.adjusted_close - old_data.adjusted_close) > {{ var('price_precision') }}
 {% endif %}

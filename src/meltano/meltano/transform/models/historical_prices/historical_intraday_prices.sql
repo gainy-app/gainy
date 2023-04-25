@@ -188,5 +188,5 @@ from (
 
 {% if is_incremental() %}
          left join {{ this }} old_data using (symbol, time)
-where old_data is null or abs(old_data.adjusted_close - t.adjusted_close) > 1e-3
+where old_data is null or abs(old_data.adjusted_close - t.adjusted_close) > {{ var('price_precision') }}
 {% endif %}

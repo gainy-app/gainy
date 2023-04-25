@@ -247,6 +247,6 @@ where adjusted_close is not null
 {% if is_incremental() %}
   and (old_data_adjusted_close is null -- no old data
    or (t3.relative_gain is not null and old_data_relative_gain is null)
-   or abs(t3.relative_gain - old_data_relative_gain) > 1e-3
-   or abs(t3.adjusted_close - old_data_adjusted_close) > 1e-3)
+   or abs(t3.relative_gain - old_data_relative_gain) > {{ var('gain_precision') }}
+   or abs(t3.adjusted_close - old_data_adjusted_close) > {{ var('price_precision') }})
 {% endif %}

@@ -1,23 +1,19 @@
-import datetime
 from decimal import Decimal
 
 import pytest
 
 from gainy.data_access.models import BaseModel
-from gainy.tests.mocks.repository_mocks import mock_find, mock_persist, mock_record_calls
-from gainy.trading.models import TradingMoneyFlowStatus, TradingMoneyFlow
-from gainy.utils import ENV_PRODUCTION
-from gainy.services.notification import NotificationService
+from gainy.tests.mocks.repository_mocks import mock_find, mock_persist
+from gainy.trading.models import TradingMoneyFlowStatus, TradingMoneyFlow, TradingStatement
 from tests.trading.drivewealth.api_mocks import mock_create_deposit, mock_create_redemption, mock_get_deposit, \
     mock_get_redemption
-from trading.models import TradingStatement
-from trading.drivewealth.models import DriveWealthStatement, DriveWealthOrder
 from trading.drivewealth.api import DriveWealthApi
 from trading.drivewealth.provider import DriveWealthProvider
 from trading.drivewealth.repository import DriveWealthRepository
 
-from gainy.trading.drivewealth.models import DriveWealthAccount, DriveWealthInstrument, DriveWealthInstrumentStatus, \
-    DriveWealthPortfolio, DriveWealthBankAccount, DriveWealthDeposit, DriveWealthRedemption, DriveWealthPortfolioStatus
+from gainy.trading.drivewealth.models import DriveWealthAccount, \
+    DriveWealthBankAccount, DriveWealthDeposit, DriveWealthRedemption, \
+    DriveWealthStatement
 
 
 def get_test_transfer_money_amounts():
@@ -286,131 +282,3 @@ def test_download_statement(monkeypatch):
 
     provider = DriveWealthProvider(repository, api, None, None, None)
     assert url == provider.download_statement(statement)
-
-
-def test_handle_instrument_status_change(monkeypatch):
-    symbol = "symbol"
-    status = DriveWealthInstrumentStatus.ACTIVE
-    new_status = "new_status"
-
-    instrument = DriveWealthInstrument()
-    monkeypatch.setattr(instrument, "status", status)
-    monkeypatch.setattr(instrument, "symbol", symbol)
-
-    repository = DriveWealthRepository(None)
-
-    def mock_symbol_is_in_collection(_symbol):
-        assert symbol == _symbol
-        return True
-
-    monkeypatch.setattr(repository, "symbol_is_in_collection",
-                        mock_symbol_is_in_collection)
-
-    notification_service = NotificationService(None, None)
-    calls = []
-    monkeypatch.setattr(notification_service,
-                        "notify_dw_instrument_status_changed",
-                        mock_record_calls(calls))
-
-    provider = DriveWealthProvider(repository, None, None, None,
-                                   notification_service)
-
-    monkeypatch.setenv("ENV", ENV_PRODUCTION)
-    provider.handle_instrument_status_change(instrument, new_status)
-
-    assert (symbol, status, new_status) in [args for args, kwargs in calls]
-
-
-def test_handle_order(monkeypatch):
-    order_executed_at = datetime.datetime.now()
-    last_order_executed_at = order_executed_at - datetime.timedelta(seconds=1)
-    account_id = 1
-    account_ref_id = "account_ref_id"
-
-    order = DriveWealthOrder()
-    order.last_executed_at = order_executed_at
-    order.account_id = account_id
-
-    account = DriveWealthAccount()
-    account.ref_id = account_ref_id
-
-    portfolio = DriveWealthPortfolio()
-    portfolio.last_order_executed_at = last_order_executed_at
-
-    repository = DriveWealthRepository(None)
-    monkeypatch.setattr(
-        repository, "find_one",
-        mock_find([
-            (DriveWealthAccount, {
-                "ref_id": account_id
-            }, account),
-            (DriveWealthPortfolio, {
-                "drivewealth_account_id": account_ref_id
-            }, portfolio),
-        ]))
-    persisted_objects = {}
-    monkeypatch.setattr(repository, "persist", mock_persist(persisted_objects))
-
-    provider = DriveWealthProvider(repository, None, None, None, None)
-    provider.handle_order(order)
-
-    assert DriveWealthPortfolio in persisted_objects
-    assert portfolio in persisted_objects[DriveWealthPortfolio]
-    assert portfolio.last_order_executed_at == order_executed_at
-
-
-def get_test_on_new_transaction_portfolio_changed():
-    return [True, False]
-
-
-@pytest.mark.parametrize("portfolio_changed",
-                         get_test_on_new_transaction_portfolio_changed())
-def test_on_new_transaction(monkeypatch, portfolio_changed):
-    account_ref_id = "account_ref_id"
-
-    portfolio_status = DriveWealthPortfolioStatus()
-
-    portfolio = DriveWealthPortfolio()
-    normalize_weights_calls = []
-    monkeypatch.setattr(portfolio, "normalize_weights",
-                        mock_record_calls(normalize_weights_calls))
-
-    repository = DriveWealthRepository(None)
-    monkeypatch.setattr(
-        repository, "find_one",
-        mock_find([
-            (DriveWealthPortfolio, {
-                "drivewealth_account_id": account_ref_id
-            }, portfolio),
-        ]))
-
-    provider = DriveWealthProvider(repository, None, None, None, None)
-
-    def mock_sync_portfolio_status(_portfolio, force=None):
-        assert _portfolio == portfolio
-        assert force
-        return portfolio_status
-
-    monkeypatch.setattr(provider, "sync_portfolio_status",
-                        mock_sync_portfolio_status)
-
-    def mock_actualize_portfolio(_portfolio, _portfolio_status):
-        assert _portfolio == portfolio
-        assert _portfolio_status == portfolio_status
-        return portfolio_changed
-
-    monkeypatch.setattr(provider, "actualize_portfolio",
-                        mock_actualize_portfolio)
-
-    send_portfolio_to_api_calls = []
-    monkeypatch.setattr(provider, "send_portfolio_to_api",
-                        mock_record_calls(send_portfolio_to_api_calls))
-
-    provider.on_new_transaction(account_ref_id)
-
-    if portfolio_changed:
-        assert normalize_weights_calls
-        assert ((portfolio, ), {}) in send_portfolio_to_api_calls
-    else:
-        assert not normalize_weights_calls
-        assert not send_portfolio_to_api_calls

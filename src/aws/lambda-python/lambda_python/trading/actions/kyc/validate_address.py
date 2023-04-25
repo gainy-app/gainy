@@ -1,7 +1,6 @@
 from common.context_container import ContextContainer
-from gainy.exceptions import NotFoundException
 from common.hasura_function import HasuraAction
-from gainy.utils import get_logger, DATETIME_ISO8601_FORMAT_TZ
+from gainy.utils import get_logger
 from trading.kyc_form_validator import KycFormValidator
 
 logger = get_logger(__name__)

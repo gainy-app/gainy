@@ -1,9 +1,9 @@
 from common.context_container import ContextContainer
 from gainy.exceptions import BadRequestException
+from gainy.trading import MIN_FIRST_DEPOSIT_AMOUNT
 from gainy.trading.models import TradingMoneyFlow
 from trading.actions.money_flow import MoneyFlowAction
 from gainy.utils import get_logger
-from trading import MIN_FIRST_DEPOSIT_AMOUNT
 
 logger = get_logger(__name__)
 

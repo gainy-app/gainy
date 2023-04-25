@@ -48,6 +48,7 @@
     { "name": "POLYGON_INTRADAY_JOBS_COUNT",         "value": "${polygon_intraday_jobs_count}" },
     { "name": "DBT_TARGET_SCHEMA",                   "value": "${pg_transform_schema}" },
     { "name": "DBT_ARTIFACT_STATE_PATH",             "value": "/project/.meltano/transformers/dbt/target/" },
+    { "name": "SQS_HANDLER_LAMBDA_ARN",             "value": "${sqs_handler_lambda_arn}" },
     { "name": "AWS_LAMBDA_API_GATEWAY_ENDPOINT",     "value": "${aws_lambda_api_gateway_endpoint}" }
   ],
   "links": [],

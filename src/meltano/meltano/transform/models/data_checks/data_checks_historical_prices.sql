@@ -127,11 +127,11 @@ with check_params(table_name, dt_interval,
              select *,
                     adjusted_close - adjusted_close_pre                            as adjusted_close_dif,
                     (adjusted_close - adjusted_close_pre)
-                        / (1e-30 + abs(adjusted_close_pre))                        as adjusted_close_perc_change,
+                        / ({{ var('epsilon') }} + abs(adjusted_close_pre))                        as adjusted_close_perc_change,
                     volume - volume_pre                                            as volume_dif,
-                    (adjusted_close - adjusted_close_pre) / (1e-30 + abs(adjusted_close_pre))
+                    (adjusted_close - adjusted_close_pre) / ({{ var('epsilon') }} + abs(adjusted_close_pre))
                         - (intrpl_symbol_asmarket_adjusted_close - intrpl_symbol_asmarket_adjusted_close_pre)
-                        / (1e-30 + abs(intrpl_symbol_asmarket_adjusted_close_pre)) as adjusted_close_perc_change_wom
+                        / ({{ var('epsilon') }} + abs(intrpl_symbol_asmarket_adjusted_close_pre)) as adjusted_close_perc_change_wom
              from tickers_lag
          ), -- select * from tickers_difs;
      -- Execution Time: 125082.553 ms
@@ -160,7 +160,6 @@ with check_params(table_name, dt_interval,
                     (
                         dev_volume_dif > stddev_volume_dif * cp.allowable_sigma_dev_volume_dif
                     )::int                                     as iserror_volume_dif_dev,
-                    (adjusted_close = adjusted_close_pre)::int as iserror_adjusted_close_twice_same,
                     (adjusted_close <= 0)::int                 as iserror_adjusted_close_is_notpositive,
                     (adjusted_close is null)::int              as iserror_adjusted_close_is_null,
                     (volume is null)::int                      as iserror_volume_is_null
@@ -214,27 +213,8 @@ with check_params(table_name, dt_interval,
                                   group by date
                                   having avg(iserror_volume_dif_dev) > 0.05
                                      and date not between '2018-01-06' and '2018-01-07'
-                                     and date != '2018-01-13'
                               ) t using (date)
                  where iserror_volume_dif_dev > 0
-                 group by symbol, table_name
-             )
-             union all
-             (
-                 select symbol,
-                        table_name || '__adjusted_close_twice_same'                            as code,
-                        'daily'                                                                as "period",
-                        'Tickers ' || symbol || ' in table ' ||
-                        table_name || ' has ' || sum(iserror_adjusted_close_twice_same) ||
-                        ' pairs of consecutive rows with same price. Example at ' || max(date) as message
-                 from tickers_checks
-                         join (
-                                  select date
-                                  from tickers_checks
-                                  group by date
-                                  having avg(iserror_adjusted_close_twice_same) > 0.2
-                              ) t using (date)
-                 where iserror_adjusted_close_twice_same > 0
                  group by symbol, table_name
              )
              union all
@@ -332,3 +312,5 @@ select 'old_historical_prices_' || symbol                    as id,
        'Tickers ' || symbol || ' has old historical prices.' as message,
        now()                                                 as updated_at
 from old_historical_prices
+         join (select count(*) as cnt from old_historical_prices) t on true
+where cnt > 20 -- if less than 20, consider them just being delisted

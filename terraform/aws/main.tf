@@ -192,6 +192,9 @@ module "ecs-service" {
   appsflyer_dev_key          = var.appsflyer_dev_key
 
   aws_lambda_api_gateway_endpoint = "${module.lambda.aws_apigatewayv2_api_endpoint}/${local.deployment_key}"
+  sqs_handler_lambda_arn          = module.lambda.sqs_handler_arn
+  drivewealth_sqs_arn             = var.drivewealth_sqs_arn
+  aws_events_sqs_arn              = module.cloudwatch.aws_events_sqs_arn
   hasura_enable_console           = "true"
   hasura_enable_dev_mode          = "true"
   hasura_jwt_secret               = var.hasura_jwt_secret
