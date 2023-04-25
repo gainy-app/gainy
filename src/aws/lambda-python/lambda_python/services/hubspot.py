@@ -31,6 +31,9 @@ class HubspotService:
                         json.dumps(api_response.to_dict(), default=str))
         except ApiException as e:
             if e.status == 409:
+                logger.info("Conflict when creating hubspot contact",
+                            extra={"e": e})
                 # Contact already exists.
                 return
-            logger.exception("Exception when creating contact: %s", e)
+            logger.exception("Exception when creating hubspot contact",
+                             extra={"e": e})
