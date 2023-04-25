@@ -97,6 +97,7 @@ query TradingGetFundingAccountsWithUpdatedBalance($profile_id: Int!) {
             id
             balance
             name
+            needs_reauth
         }
     }
 }
@@ -108,6 +109,7 @@ query TradingGetFundingAccounts($profile_id: Int!) {
         id
         balance
         name
+        needs_reauth
     }
 }
 ```

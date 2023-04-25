@@ -33,8 +33,15 @@ with portfolio_statuses as
                       from {{ source('app', 'drivewealth_portfolio_statuses') }}
                                join {{ source('app', 'drivewealth_portfolios') }}
                                     on drivewealth_portfolios.ref_id = drivewealth_portfolio_id
-{% if var('realtime') %}
-                      where drivewealth_portfolio_statuses.created_at > (select max(updated_at) from {{ this }}) - interval '1 hour'
+-- {% if var('realtime') %}
+                               left join (
+                                             select profile_id, max(date) as max_date
+                                             from app.drivewealth_portfolio_statuses
+                                                      join app.drivewealth_portfolios
+                                                           on drivewealth_portfolios.ref_id = drivewealth_portfolio_id
+                                             group by profile_id
+                                         ) last_portfolio_update using (profile_id)
+                      where drivewealth_portfolio_statuses.date >= coalesce(greatest(last_portfolio_update.max_date, now() - interval '5 days'), now() - interval '5 days')
 {% else %}
                       where drivewealth_portfolio_statuses.created_at > now() - interval '10 days'
 {% endif %}
@@ -237,7 +244,7 @@ with portfolio_statuses as
                     value,
                     updated_at,
                     relative_gain,
-                    exp(sum(ln(relative_gain + 1 + 1e-10)) over wnd) as cumulative_relative_gain,
+                    exp(sum(ln(relative_gain + 1 + {{ var('epsilon') }})) over wnd) as cumulative_relative_gain,
                     is_scheduled
              from data_combined
                  window wnd as (partition by profile_id, holding_id_v2 order by datetime)
@@ -293,7 +300,7 @@ from data_extended
 {% if is_incremental() %}
          left join {{ this }} old_data using (profile_id, holding_id_v2, symbol, datetime)
 where old_data.profile_id is null
-   or abs(data_extended.value - old_data.value) > 1e-3
-   or abs(data_extended.prev_value - old_data.prev_value) > 1e-3
-   or abs(data_extended.relative_gain - old_data.relative_gain) > 1e-5
+   or abs(data_extended.value - old_data.value) > {{ var('price_precision') }}
+   or abs(data_extended.prev_value - old_data.prev_value) > {{ var('price_precision') }}
+   or abs(data_extended.relative_gain - old_data.relative_gain) > {{ var('gain_precision') }}
 {% endif %}

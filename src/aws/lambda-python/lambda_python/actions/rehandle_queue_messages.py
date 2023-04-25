@@ -4,9 +4,9 @@ from common.context_container import ContextContainer
 from common.hasura_function import HasuraAction
 
 from gainy.data_access.operators import OperatorIn
+from gainy.queue_processing.exceptions import UnsupportedMessageException
+from gainy.queue_processing.models import QueueMessage
 from gainy.utils import get_logger
-from queue_processing.exceptions import UnsupportedMessageException
-from queue_processing.models import QueueMessage
 
 logger = get_logger(__name__)
 

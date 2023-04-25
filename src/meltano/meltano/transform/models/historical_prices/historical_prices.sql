@@ -15,14 +15,14 @@
 
 -- Execution Time: 450490.199 ms
 with
-polygon_symbols as materialized
-    (
-        select symbol
-        from {{ source('polygon', 'polygon_stocks_historical_prices') }}
-        where t >= (select max(t) from {{ source('polygon', 'polygon_stocks_historical_prices') }} where symbol not like 'C:%')
-          and symbol not like 'C:%'
-        group by symbol
-    ),
+-- TODO switch to polygon prices when they are good enough
+-- polygon_symbols as materialized
+--     (
+--         select symbol
+--         from {{ source('polygon', 'polygon_stocks_historical_prices') }}
+--         where symbol not like 'C:%' and symbol not like 'X:%'
+--         group by symbol
+--     ),
 raw_eod_historical_prices as
     (
         select code                                      as symbol,
@@ -39,48 +39,49 @@ raw_eod_historical_prices as
                'eod'                                     as source,
                _sdc_batched_at                           as updated_at
         from {{ source('eod', 'eod_historical_prices') }}
-                 left join polygon_symbols
-                           on polygon_symbols.symbol = eod_historical_prices.code
-        where polygon_symbols.symbol is null
-          and eod_historical_prices.date >= eod_historical_prices.first_date
+                 join {{ ref('base_tickers') }} on base_tickers.symbol = eod_historical_prices.code
+--                  left join polygon_symbols
+--                            on polygon_symbols.symbol = eod_historical_prices.code
+        where eod_historical_prices.date >= eod_historical_prices.first_date
           and eod_historical_prices.adjusted_close > 0
+--           and polygon_symbols.symbol is null
 ),
-raw_polygon_stocks_historical_prices as
-    (
-        select symbol,
-               to_timestamp(t / 1000)::date                           as date,
-               extract(year from to_timestamp(t / 1000))::varchar     as date_year,
-               date_trunc('month', to_timestamp(t / 1000))::timestamp as date_month,
-               date_trunc('week', to_timestamp(t / 1000))::timestamp  as date_week,
-               o                                                      as open,
-               h                                                      as high,
-               l                                                      as low,
-               c                                                      as close,
-               c                                                      as adjusted_close,
-               v                                                      as volume,
-               'polygon'                                              as source,
-               _sdc_batched_at                                        as updated_at
-        from {{ source('polygon', 'polygon_stocks_historical_prices') }}
-                 join polygon_symbols using (symbol)
-),
+-- raw_polygon_stocks_historical_prices as
+--     (
+--         select symbol,
+--                to_timestamp(t / 1000)::date                           as date,
+--                extract(year from to_timestamp(t / 1000))::varchar     as date_year,
+--                date_trunc('month', to_timestamp(t / 1000))::timestamp as date_month,
+--                date_trunc('week', to_timestamp(t / 1000))::timestamp  as date_week,
+--                o                                                      as open,
+--                h                                                      as high,
+--                l                                                      as low,
+--                c                                                      as close,
+--                c                                                      as adjusted_close,
+--                v                                                      as volume,
+--                'polygon'                                              as source,
+--                _sdc_batched_at                                        as updated_at
+--         from {{ source('polygon', 'polygon_stocks_historical_prices') }}
+--                  join polygon_symbols using (symbol)
+-- ),
 raw_historical_prices as materialized
     (
-        select symbol,
-               date,
-               date_year,
-               date_month,
-               date_week,
-               open,
-               high,
-               low,
-               close,
-               adjusted_close,
-               volume,
-               source,
-               updated_at
-        from raw_polygon_stocks_historical_prices
-
-        union all
+--         select symbol,
+--                date,
+--                date_year,
+--                date_month,
+--                date_week,
+--                open,
+--                high,
+--                low,
+--                close,
+--                adjusted_close,
+--                volume,
+--                source,
+--                updated_at
+--         from raw_polygon_stocks_historical_prices
+--
+--         union all
 
         select symbol,
                date,
@@ -157,6 +158,7 @@ prices_with_split_rates as
                raw_historical_prices.adjusted_close,
                raw_historical_prices.close,
                raw_historical_prices.volume,
+               raw_historical_prices.source,
                raw_historical_prices.updated_at
         from raw_historical_prices
                  left join stocks_with_split using (symbol)
@@ -234,6 +236,7 @@ all_rows as
            prices_with_split_rates.high,
            prices_with_split_rates.low,
            prices_with_split_rates.open,
+           prices_with_split_rates.source,
            prices_with_split_rates.volume
     from prices_with_split_rates
              left join latest_day_split_rate using (symbol)
@@ -260,6 +263,7 @@ from (
                 low,
                 open,
                 volume::numeric,
+                all_rows.source,
                 all_rows.updated_at
          from all_rows
              window wnd as (partition by symbol order by date rows between 1 preceding and current row)
@@ -282,6 +286,7 @@ from (
                 l                                                               as low,
                 o                                                               as open,
                 v::numeric                                                      as volume,
+                'polygon'                                                       as source,
                 polygon_options_historical_prices._sdc_batched_at               as updated_at
          from {{ source('polygon', 'polygon_options_historical_prices') }}
                   join {{ ref('ticker_options_monitored') }} using (contract_name)
@@ -305,6 +310,7 @@ from (
                 l                                                                      as low,
                 o                                                                      as open,
                 v::numeric                                                             as volume,
+                'polygon'                                                              as source,
                 polygon_crypto_historical_prices._sdc_batched_at                       as updated_at
          from polygon_crypto_tickers
                   join {{ source('polygon', 'polygon_crypto_historical_prices') }}
@@ -315,6 +321,6 @@ from (
          left join {{ this }} old_data using (symbol, date)
 where old_data.symbol is null
    or (old_data.relative_daily_gain is null and t.relative_daily_gain is not null)
-   or abs(t.adjusted_close - old_data.adjusted_close) > 1e-3
-   or abs(t.relative_daily_gain - old_data.relative_daily_gain) > 1e-3
+   or abs(t.adjusted_close - old_data.adjusted_close) > {{ var('price_precision') }}
+   or abs(t.relative_daily_gain - old_data.relative_daily_gain) > {{ var('gain_precision') }}
 {% endif %}

@@ -1,9 +1,9 @@
 import datetime
 
 from gainy.tests.mocks.repository_mocks import mock_persist, mock_noop
+from gainy.trading.drivewealth.models import DriveWealthKycStatus
+from gainy.trading.models import KycStatus, ProfileKycStatus
 from gainy.utils import DATETIME_ISO8601_FORMAT_TZ
-from trading.models import KycStatus, ProfileKycStatus
-from trading.drivewealth.models import DriveWealthKycStatus
 from trading.drivewealth.api import DriveWealthApi
 from trading.drivewealth.provider import DriveWealthProvider
 from trading.drivewealth.repository import DriveWealthRepository

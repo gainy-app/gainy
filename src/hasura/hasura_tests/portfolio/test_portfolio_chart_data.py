@@ -62,8 +62,9 @@ def verify_portfolio_chart(portfolio_chart,
                 chart_row_indexes[symbol] += 1
                 chart_row_index = chart_row_indexes[symbol]
 
-            if chart_row_index < len(symbol_charts[symbol]) and symbol_charts[
-                    symbol][chart_row_index]['datetime'] == date:
+            if chart_row_index < len(
+                    symbol_charts[symbol]
+            ) and symbol_charts[symbol][chart_row_index]['datetime'] == date:
                 expected_value += symbol_charts[symbol][chart_row_index][
                     'adjusted_close'] * quantity
                 print(quantity, symbol_charts[symbol][chart_row_index])

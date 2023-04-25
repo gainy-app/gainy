@@ -22,6 +22,9 @@ locals {
     polygon_jobs_count                  = local.polygon_jobs_count
     polygon_intraday_jobs_count         = local.polygon_intraday_jobs_count
     pg_transform_schema                 = local.public_schema_name
+    sqs_handler_lambda_arn              = var.sqs_handler_lambda_arn
+    drivewealth_sqs_arn                 = var.drivewealth_sqs_arn
+    aws_events_sqs_arn                  = var.aws_events_sqs_arn
     meltano_image                       = docker_registry_image.meltano.name
     aws_log_group_name                  = aws_cloudwatch_log_group.meltano.name
     aws_log_region                      = var.aws_log_region

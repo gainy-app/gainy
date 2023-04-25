@@ -1,7 +1,7 @@
 import json
 
 from gainy.data_access.repository import Repository
-from queue_processing.models import QueueMessage
+from gainy.queue_processing.models import QueueMessage
 
 
 class SqsAdapter:

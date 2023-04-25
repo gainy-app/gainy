@@ -4,17 +4,15 @@ import datetime
 
 from decimal import Decimal
 
-from gainy.trading.drivewealth.config import DRIVEWEALTH_WLP_ID, DRIVEWEALTH_PARENT_IBID, DRIVEWEALTH_RIA_ID, \
-    DRIVEWEALTH_RIA_PRODUCT_ID
-from trading.models import KycDocument, TradingStatementType
+from gainy.trading.drivewealth.config import DRIVEWEALTH_WLP_ID, DRIVEWEALTH_PARENT_IBID, DRIVEWEALTH_RIA_ID
+from gainy.trading.models import TradingStatementType
+from trading.models import KycDocument
 from trading.drivewealth.repository import DriveWealthRepository
-from trading.drivewealth.models import DriveWealthKycStatus, \
-    DriveWealthStatement
 
-from gainy.utils import get_logger, env, ENV_PRODUCTION, DATE_ISO8601_FORMAT
+from gainy.utils import get_logger, DATE_ISO8601_FORMAT
 from gainy.trading.drivewealth import DriveWealthApi as GainyDriveWealthApi
-from gainy.trading.drivewealth.models import DriveWealthAccount, DriveWealthBankAccount, DriveWealthRedemption, \
-    DriveWealthDeposit
+from gainy.trading.drivewealth.models import DriveWealthAccount, DriveWealthBankAccount, \
+    DriveWealthDeposit, DriveWealthKycStatus, DriveWealthStatement
 
 logger = get_logger(__name__)
 
@@ -43,20 +41,6 @@ class DriveWealthApi(GainyDriveWealthApi):
                 "parentIBID": DRIVEWEALTH_PARENT_IBID,
                 "documents": documents,
             })
-
-    def create_account(self, user_id: str):
-        params = {
-            "userID": user_id,
-            "accountType": "LIVE",
-            "accountManagementType": "RIA_MANAGED",
-            "tradingType": "CASH",
-            "riaUserID": DRIVEWEALTH_RIA_ID,
-            "riaProductID": DRIVEWEALTH_RIA_PRODUCT_ID,
-        }
-        if env() != ENV_PRODUCTION:
-            params["ignoreMarketHoursForTest"] = True
-
-        return self._make_request("POST", "/accounts", params)
 
     def upload_document(self, user_id: str, document: KycDocument,
                         file_base64):
@@ -104,10 +88,6 @@ class DriveWealthApi(GainyDriveWealthApi):
         return self._make_request("GET",
                                   f"/users/{user_id}/funding/redemptions")
 
-    def get_redemption(self, redemption_id):
-        return self._make_request("GET",
-                                  f"/funding/redemptions/{redemption_id}")
-
     def create_deposit(
             self, amount: Decimal, account: DriveWealthAccount,
             bank_account: DriveWealthBankAccount) -> DriveWealthDeposit:
@@ -122,16 +102,6 @@ class DriveWealthApi(GainyDriveWealthApi):
         entity = DriveWealthDeposit()
         entity.set_from_response(response)
         return entity
-
-    def update_redemption(self, redemption: DriveWealthRedemption,
-                          status: str):
-        data = self._make_request("PATCH",
-                                  f"/funding/redemptions/{redemption.ref_id}",
-                                  {
-                                      'status': status,
-                                      'statusComment': 'Updated by Gainy',
-                                  })
-        redemption.set_from_response(data)
 
     def get_autopilot_run(self, ref_id):
         return self._make_request("GET", f"/managed/autopilot/{ref_id}")
