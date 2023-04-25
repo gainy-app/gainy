@@ -1010,6 +1010,9 @@
         timeout_sec: 60
       webhook: '{{AWS_LAMBDA_API_GATEWAY_ENDPOINT}}/hasuraTrigger'
 - table:
+    name: queue_messages
+    schema: app
+- table:
     name: stripe_payment_methods
     schema: app
   event_triggers:

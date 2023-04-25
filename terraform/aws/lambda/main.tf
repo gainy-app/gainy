@@ -297,10 +297,10 @@ module "hasura_action_integration" {
 
 ##################################################################################
 
-module "sqs_listener" {
+module "sqs_handler" {
   source                 = "./function"
   env                    = var.env
-  function_name          = "sqsListener"
+  function_name          = "sqs_handler"
   handler                = "sqs_listener.handle"
   timeout                = 10
   exec_role_arn          = aws_iam_role.lambda_exec.arn
@@ -311,7 +311,23 @@ module "sqs_listener" {
   vpc_subnet_ids         = var.vpc_subnet_ids
 }
 
-module "sqs_listener_integration" {
+##################################################################################
+
+module "sqs_listener" {
+  source                 = "./function"
+  env                    = var.env
+  function_name          = "sqsListener"
+  handler                = "sqs_listener.listen"
+  timeout                = 1
+  exec_role_arn          = aws_iam_role.lambda_exec.arn
+  image_uri              = docker_registry_image.lambda_python.name
+  memory_size            = 256
+  env_vars               = local.env_vars
+  vpc_security_group_ids = var.vpc_security_group_ids
+  vpc_subnet_ids         = var.vpc_subnet_ids
+}
+
+module "sqs_handler_integration" {
   source                        = "./sqs-integration"
   aws_iam_role_lambda_exec_role = aws_iam_role.lambda_exec
   aws_lambda_invoke_arn         = "${module.sqs_listener.arn}:${module.sqs_listener.version}"
@@ -327,9 +343,35 @@ module "sqs_listener_integration" {
   )
 }
 
+data "aws_iam_policy_document" "lambda_sqs_listener_policy_document" {
+  statement {
+    sid = "InvokeLambda"
+
+    actions = [
+      "lambda:InvokeFunction",
+      "lambda:InvokeAsync",
+    ]
+
+    resources = [
+      "${module.sqs_handler.arn}:*"
+    ]
+  }
+}
+
+resource "aws_iam_role_policy" "lambda_sqs_listener_policy" {
+  name   = "lambda_sqs_listener_policy"
+  role   = aws_iam_role.lambda_exec.name
+  policy = data.aws_iam_policy_document.lambda_sqs_listener_policy_document.json
+}
+
+
 ##################################################################################
 
 output "aws_apigatewayv2_api_endpoint" {
   value      = "${aws_apigatewayv2_api.lambda.api_endpoint}/${aws_apigatewayv2_stage.lambda.name}"
   depends_on = [module.hasura_action, module.hasura_trigger]
+}
+
+output "sqs_handler_arn" {
+  value = "${module.sqs_handler.arn}:${module.sqs_handler.version}"
 }

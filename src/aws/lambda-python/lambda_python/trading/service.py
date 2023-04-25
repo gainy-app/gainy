@@ -10,18 +10,18 @@ from gainy.plaid.common import handle_error
 from gainy.trading.exceptions import InsufficientFundsException
 from models import UploadedFile
 from portfolio.plaid import PlaidService
-from services.aws_s3 import S3
 from services.uploaded_file_service import UploadedFileService
 from trading.drivewealth.provider import DriveWealthProvider
 from trading.exceptions import WrongTradingOrderStatusException
 from trading.kyc_form_validator import KycFormValidator
 from gainy.plaid.models import PlaidAccessToken, PlaidAccount
-from trading.models import KycDocument, ProfileKycStatus, TradingStatement, KycStatus
+from trading.models import KycDocument
 
 import plaid
 from gainy.utils import get_logger, env, ENV_PRODUCTION
 from gainy.trading.models import TradingAccount, TradingCollectionVersion, TradingOrderStatus, \
-    FundingAccount, TradingOrder, TradingMoneyFlowStatus, TradingMoneyFlow, AbstractProviderBankAccount
+    FundingAccount, TradingOrder, TradingMoneyFlowStatus, TradingMoneyFlow, AbstractProviderBankAccount, \
+    ProfileKycStatus, KycStatus, TradingStatement
 from gainy.trading.service import TradingService as GainyTradingService
 from trading.repository import TradingRepository
 from verification.models import VerificationCodeChannel

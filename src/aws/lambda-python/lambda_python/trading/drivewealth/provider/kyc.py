@@ -2,13 +2,13 @@ import base64
 import io
 
 from gainy.exceptions import NotFoundException
-from trading.models import ProfileKycStatus, KycDocument
+from gainy.trading.models import ProfileKycStatus
+from trading.models import KycDocument
 from trading.drivewealth.api import DriveWealthApi
 from trading.drivewealth.repository import DriveWealthRepository
 
-from gainy.trading.models import TradingAccount
-from gainy.trading.drivewealth.models import DriveWealthAccount, DriveWealthUser
-from gainy.trading.drivewealth.provider import DriveWealthProvider as GainyDriveWealthProvider
+from gainy.trading.drivewealth.models import DriveWealthUser
+from gainy.trading.drivewealth import DriveWealthProvider as GainyDriveWealthProvider
 from gainy.utils import get_logger
 
 logger = get_logger(__name__)
@@ -65,14 +65,6 @@ class DriveWealthProviderKYC(GainyDriveWealthProvider):
             self.repository.upsert_kyc_document(None, document_data)
 
         return kyc_status
-
-    def get_profile_id_by_user_id(self, user_ref_id: str) -> int:
-        user: DriveWealthUser = self.repository.find_one(
-            DriveWealthUser, {"ref_id": user_ref_id})
-        if not user or not user.profile_id:
-            raise NotFoundException
-
-        return user.profile_id
 
     def _kyc_form_to_documents(self, kyc_form: dict):
         return [
