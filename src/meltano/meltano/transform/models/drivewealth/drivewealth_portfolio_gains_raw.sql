@@ -177,14 +177,35 @@ with profile_stats as materialized
      ),
      relative_gains as
          (
-             with data as
+             with last_selloff_date as materialized
+                     (
+                         select profile_id,
+                                case
+                                    when bool_or(last_selloff_date is null)
+                                        then null
+                                    else min(last_selloff_date)
+                                    end as last_selloff_date
+                         from (select profile_id, holding_id_v2 from {{ ref('drivewealth_portfolio_historical_holdings') }} group by profile_id, holding_id_v2) t1
+                                  left join (
+                                                select profile_id, max(date) as last_selloff_date
+                                                from (
+                                                         select profile_id, date
+                                                         from {{ ref('drivewealth_portfolio_historical_holdings') }}
+                                                         group by profile_id, date
+                                                         having sum(value) < {{ var('price_precision') }}
+                                                     ) t
+                                                group by profile_id
+                                            ) t2 using (profile_id)
+                         group by profile_id
+                 ),
+                data as
                      (
                          select profile_id,
                                 date,
-                                sum(value)              as value,
-                                sum(prev_value)::numeric         as prev_value,
+                                sum(value)               as value,
+                                sum(prev_value)::numeric as prev_value,
                                 sum(case when is_last_date.holding_id_v2 is null then 0 else value end -
-                                    cash_flow)::numeric as cash_flow
+                                    cash_flow)::numeric  as cash_flow
                          from {{ ref('drivewealth_portfolio_historical_holdings') }}
                                   left join (
                                                 select holding_id_v2, max(date) as date
@@ -192,7 +213,9 @@ with profile_stats as materialized
                                                 where not is_premarket
                                                 group by holding_id_v2
                                             ) is_last_date using (holding_id_v2, date)
+                                  left join last_selloff_date using (profile_id)
                          where not is_premarket
+                           and (date > last_selloff_date or last_selloff_date is null)
                          group by profile_id, date
                      ),
                  data_1d as
