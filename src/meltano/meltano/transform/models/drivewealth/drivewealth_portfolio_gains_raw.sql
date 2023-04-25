@@ -363,6 +363,7 @@ with profile_stats as materialized
                               ) t
                  )
              select profile_id,
+                    relative_gain_1d,
                     case
                         when relative_gain_1w is null or count_1w = 1
                             then relative_gain_1d
