@@ -1,8 +1,6 @@
-import json
-
-from queue_processing.models import QueueMessage
-from trading.drivewealth.event_handlers import UsersUpdatedEventHandler
-from trading.drivewealth.queue_message_handler import DriveWealthQueueMessageHandler
+from gainy.queue_processing.models import QueueMessage
+from gainy.trading.drivewealth.queue_message_handler import DriveWealthQueueMessageHandler
+from gainy.trading.drivewealth.event_handlers import UsersUpdatedEventHandler
 
 
 def test(monkeypatch):

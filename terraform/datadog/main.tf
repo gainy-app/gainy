@@ -111,27 +111,6 @@ resource "datadog_monitor" "healthy_hosts" {
 
 #################################### Lambda ####################################
 
-resource "datadog_monitor" "lambda_invocations" {
-  name    = "Lambda Invocations"
-  type    = "query alert"
-  message = "Lambda Invocations Monitor triggered. Notify: @slack-${var.slack_channel_name} <!channel>"
-
-  query = "avg(last_1d):aws.lambda.invocations{functionname:*_production} by {functionname}.rollup(sum, 86400) / week_before(aws.lambda.invocations{functionname:*_production} by {functionname}.rollup(sum, 86400)) - 1 > 5"
-
-  monitor_thresholds {
-    critical          = "5"
-    critical_recovery = "4"
-    warning           = "2"
-    warning_recovery  = "1"
-  }
-
-  require_full_window = false
-  notify_no_data      = false
-  renotify_interval   = 240
-
-  tags = ["lambda"]
-}
-
 resource "datadog_monitor" "lambda_duration" {
   name    = "Lambda Duration"
   type    = "query alert"

@@ -10,6 +10,7 @@
       index(['holding_id_v2', 'date_month'], false),
       index(['profile_id', 'date'], false),
       index('portfolio_status_id', false),
+      fk('profile_id', 'app', 'profiles', 'id'),
     ]
   )
 }}
@@ -181,8 +182,8 @@ with portfolio_statuses as
      data_extended1 as -- calculate cumulative_daily_relative_gain
          (
              select *,
-                    lag(value) over wnd                                    as prev_value,
-                    exp(sum(ln(relative_daily_gain + 1 + 1e-10)) over wnd) as cumulative_daily_relative_gain
+                    lag(value) over wnd                                                   as prev_value,
+                    exp(sum(ln(relative_daily_gain + 1 + {{ var('epsilon') }})) over wnd) as cumulative_daily_relative_gain
              from data_extended0
                  window wnd as (partition by holding_id_v2 order by date)
      ),
@@ -278,7 +279,7 @@ with portfolio_statuses as
                     case
                         when abs(coalesce(order_cf_sum, 0) + prev_value_sum) > 0 and value_sum > 0 and abs(computed_relative_daily_gain + 1) > 0
                             then value / (computed_relative_daily_gain + 1) - prev_value
-                        when value_sum < 1e-10 and prev_value_sum > 0
+                        when value_sum < {{ var('epsilon') }} and prev_value_sum > 0
                             then value - (computed_relative_daily_gain + 1) * prev_value
                         else value - prev_value
                         end as cash_flow,
@@ -301,7 +302,7 @@ with portfolio_statuses as
                              case
                                  when abs(coalesce(order_cf_sum, 0) + prev_value_sum) > 0 and value_sum > 0
                                      then value_sum / (coalesce(order_cf_sum, 0) + prev_value_sum) - 1
-                                 when value_sum < 1e-10 and prev_value_sum > 0
+                                 when value_sum < {{ var('epsilon') }} and prev_value_sum > 0
                                      then (value_sum - coalesce(order_cf_sum, 0)) / prev_value_sum - 1
                                  end as computed_relative_daily_gain,
                              value,
@@ -335,7 +336,7 @@ with portfolio_statuses as
                              date,
                              relative_daily_gain,
                              case
-                                 when value is null and (prev_value_sum is null or prev_value_sum < 1e-10)
+                                 when value is null and (prev_value_sum is null or prev_value_sum < {{ var('epsilon') }})
                                      then 0
                                  when value is null
                                      -- EV = (CF + BV) * (HP + 1)
@@ -343,7 +344,7 @@ with portfolio_statuses as
                                  else value
                                  end as value,
                              case
-                                 when value is null and (prev_value_sum is null or prev_value_sum < 1e-10)
+                                 when value is null and (prev_value_sum is null or prev_value_sum < {{ var('epsilon') }})
                                      then 0
                                  when value is null
                                      then (order_cf_sum - equity_cf_sum) * prev_value / prev_value_sum
@@ -410,7 +411,7 @@ from data_extended
          left join {{ this }} old_data using (profile_id, holding_id_v2, symbol, date)
 where (old_data.profile_id is null
    or data_extended.is_premarket != old_data.is_premarket
-   or abs(data_extended.relative_daily_gain - old_data.relative_daily_gain) > 1e-3
-   or abs(data_extended.cash_flow - old_data.cash_flow) > 1e-3
-   or abs(data_extended.value - old_data.value) > 1e-3)
+   or abs(data_extended.relative_daily_gain - old_data.relative_daily_gain) > {{ var('gain_precision') }}
+   or abs(data_extended.cash_flow - old_data.cash_flow) > {{ var('price_precision') }}
+   or abs(data_extended.value - old_data.value) > {{ var('price_precision') }})
 {% endif %}

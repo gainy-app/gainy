@@ -2,8 +2,8 @@ from psycopg2.extras import RealDictCursor
 
 from gainy.exceptions import NotFoundException
 from gainy.trading.repository import TradingRepository as GainyTradingRepository
-from gainy.trading.models import TradingAccount
-from trading.models import KycDocument, ProfileKycStatus, KycForm
+from gainy.trading.models import TradingAccount, KycForm
+from trading.models import KycDocument
 
 
 class TradingRepository(GainyTradingRepository):
@@ -17,14 +17,6 @@ class TradingRepository(GainyTradingRepository):
                     "profile_id": profile_id,
                 })
             return cursor.fetchone()
-
-    def update_kyc_form(self, profile_id: int, status: str):
-        entity: KycForm = self.find_one(KycForm, {"profile_id": profile_id})
-        if not entity:
-            return
-
-        entity.status = status
-        self.persist(entity)
 
     def remove_sensitive_kyc_data(self, profile_id: int):
         entity: KycForm = self.find_one(KycForm, {"profile_id": profile_id})
@@ -42,11 +34,3 @@ class TradingRepository(GainyTradingRepository):
             raise NotFoundException()
 
         return trading_account
-
-    def get_actual_kyc_status(self, profile_id: int) -> ProfileKycStatus:
-        status = self.find_one(ProfileKycStatus, {"profile_id": profile_id},
-                               order_by=[("created_at", "desc")])
-        if status:
-            return status
-
-        raise NotFoundException()

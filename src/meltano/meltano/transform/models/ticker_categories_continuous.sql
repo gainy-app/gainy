@@ -71,7 +71,7 @@ with
                         (
                             select t.symbol,
                                    -(t2.beta - 1) as beta, --center at threshold 1 and flip (<1 threshold from BusDoc)
-                                   -(t2.downside_deviation - downside_deviation_gicstcr.median)/(1e-30 + downside_deviation_gicstcr.median) as downside_deviation --center at threshold 0 and flip, normalize per gic_sector
+                                   -(t2.downside_deviation - downside_deviation_gicstcr.median)/({{ var('epsilon') }} + downside_deviation_gicstcr.median) as downside_deviation --center at threshold 0 and flip, normalize per gic_sector
                             from defensive_gicsctr t
                                      join {{ ref('technicals') }} t2 on t.symbol = t2.symbol
                                      join downside_deviation_gicstcr on downside_deviation_gicstcr.gic_sector = t.gic_sector
@@ -82,11 +82,11 @@ with
                     defensive_scalekoefs as
                         ( --scale koefs for pos and neg sides for good fit into D(CDF)=>sigmoid (D(f):[-7..7]=>E(f):[0..1]) (if it's kinda normal distribution - then it is symmetrical and ok, but usual itsn't, so left and right part need to have own scalings
                             --we take the point of medians amplitudes for pos and neg sides rspctvly and make that points to be the divisors-scale-koefs for input of CDF to make them equal to 1sigma, so that CDF(+/-1)=+/-0.75 (and tails of bigger amplitudes are squized))
-                            --1e-30 epsilon to no ZeroDiv coz we will divide by this scale koef
-                            select 1e-30 + coalesce((select percentile_cont(0.5) within group(order by beta asc) from defensive_cntrflip where beta > 0), 0.) as beta_k_u,
-                                   1e-30 + coalesce((select percentile_cont(0.5) within group(order by downside_deviation asc) from defensive_cntrflip where downside_deviation > 0), 0.) as downside_deviation_k_u,
-                                   1e-30 + coalesce((select percentile_cont(0.5) within group(order by -beta asc) from defensive_cntrflip where beta < 0), 0.) as beta_k_d,
-                                   1e-30 + coalesce((select percentile_cont(0.5) within group(order by -downside_deviation asc) from defensive_cntrflip where downside_deviation < 0), 0.) as downside_deviation_k_d
+                            --{{ var('epsilon') }} epsilon to no ZeroDiv coz we will divide by this scale koef
+                            select {{ var('epsilon') }} + coalesce((select percentile_cont(0.5) within group(order by beta asc) from defensive_cntrflip where beta > 0), 0.) as beta_k_u,
+                                   {{ var('epsilon') }} + coalesce((select percentile_cont(0.5) within group(order by downside_deviation asc) from defensive_cntrflip where downside_deviation > 0), 0.) as downside_deviation_k_u,
+                                   {{ var('epsilon') }} + coalesce((select percentile_cont(0.5) within group(order by -beta asc) from defensive_cntrflip where beta < 0), 0.) as beta_k_d,
+                                   {{ var('epsilon') }} + coalesce((select percentile_cont(0.5) within group(order by -downside_deviation asc) from defensive_cntrflip where downside_deviation < 0), 0.) as downside_deviation_k_d
                         ),
 
                     defensive_sim as
@@ -109,8 +109,8 @@ with
                         ( --   and we will need to do additional step to refit from (-1..1) to [-1..1] for neg & pos sides again
                             --   (coz input n-dimnsnal coord combos and CDFs combos of them (as a consequence) can often be non-synchronous and no gurarantee for touching CDFs limits [0..1]
                             --   (e.g. lowest sim_1=0.105 ticker have {CDF1=0.01 but CDF2=0.2}=> and no any lower ticker with simultaneous {0.0,0.0} so we will need to rescale a bit there))
-                            select 1e-30 + coalesce((select MAX(sim_dif) from defensive_sim where sim_dif > 0), 0.) as sim_dif_k_u,
-                                   1e-30 + coalesce((select MAX(-sim_dif) from defensive_sim where sim_dif < 0), 0.) as sim_dif_k_d
+                            select {{ var('epsilon') }} + coalesce((select MAX(sim_dif) from defensive_sim where sim_dif > 0), 0.) as sim_dif_k_u,
+                                   {{ var('epsilon') }} + coalesce((select MAX(-sim_dif) from defensive_sim where sim_dif < 0), 0.) as sim_dif_k_d
                         ),
 
                     defensive_sim_dif as
@@ -187,14 +187,14 @@ with
 
                     dividend_scalekoefs as
                         (
-                            select 1e-30 + coalesce((select percentile_cont(0.5) within group(order by lcdy asc) from dividend_cntrflip where lcdy > 0), 0.) as lcdy_k_u,
-                                   1e-30 + coalesce((select percentile_cont(0.5) within group(order by markcap asc) from dividend_cntrflip where markcap > 0), 0.) as markcap_k_u,
-                                   1e-30 + coalesce((select percentile_cont(0.5) within group(order by dpsdifavg asc) from dividend_cntrflip where dpsdifavg > 0), 0.) as dpsdifavg_k_u,
-                                   1e-30 + coalesce((select percentile_cont(0.5) within group(order by dmedpsrat asc) from dividend_cntrflip where dmedpsrat > 0), 0.) as dmedpsrat_k_u,
-                                   1e-30 + coalesce((select percentile_cont(0.5) within group(order by -lcdy asc) from dividend_cntrflip where lcdy < 0), 0.) as lcdy_k_d,
-                                   1e-30 + coalesce((select percentile_cont(0.5) within group(order by -markcap asc) from dividend_cntrflip where markcap < 0), 0.) as markcap_k_d,
-                                   1e-30 + coalesce((select percentile_cont(0.5) within group(order by -dpsdifavg asc) from dividend_cntrflip where dpsdifavg < 0), 0.) as dpsdifavg_k_d,
-                                   1e-30 + coalesce((select percentile_cont(0.5) within group(order by -dmedpsrat asc) from dividend_cntrflip where dmedpsrat < 0), 0.) as dmedpsrat_k_d
+                            select {{ var('epsilon') }} + coalesce((select percentile_cont(0.5) within group(order by lcdy asc) from dividend_cntrflip where lcdy > 0), 0.) as lcdy_k_u,
+                                   {{ var('epsilon') }} + coalesce((select percentile_cont(0.5) within group(order by markcap asc) from dividend_cntrflip where markcap > 0), 0.) as markcap_k_u,
+                                   {{ var('epsilon') }} + coalesce((select percentile_cont(0.5) within group(order by dpsdifavg asc) from dividend_cntrflip where dpsdifavg > 0), 0.) as dpsdifavg_k_u,
+                                   {{ var('epsilon') }} + coalesce((select percentile_cont(0.5) within group(order by dmedpsrat asc) from dividend_cntrflip where dmedpsrat > 0), 0.) as dmedpsrat_k_u,
+                                   {{ var('epsilon') }} + coalesce((select percentile_cont(0.5) within group(order by -lcdy asc) from dividend_cntrflip where lcdy < 0), 0.) as lcdy_k_d,
+                                   {{ var('epsilon') }} + coalesce((select percentile_cont(0.5) within group(order by -markcap asc) from dividend_cntrflip where markcap < 0), 0.) as markcap_k_d,
+                                   {{ var('epsilon') }} + coalesce((select percentile_cont(0.5) within group(order by -dpsdifavg asc) from dividend_cntrflip where dpsdifavg < 0), 0.) as dpsdifavg_k_d,
+                                   {{ var('epsilon') }} + coalesce((select percentile_cont(0.5) within group(order by -dmedpsrat asc) from dividend_cntrflip where dmedpsrat < 0), 0.) as dmedpsrat_k_d
                         ),
 
                     dividend_sim as
@@ -211,8 +211,8 @@ with
 
                     dividend_sim_scalekoefs as
                         (
-                            select 1e-30 + coalesce((select MAX(sim_dif) from dividend_sim where sim_dif > 0), 0.) as sim_dif_k_u,
-                                   1e-30 + coalesce((select MAX(-sim_dif) from dividend_sim where sim_dif < 0), 0.) as sim_dif_k_d
+                            select {{ var('epsilon') }} + coalesce((select MAX(sim_dif) from dividend_sim where sim_dif > 0), 0.) as sim_dif_k_u,
+                                   {{ var('epsilon') }} + coalesce((select MAX(-sim_dif) from dividend_sim where sim_dif < 0), 0.) as sim_dif_k_d
                         ),
 
                     dividend_sim_dif as
@@ -245,8 +245,8 @@ with
 
                     momentum_scalekoefs as
                         (
-                            select 1e-30 + coalesce((select percentile_cont(0.5) within group(order by combined_momentum_score asc) from momentum_cntrflip where combined_momentum_score > 0), 0.) as combined_momentum_score_k_u,
-                                   1e-30 + coalesce((select percentile_cont(0.5) within group(order by -combined_momentum_score asc) from momentum_cntrflip where combined_momentum_score < 0), 0.) as combined_momentum_score_k_d
+                            select {{ var('epsilon') }} + coalesce((select percentile_cont(0.5) within group(order by combined_momentum_score asc) from momentum_cntrflip where combined_momentum_score > 0), 0.) as combined_momentum_score_k_u,
+                                   {{ var('epsilon') }} + coalesce((select percentile_cont(0.5) within group(order by -combined_momentum_score asc) from momentum_cntrflip where combined_momentum_score < 0), 0.) as combined_momentum_score_k_d
                         ),
 
                     momentum_sim as
@@ -260,8 +260,8 @@ with
 
                     momentum_sim_scalekoefs as
                         (
-                            select 1e-30 + coalesce((select MAX(sim_dif) from momentum_sim where sim_dif > 0), 0.) as sim_dif_k_u,
-                                   1e-30 + coalesce((select MAX(-sim_dif) from momentum_sim where sim_dif < 0), 0.) as sim_dif_k_d
+                            select {{ var('epsilon') }} + coalesce((select MAX(sim_dif) from momentum_sim where sim_dif > 0), 0.) as sim_dif_k_u,
+                                   {{ var('epsilon') }} + coalesce((select MAX(-sim_dif) from momentum_sim where sim_dif < 0), 0.) as sim_dif_k_d
                         ),
 
                     momentum_sim_dif as
@@ -296,10 +296,10 @@ with
 
                     value_scalekoefs as
                         (
-                            select 1e-30 + coalesce((select percentile_cont(0.5) within group(order by value_score asc) from value_cntrflip where value_score > 0), 0.) as value_score_k_u,
-                                   1e-30 + coalesce((select percentile_cont(0.5) within group(order by growth_score asc) from value_cntrflip where growth_score > 0), 0.) as growth_score_k_u,
-                                   1e-30 + coalesce((select percentile_cont(0.5) within group(order by -value_score asc) from value_cntrflip where value_score < 0), 0.) as value_score_k_d,
-                                   1e-30 + coalesce((select percentile_cont(0.5) within group(order by -growth_score asc) from value_cntrflip where growth_score < 0), 0.) as growth_score_k_d
+                            select {{ var('epsilon') }} + coalesce((select percentile_cont(0.5) within group(order by value_score asc) from value_cntrflip where value_score > 0), 0.) as value_score_k_u,
+                                   {{ var('epsilon') }} + coalesce((select percentile_cont(0.5) within group(order by growth_score asc) from value_cntrflip where growth_score > 0), 0.) as growth_score_k_u,
+                                   {{ var('epsilon') }} + coalesce((select percentile_cont(0.5) within group(order by -value_score asc) from value_cntrflip where value_score < 0), 0.) as value_score_k_d,
+                                   {{ var('epsilon') }} + coalesce((select percentile_cont(0.5) within group(order by -growth_score asc) from value_cntrflip where growth_score < 0), 0.) as growth_score_k_d
                         ),
 
                     value_sim as
@@ -314,8 +314,8 @@ with
 
                     value_sim_scalekoefs as
                         (
-                            select 1e-30 + coalesce((select MAX(sim_dif) from value_sim where sim_dif > 0), 0.) as sim_dif_k_u,
-                                   1e-30 + coalesce((select MAX(-sim_dif) from value_sim where sim_dif < 0), 0.) as sim_dif_k_d
+                            select {{ var('epsilon') }} + coalesce((select MAX(sim_dif) from value_sim where sim_dif > 0), 0.) as sim_dif_k_u,
+                                   {{ var('epsilon') }} + coalesce((select MAX(-sim_dif) from value_sim where sim_dif < 0), 0.) as sim_dif_k_d
                         ),
 
                     value_sim_dif as
@@ -350,10 +350,10 @@ with
 
                     growth_scalekoefs as
                         (
-                            select 1e-30 + coalesce((select percentile_cont(0.5) within group(order by value_score asc) from growth_cntrflip where value_score > 0), 0.) as value_score_k_u,
-                                   1e-30 + coalesce((select percentile_cont(0.5) within group(order by growth_score asc) from growth_cntrflip where growth_score > 0), 0.) as growth_score_k_u,
-                                   1e-30 + coalesce((select percentile_cont(0.5) within group(order by -value_score asc) from growth_cntrflip where value_score < 0), 0.) as value_score_k_d,
-                                   1e-30 + coalesce((select percentile_cont(0.5) within group(order by -growth_score asc) from growth_cntrflip where growth_score < 0), 0.) as growth_score_k_d
+                            select {{ var('epsilon') }} + coalesce((select percentile_cont(0.5) within group(order by value_score asc) from growth_cntrflip where value_score > 0), 0.) as value_score_k_u,
+                                   {{ var('epsilon') }} + coalesce((select percentile_cont(0.5) within group(order by growth_score asc) from growth_cntrflip where growth_score > 0), 0.) as growth_score_k_u,
+                                   {{ var('epsilon') }} + coalesce((select percentile_cont(0.5) within group(order by -value_score asc) from growth_cntrflip where value_score < 0), 0.) as value_score_k_d,
+                                   {{ var('epsilon') }} + coalesce((select percentile_cont(0.5) within group(order by -growth_score asc) from growth_cntrflip where growth_score < 0), 0.) as growth_score_k_d
                         ),
 
                     growth_sim as
@@ -368,8 +368,8 @@ with
 
                     growth_sim_scalekoefs as
                         (
-                            select 1e-30 + coalesce((select MAX(sim_dif) from growth_sim where sim_dif > 0), 0.) as sim_dif_k_u,
-                                   1e-30 + coalesce((select MAX(-sim_dif) from growth_sim where sim_dif < 0), 0.) as sim_dif_k_d
+                            select {{ var('epsilon') }} + coalesce((select MAX(sim_dif) from growth_sim where sim_dif > 0), 0.) as sim_dif_k_u,
+                                   {{ var('epsilon') }} + coalesce((select MAX(-sim_dif) from growth_sim where sim_dif < 0), 0.) as sim_dif_k_d
                         ),
 
                     growth_sim_dif as
@@ -415,7 +415,7 @@ with
                             -- so do the left join here and we have that special rule for pre-revenue company: if eps is null then ticker just on the threshold line so we coalesce eps=null to 0.
                             select t.symbol,
                                    (t2.beta-3.)       						as beta,      --BusDoc: 3x volatility of QQQ (we don't know for sure how EOD calc industry/market basis for beta.. maybe it's index qqq)
-                                   -coalesce(max_eps.value,1e-30)			as maxeps,    --BusDoc: Pre-revenue stock (earn per share zero or negative or unknown(eq0 still waiting for good product from company))
+                                   -coalesce(max_eps.value,{{ var('epsilon') }})			as maxeps,    --BusDoc: Pre-revenue stock (earn per share zero or negative or unknown(eq0 still waiting for good product from company))
                                    options_stats.call_option_shares_deliverable_outstanding
                                    - ticker_shares_stats.shares_outstanding as opt_vs_shr --BusDoc: Call option shares deliverable outstanding exceeds total shares outstanding
                             from common_stocks t
@@ -427,12 +427,12 @@ with
 
                     specul_scalekoefs as
                         (
-                            select 1e-30 + coalesce((select percentile_cont(0.5) within group(order by beta asc) from specul_cntrflip where beta > 0), 0.) as beta_k_u,
-                                   1e-30 + coalesce((select percentile_cont(0.5) within group(order by maxeps asc) from specul_cntrflip where maxeps > 0), 0.) as maxeps_k_u,
-                                   1e-30 + coalesce((select percentile_cont(0.5) within group(order by opt_vs_shr asc) from specul_cntrflip where opt_vs_shr > 0), 0.) as opt_vs_shr_k_u,
-                                   1e-30 + coalesce((select percentile_cont(0.5) within group(order by -beta asc) from specul_cntrflip where beta < 0), 0.) as beta_k_d,
-                                   1e-30 + coalesce((select percentile_cont(0.5) within group(order by -maxeps asc) from specul_cntrflip where maxeps < 0), 0.) as maxeps_k_d,
-                                   1e-30 + coalesce((select percentile_cont(0.5) within group(order by -opt_vs_shr asc) from specul_cntrflip where opt_vs_shr < 0), 0.) as opt_vs_shr_k_d
+                            select {{ var('epsilon') }} + coalesce((select percentile_cont(0.5) within group(order by beta asc) from specul_cntrflip where beta > 0), 0.) as beta_k_u,
+                                   {{ var('epsilon') }} + coalesce((select percentile_cont(0.5) within group(order by maxeps asc) from specul_cntrflip where maxeps > 0), 0.) as maxeps_k_u,
+                                   {{ var('epsilon') }} + coalesce((select percentile_cont(0.5) within group(order by opt_vs_shr asc) from specul_cntrflip where opt_vs_shr > 0), 0.) as opt_vs_shr_k_u,
+                                   {{ var('epsilon') }} + coalesce((select percentile_cont(0.5) within group(order by -beta asc) from specul_cntrflip where beta < 0), 0.) as beta_k_d,
+                                   {{ var('epsilon') }} + coalesce((select percentile_cont(0.5) within group(order by -maxeps asc) from specul_cntrflip where maxeps < 0), 0.) as maxeps_k_d,
+                                   {{ var('epsilon') }} + coalesce((select percentile_cont(0.5) within group(order by -opt_vs_shr asc) from specul_cntrflip where opt_vs_shr < 0), 0.) as opt_vs_shr_k_d
                         ),
 
                     specul_sim as
@@ -448,8 +448,8 @@ with
 
                     specul_sim_scalekoefs as
                         (
-                            select 1e-30 + coalesce((select MAX(sim_dif) from specul_sim where sim_dif > 0), 0.) as sim_dif_k_u,
-                                   1e-30 + coalesce((select MAX(-sim_dif) from specul_sim where sim_dif < 0), 0.) as sim_dif_k_d
+                            select {{ var('epsilon') }} + coalesce((select MAX(sim_dif) from specul_sim where sim_dif > 0), 0.) as sim_dif_k_u,
+                                   {{ var('epsilon') }} + coalesce((select MAX(-sim_dif) from specul_sim where sim_dif < 0), 0.) as sim_dif_k_d
                         ),
 
                     specul_sim_dif as

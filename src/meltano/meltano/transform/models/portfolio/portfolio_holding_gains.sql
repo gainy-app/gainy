@@ -6,7 +6,7 @@
 
 
 select t.*,
-       (actual_value / (1e-9 + sum(actual_value) over (partition by profile_id)))::double precision as value_to_portfolio_value
+       (actual_value / ({{ var('epsilon') }} + sum(actual_value) over (partition by profile_id)))::double precision as value_to_portfolio_value
 from (
          select plaid_holding_gains.profile_id,
                 holding_id_v2,

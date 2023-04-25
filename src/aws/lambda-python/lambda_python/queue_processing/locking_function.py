@@ -1,8 +1,8 @@
 from gainy.data_access.pessimistic_lock import AbstractPessimisticLockingFunction
 from gainy.data_access.repository import Repository
+from gainy.queue_processing.dispatcher import QueueMessageDispatcher
+from gainy.queue_processing.models import QueueMessage
 from gainy.utils import get_logger
-from queue_processing.dispatcher import QueueMessageDispatcher
-from queue_processing.models import QueueMessage
 
 logger = get_logger(__name__)
 
