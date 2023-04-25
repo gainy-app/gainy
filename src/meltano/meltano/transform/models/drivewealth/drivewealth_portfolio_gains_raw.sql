@@ -213,6 +213,7 @@ with profile_stats as materialized
                  data_1w as
                      (
                          select profile_id,
+                                dates_cnt                                   as count_1w,
                                 (1 + xirr(cf, d)) ^ (dates_cnt / 365.0) - 1 as relative_gain_1w
                          from (
                                   select profile_id,
@@ -339,13 +340,42 @@ with profile_stats as materialized
                               ) t
                  )
              select profile_id,
-                    relative_gain_1d,
-                    relative_gain_1w,
-                    relative_gain_1m,
-                    relative_gain_3m,
-                    relative_gain_1y,
-                    relative_gain_5y,
-                    relative_gain_total
+                    case
+                        when relative_gain_1w is null or count_1w = 1
+                            then relative_gain_1d
+                        when relative_gain_1w is not null
+                            then relative_gain_1w
+                        end             as relative_gain_1w,
+                    case
+                        when relative_gain_1m is null or count_1w = 1
+                            then relative_gain_1d
+                        when relative_gain_1m is not null
+                            then relative_gain_1m
+                        end             as relative_gain_1m,
+                    case
+                        when relative_gain_3m is null or count_1w = 1
+                            then relative_gain_1d
+                        when relative_gain_3m is not null
+                            then relative_gain_3m
+                        end             as relative_gain_3m,
+                    case
+                        when relative_gain_1y is null or count_1w = 1
+                            then relative_gain_1d
+                        when relative_gain_1y is not null
+                            then relative_gain_1y
+                        end             as relative_gain_1y,
+                    case
+                        when relative_gain_5y is null or count_1w = 1
+                            then relative_gain_1d
+                        when relative_gain_5y is not null
+                            then relative_gain_5y
+                        end             as relative_gain_5y,
+                    case
+                        when relative_gain_total is null or count_1w = 1
+                            then relative_gain_1d
+                        when relative_gain_total is not null
+                            then relative_gain_total
+                        end             as relative_gain_total
              from data_total
                       left join data_1d using (profile_id)
                       left join data_1w using (profile_id)

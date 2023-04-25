@@ -205,40 +205,40 @@ select profile_id,
        actual_value,
        relative_gain_1d,
        case
+           when relative_gain_1w is null or count_1w = 1
+               then relative_gain_1d
            when relative_gain_1w is not null
                then relative_gain_1w
-           when abs(actual_value - absolute_gain_1d) > 0 and count_1w = 1
-               then relative_gain_1d
            end             as relative_gain_1w,
        case
+           when relative_gain_1m is null or count_1w = 1
+               then relative_gain_1d
            when relative_gain_1m is not null
                then relative_gain_1m
-           when abs(actual_value - absolute_gain_1d) > 0 and count_1w = 1
-               then relative_gain_1d
            end             as relative_gain_1m,
        case
+           when relative_gain_3m is null or count_1w = 1
+               then relative_gain_1d
            when relative_gain_3m is not null
                then relative_gain_3m
-           when abs(actual_value - absolute_gain_1d) > 0 and count_1w = 1
-               then relative_gain_1d
            end             as relative_gain_3m,
        case
+           when relative_gain_1y is null or count_1w = 1
+               then relative_gain_1d
            when relative_gain_1y is not null
                then relative_gain_1y
-           when abs(actual_value - absolute_gain_1d) > 0 and count_1w = 1
-               then relative_gain_1d
            end             as relative_gain_1y,
        case
+           when relative_gain_5y is null or count_1w = 1
+               then relative_gain_1d
            when relative_gain_5y is not null
                then relative_gain_5y
-           when abs(actual_value - absolute_gain_1d) > 0 and count_1w = 1
-               then relative_gain_1d
            end             as relative_gain_5y,
        case
+           when relative_gain_total is null or count_1w = 1
+               then relative_gain_1d
            when relative_gain_total is not null
                then relative_gain_total
-           when abs(actual_value - absolute_gain_1d) > 0 and count_1w = 1
-               then relative_gain_1d
            end             as relative_gain_total,
        absolute_gain_1d,
        absolute_gain_1w,
