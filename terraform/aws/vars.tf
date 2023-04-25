@@ -6,7 +6,7 @@ variable "domain" {
 }
 variable "cloudflare_zone_id" {}
 variable "hasura_jwt_secret" {}
-variable "hubspot_api_key" {}
+variable "hubspot_app_token" {}
 variable "github_app_id" {}
 variable "github_app_installation_id" {}
 variable "github_app_private_key" {}
