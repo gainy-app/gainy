@@ -2770,6 +2770,18 @@ models:
         tests:
           - type:
               type: 'character varying'
+      - name: kyc_job_title
+        tests:
+          - type:
+              type: 'character varying'
+      - name: kyc_company_name
+        tests:
+          - type:
+              type: 'character varying'
+      - name: kyc_job_industry
+        tests:
+          - type:
+              type: 'character varying'
       - name: kyc_status
         tests:
           - type:
