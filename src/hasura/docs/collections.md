@@ -190,3 +190,18 @@ query GetCollectionLatestTradingSession($collection_uniq_id: String!) {
   }
 }
 ```
+
+### Get Discovery Section Collections
+```graphql
+query GetDiscoverySectionCollections($profile_id: Int!) {
+  section_collections(where: {profile_id: {_eq: $profile_id}}, order_by: {position: asc}) {
+    collection_uniq_id
+    position
+    profile_id
+    section_id
+    collection{
+      name
+    }
+  }
+}
+```
