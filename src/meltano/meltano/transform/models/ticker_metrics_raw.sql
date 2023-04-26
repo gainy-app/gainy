@@ -165,6 +165,14 @@ with highlights as (select * from {{ ref('highlights') }}),
                       left join historical_volatility using (symbol)
                       left join implied_volatility using (symbol)
          ),
+     volatility_90 as
+         (
+             select symbol,
+                    stddev(relative_daily_gain) * pow(252, 0.5) as volatility_90
+             from {{ ref('historical_prices') }}
+             where date >= now() - interval '90 days'
+             group by symbol
+     ),
      growth_metrics as (
          with ebitda_growth_yoy as
                   (
@@ -408,6 +416,7 @@ select DISTINCT ON
                trading_metrics.relative_historical_volatility_adjusted_min_1y,
                trading_metrics.relative_historical_volatility_adjusted_max_1y,
                trading_metrics.implied_volatility,
+               volatility_90.volatility_90,
 
                growth_metrics.revenue_growth_yoy,
                growth_metrics.revenue_growth_fwd::double precision,
@@ -463,6 +472,7 @@ select DISTINCT ON
 from all_tickers t
          left join highlights on t.symbol = highlights.symbol
          left join trading_metrics on t.symbol = trading_metrics.symbol
+         left join volatility_90 on t.symbol = volatility_90.symbol
          left join growth_metrics on t.symbol = growth_metrics.symbol
          left join general_data on t.symbol = general_data.symbol
          left join valuation_metrics on t.symbol = valuation_metrics.symbol

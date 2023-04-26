@@ -17,7 +17,7 @@ with data as materialized
                     collection_uniq_id,
                     collection_ticker_weights.date,
                     weight * (historical_prices.adjusted_close::numeric / price - 1) as relative_gain,
-                    coalesce(historical_dividends.value, 0)::numeric                 as dividends_value,
+                    coalesce(weight * historical_dividends.value, 0)::numeric        as dividends_value,
                     greatest(collection_ticker_weights.updated_at,
                              historical_dividends.updated_at,
                              historical_prices.updated_at)                           as updated_at
@@ -122,11 +122,13 @@ select daily_collection_gain_cumulative.profile_id,
        daily_collection_gain_cumulative.collection_id,
        collection_uniq_id,
        date,
-       date_trunc('week', date)::date              as date_week,
-       date_trunc('month', date)::date             as date_month,
-       coalesce(cumulative_daily_relative_gain, 1) as value,
+       date_trunc('week', date)::date                                as date_week,
+       date_trunc('month', date)::date                               as date_month,
+       coalesce(cumulative_daily_relative_gain, 1)                   as value,
+       coalesce(cumulative_daily_relative_gain, 1) /
+       coalesce(lag(cumulative_daily_relative_gain) over wnd, 1) - 1 as relative_daily_gain,
        daily_collection_gain_cumulative.dividends_value,
-       collection_uniq_id || '_' || date           as id,
+       collection_uniq_id || '_' || date                             as id,
        daily_collection_gain_cumulative.updated_at
 from daily_collection_gain_cumulative
 
@@ -135,3 +137,5 @@ from daily_collection_gain_cumulative
 where old_data.collection_uniq_id is null
    or abs(coalesce(cumulative_daily_relative_gain, 1) - old_data.value) > {{ var('price_precision') }}
 {% endif %}
+
+window wnd as (partition by collection_uniq_id order by date)
