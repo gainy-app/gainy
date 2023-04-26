@@ -182,7 +182,7 @@ select profile_collections.profile_id,
        ranked_performance.rank::int       as performance_rank,
        ranked_clicks.rank::int            as clicks_rank,
        volatility_90.volatility_90,
-       beta,
+       beta.beta,
        greatest(metrics.updated_at,
            ticker_metrics.updated_at,
            metrics.updated_at)            as updated_at
