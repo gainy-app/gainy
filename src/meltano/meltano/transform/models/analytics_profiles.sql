@@ -10,6 +10,7 @@ select profile_id,
        email,
        first_name,
        last_name,
+       user_type,
        profile_scoring_settings.created_at as questionaire_completed_at,
        kyc_status,
        kyc_start_date,
@@ -26,7 +27,20 @@ select profile_id,
            portfolio_gains.updated_at,
            last_deposit_at)                as updated_at
 from (
-         select id as profile_id, email, first_name, last_name, created_at
+         select id as profile_id, email, first_name, last_name, created_at,
+                case
+                    when '{{ var('env') }}' != 'production'
+                        then 'test'
+                    when array_position(string_to_array('{{ var('gainy_employee_profile_ids') }}', ','), id::text) is not null
+                      or array_position(string_to_array('{{ var('gainy_employee_emails') }}', ','), email::text) is not null
+                        then 'gainy'
+                    when email ilike '%gainy.app'
+                        or email ilike '%test%'
+                        or last_name ilike '%test%'
+                        or first_name ilike '%test%'
+                        then 'test'
+                    else 'customer'
+                    end as user_type
          from {{ source('app', 'profiles') }}
      ) profiles
          left join {{ source('app', 'profile_scoring_settings') }} using (profile_id)

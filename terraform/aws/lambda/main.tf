@@ -171,7 +171,7 @@ locals {
     ALGOLIA_TICKERS_INDEX        = var.algolia_tickers_index
     ALGOLIA_COLLECTIONS_INDEX    = var.algolia_collections_index
     ALGOLIA_SEARCH_API_KEY       = var.algolia_search_key
-    HUBSPOT_API_KEY              = var.hubspot_api_key
+    HUBSPOT_APP_TOKEN            = var.hubspot_app_token
     REVENUECAT_API_KEY           = var.revenuecat_api_key
     GNEWS_API_TOKEN              = var.gnews_api_token
     REDIS_CACHE_HOST             = var.redis_cache_host
@@ -318,7 +318,7 @@ module "sqs_listener" {
   env                    = var.env
   function_name          = "sqsListener"
   handler                = "sqs_listener.listen"
-  timeout                = 1
+  timeout                = 3
   exec_role_arn          = aws_iam_role.lambda_exec.arn
   image_uri              = docker_registry_image.lambda_python.name
   memory_size            = 256
