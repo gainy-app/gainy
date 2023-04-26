@@ -86,6 +86,7 @@ variable "appsflyer_app_id" {}
 variable "appsflyer_dev_key" {}
 variable "billing_value_fee_multiplier" {}
 variable "billing_min_annual_fee" {}
+variable "billing_min_value" {}
 variable "billing_enabled_profiles" {}
 variable "billing_autosell_enabled_profiles" {}
 variable "billing_min_date" {}
