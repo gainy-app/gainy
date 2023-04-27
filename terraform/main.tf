@@ -110,7 +110,7 @@ module "aws" {
   base_image_version          = var.base_image_version
   datadog_api_key             = var.datadog_api_key
   datadog_app_key             = var.datadog_app_key
-  hubspot_api_key             = var.hubspot_api_key
+  hubspot_app_token           = var.hubspot_app_token
   polygon_api_token           = var.polygon_api_token
   coingecko_api_key           = var.coingecko_api_key
   github_app_id               = var.github_app_id
@@ -185,6 +185,7 @@ module "aws" {
 
   billing_value_fee_multiplier      = var.billing_value_fee_multiplier
   billing_min_annual_fee            = var.billing_min_annual_fee
+  billing_min_value                 = var.billing_min_value
   billing_enabled_profiles          = var.billing_enabled_profiles
   billing_autosell_enabled_profiles = var.billing_autosell_enabled_profiles
   billing_min_date                  = var.billing_min_date

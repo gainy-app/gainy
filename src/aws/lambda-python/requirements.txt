@@ -4,7 +4,7 @@ datadog==0.42.0
 plaid-python==11.1.0
 algoliasearch==2.6.0
 python-jose[cryptography]==3.3.0
-hubspot-api-client==4.0.6
+hubspot-api-client==7.5.0
 redis>=4.1.2,<5.0.0
 backoff>=1.11.1,<2.0.0
 pytest==7.1.1

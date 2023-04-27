@@ -83,7 +83,7 @@ select profile_id,
        period_start,
        period_end,
        case
-           when value > 0
+           when value > {{ var('billing_min_value') }}
                then greatest({{ var('billing_min_annual_fee') }}, value * {{ var('billing_value_fee_multiplier') }}) / year_days
            else 0 end as fee
 from daily_usage_expanded

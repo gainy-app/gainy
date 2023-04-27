@@ -6,7 +6,7 @@ variable "domain" {
 }
 variable "cloudflare_zone_id" {}
 variable "hasura_jwt_secret" {}
-variable "hubspot_api_key" {}
+variable "hubspot_app_token" {}
 variable "github_app_id" {}
 variable "github_app_installation_id" {}
 variable "github_app_private_key" {}
@@ -94,6 +94,7 @@ variable "source_code_branch_name" {}
 
 variable "billing_value_fee_multiplier" {}
 variable "billing_min_annual_fee" {}
+variable "billing_min_value" {}
 variable "billing_enabled_profiles" {}
 variable "billing_autosell_enabled_profiles" {}
 variable "billing_min_date" {}

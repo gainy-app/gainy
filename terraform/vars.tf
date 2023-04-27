@@ -17,7 +17,7 @@ variable "base_image_registry_address" {
 variable "base_image_version" {
   type = string
 }
-variable "hubspot_api_key" {
+variable "hubspot_app_token" {
   type      = string
   sensitive = true
 }
@@ -71,6 +71,10 @@ variable "billing_value_fee_multiplier" {
 variable "billing_min_annual_fee" {
   type    = number
   default = 96
+}
+variable "billing_min_value" {
+  type    = number
+  default = 100
 }
 variable "billing_enabled_profiles" {
   type    = string

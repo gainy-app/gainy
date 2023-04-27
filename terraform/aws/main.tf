@@ -48,7 +48,7 @@ module "lambda" {
   datadog_api_key        = var.datadog_api_key
   datadog_app_key        = var.datadog_app_key
   hasura_url             = module.ecs-service.hasura_url
-  hubspot_api_key        = var.hubspot_api_key
+  hubspot_app_token      = var.hubspot_app_token
   revenuecat_api_key     = var.revenuecat_api_key
   stripe_api_key         = var.stripe_api_key
   stripe_publishable_key = var.stripe_publishable_key
@@ -267,6 +267,7 @@ module "ecs-service" {
 
   billing_value_fee_multiplier      = var.billing_value_fee_multiplier
   billing_min_annual_fee            = var.billing_min_annual_fee
+  billing_min_value                 = var.billing_min_value
   billing_enabled_profiles          = var.billing_enabled_profiles
   billing_autosell_enabled_profiles = var.billing_autosell_enabled_profiles
   billing_min_date                  = var.billing_min_date
