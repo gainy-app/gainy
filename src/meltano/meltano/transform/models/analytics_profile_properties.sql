@@ -129,7 +129,7 @@ with profiles as
      ),
      total_withdraws as
          (
-             select distinct profile_id, count(*) as total_withdraws
+             select profile_id, count(*) as total_withdraws
              from {{ source('app', 'trading_money_flow') }}
              where status = 'SUCCESS'
                and amount < 0
@@ -137,7 +137,7 @@ with profiles as
      ),
      deposits as
          (
-             select distinct profile_id, count(*) as total_deposits, sum(amount) as total_amount_deposit
+             select profile_id, count(*) as total_deposits, sum(amount) as total_amount_deposit
              from {{ source('app', 'trading_money_flow') }}
              where status = 'SUCCESS'
                and amount > 0

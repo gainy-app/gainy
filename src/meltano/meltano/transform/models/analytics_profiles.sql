@@ -54,7 +54,7 @@ from (
          left join (
                        select profile_id, max(created_at) as last_deposit_at, sum(amount) as total_deposit_amount
                        from {{ source('app', 'trading_money_flow') }}
-                       where amount > 0
+                       where amount > 0 and status = 'SUCCESS'
                        group by profile_id
                    ) deposit_stats using (profile_id)
          left join (
