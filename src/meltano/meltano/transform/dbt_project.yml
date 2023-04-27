@@ -34,5 +34,6 @@ vars:
   epsilon: 1e-30
   billing_value_fee_multiplier: "{{ env_var('BILLING_VALUE_FEE_MULTIPLIER', 0.0096) }}"
   billing_min_annual_fee: "{{ env_var('BILLING_MIN_ANNUAL_FEE', 96) }}"
+  billing_min_value: "{{ env_var('BILLING_MIN_VALUE', 100) }}"
   gainy_employee_profile_ids: "{{ env_var('GAINY_EMPLOYEE_PROFILE_IDS', '') }}"
   gainy_employee_emails: "{{ env_var('GAINY_EMPLOYEE_EMAILS', '') }}"
