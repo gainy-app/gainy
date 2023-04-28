@@ -72,6 +72,10 @@ variable "billing_min_annual_fee" {
   type    = number
   default = 96
 }
+variable "billing_min_value" {
+  type    = number
+  default = 100
+}
 variable "billing_enabled_profiles" {
   type    = string
   default = ""
