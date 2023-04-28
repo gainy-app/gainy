@@ -2,9 +2,9 @@ from decimal import Decimal
 
 from gainy.analytics.service import AnalyticsService
 from gainy.data_access.repository import MAX_TRANSACTION_SIZE
-from gainy.exceptions import NotFoundException, EntityNotFoundException
+from gainy.exceptions import NotFoundException, EntityNotFoundException, AccountNeedsReauthException
 from gainy.trading.drivewealth.config import DRIVEWEALTH_IS_UAT
-from gainy.trading.drivewealth.exceptions import DriveWealthApiException
+from gainy.trading.drivewealth.exceptions import DriveWealthApiException, PlaidProcessorTokenProvidedIsInvalidException
 from portfolio.plaid import PlaidService
 from gainy.plaid.models import PlaidAccessToken
 from gainy.services.notification import NotificationService
@@ -76,6 +76,10 @@ class DriveWealthProvider(DriveWealthProviderKYC,
 
     def transfer_money(self, money_flow: TradingMoneyFlow, amount: Decimal,
                        trading_account_id: int, funding_account_id: int):
+        """
+        :raises AccountNeedsReauthException:
+        :raises Exception:
+        """
         trading_account = self.repository.find_one(
             DriveWealthAccount, {"trading_account_id": trading_account_id})
         if not trading_account:
@@ -93,11 +97,18 @@ class DriveWealthProvider(DriveWealthProviderKYC,
             else:
                 entity = self.api.create_redemption(amount, trading_account,
                                                     bank_account)
+        except PlaidProcessorTokenProvidedIsInvalidException as e:
+            funding_account: FundingAccount = self.repository.find_one(
+                FundingAccount, {"id": funding_account_id})
+            if funding_account:
+                funding_account.needs_reauth = True
+                self.repository.persist(funding_account)
+            raise AccountNeedsReauthException() from e
         except DriveWealthApiException as e:
             money_flow.status = TradingMoneyFlowStatus.FAILED
             self.repository.persist(money_flow)
             logger.exception(e)
-            raise Exception('Request failed, please try again later.')
+            raise e
 
         entity.trading_account_ref_id = trading_account.ref_id
         entity.bank_account_ref_id = bank_account.ref_id

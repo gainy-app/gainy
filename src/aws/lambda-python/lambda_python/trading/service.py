@@ -154,10 +154,14 @@ class TradingService(GainyTradingService):
         money_flow.funding_account_id = funding_account.id
         repository.persist(money_flow)
 
-        self._get_provider_service().transfer_money(money_flow, amount,
-                                                    trading_account.id,
-                                                    funding_account.id)
-        repository.persist(money_flow)
+        try:
+            self._get_provider_service().transfer_money(
+                money_flow, amount, trading_account.id, funding_account.id)
+        except Exception as e:
+            money_flow.status = TradingMoneyFlowStatus.FAILED
+            raise e
+        finally:
+            repository.persist(money_flow)
 
         return money_flow
 
