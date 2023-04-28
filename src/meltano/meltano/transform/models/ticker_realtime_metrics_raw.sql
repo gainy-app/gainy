@@ -24,8 +24,16 @@ with latest_trading_day as
                              max(date)     as max_date,
                              min(datetime) as min_datetime,
                              sum(volume)      sum_volume
-                      from {{ ref('chart') }}
-                      where period = '1d'
+                      from (
+                               select symbol,
+                                      week_trading_sessions.date,
+                                      historical_prices_aggregated_3min.datetime,
+                                      historical_prices_aggregated_3min.volume
+                               from {{ ref('historical_prices_aggregated_3min') }}
+                                        join {{ ref('week_trading_sessions') }} using (symbol)
+                               where week_trading_sessions.index = 0
+                                 and historical_prices_aggregated_3min.datetime between week_trading_sessions.open_at and week_trading_sessions.close_at - interval '1 microsecond'
+                           ) chart
                       group by symbol
                   ) t
                       join {{ ref('historical_prices_aggregated_3min') }} hpa_close
