@@ -208,7 +208,7 @@ union all
                     updated_at,
                     0               as priority
              from {{ ref('collection_historical_values') }}
-             where collection_historical_values.date >= now() - interval '1 month'
+             where collection_historical_values.date >= now()::date - interval '1 month'
 
              union all
 
@@ -260,7 +260,7 @@ union all
                     updated_at,
                     0               as priority
              from {{ ref('collection_historical_values') }}
-             where collection_historical_values.date >= now() - interval '3 month'
+             where collection_historical_values.date >= now()::date - interval '3 month'
 
              union all
 
@@ -312,7 +312,7 @@ union all
                     updated_at,
                     0               as priority
              from {{ ref('collection_historical_values') }}
-             where collection_historical_values.date >= now() - interval '1 year'
+             where collection_historical_values.date >= now()::date - interval '1 year'
 
              union all
 
@@ -383,10 +383,10 @@ union all
                                max(updated_at)
                                OVER (partition by date_week, collection_uniq_id order by date rows between current row and unbounded following) as updated_at
                        from {{ ref('collection_historical_values') }}
-                       where date_week >= now() - interval '5 year' - interval '1 week'
+                       where date_week >= now()::date - interval '5 year' - interval '1 week'
                        order by date_week, collection_uniq_id, date
                   ) t
-             where t.date_week >= now() - interval '5 year'
+             where t.date_week >= now()::date - interval '5 year'
 
              union all
 
