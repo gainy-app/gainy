@@ -120,8 +120,7 @@ with ContextContainer() as context_container:
         portfolio.set_from_response(portfolio_data)
         trading_repository.persist(portfolio)
 
-        portfolio_status = provider.sync_portfolio_status(portfolio,
-                                                          force=True)
+        portfolio_status = provider.sync_portfolio_status(portfolio, force=True)
         fund_holdings = portfolio_status.get_fund(fund_ref_id)
 
         if not fund_holdings:
@@ -151,7 +150,6 @@ with ContextContainer() as context_container:
             logger.info(e)
             continue
 
-        portfolio.normalize_weights()
         provider.send_portfolio_to_api(portfolio)
         accounts_to_rebalance.add(row["account_ref_id"])
 
