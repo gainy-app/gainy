@@ -11,6 +11,7 @@ with latest_price_row as materialized
                  holding_id_v2
                  ) *
              from {{ ref('drivewealth_portfolio_historical_holdings') }}
+             where updated_at is not null
              order by holding_id_v2, date desc
       )
 
