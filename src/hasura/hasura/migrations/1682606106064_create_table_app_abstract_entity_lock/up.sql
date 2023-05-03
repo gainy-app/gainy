@@ -1,0 +1,1 @@
+CREATE TABLE "app"."abstract_entity_lock" ("id" serial NOT NULL, "class_name" text NOT NULL, "object_id" text NOT NULL, "version" integer NOT NULL DEFAULT 0, PRIMARY KEY ("class_name","object_id") , UNIQUE ("id"));
