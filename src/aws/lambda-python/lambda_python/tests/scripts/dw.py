@@ -120,7 +120,8 @@ with ContextContainer() as context_container:
         portfolio.set_from_response(portfolio_data)
         trading_repository.persist(portfolio)
 
-        portfolio_status = provider.sync_portfolio_status(portfolio, force=True)
+        portfolio_status = provider.sync_portfolio_status(portfolio,
+                                                          force=True)
         fund_holdings = portfolio_status.get_fund(fund_ref_id)
 
         if not fund_holdings:
