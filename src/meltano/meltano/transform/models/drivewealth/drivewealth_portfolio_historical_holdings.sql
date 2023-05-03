@@ -239,7 +239,7 @@ with portfolio_statuses as
                     symbol,
                     date,
                     prev_value,
-                    case when not is_premarket or prev_value > 0 then value else 0 end as value,
+                    case when not is_premarket or prev_value > 0 or symbol = 'CUR:USD' then value else 0 end as value,
                     relative_daily_gain,
                     is_premarket,
                     updated_at
