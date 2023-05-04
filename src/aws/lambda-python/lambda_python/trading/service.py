@@ -139,6 +139,9 @@ class TradingService(GainyTradingService):
     def create_money_flow(self, profile_id: int, amount: Decimal,
                           trading_account: TradingAccount,
                           funding_account: FundingAccount):
+        """
+        :raises InsufficientFundsException:
+        """
         repository = self.trading_repository
 
         if amount > 0:
@@ -260,6 +263,9 @@ class TradingService(GainyTradingService):
 
     def check_enough_funds_to_deposit(self, funding_account: FundingAccount,
                                       amount: Decimal):
+        """
+        :raises InsufficientFundsException:
+        """
         try:
             self.update_funding_accounts_balance([funding_account])
         except Exception as e:

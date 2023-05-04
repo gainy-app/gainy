@@ -1,5 +1,7 @@
 from common.context_container import ContextContainer
-from gainy.exceptions import BadRequestException, AccountNeedsReauthException, AccountNeedsReauthHttpException
+from gainy.exceptions import BadRequestException, AccountNeedsReauthException, AccountNeedsReauthHttpException, \
+    InsufficientFundsHttpException
+from gainy.trading.exceptions import InsufficientFundsException
 from trading.actions.money_flow import MoneyFlowAction
 from gainy.utils import get_logger
 
@@ -26,6 +28,8 @@ class TradingDepositFunds(MoneyFlowAction):
         except AccountNeedsReauthException:
             raise AccountNeedsReauthHttpException(
                 'Request failed, please try again later.')
+        except InsufficientFundsException as e:
+            raise InsufficientFundsHttpException() from e
         except:
             raise BadRequestException(
                 'Request failed, please try again later.')
