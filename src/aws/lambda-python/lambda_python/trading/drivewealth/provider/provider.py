@@ -105,6 +105,19 @@ class DriveWealthProvider(DriveWealthProviderKYC,
         self.update_money_flow_from_dw(entity, money_flow)
         self.repository.persist(entity)
 
+        if amount > 0:
+            logger.info("Created deposit",
+                        extra={
+                            "file": __file__,
+                            "deposit": entity.to_dict(),
+                        })
+        else:
+            logger.info("Created redemption",
+                        extra={
+                            "file": __file__,
+                            "redemption": entity.to_dict(),
+                        })
+
     def debug_add_money(self, trading_account_id, amount):
         if not DRIVEWEALTH_IS_UAT:
             raise Exception('Not supported in production')
@@ -180,11 +193,19 @@ class DriveWealthProvider(DriveWealthProviderKYC,
         entity = repository.find_one(
             DriveWealthDeposit,
             {"ref_id": deposit_ref_id}) or DriveWealthDeposit()
+        deposit_pre = entity.to_dict()
 
         deposit_data = self.api.get_deposit(deposit_ref_id)
         entity.set_from_response(deposit_data)
         self.ensure_account_exists(entity.trading_account_ref_id)
         repository.persist(entity)
+
+        logger.info("Updated deposit",
+                    extra={
+                        "file": __file__,
+                        "deposit_pre": deposit_pre,
+                        "deposit": entity.to_dict(),
+                    })
 
         self.update_money_flow_from_dw(entity)
 
@@ -227,8 +248,16 @@ class DriveWealthProvider(DriveWealthProviderKYC,
             entity = repository.find_one(
                 DriveWealthDeposit,
                 {"ref_id": deposit_data['id']}) or DriveWealthDeposit()
+            deposit_pre = entity.to_dict()
             entity.set_from_response(deposit_data)
             repository.persist(entity)
+
+            logger.info("Updated deposit",
+                        extra={
+                            "file": __file__,
+                            "deposit_pre": deposit_pre,
+                            "deposit": entity.to_dict(),
+                        })
 
             self.update_money_flow_from_dw(entity)
 
@@ -240,8 +269,16 @@ class DriveWealthProvider(DriveWealthProviderKYC,
             entity = repository.find_one(
                 DriveWealthRedemption,
                 {"ref_id": redemption_data['id']}) or DriveWealthRedemption()
+            redemption_pre = entity.to_dict()
             entity.set_from_response(redemption_data)
             repository.persist(entity)
+
+            logger.info("Updated redemption",
+                        extra={
+                            "file": __file__,
+                            "redemption_pre": redemption_pre,
+                            "redemption": entity.to_dict(),
+                        })
 
             self.update_money_flow_from_dw(entity)
 
