@@ -11,6 +11,7 @@ with latest_price_row as materialized
                  holding_id_v2
                  ) *
              from {{ ref('drivewealth_portfolio_historical_holdings') }}
+             where updated_at is not null
              order by holding_id_v2, date desc
       )
 
@@ -108,7 +109,7 @@ select drivewealth_portfolio_historical_prices_aggregated.profile_id,
        drivewealth_portfolio_historical_prices_aggregated.updated_at
 from {{ ref('drivewealth_portfolio_historical_prices_aggregated') }}
 where drivewealth_portfolio_historical_prices_aggregated.period = '1d'
-  and drivewealth_portfolio_historical_prices_aggregated.datetime >= now() - interval '1 month + 1 week'
+  and drivewealth_portfolio_historical_prices_aggregated.datetime >= now()::date - interval '1 month + 1 week'
 
 union all
 
@@ -122,7 +123,7 @@ select drivewealth_portfolio_historical_prices_aggregated.profile_id,
        drivewealth_portfolio_historical_prices_aggregated.updated_at
 from {{ ref('drivewealth_portfolio_historical_prices_aggregated') }}
 where drivewealth_portfolio_historical_prices_aggregated.period = '1d'
-  and drivewealth_portfolio_historical_prices_aggregated.datetime >= now() - interval '3 month + 1 week'
+  and drivewealth_portfolio_historical_prices_aggregated.datetime >= now()::date - interval '3 month + 1 week'
 
 union all
 
