@@ -8,6 +8,7 @@ terraform {
 
 terraform {
   required_providers {
+    # TODO remove aws version limit https://github.com/hashicorp/terraform-provider-aws/issues/31180
     aws = {
       source  = "hashicorp/aws"
       version = "<= 4.65"
