@@ -274,14 +274,13 @@ with portfolio_statuses as
                     relative_daily_gain,
                     value,
                     prev_value,
-                    -- CF = EV / (HP + 1) - BV
-                    -- CF = EV - (HP + 1) * BV
+                    -- CF = (EV - BV * RDG / (1 + HP_b))
                     case
-                        when abs(coalesce(order_cf_sum, 0) + prev_value_sum) > 0 and value_sum > 0 and abs(computed_relative_daily_gain + 1) > 0
-                            then value / (computed_relative_daily_gain + 1) - prev_value
-                        when value_sum < {{ var('epsilon') }} and prev_value_sum > 0
-                            then value - (computed_relative_daily_gain + 1) * prev_value
-                        else value - prev_value
+                        when symbol = 'CUR:USD'
+                            then value - prev_value
+                        when post_cf_gain is not null and abs(post_cf_gain) > 0
+                            then (value - prev_value * (1 + relative_daily_gain)) / post_cf_gain
+                        else 0
                         end as cash_flow,
                     is_premarket,
                     updated_at
@@ -294,17 +293,22 @@ with portfolio_statuses as
                              date,
                              relative_daily_gain,
                              value_sum,
-                             coalesce(order_cf_sum, 0) as order_cf_sum,
+                             order_cf_sum,
                              prev_value_sum,
 
-                             -- HP = EV_sum / (CF_sum + BV_sum) - 1
-                             -- HP = (EV_sum - CF_sum) / BV_sum - 1
+                             -- RDG = (1 + HP_a) * (1 + HP_b)
+                             -- EV = (BV * (1 + HP_a) + CF) * (1 + HP_b)
+                             -- EV_sum = BV_sum * RDG + CF_sum * (1 + HP_b)
+                             -- (1 + HP_b) = (EV_sum - BV_sum * RDG) / CF_sum = Post CF Gain
+                             -- CF = (EV - BV * RDG) / (1 + HP_b)
+
                              case
-                                 when abs(coalesce(order_cf_sum, 0) + prev_value_sum) > 0 and value_sum > 0
-                                     then value_sum / (coalesce(order_cf_sum, 0) + prev_value_sum) - 1
-                                 when value_sum < {{ var('epsilon') }} and prev_value_sum > 0
-                                     then (value_sum - coalesce(order_cf_sum, 0)) / prev_value_sum - 1
-                                 end as computed_relative_daily_gain,
+                                 when order_cf_sum is null or abs(order_cf_sum) < {{ var('gain_precision') }}
+                                     then null
+                                 when abs(value_sum - prev_value_sum * (1 + relative_daily_gain)) < {{ var('gain_precision') }}
+                                     then 1
+                                 else (value_sum - prev_value_sum * (1 + relative_daily_gain)) / order_cf_sum
+                                 end as post_cf_gain,
                              value,
                              prev_value,
                              is_premarket,
