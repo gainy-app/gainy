@@ -134,6 +134,9 @@ plugins:
           - entity: blog_article_priority
             path: data/article_priority.csv
             keys: [ "id" ]
+          - entity: section_collections
+            path: data/section_collections.csv
+            keys: [ "section_id", "collection_id" ]
 
     - name: tap-postgres
       pip_url: git+https://github.com/asmisha/pipelinewise-tap-postgres.git@refresh-streams-schema

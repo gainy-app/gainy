@@ -17,6 +17,7 @@ sources:
       - name: auto_ticker_industries
       - name: exchanges
       - name: stats_ttf_clicks
+      - name: section_collections
       - name: ticker_collections
       - name: ticker_collections_weights
       - name: ticker_override
@@ -2953,6 +2954,25 @@ models:
         tests:
           - type:
               type: 'numeric'
+
+  - name: section_collections
+    columns:
+      - name: profile_id
+        tests:
+          - type:
+              type: 'integer'
+      - name: collection_uniq_id
+        tests:
+          - type:
+              type: 'text'
+      - name: section_id
+        tests:
+          - type:
+              type: 'text'
+      - name: position
+        tests:
+          - type:
+              type: 'integer'
 
 exposures:
   - name: ticker_search_index
