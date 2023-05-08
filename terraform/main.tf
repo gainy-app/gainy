@@ -8,6 +8,11 @@ terraform {
 
 terraform {
   required_providers {
+    # TODO remove aws version limit https://github.com/hashicorp/terraform-provider-aws/issues/31180
+    aws = {
+      source  = "hashicorp/aws"
+      version = "<= 4.65"
+    }
     docker = {
       source  = "kreuzwerker/docker"
       version = "2.15.0"
@@ -185,6 +190,7 @@ module "aws" {
 
   billing_value_fee_multiplier      = var.billing_value_fee_multiplier
   billing_min_annual_fee            = var.billing_min_annual_fee
+  billing_min_value                 = var.billing_min_value
   billing_enabled_profiles          = var.billing_enabled_profiles
   billing_autosell_enabled_profiles = var.billing_autosell_enabled_profiles
   billing_min_date                  = var.billing_min_date

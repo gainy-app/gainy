@@ -1,7 +1,7 @@
 from common.context_container import ContextContainer
-from gainy.exceptions import BadRequestException
-from gainy.trading import MIN_FIRST_DEPOSIT_AMOUNT
-from gainy.trading.models import TradingMoneyFlow
+from gainy.exceptions import BadRequestException, AccountNeedsReauthException, AccountNeedsReauthHttpException, \
+    InsufficientFundsHttpException
+from gainy.trading.exceptions import InsufficientFundsException
 from trading.actions.money_flow import MoneyFlowAction
 from gainy.utils import get_logger
 
@@ -19,26 +19,19 @@ class TradingDepositFunds(MoneyFlowAction):
 
         trading_service = context_container.trading_service
 
-        self.validate_amount(context_container, profile_id, amount)
+        try:
+            money_flow = trading_service.create_money_flow(
+                profile_id, amount, trading_account, funding_account)
 
-        money_flow = trading_service.create_money_flow(profile_id, amount,
-                                                       trading_account,
-                                                       funding_account)
-
-        context_container.notification_service.on_deposit_initiated(
-            profile_id, money_flow.amount)
+            context_container.notification_service.on_deposit_initiated(
+                profile_id, money_flow.amount)
+        except AccountNeedsReauthException:
+            raise AccountNeedsReauthHttpException(
+                'Request failed, please try again later.')
+        except InsufficientFundsException as e:
+            raise InsufficientFundsHttpException() from e
+        except:
+            raise BadRequestException(
+                'Request failed, please try again later.')
 
         return {'trading_money_flow_id': money_flow.id}
-
-    def validate_amount(self, context_container: ContextContainer, profile_id,
-                        amount):
-        money_flow = context_container.trading_repository.find_one(
-            TradingMoneyFlow, {"profile_id": profile_id})
-
-        if money_flow:
-            return
-
-        if amount < MIN_FIRST_DEPOSIT_AMOUNT:
-            raise BadRequestException(
-                f"Minimal amount for the first deposit is ${MIN_FIRST_DEPOSIT_AMOUNT}."
-            )

@@ -151,7 +151,6 @@ with ContextContainer() as context_container:
             logger.info(e)
             continue
 
-        portfolio.normalize_weights()
         provider.send_portfolio_to_api(portfolio)
         accounts_to_rebalance.add(row["account_ref_id"])
 

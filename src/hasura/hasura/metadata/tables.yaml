@@ -1,4 +1,7 @@
 - table:
+    name: abstract_entity_lock
+    schema: app
+- table:
     name: analytics_profile_data
     schema: app
   object_relationships:

@@ -69,6 +69,26 @@ with raw_data as materialized
                                         join {{ ref('historical_prices_aggregated_1d') }} using (symbol)
                                where (date >= holding_since or holding_since is null)
                                  and not is_app_trading
+
+                               union all
+
+                               select holding_id_v2,
+                                      date,
+                                      null as quantity,
+                                      0    as transaction_count,
+                                      null as open,
+                                      null as high,
+                                      null as low,
+                                      null as close,
+                                      actual_price as adjusted_close,
+                                      relative_daily_change as relative_gain,
+                                      ticker_realtime_metrics.updated_at
+                               from {{ ref('profile_holdings_normalized_all') }}
+                                        join {{ ref('ticker_realtime_metrics') }} using (symbol)
+                                        left join {{ ref('historical_prices_aggregated_1d') }} using (symbol, date)
+                               where (date >= holding_since or holding_since is null)
+                                 and not is_app_trading
+                                 and historical_prices_aggregated_1d.symbol is null
                            ) t
                   ) t
              where adjusted_close is not null

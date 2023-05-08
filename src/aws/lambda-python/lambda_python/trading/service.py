@@ -139,6 +139,9 @@ class TradingService(GainyTradingService):
     def create_money_flow(self, profile_id: int, amount: Decimal,
                           trading_account: TradingAccount,
                           funding_account: FundingAccount):
+        """
+        :raises InsufficientFundsException:
+        """
         repository = self.trading_repository
 
         if amount > 0:
@@ -154,10 +157,14 @@ class TradingService(GainyTradingService):
         money_flow.funding_account_id = funding_account.id
         repository.persist(money_flow)
 
-        self._get_provider_service().transfer_money(money_flow, amount,
-                                                    trading_account.id,
-                                                    funding_account.id)
-        repository.persist(money_flow)
+        try:
+            self._get_provider_service().transfer_money(
+                money_flow, amount, trading_account.id, funding_account.id)
+        except Exception as e:
+            money_flow.status = TradingMoneyFlowStatus.FAILED
+            raise e
+        finally:
+            repository.persist(money_flow)
 
         return money_flow
 
@@ -256,6 +263,9 @@ class TradingService(GainyTradingService):
 
     def check_enough_funds_to_deposit(self, funding_account: FundingAccount,
                                       amount: Decimal):
+        """
+        :raises InsufficientFundsException:
+        """
         try:
             self.update_funding_accounts_balance([funding_account])
         except Exception as e:

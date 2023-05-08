@@ -77,7 +77,7 @@ with data as
                              portfolio_holding_chart_1d.updated_at
                       from {{ ref('portfolio_holding_chart_1d') }}
                                join {{ ref('profile_holdings_normalized_all') }} using (holding_id_v2)
-                      where portfolio_holding_chart_1d.date >= now() - interval '1 month + 1 week'
+                      where portfolio_holding_chart_1d.date >= now()::date - interval '1 month + 1 week'
                         and not is_app_trading
 
                       union all
@@ -98,7 +98,7 @@ with data as
                              portfolio_holding_chart_1d.updated_at
                       from {{ ref('portfolio_holding_chart_1d') }}
                                join {{ ref('profile_holdings_normalized_all') }} using (holding_id_v2)
-                      where portfolio_holding_chart_1d.date >= now() - interval '3 month + 1 week'
+                      where portfolio_holding_chart_1d.date >= now()::date - interval '3 month + 1 week'
                         and not is_app_trading
 
                       union all
@@ -168,13 +168,13 @@ with data as
                              date::date,
                              datetime::timestamp,
                              period::varchar,
-                             open,
-                             high,
-                             low,
-                             close,
-                             adjusted_close,
-                             null as quantity,
-                             null as transaction_count,
+                             null  as open,
+                             null  as high,
+                             null  as low,
+                             null  as close,
+                             value as adjusted_close,
+                             null  as quantity,
+                             null  as transaction_count,
                              relative_gain,
                              updated_at
                       from {{ ref('drivewealth_portfolio_chart') }}

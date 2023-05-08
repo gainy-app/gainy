@@ -39,10 +39,12 @@ class HasuraDispatcher(ABC):
                                    "request": request,
                                    "exception": he
                                })
-                return self.format_response(he.http_code, {
-                    "message": he.message,
-                    "code": he.http_code
-                })
+                return self.format_response(
+                    he.http_code, {
+                        "message": he.message,
+                        "code": he.http_code,
+                        "exception_class": he.__class__.__name__,
+                    })
             except Exception as e:
                 logger.exception('HasuraDispatcher: %s',
                                  e,

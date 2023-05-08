@@ -91,6 +91,9 @@ class DriveWealthApi(GainyDriveWealthApi):
     def create_deposit(
             self, amount: Decimal, account: DriveWealthAccount,
             bank_account: DriveWealthBankAccount) -> DriveWealthDeposit:
+        """
+        :raises PlaidProcessorTokenProvidedIsInvalidException:
+        """
         response = self._make_request(
             "POST", "/funding/deposits", {
                 'accountNo': account.ref_no,
