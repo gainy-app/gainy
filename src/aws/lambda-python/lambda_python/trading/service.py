@@ -12,7 +12,7 @@ from models import UploadedFile
 from portfolio.plaid import PlaidService
 from services.uploaded_file_service import UploadedFileService
 from trading.drivewealth.provider import DriveWealthProvider
-from trading.exceptions import WrongTradingOrderStatusException
+from trading.exceptions import WrongTradingOrderStatusException, CannotDeleteFundingAccountException
 from trading.kyc_form_validator import KycFormValidator
 from gainy.plaid.models import PlaidAccessToken, PlaidAccount
 from trading.models import KycDocument
@@ -131,6 +131,21 @@ class TradingService(GainyTradingService):
         ]
 
     def delete_funding_account(self, funding_account: FundingAccount):
+        money_flow = self.trading_repository.find_one(
+            TradingMoneyFlow, {
+                "funding_account_id":
+                funding_account.id,
+                "status":
+                OperatorIn([
+                    TradingMoneyFlowStatus.PENDING.name,
+                    TradingMoneyFlowStatus.APPROVED.name
+                ]),
+            })
+        if money_flow:
+            raise CannotDeleteFundingAccountException(
+                "You can not delete an account while it has pending deposits or withdrawals."
+            )
+
         self._get_provider_service().delete_funding_account(funding_account.id)
 
         repository = self.trading_repository
