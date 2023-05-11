@@ -12,6 +12,7 @@ select profile_id,
            else 'withdraw'
            end                       as transaction_type,
        trading_money_flow.error_message,
+       id,
        trading_money_flow.updated_at
 from {{ source('app', 'trading_money_flow') }}
          left join (

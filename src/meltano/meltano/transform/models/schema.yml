@@ -2974,7 +2974,7 @@ models:
           - type:
               type: 'integer'
 
-  - name: analytics_transactions
+  - name: analytics_trading_orders
     columns:
       - name: profile_id
         tests:
@@ -3024,6 +3024,10 @@ models:
         tests:
           - type:
               type: 'text'
+      - name: uniq_id
+        tests:
+          - type:
+              type: 'text'
       - name: updated_at
         tests:
           - type:
@@ -3031,6 +3035,10 @@ models:
 
   - name: analytics_money_flows
     columns:
+      - name: id
+        tests:
+          - type:
+              type: 'integer'
       - name: profile_id
         tests:
           - type:

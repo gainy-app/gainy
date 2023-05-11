@@ -154,6 +154,16 @@
         ]
       }
     },
+    "analytics_money_flows": {
+      "metadata": {
+        "replication-key": "updated_at",
+        "replication-method": "INCREMENTAL",
+        "view-key-properties": [
+          "id"
+        ],
+        "is-view": true
+      }
+    },
     "analytics_profiles": {
       "metadata": {
         "replication-key": "updated_at",
@@ -179,6 +189,16 @@
         "replication-method": "INCREMENTAL",
         "view-key-properties": [
           "date"
+        ],
+        "is-view": true
+      }
+    },
+    "analytics_trading_orders": {
+      "metadata": {
+        "replication-key": "updated_at",
+        "replication-method": "INCREMENTAL",
+        "view-key-properties": [
+          "uniq_id"
         ],
         "is-view": true
       }

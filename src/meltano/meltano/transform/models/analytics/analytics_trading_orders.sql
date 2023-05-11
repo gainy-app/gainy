@@ -19,9 +19,11 @@ select profile_id,
        product_type,
        collection_id,
        symbol,
+       uniq_id,
        transactions.updated_at
 from (
-         select profile_id,
+         select 'tcv_' || id        as uniq_id,
+                profile_id,
                 created_at          as transaction_date,
                 target_amount_delta as transaction_amount,
                 status              as transaction_status,
@@ -34,7 +36,8 @@ from (
 
          union all
 
-         select profile_id,
+         select 'to_' || id         as uniq_id,
+                profile_id,
                 created_at          as transaction_date,
                 target_amount_delta as transaction_amount,
                 status              as transaction_status,
