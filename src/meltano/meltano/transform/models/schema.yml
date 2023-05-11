@@ -2411,6 +2411,10 @@ models:
         tests:
           - type:
               type: 'json'
+      - name: kyc_error_codes
+        tests:
+          - type:
+              type: 'json'
       - name: funding_account_connected
         tests:
           - type:

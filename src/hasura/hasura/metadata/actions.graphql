@@ -570,6 +570,7 @@ type KycSendFormOutput {
 
 type KycStatus {
   message: String
+  error_codes: [String]
   status: String
   updated_at: String
 }

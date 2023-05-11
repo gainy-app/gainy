@@ -3216,6 +3216,7 @@
           - kyc_status
           - kyc_message
           - kyc_error_messages
+          - kyc_error_codes
           - funding_account_connected
           - account_no
           - deposited_funds
