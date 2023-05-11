@@ -2566,6 +2566,40 @@
                 _is_null: true
         allow_aggregations: true
 - table:
+    name: section_collections
+    schema: public
+  object_relationships:
+    - name: collection
+      using:
+        manual_configuration:
+          column_mapping:
+            collection_uniq_id: uniq_id
+          insertion_order: null
+          remote_table:
+            name: profile_collections
+            schema: public
+    - name: profile
+      using:
+        manual_configuration:
+          column_mapping:
+            profile_id: id
+          insertion_order: null
+          remote_table:
+            name: profiles
+            schema: app
+  select_permissions:
+    - role: user
+      permission:
+        columns:
+          - profile_id
+          - collection_uniq_id
+          - section_id
+          - position
+        filter:
+          profile:
+            user_id:
+              _eq: X-Hasura-User-Id
+- table:
     name: ticker_categories
     schema: public
   object_relationships:
