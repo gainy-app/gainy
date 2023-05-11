@@ -2978,6 +2978,116 @@ models:
           - type:
               type: 'integer'
 
+  - name: analytics_trading_orders
+    columns:
+      - name: profile_id
+        tests:
+          - type:
+              type: 'integer'
+      - name: sign_up_at
+        tests:
+          - type:
+              type: 'timestamp with time zone'
+      - name: email
+        tests:
+          - type:
+              type: 'character varying'
+      - name: first_name
+        tests:
+          - type:
+              type: 'character varying'
+      - name: last_name
+        tests:
+          - type:
+              type: 'character varying'
+      - name: transaction_date
+        tests:
+          - type:
+              type: 'timestamp with time zone'
+      - name: transaction_amount
+        tests:
+          - type:
+              type: 'numeric'
+      - name: transaction_status
+        tests:
+          - type:
+              type: 'character varying'
+      - name: transaction_type
+        tests:
+          - type:
+              type: 'text'
+      - name: product_type
+        tests:
+          - type:
+              type: 'text'
+      - name: collection_id
+        tests:
+          - type:
+              type: 'integer'
+      - name: symbol
+        tests:
+          - type:
+              type: 'text'
+      - name: uniq_id
+        tests:
+          - type:
+              type: 'text'
+      - name: updated_at
+        tests:
+          - type:
+              type: 'timestamp with time zone'
+
+  - name: analytics_money_flows
+    columns:
+      - name: id
+        tests:
+          - type:
+              type: 'integer'
+      - name: profile_id
+        tests:
+          - type:
+              type: 'integer'
+      - name: sign_up_at
+        tests:
+          - type:
+              type: 'timestamp with time zone'
+      - name: email
+        tests:
+          - type:
+              type: 'character varying'
+      - name: first_name
+        tests:
+          - type:
+              type: 'character varying'
+      - name: last_name
+        tests:
+          - type:
+              type: 'character varying'
+      - name: transaction_date
+        tests:
+          - type:
+              type: 'timestamp with time zone'
+      - name: transaction_amount
+        tests:
+          - type:
+              type: 'numeric'
+      - name: transaction_status
+        tests:
+          - type:
+              type: 'character varying'
+      - name: transaction_type
+        tests:
+          - type:
+              type: 'text'
+      - name: error_message
+        tests:
+          - type:
+              type: 'text'
+      - name: updated_at
+        tests:
+          - type:
+              type: 'timestamp with time zone'
+
 exposures:
   - name: ticker_search_index
     type: application
