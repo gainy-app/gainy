@@ -1,7 +1,6 @@
 import base64
 import io
 
-from gainy.exceptions import NotFoundException
 from gainy.trading.models import ProfileKycStatus
 from trading.models import KycDocument
 from trading.drivewealth.api import DriveWealthApi
