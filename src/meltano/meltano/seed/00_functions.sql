@@ -124,7 +124,8 @@ begin
                     return s;
                 end if;
                 if op_cnt > max_ops then
-                    raise exception 'Series diverges. l: % r: % s % npv: %',l,r,s,npv;
+                    raise notice 'Series diverges. l: % r: % s % npv: %',l,r,s,npv;
+                    return null;
                 end if;
 
                 prev_npv = npv;
