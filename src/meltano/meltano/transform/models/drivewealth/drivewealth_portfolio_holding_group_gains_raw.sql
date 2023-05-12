@@ -87,117 +87,160 @@ with dphh_groupped as
          (
              select profile_id,
                     holding_group_id,
-                    count(date)               as count_1w,
-                    (1 + xirr(array_agg(cash_flow order by date), array_agg(date order by date))) ^
-                    (count(date) / 365.0) - 1 as relative_gain_1w,
-                    sum(cash_flow)            as absolute_gain_1w
+                    cnt                                   as count_1w,
+                    (1 + xirr(cf, d)) ^ (cnt / 365.0) - 1 as relative_gain_1w,
+                    absolute_gain_1w
              from (
                       select profile_id,
                              holding_group_id,
-                             date,
-                             cash_flow - case
-                                             when row_number()
-                                                  over (partition by profile_id, holding_group_id order by date) = 1
-                                                 then prev_value
-                                             else 0 end as cash_flow
-                      from data
-                      where date >= now()::date - interval '1 week'
+                             count(date)                        as count_1w,
+                             array_agg(cash_flow order by date) as cf,
+                             array_agg(date order by date)      as d,
+                             count(date)                        as cnt,
+                             sum(cash_flow)                     as absolute_gain_1w
+                      from (
+                               select profile_id,
+                                      holding_group_id,
+                                      date,
+                                      cash_flow - case
+                                                      when row_number()
+                                                           over (partition by profile_id, holding_group_id order by date) = 1
+                                                          then prev_value
+                                                      else 0 end as cash_flow
+                               from data
+                               where date >= now()::date - interval '1 week'
+                           ) t
+                     group by profile_id, holding_group_id
                   ) t
-             group by profile_id, holding_group_id
      ),
      data_1m as
          (
              select profile_id,
                     holding_group_id,
-                    (1 + xirr(array_agg(cash_flow order by date), array_agg(date order by date))) ^
-                    (count(date) / 365.0) - 1 as relative_gain_1m,
-                    sum(cash_flow)            as absolute_gain_1m
+                    (1 + xirr(cf, d)) ^ (cnt / 365.0) - 1 as relative_gain_1m,
+                    absolute_gain_1m
              from (
                       select profile_id,
                              holding_group_id,
-                             date,
-                             cash_flow - case
-                                             when row_number()
-                                                  over (partition by profile_id, holding_group_id order by date) = 1
-                                                 then prev_value
-                                             else 0 end as cash_flow
-                      from data
-                      where date >= now()::date - interval '1 month'
+                             array_agg(cash_flow order by date) as cf,
+                             array_agg(date order by date)      as d,
+                             count(date)                        as cnt,
+                             sum(cash_flow)                     as absolute_gain_1m
+                      from (
+                               select profile_id,
+                                      holding_group_id,
+                                      date,
+                                      cash_flow - case
+                                                      when row_number()
+                                                           over (partition by profile_id, holding_group_id order by date) = 1
+                                                          then prev_value
+                                                      else 0 end as cash_flow
+                               from data
+                               where date >= now()::date - interval '1 month'
+                           ) t
+                      group by profile_id, holding_group_id
                   ) t
-             group by profile_id, holding_group_id
      ),
      data_3m as
          (
              select profile_id,
                     holding_group_id,
-                    (1 + xirr(array_agg(cash_flow order by date), array_agg(date order by date))) ^
-                    (count(date) / 365.0) - 1 as relative_gain_3m,
-                    sum(cash_flow)            as absolute_gain_3m
+                    (1 + xirr(cf, d)) ^ (cnt / 365.0) - 1 as relative_gain_3m,
+                    absolute_gain_3m
              from (
                       select profile_id,
                              holding_group_id,
-                             date,
-                             cash_flow - case
-                                             when row_number()
-                                                  over (partition by profile_id, holding_group_id order by date) = 1
-                                                 then prev_value
-                                             else 0 end as cash_flow
-                      from data
-                      where date >= now()::date - interval '3 month'
+                             array_agg(cash_flow order by date) as cf,
+                             array_agg(date order by date)      as d,
+                             count(date)                        as cnt,
+                             sum(cash_flow)                     as absolute_gain_3m
+                      from (
+                               select profile_id,
+                                      holding_group_id,
+                                      date,
+                                      cash_flow - case
+                                                      when row_number()
+                                                           over (partition by profile_id, holding_group_id order by date) = 1
+                                                          then prev_value
+                                                      else 0 end as cash_flow
+                               from data
+                               where date >= now()::date - interval '3 month'
+                           ) t
+                      group by profile_id, holding_group_id
                   ) t
-             group by profile_id, holding_group_id
      ),
      data_1y as
          (
              select profile_id,
                     holding_group_id,
-                    (1 + xirr(array_agg(cash_flow order by date), array_agg(date order by date))) ^
-                    (count(date) / 365.0) - 1 as relative_gain_1y,
-                    sum(cash_flow)            as absolute_gain_1y
+                    (1 + xirr(cf, d)) ^ (cnt / 365.0) - 1 as relative_gain_1y,
+                    absolute_gain_1y
              from (
                       select profile_id,
                              holding_group_id,
-                             date,
-                             cash_flow - case
-                                             when row_number()
-                                                  over (partition by profile_id, holding_group_id order by date) = 1
-                                                 then prev_value
-                                             else 0 end as cash_flow
-                      from data
-                      where date >= now()::date - interval '1 year'
+                             array_agg(cash_flow order by date) as cf,
+                             array_agg(date order by date)      as d,
+                             count(date)                        as cnt,
+                             sum(cash_flow)                     as absolute_gain_1y
+                      from (
+                               select profile_id,
+                                      holding_group_id,
+                                      date,
+                                      cash_flow - case
+                                                      when row_number()
+                                                           over (partition by profile_id, holding_group_id order by date) = 1
+                                                          then prev_value
+                                                      else 0 end as cash_flow
+                               from data
+                               where date >= now()::date - interval '1 year'
+                           ) t
+                      group by profile_id, holding_group_id
                   ) t
-             group by profile_id, holding_group_id
      ),
      data_5y as
          (
              select profile_id,
                     holding_group_id,
-                    (1 + xirr(array_agg(cash_flow order by date), array_agg(date order by date))) ^
-                    (count(date) / 365.0) - 1 as relative_gain_5y,
-                    sum(cash_flow)            as absolute_gain_5y
+                    (1 + xirr(cf, d)) ^ (cnt / 365.0) - 1 as relative_gain_5y,
+                    absolute_gain_5y
              from (
                       select profile_id,
                              holding_group_id,
-                             date,
-                             cash_flow - case
-                                             when row_number()
-                                                  over (partition by profile_id, holding_group_id order by date) = 1
-                                                 then prev_value
-                                             else 0 end as cash_flow
-                      from data
-                      where date >= now()::date - interval '5 year'
+                             array_agg(cash_flow order by date) as cf,
+                             array_agg(date order by date)      as d,
+                             count(date)                        as cnt,
+                             sum(cash_flow)                     as absolute_gain_5y
+                      from (
+                               select profile_id,
+                                      holding_group_id,
+                                      date,
+                                      cash_flow - case
+                                                      when row_number()
+                                                           over (partition by profile_id, holding_group_id order by date) = 1
+                                                          then prev_value
+                                                      else 0 end as cash_flow
+                               from data
+                               where date >= now()::date - interval '5 year'
+                           ) t
+                      group by profile_id, holding_group_id
                   ) t
-             group by profile_id, holding_group_id
      ),
      data_total as
          (
              select profile_id,
                     holding_group_id,
-                    (1 + xirr(array_agg(cash_flow order by date), array_agg(date order by date))) ^
-                    (count(date) / 365.0) - 1 as relative_gain_total,
-                    sum(cash_flow)            as absolute_gain_total
-             from data
-             group by profile_id, holding_group_id
+                    (1 + xirr(cf, d)) ^ (cnt / 365.0) - 1 as relative_gain_total,
+                    absolute_gain_total
+             from (
+                      select profile_id,
+                             holding_group_id,
+                             array_agg(cash_flow order by date) as cf,
+                             array_agg(date order by date)      as d,
+                             count(date)                        as cnt,
+                             sum(cash_flow)                     as absolute_gain_total
+                      from data
+                      group by profile_id, holding_group_id
+                  ) t
      )
 
 select profile_id,

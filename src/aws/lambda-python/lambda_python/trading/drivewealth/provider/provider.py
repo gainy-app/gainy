@@ -106,6 +106,7 @@ class DriveWealthProvider(DriveWealthProviderKYC,
             raise AccountNeedsReauthException() from e
         except DriveWealthApiException as e:
             money_flow.status = TradingMoneyFlowStatus.FAILED
+            money_flow.error_message = str(e)
             self.repository.persist(money_flow)
             logger.exception(e)
             raise e
