@@ -58,7 +58,8 @@ class TwilioClient:
 
     def validate_phone_number(self, phone_number, allowed_country_codes=None):
         try:
-            instance = self._lookup_service.phone_numbers(phone_number).fetch()
+            instance = self._lookup_service.phone_numbers(phone_number).fetch(
+                fields='caller_name')
             logger.info('validate_phone_number',
                         extra={"instance": instance.__dict__})
 
