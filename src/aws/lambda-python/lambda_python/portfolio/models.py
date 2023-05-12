@@ -1,3 +1,5 @@
+import json
+
 from gainy.data_access.models import BaseModel
 
 from abc import ABC
@@ -154,6 +156,7 @@ class Account(PortfolioBaseModel):
     official_name = None
     subtype = None
     type = None
+    owners = None
     profile_id = None
     created_at = None
     updated_at = None
@@ -170,6 +173,12 @@ class Account(PortfolioBaseModel):
     @property
     def key_fields(self):
         return ['ref_id']
+
+    def to_dict(self) -> dict:
+        return {
+            **super().to_dict(),
+            "owners": json.dumps(self.owners),
+        }
 
 
 class Institution(PortfolioBaseModel):
