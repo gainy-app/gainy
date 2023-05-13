@@ -51,7 +51,7 @@ class LinkPlaidAccount(HasuraAction):
 
         accounts = []
         if purpose == PURPOSE_TRADING:
-            accounts = plaid_service.get_item_accounts(entity)
+            accounts = plaid_service.get_identity(entity)
 
             account_entities = []
             for account in accounts:
@@ -66,6 +66,7 @@ class LinkPlaidAccount(HasuraAction):
                 account_entity.official_name = account.official_name
                 account_entity.subtype = account.subtype
                 account_entity.type = account.type
+                account_entity.owners = account.owners
                 account_entity.profile_id = profile_id
                 account_entity.plaid_access_token_id = access_token_id
                 account_entities.append(account_entity)
