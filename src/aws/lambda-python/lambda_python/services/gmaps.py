@@ -37,9 +37,6 @@ class GoogleMaps():
         self.cache = cache
         self.client = googlemaps.Client(key=GOOGLE_PLACES_API_KEY)
 
-    def places(self, query):
-        return self.client.places(query=query)
-
     def place(self, place_id):
         caching_loader = CachingLoader(self.cache,
                                        self.client.place,
@@ -58,18 +55,20 @@ class GoogleMaps():
         }
 
         try:
-            place_search = self.places(query=query)
+            place_search = self.client.places_autocomplete(
+                input_text=query,
+                components={'country': allowed_country_codes})
             logging_extra["place_search"] = place_search
-            if not place_search['results']:
+            if not place_search:
                 return []
 
             cnt = 0
-            for i in place_search["results"]:
+            for i in place_search:
                 if not post_office_allowed and {"post_office", "post_box"
                                                 }.intersection(i["types"]):
                     continue
 
-                formatted_address = i["formatted_address"]
+                formatted_address = i["description"]
                 place_id = i["place_id"]
                 place = self.place(place_id)
                 logging_extra["place"] = place
@@ -85,8 +84,6 @@ class GoogleMaps():
                 logging_extra["country_code"] = country_code2
                 country_code3 = self._get_country_code3(country_code2)
                 logging_extra["country_code3"] = country_code3
-                if allowed_country_codes and country_code2 not in allowed_country_codes and country_code3 not in allowed_country_codes:
-                    continue
 
                 postal_code = list(
                     filter(lambda x: 'postal_code' in x['types'],
