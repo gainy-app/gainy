@@ -158,6 +158,13 @@ type Query {
 }
 
 type Query {
+  kyc_suggest_addresses(
+    query: String!
+    limit: Int!
+  ): [SuggestedAddressOutput]
+}
+
+type Query {
   link_plaid_account(
     profile_id: Int!
     public_token: String!
@@ -658,6 +665,7 @@ type KycValidateAddressOutput {
 }
 
 type SuggestedAddressOutput {
+  formatted_address: String
   street1: String
   street2: String
   city: String
