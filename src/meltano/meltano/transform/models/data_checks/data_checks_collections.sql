@@ -186,7 +186,7 @@ union all
                                            select collection_uniq_id, date, sum(weight) as weight_sum
                                            from {{ ref('collection_ticker_weights') }}
                                            group by collection_uniq_id, date
-                                           having abs(sum(weight) - 1) > {{ var('weight_precision') }}
+                                           having abs(sum(weight) - 1) > {{ var('weight_precision') }} * count(collection_uniq_id)
                                        ) t
                                   group by collection_uniq_id
                               )
@@ -249,7 +249,7 @@ union all
                                 group by collection_id, date
                             ) t
                    ) t using (collection_id, date)
-     where abs(next_weight - new_weight / new_weight_sum) > {{ var('weight_precision') }}
+     where abs(next_weight - new_weight / new_weight_sum) > {{ var('weight_precision') }} * symbols_cnt
        and not is_last_day_before_rebalance
        and t.symbols_cnt = t.next_symbols_cnt
 )
