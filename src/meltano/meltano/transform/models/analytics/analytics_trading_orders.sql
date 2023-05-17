@@ -51,8 +51,8 @@ from (
                 null                as collection_name,
                 symbol,
                 base_tickers.name   as ticker_name,
-                to.updated_at
-         from {{ source('app', 'trading_orders')}} to
+                _to.updated_at
+         from {{ source('app', 'trading_orders')}} _to
                   left join {{ ref('base_tickers')}} using (symbol)
      ) transactions
          left join (
