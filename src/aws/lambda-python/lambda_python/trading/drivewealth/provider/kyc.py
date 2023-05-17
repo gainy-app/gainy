@@ -7,7 +7,7 @@ from trading.drivewealth.api import DriveWealthApi
 from trading.drivewealth.repository import DriveWealthRepository
 
 from gainy.trading.drivewealth.models import DriveWealthUser
-from gainy.trading.drivewealth import DriveWealthProvider as GainyDriveWealthProvider
+from gainy.trading.drivewealth.provider.provider import DriveWealthProvider as GainyDriveWealthProvider
 from gainy.utils import get_logger
 
 logger = get_logger(__name__)
