@@ -36,7 +36,7 @@ from (
                 null::text          as symbol,
                 tcv.updated_at
          from {{ source('app', 'trading_collection_versions')}} tcv
-                  left join {{ ref('collections')}} on collections.id = trading_collection_versions.collection_id
+                  left join {{ ref('collections')}} on collections.id = tcv.collection_id
 
          union all
 
