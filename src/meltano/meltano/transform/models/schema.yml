@@ -3035,7 +3035,7 @@ models:
       - name: ticker_name
         tests:
           - type:
-              type: 'character varying'
+              type: 'text'
       - name: uniq_id
         tests:
           - type:

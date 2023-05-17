@@ -34,6 +34,7 @@ from (
                 collection_id,
                 collections.name    as collection_name,
                 null::text          as symbol,
+                null::text          as ticker_name,
                 tcv.updated_at
          from {{ source('app', 'trading_collection_versions')}} tcv
                   left join {{ ref('collections')}} on collections.id = tcv.collection_id
