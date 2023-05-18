@@ -1,3 +1,5 @@
+import json
+
 from abc import ABC, abstractmethod
 from redis import Redis
 
@@ -19,10 +21,10 @@ class RedisCache(Cache):
         self.redis = Redis(host=host, port=port)
 
     def set(self, key, value, ttl_seconds: int = 60):
-        self.redis.set(name=key, value=value, ex=ttl_seconds)
+        self.redis.set(name=key, value=json.dumps(value), ex=ttl_seconds)
 
     def get(self, key):
-        return self.redis.get(key)
+        return json.loads(self.redis.get(key))
 
 
 class LocalCache(Cache):
