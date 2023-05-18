@@ -3,11 +3,10 @@ from decimal import Decimal
 from gainy.tests.mocks.repository_mocks import mock_noop, mock_find
 from gainy.tests.mocks.trading.drivewealth.api_mocks import FUND1_ID, PORTFOLIO_STATUS, PORTFOLIO, USER_ID
 from gainy.trading.models import TradingCollectionVersion
-from trading.drivewealth.api import DriveWealthApi
 from trading.drivewealth.repository import DriveWealthRepository
 from trading.drivewealth.provider.collection import DriveWealthProviderCollection
 
-from gainy.trading.drivewealth.models import DriveWealthUser, DriveWealthAccount, DriveWealthPortfolio, DriveWealthFund, \
+from gainy.trading.drivewealth.models import DriveWealthUser, DriveWealthPortfolio, DriveWealthFund, \
     DriveWealthInstrument, DriveWealthPortfolioStatus
 
 _FUND_WEIGHTS = {
