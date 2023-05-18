@@ -24,7 +24,12 @@ class RedisCache(Cache):
         self.redis.set(name=key, value=json.dumps(value), ex=ttl_seconds)
 
     def get(self, key):
-        return json.loads(self.redis.get(key))
+        data = self.redis.get(key)
+
+        if not data:
+            return data
+
+        return json.loads(data)
 
 
 class LocalCache(Cache):
