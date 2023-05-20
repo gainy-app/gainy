@@ -55,6 +55,7 @@ sources:
     description: Mobile App data, managed by hasura
     schema: app
     tables:
+      - name: corporate_action_adjustments
       - name: drivewealth_accounts
       - name: drivewealth_accounts_money
       - name: drivewealth_accounts_positions
