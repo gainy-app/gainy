@@ -2414,7 +2414,7 @@ models:
       - name: kyc_error_codes
         tests:
           - type:
-              type: 'json'
+              type: 'text'
       - name: funding_account_connected
         tests:
           - type:
@@ -3024,7 +3024,15 @@ models:
         tests:
           - type:
               type: 'integer'
+      - name: collection_name
+        tests:
+          - type:
+              type: 'character varying'
       - name: symbol
+        tests:
+          - type:
+              type: 'text'
+      - name: ticker_name
         tests:
           - type:
               type: 'text'

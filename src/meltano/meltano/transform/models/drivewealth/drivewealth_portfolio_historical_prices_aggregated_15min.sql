@@ -172,6 +172,7 @@ with portfolio_statuses as
                           where historical_prices_aggregated_15min.datetime <= datetime_threshold
 {% if var('realtime') %}
                             and historical_prices_aggregated_15min.datetime >= min_datetime
+                            and min_datetime <= datetime_threshold
 {% else %}
                             and historical_prices_aggregated_15min.date >= min_date
 {% endif %}
