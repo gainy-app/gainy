@@ -407,14 +407,14 @@ with portfolio_statuses as
                     updated_at
              from cash_flow
                       left join (
-                                    select profile_id, collection_id, symbol, date, sum(amount)
+                                    select profile_id, collection_id, symbol, date, sum(amount) as amount
                                     from {{ source('app', 'corporate_action_adjustments') }}
                                     where collection_id is not null
                                     group by profile_id, collection_id, symbol, date
                                 ) corporate_action_adjustments_collections
                                 using (profile_id, collection_id, symbol, date)
                       left join (
-                                    select profile_id, symbol, date, sum(amount)
+                                    select profile_id, symbol, date, sum(amount) as amount
                                     from {{ source('app', 'corporate_action_adjustments') }}
                                     where collection_id is null
                                     group by profile_id, symbol, date
