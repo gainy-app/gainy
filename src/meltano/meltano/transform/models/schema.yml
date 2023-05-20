@@ -3024,7 +3024,15 @@ models:
         tests:
           - type:
               type: 'integer'
+      - name: collection_name
+        tests:
+          - type:
+              type: 'character varying'
       - name: symbol
+        tests:
+          - type:
+              type: 'text'
+      - name: ticker_name
         tests:
           - type:
               type: 'text'
