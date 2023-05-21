@@ -130,12 +130,11 @@ with raw_ticker_collections_weights as materialized
                     symbol_schedule.symbol,
                     collection_schedule.date,
                     LAST_VALUE_IGNORENULLS(price)         over wnd as price,
-                    LAST_VALUE_IGNORENULLS(weight)        over wnd as weight,
-                    LAST_VALUE_IGNORENULLS(period_id)     over wnd as period_id,
-                    LAST_VALUE_IGNORENULLS(optimized_at)  over wnd as optimized_at,
+                    coalesce(ticker_collections_weights_expanded0.period_id,
+                        collection_schedule.period_id)             as period_id,
                     LAST_VALUE_IGNORENULLS(updated_at)    over wnd as updated_at
              from (
-                      select distinct collection_uniq_id, date
+                      select distinct collection_uniq_id, period_id, date
                       from ticker_collections_weights_expanded0
                   ) collection_schedule
                       left join (
@@ -154,19 +153,23 @@ with raw_ticker_collections_weights as materialized
      ),
      ticker_collections_weights_expanded2 as materialized
          (
-             select collection_uniq_id,
-                    collection_id,
-                    symbol,
-                    date,
+             select tcwe1.collection_uniq_id,
+                    tcwe1.collection_id,
+                    tcwe1.symbol,
+                    tcwe1.date,
                     price,
                     first_value(price)
-                    over (partition by collection_id, symbol, period_id order by date) as latest_rebalance_price,
+                    over (partition by tcwe1.collection_id, tcwe1.symbol, period_id order by tcwe1.date) as latest_rebalance_price,
                     first_value(weight)
-                    over (partition by collection_id, symbol, period_id order by date) as latest_rebalance_weight,
+                    over (partition by tcwe1.collection_id, tcwe1.symbol, period_id order by tcwe1.date) as latest_rebalance_weight,
                     period_id,
                     optimized_at,
-                    updated_at
-             from ticker_collections_weights_expanded1
+                    tcwe1.updated_at
+             from ticker_collections_weights_expanded1 tcwe1
+                      join ticker_collections_weights
+                           on ticker_collections_weights.date = tcwe1.period_id
+                               and ticker_collections_weights.collection_id = tcwe1.collection_id
+                               and ticker_collections_weights.symbol = tcwe1.symbol
              where period_id is not null
                and weight is not null
          ),

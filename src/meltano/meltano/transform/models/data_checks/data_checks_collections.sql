@@ -218,17 +218,17 @@ union all
                          date,
                          weight,
                          price,
-                         next_weight,
-                         weight / price * next_price as new_weight,
-                         rnk = 1 as is_last_day_before_rebalance
+                         prev_weight,
+                         prev_weight / prev_price * price as new_weight,
+                         rnk = 1 as is_first_day_after_rebalance
                   from (
                            select *,
                                   rank() over wnd2 as rnk,
-                                  lag(weight) over wnd as next_weight,
-                                  lag(price) over wnd  as next_price
+                                  lag(weight) over wnd as prev_weight,
+                                  lag(price) over wnd  as prev_price
                            from {{ ref('collection_ticker_weights') }}
-                               window wnd as (partition by collection_id, symbol order by date desc),
-                                   wnd2 as (partition by collection_id, symbol, period_id order by date desc)
+                               window wnd as (partition by collection_id, symbol order by date),
+                                   wnd2 as (partition by collection_id, symbol, period_id order by date)
                        ) t
           )
      select ('collection_tickers_wrong_weight_' || collection_id ||
@@ -242,16 +242,16 @@ union all
      from collection_ticker_weights_expanded
               join (
                        select *,
-                              lag(symbols_cnt) over (partition by collection_id order by date desc) as next_symbols_cnt
+                              lag(symbols_cnt) over (partition by collection_id order by date) as prev_symbols_cnt
                        from (
                                 select collection_id, date, count(*) as symbols_cnt, sum(new_weight) as new_weight_sum
                                 from collection_ticker_weights_expanded
                                 group by collection_id, date
                             ) t
                    ) t using (collection_id, date)
-     where abs(next_weight - new_weight / new_weight_sum) > {{ var('weight_precision') }} * symbols_cnt
-       and not is_last_day_before_rebalance
-       and t.symbols_cnt = t.next_symbols_cnt
+     where abs(weight - new_weight / new_weight_sum) > {{ var('weight_precision') }} * symbols_cnt
+       and not is_first_day_after_rebalance
+       and t.symbols_cnt = t.prev_symbols_cnt
 )
 
 union all
