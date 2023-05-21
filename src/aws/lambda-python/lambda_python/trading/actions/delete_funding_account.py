@@ -1,6 +1,7 @@
 from common.context_container import ContextContainer
-from gainy.exceptions import NotFoundException
+from gainy.exceptions import NotFoundException, BadRequestException
 from common.hasura_function import HasuraAction
+from gainy.trading.exceptions import TradingPausedException
 from gainy.trading.models import FundingAccount
 from gainy.utils import get_logger
 from trading.exceptions import CannotDeleteFundingAccountException, CannotDeleteFundingAccountHttpException
@@ -28,5 +29,7 @@ class TradingDeleteFundingAccount(HasuraAction):
                 funding_account)
         except CannotDeleteFundingAccountException as e:
             raise CannotDeleteFundingAccountHttpException(e.message) from e
+        except TradingPausedException as e:
+            raise BadRequestException(e.message) from e
 
         return {"ok": True}

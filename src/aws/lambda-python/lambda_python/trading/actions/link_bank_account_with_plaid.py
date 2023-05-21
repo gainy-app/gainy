@@ -1,8 +1,9 @@
 from gainy.plaid.common import PURPOSE_TRADING
 from common.context_container import ContextContainer
-from gainy.exceptions import NotFoundException
+from gainy.exceptions import NotFoundException, BadRequestException
 from common.hasura_function import HasuraAction
 from gainy.plaid.models import PlaidAccessToken
+from gainy.trading.exceptions import TradingPausedException
 from gainy.utils import get_logger
 
 logger = get_logger(__name__)
@@ -26,8 +27,11 @@ class TradingLinkBankAccountWithPlaid(HasuraAction):
         if not access_token or access_token.purpose != PURPOSE_TRADING or access_token.profile_id != profile_id:
             raise NotFoundException('Token not found')
 
-        funding_account = trading_service.link_bank_account_with_plaid(
-            access_token, account_name, account_id)
+        try:
+            funding_account = trading_service.link_bank_account_with_plaid(
+                access_token, account_name, account_id)
+        except TradingPausedException as e:
+            raise BadRequestException(e.message) from e
 
         context_container.notification_service.on_funding_account_linked(
             profile_id, funding_account.mask, funding_account.name)

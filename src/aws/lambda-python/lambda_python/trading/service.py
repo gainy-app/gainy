@@ -7,7 +7,7 @@ from gainy.data_access.operators import OperatorIn
 from gainy.exceptions import NotFoundException, BadRequestException
 from gainy.trading.drivewealth.models import CollectionStatus, CollectionHoldingStatus
 from gainy.plaid.common import handle_error
-from gainy.trading.exceptions import InsufficientFundsException
+from gainy.trading.exceptions import InsufficientFundsException, TradingPausedException
 from models import UploadedFile
 from portfolio.plaid import PlaidService
 from services.uploaded_file_service import UploadedFileService
@@ -71,6 +71,11 @@ class TradingService(GainyTradingService):
     def link_bank_account_with_plaid(self, access_token: PlaidAccessToken,
                                      account_name,
                                      account_id) -> FundingAccount:
+        """
+        :raises TradingPausedException:
+        """
+        self.trading_repository.check_profile_trading_not_paused(
+            access_token.profile_id)
         try:
             provider_bank_account: AbstractProviderBankAccount = self._get_provider_service(
             ).link_bank_account_with_plaid(access_token, account_id,
@@ -131,6 +136,11 @@ class TradingService(GainyTradingService):
         ]
 
     def delete_funding_account(self, funding_account: FundingAccount):
+        """
+        :raises TradingPausedException:
+        """
+        self.trading_repository.check_profile_trading_not_paused(
+            funding_account.profile_id)
         money_flow = self.trading_repository.find_one(
             TradingMoneyFlow, {
                 "funding_account_id":
@@ -156,8 +166,11 @@ class TradingService(GainyTradingService):
                           funding_account: FundingAccount):
         """
         :raises InsufficientFundsException:
+        :raises TradingPausedException:
         """
         repository = self.trading_repository
+
+        repository.check_profile_trading_not_paused(profile_id)
 
         if amount > 0:
             self.check_enough_funds_to_deposit(funding_account, amount)
