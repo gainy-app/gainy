@@ -236,7 +236,7 @@ union all
             symbol,
             'collection_tickers_wrong_weight',
             'daily'                                as period,
-            json_build_array(next_weight,
+            json_build_array(weight,
                 new_weight / new_weight_sum)::text as message,
             now()                                  as updated_at
      from collection_ticker_weights_expanded
