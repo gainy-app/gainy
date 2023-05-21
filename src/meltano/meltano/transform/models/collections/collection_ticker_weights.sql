@@ -9,6 +9,7 @@
   )
 }}
 
+-- Execution Time: 370257.070 ms
 with raw_ticker_collections_weights as materialized
          (
              select collections.id    as collection_id,
@@ -83,14 +84,6 @@ with raw_ticker_collections_weights as materialized
                   ) t
                  window wnd as (partition by collection_id order by date desc)
      ),
-{% if is_incremental() and var('realtime') %}
-     old_stats as materialized
-         (
-             select collection_uniq_id, max(date) as date
-             from {{ this }}
-             group by collection_uniq_id
-         ),
-{% endif %}
      ticker_collections_weights_expanded0 as materialized
          (
              select ticker_collections_weights.collection_uniq_id,
@@ -105,11 +98,6 @@ with raw_ticker_collections_weights as materialized
                              hp.updated_at)         as updated_at
              from ticker_collections_weights
                       join ticker_collections_next_date using (collection_id, date)
-
-{% if is_incremental() and var('realtime') %}
-                      left join old_stats using (collection_uniq_id)
-{% endif %}
-
                       join (
                                select symbol,
                                       date,
@@ -134,26 +122,54 @@ with raw_ticker_collections_weights as materialized
                                and hp.date < ticker_collections_next_date.next_date
              where hp.price is not null
                and hp.price > 0
-
-{% if is_incremental() and var('realtime') %}
-               and (old_stats.collection_uniq_id is null or hp.date >= old_stats.date - interval '2 month')
-{% endif %}
          ),
+    ticker_collections_weights_expanded1 as
+         (
+             select collection_schedule.collection_uniq_id,
+                    LAST_VALUE_IGNORENULLS(collection_id) over wnd as collection_id,
+                    symbol_schedule.symbol,
+                    collection_schedule.date,
+                    LAST_VALUE_IGNORENULLS(price)         over wnd as price,
+                    coalesce(ticker_collections_weights_expanded0.period_id,
+                        collection_schedule.period_id)             as period_id,
+                    LAST_VALUE_IGNORENULLS(updated_at)    over wnd as updated_at
+             from (
+                      select distinct collection_uniq_id, period_id, date
+                      from ticker_collections_weights_expanded0
+                  ) collection_schedule
+                      left join (
+                                    select distinct collection_uniq_id, symbol, date, next_date
+                                    from ticker_collections_weights
+                                             join ticker_collections_next_date using (collection_id, date)
+                                ) symbol_schedule
+                                on symbol_schedule.collection_uniq_id = collection_schedule.collection_uniq_id
+                                    and collection_schedule.date >= symbol_schedule.date
+                                    and collection_schedule.date < symbol_schedule.next_date
+                      left join ticker_collections_weights_expanded0
+                                on ticker_collections_weights_expanded0.collection_uniq_id = collection_schedule.collection_uniq_id
+                                    and ticker_collections_weights_expanded0.symbol = symbol_schedule.symbol
+                                    and ticker_collections_weights_expanded0.date = collection_schedule.date
+             window wnd as (partition by collection_schedule.collection_uniq_id, symbol_schedule.symbol order by collection_schedule.date)
+     ),
      ticker_collections_weights_expanded2 as materialized
          (
-             select collection_uniq_id,
-                    collection_id,
-                    symbol,
-                    date,
+             select tcwe1.collection_uniq_id,
+                    tcwe1.collection_id,
+                    tcwe1.symbol,
+                    tcwe1.date,
                     price,
                     first_value(price)
-                    over (partition by collection_id, symbol, period_id order by date) as latest_rebalance_price,
+                    over (partition by tcwe1.collection_id, tcwe1.symbol, period_id order by tcwe1.date) as latest_rebalance_price,
                     first_value(weight)
-                    over (partition by collection_id, symbol, period_id order by date) as latest_rebalance_weight,
+                    over (partition by tcwe1.collection_id, tcwe1.symbol, period_id order by tcwe1.date) as latest_rebalance_weight,
                     period_id,
                     optimized_at,
-                    updated_at
-             from ticker_collections_weights_expanded0
+                    tcwe1.updated_at
+             from ticker_collections_weights_expanded1 tcwe1
+                      join ticker_collections_weights
+                           on ticker_collections_weights.date = tcwe1.period_id
+                               and ticker_collections_weights.collection_id = tcwe1.collection_id
+                               and ticker_collections_weights.symbol = tcwe1.symbol
              where period_id is not null
                and weight is not null
          ),
@@ -166,15 +182,11 @@ with raw_ticker_collections_weights as materialized
          ),
      ticker_collections_weights_stats as
          (
-             select *,
-                    lag(date) over (partition by collection_uniq_id order by date desc) as next_date
-             from (
-                      select collection_uniq_id,
-                             date,
-                             sum(weight) as weight_sum
-                      from ticker_collections_weights_expanded
-                      group by collection_uniq_id, date
-                  ) t
+             select collection_uniq_id,
+                    date,
+                    sum(weight) as weight_sum
+             from ticker_collections_weights_expanded
+             group by collection_uniq_id, date
          ),
      ticker_collections_weights_normalized as
          (
