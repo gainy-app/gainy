@@ -1,5 +1,5 @@
 alter table app.corporate_action_adjustments
-    add column date date;
+    add column date date default now();
 update app.corporate_action_adjustments
 set date = created_at::date
 where date is null;
