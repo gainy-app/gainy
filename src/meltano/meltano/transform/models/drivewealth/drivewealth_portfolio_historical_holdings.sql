@@ -390,7 +390,7 @@ with portfolio_statuses as
                     value,
                     prev_value,
                     cash_flow - coalesce(corporate_action_adjustments_collections.amount, 0) -
-                    coalesce(corporate_action_adjustments_collections.amount, 0) as cash_flow,
+                    coalesce(corporate_action_adjustments_tickers.amount, 0) as cash_flow,
                     case
                         -- whole day
                         when value > 0 and prev_value > 0
@@ -402,7 +402,7 @@ with portfolio_statuses as
                         when prev_value > 0 -- and t.value = 0
                             then -cash_flow / prev_value - 1
                         else 0
-                        end                                                      as relative_daily_gain,
+                        end                                                  as relative_daily_gain,
                     is_premarket,
                     updated_at
              from cash_flow
