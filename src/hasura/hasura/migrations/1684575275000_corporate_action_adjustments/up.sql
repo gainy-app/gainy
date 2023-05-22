@@ -104,7 +104,15 @@ from app.corporate_action_adjustments
                       corporate_action_drivewealth_transaction_link.corporate_action_adjustment_id
          left join app.drivewealth_accounts using (trading_account_id)
          left join app.drivewealth_transactions
-                   on corporate_action_adjustments.symbol = drivewealth_transactions.symbol
+                   on corporate_action_adjustments.symbol = case
+                                                                when "type" = 'MERGER_ACQUISITION'
+                                                                    and drivewealth_transactions.data ->
+                                                                        'mergerAcquisition' ->> 'type' =
+                                                                        'ADD_SHARES_CASH'
+                                                                    then drivewealth_transactions.data ->
+                                                                         'mergerAcquisition' -> 'acquiree' ->> 'symbol'
+                                                                else drivewealth_transactions.symbol
+                       end
                        and drivewealth_accounts.ref_id = drivewealth_transactions.account_id
                        and corporate_action_adjustments.date = drivewealth_transactions.date
 where corporate_action_drivewealth_transaction_link.drivewealth_transaction_id is null;
