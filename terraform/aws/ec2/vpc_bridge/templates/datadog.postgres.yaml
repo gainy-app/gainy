@@ -36,7 +36,15 @@ instances:
                dag_runs_metrics as
                    (
                        select dag_id,
-                              greatest(0, extract(epoch from now() - next_run_date - interval '5 minutes')) as seconds_from_next_dag_run
+                              case
+                                  when (
+                                           select state
+                                           from dag_next_run
+                                           where dag_id = 'gainy-dag'
+                                       ) = 'running' and dag_id = 'realtime-dbt-dag'
+                                      then 0
+                                  else greatest(0, extract(epoch from now() - next_run_date - interval '5 minutes'))
+                                  end as seconds_from_next_dag_run
                        from dag_next_run
                ),
                successful_dag_runs_metrics as
