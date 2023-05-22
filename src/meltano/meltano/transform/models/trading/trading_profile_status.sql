@@ -68,7 +68,7 @@ from (
                             )
                        select profile_id, status, message, error_messages, created_at, error_codes.error_codes
                        from distinct_statuses
-                                join error_codes using (id)
+                                left join error_codes using (id)
                    ) kyc_status using (profile_id)
          left join (
                        select profile_id, max(updated_at) as updated_at
