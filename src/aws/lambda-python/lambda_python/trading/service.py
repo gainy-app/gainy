@@ -226,7 +226,7 @@ class TradingService(GainyTradingService):
         if env() != ENV_PRODUCTION:
             return
 
-        KycFormValidator.validate_address(
+        self.kyc_form_validator.validate_address(
             street1=kyc_form['address_street1'],
             street2=kyc_form['address_street2'],
             city=kyc_form['address_city'],
