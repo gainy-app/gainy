@@ -11,6 +11,7 @@ from portfolio.actions import *
 from portfolio.triggers import *
 from search.algolia_search import SearchTickers, SearchCollections
 from search.news_search import SearchNews
+from trading.actions.kyc.suggest_address import KycSuggestAddresses
 from triggers import *
 from actions import *
 from trading.actions import *
@@ -70,6 +71,7 @@ ACTIONS = [
     KycGetFormConfig(),
     KycGetStatus(),
     KycValidateAddress(),
+    KycSuggestAddresses(),
     KycSendForm(),
     KycAddDocument(),
 
