@@ -18,11 +18,13 @@ select profile_id,
            end             as transaction_type,
        product_type,
        collection_id,
+       collection_name,
        symbol,
+       ticker_name,
        uniq_id,
        transactions.updated_at
 from (
-         select 'tcv_' || id        as uniq_id,
+         select 'tcv_' || tcv.id    as uniq_id,
                 profile_id,
                 created_at          as transaction_date,
                 target_amount_delta as transaction_amount,
@@ -30,9 +32,12 @@ from (
                 source              as transaction_source,
                 'ttf'               as product_type,
                 collection_id,
+                collections.name    as collection_name,
                 null::text          as symbol,
-                updated_at
-         from {{ source('app', 'trading_collection_versions')}}
+                null::text          as ticker_name,
+                tcv.updated_at
+         from {{ source('app', 'trading_collection_versions')}} tcv
+                  left join {{ ref('collections')}} on collections.id = tcv.collection_id
 
          union all
 
@@ -42,11 +47,14 @@ from (
                 target_amount_delta as transaction_amount,
                 status              as transaction_status,
                 source              as transaction_source,
-                'ttf'               as product_type,
+                'ticker'            as product_type,
                 null                as collection_id,
+                null                as collection_name,
                 symbol,
-                updated_at
-         from {{ source('app', 'trading_orders')}}
+                base_tickers.name   as ticker_name,
+                _to.updated_at
+         from {{ source('app', 'trading_orders')}} _to
+                  left join {{ ref('base_tickers')}} using (symbol)
      ) transactions
          left join (
                        select id as profile_id, email, first_name, last_name, created_at

@@ -2,7 +2,7 @@ from decimal import Decimal
 from common.context_container import ContextContainer
 from common.hasura_function import HasuraAction
 from gainy.exceptions import BadRequestException, InsufficientFundsHttpException
-from gainy.trading.exceptions import InsufficientFundsException
+from gainy.trading.exceptions import InsufficientFundsException, TradingPausedException
 from gainy.trading.models import TradingOrderSource
 from gainy.utils import get_logger
 
@@ -50,6 +50,8 @@ class TradingCreateStockOrder(HasuraAction):
                 target_amount_delta_relative=target_amount_delta_relative)
         except InsufficientFundsException as e:
             raise InsufficientFundsHttpException() from e
+        except TradingPausedException as e:
+            raise BadRequestException(e.message) from e
 
         if target_amount_delta_relative:
             holding_amount = context_container.trading_repository.get_ticker_holding_value(

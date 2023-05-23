@@ -12,6 +12,8 @@ select profile_id,
            else 'withdraw'
            end                       as transaction_type,
        trading_money_flow.error_message,
+       funding_account_id,
+       row_number() over wnd         as money_flow_number,
        id,
        trading_money_flow.updated_at
 from {{ source('app', 'trading_money_flow') }}
@@ -19,3 +21,4 @@ from {{ source('app', 'trading_money_flow') }}
                        select id as profile_id, email, first_name, last_name, created_at
                        from {{ source('app', 'profiles') }}
                    ) profiles using (profile_id)
+    window wnd as (partition by profile_id, trading_money_flow.amount > 0 order by trading_money_flow.created_at)

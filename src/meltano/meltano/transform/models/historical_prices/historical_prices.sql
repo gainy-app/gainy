@@ -39,7 +39,6 @@ raw_eod_historical_prices as
                'eod'                                     as source,
                _sdc_batched_at                           as updated_at
         from {{ source('eod', 'eod_historical_prices') }}
-                 join {{ ref('base_tickers') }} on base_tickers.symbol = eod_historical_prices.code
 --                  left join polygon_symbols
 --                            on polygon_symbols.symbol = eod_historical_prices.code
         where eod_historical_prices.date >= eod_historical_prices.first_date

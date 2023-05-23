@@ -389,7 +389,8 @@ with portfolio_statuses as
                     date,
                     value,
                     prev_value,
-                    cash_flow,
+                    cash_flow - coalesce(corporate_action_adjustments_collections.amount, 0) -
+                    coalesce(corporate_action_adjustments_tickers.amount, 0) as cash_flow,
                     case
                         -- whole day
                         when value > 0 and prev_value > 0
@@ -401,10 +402,23 @@ with portfolio_statuses as
                         when prev_value > 0 -- and t.value = 0
                             then -cash_flow / prev_value - 1
                         else 0
-                        end as relative_daily_gain,
+                        end                                                  as relative_daily_gain,
                     is_premarket,
                     updated_at
              from cash_flow
+                      left join (
+                                    select profile_id, collection_id, symbol, date, sum(amount) as amount
+                                    from {{ source('app', 'corporate_action_adjustments') }}
+                                    where collection_id is not null
+                                    group by profile_id, collection_id, symbol, date
+                                ) corporate_action_adjustments_collections
+                                using (profile_id, collection_id, symbol, date)
+                      left join (
+                                    select profile_id, symbol, date, sum(amount) as amount
+                                    from {{ source('app', 'corporate_action_adjustments') }}
+                                    where collection_id is null
+                                    group by profile_id, symbol, date
+                                ) corporate_action_adjustments_tickers using (profile_id, symbol, date)
      )
 select data_extended.*,
        date_trunc('week', date)::date                    as date_week,
