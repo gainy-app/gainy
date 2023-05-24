@@ -24,10 +24,10 @@ def http_get_request(url: str):
 def load_url(url: str):
     response = http_get_request(url)
     if response.status_code == 200:
-        return response.content
+        return response.text
     else:
         raise Exception(
-            f"Url not loaded with status: {response.status_code}, response: {response.content}"
+            f"Url not loaded with status: {response.status_code}, response: {response.text}"
         )
 
 
