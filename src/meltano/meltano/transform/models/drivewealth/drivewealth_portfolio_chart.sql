@@ -257,22 +257,24 @@ where drivewealth_portfolio_historical_prices_aggregated.period = '1w'
 
 union all
 
-with holdings as
-         (
-             select holding_id_v2
-             from {{ ref('drivewealth_portfolio_historical_prices_aggregated') }}
-             where period = '1m'
-             group by holding_id_v2
-             having count(*) >= 3
-         )
-select profile_id,
-       holding_id_v2,
-       datetime::date                as date,
-       datetime,
-       'all'::varchar                as period,
-       value,
-       relative_gain,
-       drivewealth_portfolio_historical_prices_aggregated.updated_at
-from {{ ref('drivewealth_portfolio_historical_prices_aggregated') }}
-         join holdings using (holding_id_v2)
-where drivewealth_portfolio_historical_prices_aggregated.period = '1m'
+(
+    with holdings as
+             (
+                 select holding_id_v2
+                 from {{ ref('drivewealth_portfolio_historical_prices_aggregated') }}
+                 where period = '1m'
+                 group by holding_id_v2
+                 having count(*) >= 3
+             )
+    select profile_id,
+           holding_id_v2,
+           datetime::date                as date,
+           datetime,
+           'all'::varchar                as period,
+           value,
+           relative_gain,
+           drivewealth_portfolio_historical_prices_aggregated.updated_at
+    from {{ ref('drivewealth_portfolio_historical_prices_aggregated') }}
+             join holdings using (holding_id_v2)
+    where drivewealth_portfolio_historical_prices_aggregated.period = '1m'
+)
