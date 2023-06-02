@@ -243,6 +243,43 @@ all_rows as
              left join wrongfully_adjusted_prices
                        on wrongfully_adjusted_prices.symbol = prices_with_split_rates.symbol
                            and wrongfully_adjusted_prices.date = prices_with_split_rates.date
+),
+historical_prices as materialized 
+    (
+        select all_rows.*,
+               case
+                   when lag(adjusted_close) over wnd > 0
+                       then coalesce(adjusted_close / (lag(adjusted_close) over wnd) - 1, 0)
+                   end as relative_daily_gain
+        from all_rows
+        window wnd as (partition by symbol order by date rows between 1 preceding and current row)
+),
+dividend_adjustment as
+    (
+        select symbol, date, sum(dividend_adjustment) as dividend_adjustment
+        from (
+                 select symbol,
+                        date,
+                        value / lag(cumulative_relative_daily_gain) over wnd *
+                        first_value(cumulative_relative_daily_gain) over wnd as dividend_adjustment
+                 from (
+                          select symbol,
+                                 historical_prices.date,
+                                 close,
+                                 adjusted_close,
+                                 relative_daily_gain,
+                                 historical_dividends.date                      as dividend_date,
+                                 historical_dividends.value,
+                                 exp(sum(ln(relative_daily_gain + 1)) over wnd) as cumulative_relative_daily_gain
+                          from historical_prices
+                                   left join {{ ref('historical_dividends') }} using (symbol)
+                          where historical_dividends.date >= historical_prices.date
+                          window wnd as ( partition by symbol, historical_dividends.date
+                                  order by historical_prices.date desc )
+                      ) t
+                 window wnd as (partition by symbol, dividend_date order by date desc)
+             ) t
+        group by symbol, date
 )
 select t.*
 from (
@@ -251,10 +288,10 @@ from (
                 date_year,
                 date_month,
                 date_week,
-                adjusted_close,
+                adjusted_close + coalesce(dividend_adjustment, 0) as adjusted_close,
                 case
-                    when lag(adjusted_close) over wnd > 0
-                        then coalesce(adjusted_close::numeric / (lag(adjusted_close) over wnd)::numeric - 1, 0)
+                    when lag(adjusted_close + coalesce(dividend_adjustment, 0)) over wnd > 0
+                        then coalesce((adjusted_close + coalesce(dividend_adjustment, 0)) / (lag(adjusted_close + coalesce(dividend_adjustment, 0)) over wnd) - 1, 0)
                     end                 as relative_daily_gain,
                 close,
                 date::date,
@@ -262,9 +299,10 @@ from (
                 low,
                 open,
                 volume::numeric,
-                all_rows.source,
-                all_rows.updated_at
-         from all_rows
+                source,
+                updated_at
+         from historical_prices
+                  left join dividend_adjustment using (symbol, date)
              window wnd as (partition by symbol order by date rows between 1 preceding and current row)
 
          union all
