@@ -1,22 +1,9 @@
-import csv
-import os
-import sys
-from math import trunc
 from psycopg2.extras import execute_values
 from common.context_container import ContextContainer
 from common.hasura_function import HasuraTrigger
 from gainy.utils import get_logger
 
 logger = get_logger(__name__)
-script_directory = os.path.dirname(os.path.realpath(__file__))
-sys.path.append(script_directory)
-
-with open(
-        os.path.join(
-            script_directory,
-            '../data/user_categories_decision_matrix.csv')) as csv_file:
-    reader = csv.DictReader(csv_file, delimiter='\t')
-    decision_matrix = list(reader)
 
 
 class SetUserCategories(HasuraTrigger):
@@ -27,90 +14,18 @@ class SetUserCategories(HasuraTrigger):
     def get_allowed_profile_ids(self, op, data):
         return data["new"]['profile_id']
 
-    def calculate_score(self, payload):
-        risk_needed = [1, 2, 2, 3][self._list_index(payload['risk_level'], 4)]
-        if payload['average_market_return'] == 6 and risk_needed > 1:
-            risk_needed = 3
-        if payload['average_market_return'] == 50 and risk_needed < 3:
-            risk_needed = 2
-
-        investment_horizon_points = [1, 1, 2, 3][self._list_index(
-            payload['investment_horizon'], 4)]
-        unexpected_purchases_source_points = {
-            'checking_savings': 3,
-            'stock_investments': 2,
-            'credit_card': 1,
-            'other_loans': 1
-        }[payload['unexpected_purchases_source']]
-        damage_of_failure_points = [1, 2, 2, 3][self._list_index(
-            payload['damage_of_failure'], 4)]
-        risk_taking_ability = round(
-            (investment_horizon_points + unexpected_purchases_source_points +
-             damage_of_failure_points) / 3)
-
-        stock_market_risk_level_points = {
-            'very_risky': 1,
-            'somewhat_risky': 2,
-            'neutral': 2,
-            'somewhat_safe': 3,
-            'very_safe': 3,
-        }[payload['stock_market_risk_level']]
-        trading_experience_points = {
-            'never_tried': 2,
-            'very_little': 2,
-            'companies_i_believe_in': 2,
-            'etfs_and_safe_stocks': 2,
-            'advanced': 3,
-            'daily_trader': 3,
-            'investment_funds': 2,
-            'professional': 3,
-            'dont_trade_after_bad_experience': 1
-        }[payload['trading_experience']]
-
-        loss_tolerance = round(
-            (stock_market_risk_level_points + trading_experience_points) / 2)
-
-        for i in [
-                'if_market_drops_20_i_will_buy',
-                'if_market_drops_40_i_will_buy'
-        ]:
-            if payload[i] is not None:
-                buy_rate = payload[i] * 3
-                if buy_rate < 1 and loss_tolerance == 3:  # sell
-                    loss_tolerance -= 1
-                if buy_rate > 2 and loss_tolerance != 3:  # buy
-                    loss_tolerance += 1
-
-        for i in decision_matrix:
-            if int(i['Risk Need']) != risk_needed:
-                continue
-            if int(i['Risk Taking Ability']) != risk_taking_ability:
-                continue
-            if int(i['Loss Tolerance']) != loss_tolerance:
-                continue
-
-            return int(i['Hard code matrix'])
-
-        return max(risk_needed, risk_taking_ability, loss_tolerance)
-
     def apply(self, op, data, context_container: ContextContainer):
         db_conn = context_container.db_conn
         payload = self._extract_payload(data)
-
-        final_score = self.calculate_score(payload)
+        service = context_container.recommendation_service
 
         profile_id = payload["profile_id"]
+        risk_score = service.calculate_risk_score(payload)
+
         with db_conn.cursor() as cursor:
             cursor.execute(
-                "update app.profile_scoring_settings set risk_score = %(risk_score)s where profile_id = %(profile_id)s",
-                {
-                    'risk_score': final_score,
-                    "profile_id": profile_id
-                })
-
-            cursor.execute(
                 "select id from categories where risk_score = %(risk_score)s",
-                {'risk_score': final_score})
+                {'risk_score': risk_score})
 
             rows = cursor.fetchall()
             categories = [row[0] for row in rows]
@@ -118,7 +33,7 @@ class SetUserCategories(HasuraTrigger):
         logging_extra = {
             'profile_id': profile_id,
             'payload': payload,
-            'final_score': final_score,
+            'risk_score': risk_score,
             'categories': categories,
         }
         logger.info('set_user_categories', extra=logging_extra)
@@ -134,19 +49,4 @@ class SetUserCategories(HasuraTrigger):
                 [(profile_id, category_id, True)
                  for category_id in categories])
 
-        context_container.recommendation_service.compute_match_score(
-            profile_id)
-
-    @staticmethod
-    def _list_index(value, list_size):
-        """
-        Select the list index between 0 and `list_size` - 1 based on ``value`` parameter
-        :param value: real number between 0 and 1
-        :param list_size: the size of the list
-        :return: the index between 0 and `list_size` - 1
-        """
-        if value >= 1.0:
-            # covers case where `value` = 1.0
-            return list_size - 1
-
-        return trunc(value * list_size)
+        service.compute_match_score(profile_id)
