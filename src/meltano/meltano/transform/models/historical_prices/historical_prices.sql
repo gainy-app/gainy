@@ -23,7 +23,7 @@ with dividend_adjustment as
                         first_value(cumulative_relative_daily_gain) over wnd as dividend_adjustment
                  from (
                           select symbol,
-                                 historical_prices.date,
+                                 historical_prices_div_adjusted.date,
                                  close,
                                  adjusted_close,
                                  relative_daily_gain,
@@ -32,9 +32,9 @@ with dividend_adjustment as
                                  exp(sum(ln(relative_daily_gain + 1)) over wnd) as cumulative_relative_daily_gain
                           from {{ ref('historical_prices_div_adjusted') }}
                                    left join {{ ref('historical_dividends') }} using (symbol)
-                          where historical_dividends.date >= historical_prices.date
+                          where historical_dividends.date >= historical_prices_div_adjusted.date
                           window wnd as ( partition by symbol, historical_dividends.date
-                                  order by historical_prices.date desc )
+                                  order by historical_prices_div_adjusted.date desc )
                       ) t
                  window wnd as (partition by symbol, dividend_date order by date desc)
              ) t
