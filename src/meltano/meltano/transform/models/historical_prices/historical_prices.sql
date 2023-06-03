@@ -30,7 +30,7 @@ with dividend_adjustment as
                                  historical_dividends.date                      as dividend_date,
                                  historical_dividends.value,
                                  exp(sum(ln(relative_daily_gain + 1)) over wnd) as cumulative_relative_daily_gain
-                          from {{ ref('historical_prices_div_unadjusted') }}
+                          from {{ ref('historical_prices_div_adjusted') }}
                                    left join {{ ref('historical_dividends') }} using (symbol)
                           where historical_dividends.date >= historical_prices.date
                           window wnd as ( partition by symbol, historical_dividends.date
@@ -60,7 +60,7 @@ from (
                 volume::numeric,
                 source,
                 updated_at
-         from {{ ref('historical_prices_div_unadjusted') }}
+         from {{ ref('historical_prices_div_adjusted') }}
                   left join dividend_adjustment using (symbol, date)
              window wnd as (partition by symbol order by date rows between 1 preceding and current row)
       ) t
