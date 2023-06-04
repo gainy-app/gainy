@@ -251,7 +251,7 @@ from (
                 adjusted_close,
                 case
                     when lag(adjusted_close) over wnd > 0
-                        then coalesce(adjusted_close::numeric / (lag(adjusted_close) over wnd)::numeric - 1, 0)
+                        then coalesce(adjusted_close / (lag(adjusted_close) over wnd) - 1, 0)
                     end                 as relative_daily_gain,
                 close,
                 date::date,
@@ -274,7 +274,7 @@ from (
                 c                                                               as adjusted_close,
                 case
                     when lag(c) over wnd > 0
-                        then coalesce(c::numeric / (lag(c) over wnd)::numeric - 1, 0)
+                        then coalesce(c / (lag(c) over wnd) - 1, 0)
                     end                                                         as relative_daily_gain,
                 c                                                               as close,
                 to_timestamp(t / 1000)::date                                    as date,
@@ -298,7 +298,7 @@ from (
                 c                                                                      as adjusted_close,
                 case
                     when lag(c) over wnd > 0
-                        then coalesce(c::numeric / (lag(c) over wnd)::numeric - 1, 0)
+                        then coalesce(c / (lag(c) over wnd) - 1, 0)
                     end                                                                as relative_daily_gain,
                 c                                                                      as close,
                 to_timestamp(t / 1000)::date                                           as date,
