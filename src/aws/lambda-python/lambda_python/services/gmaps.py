@@ -95,10 +95,14 @@ class GoogleMaps():
                         lambda x: 'administrative_area_level_1' in x['types'],
                         address_components))
                 province = province[0]["short_name"] if province else None
-                locality = list(
+                city = list(
                     filter(lambda x: 'locality' in x['types'],
                            address_components))
-                locality = locality[0]["short_name"] if locality else None
+                city = city[0]["short_name"] if city else None
+
+                if not city or not province or not postal_code:
+                    continue
+
                 street_number = list(
                     filter(lambda x: 'street_number' in x['types'],
                            address_components))
@@ -113,7 +117,7 @@ class GoogleMaps():
                 address = Address(
                     formatted_address=formatted_address,
                     street1=street1,
-                    city=locality,
+                    city=city,
                     province=province,
                     postal_code=postal_code,
                     country=country_code3,
