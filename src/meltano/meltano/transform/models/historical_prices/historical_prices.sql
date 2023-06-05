@@ -13,7 +13,26 @@
 }}
 
 
-with dividend_adjustment as
+with symbols_to_adjust as
+         (
+             select distinct symbol
+             from (
+                      select distinct on (symbol) symbol, date
+                      from {{ ref('historical_dividends') }}
+                      order by symbol desc, date desc
+                  ) latest_dividends
+                      join (
+                               select symbol,
+                                      date,
+                                      lag(date) over wnd           as prev_date,
+                                      lag(adjusted_close) over wnd as prev_adjusted_close,
+                                      lag(close) over wnd          as prev_close
+                               from {{ ref('historical_prices_div_adjusted') }}
+                               window wnd as (partition by symbol order by date)
+                           ) hp using (symbol, date)
+             where abs(prev_adjusted_close - prev_close) > 1e-3
+         ),
+     dividend_adjustment as
          (
              select symbol,
                     date,
@@ -32,6 +51,7 @@ with dividend_adjustment as
                                       historical_dividends.value,
                                       exp(sum(ln(relative_daily_gain + 1)) over wnd) as cumulative_relative_daily_gain
                                from {{ ref('historical_prices_div_adjusted') }}
+                                        join symbols_to_adjust using (symbol)
                                         left join {{ ref('historical_dividends') }} using (symbol, date)
                                window wnd as ( partition by symbol order by historical_prices_div_adjusted.date desc )
                            ) t
