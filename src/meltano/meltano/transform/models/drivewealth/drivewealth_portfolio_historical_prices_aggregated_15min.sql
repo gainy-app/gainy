@@ -186,7 +186,7 @@ with portfolio_statuses as
                     coalesce(relative_gain, 0) as relative_gain
              from min_holding_date
                       left join profile_date_threshold using (profile_id)
-                      left join historical_prices_aggregated_15min on historical_prices_aggregated_15min.symbol = 'SPY'
+                      left join {{ ref('historical_prices_aggregated_15min') }} on historical_prices_aggregated_15min.symbol = 'SPY'
              where min_holding_date.symbol = 'CUR:USD'
                and (historical_prices_aggregated_15min.datetime <= datetime_threshold or datetime_threshold is null)
 {% if var('realtime') %}
