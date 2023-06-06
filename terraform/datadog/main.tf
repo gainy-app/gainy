@@ -117,7 +117,7 @@ resource "datadog_monitor" "lambda_duration" {
   message = "Lambda Duration Monitor triggered. Notify: @slack-${var.slack_channel_name} <!channel>"
   #  escalation_message = "Escalation message @pagerduty"
 
-  query = "autosmooth(avg(last_7d):avg:aws.lambda.duration{functionname:*_production} by {functionname}) > 3"
+  query = "autosmooth(aws.lambda.duration{functionname:*_production} by {functionname}) > 3"
 
   monitor_thresholds {
     critical = "3"
