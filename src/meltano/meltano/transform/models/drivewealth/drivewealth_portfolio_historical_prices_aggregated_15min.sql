@@ -156,50 +156,44 @@ with portfolio_statuses as
                                  min(datetime) as min_datetime
                           from data
                           group by profile_id, holding_id_v2, collection_id, symbol
-                      ),
-                  ticker_schedule as materialized
-                      (
-                          select profile_id,
-                                 holding_id_v2,
-                                 collection_id,
-                                 symbol,
-                                 date,
-                                 datetime,
-                                 coalesce(relative_gain, 0) as relative_gain
-                          from min_holding_date
-                                   join profile_date_threshold using (profile_id)
-                                   left join {{ ref('historical_prices_aggregated_15min') }} using (symbol)
-                          where historical_prices_aggregated_15min.datetime <= datetime_threshold
-{% if var('realtime') %}
-                            and historical_prices_aggregated_15min.datetime >= min_datetime
-                            and min_datetime <= datetime_threshold
-{% else %}
-                            and historical_prices_aggregated_15min.date >= min_date
-{% endif %}
-                  )
+                      )
              select profile_id,
                     holding_id_v2,
                     collection_id,
                     symbol,
                     date,
                     datetime,
-                    relative_gain
-             from ticker_schedule
+                    coalesce(relative_gain, 0) as relative_gain
+             from min_holding_date
+                      join profile_date_threshold using (profile_id)
+                      left join {{ ref('historical_prices_aggregated_15min') }} using (symbol)
+             where historical_prices_aggregated_15min.datetime <= datetime_threshold
+{% if var('realtime') %}
+               and historical_prices_aggregated_15min.datetime >= min_datetime
+               and min_datetime <= datetime_threshold
+{% else %}
+               and historical_prices_aggregated_15min.date >= min_date
+{% endif %}
 
              union all
 
              select profile_id,
-                    profile_id || '_cash_CUR:USD' as holding_id_v2,
-                    null                          as collection_id,
-                    'CUR:USD'                     as symbol,
+                    holding_id_v2,
+                    collection_id,
+                    min_holding_date.symbol,
                     date,
                     datetime,
-                    0                             as relative_gain
-             from (
-                      select profile_id, date, datetime
-                      from ticker_schedule
-                      group by profile_id, date, datetime
-                  ) t
+                    coalesce(relative_gain, 0) as relative_gain
+             from min_holding_date
+                      left join profile_date_threshold using (profile_id)
+                      left join historical_prices_aggregated_15min on historical_prices_aggregated_15min.symbol = 'SPY'
+             where min_holding_date.symbol = 'CUR:USD'
+               and (historical_prices_aggregated_15min.datetime <= datetime_threshold or datetime_threshold is null)
+{% if var('realtime') %}
+               and historical_prices_aggregated_15min.datetime >= min_datetime
+               and (min_datetime <= datetime_threshold or datetime_threshold is null)
+{% else %}
+               and historical_prices_aggregated_15min.date >= min_date
      ),
      data_combined as materialized
          (
