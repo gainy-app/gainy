@@ -2,7 +2,8 @@ from decimal import Decimal
 
 from gainy.analytics.service import AnalyticsService
 from gainy.data_access.repository import MAX_TRANSACTION_SIZE
-from gainy.exceptions import NotFoundException, EntityNotFoundException, AccountNeedsReauthException
+from gainy.exceptions import NotFoundException, EntityNotFoundException, AccountNeedsReauthException, \
+    DepositLimitExceededException
 from gainy.trading.drivewealth.config import DRIVEWEALTH_IS_UAT
 from gainy.trading.drivewealth.exceptions import DriveWealthApiException, PlaidProcessorTokenProvidedIsInvalidException
 from portfolio.plaid import PlaidService
@@ -78,6 +79,7 @@ class DriveWealthProvider(DriveWealthProviderKYC,
                        trading_account_id: int, funding_account_id: int):
         """
         :raises AccountNeedsReauthException:
+        :raises DepositLimitExceededException:
         :raises Exception:
         """
         trading_account = self.repository.find_one(
@@ -108,6 +110,12 @@ class DriveWealthProvider(DriveWealthProviderKYC,
             money_flow.status = TradingMoneyFlowStatus.FAILED
             money_flow.error_message = str(e)
             self.repository.persist(money_flow)
+
+            if e.message.find(
+                    'Deposit transaction exceeds maximum daily ACH deposit transaction limit'
+            ) > -1:
+                raise DepositLimitExceededException() from e
+
             logger.exception(e)
             raise e
 
