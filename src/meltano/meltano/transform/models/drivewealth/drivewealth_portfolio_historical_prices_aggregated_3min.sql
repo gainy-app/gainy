@@ -194,6 +194,7 @@ with portfolio_statuses as
                and (min_datetime <= datetime_threshold or datetime_threshold is null)
 {% else %}
                and historical_prices_aggregated_15min.date >= min_date
+{% endif %}
      ),
      data_combined as materialized
          (
