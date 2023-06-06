@@ -117,10 +117,10 @@ resource "datadog_monitor" "lambda_duration" {
   message = "Lambda Duration Monitor triggered. Notify: @slack-${var.slack_channel_name} <!channel>"
   #  escalation_message = "Escalation message @pagerduty"
 
-  query = "avg(last_7d):avg:aws.lambda.duration{functionname:*_production} by {functionname}.rollup(avg, 3600) / day_before(avg:aws.lambda.duration{functionname:*_production} by {functionname}.rollup(avg, 3600)) - 1 > 1"
+  query = "autosmooth(avg(last_7d):avg:aws.lambda.duration{functionname:*_production} by {functionname}) > 3"
 
   monitor_thresholds {
-    critical = "1"
+    critical = "3"
   }
 
   require_full_window = true
@@ -264,7 +264,7 @@ resource "datadog_monitor" "meltano_failed_tasks" {
   type    = "query alert"
   message = "Airflow Meltano Failed Tasks triggered. Notify: @slack-${var.slack_channel_name} <!channel>"
 
-  query = "avg(last_1d):app.failed_tasks{postgres_env:production} by {dag_id}.rollup(avg, 3600) > 0.2"
+  query = "max(last_5m):app.failed_tasks{postgres_env:production} by {dag_id} > 0.2"
 
   monitor_thresholds {
     critical          = "0.2"
@@ -372,7 +372,7 @@ resource "datadog_monitor" "logs_count" {
   type    = "query alert"
   message = "Logs count triggered. Notify: @slack-${var.slack_channel_name} <!channel>"
 
-  query = "sum(last_1d):clamp_min(sum:aws.logs.forwarded_log_events{*} by {loggroupname}.rollup(sum, 86400), 1000) / clamp_min(day_before(sum:aws.logs.forwarded_log_events{*} by {loggroupname}.rollup(sum, 86400)), 1000) - 1 > 1"
+  query = "sum(last_1d):clamp_min(sum:aws.logs.forwarded_log_events{!loggroupname:/aws/lambda/sqs*,!loggroupname:*_test} by {loggroupname}.rollup(sum, 86400), 1000) / clamp_min(day_before(sum:aws.logs.forwarded_log_events{!loggroupname:/aws/lambda/sqs*,!loggroupname:*_test} by {loggroupname}.rollup(sum, 86400)), 1000) - 1 > 1"
 
   monitor_thresholds {
     critical = 1
