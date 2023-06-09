@@ -3097,6 +3097,41 @@ models:
           - type:
               type: 'timestamp with time zone'
 
+  - name: invitation_history
+    columns:
+      - name: profile_id
+        tests:
+          - type:
+              type: 'integer'
+      - name: invited_profile_id
+        tests:
+          - type:
+              type: 'integer'
+      - name: invited_at
+        tests:
+          - type:
+              type: 'timestamp with time zone'
+      - name: name
+        tests:
+          - type:
+              type: 'text'
+      - name: step1_signed_up
+        tests:
+          - type:
+              type: 'boolean'
+      - name: step2_brokerate_account_open
+        tests:
+          - type:
+              type: 'boolean'
+      - name: step3_deposited_enough
+        tests:
+          - type:
+              type: 'boolean'
+      - name: is_complete
+        tests:
+          - type:
+              type: 'boolean'
+
 exposures:
   - name: ticker_search_index
     type: application
