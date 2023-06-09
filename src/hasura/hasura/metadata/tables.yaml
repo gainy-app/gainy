@@ -1772,6 +1772,35 @@
           - sort_order
         filter: {}
 - table:
+    name: invitation_history
+    schema: public
+  object_relationships:
+    - name: profile
+      using:
+        manual_configuration:
+          column_mapping:
+            profile_id: id
+          insertion_order: null
+          remote_table:
+            name: profiles
+            schema: app
+  select_permissions:
+    - role: user
+      permission:
+        columns:
+          - invited_at
+          - invited_profile_id
+          - is_complete
+          - name
+          - profile_id
+          - step1_signed_up
+          - step2_brokerate_account_open
+          - step3_deposited_enough
+        filter:
+          profile:
+            user_id:
+              _eq: X-Hasura-User-Id
+- table:
     name: notifications
     schema: public
   object_relationships:

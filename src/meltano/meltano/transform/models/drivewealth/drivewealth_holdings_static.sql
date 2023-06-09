@@ -60,13 +60,14 @@ with latest_portfolio_status as
              union all
 
              select profile_id,
-                    null                                          as collection_id,
-                    portfolio_status_id,
-                    'CUR:USD'                                     as symbol,
-                    (portfolio_holding_data ->> 'value')::numeric as quantity,
-                    updated_at
+                    null                                               as collection_id,
+                    max(portfolio_status_id)                           as portfolio_status_id,
+                    'CUR:USD'                                          as symbol,
+                    sum((portfolio_holding_data ->> 'value')::numeric) as quantity,
+                    max(updated_at)                                    as updated_at
              from portfolio_funds
              where portfolio_holding_data ->> 'type' = 'CASH_RESERVE'
+             group by profile_id
      ),
      base_tickers_type_to_security_type as
          (
