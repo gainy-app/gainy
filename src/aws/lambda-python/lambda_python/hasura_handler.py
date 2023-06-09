@@ -112,7 +112,6 @@ TRIGGERS = [
     OnUserCreated(ENV),
     SetRecommendations(),
     OnPlaidAccessTokenCreated(),
-    OnInvitationCreatedOrUpdated(),
     StripeDeletePaymentMethod(),
     OnNewKycStatus(),
 ]
