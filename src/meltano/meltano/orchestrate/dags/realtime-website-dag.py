@@ -1,3 +1,5 @@
+import datetime
+
 import os
 import sys
 from airflow.operators.bash import BashOperator
@@ -13,7 +15,10 @@ dag = create_dag(dag_id,
                  schedule_interval="*/5 * * * *",
                  is_paused_upon_creation=False)
 
-dbt = BashOperator(task_id="website-sync",
-                   bash_command=get_meltano_command(
-                       "schedule run website-to-postgres --force"),
-                   dag=dag)
+dbt = BashOperator(
+    task_id="website-sync",
+    bash_command=get_meltano_command(
+        "schedule run website-to-postgres --force"),
+    dag=dag,
+    retry_delay=datetime.timedelta(seconds=5),
+)
