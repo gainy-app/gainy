@@ -18,5 +18,5 @@ locals {
   eod_websockets_memory_credits    = var.env == "production" ? 512 : 256
   hasura_memory_credits            = var.env == "production" ? 1024 : 1024
   airflow_memory_credits           = var.env == "production" ? 1024 : 1024
-  meltano_scheduler_memory_credits = var.env == "production" ? 16384 : 8192
+  meltano_scheduler_memory_credits = var.env == "production" ? 16384 : 16384
 }
