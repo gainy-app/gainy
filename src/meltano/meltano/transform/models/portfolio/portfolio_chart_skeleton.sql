@@ -46,12 +46,16 @@ from (
              profile_id, period, datetime
              ) profile_id,
                period,
-               date,
+               portfolio_holding_chart.date,
                datetime,
                null::int as holding_count
          from {{ ref('portfolio_holding_chart') }}
                   join {{ ref('profile_holdings_normalized_all') }} using (profile_id, holding_id_v2)
-                  join {{ ref('week_trading_sessions_static') }} using (symbol, date)
+                  join {{ ref('week_trading_sessions_static') }}
+                       on (week_trading_sessions_static.symbol = profile_holdings_normalized_all.symbol or
+                           (profile_holdings_normalized_all.symbol = 'CUR:USD' and
+                            week_trading_sessions_static.symbol = 'SPY'))
+                           and week_trading_sessions_static.date = portfolio_holding_chart.date
          where period in ('1d', '1w')
            and week_trading_sessions_static.index >= 0
            and datetime between open_at and close_at - interval '1 second'

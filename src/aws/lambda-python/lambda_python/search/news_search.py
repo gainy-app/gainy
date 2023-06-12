@@ -24,10 +24,10 @@ def http_get_request(url: str):
 def load_url(url: str):
     response = http_get_request(url)
     if response.status_code == 200:
-        return response.content
+        return response.text
     else:
         raise Exception(
-            f"Url not loaded with status: {response.status_code}, response: {response.content}"
+            f"Url not loaded with status: {response.status_code}, response: {response.text}"
         )
 
 
@@ -45,8 +45,16 @@ class SearchNews(HasuraAction):
                                        ttl_seconds=60 * 60)
 
         url = self._build_url(query, limit)
+        logger_extra = {
+            "input_params": input_params,
+            "limit": limit,
+            "url": url
+        }
+
         try:
-            response_json = json.loads(caching_loader.get(url))
+            data = caching_loader.get(url)
+            logger_extra["data"] = data
+            response_json = json.loads(data)
 
             articles = response_json["articles"]
 
@@ -59,10 +67,8 @@ class SearchNews(HasuraAction):
                 "sourceName": article["source"]["name"],
                 "sourceUrl": article["source"]["url"]
             } for article in articles]
-        except:
-            logger.error(
-                "Exception thrown in SearchNews: url: %s, input_params: %s",
-                url, json.dumps(input_params))
+        except Exception as e:
+            logger.exception("SearchNews: %s", e, extra=logger_extra)
 
             return []
 

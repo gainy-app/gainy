@@ -21,6 +21,8 @@ class KycGetStatus(HasuraAction):
             kyc_status.status,
             "message":
             kyc_status.message,
+            "error_codes":
+            kyc_status.error_codes,
             "updated_at":
             kyc_status.created_at.strftime(DATETIME_ISO8601_FORMAT_TZ)
         }

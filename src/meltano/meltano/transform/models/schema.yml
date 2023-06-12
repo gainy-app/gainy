@@ -17,6 +17,7 @@ sources:
       - name: auto_ticker_industries
       - name: exchanges
       - name: stats_ttf_clicks
+      - name: section_collections
       - name: ticker_collections
       - name: ticker_collections_weights
       - name: ticker_override
@@ -54,6 +55,7 @@ sources:
     description: Mobile App data, managed by hasura
     schema: app
     tables:
+      - name: corporate_action_adjustments
       - name: drivewealth_accounts
       - name: drivewealth_accounts_money
       - name: drivewealth_accounts_positions
@@ -2410,6 +2412,10 @@ models:
         tests:
           - type:
               type: 'json'
+      - name: kyc_error_codes
+        tests:
+          - type:
+              type: 'text'
       - name: funding_account_connected
         tests:
           - type:
@@ -2953,6 +2959,178 @@ models:
         tests:
           - type:
               type: 'numeric'
+
+  - name: section_collections
+    columns:
+      - name: profile_id
+        tests:
+          - type:
+              type: 'integer'
+      - name: collection_uniq_id
+        tests:
+          - type:
+              type: 'text'
+      - name: section_id
+        tests:
+          - type:
+              type: 'text'
+      - name: position
+        tests:
+          - type:
+              type: 'integer'
+
+  - name: analytics_trading_orders
+    columns:
+      - name: profile_id
+        tests:
+          - type:
+              type: 'integer'
+      - name: sign_up_at
+        tests:
+          - type:
+              type: 'timestamp with time zone'
+      - name: email
+        tests:
+          - type:
+              type: 'character varying'
+      - name: first_name
+        tests:
+          - type:
+              type: 'character varying'
+      - name: last_name
+        tests:
+          - type:
+              type: 'character varying'
+      - name: transaction_date
+        tests:
+          - type:
+              type: 'timestamp with time zone'
+      - name: transaction_amount
+        tests:
+          - type:
+              type: 'numeric'
+      - name: transaction_status
+        tests:
+          - type:
+              type: 'character varying'
+      - name: transaction_type
+        tests:
+          - type:
+              type: 'text'
+      - name: product_type
+        tests:
+          - type:
+              type: 'text'
+      - name: collection_id
+        tests:
+          - type:
+              type: 'integer'
+      - name: collection_name
+        tests:
+          - type:
+              type: 'character varying'
+      - name: symbol
+        tests:
+          - type:
+              type: 'text'
+      - name: ticker_name
+        tests:
+          - type:
+              type: 'text'
+      - name: uniq_id
+        tests:
+          - type:
+              type: 'text'
+      - name: updated_at
+        tests:
+          - type:
+              type: 'timestamp with time zone'
+
+  - name: analytics_money_flows
+    columns:
+      - name: id
+        tests:
+          - type:
+              type: 'integer'
+      - name: profile_id
+        tests:
+          - type:
+              type: 'integer'
+      - name: sign_up_at
+        tests:
+          - type:
+              type: 'timestamp with time zone'
+      - name: email
+        tests:
+          - type:
+              type: 'character varying'
+      - name: first_name
+        tests:
+          - type:
+              type: 'character varying'
+      - name: last_name
+        tests:
+          - type:
+              type: 'character varying'
+      - name: transaction_date
+        tests:
+          - type:
+              type: 'timestamp with time zone'
+      - name: transaction_amount
+        tests:
+          - type:
+              type: 'numeric'
+      - name: transaction_status
+        tests:
+          - type:
+              type: 'character varying'
+      - name: transaction_type
+        tests:
+          - type:
+              type: 'text'
+      - name: error_message
+        tests:
+          - type:
+              type: 'text'
+      - name: updated_at
+        tests:
+          - type:
+              type: 'timestamp with time zone'
+
+  - name: invitation_history
+    columns:
+      - name: profile_id
+        tests:
+          - type:
+              type: 'integer'
+      - name: invited_profile_id
+        tests:
+          - type:
+              type: 'integer'
+      - name: invited_at
+        tests:
+          - type:
+              type: 'timestamp with time zone'
+      - name: name
+        tests:
+          - type:
+              type: 'text'
+      - name: step1_signed_up
+        tests:
+          - type:
+              type: 'boolean'
+      - name: step2_brokerate_account_open
+        tests:
+          - type:
+              type: 'boolean'
+      - name: step3_deposited_enough
+        tests:
+          - type:
+              type: 'boolean'
+      - name: is_complete
+        tests:
+          - type:
+              type: 'boolean'
 
 exposures:
   - name: ticker_search_index

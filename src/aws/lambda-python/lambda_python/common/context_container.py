@@ -8,6 +8,7 @@ from portfolio.service import PortfolioService
 from portfolio.service.chart import PortfolioChartService
 from portfolio.repository import PortfolioRepository
 from services.cache import Cache, RedisCache, LocalCache
+from services.gmaps import GoogleMaps
 from services.sqs import SqsAdapter
 from services.twilio import TwilioClient
 from services.uploaded_file_service import UploadedFileService
@@ -49,6 +50,10 @@ class ContextContainer(GainyContextContainer):
     @cached_property
     def uploaded_file_service(self) -> UploadedFileService:
         return UploadedFileService()
+
+    @cached_property
+    def google_maps_service(self) -> GoogleMaps:
+        return GoogleMaps(self.get_repository(), self.cache)
 
     # verification
     @cached_property
@@ -105,7 +110,8 @@ class ContextContainer(GainyContextContainer):
     # trading
     @cached_property
     def kyc_form_validator(self) -> KycFormValidator:
-        return KycFormValidator(self.trading_repository)
+        return KycFormValidator(self.trading_repository,
+                                self.google_maps_service)
 
     @cached_property
     def trading_service(self) -> TradingService:
