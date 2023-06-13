@@ -103,9 +103,64 @@ with latest_day as
                       join {{ ref('collections') }} on collections.id = top_global_collections.collection_id
              where collections.enabled = '1'
                and collections.personalized = '0'
+     ),
+     volatility_90 as
+         (
+             select collection_uniq_id,
+                    stddev(relative_daily_gain) * pow(252, 0.5) as volatility_90
+             from {{ ref('collection_historical_values') }}
+             where date >= now() - interval '90 days'
+             group by collection_uniq_id
+     ),
+     beta as
+         (
+             with data as
+                      (
+                          with market_gains as
+                                   (
+                                       select date_month,
+                                              exp(sum(ln(coalesce(relative_daily_gain, 0) + 1 + 1e-30))) - 1 as relative_gain
+                                       from {{ ref('historical_prices') }}
+                                       where historical_prices.symbol = 'SPY'
+                                       group by date_month
+                                   ),
+                               collection_gains as
+                                   (
+                                       select collection_uniq_id,
+                                              date_month,
+                                              exp(sum(ln(coalesce(relative_daily_gain, 0) + 1 + 1e-30))) - 1 as relative_gain
+                                       from {{ ref('collection_historical_values') }}
+                                       group by collection_uniq_id, date_month
+                               )
+                          select collection_uniq_id,
+                                 collection_gains.relative_gain as collection_relative_gain,
+                                 market_gains.relative_gain     as spy_relative_gain
+                          from collection_gains
+                                   join market_gains using (date_month)
+                      ),
+                  correlation as
+                      (
+                          select collection_uniq_id,
+                                 corr(collection_relative_gain, spy_relative_gain) as correlation
+                          from data
+                          group by collection_uniq_id
+                  ),
+                  variances as
+                      (
+                          select collection_uniq_id,
+                                 stddev(collection_relative_gain) as collection_covariance,
+                                 stddev(spy_relative_gain)        as market_variance
+                          from data
+                          group by collection_uniq_id
+                  )
+             select collection_uniq_id,
+                    correlation * collection_covariance / market_variance as beta
+             from correlation
+                      join variances using (collection_uniq_id)
      )
 select profile_collections.profile_id,
        profiles.user_id,
+       profile_collections.id             as collection_id,
        profile_collections.uniq_id::text  as collection_uniq_id,
        metrics.actual_price,
        metrics.absolute_daily_change,
@@ -126,6 +181,8 @@ select profile_collections.profile_id,
        ticker_metrics.market_capitalization_sum::bigint,
        ranked_performance.rank::int       as performance_rank,
        ranked_clicks.rank::int            as clicks_rank,
+       volatility_90.volatility_90,
+       beta.beta,
        greatest(metrics.updated_at,
            ticker_metrics.updated_at,
            metrics.updated_at)            as updated_at
@@ -137,6 +194,8 @@ from {{ ref('profile_collections') }}
                    on ticker_metrics.collection_uniq_id = profile_collections.uniq_id
          left join metrics
                    on metrics.collection_uniq_id = profile_collections.uniq_id
+         left join volatility_90 on volatility_90.collection_uniq_id = profile_collections.uniq_id
+         left join beta on beta.collection_uniq_id = profile_collections.uniq_id
 {% if is_incremental() %}
          left join {{ this }} old_data on old_data.collection_uniq_id = profile_collections.uniq_id
 {% endif %}
