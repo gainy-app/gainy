@@ -147,6 +147,13 @@ type Mutation {
 }
 
 type Query {
+  kyc_suggest_addresses(
+    query: String!
+    limit: Int!
+  ): [SuggestedAddressOutput]
+}
+
+type Query {
   kyc_validate_address(
     street1: String!
     street2: String
@@ -570,6 +577,7 @@ type KycSendFormOutput {
 
 type KycStatus {
   message: String
+  error_codes: [String]
   status: String
   updated_at: String
 }
@@ -657,6 +665,7 @@ type KycValidateAddressOutput {
 }
 
 type SuggestedAddressOutput {
+  formatted_address: String
   street1: String
   street2: String
   city: String

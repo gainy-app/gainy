@@ -7,12 +7,12 @@ from gainy.data_access.operators import OperatorIn
 from gainy.exceptions import NotFoundException, BadRequestException
 from gainy.trading.drivewealth.models import CollectionStatus, CollectionHoldingStatus
 from gainy.plaid.common import handle_error
-from gainy.trading.exceptions import InsufficientFundsException
+from gainy.trading.exceptions import InsufficientFundsException, TradingPausedException
 from models import UploadedFile
 from portfolio.plaid import PlaidService
 from services.uploaded_file_service import UploadedFileService
 from trading.drivewealth.provider import DriveWealthProvider
-from trading.exceptions import WrongTradingOrderStatusException
+from trading.exceptions import WrongTradingOrderStatusException, CannotDeleteFundingAccountException
 from trading.kyc_form_validator import KycFormValidator
 from gainy.plaid.models import PlaidAccessToken, PlaidAccount
 from trading.models import KycDocument
@@ -71,6 +71,11 @@ class TradingService(GainyTradingService):
     def link_bank_account_with_plaid(self, access_token: PlaidAccessToken,
                                      account_name,
                                      account_id) -> FundingAccount:
+        """
+        :raises TradingPausedException:
+        """
+        self.trading_repository.check_profile_trading_not_paused(
+            access_token.profile_id)
         try:
             provider_bank_account: AbstractProviderBankAccount = self._get_provider_service(
             ).link_bank_account_with_plaid(access_token, account_id,
@@ -131,6 +136,26 @@ class TradingService(GainyTradingService):
         ]
 
     def delete_funding_account(self, funding_account: FundingAccount):
+        """
+        :raises TradingPausedException:
+        """
+        self.trading_repository.check_profile_trading_not_paused(
+            funding_account.profile_id)
+        money_flow = self.trading_repository.find_one(
+            TradingMoneyFlow, {
+                "funding_account_id":
+                funding_account.id,
+                "status":
+                OperatorIn([
+                    TradingMoneyFlowStatus.PENDING.name,
+                    TradingMoneyFlowStatus.APPROVED.name
+                ]),
+            })
+        if money_flow:
+            raise CannotDeleteFundingAccountException(
+                "You can not delete an account while it has pending deposits or withdrawals."
+            )
+
         self._get_provider_service().delete_funding_account(funding_account.id)
 
         repository = self.trading_repository
@@ -139,7 +164,13 @@ class TradingService(GainyTradingService):
     def create_money_flow(self, profile_id: int, amount: Decimal,
                           trading_account: TradingAccount,
                           funding_account: FundingAccount):
+        """
+        :raises InsufficientFundsException:
+        :raises TradingPausedException:
+        """
         repository = self.trading_repository
+
+        repository.check_profile_trading_not_paused(profile_id)
 
         if amount > 0:
             self.check_enough_funds_to_deposit(funding_account, amount)
@@ -154,10 +185,14 @@ class TradingService(GainyTradingService):
         money_flow.funding_account_id = funding_account.id
         repository.persist(money_flow)
 
-        self._get_provider_service().transfer_money(money_flow, amount,
-                                                    trading_account.id,
-                                                    funding_account.id)
-        repository.persist(money_flow)
+        try:
+            self._get_provider_service().transfer_money(
+                money_flow, amount, trading_account.id, funding_account.id)
+        except Exception as e:
+            money_flow.status = TradingMoneyFlowStatus.FAILED
+            raise e
+        finally:
+            repository.persist(money_flow)
 
         return money_flow
 
@@ -191,7 +226,7 @@ class TradingService(GainyTradingService):
         if env() != ENV_PRODUCTION:
             return
 
-        KycFormValidator.validate_address(
+        self.kyc_form_validator.validate_address(
             street1=kyc_form['address_street1'],
             street2=kyc_form['address_street2'],
             city=kyc_form['address_city'],
@@ -256,6 +291,9 @@ class TradingService(GainyTradingService):
 
     def check_enough_funds_to_deposit(self, funding_account: FundingAccount,
                                       amount: Decimal):
+        """
+        :raises InsufficientFundsException:
+        """
         try:
             self.update_funding_accounts_balance([funding_account])
         except Exception as e:

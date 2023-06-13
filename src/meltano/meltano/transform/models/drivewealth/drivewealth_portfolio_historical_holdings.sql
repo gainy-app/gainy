@@ -239,7 +239,7 @@ with portfolio_statuses as
                     symbol,
                     date,
                     prev_value,
-                    case when not is_premarket or prev_value > 0 then value else 0 end as value,
+                    case when not is_premarket or prev_value > 0 or symbol = 'CUR:USD' then value else 0 end as value,
                     relative_daily_gain,
                     is_premarket,
                     updated_at
@@ -274,14 +274,13 @@ with portfolio_statuses as
                     relative_daily_gain,
                     value,
                     prev_value,
-                    -- CF = EV / (HP + 1) - BV
-                    -- CF = EV - (HP + 1) * BV
+                    -- CF = (EV - BV * RDG / (1 + HP_b))
                     case
-                        when abs(coalesce(order_cf_sum, 0) + prev_value_sum) > 0 and value_sum > 0 and abs(computed_relative_daily_gain + 1) > 0
-                            then value / (computed_relative_daily_gain + 1) - prev_value
-                        when value_sum < {{ var('epsilon') }} and prev_value_sum > 0
-                            then value - (computed_relative_daily_gain + 1) * prev_value
-                        else value - prev_value
+                        when symbol = 'CUR:USD'
+                            then value - prev_value
+                        when post_cf_gain is not null and abs(post_cf_gain) > 0
+                            then (value - prev_value * (1 + relative_daily_gain)) / post_cf_gain
+                        else 0
                         end as cash_flow,
                     is_premarket,
                     updated_at
@@ -294,17 +293,22 @@ with portfolio_statuses as
                              date,
                              relative_daily_gain,
                              value_sum,
-                             coalesce(order_cf_sum, 0) as order_cf_sum,
+                             order_cf_sum,
                              prev_value_sum,
 
-                             -- HP = EV_sum / (CF_sum + BV_sum) - 1
-                             -- HP = (EV_sum - CF_sum) / BV_sum - 1
+                             -- RDG = (1 + HP_a) * (1 + HP_b)
+                             -- EV = (BV * (1 + HP_a) + CF) * (1 + HP_b)
+                             -- EV_sum = BV_sum * RDG + CF_sum * (1 + HP_b)
+                             -- (1 + HP_b) = (EV_sum - BV_sum * RDG) / CF_sum = Post CF Gain
+                             -- CF = (EV - BV * RDG) / (1 + HP_b)
+
                              case
-                                 when abs(coalesce(order_cf_sum, 0) + prev_value_sum) > 0 and value_sum > 0
-                                     then value_sum / (coalesce(order_cf_sum, 0) + prev_value_sum) - 1
-                                 when value_sum < {{ var('epsilon') }} and prev_value_sum > 0
-                                     then (value_sum - coalesce(order_cf_sum, 0)) / prev_value_sum - 1
-                                 end as computed_relative_daily_gain,
+                                 when order_cf_sum is null or abs(order_cf_sum) < {{ var('gain_precision') }}
+                                     then null
+                                 when abs(value_sum - prev_value_sum * (1 + relative_daily_gain)) < {{ var('gain_precision') }}
+                                     then 1
+                                 else (value_sum - prev_value_sum * (1 + relative_daily_gain)) / order_cf_sum
+                                 end as post_cf_gain,
                              value,
                              prev_value,
                              is_premarket,
@@ -385,7 +389,8 @@ with portfolio_statuses as
                     date,
                     value,
                     prev_value,
-                    cash_flow,
+                    cash_flow - coalesce(corporate_action_adjustments_collections.amount, 0) -
+                    coalesce(corporate_action_adjustments_tickers.amount, 0) as cash_flow,
                     case
                         -- whole day
                         when value > 0 and prev_value > 0
@@ -397,10 +402,23 @@ with portfolio_statuses as
                         when prev_value > 0 -- and t.value = 0
                             then -cash_flow / prev_value - 1
                         else 0
-                        end as relative_daily_gain,
+                        end                                                  as relative_daily_gain,
                     is_premarket,
                     updated_at
              from cash_flow
+                      left join (
+                                    select profile_id, collection_id, symbol, date, sum(amount) as amount
+                                    from {{ source('app', 'corporate_action_adjustments') }}
+                                    where collection_id is not null
+                                    group by profile_id, collection_id, symbol, date
+                                ) corporate_action_adjustments_collections
+                                using (profile_id, collection_id, symbol, date)
+                      left join (
+                                    select profile_id, symbol, date, sum(amount) as amount
+                                    from {{ source('app', 'corporate_action_adjustments') }}
+                                    where collection_id is null
+                                    group by profile_id, symbol, date
+                                ) corporate_action_adjustments_tickers using (profile_id, symbol, date)
      )
 select data_extended.*,
        date_trunc('week', date)::date                    as date_week,

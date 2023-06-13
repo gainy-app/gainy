@@ -30,6 +30,7 @@ select profile_id,
        kyc_status.status                                                as kyc_status,
        kyc_status.message                                               as kyc_message,
        kyc_status.error_messages                                        as kyc_error_messages,
+       kyc_status.error_codes                                           as kyc_error_codes,
        trading_funding_accounts.profile_id is not null                  as funding_account_connected,
        coalesce(deposited_funds, false)                                 as deposited_funds,
        coalesce(pending_cash, 0)::double precision                      as pending_cash,
@@ -51,9 +52,23 @@ from (
          from {{ source('app', 'profiles') }}
      ) profiles
          left join (
-                       select distinct on (profile_id) *
-                       from {{ source('app', 'kyc_statuses') }}
-                       order by profile_id, created_at desc
+                       with distinct_statuses as
+                                (
+                                    select distinct on (profile_id) *
+                                    from {{ source('app', 'kyc_statuses') }}
+                                    order by profile_id, created_at desc
+                                ),
+                            error_codes as (
+                                               select id, string_agg(error_code, ',') as error_codes
+                                               from (
+                                                        select id, json_array_elements_text(error_codes) as error_code
+                                                        from distinct_statuses
+                                                    ) t
+                                               group by id
+                            )
+                       select profile_id, status, message, error_messages, created_at, error_codes.error_codes
+                       from distinct_statuses
+                                left join error_codes using (id)
                    ) kyc_status using (profile_id)
          left join (
                        select profile_id, max(updated_at) as updated_at

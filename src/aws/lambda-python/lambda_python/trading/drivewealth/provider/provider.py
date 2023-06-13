@@ -2,9 +2,10 @@ from decimal import Decimal
 
 from gainy.analytics.service import AnalyticsService
 from gainy.data_access.repository import MAX_TRANSACTION_SIZE
-from gainy.exceptions import NotFoundException, EntityNotFoundException
+from gainy.exceptions import NotFoundException, EntityNotFoundException, AccountNeedsReauthException, \
+    DepositLimitExceededException
 from gainy.trading.drivewealth.config import DRIVEWEALTH_IS_UAT
-from gainy.trading.drivewealth.exceptions import DriveWealthApiException
+from gainy.trading.drivewealth.exceptions import DriveWealthApiException, PlaidProcessorTokenProvidedIsInvalidException
 from portfolio.plaid import PlaidService
 from gainy.plaid.models import PlaidAccessToken
 from gainy.services.notification import NotificationService
@@ -76,6 +77,11 @@ class DriveWealthProvider(DriveWealthProviderKYC,
 
     def transfer_money(self, money_flow: TradingMoneyFlow, amount: Decimal,
                        trading_account_id: int, funding_account_id: int):
+        """
+        :raises AccountNeedsReauthException:
+        :raises DepositLimitExceededException:
+        :raises Exception:
+        """
         trading_account = self.repository.find_one(
             DriveWealthAccount, {"trading_account_id": trading_account_id})
         if not trading_account:
@@ -93,17 +99,44 @@ class DriveWealthProvider(DriveWealthProviderKYC,
             else:
                 entity = self.api.create_redemption(amount, trading_account,
                                                     bank_account)
+        except PlaidProcessorTokenProvidedIsInvalidException as e:
+            funding_account: FundingAccount = self.repository.find_one(
+                FundingAccount, {"id": funding_account_id})
+            if funding_account:
+                funding_account.needs_reauth = True
+                self.repository.persist(funding_account)
+            raise AccountNeedsReauthException() from e
         except DriveWealthApiException as e:
             money_flow.status = TradingMoneyFlowStatus.FAILED
+            money_flow.error_message = str(e)
             self.repository.persist(money_flow)
+
+            if e.message.find(
+                    'Deposit transaction exceeds maximum daily ACH deposit transaction limit'
+            ) > -1:
+                raise DepositLimitExceededException() from e
+
             logger.exception(e)
-            raise Exception('Request failed, please try again later.')
+            raise e
 
         entity.trading_account_ref_id = trading_account.ref_id
         entity.bank_account_ref_id = bank_account.ref_id
         entity.money_flow_id = money_flow.id
         self.update_money_flow_from_dw(entity, money_flow)
         self.repository.persist(entity)
+
+        if amount > 0:
+            logger.info("Created deposit",
+                        extra={
+                            "file": __file__,
+                            "deposit": entity.to_dict(),
+                        })
+        else:
+            logger.info("Created redemption",
+                        extra={
+                            "file": __file__,
+                            "redemption": entity.to_dict(),
+                        })
 
     def debug_add_money(self, trading_account_id, amount):
         if not DRIVEWEALTH_IS_UAT:
@@ -180,11 +213,19 @@ class DriveWealthProvider(DriveWealthProviderKYC,
         entity = repository.find_one(
             DriveWealthDeposit,
             {"ref_id": deposit_ref_id}) or DriveWealthDeposit()
+        deposit_pre = entity.to_dict()
 
         deposit_data = self.api.get_deposit(deposit_ref_id)
         entity.set_from_response(deposit_data)
         self.ensure_account_exists(entity.trading_account_ref_id)
         repository.persist(entity)
+
+        logger.info("Updated deposit",
+                    extra={
+                        "file": __file__,
+                        "deposit_pre": deposit_pre,
+                        "deposit": entity.to_dict(),
+                    })
 
         self.update_money_flow_from_dw(entity)
 
@@ -227,8 +268,16 @@ class DriveWealthProvider(DriveWealthProviderKYC,
             entity = repository.find_one(
                 DriveWealthDeposit,
                 {"ref_id": deposit_data['id']}) or DriveWealthDeposit()
+            deposit_pre = entity.to_dict()
             entity.set_from_response(deposit_data)
             repository.persist(entity)
+
+            logger.info("Updated deposit",
+                        extra={
+                            "file": __file__,
+                            "deposit_pre": deposit_pre,
+                            "deposit": entity.to_dict(),
+                        })
 
             self.update_money_flow_from_dw(entity)
 
@@ -240,8 +289,16 @@ class DriveWealthProvider(DriveWealthProviderKYC,
             entity = repository.find_one(
                 DriveWealthRedemption,
                 {"ref_id": redemption_data['id']}) or DriveWealthRedemption()
+            redemption_pre = entity.to_dict()
             entity.set_from_response(redemption_data)
             repository.persist(entity)
+
+            logger.info("Updated redemption",
+                        extra={
+                            "file": __file__,
+                            "redemption_pre": redemption_pre,
+                            "redemption": entity.to_dict(),
+                        })
 
             self.update_money_flow_from_dw(entity)
 

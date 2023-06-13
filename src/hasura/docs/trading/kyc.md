@@ -549,6 +549,27 @@ query KycValidateAddress(
 }
 ```
 
+### Get suggested addresses
+```graphql
+query KycSuggestAddresses(
+  $query: String!
+  $limit: Int!
+) {
+  kyc_suggest_addresses(
+    query: $query
+    limit: $limit
+  ){ 
+    formatted_address
+    street1
+    street2
+    city
+    province
+    postal_code
+    country
+  }
+}
+```
+
 ### Send KYC data
 ```graphql
 mutation KycSendForm($profile_id: Int!) {
