@@ -154,7 +154,5 @@ where data.value is not null
   
 {% if is_incremental() %}
   and (old_data.profile_id is null
-    or abs(data.value - old_data.value) > {{ var('price_precision') }}
-    or abs(data.prev_value - old_data.prev_value) > {{ var('price_precision') }}
-    or abs(data.relative_gain - old_data.relative_gain) > {{ var('gain_precision') }})
+    or abs(data.value - old_data.value) > {{ var('price_precision') }})
 {% endif %}
