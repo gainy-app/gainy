@@ -85,14 +85,20 @@ class PortfolioChartService:
                 "chart_where_clause": chart_where_clause,
             }, join_clause, self.portfolio_chart_query)
 
-        rows = list(self._filter_chart_by_transaction_count(rows))
-        if not rows:
-            return []
+        logger_extra = {"rows_before_filter": rows}
+        try:
+            rows = list(self._filter_chart_by_transaction_count(rows))
+            logger_extra = {"rows_after_filter": rows}
+            if not rows:
+                return []
 
-        if max(row['adjusted_close'] for row in rows) < 1e-3:
-            return []
+            if max(row['adjusted_close'] for row in rows) < 1e-3:
+                return []
 
-        return rows
+            return rows
+        finally:
+            logger.info('[portfolio chart] get_portfolio_chart',
+                        extra=logger_extra)
 
     def get_portfolio_chart_previous_period_close(
             self, profile_id, filter: PortfolioChartFilter):
@@ -325,5 +331,10 @@ class PortfolioChartService:
         query = sql.SQL(query).format(**format_params)
 
         with self.db_conn.cursor(cursor_factory=RealDictCursor) as cursor:
+            logger.info('[portfolio chart] _execute_query',
+                        extra={
+                            "query": query.as_string(cursor),
+                            "params": params
+                        })
             cursor.execute(query, params)
             return cursor.fetchall()
