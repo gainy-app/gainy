@@ -88,7 +88,7 @@ class PortfolioChartService:
         logger_extra = {"rows_before_filter": rows}
         try:
             rows = list(self._filter_chart_by_transaction_count(rows))
-            logger_extra = {"rows_after_filter": rows}
+            logger_extra["rows_after_filter"] = rows
             if not rows:
                 return []
 
