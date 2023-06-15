@@ -295,8 +295,13 @@ from data_extended
 
 {% if is_incremental() %}
          left join {{ this }} old_data using (profile_id, holding_id_v2, symbol, datetime)
-where old_data.profile_id is null
-   or abs(data_extended.value - old_data.value) > {{ var('price_precision') }}
-   or abs(data_extended.prev_value - old_data.prev_value) > {{ var('price_precision') }}
-   or abs(data_extended.relative_gain - old_data.relative_gain) > {{ var('gain_precision') }}
+{% endif %}
+
+where data_extended.value is not null
+  
+{% if is_incremental() %}
+  and (old_data.profile_id is null
+    or abs(data_extended.value - old_data.value) > {{ var('price_precision') }}
+    or abs(data_extended.prev_value - old_data.prev_value) > {{ var('price_precision') }}
+    or abs(data_extended.relative_gain - old_data.relative_gain) > {{ var('gain_precision') }})
 {% endif %}
