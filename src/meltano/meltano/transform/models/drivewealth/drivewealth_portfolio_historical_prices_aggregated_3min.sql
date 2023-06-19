@@ -20,7 +20,7 @@ with data as
                     symbol,
                     collection_id,
                     date,
-                    datetime_15min as datetime,
+                    datetime_3min as datetime,
                     updated_at,
                     value
              from {{ ref('drivewealth_portfolio_historical_holdings_intraday') }}

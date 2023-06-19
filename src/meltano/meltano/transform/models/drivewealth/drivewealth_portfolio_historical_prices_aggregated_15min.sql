@@ -14,15 +14,17 @@
 
 with data as
          (
-             select profile_id,
-                    holding_id_v2,
-                    portfolio_status_id,
-                    symbol,
-                    collection_id,
-                    date,
-                    datetime_15min as datetime,
-                    updated_at,
-                    value
+             select distinct on (
+                 profile_id, holding_id_v2, symbol, date, datetime_15min
+                 ) profile_id,
+                   holding_id_v2,
+                   portfolio_status_id,
+                   symbol,
+                   collection_id,
+                   date,
+                   datetime_15min as datetime,
+                   updated_at,
+                   value
              from {{ ref('drivewealth_portfolio_historical_holdings_intraday') }}
 {% if var('realtime') %}
                        left join (
@@ -36,6 +38,7 @@ with data as
 {% else %}
              where date > now() - interval '10 days'
 {% endif %}
+             order by profile_id, holding_id_v2, symbol, date, datetime_15min, datetime_3min desc
      ),
      profile_date_threshold as
          (
