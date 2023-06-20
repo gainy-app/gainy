@@ -4,7 +4,7 @@
     tags = ["realtime"],
     post_hook=[
       index(['profile_id', 'holding_group_id', 'updated_at'], false),
-      'delete from {{this}} where updated_at < (select max(updated_at) from {{this}})',
+--       'delete from {{this}} where updated_at < (select max(updated_at) from {{this}})',
     ]
   )
 }}
@@ -65,6 +65,15 @@ with dphh_groupped as
                and (date > last_selloff_date or last_selloff_date is null)
              group by dphh_groupped.profile_id, holding_group_id, date
          ),
+{% if var('realtime') %}
+     old_data_stats as
+         (
+             select profile_id, holding_group_id, max(updated_at) as updated_at
+             from {{ this }}
+             group by profile_id, holding_group_id
+         ),
+{% else %}
+
      data_1d as
          (
              select distinct on (
@@ -80,7 +89,15 @@ with dphh_groupped as
                        end as relative_gain_1d,
                    cash_flow - prev_value as absolute_gain_1d
              from data
+{% if var('realtime') %}
+                      left join old_data_stats using (profile_id, holding_group_id)
+{% endif %}
+
              where date >= now()::date - interval '1 week'
+
+{% if var('realtime') %}
+               and (data.updated_at > old_data_stats.updated_at or old_data_stats.updated_at is null)
+{% endif %}
              order by profile_id desc, holding_group_id desc, date desc
      ),
      data_1w as
@@ -108,7 +125,15 @@ with dphh_groupped as
                                                           then prev_value
                                                       else 0 end as cash_flow
                                from data
+{% if var('realtime') %}
+                                        left join old_data_stats using (profile_id, holding_group_id)
+{% endif %}
+
                                where date >= now()::date - interval '1 week'
+
+{% if var('realtime') %}
+                                 and (data.updated_at > old_data_stats.updated_at or old_data_stats.updated_at is null)
+{% endif %}
                            ) t
                      group by profile_id, holding_group_id
                   ) t
@@ -136,7 +161,14 @@ with dphh_groupped as
                                                           then prev_value
                                                       else 0 end as cash_flow
                                from data
+{% if var('realtime') %}
+                                        left join old_data_stats using (profile_id, holding_group_id)
+{% endif %}
                                where date >= now()::date - interval '1 month'
+
+{% if var('realtime') %}
+                                 and (data.updated_at > old_data_stats.updated_at or old_data_stats.updated_at is null)
+{% endif %}
                            ) t
                       group by profile_id, holding_group_id
                   ) t
@@ -164,7 +196,14 @@ with dphh_groupped as
                                                           then prev_value
                                                       else 0 end as cash_flow
                                from data
+{% if var('realtime') %}
+                                        left join old_data_stats using (profile_id, holding_group_id)
+{% endif %}
                                where date >= now()::date - interval '3 month'
+
+{% if var('realtime') %}
+                                 and (data.updated_at > old_data_stats.updated_at or old_data_stats.updated_at is null)
+{% endif %}
                            ) t
                       group by profile_id, holding_group_id
                   ) t
@@ -192,7 +231,14 @@ with dphh_groupped as
                                                           then prev_value
                                                       else 0 end as cash_flow
                                from data
+{% if var('realtime') %}
+                                        left join old_data_stats using (profile_id, holding_group_id)
+{% endif %}
                                where date >= now()::date - interval '1 year'
+
+{% if var('realtime') %}
+                                 and (data.updated_at > old_data_stats.updated_at or old_data_stats.updated_at is null)
+{% endif %}
                            ) t
                       group by profile_id, holding_group_id
                   ) t
@@ -220,7 +266,14 @@ with dphh_groupped as
                                                           then prev_value
                                                       else 0 end as cash_flow
                                from data
+{% if var('realtime') %}
+                                        left join old_data_stats using (profile_id, holding_group_id)
+{% endif %}
                                where date >= now()::date - interval '5 year'
+
+{% if var('realtime') %}
+                                 and (data.updated_at > old_data_stats.updated_at or old_data_stats.updated_at is null)
+{% endif %}
                            ) t
                       group by profile_id, holding_group_id
                   ) t
@@ -239,6 +292,10 @@ with dphh_groupped as
                              count(date)                        as cnt,
                              sum(cash_flow)                     as absolute_gain_total
                       from data
+{% if var('realtime') %}
+                               left join old_data_stats using (profile_id, holding_group_id)
+                      where (data.updated_at > old_data_stats.updated_at or old_data_stats.updated_at is null)
+{% endif %}
                       group by profile_id, holding_group_id
                   ) t
      )
