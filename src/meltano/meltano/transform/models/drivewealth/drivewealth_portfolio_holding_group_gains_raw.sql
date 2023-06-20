@@ -90,7 +90,7 @@ with dphh_groupped as
              where data_stats.updated_at > old_data_stats.updated_at
                 or old_data_stats.updated_at is null
          ),
-{% else %}
+{% endif %}
 
      data_1d as
          (
