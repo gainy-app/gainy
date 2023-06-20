@@ -56,7 +56,8 @@ with dphh_groupped as
                     sum(value)               as value,
                     sum(prev_value)::numeric as prev_value,
                     sum(case when is_last_date.holding_id_v2 is null then 0 else value end -
-                        cash_flow)::numeric  as cash_flow
+                        cash_flow)::numeric  as cash_flow,
+                    max(updated_at)          as updated_at
              from dphh_groupped
                       left join (
                                     select holding_id_v2, max(date) as date
