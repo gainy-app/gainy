@@ -8,7 +8,7 @@
         using (select profile_id, holding_group_id, max(updated_at) as updated_at from {{ this }} group by profile_id, holding_group_id) old_stats
         where {{ this }}.profile_id = old_stats.profile_id
           and {{ this }}.holding_group_id = old_stats.holding_group_id
-          and {{ this }}.updated_at < old_version.updated_at',
+          and {{ this }}.updated_at < old_stats.updated_at',
     ]
   )
 }}
@@ -276,7 +276,8 @@ with dphh_groupped as
              select profile_id,
                     holding_group_id,
                     (1 + xirr(cf, d)) ^ (cnt / 365.0) - 1 as relative_gain_total,
-                    absolute_gain_total
+                    absolute_gain_total,
+                    updated_at
              from (
                       select profile_id,
                              holding_group_id,
