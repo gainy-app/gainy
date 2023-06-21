@@ -98,7 +98,7 @@ $$
 declare
     minv     numeric;
     maxv     numeric;
-    prec     numeric = 1e-5;
+    prec     numeric = 1e-4;
     l        numeric = minrate;
     r        numeric = maxrate;
     s        numeric;

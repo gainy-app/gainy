@@ -4,7 +4,10 @@
     tags = ["realtime"],
     post_hook=[
       index(['profile_id', 'updated_at'], false),
-      'delete from {{this}} where updated_at < (select max(updated_at) from {{this}})',
+      'delete from {{ this }}
+        using (select profile_id, max(updated_at) as updated_at from {{ this }} group by profile_id) old_stats
+        where {{ this }}.profile_id = old_stats.profile_id
+          and {{ this }}.updated_at < old_stats.updated_at',
     ]
   )
 }}
@@ -198,14 +201,15 @@ with profile_stats as materialized
                                             ) t2 using (profile_id)
                          group by profile_id
                  ),
-                data as
+                 data as
                      (
                          select profile_id,
                                 date,
                                 sum(value)               as value,
                                 sum(prev_value)::numeric as prev_value,
                                 sum(case when is_last_date.holding_id_v2 is null then 0 else value end -
-                                    cash_flow)::numeric  as cash_flow
+                                    cash_flow)::numeric  as cash_flow,
+                                max(updated_at)          as updated_at
                          from {{ ref('drivewealth_portfolio_historical_holdings') }}
                                   left join (
                                                 select holding_id_v2, max(date) as date
@@ -218,6 +222,28 @@ with profile_stats as materialized
                            and (date > last_selloff_date or last_selloff_date is null)
                          group by profile_id, date
                      ),
+{% if var('realtime') %}
+                 old_data_stats as
+                     (
+                         select profile_id, max(updated_at) as updated_at
+                         from {{ this }}
+                         group by profile_id
+                     ),
+                 data_stats as
+                     (
+                         select profile_id, max(updated_at) as updated_at
+                         from data
+                         group by profile_id
+                     ),
+                 filtered_profiles as
+                     (
+                         select profile_id
+                         from data_stats
+                                  left join old_data_stats using (profile_id)
+                         where data_stats.updated_at > old_data_stats.updated_at
+                            or old_data_stats.updated_at is null
+                     ),
+{% endif %}
                  data_1d as
                      (
                          select distinct on (
@@ -230,6 +256,9 @@ with profile_stats as materialized
                                        then (value - (value - cash_flow)) / prev_value - 1
                                    end as relative_gain_1d
                          from data
+{% if var('realtime') %}
+                                  join filtered_profiles using (profile_id)
+{% endif %}
                          where date >= now()::date - interval '1 week'
                          order by profile_id desc, date desc
                  ),
@@ -252,6 +281,9 @@ with profile_stats as materialized
                                                                       then prev_value
                                                                   else 0 end as cash_flow
                                            from data
+{% if var('realtime') %}
+                                                    join filtered_profiles using (profile_id)
+{% endif %}
                                            where date >= now()::date - interval '1 week'
                                        ) t
                                   group by profile_id
@@ -275,6 +307,9 @@ with profile_stats as materialized
                                                                       then prev_value
                                                                   else 0 end as cash_flow
                                            from data
+{% if var('realtime') %}
+                                                    join filtered_profiles using (profile_id)
+{% endif %}
                                            where date >= now()::date - interval '1 month'
                                        ) t
                                   group by profile_id
@@ -298,6 +333,9 @@ with profile_stats as materialized
                                                                       then prev_value
                                                                   else 0 end as cash_flow
                                            from data
+{% if var('realtime') %}
+                                                    join filtered_profiles using (profile_id)
+{% endif %}
                                            where date >= now()::date - interval '3 month'
                                        ) t
                                   group by profile_id
@@ -321,6 +359,9 @@ with profile_stats as materialized
                                                                       then prev_value
                                                                   else 0 end as cash_flow
                                            from data
+{% if var('realtime') %}
+                                                    join filtered_profiles using (profile_id)
+{% endif %}
                                            where date >= now()::date - interval '1 year'
                                        ) t
                                   group by profile_id
@@ -344,6 +385,9 @@ with profile_stats as materialized
                                                                       then prev_value
                                                                   else 0 end as cash_flow
                                            from data
+{% if var('realtime') %}
+                                                    join filtered_profiles using (profile_id)
+{% endif %}
                                            where date >= now()::date - interval '5 year'
                                        ) t
                                   group by profile_id
@@ -352,18 +396,24 @@ with profile_stats as materialized
                  data_total as
                      (
                          select profile_id,
-                                (1 + xirr(cf, d)) ^ (dates_cnt / 365.0) - 1 as relative_gain_total
+                                (1 + xirr(cf, d)) ^ (dates_cnt / 365.0) - 1 as relative_gain_total,
+                                updated_at
                          from (
                                   select profile_id,
                                          array_agg(cash_flow order by date) as cf,
                                          array_agg(date order by date)      as d,
-                                         count(date)                        as dates_cnt
+                                         count(date)                        as dates_cnt,
+                                         max(updated_at)                    as updated_at
                                   from data
+{% if var('realtime') %}
+                                           join filtered_profiles using (profile_id)
+{% endif %}
                                   group by profile_id
                               ) t
                  )
              select profile_id,
                     relative_gain_1d,
+                    updated_at,
                     case
                         when relative_gain_1w is null or count_1w = 1
                             then relative_gain_1d
@@ -424,6 +474,6 @@ select profile_id,
        relative_gain_1y,
        relative_gain_5y,
        relative_gain_total,
-       now()                                           as updated_at
+       updated_at
 from gains
-         left join relative_gains using (profile_id)
+         join relative_gains using (profile_id)
