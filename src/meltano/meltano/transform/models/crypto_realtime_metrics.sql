@@ -2,7 +2,6 @@
   config(
     materialized = "incremental",
     unique_key = "symbol",
-    tags = ["realtime"],
     post_hook=[
       pk('symbol'),
     ]
