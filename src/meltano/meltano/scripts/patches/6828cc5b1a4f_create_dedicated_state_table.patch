@@ -1,0 +1,10 @@
+--- /venv/lib64/python3.9/site-packages/meltano/migrations/versions/6828cc5b1a4f_create_dedicated_state_table.py	2022-10-03 16:40:14.000000000 +0000
++++ /venv/lib64/python3.9/site-packages/meltano/migrations/versions/6828cc5b1a4f_create_dedicated_state_table2.py	2023-06-16 08:02:59.399644013 +0000
+@@ -356,7 +356,7 @@
+         sa.UniqueConstraint("state_id"),
+     )
+     session = Session(bind=conn)
+-    for state_id in {job_run.job_name for job_run in session.query(Job).all()}:
++    for state_id in {row['job_name'] for row in session.query(Job.job_name).distinct().all()}:
+         session.add(JobState.from_job_history(session, state_id))
+     session.commit()
