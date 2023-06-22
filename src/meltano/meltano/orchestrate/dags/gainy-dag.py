@@ -82,8 +82,30 @@ gainy_update_account_balances = BashOperator(
     skip_exit_code=1,
     dag=dag)
 
+gainy_recommendation = BashOperator(
+    task_id="update-recommendations",
+    bash_command=
+    "gainy_recommendation --batch_size=15",  # 15 gives the best performance
+    dag=dag,
+    pool="gainy_recommendation")
+
+upload_to_s3 = BashOperator(task_id="postgres-history-weekly-to-s3",
+                            bash_command=get_meltano_command(
+                                "schedule run postgres-history-weekly-to-s3"),
+                            dag=dag)
+
+upload_to_analytics = BashOperator(
+    task_id="postgres-to-analytics-match-score",
+    bash_command=get_meltano_command(
+        "schedule run postgres-to-analytics-match-score"),
+    dag=dag)
+
+gainy_recommendation >> upload_to_s3
+gainy_recommendation >> upload_to_analytics
+
 generate_meltano_config >> upstream >> dbt >> downstream >> clean
 dbt >> store_deployment_state
 dbt >> gainy_sync_profiles_analytics_attributes
+dbt >> gainy_recommendation
 generate_meltano_config >> gainy_fetch_drivewealth_countries
 generate_meltano_config >> gainy_update_account_balances >> dbt
