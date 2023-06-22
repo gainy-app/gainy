@@ -3152,7 +3152,7 @@ models:
       - name: symbol
         tests:
           - type:
-              type: 'character varying'
+              type: 'text'
       - name: state_hash
         tests:
           - type:
