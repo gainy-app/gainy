@@ -7,6 +7,7 @@ ifeq ($(shell test -e .makeenv && echo -n yes),)
 endif
 include .makeenv
 include .env.make
+IMAGE_TAG ?= "latest"
 
 docker-auth:
 	- aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin ${BASE_IMAGE_REGISTRY_ADDRESS}
@@ -52,8 +53,37 @@ style-fix:
 extract-passwords:
 	cd terraform && terraform state pull | python3 ../extract_passwords.py
 
-test-build:
-	docker-compose -p gainy_test -f docker-compose.test.yml build --progress plain
+ci-build:
+	- docker run -d -p 5123:5000 --restart=always --name registry -v /tmp/docker-registry:/var/lib/registry registry:2 && npx wait-on tcp:5123
+	- docker pull localhost:5123/gainy-meltano:${BASE_IMAGE_VERSION}
+	docker pull ${BASE_IMAGE_REGISTRY_ADDRESS}/gainy-meltano:${BASE_IMAGE_VERSION}
+	docker tag ${BASE_IMAGE_REGISTRY_ADDRESS}/gainy-meltano:${BASE_IMAGE_VERSION} localhost:5123/gainy-meltano:${BASE_IMAGE_VERSION}
+	docker push localhost:5123/gainy-meltano:${BASE_IMAGE_VERSION}
+
+	- docker pull localhost:5123/gainy-meltano:${IMAGE_TAG}
+	docker build ./src/meltano -t gainy-meltano:${IMAGE_TAG} --cache-from=localhost:5123/gainy-meltano:${IMAGE_TAG} --build-arg BASE_IMAGE_REGISTRY_ADDRESS=${BASE_IMAGE_REGISTRY_ADDRESS} --build-arg BASE_IMAGE_VERSION=${BASE_IMAGE_VERSION} --build-arg CODEARTIFACT_PIPY_URL=${CODEARTIFACT_PIPY_URL} --build-arg GAINY_COMPUTE_VERSION=${GAINY_COMPUTE_VERSION}
+	docker tag gainy-meltano:${IMAGE_TAG} localhost:5123/gainy-meltano:${IMAGE_TAG}
+	docker push localhost:5123/gainy-meltano:${IMAGE_TAG}
+
+	- docker pull localhost:5123/gainy-hasura:${BASE_IMAGE_VERSION}
+	docker pull ${BASE_IMAGE_REGISTRY_ADDRESS}/gainy-hasura:${BASE_IMAGE_VERSION}
+	docker tag ${BASE_IMAGE_REGISTRY_ADDRESS}/gainy-hasura:${BASE_IMAGE_VERSION} localhost:5123/gainy-hasura:${BASE_IMAGE_VERSION}
+	docker push localhost:5123/gainy-hasura:${BASE_IMAGE_VERSION}
+
+	- docker pull localhost:5123/gainy-hasura:${IMAGE_TAG}
+	docker build ./src/hasura -t gainy-hasura:${IMAGE_TAG} --cache-from=localhost:5123/gainy-hasura:${IMAGE_TAG} --build-arg BASE_IMAGE_REGISTRY_ADDRESS=${BASE_IMAGE_REGISTRY_ADDRESS} --build-arg BASE_IMAGE_VERSION=${BASE_IMAGE_VERSION} --build-arg CODEARTIFACT_PIPY_URL=${CODEARTIFACT_PIPY_URL} --build-arg GAINY_COMPUTE_VERSION=${GAINY_COMPUTE_VERSION}
+	docker tag gainy-hasura:${IMAGE_TAG} localhost:5123/gainy-hasura:${IMAGE_TAG}
+	docker push localhost:5123/gainy-hasura:${IMAGE_TAG}
+
+	- docker pull localhost:5123/gainy-lambda-python:${BASE_IMAGE_VERSION}
+	docker pull ${BASE_IMAGE_REGISTRY_ADDRESS}/gainy-lambda-python:${BASE_IMAGE_VERSION}
+	docker tag ${BASE_IMAGE_REGISTRY_ADDRESS}/gainy-lambda-python:${BASE_IMAGE_VERSION} localhost:5123/gainy-lambda-python:${BASE_IMAGE_VERSION}
+	docker push localhost:5123/gainy-lambda-python:${BASE_IMAGE_VERSION}
+
+	- docker pull localhost:5123/gainy-lambda-python:${IMAGE_TAG}
+	docker build ./src/aws/lambda-python -t gainy-lambda-python:${IMAGE_TAG} --cache-from=localhost:5123/gainy-lambda-python:${IMAGE_TAG} --build-arg BASE_IMAGE_REGISTRY_ADDRESS=${BASE_IMAGE_REGISTRY_ADDRESS} --build-arg BASE_IMAGE_VERSION=${BASE_IMAGE_VERSION} --build-arg CODEARTIFACT_PIPY_URL=${CODEARTIFACT_PIPY_URL} --build-arg GAINY_COMPUTE_VERSION=${GAINY_COMPUTE_VERSION}
+	docker tag gainy-lambda-python:${IMAGE_TAG} localhost:5123/gainy-lambda-python:${IMAGE_TAG}
+	docker push localhost:5123/gainy-lambda-python:${IMAGE_TAG}
 
 test-meltano:
 	docker-compose -p gainy_test -f docker-compose.test.yml run --rm test-meltano invoke dbt test --select test_type:generic
@@ -73,7 +103,7 @@ test-hasura:
 test-lambda:
 	docker-compose -p gainy_test -f docker-compose.test.yml exec -T test-lambda-python-action pytest
 
-test-configure: test-clean docker-auth env test-build
+test-configure: test-clean docker-auth env ci-build
 
 test: test-configure test-meltano test-images test-meltano-realtime test-hasura test-lambda test-clean
 

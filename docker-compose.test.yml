@@ -1,6 +1,7 @@
 version: '3.6'
 services:
   test-meltano:
+    image: gainy-meltano
     build:
       context: ./src/meltano
       args:
@@ -34,6 +35,7 @@ services:
       - .env.test
       
   test-hasura:
+    image: gainy-hasura:latest
     build:
       context: ./src/hasura
       target: test
