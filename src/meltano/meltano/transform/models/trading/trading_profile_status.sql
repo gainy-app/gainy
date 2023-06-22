@@ -8,15 +8,16 @@
 with account_stats as
          (
              select profile_id,
-                    bool_or(deposited_funds)   as deposited_funds,
-                    sum(pending_cash)          as pending_cash,
-                    sum(pending_orders_amount) as pending_orders_amount,
-                    sum(pending_orders_count)  as pending_orders_count,
-                    sum(pending_orders_sum)    as pending_orders_sum,
-                    sum(withdrawable_cash)     as withdrawable_cash,
-                    sum(buying_power)          as buying_power,
-                    max(account_no)::varchar   as account_no,
-                    max(updated_at)            as updated_at
+                    bool_or(deposited_funds)              as deposited_funds,
+                    bool_or(successfully_deposited_funds) as successfully_deposited_funds,
+                    sum(pending_cash)                     as pending_cash,
+                    sum(pending_orders_amount)            as pending_orders_amount,
+                    sum(pending_orders_count)             as pending_orders_count,
+                    sum(pending_orders_sum)               as pending_orders_sum,
+                    sum(withdrawable_cash)                as withdrawable_cash,
+                    sum(buying_power)                     as buying_power,
+                    max(account_no)::varchar              as account_no,
+                    max(updated_at)                       as updated_at
              from {{ ref('trading_account_status') }}
              group by profile_id
          )
@@ -32,7 +33,8 @@ select profile_id,
        kyc_status.error_messages                                        as kyc_error_messages,
        kyc_status.error_codes                                           as kyc_error_codes,
        trading_funding_accounts.profile_id is not null                  as funding_account_connected,
-       coalesce(deposited_funds, false)                                 as deposited_funds,
+       coalesce(deposited_funds, false)                                 as deposited_funds, -- including pending deposits
+       coalesce(successfully_deposited_funds, false)                    as successfully_deposited_funds, -- only successful deposits
        coalesce(pending_cash, 0)::double precision                      as pending_cash,
        pending_orders_amount,
        pending_orders_count::int,

@@ -2424,6 +2424,10 @@ models:
         tests:
           - type:
               type: 'boolean'
+      - name: successfully_deposited_funds
+        tests:
+          - type:
+              type: 'boolean'
       - name: pending_cash
         tests:
           - type:
