@@ -9,7 +9,6 @@ from gainy.trading.drivewealth.exceptions import DriveWealthApiException, PlaidP
 from portfolio.plaid import PlaidService
 from gainy.plaid.models import PlaidAccessToken
 from gainy.services.notification import NotificationService
-from trading.drivewealth.provider.collection import DriveWealthProviderCollection
 from trading.drivewealth.provider.kyc import DriveWealthProviderKYC
 from trading.drivewealth.models import DriveWealthAutopilotRun
 from trading.drivewealth.api import DriveWealthApi
@@ -26,8 +25,7 @@ from trading.repository import TradingRepository
 logger = get_logger(__name__)
 
 
-class DriveWealthProvider(DriveWealthProviderKYC,
-                          DriveWealthProviderCollection):
+class DriveWealthProvider(DriveWealthProviderKYC):
 
     def __init__(self,
                  repository: DriveWealthRepository,
