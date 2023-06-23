@@ -3149,10 +3149,10 @@ models:
 
   - name: profile_actual_recommendation_state
     columns:
-      - name: symbol
+      - name: profile_id
         tests:
           - type:
-              type: 'text'
+              type: 'integer'
       - name: state_hash
         tests:
           - type:
