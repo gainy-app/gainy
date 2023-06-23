@@ -24,11 +24,6 @@ with portfolio_statuses as
                    drivewealth_portfolio_statuses.created_at         as updated_at,
                    drivewealth_portfolio_statuses.id                 as portfolio_status_id,
                    drivewealth_portfolio_statuses.date,
-                   case
-                       when drivewealth_portfolio_statuses.cash_actual_weight > 0
-                           then cash_value / drivewealth_portfolio_statuses.cash_actual_weight
-                       else drivewealth_portfolio_statuses.equity_value
-                       end                                           as value,
                    drivewealth_portfolio_statuses.data -> 'holdings' as holdings
              from {{ source('app', 'drivewealth_portfolio_statuses') }}
                       join {{ source('app', 'drivewealth_portfolios') }}
@@ -56,7 +51,6 @@ with portfolio_statuses as
              select profile_id,
                     portfolio_status_id,
                     date,
-                    value,
                     updated_at,
                     json_array_elements(holdings) as portfolio_holding_data
              from portfolio_statuses
