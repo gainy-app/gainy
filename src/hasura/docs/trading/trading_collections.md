@@ -67,24 +67,6 @@ mutation TradingCancelPendingOrder(
 }
 ```
 
-### Get actual TTF holding weights and amount
-```graphql
-query TradingGetActualCollectionHoldings(
-  $profile_id: Int!
-  $collection_id: Int!
-){
-  trading_get_actual_collection_holdings(
-    profile_id: $profile_id
-    collection_id: $collection_id
-  ){
-    symbol
-    target_weight
-    actual_weight
-    value
-  }
-}
-```
-
 ### Get actual TTF amount and history
 ```graphql
 query TradingGetProfileCollectionStatus($profile_id: Int!, $collection_id: Int!) {

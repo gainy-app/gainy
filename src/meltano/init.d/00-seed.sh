@@ -43,10 +43,10 @@ if [ $($psql_auth -c "select count(*) from deployment.public_schemas where schem
     if [ -s /tmp/dbt_state ]; then
       echo "$(date)" Restoring dbt state
       base64 -d /tmp/dbt_state > /tmp/dbt_state.tgz
-      mkdir -p "$DBT_ARTIFACT_STATE_PATH"
-      tar -xzf /tmp/dbt_state.tgz -C "$DBT_ARTIFACT_STATE_PATH"
+      mkdir -p "$DBT_STATE"
+      tar -xzf /tmp/dbt_state.tgz -C "$DBT_STATE"
 
-      find $DBT_ARTIFACT_STATE_PATH -type f -print0 | xargs -0 sed -i "s/$OLD_DBT_TARGET_SCHEMA/$DBT_TARGET_SCHEMA/g"
+      find $DBT_STATE -type f -print0 | xargs -0 sed -i "s/$OLD_DBT_TARGET_SCHEMA/$DBT_TARGET_SCHEMA/g"
 
       echo "$(date)" Restoring schema "$OLD_DBT_TARGET_SCHEMA" to "$DBT_TARGET_SCHEMA"
       $psql_auth -f scripts/clone_schema.sql

@@ -42,6 +42,13 @@ resource "aws_lambda_function" "lambda" {
   }
 }
 
+resource "aws_lambda_provisioned_concurrency_config" "default" {
+  count                             = var.env == "production" ? 1 : 0
+  function_name                     = aws_lambda_function.lambda.function_name
+  provisioned_concurrent_executions = 1
+  qualifier                         = aws_lambda_function.lambda.version
+}
+
 output "function_name" {
   value = aws_lambda_function.lambda.function_name
 }
