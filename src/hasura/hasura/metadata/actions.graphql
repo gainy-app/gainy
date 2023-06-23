@@ -310,13 +310,6 @@ type Query {
 }
 
 type Query {
-  trading_get_actual_collection_holdings(
-    profile_id: Int!
-    collection_id: Int!
-  ): [ActualCollectionHoldingOutput]
-}
-
-type Query {
   trading_get_funding_accounts(
     profile_id: Int!
   ): [FundingAccount]

@@ -86,7 +86,6 @@ ACTIONS = [
     TradingDepositFunds(),
     TradingWithdrawFunds(),
     TradingReconfigureCollectionHoldings(),
-    TradingGetActualCollectionHoldings(),
     TradingSyncProviderData(),
     TradingCancelPendingOrder(),
     TradingDownloadDocument(),

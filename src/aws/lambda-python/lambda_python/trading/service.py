@@ -196,13 +196,6 @@ class TradingService(GainyTradingService):
 
         return money_flow
 
-    # TODO deprecated ?
-    def get_actual_collection_holdings(
-            self, profile_id, collection_id) -> List[CollectionHoldingStatus]:
-        collection_status: CollectionStatus = self._get_provider_service(
-        ).get_actual_collection_data(profile_id, collection_id)
-        return collection_status.holdings
-
     def sync_funding_accounts(self, profile_id) -> Iterable[FundingAccount]:
         repository = self.trading_repository
         funding_accounts = repository.find_all(FundingAccount,
