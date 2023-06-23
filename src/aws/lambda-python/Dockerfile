@@ -6,6 +6,8 @@ ARG CODEARTIFACT_PIPY_URL
 ARG GAINY_COMPUTE_VERSION
 RUN pip install -U --index-url ${CODEARTIFACT_PIPY_URL} gainy-compute==${GAINY_COMPUTE_VERSION}
 
+RUN yum -y install git
+
 COPY requirements.txt /requirements.txt
 RUN pip install --requirement /requirements.txt
 
