@@ -89,19 +89,18 @@ gainy_recommendation = BashOperator(
     dag=dag,
     pool="gainy_recommendation")
 
-upload_to_s3 = BashOperator(task_id="postgres-history-weekly-to-s3",
-                            bash_command=get_meltano_command(
-                                "schedule run postgres-history-weekly-to-s3"),
-                            dag=dag)
+if ENV == "production":
+    gainy_recommendation >> BashOperator(
+        task_id="postgres-history-weekly-to-s3",
+        bash_command=get_meltano_command(
+            "schedule run postgres-history-weekly-to-s3"),
+        dag=dag)
 
-upload_to_analytics = BashOperator(
-    task_id="postgres-to-analytics-match-score",
-    bash_command=get_meltano_command(
-        "schedule run postgres-to-analytics-match-score"),
-    dag=dag)
-
-gainy_recommendation >> upload_to_s3
-gainy_recommendation >> upload_to_analytics
+    gainy_recommendation >> BashOperator(
+        task_id="postgres-to-analytics-match-score",
+        bash_command=get_meltano_command(
+            "schedule run postgres-to-analytics-match-score"),
+        dag=dag)
 
 generate_meltano_config >> upstream >> dbt >> downstream >> clean
 dbt >> store_deployment_state
