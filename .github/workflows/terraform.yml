@@ -87,7 +87,6 @@ on:
       FIREBASE_API_SECRET: { required: true }
       APPSFLYER_APP_ID: { required: true }
       APPSFLYER_DEV_KEY: { required: true }
-      REWARD_INVITATION_CASH_AMOUNT: { required: true }
       BILLING_VALUE_FEE_MULTIPLIER: { required: true }
       BILLING_MIN_ANNUAL_FEE: { required: true }
       BILLING_ENABLED_PROFILES: { required: false }
