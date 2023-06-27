@@ -64,6 +64,10 @@ variable "appsflyer_dev_key" {
   sensitive = true
 }
 
+variable "reward_invitation_cash_amount" {
+  type    = number
+  default = 25
+}
 variable "billing_value_fee_multiplier" {
   type    = number
   default = 0.096
@@ -164,6 +168,9 @@ variable "drivewealth_sqs_arn" {
   type = string
 }
 variable "drivewealth_house_account_no" {
+  type = string
+}
+variable "drivewealth_cash_promotion_account_no" {
   type = string
 }
 

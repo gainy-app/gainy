@@ -16,7 +16,7 @@ from trading.drivewealth.repository import DriveWealthRepository
 
 from gainy.utils import get_logger
 from gainy.trading.models import FundingAccount, TradingAccount, TradingCollectionVersion, TradingMoneyFlowStatus, \
-    TradingMoneyFlow, ProfileKycStatus, TradingStatement, KycForm
+    TradingMoneyFlow, ProfileKycStatus, TradingStatement, KycForm, TradingMoneyFlowType
 from gainy.trading.drivewealth.models import DriveWealthAccount, DriveWealthUser, \
     DriveWealthTransaction, \
     DriveWealthBankAccount, DriveWealthDeposit, DriveWealthRedemption, DriveWealthStatement, DriveWealthOrder
@@ -154,6 +154,7 @@ class DriveWealthProvider(DriveWealthProviderKYC):
         money_flow.profile_id = user.profile_id
         money_flow.amount = amount
         money_flow.status = TradingMoneyFlowStatus.SUCCESS
+        money_flow.type = TradingMoneyFlowType.MANUAL
         money_flow.trading_account_id = trading_account_id
         self.repository.persist(money_flow)
 

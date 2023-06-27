@@ -21,4 +21,5 @@ from {{ source('app', 'trading_money_flow') }}
                        select id as profile_id, email, first_name, last_name, created_at
                        from {{ source('app', 'profiles') }}
                    ) profiles using (profile_id)
+where trading_money_flow.type = 'MANUAL'
     window wnd as (partition by profile_id, trading_money_flow.amount > 0 order by trading_money_flow.created_at)

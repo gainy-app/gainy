@@ -157,17 +157,18 @@ module "aws" {
   algolia_indexing_key      = module.algolia.algolia_indexing_key
   algolia_search_key        = module.algolia.algolia_search_key
 
-  drivewealth_is_uat           = var.drivewealth_is_uat
-  drivewealth_app_key          = var.drivewealth_app_key
-  drivewealth_wlp_id           = var.drivewealth_wlp_id
-  drivewealth_parent_ibid      = var.drivewealth_parent_ibid
-  drivewealth_ria_id           = var.drivewealth_ria_id
-  drivewealth_ria_product_id   = var.drivewealth_ria_product_id
-  drivewealth_api_username     = var.drivewealth_api_username
-  drivewealth_api_password     = var.drivewealth_api_password
-  drivewealth_api_url          = var.drivewealth_api_url
-  drivewealth_sqs_arn          = var.drivewealth_sqs_arn
-  drivewealth_house_account_no = var.drivewealth_house_account_no
+  drivewealth_is_uat                    = var.drivewealth_is_uat
+  drivewealth_app_key                   = var.drivewealth_app_key
+  drivewealth_wlp_id                    = var.drivewealth_wlp_id
+  drivewealth_parent_ibid               = var.drivewealth_parent_ibid
+  drivewealth_ria_id                    = var.drivewealth_ria_id
+  drivewealth_ria_product_id            = var.drivewealth_ria_product_id
+  drivewealth_api_username              = var.drivewealth_api_username
+  drivewealth_api_password              = var.drivewealth_api_password
+  drivewealth_api_url                   = var.drivewealth_api_url
+  drivewealth_sqs_arn                   = var.drivewealth_sqs_arn
+  drivewealth_house_account_no          = var.drivewealth_house_account_no
+  drivewealth_cash_promotion_account_no = var.drivewealth_cash_promotion_account_no
 
   codeartifact_pipy_url = var.codeartifact_pipy_url
   gainy_compute_version = var.gainy_compute_version
@@ -188,6 +189,7 @@ module "aws" {
   sendgrid_api_key               = var.sendgrid_api_key
   sendgrid_from_email            = var.sendgrid_from_email
 
+  reward_invitation_cash_amount     = var.reward_invitation_cash_amount
   billing_value_fee_multiplier      = var.billing_value_fee_multiplier
   billing_min_annual_fee            = var.billing_min_annual_fee
   billing_min_value                 = var.billing_min_value

@@ -29,6 +29,7 @@ with profile_scoring_settings_stats as
              from {{ source('app', 'trading_money_flow') }}
              where amount > 0
                and status != 'FAILED'
+               and type = 'MANUAL'
              group by (created_at at time zone 'America/New_York')::date
      ),
      aum_stats as

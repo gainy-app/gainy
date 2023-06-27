@@ -133,6 +133,7 @@ with profiles as
              from {{ source('app', 'trading_money_flow') }}
              where status = 'SUCCESS'
                and amount < 0
+               and type = 'MANUAL'
              group by profile_id
      ),
      deposits as
@@ -141,6 +142,7 @@ with profiles as
              from {{ source('app', 'trading_money_flow') }}
              where status = 'SUCCESS'
                and amount > 0
+               and type = 'MANUAL'
              group by profile_id
      ),
      buys as

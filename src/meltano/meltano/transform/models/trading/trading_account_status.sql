@@ -36,6 +36,7 @@ with account_stats as
                     max(updated_at) as updated_at
              from {{ source('app', 'trading_money_flow') }}
              where amount > 0
+               and type = 'MANUAL'
              group by trading_account_id
      ),
      portfolio_stats as

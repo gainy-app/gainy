@@ -155,6 +155,7 @@ from {{ source('app', 'trading_money_flow') }}
              on trading_history.money_flow_id = trading_money_flow.id
 where status = 'SUCCESS'
   and trading_money_flow.updated_at between now() - interval '1 day' and now()
+  and trading_money_flow.type = 'MANUAL'
 
 union all
 

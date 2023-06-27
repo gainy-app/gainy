@@ -23,6 +23,7 @@ with data as
                                       'error', coalesce(status, '') = 'FAILED'
                         )                                                   as tags
              from {{ source('app', 'trading_money_flow') }}
+             where type = 'MANUAL'
 
              union all
 

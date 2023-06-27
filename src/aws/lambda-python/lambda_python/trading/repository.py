@@ -1,8 +1,7 @@
 from psycopg2.extras import RealDictCursor
 
-from gainy.exceptions import NotFoundException
 from gainy.trading.repository import TradingRepository as GainyTradingRepository
-from gainy.trading.models import TradingAccount, KycForm
+from gainy.trading.models import KycForm
 from trading.models import KycDocument
 
 
@@ -25,12 +24,3 @@ class TradingRepository(GainyTradingRepository):
             self.persist(entity)
 
         self.delete_by(KycDocument, {"profile_id": profile_id})
-
-    def get_trading_account(self, profile_id: int) -> TradingAccount:
-        trading_account = self.find_one(TradingAccount,
-                                        {"profile_id": profile_id})
-
-        if not trading_account:
-            raise NotFoundException()
-
-        return trading_account
