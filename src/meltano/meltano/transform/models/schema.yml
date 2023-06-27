@@ -3111,6 +3111,10 @@ models:
         tests:
           - type:
               type: 'integer'
+      - name: invitation_id
+        tests:
+          - type:
+              type: 'integer'
       - name: invited_at
         tests:
           - type:
@@ -3128,6 +3132,10 @@ models:
           - type:
               type: 'boolean'
       - name: step3_deposited_enough
+        tests:
+          - type:
+              type: 'boolean'
+      - name: is_payment_started
         tests:
           - type:
               type: 'boolean'

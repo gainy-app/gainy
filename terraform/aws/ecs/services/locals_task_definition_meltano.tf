@@ -30,16 +30,17 @@ locals {
     aws_log_region                      = var.aws_log_region
     aws_lambda_api_gateway_endpoint     = var.aws_lambda_api_gateway_endpoint
 
-    drivewealth_is_uat           = var.drivewealth_is_uat
-    drivewealth_app_key          = var.drivewealth_app_key
-    drivewealth_wlp_id           = var.drivewealth_wlp_id
-    drivewealth_parent_ibid      = var.drivewealth_parent_ibid
-    drivewealth_ria_id           = var.drivewealth_ria_id
-    drivewealth_ria_product_id   = var.drivewealth_ria_product_id
-    drivewealth_api_username     = var.drivewealth_api_username
-    drivewealth_api_password     = var.drivewealth_api_password
-    drivewealth_api_url          = var.drivewealth_api_url
-    drivewealth_house_account_no = var.drivewealth_house_account_no
+    drivewealth_is_uat                    = var.drivewealth_is_uat
+    drivewealth_app_key                   = var.drivewealth_app_key
+    drivewealth_wlp_id                    = var.drivewealth_wlp_id
+    drivewealth_parent_ibid               = var.drivewealth_parent_ibid
+    drivewealth_ria_id                    = var.drivewealth_ria_id
+    drivewealth_ria_product_id            = var.drivewealth_ria_product_id
+    drivewealth_api_username              = var.drivewealth_api_username
+    drivewealth_api_password              = var.drivewealth_api_password
+    drivewealth_api_url                   = var.drivewealth_api_url
+    drivewealth_house_account_no          = var.drivewealth_house_account_no
+    drivewealth_cash_promotion_account_no = var.drivewealth_cash_promotion_account_no
   }
   scheduler_params = merge(local.meltano_default_params, {
     eodhistoricaldata_api_token          = var.eodhistoricaldata_api_token
@@ -106,6 +107,7 @@ locals {
     mlflow_artifact_location = "s3://${var.mlflow_artifact_bucket}"
     pg_mlflow_schema         = "mlflow"
 
+    reward_invitation_cash_amount     = var.reward_invitation_cash_amount
     billing_value_fee_multiplier      = var.billing_value_fee_multiplier
     billing_min_annual_fee            = var.billing_min_annual_fee
     billing_min_value                 = var.billing_min_value

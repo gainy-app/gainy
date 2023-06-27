@@ -67,6 +67,7 @@ variable "drivewealth_api_username" {}
 variable "drivewealth_api_password" {}
 variable "drivewealth_api_url" {}
 variable "drivewealth_house_account_no" {}
+variable "drivewealth_cash_promotion_account_no" {}
 variable "github_app_id" {}
 variable "github_app_installation_id" {}
 variable "github_app_private_key" {}
@@ -84,6 +85,7 @@ variable "firebase_app_id" {}
 variable "firebase_api_secret" {}
 variable "appsflyer_app_id" {}
 variable "appsflyer_dev_key" {}
+variable "reward_invitation_cash_amount" {}
 variable "billing_value_fee_multiplier" {}
 variable "billing_min_annual_fee" {}
 variable "billing_min_value" {}

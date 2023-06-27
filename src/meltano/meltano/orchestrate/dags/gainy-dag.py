@@ -82,8 +82,15 @@ gainy_update_account_balances = BashOperator(
     skip_exit_code=1,
     dag=dag)
 
+gainy_reward = BashOperator(
+    task_id="reward",
+    bash_command="gainy_reward 2>&1 | tee /proc/1/fd/1",
+    skip_exit_code=1,
+    dag=dag)
+
 generate_meltano_config >> upstream >> dbt >> downstream >> clean
 dbt >> store_deployment_state
 dbt >> gainy_sync_profiles_analytics_attributes
 generate_meltano_config >> gainy_fetch_drivewealth_countries
+generate_meltano_config >> gainy_reward
 generate_meltano_config >> gainy_update_account_balances >> dbt

@@ -21,7 +21,7 @@ import plaid
 from gainy.utils import get_logger, env, ENV_PRODUCTION
 from gainy.trading.models import TradingAccount, TradingCollectionVersion, TradingOrderStatus, \
     FundingAccount, TradingOrder, TradingMoneyFlowStatus, TradingMoneyFlow, AbstractProviderBankAccount, \
-    ProfileKycStatus, KycStatus, TradingStatement
+    ProfileKycStatus, KycStatus, TradingStatement, TradingMoneyFlowType
 from gainy.trading.service import TradingService as GainyTradingService
 from trading.repository import TradingRepository
 from verification.models import VerificationCodeChannel
@@ -180,6 +180,7 @@ class TradingService(GainyTradingService):
         money_flow = TradingMoneyFlow()
         money_flow.profile_id = profile_id
         money_flow.status = TradingMoneyFlowStatus.PENDING
+        money_flow.type = TradingMoneyFlowType.MANUAL
         money_flow.amount = amount
         money_flow.trading_account_id = trading_account.id
         money_flow.funding_account_id = funding_account.id

@@ -75,6 +75,7 @@ variable "drivewealth_api_password" {}
 variable "drivewealth_api_url" {}
 variable "drivewealth_sqs_arn" {}
 variable "drivewealth_house_account_no" {}
+variable "drivewealth_cash_promotion_account_no" {}
 
 variable "verification_code_cooldown" {}
 variable "verification_code_ttl" {}
@@ -92,6 +93,7 @@ variable "appsflyer_dev_key" {}
 variable "source_code_branch" {}
 variable "source_code_branch_name" {}
 
+variable "reward_invitation_cash_amount" {}
 variable "billing_value_fee_multiplier" {}
 variable "billing_min_annual_fee" {}
 variable "billing_min_value" {}

@@ -43,6 +43,7 @@ variable "drivewealth_api_password" {}
 variable "drivewealth_api_url" {}
 variable "drivewealth_sqs_arn" {}
 variable "drivewealth_house_account_no" {}
+variable "drivewealth_cash_promotion_account_no" {}
 variable "s3_bucket_uploads_kyc" {}
 variable "aws_access_key" {}
 variable "aws_secret_key" {}
