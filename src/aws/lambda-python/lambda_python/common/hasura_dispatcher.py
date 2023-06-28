@@ -20,10 +20,7 @@ class HasuraDispatcher(ABC):
         headers = event['headers'] if 'headers' in event else {}
         request = self.extract_request(event)
 
-        logger.info('HasuraDispatcher',
-                    extra={
-                        "request": request
-                    })
+        logger.info('HasuraDispatcher', extra={"request": request})
 
         with ContextContainer() as context_container:
             context_container.request = request
