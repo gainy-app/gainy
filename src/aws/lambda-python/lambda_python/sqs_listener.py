@@ -78,3 +78,5 @@ def handle(event, context):
             except Exception as e:
                 repo.rollback()
                 logger.exception(e, extra=logger_extra)
+            finally:
+                logger.info('sqs_handler finished', extra=logger_extra)

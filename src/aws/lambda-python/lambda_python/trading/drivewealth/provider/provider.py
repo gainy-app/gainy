@@ -80,6 +80,13 @@ class DriveWealthProvider(DriveWealthProviderKYC):
         :raises DepositLimitExceededException:
         :raises Exception:
         """
+        logger.info("transfer_money",
+                    extra={
+                        "money_flow": money_flow.to_dict(),
+                        "amount": amount,
+                        "trading_account_id": trading_account_id,
+                        "funding_account_id": funding_account_id,
+                    })
         trading_account = self.repository.find_one(
             DriveWealthAccount, {"trading_account_id": trading_account_id})
         if not trading_account:
