@@ -171,11 +171,13 @@ class TradingService(GainyTradingService):
         repository = self.trading_repository
 
         repository.check_profile_trading_not_paused(profile_id)
+        logger.info('create_money_flow 0', extra={"profile_id": profile_id})
 
         if amount > 0:
             self.check_enough_funds_to_deposit(funding_account, amount)
         else:
             self.check_enough_withdrawable_cash(trading_account.id, -amount)
+        logger.info('create_money_flow 1', extra={"profile_id": profile_id})
 
         money_flow = TradingMoneyFlow()
         money_flow.profile_id = profile_id
@@ -184,10 +186,13 @@ class TradingService(GainyTradingService):
         money_flow.trading_account_id = trading_account.id
         money_flow.funding_account_id = funding_account.id
         repository.persist(money_flow)
+        logger.info('create_money_flow 2', extra={"profile_id": profile_id})
 
         try:
             self._get_provider_service().transfer_money(
                 money_flow, amount, trading_account.id, funding_account.id)
+            logger.info('create_money_flow 3',
+                        extra={"profile_id": profile_id})
         except Exception as e:
             money_flow.status = TradingMoneyFlowStatus.FAILED
             raise e
