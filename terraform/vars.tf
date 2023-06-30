@@ -56,6 +56,10 @@ variable "rebrandly_api_key" {
   sensitive = true
   default   = ""
 }
+variable "rebrandly_custom_domain" {
+  type    = string
+  default = ""
+}
 variable "appsflyer_app_id" {
   type = string
 }

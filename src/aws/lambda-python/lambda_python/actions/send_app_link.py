@@ -13,6 +13,7 @@ from verification.exceptions import CooldownException
 logger = get_logger(__name__)
 
 REBRANDLY_API_KEY = os.getenv("REBRANDLY_API_KEY")
+REBRANDLY_CUSTOM_DOMAIN = os.getenv("REBRANDLY_CUSTOM_DOMAIN")
 APP_STORE_LINK = os.getenv("APP_STORE_LINK", "https://go.gainy.app/ZOFw")
 APP_STORE_LINK_COOLDOWN = 30
 
@@ -28,6 +29,8 @@ def shorten_url(url):
         "content-type": "application/json",
         "apikey": REBRANDLY_API_KEY
     }
+    if REBRANDLY_CUSTOM_DOMAIN:
+        payload["domain"] = REBRANDLY_CUSTOM_DOMAIN
     response = requests.post("https://api.rebrandly.com/v1/links",
                              headers=headers,
                              json=payload)

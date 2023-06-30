@@ -159,6 +159,7 @@ env:
   TF_VAR_slack_bot_token: ${{ secrets.SLACK_BOT_TOKEN }}
   TF_VAR_amplitude_api_key: ${{ secrets.AMPLITUDE_API_KEY }}
   TF_VAR_rebrandly_api_key: ${{ secrets.REBRANDLY_API_KEY }}
+  TF_VAR_rebrandly_custom_domain: ${{ vars.REBRANDLY_CUSTOM_DOMAIN }}
   TF_VAR_firebase_app_id: ${{ secrets.FIREBASE_APP_ID }}
   TF_VAR_firebase_api_secret: ${{ secrets.FIREBASE_API_SECRET }}
   TF_VAR_appsflyer_app_id: ${{ secrets.APPSFLYER_APP_ID }}

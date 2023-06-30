@@ -14,6 +14,7 @@ variable "google_places_api_key" {}
 variable "slack_bot_token" {}
 variable "amplitude_api_key" {}
 variable "rebrandly_api_key" {}
+variable "rebrandly_custom_domain" {}
 
 variable "aws_region" {}
 variable "aws_access_key" {}
