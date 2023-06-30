@@ -1,8 +1,10 @@
 {{
   config(
-    materialized = "table",
+    materialized = "incremental",
+    unique_key = "symbol",
     post_hook=[
       pk('symbol'),
+      'delete from {{this}} where updated_at < (select max(updated_at) from {{this}})',
     ]
   )
 }}
@@ -64,5 +66,6 @@ with filtered_tickers as
                       left join data_skeleton using (symbol)
      )
 select symbol,
-       0.75 * volatility_90_pct + 0.25 * beta_pct as risk_score
+       0.75 * volatility_90_pct + 0.25 * beta_pct as risk_score,
+       now()                                      as updated_at
 from data
