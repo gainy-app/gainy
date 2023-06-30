@@ -6,7 +6,7 @@ with filtered_holdings as
              where profile_holdings_normalized_all.profile_id = %(profile_id)s
                    {holding_where_clause}
          ),
-    ticker_chart as
+     ticker_chart as
          (
              select profile_id,
                     portfolio_holding_chart.quantity,
@@ -27,36 +27,41 @@ with filtered_holdings as
                and filtered_holdings.holding_id_v2 is not null
                    {chart_where_clause}
          ),
-     static_values as
+     static_cash as
          (
-             select case
+             select profile_id,
+                    holding_since as dt_from,
+                    quantity      as value
+             from profile_holdings_normalized_all
+             where profile_id = %(profile_id)s
+               and type = 'cash'
+               and ticker_symbol = 'CUR:USD'
+               and not is_app_trading
+
+             union all
+
+             select profile_id, created_at as dt_from, amount as value
+             from app.trading_money_flow
+             where profile_id = %(profile_id)s
+               and amount > 0
+               and status not in ('FAILED', 'SUCCESS')
+     ),
+     portfolio_chart_skeleton_with_cash as
+         (
+             select portfolio_chart_skeleton.profile_id,
+                    period,
+                    datetime,
+                    case
                         when %(include_cash)s
                             then sum(value)
                         end as cash_value
-             from (
-                      select distinct on (
-                          profile_holdings_normalized_all.holding_id_v2
-                          ) profile_id,
-                            case
-                                when type = 'cash' and ticker_symbol = 'CUR:USD'
-                                    then quantity
-                                else 0
-                                end as value
-                      from profile_holdings_normalized_all
-                      where profile_id = %(profile_id)s
-                        and type = 'cash'
-                        and ticker_symbol = 'CUR:USD'
-                        and not is_app_trading
-
-                      union all
-
-                      select profile_id,
-                             coalesce(pending_cash, 0) as value
-                      from trading_profile_status
-                      where profile_id = %(profile_id)s
-                  ) t
+             from portfolio_chart_skeleton
+                      left join static_cash
+                                on static_cash.profile_id = portfolio_chart_skeleton.profile_id
+                                    and static_cash.dt_from >= portfolio_chart_skeleton.datetime
+             group by portfolio_chart_skeleton.profile_id, period, datetime
          ),
-     raw_chart as materialized
+     raw_chart as
          (
              select profile_id,
                     period,
@@ -96,8 +101,7 @@ from (
                                             then relative_gain / adjusted_close_abs
                                         end, 0) + 1)) over wnd) - 1                                as relative_gain
          from raw_chart
-                  join portfolio_chart_skeleton using (profile_id, period, datetime)
-                  left join static_values on true
+                  join portfolio_chart_skeleton_with_cash using (profile_id, period, datetime)
          window wnd as (partition by period order by datetime)
      ) t
 where (period != '1d' or is_latest_day)
