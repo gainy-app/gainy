@@ -40,6 +40,7 @@ locals {
     drivewealth_api_password     = var.drivewealth_api_password
     drivewealth_api_url          = var.drivewealth_api_url
     drivewealth_house_account_no = var.drivewealth_house_account_no
+    trading_rebalance_jobs_count = var.trading_rebalance_jobs_count
   }
   scheduler_params = merge(local.meltano_default_params, {
     eodhistoricaldata_api_token          = var.eodhistoricaldata_api_token
