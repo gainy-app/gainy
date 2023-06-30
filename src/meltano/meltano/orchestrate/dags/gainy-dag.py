@@ -91,9 +91,9 @@ gainy_recommendation = BashOperator(
 
 if ENV == "production":
     gainy_recommendation >> BashOperator(
-        task_id="postgres-history-weekly-to-s3",
+        task_id="postgres-history-daily-to-s3",
         bash_command=get_meltano_command(
-            "schedule run postgres-history-weekly-to-s3"),
+            "schedule run postgres-history-daily-to-s3"),
         dag=dag)
 
     gainy_recommendation >> BashOperator(
