@@ -3136,6 +3136,28 @@ models:
           - type:
               type: 'boolean'
 
+  - name: ticker_actual_recommendation_state
+    columns:
+      - name: symbol
+        tests:
+          - type:
+              type: 'character varying'
+      - name: state_hash
+        tests:
+          - type:
+              type: 'text'
+
+  - name: profile_actual_recommendation_state
+    columns:
+      - name: profile_id
+        tests:
+          - type:
+              type: 'integer'
+      - name: state_hash
+        tests:
+          - type:
+              type: 'text'
+
 exposures:
   - name: ticker_search_index
     type: application

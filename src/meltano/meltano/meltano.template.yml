@@ -207,10 +207,6 @@ plugins:
       inherit_from: tap-postgres-history
       catalog: catalog/history/tap.daily.catalog.json
 
-    - name: tap-postgres-history-weekly
-      inherit_from: tap-postgres-history
-      catalog: catalog/history/tap.weekly.catalog.json
-
     - name: tap-bigquery
       variant: anelendata
       pip_url: tap-bigquery
@@ -394,16 +390,6 @@ schedules:
 
   - name: postgres-history-daily-to-s3
     extractor: tap-postgres-history-daily
-    loader: target-s3-csv-history
-    transform: skip
-    interval: '@daily'
-    start_date: 2021-06-17 10:40:58.742133
-    env:
-      TARGET_ENVS: '["production","local"]'
-      INTEGRATION: 'DOWNSTREAM'
-
-  - name: postgres-history-weekly-to-s3
-    extractor: tap-postgres-history-weekly
     loader: target-s3-csv-history
     transform: skip
     interval: '@daily'
