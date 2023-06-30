@@ -14,5 +14,6 @@ batch_cnt = int(os.getenv("TRADING_REBALANCE_JOBS_COUNT", "1"))
 for batch_id in range(batch_cnt):
     BashOperator(
         task_id=f"rebalance-portfolios {batch_id}",
-        bash_command=f"gainy_rebalance_portfolios --batch-id {batch_id} --batch-cnt {batch_cnt} 2>&1 | tee /proc/1/fd/1",
+        bash_command=
+        f"gainy_rebalance_portfolios --batch-id {batch_id} --batch-cnt {batch_cnt} 2>&1 | tee /proc/1/fd/1",
         dag=dag)
