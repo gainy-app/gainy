@@ -46,6 +46,7 @@
     { "name": "COINGECKO_JOBS_COUNT",                "value": "${coingecko_jobs_count}" },
     { "name": "POLYGON_JOBS_COUNT",                  "value": "${polygon_jobs_count}" },
     { "name": "POLYGON_INTRADAY_JOBS_COUNT",         "value": "${polygon_intraday_jobs_count}" },
+    { "name": "TRADING_REBALANCE_JOBS_COUNT",        "value": "${trading_rebalance_jobs_count}" },
     { "name": "DBT_TARGET_SCHEMA",                   "value": "${pg_transform_schema}" },
     { "name": "DBT_STATE",                           "value": "/project/.meltano/transformers/dbt/target/" },
     { "name": "SQS_HANDLER_LAMBDA_ARN",              "value": "${sqs_handler_lambda_arn}" },

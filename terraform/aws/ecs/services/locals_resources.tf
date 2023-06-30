@@ -13,6 +13,7 @@ locals {
   coingecko_jobs_count                = 1
   polygon_jobs_count                  = 6
   polygon_intraday_jobs_count         = 10
+  trading_rebalance_jobs_count        = 2
 
   eod_symbols_limit                = var.env == "production" ? 900 : 20
   eod_websockets_memory_credits    = var.env == "production" ? 512 : 256
