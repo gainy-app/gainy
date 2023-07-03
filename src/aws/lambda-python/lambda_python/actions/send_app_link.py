@@ -30,11 +30,18 @@ def shorten_url(url):
         "apikey": REBRANDLY_API_KEY
     }
     if REBRANDLY_CUSTOM_DOMAIN:
-        payload["domain"] = REBRANDLY_CUSTOM_DOMAIN
+        payload["domain"] = {"fullName": REBRANDLY_CUSTOM_DOMAIN}
+
     response = requests.post("https://api.rebrandly.com/v1/links",
                              headers=headers,
                              json=payload)
-    return "https://" + response.json()["shortUrl"]
+    res_data = response.json()
+
+    if "shortUrl" not in res_data:
+        logger.error("No shortUrl in response", extra={"response": res_data})
+        raise Exception("No shortUrl in response")
+
+    return "https://" + res_data["shortUrl"]
 
 
 def _send(twilio_client: TwilioClient, phone_number, query_string):
@@ -43,9 +50,8 @@ def _send(twilio_client: TwilioClient, phone_number, query_string):
         url += f"?{query_string}"
         try:
             url = shorten_url(url)
-        except Exception as e:
-            logger.exception(e)
-
+        except:
+            pass
     if not twilio_client.send_sms(phone_number, f"Download Gainy app: {url}"):
         raise Exception('Failed to send link.')
 
