@@ -43,7 +43,7 @@ class DriveWealthApi(GainyDriveWealthApi):
             })
 
     def upload_document(self, user_id: str, document: KycDocument,
-                        file_base64):
+                        file_base64: str):
         return self._make_request(
             "POST", "/documents", {
                 "userID": user_id,

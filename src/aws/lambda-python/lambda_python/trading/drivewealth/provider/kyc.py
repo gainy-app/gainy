@@ -42,6 +42,7 @@ class DriveWealthProviderKYC(GainyDriveWealthProvider):
     def send_kyc_document(self, profile_id: int, document: KycDocument,
                           file_stream: io.BytesIO):
         file_base64 = base64.b64encode(file_stream.getvalue())
+        file_base64 = file_base64.decode('ascii')
 
         file_data = f"data:{document.content_type};base64,{file_base64}"
 
