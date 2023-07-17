@@ -96,12 +96,6 @@ if ENV == "production":
             "schedule run postgres-history-daily-to-s3"),
         dag=dag)
 
-    gainy_recommendation >> BashOperator(
-        task_id="postgres-to-analytics-match-score",
-        bash_command=get_meltano_command(
-            "schedule run postgres-to-analytics-match-score"),
-        dag=dag)
-
 generate_meltano_config >> upstream >> dbt >> downstream >> clean
 dbt >> store_deployment_state
 dbt >> gainy_sync_profiles_analytics_attributes
