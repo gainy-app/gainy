@@ -7,12 +7,13 @@
 
 with latest_portfolio_status as
          (
-             select distinct on (
-                 drivewealth_portfolio_id,
-                 drivewealth_portfolio_statuses.date
-                 ) drivewealth_portfolio_statuses.*
+             select drivewealth_portfolio_statuses.*
              from {{ source('app', 'drivewealth_portfolio_statuses') }}
-             order by drivewealth_portfolio_id, drivewealth_portfolio_statuses.date, created_at desc
+                      join (
+                               select max(id) as id
+                               from {{ source('app', 'drivewealth_portfolio_statuses') }}
+                               group by drivewealth_portfolio_id, date
+                           ) t using (id)
          ),
      portfolio_funds as
          (
