@@ -6,6 +6,7 @@
     post_hook=[
       pk('holding_id_v2, datetime'),
       index('id', true),
+      'delete from {{ this }} where datetime < now() - interval \'2 weeks\'',
     ],
   )
 }}

@@ -44,13 +44,15 @@ with account_stats as
                     sum(cash_value)   as cash_value,
                     max(t.created_at) as updated_at
              from (
-                      select distinct on (
-                          drivewealth_portfolio_id
-                          ) drivewealth_portfolio_id,
-                            cash_value,
-                            created_at
+                      select drivewealth_portfolio_id,
+                             cash_value,
+                             created_at
                       from {{ source('app', 'drivewealth_portfolio_statuses') }}
-                      order by drivewealth_portfolio_id, created_at desc
+                               join (
+                                        select drivewealth_portfolio_id, max(id) as id
+                                        from {{ source('app', 'drivewealth_portfolio_statuses') }}
+                                        group by drivewealth_portfolio_id
+                                    ) t using (id, drivewealth_portfolio_id)
                   ) t
                       join {{ source('app', 'drivewealth_portfolios') }}
                            on drivewealth_portfolios.ref_id = t.drivewealth_portfolio_id

@@ -7,6 +7,7 @@
       pk('holding_id_v2, datetime'),
       index('id', true),
       index('updated_at'),
+      'delete from {{ this }} where datetime < now() - interval \'2 weeks\'',
     ]
   )
 }}
