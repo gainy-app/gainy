@@ -82,7 +82,7 @@ select regexp_replace(regexp_replace($1, '\.([AB])$', '-\1'), '\.(.*)$', '');
 $$ language sql;
 
 create or replace function npv(cf numeric[], d date[], rate numeric) returns numeric
-    language sql as
+    language sql IMMUTABLE PARALLEL UNSAFE as
 $$
 select sum(cf / (1 + rate) ^ ((u.d - first_d)::numeric / 365))
 from (
@@ -93,7 +93,7 @@ $$;
 
 -- https://www.investopedia.com/terms/i/irr.asp
 create or replace function xirr(cf numeric[], d date[], minrate numeric= -1.0, maxrate numeric=100.0) returns numeric
-    language plpgsql IMMUTABLE PARALLEL SAFE COST 10000 as
+    language plpgsql IMMUTABLE PARALLEL UNSAFE COST 10000 as
 $$
 declare
     minv     numeric;
