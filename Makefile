@@ -16,7 +16,6 @@ env:
 	- if [ ! -f src/meltano/meltano/exchanges.local.json ]; then cp -n src/meltano/meltano/symbols.local.json.dist src/meltano/meltano/symbols.local.json; fi
 
 configure: clean docker-auth env build
-	- docker network create gainy-default
 
 up:
 	docker-compose up --no-build

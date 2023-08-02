@@ -18,17 +18,19 @@
 
 with portfolio_statuses as
          (
-             select distinct on (
-                 profile_id, date
-                 ) profile_id,
-                   drivewealth_portfolio_statuses.created_at         as updated_at,
-                   drivewealth_portfolio_statuses.id                 as portfolio_status_id,
-                   drivewealth_portfolio_statuses.date,
-                   drivewealth_portfolio_statuses.data -> 'holdings' as holdings
+             select profile_id,
+                    drivewealth_portfolio_statuses.created_at         as updated_at,
+                    drivewealth_portfolio_statuses.id                 as portfolio_status_id,
+                    drivewealth_portfolio_statuses.date,
+                    drivewealth_portfolio_statuses.data -> 'holdings' as holdings
              from {{ source('app', 'drivewealth_portfolio_statuses') }}
+                      join (
+                               select max(id) as id
+                               from {{ source('app', 'drivewealth_portfolio_statuses') }}
+                               group by drivewealth_portfolio_id, date
+                           ) t using (id)
                       join {{ source('app', 'drivewealth_portfolios') }}
-                           on drivewealth_portfolios.ref_id = drivewealth_portfolio_id
-             order by profile_id desc, date desc, drivewealth_portfolio_statuses.created_at desc
+                                       on drivewealth_portfolios.ref_id = drivewealth_portfolio_id
          ),
      order_stats as materialized
          (

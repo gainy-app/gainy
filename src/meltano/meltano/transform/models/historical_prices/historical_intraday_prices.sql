@@ -9,6 +9,7 @@
       index(['time', 'source']),
       'create index if not exists "symbol__time_3min" ON {{ this }} (symbol, time_3min)',
       'create index if not exists "symbol__time_15min" ON {{ this }} (symbol, time_15min)',
+      'delete from {{ this }} where time < now() - interval \'2 weeks\'',
     ]
   )
 }}

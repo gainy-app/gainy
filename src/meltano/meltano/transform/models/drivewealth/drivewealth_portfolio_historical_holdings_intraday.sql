@@ -7,6 +7,7 @@
       pk('id'),
       index(['profile_id', 'holding_id_v2', 'symbol', 'date', 'datetime_3min']),
       index(['profile_id', 'holding_id_v2', 'symbol', 'date', 'datetime_15min']),
+      'delete from {{ this }} where date < now() - interval \'2 weeks\'',
     ]
   )
 }}
