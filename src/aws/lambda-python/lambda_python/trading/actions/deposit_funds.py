@@ -14,6 +14,9 @@ class TradingDepositFunds(MoneyFlowAction):
         super().__init__("trading_deposit_funds", "profile_id")
 
     def apply(self, input_params, context_container: ContextContainer):
+        raise BadRequestException(
+            'Sorry, new deposits are disabled at this moment.')
+
         (profile_id, amount, trading_account,
          funding_account) = self.process_input(input_params, context_container)
 
