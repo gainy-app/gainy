@@ -1,4 +1,7 @@
 from decimal import Decimal
+
+from math import floor
+
 from common.context_container import ContextContainer
 from gainy.exceptions import NotFoundException, BadRequestException
 from common.hasura_function import HasuraAction
@@ -11,6 +14,7 @@ class MoneyFlowAction(HasuraAction):
         profile_id = input_params["profile_id"]
         trading_account_id = input_params.get("trading_account_id")
         amount = Decimal(input_params["amount"])
+        amount = floor(amount * 100) / 100
         funding_account_id = input_params["funding_account_id"]
 
         if amount <= 0:
