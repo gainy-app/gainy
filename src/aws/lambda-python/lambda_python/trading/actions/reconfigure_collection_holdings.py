@@ -21,6 +21,11 @@ class TradingReconfigureCollectionHoldings(HasuraAction):
         collection_id = input_params['collection_id']
         weights = input_params['weights']
         target_amount_delta = input_params.get('target_amount_delta')
+
+        if target_amount_delta and target_amount_delta > 0:
+            raise BadRequestException(
+                'Sorry, new buy orders are disabled at this moment.')
+
         target_amount_delta = Decimal(
             target_amount_delta) if target_amount_delta else None
         target_amount_delta_relative = input_params.get(

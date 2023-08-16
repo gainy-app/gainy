@@ -19,6 +19,11 @@ class TradingCreateStockOrder(HasuraAction):
         profile_id = input_params['profile_id']
         symbol = input_params['symbol']
         target_amount_delta = input_params.get('target_amount_delta')
+
+        if target_amount_delta and target_amount_delta > 0:
+            raise BadRequestException(
+                'Sorry, new buy orders are disabled at this moment.')
+
         target_amount_delta = Decimal(
             target_amount_delta) if target_amount_delta else None
         target_amount_delta_relative = input_params.get(
